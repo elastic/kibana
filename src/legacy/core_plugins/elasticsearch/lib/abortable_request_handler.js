@@ -17,4 +17,18 @@
  * under the License.
  */
 
-export { MarkdownSimple } from './markdown_simple';
+import { AbortController } from 'abortcontroller-polyfill/dist/cjs-ponyfill';
+
+/*
+ * A simple utility for generating a handler that provides a signal to the handler that signals when
+ * the client has closed the connection on this request.
+ */
+export function abortableRequestHandler(fn) {
+  return (req, ...args) => {
+    const controller = new AbortController();
+    req.events.once('disconnect', () => {
+      controller.abort();
+    });
+    return fn(controller.signal, req, ...args);
+  };
+}

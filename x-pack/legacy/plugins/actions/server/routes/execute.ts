@@ -9,7 +9,7 @@ import Hapi from 'hapi';
 import { execute } from '../lib';
 import { ActionTypeRegistryContract, GetServicesFunction } from '../types';
 
-interface FireRequest extends Hapi.Request {
+interface ExecuteRequest extends Hapi.Request {
   params: {
     id: string;
   };
@@ -18,16 +18,16 @@ interface FireRequest extends Hapi.Request {
   };
 }
 
-interface FireRouteOptions {
+interface ExecuteRouteOptions {
   server: Hapi.Server;
   actionTypeRegistry: ActionTypeRegistryContract;
   getServices: GetServicesFunction;
 }
 
-export function fireRoute({ server, actionTypeRegistry, getServices }: FireRouteOptions) {
+export function executeRoute({ server, actionTypeRegistry, getServices }: ExecuteRouteOptions) {
   server.route({
     method: 'POST',
-    path: '/api/action/{id}/_fire',
+    path: '/api/action/{id}/_execute',
     options: {
       response: {
         emptyStatusCode: 204,
@@ -48,7 +48,7 @@ export function fireRoute({ server, actionTypeRegistry, getServices }: FireRoute
           .required(),
       },
     },
-    async handler(request: FireRequest, h: Hapi.ResponseToolkit) {
+    async handler(request: ExecuteRequest, h: Hapi.ResponseToolkit) {
       const { id } = request.params;
       const { params } = request.payload;
       const namespace = server.plugins.spaces && server.plugins.spaces.getSpaceId(request);
