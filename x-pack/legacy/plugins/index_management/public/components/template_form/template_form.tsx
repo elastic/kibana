@@ -29,7 +29,7 @@ interface Props {
   isEditing?: boolean;
 }
 
-export const TemplatesForm: React.FunctionComponent<Props> = ({
+export const TemplateForm: React.FunctionComponent<Props> = ({
   template: initialTemplate,
   onSave,
   isSaving,

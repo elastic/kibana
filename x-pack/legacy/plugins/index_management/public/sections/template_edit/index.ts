@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SummaryTab } from './summary_tab';
-export { MappingsTab } from './mappings_tab';
-export { SettingsTab } from './settings_tab';
-export { AliasesTab } from './aliases_tab';
+export { TemplateEdit } from './template_edit';

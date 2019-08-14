@@ -10,14 +10,14 @@ import { EuiPageBody, EuiPageContent, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { BASE_PATH } from '../../../common/constants';
 import { setBreadcrumbs } from '../../services/set_breadcrumbs';
 import { loadIndexTemplate, updateTemplate } from '../../services/api';
-import { SectionLoading, SectionError, TemplatesForm } from '../../components';
+import { SectionLoading, SectionError, TemplateForm } from '../../components';
 import { Template } from '../../../common/types';
 
 interface MatchParams {
   name: string;
 }
 
-export const TemplatesEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
+export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
   match: {
     params: { name },
   },
@@ -78,7 +78,7 @@ export const TemplatesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
     );
   } else if (template) {
     content = (
-      <TemplatesForm
+      <TemplateForm
         template={template}
         onSave={onSave}
         isSaving={isSaving}

@@ -18,6 +18,7 @@ import {
   EuiText,
   EuiCallOut,
   EuiLink,
+  EuiCodeBlock,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { serializeTemplate } from '../../../../common/lib/template_serialization';
@@ -151,25 +152,32 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
     </div>
   );
 
-  const JsonTab = () => (
-    <div data-test-subj="jsonTab">
-      <EuiSpacer size="m" />
-      <EuiCodeEditor
-        mode="json"
-        theme="textmate"
-        isReadOnly
-        setOptions={{ maxLines: Infinity }}
-        value={JSON.stringify(serializedTemplate, null, 2)}
-        editorProps={{ $blockScrolling: Infinity }}
-        aria-label={
-          <FormattedMessage
-            id="xpack.idxMgmt.templatesForm.stepReview.jsonTab.jsonAriaLabel"
-            defaultMessage="Index templates payload"
-          />
-        }
-      />
-    </div>
-  );
+  const RequestTab = () => {
+    const endpoint = `PUT _template/${name || '<templateName>'}`;
+    const templateString = JSON.stringify(serializedTemplate, null, 2);
+    const request = `${endpoint}\n${templateString}`;
+
+    return (
+      <div data-test-subj="requestTab">
+        <EuiSpacer size="m" />
+
+        <EuiText>
+          <p>
+            <FormattedMessage
+              id="xpack.idxMgmt.templatesForm.stepReview.requestTab.descriptionText"
+              defaultMessage="This Elasticsearch request will create this index template."
+            />
+          </p>
+        </EuiText>
+
+        <EuiSpacer size="m" />
+
+        <EuiCodeBlock language="json" isCopyable>
+          {request}
+        </EuiCodeBlock>
+      </div>
+    );
+  };
 
   return (
     <div data-test-subj="stepSummary">
@@ -227,11 +235,11 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
             content: <SummaryTab />,
           },
           {
-            id: 'json',
-            name: i18n.translate('xpack.idxMgmt.templatesForm.stepReview.jsonTabTitle', {
-              defaultMessage: 'JSON',
+            id: 'request',
+            name: i18n.translate('xpack.idxMgmt.templatesForm.stepReview.requestTabTitle', {
+              defaultMessage: 'Request',
             }),
-            content: <JsonTab />,
+            content: <RequestTab />,
           },
         ]}
       />

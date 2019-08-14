@@ -30,7 +30,7 @@ const NoneDescriptionText = () => (
   />
 );
 
-export const SummaryTab: React.FunctionComponent<Props> = ({ templateDetails }) => {
+export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) => {
   const { version, order, indexPatterns = [], ilmPolicy } = templateDetails;
 
   const numIndexPatterns = indexPatterns.length;

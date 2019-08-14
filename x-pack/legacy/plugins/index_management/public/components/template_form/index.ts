@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { TemplatesEdit } from './templates_edit';
+export { TemplateForm } from './template_form';

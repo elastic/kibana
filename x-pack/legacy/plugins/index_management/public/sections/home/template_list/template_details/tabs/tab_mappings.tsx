@@ -13,21 +13,22 @@ interface Props {
   templateDetails: Template;
 }
 
-export const SettingsTab: React.FunctionComponent<Props> = ({ templateDetails }) => {
-  const { settings } = templateDetails;
+export const TabMappings: React.FunctionComponent<Props> = ({ templateDetails }) => {
+  const { mappings } = templateDetails;
+  const mappingsJsonString = JSON.stringify(mappings, null, 2);
 
   return (
-    <div data-test-subj="settingsTab">
+    <div data-test-subj="mappingsTab">
       <EuiCodeEditor
         mode="json"
         theme="textmate"
         width="100%"
         isReadOnly
-        value={settings}
+        value={mappingsJsonString}
         aria-label={i18n.translate(
-          'xpack.idxMgmt.templateDetails.settingsTab.settingsEditorAriaLabel',
+          'xpack.idxMgmt.templateDetails.mappingsTab.mappingsEditorAriaLabel',
           {
-            defaultMessage: 'Settings code editor',
+            defaultMessage: 'Mappings code editor',
           }
         )}
       />

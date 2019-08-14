@@ -12,7 +12,7 @@ import { toastNotifications } from 'ui/notify';
 import { deleteTemplates } from '../services/api';
 import { Template } from '../../common/types';
 
-export const DeleteTemplatesModal = ({
+export const TemplateDeleteModal = ({
   templatesToDelete,
   callback,
 }: {

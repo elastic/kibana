@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { TemplatesForm } from './templates_form';
+export { TemplateList } from './template_list';

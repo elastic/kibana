@@ -17,7 +17,7 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { SectionError, SectionLoading } from '../../../components';
-import { TemplatesTable } from './templates_table';
+import { TemplateTable } from './template_table';
 import { loadIndexTemplates } from '../../../services/api';
 import { Template } from '../../../../common/types';
 import { trackUiMetric, METRIC_TYPE } from '../../../services/track_ui_metric';
@@ -28,7 +28,7 @@ interface MatchParams {
   templateName?: Template['name'];
 }
 
-export const TemplatesList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
+export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
   match: {
     params: { templateName },
   },
@@ -130,7 +130,7 @@ export const TemplatesList: React.FunctionComponent<RouteComponentProps<MatchPar
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="l" />
-        <TemplatesTable
+        <TemplateTable
           templates={showSystemTemplates ? templates : filteredTemplates}
           reload={reload}
           editTemplate={editTemplate}

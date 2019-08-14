@@ -4,4 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { TemplatesCreate } from './templates_create';
+export { TabSummary } from './tab_summary';
+export { TabMappings } from './tab_mappings';
+export { TabSettings } from './tab_settings';
+export { TabAliases } from './tab_aliases';

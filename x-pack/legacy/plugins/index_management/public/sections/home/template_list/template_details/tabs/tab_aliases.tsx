@@ -13,7 +13,7 @@ interface Props {
   templateDetails: Template;
 }
 
-export const AliasesTab: React.FunctionComponent<Props> = ({ templateDetails }) => {
+export const TabAliases: React.FunctionComponent<Props> = ({ templateDetails }) => {
   const { aliases } = templateDetails;
 
   return (

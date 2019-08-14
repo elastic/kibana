@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { TemplateListItem, Template } from '../../../../../common/types';
 import { BASE_PATH, UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../common/constants';
-import { DeleteTemplatesModal } from '../../../../components';
+import { TemplateDeleteModal } from '../../../../components';
 import { trackUiMetric, METRIC_TYPE } from '../../../../services/track_ui_metric';
 
 interface Props {
@@ -27,7 +27,7 @@ interface Props {
   cloneTemplate: (name: Template['name']) => void;
 }
 
-export const TemplatesTable: React.FunctionComponent<Props> = ({
+export const TemplateTable: React.FunctionComponent<Props> = ({
   templates,
   reload,
   editTemplate,
@@ -244,7 +244,7 @@ export const TemplatesTable: React.FunctionComponent<Props> = ({
   return (
     <Fragment>
       {templatesToDelete && templatesToDelete.length > 0 ? (
-        <DeleteTemplatesModal
+        <TemplateDeleteModal
           callback={data => {
             if (data && data.hasDeletedTemplates) {
               reload();

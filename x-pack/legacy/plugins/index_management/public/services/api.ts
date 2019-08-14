@@ -30,6 +30,7 @@ import {
   UIM_TEMPLATE_DELETE_MANY,
   UIM_TEMPLATE_CREATE,
   UIM_TEMPLATE_UPDATE,
+  UIM_TEMPLATE_CLONE,
 } from '../../common/constants';
 
 import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS } from '../constants';
@@ -243,14 +244,16 @@ export async function loadIndexPatterns() {
   return savedObjects;
 }
 
-export async function saveTemplate(template: Template) {
+export async function saveTemplate(template: Template, isClone: boolean) {
   const result = sendRequest({
     path: `${apiPrefix}/templates`,
     method: 'put',
     body: template,
   });
 
-  trackUiMetric(METRIC_TYPE.COUNT, UIM_TEMPLATE_CREATE);
+  const uimActionType = isClone ? UIM_TEMPLATE_CLONE : UIM_TEMPLATE_CREATE;
+
+  trackUiMetric(METRIC_TYPE.COUNT, uimActionType);
 
   return result;
 }

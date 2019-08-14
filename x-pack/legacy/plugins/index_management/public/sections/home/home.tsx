@@ -21,7 +21,7 @@ import {
 import { BASE_PATH } from '../../../common/constants';
 import { idxMgmtDocumentationLink } from '../../lib/documentation_links';
 import { IndexList } from './index_list';
-import { TemplatesList } from './templates_list';
+import { TemplateList } from './template_list';
 import { setBreadcrumbs } from '../../services/set_breadcrumbs';
 
 type Section = 'indices' | 'templates';
@@ -109,7 +109,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         <Switch>
           <Route exact path={`${BASE_PATH}indices`} component={IndexList} />
           <Route exact path={`${BASE_PATH}indices/filter/:filter?`} component={IndexList} />
-          <Route exact path={`${BASE_PATH}templates/:templateName*`} component={TemplatesList} />
+          <Route exact path={`${BASE_PATH}templates/:templateName*`} component={TemplateList} />
         </Switch>
       </EuiPageContent>
     </EuiPageBody>

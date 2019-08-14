@@ -33,10 +33,10 @@ import {
   UIM_TEMPLATE_DETAIL_PANEL_ALIASES_TAB,
 } from '../../../../../common/constants';
 import { Template } from '../../../../../common/types';
-import { DeleteTemplatesModal, SectionLoading, SectionError } from '../../../../components';
+import { TemplateDeleteModal, SectionLoading, SectionError } from '../../../../components';
 import { loadIndexTemplate } from '../../../../services/api';
 import { trackUiMetric, METRIC_TYPE } from '../../../../services/track_ui_metric';
-import { SummaryTab, MappingsTab, SettingsTab, AliasesTab } from './tabs';
+import { TabSummary, TabMappings, TabSettings, TabAliases } from './tabs';
 
 interface Props {
   templateName: Template['name'];
@@ -88,10 +88,10 @@ const aliasesTabData = {
 const tabToComponentMap: {
   [key: string]: React.FunctionComponent<{ templateDetails: Template }>;
 } = {
-  [SUMMARY_TAB_ID]: SummaryTab,
-  [SETTINGS_TAB_ID]: SettingsTab,
-  [MAPPINGS_TAB_ID]: MappingsTab,
-  [ALIASES_TAB_ID]: AliasesTab,
+  [SUMMARY_TAB_ID]: TabSummary,
+  [SETTINGS_TAB_ID]: TabSettings,
+  [MAPPINGS_TAB_ID]: TabMappings,
+  [ALIASES_TAB_ID]: TabAliases,
 };
 
 const tabToUiMetricMap: { [key: string]: string } = {
@@ -224,7 +224,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
 
           <EuiSpacer size="l" />
 
-          <SummaryTab templateDetails={templateDetails} />
+          <TabSummary templateDetails={templateDetails} />
         </Fragment>
       );
     }
@@ -233,7 +233,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
   return (
     <Fragment>
       {templateToDelete && templateToDelete.length > 0 ? (
-        <DeleteTemplatesModal
+        <TemplateDeleteModal
           callback={data => {
             if (data && data.hasDeletedTemplates) {
               reload();

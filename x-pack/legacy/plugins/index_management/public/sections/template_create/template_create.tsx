@@ -7,7 +7,7 @@ import React, { useEffect, useState, Fragment } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { TemplatesForm, SectionLoading, SectionError } from '../../components';
+import { TemplateForm, SectionLoading, SectionError } from '../../components';
 import { setBreadcrumbs } from '../../services/set_breadcrumbs';
 import { Template } from '../../../common/types';
 import { saveTemplate, loadTemplateToClone } from '../../services/api';
@@ -27,7 +27,7 @@ const defaultTemplate: Template = {
   aliases: undefined,
 };
 
-export const TemplatesCreate: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
+export const TemplateCreate: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
   match: {
     params: { name },
   },
@@ -51,10 +51,12 @@ export const TemplatesCreate: React.FunctionComponent<RouteComponentProps<MatchP
   };
 
   const onSave = async (template: Template) => {
+    const isClone = Boolean(name);
+
     setIsSaving(true);
     setSaveError(null);
 
-    const { error } = await saveTemplate(template);
+    const { error } = await saveTemplate(template, isClone);
 
     setIsSaving(false);
 
@@ -72,7 +74,7 @@ export const TemplatesCreate: React.FunctionComponent<RouteComponentProps<MatchP
 
   const renderTemplateForm = (templateData?: Template) => {
     return (
-      <TemplatesForm
+      <TemplateForm
         template={templateData ? templateData : defaultTemplate}
         onSave={onSave}
         isSaving={isSaving}
