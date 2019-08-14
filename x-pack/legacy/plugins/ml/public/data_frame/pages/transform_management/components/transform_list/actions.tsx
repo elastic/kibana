@@ -5,23 +5,12 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
-
-import {
-  checkPermission,
-  createPermissionFailureMessage,
-} from '../../../../../privilege/check_privilege';
-
 import { DataFrameTransformListRow, DATA_FRAME_TRANSFORM_STATE } from './common';
-import { stopTransform } from '../../services/transform_service';
-
 import { StartAction } from './action_start';
+import { StopAction } from './action_stop';
 import { DeleteAction } from './action_delete';
 
 export const getActions = () => {
-  const canStartStopDataFrame: boolean = checkPermission('canStartStopDataFrame');
-
   return [
     {
       isPrimary: true,
@@ -29,35 +18,7 @@ export const getActions = () => {
         if (item.stats.state === DATA_FRAME_TRANSFORM_STATE.STOPPED) {
           return <StartAction item={item} />;
         }
-
-        const buttonStopText = i18n.translate('xpack.ml.dataframe.transformList.stopActionName', {
-          defaultMessage: 'Stop',
-        });
-
-        const stopButton = (
-          <EuiButtonEmpty
-            size="xs"
-            color="text"
-            disabled={!canStartStopDataFrame}
-            iconType="stop"
-            onClick={() => stopTransform(item)}
-            aria-label={buttonStopText}
-          >
-            {buttonStopText}
-          </EuiButtonEmpty>
-        );
-        if (!canStartStopDataFrame) {
-          return (
-            <EuiToolTip
-              position="top"
-              content={createPermissionFailureMessage('canStartStopDataFrame')}
-            >
-              {stopButton}
-            </EuiToolTip>
-          );
-        }
-
-        return stopButton;
+        return <StopAction item={item} />;
       },
     },
     {

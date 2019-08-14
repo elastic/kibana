@@ -13,8 +13,6 @@ import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiCallOut,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
   EuiEmptyPrompt,
   EuiPopover,
   SortDirection,
@@ -29,6 +27,7 @@ import { checkPermission } from '../../../../../privilege/check_privilege';
 import { getTaskStateBadge } from './columns';
 import { DeleteAction } from './action_delete';
 import { StartAction } from './action_start';
+import { StopAction } from './action_stop';
 
 import {
   DataFrameTransformListColumn,
@@ -253,17 +252,15 @@ export const DataFrameTransformList: SFC = () => {
   };
 
   const bulkActionMenuItems = [
-    <StartAction key="startAction" items={transformSelection} />,
-    <EuiContextMenuItem
-      key="stopAction"
-      icon="stop"
-      onClick={() => {
-        // TODO
-      }}
-    >
-      Stop
-    </EuiContextMenuItem>,
-    <DeleteAction key="deleteAction" items={transformSelection} />,
+    <div key="startAction" className="mlTransformBulkActionItem">
+      <StartAction items={transformSelection} />
+    </div>,
+    <div key="stopAction" className="mlTransformBulkActionItem">
+      <StopAction items={transformSelection} />
+    </div>,
+    <div key="deleteAction" className="mlTransformBulkActionItem">
+      <DeleteAction items={transformSelection} />
+    </div>,
   ];
 
   const renderToolsLeft = () => {
@@ -291,9 +288,9 @@ export const DataFrameTransformList: SFC = () => {
         isOpen={isActionsMenuOpen}
         closePopover={() => setIsActionsMenuOpen(false)}
         panelPaddingSize="none"
-        anchorPosition="rightDown"
+        anchorPosition="rightUp"
       >
-        <EuiContextMenuPanel items={bulkActionMenuItems} />
+        {bulkActionMenuItems}
       </EuiPopover>
     );
   };

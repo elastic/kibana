@@ -7,4 +7,4 @@
 export { getTransformsFactory } from './get_transforms';
 export { deleteTransform, bulkDeleteTransforms } from './delete_transform';
 export { startTransform, bulkStartTransforms } from './start_transform';
-export { stopTransform } from './stop_transform';
+export { stopTransform, bulkStopTransforms } from './stop_transform';

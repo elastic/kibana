@@ -17,6 +17,13 @@
     animation: none !important;
   }
 }
+.mlTransformBulkActionItem {
+  display: block;
+  padding: $euiSizeS;
+  width: 100%;
+  text-align: left;
+}
+
 .mlTransformProgressBar {
   margin-bottom: $euiSizeM;
 }
