@@ -365,6 +365,24 @@ function replaceMovAvgToMovFn(doc, logger) {
   return doc;
 }
 
+function migrateSearchSortToNestedArray(doc) {
+  const sort = get(doc, 'attributes.sort');
+  if (!sort) return doc;
+
+  // Don't do anything if we already have a two dimensional array
+  if (Array.isArray(sort) && sort.length > 0 && Array.isArray(sort[0])) {
+    return doc;
+  }
+
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      sort: [doc.attributes.sort],
+    }
+  };
+}
+
 const executeMigrations720 = flow(
   migratePercentileRankAggregation,
   migrateDateHistogramAggregation
@@ -374,6 +392,10 @@ const executeMigrations730 = flow(
   transformFilterStringToQueryObject,
   migrateFiltersAggQuery,
   replaceMovAvgToMovFn
+);
+
+const executeSearchMigrations740 = flow(
+  migrateSearchSortToNestedArray,
 );
 
 export const migrations = {
@@ -530,5 +552,6 @@ export const migrations = {
       migrateIndexPattern(doc);
       return doc;
     },
+    '7.4.0': executeSearchMigrations740,
   },
 };
