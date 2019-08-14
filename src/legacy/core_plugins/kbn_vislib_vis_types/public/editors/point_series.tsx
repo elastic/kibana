@@ -77,8 +77,6 @@ function PointSeriesOptions(props: VisOptionsProps<BasicVislibParams>) {
             }
           />
         )}
-
-        <EuiSpacer size="s" />
       </EuiPanel>
 
       <EuiSpacer size="s" />
