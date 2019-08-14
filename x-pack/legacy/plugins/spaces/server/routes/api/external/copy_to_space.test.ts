@@ -143,6 +143,7 @@ describe('POST /api/spaces/copy_saved_objects', () => {
       'POST',
       '/api/spaces/copy_saved_objects',
       {
+        expectSpacesClientCall: false,
         payload,
       }
     );
@@ -171,6 +172,7 @@ describe('POST /api/spaces/copy_saved_objects', () => {
       'POST',
       '/api/spaces/copy_saved_objects',
       {
+        expectSpacesClientCall: false,
         payload,
       }
     );
@@ -317,6 +319,7 @@ describe('POST /api/spaces/copy_saved_objects/resolve_conflicts', () => {
       'POST',
       '/api/spaces/copy_saved_objects/resolve_conflicts',
       {
+        expectSpacesClientCall: false,
         payload,
       }
     );
@@ -360,6 +363,7 @@ describe('POST /api/spaces/copy_saved_objects/resolve_conflicts', () => {
       'POST',
       '/api/spaces/copy_saved_objects/resolve_conflicts',
       {
+        expectSpacesClientCall: false,
         payload,
       }
     );

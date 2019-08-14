@@ -7,11 +7,8 @@
 import { SavedObjectsClientContract, SavedObjectsService, SavedObject } from 'src/core/server';
 import { Readable } from 'stream';
 import { SavedObjectsClientProviderOptions } from 'src/core/server';
-import { SpacesClient } from '../spaces_client';
 import { spaceIdToNamespace } from '../utils/namespace';
-import { CopyOptions } from './types';
-import { canImportIntoSpace } from './lib/can_import_into_space';
-import { CopyResponse } from './types';
+import { CopyOptions, CopyResponse } from './types';
 import { getEligibleTypes } from './lib/get_eligible_types';
 import { createEmptyFailureResponse } from './lib/create_empty_failure_response';
 import { readStreamToCompletion } from './lib/read_stream_to_completion';
@@ -21,7 +18,6 @@ export const COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS: SavedObjectsClientProvide
 };
 
 export function copySavedObjectsToSpacesFactory(
-  spacesClient: SpacesClient,
   savedObjectsClient: SavedObjectsClientContract,
   savedObjectsService: SavedObjectsService
 ) {
@@ -50,16 +46,6 @@ export function copySavedObjectsToSpacesFactory(
     options: CopyOptions
   ) => {
     try {
-      const { canImport, reason } = await canImportIntoSpace(
-        spaceId,
-        spacesClient,
-        savedObjectsClient
-      );
-
-      if (!canImport) {
-        return createEmptyFailureResponse([{ error: { type: reason!, spaceId } }]);
-      }
-
       const importResponse = await importExport.importSavedObjects({
         namespace: spaceIdToNamespace(spaceId),
         objectLimit: importExport.objectLimit,

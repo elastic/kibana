@@ -21,7 +21,8 @@ const PURPOSE_PRIVILEGE_MAP: Record<
   (authorization: AuthorizationService) => string
 > = {
   any: authorization => authorization.actions.login,
-  copySavedObjects: authorization => authorization.actions.ui.get('savedObjectsManagement', 'edit'),
+  copySavedObjects: authorization =>
+    authorization.actions.ui.get('savedObjectsManagement', 'copyIntoSpace'),
 };
 
 export class SpacesClient {
@@ -213,19 +214,6 @@ export class SpacesClient {
     await repository.delete('space', id);
 
     await repository.deleteByNamespace(id);
-  }
-
-  public async canManageSavedObjects(spaceId: string): Promise<boolean> {
-    if (!this.useRbac()) {
-      return true;
-    }
-    const checkPrivileges = this.authorization!.checkPrivilegesWithRequest(this.request);
-    const { hasAllRequested } = await checkPrivileges.atSpace(
-      spaceId,
-      this.authorization!.actions.ui.get('savedObjectsManagement', 'edit')
-    );
-
-    return hasAllRequested;
   }
 
   private useRbac(): boolean {

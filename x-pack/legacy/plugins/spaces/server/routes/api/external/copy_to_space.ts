@@ -40,15 +40,12 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
     method: 'POST',
     path: '/api/spaces/copy_saved_objects',
     async handler(request: Legacy.Request, h: Legacy.ResponseToolkit) {
-      const spacesClient = await spacesService.scopedClient(request);
-
       const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(
         request,
         COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS
       );
 
       const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
-        spacesClient,
         savedObjectsClient,
         savedObjects
       );
@@ -94,15 +91,12 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
     method: 'POST',
     path: '/api/spaces/copy_saved_objects/resolve_conflicts',
     async handler(request: Legacy.Request, h: Legacy.ResponseToolkit) {
-      const spacesClient = await spacesService.scopedClient(request);
-
       const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(
         request,
         COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS
       );
 
       const resolveCopySavedObjectsToSpacesConflicts = resolveCopySavedObjectsToSpacesConflictsFactory(
-        spacesClient,
         savedObjectsClient,
         savedObjects
       );

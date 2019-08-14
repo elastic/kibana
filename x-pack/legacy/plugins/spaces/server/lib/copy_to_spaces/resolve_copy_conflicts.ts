@@ -6,16 +6,13 @@
 
 import { SavedObjectsClientContract, SavedObjectsService, SavedObject } from 'src/core/server';
 import { Readable } from 'stream';
-import { SpacesClient } from '../spaces_client';
 import { spaceIdToNamespace } from '../utils/namespace';
 import { CopyOptions, ResolveConflictsOptions, CopyResponse } from './types';
-import { canImportIntoSpace } from './lib/can_import_into_space';
 import { getEligibleTypes } from './lib/get_eligible_types';
 import { createEmptyFailureResponse } from './lib/create_empty_failure_response';
 import { readStreamToCompletion } from './lib/read_stream_to_completion';
 
 export function resolveCopySavedObjectsToSpacesConflictsFactory(
-  spacesClient: SpacesClient,
   savedObjectsClient: SavedObjectsClientContract,
   savedObjectsService: SavedObjectsService
 ) {
@@ -48,16 +45,6 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
     }>
   ) => {
     try {
-      const { canImport, reason } = await canImportIntoSpace(
-        spaceId,
-        spacesClient,
-        savedObjectsClient
-      );
-
-      if (!canImport) {
-        return createEmptyFailureResponse([{ error: { type: reason!, spaceId } }]);
-      }
-
       const importResponse = await importExport.resolveImportErrors({
         namespace: spaceIdToNamespace(spaceId),
         objectLimit: importExport.objectLimit,
