@@ -8,6 +8,7 @@ import { shallow, ShallowWrapper } from 'enzyme';
 import React from 'react';
 import { APMError } from '../../../../../typings/es_schemas/ui/APMError';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
+import { IStickyProperty } from '../../../shared/StickyProperties';
 import { StickyErrorProperties } from './StickyErrorProperties';
 import {
   ERROR_PAGE_URL,
