@@ -193,6 +193,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     return {
       checkGroups: this.reorderResults(flatten(Array.from(checkGroupsById.values())), pagination),
       searchAfter: result.aggregations.monitors.after_key,
+      checkGroupsById,
     };
   }
 
@@ -203,7 +204,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     pagination: CursorPagination,
     filters?: string | null
   ) {
-    const monitors: any[] = [];
+    let monitors: any[] = [];
     let searchAfter = pagination.cursorKey || null;
     do {
       const queryRes: LegacyMonitorStatesQueryResult = await this.enrichAndCollapsePage(
@@ -216,11 +217,12 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       );
       const { result, statusFilter } = queryRes;
       searchAfter = queryRes.searchAfter;
-      monitors.push(...this.getMonitorBuckets(result, statusFilter));
-      if (get<number>(result, 'hits.total.value', 0) === 0) {
-        break;
+      const monitorBucketsToAdd = this.getMonitorBuckets(result, statusFilter);
+      monitors.push(...monitorBucketsToAdd);
+      if (monitors.length > STATES.LEGACY_STATES_QUERY_SIZE) {
+        monitors = monitors.slice(0, STATES.LEGACY_STATES_QUERY_SIZE);
       }
-    } while (searchAfter !== null && monitors.length < STATES.LEGACY_STATES_QUERY_SIZE);
+    } while (!!searchAfter && monitors.length < STATES.LEGACY_STATES_QUERY_SIZE);
 
     return monitors;
   }
@@ -272,7 +274,15 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
         aggs: {
           monitors: {
             composite: {
-              size,
+              /**
+               * TODO: extract this to a constant; we can't be looking for _only_
+               * ten monitors, because it's possible our check groups selection will represent more than ten.
+               *
+               * We were previously passing the after key from the check groups query regardless of the number of monitors we had,
+               * it's important that the latest check group from the final monitor we use is what we return, or we will be way ahead in terms
+               * of check groups and end up skipping monitors on subsequent calls.
+               */
+              size: 500,
               sources: [
                 {
                   monitor_id: {
@@ -454,8 +464,19 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     };
 
     const result = await this.database.search(request, params);
+    const monitorBuckets = get(result, 'aggregations.monitors.buckets', []);
+    let afterKeyToReturn = checkGroupsRes.searchAfter;
+    // When we end up with more monitors than we want, we must determine the final monitor in the list,
+    // get its associated check group, and use _those_ values for the after key to ensure we don't skip
+    // any monitors
+    if (monitorBuckets.length > size) {
+      afterKeyToReturn = {
+        monitor_id: monitorBuckets[size - 1].key.monitor_id,
+        location: monitorBuckets[size - 1].state.value.observer.geo.name[0],
+      };
+    }
 
-    return { result, statusFilter, searchAfter: checkGroupsRes.searchAfter };
+    return { result, statusFilter, searchAfter: afterKeyToReturn };
   }
 
   private getMonitorBuckets(queryResult: any, statusFilter?: any) {
