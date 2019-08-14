@@ -142,28 +142,53 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
       activePage * pageCount,
       activePage * pageCount + pageCount
     );
-    return savedQueriesDisplayRows.map(savedQuery => (
-      <li key={savedQuery.id}>
+    return savedQueriesDisplayRows.map((savedQuery, index) => (
+      <li
+        key={savedQuery.id}
+        data-test-subj={`saved-query-list-item ${
+          index === 0 ? 'saved-query-list-item-selected' : ''
+        }`}
+      >
         <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={() => {
-                onLoad(savedQuery);
-                setIsOpen(false);
-              }}
-              flush="left"
-              data-test-subj={`load-saved-query-${savedQuery.attributes.title}-button`}
-              textProps={{ className: 'saved-query-list-item-text' }}
-            >
-              <EuiScreenReaderOnly>
-                <span>
-                  {i18n.translate('data.search.searchBar.savedQueryScreenReaderOpenText', {
-                    defaultMessage: 'Open saved query',
-                  })}
-                </span>
-              </EuiScreenReaderOnly>
-              {savedQuery.attributes.title}
-            </EuiButtonEmpty>
+            {loadedSavedQuery && loadedSavedQuery.id === savedQuery.id ? (
+              <EuiButtonEmpty
+                onClick={() => {
+                  onLoad(savedQuery);
+                  setIsOpen(false);
+                }}
+                flush="left"
+                data-test-subj={`load-saved-query-${savedQuery.attributes.title}-button`}
+                textProps={{ className: 'saved-query-list-item-text' }}
+              >
+                <EuiScreenReaderOnly>
+                  <span>
+                    {i18n.translate('data.search.searchBar.savedQueryScreenReaderOpenText', {
+                      defaultMessage: 'Open saved query',
+                    })}
+                  </span>
+                </EuiScreenReaderOnly>
+                {savedQuery.attributes.title}
+              </EuiButtonEmpty>
+            ) : (
+              <EuiButtonEmpty
+                onClick={() => {
+                  onLoad(savedQuery);
+                  setIsOpen(false);
+                }}
+                flush="left"
+                data-test-subj={`load-saved-query-${savedQuery.attributes.title}-button`}
+              >
+                <EuiScreenReaderOnly>
+                  <span>
+                    {i18n.translate('data.search.searchBar.savedQueryScreenReaderOpenText', {
+                      defaultMessage: 'Open saved query',
+                    })}
+                  </span>
+                </EuiScreenReaderOnly>
+                {savedQuery.attributes.title}
+              </EuiButtonEmpty>
+            )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="none" justifyContent="flexEnd" alignItems="center">
