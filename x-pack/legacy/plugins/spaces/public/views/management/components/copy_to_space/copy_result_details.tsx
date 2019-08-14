@@ -9,7 +9,7 @@ import { SavedObjectRecord } from 'ui/management/saved_objects_management';
 import { SummarizedCopyToSpaceResponse } from 'plugins/spaces/lib/copy_to_space';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { SavedObjectsImportRetry } from 'src/core/server/saved_objects/import/types';
+import { SavedObjectsImportRetry } from 'src/core/server';
 import { Space } from '../../../../../common/model/space';
 import { CopyStatusIndicator } from './copy_status_indicator';
 

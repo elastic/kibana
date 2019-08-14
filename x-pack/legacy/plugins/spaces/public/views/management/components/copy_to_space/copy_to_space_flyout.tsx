@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, useEffect, Fragment } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiFlyout,
   EuiIcon,
@@ -11,14 +11,12 @@ import {
   EuiTitle,
   EuiText,
   EuiFlyoutBody,
-  EuiSpacer,
-  EuiSwitch,
-  EuiFormRow,
   EuiFlyoutFooter,
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -28,15 +26,13 @@ import {
   processImportResponse,
   ProcessedImportResponse,
 } from 'ui/management/saved_objects_management';
-import {
-  SavedObjectsImportResponse,
-  SavedObjectsImportRetry,
-} from 'src/core/server/saved_objects/import/types';
+import { SavedObjectsImportResponse, SavedObjectsImportRetry } from 'src/core/server';
 import { toastNotifications } from 'ui/notify';
 import { useKibanaSpaces } from '../../../../lib/hooks';
-import { SelectableSpacesControl } from './selectable_spaces_control';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';
 import { CopyToSpaceFlyoutFooter } from './copy_to_space_flyout_footer';
+import { CopyToSpaceForm } from './copy_to_space_form';
+import { CopyOptions } from './types';
 
 interface Props {
   onClose: () => void;
@@ -44,13 +40,13 @@ interface Props {
 }
 
 export const CopyToSpaceFlyout = ({ onClose, savedObject }: Props) => {
-  const [includeRelated, setIncludeRelated] = useState(true);
-  const [overwrite, setOverwrite] = useState(true);
-  const [selectedSpaceIds, setSelectedSpaceIds] = useState<string[]>([]);
+  const [copyOptions, setCopyOptions] = useState<CopyOptions>({
+    includeRelated: true,
+    overwrite: true,
+    selectedSpaceIds: [],
+  });
 
-  const spaces = useKibanaSpaces();
-
-  const isLoading = spaces.length === 0;
+  const { isLoading, spaces } = useKibanaSpaces();
 
   const [copyInProgress, setCopyInProgress] = useState(false);
   const [conflictResolutionInProgress, setConflictResolutionInProgress] = useState(false);
@@ -67,32 +63,31 @@ export const CopyToSpaceFlyout = ({ onClose, savedObject }: Props) => {
     if (copyInProgress) {
       // simulating copy operation
       setTimeout(() => {
-        const dummyResponse = selectedSpaceIds.reduce<Record<string, SavedObjectsImportResponse>>(
-          (acc, id) => {
-            const successCount = Math.floor(Math.random() * 10);
-            const hasErrors = successCount % 2 === 0;
-            return {
-              ...acc,
-              [id]: {
-                successCount,
-                success: true,
-                errors: hasErrors
-                  ? [
-                      {
-                        type: savedObject.type,
-                        id: savedObject.id,
-                        error: {
-                          type: overwrite ? 'missing_references' : 'conflict',
-                          references: [],
-                        },
+        const dummyResponse = copyOptions.selectedSpaceIds.reduce<
+          Record<string, SavedObjectsImportResponse>
+        >((acc, id) => {
+          const successCount = Math.floor(Math.random() * 10);
+          const hasErrors = successCount % 2 === 0;
+          return {
+            ...acc,
+            [id]: {
+              successCount,
+              success: true,
+              errors: hasErrors
+                ? [
+                    {
+                      type: savedObject.type,
+                      id: savedObject.id,
+                      error: {
+                        type: copyOptions.overwrite ? 'missing_references' : 'conflict',
+                        references: [],
                       },
-                    ]
-                  : undefined,
-              } as SavedObjectsImportResponse,
-            };
-          },
-          {}
-        );
+                    },
+                  ]
+                : undefined,
+            } as SavedObjectsImportResponse,
+          };
+        }, {});
 
         const processedResult = mapValues(dummyResponse, processImportResponse);
         setCopyResult(processedResult);
@@ -117,32 +112,31 @@ export const CopyToSpaceFlyout = ({ onClose, savedObject }: Props) => {
       setTimeout(() => {
         setConflictResolutionInProgress(false);
 
-        const dummyResponse = selectedSpaceIds.reduce<Record<string, SavedObjectsImportResponse>>(
-          (acc, id) => {
-            const successCount = Math.floor(Math.random() * 10);
-            const hasErrors = false; // successCount % 2 === 0;
-            return {
-              ...acc,
-              [id]: {
-                successCount,
-                success: true,
-                errors: hasErrors
-                  ? [
-                      {
-                        type: savedObject.type,
-                        id: savedObject.id,
-                        error: {
-                          type: overwrite ? 'missing_references' : 'conflict',
-                          references: [],
-                        },
+        const dummyResponse = copyOptions.selectedSpaceIds.reduce<
+          Record<string, SavedObjectsImportResponse>
+        >((acc, id) => {
+          const successCount = Math.floor(Math.random() * 10);
+          const hasErrors = false; // successCount % 2 === 0;
+          return {
+            ...acc,
+            [id]: {
+              successCount,
+              success: true,
+              errors: hasErrors
+                ? [
+                    {
+                      type: savedObject.type,
+                      id: savedObject.id,
+                      error: {
+                        type: copyOptions.overwrite ? 'missing_references' : 'conflict',
+                        references: [],
                       },
-                    ]
-                  : undefined,
-              } as SavedObjectsImportResponse,
-            };
-          },
-          {}
-        );
+                    },
+                  ]
+                : undefined,
+            } as SavedObjectsImportResponse,
+          };
+        }, {});
 
         if (dummyResponse.success) {
           toastNotifications.addSuccess(
@@ -170,59 +164,57 @@ export const CopyToSpaceFlyout = ({ onClose, savedObject }: Props) => {
     }
   }
 
-  const form = (
-    <Fragment>
-      <EuiSwitch
-        label={
-          <FormattedMessage
-            id="xpack.spaces.management.copyToSpace.includeRelatedObjects"
-            defaultMessage="Include related objects"
-          />
-        }
-        checked={includeRelated}
-        onChange={e => setIncludeRelated(e.target.checked)}
-        disabled={copyInProgress}
-      />
+  const getFlyoutBody = () => {
+    // Step 1: loading assets for main form
+    if (isLoading) {
+      return <EuiLoadingSpinner />;
+    }
 
-      <EuiSpacer />
-
-      <EuiSwitch
-        label={
-          <FormattedMessage
-            id="xpack.spaces.management.copyToSpace.automaticallyOverwrite"
-            defaultMessage="Automatically overwrite all saved objects"
-          />
-        }
-        checked={overwrite}
-        onChange={e => setOverwrite(e.target.checked)}
-        disabled={copyInProgress}
-      />
-
-      <EuiHorizontalRule margin="m" />
-
-      {/* TODO: remove once https://github.com/elastic/eui/issues/2071 is fixed */}
-      {isLoading && <EuiLoadingSpinner />}
-
-      {!isLoading && (
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.spaces.management.copyToSpace.selectSpacesLabel"
-              defaultMessage="Select spaces to copy into"
-            />
+    // Step 1a: assets loaded, but no spaces are available for copy.
+    if (spaces.length === 0) {
+      return (
+        <EuiEmptyPrompt
+          body={
+            <p>
+              <FormattedMessage
+                id="xpack.spaces.management.copyToSpace.noSpacesBody"
+                defaultMessage="There are no eligible spaces to copy into."
+              />
+            </p>
           }
-          fullWidth
-        >
-          <SelectableSpacesControl
-            spaces={spaces}
-            selectedSpaceIds={selectedSpaceIds}
-            onChange={selection => setSelectedSpaceIds(selection)}
-            disabled={copyInProgress}
-          />
-        </EuiFormRow>
-      )}
-    </Fragment>
-  );
+          title={
+            <h3>
+              <FormattedMessage
+                id="xpack.spaces.management.copyToSpace.noSpacesTitle"
+                defaultMessage="No spaces available"
+              />
+            </h3>
+          }
+        />
+      );
+    }
+
+    // Step 2: Copy has not been initiated yet; User must fill out form to continue.
+    if (!copyInProgress) {
+      return (
+        <CopyToSpaceForm spaces={spaces} copyOptions={copyOptions} onUpdate={setCopyOptions} />
+      );
+    }
+
+    // Step3: Copy operation is in progress
+    return (
+      <ProcessingCopyToSpace
+        savedObject={savedObject}
+        copyInProgress={copyInProgress}
+        conflictResolutionInProgress={conflictResolutionInProgress}
+        copyResult={copyResult}
+        spaces={spaces}
+        copyOptions={copyOptions}
+        retries={retries}
+        onRetriesChange={onRetriesChange}
+      />
+    );
+  };
 
   return (
     <EuiFlyout onClose={onClose} maxWidth={600}>
@@ -254,22 +246,10 @@ export const CopyToSpaceFlyout = ({ onClose, savedObject }: Props) => {
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
+
         <EuiHorizontalRule margin="m" />
-        {copyInProgress && (
-          <ProcessingCopyToSpace
-            savedObject={savedObject}
-            copyInProgress={copyInProgress}
-            conflictResolutionInProgress={conflictResolutionInProgress}
-            copyResult={copyResult}
-            spaces={spaces}
-            selectedSpaceIds={selectedSpaceIds}
-            retries={retries}
-            onRetriesChange={onRetriesChange}
-            includeRelated={includeRelated}
-            overwrite={overwrite}
-          />
-        )}
-        {!copyInProgress && form}
+
+        {getFlyoutBody()}
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
@@ -278,7 +258,7 @@ export const CopyToSpaceFlyout = ({ onClose, savedObject }: Props) => {
           conflictResolutionInProgress={conflictResolutionInProgress}
           initialCopyFinished={initialCopyFinished}
           copyResult={copyResult}
-          numberOfSelectedSpaces={selectedSpaceIds.length}
+          numberOfSelectedSpaces={copyOptions.selectedSpaceIds.length}
           retries={retries}
           onCopyStart={startCopy}
           onCopyFinish={finishCopy}

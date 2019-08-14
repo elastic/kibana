@@ -7,7 +7,7 @@
 import React, { Fragment } from 'react';
 import { ProcessedImportResponse, SavedObjectRecord } from 'ui/management/saved_objects_management';
 import { SpaceAvatar } from 'plugins/spaces/components';
-import { SavedObjectsImportRetry } from 'src/core/server/saved_objects/import/types';
+import { SavedObjectsImportRetry } from 'src/core/server';
 import {
   EuiAccordion,
   EuiFlexGroup,
@@ -23,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Space } from '../../../../../common/model/space';
 import { CopyStatusSummaryIndicator } from './copy_status_summary_indicator';
 import { CopyResultDetails } from './copy_result_details';
+import { CopyOptions } from './types';
 
 interface Props {
   savedObject: SavedObjectRecord;
@@ -32,9 +33,7 @@ interface Props {
   retries: Record<string, SavedObjectsImportRetry[]>;
   onRetriesChange: (retries: Record<string, SavedObjectsImportRetry[]>) => void;
   spaces: Space[];
-  selectedSpaceIds: string[];
-  includeRelated: boolean;
-  overwrite: boolean;
+  copyOptions: CopyOptions;
 }
 
 export const ProcessingCopyToSpace = (props: Props) => {
@@ -46,12 +45,12 @@ export const ProcessingCopyToSpace = (props: Props) => {
   }
 
   return (
-    <Fragment>
+    <div data-test-subj="copy-to-space-processing">
       <EuiListGroup className="spcCopyToSpaceOptionsView" flush>
         <EuiListGroupItem
-          iconType={props.includeRelated ? 'check' : 'cross'}
+          iconType={props.copyOptions.includeRelated ? 'check' : 'cross'}
           label={
-            props.includeRelated ? (
+            props.copyOptions.includeRelated ? (
               <FormattedMessage
                 id="xpack.spaces.management.copyToSpace.includeRelatedLabel"
                 defaultMessage="Including related saved objects"
@@ -65,9 +64,9 @@ export const ProcessingCopyToSpace = (props: Props) => {
           }
         />
         <EuiListGroupItem
-          iconType={props.overwrite ? 'check' : 'cross'}
+          iconType={props.copyOptions.overwrite ? 'check' : 'cross'}
           label={
-            props.overwrite ? (
+            props.copyOptions.overwrite ? (
               <FormattedMessage
                 id="xpack.spaces.management.copyToSpace.overwriteLabel"
                 defaultMessage="Automatically overwriting saved objects"
@@ -86,19 +85,19 @@ export const ProcessingCopyToSpace = (props: Props) => {
         <h5>Copy results</h5>
       </EuiText>
       <EuiSpacer size="m" />
-      {props.selectedSpaceIds.map(id => {
+      {props.copyOptions.selectedSpaceIds.map(id => {
         const space = props.spaces.find(s => s.id === id) as Space;
         const result = props.copyResult[space.id];
         const summarizedCopyResult = summarizeCopyResult(
           props.savedObject,
           result,
-          props.includeRelated
+          props.copyOptions.includeRelated
         );
 
         const spaceHasPendingOverwrites = (props.retries[space.id] || []).some(r => r.overwrite);
 
         return (
-          <Fragment>
+          <Fragment key={id}>
             <EuiAccordion
               id={`copyToSpace-${id}`}
               className="spcCopyToSpaceResult"
@@ -137,6 +136,6 @@ export const ProcessingCopyToSpace = (props: Props) => {
           </Fragment>
         );
       })}
-    </Fragment>
+    </div>
   );
 };

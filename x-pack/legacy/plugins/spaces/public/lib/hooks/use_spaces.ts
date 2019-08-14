@@ -10,12 +10,18 @@ import { Space } from '../../../common/model/space';
 
 export const useKibanaSpaces = () => {
   const [spaces, setSpaces] = useState([] as Space[]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    setIsLoading(true);
     kfetch({ pathname: '/api/spaces/space' }).then((response: Space[]) => {
       setSpaces(response);
+      setIsLoading(false);
     });
   }, []);
 
-  return spaces;
+  return {
+    isLoading,
+    spaces,
+  };
 };

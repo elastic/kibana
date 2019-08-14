@@ -61,7 +61,12 @@ export const SelectableSpacesControl = (props: Props) => {
     <EuiSelectable
       options={options as any[]}
       onChange={newOptions => updateSelectedSpaces(newOptions as SpaceOption[])}
-      listProps={{ bordered: true, rowHeight: 40, className: 'spcCopyToSpace__spacesList' }}
+      listProps={{
+        bordered: true,
+        rowHeight: 40,
+        className: 'spcCopyToSpace__spacesList',
+        'data-test-subj': 'cts-form-space-selector',
+      }}
       searchable
     >
       {(list, search) => {
