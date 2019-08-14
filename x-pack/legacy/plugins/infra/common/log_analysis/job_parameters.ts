@@ -6,5 +6,8 @@
 
 import { JobType } from './log_analysis';
 
+export const getJobIdPrefix = (spaceId: string, sourceId: string) =>
+  `kibana-logs-ui-${spaceId}-${sourceId}-`;
+
 export const getJobId = (spaceId: string, sourceId: string, jobType: JobType) =>
-  `kibana-logs-ui-${spaceId}-${sourceId}-${jobType}`;
+  `${getJobIdPrefix(spaceId, sourceId)}${jobType}`;

@@ -4,6 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './log_analysis_capabilities';
-export * from './log_analysis_jobs';
-export * from './log_analysis_results';
+export interface ControlledProgram {
+  readonly pid: number;
+
+  kill(force: boolean): void;
+
+  onExit(callback: () => void): void;
+
+  killed(): boolean;
+}
