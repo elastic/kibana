@@ -114,6 +114,10 @@ export const MetricDetail = withMetricPageProviders(
           []
         );
 
+        if (metadataLoading && !filteredLayouts.length) {
+          return null;
+        }
+
         return (
           <WithMetricsTime>
             {({
@@ -190,9 +194,10 @@ export const MetricDetail = withMetricPageProviders(
                           />
                           <AutoSizer content={false} bounds detectAnyWindowResize>
                             {({ measureRef, bounds: { width = 0 } }) => {
+                              const w = width ? `${width}px` : `100%`;
                               return (
                                 <MetricsDetailsPageColumn innerRef={measureRef}>
-                                  <EuiPageBody style={{ width: `${width}px` }}>
+                                  <EuiPageBody style={{ width: w }}>
                                     <EuiPageHeader style={{ flex: '0 0 auto' }}>
                                       <EuiPageHeaderSection style={{ width: '100%' }}>
                                         <MetricsTitleTimeRangeContainer>
