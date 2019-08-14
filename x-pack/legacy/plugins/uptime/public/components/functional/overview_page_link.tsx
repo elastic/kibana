@@ -5,38 +5,26 @@
  */
 
 import { EuiLink } from '@elastic/eui';
-import { Link } from 'react-router-dom';
 import React, { FunctionComponent } from 'react';
 import { CursorPagination } from '../../../common/graphql/types';
-import queryString from 'querystring';
+import { useUrlParams } from '../../hooks';
 
 interface OverviewPageLinkProps {
   pagination?: CursorPagination;
-  linkParameters: string | undefined;
 }
 
 export const OverviewPageLink: FunctionComponent<OverviewPageLinkProps> = ({
   children,
   pagination,
-  linkParameters,
 }) => {
-  let params = {};
-
-  if (linkParameters) {
-    // Replace prefixed ? since we add our own in
-    params = Object.assign(params, queryString.parse(linkParameters.replace(/^\?/, '')));
-  }
-
-  if (pagination) {
-    params = Object.assign(params, pagination);
-  }
-
-  const to = `/?${queryString.stringify(params)}`;
-  return (
-    <EuiLink>
-      <Link data-test-subj={`overview-page-link`} to={to}>
+  const [, updateUrlParams] = useUrlParams();
+  if (pagination && pagination.cursorKey) {
+    const { cursorKey, cursorDirection, sortOrder } = pagination;
+    return (
+      <EuiLink onClick={() => updateUrlParams({ cursorKey, cursorDirection, sortOrder })}>
         {children}
-      </Link>
-    </EuiLink>
-  );
+      </EuiLink>
+    );
+  }
+  return null;
 };
