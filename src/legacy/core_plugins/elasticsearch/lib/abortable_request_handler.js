@@ -17,18 +17,18 @@
  * under the License.
  */
 
-import { uiModules } from 'ui/modules';
-import vislibGridTemplate from './grid.html';
-const module = uiModules.get('kibana');
+import { AbortController } from 'abortcontroller-polyfill/dist/cjs-ponyfill';
 
-module.directive('vislibGrid', function () {
-  return {
-    restrict: 'E',
-    template: vislibGridTemplate,
-    replace: true,
-    link: function ($scope) {
-
-      $scope.isGridOpen = true;
-    }
+/*
+ * A simple utility for generating a handler that provides a signal to the handler that signals when
+ * the client has closed the connection on this request.
+ */
+export function abortableRequestHandler(fn) {
+  return (req, ...args) => {
+    const controller = new AbortController();
+    req.events.once('disconnect', () => {
+      controller.abort();
+    });
+    return fn(controller.signal, req, ...args);
   };
-});
+}

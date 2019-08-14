@@ -21,14 +21,17 @@ import React from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 
 interface SelectOptionProps<ParamName extends string, ValidParamValues extends string> {
+  id?: string;
   label: string;
   options: Array<{ value: ValidParamValues; text: string }>;
   paramName: ParamName;
   value?: ValidParamValues;
+  dataTestSubj?: string;
   setValue: (paramName: ParamName, value: ValidParamValues) => void;
 }
 
 function SelectOption<ParamName extends string, ValidParamValues extends string>({
+  id,
   label,
   options,
   paramName,
@@ -36,7 +39,7 @@ function SelectOption<ParamName extends string, ValidParamValues extends string>
   setValue,
 }: SelectOptionProps<ParamName, ValidParamValues>) {
   return (
-    <EuiFormRow label={label} fullWidth={true} compressed>
+    <EuiFormRow id={id} label={label} fullWidth={true} compressed>
       <EuiSelect
         options={options}
         value={value}
