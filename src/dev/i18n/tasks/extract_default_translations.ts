@@ -21,14 +21,7 @@ import chalk from 'chalk';
 import { createFailError } from '../../run';
 import { ErrorReporter, extractMessagesFromPathToMap, filterConfigPaths, I18nConfig } from '..';
 
-export function extractDefaultMessages({
-  path,
-  config,
-}: {
-  path?: string | string[];
-  config: I18nConfig;
-}) {
-  const inputPaths = Array.isArray(path) ? path : [path || './'];
+export function extractDefaultMessages(config: I18nConfig, inputPaths: string[]) {
   const filteredPaths = filterConfigPaths(inputPaths, config) as string[];
   if (filteredPaths.length === 0) {
     throw createFailError(
@@ -37,7 +30,6 @@ export function extractDefaultMessages({
       )} None of input paths is covered by the mappings in .i18nrc.json.`
     );
   }
-
   return filteredPaths.map(filteredPath => ({
     task: async (context: {
       messages: Map<string, { message: string }>;
