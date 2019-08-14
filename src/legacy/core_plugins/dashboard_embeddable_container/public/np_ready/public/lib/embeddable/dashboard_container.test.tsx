@@ -32,11 +32,15 @@ import {
   ContactCardEmbeddable,
   ContactCardEmbeddableOutput,
 } from '../../../../../../embeddable_api/public/np_ready/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable';
+import { createContext } from '../../../../../../../../plugins/kibana_react/public';
 
-const viewportProps: DashboardContainerOptions = {
-  getActions: (() => []) as any,
-  getAllEmbeddableFactories: (() => []) as any,
-  getEmbeddableFactory: undefined as any,
+const options: DashboardContainerOptions = {
+  application: {} as any,
+  embeddable: {
+    getTriggerCompatibleActions: (() => []) as any,
+    getEmbeddableFactories: (() => []) as any,
+    getEmbeddableFactory: undefined as any,
+  } as any,
   notifications: {} as any,
   overlays: {} as any,
   inspector: {} as any,
@@ -45,26 +49,24 @@ const viewportProps: DashboardContainerOptions = {
 };
 
 beforeEach(() => {
-  const __embeddableFactories = new Map<string, EmbeddableFactory>();
-  __embeddableFactories.set(
+  const embeddableFactories = new Map<string, EmbeddableFactory>();
+  embeddableFactories.set(
     CONTACT_CARD_EMBEDDABLE,
     new ContactCardEmbeddableFactory({} as any, (() => null) as any, {} as any)
   );
-  viewportProps.getEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
+  options.embeddable.getEmbeddableFactory = (id: string) => embeddableFactories.get(id) as any;
 });
 
 test('DashboardContainer initializes embeddables', async done => {
-  const container = new DashboardContainer(
-    getSampleDashboardInput({
-      panels: {
-        '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
-          explicitInput: { firstName: 'Sam', id: '123' },
-          type: CONTACT_CARD_EMBEDDABLE,
-        }),
-      },
-    }),
-    viewportProps
-  );
+  const initialInput = getSampleDashboardInput({
+    panels: {
+      '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
+        explicitInput: { firstName: 'Sam', id: '123' },
+        type: CONTACT_CARD_EMBEDDABLE,
+      }),
+    },
+  });
+  const container = new DashboardContainer(initialInput, options, createContext(options));
 
   const subscription = container.getOutput$().subscribe(output => {
     if (container.getOutput().embeddableLoaded['123']) {
@@ -85,7 +87,11 @@ test('DashboardContainer initializes embeddables', async done => {
 });
 
 test('DashboardContainer.addNewEmbeddable', async () => {
-  const container = new DashboardContainer(getSampleDashboardInput(), viewportProps);
+  const container = new DashboardContainer(
+    getSampleDashboardInput(),
+    options,
+    createContext(options)
+  );
   const embeddable = await container.addNewEmbeddable<ContactCardEmbeddableInput>(
     CONTACT_CARD_EMBEDDABLE,
     {
@@ -106,17 +112,15 @@ test('DashboardContainer.addNewEmbeddable', async () => {
 });
 
 test('Container view mode change propagates to existing children', async () => {
-  const container = new DashboardContainer(
-    getSampleDashboardInput({
-      panels: {
-        '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
-          explicitInput: { firstName: 'Sam', id: '123' },
-          type: CONTACT_CARD_EMBEDDABLE,
-        }),
-      },
-    }),
-    viewportProps
-  );
+  const initialInput = getSampleDashboardInput({
+    panels: {
+      '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
+        explicitInput: { firstName: 'Sam', id: '123' },
+        type: CONTACT_CARD_EMBEDDABLE,
+      }),
+    },
+  });
+  const container = new DashboardContainer(initialInput, options, createContext(options));
   await nextTick();
 
   const embeddable = await container.getChild('123');
@@ -126,7 +130,11 @@ test('Container view mode change propagates to existing children', async () => {
 });
 
 test('Container view mode change propagates to new children', async () => {
-  const container = new DashboardContainer(getSampleDashboardInput(), viewportProps);
+  const container = new DashboardContainer(
+    getSampleDashboardInput(),
+    options,
+    createContext(options)
+  );
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
     ContactCardEmbeddableOutput,

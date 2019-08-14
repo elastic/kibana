@@ -25,40 +25,51 @@ import { shallowWithIntl, nextTick, mountWithIntl } from 'test_utils/enzyme_help
 import { skip } from 'rxjs/operators';
 import { EmbeddableFactory, GetEmbeddableFactory } from '../../embeddable_api';
 import { DashboardGrid, DashboardGridProps } from './dashboard_grid';
-import { DashboardContainer } from '../dashboard_container';
+import { DashboardContainer, DashboardContainerOptions } from '../dashboard_container';
 import { getSampleDashboardInput } from '../../test_helpers';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
 } from '../../../../../../../embeddable_api/public/np_ready/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
+import { createContext } from '../../../../../../../../../plugins/kibana_react/public';
 
 let dashboardContainer: DashboardContainer | undefined;
 
 function getProps(props?: Partial<DashboardGridProps>): DashboardGridProps {
-  const __embeddableFactories = new Map<string, EmbeddableFactory>();
-  __embeddableFactories.set(
+  const embeddableFactories = new Map<string, EmbeddableFactory>();
+  embeddableFactories.set(
     CONTACT_CARD_EMBEDDABLE,
     new ContactCardEmbeddableFactory({} as any, (() => {}) as any, {} as any)
   );
-  const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => __embeddableFactories.get(id);
-
-  dashboardContainer = new DashboardContainer(
-    getSampleDashboardInput({
-      panels: {
-        '1': {
-          gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
-          type: CONTACT_CARD_EMBEDDABLE,
-          explicitInput: { id: '1' },
-        },
-        '2': {
-          gridData: { x: 6, y: 6, w: 6, h: 6, i: '2' },
-          type: CONTACT_CARD_EMBEDDABLE,
-          explicitInput: { id: '2' },
-        },
+  const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => embeddableFactories.get(id);
+  const initialInput = getSampleDashboardInput({
+    panels: {
+      '1': {
+        gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
+        type: CONTACT_CARD_EMBEDDABLE,
+        explicitInput: { id: '1' },
       },
-    }),
-    { getEmbeddableFactory } as any
-  );
+      '2': {
+        gridData: { x: 6, y: 6, w: 6, h: 6, i: '2' },
+        type: CONTACT_CARD_EMBEDDABLE,
+        explicitInput: { id: '2' },
+      },
+    },
+  });
+  const options: DashboardContainerOptions = {
+    application: {} as any,
+    embeddable: {
+      getTriggerCompatibleActions: (() => []) as any,
+      getEmbeddableFactories: (() => []) as any,
+      getEmbeddableFactory,
+    } as any,
+    notifications: {} as any,
+    overlays: {} as any,
+    inspector: {} as any,
+    SavedObjectFinder: () => null,
+    ExitFullScreenButton: () => null,
+  };
+  dashboardContainer = new DashboardContainer(initialInput, options, createContext(options));
   const defaultTestProps: DashboardGridProps = {
     container: dashboardContainer,
     intl: null as any,
