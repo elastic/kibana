@@ -20,10 +20,12 @@
 import * as React from 'react';
 import { KibanaReactContext, KibanaReactContextValue, KibanaServices } from './types';
 import { createReactOverlays } from '../overlays';
+import { createNotifications } from '../notifications';
 
 const defaultContextValue = {
   services: {},
   overlays: undefined,
+  notifications: undefined,
 };
 
 export const context = React.createContext<KibanaReactContextValue<KibanaServices>>(
@@ -41,15 +43,19 @@ export const createContext = <Services extends KibanaServices>(
   services: Services
 ): KibanaReactContext<Services> => {
   const overlays = services.overlays ? createReactOverlays(services) : undefined;
+  const notifications = services.notifications ? createNotifications(services) : undefined;
+
   const value: KibanaReactContextValue<Services> = {
     services,
     overlays,
+    notifications,
   } as KibanaReactContextValue<Services>;
 
   const Provider: React.FC<{}> = ({ children }) =>
     React.createElement(context.Provider as React.ComponentType<any>, { value, children });
 
   return {
+    ...value,
     Provider,
     Consumer: (context.Consumer as unknown) as React.Consumer<KibanaReactContextValue<Services>>,
   };

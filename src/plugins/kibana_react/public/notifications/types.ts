@@ -18,26 +18,22 @@
  */
 
 import * as React from 'react';
-import { KibanaServices } from '../context/types';
-import { KibanaReactOverlays } from './types';
+import { Toast } from '../../../../core/public';
 
-export const createReactOverlays = (services: KibanaServices): KibanaReactOverlays => {
-  if (!services.overlays) {
-    throw new TypeError(
-      'Could not create KibanaReactOverlays as overlays service is not available.'
-    );
-  }
+export interface ToastInput {
+  title?: React.ReactNode;
+  body?: React.ReactNode;
+  color?: Toast['color'];
+  iconType?: Toast['iconType'];
+  toastLifeTimeMs?: Toast['toastLifeTimeMs'];
+  onClose?: Toast['onClose'];
+}
 
-  const openFlyout: KibanaReactOverlays['openFlyout'] = (node, options?) =>
-    services.overlays!.openFlyout(<>{node}</>, options);
-
-  const openModal: KibanaReactOverlays['openModal'] = (node, options?) =>
-    services.overlays!.openModal(<>{node}</>, options);
-
-  const overlays: KibanaReactOverlays = {
-    openFlyout,
-    openModal,
+export interface KibanaReactNotifications {
+  toasts: {
+    show: (input: ToastInput) => void;
+    success: (input: ToastInput) => void;
+    warning: (input: ToastInput) => void;
+    danger: (input: ToastInput) => void;
   };
-
-  return overlays;
-};
+}

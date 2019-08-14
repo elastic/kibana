@@ -20,6 +20,7 @@
 import * as React from 'react';
 import { CoreStart } from '../../../../core/public';
 import { KibanaReactOverlays } from '../overlays';
+import { KibanaReactNotifications } from '../notifications';
 
 export { CoreStart };
 
@@ -28,9 +29,12 @@ export type KibanaServices = Partial<CoreStart>;
 export interface KibanaReactContextValue<Services extends KibanaServices> {
   readonly services: Services;
   readonly overlays: undefined extends Services['overlays'] ? undefined : KibanaReactOverlays;
+  readonly notifications: undefined extends Services['notifications']
+    ? undefined
+    : KibanaReactNotifications;
 }
 
-export interface KibanaReactContext<T extends KibanaServices> {
+export interface KibanaReactContext<T extends KibanaServices> extends KibanaReactContextValue<T> {
   Provider: React.FC;
   Consumer: React.Consumer<KibanaReactContextValue<T>>;
 }

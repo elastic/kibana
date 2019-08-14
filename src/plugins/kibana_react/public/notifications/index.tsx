@@ -17,27 +17,5 @@
  * under the License.
  */
 
-import * as React from 'react';
-import { KibanaServices } from '../context/types';
-import { KibanaReactOverlays } from './types';
-
-export const createReactOverlays = (services: KibanaServices): KibanaReactOverlays => {
-  if (!services.overlays) {
-    throw new TypeError(
-      'Could not create KibanaReactOverlays as overlays service is not available.'
-    );
-  }
-
-  const openFlyout: KibanaReactOverlays['openFlyout'] = (node, options?) =>
-    services.overlays!.openFlyout(<>{node}</>, options);
-
-  const openModal: KibanaReactOverlays['openModal'] = (node, options?) =>
-    services.overlays!.openModal(<>{node}</>, options);
-
-  const overlays: KibanaReactOverlays = {
-    openFlyout,
-    openModal,
-  };
-
-  return overlays;
-};
+export * from './types';
+export * from './create_notifications';
