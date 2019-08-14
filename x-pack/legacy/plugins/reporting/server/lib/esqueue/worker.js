@@ -27,8 +27,11 @@ const MAX_ERROR_LENGTH = (MAX_PARTIAL_ERROR_LENGTH * 2) + ERROR_PARTIAL_SEPARATO
 
 function getLogger(opts, id, logLevel) {
   return (msg, err) => {
+    /*
+     * This does not get the logger instance from queue.registerWorker in the createWorker function.
+     * The logger instance in the Equeue lib comes from createTaggedLogger, so logLevel tags are passed differently
+     */
     const logger = opts.logger || function () {};
-
     const message = `${id} - ${msg}`;
     const tags = ['worker', logLevel];
 
@@ -280,8 +283,10 @@ export class Worker extends events.EventEmitter {
             job: formatJobObject(job),
             output: docOutput,
           };
-
           this.emit(constants.EVENT_WORKER_COMPLETE, eventOutput);
+
+          const formattedDocPath = `/${response._index}/${response._type}/${response._id}`;
+          this.info(`Job data saved successfully: ${formattedDocPath}`);
           return response;
         })
         .catch((err) => {
@@ -315,11 +320,7 @@ export class Worker extends events.EventEmitter {
       this.warn(`Failure occurred on job ${job._id}`, jobErr);
       this.emit(constants.EVENT_WORKER_JOB_EXECUTION_ERROR, this._formatErrorParams(jobErr, job));
       return this._failJob(job, (jobErr.toString) ? jobErr.toString() : false);
-    })
-      .then((response) => {
-        const formattedDocPath = `/${response._index}/${response._type}/${response._id}`;
-        this.info(`Job data saved successfully: ${formattedDocPath}`);
-      });
+    });
   }
 
   _startJobPolling() {
