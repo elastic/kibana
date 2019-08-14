@@ -30,6 +30,7 @@ import {
   EuiOverlayMask,
   EuiScreenReaderOnly,
   EuiIconTip,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -83,8 +84,7 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
   const savedQueryDescriptionText = i18n.translate(
     'data.search.searchBar.savedQueryDescriptionText',
     {
-      defaultMessage:
-        'Saved queries allow you to save common search snippets and filters for later use.',
+      defaultMessage: 'Save query text and filters that you want to use again.',
     }
   );
 
@@ -226,54 +226,70 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
 
               <EuiFlexItem>
                 {showSaveQuery && (
-                  <EuiButtonEmpty
-                    onClick={() => {
-                      setConfirmDeletionModal(
-                        <EuiOverlayMask>
-                          <EuiConfirmModal
-                            title={i18n.translate(
-                              'data.search.searchBar.savedQueryPopoverConfirmDeletionTitle',
-                              {
-                                defaultMessage: 'Delete {savedQueryName}?',
-                                values: {
-                                  savedQueryName: savedQuery.attributes.title,
-                                },
-                              }
-                            )}
-                            confirmButtonText={i18n.translate(
-                              'data.search.searchBar.savedQueryPopoverConfirmDeletionConfirmButtonText',
-                              {
-                                defaultMessage: 'Delete',
-                              }
-                            )}
-                            cancelButtonText={i18n.translate(
-                              'data.search.searchBar.savedQueryPopoverConfirmDeletionCancelButtonText',
-                              {
-                                defaultMessage: 'Cancel',
-                              }
-                            )}
-                            onConfirm={() => {
-                              onDeleteSavedQuery(savedQuery);
-                              setConfirmDeletionModal(null);
-                            }}
-                            onCancel={() => {
-                              setConfirmDeletionModal(null);
-                            }}
-                          />
-                        </EuiOverlayMask>
-                      );
-                    }}
-                    iconType="trash"
-                    color="danger"
-                    aria-label={i18n.translate(
-                      'data.search.searchBar.savedQueryPopoverDeleteButtonAriaLabel',
-                      {
-                        defaultMessage: 'Delete saved query {savedQueryName}',
-                        values: { savedQueryName: savedQuery.attributes.title },
+                  <Fragment>
+                    <EuiToolTip
+                      position="top"
+                      content={
+                        <p>
+                          {i18n.translate(
+                            'data.search.searchBar.savedQueryPopoverDeleteButtonTooltip',
+                            {
+                              defaultMessage: 'Delete saved query',
+                            }
+                          )}
+                        </p>
                       }
-                    )}
-                    data-test-subj={`delete-saved-query-${savedQuery.attributes.title}-button`}
-                  />
+                    >
+                      <EuiButtonEmpty
+                        onClick={() => {
+                          setConfirmDeletionModal(
+                            <EuiOverlayMask>
+                              <EuiConfirmModal
+                                title={i18n.translate(
+                                  'data.search.searchBar.savedQueryPopoverConfirmDeletionTitle',
+                                  {
+                                    defaultMessage: 'Delete {savedQueryName}?',
+                                    values: {
+                                      savedQueryName: savedQuery.attributes.title,
+                                    },
+                                  }
+                                )}
+                                confirmButtonText={i18n.translate(
+                                  'data.search.searchBar.savedQueryPopoverConfirmDeletionConfirmButtonText',
+                                  {
+                                    defaultMessage: 'Delete',
+                                  }
+                                )}
+                                cancelButtonText={i18n.translate(
+                                  'data.search.searchBar.savedQueryPopoverConfirmDeletionCancelButtonText',
+                                  {
+                                    defaultMessage: 'Cancel',
+                                  }
+                                )}
+                                onConfirm={() => {
+                                  onDeleteSavedQuery(savedQuery);
+                                  setConfirmDeletionModal(null);
+                                }}
+                                onCancel={() => {
+                                  setConfirmDeletionModal(null);
+                                }}
+                              />
+                            </EuiOverlayMask>
+                          );
+                        }}
+                        iconType="trash"
+                        color="danger"
+                        aria-label={i18n.translate(
+                          'data.search.searchBar.savedQueryPopoverDeleteButtonAriaLabel',
+                          {
+                            defaultMessage: 'Delete saved query {savedQueryName}',
+                            values: { savedQueryName: savedQuery.attributes.title },
+                          }
+                        )}
+                        data-test-subj={`delete-saved-query-${savedQuery.attributes.title}-button`}
+                      />
+                    </EuiToolTip>
+                  </Fragment>
                 )}
               </EuiFlexItem>
             </EuiFlexGroup>

@@ -72,8 +72,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
   const savedQueryDescriptionText = i18n.translate(
     'data.search.searchBar.savedQueryDescriptionText',
     {
-      defaultMessage:
-        'Saved queries allow you to save common search snippets and filters for later use.',
+      defaultMessage: 'Save query text and filters that you want to use again.',
     }
   );
 
@@ -87,7 +86,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
           defaultMessage: 'Name',
         })}
         helpText={i18n.translate('data.search.searchBar.savedQueryNameHelpText', {
-          defaultMessage: 'Must be unique.',
+          defaultMessage: 'Name must be unique.',
         })}
       >
         <EuiFieldText
