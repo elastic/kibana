@@ -22,7 +22,6 @@ import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { APMLink } from '../../../shared/Links/APMLink';
 import { legacyEncodeURIComponent } from '../../../shared/Links/url_helpers';
 import { StickyProperties } from '../../../shared/StickyProperties';
-import { TransactionLink } from '../../../shared/Links/apm/TransactionLink';
 import { isRumAgentName } from '../../../../../common/agent_name';
 
 interface Props {
@@ -55,8 +54,7 @@ function TransactionLink({
       path={path}
       query={{
         transactionId: transaction.transaction.id,
-        traceId: transaction.trace.id,
-        banana: 'ok'
+        traceId: transaction.trace.id
       }}
     >
       {transaction.transaction.id}
