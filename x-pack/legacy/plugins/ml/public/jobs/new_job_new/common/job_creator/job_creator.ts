@@ -95,9 +95,17 @@ export class JobCreator {
     return agg !== undefined ? agg : null;
   }
 
+  public get aggregations(): Aggregation[] {
+    return this._aggs;
+  }
+
   public getField(index: number): Field | null {
     const field = this._fields[index];
     return field !== undefined ? field : null;
+  }
+
+  public get fields(): Field[] {
+    return this._fields;
   }
 
   public set bucketSpan(bucketSpan: BucketSpan) {
@@ -247,11 +255,12 @@ export class JobCreator {
     return this._subscribers;
   }
 
-  public async createAndStartJob() {
+  public async createAndStartJob(): Promise<JobRunner> {
     try {
       await this.createJob();
       await this.createDatafeed();
-      await this.startDatafeed();
+      const jobRunner = await this.startDatafeed();
+      return jobRunner;
     } catch (error) {
       throw error;
     }
