@@ -33,7 +33,7 @@ export function ServiceMetrics({ agentName }: ServiceMetricsProps) {
     typeof LocalUIFilters
   > = useMemo(
     () => ({
-      filterNames: ['host', 'containerId', 'podId'],
+      filterNames: ['host', 'containerId', 'podName'],
       params: {
         serviceName
       },

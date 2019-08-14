@@ -6,7 +6,7 @@
 import { i18n } from '@kbn/i18n';
 import {
   CONTAINER_ID,
-  POD_ID,
+  POD_NAME,
   SERVICE_AGENT_NAME,
   HOST_NAME,
   TRANSACTION_RESULT
@@ -31,11 +31,11 @@ const filtersByName = {
     }),
     fieldName: CONTAINER_ID
   },
-  podId: {
-    title: i18n.translate('xpack.apm.localFilters.titles.podId', {
+  podName: {
+    title: i18n.translate('xpack.apm.localFilters.titles.podName', {
       defaultMessage: 'Pod'
     }),
-    fieldName: POD_ID
+    fieldName: POD_NAME
   },
   transactionResult: {
     title: i18n.translate('xpack.apm.localFilters.titles.transactionResult', {

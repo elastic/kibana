@@ -60,4 +60,4 @@ export const METRIC_JAVA_THREAD_COUNT = 'jvm.thread.count';
 
 export const HOST_NAME = 'host.hostname';
 export const CONTAINER_ID = 'container.id';
-export const POD_ID = 'kubernetes.pod.uid';
+export const POD_NAME = 'kubernetes.pod.name';

@@ -95,7 +95,7 @@ export function TransactionOverview() {
     typeof LocalUIFilters
   > = useMemo(
     () => ({
-      filterNames: ['transactionResult', 'host', 'containerId', 'podId'],
+      filterNames: ['transactionResult', 'host', 'containerId', 'podName'],
       params: {
         serviceName,
         transactionType

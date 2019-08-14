@@ -28,7 +28,7 @@ export function TraceOverview() {
 
   const localUIFiltersConfig = useMemo(() => {
     const config: React.ComponentProps<typeof LocalUIFilters> = {
-      filterNames: ['transactionResult', 'host', 'containerId', 'podId'],
+      filterNames: ['transactionResult', 'host', 'containerId', 'podName'],
       projection: PROJECTION.TRACES
     };
 

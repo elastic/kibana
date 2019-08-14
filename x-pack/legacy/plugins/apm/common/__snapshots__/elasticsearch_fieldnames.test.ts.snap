@@ -46,7 +46,7 @@ exports[`Error OBSERVER_VERSION_MAJOR 1`] = `undefined`;
 
 exports[`Error PARENT_ID 1`] = `"parentId"`;
 
-exports[`Error POD_ID 1`] = `undefined`;
+exports[`Error POD_NAME 1`] = `undefined`;
 
 exports[`Error PROCESSOR_EVENT 1`] = `"error"`;
 
@@ -138,7 +138,7 @@ exports[`Span OBSERVER_VERSION_MAJOR 1`] = `undefined`;
 
 exports[`Span PARENT_ID 1`] = `"parentId"`;
 
-exports[`Span POD_ID 1`] = `undefined`;
+exports[`Span POD_NAME 1`] = `undefined`;
 
 exports[`Span PROCESSOR_EVENT 1`] = `"span"`;
 
@@ -230,7 +230,7 @@ exports[`Transaction OBSERVER_VERSION_MAJOR 1`] = `undefined`;
 
 exports[`Transaction PARENT_ID 1`] = `"parentId"`;
 
-exports[`Transaction POD_ID 1`] = `"pod1234567890abcdef"`;
+exports[`Transaction POD_NAME 1`] = `undefined`;
 
 exports[`Transaction PROCESSOR_EVENT 1`] = `"transaction"`;
 
