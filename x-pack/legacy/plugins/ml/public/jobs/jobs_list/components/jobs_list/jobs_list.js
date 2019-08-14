@@ -80,21 +80,16 @@ class JobsListUI extends Component {
   };
 
   getJobIdLink(id) {
-    let link = (
+    // Don't allow link to job if ML is not enabled in current space
+    if (this.props.isMlEnabledInSpace === false) {
+      return id;
+    }
+
+    return (
       <EuiLink href={getJobIdUrl(id)}>
         {id}
       </EuiLink>
     );
-    // Disable link to job if ML is not enabled in current space
-    if (this.props.isMlEnabledInSpace === false) {
-      link = (
-        <EuiLink className="disabledLink" onClick={() => {}} color="subdued">
-          {id}
-        </EuiLink>
-      );
-    }
-
-    return link;
   }
 
   getPageOfJobs(index, size, sortField, sortDirection) {
