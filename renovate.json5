@@ -633,6 +633,14 @@
         ],
       },
       {
+        groupSlug: 'keymirror',
+        groupName: 'keymirror related packages',
+        packageNames: [
+          'keymirror',
+          '@types/keymirror',
+        ],
+      },
+      {
         groupSlug: 'memoize-one',
         groupName: 'memoize-one related packages',
         packageNames: [
