@@ -106,6 +106,12 @@ export const getQuery = ({ map }) => map.mapState.query;
 
 export const getFilters = ({ map }) => map.mapState.filters;
 
+export const isUsingSearch = (state) => {
+  const filters = getFilters(state).filter(filter => !filter.meta.disabled);
+  const queryString = _.get(getQuery(state), 'query', '');
+  return filters.length || queryString.length;
+};
+
 export const getDrawState = ({ map }) => map.mapState.drawState;
 
 export const getRefreshConfig = ({ map }) => {

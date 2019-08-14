@@ -52,10 +52,20 @@ export class LayerTocActions extends Component {
 
   _renderPopoverToggleButton() {
     const { icon, tooltipContent, areResultsTrimmed } = this.props.layer.getIconAndTooltipContent(this.props.zoom);
-    const infoButton = areResultsTrimmed ? (<EuiIcon
-      color="subdued"
-      type="iInCircle"
-    />) : null;
+    const infoButton = areResultsTrimmed
+      ? (<EuiIcon
+        color="subdued"
+        type="iInCircle"
+        size="s"
+      />)
+      : null;
+    const filterIcon = this.props.isUsingSearch && this.props.layer.getQueryableIndexPatternIds().length
+      ? (<EuiIcon
+        color="subdued"
+        type="filter"
+        size="s"
+      />)
+      : null;
     const tooltip = <Fragment>{infoButton} {tooltipContent}</Fragment>;
     return (
       <EuiToolTip
@@ -73,7 +83,9 @@ export class LayerTocActions extends Component {
           data-test-subj={`layerTocActionsPanelToggleButton${this.props.escapedDisplayName}`}
         >
           <span className="mapTocEntry__layerNameIcon">{icon}</span>
-          {this.props.displayName}{infoButton}
+          {this.props.displayName}
+          {infoButton}
+          {filterIcon}
         </EuiButtonEmpty>
 
       </EuiToolTip>
