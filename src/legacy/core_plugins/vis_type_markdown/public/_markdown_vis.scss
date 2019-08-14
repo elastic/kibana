@@ -2,3 +2,13 @@
   padding: $euiSizeS;
   width: 100%;
 }
+
+.visEditor--markdown {
+  vis-editor-vis-options, vis-options-react-wrapper, textarea {
+    @include flex-parent(1, 1, auto);
+  }
+
+  .mkdEditor {
+    height: 100%;
+  }
+}
