@@ -265,11 +265,11 @@ export class AggConfig {
   }
 
   getRequestAggs() {
-    return this.type.getRequestAggs(this) || [this];
+    return (this.type && this.type.getRequestAggs(this)) || [this];
   }
 
   getResponseAggs() {
-    return this.type.getResponseAggs(this) || [this];
+    return (this.type && this.type.getResponseAggs(this)) || [this];
   }
 
   getValue(bucket: any) {
