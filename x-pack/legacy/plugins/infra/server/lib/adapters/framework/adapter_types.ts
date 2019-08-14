@@ -9,6 +9,7 @@ import { GraphQLSchema } from 'graphql';
 import { Lifecycle, ResponseToolkit, RouteOptions } from 'hapi';
 import { Legacy } from 'kibana';
 
+import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { JsonObject } from '../../../../common/typed_json';
 import { InfraMetricModel } from '../metrics/adapter_types';
 
@@ -66,6 +67,7 @@ export interface InfraBackendFrameworkAdapter {
     timerange: { min: number; max: number },
     filters: JsonObject[]
   ): Promise<InfraTSVBResponse>;
+  config(req: InfraFrameworkRequest): KibanaConfig;
 }
 /* eslint-enable  @typescript-eslint/unified-signatures */
 
@@ -155,15 +157,21 @@ export interface SortedSearchHit extends SearchHit {
   };
 }
 
-export interface InfraDateRangeAggregationBucket {
+export type InfraDateRangeAggregationBucket<NestedAggregation extends object = {}> = {
   from?: number;
   to?: number;
   doc_count: number;
   key: string;
+} & NestedAggregation;
+
+export interface InfraDateRangeAggregationResponse<NestedAggregation extends object = {}> {
+  buckets: Array<InfraDateRangeAggregationBucket<NestedAggregation>>;
 }
 
-export interface InfraDateRangeAggregationResponse {
-  buckets: InfraDateRangeAggregationBucket[];
+export interface InfraTopHitsAggregationResponse {
+  hits: {
+    hits: [];
+  };
 }
 
 export interface InfraMetadataAggregationBucket {

@@ -33,7 +33,7 @@ export function spacesUtilsProvider(spacesPlugin: any, request: Request, config:
     }
   }
 
-  async function isMlEnabled(): Promise<boolean> {
+  async function isMlEnabledInSpace(): Promise<boolean> {
     const { valid, space } = await activeSpace();
     if (valid === true && space !== undefined) {
       return space.disabledFeatures.includes('ml') === false;
@@ -41,5 +41,5 @@ export function spacesUtilsProvider(spacesPlugin: any, request: Request, config:
     return true;
   }
 
-  return { isMlEnabled };
+  return { isMlEnabledInSpace };
 }

@@ -47,6 +47,7 @@ describe('ColumnHeaders', () => {
           showEventsSelect={false}
           sort={sort}
           timelineId={'test'}
+          toggleColumn={jest.fn()}
         />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -68,6 +69,7 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             sort={sort}
             timelineId={'test'}
+            toggleColumn={jest.fn()}
           />
         </TestProviders>
       );
@@ -96,6 +98,7 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             sort={sort}
             timelineId={'test'}
+            toggleColumn={jest.fn()}
           />
         </TestProviders>
       );
@@ -126,6 +129,7 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             sort={sort}
             timelineId={'test'}
+            toggleColumn={jest.fn()}
           />
         </TestProviders>
       );

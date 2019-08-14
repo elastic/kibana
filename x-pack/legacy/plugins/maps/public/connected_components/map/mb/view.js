@@ -17,7 +17,8 @@ import { getGlyphUrl, isRetina } from '../../../meta';
 import {
   DECIMAL_DEGREES_PRECISION,
   FEATURE_ID_PROPERTY_NAME,
-  ZOOM_PRECISION
+  ZOOM_PRECISION,
+  LON_INDEX
 } from '../../../../common/constants';
 import mapboxgl from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw-unminified';
@@ -25,7 +26,8 @@ import DrawRectangle from 'mapbox-gl-draw-rectangle-mode';
 import { FeatureTooltip } from '../feature_tooltip';
 import { DRAW_TYPE } from '../../../actions/map_actions';
 import {
-  createGeometryFilterWithMeta,
+  createSpatialFilterWithBoundingBox,
+  createSpatialFilterWithGeometry,
   getBoundingBoxGeometry,
   roundCoordinates
 } from '../../../elasticsearch_geo_utils';
@@ -102,26 +104,27 @@ export class MBMapContainer extends React.Component {
     // MapboxDraw returns coordinates with 12 decimals. Round to a more reasonable number
     roundCoordinates(geometry.coordinates);
 
-    // TODO allow user to set geojson label when initiating draw
-    const geometryLabel = isBoundingBox
-      ? i18n.translate('xpack.maps.drawControl.defaultEnvelopeLabel', {
-        defaultMessage: 'extent'
-      })
-      : i18n.translate('xpack.maps.drawControl.defaultShapeLabel', {
-        defaultMessage: 'shape'
-      });
-
     try {
-      const filter = createGeometryFilterWithMeta({
-        geometry: isBoundingBox
-          ? getBoundingBoxGeometry(geometry)
-          : geometry,
-        geometryLabel,
+      const options = {
         indexPatternId: this.props.drawState.indexPatternId,
         geoFieldName: this.props.drawState.geoField,
         geoFieldType: this.props.drawState.geoFieldType,
-        isBoundingBox,
-      });
+      };
+      const filter = isBoundingBox
+        ? createSpatialFilterWithBoundingBox({
+          ...options,
+          geometryLabel: i18n.translate('xpack.maps.drawControl.defaultEnvelopeLabel', {
+            defaultMessage: 'extent'
+          }),
+          geometry: getBoundingBoxGeometry(geometry)
+        })
+        : createSpatialFilterWithGeometry({
+          ...options,
+          geometryLabel: i18n.translate('xpack.maps.drawControl.defaultShapeLabel', {
+            defaultMessage: 'shape'
+          }),
+          geometry
+        });
       this.props.addFilters([filter]);
     } catch (error) {
       // TODO notify user why filter was not created
@@ -244,8 +247,8 @@ export class MBMapContainer extends React.Component {
       // Ensure that if the map is zoomed out such that multiple
       // copies of the feature are visible, the popup appears
       // over the copy being pointed to.
-      while (Math.abs(mbLngLat.lng - coordinates[0]) > 180) {
-        coordinates[0] += mbLngLat.lng > coordinates[0] ? 360 : -360;
+      while (Math.abs(mbLngLat.lng - coordinates[LON_INDEX]) > 180) {
+        coordinates[0] += mbLngLat.lng > coordinates[LON_INDEX] ? 360 : -360;
       }
 
       popupAnchorLocation = coordinates;
@@ -471,6 +474,15 @@ export class MBMapContainer extends React.Component {
     addSpritesheetToMap(json, sprites, this._mbMap);
   }
 
+  _reevaluateTooltipPosition = () => {
+    // Force mapbox to ensure tooltip does not clip map boundary and move anchor when clipping occurs
+    requestAnimationFrame(() => {
+      if (this._isMounted && this.props.tooltipState && this.props.tooltipState.location) {
+        this._mbPopup.setLngLat(this.props.tooltipState.location);
+      }
+    });
+  }
+
   _hideTooltip() {
     if (this._mbPopup.isOpen()) {
       this._mbPopup.remove();
@@ -492,6 +504,7 @@ export class MBMapContainer extends React.Component {
         showFilterButtons={!!this.props.addFilters && isLocked}
         isLocked={isLocked}
         addFilters={this.props.addFilters}
+        reevaluateTooltipPosition={this._reevaluateTooltipPosition}
       />
     ), this._tooltipContainer);
 

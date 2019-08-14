@@ -13,7 +13,7 @@ import {
   getLogEntryIndexBeforeTime,
   getUniqueLogEntryKey,
 } from '../../../utils/log_entry';
-import { LogEntryHighlights } from './data_fetching';
+import { LogEntryHighlights } from './log_entry_highlights';
 
 export const useNextAndPrevious = ({
   highlightTerms,
