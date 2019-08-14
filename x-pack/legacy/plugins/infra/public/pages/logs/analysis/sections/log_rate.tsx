@@ -4,9 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Axis, Chart, getAxisId, getSpecId, AreaSeries, LineSeries } from '@elastic/charts';
+import { first, last } from 'lodash';
+import {
+  Axis,
+  Chart,
+  getAxisId,
+  getSpecId,
+  AreaSeries,
+  LineSeries,
+  niceTimeFormatter,
+} from '@elastic/charts';
 import {
   EuiTitle,
   EuiFlexGroup,
@@ -37,6 +46,14 @@ export const LogRateResults = ({
   const { areaSeries, lineSeries } = useLogEntryRateGraphData({
     data: results,
   });
+
+  const dateFormatter = useMemo(
+    () =>
+      lineSeries.length > 0
+        ? niceTimeFormatter([first(lineSeries)[0], last(lineSeries)[0]])
+        : (value: number) => `${value}`,
+    [lineSeries]
+  );
 
   return (
     <>
@@ -76,7 +93,7 @@ export const LogRateResults = ({
               title="Time"
               position="bottom"
               showOverlappingTicks
-              tickFormat={value => value}
+              tickFormat={dateFormatter}
             />
             <Axis
               id={getAxisId('values')}
