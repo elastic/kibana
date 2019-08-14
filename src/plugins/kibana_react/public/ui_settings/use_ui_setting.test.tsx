@@ -21,8 +21,8 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { act, Simulate } from 'react-dom/test-utils';
 import { useUiSetting } from './use_ui_setting';
-import { createContext } from '../core';
-import { KibanaReactCore } from '../core/types';
+import { createContext } from '../context';
+import { KibanaServices } from '../context/types';
 import { Subject } from 'rxjs';
 import { useObservable } from '../util/use_observable';
 import { coreMock } from '../../../../core/public/mocks';
@@ -31,7 +31,7 @@ jest.mock('../util/use_observable');
 const useObservableSpy = (useObservable as any) as jest.SpyInstance;
 useObservableSpy.mockImplementation((observable, def) => def);
 
-const mock = (): [KibanaReactCore, Subject<any>] => {
+const mock = (): [KibanaServices, Subject<any>] => {
   const core = coreMock.createStart();
   const get = core.uiSettings.get;
   const get$ = core.uiSettings.get$;

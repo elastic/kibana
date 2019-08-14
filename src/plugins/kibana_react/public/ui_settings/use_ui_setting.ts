@@ -18,7 +18,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useKibana } from '../core';
+import { useKibana } from '../context';
 import { useObservable } from '../util/use_observable';
 
 type Setter<T> = (newValue: T) => Promise<boolean>;
@@ -41,10 +41,18 @@ type Setter<T> = (newValue: T) => Promise<boolean>;
  *       thus postfix assertion is used `core.uiSetting!`.
  */
 export const useUiSetting = <T>(key: string, defaultValue?: T): [T, Setter<T>] => {
-  const { core } = useKibana();
-  const observable$ = useMemo(() => core.uiSettings!.get$(key, defaultValue), [key, defaultValue]);
-  const value = useObservable<T>(observable$, core.uiSettings!.get(key, defaultValue));
-  const set = useCallback((newValue: T) => core.uiSettings!.set(key, newValue), [key]);
+  const { services } = useKibana();
+
+  if (typeof services.uiSettings !== 'object') {
+    throw new TypeError('uiSettings service not available in kibana-react context.');
+  }
+
+  const observable$ = useMemo(() => services.uiSettings!.get$(key, defaultValue), [
+    key,
+    defaultValue,
+  ]);
+  const value = useObservable<T>(observable$, services.uiSettings!.get(key, defaultValue));
+  const set = useCallback((newValue: T) => services.uiSettings!.set(key, newValue), [key]);
 
   return [value, set];
 };
