@@ -72,8 +72,9 @@ export class CustomTimeRangeBadge extends Action {
     return Boolean(embeddable && hasTimeRange(embeddable) && !doesInheritTimeRange(embeddable));
   }
 
-  public execute({ embeddable }: ActionContext) {
-    if (!this.isCompatible({ embeddable })) {
+  public async execute({ embeddable }: ActionContext) {
+    const isCompatible = await this.isCompatible({ embeddable });
+    if (!isCompatible) {
       throw new IncompatibleActionError();
     }
 

@@ -15,6 +15,15 @@ import { TimeRangeEmbeddable, TimeRangeContainer, TIME_RANGE_EMBEDDABLE } from '
 import { TimeRangeEmbeddableFactory } from './test_helpers/time_range_embeddable_factory';
 import { CustomTimeRangeAction } from './custom_time_range_action';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
+import {
+  HelloWorldEmbeddableFactory,
+  HELLO_WORLD_EMBEDDABLE_TYPE,
+  HelloWorldEmbeddable,
+  HelloWorldContainer,
+} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/test_samples';
+
+import { nextTick } from 'test_utils/enzyme_helpers';
+import { ReactElement } from 'react';
 
 jest.mock('ui/new_platform');
 
@@ -57,7 +66,7 @@ test('Custom time range action prevents embeddable from using container time', a
 
   const start = coreMock.createStart();
   const overlayMock = start.overlays;
-  (overlayMock.openModal as any).mockClear();
+  overlayMock.openModal.mockClear();
   new CustomTimeRangeAction({
     openModal: start.overlays.openModal,
     commonlyUsedRanges: [],
@@ -66,7 +75,8 @@ test('Custom time range action prevents embeddable from using container time', a
     embeddable: child1,
   });
 
-  const openModal = (overlayMock.openModal as any).mock.calls[0][0];
+  await nextTick();
+  const openModal = overlayMock.openModal.mock.calls[0][0] as ReactElement;
 
   const wrapper = mount(openModal);
   wrapper.setState({ timeRange: { from: 'now-30days', to: 'now-29days' } });
@@ -128,7 +138,8 @@ test('Removing custom time range action resets embeddable back to container time
     embeddable: child1,
   });
 
-  const openModal = (overlayMock.openModal as any).mock.calls[0][0];
+  await nextTick();
+  const openModal = overlayMock.openModal.mock.calls[0][0] as ReactElement;
 
   const wrapper = mount(openModal);
   wrapper.setState({ timeRange: { from: 'now-30days', to: 'now-29days' } });
@@ -145,6 +156,7 @@ test('Removing custom time range action resets embeddable back to container time
     embeddable: child1,
   });
 
+  await nextTick();
   const openModal2 = (overlayMock.openModal as any).mock.calls[1][0];
 
   const wrapper2 = mount(openModal2);
@@ -206,7 +218,8 @@ test('Cancelling custom time range action leaves state alone', async done => {
     embeddable: child1,
   });
 
-  const openModal = (overlayMock.openModal as any).mock.calls[0][0];
+  await nextTick();
+  const openModal = overlayMock.openModal.mock.calls[0][0] as ReactElement;
 
   const wrapper = mount(openModal);
   wrapper.setState({ timeRange: { from: 'now-300m', to: 'now-400m' } });
@@ -257,4 +270,76 @@ test(`badge is compatible with embeddable that inherits from parent`, async () =
     embeddable: child,
   });
   expect(compatible).toBe(true);
+});
+
+// TODO: uncomment when https://github.com/elastic/kibana/issues/43271 is fixed.
+// test('Embeddable that does not use time range in a container that has time range is incompatible', async () => {
+//   const embeddableFactories = new Map<string, EmbeddableFactory>();
+//   embeddableFactories.set(HELLO_WORLD_EMBEDDABLE_TYPE, new HelloWorldEmbeddableFactory());
+// const container = new TimeRangeContainer(
+//   {
+//     timeRange: { from: 'now-15m', to: 'now' },
+//     panels: {
+//       '1': {
+//         type: HELLO_WORLD_EMBEDDABLE_TYPE,
+//         explicitInput: {
+//           id: '1',
+//         },
+//       },
+//     },
+//     id: '123',
+//   },
+//   (() => null) as any
+// );
+
+//   await container.untilEmbeddableLoaded('1');
+
+//   const child = container.getChild<HelloWorldEmbeddable>('1');
+
+//   const start = coreMock.createStart();
+//   const action = await new CustomTimeRangeAction({
+//     openModal: start.overlays.openModal,
+//     dateFormat: 'MM YYYY',
+//     commonlyUsedRanges: [],
+//   });
+
+//   async function check() {
+//     await action.execute({ embeddable: child });
+//   }
+//   await expect(check()).rejects.toThrow(Error);
+// });
+
+test('Attempting to execute on incompatible embeddable throws an error', async () => {
+  const embeddableFactories = new Map<string, EmbeddableFactory>();
+  embeddableFactories.set(HELLO_WORLD_EMBEDDABLE_TYPE, new HelloWorldEmbeddableFactory());
+  const container = new HelloWorldContainer(
+    {
+      panels: {
+        '1': {
+          type: HELLO_WORLD_EMBEDDABLE_TYPE,
+          explicitInput: {
+            id: '1',
+          },
+        },
+      },
+      id: '123',
+    },
+    (() => null) as any
+  );
+
+  await container.untilEmbeddableLoaded('1');
+
+  const child = container.getChild<HelloWorldEmbeddable>('1');
+
+  const start = coreMock.createStart();
+  const action = await new CustomTimeRangeAction({
+    openModal: start.overlays.openModal,
+    dateFormat: 'MM YYYY',
+    commonlyUsedRanges: [],
+  });
+
+  async function check() {
+    await action.execute({ embeddable: child });
+  }
+  await expect(check()).rejects.toThrow(Error);
 });

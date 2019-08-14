@@ -80,7 +80,6 @@ export class CustomTimeRangeAction extends Action {
 
     const isMarkdown =
       isVisualizeEmbeddable(embeddable) && embeddable.getOutput().visTypeName === 'markdown';
-
     return Boolean(
       embeddable &&
         hasTimeRange(embeddable) &&
@@ -92,8 +91,9 @@ export class CustomTimeRangeAction extends Action {
     );
   }
 
-  public execute({ embeddable }: ActionContext) {
-    if (!this.isCompatible({ embeddable })) {
+  public async execute({ embeddable }: ActionContext) {
+    const isCompatible = await this.isCompatible({ embeddable });
+    if (!isCompatible) {
       throw new IncompatibleActionError();
     }
 
