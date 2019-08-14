@@ -20,6 +20,7 @@
 import { Vis } from './../..';
 
 export interface VisOptionsProps<VisParamType = unknown> {
+  hasHistogramAgg: boolean;
   stateParams: VisParamType;
   vis: Vis;
   setValue<T extends keyof VisParamType>(paramName: T, value: VisParamType[T]): void;

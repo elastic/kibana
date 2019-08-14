@@ -9,22 +9,22 @@ jest.mock('../lib/execute', () => ({
 }));
 
 import { createMockServer } from './_mock_server';
-import { fireRoute } from './fire';
+import { executeRoute } from './execute';
 
 const getServices = jest.fn();
 
 const { server, actionTypeRegistry, savedObjectsClient } = createMockServer();
-fireRoute({ server, actionTypeRegistry, getServices });
+executeRoute({ server, actionTypeRegistry, getServices });
 
 beforeEach(() => jest.resetAllMocks());
 
-it('fires an action with proper parameters', async () => {
+it('executes an action with proper parameters', async () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { execute } = require('../lib/execute');
 
   const request = {
     method: 'POST',
-    url: '/api/action/1/_fire',
+    url: '/api/action/1/_execute',
     payload: {
       params: {
         foo: true,

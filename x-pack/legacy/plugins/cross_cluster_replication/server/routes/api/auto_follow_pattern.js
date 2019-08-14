@@ -11,7 +11,7 @@ import {
   deserializeAutoFollowPattern,
   deserializeListAutoFollowPatterns,
   serializeAutoFollowPattern
-} from '../../lib/auto_follow_pattern_serialization';
+} from '../../../common/services/auto_follow_pattern_serialization';
 import { licensePreRoutingFactory } from'../../lib/license_pre_routing_factory';
 import { API_BASE_PATH } from '../../../common/constants';
 
