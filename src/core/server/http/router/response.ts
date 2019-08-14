@@ -259,21 +259,20 @@ const errorResponseFactory = {
  * }
  *
  * return response.badRequest({
- *   body: 'validation error',
- *   attributes: {
- *     requestBody: request.body,
- *     failedFields: validationResult
- *   }
+ *  body:{
+ *    message: 'validation error',
+ *    attributes: {
+ *      requestBody: request.body,
+ *      failedFields: validationResult
+ *    }
+ *  }
  * });
  *
  * try {
  *   // ...
  * } catch(error) {
  *   return response.badRequest({
- *     body: error,
- *     attributes: {
- *       requestBody: request.body,
- *     }
+ *     body: error
  *   });
  * }
  *

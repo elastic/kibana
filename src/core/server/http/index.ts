@@ -28,6 +28,7 @@ export {
   isRealRequest,
   HttpResponseOptions,
   HttpResponsePayload,
+  ErrorHttpResponseOptions,
   KibanaRequest,
   KibanaRequestRoute,
   KnownHeaders,

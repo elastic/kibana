@@ -32,6 +32,7 @@ export {
   CustomHttpResponseOptions,
   HttpResponseOptions,
   HttpResponsePayload,
+  ErrorHttpResponseOptions,
   RedirectResponseOptions,
   ResponseError,
   ResponseErrorAttributes,
