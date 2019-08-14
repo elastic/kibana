@@ -28,6 +28,7 @@ import {
 import { checkPermission } from '../../../../../privilege/check_privilege';
 import { getTaskStateBadge } from './columns';
 import { DeleteAction } from './action_delete';
+import { StartAction } from './action_start';
 
 import {
   DataFrameTransformListColumn,
@@ -252,15 +253,7 @@ export const DataFrameTransformList: SFC = () => {
   };
 
   const bulkActionMenuItems = [
-    <EuiContextMenuItem
-      key="startAction"
-      icon="play"
-      onClick={() => {
-        // TODO
-      }}
-    >
-      Start
-    </EuiContextMenuItem>,
+    <StartAction key="startAction" items={transformSelection} />,
     <EuiContextMenuItem
       key="stopAction"
       icon="stop"
@@ -268,7 +261,7 @@ export const DataFrameTransformList: SFC = () => {
         // TODO
       }}
     >
-      Start
+      Stop
     </EuiContextMenuItem>,
     <DeleteAction key="deleteAction" items={transformSelection} />,
   ];

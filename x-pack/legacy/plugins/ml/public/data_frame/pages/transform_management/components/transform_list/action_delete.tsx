@@ -137,7 +137,9 @@ export const DeleteAction: SFC<DeleteActionProps> = ({ item, items = [] }) => {
           >
             <p>
               {i18n.translate('xpack.ml.dataframe.transformList.deleteModalBody', {
-                defaultMessage: `Are you sure you want to delete this transform? The transform's destination index and optional Kibana index pattern will not be deleted.`,
+                defaultMessage:
+                  "Are you sure you want to delete {count, plural, one {this} other {these}} {count, plural, one {transform} other {transforms}}? The transform's destination index and optional Kibana index pattern will not be deleted.",
+                values: { count: items ? items.length : 1 },
               })}
             </p>
           </EuiConfirmModal>

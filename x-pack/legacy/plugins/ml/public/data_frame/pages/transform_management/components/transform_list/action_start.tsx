@@ -14,7 +14,7 @@ import {
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
-import { startTransform } from '../../services/transform_service';
+import { startTransform, bulkStartTransforms } from '../../services/transform_service';
 
 import {
   checkPermission,
@@ -24,10 +24,12 @@ import {
 import { DataFrameTransformListRow, isCompletedBatchTransform } from './common';
 
 interface StartActionProps {
-  item: DataFrameTransformListRow;
+  item?: DataFrameTransformListRow;
+  items?: DataFrameTransformListRow[];
 }
 
-export const StartAction: SFC<StartActionProps> = ({ item }) => {
+export const StartAction: SFC<StartActionProps> = ({ item, items }) => {
+  const isBulkAction = item === undefined && items !== undefined;
   const canStartStopDataFrameTransform: boolean = checkPermission('canStartStopDataFrame');
 
   const [isModalVisible, setModalVisible] = useState(false);
@@ -35,7 +37,11 @@ export const StartAction: SFC<StartActionProps> = ({ item }) => {
   const closeModal = () => setModalVisible(false);
   const startAndCloseModal = () => {
     setModalVisible(false);
-    startTransform(item);
+    if (isBulkAction === false && item) {
+      startTransform(item);
+    } else if (isBulkAction === true && items) {
+      bulkStartTransforms(items);
+    }
   };
   const openModal = () => setModalVisible(true);
 
@@ -44,7 +50,29 @@ export const StartAction: SFC<StartActionProps> = ({ item }) => {
   });
 
   // Disable start for batch transforms which have completed.
-  const completedBatchTransform = isCompletedBatchTransform(item);
+  let completedBatchTransform;
+  let completedBatchTransformMessage;
+
+  if (isBulkAction === true) {
+    completedBatchTransform =
+      items && items.some((i: DataFrameTransformListRow) => isCompletedBatchTransform(i));
+    completedBatchTransformMessage = i18n.translate(
+      'xpack.ml.dataframe.transformList.completeBatchTransformToolTip',
+      {
+        defaultMessage:
+          'One or more selected data frame transforms is a completed batch transform and cannot be restarted.',
+      }
+    );
+  } else {
+    completedBatchTransform = item && isCompletedBatchTransform(item);
+    completedBatchTransformMessage = i18n.translate(
+      'xpack.ml.dataframe.transformList.completeBatchTransformToolTip',
+      {
+        defaultMessage: '{transformId} is a completed batch transform and cannot be restarted.',
+        values: { transformId: item && item.config.id },
+      }
+    );
+  }
 
   let startButton = (
     <EuiButtonEmpty
@@ -66,11 +94,7 @@ export const StartAction: SFC<StartActionProps> = ({ item }) => {
         content={
           !canStartStopDataFrameTransform
             ? createPermissionFailureMessage('canStartStopDataFrame')
-            : i18n.translate('xpack.ml.dataframe.transformList.completeBatchTransformToolTip', {
-                defaultMessage:
-                  '{transformId} is a completed batch transform and cannot be restarted.',
-                values: { transformId: item.config.id },
-              })
+            : completedBatchTransformMessage
         }
       >
         {startButton}
@@ -78,16 +102,25 @@ export const StartAction: SFC<StartActionProps> = ({ item }) => {
     );
   }
 
+  const bulkStartModalTitle = i18n.translate(
+    'xpack.ml.dataframe.transformList.bulkStartModalTitle',
+    {
+      defaultMessage: 'Start {count} {count, plural, one {transform} other {transforms}}?',
+      values: { count: items && items.length },
+    }
+  );
+  const startModalTitle = i18n.translate('xpack.ml.dataframe.transformList.startModalTitle', {
+    defaultMessage: 'Start {transformId}',
+    values: { transformId: item && item.config.id },
+  });
+
   return (
     <Fragment>
       {startButton}
       {isModalVisible && (
         <EuiOverlayMask>
           <EuiConfirmModal
-            title={i18n.translate('xpack.ml.dataframe.transformList.startModalTitle', {
-              defaultMessage: 'Start {transformId}',
-              values: { transformId: item.config.id },
-            })}
+            title={isBulkAction === true ? bulkStartModalTitle : startModalTitle}
             onCancel={closeModal}
             onConfirm={startAndCloseModal}
             cancelButtonText={i18n.translate(
@@ -108,7 +141,8 @@ export const StartAction: SFC<StartActionProps> = ({ item }) => {
             <p>
               {i18n.translate('xpack.ml.dataframe.transformList.startModalBody', {
                 defaultMessage:
-                  'A data frame transform will increase search and indexing load in your cluster. Please stop the transform if excessive load is experienced. Are you sure you want to start this transform?',
+                  'A data frame transform will increase search and indexing load in your cluster. Please stop the transform if excessive load is experienced. Are you sure you want to start {count, plural, one {this} other {these}} {count, plural, one {transform} other {transforms}}?',
+                values: { count: items ? items.length : 1 },
               })}
             </p>
           </EuiConfirmModal>

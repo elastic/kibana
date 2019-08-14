@@ -42,13 +42,12 @@ export const deleteTransform = async (d: DataFrameTransformListRow) => {
 export const bulkDeleteTransforms = async (dataFrames: DataFrameTransformListRow[]) => {
   const results = await Promise.all(
     dataFrames.map(async df => {
-      const dfId = df.id;
+      const dfId = df.config.id;
       try {
-        df.id = dfId;
         if (df.stats.state === DATA_FRAME_TRANSFORM_STATE.FAILED) {
-          await ml.dataFrame.stopDataFrameTransform(df.config.id, true, true);
+          await ml.dataFrame.stopDataFrameTransform(dfId, true, true);
         }
-        await ml.dataFrame.deleteDataFrameTransform(df.config.id);
+        await ml.dataFrame.deleteDataFrameTransform(dfId);
         return { id: dfId, success: true };
       } catch (e) {
         return { id: dfId, success: false, error: JSON.stringify(e) };
