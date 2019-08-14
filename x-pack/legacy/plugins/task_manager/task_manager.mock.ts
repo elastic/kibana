@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TaskManager } from './task_manager';
-
-type Schema = PublicMethodsOf<TaskManager>;
+import { TaskManager } from './types';
 
 const createTaskManagerMock = () => {
-  const mocked: jest.Mocked<Schema> = {
+  const mocked: jest.Mocked<TaskManager> = {
     registerTaskDefinitions: jest.fn(),
     addMiddleware: jest.fn(),
     schedule: jest.fn(),

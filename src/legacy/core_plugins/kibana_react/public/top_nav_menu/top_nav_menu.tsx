@@ -21,12 +21,14 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
+import { UiSettingsClientContract } from 'src/core/public';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
-import { SearchBar, SearchBarProps } from '../search_bar';
+import { SearchBar, SearchBarProps } from '../../../../core_plugins/data/public';
 
 type Props = Partial<SearchBarProps> & {
   name: string;
+  uiSettings: UiSettingsClientContract;
   config?: TopNavMenuData[];
   showSearchBar?: boolean;
 };
@@ -60,6 +62,7 @@ export function TopNavMenu(props: Props) {
       <SearchBar
         query={props.query}
         filters={props.filters}
+        uiSettings={props.uiSettings}
         showQueryBar={props.showQueryBar}
         showQueryInput={props.showQueryInput}
         showFilterBar={props.showFilterBar}

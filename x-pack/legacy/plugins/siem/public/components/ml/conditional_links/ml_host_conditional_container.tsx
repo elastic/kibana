@@ -87,3 +87,5 @@ export const MlHostConditionalContainer = pure<MlHostConditionalProps>(({ match 
     <Redirect from="/ml-hosts/" to="/ml-hosts" />
   </Switch>
 ));
+
+MlHostConditionalContainer.displayName = 'MlHostConditionalContainer';

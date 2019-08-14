@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { metric } from '../../functions/common/metric';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
-import { FONT_FAMILY, FONT_WEIGHT, CSS } from '../constants';
+import { FONT_FAMILY, FONT_WEIGHT, CSS, NUMERALJS } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof metric>> = {
   help: i18n.translate('xpack.canvas.functions.metricHelpText', {
@@ -17,6 +17,15 @@ export const help: FunctionHelp<FunctionFactory<typeof metric>> = {
   args: {
     label: i18n.translate('xpack.canvas.functions.metric.args.labelHelpText', {
       defaultMessage: 'The text describing the metric.',
+    }),
+    labelFont: i18n.translate('xpack.canvas.functions.metric.args.labelFontHelpText', {
+      defaultMessage:
+        'The {CSS} font properties for the label. For example, {FONT_FAMILY} or {FONT_WEIGHT}.',
+      values: {
+        CSS,
+        FONT_FAMILY,
+        FONT_WEIGHT,
+      },
     }),
     metricFont: i18n.translate('xpack.canvas.functions.metric.args.metricFontHelpText', {
       defaultMessage:
@@ -27,13 +36,14 @@ export const help: FunctionHelp<FunctionFactory<typeof metric>> = {
         FONT_WEIGHT,
       },
     }),
-    labelFont: i18n.translate('xpack.canvas.functions.metric.args.labelFontHelpText', {
+    metricFormat: i18n.translate('xpack.canvas.functions.metric.args.metricFormatHelpText', {
       defaultMessage:
-        'The {CSS} font properties for the label. For example, {FONT_FAMILY} or {FONT_WEIGHT}.',
+        'A {NUMERALJS} format string. For example, {example1} or {example2}. See {url}.',
       values: {
-        CSS,
-        FONT_FAMILY,
-        FONT_WEIGHT,
+        example1: `"0.0a"`,
+        example2: `"0%"`,
+        NUMERALJS,
+        url: 'http://numeraljs.com/#format',
       },
     }),
   },

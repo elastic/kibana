@@ -9,6 +9,8 @@ import PropTypes from 'prop-types';
 import mapValues from 'lodash/object/mapValues';
 import cloneDeep from 'lodash/lang/cloneDeep';
 import debounce from 'lodash/function/debounce';
+import first from 'lodash/array/first';
+
 import { i18n } from '@kbn/i18n';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
@@ -32,6 +34,7 @@ import {
   formatFields,
   listBreadcrumb,
   createBreadcrumb,
+  retypeMetrics,
 } from '../../services';
 
 import { Navigation } from './navigation';
@@ -80,24 +83,30 @@ const stepIdToTitleMap = {
 export class JobCreateUi extends Component {
   static propTypes = {
     createJob: PropTypes.func,
+    clearCloneJob: PropTypes.func,
     isSaving: PropTypes.bool,
     createJobError: PropTypes.node,
+    jobToClone: PropTypes.object,
   };
 
   constructor(props) {
     super(props);
 
-    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb, createBreadcrumb ]);
-
-    const stepsFields = mapValues(stepIdToStepConfigMap, step => cloneDeep(step.defaultFields || {}));
+    chrome.breadcrumbs.set([MANAGEMENT_BREADCRUMB, listBreadcrumb, createBreadcrumb]);
+    const { jobToClone: stepDefaultOverrides } = props;
+    const stepsFields = mapValues(stepIdToStepConfigMap, step =>
+      cloneDeep(step.getDefaultFields(stepDefaultOverrides))
+    );
 
     this.state = {
+      jobToClone: stepDefaultOverrides || null,
       checkpointStepId: stepIds[0],
       currentStepId: stepIds[0],
       nextStepId: stepIds[1],
       previousStepId: undefined,
       stepsFieldErrors: this.getStepsFieldsErrors(stepsFields),
-      areStepErrorsVisible: false,
+      // Show step errors immediately if we are cloning a job.
+      areStepErrorsVisible: !!stepDefaultOverrides,
       stepsFields,
       isValidatingIndexPattern: false,
       indexPatternAsyncErrors: undefined,
@@ -113,6 +122,11 @@ export class JobCreateUi extends Component {
 
   componentDidMount() {
     this._isMounted = true;
+    const { clearCloneJob, jobToClone } = this.props;
+    if (jobToClone) {
+      clearCloneJob();
+      this.requestIndexPatternValidation();
+    }
   }
 
   componentDidUpdate(prevProps, prevState) { // eslint-disable-line no-unused-vars
@@ -155,7 +169,7 @@ export class JobCreateUi extends Component {
         return;
       }
 
-      // Ignore all responses except that to the most recent request.
+      // Only re-request if the index pattern changed.
       if (lastIndexPatternValidationTime !== this.lastIndexPatternValidationTime) {
         return;
       }
@@ -171,40 +185,58 @@ export class JobCreateUi extends Component {
       let indexPatternAsyncErrors;
 
       if (doesIndexPatternMatchRollupIndices) {
-        indexPatternAsyncErrors = [(
+        indexPatternAsyncErrors = [
           <FormattedMessage
             id="xpack.rollupJobs.create.errors.indexPatternMatchesRollupIndices"
             defaultMessage="Index pattern must not match rollup indices."
-          />
-        )];
+          />,
+        ];
       } else if (!doesIndexPatternMatchIndices) {
-        indexPatternAsyncErrors = [(
+        indexPatternAsyncErrors = [
           <FormattedMessage
             id="xpack.rollupJobs.create.errors.indexPatternNoMatchingIndices"
             defaultMessage="Index pattern doesn't match any indices."
-          />
-        )];
+          />,
+        ];
       } else if (!indexPatternDateFields.length) {
-        indexPatternAsyncErrors = [(
+        indexPatternAsyncErrors = [
           <FormattedMessage
             id="xpack.rollupJobs.create.errors.indexPatternNoTimeFields"
             defaultMessage="Index pattern must match indices that contain time fields."
-          />
-        )];
+          />,
+        ];
       }
 
-      const formattedNumericFields = formatFields(
-        numericFields,
-        i18n.translate('xpack.rollupJobs.create.numericTypeField', { defaultMessage: 'numeric' })
-      );
-      const formattedKeywordFields = formatFields(
-        keywordFields,
-        i18n.translate('xpack.rollupJobs.create.keywordTypeField', { defaultMessage: 'keyword' })
-      );
-      const formattedDateFields = formatFields(
-        indexPatternDateFields,
-        i18n.translate('xpack.rollupJobs.create.dateTypeField', { defaultMessage: 'date' })
-      );
+      const numericType = i18n.translate('xpack.rollupJobs.create.numericTypeField', {
+        defaultMessage: 'numeric',
+      });
+      const keywordType = i18n.translate('xpack.rollupJobs.create.keywordTypeField', {
+        defaultMessage: 'keyword',
+      });
+      const dateType = i18n.translate('xpack.rollupJobs.create.dateTypeField', {
+        defaultMessage: 'date',
+      });
+
+      const formattedNumericFields = formatFields(numericFields, numericType);
+      const formattedKeywordFields = formatFields(keywordFields, keywordType);
+      const formattedDateFields = formatFields(indexPatternDateFields, dateType);
+
+      const { jobToClone, stepsFields } = this.state;
+      const {
+        [STEP_METRICS]: { metrics },
+      } = stepsFields;
+
+      // Only re-type metrics if they haven't been typed already
+      if (jobToClone && metrics && metrics.length && !first(metrics).type) {
+        // Re-type any pre-existing metrics entries for the job we are cloning.
+        const typeMaps = [
+          { fields: formattedNumericFields, type: numericType },
+          { fields: formattedKeywordFields, type: keywordType },
+          { fields: formattedDateFields, type: dateType },
+        ];
+        const retypedMetrics = retypeMetrics({ metrics, typeMaps });
+        this.onFieldsChange({ metrics: retypedMetrics }, STEP_METRICS);
+      }
 
       function sortFields(a, b) {
         const nameA = a.name.toUpperCase();
@@ -221,17 +253,15 @@ export class JobCreateUi extends Component {
         return 0;
       }
 
-      const indexPatternTermsFields = [
-        ...formattedNumericFields,
-        ...formattedKeywordFields,
-      ].sort(sortFields);
+      const indexPatternTermsFields = [...formattedNumericFields, ...formattedKeywordFields].sort(
+        sortFields
+      );
 
-      const indexPatternHistogramFields = [ ...formattedNumericFields ].sort(sortFields);
+      const indexPatternHistogramFields = [...formattedNumericFields].sort(sortFields);
 
-      const indexPatternMetricsFields = [
-        ...formattedNumericFields,
-        ...formattedDateFields,
-      ].sort(sortFields);
+      const indexPatternMetricsFields = [...formattedNumericFields, ...formattedDateFields].sort(
+        sortFields
+      );
 
       indexPatternDateFields.sort();
 
@@ -244,11 +274,16 @@ export class JobCreateUi extends Component {
         isValidatingIndexPattern: false,
       });
 
-      // Select first time field by default.
-      this.onFieldsChange({
-        dateHistogramField: indexPatternDateFields.length ? indexPatternDateFields[0] : null,
-      }, STEP_DATE_HISTOGRAM);
-    }).catch((error) => {
+      if (!jobToClone) {
+        // Select first time field by default.
+        this.onFieldsChange(
+          {
+            dateHistogramField: indexPatternDateFields.length ? indexPatternDateFields[0] : null,
+          },
+          STEP_DATE_HISTOGRAM
+        );
+      }
+    }).catch(error => {
       // We don't need to do anything if this component has been unmounted.
       if (!this._isMounted) {
         return;
@@ -263,13 +298,13 @@ export class JobCreateUi extends Component {
       if (error && error.data) {
         const { error: errorString, statusCode } = error.data;
 
-        const indexPatternAsyncErrors = [(
+        const indexPatternAsyncErrors = [
           <FormattedMessage
             id="xpack.rollupJobs.create.errors.indexPatternValidationError"
             defaultMessage="There was a problem validating this index pattern: {statusCode} {error}"
             values={{ error: errorString, statusCode }}
-          />
-        )];
+          />,
+        ];
 
         this.setState({
           indexPatternAsyncErrors,
@@ -285,9 +320,12 @@ export class JobCreateUi extends Component {
 
       // This error isn't an HTTP error, so let the fatal error screen tell the user something
       // unexpected happened.
-      fatalError(error, i18n.translate('xpack.rollupJobs.create.errors.indexPatternValidationFatalErrorTitle', {
-        defaultMessage: 'Rollup Job Wizard index pattern validation',
-      }));
+      fatalError(
+        error,
+        i18n.translate('xpack.rollupJobs.create.errors.indexPatternValidationFatalErrorTitle', {
+          defaultMessage: 'Rollup Job Wizard index pattern validation',
+        })
+      );
     });
   }, 300);
 
@@ -300,11 +338,12 @@ export class JobCreateUi extends Component {
       isComplete: index < indexOfCurrentStep,
       isSelected: index === indexOfCurrentStep,
       onClick: () => this.goToStep(stepId),
-      disabled: (
-        !this.canGoToStep(stepId)
-        || stepIds.indexOf(stepId) > stepIds.indexOf(checkpointStepId)
-      ),
-      'data-test-subj': index === indexOfCurrentStep ? `createRollupStep${index + 1}--active` : `createRollupStep${index + 1}`,
+      disabled:
+        !this.canGoToStep(stepId) || stepIds.indexOf(stepId) > stepIds.indexOf(checkpointStepId),
+      'data-test-subj':
+        index === indexOfCurrentStep
+          ? `createRollupStep${index + 1}--active`
+          : `createRollupStep${index + 1}`,
     }));
   }
 
@@ -353,10 +392,7 @@ export class JobCreateUi extends Component {
   }
 
   hasStepErrors(stepId) {
-    const {
-      indexPatternAsyncErrors,
-      stepsFieldErrors,
-    } = this.state;
+    const { indexPatternAsyncErrors, stepsFieldErrors } = this.state;
 
     if (stepId === STEP_LOGISTICS) {
       if (Boolean(indexPatternAsyncErrors)) {
@@ -372,7 +408,8 @@ export class JobCreateUi extends Component {
     return Object.keys(newStepsFields).reduce((stepsFieldErrors, stepId) => {
       const stepFields = newStepsFields[stepId];
       const fieldsValidator = stepIdToStepConfigMap[stepId].fieldsValidator;
-      stepsFieldErrors[stepId] = typeof fieldsValidator === `function` ? fieldsValidator(stepFields) : {};
+      stepsFieldErrors[stepId] =
+        typeof fieldsValidator === `function` ? fieldsValidator(stepFields) : {};
       return stepsFieldErrors;
     }, {});
   }
@@ -425,7 +462,7 @@ export class JobCreateUi extends Component {
         [STEP_METRICS]: {
           metrics,
         },
-        [STEP_REVIEW]: {}
+        [STEP_REVIEW]: {},
       },
       startJobAfterCreation,
     } = this.state;
@@ -618,13 +655,7 @@ export class JobCreateUi extends Component {
         );
 
       case STEP_REVIEW:
-        return (
-          <StepReview
-            fields={currentStepFields}
-            onFieldsChange={this.onFieldsChange}
-            job={this.getAllFields()}
-          />
-        );
+        return <StepReview job={this.getAllFields()} />;
 
       default:
         return null;
@@ -650,9 +681,9 @@ export class JobCreateUi extends Component {
     // Users can click the next step button as long as validation hasn't executed, and as long
     // as we're not waiting on async validation to complete.
     const canGoToNextStep =
-      !isValidatingIndexPattern
-      && hasNextStep
-      && (!areStepErrorsVisible || this.canGoToStep(nextStepId));
+      !isValidatingIndexPattern &&
+      hasNextStep &&
+      (!areStepErrorsVisible || this.canGoToStep(nextStepId));
 
     return (
       <Navigation

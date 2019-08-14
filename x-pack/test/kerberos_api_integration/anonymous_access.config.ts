@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaFunctionalTestDefaultProviders } from '../types/providers';
+import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 
-// eslint-disable-next-line import/no-default-export
-export default async function({ readConfigFile }: KibanaFunctionalTestDefaultProviders) {
+export default async function({ readConfigFile }: FtrConfigProviderContext) {
   const kerberosAPITestsConfig = await readConfigFile(require.resolve('./config.ts'));
 
   return {

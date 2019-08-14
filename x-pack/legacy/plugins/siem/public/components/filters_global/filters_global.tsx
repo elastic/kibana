@@ -43,6 +43,8 @@ const Aside = styled.aside<{ isSticky?: boolean }>`
   `}
 `;
 
+Aside.displayName = 'Aside';
+
 // Temporary fix for EuiSuperDatePicker whitespace bug and auto width - Michael Marcialis
 const FlexItemWithDatePickerFix = styled(EuiFlexItem)`
   .euiSuperDatePicker__flexWrapper {
@@ -50,6 +52,8 @@ const FlexItemWithDatePickerFix = styled(EuiFlexItem)`
     width: auto;
   }
 `;
+
+FlexItemWithDatePickerFix.displayName = 'FlexItemWithDatePickerFix';
 
 export interface FiltersGlobalProps {
   children: React.ReactNode;
@@ -70,3 +74,5 @@ export const FiltersGlobal = pure<FiltersGlobalProps>(({ children }) => (
     )}
   </Sticky>
 ));
+
+FiltersGlobal.displayName = 'FiltersGlobal';

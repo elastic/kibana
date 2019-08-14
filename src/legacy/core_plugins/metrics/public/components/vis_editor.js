@@ -19,7 +19,6 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import chrome from 'ui/chrome';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
 import { isEqual, isEmpty, debounce } from 'lodash';
@@ -32,8 +31,13 @@ import { brushHandler } from '../lib/create_brush_handler';
 import { fetchFields } from '../lib/fetch_fields';
 import { extractIndexPatterns } from '../../common/extract_index_patterns';
 
+import { npSetup } from 'ui/new_platform';
+import { Storage } from 'ui/storage';
+import { CoreSetupContextProvider } from '../contexts/query_input_bar_context';
+const localStorage = new Storage(window.localStorage);
+
 const VIS_STATE_DEBOUNCE_DELAY = 200;
-const queryOptions = chrome.getUiSettingsClient().get('query:allowLeadingWildcards');
+const APP_NAME = 'VisEditor';
 
 export class VisEditor extends Component {
   constructor(props) {
@@ -50,6 +54,14 @@ export class VisEditor extends Component {
     this.onBrush = brushHandler(props.vis.API.timeFilter);
     this.visDataSubject = new Rx.BehaviorSubject(this.props.visData);
     this.visData$ = this.visDataSubject.asObservable().pipe(share());
+
+    // In new_platform, this context should be populated with
+    // core dependencies required by React components downstream.
+    this.coreContext = {
+      appName: APP_NAME,
+      uiSettings: npSetup.core.uiSettings,
+      store: localStorage,
+    };
   }
 
   get uiState() {
@@ -72,6 +84,7 @@ export class VisEditor extends Component {
   isValidKueryQuery = filterQuery => {
     if (filterQuery && filterQuery.language === 'kuery') {
       try {
+        const queryOptions = this.coreContext.uiSettings.get('query:allowLeadingWildcards');
         fromKueryExpression(filterQuery.query, { allowLeadingWildcards: queryOptions });
       } catch (error) {
         return false;
@@ -168,14 +181,16 @@ export class VisEditor extends Component {
             onDataChange={this.onDataChange}
           />
           <div className="tvbEditor--hideForReporting">
-            <PanelConfig
-              fields={this.state.visFields}
-              model={model}
-              visData$={this.visData$}
-              dateFormat={this.props.config.get('dateFormat')}
-              onChange={this.handleChange}
-              getConfig={this.getConfig}
-            />
+            <CoreSetupContextProvider value={this.coreContext}>
+              <PanelConfig
+                fields={this.state.visFields}
+                model={model}
+                visData$={this.visData$}
+                dateFormat={this.props.config.get('dateFormat')}
+                onChange={this.handleChange}
+                getConfig={this.getConfig}
+              />
+            </CoreSetupContextProvider>
           </div>
         </div>
       );

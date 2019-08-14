@@ -18,13 +18,14 @@
  */
 
 import sinon from 'sinon';
-import { IndexPattern } from 'ui/index_patterns/_index_pattern';
-import { getRoutes } from 'ui/index_patterns/get_routes';
-import { formatHitProvider } from 'ui/index_patterns/_format_hit';
-import { getComputedFields } from 'ui/index_patterns/_get_computed_fields';
+import {
+  IndexPattern,
+  FieldList,
+  getRoutes,
+  formatHitProvider,
+  flattenHitWrapper,
+} from 'ui/index_patterns';
 import { fieldFormats } from 'ui/registry/field_formats';
-import { flattenHitWrapper } from 'ui/index_patterns/_flatten_hit';
-import { FieldList } from 'ui/index_patterns/_field_list';
 
 export default function () {
 
@@ -43,7 +44,7 @@ export default function () {
     this.routes = getRoutes();
 
     this.getIndex = () => pattern;
-    this.getComputedFields = getComputedFields.bind(this);
+    this.getComputedFields = IndexPattern.prototype.getComputedFields.bind(this);
     this.flattenHit = flattenHitWrapper(this, this.metaFields);
     this.formatHit = formatHitProvider(this, fieldFormats.getDefaultInstance('string'));
     this.fieldsFetcher = { apiClient: { baseUrl: '' } };

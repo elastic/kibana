@@ -19,20 +19,21 @@ import { MainRouteParams, PathTypes } from '../../../common/types';
 import { History, Location } from 'history';
 
 const location: Location = createLocation({
-  pathname: '/github.com/google/guava/tree/master/guava/src/com/google',
+  pathname:
+    '/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts',
 });
 
 const m: match<MainRouteParams> = createMatch({
   path: '/:resource/:org/:repo/:pathType(blob|tree)/:revision/:path*:goto(!.*)?',
-  url: '/github.com/google/guava/tree/master/guava/src/com/google',
+  url: '/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts',
   isExact: true,
   params: {
     resource: 'github.com',
     org: 'google',
-    repo: 'guava',
-    pathType: PathTypes.tree,
+    repo: 'vmware',
+    pathType: PathTypes.blob,
     revision: 'master',
-    path: 'guava/src/com/google',
+    path: 'src/clr-angular/data/stack-view/stack-control.ts',
   },
 });
 
@@ -50,6 +51,7 @@ test('render symbol tree correctly', () => {
           closedPaths={[]}
           openSymbolPath={mockFunction}
           closeSymbolPath={mockFunction}
+          uri="git://github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts"
         />
       </MemoryRouter>
     )

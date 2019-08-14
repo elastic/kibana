@@ -31,7 +31,7 @@ exports[`StepTimeField should render "Custom index pattern ID already exists" wh
   />
   <TimeField
     fetchTimeFields={[Function]}
-    isLoading={true}
+    isLoading={false}
     isVisible={false}
     onTimeFieldChanged={[Function]}
     timeFieldOptions={
@@ -130,7 +130,7 @@ exports[`StepTimeField should render a selected timeField 1`] = `
   />
   <TimeField
     fetchTimeFields={[Function]}
-    isLoading={true}
+    isLoading={false}
     isVisible={true}
     onTimeFieldChanged={[Function]}
     selectedTimeField="@timestamp"
@@ -188,7 +188,7 @@ exports[`StepTimeField should render advanced options 1`] = `
   />
   <TimeField
     fetchTimeFields={[Function]}
-    isLoading={true}
+    isLoading={false}
     isVisible={false}
     onTimeFieldChanged={[Function]}
     timeFieldOptions={
@@ -235,7 +235,7 @@ exports[`StepTimeField should render advanced options with an index pattern id 1
   />
   <TimeField
     fetchTimeFields={[Function]}
-    isLoading={true}
+    isLoading={false}
     isVisible={false}
     onTimeFieldChanged={[Function]}
     timeFieldOptions={
@@ -282,7 +282,7 @@ exports[`StepTimeField should render any error message 1`] = `
   />
   <TimeField
     fetchTimeFields={[Function]}
-    isLoading={true}
+    isLoading={false}
     isVisible={false}
     onTimeFieldChanged={[Function]}
     timeFieldOptions={
@@ -348,7 +348,7 @@ exports[`StepTimeField should render normally 1`] = `
   />
   <TimeField
     fetchTimeFields={[Function]}
-    isLoading={true}
+    isLoading={false}
     isVisible={false}
     onTimeFieldChanged={[Function]}
     timeFieldOptions={
@@ -395,7 +395,7 @@ exports[`StepTimeField should render timeFields 1`] = `
   />
   <TimeField
     fetchTimeFields={[Function]}
-    isLoading={true}
+    isLoading={false}
     isVisible={true}
     onTimeFieldChanged={[Function]}
     timeFieldOptions={

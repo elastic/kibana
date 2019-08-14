@@ -7,6 +7,7 @@
 // @ts-ignore no module definition
 import * as Chrome from 'puppeteer-core';
 import { parse as parseUrl } from 'url';
+import { ViewZoomWidthHeight } from '../../../../export_types/common/layouts/layout';
 import {
   ConditionalHeaders,
   ConditionalHeadersConditions,
@@ -15,7 +16,6 @@ import {
   EvalFn,
   EvaluateOptions,
   Logger,
-  ViewZoomWidthHeight,
 } from '../../../../types';
 
 export interface ChromiumDriverOptions {

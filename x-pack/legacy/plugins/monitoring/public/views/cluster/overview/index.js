@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
@@ -11,6 +11,10 @@ import template from './index.html';
 import { MonitoringViewBaseController } from '../../';
 import { Overview } from 'plugins/monitoring/components/cluster/overview';
 import { I18nContext } from 'ui/i18n';
+import { SetupModeRenderer } from '../../../components/renderers';
+import { CODE_PATH_ALL } from '../../../../common/constants';
+
+const CODE_PATHS = [CODE_PATH_ALL];
 
 uiRoutes.when('/overview', {
   template,
@@ -18,10 +22,7 @@ uiRoutes.when('/overview', {
     clusters(Private) {
       // checks license info of all monitored clusters for multi-cluster monitoring usage and capability
       const routeInit = Private(routeInitProvider);
-      return routeInit();
-    },
-    cluster(monitoringClusters, globalState) {
-      return monitoringClusters(globalState.cluster_uuid, globalState.ccs);
+      return routeInit({ codePaths: CODE_PATHS });
     }
   },
   controller: class extends MonitoringViewBaseController {
@@ -35,7 +36,10 @@ uiRoutes.when('/overview', {
           defaultMessage: 'Overview'
         }),
         defaultData: {},
-        getPageData: () => monitoringClusters(globalState.cluster_uuid, globalState.ccs),
+        getPageData: async () => {
+          const clusters = await monitoringClusters(globalState.cluster_uuid, globalState.ccs, CODE_PATHS);
+          return clusters[0];
+        },
         reactNodeId: 'monitoringClusterOverviewApp',
         $scope,
         $injector
@@ -50,10 +54,20 @@ uiRoutes.when('/overview', {
       $scope.$watch(() => this.data, data => {
         this.renderReact(
           <I18nContext>
-            <Overview
-              cluster={data}
-              changeUrl={changeUrl}
-              showLicenseExpiration={true}
+            <SetupModeRenderer
+              scope={$scope}
+              injector={$injector}
+              render={({ setupMode, flyoutComponent }) => (
+                <Fragment>
+                  {flyoutComponent}
+                  <Overview
+                    cluster={data}
+                    setupMode={setupMode}
+                    changeUrl={changeUrl}
+                    showLicenseExpiration={true}
+                  />
+                </Fragment>
+              )}
             />
           </I18nContext>
         );
