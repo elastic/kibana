@@ -49,7 +49,7 @@ export function SavedQueryManagementComponentProvider({ getService }) {
       await testSubjects.click(`load-saved-query-${title}-button`);
       await retry.try(async () => {
         await this.openSavedQueryManagementComponent();
-        const selectedSavedQueryText = testSubjects.getVisibleText('saved-query-list-item-selected');
+        const selectedSavedQueryText = await testSubjects.getVisibleText('saved-query-list-item-selected');
         expect(selectedSavedQueryText).to.eql(title);
       });
       await this.closeSavedQueryManagementComponent();

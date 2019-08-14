@@ -157,7 +157,7 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
                   setIsOpen(false);
                 }}
                 flush="left"
-                data-test-subj={`load-saved-query-${savedQuery.attributes.title}-button`}
+                data-test-subj={`load-saved-query-${savedQuery.attributes.title}-button saved-query-list-item-selected`}
                 textProps={{ className: 'saved-query-list-item-text' }}
               >
                 <EuiScreenReaderOnly>
