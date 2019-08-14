@@ -391,7 +391,7 @@ export function copyToSpaceTestSuiteFactory(
         await assertSpaceCounts(destination, INITIAL_COUNTS[destination]);
 
         return supertest
-          .post(`${getUrlPrefix(spaceId)}/api/spaces/copySavedObjects`)
+          .post(`${getUrlPrefix(spaceId)}/api/spaces/copy_saved_objects`)
           .auth(user.username, user.password)
           .send({
             objects: [
@@ -414,7 +414,7 @@ export function copyToSpaceTestSuiteFactory(
         await assertSpaceCounts(destination, INITIAL_COUNTS[destination]);
 
         return supertest
-          .post(`${getUrlPrefix(spaceId)}/api/spaces/copySavedObjects`)
+          .post(`${getUrlPrefix(spaceId)}/api/spaces/copy_saved_objects`)
           .auth(user.username, user.password)
           .send({
             objects: [
@@ -437,7 +437,7 @@ export function copyToSpaceTestSuiteFactory(
         await assertSpaceCounts(destination, INITIAL_COUNTS[destination]);
 
         return supertest
-          .post(`${getUrlPrefix(spaceId)}/api/spaces/copySavedObjects`)
+          .post(`${getUrlPrefix(spaceId)}/api/spaces/copy_saved_objects`)
           .auth(user.username, user.password)
           .send({
             objects: [
@@ -460,7 +460,7 @@ export function copyToSpaceTestSuiteFactory(
         await assertSpaceCounts(destination, INITIAL_COUNTS[destination]);
 
         return supertest
-          .post(`${getUrlPrefix(spaceId)}/api/spaces/copySavedObjects`)
+          .post(`${getUrlPrefix(spaceId)}/api/spaces/copy_saved_objects`)
           .auth(user.username, user.password)
           .send({
             objects: [
@@ -482,7 +482,7 @@ export function copyToSpaceTestSuiteFactory(
         const noConflictDestination = getDestinationWithoutConflicts();
 
         return supertest
-          .post(`${getUrlPrefix(spaceId)}/api/spaces/copySavedObjects`)
+          .post(`${getUrlPrefix(spaceId)}/api/spaces/copy_saved_objects`)
           .auth(user.username, user.password)
           .send({
             objects: [
@@ -522,7 +522,7 @@ export function copyToSpaceTestSuiteFactory(
 
       it(`should return ${tests.nonExistentSpace.statusCode} with copying to non-existent space`, async () => {
         return supertest
-          .post(`${getUrlPrefix(spaceId)}/api/spaces/copySavedObjects`)
+          .post(`${getUrlPrefix(spaceId)}/api/spaces/copy_saved_objects`)
           .auth(user.username, user.password)
           .send({
             objects: [

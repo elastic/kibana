@@ -26,7 +26,7 @@ import Boom from 'boom';
 import { createTestHandler, RequestRunner, TeardownFn } from '../__fixtures__';
 import { initCopyToSpacesApi } from './copy_to_space';
 
-describe('POST /api/spaces/copySavedObjects', () => {
+describe('POST /api/spaces/copy_saved_objects', () => {
   let request: RequestRunner;
   let teardowns: TeardownFn[];
 
@@ -47,7 +47,7 @@ describe('POST /api/spaces/copySavedObjects', () => {
       objects: [],
     };
 
-    const { response } = await request('POST', '/api/spaces/copySavedObjects', {
+    const { response } = await request('POST', '/api/spaces/copy_saved_objects', {
       preCheckLicenseImpl: () => Boom.forbidden('test forbidden message'),
       expectSpacesClientCall: false,
       payload,
@@ -67,7 +67,7 @@ describe('POST /api/spaces/copySavedObjects', () => {
       objects: [],
     };
 
-    const { response } = await request('POST', '/api/spaces/copySavedObjects', {
+    const { response } = await request('POST', '/api/spaces/copy_saved_objects', {
       expectSpacesClientCall: false,
       expectPreCheckLicenseCall: false,
       payload,
@@ -91,7 +91,7 @@ describe('POST /api/spaces/copySavedObjects', () => {
       objects: [],
     };
 
-    const { response } = await request('POST', '/api/spaces/copySavedObjects', {
+    const { response } = await request('POST', '/api/spaces/copy_saved_objects', {
       expectSpacesClientCall: false,
       expectPreCheckLicenseCall: false,
       payload,
@@ -115,7 +115,7 @@ describe('POST /api/spaces/copySavedObjects', () => {
       objects: [{ type: 'foo', id: 'bar' }, { type: 'foo', id: 'bar' }],
     };
 
-    const { response } = await request('POST', '/api/spaces/copySavedObjects', {
+    const { response } = await request('POST', '/api/spaces/copy_saved_objects', {
       expectSpacesClientCall: false,
       expectPreCheckLicenseCall: false,
       payload,
@@ -141,7 +141,7 @@ describe('POST /api/spaces/copySavedObjects', () => {
 
     const { response, mockSavedObjectsService } = await request(
       'POST',
-      '/api/spaces/copySavedObjects',
+      '/api/spaces/copy_saved_objects',
       {
         payload,
       }
@@ -169,7 +169,7 @@ describe('POST /api/spaces/copySavedObjects', () => {
 
     const { response, mockSavedObjectsService } = await request(
       'POST',
-      '/api/spaces/copySavedObjects',
+      '/api/spaces/copy_saved_objects',
       {
         payload,
       }
@@ -197,7 +197,7 @@ describe('POST /api/spaces/copySavedObjects', () => {
   });
 });
 
-describe('POST /api/spaces/copySavedObjects/resolveConflicts', () => {
+describe('POST /api/spaces/copy_saved_objects/resolve_conflicts', () => {
   let request: RequestRunner;
   let teardowns: TeardownFn[];
 
@@ -218,7 +218,7 @@ describe('POST /api/spaces/copySavedObjects/resolveConflicts', () => {
       objects: [],
     };
 
-    const { response } = await request('POST', '/api/spaces/copySavedObjects/resolveConflicts', {
+    const { response } = await request('POST', '/api/spaces/copy_saved_objects/resolve_conflicts', {
       preCheckLicenseImpl: () => Boom.forbidden('test forbidden message'),
       expectSpacesClientCall: false,
       payload,
@@ -238,7 +238,7 @@ describe('POST /api/spaces/copySavedObjects/resolveConflicts', () => {
       objects: [{ type: 'foo', id: 'bar' }, { type: 'foo', id: 'bar' }],
     };
 
-    const { response } = await request('POST', '/api/spaces/copySavedObjects/resolveConflicts', {
+    const { response } = await request('POST', '/api/spaces/copy_saved_objects/resolve_conflicts', {
       expectSpacesClientCall: false,
       expectPreCheckLicenseCall: false,
       payload,
@@ -270,7 +270,7 @@ describe('POST /api/spaces/copySavedObjects/resolveConflicts', () => {
       objects: [{ type: 'foo', id: 'bar' }],
     };
 
-    const { response } = await request('POST', '/api/spaces/copySavedObjects/resolveConflicts', {
+    const { response } = await request('POST', '/api/spaces/copy_saved_objects/resolve_conflicts', {
       expectSpacesClientCall: false,
       expectPreCheckLicenseCall: false,
       payload,
@@ -315,7 +315,7 @@ describe('POST /api/spaces/copySavedObjects/resolveConflicts', () => {
 
     const { response, mockSavedObjectsService } = await request(
       'POST',
-      '/api/spaces/copySavedObjects/resolveConflicts',
+      '/api/spaces/copy_saved_objects/resolve_conflicts',
       {
         payload,
       }
@@ -358,7 +358,7 @@ describe('POST /api/spaces/copySavedObjects/resolveConflicts', () => {
 
     const { response, mockSavedObjectsService } = await request(
       'POST',
-      '/api/spaces/copySavedObjects/resolveConflicts',
+      '/api/spaces/copy_saved_objects/resolve_conflicts',
       {
         payload,
       }
