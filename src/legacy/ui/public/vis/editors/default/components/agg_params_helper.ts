@@ -20,11 +20,11 @@
 import { get, isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { aggTypeFilters } from 'ui/agg_types/filter';
-import { IndexPattern } from 'ui/index_patterns';
+import { IndexPattern, Field } from 'ui/index_patterns';
 import { aggTypes, AggParam, FieldParamType, AggType } from 'ui/agg_types';
 import { aggTypeFieldFilters } from 'ui/agg_types/param_types/filter';
 import { AggConfig, VisState } from '../../..';
-import { groupAggregationsBy } from '../utils';
+import { groupAndSortBy, ComboBoxGroupedOptions } from '../utils';
 import { EditorConfig } from '../../config/types';
 import { AggTypeState, AggParamsState } from './agg_params_state';
 import { AggParamEditorProps } from './agg_param_props';
@@ -38,7 +38,7 @@ interface ParamInstanceBase {
 
 export interface ParamInstance extends ParamInstanceBase {
   aggParam: AggParam;
-  indexedFields: FieldParamType[];
+  indexedFields: ComboBoxGroupedOptions<Field>;
   paramEditor: React.ComponentType<AggParamEditorProps<unknown>>;
   value: unknown;
 }
@@ -58,8 +58,8 @@ function getAggParamsToRender({ agg, editorConfig, metricAggs, state }: ParamIns
 
   // build collection of agg params components
   paramsToRender.forEach((param: AggParam, index: number) => {
-    let indexedFields: FieldParamType[] = [];
-    let fields;
+    let indexedFields: ComboBoxGroupedOptions<Field> = [];
+    let fields: Field[];
 
     if (agg.schema.hideCustomLabel && param.name === 'customLabel') {
       return;
@@ -69,13 +69,13 @@ function getAggParamsToRender({ agg, editorConfig, metricAggs, state }: ParamIns
       const availableFields = (param as FieldParamType).getAvailableFields(
         agg.getIndexPattern().fields
       );
-      fields = aggTypeFieldFilters.filter(availableFields, param.type, agg);
-      indexedFields = groupAggregationsBy(fields, 'type', 'displayName');
-    }
+      fields = aggTypeFieldFilters.filter(availableFields, agg);
+      indexedFields = groupAndSortBy(fields, 'type', 'name');
 
-    if (fields && !indexedFields.length && index > 0) {
-      // don't draw the rest of the options if there are no indexed fields and it's an extra param (index > 0).
-      return;
+      if (fields && !indexedFields.length && index > 0) {
+        // don't draw the rest of the options if there are no indexed fields and it's an extra param (index > 0).
+        return;
+      }
     }
 
     const type = param.advanced ? 'advanced' : 'basic';
@@ -112,9 +112,13 @@ function getError(agg: AggConfig, aggIsTooLow: boolean) {
   return errors;
 }
 
-function getAggTypeOptions(agg: AggConfig, indexPattern: IndexPattern, groupName: string) {
+function getAggTypeOptions(
+  agg: AggConfig,
+  indexPattern: IndexPattern,
+  groupName: string
+): ComboBoxGroupedOptions<AggType> {
   const aggTypeOptions = aggTypeFilters.filter(aggTypes.byType[groupName], indexPattern, agg);
-  return groupAggregationsBy(aggTypeOptions, 'subtype');
+  return groupAndSortBy(aggTypeOptions, 'subtype', 'title');
 }
 
 /**

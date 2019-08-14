@@ -75,6 +75,8 @@ export class VectorIcon extends Component {
       <SymbolIcon
         symbolId={this.props.symbolId}
         fill={style.fill}
+        stroke={style.stroke}
+        strokeWidth={style.strokeWidth}
       />
     );
   }
