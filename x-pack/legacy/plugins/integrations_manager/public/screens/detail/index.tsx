@@ -58,7 +58,7 @@ export function DetailLayout(props: LayoutProps) {
 
 function overviewContentStyles() {
   const headerGlobalNav = 49;
-  const pageTopNav = /* line-height */ 24 + /* padding-top */ 16;
+  const pageTopNav = /* line-height */ 24 + /* padding-top */ 16 + /* padding-bottom */ 16;
   const header = /* line-height */ 48 + /* padding-top */ 16 + /* padding-bottom */ 32;
   const topBarsTotal = headerGlobalNav + pageTopNav + header;
 
