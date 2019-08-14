@@ -17,12 +17,20 @@
  * under the License.
  */
 
+import * as React from 'react';
 import { CoreStart } from '../../../../core/public';
+import { KibanaReactOverlays } from '../overlays';
 
 export { CoreStart };
 
-export type KibanaReactCore = Partial<CoreStart>;
+export type KibanaServices = Partial<CoreStart>;
 
-export interface KibanaReactContextValue {
-  core: KibanaReactCore;
+export interface KibanaReactContextValue<Services extends KibanaServices> {
+  readonly services: Services;
+  readonly overlays: undefined extends Services['overlays'] ? undefined : KibanaReactOverlays;
+}
+
+export interface KibanaReactContext<T extends KibanaServices> {
+  Provider: React.FC;
+  Consumer: React.Consumer<KibanaReactContextValue<T>>;
 }

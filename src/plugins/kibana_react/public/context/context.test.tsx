@@ -37,7 +37,7 @@ afterEach(() => {
 test('can mount <Provider> without crashing', () => {
   const core = coreMock.createStart();
   ReactDOM.render(
-    <context.Provider value={{ core }}>
+    <context.Provider value={{ services: core }}>
       <div>Hello world</div>
     </context.Provider>,
     container
@@ -45,7 +45,7 @@ test('can mount <Provider> without crashing', () => {
 });
 
 const TestConsumer = () => {
-  const { core } = useKibana();
+  const { services: core } = useKibana();
   return <div>{(core as any).foo}</div>;
 };
 
@@ -53,7 +53,7 @@ test('useKibana() hook retrieves Kibana context', () => {
   const core = coreMock.createStart();
   (core as any).foo = 'bar';
   ReactDOM.render(
-    <context.Provider value={{ core }}>
+    <context.Provider value={{ services: core }}>
       <TestConsumer />
     </context.Provider>,
     container
