@@ -7,7 +7,8 @@
 import React from 'react';
 
 import { EuiBadge, EuiText } from '@elastic/eui';
-import { idx } from '@kbn/elastic-idx';
+
+import { getNestedProperty } from '../../../../../util/object_utils';
 
 import { getSelectableFields, EsDoc } from '../../../../common';
 
@@ -18,8 +19,7 @@ interface ExpandedRowProps {
 export const ExpandedRow: React.SFC<ExpandedRowProps> = ({ item }) => {
   const keys = getSelectableFields([item]);
   const list = keys.map(k => {
-    // split the attribute key string and use reduce with an idx check to access nested attributes.
-    const value = k.split('.').reduce((obj, i) => idx(obj, _ => _[i]), item._source) || '';
+    const value = getNestedProperty(item._source, k, '');
     return (
       <span key={k}>
         <EuiBadge>{k}:</EuiBadge>
