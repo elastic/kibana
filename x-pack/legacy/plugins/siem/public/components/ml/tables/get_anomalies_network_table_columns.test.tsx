@@ -7,7 +7,7 @@
 import { getAnomaliesNetworkTableColumnsCurated } from './get_anomalies_network_table_columns';
 import { NetworkType } from '../../../store/network/model';
 import * as i18n from './translations';
-import { AnomaliesByNetwork } from '../types';
+import { AnomaliesByNetwork, Anomaly } from '../types';
 import { Columns } from '../../load_more_table';
 import { mount } from 'enzyme';
 import React from 'react';
@@ -100,7 +100,7 @@ describe('get_anomalies_network_table_columns', () => {
           is_interim: true,
           timestamp: new Date('01/01/2000').valueOf(),
           by_field_name: 'some field name',
-          by_field_value: 'some field valuke',
+          by_field_value: 'some field value',
           partition_field_name: 'partition field name',
           partition_field_value: 'partition field value',
           function: 'function-1',
@@ -121,6 +121,60 @@ describe('get_anomalies_network_table_columns', () => {
           .first()
           .exists()
       ).toBe(true);
+    } else {
+      expect(column).not.toBe(null);
+    }
+  });
+
+  test('on network page, undefined influencers should turn into an empty column string', () => {
+    const columns = getAnomaliesNetworkTableColumnsCurated(
+      NetworkType.page,
+      startDate,
+      endDate,
+      interval,
+      narrowDateRange
+    );
+    const column = columns.find(col => col.name === i18n.INFLUENCED_BY) as Columns<
+      Anomaly['influencers'],
+      AnomaliesByNetwork
+    >;
+    const anomaly: AnomaliesByNetwork = {
+      type: 'source.ip',
+      ip: '127.0.0.1',
+      anomaly: {
+        detectorIndex: 0,
+        entityName: 'entity-name-1',
+        entityValue: 'entity-value-1',
+        jobId: 'job-1',
+        rowId: 'row-1',
+        severity: 100,
+        time: new Date('01/01/2000').valueOf(),
+        source: {
+          job_id: 'job-1',
+          result_type: 'result-1',
+          probability: 50,
+          multi_bucket_impact: 0,
+          record_score: 0,
+          initial_record_score: 0,
+          bucket_span: 0,
+          detector_index: 0,
+          is_interim: true,
+          timestamp: new Date('01/01/2000').valueOf(),
+          by_field_name: 'some field name',
+          by_field_value: 'some field value',
+          partition_field_name: 'partition field name',
+          partition_field_value: 'partition field value',
+          function: 'function-1',
+          function_description: 'description-1',
+          typical: [5, 3],
+          actual: [7, 4],
+          influencers: [],
+        },
+      },
+    };
+    if (column != null && column.render != null) {
+      const wrapper = mount(<TestProviders>{column.render(undefined, anomaly)}</TestProviders>);
+      expect(wrapper.text()).toEqual('');
     } else {
       expect(column).not.toBe(null);
     }

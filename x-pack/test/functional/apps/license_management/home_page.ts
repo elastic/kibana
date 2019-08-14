@@ -5,14 +5,14 @@
  */
 
 import expect from '@kbn/expect';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) => {
+export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'licenseManagement']);
   const log = getService('log');
 
   describe('Home page', function() {
+    this.tags(['skipCloud']);
     before(async () => {
       await pageObjects.common.navigateToApp('licenseManagement');
     });

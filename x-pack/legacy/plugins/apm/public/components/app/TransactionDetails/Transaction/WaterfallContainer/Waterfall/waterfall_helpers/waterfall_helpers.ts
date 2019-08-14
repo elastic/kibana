@@ -6,14 +6,14 @@
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import {
-  first,
   flatten,
   groupBy,
   indexBy,
-  isEmpty,
   sortBy,
   uniq,
-  zipObject
+  zipObject,
+  isEmpty,
+  first
 } from 'lodash';
 import { idx } from '@kbn/elastic-idx';
 import { TraceAPIResponse } from '../../../../../../../../server/lib/traces/get_trace';
@@ -22,7 +22,7 @@ import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
 
 interface IWaterfallIndex {
-  [key: string]: IWaterfallItem;
+  [key: string]: IWaterfallItem | undefined;
 }
 
 interface IWaterfallGroup {
@@ -234,7 +234,7 @@ export function getWaterfall(
   { trace, errorsPerTransaction }: TraceAPIResponse,
   entryTransactionId?: Transaction['transaction']['id']
 ): IWaterfall {
-  if (isEmpty(trace) || !entryTransactionId) {
+  if (isEmpty(trace.items) || !entryTransactionId) {
     return {
       services: [],
       duration: 0,
@@ -246,7 +246,7 @@ export function getWaterfall(
     };
   }
 
-  const waterfallItems = trace.map(traceItem => {
+  const waterfallItems = trace.items.map(traceItem => {
     const docType = traceItem.processor.event;
     switch (docType) {
       case 'span':

@@ -10,12 +10,8 @@ import ReactDOM from 'react-dom';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
-import chrome from 'ui/chrome';
-import { timefilter } from 'ui/timefilter';
-import { timeHistory } from 'ui/timefilter/time_history';
 
 import { I18nContext } from 'ui/i18n';
-import { NavigationMenuContext } from '../../../util/context_utils';
 import { Page } from './page';
 
 module.directive('mlDataFramePage', () => {
@@ -25,9 +21,7 @@ module.directive('mlDataFramePage', () => {
     link: (scope: ng.IScope, element: ng.IAugmentedJQuery) => {
       ReactDOM.render(
         <I18nContext>
-          <NavigationMenuContext.Provider value={{ chrome, timefilter, timeHistory }}>
-            <Page />
-          </NavigationMenuContext.Provider>
+          <Page />
         </I18nContext>,
         element[0]
       );

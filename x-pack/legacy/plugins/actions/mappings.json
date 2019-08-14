@@ -7,11 +7,11 @@
       "actionTypeId": {
         "type": "keyword"
       },
-      "actionTypeConfig": {
+      "config": {
         "enabled": false,
         "type": "object"
       },
-      "actionTypeConfigSecrets": {
+      "secrets": {
         "type": "binary"
       }
     }

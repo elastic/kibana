@@ -5,11 +5,14 @@
  */
 
 import createContainer from 'constate-latest';
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 
-import { useHighlightsFetcher } from './data_fetching';
+import { useLogEntryHighlights } from './log_entry_highlights';
+import { useLogSummaryHighlights } from './log_summary_highlights';
 import { useNextAndPrevious } from './next_and_previous';
 import { useReduxBridgeSetters } from './redux_bridge_setters';
+import { useLogSummaryBufferInterval } from '../log_summary';
+import { LogViewConfiguration } from '../log_view_configuration';
 
 export const useLogHighlightsState = ({
   sourceId,
@@ -33,11 +36,31 @@ export const useLogHighlightsState = ({
     setJumpToTarget,
   } = useReduxBridgeSetters();
 
+  const { intervalSize: summaryIntervalSize } = useContext(LogViewConfiguration.Context);
+  const {
+    start: summaryStart,
+    end: summaryEnd,
+    bucketSize: summaryBucketSize,
+  } = useLogSummaryBufferInterval(
+    visibleMidpoint ? visibleMidpoint.time : null,
+    summaryIntervalSize
+  );
+
   const {
     logEntryHighlights,
     logEntryHighlightsById,
     loadLogEntryHighlightsRequest,
-  } = useHighlightsFetcher(sourceId, sourceVersion, startKey, endKey, filterQuery, highlightTerms);
+  } = useLogEntryHighlights(sourceId, sourceVersion, startKey, endKey, filterQuery, highlightTerms);
+
+  const { logSummaryHighlights, loadLogSummaryHighlightsRequest } = useLogSummaryHighlights(
+    sourceId,
+    sourceVersion,
+    summaryStart,
+    summaryEnd,
+    summaryBucketSize,
+    filterQuery,
+    highlightTerms
+  );
 
   const {
     currentHighlightKey,
@@ -60,7 +83,9 @@ export const useLogHighlightsState = ({
     setFilterQuery,
     logEntryHighlights,
     logEntryHighlightsById,
+    logSummaryHighlights,
     loadLogEntryHighlightsRequest,
+    loadLogSummaryHighlightsRequest,
     setVisibleMidpoint,
     currentHighlightKey,
     hasPreviousHighlight,
