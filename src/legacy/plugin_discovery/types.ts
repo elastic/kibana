@@ -58,6 +58,7 @@ export interface LegacyPluginOptions {
       icon: string;
       euiIconType: string;
       order: number;
+      listed: boolean;
     }>;
     apps: any;
     hacks: string[];

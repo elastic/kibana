@@ -17,12 +17,39 @@
  * under the License.
  */
 
+export interface VisualizationListItem {
+  canDelete?: boolean;
+  canEdit?: boolean;
+  editURL: string;
+  icon: string;
+  id: string;
+  isExperimental: boolean;
+  title: string;
+  typeTitle: string;
+  savedObjectType: string;
+}
+
+export interface VisualizationsAppExtension {
+  docTypes: string[];
+  searchFields?: string[];
+  toListItem: (savedObject: {
+    id: string;
+    type: string;
+    attributes: object;
+  }) => VisualizationListItem;
+}
+
 export interface VisTypeAlias {
   aliasUrl: string;
   name: string;
   title: string;
   icon: string;
   description: string;
+
+  appExtensions?: {
+    visualizations: VisualizationsAppExtension;
+    [appName: string]: unknown;
+  };
 }
 
 const registry: VisTypeAlias[] = [];
