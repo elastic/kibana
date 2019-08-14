@@ -61,8 +61,10 @@ export class AutoScale extends React.Component<Props, State> {
         style={{
           display: 'flex',
           justifyContent: 'center',
+          alignItems: 'center',
           position: 'relative',
           maxWidth: '100%',
+          maxHeight: '100%',
         }}
       >
         <div
@@ -70,7 +72,6 @@ export class AutoScale extends React.Component<Props, State> {
           ref={this.setChild}
           style={{
             transform: `scale(${scale})`,
-            position: 'relative',
           }}
         >
           {children}
@@ -97,10 +98,8 @@ export function computeScale(
     return 1;
   }
 
-  const marginSize = 16;
-  const labelSize = 16;
-  const scaleX = (parent.clientWidth - marginSize) / child.clientWidth;
-  const scaleY = (parent.clientHeight - marginSize - labelSize) / child.clientHeight;
+  const scaleX = (parent.clientWidth) / child.clientWidth;
+  const scaleY = (parent.clientHeight) / child.clientHeight;
 
   return Math.min(1, Math.min(scaleX, scaleY));
 }
