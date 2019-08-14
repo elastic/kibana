@@ -27,6 +27,8 @@ const FieldText = styled(EuiFieldText)<{ minwidth: string }>`
   min-width: ${props => props.minwidth};
 `;
 
+FieldText.displayName = 'FieldText';
+
 /** Renders a text-based column filter */
 export const TextFilter = pure<Props>(
   ({
@@ -51,3 +53,5 @@ export const TextFilter = pure<Props>(
     );
   }
 );
+
+TextFilter.displayName = 'TextFilter';

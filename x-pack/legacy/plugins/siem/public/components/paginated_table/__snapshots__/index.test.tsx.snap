@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Paginated Table Component rendering it renders the default load more table 1`] = `
-<Component
+<PaginatedTable
   columns={
     Array [
       Object {

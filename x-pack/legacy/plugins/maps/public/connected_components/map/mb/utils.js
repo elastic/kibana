@@ -5,6 +5,7 @@
  */
 
 import _ from 'lodash';
+import { RGBAImage } from './image_utils';
 
 export function removeOrphanedSourcesAndLayers(mbMap, layerList) {
 
@@ -93,4 +94,33 @@ export function syncLayerOrderForSingleLayer(mbMap, layerList) {
     }
   });
 
+}
+
+function getImageData(img) {
+  const canvas = window.document.createElement('canvas');
+  const context = canvas.getContext('2d');
+  if (!context) {
+    throw new Error('failed to create canvas 2d context');
+  }
+  canvas.width = img.width;
+  canvas.height = img.height;
+  context.drawImage(img, 0, 0, img.width, img.height);
+  return context.getImageData(0, 0, img.width, img.height);
+}
+
+export async function addSpritesheetToMap(json, img, mbMap) {
+  const image = new Image();
+  image.onload = (el) => {
+    const imgData = getImageData(el.currentTarget);
+    for (const imageId in json) {
+      if (json.hasOwnProperty(imageId)) {
+        const { width, height, x, y, sdf, pixelRatio } = json[imageId];
+        const data = new RGBAImage({ width, height });
+        RGBAImage.copy(imgData, data, { x, y }, { x: 0, y: 0 }, { width, height });
+        // TODO not sure how to catch errors?
+        mbMap.addImage(imageId, data, { pixelRatio, sdf });
+      }
+    }
+  };
+  image.src = img;
 }
