@@ -125,5 +125,5 @@ test('Returns title', async () => {
 });
 
 test('Returns an icon', async () => {
-  expect(action.getIcon()).toBeDefined();
+  expect(action.getIconType()).toBeDefined();
 });
