@@ -34,7 +34,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SavedQueryAttributes } from '../index';
+import { SavedQueryAttributes } from '../../index';
 
 interface Props {
   savedQuery?: SavedQueryAttributes;

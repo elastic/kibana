@@ -30,8 +30,8 @@ import { UiSettingsClientContract } from 'src/core/public';
 import { IndexPattern, Query, QueryBar, FilterBar } from '../../../../../data/public';
 import { SavedQuery, SavedQueryAttributes } from '../index';
 import { saveQuery } from '../lib/saved_query_service';
-import { SavedQueryMeta, SaveQueryForm } from './save_query_form';
-import { SavedQueryManagementComponent } from './saved_query_management_component';
+import { SavedQueryMeta, SaveQueryForm } from './saved_query_management/save_query_form';
+import { SavedQueryManagementComponent } from './saved_query_management/saved_query_management_component';
 
 interface DateRange {
   from: string;

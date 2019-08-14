@@ -26,19 +26,15 @@ import {
   EuiFlexItem,
   EuiPagination,
   EuiText,
-  EuiConfirmModal,
-  EuiOverlayMask,
-  EuiScreenReaderOnly,
-  EuiIconTip,
-  EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useEffect, useState, Fragment } from 'react';
 import { sortBy } from 'lodash';
-import { SavedQuery } from '../index';
-import { getAllSavedQueries, deleteSavedQuery } from '../lib/saved_query_service';
-import { Query } from '../../../query';
+import { SavedQuery } from '../../index';
+import { getAllSavedQueries, deleteSavedQuery } from '../../lib/saved_query_service';
+import { Query } from '../../../../query';
+import { SavedQueryListItem } from './saved_query_list_item';
 
 const pageCount = 50;
 
@@ -64,7 +60,6 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
   const [activePage, setActivePage] = useState(0);
-  const [confirmDeletionModal, setConfirmDeletionModal] = useState(null as React.ReactNode);
 
   useEffect(() => {
     const fetchQueries = async () => {
@@ -141,161 +136,17 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
       activePage * pageCount,
       activePage * pageCount + pageCount
     );
-    return savedQueriesDisplayRows.map((savedQuery, index) => (
-      <li
-        key={savedQuery.id}
-        data-test-subj={`saved-query-list-item ${
-          index === 0 ? 'saved-query-list-item-selected' : ''
-        }`}
-      >
-        <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
-          <EuiFlexItem grow={false}>
-            {loadedSavedQuery && loadedSavedQuery.id === savedQuery.id ? (
-              <EuiButtonEmpty
-                onClick={() => {
-                  onLoad(savedQuery);
-                  setIsOpen(false);
-                }}
-                flush="left"
-                data-test-subj={`load-saved-query-${savedQuery.attributes.title}-button saved-query-list-item-selected`}
-                textProps={{ className: 'saved-query-list-item-text' }}
-                aria-label={i18n.translate(
-                  'data.search.searchBar.savedQueryPopoverSavedQueryListItemSelectedButtonAriaLabel',
-                  {
-                    defaultMessage: 'Saved query button selected {savedQueryName}',
-                    values: { savedQueryName: savedQuery.attributes.title },
-                  }
-                )}
-              >
-                <EuiScreenReaderOnly>
-                  <span>
-                    {i18n.translate('data.search.searchBar.savedQueryScreenReaderSelectedText', {
-                      defaultMessage: 'Selected saved query {savedQueryName}',
-                      values: {
-                        savedQueryName: `${savedQuery.attributes.title}`,
-                      },
-                    })}
-                  </span>
-                </EuiScreenReaderOnly>
-                {savedQuery.attributes.title}
-              </EuiButtonEmpty>
-            ) : (
-              <EuiButtonEmpty
-                onClick={() => {
-                  onLoad(savedQuery);
-                  setIsOpen(false);
-                }}
-                flush="left"
-                data-test-subj={`load-saved-query-${savedQuery.attributes.title}-button`}
-                aria-label={i18n.translate(
-                  'data.search.searchBar.savedQueryPopoverSavedQueryListItemButtonAriaLabel',
-                  {
-                    defaultMessage: 'Saved query button {savedQueryName}',
-                    values: { savedQueryName: savedQuery.attributes.title },
-                  }
-                )}
-              >
-                <EuiScreenReaderOnly>
-                  <span>
-                    {i18n.translate('data.search.searchBar.savedQueryScreenReaderOpenText', {
-                      defaultMessage: 'Open saved query',
-                    })}
-                  </span>
-                </EuiScreenReaderOnly>
-                {savedQuery.attributes.title}
-              </EuiButtonEmpty>
-            )}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="none" justifyContent="flexEnd" alignItems="center">
-              <EuiFlexItem>
-                {savedQuery.attributes.description && (
-                  <EuiIconTip
-                    type="iInCircle"
-                    content={savedQuery.attributes.description}
-                    aria-label={i18n.translate(
-                      'data.search.searchBar.savedQueryPopoverSavedQueryListItemDescriptionAriaLabel',
-                      {
-                        defaultMessage: '{savedQueryName} description',
-                        values: { savedQueryName: savedQuery.attributes.title },
-                      }
-                    )}
-                  />
-                )}
-              </EuiFlexItem>
-
-              <EuiFlexItem>
-                {showSaveQuery && (
-                  <Fragment>
-                    <EuiToolTip
-                      position="top"
-                      content={
-                        <p>
-                          {i18n.translate(
-                            'data.search.searchBar.savedQueryPopoverDeleteButtonTooltip',
-                            {
-                              defaultMessage: 'Delete saved query',
-                            }
-                          )}
-                        </p>
-                      }
-                    >
-                      <EuiButtonEmpty
-                        onClick={() => {
-                          setConfirmDeletionModal(
-                            <EuiOverlayMask>
-                              <EuiConfirmModal
-                                title={i18n.translate(
-                                  'data.search.searchBar.savedQueryPopoverConfirmDeletionTitle',
-                                  {
-                                    defaultMessage: 'Delete {savedQueryName}?',
-                                    values: {
-                                      savedQueryName: savedQuery.attributes.title,
-                                    },
-                                  }
-                                )}
-                                confirmButtonText={i18n.translate(
-                                  'data.search.searchBar.savedQueryPopoverConfirmDeletionConfirmButtonText',
-                                  {
-                                    defaultMessage: 'Delete',
-                                  }
-                                )}
-                                cancelButtonText={i18n.translate(
-                                  'data.search.searchBar.savedQueryPopoverConfirmDeletionCancelButtonText',
-                                  {
-                                    defaultMessage: 'Cancel',
-                                  }
-                                )}
-                                onConfirm={() => {
-                                  onDeleteSavedQuery(savedQuery);
-                                  setConfirmDeletionModal(null);
-                                }}
-                                onCancel={() => {
-                                  setConfirmDeletionModal(null);
-                                }}
-                              />
-                            </EuiOverlayMask>
-                          );
-                        }}
-                        iconType="trash"
-                        color="danger"
-                        aria-label={i18n.translate(
-                          'data.search.searchBar.savedQueryPopoverDeleteButtonAriaLabel',
-                          {
-                            defaultMessage: 'Delete saved query {savedQueryName}',
-                            values: { savedQueryName: savedQuery.attributes.title },
-                          }
-                        )}
-                        data-test-subj={`delete-saved-query-${savedQuery.attributes.title}-button`}
-                      />
-                    </EuiToolTip>
-                  </Fragment>
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </li>
+    return savedQueriesDisplayRows.map(savedQuery => (
+      <SavedQueryListItem
+        savedQuery={savedQuery}
+        isSelected={!!loadedSavedQuery && loadedSavedQuery.id === savedQuery.id}
+        onSelect={savedQueryToSelect => {
+          onLoad(savedQueryToSelect);
+          setIsOpen(false);
+        }}
+        onDelete={savedQueryToDelete => onDeleteSavedQuery(savedQueryToDelete)}
+        showWriteOperations={!!showSaveQuery}
+      />
     ));
   };
 
@@ -433,7 +284,6 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
           </EuiFlexGroup>
         </div>
       </EuiPopover>
-      {confirmDeletionModal}
     </Fragment>
   );
 };
