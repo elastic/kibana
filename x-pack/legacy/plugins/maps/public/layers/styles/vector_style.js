@@ -425,8 +425,20 @@ export class VectorStyle extends AbstractStyle {
     return hasGeoJsonProperties;
   }
 
-  _getMBDataDrivenColor({ fieldName, colorStops }) {
+  _getMBDataDrivenColor({ fieldName, colorStops, isSteps }) {
     const targetName = VectorStyle.getComputedFieldName(fieldName);
+
+    if (isSteps) {
+      const firstStopValue = colorStops[0];
+      const lessThenFirstStopValue = firstStopValue - 1;
+      return [
+        'step',
+        ['coalesce', ['feature-state', targetName], lessThenFirstStopValue],
+        'rgba(0,0,0,0)', // MB will assign the base value to any features that is below the first stop value
+        ...colorStops
+      ];
+    }
+
     return [
       'interpolate',
       ['linear'],
@@ -467,7 +479,8 @@ export class VectorStyle extends AbstractStyle {
 
     return this._getMBDataDrivenColor({
       fieldName: styleDescriptor.options.field.name,
-      colorStops: this._getMBColorStops(styleDescriptor)
+      colorStops: this._getMBColorStops(styleDescriptor),
+      isSteps: styleDescriptor.options.useCustomColorRamp,
     });
   }
 
