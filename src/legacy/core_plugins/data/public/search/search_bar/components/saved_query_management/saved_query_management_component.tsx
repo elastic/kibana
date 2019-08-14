@@ -33,7 +33,6 @@ import React, { FunctionComponent, useEffect, useState, Fragment } from 'react';
 import { sortBy } from 'lodash';
 import { SavedQuery } from '../../index';
 import { getAllSavedQueries, deleteSavedQuery } from '../../lib/saved_query_service';
-import { Query } from '../../../../query';
 import { SavedQueryListItem } from './saved_query_list_item';
 
 const pageCount = 50;
@@ -44,7 +43,6 @@ interface Props {
   onSave: () => void;
   onSaveAsNew: () => void;
   onLoad: (savedQuery: SavedQuery) => void;
-  query: Query;
   onClearSavedQuery: () => void;
 }
 
@@ -54,7 +52,6 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
   onSave,
   onSaveAsNew,
   onLoad,
-  query,
   onClearSavedQuery,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
