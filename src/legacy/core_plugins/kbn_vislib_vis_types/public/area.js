@@ -21,7 +21,16 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { PointSeriesOptions } from './editors/point_series';
-import { getLegendPositions, LegendPositions } from './utils/legend_positions';
+import {
+  getLegendPositions,
+  LegendPositions,
+  getChartTypes,
+  ChartTypes,
+  getChartModes,
+  ChartModes,
+  getInterpolationModes,
+  InterpolationModes,
+} from './utils/legend_positions';
 
 export default function PointSeriesVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
@@ -81,15 +90,15 @@ export default function PointSeriesVisType(Private) {
         ],
         seriesParams: [{
           show: 'true',
-          type: 'area',
-          mode: 'stacked',
+          type: ChartTypes.AREA,
+          mode: ChartModes.STACKED,
           data: {
             label: 'Count',
             id: '1'
           },
           drawLinesBetweenPoints: true,
           showCircles: true,
-          interpolate: 'linear',
+          interpolate: InterpolationModes.LINEAR,
           valueAxis: 'ValueAxis-1'
         }],
         addTooltip: true,
@@ -104,29 +113,11 @@ export default function PointSeriesVisType(Private) {
       collections: {
         legendPositions: getLegendPositions(),
         positions: ['top', 'left', 'right', 'bottom'],
-        chartTypes: [{
-          value: 'line',
-          text: 'line'
-        }, {
-          value: 'area',
-          text: 'area'
-        }, {
-          value: 'histogram',
-          text: 'bar'
-        }],
+        chartTypes: getChartTypes(),
         axisModes: ['normal', 'percentage', 'wiggle', 'silhouette'],
         scaleTypes: ['linear', 'log', 'square root'],
-        chartModes: ['normal', 'stacked'],
-        interpolationModes: [{
-          value: 'linear',
-          text: 'straight',
-        }, {
-          value: 'cardinal',
-          text: 'smoothed',
-        }, {
-          value: 'step-after',
-          text: 'stepped',
-        }],
+        chartModes: getChartModes(),
+        interpolationModes: getInterpolationModes(),
       },
       optionTabs: [
         {

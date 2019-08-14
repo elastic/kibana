@@ -53,4 +53,78 @@ const getLegendPositions = () => [
   },
 ];
 
-export { getLegendPositions };
+export enum ChartTypes {
+  LINE = 'line',
+  AREA = 'area',
+  HISTOGRAM = 'histogram',
+}
+
+const getChartTypes = () => [
+  {
+    text: i18n.translate('kbnVislibVisTypes.chartTypes.lineText', {
+      defaultMessage: 'Line',
+    }),
+    value: ChartTypes.LINE,
+  },
+  {
+    text: i18n.translate('kbnVislibVisTypes.chartTypes.areaText', {
+      defaultMessage: 'Area',
+    }),
+    value: ChartTypes.AREA,
+  },
+  {
+    text: i18n.translate('kbnVislibVisTypes.chartTypes.histogramText', {
+      defaultMessage: 'Histogram',
+    }),
+    value: ChartTypes.HISTOGRAM,
+  },
+];
+
+export enum ChartModes {
+  NORMAL = 'normal',
+  STACKED = 'stacked',
+}
+
+const getChartModes = () => [
+  {
+    text: i18n.translate('kbnVislibVisTypes.chartModes.normalText', {
+      defaultMessage: 'Normal',
+    }),
+    value: ChartModes.NORMAL,
+  },
+  {
+    text: i18n.translate('kbnVislibVisTypes.chartModes.stackedText', {
+      defaultMessage: 'Stacked',
+    }),
+    value: ChartModes.STACKED,
+  },
+];
+
+export enum InterpolationModes {
+  LINEAR = 'linear',
+  CARDINAL = 'cardinal',
+  STEP_AFTER = 'step-after',
+}
+
+const getInterpolationModes = () => [
+  {
+    text: i18n.translate('kbnVislibVisTypes.interpolationModes.straightText', {
+      defaultMessage: 'Straight',
+    }),
+    value: InterpolationModes.LINEAR,
+  },
+  {
+    text: i18n.translate('kbnVislibVisTypes.interpolationModes.smoothedText', {
+      defaultMessage: 'Smoothed',
+    }),
+    value: InterpolationModes.CARDINAL,
+  },
+  {
+    text: i18n.translate('kbnVislibVisTypes.interpolationModes.steppedText', {
+      defaultMessage: 'Stepped',
+    }),
+    value: InterpolationModes.STEP_AFTER,
+  },
+];
+
+export { getLegendPositions, getChartTypes, getChartModes, getInterpolationModes };

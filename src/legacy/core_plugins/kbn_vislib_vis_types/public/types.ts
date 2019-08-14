@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { LegendPositions } from './utils/legend_positions';
+import { LegendPositions, ChartModes, ChartTypes } from './utils/legend_positions';
 
 export interface CommonVislibParams {
   addTooltip: boolean;
@@ -42,6 +42,17 @@ export interface ValueAxis {
   type: string;
 }
 
+export interface SeriesParam {
+  data: { label: string; id: string };
+  drawLinesBetweenPoints: boolean;
+  interpolate: string;
+  mode: ChartModes;
+  show: boolean;
+  showCircles: boolean;
+  type: ChartTypes;
+  valueAxis: string;
+}
+
 export interface BasicVislibParams extends CommonVislibParams {
   addTimeMarker: boolean;
   orderBucketsBySum?: boolean;
@@ -51,4 +62,5 @@ export interface BasicVislibParams extends CommonVislibParams {
     categoryLines: boolean;
     valueAxis?: string;
   };
+  seriesParams: SeriesParam[];
 }
