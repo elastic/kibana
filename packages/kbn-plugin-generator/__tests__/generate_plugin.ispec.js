@@ -27,7 +27,7 @@ import * as del from 'del';
 const ROOT_DIR = resolve(__dirname, '../../../');
 const oneMinute = 60000;
 
-describe('running the plugin-generator', () => {
+describe(`running the plugin-generator via 'node scripts/generate_plugin.js plugin-name'`, () => {
   const pluginName = 'ispec-plugin';
   const snakeCased = snakeCase(pluginName);
   const generatedPath = resolve(ROOT_DIR, `plugins/${snakeCased}`);
@@ -35,7 +35,7 @@ describe('running the plugin-generator', () => {
   // eslint-disable-next-line no-undef
   beforeAll(() => {
     // eslint-disable-next-line no-undef
-    jest.setTimeout(oneMinute);
+    jest.setTimeout(oneMinute * 3);
   });
 
   // eslint-disable-next-line no-undef
