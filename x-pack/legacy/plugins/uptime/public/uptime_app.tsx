@@ -173,7 +173,7 @@ const Application = (props: UptimeAppProps) => {
                             )}
                           />
                           <Route
-                            path="/monitor/:id/:location?"
+                            path="/monitor/:monitorId/:location?"
                             render={routerProps => (
                               <MonitorPage
                                 logMonitorPageLoad={logMonitorPageLoad}

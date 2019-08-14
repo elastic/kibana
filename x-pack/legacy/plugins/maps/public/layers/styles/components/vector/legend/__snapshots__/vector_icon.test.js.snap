@@ -38,6 +38,8 @@ exports[`Renders PolygonIcon with correct styles when not line only or not point
 exports[`Renders SymbolIcon with correct styles when isPointOnly and symbolId provided 1`] = `
 <SymbolIcon
   fill="#ff0000"
+  stroke="rgb(106,173,213)"
+  strokeWidth="1px"
   symbolId="airfield-15"
 />
 `;
