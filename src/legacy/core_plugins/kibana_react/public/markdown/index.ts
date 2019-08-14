@@ -17,16 +17,5 @@
  * under the License.
  */
 
-import { Type } from './type';
-
-export class NullableType<V> extends Type<V | null> {
-  constructor(type: Type<V>) {
-    super(
-      type
-        .getSchema()
-        .optional()
-        .allow(null)
-        .default(null)
-    );
-  }
-}
+export { MarkdownSimple } from './markdown_simple';
+export { Markdown } from './markdown';

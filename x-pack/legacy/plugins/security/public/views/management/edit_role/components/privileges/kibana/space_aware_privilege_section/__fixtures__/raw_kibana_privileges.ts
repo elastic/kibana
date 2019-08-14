@@ -8,12 +8,17 @@ import { RawKibanaPrivileges } from '../../../../../../../../../common/model';
 
 export const rawKibanaPrivileges: RawKibanaPrivileges = {
   global: {
-    all: ['normal-feature-all', 'normal-feature-read', 'just-global-all'],
-    read: ['normal-feature-read'],
+    all: [
+      'normal-feature-all',
+      'normal-feature-read',
+      'just-global-all',
+      'all-privilege-excluded-from-base-read',
+    ],
+    read: ['normal-feature-read', 'all-privilege-excluded-from-base-read'],
   },
   space: {
-    all: ['normal-feature-all', 'normal-feature-read'],
-    read: ['normal-feature-read'],
+    all: ['normal-feature-all', 'normal-feature-read', 'all-privilege-excluded-from-base-read'],
+    read: ['normal-feature-read', 'all-privilege-excluded-from-base-read'],
   },
   reserved: {},
   features: {
@@ -21,9 +26,13 @@ export const rawKibanaPrivileges: RawKibanaPrivileges = {
       all: ['normal-feature-all', 'normal-feature-read'],
       read: ['normal-feature-read'],
     },
-    excludedFromBase: {
-      all: ['excluded-from-base-all', 'excluded-from-base-read'],
-      read: ['excluded-from-base-read'],
+    bothPrivilegesExcludedFromBase: {
+      all: ['both-privileges-excluded-from-base-all', 'both-privileges-excluded-from-base-read'],
+      read: ['both-privileges-excluded-from-base-read'],
+    },
+    allPrivilegeExcludedFromBase: {
+      all: ['all-privilege-excluded-from-base-all', 'all-privilege-excluded-from-base-read'],
+      read: ['all-privilege-excluded-from-base-read'],
     },
   },
 };
