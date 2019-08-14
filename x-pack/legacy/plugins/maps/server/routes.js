@@ -12,12 +12,10 @@ import {
   EMS_TILES_CATALOGUE_PATH,
   EMS_TILES_RASTER_STYLE_PATH,
   EMS_TILES_RASTER_TILE_PATH,
-  GIS_API_PATH,
-  SPRITE_PATH,
+  GIS_API_PATH
 } from '../common/constants';
 import fetch from 'node-fetch';
 import { i18n } from '@kbn/i18n';
-import path from 'path';
 
 import Boom from 'boom';
 
@@ -267,16 +265,6 @@ export function initRoutes(server, licenseUid) {
         return { count };
       } catch (error) {
         return h.response().code(400);
-      }
-    }
-  });
-
-  server.route({
-    method: 'GET',
-    path: `${SPRITE_PATH}/{path*}`,
-    handler: {
-      directory: {
-        path: path.join(__dirname, './sprites')
       }
     }
   });

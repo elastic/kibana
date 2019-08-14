@@ -23,7 +23,7 @@ import { Logger } from '../log';
 import { RepositoryObjectClient } from '../search';
 import { aggregateIndexStats } from '../utils/index_stats_aggregator';
 import { AbstractWorker } from './abstract_worker';
-import { CancellationSerivce } from './cancellation_service';
+import { CancellationReason, CancellationSerivce } from './cancellation_service';
 import { Job } from './job';
 
 export class IndexWorker extends AbstractWorker {
@@ -84,7 +84,7 @@ export class IndexWorker extends AbstractWorker {
 
     // Binding the index cancellation logic
     let cancelled = false;
-    this.cancellationService.cancelIndexJob(uri);
+    this.cancellationService.cancelIndexJob(uri, CancellationReason.NEW_JOB_OVERRIDEN);
     const indexPromises: Array<Promise<IndexStats>> = this.indexerFactories.map(
       async (indexerFactory: IndexerFactory, index: number) => {
         const indexer = await indexerFactory.create(uri, revision, enforceReindex);

@@ -68,3 +68,5 @@ export const OverviewComponent = pure(() => {
     </>
   );
 });
+
+OverviewComponent.displayName = 'OverviewComponent';

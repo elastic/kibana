@@ -1046,7 +1046,7 @@ import { npStart: { core } } from 'ui/new_platform';
 _See also: [Public's CoreStart API Docs](/docs/development/core/public/kibana-plugin-public.corestart.md)_
 
 ##### Plugins for shared application services
-In client code, we have a series of plugins which house shared application services that are being built in the shape of the new platform, but still technically reside in the legacy world. If your plugin depends on any of the APIs below, you'll need to add a dependency on the new platform plugin which will house them moving forward.
+In client code, we have a series of plugins which house shared application services that are being built in the shape of the new platform, but for the time being, are only available in legacy. So if your plugin depends on any of the APIs below, you'll need build your plugin as a legacy plugin that shims the new platform. Once these API's have been moved to the new platform you can migrate your plugin and declare a dependency on the plugin that owns the API's you require.
 
 The contracts for these plugins are exposed for you to consume in your own plugin; we have created dedicated exports for the `setup` and `start` contracts in a file called `legacy`. By passing these contracts to your plugin's `setup` and `start` methods, you can mimic the functionality that will eventually be provided in the new platform.
 
@@ -1056,15 +1056,14 @@ import { setup, start } from '../core_plugins/embeddables/public/legacy';
 import { setup, start } from '../core_plugins/visualizations/public/legacy';
 ```
 
-| Legacy Platform                                        | New Platform                               | Notes                                                                                                                              |
-|--------------------------------------------------------|--------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------|
-| `core_plugins/interpreter`                             | `data.expressions`                         | still in progress                                                                                                                  |
-| `import 'ui/apply_filters'`                            | `data.filter.loadLegacyDirectives`         | `loadLegacyDirectives()` should be called explicitly where you previously relied on importing for side effects                     |
-| `import 'ui/filter_bar'`                               | `data.filter.loadLegacyDirectives`         | `loadLegacyDirectives()` should be called explicitly where you previously relied on importing for side effects                     |
-| `import 'ui/query_bar'`                                | `data.query.loadLegacyDirectives`          | `loadLegacyDirectives()` should be called explicitly where you previously relied on importing for side effects                     |
-| `import 'ui/search_bar'`                               | `data.search.loadLegacyDirectives`         | `loadLegacyDirectives()` should be called explicitly where you previously relied on importing for side effects                     |
-| `import { QueryBar } from 'ui/query_bar'`              | `data.query.ui.QueryBar`                   | --                                                                                                                                 |
-| `import { SearchBar } from 'ui/search_bar'`            | `data.search.ui.SearchBar`                 | --                                                                                                                                 |
+| Legacy Platform                                        | New Platform                               | Notes                                                                                                                                  |
+|--------------------------------------------------------|--------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| `import 'ui/apply_filters'`                            | `import { ApplyFiltersPopover } from '../data/public'`         | `import '../data/public/legacy` should be called to load legacy directives                                               |
+| `import 'ui/filter_bar'`                               | `import { FilterBar } from '../data/public'`                   | `import '../data/public/legacy` should be called to load legacy directives                                               |
+| `import 'ui/query_bar'`                                | `import { QueryBar, QueryBarInput } from '../data/public'`     | Directives are deprecated.                                                                                            |
+| `import 'ui/search_bar'`                               | `import { SearchBar } from '../data/public'`           | Directive is deprecated.                                                                                              |
+| `import 'ui/kbn_top_nav'`                              | `import { TopNavMenu } from '../kibana_react/public'`          | Directive is still available in `ui/kbn_top_nav`.                                                                     |              
+| `core_plugins/interpreter`                             | `data.expressions`                                          | still in progress                                                                                                     |
 | `ui/courier`                                           | `data.search`                              | still in progress                                                                                                                  |
 | `ui/embeddable`                                        | `embeddables`                              | still in progress                                                                                                                  |
 | `ui/filter_manager`                                    | `data.filter`                              | --                                                                                                                                 |
@@ -1073,6 +1072,7 @@ import { setup, start } from '../core_plugins/visualizations/public/legacy';
 | `ui/vis`                                               | `visualizations.types`                     | --                                                                                                                                 |
 | `ui/vis/vis_factory`                                   | `visualizations.types`                     | --                                                                                                                                 |
 | `ui/vis/vis_filters`                                   | `visualizations.filters`                   | --                                                                                                                                 |
+| `ui/utils/parse_es_interval`                           | `import { parseEsInterval } from '../data/public'`                  | `parseEsInterval`, `ParsedInterval`, `InvalidEsCalendarIntervalError`, `InvalidEsIntervalFormatError` items were moved to the `Data Plugin` as a static code    |
 
 
 #### Server-side

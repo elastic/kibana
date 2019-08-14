@@ -12,10 +12,6 @@ export const EMS_TILES_CATALOGUE_PATH = 'ems/tiles';
 export const EMS_TILES_RASTER_TILE_PATH = 'ems/tiles/raster/tile';
 export const EMS_TILES_RASTER_STYLE_PATH = 'ems/tiles/raster/style';
 
-
-export const SPRITE_PATH = '/maps/sprite';
-export const MAKI_SPRITE_PATH = `${SPRITE_PATH}/maki`;
-
 export const MAP_SAVED_OBJECT_TYPE = 'map';
 export const APP_ID = 'maps';
 export const APP_ICON = 'gisApp';
@@ -50,6 +46,13 @@ export const ES_GEO_FIELD_TYPE = {
   GEO_SHAPE: 'geo_shape'
 };
 
+export const ES_SPATIAL_RELATIONS = {
+  INTERSECTS: 'INTERSECTS',
+  DISJOINT: 'DISJOINT',
+  WITHIN: 'WITHIN',
+  CONTAINS: 'CONTAINS'
+};
+
 export const GEO_JSON_TYPE = {
   POINT: 'Point',
   MULTI_POINT: 'MultiPoint',
@@ -59,6 +62,10 @@ export const GEO_JSON_TYPE = {
   MULTI_POLYGON: 'MultiPolygon',
   GEOMETRY_COLLECTION: 'GeometryCollection',
 };
+
+export const POLYGON_COORDINATES_EXTERIOR_INDEX = 0;
+export const LON_INDEX = 0;
+export const LAT_INDEX = 1;
 
 export const EMPTY_FEATURE_COLLECTION = {
   type: 'FeatureCollection',
