@@ -159,7 +159,6 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
                 <EuiLink
                   href={stateParams.emsHotLink}
                   target="_blank"
-                  rel="noopener"
                   title={i18n.translate('regionMap.visParams.previewOnEMSLinkTitle', {
                     defaultMessage: 'Preview {selectedLayerName} on the Elastic Maps Service',
                     values: {

@@ -32,7 +32,7 @@ import { ORIGIN } from '../../tile_map/common/origin';
 
 export function createRegionMapTypeDefinition(dependencies) {
   const { uiSettings, regionmapsConfig, serviceSettings } = dependencies;
-  const RegionMapsVisualization = createRegionMapVisualization(dependencies);
+  const visualization = createRegionMapVisualization(dependencies);
   const vectorLayers = regionmapsConfig.layers.map(mapToLayerWithId.bind(null, ORIGIN.KIBANA_YML));
   const selectedLayer = vectorLayers[0];
   const selectedJoinField = selectedLayer ? selectedLayer.fields[0] : null;
@@ -48,9 +48,9 @@ provided base maps, or add your own. Darker colors represent higher values.' }),
         legendPosition: 'bottomright',
         addTooltip: true,
         colorSchema: 'Yellow to Red',
-        selectedLayer: selectedLayer,
         emsHotLink: '',
-        selectedJoinField: selectedJoinField,
+        selectedLayer,
+        selectedJoinField,
         isDisplayWarning: true,
         wms: uiSettings.get('visualization:tileMap:WMSdefaults'),
         mapZoom: 2,
@@ -60,7 +60,7 @@ provided base maps, or add your own. Darker colors represent higher values.' }),
       }
     },
     requiresUpdateStatus: [Status.AGGS, Status.PARAMS, Status.RESIZE, Status.DATA, Status.UI_STATE],
-    visualization: RegionMapsVisualization,
+    visualization,
     editorConfig: {
       optionsTemplate: (props) =>
         (<RegionMapOptions
