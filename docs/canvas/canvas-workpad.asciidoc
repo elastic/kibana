@@ -1,36 +1,29 @@
 [role="xpack"]
-[[canvas-workpad]]
-== Creating and building a workpad
-
-To create a dynamic, multi-page, pixel perfect presentation, create and build your Canvas workpad.
-
-In need of some workpad inspiration? Check out the link:https://www.elastic.co/blog/[Elastic Blog]. 
-
-[float]
 [[create-canvas-workpad]]
 === Create a workpad
 
-When you create a workpad, you'll start with a blank page, or you can choose a workpad that is already started for you. 
+A Canvas _workpad_ provides you with a workspace where you can build presentations of your live data.
+
+To create a workpad, you can:
+
+* <<blank-canvas-workpad,Build fully customizable presentations of your own data>>
+
+* <<canvas-template-workpad,Choose from a set of preconfigured workpad templates>>
+
+* <<import-canvas-workpad,Import a workpad that someone else has already started>>
+
+* <<sample-data-workpad,Gather inspiration from the {kib} sample data workpads>>
+
+[[blank-canvas-workpad]]
+==== Start with a blank 
+
+To use the background colors, images, and data of your choice, start with a blank workpad. 
 
 . Open *Canvas*.
 
-. On the *Canvas workpads* page, choose one of the following options:
+. On the *Canvas workpads* page, click *Create workpad*.
 
-* To start with a single, blank workpad, click *Create workpad*.
-
-* To create a workpad from a template, select *Templates*, then click on a preconfigured template.
-
-* To import an existing workpad, click and drag a workpad JSON file to the *Import workpad JSON file* field.
-
-* To use a sample data workpad, click *Try the sample data workpads*, add the data, then select *Canvas* from the *View Data* dropdown list.
-
-[float]
-[[customize-workpad-basic]]
-=== Customize your workpad
-
-To make your workpad look the way you want, use the editor on the right.
-
-. Add a *Name* to your workpad. For example, `My Canvas Workpad`.
+. Add a *Name* to your workpad.
 
 . In the *Width* and *Height* fields, specify the size. 
 
@@ -41,264 +34,56 @@ For example, click *720p* for a traditional presentation layout.
 . Click the *Background color* picker, then select the background color for your workpad.
 +
 [role="screenshot"]
-image::images/canvas-background-color-picker.gif[]
-
-. Apply a set of styles to the entire workpad.
-
-.. Expand *Global CCS overrides*.
-
-.. Enter the CCS, then click *Apply stylesheet*.
+image::images/canvas-background-color-picker.gif[Canvas color picker]
 
 [float]
-[[element-intro]]
-== Showcase your data with elements
+[[canvas-template-workpad]]
+==== Create a workpad from a template
 
-Elements are the building blocks of your workpad. You can add and combine elements to create dynamic displays of your data.
+If you're unsure about where to start, you can use one of the preconfigured templates that come with Canvas.
 
-[float]
-[[add-canvas-element]]
-=== Add elements
+. Open *Canvas*.
 
-Choose the elements that best display your brand and data.
+. On the *Canvas workpads* page, select *Templates*.
 
-. Click *Add element*.
+. Click on the preconfigured template that you want to use.
 
-. On the *Elements* window, select the element you want to use. 
-+
-[role="screenshot"]
-image::images/canvas-element-select.gif[Canvas elements]
-
-. Elements come preconfigured with a small data set so that you can familiarize yourself with the element. Play around with the default settings and see what the element can do. 
-
-TIP: Want to use a different element? You can delete the element by selecting it, clicking the *Element options* icon in the top right corner, then selecting *Delete*.
+. Add your own *Name* to the workpad.
 
 [float]
-[[connect-element-data]]
-=== Connect the element to your data
+[[import-canvas-workpad]]
+==== Import an existing workpad
 
-When you are ready to move on from the demo data, connect the element to your own data.
+When you want to use a workpad that someone else has already started, import the JSON file into Canvas.
 
-. Make sure that the element is selected, then select *Data*.
+. Open *Canvas*.
 
-. Click *Change your data source*.
-
-[float]
-[[elasticsearch-sql-data-source]]
-==== Connect to Elasticsearch SQL
-
-Access your data in Elasticsearch using the Elasticsearch SQL syntax.
-
-. Click *Elasticsearch SQL*.
-
-. In the *Elasticearch SQL query* box, enter your query, then click *Preview*.
-
-. If everything looks correct, click *Save*. 
-
-Unfamiliar with writing Elasticsearch SQL queries? For more information, refer to {ref}/sql-spec.html[SQL language].
+. On the *Canvas workpads* page, click and drag the file to the *Import workpad JSON file* field.
 
 [float]
-[[elasticsearch-raw-doc-data-source]]
-==== Connect to Elasticsearch raw data
+[[sample-data-workpad]]
+==== Use a sample data workpad
 
-Use the Lucene query syntax to use your raw data in Elasticsearch.
+Each of the sample data sets comes with a Canvas workpad that you can use for your own workpad inspiration.
 
-. Click *Elasticsearch raw documents*.
+. Add a {kibana-ref}/add-sample-data.html[sample data set]. 
 
-. From the *Index* dropdown, select the index data that you want to display. 
-
-. From the *Fields* dropdown, select the associated fields you want to display.
-
-. To sort the data, select an option from the *Sort Field* and *Sort Order* dropdowns.
-
-. For more targeted queries, enter a *Query* using the Lucene query string syntax. 
-
-. Click *Preview*. 
-
-. If your query looks correct, click *Save*. 
-
-For for more information about the Lucene query string sytax, refer to <<lucene-query,Lucene Query Syntax>>.
+. On the *Add Data to Kibana* page, click the *View data* dropdown list, then select *Canvas*.
 
 [float]
-[[timelion-data-source]]
-==== Connect to Timelion
+[[apply-workpad-styles]]
+=== Apply a set of styles to the entire workpad
 
-Use Timelion queries to use your time series data. 
+To make your workpad look exactly the way you want, use the editor on the right to apply CSS overrides.
 
-. Click *Timelion*.
+. Expand *Global CSS overrides*.
 
-. Enter a *Query* using the Lucene query string syntax. 
-+
-For for more information about the Lucene query string syntax, refer to <<lucene-query,Lucene Query Syntax>>.
+. Enter the CSS. For example, to change the background on every page, enter:
 
-. Enter the *Interval*, then click *Preview*.
+````
+.canvasPage {
+background-color: #3990e6;
+}
+````
 
-. If your query looks correct, click *Save*. 
-
-For more information about Timelion, refer to <<timelion,Timelion>>.
-
-[float]
-[[configure-display-options]]
-=== Change the display options
-
-When you connect your element to a data source, the element often appears as a warning. To remove the error, you must specify how to process and display the data. 
-
-. Click *Display*
-
-. Change the data points to display in your element. 
-
-. In the *Label* field, enter a name for the data.
-
-[float]
-[[configure-auto-refresh-interval]]
-=== Change the data auto-refresh interval
-
-Choose the interval to refresh the data.
-
-. In the top left corner, click the *Control settings* icon.
-
-. Under *Change auto-refresh interval*, select the interval you want to use.
-
-[role="screenshot"]
-image::images/canvas-refresh-interval.png[Element data refresh interval]
-
-To manually refresh the data, click the *Refresh data* icon. 
-
-[float]
-[[element-display-options]]
-=== Choose the advanced display options
-
-Choose further define the appearance of the element, use the advanced display options.
-
-. Next to *Element style*, click *+*.
-
-. Choose one of these options:
-
-* To change the appearance and border of the element, click *Container style*, then change the settings.
-
-* To apply a CSS stylesheet to the element, click *CSS*, enter the CCS, then click *Apply stylesheet*.
-
-//For more advanced customization options, create Canvas plugins.
-
-[float]
-[[organize-element]]
-=== Organize the elements on your workpad
-
-Choose where you want the elements to appear on your workpad.
-
-[float]
-[[move-canvas-elements]]
-==== Move elements
-
-Move the element to a preferred location on your workpad.
-
-* Click and drag the element to your preferred location.
-
-* To move the element by 1 pixel, select the element, then use your arrow keys.
-
-As you move the element, notice the alignment lines that appear to help you place the element exactly where you want it.
-
-[float]
-[[resize-canvas-elements]]
-==== Resize elements
-
-Make your elements bigger or smaller than the default size.
-
-. Select the element.
-
-. Click and drag the resizing icon to the size you want.
-
-[float]
-[[alighn-canvas-elements]]
-==== Align elements
-
-Align two or more elements on your workpad.
-
-. Press Shift, then select the elements you want to align.
-
-. Click the *Element options* icon in the top right corner, then select *Align elements*.
-
-. From the *Alignment* menu, how you want to align the elements on the workpad.
-
-[role="screenshot"]
-image::images/canvas-align-elements.gif[Align elements]
-
-[float]
-[[distribute-canvas-elements]]
-==== Distribute elements
-
-Distribute two or more elements on your workpad.
-
-. Press Shift, then select the elements you want to distribute.
-
-. Click the *Element options* icon in the top right corner, then select *Distribute elements*.
-
-. From the *Distribution* menu, how you want to distribute the elements on the workpad.
-
-[role="screenshot"]
-image::images/canvas-distribute-elements.gif[Distribute elements]
-
-[float]
-[[change-element-order]]
-==== Change the element order
-
-Change the order of how the elements are displayed on your workpad.
-
-. Select an element.
-
-. In the top right corder, click the *Element options* icon. 
-
-. Select *Order*, then select the order that you want the element to appear.
-
-[float]
-[[element-save]]
-=== Save elements
-
-After you have made changes to elements, save them so that you can reuse them across your workpads.
-
-. Select the element that you want to save.
-+
-To save a group of elements, press Shift, then select the elements you want to save.
-
-. Click the *Save as new element* icon.
-
-. In the *Create new element* window, enter a *Name*.
-
-. Enter an optional *Description*, then click *Save*.
-
-To access the element, click *Add element*, then select *My elements*.
-
-[float]
-[[add-more-pages]]
-=== Add more pages
-
-When you have run out of room on your workpad page, you can add more pages.
-
-. Click *Page 1*, then click *+*.
-
-. On the *Page* editor panel on the right, select the page transition from the *Transition* dropdown. 
-
-[role="screenshot"]
-image::images/canvas-add-pages.gif[Add pages]
-
-[float]
-[[workpad-display-options]]
-=== Change the workpad display options
-
-To change the view of the elements on your workpad, change the display options.
-
-* To view your workpad in fullscreen mode, click the *Enter fullscreen mode* icon in the upper left corner.
-
-* To zoom in or out on the workpad, click the *Zoom controls* icon in the upper left corder, then select one of the options.
-
-[float]
-[[enable-autoplay]]
-=== Enable autoplay 
-
-Automatically cycle through your workpads pages in fullscreen mode.
-
-. In the upper left corner, click the *Control settings* icon.
-
-. Under *Change cycling interval*, select the interval you want to use.
-
-[role="screenshot"]
-image::images/canvas-refresh-interval.png[Element data refresh interval]
+. Click *Apply stylesheet*.

@@ -31,6 +31,8 @@ include::canvas/canvas-getting-started.asciidoc[]
 
 include::canvas/canvas-workpad.asciidoc[]
 
+include::canvas/canvas-elements.asciidoc[]
+
 include::canvas/canvas-share-workpad.asciidoc[]
 
 //include::canvas/canvas-expressions.asciidoc[]
