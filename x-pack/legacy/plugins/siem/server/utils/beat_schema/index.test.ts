@@ -123,6 +123,7 @@ describe('Schema Beat', () => {
             'client.bytes': {
               description: 'Bytes sent from the client to the server.',
               example: 184,
+              format: 'bytes',
               name: 'bytes',
               type: 'long',
             },
@@ -303,6 +304,7 @@ describe('Schema Beat', () => {
             'client.bytes': {
               description: 'Bytes sent from the client to the server.',
               example: 184,
+              format: 'bytes',
               name: 'bytes',
               type: 'long',
             },
@@ -483,6 +485,7 @@ describe('Schema Beat', () => {
             'client.bytes': {
               description: 'Bytes sent from the client to the server.',
               example: 184,
+              format: 'bytes',
               name: 'bytes',
               type: 'long',
             },
