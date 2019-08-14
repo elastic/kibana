@@ -6,85 +6,92 @@
 
 import expect from '@kbn/expect';
 import { getTestAlertData } from './utils';
+import { UserAtSpaceScenarios } from '../../scenarios';
+import { getUrlPrefix } from '../../../common/lib/space_test_utils';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createDeleteTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
   const es = getService('es');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('delete', () => {
-    let alertId: string;
-    let scheduledTaskId: string;
-    let space1AlertId: string;
-    let space1ScheduledTaskId: string;
+    const createdObjects: Array<{ spaceId: string; id: string; type: string }> = [];
 
-    before(async () => {
-      await esArchiver.load('actions/basic');
-      await supertest
-        .post('/api/alert')
-        .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
-        .expect(200)
-        .then((resp: any) => {
-          alertId = resp.body.id;
-          scheduledTaskId = resp.body.scheduledTaskId;
-        });
-      await supertest
-        .post('/s/space_1/api/alert')
-        .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
-        .expect(200)
-        .then((resp: any) => {
-          space1AlertId = resp.body.id;
-          space1ScheduledTaskId = resp.body.scheduledTaskId;
-        });
+    after(async () => {
+      await Promise.all(
+        createdObjects.map(({ spaceId, id, type }) => {
+          return supertest
+            .delete(`${getUrlPrefix(spaceId)}/api/${type}/${id}`)
+            .set('kbn-xsrf', 'foo')
+            .expect(204);
+        })
+      );
     });
-    after(() => esArchiver.unload('actions/basic'));
 
     async function getScheduledTask(id: string) {
       return await es.get({
-        id,
+        id: `task:${id}`,
         index: '.kibana_task_manager',
       });
     }
 
-    it('should return 204 when deleting an alert and removing scheduled task', async () => {
-      await supertest
-        .delete(`/api/alert/${alertId}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(204, '');
-      let hasThrownError = false;
-      try {
-        await getScheduledTask(scheduledTaskId);
-      } catch (e) {
-        hasThrownError = true;
-        expect(e.status).to.eql(404);
-      }
-      expect(hasThrownError).to.eql(true);
-    });
+    for (const scenario of UserAtSpaceScenarios) {
+      const { user, space } = scenario;
+      describe(scenario.id, () => {
+        it('delete as user', async () => {
+          const { body: createdAlert } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .set('kbn-xsrf', 'foo')
+            .send(getTestAlertData())
+            .expect(200);
 
-    it('should return 404 when deleting an alert from another space', async () => {
-      await supertest
-        .delete(`/api/alert/${space1AlertId}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(404);
-    });
+          const response = await supertestWithoutAuth
+            .delete(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password);
 
-    it('should return 204 when deleting an alert in a space', async () => {
-      await supertest
-        .delete(`/s/space_1/api/alert/${space1AlertId}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(204, '');
-      let hasThrownError = false;
-      try {
-        await getScheduledTask(space1ScheduledTaskId);
-      } catch (e) {
-        hasThrownError = true;
-        expect(e.status).to.eql(404);
-      }
-      expect(hasThrownError).to.eql(true);
-    });
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unable to get alert',
+              });
+              createdObjects.push({ spaceId: space.id, id: createdAlert.id, type: 'alert' });
+              // Ensure task still exists
+              await getScheduledTask(createdAlert.scheduledTaskId);
+              break;
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unable to delete alert',
+              });
+              createdObjects.push({ spaceId: space.id, id: createdAlert.id, type: 'alert' });
+              // Ensure task still exists
+              await getScheduledTask(createdAlert.scheduledTaskId);
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(204);
+              expect(response.body).to.eql('');
+              try {
+                await getScheduledTask(createdAlert.scheduledTaskId);
+                throw new Error('Should have removed scheduled task');
+              } catch (e) {
+                expect(e.status).to.eql(404);
+              }
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+      });
+    }
   });
 }

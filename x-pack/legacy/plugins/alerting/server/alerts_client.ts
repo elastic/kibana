@@ -227,7 +227,6 @@ export class AlertsClient {
   public async disable({ id }: { id: string }) {
     const existingObject = await this.savedObjectsClient.get('alert', id);
     if (existingObject.attributes.enabled === true) {
-      await this.taskManager.remove(existingObject.attributes.scheduledTaskId);
       await this.savedObjectsClient.update(
         'alert',
         id,
@@ -237,6 +236,7 @@ export class AlertsClient {
         },
         { references: existingObject.references }
       );
+      await this.taskManager.remove(existingObject.attributes.scheduledTaskId);
     }
   }
 

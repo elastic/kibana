@@ -6,105 +6,105 @@
 
 import expect from '@kbn/expect';
 import { getTestAlertData } from './utils';
-import { ES_ARCHIVER_ACTION_ID } from './constants';
+import { UserAtSpaceScenarios } from '../../scenarios';
+import { getUrlPrefix } from '../../../common/lib/space_test_utils';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('get', () => {
-    let alertId: string;
-    let space1AlertId: string;
+    let createdObjects: Array<{ spaceId: string; id: string; type: string }> = [];
 
-    before(async () => {
-      await esArchiver.load('actions/basic');
-      await supertest
-        .post('/api/alert')
-        .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
-        .expect(200)
-        .then((resp: any) => {
-          alertId = resp.body.id;
-        });
-      await supertest
-        .post('/s/space_1/api/alert')
-        .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
-        .expect(200)
-        .then((resp: any) => {
-          space1AlertId = resp.body.id;
-        });
-    });
-    after(async () => {
-      await supertest
-        .delete(`/api/alert/${alertId}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(204, '');
-      await supertest
-        .delete(`/s/space_1/api/alert/${space1AlertId}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(204, '');
-      await esArchiver.unload('actions/basic');
+    afterEach(async () => {
+      await Promise.all(
+        createdObjects.map(({ spaceId, id, type }) => {
+          return supertest
+            .delete(`${getUrlPrefix(spaceId)}/api/${type}/${id}`)
+            .set('kbn-xsrf', 'foo')
+            .expect(204);
+        })
+      );
+      createdObjects = [];
     });
 
-    it('should return 200 when getting an alert', async () => {
-      await supertest
-        .get(`/api/alert/${alertId}`)
-        .expect(200)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            id: alertId,
-            alertTypeId: 'test.noop',
-            interval: '10s',
-            enabled: true,
-            actions: [
-              {
-                group: 'default',
-                id: ES_ARCHIVER_ACTION_ID,
-                params: {
-                  message:
-                    'instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
-                },
-              },
-            ],
-            alertTypeParams: {},
-            createdBy: 'elastic',
-            scheduledTaskId: resp.body.scheduledTaskId,
-          });
-        });
-    });
+    for (const scenario of UserAtSpaceScenarios) {
+      const { user, space } = scenario;
+      describe(scenario.id, () => {
+        it('get as user', async () => {
+          const { body: createdAlert } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .set('kbn-xsrf', 'foo')
+            .send(getTestAlertData())
+            .expect(200);
+          createdObjects.push({ spaceId: space.id, id: createdAlert.id, type: 'alert' });
 
-    it('should return 404 when gettin an alert in another space', async () => {
-      await supertest.get(`/api/alert/${space1AlertId}`).expect(404);
-    });
+          const response = await supertestWithoutAuth
+            .get(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)
+            .auth(user.username, user.password);
 
-    it('should return 200 when getting an alert in a space', async () => {
-      await supertest
-        .get(`/s/space_1/api/alert/${space1AlertId}`)
-        .expect(200)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            id: space1AlertId,
-            alertTypeId: 'test.noop',
-            interval: '10s',
-            enabled: true,
-            actions: [
-              {
-                group: 'default',
-                id: ES_ARCHIVER_ACTION_ID,
-                params: {
-                  message:
-                    'instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
-                },
-              },
-            ],
-            alertTypeParams: {},
-            createdBy: 'elastic',
-            scheduledTaskId: resp.body.scheduledTaskId,
-          });
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unable to get alert',
+              });
+              break;
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(200);
+              expect(response.body).to.eql({
+                id: createdAlert.id,
+                alertTypeId: 'test.noop',
+                interval: '10s',
+                enabled: true,
+                actions: [],
+                alertTypeParams: {},
+                createdBy: 'elastic',
+                scheduledTaskId: response.body.scheduledTaskId,
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
         });
-    });
+
+        it('get non existing alert', async () => {
+          const response = await supertestWithoutAuth
+            .get(`${getUrlPrefix(space.id)}/api/alert/1`)
+            .auth(user.username, user.password);
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unable to get alert',
+              });
+              break;
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Saved object [alert/1] not found',
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+      });
+    }
   });
 }

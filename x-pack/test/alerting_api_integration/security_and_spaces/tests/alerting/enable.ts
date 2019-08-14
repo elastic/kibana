@@ -4,69 +4,96 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import expect from '@kbn/expect';
 import { getTestAlertData } from './utils';
+import { UserAtSpaceScenarios } from '../../scenarios';
+import { getUrlPrefix } from '../../../common/lib/space_test_utils';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createEnableAlertTests({ getService }: FtrProviderContext) {
+  const es = getService('es');
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('enable', () => {
-    let alertId: string;
-    let space1AlertId: string;
-
-    before(async () => {
-      await esArchiver.load('actions/basic');
-      await supertest
-        .post('/api/alert')
-        .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData({ enabled: false }))
-        .expect(200)
-        .then((resp: any) => {
-          alertId = resp.body.id;
-        });
-      await supertest
-        .post('/s/space_1/api/alert')
-        .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData({ enabled: false }))
-        .expect(200)
-        .then((resp: any) => {
-          space1AlertId = resp.body.id;
-        });
-    });
+    const createdObjects: Array<{ spaceId: string; id: string; type: string }> = [];
 
     after(async () => {
-      await supertest
-        .delete(`/api/alert/${alertId}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(204, '');
-      await supertest
-        .delete(`/s/space_1/api/alert/${space1AlertId}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(204, '');
-      await esArchiver.unload('actions/basic');
+      await Promise.all(
+        createdObjects.map(({ spaceId, id, type }) => {
+          return supertest
+            .delete(`${getUrlPrefix(spaceId)}/api/${type}/${id}`)
+            .set('kbn-xsrf', 'foo')
+            .expect(204);
+        })
+      );
     });
 
-    it('should return 204 when enabling an alert', async () => {
-      await supertest
-        .post(`/api/alert/${alertId}/_enable`)
-        .set('kbn-xsrf', 'foo')
-        .expect(204);
-    });
+    async function getScheduledTask(id: string) {
+      return await es.get({
+        id: `task:${id}`,
+        index: '.kibana_task_manager',
+      });
+    }
 
-    it('should return 404 when enabling an alert from another space', async () => {
-      await supertest
-        .post(`/api/alert/${space1AlertId}/_enable`)
-        .set('kbn-xsrf', 'foo')
-        .expect(404);
-    });
+    for (const scenario of UserAtSpaceScenarios) {
+      const { user, space } = scenario;
+      describe(scenario.id, () => {
+        it('enable an alert as a user', async () => {
+          const { body: createdAlert } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .set('kbn-xsrf', 'foo')
+            .send(getTestAlertData({ enabled: false }))
+            .expect(200);
+          createdObjects.push({ spaceId: space.id, id: createdAlert.id, type: 'alert' });
 
-    it('should return 204 when enabling an alert in a space', async () => {
-      await supertest
-        .post(`/s/space_1/api/alert/${space1AlertId}/_enable`)
-        .set('kbn-xsrf', 'foo')
-        .expect(204);
-    });
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}/_enable`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password);
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unable to get alert',
+              });
+              break;
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unable to update alert',
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(204);
+              expect(response.body).to.eql('');
+              const { body: updatedAlert } = await supertestWithoutAuth
+                .get(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)
+                .set('kbn-xsrf', 'foo')
+                .auth(user.username, user.password)
+                .expect(200);
+              expect(typeof updatedAlert.scheduledTaskId).to.eql('string');
+              const { _source: taskRecord } = await getScheduledTask(updatedAlert.scheduledTaskId);
+              expect(taskRecord.type).to.eql('task');
+              expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
+              expect(JSON.parse(taskRecord.task.params)).to.eql({
+                alertId: createdAlert.id,
+                spaceId: space.id,
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+      });
+    }
   });
 }

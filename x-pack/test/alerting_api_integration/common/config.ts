@@ -39,9 +39,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       junit: {
         reportName: 'X-Pack Alerting API Integration Tests',
       },
-      esArchiver: {
-        directory: path.resolve(__dirname, 'es_archives'),
-      },
+      esArchiver: xPackApiIntegrationTestsConfig.get('esArchiver'),
       esTestCluster: {
         ...xPackApiIntegrationTestsConfig.get('esTestCluster'),
         license,

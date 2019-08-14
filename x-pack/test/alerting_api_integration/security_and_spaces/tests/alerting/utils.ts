@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ES_ARCHIVER_ACTION_ID } from './constants';
-
 const esTestIndexName = '.kibaka-alerting-test-data';
 
 export function getTestAlertData(attributeOverwrites = {}) {
@@ -13,16 +11,7 @@ export function getTestAlertData(attributeOverwrites = {}) {
     enabled: true,
     alertTypeId: 'test.noop',
     interval: '10s',
-    actions: [
-      {
-        group: 'default',
-        id: ES_ARCHIVER_ACTION_ID,
-        params: {
-          message:
-            'instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
-        },
-      },
-    ],
+    actions: [],
     alertTypeParams: {},
     ...attributeOverwrites,
   };

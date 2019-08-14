@@ -6,107 +6,81 @@
 
 import expect from '@kbn/expect';
 import { getTestAlertData } from './utils';
-import { ES_ARCHIVER_ACTION_ID } from './constants';
+import { UserAtSpaceScenarios } from '../../scenarios';
+import { getUrlPrefix } from '../../../common/lib/space_test_utils';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createFindTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('find', () => {
-    let alertId: string;
-    let space1AlertId: string;
+    let createdObjects: Array<{ spaceId: string; id: string; type: string }> = [];
 
-    before(async () => {
-      await esArchiver.load('actions/basic');
-      await supertest
-        .post('/api/alert')
-        .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
-        .expect(200)
-        .then((resp: any) => {
-          alertId = resp.body.id;
-        });
-      await supertest
-        .post('/s/space_1/api/alert')
-        .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
-        .expect(200)
-        .then((resp: any) => {
-          space1AlertId = resp.body.id;
-        });
-    });
-    after(async () => {
-      await supertest
-        .delete(`/api/alert/${alertId}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(204, '');
-      await supertest
-        .delete(`/s/space_1/api/alert/${space1AlertId}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(204, '');
-      await esArchiver.unload('actions/basic');
+    afterEach(async () => {
+      await Promise.all(
+        createdObjects.map(({ spaceId, id, type }) => {
+          return supertest
+            .delete(`${getUrlPrefix(spaceId)}/api/${type}/${id}`)
+            .set('kbn-xsrf', 'foo')
+            .expect(204);
+        })
+      );
+      createdObjects = [];
     });
 
-    it('should return 200 when finding alerts', async () => {
-      await supertest
-        .get('/api/alert/_find')
-        .expect(200)
-        .then((resp: any) => {
-          const body = resp.body;
-          expect(body.page).to.equal(1);
-          expect(body.perPage).to.be.greaterThan(0);
-          expect(body.total).to.be.greaterThan(0);
-          const match = body.data.find((obj: any) => obj.id === alertId);
-          expect(match).to.eql({
-            id: alertId,
-            alertTypeId: 'test.noop',
-            interval: '10s',
-            enabled: true,
-            actions: [
-              {
-                group: 'default',
-                id: ES_ARCHIVER_ACTION_ID,
-                params: {
-                  message:
-                    'instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
-                },
-              },
-            ],
-            alertTypeParams: {},
-            createdBy: 'elastic',
-            scheduledTaskId: match.scheduledTaskId,
-          });
-        });
-    });
+    for (const scenario of UserAtSpaceScenarios) {
+      const { user, space } = scenario;
+      describe(scenario.id, () => {
+        it('find as user', async () => {
+          const { body: createdAlert } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .set('kbn-xsrf', 'foo')
+            .send(getTestAlertData())
+            .expect(200);
+          createdObjects.push({ spaceId: space.id, id: createdAlert.id, type: 'alert' });
 
-    it('should return 200 when finding alerts in a space', async () => {
-      await supertest
-        .get('/s/space_1/api/alert/_find')
-        .expect(200)
-        .then((resp: any) => {
-          const match = resp.body.data.find((obj: any) => obj.id === space1AlertId);
-          expect(match).to.eql({
-            id: space1AlertId,
-            alertTypeId: 'test.noop',
-            interval: '10s',
-            enabled: true,
-            actions: [
-              {
-                group: 'default',
-                id: ES_ARCHIVER_ACTION_ID,
-                params: {
-                  message:
-                    'instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
-                },
-              },
-            ],
-            alertTypeParams: {},
-            createdBy: 'elastic',
-            scheduledTaskId: match.scheduledTaskId,
-          });
+          const response = await supertestWithoutAuth
+            .get(
+              `${getUrlPrefix(space.id)}/api/alert/_find?search=test.noop&search_fields=alertTypeId`
+            )
+            .auth(user.username, user.password);
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unable to find alert',
+              });
+              break;
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(200);
+              expect(response.body.page).to.equal(1);
+              expect(response.body.perPage).to.be.greaterThan(0);
+              expect(response.body.total).to.be.greaterThan(0);
+              const match = response.body.data.find((obj: any) => obj.id === createdAlert.id);
+              expect(match).to.eql({
+                id: createdAlert.id,
+                alertTypeId: 'test.noop',
+                interval: '10s',
+                enabled: true,
+                actions: [],
+                alertTypeParams: {},
+                createdBy: 'elastic',
+                scheduledTaskId: match.scheduledTaskId,
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
         });
-    });
+      });
+    }
   });
 }

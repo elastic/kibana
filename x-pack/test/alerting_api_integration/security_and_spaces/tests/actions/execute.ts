@@ -301,16 +301,15 @@ export default function({ getService }: FtrProviderContext) {
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({})
-            .expect(400);
-          expect(error).to.eql({
-            statusCode: 400,
-            error: 'Bad Request',
-            message: 'child "params" fails because ["params" is required]',
-            validation: {
-              source: 'payload',
-              keys: ['params'],
-            },
-          });
+            .expect(400, {
+              tatusCode: 400,
+              error: 'Bad Request',
+              message: 'child "params" fails because ["params" is required]',
+              validation: {
+                source: 'payload',
+                keys: ['params'],
+              },
+            });
         });
 
         it('changing config properties', async () => {

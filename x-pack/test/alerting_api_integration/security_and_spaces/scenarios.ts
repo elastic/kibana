@@ -12,6 +12,8 @@ const NoKibanaPrivileges: User = {
   role: {
     name: 'no_kibana_privileges',
     elasticsearch: {
+      // TODO: Remove once Elasticsearch doesn't require the permission for own keys
+      cluster: ['manage_api_key'],
       indices: [
         {
           names: ['foo'],
@@ -48,6 +50,8 @@ const GlobalRead: User = {
       },
     ],
     elasticsearch: {
+      // TODO: Remove once Elasticsearch doesn't require the permission for own keys
+      cluster: ['manage_api_key'],
       indices: [
         {
           names: ['.kibaka-alerting-test-data*'],
@@ -71,6 +75,8 @@ const Space1All: User = {
       },
     ],
     elasticsearch: {
+      // TODO: Remove once Elasticsearch doesn't require the permission for own keys
+      cluster: ['manage_api_key'],
       indices: [
         {
           names: ['.kibaka-alerting-test-data*'],

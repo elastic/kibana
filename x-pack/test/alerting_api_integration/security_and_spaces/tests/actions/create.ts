@@ -86,13 +86,10 @@ export default function createActionTests({ getService }: FtrProviderContext) {
               actionTypeId: 'test.unregistered-action-type',
               config: {},
             })
-            .expect(400)
-            .then((resp: any) => {
-              expect(resp.body).to.eql({
-                statusCode: 400,
-                error: 'Bad Request',
-                message: 'Action type "test.unregistered-action-type" is not registered.',
-              });
+            .expect(400, {
+              statusCode: 400,
+              error: 'Bad Request',
+              message: 'Action type "test.unregistered-action-type" is not registered.',
             });
         });
 
@@ -102,18 +99,15 @@ export default function createActionTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({})
-            .expect(400)
-            .then((resp: any) => {
-              expect(resp.body).to.eql({
-                statusCode: 400,
-                error: 'Bad Request',
-                message:
-                  'child "description" fails because ["description" is required]. child "actionTypeId" fails because ["actionTypeId" is required]',
-                validation: {
-                  source: 'payload',
-                  keys: ['description', 'actionTypeId'],
-                },
-              });
+            .expect(400, {
+              statusCode: 400,
+              error: 'Bad Request',
+              message:
+                'child "description" fails because ["description" is required]. child "actionTypeId" fails because ["actionTypeId" is required]',
+              validation: {
+                source: 'payload',
+                keys: ['description', 'actionTypeId'],
+              },
             });
         });
 
@@ -129,14 +123,11 @@ export default function createActionTests({ getService }: FtrProviderContext) {
                 unencrypted: 'my unencrypted text',
               },
             })
-            .expect(400)
-            .then((resp: any) => {
-              expect(resp.body).to.eql({
-                statusCode: 400,
-                error: 'Bad Request',
-                message:
-                  'error validating action type secrets: [encrypted]: expected value of type [string] but got [undefined]',
-              });
+            .expect(400, {
+              statusCode: 400,
+              error: 'Bad Request',
+              message:
+                'error validating action type secrets: [encrypted]: expected value of type [string] but got [undefined]',
             });
         });
       });

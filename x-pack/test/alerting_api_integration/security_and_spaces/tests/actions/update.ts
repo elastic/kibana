@@ -30,7 +30,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
-        it('update document as user', async () => {
+        it('update action as user', async () => {
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
