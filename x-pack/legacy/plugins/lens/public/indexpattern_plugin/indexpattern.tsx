@@ -150,6 +150,7 @@ export interface IndexPatternPersistedState {
 
 export type IndexPatternPrivateState = IndexPatternPersistedState & {
   indexPatterns: Record<string, IndexPattern>;
+  showEmptyFields: boolean;
 };
 
 export function columnToOperation(column: IndexPatternColumn): Operation {
@@ -225,12 +226,14 @@ export function getIndexPatternDatasource({
         return {
           ...state,
           indexPatterns,
+          showEmptyFields: false,
         };
       }
       return {
         currentIndexPatternId: indexPatternObjects ? indexPatternObjects[0].id : '',
         indexPatterns,
         layers: {},
+        showEmptyFields: false,
       };
     },
 

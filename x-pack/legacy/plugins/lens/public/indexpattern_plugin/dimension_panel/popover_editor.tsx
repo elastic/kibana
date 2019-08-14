@@ -253,8 +253,9 @@ export function PopoverEditor(props: PopoverEditorProps) {
         <EuiFlexGroup gutterSize="s" direction="column">
           <EuiFlexItem>
             <FieldSelect
-              fieldMap={fieldMap}
               currentIndexPattern={currentIndexPattern}
+              showEmptyFields={state.showEmptyFields}
+              fieldMap={fieldMap}
               operationFieldSupportMatrix={operationFieldSupportMatrix}
               selectedColumnOperationType={selectedColumn && selectedColumn.operationType}
               selectedColumnSourceField={

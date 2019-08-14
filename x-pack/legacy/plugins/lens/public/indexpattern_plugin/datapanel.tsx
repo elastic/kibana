@@ -63,6 +63,8 @@ export function IndexPatternDataPanel({
   setState,
   state,
   dragDropContext,
+  query,
+  dateRange,
 }: DatasourceDataPanelProps<IndexPatternPrivateState>) {
   const { indexPatterns, currentIndexPatternId } = state;
   const [showIndexPatternSwitcher, setShowIndexPatternSwitcher] = useState(false);
@@ -83,14 +85,14 @@ export function IndexPatternDataPanel({
   );
 
   const updateFieldsWithCounts = useCallback(
-    (allFields: IndexPattern['fields']) => {
+    (indexPatternId: string, allFields: IndexPattern['fields']) => {
       setState(prevState => {
         return {
           ...prevState,
           indexPatterns: {
             ...prevState.indexPatterns,
-            [currentIndexPatternId]: {
-              ...prevState.indexPatterns[currentIndexPatternId],
+            [indexPatternId]: {
+              ...prevState.indexPatterns[indexPatternId],
               hasExistence: true,
               fields: allFields,
             },
@@ -101,13 +103,21 @@ export function IndexPatternDataPanel({
     [currentIndexPatternId, indexPatterns[currentIndexPatternId]]
   );
 
+  const onToggleEmptyFields = useCallback(() => {
+    setState(prevState => ({ ...prevState, showEmptyFields: !prevState.showEmptyFields }));
+  }, [state, setState]);
+
   return (
     <MemoizedDataPanel
       showIndexPatternSwitcher={showIndexPatternSwitcher}
       setShowIndexPatternSwitcher={setShowIndexPatternSwitcher}
       currentIndexPatternId={currentIndexPatternId}
       indexPatterns={indexPatterns}
+      query={query}
+      dateRange={dateRange}
       dragDropContext={dragDropContext}
+      showEmptyFields={state.showEmptyFields}
+      onToggleEmptyFields={onToggleEmptyFields}
       // only pass in the state change callback if it's actually needed to avoid re-renders
       onChangeIndexPattern={showIndexPatternSwitcher ? onChangeIndexPattern : undefined}
       updateFieldsWithCounts={
@@ -129,32 +139,37 @@ interface DataPanelState {
   isLoading: boolean;
   nameFilter: string;
   typeFilter: DataType[];
-  hiddenFilter: boolean;
   isTypeFilterOpen: boolean;
 }
 
 export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   currentIndexPatternId,
   indexPatterns,
+  query,
+  dateRange,
   dragDropContext,
   showIndexPatternSwitcher,
   setShowIndexPatternSwitcher,
   onChangeIndexPattern,
   updateFieldsWithCounts,
-}: {
+  showEmptyFields,
+  onToggleEmptyFields,
+}: Partial<DatasourceDataPanelProps> & {
   currentIndexPatternId: string;
   indexPatterns: Record<string, IndexPattern>;
+  dateRange: DatasourceDataPanelProps['dateRange'];
   dragDropContext: DragContextState;
   showIndexPatternSwitcher: boolean;
   setShowIndexPatternSwitcher: (show: boolean) => void;
+  showEmptyFields: boolean;
+  onToggleEmptyFields: () => void;
   onChangeIndexPattern?: (newId: string) => void;
-  updateFieldsWithCounts?: (fields: IndexPattern['fields']) => void;
+  updateFieldsWithCounts?: (indexPatternId: string, fields: IndexPattern['fields']) => void;
 }) {
-  const [state, setState] = useState<DataPanelState>({
+  const [localState, setLocalState] = useState<DataPanelState>({
     isLoading: false,
     nameFilter: '',
     typeFilter: [],
-    hiddenFilter: false,
     isTypeFilterOpen: false,
   });
   const [pageSize, setPageSize] = useState(PAGINATION_SIZE);
@@ -176,7 +191,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       setPageSize(PAGINATION_SIZE);
       lazyScroll();
     }
-  }, [state.nameFilter, state.typeFilter, currentIndexPatternId]);
+  }, [localState.nameFilter, localState.typeFilter, currentIndexPatternId, showEmptyFields]);
 
   if (Object.keys(indexPatterns).length === 0) {
     return (
@@ -215,49 +230,51 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
 
   const displayedFields = allFields
     .filter(field => {
-      if (!state.hiddenFilter) {
+      if (!showEmptyFields) {
         const indexField =
           indexPatterns[currentIndexPatternId] &&
           indexPatterns[currentIndexPatternId].hasExistence &&
           indexPatterns[currentIndexPatternId].fields.find(f => f.name === field.name);
-        if (state.typeFilter.length > 0) {
+        if (localState.typeFilter.length > 0) {
           return (
-            indexField && indexField.exists && state.typeFilter.includes(field.type as DataType)
+            indexField &&
+            indexField.exists &&
+            localState.typeFilter.includes(field.type as DataType)
           );
         }
         return indexField && indexField.exists;
       }
-      if (state.typeFilter.length > 0) {
-        return state.typeFilter.includes(field.type as DataType);
+      if (localState.typeFilter.length > 0) {
+        return localState.typeFilter.includes(field.type as DataType);
       }
       return true;
     })
     .filter(
       (field: IndexPatternField) =>
-        field.name.toLowerCase().includes(state.nameFilter.toLowerCase()) &&
+        field.name.toLowerCase().includes(localState.nameFilter.toLowerCase()) &&
         supportedFieldTypes.includes(field.type)
     );
 
   const paginatedFields = displayedFields.sort(sortFields).slice(0, pageSize);
 
   useEffect(() => {
-    setState(s => ({ ...s, isLoading: true }));
-
     if (
-      state.isLoading ||
+      localState.isLoading ||
       indexPatterns[currentIndexPatternId].hasExistence ||
       !updateFieldsWithCounts
     ) {
       return;
     }
 
+    setLocalState(s => ({ ...s, isLoading: true }));
+
     npStart.core.http
       .post(`/api/lens/index_stats/${indexPatterns[currentIndexPatternId].title}`, {
         body: JSON.stringify({
           query: { match_all: {} },
-          earliest: 'now-14d',
-          latest: 'now',
-          interval: '1d',
+          earliest: dateRange.fromDate,
+          latest: dateRange.toDate,
+          size: 500,
           timeFieldName: indexPatterns[currentIndexPatternId].timeFieldName,
           maxExamples: 5,
           fields: allFields
@@ -269,7 +286,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         }),
       })
       .then((results: OverallFields) => {
-        setState(s => ({
+        setLocalState(s => ({
           ...s,
           isLoading: false,
         }));
@@ -279,6 +296,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         }
 
         updateFieldsWithCounts(
+          currentIndexPatternId,
           indexPatterns[currentIndexPatternId].fields.map(field => {
             const matching = results[field.name];
             if (!matching) {
@@ -294,7 +312,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         );
       })
       .catch(() => {
-        setState(s => ({ ...s, isLoading: false }));
+        setLocalState(s => ({ ...s, isLoading: false }));
       });
   }, [currentIndexPatternId]);
 
@@ -362,11 +380,10 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 onChange={choices => {
                   onChangeIndexPattern!(choices[0].value as string);
 
-                  setState(s => ({
+                  setLocalState(s => ({
                     ...s,
                     nameFilter: '',
                     typeFilter: [],
-                    hiddenFilter: false,
                   }));
 
                   setShowIndexPatternSwitcher(false);
@@ -388,9 +405,9 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                   description:
                     'Search the list of fields in the index pattern for the provided text',
                 })}
-                value={state.nameFilter}
+                value={localState.nameFilter}
                 onChange={e => {
-                  setState({ ...state, nameFilter: e.target.value });
+                  setLocalState({ ...localState, nameFilter: e.target.value });
                 }}
                 aria-label={i18n.translate('xpack.lens.indexPatterns.filterByNameAriaLabel', {
                   defaultMessage: 'Search fields',
@@ -403,19 +420,24 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                   id="dataPanelTypeFilter"
                   panelClassName="euiFilterGroup__popoverPanel"
                   panelPaddingSize="none"
-                  isOpen={state.isTypeFilterOpen}
-                  closePopover={() => setState(s => ({ ...state, isTypeFilterOpen: false }))}
+                  isOpen={localState.isTypeFilterOpen}
+                  closePopover={() =>
+                    setLocalState(s => ({ ...localState, isTypeFilterOpen: false }))
+                  }
                   button={
                     <EuiFilterButton
                       onClick={() =>
-                        setState(s => ({ ...s, isTypeFilterOpen: !state.isTypeFilterOpen }))
+                        setLocalState(s => ({
+                          ...s,
+                          isTypeFilterOpen: !localState.isTypeFilterOpen,
+                        }))
                       }
                       iconType="arrowDown"
                       data-test-subj="indexPatternTypeFilterButton"
-                      isSelected={state.isTypeFilterOpen}
+                      isSelected={localState.isTypeFilterOpen}
                       numFilters={availableFieldTypes.length + 1}
-                      hasActiveFilters={state.typeFilter.length > 0 || state.hiddenFilter}
-                      numActiveFilters={state.typeFilter.length + (state.hiddenFilter ? 1 : 0)}
+                      hasActiveFilters={localState.typeFilter.length > 0 || showEmptyFields}
+                      numActiveFilters={localState.typeFilter.length + (showEmptyFields ? 1 : 0)}
                     >
                       {i18n.translate('xpack.lens.indexPatterns.typeFilterLabel', {
                         defaultMessage: 'Types',
@@ -425,41 +447,38 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 >
                   <FixedEuiContextMenuPanel
                     watchedItemProps={['icon', 'disabled']}
-                    items={[
-                      <EuiContextMenuItem
-                        key="hidden"
-                        icon={state.hiddenFilter ? 'check' : 'empty'}
-                        data-test-subj="hiddenFilter"
-                        onClick={() => {
-                          setState(s => ({
-                            ...s,
-                            hiddenFilter: !state.hiddenFilter,
-                          }));
-                        }}
-                      >
-                        {i18n.translate('xpack.lens.datatypes.hiddenFields', {
-                          defaultMessage: 'Show fields without data',
-                        })}
-                      </EuiContextMenuItem>,
-                    ].concat(
-                      (availableFieldTypes as DataType[]).map(type => (
+                    items={(availableFieldTypes as DataType[])
+                      .map(type => (
                         <EuiContextMenuItem
                           key={type}
-                          icon={state.typeFilter.includes(type) ? 'check' : 'empty'}
+                          icon={localState.typeFilter.includes(type) ? 'check' : 'empty'}
                           data-test-subj={`typeFilter-${type}`}
                           onClick={() =>
-                            setState(s => ({
+                            setLocalState(s => ({
                               ...s,
-                              typeFilter: state.typeFilter.includes(type)
-                                ? state.typeFilter.filter(t => t !== type)
-                                : [...state.typeFilter, type],
+                              typeFilter: localState.typeFilter.includes(type)
+                                ? localState.typeFilter.filter(t => t !== type)
+                                : [...localState.typeFilter, type],
                             }))
                           }
                         >
                           <FieldIcon type={type} /> {fieldTypeNames[type]}
                         </EuiContextMenuItem>
                       ))
-                    )}
+                      .concat([
+                        <EuiContextMenuItem
+                          key="empty"
+                          icon={showEmptyFields ? 'empty' : 'check'}
+                          data-test-subj="emptyFilter"
+                          onClick={() => {
+                            onToggleEmptyFields();
+                          }}
+                        >
+                          {i18n.translate('xpack.lens.datatypes.hiddenFields', {
+                            defaultMessage: 'Only show fields that contain data',
+                          })}
+                        </EuiContextMenuItem>,
+                      ])}
                   />
                 </EuiPopover>
               </EuiFilterGroup>
@@ -476,7 +495,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             onScroll={lazyScroll}
           >
             <div className="lnsFieldListPanel__list">
-              {state.isLoading && <EuiLoadingSpinner />}
+              {localState.isLoading && <EuiLoadingSpinner />}
 
               {paginatedFields.map(field => {
                 // const overallField = state.overallFields && state.overallFields[field.name];
@@ -488,7 +507,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     indexPattern={indexPatterns[currentIndexPatternId]}
                     key={field.name}
                     field={field}
-                    highlight={state.nameFilter.toLowerCase()}
+                    highlight={localState.nameFilter.toLowerCase()}
                     exists={overallField ? !!overallField.exists : false}
                     // howManyDocs={state.overallStats && state.overallStats.totalCount}
                     count={overallField && overallField.count}

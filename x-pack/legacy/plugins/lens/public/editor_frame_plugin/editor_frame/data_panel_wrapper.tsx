@@ -7,11 +7,12 @@
 import React, { useMemo, memo, useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
+import { Query } from 'src/plugins/data/common';
 import { DatasourceDataPanelProps, Datasource } from '../../../public';
 import { NativeRenderer } from '../../native_renderer';
 import { Action } from './state_management';
 import { DragContext } from '../../drag_drop';
-import { StateSetter } from '../../types';
+import { StateSetter, FramePublicAPI } from '../../types';
 
 interface DataPanelWrapperProps {
   datasourceState: unknown;
@@ -19,6 +20,8 @@ interface DataPanelWrapperProps {
   activeDatasource: string | null;
   datasourceIsLoading: boolean;
   dispatch: (action: Action) => void;
+  query: Query;
+  dateRange: FramePublicAPI['dateRange'];
 }
 
 export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
@@ -36,6 +39,8 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     dragDropContext: useContext(DragContext),
     state: props.datasourceState,
     setState: setDatasourceState,
+    query: props.query,
+    dateRange: props.dateRange,
   };
 
   const [showDatasourceSwitcher, setDatasourceSwitcher] = useState(false);

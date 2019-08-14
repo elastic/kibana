@@ -5,15 +5,9 @@
  */
 
 import _ from 'lodash';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiComboBox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiComboBoxOptionProps,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiComboBoxOptionProps } from '@elastic/eui';
 import classNames from 'classnames';
 import {
   // @ts-ignore
@@ -26,11 +20,11 @@ import { OperationFieldSupportMatrix } from './dimension_panel';
 
 export type FieldChoice =
   | { type: 'field'; field: string; operationType?: OperationType }
-  | { type: 'document' }
-  | { type: 'toggleHidden' };
+  | { type: 'document' };
 
 export interface FieldSelectProps {
   currentIndexPattern: IndexPattern;
+  showEmptyFields: boolean;
   fieldMap: Record<string, IndexPatternField>;
   incompatibleSelectedOperationType: OperationType | null;
   selectedColumnOperationType?: OperationType;
@@ -41,18 +35,17 @@ export interface FieldSelectProps {
 }
 
 export function FieldSelect({
+  currentIndexPattern,
+  showEmptyFields,
+  fieldMap,
   incompatibleSelectedOperationType,
   selectedColumnOperationType,
   selectedColumnSourceField,
   operationFieldSupportMatrix,
-  currentIndexPattern,
-  fieldMap,
   onChoose,
   onDeleteColumn,
 }: FieldSelectProps) {
   const { operationByDocument, operationByField } = operationFieldSupportMatrix;
-
-  const [showHidden, setShowHidden] = useState(false);
 
   const memoizedFieldOptions = useMemo(() => {
     const fields = Object.keys(operationByField).sort();
@@ -110,7 +103,7 @@ export function FieldSelect({
             exists: fieldMap[field].exists || false,
             compatible: isCompatibleWithCurrentOperation(field),
           }))
-          .filter(field => (showHidden ? true : field.exists))
+          .filter(field => (showEmptyFields ? true : field.exists))
           .sort((a, b) => {
             if (a.compatible && !b.compatible) {
               return -1;
@@ -132,14 +125,6 @@ export function FieldSelect({
       });
     }
 
-    fieldOptions.push({
-      label: i18n.translate('xpack.lens.indexPattern.toggleHiddenLabel', {
-        defaultMessage: 'Toggle hidden fields',
-      }),
-      type: 'toggleHidden',
-      'data-test-subj': 'lns-fieldOption-toggleHidden',
-    });
-
     return fieldOptions;
   }, [
     incompatibleSelectedOperationType,
@@ -148,7 +133,7 @@ export function FieldSelect({
     operationFieldSupportMatrix,
     currentIndexPattern,
     fieldMap,
-    showHidden,
+    showEmptyFields,
   ]);
 
   return (
@@ -179,38 +164,17 @@ export function FieldSelect({
           return;
         }
 
-        if (choices[0].type === 'toggleHidden') {
-          setShowHidden(!showHidden);
-          return;
-        }
-
         onChoose((choices[0].value as unknown) as FieldChoice);
       }}
       renderOption={(option, searchValue) => {
         return (
           <EuiFlexGroup gutterSize="s" alignItems="center">
-            {option.type === 'toggleHidden' && (
-              <>
-                <EuiFlexItem grow={null}>
-                  <EuiIcon type={showHidden ? 'check' : 'empty'} />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiFlexItem>{option.label}</EuiFlexItem>
-                </EuiFlexItem>
-              </>
-            )}
-            {option.type !== 'toggleHidden' && (
-              <>
-                <EuiFlexItem grow={null}>
-                  <FieldIcon
-                    type={((option.value as unknown) as { dataType: DataType }).dataType}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
-                </EuiFlexItem>
-              </>
-            )}
+            <EuiFlexItem grow={null}>
+              <FieldIcon type={((option.value as unknown) as { dataType: DataType }).dataType} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+            </EuiFlexItem>
           </EuiFlexGroup>
         );
       }}
