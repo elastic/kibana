@@ -5,19 +5,20 @@
  */
 
 const path = require('path');
+// eslint-disable-next-line
+const webpack = require('webpack');
 
-const KIBANA_ROOT = path.resolve(__dirname, '../../../../..');
-const RUNTIME_NAME = 'canvas_external_runtime';
-const BUILT_ASSETS = path.resolve(KIBANA_ROOT, 'built_assets');
-const RUNTIME_OUTPUT = path.resolve(BUILT_ASSETS, RUNTIME_NAME);
+const { KIBANA_ROOT, RUNTIME_OUTPUT } = require('./constants');
+
+const isProd = process.env.NODE_ENV === 'production';
 
 module.exports = {
   context: KIBANA_ROOT,
-  mode: 'development',
   entry: {
     canvas_external_runtime: require.resolve('./index.ts'),
   },
-  plugins: [],
+  mode: isProd ? 'production' : 'development',
+  plugins: [new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 })],
   // Output the DLL JS file
   output: {
     path: RUNTIME_OUTPUT,
@@ -49,6 +50,7 @@ module.exports = {
         options: {
           presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
         },
+        sideEffects: false,
       },
       {
         test: /\.tsx?$/,
@@ -60,6 +62,7 @@ module.exports = {
             },
           },
         ],
+        sideEffects: false,
       },
       {
         test: /\.css$/,
@@ -76,6 +79,7 @@ module.exports = {
             },
           },
         ],
+        sideEffects: true,
       },
       {
         test: /\.module\.s(a|c)ss$/,
@@ -87,16 +91,17 @@ module.exports = {
               modules: true,
               localIdentName: '[name]__[local]___[hash:base64:5]',
               camelCase: true,
-              sourceMap: true,
+              sourceMap: !isProd,
             },
           },
           {
             loader: 'sass-loader',
             options: {
-              sourceMap: true,
+              sourceMap: !isProd,
             },
           },
         ],
+        sideEffects: true,
       },
       {
         test: /\.less$/,
@@ -113,10 +118,16 @@ module.exports = {
           },
           { loader: 'less-loader' },
         ],
+        sideEffects: true,
+      },
+      {
+        test: require.resolve('jquery'),
+        loader: 'expose-loader?jQuery!expose-loader?$',
       },
       {
         test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/,
         loader: 'file-loader',
+        sideEffects: false,
       },
       {
         test: /\.scss$/,
@@ -134,11 +145,22 @@ module.exports = {
           },
           { loader: 'sass-loader' },
         ],
+        sideEffects: true,
       },
       {
         test: /\.html$/,
         loader: 'html-loader',
         exclude: /node_modules/,
+        sideEffects: true,
+      },
+      {
+        test: [
+          require.resolve('@elastic/eui/es/components/code_editor'),
+          require.resolve('@elastic/eui/es/components/drag_and_drop'),
+          require.resolve('highlight.js'),
+          require.resolve('@elastic/eui/packages/react-datepicker'),
+        ],
+        use: 'null-loader',
       },
     ],
   },

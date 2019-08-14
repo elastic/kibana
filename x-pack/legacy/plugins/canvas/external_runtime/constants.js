@@ -1,0 +1,23 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+const path = require('path');
+
+const RUNTIME_NAME = 'canvas_external_runtime';
+const KIBANA_ROOT = path.resolve(__dirname, '../../../../..');
+const RUNTIME_SRC = path.resolve(KIBANA_ROOT, 'x-pack/legacy/plugins/canvas/external_runtime');
+const BUILT_ASSETS = path.resolve(KIBANA_ROOT, 'built_assets');
+const RUNTIME_OUTPUT = path.resolve(BUILT_ASSETS, RUNTIME_NAME);
+const STATS_OUTPUT = path.resolve(RUNTIME_OUTPUT, 'webpack_stats.json');
+
+module.exports = {
+  BUILT_ASSETS,
+  KIBANA_ROOT,
+  RUNTIME_NAME,
+  RUNTIME_OUTPUT,
+  RUNTIME_SRC,
+  STATS_OUTPUT,
+};
