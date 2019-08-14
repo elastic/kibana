@@ -8,6 +8,7 @@ import * as React from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../../containers/source';
+import { ColumnHeader } from '../body/column_headers/column_header';
 import { DetailItem } from '../../../graphql/types';
 import { StatefulEventDetails } from '../../event_details/stateful_event_details';
 import { LazyAccordion } from '../../lazy_accordion';
@@ -18,9 +19,8 @@ const ExpandableDetails = styled.div<{ hideExpandButton: boolean; width?: number
     ${({ hideExpandButton }) =>
       hideExpandButton
         ? `
-  .euiAccordion__button svg {
-    width: 0px;
-    height: 0px;
+  .euiAccordion__button {
+    display: none;
   }
   `
         : ''};
@@ -30,6 +30,7 @@ ExpandableDetails.displayName = 'ExpandableDetails';
 
 interface Props {
   browserFields: BrowserFields;
+  columnHeaders: ColumnHeader[];
   id: string;
   event: DetailItem[];
   forceExpand?: boolean;
@@ -37,12 +38,24 @@ interface Props {
   isLoading: boolean;
   onUpdateColumns: OnUpdateColumns;
   timelineId: string;
+  toggleColumn: (column: ColumnHeader) => void;
   width?: number;
 }
 
 export class ExpandableEvent extends React.PureComponent<Props> {
   public render() {
-    const { forceExpand = false, id, timelineId, width } = this.props;
+    const {
+      browserFields,
+      columnHeaders,
+      event,
+      forceExpand = false,
+      id,
+      isLoading,
+      timelineId,
+      toggleColumn,
+      onUpdateColumns,
+      width,
+    } = this.props;
 
     return (
       <ExpandableDetails
@@ -52,26 +65,22 @@ export class ExpandableEvent extends React.PureComponent<Props> {
       >
         <LazyAccordion
           id={`timeline-${timelineId}-row-${id}`}
-          renderExpandedContent={this.renderExpandedContent}
+          renderExpandedContent={() => (
+            <StatefulEventDetails
+              browserFields={browserFields}
+              columnHeaders={columnHeaders}
+              data={event}
+              id={id}
+              isLoading={isLoading}
+              onUpdateColumns={onUpdateColumns}
+              timelineId={timelineId}
+              toggleColumn={toggleColumn}
+            />
+          )}
           forceExpand={forceExpand}
           paddingSize="none"
         />
       </ExpandableDetails>
     );
   }
-
-  private renderExpandedContent = () => {
-    const { browserFields, event, id, isLoading, onUpdateColumns, timelineId } = this.props;
-
-    return (
-      <StatefulEventDetails
-        browserFields={browserFields}
-        data={event}
-        id={id}
-        isLoading={isLoading}
-        onUpdateColumns={onUpdateColumns}
-        timelineId={timelineId}
-      />
-    );
-  };
 }
