@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { ExternalEmbedElement } from './element';
+import { RenderedElement } from './rendered_element';
 import { useExternalEmbedState } from '../context';
 import { CanvasRenderedPage, CanvasRenderedElement } from '../types';
 
@@ -26,7 +26,7 @@ export const Page = (props: Props) => {
   const { elements, style } = props.page;
 
   const output = elements.map((element: CanvasRenderedElement, index) => (
-    <ExternalEmbedElement key={element.id} element={element} number={index + 1} />
+    <RenderedElement key={element.id} element={element} number={index + 1} />
   ));
 
   return (
