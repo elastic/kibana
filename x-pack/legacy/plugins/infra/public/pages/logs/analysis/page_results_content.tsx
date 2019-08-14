@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -20,6 +20,7 @@ import {
 import dateMath from '@elastic/datemath';
 import moment from 'moment';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
+import { useInterval } from '../../../hooks/use_interval';
 import { useLogAnalysisResults } from '../../../containers/logs/log_analysis';
 import { useLogAnalysisResultsUrlState } from '../../../containers/logs/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
@@ -41,7 +42,28 @@ export const AnalysisResultsContent = ({ sourceId }: { sourceId: string }) => {
   useTrackPageview({ app: 'infra_logs', path: 'analysis_results' });
   useTrackPageview({ app: 'infra_logs', path: 'analysis_results', delay: 15000 });
 
-  const { timeRange, setTimeRange } = useLogAnalysisResultsUrlState();
+  const {
+    timeRange,
+    setTimeRange,
+    autoRefreshEnabled,
+    setAutoRefresh,
+  } = useLogAnalysisResultsUrlState();
+
+  const [refreshInterval, setRefreshInterval] = useState(300000);
+
+  const setTimeRangeToNow = useCallback(() => {
+    const range = timeRange.endTime - timeRange.startTime;
+    const nowInMs = moment()
+      .utc()
+      .valueOf();
+    setTimeRange({
+      startTime: nowInMs - range,
+      endTime: nowInMs,
+    });
+  }, [timeRange.startTime, timeRange.endTime, setTimeRange]);
+
+  useInterval(setTimeRangeToNow, autoRefreshEnabled ? refreshInterval : null);
+
   const bucketDuration = useMemo(() => {
     const msRange = timeRange.endTime - timeRange.startTime;
     const bucketIntervalInMs = msRange / 200;
@@ -89,6 +111,16 @@ export const AnalysisResultsContent = ({ sourceId }: { sourceId: string }) => {
                   start={moment.utc(timeRange.startTime).format(DATE_PICKER_FORMAT)}
                   end={moment.utc(timeRange.endTime).format(DATE_PICKER_FORMAT)}
                   onTimeChange={handleTimeRangeChange}
+                  isPaused={!autoRefreshEnabled}
+                  refreshInterval={refreshInterval}
+                  onRefreshChange={({ isPaused, refreshInterval: interval }) => {
+                    if (isPaused) {
+                      setAutoRefresh(false);
+                    } else {
+                      setRefreshInterval(interval);
+                      setAutoRefresh(true);
+                    }
+                  }}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

@@ -6,10 +6,14 @@
 
 import moment from 'moment';
 import { useEffect } from 'react';
+import * as rt from 'io-ts';
 import { useUrlState } from '../../../utils/use_url_state';
 import { timeRangeRT } from '../../../../common/http_api/shared/time_range';
 
+const autoRefreshRT = rt.boolean;
+
 const TIME_RANGE_URL_STATE_KEY = 'timeRange';
+const AUTOREFRESH_URL_STATE_KEY = 'autoRefresh';
 
 export const useLogAnalysisResultsUrlState = () => {
   const [timeRange, setTimeRange] = useUrlState({
@@ -29,8 +33,21 @@ export const useLogAnalysisResultsUrlState = () => {
     setTimeRange(timeRange);
   }, []);
 
+  const [autoRefreshEnabled, setAutoRefresh] = useUrlState({
+    defaultState: false,
+    decodeUrlState: (value: unknown) => autoRefreshRT.decode(value).getOrElse(undefined),
+    encodeUrlState: autoRefreshRT.encode,
+    urlStateKey: AUTOREFRESH_URL_STATE_KEY,
+  });
+
+  useEffect(() => {
+    setAutoRefresh(autoRefreshEnabled);
+  }, []);
+
   return {
     timeRange,
     setTimeRange,
+    autoRefreshEnabled,
+    setAutoRefresh,
   };
 };
