@@ -64,6 +64,12 @@ export class StatefulEvent extends React.PureComponent<Props, State> {
     initialRender: false,
   };
 
+  /**
+   * Incrementally loads the events when it mounts by trying to
+   * see if it resides within a window frame and if it is it will
+   * indicate to React that it should render its self by setting
+   * its initialRender to true.
+   */
   public componentDidMount() {
     requestIdleCallbackViaScheduler(
       () => {
@@ -98,6 +104,9 @@ export class StatefulEvent extends React.PureComponent<Props, State> {
       width,
     } = this.props;
 
+    // If we are not ready to render yet, just return null
+    // see componentDidMount() for when it schedules the first
+    // time this stateful component should be rendered.
     if (!this.state.initialRender) {
       return null;
     }
