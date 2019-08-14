@@ -25,14 +25,14 @@ import { createStore } from '../store';
 import { GlobalToaster, ManageGlobalToaster } from '../components/toasters';
 import { MlCapabilitiesProvider } from '../components/ml/permissions/ml_capabilities_provider';
 
-export const startApp = async (libs: AppFrontendLibs) => {
+export const startApp = (libs: AppFrontendLibs) => {
   const history = createHashHistory();
 
   const libs$ = new BehaviorSubject(libs);
 
   const store = createStore(undefined, libs$.pipe(pluck('apolloClient')));
 
-  libs.framework.render(
+  return (
     <EuiErrorBoundary>
       <I18nContext>
         <ManageGlobalToaster>

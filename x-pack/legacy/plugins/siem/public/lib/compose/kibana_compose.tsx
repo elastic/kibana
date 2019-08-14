@@ -18,7 +18,6 @@ import { timezoneProvider } from 'ui/vis/lib/timezone';
 
 import introspectionQueryResultData from '../../graphql/introspection.json';
 import { AppKibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
-import { AppKibanaObservableApiAdapter } from '../adapters/observable_api/kibana_observable_api';
 import { AppFrontendLibs } from '../lib';
 import { getLinks } from './helpers';
 
@@ -28,11 +27,6 @@ export function compose(): AppFrontendLibs {
     fragmentMatcher: new IntrospectionFragmentMatcher({
       introspectionQueryResultData,
     }),
-  });
-
-  const observableApi = new AppKibanaObservableApiAdapter({
-    basePath: chrome.getBasePath(),
-    xsrfToken: chrome.getXsrfToken(),
   });
 
   const graphQLOptions = {
@@ -50,7 +44,6 @@ export function compose(): AppFrontendLibs {
   const libs: AppFrontendLibs = {
     apolloClient,
     framework,
-    observableApi,
   };
   return libs;
 }

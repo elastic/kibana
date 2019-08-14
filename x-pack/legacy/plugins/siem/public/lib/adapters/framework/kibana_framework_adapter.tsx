@@ -7,7 +7,6 @@
 // eslint-disable-next-line max-classes-per-file
 import { IModule, IScope } from 'angular';
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
 
 import { UIRoutes as KibanaUIRoutes } from 'ui/routes';
 
@@ -18,11 +17,7 @@ import {
   AppKibanaAdapterServiceRefs,
   AppKibanaUIConfig,
   AppTimezoneProvider,
-  AppUiKibanaAdapterScope,
 } from '../../lib';
-
-const ROOT_ELEMENT_ID = 'react-siem-root';
-const BREADCRUMBS_ELEMENT_ID = 'react-siem-breadcrumbs';
 
 export const KibanaConfigContext = React.createContext<Partial<AppKibanaFrameworkAdapter>>({});
 
@@ -39,10 +34,6 @@ export class AppKibanaFrameworkAdapter implements AppFrameworkAdapter {
 
   private adapterService: KibanaAdapterServiceProvider;
   private timezoneProvider: AppTimezoneProvider;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private rootComponent: React.ReactElement<any> | null = null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private breadcrumbsComponent: React.ReactElement<any> | null = null;
 
   constructor(uiModule: IModule, uiRoutes: KibanaUIRoutes, timezoneProvider: AppTimezoneProvider) {
     this.adapterService = new KibanaAdapterServiceProvider();
@@ -57,75 +48,8 @@ export class AppKibanaFrameworkAdapter implements AppFrameworkAdapter {
     });
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public render = (component: React.ReactElement<any>) => {
-    this.adapterService.callOrBuffer(() => (this.rootComponent = component));
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public renderBreadcrumbs = (component: React.ReactElement<any>) => {
-    this.adapterService.callOrBuffer(() => (this.breadcrumbsComponent = component));
-  };
-
   private register = (adapterModule: IModule, uiRoutes: KibanaUIRoutes) => {
     adapterModule.provider('kibanaAdapter', this.adapterService);
-
-    adapterModule.directive('appUiKibanaAdapter', () => ({
-      controller: ($scope: AppUiKibanaAdapterScope, $element: JQLite) => ({
-        $onDestroy: () => {
-          const targetRootElement = $element[0].querySelector(`#${ROOT_ELEMENT_ID}`);
-          const targetBreadcrumbsElement = $element[0].querySelector(`#${ROOT_ELEMENT_ID}`);
-
-          if (targetRootElement) {
-            ReactDOM.unmountComponentAtNode(targetRootElement);
-          }
-
-          if (targetBreadcrumbsElement) {
-            ReactDOM.unmountComponentAtNode(targetBreadcrumbsElement);
-          }
-        },
-        $onInit: () => {
-          $scope.topNavMenu = [];
-        },
-        $postLink: () => {
-          $scope.$watchGroup(
-            [
-              () => this.breadcrumbsComponent,
-              () => $element[0].querySelector(`#${BREADCRUMBS_ELEMENT_ID}`),
-            ],
-            ([breadcrumbsComponent, targetElement]) => {
-              if (!targetElement) {
-                return;
-              }
-
-              if (breadcrumbsComponent) {
-                ReactDOM.render(breadcrumbsComponent, targetElement);
-              } else {
-                ReactDOM.unmountComponentAtNode(targetElement);
-              }
-            }
-          );
-          $scope.$watchGroup(
-            [() => this.rootComponent, () => $element[0].querySelector(`#${ROOT_ELEMENT_ID}`)],
-            ([rootComponent, targetElement]) => {
-              if (!targetElement) {
-                return;
-              }
-
-              if (rootComponent) {
-                ReactDOM.render(rootComponent, targetElement);
-              } else {
-                ReactDOM.unmountComponentAtNode(targetElement);
-              }
-            }
-          );
-        },
-      }),
-      scope: true,
-      template: `
-        <div id="${ROOT_ELEMENT_ID}"></div>
-      `,
-    }));
 
     adapterModule.run((
       config: AppKibanaUIConfig,
@@ -150,12 +74,13 @@ export class AppKibanaFrameworkAdapter implements AppFrameworkAdapter {
       this.scaledDateFormat = config.get('dateFormat:scaled');
     });
 
-    uiRoutes.enable();
-
-    uiRoutes.otherwise({
-      reloadOnSearch: false,
-      template: '<app-ui-kibana-adapter></app-ui-kibana-adapter>',
-    });
+    // adapterModule.config($locationProvider => {
+    //   $locationProvider.html5Mode({
+    //     enabled: false,
+    //     requireBase: false,
+    //     rewriteLinks: false,
+    //   });
+    // });
   };
 }
 
