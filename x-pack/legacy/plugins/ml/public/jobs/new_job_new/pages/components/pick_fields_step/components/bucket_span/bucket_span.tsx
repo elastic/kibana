@@ -12,7 +12,11 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
 import { BucketSpanEstimator } from '../bucket_span_estimator';
 
-export const BucketSpan: FC = () => {
+interface Props {
+  setIsValid: (proceed: boolean) => void;
+}
+
+export const BucketSpan: FC<Props> = ({ setIsValid }) => {
   const {
     jobCreator,
     jobCreatorUpdate,
@@ -36,6 +40,10 @@ export const BucketSpan: FC = () => {
   useEffect(() => {
     setValidation(jobValidator.bucketSpan);
   }, [jobValidatorUpdated]);
+
+  useEffect(() => {
+    setIsValid(estimating === false);
+  }, [estimating]);
 
   return (
     <Description validation={validation}>
