@@ -430,7 +430,6 @@ export class JobsListView extends Component {
         <CreateWatchFlyout
           setShowFunction={this.setShowCreateWatchFlyoutFunction}
           unsetShowFunction={this.unsetShowCreateWatchFlyoutFunction}
-          compile={this.props.compile}
         />
       </div>
     );
