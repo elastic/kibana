@@ -13,30 +13,30 @@ import {
 } from './ecs_allowed_list';
 describe('getAllowedListForPrefix()', () => {
   test('kubernetes', () => {
-    expect(getAllowedListForPrefix('kubernetes.pod.cpu.pct')).toEqual([
+    expect(getAllowedListForPrefix('kubernetes.pod')).toEqual([
       ...ECS_ALLOWED_LIST,
-      'kubernetes.pod.cpu.pct',
+      'kubernetes.pod',
       ...K8S_ALLOWED_LIST,
     ]);
   });
   test('docker', () => {
-    expect(getAllowedListForPrefix('docker.container.cpu.pct')).toEqual([
+    expect(getAllowedListForPrefix('docker.container')).toEqual([
       ...ECS_ALLOWED_LIST,
-      'docker.container.cpu.pct',
+      'docker.container',
       ...DOCKER_ALLOWED_LIST,
     ]);
   });
   test('prometheus', () => {
-    expect(getAllowedListForPrefix('prometheus.metrics.custom1')).toEqual([
+    expect(getAllowedListForPrefix('prometheus.metrics')).toEqual([
       ...ECS_ALLOWED_LIST,
-      'prometheus.metrics.custom1',
+      'prometheus.metrics',
       ...PROMETHEUS_ALLOWED_LIST,
     ]);
   });
   test('anything.else', () => {
-    expect(getAllowedListForPrefix('anything.else.metric')).toEqual([
+    expect(getAllowedListForPrefix('anything.else')).toEqual([
       ...ECS_ALLOWED_LIST,
-      'anything.else.metric',
+      'anything.else',
     ]);
   });
 });
