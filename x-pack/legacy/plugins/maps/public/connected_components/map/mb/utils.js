@@ -10,6 +10,18 @@ import { RGBAImage } from './image_utils';
 export function removeOrphanedSourcesAndLayers(mbMap, layerList) {
 
   const mbStyle = mbMap.getStyle();
+
+  const mbLayerIdsToRemove = [];
+  mbStyle.layers.forEach(mbLayer => {
+    const layer = layerList.find(layer => {
+      return layer.ownsMbLayerId(mbLayer.id);
+    });
+    if (!layer) {
+      mbLayerIdsToRemove.push(mbLayer.id);
+    }
+  });
+  mbLayerIdsToRemove.forEach((mbLayerId) => mbMap.removeLayer(mbLayerId));
+
   const mbSourcesToRemove = [];
   for (const mbSourceId in mbStyle.sources) {
     if (mbStyle.sources.hasOwnProperty(mbSourceId)) {
@@ -21,23 +33,7 @@ export function removeOrphanedSourcesAndLayers(mbMap, layerList) {
       }
     }
   }
-
-  const mbLayerIdsToRemove = [];
-  mbStyle.layers.forEach(mbLayer => {
-    const layer = layerList.find(layer => {
-      return layer.ownsMbLayerId(mbLayer.id);
-    });
-    if (!layer) {
-      mbLayerIdsToRemove.push(mbLayer.id);
-    }
-  });
-
-  mbLayerIdsToRemove.forEach((mbLayerId) => {
-    mbMap.removeLayer(mbLayerId);
-  });
-  mbSourcesToRemove.forEach(mbSourceId => {
-    mbMap.removeSource(mbSourceId);
-  });
+  mbSourcesToRemove.forEach(mbSourceId => mbMap.removeSource(mbSourceId));
 
 }
 
@@ -120,13 +116,11 @@ export async function addSpritesheetToMap(json, imgUrl, mbMap) {
   image.onload = (el) => {
     const imgData = getImageData(el.currentTarget);
     for (const imageId in json) {
-      if (json.hasOwnProperty(imageId)) {
-        if (!mbMap.hasImage(imageId)) {
-          const { width, height, x, y, sdf, pixelRatio } = json[imageId];
-          const data = new RGBAImage({ width, height });
-          RGBAImage.copy(imgData, data, { x, y }, { x: 0, y: 0 }, { width, height });
-          mbMap.addImage(imageId, data, { pixelRatio, sdf });
-        }
+      if (json.hasOwnProperty(imageId) && !mbMap.hasImage(imageId)) {
+        const { width, height, x, y, sdf, pixelRatio } = json[imageId];
+        const data = new RGBAImage({ width, height });
+        RGBAImage.copy(imgData, data, { x, y }, { x: 0, y: 0 }, { width, height });
+        mbMap.addImage(imageId, data, { pixelRatio, sdf });
       }
     }
   };

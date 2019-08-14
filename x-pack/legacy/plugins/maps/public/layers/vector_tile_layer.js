@@ -139,6 +139,9 @@ export class VectorTileLayer extends TileLayer {
 
       //sync spritesheet
       const spriteMeta = this._getSpriteMeta();
+      if (!spriteMeta) {
+        return;
+      }
       const newJson = {};
       for (const imageId in spriteMeta.json) {
         if (spriteMeta.json.hasOwnProperty(imageId)) {
@@ -186,7 +189,7 @@ export class VectorTileLayer extends TileLayer {
 
     opacityProps.forEach(opacityProp => {
       if (mbLayer.paint && typeof mbLayer.paint[opacityProp] === 'number') {
-        const newOpacity = (mbLayer.paint[opacityProp] / 1) * this.getAlpha();
+        const newOpacity = mbLayer.paint[opacityProp] * this.getAlpha();
         mbMap.setPaintProperty(mbLayerId, opacityProp, newOpacity);
       } else {
         mbMap.setPaintProperty(mbLayerId, opacityProp, this.getAlpha());

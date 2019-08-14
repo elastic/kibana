@@ -396,6 +396,39 @@ export function initRoutes(server, licenseUid) {
     }
 
   });
+  //
+  //
+  // server.route({
+  //
+  //   method: 'GET',
+  //   path: `${ROOT}/${EMS_SPRITES_PATH}/sprite{scaling}.{extension}`,
+  //   handler: async (request, h) => {
+  //
+  //     checkEMSProxyConfig();
+  //
+  //     const fontUrl = mapConfig.emsFontLibraryUrl
+  //       .replace('{fontstack}', request.params.scaling)
+  //       .replace('{range}', request.params.extension);
+  //
+  //     // try {
+  //     //   const font = await fetch(fontUrl);
+  //     //   const arrayBuffer = await font.arrayBuffer();
+  //     //   const buffer = Buffer.from(arrayBuffer);
+  //     //   let response = h.response(buffer);
+  //     //   response = response.bytes(buffer.length);
+  //     //   response = response.header('Content-Disposition', 'inline');
+  //     //   response = response.encoding('binary');
+  //     //   return response;
+  //     // } catch(e) {
+  //     //   server.log('warning', `Cannot connect to EMS for font, error: ${e.message}`);
+  //     //   throw Boom.badRequest(`Cannot connect to EMS`);
+  //     // }
+  //
+  //
+  //   }
+  //
+  // });
+
 
   server.route({
     method: 'GET',

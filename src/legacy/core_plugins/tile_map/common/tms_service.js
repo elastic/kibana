@@ -23,13 +23,13 @@ import { ORIGIN } from './origin';
 export class TMSService {
 
   _getRasterStyleJson = _.once(async () => {
-    const rasterUrl = this._getRasterStyleUrl();
+    const rasterUrl = this._getStyleUrlForLocale('raster');
     const url = this._proxyPath + rasterUrl;
     return this._emsClient.getManifest(this._emsClient.extendUrlWithParams(url));
   });
 
   _getVectorStyleJsonRaw = _.once(async () => {
-    const vectorUrl = this._getVectorStyleUrl();
+    const vectorUrl = this._getStyleUrlForLocale('vector');
     const url = this._proxyPath + vectorUrl;
     const vectorJson =  await this._emsClient.getManifest(this._emsClient.extendUrlWithParams(url));
     return { ...vectorJson };
@@ -38,22 +38,20 @@ export class TMSService {
   _getVectorStyleJsonInlined = _.once(async () => {
     const vectorJson = await this._getVectorStyleJsonRaw();
     const inlinedSources = {};
-    for (const sourceName in vectorJson.sources) {
-      if (vectorJson.sources.hasOwnProperty(sourceName)) {
-        const sourceUrl = this._proxyPath + vectorJson.sources[sourceName].url;
-        const extendedUrl =  this._emsClient.extendUrlWithParams(sourceUrl);
-        const sourceJson = await this._emsClient.getManifest(extendedUrl);
+    for (const sourceName of Object.getOwnPropertyNames(vectorJson.sources)) {
+      const sourceUrl = this._proxyPath + vectorJson.sources[sourceName].url;
+      const extendedUrl =  this._emsClient.extendUrlWithParams(sourceUrl);
+      const sourceJson = await this._emsClient.getManifest(extendedUrl);
 
-        const extendedTileUrls = sourceJson.tiles.map(tileUrl => {
-          const url = this._proxyPath + tileUrl;
-          return this._emsClient.extendUrlWithParams(url);
-        });
-        inlinedSources[sourceName] = {
-          type: 'vector',
-          ...sourceJson,
-          tiles: extendedTileUrls
-        };
-      }
+      const extendedTileUrls = sourceJson.tiles.map(tileUrl => {
+        const url = this._proxyPath + tileUrl;
+        return this._emsClient.extendUrlWithParams(url);
+      });
+      inlinedSources[sourceName] = {
+        type: 'vector',
+        ...sourceJson,
+        tiles: extendedTileUrls
+      };
     }
     vectorJson.sources = inlinedSources;
     return vectorJson;
@@ -82,14 +80,6 @@ export class TMSService {
     if (defaultStyle && defaultStyle.hasOwnProperty('url')) {
       return defaultStyle.url;
     }
-  }
-
-  _getVectorStyleUrl() {
-    return this._getStyleUrlForLocale('vector');
-  }
-
-  _getRasterStyleUrl() {
-    return this._getStyleUrlForLocale('raster');
   }
 
   async getDefaultRasterStyle() {
