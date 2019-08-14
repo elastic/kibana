@@ -260,7 +260,7 @@ The API returns the following result:
 }
 ----
 
-The following example attempts to copy a visualization with id `my-viz` from the `marketing` space to the `default` space:
+The following example successfully copies a visualization with id `my-viz` from the `marketing` space to the `default` space:
 
 [source,js]
 ----
