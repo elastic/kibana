@@ -19,7 +19,6 @@ export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPlugi
       '/logout',
       '/logged_out',
       '/status',
-      '/app/kibana',
     ]);
     core.http.intercept(
       new UnauthorizedResponseInterceptor(new SessionExpired(basePath), anonymousPaths)
