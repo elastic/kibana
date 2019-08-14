@@ -25,11 +25,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { AggType } from 'ui/agg_types';
 import { IndexPattern } from 'ui/index_patterns';
 import { documentationLinks } from '../../../../documentation_links/documentation_links';
-import { ComboBoxGroupedOption } from '../utils';
+import { ComboBoxGroupedOptions } from '../utils';
 
 interface DefaultEditorAggSelectProps {
   aggError?: string;
-  aggTypeOptions: AggType[];
+  aggTypeOptions: ComboBoxGroupedOptions<AggType>;
   id: string;
   indexPattern: IndexPattern;
   showValidation: boolean;
@@ -52,7 +52,9 @@ function DefaultEditorAggSelect({
   setTouched,
   setValidity,
 }: DefaultEditorAggSelectProps) {
-  const selectedOptions: ComboBoxGroupedOption[] = value ? [{ label: value.title, value }] : [];
+  const selectedOptions: ComboBoxGroupedOptions<AggType> = value
+    ? [{ label: value.title, target: value }]
+    : [];
 
   const label = isSubAggregation ? (
     <FormattedMessage
@@ -110,7 +112,7 @@ function DefaultEditorAggSelect({
   }, [errors.length]);
 
   const onChange = (options: EuiComboBoxOptionProps[]) => {
-    const selectedOption = get(options, '0.value');
+    const selectedOption = get(options, '0.target');
     if (selectedOption) {
       setValue(selectedOption);
     }

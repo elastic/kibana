@@ -209,6 +209,8 @@ const NetworkComponent = pure<NetworkComponentProps>(
   )
 );
 
+NetworkComponent.displayName = 'NetworkComponent';
+
 const makeMapStateToProps = () => {
   const getNetworkFilterQueryAsJson = networkSelectors.networkFilterQueryAsJson();
   const mapStateToProps = (state: State) => ({

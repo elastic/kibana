@@ -10,23 +10,15 @@ import { act } from 'react-dom/test-utils';
 import { filterRatioOperation } from './filter_ratio';
 import { FilterRatioIndexPatternColumn, IndexPatternPrivateState } from '../indexpattern';
 import { Storage } from 'ui/storage';
-import { DataPluginDependencies } from '../plugin';
+import { UiSettingsClientContract } from 'src/core/public';
+import { QueryBarInput } from '../../../../../../../src/legacy/core_plugins/data/public/query';
+
+jest.mock('ui/new_platform');
 
 describe('filter_ratio', () => {
   let state: IndexPatternPrivateState;
   let storageMock: Storage;
-  let mockedDependencies: DataPluginDependencies;
   const InlineOptions = filterRatioOperation.paramEditor!;
-
-  class MockQueryBarInput {
-    props: {};
-    constructor(props: {}) {
-      this.props = props;
-    }
-    render() {
-      return <></>;
-    }
-  }
 
   beforeEach(() => {
     state = {
@@ -61,9 +53,6 @@ describe('filter_ratio', () => {
     };
 
     storageMock = {} as Storage;
-    mockedDependencies = ({
-      components: { QueryBarInput: MockQueryBarInput },
-    } as unknown) as DataPluginDependencies;
   });
 
   describe('buildColumn', () => {
@@ -113,7 +102,7 @@ describe('filter_ratio', () => {
             setState={jest.fn()}
             columnId="col1"
             storage={storageMock}
-            dataPluginDependencies={mockedDependencies}
+            uiSettings={{} as UiSettingsClientContract}
           />
         );
       }).not.toThrow();
@@ -127,12 +116,12 @@ describe('filter_ratio', () => {
           setState={jest.fn()}
           columnId="col1"
           storage={storageMock}
-          dataPluginDependencies={mockedDependencies}
+          uiSettings={{} as UiSettingsClientContract}
         />
       );
 
-      expect(wrapper.find(MockQueryBarInput)).toHaveLength(1);
-      expect(wrapper.find(MockQueryBarInput).prop('indexPatterns')).toEqual(['Mock Indexpattern']);
+      expect(wrapper.find(QueryBarInput)).toHaveLength(1);
+      expect(wrapper.find(QueryBarInput).prop('indexPatterns')).toEqual(['Mock Indexpattern']);
     });
 
     it('should update the state when typing into the query bar', () => {
@@ -144,11 +133,11 @@ describe('filter_ratio', () => {
           setState={setState}
           columnId="col1"
           storage={storageMock}
-          dataPluginDependencies={mockedDependencies}
+          uiSettings={{} as UiSettingsClientContract}
         />
       );
 
-      wrapper.find(MockQueryBarInput).prop('onChange')!({
+      wrapper.find(QueryBarInput).prop('onChange')!({
         query: 'geo.src : "US"',
         language: 'kuery',
       });
@@ -182,7 +171,7 @@ describe('filter_ratio', () => {
           setState={setState}
           columnId="col1"
           storage={storageMock}
-          dataPluginDependencies={mockedDependencies}
+          uiSettings={{} as UiSettingsClientContract}
         />
       );
 
@@ -193,10 +182,10 @@ describe('filter_ratio', () => {
           .simulate('click');
       });
 
-      expect(wrapper.find(MockQueryBarInput)).toHaveLength(2);
+      expect(wrapper.find(QueryBarInput)).toHaveLength(2);
 
       wrapper
-        .find(MockQueryBarInput)
+        .find(QueryBarInput)
         .at(1)
         .prop('onChange')!({
         query: 'geo.src : "US"',

@@ -13,6 +13,7 @@ import { updateLayerIndexPattern } from './state_helpers';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
 
+jest.mock('ui/new_platform');
 jest.mock('./state_helpers');
 
 const initialState: IndexPatternPrivateState = {

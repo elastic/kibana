@@ -21,9 +21,15 @@ import { map } from 'lodash';
 
 const name = 'kibana_datatable';
 
+export interface SerializedFieldFormat<TParams = object> {
+  id?: string;
+  params?: TParams;
+}
+
 interface Column {
   id: string;
   name: string;
+  formatHint?: SerializedFieldFormat;
 }
 
 interface Row {
