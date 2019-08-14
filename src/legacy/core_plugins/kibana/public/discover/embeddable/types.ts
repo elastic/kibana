@@ -34,7 +34,7 @@ export interface SearchInput extends EmbeddableInput {
   filters?: Filter[];
   hidePanelTitles?: boolean;
   columns?: string[];
-  sort?: string[];
+  sort?: string[][];
 }
 
 export interface SearchOutput extends EmbeddableOutput {
