@@ -83,7 +83,11 @@ export const FieldName = pure<{
         >
           <EuiFlexItem grow={false}>
             <EuiToolTip content={i18n.COPY_TO_CLIPBOARD}>
-              <WithCopyToClipboard text={fieldId} titleSummary={i18n.FIELD} />
+              <WithCopyToClipboard
+                data-test-subj="copy-to-clipboard"
+                text={fieldId}
+                titleSummary={i18n.FIELD}
+              />
             </EuiToolTip>
           </EuiFlexItem>
 
@@ -94,6 +98,7 @@ export const FieldName = pure<{
                   <ViewCategoryIcon
                     aria-label={i18n.VIEW_CATEGORY(categoryId)}
                     color="text"
+                    data-test-subj="view-category"
                     onClick={() => {
                       onUpdateColumns(categoryColumns);
                     }}
@@ -110,7 +115,9 @@ export const FieldName = pure<{
     }
     render={() => (
       <FieldNameContainer>
-        <EuiHighlight search={highlight}>{fieldId}</EuiHighlight>
+        <EuiHighlight data-test-subj={`field-name-${fieldId}`} search={highlight}>
+          {fieldId}
+        </EuiHighlight>
       </FieldNameContainer>
     )}
   />

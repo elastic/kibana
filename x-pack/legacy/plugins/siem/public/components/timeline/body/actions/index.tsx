@@ -66,6 +66,8 @@ const ActionLoading = styled(EuiLoadingSpinner)`
 ActionLoading.displayName = 'ActionLoading';
 
 const PinContainer = styled.div`
+  position: relative;
+  top: -1px;
   width: 27px;
 `;
 
@@ -79,6 +81,8 @@ SelectEventContainer.displayName = 'SelectEventContainer';
 
 const NotesButtonContainer = styled(EuiFlexItem)`
   margin-left: 5px;
+  position: relative;
+  top: -3px;
 `;
 
 NotesButtonContainer.displayName = 'NotesButtonContainer';
