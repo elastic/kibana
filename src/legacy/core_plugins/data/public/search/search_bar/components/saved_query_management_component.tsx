@@ -35,7 +35,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useEffect, useState, Fragment } from 'react';
 import { sortBy } from 'lodash';
-import { EuiSpacer } from '@elastic/eui';
 import { SavedQuery } from '../index';
 import { getAllSavedQueries, deleteSavedQuery } from '../lib/saved_query_service';
 import { Query } from '../../../query';
