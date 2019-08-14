@@ -156,7 +156,7 @@ test('HelloWorldContainer in view mode hides edit mode actions', async () => {
     <I18nProvider>
       <EmbeddablePanel
         embeddable={embeddable}
-        getActions={(() => undefined) as any}
+        getActions={() => Promise.resolve([])}
         getAllEmbeddableFactories={(() => []) as any}
         getEmbeddableFactory={(() => undefined) as any}
         notifications={{} as any}
@@ -193,7 +193,7 @@ test('HelloWorldContainer in edit mode shows edit mode actions', async () => {
     <I18nProvider>
       <EmbeddablePanel
         embeddable={embeddable}
-        getActions={(() => undefined) as any}
+        getActions={() => Promise.resolve([])}
         getAllEmbeddableFactories={(() => []) as any}
         getEmbeddableFactory={(() => undefined) as any}
         notifications={{} as any}
@@ -255,7 +255,7 @@ test('Updates when hidePanelTitles is toggled', async () => {
     <I18nProvider>
       <EmbeddablePanel
         embeddable={embeddable}
-        getActions={(() => undefined) as any}
+        getActions={() => Promise.resolve([])}
         getAllEmbeddableFactories={(() => []) as any}
         getEmbeddableFactory={(() => undefined) as any}
         notifications={{} as any}
