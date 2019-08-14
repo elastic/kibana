@@ -5,11 +5,7 @@
  */
 
 import sinon from 'sinon';
-import {
-  DEFAULT_CSP_RULES,
-  DEFAULT_CSP_STRICT,
-  DEFAULT_CSP_WARN_LEGACY_BROWSERS,
-} from '../../../../../../../../src/legacy/server/csp';
+import { DEFAULT_CSP_RULES } from '../../../../../../../../src/legacy/server/csp';
 import {
   getMockCallWithInternal,
   getMockKbnServer,
@@ -44,13 +40,22 @@ test('fetches whether the csp rules have been changed or not', async () => {
   expect((await collector.fetch()).rulesChangedFromDefault).toEqual(true);
 });
 
-test('does not include raw csp.rules', async () => {
-  const { collector, mockConfig } = setupCollector();
+test('does not include raw csp.rules under any property names', async () => {
+  const { collector } = setupCollector();
 
-  expect(await collector.fetch()).not.toHaveProperty('rules');
-
-  mockConfig.get.withArgs('csp.rules').returns(['not', 'default']);
-  expect(await collector.fetch()).not.toHaveProperty('rules');
+  // It's important that we do not send the value of csp.rules here as it
+  // can be customized with values that can be identifiable to given
+  // installs, such as URLs
+  //
+  // We use a snapshot here to ensure csp.rules isn't finding its way into the
+  // payload under some new and unexpected variable name (e.g. cspRules).
+  expect(await collector.fetch()).toMatchInlineSnapshot(`
+    Object {
+      "rulesChangedFromDefault": false,
+      "strict": true,
+      "warnLegacyBrowsers": true,
+    }
+  `);
 });
 
 test('does not arbitrarily fetch other csp configurations (e.g. whitelist only)', async () => {
@@ -64,8 +69,8 @@ test('does not arbitrarily fetch other csp configurations (e.g. whitelist only)'
 function setupCollector() {
   const mockConfig = { get: sinon.stub() };
   mockConfig.get.withArgs('csp.rules').returns(DEFAULT_CSP_RULES);
-  mockConfig.get.withArgs('csp.strict').returns(DEFAULT_CSP_STRICT);
-  mockConfig.get.withArgs('csp.warnLegacyBrowsers').returns(DEFAULT_CSP_WARN_LEGACY_BROWSERS);
+  mockConfig.get.withArgs('csp.strict').returns(true);
+  mockConfig.get.withArgs('csp.warnLegacyBrowsers').returns(true);
 
   const mockKbnServer = getMockKbnServer(getMockCallWithInternal(), getMockTaskFetch(), mockConfig);
 
