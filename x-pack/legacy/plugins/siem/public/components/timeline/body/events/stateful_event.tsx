@@ -22,6 +22,7 @@ import { EventColumnView } from './event_column_view';
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { RowRenderer } from '../renderers/row_renderer';
 import { getRowRenderer } from '../renderers/get_row_renderer';
+import { requestIdleCallbackViaScheduler } from '../../../../lib/helpers/scheduler';
 
 interface Props {
   actionsColumnWidth: number;
@@ -43,11 +44,13 @@ interface Props {
   toggleColumn: (column: ColumnHeader) => void;
   updateNote: UpdateNote;
   width: number;
+  maxDelay: number;
 }
 
 interface State {
   expanded: { [eventId: string]: boolean };
   showNotes: { [eventId: string]: boolean };
+  initialRender: boolean;
 }
 
 export const getNewNoteId = (): string => uuid.v4();
@@ -58,7 +61,19 @@ export class StatefulEvent extends React.PureComponent<Props, State> {
   public readonly state: State = {
     expanded: {},
     showNotes: {},
+    initialRender: false,
   };
+
+  public componentDidMount() {
+    requestIdleCallbackViaScheduler(
+      () => {
+        if (!this.state.initialRender) {
+          this.setState({ initialRender: true });
+        }
+      },
+      { timeout: this.props.maxDelay }
+    );
+  }
 
   public render() {
     const {
@@ -82,6 +97,10 @@ export class StatefulEvent extends React.PureComponent<Props, State> {
       updateNote,
       width,
     } = this.props;
+
+    if (!this.state.initialRender) {
+      return null;
+    }
 
     return (
       <TimelineDetailsComponentQuery
