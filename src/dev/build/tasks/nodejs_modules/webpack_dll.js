@@ -70,6 +70,7 @@ export async function cleanDllModuleFromEntryPath(logger, entryPath) {
   const modulePkgPath = await pkgUp(entryPath);
   const modulePkg = JSON.parse(await read(modulePkgPath));
   const moduleDir = dirname(modulePkgPath);
+  const normalizedModuleDir = normalizePosixPath(moduleDir);
 
   // Cancel the cleanup for this module as it
   // was already done.
@@ -94,9 +95,9 @@ export async function cleanDllModuleFromEntryPath(logger, entryPath) {
   // until the following issue gets closed
   // https://github.com/sindresorhus/globby/issues/87
   const filesToDelete = await globby([
-    `${moduleDir}/**`,
-    `!${moduleDir}/**/*.+(css)`,
-    `!${moduleDir}/**/*.+(gif|ico|jpeg|jpg|tiff|tif|svg|png|webp)`,
+    `${normalizedModuleDir}/**`,
+    `!${normalizedModuleDir}/**/*.+(css)`,
+    `!${normalizedModuleDir}/**/*.+(gif|ico|jpeg|jpg|tiff|tif|svg|png|webp)`,
   ]);
 
   await deleteAll(filesToDelete.filter(path => {
