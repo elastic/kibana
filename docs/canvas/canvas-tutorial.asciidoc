@@ -1,6 +1,6 @@
 [role="xpack"]
-[[canvas-getting-started]]
-== Getting started with Canvas
+[[canvas-tutorial]]
+== Canvas tutorial
 
 To get up and running with Canvas, use the following tutorial where you'll create a display for monitoring sales at an eCommerce store.
 
