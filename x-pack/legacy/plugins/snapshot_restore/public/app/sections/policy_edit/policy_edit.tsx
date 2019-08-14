@@ -13,7 +13,7 @@ import { SectionError, SectionLoading, PolicyForm } from '../../components';
 import { BASE_PATH } from '../../constants';
 import { useAppDependencies } from '../../index';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
-import { editPolicy, useLoadPolicy } from '../../services/http';
+import { editPolicy, useLoadPolicy, useLoadIndicies } from '../../services/http';
 
 interface MatchParams {
   name: string;
@@ -46,8 +46,18 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
     config: {},
   });
 
+  const {
+    error: errorLoadingIndices,
+    isLoading: isLoadingIndices,
+    data: { indices } = {
+      indices: [],
+    },
+  } = useLoadIndicies();
+
   // Load policy
-  const { error: policyError, isLoading: loadingPolicy, data: policyData } = useLoadPolicy(name);
+  const { error: errorLoadingPolicy, isLoading: isLoadingPolicy, data: policyData } = useLoadPolicy(
+    name
+  );
 
   // Update policy state when data is loaded
   useEffect(() => {
@@ -78,41 +88,64 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
   };
 
   const renderLoading = () => {
-    return (
+    return errorLoadingPolicy ? (
       <SectionLoading>
         <FormattedMessage
           id="xpack.snapshotRestore.editPolicy.loadingPolicyDescription"
           defaultMessage="Loading policy details…"
         />
       </SectionLoading>
+    ) : (
+      <SectionLoading>
+        <FormattedMessage
+          id="xpack.snapshotRestore.editPolicy.loadingIndicesDescription"
+          defaultMessage="Loading available indices…"
+        />
+      </SectionLoading>
     );
   };
 
   const renderError = () => {
-    const notFound = policyError.status === 404;
-    const errorObject = notFound
-      ? {
-          data: {
-            error: i18n.translate('xpack.snapshotRestore.editPolicy.policyNotFoundErrorMessage', {
-              defaultMessage: `The policy '{name}' does not exist.`,
-              values: {
-                name,
-              },
-            }),
-          },
-        }
-      : policyError;
-    return (
-      <SectionError
-        title={
-          <FormattedMessage
-            id="xpack.snapshotRestore.editPolicy.loadingPolicyErrorTitle"
-            defaultMessage="Error loading policy details"
-          />
-        }
-        error={errorObject}
-      />
-    );
+    if (errorLoadingPolicy) {
+      const notFound = errorLoadingPolicy.status === 404;
+      const errorObject = notFound
+        ? {
+            data: {
+              error: i18n.translate('xpack.snapshotRestore.editPolicy.policyNotFoundErrorMessage', {
+                defaultMessage: `The policy '{name}' does not exist.`,
+                values: {
+                  name,
+                },
+              }),
+            },
+          }
+        : errorLoadingPolicy;
+      return (
+        <SectionError
+          title={
+            <FormattedMessage
+              id="xpack.snapshotRestore.editPolicy.loadingPolicyErrorTitle"
+              defaultMessage="Error loading policy details"
+            />
+          }
+          error={errorObject}
+        />
+      );
+    }
+
+    if (errorLoadingIndices) {
+      return (
+        <SectionError
+          title={
+            <FormattedMessage
+              id="xpack.snapshotRestore.editPolicy.LoadingIndicesErrorMessage"
+              defaultMessage="Error loading available indices"
+            />
+          }
+          error={errorLoadingIndices}
+        />
+      );
+    }
   };
 
   const renderSaveError = () => {
@@ -134,10 +167,10 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
   };
 
   const renderContent = () => {
-    if (loadingPolicy) {
+    if (isLoadingPolicy || isLoadingIndices) {
       return renderLoading();
     }
-    if (policyError) {
+    if (errorLoadingPolicy || errorLoadingIndices) {
       return renderError();
     }
 
@@ -145,6 +178,7 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
       <Fragment>
         <PolicyForm
           policy={policy}
+          indices={indices}
           currentUrl={pathname}
           isEditing={true}
           isSaving={isSaving}

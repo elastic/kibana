@@ -11,7 +11,7 @@ import { SlmPolicyPayload } from '../../../../common/types';
 
 import { PolicyForm, SectionError, SectionLoading } from '../../components';
 import { useAppDependencies } from '../../index';
-import { BASE_PATH } from '../../constants';
+import { BASE_PATH, DEFAULT_POLICY_SCHEDULE } from '../../constants';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { addPolicy, useLoadIndicies } from '../../services/http';
 
@@ -61,7 +61,7 @@ export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
   const emptyPolicy: SlmPolicyPayload = {
     name: '',
     snapshotName: '',
-    schedule: '',
+    schedule: DEFAULT_POLICY_SCHEDULE,
     repository: '',
     config: {},
   };

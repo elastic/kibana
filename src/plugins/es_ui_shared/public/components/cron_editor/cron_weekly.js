@@ -47,7 +47,7 @@ export const CronWeekly = ({
         />
       )}
       fullWidth
-      data-test-subj="rollupCronFrequencyConfiguration"
+      data-test-subj="cronFrequencyConfiguration"
     >
       <EuiSelect
         options={dayOptions}
@@ -64,7 +64,7 @@ export const CronWeekly = ({
             </strong>
           </EuiText>
         )}
-        data-test-subj="rollupJobCreateFrequencyWeeklyDaySelect"
+        data-test-subj="cronFrequencyWeeklyDaySelect"
       />
     </EuiFormRow>
 
@@ -76,7 +76,7 @@ export const CronWeekly = ({
         />
       )}
       fullWidth
-      data-test-subj="rollupCronFrequencyConfiguration"
+      data-test-subj="cronFrequencyConfiguration"
     >
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow={false}>
@@ -95,7 +95,7 @@ export const CronWeekly = ({
                 </strong>
               </EuiText>
             )}
-            data-test-subj="rollupJobCreateFrequencyWeeklyHourSelect"
+            data-test-subj="cronFrequencyWeeklyHourSelect"
           />
         </EuiFlexItem>
 
@@ -112,7 +112,7 @@ export const CronWeekly = ({
                 </strong>
               </EuiText>
             )}
-            data-test-subj="rollupJobCreateFrequencyWeeklyMinuteSelect"
+            data-test-subj="cronFrequencyWeeklyMinuteSelect"
           />
         </EuiFlexItem>
       </EuiFlexGroup>

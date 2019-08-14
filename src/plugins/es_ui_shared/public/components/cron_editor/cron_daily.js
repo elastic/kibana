@@ -45,7 +45,7 @@ export const CronDaily = ({
         />
       )}
       fullWidth
-      data-test-subj="rollupCronFrequencyConfiguration"
+      data-test-subj="cronFrequencyConfiguration"
     >
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow={false}>
@@ -64,7 +64,7 @@ export const CronDaily = ({
                 </strong>
               </EuiText>
             )}
-            data-test-subj="rollupJobCreateFrequencyDailyHourSelect"
+            data-test-subj="cronFrequencyDailyHourSelect"
           />
         </EuiFlexItem>
 
@@ -81,7 +81,7 @@ export const CronDaily = ({
                 </strong>
               </EuiText>
             )}
-            data-test-subj="rollupJobCreateFrequencyDailyMinuteSelect"
+            data-test-subj="cronFrequencyDailyMinuteSelect"
           />
         </EuiFlexItem>
       </EuiFlexGroup>

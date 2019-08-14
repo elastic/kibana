@@ -47,7 +47,7 @@ export const CronMonthly = ({
         />
       )}
       fullWidth
-      data-test-subj="rollupCronFrequencyConfiguration"
+      data-test-subj="cronFrequencyConfiguration"
     >
       <EuiSelect
         options={dateOptions}
@@ -64,7 +64,7 @@ export const CronMonthly = ({
             </strong>
           </EuiText>
         )}
-        data-test-subj="rollupJobCreateFrequencyMonthlyDateSelect"
+        data-test-subj="cronFrequencyMonthlyDateSelect"
       />
     </EuiFormRow>
 
@@ -76,7 +76,7 @@ export const CronMonthly = ({
         />
       )}
       fullWidth
-      data-test-subj="rollupCronFrequencyConfiguration"
+      data-test-subj="cronFrequencyConfiguration"
     >
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow={false}>
@@ -95,7 +95,7 @@ export const CronMonthly = ({
                 </strong>
               </EuiText>
             )}
-            data-test-subj="rollupJobCreateFrequencyMonthlyHourSelect"
+            data-test-subj="cronFrequencyMonthlyHourSelect"
           />
         </EuiFlexItem>
 
@@ -112,7 +112,7 @@ export const CronMonthly = ({
                 </strong>
               </EuiText>
             )}
-            data-test-subj="rollupJobCreateFrequencyMonthlyMinuteSelect"
+            data-test-subj="cronFrequencyMonthlyMinuteSelect"
           />
         </EuiFlexItem>
       </EuiFlexGroup>

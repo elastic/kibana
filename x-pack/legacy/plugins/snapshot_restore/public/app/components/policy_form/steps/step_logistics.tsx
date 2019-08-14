@@ -17,8 +17,12 @@ import {
   EuiButtonEmpty,
   EuiLink,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
+
 import { Repository } from '../../../../../common/types';
+import { CronEditor } from '../../../../shared_imports';
+import { DEFAULT_POLICY_SCHEDULE, DEFAULT_POLICY_FREQUENCY } from '../../../constants';
 import { useLoadRepositories } from '../../../services/http';
 import { linkToAddRepository } from '../../../services/navigation';
 import { documentationLinksService } from '../../../services/documentation';
@@ -55,6 +59,19 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
     repository: false,
     schedule: false,
   });
+
+  // State for cron editor
+  const [simpleCron, setSimpleCron] = useState<{
+    expression: string;
+    frequency: string;
+  }>({
+    expression: DEFAULT_POLICY_SCHEDULE,
+    frequency: DEFAULT_POLICY_FREQUENCY,
+  });
+  const [isAdvancedCronVisible, setIsAdvancedCronVisible] = useState<boolean>(
+    Boolean(policy.schedule && policy.schedule !== DEFAULT_POLICY_SCHEDULE)
+  );
+  const [fieldToPreferredValueMap, setFieldToPreferredValueMap] = useState<any>({});
 
   const renderNameField = () => (
     <EuiDescribedFormGroup
@@ -345,47 +362,108 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
       idAria="policyScheduleDescription"
       fullWidth
     >
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.snapshotRestore.policyForm.stepLogistics.policyScheduleLabel"
-            defaultMessage="Schedule"
-          />
-        }
-        describedByIds={['policyScheduleDescription']}
-        isInvalid={touched.schedule && Boolean(errors.schedule)}
-        error={errors.schedule}
-        helpText={
-          <FormattedMessage
-            id="xpack.snapshotRestore.policyForm.stepLogistics.policyScheduleHelpText"
-            defaultMessage="Use cron expression. {docLink}"
-            values={{
-              docLink: (
-                <EuiLink href={documentationLinksService.getCronUrl()} target="_blank">
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.policyForm.stepLogistics.policyScheduleHelpTextDocLink"
-                    defaultMessage="Learn more"
-                  />
-                </EuiLink>
-              ),
+      {isAdvancedCronVisible ? (
+        <Fragment>
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyForm.stepLogistics.policyScheduleLabel"
+                defaultMessage="Schedule"
+              />
+            }
+            describedByIds={['policyScheduleDescription']}
+            isInvalid={touched.schedule && Boolean(errors.schedule)}
+            error={errors.schedule}
+            helpText={
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyForm.stepLogistics.policyScheduleHelpText"
+                defaultMessage="Use cron expression. {docLink}"
+                values={{
+                  docLink: (
+                    <EuiLink href={documentationLinksService.getCronUrl()} target="_blank">
+                      <FormattedMessage
+                        id="xpack.snapshotRestore.policyForm.stepLogistics.policyScheduleHelpTextDocLink"
+                        defaultMessage="Learn more"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            }
+            fullWidth
+          >
+            <EuiFieldText
+              defaultValue={policy.schedule}
+              fullWidth
+              onChange={e => {
+                updatePolicy({
+                  schedule: e.target.value,
+                });
+              }}
+              onBlur={() => setTouched({ ...touched, schedule: true })}
+              placeholder={DEFAULT_POLICY_SCHEDULE}
+              data-test-subj="snapshotNameInput"
+            />
+          </EuiFormRow>
+
+          <EuiText size="s">
+            <EuiLink
+              onClick={() => {
+                setIsAdvancedCronVisible(false);
+                updatePolicy({
+                  schedule: simpleCron.expression,
+                });
+              }}
+              data-test-subj="showBasicCronLink"
+            >
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyForm.stepLogistics.policyScheduleButtonBasicLabel"
+                defaultMessage="Create basic interval"
+              />
+            </EuiLink>
+          </EuiText>
+        </Fragment>
+      ) : (
+        <Fragment>
+          <CronEditor
+            fieldToPreferredValueMap={fieldToPreferredValueMap}
+            cronExpression={simpleCron.expression}
+            frequency={simpleCron.frequency}
+            onChange={({
+              cronExpression: expression,
+              frequency,
+              fieldToPreferredValueMap: newFieldToPreferredValueMap,
+            }: {
+              cronExpression: string;
+              frequency: string;
+              fieldToPreferredValueMap: any;
+            }) => {
+              setSimpleCron({
+                expression,
+                frequency,
+              });
+              setFieldToPreferredValueMap(newFieldToPreferredValueMap);
+              updatePolicy({
+                schedule: expression,
+              });
             }}
           />
-        }
-        fullWidth
-      >
-        <EuiFieldText
-          defaultValue={policy.schedule}
-          fullWidth
-          onChange={e => {
-            updatePolicy({
-              schedule: e.target.value,
-            });
-          }}
-          onBlur={() => setTouched({ ...touched, schedule: true })}
-          placeholder="0 30 1 * * ?"
-          data-test-subj="snapshotNameInput"
-        />
-      </EuiFormRow>
+
+          <EuiText size="s">
+            <EuiLink
+              onClick={() => {
+                setIsAdvancedCronVisible(true);
+              }}
+              data-test-subj="showAdvancedCronLink"
+            >
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyForm.stepLogistics.policyScheduleButtonAdvancedLabel"
+                defaultMessage="Create cron expression"
+              />
+            </EuiLink>
+          </EuiText>
+        </Fragment>
+      )}
     </EuiDescribedFormGroup>
   );
 

@@ -17,5 +17,6 @@
  * under the License.
  */
 
-export { CronEditor } from './cron_editor';
-export { DAY, WEEK } from './services';
+export declare const DAY: string;
+export declare const WEEK: string;
+export declare const CronEditor: any;

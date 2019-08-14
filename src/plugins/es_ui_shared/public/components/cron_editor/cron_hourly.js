@@ -41,7 +41,7 @@ export const CronHourly = ({
         />
       )}
       fullWidth
-      data-test-subj="rollupCronFrequencyConfiguration"
+      data-test-subj="cronFrequencyConfiguration"
     >
       <EuiSelect
         options={minuteOptions}
@@ -58,7 +58,7 @@ export const CronHourly = ({
             </strong>
           </EuiText>
         )}
-        data-test-subj="rollupJobCreateFrequencyHourlyMinuteSelect"
+        data-test-subj="cronFrequencyHourlyMinuteSelect"
       />
     </EuiFormRow>
   </Fragment>
