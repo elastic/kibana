@@ -481,6 +481,7 @@ export class MBMapContainer extends React.Component {
       <I18nProvider>
         <FeatureTooltip
           features={this.props.tooltipState.features}
+          anchorLocation={this.props.tooltipState.location}
           loadFeatureProperties={this._loadFeatureProperties}
           findLayerById={this._findLayerById}
           closeTooltip={this._onTooltipClose}

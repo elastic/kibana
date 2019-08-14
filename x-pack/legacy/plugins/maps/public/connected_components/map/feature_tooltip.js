@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import React, { Fragment } from 'react';
 import {
   EuiButtonIcon,
@@ -39,10 +40,22 @@ export class FeatureTooltip extends React.Component {
     view: VIEWS.PROPERTIES_VIEW,
   };
 
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (!_.isEqual(nextProps.anchorLocation, prevState.prevAnchorLocation)) {
+      return {
+        view: VIEWS.PROPERTIES_VIEW, // reset to properties view when tooltip changes location
+        prevAnchorLocation: nextProps.anchorLocation
+      };
+    }
+
+    return null;
+  }
+
   constructor() {
     super();
     this._prevFeatures = null;
   }
+
 
   componentDidMount() {
     this._isMounted = true;
