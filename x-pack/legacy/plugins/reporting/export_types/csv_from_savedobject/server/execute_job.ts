@@ -46,10 +46,10 @@ function executeJobFactoryFn(server: KbnServer): ExecuteJobFn {
 
     let requestObject: Request | FakeRequest;
     if (isImmediate && realRequest) {
-      logger.debug(`executing job from immediate API`);
+      logger.info(`Executing job from immediate API`);
       requestObject = realRequest;
     } else {
-      logger.debug(`executing job async using encrypted headers`);
+      logger.info(`Executing job async using encrypted headers`);
       let decryptedHeaders;
       const serializedEncryptedHeaders = job.headers;
       try {

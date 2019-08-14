@@ -54,7 +54,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
         size: jobOutputSize,
       }: JobDocOutputExecuted = await executeJobFn(jobDocPayload, request);
 
-      logger.info(`job output size: ${jobOutputSize} bytes`);
+      logger.info(`Job output size: ${jobOutputSize} bytes`);
 
       /*
        * ESQueue worker function defaults `content` to null, even if the
