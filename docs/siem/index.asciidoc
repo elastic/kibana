@@ -4,7 +4,6 @@
 
 [partintro]
 --
-coming[7.2]
 
 beta[]
 
@@ -26,7 +25,7 @@ Kibana provides step-by-step instructions to help you add data. The
 detailed information and instructions.
 
 [float]
-=== {Beats} 
+=== {Beats}
 
 https://www.elastic.co/products/beats/auditbeat[{auditbeat}],
 https://www.elastic.co/products/beats/filebeat[{filebeat}],
