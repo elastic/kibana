@@ -17,7 +17,6 @@ jest.mock('../../../../../../../src/legacy/ui/public/inspector', () => ({
 }));
 
 const savedVis: Document = {
-  activeDatasourceId: '',
   expression: 'my | expression',
   state: {
     visualization: {},

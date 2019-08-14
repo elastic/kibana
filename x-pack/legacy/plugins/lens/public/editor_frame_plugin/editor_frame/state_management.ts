@@ -64,7 +64,7 @@ export type Action =
       newDatasourceId: string;
     };
 
-function getActiveDatasourceIdFromDoc(doc?: Document) {
+export function getActiveDatasourceIdFromDoc(doc?: Document) {
   if (!doc) {
     return null;
   }

@@ -27,7 +27,6 @@ describe('LensStore', () => {
         title: 'Hello',
         visualizationType: 'bar',
         expression: '',
-        activeDatasourceId: 'indexpattern',
         state: {
           datasourceMetaData: {
             filterableIndexPatterns: [],
@@ -46,7 +45,6 @@ describe('LensStore', () => {
         title: 'Hello',
         visualizationType: 'bar',
         expression: '',
-        activeDatasourceId: 'indexpattern',
         state: {
           datasourceMetaData: {
             filterableIndexPatterns: [],
@@ -64,9 +62,7 @@ describe('LensStore', () => {
       expect(client.create).toHaveBeenCalledWith('lens', {
         title: 'Hello',
         visualizationType: 'bar',
-
         expression: '',
-        activeDatasourceId: 'indexpattern',
         state: {
           datasourceMetaData: { filterableIndexPatterns: [] },
           datasourceStates: {
@@ -86,7 +82,6 @@ describe('LensStore', () => {
         title: 'Even the very wise cannot see all ends.',
         visualizationType: 'line',
         expression: '',
-        activeDatasourceId: 'indexpattern',
         state: {
           datasourceMetaData: { filterableIndexPatterns: [] },
           datasourceStates: { indexpattern: { type: 'index_pattern', indexPattern: 'lotr' } },
@@ -101,7 +96,6 @@ describe('LensStore', () => {
         title: 'Even the very wise cannot see all ends.',
         visualizationType: 'line',
         expression: '',
-        activeDatasourceId: 'indexpattern',
         state: {
           datasourceMetaData: { filterableIndexPatterns: [] },
           datasourceStates: { indexpattern: { type: 'index_pattern', indexPattern: 'lotr' } },
@@ -116,7 +110,6 @@ describe('LensStore', () => {
         title: 'Even the very wise cannot see all ends.',
         visualizationType: 'line',
         expression: '',
-        activeDatasourceId: 'indexpattern',
         state: {
           datasourceMetaData: { filterableIndexPatterns: [] },
           datasourceStates: { indexpattern: { type: 'index_pattern', indexPattern: 'lotr' } },
