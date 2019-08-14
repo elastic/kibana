@@ -15,6 +15,7 @@ import {
   AreaSeries,
   LineSeries,
   niceTimeFormatter,
+  Settings,
 } from '@elastic/charts';
 import {
   EuiTitle,
@@ -26,6 +27,12 @@ import {
 } from '@elastic/eui';
 import { GetLogEntryRateSuccessResponsePayload } from '../../../../../common/http_api/log_analysis/results/log_entry_rate';
 import { useLogEntryRateGraphData } from '../../../../containers/logs/log_analysis/log_analysis_graph_data/log_entry_rate';
+
+const getColorsMap = (color, specId) => {
+  const map = new Map();
+  map.set({ colorValues: [], specId }, color);
+  return map;
+};
 
 export const LogRateResults = ({
   isLoading,
@@ -54,6 +61,9 @@ export const LogRateResults = ({
         : (value: number) => `${value}`,
     [lineSeries]
   );
+
+  const areaSpecId = getSpecId('modelBounds');
+  const lineSpecId = getSpecId('averageValues');
 
   return (
     <>
@@ -99,10 +109,11 @@ export const LogRateResults = ({
               id={getAxisId('values')}
               title="Log entries"
               position="left"
-              tickFormat={value => value}
+              tickFormat={value => Number(value).toFixed(0)}
             />
             <AreaSeries
-              id={getSpecId('modelBounds')}
+              id={areaSpecId}
+              name="Expected"
               xScaleType="time"
               yScaleType="linear"
               xAccessor="x"
@@ -111,9 +122,15 @@ export const LogRateResults = ({
               data={areaSeries}
               yScaleToDataExtent
               curve={2}
+              areaSeriesStyle={{
+                line: { stroke: 'rgb(224, 237, 255)' },
+                area: { fill: 'rgb(224, 237, 255)', visible: true, opacity: 0.8 },
+              }}
+              customSeriesColors={getColorsMap('rgb(224, 237, 255)', areaSpecId)}
             />
             <LineSeries
-              id={getSpecId('averageValues')}
+              id={lineSpecId}
+              name="Log entries (avg)"
               xScaleType="time"
               yScaleType="linear"
               xAccessor={0}
@@ -121,7 +138,17 @@ export const LogRateResults = ({
               data={lineSeries}
               yScaleToDataExtent
               curve={2}
+              lineSeriesStyle={{
+                line: { stroke: 'rgb(49, 133, 252)' },
+                point: { radius: 2, fill: 'rgb(49, 133, 252)' },
+              }}
+              customSeriesColors={getColorsMap('rgb(49, 133, 252)', lineSpecId)}
             />
+            {/* <Settings
+              tooltip={tooltipProps}
+              onBrushEnd={handleTimeChange}
+              theme={getChartTheme()}
+            /> */}
           </Chart>
         </div>
       )}
