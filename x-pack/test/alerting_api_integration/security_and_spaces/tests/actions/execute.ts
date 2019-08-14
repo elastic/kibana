@@ -296,7 +296,7 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         it('should return 400 when payload is empty and invalid', async () => {
-          const { body: error } = await supertestWithoutAuth
+          await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/action/1/_execute`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
