@@ -1,44 +1,34 @@
 JOB:
-  - x-pack-firefoxSmoke-0
-  - x-pack-firefoxSmoke-1
-  - x-pack-firefoxSmoke-2
-  - x-pack-firefoxSmoke-3
-  - x-pack-firefoxSmoke-4
-  - x-pack-firefoxSmoke-5
-  - x-pack-firefoxSmoke-6
-  - x-pack-firefoxSmoke-7
-  - x-pack-firefoxSmoke-8
-  - x-pack-firefoxSmoke-9
-  - x-pack-firefoxSmoke-10
-  - x-pack-firefoxSmoke-11
-  - x-pack-firefoxSmoke-12
-  - x-pack-firefoxSmoke-13
-  - x-pack-firefoxSmoke-14
-  - x-pack-firefoxSmoke-15
-  - x-pack-firefoxSmoke-16
-  - x-pack-firefoxSmoke-17
-  - x-pack-firefoxSmoke-18
-  - x-pack-firefoxSmoke-19
-  - x-pack-firefoxSmoke-20
-  - x-pack-firefoxSmoke-21
-  - x-pack-firefoxSmoke-22
-  - x-pack-firefoxSmoke-23
-  - x-pack-firefoxSmoke-24
-  - x-pack-firefoxSmoke-25
-  - x-pack-firefoxSmoke-26
-  - x-pack-firefoxSmoke-27
-  - x-pack-firefoxSmoke-28
-  - x-pack-firefoxSmoke-29
-  - x-pack-firefoxSmoke-30
-  - x-pack-firefoxSmoke-31
-  - x-pack-firefoxSmoke-32
-  - x-pack-firefoxSmoke-33
-  - x-pack-firefoxSmoke-34
-  - x-pack-firefoxSmoke-35
-  - x-pack-firefoxSmoke-36
-  - x-pack-firefoxSmoke-37
-  - x-pack-firefoxSmoke-38
-  - x-pack-firefoxSmoke-39
+  - kibana-intake
+  - x-pack-intake
+  - kibana-firefoxSmoke
+  - kibana-ciGroup1
+  - kibana-ciGroup2
+  - kibana-ciGroup3
+  - kibana-ciGroup4
+  - kibana-ciGroup5
+  - kibana-ciGroup6
+  - kibana-ciGroup7
+  - kibana-ciGroup8
+  - kibana-ciGroup9
+  - kibana-ciGroup10
+  - kibana-ciGroup11
+  - kibana-ciGroup12
+  # - kibana-visualRegression
+
+  # make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
+  - x-pack-firefoxSmoke
+  - x-pack-ciGroup1
+  - x-pack-ciGroup2
+  - x-pack-ciGroup3
+  - x-pack-ciGroup4
+  - x-pack-ciGroup5
+  - x-pack-ciGroup6
+  - x-pack-ciGroup7
+  - x-pack-ciGroup8
+  - x-pack-ciGroup9
+  - x-pack-ciGroup10
+  # - x-pack-visualRegression
 
 # `~` is yaml for `null`
 exclude: ~
