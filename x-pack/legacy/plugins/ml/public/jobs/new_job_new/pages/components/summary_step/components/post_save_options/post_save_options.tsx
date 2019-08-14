@@ -45,7 +45,7 @@ export const PostSaveOptions: FC<Props> = ({ jobRunner }) => {
     setDatafeedState(DATAFEED_STATE.STARTING);
     if (jobRunner !== null) {
       try {
-        const started = await jobRunner.startDatafeedInRealTime();
+        const started = await jobRunner.startDatafeedInRealTime(true);
         setDatafeedState(started === true ? DATAFEED_STATE.STARTED : DATAFEED_STATE.STOPPED);
         toastNotifications.addSuccess({
           title: i18n.translate('xpack.ml.newJob.wizard.createJobError1', {

@@ -80,10 +80,10 @@ class CreateWatchFlyoutUI extends Component {
     }
   }
 
-  closeFlyout = (jobCreated = false) => {
+  closeFlyout = (watchCreated = false) => {
     this.setState({ isFlyoutVisible: false }, ()=>{
       if (typeof this.props.flyoutHidden === 'function') {
-        this.props.flyoutHidden(jobCreated);
+        this.props.flyoutHidden(watchCreated);
       }
     });
   }

@@ -110,9 +110,10 @@ export class JobRunner {
     return await this._startDatafeed(this._start, this._end, true);
   }
 
-  public async startDatafeedInRealTime() {
-    // set end as the start, to start off from where job last ran to
-    return await this._startDatafeed(this._end, undefined, false);
+  public async startDatafeedInRealTime(continueJob: boolean) {
+    // if continuing a job, set the start to be the end date
+    const start = continueJob ? this._end : this._start;
+    return await this._startDatafeed(start, undefined, false);
   }
 
   public async getProgress(): Promise<{ progress: Progress; isRunning: boolean }> {
