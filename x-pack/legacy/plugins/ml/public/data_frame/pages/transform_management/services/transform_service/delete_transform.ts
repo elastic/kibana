@@ -38,3 +38,41 @@ export const deleteTransform = async (d: DataFrameTransformListRow) => {
   }
   refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.REFRESH);
 };
+
+export const bulkDeleteTransforms = async (dataFrames: DataFrameTransformListRow[]) => {
+  const results = await Promise.all(
+    dataFrames.map(async df => {
+      const dfId = df.id;
+      try {
+        df.id = dfId;
+        if (df.stats.state === DATA_FRAME_TRANSFORM_STATE.FAILED) {
+          await ml.dataFrame.stopDataFrameTransform(df.config.id, true, true);
+        }
+        await ml.dataFrame.deleteDataFrameTransform(df.config.id);
+        return { id: dfId, success: true };
+      } catch (e) {
+        return { id: dfId, success: false, error: JSON.stringify(e) };
+      }
+    })
+  );
+
+  results.forEach(result => {
+    if (result.success === true) {
+      toastNotifications.addSuccess(
+        i18n.translate('xpack.ml.dataframe.transformList.deleteTransformSuccessMessage', {
+          defaultMessage: 'Data frame transform {transformId} deleted successfully.',
+          values: { transformId: result.id },
+        })
+      );
+    } else {
+      toastNotifications.addDanger(
+        i18n.translate('xpack.ml.dataframe.transformList.deleteTransformErrorMessage', {
+          defaultMessage:
+            'An error occurred deleting the data frame transform {transformId}: {error}',
+          values: { transformId: result.id, error: result.error },
+        })
+      );
+    }
+  });
+  refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.REFRESH);
+};

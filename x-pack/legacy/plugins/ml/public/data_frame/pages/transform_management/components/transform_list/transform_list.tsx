@@ -13,6 +13,8 @@ import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiCallOut,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
   EuiEmptyPrompt,
   EuiPopover,
   SortDirection,
@@ -25,6 +27,7 @@ import {
 } from '../../../../common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
 import { getTaskStateBadge } from './columns';
+import { DeleteAction } from './action_delete';
 
 import {
   DataFrameTransformListColumn,
@@ -76,6 +79,7 @@ export const DataFrameTransformList: SFC = () => {
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<DataFrameTransformId[]>([]);
 
   const [transformSelection, setTransformSelection] = useState<DataFrameTransformListRow[]>([]);
+  const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
 
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
   const [searchError, setSearchError] = useState<any>(undefined);
@@ -247,21 +251,37 @@ export const DataFrameTransformList: SFC = () => {
     hidePerPageOptions: false,
   };
 
+  const bulkActionMenuItems = [
+    <EuiContextMenuItem
+      key="startAction"
+      icon="play"
+      onClick={() => {
+        // TODO
+      }}
+    >
+      Start
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="stopAction"
+      icon="stop"
+      onClick={() => {
+        // TODO
+      }}
+    >
+      Start
+    </EuiContextMenuItem>,
+    <DeleteAction key="deleteAction" items={transformSelection} />,
+  ];
+
   const renderToolsLeft = () => {
-    // const selection = this.state.selection;
-    // if (selection.length === 0) {
-    //   return;
-    // }
-    // const onClick = () => {
-    //   store.deleteUsers(...selection.map(user => user.id));
-    //   this.setState({ selection: [] });
-    // };
-    return (
+    const buttonIcon = (
       <EuiButtonIcon
         size="s"
         iconType="gear"
         color="text"
-        onClick={() => {}}
+        onClick={() => {
+          setIsActionsMenuOpen(true);
+        }}
         aria-label={i18n.translate(
           'xpack.ml.dataframe.multiTransformActionsMenu.managementActionsAriaLabel',
           {
@@ -270,10 +290,23 @@ export const DataFrameTransformList: SFC = () => {
         )}
       />
     );
+
+    return (
+      <EuiPopover
+        id="transformBulkActionsMenu"
+        button={buttonIcon}
+        isOpen={isActionsMenuOpen}
+        closePopover={() => setIsActionsMenuOpen(false)}
+        panelPaddingSize="none"
+        anchorPosition="rightDown"
+      >
+        <EuiContextMenuPanel items={bulkActionMenuItems} />
+      </EuiPopover>
+    );
   };
 
   const search = {
-    toolsLeft: renderToolsLeft(),
+    toolsLeft: transformSelection.length > 0 ? renderToolsLeft() : undefined,
     onChange: onQueryChange,
     box: {
       incremental: true,

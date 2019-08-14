@@ -14,7 +14,7 @@ import {
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
-import { deleteTransform } from '../../services/transform_service';
+import { deleteTransform, bulkDeleteTransforms } from '../../services/transform_service';
 
 import {
   checkPermission,
@@ -24,11 +24,21 @@ import {
 import { DataFrameTransformListRow, DATA_FRAME_TRANSFORM_STATE } from './common';
 
 interface DeleteActionProps {
-  item: DataFrameTransformListRow;
+  item?: DataFrameTransformListRow;
+  items?: DataFrameTransformListRow[];
 }
 
-export const DeleteAction: SFC<DeleteActionProps> = ({ item }) => {
-  const disabled = item.stats.state !== DATA_FRAME_TRANSFORM_STATE.STOPPED;
+export const DeleteAction: SFC<DeleteActionProps> = ({ item, items = [] }) => {
+  const isBulkAction = item === undefined && items !== undefined;
+  let disabled;
+
+  if (isBulkAction === true) {
+    disabled = items.some(
+      (i: DataFrameTransformListRow) => i.stats.state !== DATA_FRAME_TRANSFORM_STATE.STOPPED
+    );
+  } else {
+    disabled = item && item.stats.state !== DATA_FRAME_TRANSFORM_STATE.STOPPED;
+  }
 
   const canDeleteDataFrame: boolean = checkPermission('canDeleteDataFrame');
 
@@ -37,12 +47,40 @@ export const DeleteAction: SFC<DeleteActionProps> = ({ item }) => {
   const closeModal = () => setModalVisible(false);
   const deleteAndCloseModal = () => {
     setModalVisible(false);
-    deleteTransform(item);
+    if (isBulkAction === false && item) {
+      deleteTransform(item);
+    } else if (isBulkAction === true && items) {
+      bulkDeleteTransforms(items);
+    }
   };
   const openModal = () => setModalVisible(true);
 
   const buttonDeleteText = i18n.translate('xpack.ml.dataframe.transformList.deleteActionName', {
     defaultMessage: 'Delete',
+  });
+  const bulkDeleteButtonDisabledText = i18n.translate(
+    'xpack.ml.dataframe.transformList.deleteBulkActionDisabledToolTipContent',
+    {
+      defaultMessage:
+        'One or more selected data frame transforms must be stopped in order to be deleted.',
+    }
+  );
+  const deleteButtonDisabledText = i18n.translate(
+    'xpack.ml.dataframe.transformList.deleteActionDisabledToolTipContent',
+    {
+      defaultMessage: 'Stop the data frame transform in order to delete it.',
+    }
+  );
+  const bulkDeleteModalTitle = i18n.translate(
+    'xpack.ml.dataframe.transformList.bulkDeleteModalTitle',
+    {
+      defaultMessage: 'Delete {count} {count, plural, one {transform} other {transforms}}?',
+      values: { count: items.length },
+    }
+  );
+  const deleteModalTitle = i18n.translate('xpack.ml.dataframe.transformList.deleteModalTitle', {
+    defaultMessage: 'Delete {transformId}',
+    values: { transformId: item && item.config.id },
   });
 
   let deleteButton = (
@@ -59,20 +97,15 @@ export const DeleteAction: SFC<DeleteActionProps> = ({ item }) => {
   );
 
   if (disabled || !canDeleteDataFrame) {
+    let content;
+    if (disabled) {
+      content = isBulkAction === true ? bulkDeleteButtonDisabledText : deleteButtonDisabledText;
+    } else {
+      content = createPermissionFailureMessage('canStartStopDataFrame');
+    }
+
     deleteButton = (
-      <EuiToolTip
-        position="top"
-        content={
-          disabled
-            ? i18n.translate(
-                'xpack.ml.dataframe.transformList.deleteActionDisabledToolTipContent',
-                {
-                  defaultMessage: 'Stop the data frame transform in order to delete it.',
-                }
-              )
-            : createPermissionFailureMessage('canStartStopDataFrame')
-        }
-      >
+      <EuiToolTip position="top" content={content}>
         {deleteButton}
       </EuiToolTip>
     );
@@ -84,10 +117,7 @@ export const DeleteAction: SFC<DeleteActionProps> = ({ item }) => {
       {isModalVisible && (
         <EuiOverlayMask>
           <EuiConfirmModal
-            title={i18n.translate('xpack.ml.dataframe.transformList.deleteModalTitle', {
-              defaultMessage: 'Delete {transformId}',
-              values: { transformId: item.config.id },
-            })}
+            title={isBulkAction === true ? bulkDeleteModalTitle : deleteModalTitle}
             onCancel={closeModal}
             onConfirm={deleteAndCloseModal}
             cancelButtonText={i18n.translate(
