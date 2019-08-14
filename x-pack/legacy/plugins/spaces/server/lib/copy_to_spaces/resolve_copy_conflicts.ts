@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract, SavedObjectsService } from 'src/core/server';
+import { SavedObjectsClientContract, SavedObjectsService, SavedObject } from 'src/core/server';
 import { Readable } from 'stream';
 import { SpacesClient } from '../spaces_client';
-import { Rereadable } from './lib/rereadable_stream';
 import { spaceIdToNamespace } from '../utils/namespace';
 import { CopyOptions, ResolveConflictsOptions, CopyResponse } from './types';
 import { canImportIntoSpace } from './lib/can_import_into_space';
 import { getEligibleTypes } from './lib/get_eligible_types';
 import { createEmptyFailureResponse } from './lib/create_empty_failure_response';
+import { readStreamToCompletion } from './lib/read_stream_to_completion';
 
 export function resolveCopySavedObjectsToSpacesConflictsFactory(
   spacesClient: SpacesClient,
@@ -34,7 +34,7 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
       types: eligibleTypes,
       exportSizeLimit: importExport.objectLimit,
     });
-    return objectStream;
+    return readStreamToCompletion<SavedObject>(objectStream);
   };
 
   const resolveConflictsForSpace = async (
@@ -83,22 +83,27 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
   ): Promise<CopyResponse> => {
     const response: CopyResponse = {};
 
-    const objectsStream = await exportRequestedObjects(sourceSpaceId, {
+    const exportedSavedObjects = await exportRequestedObjects(sourceSpaceId, {
       includeReferences: options.includeReferences,
       objects: options.objects,
     });
 
-    const rereadableStream = objectsStream.pipe(new Rereadable());
-
-    let readStream: Readable | null = null;
-
     for (const entry of Object.entries(options.retries)) {
-      readStream = readStream ? rereadableStream.reread() : rereadableStream;
       const [spaceId, entryRetries] = entry;
 
       const retries = entryRetries.map(retry => ({ ...retry, replaceReferences: [] }));
 
-      response[spaceId] = await resolveConflictsForSpace(spaceId, readStream!, retries);
+      response[spaceId] = await resolveConflictsForSpace(
+        spaceId,
+        new Readable({
+          objectMode: true,
+          read() {
+            exportedSavedObjects.forEach(object => this.push(object));
+            this.push(null);
+          },
+        }),
+        retries
+      );
     }
 
     return response;

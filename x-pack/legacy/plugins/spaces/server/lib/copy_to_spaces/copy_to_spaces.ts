@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract, SavedObjectsService } from 'src/core/server';
+import { SavedObjectsClientContract, SavedObjectsService, SavedObject } from 'src/core/server';
 import { Readable } from 'stream';
 import { SavedObjectsClientProviderOptions } from 'src/core/server';
 import { SpacesClient } from '../spaces_client';
-import { Rereadable } from './lib/rereadable_stream';
 import { spaceIdToNamespace } from '../utils/namespace';
 import { CopyOptions } from './types';
 import { canImportIntoSpace } from './lib/can_import_into_space';
 import { CopyResponse } from './types';
 import { getEligibleTypes } from './lib/get_eligible_types';
 import { createEmptyFailureResponse } from './lib/create_empty_failure_response';
+import { readStreamToCompletion } from './lib/read_stream_to_completion';
 
 export const COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS: SavedObjectsClientProviderOptions = {
   excludedWrappers: ['spaces'],
@@ -40,7 +40,8 @@ export function copySavedObjectsToSpacesFactory(
       types: eligibleTypes,
       exportSizeLimit: importExport.objectLimit,
     });
-    return objectStream;
+
+    return readStreamToCompletion<SavedObject>(objectStream);
   };
 
   const importObjectsToSpace = async (
@@ -85,13 +86,20 @@ export function copySavedObjectsToSpacesFactory(
   ): Promise<CopyResponse> => {
     const response: CopyResponse = {};
 
-    const objectsStream = await exportRequestedObjects(sourceSpaceId, options);
-    const rereadableStream = objectsStream.pipe(new Rereadable());
+    const exportedSavedObjects = await exportRequestedObjects(sourceSpaceId, options);
 
-    let readStream: Readable | null = null;
     for (const spaceId of destinationSpaceIds) {
-      readStream = readStream ? rereadableStream.reread() : rereadableStream;
-      response[spaceId] = await importObjectsToSpace(spaceId, readStream!, options);
+      response[spaceId] = await importObjectsToSpace(
+        spaceId,
+        new Readable({
+          objectMode: true,
+          read() {
+            exportedSavedObjects.forEach(object => this.push(object));
+            this.push(null);
+          },
+        }),
+        options
+      );
     }
 
     return response;
