@@ -21,7 +21,7 @@ import { mockHttpServer } from './http_service.test.mocks';
 
 import { noop } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
-import { HttpService, Router } from '.';
+import { HttpService } from '.';
 import { HttpConfigType, config } from './http_config';
 import { httpServerMock } from './http_server.mocks';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
@@ -30,6 +30,7 @@ import { getEnvOptions } from '../config/__mocks__/env';
 
 const logger = loggingServiceMock.create();
 const env = Env.createDefault(getEnvOptions());
+const coreId = Symbol();
 
 const createConfigService = (value: Partial<HttpConfigType> = {}) => {
   const configService = new ConfigService(
@@ -68,7 +69,7 @@ test('creates and sets up http server', async () => {
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
-  const service = new HttpService({ configService, env, logger });
+  const service = new HttpService({ coreId, configService, env, logger });
 
   expect(mockHttpServer.mock.instances.length).toBe(1);
 
@@ -86,7 +87,7 @@ test('spins up notReady server until started if configured with `autoListen:true
   const configService = createConfigService();
   const httpServer = {
     isListening: () => false,
-    setup: jest.fn(),
+    setup: jest.fn().mockReturnValue({}),
     start: jest.fn(),
     stop: jest.fn(),
   };
@@ -103,6 +104,7 @@ test('spins up notReady server until started if configured with `autoListen:true
     }));
 
   const service = new HttpService({
+    coreId,
     configService,
     env: new Env('.', getEnvOptions()),
     logger,
@@ -133,46 +135,6 @@ test('spins up notReady server until started if configured with `autoListen:true
   expect(notReadyHapiServer.stop).toBeCalledTimes(1);
 });
 
-// this is an integration test!
-test('creates and sets up second http server', async () => {
-  const configService = createConfigService({
-    host: 'localhost',
-    port: 1234,
-  });
-  const { HttpServer } = jest.requireActual('./http_server');
-
-  mockHttpServer.mockImplementation((...args) => new HttpServer(...args));
-
-  const service = new HttpService({ configService, env, logger });
-  const serverSetup = await service.setup();
-  const cfg = { port: 2345 };
-  await serverSetup.createNewServer(cfg);
-  const server = await service.start();
-  expect(server.isListening()).toBeTruthy();
-  expect(server.isListening(cfg.port)).toBeTruthy();
-
-  try {
-    await serverSetup.createNewServer(cfg);
-  } catch (err) {
-    expect(err.message).toBe('port 2345 is already in use');
-  }
-
-  try {
-    await serverSetup.createNewServer({ port: 1234 });
-  } catch (err) {
-    expect(err.message).toBe('port 1234 is already in use');
-  }
-
-  try {
-    await serverSetup.createNewServer({ host: 'example.org' });
-  } catch (err) {
-    expect(err.message).toBe('port must be defined');
-  }
-  await service.stop();
-  expect(server.isListening()).toBeFalsy();
-  expect(server.isListening(cfg.port)).toBeFalsy();
-});
-
 test('logs error if already set up', async () => {
   const configService = createConfigService();
 
@@ -184,7 +146,7 @@ test('logs error if already set up', async () => {
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
-  const service = new HttpService({ configService, env, logger });
+  const service = new HttpService({ coreId, configService, env, logger });
 
   await service.setup();
 
@@ -202,7 +164,7 @@ test('stops http server', async () => {
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
-  const service = new HttpService({ configService, env, logger });
+  const service = new HttpService({ coreId, configService, env, logger });
 
   await service.setup();
   await service.start();
@@ -229,7 +191,7 @@ test('stops not ready server if it is running', async () => {
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
-  const service = new HttpService({ configService, env, logger });
+  const service = new HttpService({ coreId, configService, env, logger });
 
   await service.setup();
 
@@ -252,11 +214,10 @@ test('register route handler', async () => {
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
-  const service = new HttpService({ configService, env, logger });
+  const service = new HttpService({ coreId, configService, env, logger });
 
-  const router = new Router('/foo');
-  const { registerRouter } = await service.setup();
-  registerRouter(router);
+  const { createRouter } = await service.setup();
+  const router = createRouter('/foo');
 
   expect(registerRouterMock).toHaveBeenCalledTimes(1);
   expect(registerRouterMock).toHaveBeenLastCalledWith(router);
@@ -272,23 +233,26 @@ test('returns http server contract on setup', async () => {
     stop: noop,
   }));
 
-  const service = new HttpService({ configService, env, logger });
-  const { createNewServer, ...setupHttpServer } = await service.setup();
-  expect(createNewServer).toBeDefined();
-  expect(setupHttpServer).toEqual(httpServer);
+  const service = new HttpService({ coreId, configService, env, logger });
+  const setupContract = await service.setup();
+  expect(setupContract).toMatchObject(httpServer);
+  expect(setupContract).toMatchObject({
+    createRouter: expect.any(Function),
+  });
 });
 
 test('does not start http server if process is dev cluster master', async () => {
   const configService = createConfigService();
   const httpServer = {
     isListening: () => false,
-    setup: noop,
+    setup: jest.fn().mockReturnValue({}),
     start: jest.fn(),
     stop: noop,
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
   const service = new HttpService({
+    coreId,
     configService,
     env: new Env('.', getEnvOptions({ isDevClusterMaster: true })),
     logger,
@@ -306,13 +270,14 @@ test('does not start http server if configured with `autoListen:false`', async (
   });
   const httpServer = {
     isListening: () => false,
-    setup: noop,
+    setup: jest.fn().mockReturnValue({}),
     start: jest.fn(),
     stop: noop,
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
   const service = new HttpService({
+    coreId,
     configService,
     env: new Env('.', getEnvOptions()),
     logger,

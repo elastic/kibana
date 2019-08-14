@@ -82,7 +82,7 @@ export function ServiceOverview() {
         noItemsMessage={
           <NoServicesMessage
             historicalDataFound={data.hasHistoricalData}
-            isLoading={status === 'loading'}
+            status={status}
           />
         }
       />

@@ -18,7 +18,9 @@
  */
 
 import { ResponseObject, Server } from 'hapi';
+import { UnwrapPromise } from '@kbn/utility-types';
 
+import { SavedObjectsClientProviderOptions } from 'src/core/server';
 import {
   ConfigService,
   ElasticsearchServiceSetup,
@@ -74,7 +76,7 @@ declare module 'hapi' {
   }
 
   interface Request {
-    getSavedObjectsClient(): SavedObjectsClientContract;
+    getSavedObjectsClient(options?: SavedObjectsClientProviderOptions): SavedObjectsClientContract;
     getBasePath(): string;
     getUiSettingsService(): any;
     getCapabilities(): Promise<Capabilities>;
@@ -86,7 +88,7 @@ declare module 'hapi' {
 }
 
 type KbnMixinFunc = (kbnServer: KbnServer, server: Server, config: any) => Promise<any> | void;
-type Unpromise<T> = T extends Promise<infer U> ? U : T;
+
 // eslint-disable-next-line import/no-default-export
 export default class KbnServer {
   public readonly newPlatform: {
@@ -103,7 +105,7 @@ export default class KbnServer {
     };
     stop: null;
     params: {
-      handledConfigPaths: Unpromise<ReturnType<ConfigService['getUsedPaths']>>;
+      handledConfigPaths: UnwrapPromise<ReturnType<ConfigService['getUsedPaths']>>;
     };
   };
   public server: Server;

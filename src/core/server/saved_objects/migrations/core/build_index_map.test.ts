@@ -18,16 +18,19 @@
  */
 
 import { createIndexMap } from './build_index_map';
+import { ObjectToConfigAdapter } from '../../../config';
+import { SavedObjectsSchema } from '../../schema';
 
 test('mappings without index pattern goes to default index', () => {
-  const result = createIndexMap(
-    '.kibana',
-    {
+  const result = createIndexMap({
+    config: new ObjectToConfigAdapter({}),
+    kibanaIndexName: '.kibana',
+    schema: new SavedObjectsSchema({
       type1: {
         isNamespaceAgnostic: false,
       },
-    },
-    {
+    }),
+    indexMap: {
       type1: {
         properties: {
           field1: {
@@ -35,8 +38,8 @@ test('mappings without index pattern goes to default index', () => {
           },
         },
       },
-    }
-  );
+    },
+  });
   expect(result).toEqual({
     '.kibana': {
       typeMappings: {
@@ -53,15 +56,16 @@ test('mappings without index pattern goes to default index', () => {
 });
 
 test(`mappings with custom index pattern doesn't go to default index`, () => {
-  const result = createIndexMap(
-    '.kibana',
-    {
+  const result = createIndexMap({
+    config: new ObjectToConfigAdapter({}),
+    kibanaIndexName: '.kibana',
+    schema: new SavedObjectsSchema({
       type1: {
         isNamespaceAgnostic: false,
         indexPattern: '.other_kibana',
       },
-    },
-    {
+    }),
+    indexMap: {
       type1: {
         properties: {
           field1: {
@@ -69,8 +73,8 @@ test(`mappings with custom index pattern doesn't go to default index`, () => {
           },
         },
       },
-    }
-  );
+    },
+  });
   expect(result).toEqual({
     '.other_kibana': {
       typeMappings: {
@@ -87,16 +91,17 @@ test(`mappings with custom index pattern doesn't go to default index`, () => {
 });
 
 test('creating a script gets added to the index pattern', () => {
-  const result = createIndexMap(
-    '.kibana',
-    {
+  const result = createIndexMap({
+    config: new ObjectToConfigAdapter({}),
+    kibanaIndexName: '.kibana',
+    schema: new SavedObjectsSchema({
       type1: {
         isNamespaceAgnostic: false,
         indexPattern: '.other_kibana',
         convertToAliasScript: `ctx._id = ctx._source.type + ':' + ctx._id`,
       },
-    },
-    {
+    }),
+    indexMap: {
       type1: {
         properties: {
           field1: {
@@ -104,8 +109,8 @@ test('creating a script gets added to the index pattern', () => {
           },
         },
       },
-    }
-  );
+    },
+  });
   expect(result).toEqual({
     '.other_kibana': {
       script: `ctx._id = ctx._source.type + ':' + ctx._id`,
@@ -124,7 +129,7 @@ test('creating a script gets added to the index pattern', () => {
 
 test('throws when two scripts are defined for an index pattern', () => {
   const defaultIndex = '.kibana';
-  const savedObjectSchemas = {
+  const schema = new SavedObjectsSchema({
     type1: {
       isNamespaceAgnostic: false,
       convertToAliasScript: `ctx._id = ctx._source.type + ':' + ctx._id`,
@@ -133,7 +138,7 @@ test('throws when two scripts are defined for an index pattern', () => {
       isNamespaceAgnostic: false,
       convertToAliasScript: `ctx._id = ctx._source.type + ':' + ctx._id`,
     },
-  };
+  });
   const indexMap = {
     type1: {
       properties: {
@@ -151,7 +156,12 @@ test('throws when two scripts are defined for an index pattern', () => {
     },
   };
   expect(() =>
-    createIndexMap(defaultIndex, savedObjectSchemas, indexMap)
+    createIndexMap({
+      config: new ObjectToConfigAdapter({}),
+      kibanaIndexName: defaultIndex,
+      schema,
+      indexMap,
+    })
   ).toThrowErrorMatchingInlineSnapshot(
     `"convertToAliasScript has been defined more than once for index pattern \\".kibana\\""`
   );

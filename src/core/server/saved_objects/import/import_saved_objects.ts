@@ -17,26 +17,14 @@
  * under the License.
  */
 
-import { Readable } from 'stream';
 import { collectSavedObjects } from './collect_saved_objects';
 import { extractErrors } from './extract_errors';
-import { ImportError } from './types';
+import {
+  SavedObjectsImportError,
+  SavedObjectsImportResponse,
+  SavedObjectsImportOptions,
+} from './types';
 import { validateReferences } from './validate_references';
-import { SavedObjectsClientContract } from '../';
-
-interface ImportSavedObjectsOptions {
-  readStream: Readable;
-  objectLimit: number;
-  overwrite: boolean;
-  savedObjectsClient: SavedObjectsClientContract;
-  supportedTypes: string[];
-}
-
-interface ImportResponse {
-  success: boolean;
-  successCount: number;
-  errors?: ImportError[];
-}
 
 export async function importSavedObjects({
   readStream,
@@ -44,8 +32,9 @@ export async function importSavedObjects({
   overwrite,
   savedObjectsClient,
   supportedTypes,
-}: ImportSavedObjectsOptions): Promise<ImportResponse> {
-  let errorAccumulator: ImportError[] = [];
+  namespace,
+}: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse> {
+  let errorAccumulator: SavedObjectsImportError[] = [];
 
   // Get the objects to import
   const {
@@ -57,7 +46,8 @@ export async function importSavedObjects({
   // Validate references
   const { filteredObjects, errors: validationErrors } = await validateReferences(
     objectsFromStream,
-    savedObjectsClient
+    savedObjectsClient,
+    namespace
   );
   errorAccumulator = [...errorAccumulator, ...validationErrors];
 
@@ -73,6 +63,7 @@ export async function importSavedObjects({
   // Create objects in bulk
   const bulkCreateResult = await savedObjectsClient.bulkCreate(filteredObjects, {
     overwrite,
+    namespace,
   });
   errorAccumulator = [
     ...errorAccumulator,

@@ -54,6 +54,7 @@ interface Props {
   range: string;
   rowRenderers: RowRenderer[];
   sort: Sort;
+  toggleColumn: (column: ColumnHeader) => void;
   updateNote: UpdateNote;
   width: number;
 }
@@ -68,6 +69,8 @@ const HorizontalScroll = styled.div<{
   min-height: 0px;
 `;
 
+HorizontalScroll.displayName = 'HorizontalScroll';
+
 const VerticalScrollContainer = styled.div<{
   height: number;
   minWidth: number;
@@ -78,6 +81,8 @@ const VerticalScrollContainer = styled.div<{
   overflow-y: auto;
   min-width: ${({ minWidth }) => `${minWidth}px`};
 `;
+
+VerticalScrollContainer.displayName = 'VerticalScrollContainer';
 
 /** Renders the timeline body */
 export const Body = pure<Props>(
@@ -102,6 +107,7 @@ export const Body = pure<Props>(
     pinnedEventIds,
     rowRenderers,
     sort,
+    toggleColumn,
     updateNote,
     width,
   }) => {
@@ -126,6 +132,7 @@ export const Body = pure<Props>(
             showEventsSelect={false}
             sort={sort}
             timelineId={id}
+            toggleColumn={toggleColumn}
             minWidth={columnWidths}
           />
 
@@ -151,6 +158,7 @@ export const Body = pure<Props>(
               onUnPinEvent={onUnPinEvent}
               pinnedEventIds={pinnedEventIds}
               rowRenderers={rowRenderers}
+              toggleColumn={toggleColumn}
               updateNote={updateNote}
               minWidth={columnWidths}
               width={width}
@@ -161,3 +169,5 @@ export const Body = pure<Props>(
     );
   }
 );
+
+Body.displayName = 'Body';

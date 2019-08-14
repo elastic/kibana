@@ -2,18 +2,13 @@
 
 [Home](./index.md) &gt; [kibana-plugin-server](./kibana-plugin-server.md) &gt; [HttpServiceSetup](./kibana-plugin-server.httpservicesetup.md)
 
-## HttpServiceSetup interface
+## HttpServiceSetup type
 
 
 <b>Signature:</b>
 
 ```typescript
-export interface HttpServiceSetup extends HttpServerSetup 
+export declare type HttpServiceSetup = Omit<HttpServerSetup, 'registerRouter'> & {
+    createRouter: (path: string) => IRouter;
+};
 ```
-
-## Properties
-
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [createNewServer](./kibana-plugin-server.httpservicesetup.createnewserver.md) | <code>(cfg: Partial&lt;HttpConfig&gt;) =&gt; Promise&lt;HttpServerSetup&gt;</code> |  |
-

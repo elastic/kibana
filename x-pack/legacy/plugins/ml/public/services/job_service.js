@@ -30,6 +30,12 @@ class JobService {
     // if populated when loading the job management page, the start datafeed modal
     // is automatically opened.
     this.currentJob = undefined;
+
+    this.tempJobCloningObjects = {
+      job: undefined,
+      skipTimeRangeStep: false,
+    };
+
     this.jobs = [];
 
     // Provide ready access to widely used basic job properties.
@@ -740,6 +746,16 @@ class JobService {
   }
 
 
+  async getJobAndGroupIds() {
+    try {
+      return await ml.jobs.getAllJobAndGroupIds();
+    } catch (error) {
+      return {
+        jobIds: [],
+        groupIds: [],
+      };
+    }
+  }
 }
 
 // private function used to check the job saving response

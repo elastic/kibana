@@ -14,6 +14,8 @@ import {
   Position,
   ScaleType,
   Settings,
+  AreaSeriesStyle,
+  RecursivePartial,
 } from '@elastic/charts';
 import { getOr, get } from 'lodash/fp';
 import {
@@ -24,37 +26,28 @@ import {
   getTheme,
   ChartSeriesConfigs,
   browserTimezone,
+  chartDefaultSettings,
 } from './common';
 import { AutoSizer } from '../auto_sizer';
 
 // custom series styles: https://ela.st/areachart-styling
-const getSeriesLineStyle = (color: string | undefined) => {
-  return color
-    ? {
-        area: {
-          fill: color,
-          opacity: 0.04,
-          visible: true,
-        },
-        line: {
-          stroke: color,
-          strokeWidth: 1,
-          visible: true,
-        },
-        border: {
-          visible: false,
-          strokeWidth: 1,
-          stroke: color,
-        },
-        point: {
-          visible: false,
-          radius: 0.2,
-          stroke: color,
-          strokeWidth: 1,
-          opacity: 1,
-        },
-      }
-    : undefined;
+const getSeriesLineStyle = (): RecursivePartial<AreaSeriesStyle> => {
+  return {
+    area: {
+      opacity: 0.04,
+      visible: true,
+    },
+    line: {
+      strokeWidth: 1,
+      visible: true,
+    },
+    point: {
+      visible: false,
+      radius: 0.2,
+      strokeWidth: 1,
+      opacity: 1,
+    },
+  };
 };
 
 // https://ela.st/multi-areaseries
@@ -68,11 +61,14 @@ export const AreaChartBaseComponent = React.memo<{
   const yTickFormatter = get('configs.axis.yTickFormatter', chartConfigs);
   const xAxisId = getAxisId(`group-${data[0].key}-x`);
   const yAxisId = getAxisId(`group-${data[0].key}-y`);
-
+  const settings = {
+    ...chartDefaultSettings,
+    ...get('configs.settings', chartConfigs),
+  };
   return chartConfigs.width && chartConfigs.height ? (
     <div style={{ height: chartConfigs.height, width: chartConfigs.width, position: 'relative' }}>
       <Chart>
-        <Settings theme={getTheme()} />
+        <Settings {...settings} theme={getTheme()} />
         {data.map(series => {
           const seriesKey = series.key;
           const seriesSpecId = getSpecId(seriesKey);
@@ -87,7 +83,7 @@ export const AreaChartBaseComponent = React.memo<{
               timeZone={browserTimezone}
               xAccessor="x"
               yAccessors={['y']}
-              areaSeriesStyle={getSeriesLineStyle(series.color)}
+              areaSeriesStyle={getSeriesLineStyle()}
               customSeriesColors={getSeriesStyle(seriesKey, series.color)}
             />
           ) : null;
@@ -115,6 +111,8 @@ export const AreaChartBaseComponent = React.memo<{
   ) : null;
 });
 
+AreaChartBaseComponent.displayName = 'AreaChartBaseComponent';
+
 export const AreaChartWithCustomPrompt = React.memo<{
   data: ChartConfigsData[] | null | undefined;
   height: number | null | undefined;
@@ -135,6 +133,8 @@ export const AreaChartWithCustomPrompt = React.memo<{
   );
 });
 
+AreaChartWithCustomPrompt.displayName = 'AreaChartWithCustomPrompt';
+
 export const AreaChart = React.memo<{
   areaChart: ChartConfigsData[] | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
@@ -152,3 +152,5 @@ export const AreaChart = React.memo<{
     )}
   </AutoSizer>
 ));
+
+AreaChart.displayName = 'AreaChart';

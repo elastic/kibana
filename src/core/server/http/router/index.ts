@@ -17,7 +17,29 @@
  * under the License.
  */
 
-export { Headers, filterHeaders, ResponseHeaders } from './headers';
-export { Router } from './router';
-export { KibanaRequest, KibanaRequestRoute, ensureRawRequest, isRealRequest } from './request';
-export { RouteMethod, RouteConfigOptions } from './route';
+export { Headers, filterHeaders, ResponseHeaders, KnownHeaders } from './headers';
+export { Router, RequestHandler, IRouter } from './router';
+export {
+  KibanaRequest,
+  KibanaRequestRoute,
+  isRealRequest,
+  LegacyRequest,
+  ensureRawRequest,
+} from './request';
+export { RouteMethod, RouteConfig, RouteConfigOptions } from './route';
+export { HapiResponseAdapter } from './response_adapter';
+export {
+  CustomHttpResponseOptions,
+  HttpResponseOptions,
+  HttpResponsePayload,
+  RedirectResponseOptions,
+  ResponseError,
+  ResponseErrorMeta,
+  KibanaResponse,
+  kibanaResponseFactory,
+  KibanaResponseFactory,
+  lifecycleResponseFactory,
+  LifecycleResponseFactory,
+} from './response';
+
+export { IKibanaSocket } from './socket';

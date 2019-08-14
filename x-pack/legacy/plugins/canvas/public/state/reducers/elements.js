@@ -125,7 +125,7 @@ export const elementsReducer = handleActions(
       }
       return push(
         workpadState,
-        `pages${pageIndex}.${getLocation(element.position.type)}`,
+        `pages.${pageIndex}.${getLocation(element.position.type)}`,
         trimElement(element)
       );
     },
