@@ -260,10 +260,11 @@ describe('http service', () => {
       );
 
       const router = createRouter('/new-platform');
+
       router.get({ path: '/', validate: false }, async (context, req, res) => {
         const client = await elasticsearch.dataClient$.pipe(first()).toPromise();
         client.asScoped(req);
-        return res.ok({ header: 'ok' });
+        return res.ok();
       });
 
       await root.start();
@@ -281,10 +282,11 @@ describe('http service', () => {
       const { createRouter } = http;
 
       const router = createRouter('/new-platform');
+
       router.get({ path: '/', validate: false }, async (context, req, res) => {
         const client = await elasticsearch.dataClient$.pipe(first()).toPromise();
         client.asScoped(req);
-        return res.ok({ header: 'ok' });
+        return res.ok();
       });
 
       await root.start();

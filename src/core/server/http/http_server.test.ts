@@ -134,7 +134,7 @@ test('valid params', async () => {
       },
     },
     (context, req, res) => {
-      return res.ok({ key: req.params.test });
+      return res.ok({ body: req.params.test });
     }
   );
 
@@ -147,7 +147,7 @@ test('valid params', async () => {
     .get('/foo/some-string')
     .expect(200)
     .then(res => {
-      expect(res.body).toEqual({ key: 'some-string' });
+      expect(res.text).toBe('some-string');
     });
 });
 
@@ -164,7 +164,7 @@ test('invalid params', async () => {
       },
     },
     (context, req, res) => {
-      return res.ok({ key: req.params.test });
+      return res.ok({ body: String(req.params.test) });
     }
   );
 
@@ -199,7 +199,7 @@ test('valid query', async () => {
       },
     },
     (context, req, res) => {
-      return res.ok(req.query);
+      return res.ok({ body: req.query });
     }
   );
 
@@ -229,7 +229,7 @@ test('invalid query', async () => {
       },
     },
     (context, req, res) => {
-      return res.ok(req.query);
+      return res.ok({ body: req.query });
     }
   );
 
@@ -264,7 +264,7 @@ test('valid body', async () => {
       },
     },
     (context, req, res) => {
-      return res.ok(req.body);
+      return res.ok({ body: req.body });
     }
   );
 
@@ -298,7 +298,7 @@ test('invalid body', async () => {
       },
     },
     (context, req, res) => {
-      return res.ok(req.body);
+      return res.ok({ body: req.body });
     }
   );
 
@@ -333,7 +333,7 @@ test('handles putting', async () => {
       },
     },
     (context, req, res) => {
-      return res.ok(req.body);
+      return res.ok({ body: req.body });
     }
   );
 
@@ -364,7 +364,7 @@ test('handles deleting', async () => {
       },
     },
     (context, req, res) => {
-      return res.ok({ key: req.params.id });
+      return res.ok({ body: { key: req.params.id } });
     }
   );
 
@@ -393,9 +393,9 @@ describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
     } as HttpConfig;
 
     const router = new Router('/', logger);
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ key: 'value:/' }));
+    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'value:/' }));
     router.get({ path: '/foo', validate: false }, (context, req, res) =>
-      res.ok({ key: 'value:/foo' })
+      res.ok({ body: 'value:/foo' })
     );
 
     const { registerRouter, server: innerServer } = await server.setup(configWithBasePath);
@@ -428,7 +428,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
       .get('/')
       .expect(200)
       .then(res => {
-        expect(res.body).toEqual({ key: 'value:/' });
+        expect(res.text).toBe('value:/');
       });
   });
 
@@ -437,7 +437,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
       .get('/foo')
       .expect(200)
       .then(res => {
-        expect(res.body).toEqual({ key: 'value:/foo' });
+        expect(res.text).toBe('value:/foo');
       });
   });
 });
@@ -454,9 +454,9 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
     } as HttpConfig;
 
     const router = new Router('/', logger);
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ key: 'value:/' }));
+    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'value:/' }));
     router.get({ path: '/foo', validate: false }, (context, req, res) =>
-      res.ok({ key: 'value:/foo' })
+      res.ok({ body: 'value:/foo' })
     );
 
     const { registerRouter, server: innerServer } = await server.setup(configWithBasePath);
@@ -471,7 +471,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
       .get('/bar')
       .expect(200)
       .then(res => {
-        expect(res.body).toEqual({ key: 'value:/' });
+        expect(res.text).toBe('value:/');
       });
   });
 
@@ -480,7 +480,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
       .get('/bar/')
       .expect(200)
       .then(res => {
-        expect(res.body).toEqual({ key: 'value:/' });
+        expect(res.text).toBe('value:/');
       });
   });
 
@@ -489,7 +489,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
       .get('/bar/foo')
       .expect(200)
       .then(res => {
-        expect(res.body).toEqual({ key: 'value:/foo' });
+        expect(res.text).toBe('value:/foo');
       });
   });
 
@@ -508,7 +508,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
 
 test('with defined `redirectHttpFromPort`', async () => {
   const router = new Router('/', logger);
-  router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ key: 'value:/' }));
+  router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'value:/' }));
 
   const { registerRouter } = await server.setup(configWithSSL);
   registerRouter(router);
@@ -539,10 +539,10 @@ test('allows attaching metadata to attach meta-data tag strings to a route', asy
 
   const router = new Router('', logger);
   router.get({ path: '/with-tags', validate: false, options: { tags } }, (context, req, res) =>
-    res.ok({ tags: req.route.options.tags })
+    res.ok({ body: { tags: req.route.options.tags } })
   );
   router.get({ path: '/without-tags', validate: false }, (context, req, res) =>
-    res.ok({ tags: req.route.options.tags })
+    res.ok({ body: { tags: req.route.options.tags } })
   );
   registerRouter(router);
 
@@ -560,7 +560,7 @@ test('exposes route details of incoming request to a route handler', async () =>
   const { registerRouter, server: innerServer } = await server.setup(config);
 
   const router = new Router('', logger);
-  router.get({ path: '/', validate: false }, (context, req, res) => res.ok(req.route));
+  router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: req.route }));
   registerRouter(router);
 
   await server.start();
@@ -601,7 +601,7 @@ describe('setup contract', () => {
 
       const router = new Router('', logger);
       router.get({ path: '/', validate: false }, (context, req, res) =>
-        res.ok({ isAuthenticated: auth.isAuthenticated(req) })
+        res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
       );
       registerRouter(router);
 
@@ -621,7 +621,7 @@ describe('setup contract', () => {
       const router = new Router('', logger);
       router.get(
         { path: '/', validate: false, options: { authRequired: false } },
-        (context, req, res) => res.ok({ isAuthenticated: auth.isAuthenticated(req) })
+        (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
       );
       registerRouter(router);
 
@@ -639,7 +639,7 @@ describe('setup contract', () => {
       const router = new Router('', logger);
       router.get(
         { path: '/', validate: false, options: { authRequired: false } },
-        (context, req, res) => res.ok({ isAuthenticated: auth.isAuthenticated(req) })
+        (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
       );
       registerRouter(router);
 
@@ -667,7 +667,9 @@ describe('setup contract', () => {
       });
 
       const router = new Router('', logger);
-      router.get({ path: '/', validate: false }, (context, req, res) => res.ok(auth.get(req)));
+      router.get({ path: '/', validate: false }, (context, req, res) =>
+        res.ok({ body: auth.get(req) })
+      );
       registerRouter(router);
       await server.start();
 
@@ -679,7 +681,9 @@ describe('setup contract', () => {
     it('returns correct authentication unknown status', async () => {
       const { registerRouter, server: innerServer, auth } = await server.setup(config);
       const router = new Router('', logger);
-      router.get({ path: '/', validate: false }, (context, req, res) => res.ok(auth.get(req)));
+      router.get({ path: '/', validate: false }, (context, req, res) =>
+        res.ok({ body: auth.get(req) })
+      );
 
       registerRouter(router);
       await server.start();
@@ -698,7 +702,7 @@ describe('setup contract', () => {
       const router = new Router('', logger);
       router.get(
         { path: '/', validate: false, options: { authRequired: false } },
-        (context, req, res) => res.ok(auth.get(req))
+        (context, req, res) => res.ok({ body: auth.get(req) })
       );
 
       registerRouter(router);

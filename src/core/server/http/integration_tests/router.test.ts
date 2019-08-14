@@ -166,7 +166,7 @@ describe('Response factory', () => {
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.ok({ key: 'value' });
+        return res.ok({ body: { key: 'value' } });
       });
 
       await server.start();
@@ -184,7 +184,7 @@ describe('Response factory', () => {
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.ok('result');
+        return res.ok({ body: 'result' });
       });
 
       await server.start();
@@ -226,7 +226,7 @@ describe('Response factory', () => {
           },
         });
 
-        return res.ok(stream);
+        return res.ok({ body: stream });
       });
 
       await server.start();
@@ -252,7 +252,7 @@ describe('Response factory', () => {
           stream.end();
         }, 100);
 
-        return res.ok(stream);
+        return res.ok({ body: stream });
       });
 
       await server.start();
@@ -272,7 +272,8 @@ describe('Response factory', () => {
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const buffer = Buffer.alloc(1028, '.');
 
-        return res.ok(buffer, {
+        return res.ok({
+          body: buffer,
           headers: {
             'content-encoding': 'binary',
           },
@@ -298,7 +299,8 @@ describe('Response factory', () => {
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const buffer = new Buffer('abc');
 
-        return res.ok(buffer, {
+        return res.ok({
+          body: buffer,
           headers: {
             'content-type': 'text/plain',
           },
@@ -322,7 +324,8 @@ describe('Response factory', () => {
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.ok('value', {
+        return res.ok({
+          body: 'value',
           headers: {
             etag: '1234',
           },
@@ -344,7 +347,8 @@ describe('Response factory', () => {
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.ok('value', {
+        return res.ok({
+          body: 'value',
           headers: {
             etag: '1234',
             'x-kibana': 'key',
@@ -368,7 +372,8 @@ describe('Response factory', () => {
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.ok('value', {
+        return res.ok({
+          body: 'value',
           headers: {
             ETag: '1234',
           },
@@ -389,7 +394,8 @@ describe('Response factory', () => {
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.ok('value', {
+        return res.ok({
+          body: 'value',
           headers: {
             'set-cookie': ['foo', 'bar'],
           },
@@ -412,7 +418,7 @@ describe('Response factory', () => {
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const payload: any = { key: {} };
         payload.key.payload = payload;
-        return res.ok(payload);
+        return res.ok({ body: payload });
       });
 
       await server.start();
@@ -430,7 +436,7 @@ describe('Response factory', () => {
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.ok({ key: 'value' });
+        return res.ok({ body: { key: 'value' } });
       });
 
       await server.start();
@@ -448,7 +454,7 @@ describe('Response factory', () => {
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.accepted({ location: 'somewhere' });
+        return res.accepted({ body: { location: 'somewhere' } });
       });
 
       await server.start();
@@ -485,7 +491,8 @@ describe('Response factory', () => {
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.redirected('The document has moved', {
+        return res.redirected({
+          body: 'The document has moved',
           headers: {
             location: '/new-url',
             'x-kibana': 'tag',
@@ -509,7 +516,7 @@ describe('Response factory', () => {
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.redirected(undefined, {
+        return res.redirected({
           headers: {
             'x-kibana': 'tag',
           },
@@ -540,7 +547,7 @@ describe('Response factory', () => {
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const error = new Error('some message');
-        return res.badRequest(error);
+        return res.badRequest({ body: error });
       });
 
       await server.start();
@@ -582,7 +589,9 @@ describe('Response factory', () => {
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.badRequest({ message: 'some message', meta: { data: ['good', 'bad'] } });
+        return res.badRequest({
+          body: { message: 'some message', attributes: { data: ['good', 'bad'] } },
+        });
       });
 
       await server.start();
@@ -594,7 +603,7 @@ describe('Response factory', () => {
       expect(result.body).toEqual({
         error: 'Bad Request',
         message: 'some message',
-        meta: {
+        attributes: {
           data: ['good', 'bad'],
         },
         statusCode: 400,
@@ -607,7 +616,8 @@ describe('Response factory', () => {
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const error = new Error('no access');
-        return res.unauthorized(error, {
+        return res.unauthorized({
+          body: error,
           headers: {
             'WWW-Authenticate': 'challenge',
           },
@@ -647,7 +657,7 @@ describe('Response factory', () => {
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const error = new Error('reason');
-        return res.forbidden(error);
+        return res.forbidden({ body: error });
       });
 
       await server.start();
@@ -682,7 +692,7 @@ describe('Response factory', () => {
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const error = new Error('file is not found');
-        return res.notFound(error);
+        return res.notFound({ body: error });
       });
 
       await server.start();
@@ -717,7 +727,7 @@ describe('Response factory', () => {
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const error = new Error('stale version');
-        return res.conflict(error);
+        return res.conflict({ body: error });
       });
 
       await server.start();
@@ -752,7 +762,8 @@ describe('Response factory', () => {
       const router = createRouter('/');
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const error = new Error('some message');
-        return res.customError(error, {
+        return res.customError({
+          body: error,
           statusCode: 418,
         });
       });
@@ -777,7 +788,8 @@ describe('Response factory', () => {
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const error = new Error('some message');
 
-        return res.customError(error, {
+        return res.customError({
+          body: error,
           statusCode: 500,
         });
       });
@@ -802,7 +814,8 @@ describe('Response factory', () => {
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const error = new Error('some message');
 
-        return res.customError(Boom.boomify(error), {
+        return res.customError({
+          body: Boom.boomify(error),
           statusCode: 500,
         });
       });
@@ -826,7 +839,8 @@ describe('Response factory', () => {
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const error = new Error('some message');
-        return res.customError(error, {
+        return res.customError({
+          body: error,
           statusCode: 200,
         });
       });
@@ -858,7 +872,8 @@ describe('Response factory', () => {
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.custom(undefined, {
+        return res.custom({
+          body: undefined,
           statusCode: 201,
           headers: {
             location: 'somewhere',
@@ -880,7 +895,8 @@ describe('Response factory', () => {
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.custom('The document has moved', {
+        return res.custom({
+          body: 'The document has moved',
           headers: {
             location: '/new-url',
           },
@@ -902,7 +918,8 @@ describe('Response factory', () => {
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.custom('The document has moved', {
+        return res.custom({
+          body: 'The document has moved',
           headers: {},
           statusCode: 301,
         });
@@ -929,7 +946,8 @@ describe('Response factory', () => {
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const error = new Error('unauthorized');
-        return res.custom(error, {
+        return res.custom({
+          body: error,
           statusCode: 401,
         });
       });
@@ -948,15 +966,13 @@ describe('Response factory', () => {
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.custom(
-          {
+        return res.custom({
+          body: {
             message: 'unauthorized',
-            meta: { errorCode: 'K401' },
+            attributes: { errorCode: 'K401' },
           },
-          {
-            statusCode: 401,
-          }
-        );
+          statusCode: 401,
+        });
       });
 
       await server.start();
@@ -968,7 +984,7 @@ describe('Response factory', () => {
       expect(result.body).toEqual({
         error: 'Unauthorized',
         message: 'unauthorized',
-        meta: { errorCode: 'K401' },
+        attributes: { errorCode: 'K401' },
         statusCode: 401,
       });
     });
@@ -978,15 +994,13 @@ describe('Response factory', () => {
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.custom(
-          {
+        return res.custom({
+          body: {
             message: new Error('unauthorized'),
-            meta: { errorCode: 'K401' },
+            attributes: { errorCode: 'K401' },
           },
-          {
-            statusCode: 401,
-          }
-        );
+          statusCode: 401,
+        });
       });
 
       await server.start();
@@ -998,7 +1012,7 @@ describe('Response factory', () => {
       expect(result.body).toEqual({
         error: 'Unauthorized',
         message: 'unauthorized',
-        meta: { errorCode: 'K401' },
+        attributes: { errorCode: 'K401' },
         statusCode: 401,
       });
     });
@@ -1009,7 +1023,8 @@ describe('Response factory', () => {
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const error = Boom.unauthorized();
-        return res.custom(error, {
+        return res.custom({
+          body: error,
           statusCode: 401,
         });
       });
@@ -1028,7 +1043,8 @@ describe('Response factory', () => {
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.custom('reason', {
+        return res.custom({
+          body: 'reason',
           statusCode: 500,
         });
       });
@@ -1048,12 +1064,10 @@ describe('Response factory', () => {
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.custom(
-          { error: 'error-message' },
-          {
-            statusCode: 401,
-          }
-        );
+        return res.custom({
+          body: { error: 'error-message' },
+          statusCode: 401,
+        });
       });
 
       await server.start();
@@ -1077,9 +1091,9 @@ describe('Response factory', () => {
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.custom(undefined, {
+        return res.custom({
           statusCode: 401,
-        });
+        } as any); // requires error message
       });
 
       await server.start();
@@ -1104,7 +1118,7 @@ describe('Response factory', () => {
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const error = new Error('error message');
-        return res.custom(error, undefined as any); // options.statusCode is required
+        return res.custom({ body: error } as any); // options.statusCode is required
       });
 
       await server.start();
@@ -1129,7 +1143,7 @@ describe('Response factory', () => {
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const error = new Error('error message');
-        return res.custom(error, { statusCode: 20 });
+        return res.custom({ body: error, statusCode: 20 });
       });
 
       await server.start();

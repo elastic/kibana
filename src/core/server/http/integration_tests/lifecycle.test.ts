@@ -76,7 +76,7 @@ describe('OnPreAuth', () => {
     const { registerOnPreAuth, server: innerServer, createRouter } = await server.setup();
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok('ok'));
+    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'ok' }));
 
     const callingOrder: string[] = [];
     registerOnPreAuth((req, res, t) => {
@@ -101,9 +101,11 @@ describe('OnPreAuth', () => {
     const { registerOnPreAuth, server: innerServer, createRouter } = await server.setup();
     const router = createRouter('/');
 
-    router.get({ path: '/initial', validate: false }, (context, req, res) => res.ok('initial'));
+    router.get({ path: '/initial', validate: false }, (context, req, res) =>
+      res.ok({ body: 'initial' })
+    );
     router.get({ path: '/redirectUrl', validate: false }, (context, req, res) =>
-      res.ok('redirected')
+      res.ok({ body: 'redirected' })
     );
 
     let urlBeforeForwarding;
@@ -134,10 +136,10 @@ describe('OnPreAuth', () => {
     const router = createRouter('/');
 
     const redirectUrl = '/redirectUrl';
-    router.get({ path: '/initial', validate: false }, (context, req, res) => res.ok('initial'));
+    router.get({ path: '/initial', validate: false }, (context, req, res) => res.ok());
 
     registerOnPreAuth((req, res, t) =>
-      res.redirected(undefined, {
+      res.redirected({
         headers: {
           location: redirectUrl,
         },
@@ -156,10 +158,10 @@ describe('OnPreAuth', () => {
     const { registerOnPreAuth, server: innerServer, createRouter } = await server.setup();
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok(undefined));
+    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
 
     registerOnPreAuth((req, res, t) =>
-      res.unauthorized('not found error', {
+      res.unauthorized({
         headers: {
           'www-authenticate': 'challenge',
         },
@@ -178,7 +180,7 @@ describe('OnPreAuth', () => {
     const { registerOnPreAuth, server: innerServer, createRouter } = await server.setup();
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok(undefined));
+    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
 
     registerOnPreAuth((req, res, t) => {
       throw new Error('reason');
@@ -203,7 +205,7 @@ describe('OnPreAuth', () => {
     const { registerOnPreAuth, server: innerServer, createRouter } = await server.setup();
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok('ok'));
+    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
 
     registerOnPreAuth((req, res, t) => ({} as any));
     await server.start();
@@ -240,7 +242,7 @@ describe('OnPreAuth', () => {
     });
     router.get({ path: '/', validate: false }, (context, req, res) =>
       // don't complain customField is not defined on Request type
-      res.ok({ customField: String((req as any).customField) })
+      res.ok({ body: { customField: String((req as any).customField) } })
     );
 
     await server.start();
@@ -256,7 +258,7 @@ describe('OnPostAuth', () => {
     const { registerOnPostAuth, server: innerServer, createRouter } = await server.setup();
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok('ok'));
+    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'ok' }));
 
     const callingOrder: string[] = [];
     registerOnPostAuth((req, res, t) => {
@@ -282,10 +284,10 @@ describe('OnPostAuth', () => {
     const router = createRouter('/');
 
     const redirectUrl = '/redirectUrl';
-    router.get({ path: '/initial', validate: false }, (context, req, res) => res.ok('initial'));
+    router.get({ path: '/initial', validate: false }, (context, req, res) => res.ok());
 
     registerOnPostAuth((req, res, t) =>
-      res.redirected(undefined, {
+      res.redirected({
         headers: {
           location: redirectUrl,
         },
@@ -306,7 +308,7 @@ describe('OnPostAuth', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok(undefined));
     registerOnPostAuth((req, res, t) =>
-      res.unauthorized('not found error', {
+      res.unauthorized({
         headers: {
           'www-authenticate': 'challenge',
         },
@@ -349,7 +351,7 @@ describe('OnPostAuth', () => {
     const { registerOnPostAuth, server: innerServer, createRouter } = await server.setup();
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok('ok'));
+    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
     registerOnPostAuth((req, res, t) => ({} as any));
     await server.start();
 
@@ -386,7 +388,7 @@ describe('OnPostAuth', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) =>
       // don't complain customField is not defined on Request type
-      res.ok({ customField: String((req as any).customField) })
+      res.ok({ body: { customField: String((req as any).customField) } })
     );
 
     await server.start();
@@ -417,7 +419,9 @@ describe('Auth', () => {
     const { registerAuth, server: innerServer, createRouter } = await server.setup();
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ content: 'ok' }));
+    router.get({ path: '/', validate: false }, (context, req, res) =>
+      res.ok({ body: { content: 'ok' } })
+    );
     registerAuth((req, res, t) => t.authenticated());
     await server.start();
 
@@ -431,7 +435,7 @@ describe('Auth', () => {
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) =>
-      res.ok({ authRequired: req.route.options.authRequired })
+      res.ok({ body: { authRequired: req.route.options.authRequired } })
     );
     const authenticate = jest.fn().mockImplementation((req, res, t) => t.authenticated());
     registerAuth(authenticate);
@@ -450,7 +454,7 @@ describe('Auth', () => {
 
     router.get(
       { path: '/', validate: false, options: { authRequired: false } },
-      (context, req, res) => res.ok({ authRequired: req.route.options.authRequired })
+      (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
     );
 
     const authenticate = jest.fn();
@@ -470,7 +474,7 @@ describe('Auth', () => {
 
     router.get(
       { path: '/', validate: false, options: { authRequired: true } },
-      (context, req, res) => res.ok({ authRequired: req.route.options.authRequired })
+      (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
     );
 
     const authenticate = jest.fn().mockImplementation((req, res, t) => t.authenticated({}));
@@ -488,7 +492,7 @@ describe('Auth', () => {
     const { registerAuth, server: innerServer, createRouter } = await server.setup();
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ content: 'ok' }));
+    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
     registerAuth((req, res) => res.unauthorized());
     await server.start();
 
@@ -501,10 +505,10 @@ describe('Auth', () => {
     const { registerAuth, server: innerServer, createRouter } = await server.setup();
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ content: 'ok' }));
+    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
     const redirectTo = '/redirect-url';
     registerAuth((req, res) =>
-      res.redirected(undefined, {
+      res.redirected({
         headers: {
           location: redirectTo,
         },
@@ -522,7 +526,7 @@ describe('Auth', () => {
     const { registerAuth, server: innerServer, createRouter } = await server.setup();
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ content: 'ok' }));
+    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
     registerAuth((req, t) => {
       throw new Error('reason');
     });
@@ -551,7 +555,7 @@ describe('Auth', () => {
     } = await server.setup();
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ content: 'ok' }));
+    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
 
     const sessionStorageFactory = await createCookieSessionStorageFactory<StorageData>(
       cookieOptions
@@ -567,7 +571,7 @@ describe('Auth', () => {
 
     const response = await supertest(innerServer.listener)
       .get('/')
-      .expect(200, { content: 'ok' });
+      .expect(200);
 
     expect(response.header['set-cookie']).toBeDefined();
     const cookies = response.header['set-cookie'];
@@ -603,11 +607,11 @@ describe('Auth', () => {
       return toolkit.authenticated();
     });
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ content: 'ok' }));
+    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
     router.get({ path: '/with-cookie', validate: false }, (context, req, res) => {
       const sessionStorage = sessionStorageFactory.asScoped(req);
       sessionStorage.clear();
-      return res.ok({ content: 'ok' });
+      return res.ok();
     });
     await server.start();
 
@@ -658,7 +662,7 @@ describe('Auth', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) => {
       fromRouteHandler = req.headers.authorization;
-      return res.ok({ content: 'ok' });
+      return res.ok();
     });
     await server.start();
 
@@ -685,7 +689,7 @@ describe('Auth', () => {
       return toolkit.authenticated({ responseHeaders: authResponseHeader });
     });
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ header: 'ok' }));
+    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
     await server.start();
 
     const response = await supertest(innerServer.listener)
@@ -706,9 +710,7 @@ describe('Auth', () => {
       return toolkit.authenticated({ responseHeaders: authResponseHeader });
     });
 
-    router.get({ path: '/', validate: false }, (context, req, res) =>
-      res.badRequest(new Error('reason'))
-    );
+    router.get({ path: '/', validate: false }, (context, req, res) => res.badRequest());
     await server.start();
 
     const response = await supertest(innerServer.listener)
@@ -731,14 +733,11 @@ describe('Auth', () => {
     });
 
     router.get({ path: '/', validate: false }, (context, req, res) =>
-      res.ok(
-        {},
-        {
-          headers: {
-            'www-authenticate': 'from handler',
-          },
-        }
-      )
+      res.ok({
+        headers: {
+          'www-authenticate': 'from handler',
+        },
+      })
     );
     await server.start();
 
@@ -769,7 +768,7 @@ describe('Auth', () => {
     });
 
     router.get({ path: '/', validate: false }, (context, req, res) =>
-      res.badRequest('reason', {
+      res.badRequest({
         headers: {
           'www-authenticate': 'from handler',
         },
@@ -796,9 +795,9 @@ describe('Auth', () => {
     const router = createRouter('/');
 
     const redirectUrl = '/redirectUrl';
-    router.get({ path: '/initial', validate: false }, (context, req, res) => res.ok('initial'));
+    router.get({ path: '/initial', validate: false }, (context, req, res) => res.ok());
     registerOnPostAuth((req, res, t) =>
-      res.redirected(undefined, {
+      res.redirected({
         headers: {
           location: redirectUrl,
         },
@@ -820,7 +819,7 @@ describe('Auth', () => {
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok(undefined));
 
     registerOnPostAuth((req, res, t) =>
-      res.unauthorized('not found error', {
+      res.unauthorized({
         headers: {
           'www-authenticate': 'challenge',
         },
@@ -863,7 +862,7 @@ describe('Auth', () => {
     const { registerOnPostAuth, server: innerServer, createRouter } = await server.setup();
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok('ok'));
+    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
     registerOnPostAuth((req, res, t) => ({} as any));
     await server.start();
 
@@ -899,7 +898,7 @@ describe('Auth', () => {
     });
     router.get({ path: '/', validate: false }, (context, req, res) =>
       // don't complain customField is not defined on Request type
-      res.ok({ customField: String((req as any).customField) })
+      res.ok({ body: { customField: String((req as any).customField) } })
     );
 
     await server.start();
