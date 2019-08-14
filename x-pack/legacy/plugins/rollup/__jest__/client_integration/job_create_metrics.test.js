@@ -325,6 +325,9 @@ describe('Create Rollup Job, step 5: Metrics', () => {
 
       it('should deselect all of the metric types across rows (column-wise)',  () => {
         const selectAllAvgCheckbox = find('rollupJobMetricsSelectAllCheckbox-avg');
+
+        // Select first, which adds metrics column-wise, and then de-select column-wise to ensure
+        // that we correctly remove/undo our adding action.
         selectAllAvgCheckbox.last().simulate('change', { checked: true });
         selectAllAvgCheckbox.last().simulate('change', { checked: false });
 
@@ -352,7 +355,9 @@ describe('Create Rollup Job, step 5: Metrics', () => {
          *
          * 1. Select all avg column-wise
          * 2. Select all max column-wise
-         * 3. Select and deselect row-wise the first numeric metric row
+         * 3. Select and deselect row-wise the first numeric metric row. Because some items will
+         *    have been selected by the previous column-wise selection we want to test that row-wise
+         *    select all followed by de-select can effectively undo the column-wise selections.
          * 4. Expect the avg and max select all checkboxes to be unchecked
          * 5. Select all on the last date metric row-wise
          * 6. Select then deselect all max column-wise
@@ -369,9 +374,9 @@ describe('Create Rollup Job, step 5: Metrics', () => {
         const selectAllCheckbox = getSelectAllInputForRow(0);
 
         // 3.
-        // Select All
+        // Select all (which should check all checkboxes)
         selectAllCheckbox.simulate('change', { checked: true });
-        // Deselect All
+        // Deselect all (which should deselect all checkboxes)
         selectAllCheckbox.simulate('change', { checked: false });
 
         // 4.

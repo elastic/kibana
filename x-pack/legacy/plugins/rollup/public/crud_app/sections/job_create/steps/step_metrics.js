@@ -26,6 +26,7 @@ import {
 import { metricsDetailsUrl } from '../../../services';
 import { FieldList } from '../../components';
 import { FieldChooser, StepError } from './components';
+import { METRICS_CONFIG } from '../../../constants';
 
 const whiteListedMetricByFieldType = {
   numeric: {
@@ -52,53 +53,7 @@ const checkWhiteListedMetricByFieldType = (fieldType, metricType) => {
 // objects should have a fieldTypes: { date: true, numeric: true }
 // like object.
 const metricTypesConfig = (function () {
-  return [
-    {
-      type: 'avg',
-      label: (
-        <FormattedMessage
-          id="xpack.rollupJobs.create.stepMetrics.checkboxAverageLabel"
-          defaultMessage="Average"
-        />
-      ),
-    },
-    {
-      type: 'max',
-      label: (
-        <FormattedMessage
-          id="xpack.rollupJobs.create.stepMetrics.checkboxMaxLabel"
-          defaultMessage="Maximum"
-        />
-      ),
-    },
-    {
-      type: 'min',
-      label: (
-        <FormattedMessage
-          id="xpack.rollupJobs.create.stepMetrics.checkboxMinLabel"
-          defaultMessage="Minimum"
-        />
-      ),
-    },
-    {
-      type: 'sum',
-      label: (
-        <FormattedMessage
-          id="xpack.rollupJobs.create.stepMetrics.checkboxSumLabel"
-          defaultMessage="Sum"
-        />
-      ),
-    },
-    {
-      type: 'value_count',
-      label: (
-        <FormattedMessage
-          id="xpack.rollupJobs.create.stepMetrics.checkboxValueCountLabel"
-          defaultMessage="Value count"
-        />
-      ),
-    },
-  ].map(config => {
+  return METRICS_CONFIG.map(config => {
     const fieldTypes = {};
     for (const [fieldType, metrics] of Object.entries(whiteListedMetricByFieldType)) {
       fieldTypes[fieldType] = !!metrics[config.type];
@@ -151,9 +106,9 @@ export class StepMetricsUi extends Component {
 
     /**
      * Look at all the metric configs and include the special "All" checkbox which adds the ability
-     * to select a all the checkboxes across columns and rows.
+     * to select all the checkboxes across columns and rows.
      */
-    const jsxElements = [{
+    const checkboxElements = [{
       label: i18n.translate('xpack.rollupJobs.create.stepMetrics.allCheckbox', { defaultMessage: 'All' }),
       type: 'all',
     }].concat(metricTypesConfig).map(({ label, type: metricType, fieldTypes }, idx) => {
@@ -202,7 +157,7 @@ export class StepMetricsUi extends Component {
           id={`${idx}-select-all-checkbox`}
           data-test-subj={`rollupJobMetricsSelectAllCheckbox-${metricType}`}
           disabled={isDisabled}
-          label={<span style={{ whiteSpace: 'nowrap' }}>{label}</span>}
+          label={label}
           checked={!isDisabled && isChecked}
           onChange={() => {
             if (isAllMetricTypes) {
@@ -218,14 +173,14 @@ export class StepMetricsUi extends Component {
     });
 
     return {
-      jsxElements,
-      allCheckboxesDisabled: jsxElements.length === disabledCheckboxesCount,
+      checkboxElements,
+      allCheckboxesDisabled: checkboxElements.length === disabledCheckboxesCount,
     };
   }
 
   getMetricsSelectAllMenu() {
     const {
-      jsxElements: checkboxElements,
+      checkboxElements,
       allCheckboxesDisabled
     } = this.renderMetricsSelectAllCheckboxes();
 
@@ -510,13 +465,19 @@ export class StepMetricsUi extends Component {
   static chooserColumns = [
     {
       field: 'name',
-      name: 'Field',
+      name: i18n.translate(
+        'xpack.rollupJobs.create.stepMetrics.fieldColumnLabel',
+        { defaultMessage: 'Field' }
+      ),
       sortable: true,
       width: '240px',
     },
     {
       field: 'type',
-      name: 'Type',
+      name: i18n.translate(
+        'xpack.rollupJobs.create.stepMetrics.typeColumnLabel',
+        { defaultMessage: 'Type' }
+      ),
       truncateText: true,
       sortable: true,
       width: '100px',
