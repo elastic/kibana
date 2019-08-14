@@ -4892,7 +4892,6 @@
     "xpack.indexLifecycleMgmt.editPolicy.saveAsNewPolicyMessage": "新規ポリシーとして保存します",
     "xpack.indexLifecycleMgmt.editPolicy.saveButton": "ポリシーを保存",
     "xpack.indexLifecycleMgmt.editPolicy.saveErrorMessage": "ライフサイクルポリシー {lifecycleName} の保存中にエラーが発生しました",
-    "xpack.indexLifecycleMgmt.editPolicy.showPolicyJsonButton": "JSON を表示",
     "xpack.indexLifecycleMgmt.editPolicy.successfulSaveMessage": "ライフサイクルポリシー「{lifecycleName}」を {verb}",
     "xpack.indexLifecycleMgmt.editPolicy.updatedMessage": "更新しました",
     "xpack.indexLifecycleMgmt.editPolicy.validPolicyNameMessage": "ポリシー名の頭にアンダーラインを使用することはできず、括弧やスペースを含めることもできません。",

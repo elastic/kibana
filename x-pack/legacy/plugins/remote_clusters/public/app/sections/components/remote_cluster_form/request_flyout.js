@@ -4,6 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import React, { PureComponent } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import PropTypes from 'prop-types';
@@ -20,39 +26,35 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-export class PolicyJsonFlyout extends PureComponent {
+import { serializeCluster } from '../../../../../common';
+
+export class RequestFlyout extends PureComponent {
   static propTypes = {
     close: PropTypes.func.isRequired,
-    lifecycle: PropTypes.object.isRequired,
+    name: PropTypes.string.isRequired,
+    cluster: PropTypes.object.isRequired,
   };
 
-  getEsJson({ phases }) {
-    return JSON.stringify({
-      policy: {
-        phases
-      }
-    }, null, 2);
-  }
-
   render() {
-    const { lifecycle, close, policyName } = this.props;
-    const endpoint = `PUT _ilm/policy/${policyName || '<policyName>'}`;
-    const request = `${endpoint}\n${this.getEsJson(lifecycle)}`;
+    const { name, close, cluster } = this.props;
+    const endpoint = 'PUT _cluster/settings';
+    const payload = JSON.stringify(serializeCluster(cluster), null, 2);
+    const request = `${endpoint}\n${payload}`;
 
     return (
       <EuiFlyout maxWidth={480} onClose={close}>
         <EuiFlyoutHeader>
           <EuiTitle>
             <h2>
-              {policyName ? (
+              {name ? (
                 <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.policyJsonFlyout.namedTitle"
-                  defaultMessage="Request for '{policyName}'"
-                  values={{ policyName }}
+                  id="xpack.remoteClusters.requestFlyout.namedTitle"
+                  defaultMessage="Request for '{name}'"
+                  values={{ name }}
                 />
               ) : (
                 <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.policyJsonFlyout.unnamedTitle"
+                  id="xpack.remoteClusters.requestFlyout.unnamedTitle"
                   defaultMessage="Request"
                 />
               )}
@@ -64,8 +66,8 @@ export class PolicyJsonFlyout extends PureComponent {
           <EuiText>
             <p>
               <FormattedMessage
-                id="xpack.indexLifecycleMgmt.policyJsonFlyout.descriptionText"
-                defaultMessage="This Elasticsearch request will create or update this index lifecycle policy."
+                id="xpack.remoteClusters.requestFlyout.descriptionText"
+                defaultMessage="This Elasticsearch request will create or update this remote cluster."
               />
             </p>
           </EuiText>
@@ -87,7 +89,7 @@ export class PolicyJsonFlyout extends PureComponent {
             flush="left"
           >
             <FormattedMessage
-              id="xpack.indexLifecycleMgmt.policyJsonFlyout.closeButtonLabel"
+              id="xpack.remoteClusters.requestFlyout.closeButtonLabel"
               defaultMessage="Close"
             />
           </EuiButtonEmpty>
