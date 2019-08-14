@@ -93,6 +93,7 @@ export default () => Joi.object({
 
     // keep them for BWC, remove when not used in Legacy.
     // validation should be in sync with one in New platform.
+    // https://github.com/elastic/kibana/blob/master/src/core/server/http/http_config.ts
     basePath: Joi.string().default('').allow('').regex(/(^$|^\/.*[^\/]$)/, `start with a slash, don't end with one`),
     host: Joi.string().hostname().default('localhost'),
     port: Joi.number().default(5601),
