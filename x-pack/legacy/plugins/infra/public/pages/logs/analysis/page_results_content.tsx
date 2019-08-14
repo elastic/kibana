@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -42,10 +42,19 @@ export const AnalysisResultsContent = ({ sourceId }: { sourceId: string }) => {
   useTrackPageview({ app: 'infra_logs', path: 'analysis_results', delay: 15000 });
 
   const { timeRange, setTimeRange } = useLogAnalysisResultsUrlState();
+  const bucketDuration = useMemo(() => {
+    const msRange = timeRange.endTime - timeRange.startTime;
+    const bucketIntervalInMs = msRange / 200;
+    const bucketSpan = 900000; // TODO: Pull this from 'common' when setup hook PR is merged
+    const result = ((bucketIntervalInMs + bucketSpan / 2) / bucketSpan) * bucketSpan;
+    const roundedResult = parseInt(Number(result).toFixed(0), 10);
+    return roundedResult < bucketSpan ? bucketSpan : roundedResult;
+  }, [timeRange]);
   const { isLoading, logEntryRate } = useLogAnalysisResults({
     sourceId,
     startTime: timeRange.startTime,
     endTime: timeRange.endTime,
+    bucketDuration,
   });
   const handleTimeRangeChange = useCallback(
     ({ start, end }: { start: string; end: string }) => {

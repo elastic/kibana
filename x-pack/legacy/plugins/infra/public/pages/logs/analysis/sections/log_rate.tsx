@@ -42,7 +42,7 @@ export const LogRateResults = ({
   results: GetLogEntryRateSuccessResponsePayload['data'] | null;
 }) => {
   const title = i18n.translate('xpack.infra.logs.analysis.logRateSectionTitle', {
-    defaultMessage: 'Logs entries',
+    defaultMessage: 'Log entries',
   });
 
   const loadingAriaLabel = i18n.translate(
