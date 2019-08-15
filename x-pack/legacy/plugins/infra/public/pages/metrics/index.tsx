@@ -20,7 +20,6 @@ import { UICapabilities } from 'ui/capabilities';
 import { injectUICapabilities } from 'ui/capabilities/react';
 import euiStyled, { EuiTheme, withTheme } from '../../../../../common/eui_styled_components';
 import { InfraMetricsErrorCodes } from '../../../common/errors';
-import { AutoSizer } from '../../components/auto_sizer';
 import { DocumentTitle } from '../../components/document_title';
 import { Header } from '../../components/header';
 import { Metrics } from '../../components/metrics';
