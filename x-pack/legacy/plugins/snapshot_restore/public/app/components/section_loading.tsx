@@ -18,9 +18,10 @@ import {
 interface Props {
   inline?: boolean;
   children: React.ReactNode;
+  [key: string]: any;
 }
 
-export const SectionLoading: React.FunctionComponent<Props> = ({ inline, children }) => {
+export const SectionLoading: React.FunctionComponent<Props> = ({ inline, children, ...rest }) => {
   if (inline) {
     return (
       <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
@@ -28,7 +29,7 @@ export const SectionLoading: React.FunctionComponent<Props> = ({ inline, childre
           <EuiLoadingSpinner size="m" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText>
+          <EuiText {...rest}>
             <EuiTextColor color="subdued">{children}</EuiTextColor>
           </EuiText>
         </EuiFlexItem>

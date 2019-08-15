@@ -16,6 +16,7 @@ export const deserializePolicy = (name: string, esPolicy: SlmPolicyEs): SlmPolic
     next_execution_millis: nextExecutionMillis,
     last_failure: lastFailure,
     last_success: lastSuccess,
+    in_progress: inProgress,
   } = esPolicy;
 
   const policy: SlmPolicy = {
@@ -70,6 +71,14 @@ export const deserializePolicy = (name: string, esPolicy: SlmPolicyEs): SlmPolic
       snapshotName: successSnapshotName,
       time: successTime,
       timeString: successTimeString,
+    };
+  }
+
+  if (inProgress) {
+    const { name: inProgressSnapshotName } = inProgress;
+
+    policy.inProgress = {
+      snapshotName: inProgressSnapshotName,
     };
   }
 

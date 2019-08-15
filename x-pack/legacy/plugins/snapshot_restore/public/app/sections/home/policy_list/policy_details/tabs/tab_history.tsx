@@ -47,7 +47,7 @@ export const TabHistory: React.FunctionComponent<Props> = ({ policy }) => {
           <h3>
             <FormattedMessage
               id="xpack.snapshotRestore.policyDetails.lastSuccessTitle"
-              defaultMessage="Last successful snapshot"
+              defaultMessage="Last successful run"
             />
           </h3>
         </EuiTitle>
@@ -59,8 +59,8 @@ export const TabHistory: React.FunctionComponent<Props> = ({ policy }) => {
               <EuiDescriptionListTitle data-test-subj="title">
                 <FormattedMessage
                   id="xpack.snapshotRestore.policyDetails.lastSuccess.timeLabel"
-                  defaultMessage="Succeeded on"
-                  description="Title for date time. Example: Succeeded on Jul 16, 2019 6:30 PM PDT"
+                  defaultMessage="Ran on"
+                  description="Title for date time. Example: Ran on Jul 16, 2019 6:30 PM PDT"
                 />
               </EuiDescriptionListTitle>
 
@@ -154,13 +154,13 @@ export const TabHistory: React.FunctionComponent<Props> = ({ policy }) => {
                   setOptions={{
                     showLineNumbers: false,
                     tabSize: 2,
-                    maxLines: Infinity,
                   }}
                   editorProps={{
                     $blockScrolling: Infinity,
                   }}
                   minLines={6}
-                  maxLines={6}
+                  maxLines={12}
+                  wrapEnabled={true}
                   showGutter={false}
                   aria-label={
                     <FormattedMessage

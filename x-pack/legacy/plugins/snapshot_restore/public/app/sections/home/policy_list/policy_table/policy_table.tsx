@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, Fragment } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -13,6 +13,7 @@ import {
   EuiLink,
   EuiToolTip,
   EuiButtonIcon,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 
 import { SlmPolicy } from '../../../../../../common/types';
@@ -56,15 +57,33 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
       }),
       truncateText: true,
       sortable: true,
-      render: (name: SlmPolicy['name']) => {
+      render: (name: SlmPolicy['name'], { inProgress }: SlmPolicy) => {
         return (
-          <EuiLink
-            onClick={() => trackUiMetric(UIM_POLICY_SHOW_DETAILS_CLICK)}
-            href={openPolicyDetailsUrl(name)}
-            data-test-subj="policyLink"
-          >
-            {name}
-          </EuiLink>
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiLink
+                onClick={() => trackUiMetric(UIM_POLICY_SHOW_DETAILS_CLICK)}
+                href={openPolicyDetailsUrl(name)}
+                data-test-subj="policyLink"
+              >
+                {name}
+              </EuiLink>
+            </EuiFlexItem>
+            {inProgress ? (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.snapshotRestore.policyList.table.inProgressTooltip',
+                    {
+                      defaultMessage: 'Snapshot currently being taken',
+                    }
+                  )}
+                >
+                  <EuiLoadingSpinner size="m" />
+                </EuiToolTip>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
         );
       },
     },
@@ -109,7 +128,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
       }),
       actions: [
         {
-          render: ({ name }: SlmPolicy) => {
+          render: ({ name, inProgress }: SlmPolicy) => {
             return (
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem>
@@ -117,10 +136,17 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
                     {executePolicyPrompt => {
                       return (
                         <EuiToolTip
-                          content={i18n.translate(
-                            'xpack.snapshotRestore.policyList.table.actionExecuteTooltip',
-                            { defaultMessage: 'Run immediately' }
-                          )}
+                          content={
+                            Boolean(inProgress)
+                              ? i18n.translate(
+                                  'xpack.snapshotRestore.policyList.table.actionExecuteDisabledTooltip',
+                                  { defaultMessage: 'Policy is already running' }
+                                )
+                              : i18n.translate(
+                                  'xpack.snapshotRestore.policyList.table.actionExecuteTooltip',
+                                  { defaultMessage: 'Run immediately' }
+                                )
+                          }
                         >
                           <EuiButtonIcon
                             aria-label={i18n.translate(
@@ -134,6 +160,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
                             color="primary"
                             data-test-subj="executePolicyButton"
                             onClick={() => executePolicyPrompt(name, onPolicyExecuted)}
+                            disabled={Boolean(inProgress)}
                           />
                         </EuiToolTip>
                       );
@@ -305,6 +332,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
 
   return (
     <EuiInMemoryTable
+      className="snapshotRestore__policyTable"
       items={policies}
       itemId="name"
       columns={columns}

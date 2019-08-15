@@ -18,6 +18,8 @@ import {
   EuiButton,
   EuiPopover,
   EuiContextMenu,
+  EuiButtonIcon,
+  EuiLink,
 } from '@elastic/eui';
 
 import { SlmPolicy } from '../../../../../../common/types';
@@ -28,7 +30,7 @@ import {
 } from '../../../../constants';
 import { useLoadPolicy } from '../../../../services/http';
 import { uiMetricService } from '../../../../services/ui_metric';
-import { linkToEditPolicy } from '../../../../services/navigation';
+import { linkToEditPolicy, linkToSnapshot } from '../../../../services/navigation';
 
 import {
   SectionError,
@@ -240,11 +242,16 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
                                     ),
                                     icon: 'play',
                                     onClick: () => {
-                                      executePolicyPrompt(policyName, () => {
-                                        onPolicyExecuted();
-                                        reload();
-                                      });
+                                      executePolicyPrompt(policyName, () =>
+                                        // Wait a little bit for policy to execute before
+                                        // reloading policy table and policy details
+                                        setTimeout(() => {
+                                          onPolicyExecuted();
+                                          reload();
+                                        }, 2000)
+                                      );
                                     },
+                                    disabled: Boolean(policyDetails.policy.inProgress),
                                   },
                                   {
                                     name: i18n.translate(
@@ -293,11 +300,49 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
       maxWidth={550}
     >
       <EuiFlyoutHeader>
-        <EuiTitle size="m">
-          <h2 id="srPolicyDetailsFlyoutTitle" data-test-subj="title">
-            {policyName}
-          </h2>
-        </EuiTitle>
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexItem>
+            <EuiTitle size="m">
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <h2 id="srPolicyDetailsFlyoutTitle" data-test-subj="title">
+                    {policyName}
+                  </h2>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    iconType="refresh"
+                    color="subdued"
+                    aria-label={i18n.translate(
+                      'xpack.snapshotRestore.policyDetails.reloadButtonAriaLabel',
+                      { defaultMessage: 'Reload' }
+                    )}
+                    onClick={() => reload()}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiTitle>
+          </EuiFlexItem>
+          {policyDetails && policyDetails.policy && policyDetails.policy.inProgress ? (
+            <EuiFlexItem>
+              <SectionLoading inline={true} size="s">
+                <EuiLink
+                  href={linkToSnapshot(
+                    policyDetails.policy.repository,
+                    policyDetails.policy.inProgress.snapshotName
+                  )}
+                  data-test-subj="inProgressSnapshotLink"
+                >
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.policyDetails.inProgressSnapshotLinkText"
+                    defaultMessage="'{snapshotName}' currently being taken…"
+                    values={{ snapshotName: policyDetails.policy.inProgress.snapshotName }}
+                  />
+                </EuiLink>
+              </SectionLoading>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
         {renderTabs()}
       </EuiFlyoutHeader>
 

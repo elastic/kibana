@@ -31,6 +31,9 @@ export interface SlmPolicy extends SlmPolicyPayload {
     time: number;
     details: object | string;
   };
+  inProgress?: {
+    snapshotName: string;
+  };
 }
 
 export interface SlmPolicyEs {
@@ -55,5 +58,12 @@ export interface SlmPolicyEs {
     time_string: string;
     time: number;
     details: string;
+  };
+  in_progress?: {
+    name: string;
+    uuid: string;
+    state: string;
+    start_time: string;
+    start_time_millis: number;
   };
 }
