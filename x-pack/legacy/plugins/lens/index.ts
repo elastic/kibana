@@ -25,6 +25,7 @@ export const lens: LegacyPluginInitializer = kibana => {
         title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
         description: 'Explore and visualize data.',
         main: `plugins/${PLUGIN_ID}/index`,
+        listed: false,
       },
       embeddableFactories: ['plugins/lens/register_embeddable'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
@@ -64,7 +65,7 @@ export const lens: LegacyPluginInitializer = kibana => {
               all: [],
               read: [],
             },
-            ui: ['save', 'show'],
+            ui: ['save', 'show', 'delete'],
           },
           read: {
             api: [PLUGIN_ID],
