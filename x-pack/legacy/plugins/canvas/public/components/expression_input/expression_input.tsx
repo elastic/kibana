@@ -12,29 +12,10 @@ import * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
 
 import { Editor } from '../editor';
 
-// TODO: update when https://github.com/elastic/kibana/pull/42502 hits
-// @ts-ignore untyped local
-import {
-  getAutocompleteSuggestions,
-  getFnArgDefAtPosition,
-} from '../../../common/lib/autocomplete';
+import { CanvasFunction } from '../../../types';
+import { getAutocompleteSuggestions } from '../../../common/lib/autocomplete';
 
 import { language } from './expression_language';
-
-// TODO: update and remove when https://github.com/elastic/kibana/pull/42502 hits
-interface ArgDef {
-  text: string;
-  name: string;
-}
-
-interface FunctionDef {
-  name: string;
-  help: string;
-  args: {
-    [key: string]: ArgDef;
-  };
-  type: string;
-}
 
 interface Props {
   fontSize: number;
@@ -42,7 +23,7 @@ interface Props {
 
   error?: string;
   value: string;
-  functionDefinitions: FunctionDef[];
+  functionDefinitions: CanvasFunction[];
   onChange: (value?: string) => void;
 }
 
@@ -57,12 +38,9 @@ export class ExpressionInput extends React.Component<Props> {
 
   undoHistory: string[];
   redoHistory: string[];
-  editor: monacoEditor.editor.IStandaloneCodeEditor | null;
 
   constructor(props: Props) {
     super(props);
-
-    this.editor = null;
 
     this.undoHistory = [];
     this.redoHistory = [];
@@ -134,6 +112,14 @@ export class ExpressionInput extends React.Component<Props> {
       endColumn: textRange.endColumn,
     });
 
+    const wordUntil = model.getWordUntilPosition(position);
+    const wordRange = new monacoEditor.Range(
+      position.lineNumber,
+      wordUntil.startColumn,
+      position.lineNumber,
+      wordUntil.endColumn
+    );
+
     const aSuggestions = getAutocompleteSuggestions(
       this.props.functionDefinitions,
       text,
@@ -157,8 +143,10 @@ export class ExpressionInput extends React.Component<Props> {
           documentation: { value: doc, isTrusted: true },
           insertText: s.text,
           command: {
+            title: 'Trigger Suggestion Dialog',
             id: 'editor.action.triggerSuggest',
           },
+          range: wordRange,
         };
       } else if (s.type === 'value') {
         return {
@@ -166,8 +154,10 @@ export class ExpressionInput extends React.Component<Props> {
           kind: monacoEditor.languages.CompletionItemKind.Value,
           insertText: s.text,
           command: {
+            title: 'Trigger Suggestion Dialog',
             id: 'editor.action.triggerSuggest',
           },
+          range: wordRange,
         };
       } else {
         const { help, context, type } = s.fnDef;
@@ -185,8 +175,10 @@ export class ExpressionInput extends React.Component<Props> {
           },
           insertText: s.text,
           command: {
+            title: 'Trigger Suggestion Dialog',
             id: 'editor.action.triggerSuggest',
           },
+          range: wordRange,
         };
       }
     });
