@@ -13,9 +13,13 @@ import * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
 import { Editor } from '../editor';
 
 import { CanvasFunction } from '../../../types';
-import { getAutocompleteSuggestions } from '../../../common/lib/autocomplete';
+import {
+  getAutocompleteSuggestions,
+  getFnArgDefAtPosition,
+} from '../../../common/lib/autocomplete';
 
 import { language } from './expression_language';
+import { getFunctionReferenceStr, getArgReferenceStr } from './reference';
 
 interface Props {
   fontSize: number;
@@ -101,7 +105,6 @@ export class ExpressionInput extends React.Component<Props> {
   };
 
   provideSuggestions = (model: monacoEditor.editor.ITextModel, position: monacoEditor.Position) => {
-    // find out if we are completing a property in the 'dependencies' object.
     const text = model.getValue();
     const textRange = model.getFullModelRange();
 
@@ -128,19 +131,10 @@ export class ExpressionInput extends React.Component<Props> {
 
     const suggestions = aSuggestions.map((s: any) => {
       if (s.type === 'argument') {
-        const { aliases, types, default: def, required, help } = s.argDef;
-
-        // Aliases, Types, Default, Required
-        const doc = `**Aliases**: ${aliases.length ? aliases.join(' | ') : 'null'}, **Types**: ${
-          types.length ? types.join(' | ') : 'null'
-        }
-\n\n${def != null ? '**Default**: ' + def + ', ' : ''}**Required**: ${String(Boolean(required))}
-\n\n${help}`;
-
         return {
           label: s.argDef.name,
           kind: monacoEditor.languages.CompletionItemKind.Field,
-          documentation: { value: doc, isTrusted: true },
+          documentation: { value: getArgReferenceStr(s.argDef), isTrusted: true },
           insertText: s.text,
           command: {
             title: 'Trigger Suggestion Dialog',
@@ -160,17 +154,11 @@ export class ExpressionInput extends React.Component<Props> {
           range: wordRange,
         };
       } else {
-        const { help, context, type } = s.fnDef;
-        const doc = `**Accepts**: ${
-          context.types ? context.types.join(' | ') : 'null'
-        }, **Returns**: ${type ? type : 'null'}
-\n\n${help}`;
-
         return {
           label: s.fnDef.name,
           kind: monacoEditor.languages.CompletionItemKind.Function,
           documentation: {
-            value: doc,
+            value: getFunctionReferenceStr(s.fnDef),
             isTrusted: true,
           },
           insertText: s.text,
@@ -188,6 +176,53 @@ export class ExpressionInput extends React.Component<Props> {
     };
   };
 
+  providerHover = (model: monacoEditor.editor.ITextModel, position: monacoEditor.Position) => {
+    const text = model.getValue();
+    const word = model.getWordAtPosition(position);
+
+    if (!word) {
+      return {
+        contents: [],
+      };
+    }
+
+    const absPosition = model.getValueLengthInRange({
+      startLineNumber: 0,
+      startColumn: 0,
+      endLineNumber: position.lineNumber,
+      endColumn: word.endColumn,
+    });
+
+    const { fnDef, argDef } = getFnArgDefAtPosition(
+      this.props.functionDefinitions,
+      text,
+      absPosition
+    );
+
+    if (argDef) {
+      return {
+        contents: [{ value: getArgReferenceStr(argDef), isTrusted: true }],
+      };
+    } else if (fnDef) {
+      return {
+        contents: [
+          {
+            value: getFunctionReferenceStr(fnDef),
+            isTrusted: true,
+          },
+        ],
+      };
+    }
+
+    return {
+      contents: [],
+    };
+  };
+
+  editorWillMount = () => {
+    language.keywords = this.props.functionDefinitions.map(fn => fn.name);
+  };
+
   render() {
     const { value, error, fontSize, functionDefinitions, isAutocompleteEnabled } = this.props;
 
@@ -196,9 +231,6 @@ export class ExpressionInput extends React.Component<Props> {
     if (functionDefinitions.length === 0) {
       return null;
     }
-
-    // TODO: Move this
-    language.keywords = this.props.functionDefinitions.map(fn => fn.name);
 
     const helpText = error
       ? null
@@ -218,9 +250,13 @@ export class ExpressionInput extends React.Component<Props> {
               languageDef={language}
               value={value}
               onChange={this.onChange}
+              editorWillMount={this.editorWillMount}
               suggestionProvider={{
                 triggerCharacters: [' '],
                 provideCompletionItems: this.provideSuggestions,
+              }}
+              hoverProvider={{
+                provideHover: this.providerHover,
               }}
               options={{
                 fontSize,

@@ -63,6 +63,10 @@ export class Editor extends React.Component<Props, {}> {
       return;
     }
 
+    if (this.props.editorWillMount) {
+      this.props.editorWillMount(monaco);
+    }
+
     // Setup on language handler here which registers all our code providers for the language
     // https://microsoft.github.io/monaco-editor/api/modules/monaco.languages.html#onlanguage
 
@@ -91,10 +95,6 @@ export class Editor extends React.Component<Props, {}> {
 
     // Register the lovely theme
     monaco.editor.defineTheme('euiColors', theme);
-
-    if (this.props.editorWillMount) {
-      this.props.editorWillMount(monaco);
-    }
   };
 
   editorDidMount = (

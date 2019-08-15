@@ -12,6 +12,8 @@ import {
   ExpressionFunctionAST,
   ExpressionArgAST,
   CanvasFunction,
+  CanvasArg,
+  CanvasArgValue,
 } from '../../types';
 
 const MARKER = 'CANVAS_SUGGESTION_MARKER';
@@ -62,19 +64,14 @@ function isExpression(
   return typeof maybeExpression.node === 'object';
 }
 
-type valueof<T> = T[keyof T];
-type ValuesOfUnion<T> = T extends any ? valueof<T> : never;
-
-// All of the possible Arg Values
-type ArgValue = ValuesOfUnion<CanvasFunction['args']>;
-// All of the argument objects
-type CanvasArg = CanvasFunction['args'];
-
 // Overloads to change return type based on specs
 function getByAlias(specs: CanvasFunction[], name: string): CanvasFunction;
 // eslint-disable-next-line @typescript-eslint/unified-signatures
-function getByAlias(specs: CanvasArg, name: string): ArgValue;
-function getByAlias(specs: CanvasFunction[] | CanvasArg, name: string): CanvasFunction | ArgValue {
+function getByAlias(specs: CanvasArg, name: string): CanvasArgValue;
+function getByAlias(
+  specs: CanvasFunction[] | CanvasArg,
+  name: string
+): CanvasFunction | CanvasArgValue {
   return untypedGetByAlias(specs, name);
 }
 
@@ -103,7 +100,7 @@ export function getFnArgDefAtPosition(
   } catch (e) {
     // Fail silently
   }
-  return [];
+  return {};
 }
 
 /**
@@ -218,7 +215,7 @@ function getArgNameSuggestions(
 
   // Filter the list of args by the text at the marker
   const query = text.replace(MARKER, '');
-  const matchingArgDefs = Object.entries<ArgValue>(fnDef.args).filter(([name]) =>
+  const matchingArgDefs = Object.entries<CanvasArgValue>(fnDef.args).filter(([name]) =>
     textMatches(name, query)
   );
 
@@ -245,11 +242,11 @@ function getArgNameSuggestions(
   // with the text at the marker, then alphabetically
   const comparator = combinedComparator(
     unnamedArgComparator,
-    invokeWithProp<string, 'name', ArgValue & { name: string }, number>(
+    invokeWithProp<string, 'name', CanvasArgValue & { name: string }, number>(
       startsWithComparator(query),
       'name'
     ),
-    invokeWithProp<string, 'name', ArgValue & { name: string }, number>(
+    invokeWithProp<string, 'name', CanvasArgValue & { name: string }, number>(
       alphanumericalComparator,
       'name'
     )
@@ -331,7 +328,7 @@ function prevFnTypeComparator(prevFnType: any) {
   };
 }
 
-function unnamedArgComparator(a: ArgValue, b: ArgValue): number {
+function unnamedArgComparator(a: CanvasArgValue, b: CanvasArgValue): number {
   return (
     (b.aliases && b.aliases.includes('_') ? 1 : 0) - (a.aliases && a.aliases.includes('_') ? 1 : 0)
   );
