@@ -28,17 +28,10 @@ import { Subscription } from 'rxjs';
 import ReactGridLayout, { Layout } from 'react-grid-layout';
 // @ts-ignore
 import sizeMe from 'react-sizeme';
-import {
-  GetActionsCompatibleWithTrigger,
-  GetEmbeddableFactory,
-  GetEmbeddableFactories,
-} from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { CoreStart } from 'src/core/public';
 import { ViewMode, EmbeddableChildPanel } from '../../embeddable_api';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardPanelState, GridData } from '../types';
-import { Start as InspectorStartContract } from '../../../../../../../../../plugins/inspector/public';
 import { withKibana } from '../../../../../../../../../plugins/kibana_react/public';
 
 let lastValidGridSize = 0;
@@ -120,13 +113,6 @@ const ResponsiveSizedGrid = sizeMe(config)(ResponsiveGrid);
 export interface DashboardGridProps extends ReactIntl.InjectedIntlProps {
   kibana: DashboardReactContextValue;
   container: DashboardContainer;
-  getActions: GetActionsCompatibleWithTrigger;
-  getEmbeddableFactory: GetEmbeddableFactory;
-  getAllEmbeddableFactories: GetEmbeddableFactories;
-  overlays: CoreStart['overlays'];
-  notifications: CoreStart['notifications'];
-  inspector: InspectorStartContract;
-  SavedObjectFinder: React.ComponentType<any>;
 }
 
 interface State {
@@ -280,13 +266,13 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
           <EmbeddableChildPanel
             embeddableId={panel.explicitInput.id}
             container={this.props.container}
-            getActions={this.props.getActions}
-            getEmbeddableFactory={this.props.getEmbeddableFactory}
-            getAllEmbeddableFactories={this.props.getAllEmbeddableFactories}
-            overlays={this.props.overlays}
-            notifications={this.props.notifications}
-            inspector={this.props.inspector}
-            SavedObjectFinder={this.props.SavedObjectFinder}
+            getActions={this.props.kibana.services.embeddable.getTriggerCompatibleActions}
+            getEmbeddableFactory={this.props.kibana.services.embeddable.getEmbeddableFactory}
+            getAllEmbeddableFactories={this.props.kibana.services.embeddable.getEmbeddableFactories}
+            overlays={this.props.kibana.services.overlays}
+            notifications={this.props.kibana.services.notifications}
+            inspector={this.props.kibana.services.inspector}
+            SavedObjectFinder={this.props.kibana.services.SavedObjectFinder}
           />
         </div>
       );

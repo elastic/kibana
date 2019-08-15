@@ -99,16 +99,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
             onExitFullScreenMode={this.onExitFullScreenMode}
           />
         )}
-        <DashboardGrid
-          container={container}
-          getActions={this.context.services.embeddable.getTriggerCompatibleActions}
-          getAllEmbeddableFactories={this.context.services.embeddable.getEmbeddableFactories}
-          getEmbeddableFactory={this.context.services.embeddable.getEmbeddableFactory}
-          notifications={this.context.services.notifications}
-          overlays={this.context.services.overlays}
-          inspector={this.context.services.inspector}
-          SavedObjectFinder={this.context.services.SavedObjectFinder}
-        />
+        <DashboardGrid container={container} />
       </div>
     );
   }
