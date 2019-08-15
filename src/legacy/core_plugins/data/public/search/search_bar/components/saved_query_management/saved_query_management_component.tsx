@@ -97,15 +97,15 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
   );
 
   const onDeleteSavedQuery = async (savedQuery: SavedQuery) => {
-    setSavedQueries(savedQueries.filter(currentSavedQuery => currentSavedQuery !== savedQuery));
+    setSavedQueries(
+      savedQueries.filter(currentSavedQuery => currentSavedQuery.id !== savedQuery.id)
+    );
 
     if (loadedSavedQuery && loadedSavedQuery.id === savedQuery.id) {
       onClearSavedQuery();
     }
 
     await savedQueryService.deleteSavedQuery(savedQuery.id);
-    // close the modal after delete
-    setIsOpen(false);
   };
 
   const savedQueryPopoverButton = (
@@ -131,9 +131,10 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
       if (!loadedSavedQuery) return true;
       return savedQuery.id !== loadedSavedQuery.id;
     });
-    const savedQueriesReordered = loadedSavedQuery
-      ? [loadedSavedQuery, ...savedQueriesWithoutCurrent]
-      : [...savedQueriesWithoutCurrent];
+    const savedQueriesReordered =
+      loadedSavedQuery && savedQueriesWithoutCurrent.length !== savedQueries.length
+        ? [loadedSavedQuery, ...savedQueriesWithoutCurrent]
+        : [...savedQueriesWithoutCurrent];
     const savedQueriesDisplayRows = savedQueriesReordered.slice(
       activePage * pageCount,
       activePage * pageCount + pageCount

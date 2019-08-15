@@ -148,8 +148,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('allows deleting saved queries in the saved query management component ', async () => {
         await savedQueryManagementComponent.deleteSavedQuery('foo2');
-        // add a manual delay
-        await queryBar.setQuery('response:503');
         await savedQueryManagementComponent.savedQueryMissingOrFail('foo2');
       });
     });

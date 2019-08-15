@@ -135,9 +135,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await savedQueryManagementComponent.savedQueryMissingOrFail('foo2');
       });
 
-      it('allows deleting an unselected saved query in the saved query management component ', async () => {
-        await savedQueryManagementComponent.deleteSavedQuery('foo');
-        await savedQueryManagementComponent.savedQueryMissingOrFail('foo');
+      it('allows deleting a loaded saved query in the saved query management component ', async () => {
+        await savedQueryManagementComponent.deleteSavedQuery('foo2');
+        await savedQueryManagementComponent.savedQueryMissingOrFail('foo2');
       });
     });
 
