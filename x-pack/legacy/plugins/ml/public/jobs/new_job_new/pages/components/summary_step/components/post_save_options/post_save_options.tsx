@@ -48,17 +48,23 @@ export const PostSaveOptions: FC<Props> = ({ jobRunner }) => {
         const started = await jobRunner.startDatafeedInRealTime(true);
         setDatafeedState(started === true ? DATAFEED_STATE.STARTED : DATAFEED_STATE.STOPPED);
         toastNotifications.addSuccess({
-          title: i18n.translate('xpack.ml.newJob.wizard.startJobInRealTimeSuccess', {
-            defaultMessage: `Job {jobId} started`,
-            values: { jobId: jobCreator.jobId },
-          }),
+          title: i18n.translate(
+            'xpack.ml.newJob.wizard.summaryStep.postSaveOptions.startJobInRealTimeSuccess',
+            {
+              defaultMessage: `Job {jobId} started`,
+              values: { jobId: jobCreator.jobId },
+            }
+          ),
         });
       } catch (error) {
         setDatafeedState(DATAFEED_STATE.STOPPED);
         toastNotifications.addDanger({
-          title: i18n.translate('xpack.ml.newJob.wizard.startJobInRealTimeError', {
-            defaultMessage: `Error starting job`,
-          }),
+          title: i18n.translate(
+            'xpack.ml.newJob.wizard.summaryStep.postSaveOptions.startJobInRealTimeError',
+            {
+              defaultMessage: `Error starting job`,
+            }
+          ),
           text: error.message,
         });
       }
@@ -76,7 +82,7 @@ export const PostSaveOptions: FC<Props> = ({ jobRunner }) => {
         data-test-subj="mlButtonUseFullData3"
       >
         <FormattedMessage
-          id="xpack.ml.newJob.wizard.startJobInRealTime"
+          id="xpack.ml.newJob.wizard.summaryStep.postSaveOptions.startJobInRealTime"
           defaultMessage="Start job running in real time"
         />
       </EuiButton>
@@ -90,7 +96,10 @@ export const PostSaveOptions: FC<Props> = ({ jobRunner }) => {
         onClick={() => setWatchFlyoutVisible(true)}
         data-test-subj="mlButtonUseFullData"
       >
-        <FormattedMessage id="xpack.ml.newJob.wizard.createWatch" defaultMessage="Create watch" />
+        <FormattedMessage
+          id="xpack.ml.newJob.wizard.summaryStep.postSaveOptions.createWatch"
+          defaultMessage="Create watch"
+        />
       </EuiButton>
       {datafeedState === DATAFEED_STATE.STARTED && watchFlyoutVisible && (
         <CreateWatchFlyout
