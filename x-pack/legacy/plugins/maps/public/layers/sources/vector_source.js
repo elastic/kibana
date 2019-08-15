@@ -125,6 +125,6 @@ export class AbstractVectorSource extends AbstractSource {
   }
 
   getSourceTooltipContent(/* sourceDataRequest */) {
-    return null;
+    return { tooltipContent: null, areResultsTrimmed: false };
   }
 }

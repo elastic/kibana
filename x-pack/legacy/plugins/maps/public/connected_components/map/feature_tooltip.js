@@ -4,36 +4,58 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import React, { Fragment } from 'react';
 import {
   EuiButtonIcon,
-  EuiText,
+  EuiLink,
   EuiPagination,
   EuiSelect,
   EuiIconTip,
   EuiHorizontalRule,
   EuiFlexGroup,
-  EuiFlexItem
+  EuiFlexItem,
+  EuiTextColor
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FeatureProperties } from './feature_properties';
-
+import { FormattedMessage } from '@kbn/i18n/react';
+import { GEO_JSON_TYPE, ES_GEO_FIELD_TYPE } from '../../../common/constants';
+import { FeatureGeometryFilterForm } from './feature_geometry_filter_form';
 
 const ALL_LAYERS = '_ALL_LAYERS_';
 const DEFAULT_PAGE_NUMBER = 0;
+
+const VIEWS = {
+  PROPERTIES_VIEW: 'PROPERTIES_VIEW',
+  GEOMETRY_FILTER_VIEW: 'GEOMETRY_FILTER_VIEW'
+};
 
 export class FeatureTooltip extends React.Component {
 
   state = {
     uniqueLayers: [],
     pageNumber: DEFAULT_PAGE_NUMBER,
-    layerIdFilter: ALL_LAYERS
+    layerIdFilter: ALL_LAYERS,
+    view: VIEWS.PROPERTIES_VIEW,
   };
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (!_.isEqual(nextProps.anchorLocation, prevState.prevAnchorLocation)) {
+      return {
+        view: VIEWS.PROPERTIES_VIEW, // reset to properties view when tooltip changes location
+        prevAnchorLocation: nextProps.anchorLocation
+      };
+    }
+
+    return null;
+  }
 
   constructor() {
     super();
     this._prevFeatures = null;
   }
+
 
   componentDidMount() {
     this._isMounted = true;
@@ -48,7 +70,6 @@ export class FeatureTooltip extends React.Component {
   }
 
   _onLayerChange = (e) => {
-
     const layerId = e.target.value;
     if (this.state.layerIdFilter === layerId) {
       return;
@@ -70,13 +91,11 @@ export class FeatureTooltip extends React.Component {
   };
 
   _loadUniqueLayers = async () => {
-
     if (this._prevFeatures === this.props.features) {
       return;
     }
 
     this._prevFeatures = this.props.features;
-
 
     const countByLayerId = new Map();
     for (let i = 0; i < this.props.features.length; i++) {
@@ -115,9 +134,15 @@ export class FeatureTooltip extends React.Component {
     }
   };
 
+  _showGeometryFilterView = () => {
+    this.setState({ view: VIEWS.GEOMETRY_FILTER_VIEW });
+  }
 
-  _renderProperties(features) {
-    const feature = features[this.state.pageNumber];
+  _showPropertiesView = () => {
+    this.setState({ view: VIEWS.PROPERTIES_VIEW });
+  }
+
+  _renderProperties(feature) {
     if (!feature) {
       return null;
     }
@@ -128,7 +153,27 @@ export class FeatureTooltip extends React.Component {
         loadFeatureProperties={this.props.loadFeatureProperties}
         showFilterButtons={this.props.showFilterButtons}
         onCloseTooltip={this._onCloseTooltip}
+        addFilters={this.props.addFilters}
+        reevaluateTooltipPosition={this.props.reevaluateTooltipPosition}
       />
+    );
+  }
+
+  _renderActions(feature, geoFields) {
+    if (!this.props.isLocked || geoFields.length === 0) {
+      return null;
+    }
+
+    return (
+      <EuiLink
+        className="mapFeatureTooltip_actionLinks"
+        onClick={this._showGeometryFilterView}
+      >
+        <FormattedMessage
+          id="xpack.maps.tooltip.showGeometryFilterViewLinkLabel"
+          defaultMessage="Filter by geometry"
+        />
+      </EuiLink>
     );
   }
 
@@ -157,8 +202,9 @@ export class FeatureTooltip extends React.Component {
       <EuiSelect
         options={options}
         onChange={this._onLayerChange}
-        valueOfSelected={this.state.layerIdFilter}
+        value={this.state.layerIdFilter}
         compressed
+        fullWidth
         aria-label={i18n.translate('xpack.maps.tooltip.layerFilterLabel', {
           defaultMessage: 'Filter results by layer'
         })}
@@ -167,7 +213,6 @@ export class FeatureTooltip extends React.Component {
   }
 
   _renderHeader() {
-
     if (!this.props.isLocked) {
       return null;
     }
@@ -176,12 +221,19 @@ export class FeatureTooltip extends React.Component {
       <EuiHorizontalRule margin="xs"/> : null;
     return (
       <Fragment>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem>
             {this._renderLayerFilterBox()}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {this._renderCloseButton()}
+            <EuiButtonIcon
+              onClick={this._onCloseTooltip}
+              iconType="cross"
+              aria-label={i18n.translate('xpack.maps.tooltip.closeAriaLabel', {
+                defaultMessage: 'Close tooltip'
+              })}
+              data-test-subj="mapTooltipCloseButton"
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
         {divider}
@@ -190,7 +242,6 @@ export class FeatureTooltip extends React.Component {
   }
 
   _renderFooter(filteredFeatures) {
-
     if (filteredFeatures.length === 1) {
       return null;
     }
@@ -202,20 +253,6 @@ export class FeatureTooltip extends React.Component {
       </Fragment>
     );
   }
-
-  _renderCloseButton() {
-    return (
-      <EuiButtonIcon
-        onClick={this._onCloseTooltip}
-        iconType="cross"
-        aria-label={i18n.translate('xpack.maps.tooltip.closeAriaLabel', {
-          defaultMessage: 'Close tooltip'
-        })}
-        data-test-subj="mapTooltipCloseButton"
-      />
-    );
-  }
-
 
   _onPageChange = (pageNumber) => {
     this.setState({
@@ -233,10 +270,40 @@ export class FeatureTooltip extends React.Component {
     });
   }
 
-  _renderPagination(filteredFeatures) {
+  _filterGeoFields(feature) {
+    if (!feature) {
+      return [];
+    }
 
+    // line geometry can only create filters for geo_shape fields.
+    if (feature.geometry.type === GEO_JSON_TYPE.LINE_STRING
+      || feature.geometry.type === GEO_JSON_TYPE.MULTI_LINE_STRING) {
+      return this.props.geoFields.filter(({ geoFieldType }) => {
+        return geoFieldType === ES_GEO_FIELD_TYPE.GEO_SHAPE;
+      });
+    }
+
+    // TODO support geo distance filters for points
+    if (feature.geometry.type === GEO_JSON_TYPE.POINT
+      || feature.geometry.type === GEO_JSON_TYPE.MULTI_POINT) {
+      return [];
+    }
+
+    return this.props.geoFields;
+  }
+
+  _renderPagination(filteredFeatures) {
     const pageNumberReadout = (
-      <EuiText size="s"><b>{(this.state.pageNumber + 1)}</b> of <b>{filteredFeatures.length}</b></EuiText>
+      <EuiTextColor color="subdued">
+        <FormattedMessage
+          id="xpack.maps.tooltip.pageNumerText"
+          defaultMessage="{pageNumber} of {total} features"
+          values={{
+            pageNumber: this.state.pageNumber + 1,
+            total: filteredFeatures.length
+          }}
+        />
+      </EuiTextColor>
     );
 
     const cycleArrows = (this.props.isLocked) ? (<EuiPagination
@@ -270,18 +337,33 @@ export class FeatureTooltip extends React.Component {
         </EuiFlexGroup>
       </Fragment>
     );
-
   }
 
   render() {
     const filteredFeatures = this._filterFeatures();
+    const currentFeature = filteredFeatures[this.state.pageNumber];
+    const filteredGeoFields = this._filterGeoFields(currentFeature);
+
+    if (this.state.view === VIEWS.GEOMETRY_FILTER_VIEW) {
+      return (
+        <FeatureGeometryFilterForm
+          onClose={this._onCloseTooltip}
+          showPropertiesView={this._showPropertiesView}
+          feature={currentFeature}
+          geoFields={filteredGeoFields}
+          addFilters={this.props.addFilters}
+          reevaluateTooltipPosition={this.props.reevaluateTooltipPosition}
+        />
+      );
+    }
+
     return (
       <Fragment>
         {this._renderHeader()}
-        {this._renderProperties(filteredFeatures)}
+        {this._renderProperties(currentFeature)}
+        {this._renderActions(currentFeature, filteredGeoFields)}
         {this._renderFooter(filteredFeatures)}
       </Fragment>
     );
   }
 }
-

@@ -13,6 +13,8 @@ export const RowRendererContainer = styled.div<{ width: number }>`
   width: ${({ width }) => `${width}px`};
 `;
 
+RowRendererContainer.displayName = 'RowRendererContainer';
+
 export interface RowRenderer {
   isInstance: (data: Ecs) => boolean;
   renderRow: ({

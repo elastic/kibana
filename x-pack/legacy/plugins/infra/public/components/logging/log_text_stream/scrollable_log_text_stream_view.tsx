@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { TextScale } from '../../../../common/log_text_scale';
-import { TimeKey } from '../../../../common/time';
+import { TimeKey, UniqueTimeKey } from '../../../../common/time';
 import { callWithoutRepeats } from '../../../utils/handlers';
 import { LogColumnConfiguration } from '../../../utils/source_configuration';
 import { AutoSizer } from '../../auto_sizer';
@@ -44,13 +44,14 @@ interface ScrollableLogTextStreamViewProps {
     startKey: TimeKey | null;
     middleKey: TimeKey | null;
     endKey: TimeKey | null;
+    fromScroll: boolean;
   }) => any;
   loadNewerItems: () => void;
   setFlyoutItem: (id: string) => void;
   setFlyoutVisibility: (visible: boolean) => void;
-  showColumnConfiguration: () => void;
   intl: InjectedIntl;
   highlightedItem: string | null;
+  currentHighlightKey: UniqueTimeKey | null;
 }
 
 interface ScrollableLogTextStreamViewState {
@@ -97,6 +98,7 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
   public render() {
     const {
       columnConfigurations,
+      currentHighlightKey,
       hasMoreAfterEnd,
       hasMoreBeforeStart,
       highlightedItem,
@@ -107,7 +109,6 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
       items,
       lastLoadedTime,
       scale,
-      showColumnConfiguration,
       wrap,
     } = this.props;
     const { targetId } = this.state;
@@ -151,7 +152,6 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
                 <LogColumnHeaders
                   columnConfigurations={columnConfigurations}
                   columnWidths={columnWidths}
-                  showColumnConfiguration={showColumnConfiguration}
                 />
                 <AutoSizer bounds content detectAnyWindowResize="height">
                   {({ measureRef, bounds: { height = 0 }, content: { width = 0 } }) => (
@@ -187,6 +187,10 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
                                     boundingBoxRef={itemMeasureRef}
                                     logEntry={item.logEntry}
                                     highlights={item.highlights}
+                                    isActiveHighlight={
+                                      !!currentHighlightKey &&
+                                      currentHighlightKey.gid === item.logEntry.gid
+                                    }
                                     scale={scale}
                                     wrap={wrap}
                                     isHighlighted={
@@ -250,12 +254,14 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
       bottomChild,
       pagesAbove,
       pagesBelow,
+      fromScroll,
     }: {
       topChild: string;
       middleChild: string;
       bottomChild: string;
       pagesAbove: number;
       pagesBelow: number;
+      fromScroll: boolean;
     }) => {
       this.props.reportVisibleInterval({
         endKey: parseStreamItemId(bottomChild),
@@ -263,6 +269,7 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
         pagesAfterEnd: pagesBelow,
         pagesBeforeStart: pagesAbove,
         startKey: parseStreamItemId(topChild),
+        fromScroll,
       });
     }
   );

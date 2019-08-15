@@ -34,7 +34,7 @@ export class TooltipProperty {
     return false;
   }
 
-  getFilterAction() {
-    throw new Error('This property is not filterable');
+  async getESFilters() {
+    return [];
   }
 }

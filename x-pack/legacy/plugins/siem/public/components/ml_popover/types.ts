@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { MlError } from '../ml/types';
+
 export interface Group {
   id: string;
   jobIds: string[];
@@ -44,12 +46,14 @@ export interface Job {
 export interface SetupMlResponseJob {
   id: string;
   success: boolean;
+  error?: MlError;
 }
 
 export interface SetupMlResponseDatafeed {
   id: string;
   success: boolean;
   started: boolean;
+  error?: MlError;
 }
 
 export interface SetupMlResponse {

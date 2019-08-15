@@ -14,6 +14,8 @@ import { getRenderedHref } from '../../../../../utils/testHelpers';
 import { DiscoverErrorLink } from '../DiscoverErrorLink';
 import { DiscoverSpanLink } from '../DiscoverSpanLink';
 import { DiscoverTransactionLink } from '../DiscoverTransactionLink';
+import * as hooks from '../../../../../hooks/useCore';
+import { InternalCoreStart } from 'src/core/public';
 
 jest.mock('ui/kfetch');
 
@@ -25,6 +27,16 @@ jest
 
 beforeAll(() => {
   jest.spyOn(console, 'error').mockImplementation(() => null);
+
+  const coreMock = ({
+    http: {
+      basePath: {
+        prepend: (path: string) => `/basepath${path}`
+      }
+    }
+  } as unknown) as InternalCoreStart;
+
+  jest.spyOn(hooks, 'useCore').mockReturnValue(coreMock);
 });
 
 afterAll(() => {
@@ -49,7 +61,7 @@ test('DiscoverTransactionLink should produce the correct URL', async () => {
   );
 
   expect(href).toEqual(
-    `/app/kibana#/discover?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now))&_a=(index:apm-index-pattern-id,interval:auto,query:(language:lucene,query:'processor.event:"transaction" AND transaction.id:"8b60bd32ecc6e150" AND trace.id:"8b60bd32ecc6e1506735a8b6cfcf175c"'))`
+    `/basepath/app/kibana#/discover?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now))&_a=(index:apm-index-pattern-id,interval:auto,query:(language:lucene,query:'processor.event:"transaction" AND transaction.id:"8b60bd32ecc6e150" AND trace.id:"8b60bd32ecc6e1506735a8b6cfcf175c"'))`
   );
 });
 
@@ -65,7 +77,7 @@ test('DiscoverSpanLink should produce the correct URL', async () => {
   } as Location);
 
   expect(href).toEqual(
-    `/app/kibana#/discover?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now))&_a=(index:apm-index-pattern-id,interval:auto,query:(language:lucene,query:'span.id:"test-span-id"'))`
+    `/basepath/app/kibana#/discover?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now))&_a=(index:apm-index-pattern-id,interval:auto,query:(language:lucene,query:'span.id:"test-span-id"'))`
   );
 });
 
@@ -86,7 +98,7 @@ test('DiscoverErrorLink should produce the correct URL', async () => {
   );
 
   expect(href).toEqual(
-    `/app/kibana#/discover?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now))&_a=(index:apm-index-pattern-id,interval:auto,query:(language:lucene,query:'service.name:"service-name" AND error.grouping_key:"grouping-key"'),sort:('@timestamp':desc))`
+    `/basepath/app/kibana#/discover?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now))&_a=(index:apm-index-pattern-id,interval:auto,query:(language:lucene,query:'service.name:"service-name" AND error.grouping_key:"grouping-key"'),sort:('@timestamp':desc))`
   );
 });
 
@@ -108,6 +120,6 @@ test('DiscoverErrorLink should include optional kuery string in URL', async () =
   );
 
   expect(href).toEqual(
-    `/app/kibana#/discover?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now))&_a=(index:apm-index-pattern-id,interval:auto,query:(language:lucene,query:'service.name:"service-name" AND error.grouping_key:"grouping-key" AND some:kuery-string'),sort:('@timestamp':desc))`
+    `/basepath/app/kibana#/discover?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now))&_a=(index:apm-index-pattern-id,interval:auto,query:(language:lucene,query:'service.name:"service-name" AND error.grouping_key:"grouping-key" AND some:kuery-string'),sort:('@timestamp':desc))`
   );
 });

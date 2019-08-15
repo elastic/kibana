@@ -15,7 +15,10 @@ import { InfraSourceConfiguration } from '../../sources';
 import { InfraFrameworkRequest } from '../framework';
 
 export interface InfraMetricsRequestOptions {
-  nodeId: string;
+  nodeIds: {
+    nodeId: string;
+    cloudId?: string | null;
+  };
   nodeType: InfraNodeType;
   sourceConfiguration: InfraSourceConfiguration;
   timerange: InfraTimerangeInput;
@@ -27,6 +30,11 @@ export interface InfraMetricsAdapter {
     req: InfraFrameworkRequest,
     options: InfraMetricsRequestOptions
   ): Promise<InfraMetricData[]>;
+}
+
+export enum InfraMetricModelQueryType {
+  lucene = 'lucene',
+  kuery = 'kuery',
 }
 
 export enum InfraMetricModelMetricType {
@@ -42,7 +50,7 @@ export enum InfraMetricModelMetricType {
 }
 
 export interface InfraMetricModel {
-  id: string;
+  id: InfraMetric;
   requires: string[];
   index_pattern: string | string[];
   interval: string;
@@ -51,6 +59,7 @@ export interface InfraMetricModel {
   series: InfraMetricModelSeries[];
   filter?: string;
   map_field_to?: string;
+  id_type?: 'cloud' | 'node';
 }
 
 export interface InfraMetricModelSeries {
@@ -60,7 +69,7 @@ export interface InfraMetricModelSeries {
   terms_field?: string;
   terms_size?: number;
   terms_order_by?: string;
-  filter?: string;
+  filter?: { query: string; language: InfraMetricModelQueryType };
 }
 
 export interface InfraMetricModelBasicMetric {

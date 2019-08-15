@@ -24,15 +24,6 @@ export default function ({ getPageObjects, getService }) {
       return requestTimestamp;
     }
 
-    async function getHits() {
-      await inspector.open();
-      await inspector.openInspectorRequestsView();
-      const requestStats = await inspector.getTableData();
-      const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
-      await inspector.close();
-      return hits;
-    }
-
     it('should re-fetch documents with refresh timer', async () => {
       const beforeRefreshTimerTimestamp = await getRequestTimestamp();
       expect(beforeRefreshTimerTimestamp.length).to.be(24);
@@ -43,7 +34,7 @@ export default function ({ getPageObjects, getService }) {
 
     describe('inspector', () => {
       it('should register elasticsearch request in inspector', async () => {
-        const hits = await getHits();
+        const hits = await PageObjects.maps.getHits();
         expect(hits).to.equal('6');
       });
     });
@@ -112,13 +103,13 @@ export default function ({ getPageObjects, getService }) {
     describe('filter by extent', () => {
       it('should handle geo_point filtering with extents that cross antimeridian', async () => {
         await PageObjects.maps.loadSavedMap('antimeridian points example');
-        const hits = await getHits();
+        const hits = await PageObjects.maps.getHits();
         expect(hits).to.equal('2');
       });
 
       it('should handle geo_shape filtering with extents that cross antimeridian', async () => {
         await PageObjects.maps.loadSavedMap('antimeridian shapes example');
-        const hits = await getHits();
+        const hits = await PageObjects.maps.getHits();
         expect(hits).to.equal('2');
       });
     });

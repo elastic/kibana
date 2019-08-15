@@ -5,16 +5,14 @@
  */
 
 import createContainer from 'constate-latest';
-import { useEffect, useState, useMemo } from 'react';
+import { useState, useContext } from 'react';
 
-import { TimeKey, getPreviousTimeKey, getNextTimeKey } from '../../../../common/time';
-import { LogEntryHighlightsQuery } from '../../../graphql/types';
-import { DependencyError, useApolloClient } from '../../../utils/apollo_context';
-import { LogEntryHighlightsMap } from '../../../utils/log_entry';
-import { useTrackedPromise } from '../../../utils/use_tracked_promise';
-import { logEntryHighlightsQuery } from './log_highlights.gql_query';
-
-type LogEntryHighlights = LogEntryHighlightsQuery.Query['source']['logEntryHighlights'];
+import { useLogEntryHighlights } from './log_entry_highlights';
+import { useLogSummaryHighlights } from './log_summary_highlights';
+import { useNextAndPrevious } from './next_and_previous';
+import { useReduxBridgeSetters } from './redux_bridge_setters';
+import { useLogSummaryBufferInterval } from '../log_summary';
+import { LogViewConfiguration } from '../log_view_configuration';
 
 export const useLogHighlightsState = ({
   sourceId,
@@ -24,86 +22,58 @@ export const useLogHighlightsState = ({
   sourceVersion: string | undefined;
 }) => {
   const [highlightTerms, setHighlightTerms] = useState<string[]>([]);
-  const apolloClient = useApolloClient();
-  const [logEntryHighlights, setLogEntryHighlights] = useState<LogEntryHighlights | undefined>(
-    undefined
-  );
-  const [startKey, setStartKey] = useState<TimeKey | null>(null);
-  const [endKey, setEndKey] = useState<TimeKey | null>(null);
-  const [filterQuery, setFilterQuery] = useState<string | null>(null);
 
-  const [loadLogEntryHighlightsRequest, loadLogEntryHighlights] = useTrackedPromise(
-    {
-      cancelPreviousOn: 'resolution',
-      createPromise: async () => {
-        if (!apolloClient) {
-          throw new DependencyError('Failed to load source: No apollo client available.');
-        }
-        if (!startKey || !endKey || !highlightTerms.length) {
-          throw new Error();
-        }
+  const {
+    startKey,
+    endKey,
+    filterQuery,
+    visibleMidpoint,
+    setStartKey,
+    setEndKey,
+    setFilterQuery,
+    setVisibleMidpoint,
+    jumpToTarget,
+    setJumpToTarget,
+  } = useReduxBridgeSetters();
 
-        return await apolloClient.query<
-          LogEntryHighlightsQuery.Query,
-          LogEntryHighlightsQuery.Variables
-        >({
-          fetchPolicy: 'no-cache',
-          query: logEntryHighlightsQuery,
-          variables: {
-            sourceId,
-            startKey: getPreviousTimeKey(startKey), // interval boundaries are exclusive
-            endKey: getNextTimeKey(endKey), // interval boundaries are exclusive
-            filterQuery,
-            highlights: [
-              {
-                query: JSON.stringify({
-                  multi_match: { query: highlightTerms[0], type: 'phrase', lenient: true },
-                }),
-              },
-            ],
-          },
-        });
-      },
-      onResolve: response => {
-        setLogEntryHighlights(response.data.source.logEntryHighlights);
-      },
-    },
-    [apolloClient, sourceId, startKey, endKey, filterQuery, highlightTerms]
+  const { intervalSize: summaryIntervalSize } = useContext(LogViewConfiguration.Context);
+  const {
+    start: summaryStart,
+    end: summaryEnd,
+    bucketSize: summaryBucketSize,
+  } = useLogSummaryBufferInterval(
+    visibleMidpoint ? visibleMidpoint.time : null,
+    summaryIntervalSize
   );
 
-  useEffect(() => {
-    if (
-      highlightTerms.filter(highlightTerm => highlightTerm.length > 0).length &&
-      startKey &&
-      endKey
-    ) {
-      loadLogEntryHighlights();
-    } else {
-      setLogEntryHighlights(undefined);
-    }
-  }, [highlightTerms, startKey, endKey, filterQuery, sourceVersion]);
+  const {
+    logEntryHighlights,
+    logEntryHighlightsById,
+    loadLogEntryHighlightsRequest,
+  } = useLogEntryHighlights(sourceId, sourceVersion, startKey, endKey, filterQuery, highlightTerms);
 
-  const logEntryHighlightsById = useMemo(
-    () =>
-      logEntryHighlights
-        ? logEntryHighlights.reduce<LogEntryHighlightsMap>(
-            (accumulatedLogEntryHighlightsById, { entries }) => {
-              return entries.reduce<LogEntryHighlightsMap>(
-                (singleHighlightLogEntriesById, entry) => {
-                  const highlightsForId = singleHighlightLogEntriesById[entry.gid] || [];
-                  return {
-                    ...singleHighlightLogEntriesById,
-                    [entry.gid]: [...highlightsForId, entry],
-                  };
-                },
-                accumulatedLogEntryHighlightsById
-              );
-            },
-            {}
-          )
-        : {},
-    [logEntryHighlights]
+  const { logSummaryHighlights, loadLogSummaryHighlightsRequest } = useLogSummaryHighlights(
+    sourceId,
+    sourceVersion,
+    summaryStart,
+    summaryEnd,
+    summaryBucketSize,
+    filterQuery,
+    highlightTerms
   );
+
+  const {
+    currentHighlightKey,
+    hasPreviousHighlight,
+    hasNextHighlight,
+    goToPreviousHighlight,
+    goToNextHighlight,
+  } = useNextAndPrevious({
+    visibleMidpoint,
+    logEntryHighlights,
+    highlightTerms,
+    jumpToTarget,
+  });
 
   return {
     highlightTerms,
@@ -113,7 +83,16 @@ export const useLogHighlightsState = ({
     setFilterQuery,
     logEntryHighlights,
     logEntryHighlightsById,
+    logSummaryHighlights,
     loadLogEntryHighlightsRequest,
+    loadLogSummaryHighlightsRequest,
+    setVisibleMidpoint,
+    currentHighlightKey,
+    hasPreviousHighlight,
+    hasNextHighlight,
+    goToPreviousHighlight,
+    goToNextHighlight,
+    setJumpToTarget,
   };
 };
 

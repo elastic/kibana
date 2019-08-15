@@ -39,7 +39,7 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
   const [snapshotDetails, setSnapshotDetails] = useState<SnapshotDetails | {}>({});
 
   // Load snapshot
-  const { error: snapshotError, loading: loadingSnapshot, data: snapshotData } = useLoadSnapshot(
+  const { error: snapshotError, isLoading: loadingSnapshot, data: snapshotData } = useLoadSnapshot(
     repositoryName,
     snapshotId
   );
@@ -121,7 +121,7 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
         title={
           <FormattedMessage
             id="xpack.snapshotRestore.restoreSnapshot.executeRestoreErrorTitle"
-            defaultMessage="Unable to execute restore"
+            defaultMessage="Unable to restore snapshot"
           />
         }
         error={saveError}

@@ -169,7 +169,10 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('disabling a filter unfilters the data on', () => {
+    describe('disabling a filter unfilters the data on', function () {
+      // Flaky test
+      // https://github.com/elastic/kibana/issues/41087
+      this.tags('skipFirefox');
       before(async () => {
         await filterBar.toggleFilterEnabled('bytes');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -189,7 +192,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('goal and guages', async () => {
-        await dashboardExpect.goalAndGuageLabelsExist(['40%', '7,544']);
+        await dashboardExpect.goalAndGuageLabelsExist(['39.958%', '7,544']);
       });
 
       it('tsvb time series', async () => {
@@ -217,8 +220,7 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.tsvbMarkdownWithValuesExists(['7,209.286']);
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/41087
-      it.skip('saved searches', async () => {
+      it('saved searches', async () => {
         await dashboardExpect.savedSearchRowCount(1);
       });
 

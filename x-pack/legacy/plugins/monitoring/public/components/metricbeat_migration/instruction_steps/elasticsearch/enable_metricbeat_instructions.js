@@ -9,23 +9,16 @@ import {
   EuiSpacer,
   EuiCodeBlock,
   EuiLink,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
   EuiCallOut,
   EuiText
 } from '@elastic/eui';
 import { Monospace } from '../components/monospace';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { statusTitle } from './common_elasticsearch_instructions';
+import { statusTitle, statusTitleNewUser } from './common_elasticsearch_instructions';
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 
 export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta, {
   esMonitoringUrl,
-  hasCheckedStatus,
-  checkingMigrationStatus,
-  checkForMigrationStatus,
-  autoCheckIntervalInMs
 }) {
   const securitySetup = (
     <Fragment>
@@ -177,61 +170,19 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(product, _meta
   };
 
   let migrationStatusStep = null;
-  if (product.isInternalCollector) {
-    let status = null;
-    if (hasCheckedStatus) {
-      status = (
-        <Fragment>
-          <EuiSpacer size="m"/>
-          <EuiCallOut
-            size="s"
-            color="warning"
-            title={i18n.translate('xpack.monitoring.metricbeatMigration.elasticsearchInstructions.isInternalCollectorStatusTitle', {
-              defaultMessage: `We have not detected any monitoring data coming from Metricbeat for this Elasticsearch.
-              We will continuously check every {timePeriod} seconds in the background.`,
-              values: {
-                timePeriod: autoCheckIntervalInMs / 1000,
-              }
-            })}
-          />
-        </Fragment>
-      );
-    }
-
-    let buttonLabel;
-    if (checkingMigrationStatus) {
-      buttonLabel = i18n.translate('xpack.monitoring.metricbeatMigration.elasticsearchInstructions.checkingStatusButtonLabel', {
-        defaultMessage: 'Checking for data...'
-      });
-    } else {
-      buttonLabel = i18n.translate('xpack.monitoring.metricbeatMigration.elasticsearchInstructions.checkStatusButtonLabel', {
-        defaultMessage: 'Check for data'
-      });
-    }
-
+  if (product.isInternalCollector || product.isNetNewUser) {
     migrationStatusStep = {
-      title: statusTitle,
+      title: product.isNetNewUser ? statusTitleNewUser : statusTitle,
       status: 'incomplete',
       children: (
-        <Fragment>
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem>
-              <EuiText>
-                <p>
-                  {i18n.translate('xpack.monitoring.metricbeatMigration.elasticsearchInstructions.statusDescription', {
-                    defaultMessage: 'Check that data is received from the Metricbeat'
-                  })}
-                </p>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton onClick={checkForMigrationStatus} isDisabled={checkingMigrationStatus}>
-                {buttonLabel}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          {status}
-        </Fragment>
+        <EuiCallOut
+          size="s"
+          color="warning"
+          title={i18n.translate('xpack.monitoring.metricbeatMigration.elasticsearchInstructions.isInternalCollectorStatusTitle', {
+            defaultMessage: `We have not detected any monitoring data coming from Metricbeat for this Elasticsearch node.
+            We will continuously check in the background.`,
+          })}
+        />
       )
     };
   }

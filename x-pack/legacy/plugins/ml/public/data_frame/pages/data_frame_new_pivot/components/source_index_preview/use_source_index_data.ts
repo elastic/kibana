@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
-
 import React, { useEffect, useState } from 'react';
 
 import { SearchResponse } from 'elasticsearch';
 
-import { IndexPattern } from 'ui/index_patterns';
+import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { ml } from '../../../../../services/ml_api_service';
+import { getNestedProperty } from '../../../../../util/object_utils';
 
 import {
   getDefaultSelectableFields,
@@ -39,7 +38,7 @@ export interface UseSourceIndexDataReturnType {
 }
 
 export const useSourceIndexData = (
-  indexPattern: IndexPattern,
+  indexPattern: StaticIndexPattern,
   query: PivotQuery,
   selectedFields: EsFieldName[],
   setSelectedFields: React.Dispatch<React.SetStateAction<EsFieldName[]>>
@@ -82,8 +81,11 @@ export const useSourceIndexData = (
           [key: string]: any;
         };
         flattenedFields.forEach(ff => {
-          item[ff] = get(doc._source, ff);
+          item[ff] = getNestedProperty(doc._source, ff);
           if (item[ff] === undefined) {
+            // If the attribute is undefined, it means it was not a nested property
+            // but had dots in its actual name. This selects the property by its
+            // full name and assigns it to `item[ff]`.
             item[ff] = doc._source[`"${ff}"`];
           }
         });

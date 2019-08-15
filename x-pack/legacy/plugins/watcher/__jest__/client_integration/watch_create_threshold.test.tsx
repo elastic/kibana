@@ -421,13 +421,7 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
 
           expect(exists('watchActionAccordion')).toBe(true);
 
-          // First, provide invalid fields and verify
-          form.setInputValue('emailBodyInput', '');
-
-          expect(form.getErrorsMessages()).toContain('Email body is required.');
-          expect(find('simulateActionButton').props().disabled).toEqual(true);
-
-          // Next, provide valid field and verify
+          // Provide valid fields and verify
           find('watchActionAccordion.mockComboBox').simulate('change', [
             { label: EMAIL_RECIPIENT, value: EMAIL_RECIPIENT },
           ]); // Using mocked EuiComboBox

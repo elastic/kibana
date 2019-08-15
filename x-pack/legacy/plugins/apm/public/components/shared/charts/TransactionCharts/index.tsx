@@ -16,17 +16,23 @@ import {
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React, { Component } from 'react';
-import { isEmpty } from 'lodash';
+import { isEmpty, flatten } from 'lodash';
 import styled from 'styled-components';
+import { idx } from '@kbn/elastic-idx';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { Coordinate } from '../../../../../typings/timeseries';
+import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { ITransactionChartData } from '../../../../selectors/chartSelectors';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
-import { asInteger, asMillis, tpmUnit } from '../../../../utils/formatters';
+import {
+  asInteger,
+  tpmUnit,
+  TimeFormatter
+} from '../../../../utils/formatters';
 import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
 import { LicenseContext } from '../../../../context/LicenseContext';
 import { TransactionLineChart } from './TransactionLineChart';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
+import { getTimeFormatter } from '../../../../utils/formatters';
 
 interface TransactionChartProps {
   hasMLJob: boolean;
@@ -48,12 +54,26 @@ const ShiftedEuiText = styled(EuiText)`
 `;
 
 export class TransactionCharts extends Component<TransactionChartProps> {
-  public getResponseTimeTickFormatter = (t: number) => {
-    return asMillis(t);
+  public getMaxY = (responseTimeSeries: TimeSeries[]) => {
+    const coordinates = flatten(
+      responseTimeSeries.map((serie: TimeSeries) => serie.data as Coordinate[])
+    );
+
+    const numbers: number[] = coordinates.map((c: Coordinate) =>
+      c.y ? c.y : 0
+    );
+
+    return Math.max(...numbers, 0);
   };
 
-  public getResponseTimeTooltipFormatter = (p: Coordinate) => {
-    return isValidCoordinateValue(p.y) ? asMillis(p.y) : NOT_AVAILABLE_LABEL;
+  public getResponseTimeTickFormatter = (formatter: TimeFormatter) => {
+    return (t: number) => formatter(t);
+  };
+
+  public getResponseTimeTooltipFormatter = (formatter: TimeFormatter) => {
+    return (p: Coordinate) => {
+      return isValidCoordinateValue(p.y) ? formatter(p.y) : NOT_AVAILABLE_LABEL;
+    };
   };
 
   public getTPMFormatter = (t: number) => {
@@ -68,7 +88,7 @@ export class TransactionCharts extends Component<TransactionChartProps> {
       : NOT_AVAILABLE_LABEL;
   };
 
-  public renderMLHeader(hasValidMlLicense: boolean) {
+  public renderMLHeader(hasValidMlLicense: boolean | undefined) {
     const { hasMLJob } = this.props;
     if (!hasValidMlLicense || !hasMLJob) {
       return null;
@@ -126,6 +146,8 @@ export class TransactionCharts extends Component<TransactionChartProps> {
     const { charts, urlParams } = this.props;
     const { responseTimeSeries, tpmSeries } = charts;
     const { transactionType } = urlParams;
+    const maxY = this.getMaxY(responseTimeSeries);
+    const formatter = getTimeFormatter(maxY);
 
     return (
       <EuiFlexGrid columns={2} gutterSize="s">
@@ -140,14 +162,18 @@ export class TransactionCharts extends Component<TransactionChartProps> {
                 </EuiFlexItem>
                 <LicenseContext.Consumer>
                   {license =>
-                    this.renderMLHeader(license.features.ml.is_available)
+                    this.renderMLHeader(
+                      idx(license, _ => _.features.ml.is_available)
+                    )
                   }
                 </LicenseContext.Consumer>
               </EuiFlexGroup>
               <TransactionLineChart
                 series={responseTimeSeries}
-                tickFormatY={this.getResponseTimeTickFormatter}
-                formatTooltipValue={this.getResponseTimeTooltipFormatter}
+                tickFormatY={this.getResponseTimeTickFormatter(formatter)}
+                formatTooltipValue={this.getResponseTimeTooltipFormatter(
+                  formatter
+                )}
               />
             </React.Fragment>
           </EuiPanel>

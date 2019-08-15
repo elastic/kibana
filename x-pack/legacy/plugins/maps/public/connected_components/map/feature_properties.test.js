@@ -19,10 +19,6 @@ class MockTooltipProperty {
     return this._isFilterable;
   }
 
-  getFilterAction() {
-    return () => {};
-  }
-
   getHtmlDisplayValue() {
     return this._value;
   }
@@ -37,7 +33,8 @@ const defaultProps = {
   featureId: `feature`,
   layerId: `layer`,
   onCloseTooltip: () => {},
-  showFilterButtons: false
+  showFilterButtons: false,
+  reevaluateTooltipPosition: () => {},
 };
 
 const mockTooltipProperties = [

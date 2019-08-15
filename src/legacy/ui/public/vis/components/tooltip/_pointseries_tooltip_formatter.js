@@ -18,7 +18,6 @@
  */
 
 import $ from 'jquery';
-import { getFormat } from '../../../visualize/loader/pipeline_helpers/utilities';
 import template from './_pointseries_tooltip.html';
 
 export function PointSeriesTooltipFormatterProvider($compile, $rootScope) {
@@ -49,20 +48,14 @@ export function PointSeriesTooltipFormatterProvider($compile, $rootScope) {
       }
       if (datum.y) {
         const value = datum.yScale ? datum.yScale * datum.y : datum.y;
-        if(event.isPercentageMode) {
-          const valueInPercent = Math.round(value * 10000) / 100;
-          addDetail(currentSeries.label, `${valueInPercent.toFixed(2)} %`);
-        } else {
-          addDetail(currentSeries.label, currentSeries.yAxisFormatter(value));
-        }
+        addDetail(currentSeries.label, currentSeries.yAxisFormatter(value));
       }
       if (datum.z) {
         addDetail(currentSeries.zLabel, currentSeries.zAxisFormatter(datum.z));
       }
       if (datum.series && datum.parent) {
         const dimension = datum.parent;
-        const seriesFormatter = getFormat(dimension.format);
-        addDetail(dimension.title, seriesFormatter.convert(datum.series));
+        addDetail(dimension.title, datum.series);
       }
       if (datum.tableRaw) {
         addDetail(datum.tableRaw.title, datum.tableRaw.value);

@@ -6,9 +6,8 @@
 
 import Boom from 'boom';
 import { InternalCoreSetup } from 'src/core/server';
-import { getIndexPattern } from '../lib/index_pattern';
+import { getAPMIndexPattern } from '../lib/index_pattern';
 
-const ROOT = '/api/apm/index_pattern';
 const defaultErrorHandler = (err: Error & { status?: number }) => {
   // eslint-disable-next-line
   console.error(err.stack);
@@ -19,12 +18,12 @@ export function initIndexPatternApi(core: InternalCoreSetup) {
   const { server } = core.http;
   server.route({
     method: 'GET',
-    path: ROOT,
+    path: '/api/apm/index_pattern',
     options: {
       tags: ['access:apm']
     },
     handler: async req => {
-      return await getIndexPattern(core).catch(defaultErrorHandler);
+      return await getAPMIndexPattern(server).catch(defaultErrorHandler);
     }
   });
 }

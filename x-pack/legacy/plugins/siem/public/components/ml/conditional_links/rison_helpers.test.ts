@@ -7,7 +7,17 @@
 import { decodeRison, isRisonObject, isRegularString } from './rison_helpers';
 
 describe('rison_helpers', () => {
+  // Suppress warnings about invalid RISON as this is what we are testing
+  /* eslint-disable no-console */
+  const originalError = console.log;
   describe('#decodeRison', () => {
+    beforeAll(() => {
+      console.log = jest.fn();
+    });
+
+    afterAll(() => {
+      console.log = originalError;
+    });
     test('returns null if given a bad value for RISON', () => {
       const expected = decodeRison('some invalid value');
       expect(expected).toEqual(null);

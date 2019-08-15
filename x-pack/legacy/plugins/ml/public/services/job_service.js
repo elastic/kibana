@@ -30,6 +30,12 @@ class JobService {
     // if populated when loading the job management page, the start datafeed modal
     // is automatically opened.
     this.currentJob = undefined;
+
+    this.tempJobCloningObjects = {
+      job: undefined,
+      skipTimeRangeStep: false,
+    };
+
     this.jobs = [];
 
     // Provide ready access to widely used basic job properties.
@@ -351,6 +357,7 @@ class JobService {
       delete tempJob.datafeed_config.job_id;
       delete tempJob.datafeed_config.state;
       delete tempJob.datafeed_config.node;
+      delete tempJob.datafeed_config.timing_stats;
 
       // remove query_delay if it's between 60s and 120s
       // the back-end produces a random value between 60 and 120 and so
@@ -739,6 +746,16 @@ class JobService {
   }
 
 
+  async getJobAndGroupIds() {
+    try {
+      return await ml.jobs.getAllJobAndGroupIds();
+    } catch (error) {
+      return {
+        jobIds: [],
+        groupIds: [],
+      };
+    }
+  }
 }
 
 // private function used to check the job saving response

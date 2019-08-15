@@ -34,3 +34,5 @@ export const AnomalyTableProvider = React.memo<Props>(
     return <>{children({ isLoadingAnomaliesData, anomaliesData })}</>;
   }
 );
+
+AnomalyTableProvider.displayName = 'AnomalyTableProvider';

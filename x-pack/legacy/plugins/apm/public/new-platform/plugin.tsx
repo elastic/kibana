@@ -8,8 +8,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Route, Switch } from 'react-router-dom';
 import styled from 'styled-components';
-import { CoreStart } from 'src/core/public';
+import { InternalCoreStart } from 'src/core/public';
 import { history } from '../utils/history';
+import { CoreProvider } from '../context/CoreContext';
 import { LocationProvider } from '../context/LocationContext';
 import { UrlParamsProvider } from '../context/UrlParamsContext';
 import { px, unit, units } from '../style/variables';
@@ -53,16 +54,18 @@ const App = () => {
 };
 
 export class Plugin {
-  public start(core: CoreStart) {
+  public start(core: InternalCoreStart) {
     const { i18n } = core;
     ReactDOM.render(
-      <i18n.Context>
-        <Router history={history}>
-          <LocationProvider>
-            <App />
-          </LocationProvider>
-        </Router>
-      </i18n.Context>,
+      <CoreProvider core={core}>
+        <i18n.Context>
+          <Router history={history}>
+            <LocationProvider>
+              <App />
+            </LocationProvider>
+          </Router>
+        </i18n.Context>
+      </CoreProvider>,
       document.getElementById(REACT_APP_ROOT_ID)
     );
   }

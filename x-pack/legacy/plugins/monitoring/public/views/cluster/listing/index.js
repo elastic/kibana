@@ -11,10 +11,13 @@ import { MonitoringViewBaseEuiTableController } from '../../';
 import { I18nContext } from 'ui/i18n';
 import template from './index.html';
 import { Listing } from '../../../components/cluster/listing';
+import { CODE_PATH_ALL } from '../../../../common/constants';
+
+const CODE_PATHS = [CODE_PATH_ALL];
 
 const getPageData = $injector => {
   const monitoringClusters = $injector.get('monitoringClusters');
-  return monitoringClusters();
+  return monitoringClusters(undefined, undefined, CODE_PATHS);
 };
 
 uiRoutes.when('/home', {
@@ -22,7 +25,7 @@ uiRoutes.when('/home', {
   resolve: {
     clusters: (Private, kbnUrl) => {
       const routeInit = Private(routeInitProvider);
-      return routeInit()
+      return routeInit({ codePaths: CODE_PATHS, fetchAllClusters: true })
         .then(clusters => {
           if (!clusters || !clusters.length) {
             kbnUrl.changePath('/no-data');

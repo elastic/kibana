@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { npStart } from 'ui/new_platform';
 import { ESFilter } from 'elasticsearch';
-import chrome from 'ui/chrome';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
@@ -31,6 +31,8 @@ interface StartedMLJobApiResponse {
   jobs: MlResponseItem[];
 }
 
+const { core } = npStart;
+
 export async function startMLJob({
   serviceName,
   transactionType
@@ -38,7 +40,9 @@ export async function startMLJob({
   serviceName: string;
   transactionType: string;
 }) {
-  const indexPatternName = chrome.getInjected('apmIndexPatternTitle');
+  const indexPatternName = core.injectedMetadata.getInjectedVar(
+    'apmIndexPatternTitle'
+  );
   const groups = ['apm', serviceName.toLowerCase()];
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },

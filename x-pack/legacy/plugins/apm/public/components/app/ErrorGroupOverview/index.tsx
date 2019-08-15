@@ -12,7 +12,7 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useFetcher } from '../../../hooks/useFetcher';
 import {
   loadErrorDistribution,
@@ -21,12 +21,14 @@ import {
 import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
 import { ErrorGroupList } from './List';
 import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useTrackPageview } from '../../../../../infra/public';
+import { PROJECTION } from '../../../../common/projections/typings';
+import { LocalUIFilters } from '../../shared/LocalUIFilters';
 
 const ErrorGroupOverview: React.SFC = () => {
-  const {
-    urlParams: { serviceName, start, end, sortField, sortDirection },
-    uiFilters
-  } = useUrlParams();
+  const { urlParams, uiFilters } = useUrlParams();
+
+  const { serviceName, start, end, sortField, sortDirection } = urlParams;
 
   const { data: errorDistributionData } = useFetcher(() => {
     if (serviceName && start && end) {
@@ -52,39 +54,62 @@ const ErrorGroupOverview: React.SFC = () => {
     }
   }, [serviceName, start, end, sortField, sortDirection, uiFilters]);
 
+  useTrackPageview({
+    app: 'apm',
+    path: 'error_group_overview'
+  });
+  useTrackPageview({ app: 'apm', path: 'error_group_overview', delay: 15000 });
+
+  const localUIFiltersConfig = useMemo(() => {
+    const config: React.ComponentProps<typeof LocalUIFilters> = {
+      filterNames: ['transactionResult', 'host', 'containerId', 'podName'],
+      params: {
+        serviceName
+      },
+      projection: PROJECTION.ERROR_GROUPS
+    };
+
+    return config;
+  }, [serviceName]);
+
   if (!errorDistributionData || !errorGroupListData) {
     return null;
   }
 
   return (
-    <React.Fragment>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiPanel>
-            <ErrorDistribution
-              distribution={errorDistributionData}
-              title={i18n.translate(
-                'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
-                {
-                  defaultMessage: 'Error occurrences'
-                }
-              )}
-            />
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    <EuiFlexGroup>
+      <EuiFlexItem grow={1}>
+        <LocalUIFilters {...localUIFiltersConfig} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={7}>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiPanel>
+              <ErrorDistribution
+                distribution={errorDistributionData}
+                title={i18n.translate(
+                  'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
+                  {
+                    defaultMessage: 'Error occurrences'
+                  }
+                )}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
-      <EuiSpacer size="s" />
-
-      <EuiPanel>
-        <EuiTitle size="xs">
-          <h3>Errors</h3>
-        </EuiTitle>
         <EuiSpacer size="s" />
 
-        <ErrorGroupList items={errorGroupListData} />
-      </EuiPanel>
-    </React.Fragment>
+        <EuiPanel>
+          <EuiTitle size="xs">
+            <h3>Errors</h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+
+          <ErrorGroupList items={errorGroupListData} />
+        </EuiPanel>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

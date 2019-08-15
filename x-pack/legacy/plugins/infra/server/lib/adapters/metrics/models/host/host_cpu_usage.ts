@@ -9,13 +9,14 @@ import {
   InfraMetricModelMetricType,
   InfraMetricModel,
 } from '../../adapter_types';
+import { InfraMetric } from '../../../../../graphql/types';
 
 export const hostCpuUsage: InfraMetricModelCreator = (
   timeField,
   indexPattern,
   interval
 ): InfraMetricModel => ({
-  id: 'hostCpuUsage',
+  id: InfraMetric.hostCpuUsage,
   requires: ['system.cpu'],
   index_pattern: indexPattern,
   interval,

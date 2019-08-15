@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { Field, IndexPattern } from '../index';
+import { FieldType } from '../_field';
+import { StaticIndexPattern } from '../_index_pattern';
 
-export const mockFields: Field[] = [
+export const mockFields: FieldType[] = [
   {
     name: 'machine.os',
     esTypes: ['text'],
@@ -78,7 +79,7 @@ export const mockFields: Field[] = [
   },
 ];
 
-export const mockIndexPattern: IndexPattern = {
+export const mockIndexPattern: StaticIndexPattern = {
   id: 'logstash-*',
   fields: mockFields,
   title: 'logstash-*',

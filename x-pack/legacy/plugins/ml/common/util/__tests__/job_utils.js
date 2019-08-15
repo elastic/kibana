@@ -521,12 +521,12 @@ describe('ML - job utils', () => {
 
   describe('prefixDatafeedId', () => {
 
-    it('returns datafeed-prefix-job"', () => {
+    it('returns datafeed-prefix-job from datafeed-job"', () => {
       expect(prefixDatafeedId('datafeed-job', 'prefix-')).to.be('datafeed-prefix-job');
     });
 
-    it('returns prefix-job"', () => {
-      expect(prefixDatafeedId('job', 'prefix-')).to.be('prefix-job');
+    it('returns datafeed-prefix-job from job"', () => {
+      expect(prefixDatafeedId('job', 'prefix-')).to.be('datafeed-prefix-job');
     });
   });
 

@@ -11,7 +11,6 @@ import {
   FilterBar,
   LatestMonitor,
   MonitorChart,
-  MonitorKey,
   MonitorPageTitle,
   MonitorSeriesPoint,
   Ping,
@@ -436,18 +435,17 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     dateRangeStart: string,
     dateRangeEnd: string
   ): Promise<FilterBar> {
+    const fields: { [key: string]: string } = {
+      ids: 'monitor.id',
+      schemes: 'monitor.type',
+      urls: 'url.full',
+      ports: 'url.port',
+      locations: 'observer.geo.name',
+    };
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
-        _source: [
-          'monitor.id',
-          'monitor.type',
-          'url.full',
-          'url.port',
-          'monitor.name',
-          'observer.geo.name',
-        ],
-        size: 1000,
+        size: 0,
         query: {
           range: {
             '@timestamp': {
@@ -456,55 +454,19 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
             },
           },
         },
-        collapse: {
-          field: 'monitor.id',
-        },
-        sort: {
-          '@timestamp': 'desc',
-        },
+        aggs: Object.values(fields).reduce((acc: { [key: string]: any }, field) => {
+          acc[field] = { terms: { field, size: 20 } };
+          return acc;
+        }, {}),
       },
     };
-    const result = await this.database.search(request, params);
-    const ids: MonitorKey[] = [];
-    const ports = new Set<number>();
-    const types = new Set<string>();
-    const names = new Set<string>();
-    const locations = new Set<string>();
+    const { aggregations } = await this.database.search(request, params);
 
-    const hits = get(result, 'hits.hits', []);
-    hits.forEach((hit: any) => {
-      const key: string = get(hit, '_source.monitor.id');
-      const url: string | null = get(hit, '_source.url.full', null);
-      const port: number | undefined = get(hit, '_source.url.port', undefined);
-      const type: string | undefined = get(hit, '_source.monitor.type', undefined);
-      const name: string | null = get(hit, '_source.monitor.name', null);
-      const location: string | null = get(hit, '_source.observer.geo.name', null);
-
-      if (key) {
-        ids.push({ key, url });
-      }
-      if (port) {
-        ports.add(port);
-      }
-      if (type) {
-        types.add(type);
-      }
-      if (name) {
-        names.add(name);
-      }
-      if (location) {
-        locations.add(location);
-      }
-    });
-
-    return {
-      ids,
-      locations: Array.from(locations),
-      names: Array.from(names),
-      ports: Array.from(ports),
-      schemes: Array.from(types),
-      statuses: ['up', 'down'],
-    };
+    return Object.keys(fields).reduce((acc: { [key: string]: any[] }, field) => {
+      const bucketName = fields[field];
+      acc[field] = aggregations[bucketName].buckets.map((b: { key: string | number }) => b.key);
+      return acc;
+    }, {});
   }
 
   /**

@@ -1,0 +1,21 @@
+{
+  "name": "@kbn/analytics",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Kibana Analytics tool",
+  "main": "target/index.js",
+  "types": "target/index.d.ts",
+  "author": "Ahmad Bamieh <ahmadbamieh@gmail.com>",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "tsc",
+    "kbn:bootstrap": "yarn build",
+    "kbn:watch": "yarn build --watch"
+  },
+  "devDependencies": {
+    "typescript": "3.5.1"
+  },
+  "dependencies": {
+    "@kbn/dev-utils": "1.0.0"
+  }
+}

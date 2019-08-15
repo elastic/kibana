@@ -18,11 +18,9 @@
  */
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { pluck, get, clone } from 'lodash';
-import { relativeOptions } from '../../../../../ui/public/timepicker/relative_options';
-
+import { get } from 'lodash';
+import { parseEsInterval } from '../../../../data/public';
 import { GTE_INTERVAL_RE } from '../../../common/interval_regexp';
-import { parseEsInterval } from '../../../../data/common/parse_es_interval';
 
 export const AUTO_INTERVAL = 'auto';
 
@@ -37,7 +35,8 @@ export const unitLookup = {
 };
 
 export const convertIntervalIntoUnit = (interval, hasTranslateUnitString = true) => {
-  const units = pluck(clone(relativeOptions).reverse(), 'value').filter(s => /^[smhdwMy]$/.test(s));
+  // Iterate units from biggest to smallest
+  const units = Object.keys(unitLookup).reverse();
   const duration = moment.duration(interval, 'ms');
 
   for (let i = 0; i < units.length; i++) {
