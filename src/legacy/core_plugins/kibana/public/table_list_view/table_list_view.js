@@ -116,7 +116,8 @@ class TableListViewUi extends React.Component {
       isDeletingItems: true
     });
     try {
-      await this.props.deleteItems(this.state.selectedIds);
+      const itemsById = _.indexBy(this.state.items, 'id');
+      await this.props.deleteItems(this.state.selectedIds.map(id => itemsById[id]));
     } catch (error) {
       toastNotifications.addDanger({
         title: (
@@ -316,6 +317,7 @@ class TableListViewUi extends React.Component {
     };
 
     const selection = this.props.deleteItems ? {
+      selectable: this.props.selectable,
       onSelectionChange: (selection) => {
         this.setState({
           selectedIds: selection.map(item => { return item.id; })
@@ -468,6 +470,7 @@ TableListViewUi.propTypes = {
   deleteItems: PropTypes.func,
   createItem: PropTypes.func,
   editItem: PropTypes.func,
+  selectable: PropTypes.func,
 
   listingLimit: PropTypes.number,
   initialFilter: PropTypes.string,
@@ -482,4 +485,3 @@ TableListViewUi.defaultProps = {
 };
 
 export const TableListView = injectI18n(TableListViewUi);
-

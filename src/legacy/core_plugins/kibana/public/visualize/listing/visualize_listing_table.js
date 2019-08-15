@@ -21,12 +21,12 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { capabilities } from 'ui/capabilities';
 import { TableListView } from './../../table_list_view';
 
 import {
   EuiIcon,
   EuiBetaBadge,
+  EuiButtonIcon,
   EuiLink,
   EuiButton,
   EuiEmptyPrompt,
@@ -46,10 +46,10 @@ class VisualizeListingTableUi extends Component {
         // for data exploration purposes
         createItem={this.props.createItem}
         findItems={this.props.findItems}
-        deleteItems={capabilities.get().visualize.delete ? this.props.deleteItems : null}
-        editItem={capabilities.get().visualize.save ? this.props.editItem : null}
+        deleteItems={this.props.deleteItems}
         tableColumns={this.getTableColumns()}
         listingLimit={this.props.listingLimit}
+        selectable={item => item.canDelete}
         initialFilter={''}
         noItemsFragment={this.getNoItemsMessage()}
         entityName={
@@ -94,7 +94,7 @@ class VisualizeListingTableUi extends Component {
         )
       },
       {
-        field: 'type.title',
+        field: 'typeTitle',
         name: intl.formatMessage({
           id: 'kbn.visualize.listing.table.typeColumnName',
           defaultMessage: 'Type',
@@ -103,10 +103,31 @@ class VisualizeListingTableUi extends Component {
         render: (field, record) =>  (
           <span>
             {this.renderItemTypeIcon(record)}
-            {record.type.title}
+            {record.typeTitle}
             {this.getExperimentalBadge(record)}
           </span>
         )
+      },
+      {
+        field: 'canEdit',
+        name: intl.formatMessage({
+          id: 'kbn.visualize.listing.table.actionsColumnName',
+          defaultMessage: 'Actions',
+        }),
+        align: 'right',
+        width: '100px',
+        render: (_field, record) => (
+          <EuiButtonIcon
+            className="visListingTable__actionIcon"
+            onClick={() => this.props.editItem(record)}
+            iconType="pencil"
+            aria-label={intl.formatMessage({
+              id: 'kbn.visualize.listing.table.editActionDescription',
+              defaultMessage: 'Edit',
+            })}
+            disabled={!record.canEdit}
+          />
+        ),
       }
     ];
 
@@ -175,13 +196,13 @@ class VisualizeListingTableUi extends Component {
 
   renderItemTypeIcon(item) {
     let icon;
-    if (item.type.image) {
+    if (item.image) {
       icon = (
         <img
           className="visListingTable__typeImage"
           aria-hidden="true"
           alt=""
-          src={item.type.image}
+          src={item.image}
         />
       );
     } else {
@@ -199,7 +220,7 @@ class VisualizeListingTableUi extends Component {
   }
 
   getExperimentalBadge(item) {
-    return item.type.shouldMarkAsExperimentalInUI() && (
+    return item.isExperimental && (
       <EuiBetaBadge
         className="visListingTable__experimentalIcon"
         label="E"
