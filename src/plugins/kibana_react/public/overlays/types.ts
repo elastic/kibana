@@ -23,10 +23,10 @@ import { CoreStart } from '../context/types';
 export interface KibanaReactOverlays {
   openFlyout: (
     node: React.ReactNode,
-    options: Parameters<CoreStart['overlays']['openFlyout']>['1']
+    options?: Parameters<CoreStart['overlays']['openFlyout']>['1']
   ) => ReturnType<CoreStart['overlays']['openFlyout']>;
   openModal: (
     node: React.ReactNode,
-    options: Parameters<CoreStart['overlays']['openFlyout']>['1']
+    options?: Parameters<CoreStart['overlays']['openFlyout']>['1']
   ) => ReturnType<CoreStart['overlays']['openModal']>;
 }
