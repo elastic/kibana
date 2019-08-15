@@ -216,7 +216,7 @@ describe('BulkUploader', () => {
 
 
     it('refetches UsageCollectors if uploading to local cluster was not successful', done => {
-      const usageCollectorFetch = sinon.stub();
+      const usageCollectorFetch = sinon.stub().returns({ type: 'type_usage_collector_test', result: { testData: 12345 } });
 
       const collectors = new MockCollectorSet(server, [
         {
@@ -236,7 +236,7 @@ describe('BulkUploader', () => {
       uploader.start(collectors);
       setTimeout(() => {
         uploader.stop();
-        expect(usageCollectorFetch.callCount).to.be.greaterThan(0);
+        expect(usageCollectorFetch.callCount).to.be.greaterThan(1);
         done();
       }, CHECK_DELAY);
     });
