@@ -1,0 +1,186 @@
+# `kibana-react`
+
+Tools for building React applications in Kibana.
+
+
+## Context
+
+You can create React context that holds Core or plugin services that your plugin depends on.
+
+```ts
+import { createContext } from 'kibana-react';
+
+class MyPlugin {
+  start(core, plugins) {
+    const context = createContext({ ...core, ...plugins });
+  }
+}
+```
+
+You may also want to be explicit on which services you depend on.
+
+```ts
+import { createContext } from 'kibana-react';
+
+class MyPlugin {
+  start({ notifications, overlays }, { embeddable }) {
+    const context = createContext({ notifications, overlays, embeddable });
+  }
+}
+```
+
+Wrap your React application in the created context.
+
+```jsx
+<context.Provider>
+  <KibanaApplication />
+</context.Provider>
+```
+
+
+## Accessing `kibana-react` context
+
+Using `useKibana` hook.
+
+```tsx
+import { useKibana } from 'kibana-react';
+
+const Demo = () => {
+  const kibana = useKibana();
+  return (
+    <div>
+      {kibana.services.uiSettings.get('theme:darkMode') ? 'dark' : 'light'}
+    </div>
+  );
+};
+```
+
+Using `withKibana()` higher order component.
+
+```tsx
+import { withKibana } from 'kibana-react';
+
+const Demo = ({ kibana }) => {
+  return (
+    <div>
+      {kibana.services.uiSettings.get('theme:darkMode') ? 'dark' : 'light'}
+    </div>
+  );
+};
+
+export default withKibana(Demo);
+```
+
+Using `<UseKibana>` render prop.
+
+```tsx
+import { UseKibana } from 'kibana-react';
+
+const Demo = () => {
+  return (
+    <UseKibana>{kibana => 
+      <div>
+        {kibana.services.uiSettings.get('theme:darkMode') ? 'dark' : 'light'}
+      </div>
+    }</UseKibana>
+  );
+};
+
+export default withKibana(Demo);
+```
+
+
+## `uiSettings` service
+
+Wrappers around Core's `uiSettings` service.
+
+
+### `useUiSetting` hook
+
+`useUiSetting` synchronously returns the latest setting from `CoreStart['uiSettings']` service and
+subscribes to changes, re-rendering your component with latest values.
+
+```tsx
+import { useUiSetting } from 'kibana-react';
+
+const Demo = () => {
+  const [darkMode] = useUiSetting<boolean>('theme:darkMode');
+  return (
+    <div>
+      {darkMode ? 'dark' : 'light'}
+    </div>
+  );
+};
+```
+
+
+## `notifications` service
+
+Wrapper around Core's `notifications` service, allows you to render React elements
+directly without having to use `react-dom` library to mount to DOM nodes.
+
+```tsx
+import { createContext } from 'kibana-react';
+
+class MyPlugin {
+  start(core) {
+    const { notifications } = createContext(core);
+
+    notifications.toasts.show({
+      title: <div>Hello</div>,
+      body: <div>world!</div>
+    });
+  }
+}
+```
+
+
+## `notifications` service
+
+Wrapper around Core's `notifications` service, allows you to render React elements
+directly without having to use `react-dom` library to mount to DOM nodes.
+
+```tsx
+import { createContext } from 'kibana-react';
+
+class MyPlugin {
+  start(core) {
+    const { notifications } = createContext(core);
+
+    notifications.toasts.show({
+      title: <div>Hello</div>,
+      body: <div>world!</div>
+    });
+  }
+}
+```
+
+- `notifications.toasts.show()` &mdash; show generic toast message.
+- `notifications.toasts.success()` &mdash; show positive toast message.
+- `notifications.toasts.warning()` &mdash; show warning toast message.
+- `notifications.toasts.danger()` &mdash; show error toast message.
+
+
+## `overlays` service
+
+Wrapper around Core's `overlays` service, allows you to display React modals and flyouts
+directly without having to use `react-dom` library to mount to DOM nodes.
+
+```tsx
+import { createContext } from 'kibana-react';
+
+class MyPlugin {
+  start(core) {
+    const { overlays } = createContext(core);
+
+    overlays.openModal(
+      <div>
+        Hello world!
+      </div>
+    );
+  }
+}
+```
+
+- `overlays.openModal` &mdash; opens modal window.
+- `overlays.openFlyout` &mdash; opens right side panel.
