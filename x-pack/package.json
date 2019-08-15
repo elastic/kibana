@@ -14,7 +14,7 @@
     "test:browser:dev": "gulp testbrowser-dev",
     "test:browser": "gulp testbrowser",
     "test:jest": "node scripts/jest",
-    "test:mocha": "grunt test:mocha",
+    "test:mocha": "node scripts/mocha",
     "test:server": "gulp testserver"
   },
   "kibana": {
