@@ -36,6 +36,8 @@ import { HttpServiceStart, BasePathProxyServer } from '../http';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { DiscoveredPlugin, DiscoveredPluginInternal } from '../plugins';
 import { PluginsServiceSetup, PluginsServiceStart } from '../plugins/plugins_service';
+import { SavedObjectsServiceStart } from 'src/core/server/saved_objects/saved_objects_service';
+import { KibanaMigrator } from '../saved_objects/migrations';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
 
@@ -55,6 +57,7 @@ let setupDeps: {
 let startDeps: {
   core: {
     http: HttpServiceStart;
+    savedObjects: SavedObjectsServiceStart;
     plugins: PluginsServiceStart;
   };
   plugins: Record<string, unknown>;
@@ -94,6 +97,9 @@ beforeEach(() => {
     core: {
       http: {
         isListening: () => true,
+      },
+      savedObjects: {
+        migrator: {} as KibanaMigrator,
       },
       plugins: { contracts: new Map() },
     },
@@ -200,7 +206,7 @@ describe('once LegacyService is set up with connection info', () => {
       configService: configService as any,
     });
 
-    await legacyService.setup(setupDeps);
+    await expect(legacyService.setup(setupDeps)).rejects.toThrowErrorMatchingSnapshot();
     await expect(legacyService.start(startDeps)).rejects.toThrowErrorMatchingSnapshot();
 
     expect(MockKbnServer).not.toHaveBeenCalled();

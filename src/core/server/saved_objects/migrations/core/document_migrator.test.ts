@@ -508,7 +508,7 @@ describe('DocumentMigrator', () => {
       expect('Did not throw').toEqual('But it should have!');
     } catch (error) {
       expect(error.message).toMatch(/Dang diggity!/);
-      const warning = log.warn.mock.calls[0][1];
+      const warning = log.warn.mock.calls[0][0];
       expect(warning).toContain(JSON.stringify(failedDoc));
       expect(warning).toContain('dog:1.2.3');
     }
@@ -535,7 +535,7 @@ describe('DocumentMigrator', () => {
       migrationVersion: {},
     };
     migrator.migrate(doc);
-    expect(mockLogger.info.mock.calls[0][1]).toEqual(logTestMsg);
+    expect(mockLogger.info.mock.calls[0][0]).toEqual(logTestMsg);
   });
 
   test('extracts the latest migration version info', () => {

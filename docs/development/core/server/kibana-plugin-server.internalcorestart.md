@@ -10,3 +10,10 @@
 ```typescript
 export interface InternalCoreStart 
 ```
+
+## Properties
+
+|  Property | Type | Description |
+|  --- | --- | --- |
+|  [savedObjects](./kibana-plugin-server.internalcorestart.savedobjects.md) | <code>SavedObjectsServiceStart</code> |  |
+

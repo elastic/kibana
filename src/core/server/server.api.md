@@ -10,6 +10,8 @@ import { ConfigOptions } from 'elasticsearch';
 import { DetailedPeerCertificate } from 'tls';
 import { Duration } from 'moment';
 import { IncomingHttpHeaders } from 'http';
+import { KibanaConfig } from 'src/core/server/kibana_config';
+import { Logger as Logger_2 } from 'src/core/server/logging';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { PeerCertificate } from 'tls';
@@ -17,6 +19,7 @@ import { Readable } from 'stream';
 import { Request } from 'hapi';
 import { ResponseObject } from 'hapi';
 import { ResponseToolkit } from 'hapi';
+import { SavedObjectsMapping } from 'src/core/server/legacy/plugins/collect_legacy_ui_exports';
 import { Server } from 'hapi';
 import { Stream } from 'stream';
 import { Type } from '@kbn/config-schema';
@@ -284,6 +287,10 @@ export interface InternalCoreSetup {
 
 // @public (undocumented)
 export interface InternalCoreStart {
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectsServiceStart" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    savedObjects: SavedObjectsServiceStart;
 }
 
 // @public

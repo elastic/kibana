@@ -22,10 +22,11 @@ import { collectUiExports } from '../../../../legacy/ui/ui_exports/collect_ui_ex
 import { SavedObjectsSchemaDefinition } from '../../saved_objects/schema';
 import { PropertyValidators } from '../../saved_objects/validation';
 import { MigrationDefinition } from '../../saved_objects/migrations/core/document_migrator';
+import { MappingProperties } from '../../saved_objects/mappings';
 
 export interface SavedObjectsMapping {
   pluginId: string;
-  properties: string[];
+  properties: MappingProperties;
 }
 
 export interface SavedObjectsLegacyUiExports {

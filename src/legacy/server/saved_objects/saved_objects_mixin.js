@@ -20,7 +20,6 @@
 // Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 
-import { KibanaMigrator } from '../../../core/server/saved_objects/migrations';
 import { SavedObjectsSchema } from '../../../core/server/saved_objects/schema';
 import { SavedObjectsSerializer } from '../../../core/server/saved_objects/serialization';
 import {
@@ -58,7 +57,7 @@ function getImportableAndExportableTypes({ kbnServer, visibleTypes }) {
 }
 
 export function savedObjectsMixin(kbnServer, server) {
-  const migrator = new KibanaMigrator({ kbnServer });
+  const migrator = kbnServer.newPlatform.start.core.savedObjects.migrator;
   const mappings = migrator.getActiveMappings();
   const allTypes = Object.keys(getRootPropertiesObjects(mappings));
   const schema = new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas);

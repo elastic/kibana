@@ -26,6 +26,7 @@ import { HttpService, HttpServiceSetup } from './http';
 import { LegacyService } from './legacy';
 import { Logger, LoggerFactory } from './logging';
 import { PluginsService, config as pluginsConfig } from './plugins';
+import { SavedObjectsService } from '../server/saved_objects';
 
 import { config as elasticsearchConfig } from './elasticsearch';
 import { config as httpConfig } from './http';
@@ -43,9 +44,10 @@ export class Server {
   private readonly context: ContextService;
   private readonly elasticsearch: ElasticsearchService;
   private readonly http: HttpService;
-  private readonly plugins: PluginsService;
   private readonly legacy: LegacyService;
   private readonly log: Logger;
+  private readonly plugins: PluginsService;
+  private readonly savedObjects: SavedObjectsService;
 
   constructor(
     readonly config$: Observable<Config>,
@@ -61,6 +63,7 @@ export class Server {
     this.plugins = new PluginsService(core);
     this.legacy = new LegacyService(core);
     this.elasticsearch = new ElasticsearchService(core);
+    this.savedObjects = new SavedObjectsService(core);
   }
 
   public async setup() {
@@ -89,9 +92,14 @@ export class Server {
     this.registerCoreContext(coreSetup);
     const pluginsSetup = await this.plugins.setup(coreSetup);
 
-    await this.legacy.setup({
+    const legacySetup = await this.legacy.setup({
       core: { ...coreSetup, plugins: pluginsSetup },
       plugins: mapToObject(pluginsSetup.contracts),
+    });
+
+    await this.savedObjects.setup({
+      elasticsearch: elasticsearchServiceSetup,
+      legacy: legacySetup,
     });
 
     return coreSetup;
@@ -99,8 +107,10 @@ export class Server {
 
   public async start() {
     const pluginsStart = await this.plugins.start({});
+    const savedObjectsStart = await this.savedObjects.start({});
 
     const coreStart = {
+      savedObjects: savedObjectsStart,
       plugins: pluginsStart,
     };
 
@@ -118,6 +128,7 @@ export class Server {
 
     await this.legacy.stop();
     await this.plugins.stop();
+    await this.savedObjects.stop();
     await this.elasticsearch.stop();
     await this.http.stop();
   }

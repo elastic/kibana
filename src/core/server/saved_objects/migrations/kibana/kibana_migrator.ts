@@ -39,7 +39,7 @@ import {
 import { createIndexMap } from '../core/build_index_map';
 import { Config } from '../../../config';
 
-interface KibanaMigratorOptions {
+export interface KibanaMigratorOptions {
   callCluster: CallCluster;
   config: Config;
   kibanaConfig: KibanaConfig;
@@ -131,10 +131,6 @@ export class KibanaMigrator {
       });
     });
 
-    if (migrators.length === 0) {
-      throw new Error(`Migrations failed to run, no mappings found or Kibana is not "ready".`);
-    }
-
     return Promise.all(migrators.map(migrator => migrator.migrate()));
   });
 
@@ -164,7 +160,7 @@ export class KibanaMigrator {
  * Merges savedObjectMappings properties into a single object, verifying that
  * no mappings are redefined.
  */
-function mergeProperties(mappings: SavedObjectsMapping[]): MappingProperties {
+export function mergeProperties(mappings: SavedObjectsMapping[]): MappingProperties {
   return mappings.reduce((acc, { pluginId, properties }) => {
     const duplicate = Object.keys(properties).find(k => acc.hasOwnProperty(k));
     if (duplicate) {
