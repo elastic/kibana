@@ -48,19 +48,21 @@ When you are ready to move on from the demo data, connect the element to your ow
 
 Access your data in Elasticsearch using the Elasticsearch SQL syntax.
 
+Unfamiliar with writing Elasticsearch SQL queries? For more information, refer to {ref}/sql-spec.html[SQL language].
+
 . Click *Elasticsearch SQL*.
 
-. In the *Elasticearch SQL query* box, enter your query, then click *Preview*.
+. In the *Elasticearch SQL query* box, enter your query, then *Preview* it.
 
-. If everything looks correct, click *Save*. 
-
-Unfamiliar with writing Elasticsearch SQL queries? For more information, refer to {ref}/sql-spec.html[SQL language].
+. If everything looks correct, *Save* it. 
 
 [float]
 [[elasticsearch-raw-doc-data-source]]
 ==== Connect to Elasticsearch raw data
 
 Use the Lucene query syntax to use your raw data in Elasticsearch.
+
+For for more information about the Lucene query string sytax, refer to <<lucene-query,Lucene Query Syntax>>.
 
 . Click *Elasticsearch raw documents*.
 
@@ -72,17 +74,15 @@ Use the Lucene query syntax to use your raw data in Elasticsearch.
 
 . For more targeted queries, enter a *Query* using the Lucene query string syntax. 
 
-. Click *Preview*. 
+. *Preview* the query. 
 
-. If your query looks correct, click *Save*. 
-
-For for more information about the Lucene query string sytax, refer to <<lucene-query,Lucene Query Syntax>>.
+. If your query looks correct, *Save* it. 
 
 [float]
 [[timelion-data-source]]
 ==== Connect to Timelion
 
-Use Timelion queries to use your time series data. 
+Use <<timelion,Timelion>> queries to use your time series data. 
 
 . Click *Timelion*.
 
@@ -90,11 +90,9 @@ Use Timelion queries to use your time series data.
 +
 For for more information about the Lucene query string syntax, refer to <<lucene-query,Lucene Query Syntax>>.
 
-. Enter the *Interval*, then click *Preview*.
+. Enter the *Interval*, then *Preview* the query.
 
-. If your query looks correct, click *Save*. 
-
-For more information about Timelion, refer to <<timelion,Timelion>>.
+. If your query looks correct, *Save* it. 
 
 [float]
 [[configure-display-options]]
@@ -170,13 +168,11 @@ Choose where you want the elements to appear on your workpad.
 [[move-canvas-elements]]
 ==== Move elements
 
-Move the element to a preferred location on your workpad.
+Move the element to a preferred location on your workpad. As you move the element, notice the alignment lines that appear to help you place the element exactly where you want it.
 
 * Click and drag the element to your preferred location.
 
 * To move the element by 1 pixel, select the element, then use your arrow keys.
-
-As you move the element, notice the alignment lines that appear to help you place the element exactly where you want it.
 
 [float]
 [[resize-canvas-elements]]
@@ -189,7 +185,7 @@ Make your elements bigger or smaller than the default size.
 . Click and drag the resizing icon to the size you want.
 
 [float]
-[[alighn-canvas-elements]]
+[[align-canvas-elements]]
 ==== Align elements
 
 Align two or more elements on your workpad.
@@ -198,7 +194,7 @@ Align two or more elements on your workpad.
 
 . Click the *Element options* icon in the top right corner, then select *Align elements*.
 
-. From the *Alignment* menu, how you want to align the elements on the workpad.
+. From the *Alignment* menu, select how you want to align the elements on the workpad.
 +
 [role="screenshot"]
 image::images/canvas-align-elements.gif[Align elements]
@@ -213,7 +209,7 @@ Distribute two or more elements on your workpad.
 
 . Click the *Element options* icon in the top right corner, then select *Distribute elements*.
 
-. From the *Distribution* menu, how you want to distribute the elements on the workpad.
+. From the *Distribution* menu, select how you want to distribute the elements on the workpad.
 +
 [role="screenshot"]
 image::images/canvas-distribute-elements.gif[Distribute elements]
@@ -246,11 +242,11 @@ To save a group of elements, press Shift, then select the elements you want to s
 
 . Enter an optional *Description*, then click *Save*.
 
-To access the element, click *Add element*, then select *My elements*.
+. To access the element, click *Add element*, then select *My elements*.
 
 [float]
 [[add-more-pages]]
-=== Add more pages
+=== Add pages
 
 When you have run out of room on your workpad page, add more pages.
 
