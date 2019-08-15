@@ -19,19 +19,16 @@
 
 import { dataPluginMock } from '../../../../core_plugins/data/public/mocks';
 
-const createMock = () => {
-  const mock = {
-    setup: {
-      data: dataPluginMock.createSetup(),
-    },
-    start: {
-      data: dataPluginMock.createStart(),
-    },
-  };
-  return mock;
-};
+const dataSetup = dataPluginMock.createSetup();
 
-createMock();
+// mocks for stateful code
+export const { FieldImpl } = dataSetup.indexPatterns!.__LEGACY;
+export const {
+  FieldList,
+  flattenHitWrapper,
+  formatHitProvider,
+  indexPatterns,
+} = dataSetup.indexPatterns!;
 
 // static code
 export {

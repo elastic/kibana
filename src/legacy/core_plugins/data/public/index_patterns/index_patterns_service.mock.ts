@@ -20,6 +20,8 @@
 import { IndexPatternsService, IndexPatternsSetup } from '.';
 import { FieldType } from './fields';
 import { StaticIndexPattern } from './index_patterns';
+// @ts-ignore
+import { flattenHitWrapper } from './index_patterns/flatten_hit';
 
 type IndexPatternsServiceClientContract = PublicMethodsOf<IndexPatternsService>;
 
@@ -31,7 +33,7 @@ const createSetupContractMock = () => {
 
   const setupContract: jest.Mocked<IndexPatternsSetup> = {
     FieldList: {} as any,
-    flattenHitWrapper: jest.fn(),
+    flattenHitWrapper: jest.fn().mockImplementation(flattenHitWrapper),
     formatHitProvider: jest.fn(),
     indexPatterns: jest.fn() as any,
     IndexPatternSelect: jest.fn(),

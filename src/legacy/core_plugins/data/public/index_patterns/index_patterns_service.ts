@@ -20,7 +20,7 @@
 import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
 import { Field, FieldList, FieldType } from './fields';
 // @ts-ignore
-import { flattenHitWrapper } from './index_patterns/flatten_hit';
+import { createFlattenHitWrapper } from './index_patterns/flatten_hit';
 import { createIndexPatternSelect } from './components';
 import {
   formatHitProvider,
@@ -43,7 +43,7 @@ export class IndexPatternsService {
   public setup({ uiSettings, savedObjectsClient }: IndexPatternDependencies) {
     return {
       FieldList,
-      flattenHitWrapper,
+      flattenHitWrapper: createFlattenHitWrapper(),
       formatHitProvider,
       indexPatterns: new IndexPatterns(uiSettings, savedObjectsClient),
       IndexPatternSelect: createIndexPatternSelect(savedObjectsClient),
