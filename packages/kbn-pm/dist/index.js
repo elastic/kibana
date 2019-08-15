@@ -9194,33 +9194,38 @@ function bugsTypos(bugs, warn) {
 /* 67 */
 /***/ (function(module, exports) {
 
-exports = module.exports = SemVer;
+exports = module.exports = SemVer
 
-// The debug function is excluded entirely from the minified version.
-/* nomin */ var debug;
-/* nomin */ if (typeof process === 'object' &&
-    /* nomin */ process.env &&
-    /* nomin */ process.env.NODE_DEBUG &&
-    /* nomin */ /\bsemver\b/i.test(process.env.NODE_DEBUG))
-  /* nomin */ debug = function() {
-    /* nomin */ var args = Array.prototype.slice.call(arguments, 0);
-    /* nomin */ args.unshift('SEMVER');
-    /* nomin */ console.log.apply(console, args);
-    /* nomin */ };
-/* nomin */ else
-  /* nomin */ debug = function() {};
+var debug
+/* istanbul ignore next */
+if (typeof process === 'object' &&
+    process.env &&
+    process.env.NODE_DEBUG &&
+    /\bsemver\b/i.test(process.env.NODE_DEBUG)) {
+  debug = function () {
+    var args = Array.prototype.slice.call(arguments, 0)
+    args.unshift('SEMVER')
+    console.log.apply(console, args)
+  }
+} else {
+  debug = function () {}
+}
 
 // Note: this is the semver.org version of the spec that it implements
 // Not necessarily the package version of this code.
-exports.SEMVER_SPEC_VERSION = '2.0.0';
+exports.SEMVER_SPEC_VERSION = '2.0.0'
 
-var MAX_LENGTH = 256;
-var MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER || 9007199254740991;
+var MAX_LENGTH = 256
+var MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER ||
+  /* istanbul ignore next */ 9007199254740991
+
+// Max safe segment length for coercion.
+var MAX_SAFE_COMPONENT_LENGTH = 16
 
 // The actual regexps go on exports.re
-var re = exports.re = [];
-var src = exports.src = [];
-var R = 0;
+var re = exports.re = []
+var src = exports.src = []
+var R = 0
 
 // The following Regular Expressions can be used for tokenizing,
 // validating, and parsing SemVer version strings.
@@ -9228,71 +9233,67 @@ var R = 0;
 // ## Numeric Identifier
 // A single `0`, or a non-zero digit followed by zero or more digits.
 
-var NUMERICIDENTIFIER = R++;
-src[NUMERICIDENTIFIER] = '0|[1-9]\\d*';
-var NUMERICIDENTIFIERLOOSE = R++;
-src[NUMERICIDENTIFIERLOOSE] = '[0-9]+';
-
+var NUMERICIDENTIFIER = R++
+src[NUMERICIDENTIFIER] = '0|[1-9]\\d*'
+var NUMERICIDENTIFIERLOOSE = R++
+src[NUMERICIDENTIFIERLOOSE] = '[0-9]+'
 
 // ## Non-numeric Identifier
 // Zero or more digits, followed by a letter or hyphen, and then zero or
 // more letters, digits, or hyphens.
 
-var NONNUMERICIDENTIFIER = R++;
-src[NONNUMERICIDENTIFIER] = '\\d*[a-zA-Z-][a-zA-Z0-9-]*';
-
+var NONNUMERICIDENTIFIER = R++
+src[NONNUMERICIDENTIFIER] = '\\d*[a-zA-Z-][a-zA-Z0-9-]*'
 
 // ## Main Version
 // Three dot-separated numeric identifiers.
 
-var MAINVERSION = R++;
+var MAINVERSION = R++
 src[MAINVERSION] = '(' + src[NUMERICIDENTIFIER] + ')\\.' +
                    '(' + src[NUMERICIDENTIFIER] + ')\\.' +
-                   '(' + src[NUMERICIDENTIFIER] + ')';
+                   '(' + src[NUMERICIDENTIFIER] + ')'
 
-var MAINVERSIONLOOSE = R++;
+var MAINVERSIONLOOSE = R++
 src[MAINVERSIONLOOSE] = '(' + src[NUMERICIDENTIFIERLOOSE] + ')\\.' +
                         '(' + src[NUMERICIDENTIFIERLOOSE] + ')\\.' +
-                        '(' + src[NUMERICIDENTIFIERLOOSE] + ')';
+                        '(' + src[NUMERICIDENTIFIERLOOSE] + ')'
 
 // ## Pre-release Version Identifier
 // A numeric identifier, or a non-numeric identifier.
 
-var PRERELEASEIDENTIFIER = R++;
+var PRERELEASEIDENTIFIER = R++
 src[PRERELEASEIDENTIFIER] = '(?:' + src[NUMERICIDENTIFIER] +
-                            '|' + src[NONNUMERICIDENTIFIER] + ')';
+                            '|' + src[NONNUMERICIDENTIFIER] + ')'
 
-var PRERELEASEIDENTIFIERLOOSE = R++;
+var PRERELEASEIDENTIFIERLOOSE = R++
 src[PRERELEASEIDENTIFIERLOOSE] = '(?:' + src[NUMERICIDENTIFIERLOOSE] +
-                                 '|' + src[NONNUMERICIDENTIFIER] + ')';
-
+                                 '|' + src[NONNUMERICIDENTIFIER] + ')'
 
 // ## Pre-release Version
 // Hyphen, followed by one or more dot-separated pre-release version
 // identifiers.
 
-var PRERELEASE = R++;
+var PRERELEASE = R++
 src[PRERELEASE] = '(?:-(' + src[PRERELEASEIDENTIFIER] +
-                  '(?:\\.' + src[PRERELEASEIDENTIFIER] + ')*))';
+                  '(?:\\.' + src[PRERELEASEIDENTIFIER] + ')*))'
 
-var PRERELEASELOOSE = R++;
+var PRERELEASELOOSE = R++
 src[PRERELEASELOOSE] = '(?:-?(' + src[PRERELEASEIDENTIFIERLOOSE] +
-                       '(?:\\.' + src[PRERELEASEIDENTIFIERLOOSE] + ')*))';
+                       '(?:\\.' + src[PRERELEASEIDENTIFIERLOOSE] + ')*))'
 
 // ## Build Metadata Identifier
 // Any combination of digits, letters, or hyphens.
 
-var BUILDIDENTIFIER = R++;
-src[BUILDIDENTIFIER] = '[0-9A-Za-z-]+';
+var BUILDIDENTIFIER = R++
+src[BUILDIDENTIFIER] = '[0-9A-Za-z-]+'
 
 // ## Build Metadata
 // Plus sign, followed by one or more period-separated build metadata
 // identifiers.
 
-var BUILD = R++;
+var BUILD = R++
 src[BUILD] = '(?:\\+(' + src[BUILDIDENTIFIER] +
-             '(?:\\.' + src[BUILDIDENTIFIER] + ')*))';
-
+             '(?:\\.' + src[BUILDIDENTIFIER] + ')*))'
 
 // ## Full Version String
 // A main version, followed optionally by a pre-release version and
@@ -9303,774 +9304,870 @@ src[BUILD] = '(?:\\+(' + src[BUILDIDENTIFIER] +
 // capturing group, because it should not ever be used in version
 // comparison.
 
-var FULL = R++;
+var FULL = R++
 var FULLPLAIN = 'v?' + src[MAINVERSION] +
                 src[PRERELEASE] + '?' +
-                src[BUILD] + '?';
+                src[BUILD] + '?'
 
-src[FULL] = '^' + FULLPLAIN + '$';
+src[FULL] = '^' + FULLPLAIN + '$'
 
 // like full, but allows v1.2.3 and =1.2.3, which people do sometimes.
 // also, 1.0.0alpha1 (prerelease without the hyphen) which is pretty
 // common in the npm registry.
 var LOOSEPLAIN = '[v=\\s]*' + src[MAINVERSIONLOOSE] +
                  src[PRERELEASELOOSE] + '?' +
-                 src[BUILD] + '?';
+                 src[BUILD] + '?'
 
-var LOOSE = R++;
-src[LOOSE] = '^' + LOOSEPLAIN + '$';
+var LOOSE = R++
+src[LOOSE] = '^' + LOOSEPLAIN + '$'
 
-var GTLT = R++;
-src[GTLT] = '((?:<|>)?=?)';
+var GTLT = R++
+src[GTLT] = '((?:<|>)?=?)'
 
 // Something like "2.*" or "1.2.x".
 // Note that "x.x" is a valid xRange identifer, meaning "any version"
 // Only the first item is strictly required.
-var XRANGEIDENTIFIERLOOSE = R++;
-src[XRANGEIDENTIFIERLOOSE] = src[NUMERICIDENTIFIERLOOSE] + '|x|X|\\*';
-var XRANGEIDENTIFIER = R++;
-src[XRANGEIDENTIFIER] = src[NUMERICIDENTIFIER] + '|x|X|\\*';
+var XRANGEIDENTIFIERLOOSE = R++
+src[XRANGEIDENTIFIERLOOSE] = src[NUMERICIDENTIFIERLOOSE] + '|x|X|\\*'
+var XRANGEIDENTIFIER = R++
+src[XRANGEIDENTIFIER] = src[NUMERICIDENTIFIER] + '|x|X|\\*'
 
-var XRANGEPLAIN = R++;
+var XRANGEPLAIN = R++
 src[XRANGEPLAIN] = '[v=\\s]*(' + src[XRANGEIDENTIFIER] + ')' +
                    '(?:\\.(' + src[XRANGEIDENTIFIER] + ')' +
                    '(?:\\.(' + src[XRANGEIDENTIFIER] + ')' +
                    '(?:' + src[PRERELEASE] + ')?' +
                    src[BUILD] + '?' +
-                   ')?)?';
+                   ')?)?'
 
-var XRANGEPLAINLOOSE = R++;
+var XRANGEPLAINLOOSE = R++
 src[XRANGEPLAINLOOSE] = '[v=\\s]*(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
                         '(?:\\.(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
                         '(?:\\.(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
                         '(?:' + src[PRERELEASELOOSE] + ')?' +
                         src[BUILD] + '?' +
-                        ')?)?';
+                        ')?)?'
 
-var XRANGE = R++;
-src[XRANGE] = '^' + src[GTLT] + '\\s*' + src[XRANGEPLAIN] + '$';
-var XRANGELOOSE = R++;
-src[XRANGELOOSE] = '^' + src[GTLT] + '\\s*' + src[XRANGEPLAINLOOSE] + '$';
+var XRANGE = R++
+src[XRANGE] = '^' + src[GTLT] + '\\s*' + src[XRANGEPLAIN] + '$'
+var XRANGELOOSE = R++
+src[XRANGELOOSE] = '^' + src[GTLT] + '\\s*' + src[XRANGEPLAINLOOSE] + '$'
+
+// Coercion.
+// Extract anything that could conceivably be a part of a valid semver
+var COERCE = R++
+src[COERCE] = '(?:^|[^\\d])' +
+              '(\\d{1,' + MAX_SAFE_COMPONENT_LENGTH + '})' +
+              '(?:\\.(\\d{1,' + MAX_SAFE_COMPONENT_LENGTH + '}))?' +
+              '(?:\\.(\\d{1,' + MAX_SAFE_COMPONENT_LENGTH + '}))?' +
+              '(?:$|[^\\d])'
 
 // Tilde ranges.
 // Meaning is "reasonably at or greater than"
-var LONETILDE = R++;
-src[LONETILDE] = '(?:~>?)';
+var LONETILDE = R++
+src[LONETILDE] = '(?:~>?)'
 
-var TILDETRIM = R++;
-src[TILDETRIM] = '(\\s*)' + src[LONETILDE] + '\\s+';
-re[TILDETRIM] = new RegExp(src[TILDETRIM], 'g');
-var tildeTrimReplace = '$1~';
+var TILDETRIM = R++
+src[TILDETRIM] = '(\\s*)' + src[LONETILDE] + '\\s+'
+re[TILDETRIM] = new RegExp(src[TILDETRIM], 'g')
+var tildeTrimReplace = '$1~'
 
-var TILDE = R++;
-src[TILDE] = '^' + src[LONETILDE] + src[XRANGEPLAIN] + '$';
-var TILDELOOSE = R++;
-src[TILDELOOSE] = '^' + src[LONETILDE] + src[XRANGEPLAINLOOSE] + '$';
+var TILDE = R++
+src[TILDE] = '^' + src[LONETILDE] + src[XRANGEPLAIN] + '$'
+var TILDELOOSE = R++
+src[TILDELOOSE] = '^' + src[LONETILDE] + src[XRANGEPLAINLOOSE] + '$'
 
 // Caret ranges.
 // Meaning is "at least and backwards compatible with"
-var LONECARET = R++;
-src[LONECARET] = '(?:\\^)';
+var LONECARET = R++
+src[LONECARET] = '(?:\\^)'
 
-var CARETTRIM = R++;
-src[CARETTRIM] = '(\\s*)' + src[LONECARET] + '\\s+';
-re[CARETTRIM] = new RegExp(src[CARETTRIM], 'g');
-var caretTrimReplace = '$1^';
+var CARETTRIM = R++
+src[CARETTRIM] = '(\\s*)' + src[LONECARET] + '\\s+'
+re[CARETTRIM] = new RegExp(src[CARETTRIM], 'g')
+var caretTrimReplace = '$1^'
 
-var CARET = R++;
-src[CARET] = '^' + src[LONECARET] + src[XRANGEPLAIN] + '$';
-var CARETLOOSE = R++;
-src[CARETLOOSE] = '^' + src[LONECARET] + src[XRANGEPLAINLOOSE] + '$';
+var CARET = R++
+src[CARET] = '^' + src[LONECARET] + src[XRANGEPLAIN] + '$'
+var CARETLOOSE = R++
+src[CARETLOOSE] = '^' + src[LONECARET] + src[XRANGEPLAINLOOSE] + '$'
 
 // A simple gt/lt/eq thing, or just "" to indicate "any version"
-var COMPARATORLOOSE = R++;
-src[COMPARATORLOOSE] = '^' + src[GTLT] + '\\s*(' + LOOSEPLAIN + ')$|^$';
-var COMPARATOR = R++;
-src[COMPARATOR] = '^' + src[GTLT] + '\\s*(' + FULLPLAIN + ')$|^$';
-
+var COMPARATORLOOSE = R++
+src[COMPARATORLOOSE] = '^' + src[GTLT] + '\\s*(' + LOOSEPLAIN + ')$|^$'
+var COMPARATOR = R++
+src[COMPARATOR] = '^' + src[GTLT] + '\\s*(' + FULLPLAIN + ')$|^$'
 
 // An expression to strip any whitespace between the gtlt and the thing
 // it modifies, so that `> 1.2.3` ==> `>1.2.3`
-var COMPARATORTRIM = R++;
+var COMPARATORTRIM = R++
 src[COMPARATORTRIM] = '(\\s*)' + src[GTLT] +
-                      '\\s*(' + LOOSEPLAIN + '|' + src[XRANGEPLAIN] + ')';
+                      '\\s*(' + LOOSEPLAIN + '|' + src[XRANGEPLAIN] + ')'
 
 // this one has to use the /g flag
-re[COMPARATORTRIM] = new RegExp(src[COMPARATORTRIM], 'g');
-var comparatorTrimReplace = '$1$2$3';
-
+re[COMPARATORTRIM] = new RegExp(src[COMPARATORTRIM], 'g')
+var comparatorTrimReplace = '$1$2$3'
 
 // Something like `1.2.3 - 1.2.4`
 // Note that these all use the loose form, because they'll be
 // checked against either the strict or loose comparator form
 // later.
-var HYPHENRANGE = R++;
+var HYPHENRANGE = R++
 src[HYPHENRANGE] = '^\\s*(' + src[XRANGEPLAIN] + ')' +
                    '\\s+-\\s+' +
                    '(' + src[XRANGEPLAIN] + ')' +
-                   '\\s*$';
+                   '\\s*$'
 
-var HYPHENRANGELOOSE = R++;
+var HYPHENRANGELOOSE = R++
 src[HYPHENRANGELOOSE] = '^\\s*(' + src[XRANGEPLAINLOOSE] + ')' +
                         '\\s+-\\s+' +
                         '(' + src[XRANGEPLAINLOOSE] + ')' +
-                        '\\s*$';
+                        '\\s*$'
 
 // Star ranges basically just allow anything at all.
-var STAR = R++;
-src[STAR] = '(<|>)?=?\\s*\\*';
+var STAR = R++
+src[STAR] = '(<|>)?=?\\s*\\*'
 
 // Compile to actual regexp objects.
 // All are flag-free, unless they were created above with a flag.
 for (var i = 0; i < R; i++) {
-  debug(i, src[i]);
-  if (!re[i])
-    re[i] = new RegExp(src[i]);
+  debug(i, src[i])
+  if (!re[i]) {
+    re[i] = new RegExp(src[i])
+  }
 }
 
-exports.parse = parse;
-function parse(version, loose) {
-  if (version instanceof SemVer)
-    return version;
+exports.parse = parse
+function parse (version, options) {
+  if (!options || typeof options !== 'object') {
+    options = {
+      loose: !!options,
+      includePrerelease: false
+    }
+  }
 
-  if (typeof version !== 'string')
-    return null;
+  if (version instanceof SemVer) {
+    return version
+  }
 
-  if (version.length > MAX_LENGTH)
-    return null;
+  if (typeof version !== 'string') {
+    return null
+  }
 
-  var r = loose ? re[LOOSE] : re[FULL];
-  if (!r.test(version))
-    return null;
+  if (version.length > MAX_LENGTH) {
+    return null
+  }
+
+  var r = options.loose ? re[LOOSE] : re[FULL]
+  if (!r.test(version)) {
+    return null
+  }
 
   try {
-    return new SemVer(version, loose);
+    return new SemVer(version, options)
   } catch (er) {
-    return null;
+    return null
   }
 }
 
-exports.valid = valid;
-function valid(version, loose) {
-  var v = parse(version, loose);
-  return v ? v.version : null;
+exports.valid = valid
+function valid (version, options) {
+  var v = parse(version, options)
+  return v ? v.version : null
 }
 
-
-exports.clean = clean;
-function clean(version, loose) {
-  var s = parse(version.trim().replace(/^[=v]+/, ''), loose);
-  return s ? s.version : null;
+exports.clean = clean
+function clean (version, options) {
+  var s = parse(version.trim().replace(/^[=v]+/, ''), options)
+  return s ? s.version : null
 }
 
-exports.SemVer = SemVer;
+exports.SemVer = SemVer
 
-function SemVer(version, loose) {
+function SemVer (version, options) {
+  if (!options || typeof options !== 'object') {
+    options = {
+      loose: !!options,
+      includePrerelease: false
+    }
+  }
   if (version instanceof SemVer) {
-    if (version.loose === loose)
-      return version;
-    else
-      version = version.version;
+    if (version.loose === options.loose) {
+      return version
+    } else {
+      version = version.version
+    }
   } else if (typeof version !== 'string') {
-    throw new TypeError('Invalid Version: ' + version);
+    throw new TypeError('Invalid Version: ' + version)
   }
 
-  if (version.length > MAX_LENGTH)
+  if (version.length > MAX_LENGTH) {
     throw new TypeError('version is longer than ' + MAX_LENGTH + ' characters')
+  }
 
-  if (!(this instanceof SemVer))
-    return new SemVer(version, loose);
+  if (!(this instanceof SemVer)) {
+    return new SemVer(version, options)
+  }
 
-  debug('SemVer', version, loose);
-  this.loose = loose;
-  var m = version.trim().match(loose ? re[LOOSE] : re[FULL]);
+  debug('SemVer', version, options)
+  this.options = options
+  this.loose = !!options.loose
 
-  if (!m)
-    throw new TypeError('Invalid Version: ' + version);
+  var m = version.trim().match(options.loose ? re[LOOSE] : re[FULL])
 
-  this.raw = version;
+  if (!m) {
+    throw new TypeError('Invalid Version: ' + version)
+  }
+
+  this.raw = version
 
   // these are actually numbers
-  this.major = +m[1];
-  this.minor = +m[2];
-  this.patch = +m[3];
+  this.major = +m[1]
+  this.minor = +m[2]
+  this.patch = +m[3]
 
-  if (this.major > MAX_SAFE_INTEGER || this.major < 0)
+  if (this.major > MAX_SAFE_INTEGER || this.major < 0) {
     throw new TypeError('Invalid major version')
+  }
 
-  if (this.minor > MAX_SAFE_INTEGER || this.minor < 0)
+  if (this.minor > MAX_SAFE_INTEGER || this.minor < 0) {
     throw new TypeError('Invalid minor version')
+  }
 
-  if (this.patch > MAX_SAFE_INTEGER || this.patch < 0)
+  if (this.patch > MAX_SAFE_INTEGER || this.patch < 0) {
     throw new TypeError('Invalid patch version')
+  }
 
   // numberify any prerelease numeric ids
-  if (!m[4])
-    this.prerelease = [];
-  else
-    this.prerelease = m[4].split('.').map(function(id) {
+  if (!m[4]) {
+    this.prerelease = []
+  } else {
+    this.prerelease = m[4].split('.').map(function (id) {
       if (/^[0-9]+$/.test(id)) {
-        var num = +id;
-        if (num >= 0 && num < MAX_SAFE_INTEGER)
-          return num;
+        var num = +id
+        if (num >= 0 && num < MAX_SAFE_INTEGER) {
+          return num
+        }
       }
-      return id;
-    });
+      return id
+    })
+  }
 
-  this.build = m[5] ? m[5].split('.') : [];
-  this.format();
+  this.build = m[5] ? m[5].split('.') : []
+  this.format()
 }
 
-SemVer.prototype.format = function() {
-  this.version = this.major + '.' + this.minor + '.' + this.patch;
-  if (this.prerelease.length)
-    this.version += '-' + this.prerelease.join('.');
-  return this.version;
-};
+SemVer.prototype.format = function () {
+  this.version = this.major + '.' + this.minor + '.' + this.patch
+  if (this.prerelease.length) {
+    this.version += '-' + this.prerelease.join('.')
+  }
+  return this.version
+}
 
-SemVer.prototype.toString = function() {
-  return this.version;
-};
+SemVer.prototype.toString = function () {
+  return this.version
+}
 
-SemVer.prototype.compare = function(other) {
-  debug('SemVer.compare', this.version, this.loose, other);
-  if (!(other instanceof SemVer))
-    other = new SemVer(other, this.loose);
+SemVer.prototype.compare = function (other) {
+  debug('SemVer.compare', this.version, this.options, other)
+  if (!(other instanceof SemVer)) {
+    other = new SemVer(other, this.options)
+  }
 
-  return this.compareMain(other) || this.comparePre(other);
-};
+  return this.compareMain(other) || this.comparePre(other)
+}
 
-SemVer.prototype.compareMain = function(other) {
-  if (!(other instanceof SemVer))
-    other = new SemVer(other, this.loose);
+SemVer.prototype.compareMain = function (other) {
+  if (!(other instanceof SemVer)) {
+    other = new SemVer(other, this.options)
+  }
 
   return compareIdentifiers(this.major, other.major) ||
          compareIdentifiers(this.minor, other.minor) ||
-         compareIdentifiers(this.patch, other.patch);
-};
+         compareIdentifiers(this.patch, other.patch)
+}
 
-SemVer.prototype.comparePre = function(other) {
-  if (!(other instanceof SemVer))
-    other = new SemVer(other, this.loose);
+SemVer.prototype.comparePre = function (other) {
+  if (!(other instanceof SemVer)) {
+    other = new SemVer(other, this.options)
+  }
 
   // NOT having a prerelease is > having one
-  if (this.prerelease.length && !other.prerelease.length)
-    return -1;
-  else if (!this.prerelease.length && other.prerelease.length)
-    return 1;
-  else if (!this.prerelease.length && !other.prerelease.length)
-    return 0;
+  if (this.prerelease.length && !other.prerelease.length) {
+    return -1
+  } else if (!this.prerelease.length && other.prerelease.length) {
+    return 1
+  } else if (!this.prerelease.length && !other.prerelease.length) {
+    return 0
+  }
 
-  var i = 0;
+  var i = 0
   do {
-    var a = this.prerelease[i];
-    var b = other.prerelease[i];
-    debug('prerelease compare', i, a, b);
-    if (a === undefined && b === undefined)
-      return 0;
-    else if (b === undefined)
-      return 1;
-    else if (a === undefined)
-      return -1;
-    else if (a === b)
-      continue;
-    else
-      return compareIdentifiers(a, b);
-  } while (++i);
-};
+    var a = this.prerelease[i]
+    var b = other.prerelease[i]
+    debug('prerelease compare', i, a, b)
+    if (a === undefined && b === undefined) {
+      return 0
+    } else if (b === undefined) {
+      return 1
+    } else if (a === undefined) {
+      return -1
+    } else if (a === b) {
+      continue
+    } else {
+      return compareIdentifiers(a, b)
+    }
+  } while (++i)
+}
 
 // preminor will bump the version up to the next minor release, and immediately
 // down to pre-release. premajor and prepatch work the same way.
-SemVer.prototype.inc = function(release, identifier) {
+SemVer.prototype.inc = function (release, identifier) {
   switch (release) {
     case 'premajor':
-      this.prerelease.length = 0;
-      this.patch = 0;
-      this.minor = 0;
-      this.major++;
-      this.inc('pre', identifier);
-      break;
+      this.prerelease.length = 0
+      this.patch = 0
+      this.minor = 0
+      this.major++
+      this.inc('pre', identifier)
+      break
     case 'preminor':
-      this.prerelease.length = 0;
-      this.patch = 0;
-      this.minor++;
-      this.inc('pre', identifier);
-      break;
+      this.prerelease.length = 0
+      this.patch = 0
+      this.minor++
+      this.inc('pre', identifier)
+      break
     case 'prepatch':
       // If this is already a prerelease, it will bump to the next version
       // drop any prereleases that might already exist, since they are not
       // relevant at this point.
-      this.prerelease.length = 0;
-      this.inc('patch', identifier);
-      this.inc('pre', identifier);
-      break;
+      this.prerelease.length = 0
+      this.inc('patch', identifier)
+      this.inc('pre', identifier)
+      break
     // If the input is a non-prerelease version, this acts the same as
     // prepatch.
     case 'prerelease':
-      if (this.prerelease.length === 0)
-        this.inc('patch', identifier);
-      this.inc('pre', identifier);
-      break;
+      if (this.prerelease.length === 0) {
+        this.inc('patch', identifier)
+      }
+      this.inc('pre', identifier)
+      break
 
     case 'major':
       // If this is a pre-major version, bump up to the same major version.
       // Otherwise increment major.
       // 1.0.0-5 bumps to 1.0.0
       // 1.1.0 bumps to 2.0.0
-      if (this.minor !== 0 || this.patch !== 0 || this.prerelease.length === 0)
-        this.major++;
-      this.minor = 0;
-      this.patch = 0;
-      this.prerelease = [];
-      break;
+      if (this.minor !== 0 ||
+          this.patch !== 0 ||
+          this.prerelease.length === 0) {
+        this.major++
+      }
+      this.minor = 0
+      this.patch = 0
+      this.prerelease = []
+      break
     case 'minor':
       // If this is a pre-minor version, bump up to the same minor version.
       // Otherwise increment minor.
       // 1.2.0-5 bumps to 1.2.0
       // 1.2.1 bumps to 1.3.0
-      if (this.patch !== 0 || this.prerelease.length === 0)
-        this.minor++;
-      this.patch = 0;
-      this.prerelease = [];
-      break;
+      if (this.patch !== 0 || this.prerelease.length === 0) {
+        this.minor++
+      }
+      this.patch = 0
+      this.prerelease = []
+      break
     case 'patch':
       // If this is not a pre-release version, it will increment the patch.
       // If it is a pre-release it will bump up to the same patch version.
       // 1.2.0-5 patches to 1.2.0
       // 1.2.0 patches to 1.2.1
-      if (this.prerelease.length === 0)
-        this.patch++;
-      this.prerelease = [];
-      break;
+      if (this.prerelease.length === 0) {
+        this.patch++
+      }
+      this.prerelease = []
+      break
     // This probably shouldn't be used publicly.
     // 1.0.0 "pre" would become 1.0.0-0 which is the wrong direction.
     case 'pre':
-      if (this.prerelease.length === 0)
-        this.prerelease = [0];
-      else {
-        var i = this.prerelease.length;
+      if (this.prerelease.length === 0) {
+        this.prerelease = [0]
+      } else {
+        var i = this.prerelease.length
         while (--i >= 0) {
           if (typeof this.prerelease[i] === 'number') {
-            this.prerelease[i]++;
-            i = -2;
+            this.prerelease[i]++
+            i = -2
           }
         }
-        if (i === -1) // didn't increment anything
-          this.prerelease.push(0);
+        if (i === -1) {
+          // didn't increment anything
+          this.prerelease.push(0)
+        }
       }
       if (identifier) {
         // 1.2.0-beta.1 bumps to 1.2.0-beta.2,
         // 1.2.0-beta.fooblz or 1.2.0-beta bumps to 1.2.0-beta.0
         if (this.prerelease[0] === identifier) {
-          if (isNaN(this.prerelease[1]))
-            this.prerelease = [identifier, 0];
-        } else
-          this.prerelease = [identifier, 0];
+          if (isNaN(this.prerelease[1])) {
+            this.prerelease = [identifier, 0]
+          }
+        } else {
+          this.prerelease = [identifier, 0]
+        }
       }
-      break;
+      break
 
     default:
-      throw new Error('invalid increment argument: ' + release);
+      throw new Error('invalid increment argument: ' + release)
   }
-  this.format();
-  this.raw = this.version;
-  return this;
-};
+  this.format()
+  this.raw = this.version
+  return this
+}
 
-exports.inc = inc;
-function inc(version, release, loose, identifier) {
-  if (typeof(loose) === 'string') {
-    identifier = loose;
-    loose = undefined;
+exports.inc = inc
+function inc (version, release, loose, identifier) {
+  if (typeof (loose) === 'string') {
+    identifier = loose
+    loose = undefined
   }
 
   try {
-    return new SemVer(version, loose).inc(release, identifier).version;
+    return new SemVer(version, loose).inc(release, identifier).version
   } catch (er) {
-    return null;
+    return null
   }
 }
 
-exports.diff = diff;
-function diff(version1, version2) {
+exports.diff = diff
+function diff (version1, version2) {
   if (eq(version1, version2)) {
-    return null;
+    return null
   } else {
-    var v1 = parse(version1);
-    var v2 = parse(version2);
+    var v1 = parse(version1)
+    var v2 = parse(version2)
+    var prefix = ''
     if (v1.prerelease.length || v2.prerelease.length) {
-      for (var key in v1) {
-        if (key === 'major' || key === 'minor' || key === 'patch') {
-          if (v1[key] !== v2[key]) {
-            return 'pre'+key;
-          }
-        }
-      }
-      return 'prerelease';
+      prefix = 'pre'
+      var defaultResult = 'prerelease'
     }
     for (var key in v1) {
       if (key === 'major' || key === 'minor' || key === 'patch') {
         if (v1[key] !== v2[key]) {
-          return key;
+          return prefix + key
         }
       }
     }
+    return defaultResult // may be undefined
   }
 }
 
-exports.compareIdentifiers = compareIdentifiers;
+exports.compareIdentifiers = compareIdentifiers
 
-var numeric = /^[0-9]+$/;
-function compareIdentifiers(a, b) {
-  var anum = numeric.test(a);
-  var bnum = numeric.test(b);
+var numeric = /^[0-9]+$/
+function compareIdentifiers (a, b) {
+  var anum = numeric.test(a)
+  var bnum = numeric.test(b)
 
   if (anum && bnum) {
-    a = +a;
-    b = +b;
+    a = +a
+    b = +b
   }
 
-  return (anum && !bnum) ? -1 :
-         (bnum && !anum) ? 1 :
-         a < b ? -1 :
-         a > b ? 1 :
-         0;
+  return a === b ? 0
+    : (anum && !bnum) ? -1
+    : (bnum && !anum) ? 1
+    : a < b ? -1
+    : 1
 }
 
-exports.rcompareIdentifiers = rcompareIdentifiers;
-function rcompareIdentifiers(a, b) {
-  return compareIdentifiers(b, a);
+exports.rcompareIdentifiers = rcompareIdentifiers
+function rcompareIdentifiers (a, b) {
+  return compareIdentifiers(b, a)
 }
 
-exports.major = major;
-function major(a, loose) {
-  return new SemVer(a, loose).major;
+exports.major = major
+function major (a, loose) {
+  return new SemVer(a, loose).major
 }
 
-exports.minor = minor;
-function minor(a, loose) {
-  return new SemVer(a, loose).minor;
+exports.minor = minor
+function minor (a, loose) {
+  return new SemVer(a, loose).minor
 }
 
-exports.patch = patch;
-function patch(a, loose) {
-  return new SemVer(a, loose).patch;
+exports.patch = patch
+function patch (a, loose) {
+  return new SemVer(a, loose).patch
 }
 
-exports.compare = compare;
-function compare(a, b, loose) {
-  return new SemVer(a, loose).compare(new SemVer(b, loose));
+exports.compare = compare
+function compare (a, b, loose) {
+  return new SemVer(a, loose).compare(new SemVer(b, loose))
 }
 
-exports.compareLoose = compareLoose;
-function compareLoose(a, b) {
-  return compare(a, b, true);
+exports.compareLoose = compareLoose
+function compareLoose (a, b) {
+  return compare(a, b, true)
 }
 
-exports.rcompare = rcompare;
-function rcompare(a, b, loose) {
-  return compare(b, a, loose);
+exports.rcompare = rcompare
+function rcompare (a, b, loose) {
+  return compare(b, a, loose)
 }
 
-exports.sort = sort;
-function sort(list, loose) {
-  return list.sort(function(a, b) {
-    return exports.compare(a, b, loose);
-  });
+exports.sort = sort
+function sort (list, loose) {
+  return list.sort(function (a, b) {
+    return exports.compare(a, b, loose)
+  })
 }
 
-exports.rsort = rsort;
-function rsort(list, loose) {
-  return list.sort(function(a, b) {
-    return exports.rcompare(a, b, loose);
-  });
+exports.rsort = rsort
+function rsort (list, loose) {
+  return list.sort(function (a, b) {
+    return exports.rcompare(a, b, loose)
+  })
 }
 
-exports.gt = gt;
-function gt(a, b, loose) {
-  return compare(a, b, loose) > 0;
+exports.gt = gt
+function gt (a, b, loose) {
+  return compare(a, b, loose) > 0
 }
 
-exports.lt = lt;
-function lt(a, b, loose) {
-  return compare(a, b, loose) < 0;
+exports.lt = lt
+function lt (a, b, loose) {
+  return compare(a, b, loose) < 0
 }
 
-exports.eq = eq;
-function eq(a, b, loose) {
-  return compare(a, b, loose) === 0;
+exports.eq = eq
+function eq (a, b, loose) {
+  return compare(a, b, loose) === 0
 }
 
-exports.neq = neq;
-function neq(a, b, loose) {
-  return compare(a, b, loose) !== 0;
+exports.neq = neq
+function neq (a, b, loose) {
+  return compare(a, b, loose) !== 0
 }
 
-exports.gte = gte;
-function gte(a, b, loose) {
-  return compare(a, b, loose) >= 0;
+exports.gte = gte
+function gte (a, b, loose) {
+  return compare(a, b, loose) >= 0
 }
 
-exports.lte = lte;
-function lte(a, b, loose) {
-  return compare(a, b, loose) <= 0;
+exports.lte = lte
+function lte (a, b, loose) {
+  return compare(a, b, loose) <= 0
 }
 
-exports.cmp = cmp;
-function cmp(a, op, b, loose) {
-  var ret;
+exports.cmp = cmp
+function cmp (a, op, b, loose) {
   switch (op) {
     case '===':
-      if (typeof a === 'object') a = a.version;
-      if (typeof b === 'object') b = b.version;
-      ret = a === b;
-      break;
+      if (typeof a === 'object')
+        a = a.version
+      if (typeof b === 'object')
+        b = b.version
+      return a === b
+
     case '!==':
-      if (typeof a === 'object') a = a.version;
-      if (typeof b === 'object') b = b.version;
-      ret = a !== b;
-      break;
-    case '': case '=': case '==': ret = eq(a, b, loose); break;
-    case '!=': ret = neq(a, b, loose); break;
-    case '>': ret = gt(a, b, loose); break;
-    case '>=': ret = gte(a, b, loose); break;
-    case '<': ret = lt(a, b, loose); break;
-    case '<=': ret = lte(a, b, loose); break;
-    default: throw new TypeError('Invalid operator: ' + op);
+      if (typeof a === 'object')
+        a = a.version
+      if (typeof b === 'object')
+        b = b.version
+      return a !== b
+
+    case '':
+    case '=':
+    case '==':
+      return eq(a, b, loose)
+
+    case '!=':
+      return neq(a, b, loose)
+
+    case '>':
+      return gt(a, b, loose)
+
+    case '>=':
+      return gte(a, b, loose)
+
+    case '<':
+      return lt(a, b, loose)
+
+    case '<=':
+      return lte(a, b, loose)
+
+    default:
+      throw new TypeError('Invalid operator: ' + op)
   }
-  return ret;
 }
 
-exports.Comparator = Comparator;
-function Comparator(comp, loose) {
+exports.Comparator = Comparator
+function Comparator (comp, options) {
+  if (!options || typeof options !== 'object') {
+    options = {
+      loose: !!options,
+      includePrerelease: false
+    }
+  }
+
   if (comp instanceof Comparator) {
-    if (comp.loose === loose)
-      return comp;
-    else
-      comp = comp.value;
+    if (comp.loose === !!options.loose) {
+      return comp
+    } else {
+      comp = comp.value
+    }
   }
 
-  if (!(this instanceof Comparator))
-    return new Comparator(comp, loose);
+  if (!(this instanceof Comparator)) {
+    return new Comparator(comp, options)
+  }
 
-  debug('comparator', comp, loose);
-  this.loose = loose;
-  this.parse(comp);
+  debug('comparator', comp, options)
+  this.options = options
+  this.loose = !!options.loose
+  this.parse(comp)
 
-  if (this.semver === ANY)
-    this.value = '';
-  else
-    this.value = this.operator + this.semver.version;
+  if (this.semver === ANY) {
+    this.value = ''
+  } else {
+    this.value = this.operator + this.semver.version
+  }
 
-  debug('comp', this);
+  debug('comp', this)
 }
 
-var ANY = {};
-Comparator.prototype.parse = function(comp) {
-  var r = this.loose ? re[COMPARATORLOOSE] : re[COMPARATOR];
-  var m = comp.match(r);
+var ANY = {}
+Comparator.prototype.parse = function (comp) {
+  var r = this.options.loose ? re[COMPARATORLOOSE] : re[COMPARATOR]
+  var m = comp.match(r)
 
-  if (!m)
-    throw new TypeError('Invalid comparator: ' + comp);
+  if (!m) {
+    throw new TypeError('Invalid comparator: ' + comp)
+  }
 
-  this.operator = m[1];
-  if (this.operator === '=')
-    this.operator = '';
+  this.operator = m[1]
+  if (this.operator === '=') {
+    this.operator = ''
+  }
 
   // if it literally is just '>' or '' then allow anything.
-  if (!m[2])
-    this.semver = ANY;
-  else
-    this.semver = new SemVer(m[2], this.loose);
-};
+  if (!m[2]) {
+    this.semver = ANY
+  } else {
+    this.semver = new SemVer(m[2], this.options.loose)
+  }
+}
 
-Comparator.prototype.toString = function() {
-  return this.value;
-};
+Comparator.prototype.toString = function () {
+  return this.value
+}
 
-Comparator.prototype.test = function(version) {
-  debug('Comparator.test', version, this.loose);
+Comparator.prototype.test = function (version) {
+  debug('Comparator.test', version, this.options.loose)
 
-  if (this.semver === ANY)
-    return true;
-
-  if (typeof version === 'string')
-    version = new SemVer(version, this.loose);
-
-  return cmp(version, this.operator, this.semver, this.loose);
-};
-
-Comparator.prototype.intersects = function(comp, loose) {
-  if (!(comp instanceof Comparator)) {
-    throw new TypeError('a Comparator is required');
+  if (this.semver === ANY) {
+    return true
   }
 
-  var rangeTmp;
+  if (typeof version === 'string') {
+    version = new SemVer(version, this.options)
+  }
+
+  return cmp(version, this.operator, this.semver, this.options)
+}
+
+Comparator.prototype.intersects = function (comp, options) {
+  if (!(comp instanceof Comparator)) {
+    throw new TypeError('a Comparator is required')
+  }
+
+  if (!options || typeof options !== 'object') {
+    options = {
+      loose: !!options,
+      includePrerelease: false
+    }
+  }
+
+  var rangeTmp
 
   if (this.operator === '') {
-    rangeTmp = new Range(comp.value, loose);
-    return satisfies(this.value, rangeTmp, loose);
+    rangeTmp = new Range(comp.value, options)
+    return satisfies(this.value, rangeTmp, options)
   } else if (comp.operator === '') {
-    rangeTmp = new Range(this.value, loose);
-    return satisfies(comp.semver, rangeTmp, loose);
+    rangeTmp = new Range(this.value, options)
+    return satisfies(comp.semver, rangeTmp, options)
   }
 
   var sameDirectionIncreasing =
     (this.operator === '>=' || this.operator === '>') &&
-    (comp.operator === '>=' || comp.operator === '>');
+    (comp.operator === '>=' || comp.operator === '>')
   var sameDirectionDecreasing =
     (this.operator === '<=' || this.operator === '<') &&
-    (comp.operator === '<=' || comp.operator === '<');
-  var sameSemVer = this.semver.version === comp.semver.version;
+    (comp.operator === '<=' || comp.operator === '<')
+  var sameSemVer = this.semver.version === comp.semver.version
   var differentDirectionsInclusive =
     (this.operator === '>=' || this.operator === '<=') &&
-    (comp.operator === '>=' || comp.operator === '<=');
+    (comp.operator === '>=' || comp.operator === '<=')
   var oppositeDirectionsLessThan =
-    cmp(this.semver, '<', comp.semver, loose) &&
+    cmp(this.semver, '<', comp.semver, options) &&
     ((this.operator === '>=' || this.operator === '>') &&
-    (comp.operator === '<=' || comp.operator === '<'));
+    (comp.operator === '<=' || comp.operator === '<'))
   var oppositeDirectionsGreaterThan =
-    cmp(this.semver, '>', comp.semver, loose) &&
+    cmp(this.semver, '>', comp.semver, options) &&
     ((this.operator === '<=' || this.operator === '<') &&
-    (comp.operator === '>=' || comp.operator === '>'));
+    (comp.operator === '>=' || comp.operator === '>'))
 
   return sameDirectionIncreasing || sameDirectionDecreasing ||
     (sameSemVer && differentDirectionsInclusive) ||
-    oppositeDirectionsLessThan || oppositeDirectionsGreaterThan;
-};
+    oppositeDirectionsLessThan || oppositeDirectionsGreaterThan
+}
 
+exports.Range = Range
+function Range (range, options) {
+  if (!options || typeof options !== 'object') {
+    options = {
+      loose: !!options,
+      includePrerelease: false
+    }
+  }
 
-exports.Range = Range;
-function Range(range, loose) {
   if (range instanceof Range) {
-    if (range.loose === loose) {
-      return range;
+    if (range.loose === !!options.loose &&
+        range.includePrerelease === !!options.includePrerelease) {
+      return range
     } else {
-      return new Range(range.raw, loose);
+      return new Range(range.raw, options)
     }
   }
 
   if (range instanceof Comparator) {
-    return new Range(range.value, loose);
+    return new Range(range.value, options)
   }
 
-  if (!(this instanceof Range))
-    return new Range(range, loose);
+  if (!(this instanceof Range)) {
+    return new Range(range, options)
+  }
 
-  this.loose = loose;
+  this.options = options
+  this.loose = !!options.loose
+  this.includePrerelease = !!options.includePrerelease
 
   // First, split based on boolean or ||
-  this.raw = range;
-  this.set = range.split(/\s*\|\|\s*/).map(function(range) {
-    return this.parseRange(range.trim());
-  }, this).filter(function(c) {
+  this.raw = range
+  this.set = range.split(/\s*\|\|\s*/).map(function (range) {
+    return this.parseRange(range.trim())
+  }, this).filter(function (c) {
     // throw out any that are not relevant for whatever reason
-    return c.length;
-  });
+    return c.length
+  })
 
   if (!this.set.length) {
-    throw new TypeError('Invalid SemVer Range: ' + range);
+    throw new TypeError('Invalid SemVer Range: ' + range)
   }
 
-  this.format();
+  this.format()
 }
 
-Range.prototype.format = function() {
-  this.range = this.set.map(function(comps) {
-    return comps.join(' ').trim();
-  }).join('||').trim();
-  return this.range;
-};
+Range.prototype.format = function () {
+  this.range = this.set.map(function (comps) {
+    return comps.join(' ').trim()
+  }).join('||').trim()
+  return this.range
+}
 
-Range.prototype.toString = function() {
-  return this.range;
-};
+Range.prototype.toString = function () {
+  return this.range
+}
 
-Range.prototype.parseRange = function(range) {
-  var loose = this.loose;
-  range = range.trim();
-  debug('range', range, loose);
+Range.prototype.parseRange = function (range) {
+  var loose = this.options.loose
+  range = range.trim()
   // `1.2.3 - 1.2.4` => `>=1.2.3 <=1.2.4`
-  var hr = loose ? re[HYPHENRANGELOOSE] : re[HYPHENRANGE];
-  range = range.replace(hr, hyphenReplace);
-  debug('hyphen replace', range);
+  var hr = loose ? re[HYPHENRANGELOOSE] : re[HYPHENRANGE]
+  range = range.replace(hr, hyphenReplace)
+  debug('hyphen replace', range)
   // `> 1.2.3 < 1.2.5` => `>1.2.3 <1.2.5`
-  range = range.replace(re[COMPARATORTRIM], comparatorTrimReplace);
-  debug('comparator trim', range, re[COMPARATORTRIM]);
+  range = range.replace(re[COMPARATORTRIM], comparatorTrimReplace)
+  debug('comparator trim', range, re[COMPARATORTRIM])
 
   // `~ 1.2.3` => `~1.2.3`
-  range = range.replace(re[TILDETRIM], tildeTrimReplace);
+  range = range.replace(re[TILDETRIM], tildeTrimReplace)
 
   // `^ 1.2.3` => `^1.2.3`
-  range = range.replace(re[CARETTRIM], caretTrimReplace);
+  range = range.replace(re[CARETTRIM], caretTrimReplace)
 
   // normalize spaces
-  range = range.split(/\s+/).join(' ');
+  range = range.split(/\s+/).join(' ')
 
   // At this point, the range is completely trimmed and
   // ready to be split into comparators.
 
-  var compRe = loose ? re[COMPARATORLOOSE] : re[COMPARATOR];
-  var set = range.split(' ').map(function(comp) {
-    return parseComparator(comp, loose);
-  }).join(' ').split(/\s+/);
-  if (this.loose) {
+  var compRe = loose ? re[COMPARATORLOOSE] : re[COMPARATOR]
+  var set = range.split(' ').map(function (comp) {
+    return parseComparator(comp, this.options)
+  }, this).join(' ').split(/\s+/)
+  if (this.options.loose) {
     // in loose mode, throw out any that are not valid comparators
-    set = set.filter(function(comp) {
-      return !!comp.match(compRe);
-    });
+    set = set.filter(function (comp) {
+      return !!comp.match(compRe)
+    })
   }
-  set = set.map(function(comp) {
-    return new Comparator(comp, loose);
-  });
+  set = set.map(function (comp) {
+    return new Comparator(comp, this.options)
+  }, this)
 
-  return set;
-};
+  return set
+}
 
-Range.prototype.intersects = function(range, loose) {
+Range.prototype.intersects = function (range, options) {
   if (!(range instanceof Range)) {
-    throw new TypeError('a Range is required');
+    throw new TypeError('a Range is required')
   }
 
-  return this.set.some(function(thisComparators) {
-    return thisComparators.every(function(thisComparator) {
-      return range.set.some(function(rangeComparators) {
-        return rangeComparators.every(function(rangeComparator) {
-          return thisComparator.intersects(rangeComparator, loose);
-        });
-      });
-    });
-  });
-};
+  return this.set.some(function (thisComparators) {
+    return thisComparators.every(function (thisComparator) {
+      return range.set.some(function (rangeComparators) {
+        return rangeComparators.every(function (rangeComparator) {
+          return thisComparator.intersects(rangeComparator, options)
+        })
+      })
+    })
+  })
+}
 
 // Mostly just for testing and legacy API reasons
-exports.toComparators = toComparators;
-function toComparators(range, loose) {
-  return new Range(range, loose).set.map(function(comp) {
-    return comp.map(function(c) {
-      return c.value;
-    }).join(' ').trim().split(' ');
-  });
+exports.toComparators = toComparators
+function toComparators (range, options) {
+  return new Range(range, options).set.map(function (comp) {
+    return comp.map(function (c) {
+      return c.value
+    }).join(' ').trim().split(' ')
+  })
 }
 
 // comprised of xranges, tildes, stars, and gtlt's at this point.
 // already replaced the hyphen ranges
 // turn into a set of JUST comparators.
-function parseComparator(comp, loose) {
-  debug('comp', comp);
-  comp = replaceCarets(comp, loose);
-  debug('caret', comp);
-  comp = replaceTildes(comp, loose);
-  debug('tildes', comp);
-  comp = replaceXRanges(comp, loose);
-  debug('xrange', comp);
-  comp = replaceStars(comp, loose);
-  debug('stars', comp);
-  return comp;
+function parseComparator (comp, options) {
+  debug('comp', comp, options)
+  comp = replaceCarets(comp, options)
+  debug('caret', comp)
+  comp = replaceTildes(comp, options)
+  debug('tildes', comp)
+  comp = replaceXRanges(comp, options)
+  debug('xrange', comp)
+  comp = replaceStars(comp, options)
+  debug('stars', comp)
+  return comp
 }
 
-function isX(id) {
-  return !id || id.toLowerCase() === 'x' || id === '*';
+function isX (id) {
+  return !id || id.toLowerCase() === 'x' || id === '*'
 }
 
 // ~, ~> --> * (any, kinda silly)
@@ -10079,39 +10176,38 @@ function isX(id) {
 // ~1.2, ~1.2.x, ~>1.2, ~>1.2.x --> >=1.2.0 <1.3.0
 // ~1.2.3, ~>1.2.3 --> >=1.2.3 <1.3.0
 // ~1.2.0, ~>1.2.0 --> >=1.2.0 <1.3.0
-function replaceTildes(comp, loose) {
-  return comp.trim().split(/\s+/).map(function(comp) {
-    return replaceTilde(comp, loose);
-  }).join(' ');
+function replaceTildes (comp, options) {
+  return comp.trim().split(/\s+/).map(function (comp) {
+    return replaceTilde(comp, options)
+  }).join(' ')
 }
 
-function replaceTilde(comp, loose) {
-  var r = loose ? re[TILDELOOSE] : re[TILDE];
-  return comp.replace(r, function(_, M, m, p, pr) {
-    debug('tilde', comp, _, M, m, p, pr);
-    var ret;
+function replaceTilde (comp, options) {
+  var r = options.loose ? re[TILDELOOSE] : re[TILDE]
+  return comp.replace(r, function (_, M, m, p, pr) {
+    debug('tilde', comp, _, M, m, p, pr)
+    var ret
 
-    if (isX(M))
-      ret = '';
-    else if (isX(m))
-      ret = '>=' + M + '.0.0 <' + (+M + 1) + '.0.0';
-    else if (isX(p))
+    if (isX(M)) {
+      ret = ''
+    } else if (isX(m)) {
+      ret = '>=' + M + '.0.0 <' + (+M + 1) + '.0.0'
+    } else if (isX(p)) {
       // ~1.2 == >=1.2.0 <1.3.0
-      ret = '>=' + M + '.' + m + '.0 <' + M + '.' + (+m + 1) + '.0';
-    else if (pr) {
-      debug('replaceTilde pr', pr);
-      if (pr.charAt(0) !== '-')
-        pr = '-' + pr;
-      ret = '>=' + M + '.' + m + '.' + p + pr +
-            ' <' + M + '.' + (+m + 1) + '.0';
-    } else
+      ret = '>=' + M + '.' + m + '.0 <' + M + '.' + (+m + 1) + '.0'
+    } else if (pr) {
+      debug('replaceTilde pr', pr)
+      ret = '>=' + M + '.' + m + '.' + p + '-' + pr +
+            ' <' + M + '.' + (+m + 1) + '.0'
+    } else {
       // ~1.2.3 == >=1.2.3 <1.3.0
       ret = '>=' + M + '.' + m + '.' + p +
-            ' <' + M + '.' + (+m + 1) + '.0';
+            ' <' + M + '.' + (+m + 1) + '.0'
+    }
 
-    debug('tilde return', ret);
-    return ret;
-  });
+    debug('tilde return', ret)
+    return ret
+  })
 }
 
 // ^ --> * (any, kinda silly)
@@ -10120,138 +10216,144 @@ function replaceTilde(comp, loose) {
 // ^1.2, ^1.2.x --> >=1.2.0 <2.0.0
 // ^1.2.3 --> >=1.2.3 <2.0.0
 // ^1.2.0 --> >=1.2.0 <2.0.0
-function replaceCarets(comp, loose) {
-  return comp.trim().split(/\s+/).map(function(comp) {
-    return replaceCaret(comp, loose);
-  }).join(' ');
+function replaceCarets (comp, options) {
+  return comp.trim().split(/\s+/).map(function (comp) {
+    return replaceCaret(comp, options)
+  }).join(' ')
 }
 
-function replaceCaret(comp, loose) {
-  debug('caret', comp, loose);
-  var r = loose ? re[CARETLOOSE] : re[CARET];
-  return comp.replace(r, function(_, M, m, p, pr) {
-    debug('caret', comp, _, M, m, p, pr);
-    var ret;
+function replaceCaret (comp, options) {
+  debug('caret', comp, options)
+  var r = options.loose ? re[CARETLOOSE] : re[CARET]
+  return comp.replace(r, function (_, M, m, p, pr) {
+    debug('caret', comp, _, M, m, p, pr)
+    var ret
 
-    if (isX(M))
-      ret = '';
-    else if (isX(m))
-      ret = '>=' + M + '.0.0 <' + (+M + 1) + '.0.0';
-    else if (isX(p)) {
-      if (M === '0')
-        ret = '>=' + M + '.' + m + '.0 <' + M + '.' + (+m + 1) + '.0';
-      else
-        ret = '>=' + M + '.' + m + '.0 <' + (+M + 1) + '.0.0';
+    if (isX(M)) {
+      ret = ''
+    } else if (isX(m)) {
+      ret = '>=' + M + '.0.0 <' + (+M + 1) + '.0.0'
+    } else if (isX(p)) {
+      if (M === '0') {
+        ret = '>=' + M + '.' + m + '.0 <' + M + '.' + (+m + 1) + '.0'
+      } else {
+        ret = '>=' + M + '.' + m + '.0 <' + (+M + 1) + '.0.0'
+      }
     } else if (pr) {
-      debug('replaceCaret pr', pr);
-      if (pr.charAt(0) !== '-')
-        pr = '-' + pr;
+      debug('replaceCaret pr', pr)
       if (M === '0') {
-        if (m === '0')
-          ret = '>=' + M + '.' + m + '.' + p + pr +
-                ' <' + M + '.' + m + '.' + (+p + 1);
-        else
-          ret = '>=' + M + '.' + m + '.' + p + pr +
-                ' <' + M + '.' + (+m + 1) + '.0';
-      } else
-        ret = '>=' + M + '.' + m + '.' + p + pr +
-              ' <' + (+M + 1) + '.0.0';
+        if (m === '0') {
+          ret = '>=' + M + '.' + m + '.' + p + '-' + pr +
+                ' <' + M + '.' + m + '.' + (+p + 1)
+        } else {
+          ret = '>=' + M + '.' + m + '.' + p + '-' + pr +
+                ' <' + M + '.' + (+m + 1) + '.0'
+        }
+      } else {
+        ret = '>=' + M + '.' + m + '.' + p + '-' + pr +
+              ' <' + (+M + 1) + '.0.0'
+      }
     } else {
-      debug('no pr');
+      debug('no pr')
       if (M === '0') {
-        if (m === '0')
+        if (m === '0') {
           ret = '>=' + M + '.' + m + '.' + p +
-                ' <' + M + '.' + m + '.' + (+p + 1);
-        else
+                ' <' + M + '.' + m + '.' + (+p + 1)
+        } else {
           ret = '>=' + M + '.' + m + '.' + p +
-                ' <' + M + '.' + (+m + 1) + '.0';
-      } else
+                ' <' + M + '.' + (+m + 1) + '.0'
+        }
+      } else {
         ret = '>=' + M + '.' + m + '.' + p +
-              ' <' + (+M + 1) + '.0.0';
+              ' <' + (+M + 1) + '.0.0'
+      }
     }
 
-    debug('caret return', ret);
-    return ret;
-  });
+    debug('caret return', ret)
+    return ret
+  })
 }
 
-function replaceXRanges(comp, loose) {
-  debug('replaceXRanges', comp, loose);
-  return comp.split(/\s+/).map(function(comp) {
-    return replaceXRange(comp, loose);
-  }).join(' ');
+function replaceXRanges (comp, options) {
+  debug('replaceXRanges', comp, options)
+  return comp.split(/\s+/).map(function (comp) {
+    return replaceXRange(comp, options)
+  }).join(' ')
 }
 
-function replaceXRange(comp, loose) {
-  comp = comp.trim();
-  var r = loose ? re[XRANGELOOSE] : re[XRANGE];
-  return comp.replace(r, function(ret, gtlt, M, m, p, pr) {
-    debug('xRange', comp, ret, gtlt, M, m, p, pr);
-    var xM = isX(M);
-    var xm = xM || isX(m);
-    var xp = xm || isX(p);
-    var anyX = xp;
+function replaceXRange (comp, options) {
+  comp = comp.trim()
+  var r = options.loose ? re[XRANGELOOSE] : re[XRANGE]
+  return comp.replace(r, function (ret, gtlt, M, m, p, pr) {
+    debug('xRange', comp, ret, gtlt, M, m, p, pr)
+    var xM = isX(M)
+    var xm = xM || isX(m)
+    var xp = xm || isX(p)
+    var anyX = xp
 
-    if (gtlt === '=' && anyX)
-      gtlt = '';
+    if (gtlt === '=' && anyX) {
+      gtlt = ''
+    }
 
     if (xM) {
       if (gtlt === '>' || gtlt === '<') {
         // nothing is allowed
-        ret = '<0.0.0';
+        ret = '<0.0.0'
       } else {
         // nothing is forbidden
-        ret = '*';
+        ret = '*'
       }
     } else if (gtlt && anyX) {
+      // we know patch is an x, because we have any x at all.
       // replace X with 0
-      if (xm)
-        m = 0;
-      if (xp)
-        p = 0;
+      if (xm) {
+        m = 0
+      }
+      p = 0
 
       if (gtlt === '>') {
         // >1 => >=2.0.0
         // >1.2 => >=1.3.0
         // >1.2.3 => >= 1.2.4
-        gtlt = '>=';
+        gtlt = '>='
         if (xm) {
-          M = +M + 1;
-          m = 0;
-          p = 0;
-        } else if (xp) {
-          m = +m + 1;
-          p = 0;
+          M = +M + 1
+          m = 0
+          p = 0
+        } else {
+          m = +m + 1
+          p = 0
         }
       } else if (gtlt === '<=') {
         // <=0.7.x is actually <0.8.0, since any 0.7.x should
         // pass.  Similarly, <=7.x is actually <8.0.0, etc.
-        gtlt = '<';
-        if (xm)
-          M = +M + 1;
-        else
-          m = +m + 1;
+        gtlt = '<'
+        if (xm) {
+          M = +M + 1
+        } else {
+          m = +m + 1
+        }
       }
 
-      ret = gtlt + M + '.' + m + '.' + p;
+      ret = gtlt + M + '.' + m + '.' + p
     } else if (xm) {
-      ret = '>=' + M + '.0.0 <' + (+M + 1) + '.0.0';
+      ret = '>=' + M + '.0.0 <' + (+M + 1) + '.0.0'
     } else if (xp) {
-      ret = '>=' + M + '.' + m + '.0 <' + M + '.' + (+m + 1) + '.0';
+      ret = '>=' + M + '.' + m + '.0 <' + M + '.' + (+m + 1) + '.0'
     }
 
-    debug('xRange return', ret);
+    debug('xRange return', ret)
 
-    return ret;
-  });
+    return ret
+  })
 }
 
 // Because * is AND-ed with everything else in the comparator,
 // and '' means "any version", just remove the *s entirely.
-function replaceStars(comp, loose) {
-  debug('replaceStars', comp, loose);
+function replaceStars (comp, options) {
+  debug('replaceStars', comp, options)
   // Looseness is ignored here.  star is always as loose as it gets!
-  return comp.trim().replace(re[STAR], '');
+  return comp.trim().replace(re[STAR], '')
 }
 
 // This function is passed to string.replace(re[HYPHENRANGE])
@@ -10259,236 +10361,321 @@ function replaceStars(comp, loose) {
 // 1.2 - 3.4.5 => >=1.2.0 <=3.4.5
 // 1.2.3 - 3.4 => >=1.2.0 <3.5.0 Any 3.4.x will do
 // 1.2 - 3.4 => >=1.2.0 <3.5.0
-function hyphenReplace($0,
-                       from, fM, fm, fp, fpr, fb,
-                       to, tM, tm, tp, tpr, tb) {
+function hyphenReplace ($0,
+  from, fM, fm, fp, fpr, fb,
+  to, tM, tm, tp, tpr, tb) {
+  if (isX(fM)) {
+    from = ''
+  } else if (isX(fm)) {
+    from = '>=' + fM + '.0.0'
+  } else if (isX(fp)) {
+    from = '>=' + fM + '.' + fm + '.0'
+  } else {
+    from = '>=' + from
+  }
 
-  if (isX(fM))
-    from = '';
-  else if (isX(fm))
-    from = '>=' + fM + '.0.0';
-  else if (isX(fp))
-    from = '>=' + fM + '.' + fm + '.0';
-  else
-    from = '>=' + from;
+  if (isX(tM)) {
+    to = ''
+  } else if (isX(tm)) {
+    to = '<' + (+tM + 1) + '.0.0'
+  } else if (isX(tp)) {
+    to = '<' + tM + '.' + (+tm + 1) + '.0'
+  } else if (tpr) {
+    to = '<=' + tM + '.' + tm + '.' + tp + '-' + tpr
+  } else {
+    to = '<=' + to
+  }
 
-  if (isX(tM))
-    to = '';
-  else if (isX(tm))
-    to = '<' + (+tM + 1) + '.0.0';
-  else if (isX(tp))
-    to = '<' + tM + '.' + (+tm + 1) + '.0';
-  else if (tpr)
-    to = '<=' + tM + '.' + tm + '.' + tp + '-' + tpr;
-  else
-    to = '<=' + to;
-
-  return (from + ' ' + to).trim();
+  return (from + ' ' + to).trim()
 }
 
-
 // if ANY of the sets match ALL of its comparators, then pass
-Range.prototype.test = function(version) {
-  if (!version)
-    return false;
+Range.prototype.test = function (version) {
+  if (!version) {
+    return false
+  }
 
-  if (typeof version === 'string')
-    version = new SemVer(version, this.loose);
+  if (typeof version === 'string') {
+    version = new SemVer(version, this.options)
+  }
 
   for (var i = 0; i < this.set.length; i++) {
-    if (testSet(this.set[i], version))
-      return true;
+    if (testSet(this.set[i], version, this.options)) {
+      return true
+    }
   }
-  return false;
-};
+  return false
+}
 
-function testSet(set, version) {
+function testSet (set, version, options) {
   for (var i = 0; i < set.length; i++) {
-    if (!set[i].test(version))
-      return false;
+    if (!set[i].test(version)) {
+      return false
+    }
   }
 
-  if (version.prerelease.length) {
+  if (version.prerelease.length && !options.includePrerelease) {
     // Find the set of versions that are allowed to have prereleases
     // For example, ^1.2.3-pr.1 desugars to >=1.2.3-pr.1 <2.0.0
     // That should allow `1.2.3-pr.2` to pass.
     // However, `1.2.4-alpha.notready` should NOT be allowed,
     // even though it's within the range set by the comparators.
-    for (var i = 0; i < set.length; i++) {
-      debug(set[i].semver);
-      if (set[i].semver === ANY)
-        continue;
+    for (i = 0; i < set.length; i++) {
+      debug(set[i].semver)
+      if (set[i].semver === ANY) {
+        continue
+      }
 
       if (set[i].semver.prerelease.length > 0) {
-        var allowed = set[i].semver;
+        var allowed = set[i].semver
         if (allowed.major === version.major &&
             allowed.minor === version.minor &&
-            allowed.patch === version.patch)
-          return true;
+            allowed.patch === version.patch) {
+          return true
+        }
       }
     }
 
     // Version has a -pre, but it's not one of the ones we like.
-    return false;
+    return false
   }
 
-  return true;
+  return true
 }
 
-exports.satisfies = satisfies;
-function satisfies(version, range, loose) {
+exports.satisfies = satisfies
+function satisfies (version, range, options) {
   try {
-    range = new Range(range, loose);
+    range = new Range(range, options)
   } catch (er) {
-    return false;
+    return false
   }
-  return range.test(version);
+  return range.test(version)
 }
 
-exports.maxSatisfying = maxSatisfying;
-function maxSatisfying(versions, range, loose) {
-  var max = null;
-  var maxSV = null;
+exports.maxSatisfying = maxSatisfying
+function maxSatisfying (versions, range, options) {
+  var max = null
+  var maxSV = null
   try {
-    var rangeObj = new Range(range, loose);
+    var rangeObj = new Range(range, options)
   } catch (er) {
-    return null;
+    return null
   }
   versions.forEach(function (v) {
-    if (rangeObj.test(v)) { // satisfies(v, range, loose)
-      if (!max || maxSV.compare(v) === -1) { // compare(max, v, true)
-        max = v;
-        maxSV = new SemVer(max, loose);
+    if (rangeObj.test(v)) {
+      // satisfies(v, range, options)
+      if (!max || maxSV.compare(v) === -1) {
+        // compare(max, v, true)
+        max = v
+        maxSV = new SemVer(max, options)
       }
     }
   })
-  return max;
+  return max
 }
 
-exports.minSatisfying = minSatisfying;
-function minSatisfying(versions, range, loose) {
-  var min = null;
-  var minSV = null;
+exports.minSatisfying = minSatisfying
+function minSatisfying (versions, range, options) {
+  var min = null
+  var minSV = null
   try {
-    var rangeObj = new Range(range, loose);
+    var rangeObj = new Range(range, options)
   } catch (er) {
-    return null;
+    return null
   }
   versions.forEach(function (v) {
-    if (rangeObj.test(v)) { // satisfies(v, range, loose)
-      if (!min || minSV.compare(v) === 1) { // compare(min, v, true)
-        min = v;
-        minSV = new SemVer(min, loose);
+    if (rangeObj.test(v)) {
+      // satisfies(v, range, options)
+      if (!min || minSV.compare(v) === 1) {
+        // compare(min, v, true)
+        min = v
+        minSV = new SemVer(min, options)
       }
     }
   })
-  return min;
+  return min
 }
 
-exports.validRange = validRange;
-function validRange(range, loose) {
+exports.minVersion = minVersion
+function minVersion (range, loose) {
+  range = new Range(range, loose)
+
+  var minver = new SemVer('0.0.0')
+  if (range.test(minver)) {
+    return minver
+  }
+
+  minver = new SemVer('0.0.0-0')
+  if (range.test(minver)) {
+    return minver
+  }
+
+  minver = null
+  for (var i = 0; i < range.set.length; ++i) {
+    var comparators = range.set[i]
+
+    comparators.forEach(function (comparator) {
+      // Clone to avoid manipulating the comparator's semver object.
+      var compver = new SemVer(comparator.semver.version)
+      switch (comparator.operator) {
+        case '>':
+          if (compver.prerelease.length === 0) {
+            compver.patch++
+          } else {
+            compver.prerelease.push(0)
+          }
+          compver.raw = compver.format()
+          /* fallthrough */
+        case '':
+        case '>=':
+          if (!minver || gt(minver, compver)) {
+            minver = compver
+          }
+          break
+        case '<':
+        case '<=':
+          /* Ignore maximum versions */
+          break
+        /* istanbul ignore next */
+        default:
+          throw new Error('Unexpected operation: ' + comparator.operator)
+      }
+    })
+  }
+
+  if (minver && range.test(minver)) {
+    return minver
+  }
+
+  return null
+}
+
+exports.validRange = validRange
+function validRange (range, options) {
   try {
     // Return '*' instead of '' so that truthiness works.
     // This will throw if it's invalid anyway
-    return new Range(range, loose).range || '*';
+    return new Range(range, options).range || '*'
   } catch (er) {
-    return null;
+    return null
   }
 }
 
 // Determine if version is less than all the versions possible in the range
-exports.ltr = ltr;
-function ltr(version, range, loose) {
-  return outside(version, range, '<', loose);
+exports.ltr = ltr
+function ltr (version, range, options) {
+  return outside(version, range, '<', options)
 }
 
 // Determine if version is greater than all the versions possible in the range.
-exports.gtr = gtr;
-function gtr(version, range, loose) {
-  return outside(version, range, '>', loose);
+exports.gtr = gtr
+function gtr (version, range, options) {
+  return outside(version, range, '>', options)
 }
 
-exports.outside = outside;
-function outside(version, range, hilo, loose) {
-  version = new SemVer(version, loose);
-  range = new Range(range, loose);
+exports.outside = outside
+function outside (version, range, hilo, options) {
+  version = new SemVer(version, options)
+  range = new Range(range, options)
 
-  var gtfn, ltefn, ltfn, comp, ecomp;
+  var gtfn, ltefn, ltfn, comp, ecomp
   switch (hilo) {
     case '>':
-      gtfn = gt;
-      ltefn = lte;
-      ltfn = lt;
-      comp = '>';
-      ecomp = '>=';
-      break;
+      gtfn = gt
+      ltefn = lte
+      ltfn = lt
+      comp = '>'
+      ecomp = '>='
+      break
     case '<':
-      gtfn = lt;
-      ltefn = gte;
-      ltfn = gt;
-      comp = '<';
-      ecomp = '<=';
-      break;
+      gtfn = lt
+      ltefn = gte
+      ltfn = gt
+      comp = '<'
+      ecomp = '<='
+      break
     default:
-      throw new TypeError('Must provide a hilo val of "<" or ">"');
+      throw new TypeError('Must provide a hilo val of "<" or ">"')
   }
 
   // If it satisifes the range it is not outside
-  if (satisfies(version, range, loose)) {
-    return false;
+  if (satisfies(version, range, options)) {
+    return false
   }
 
   // From now on, variable terms are as if we're in "gtr" mode.
   // but note that everything is flipped for the "ltr" function.
 
   for (var i = 0; i < range.set.length; ++i) {
-    var comparators = range.set[i];
+    var comparators = range.set[i]
 
-    var high = null;
-    var low = null;
+    var high = null
+    var low = null
 
-    comparators.forEach(function(comparator) {
+    comparators.forEach(function (comparator) {
       if (comparator.semver === ANY) {
         comparator = new Comparator('>=0.0.0')
       }
-      high = high || comparator;
-      low = low || comparator;
-      if (gtfn(comparator.semver, high.semver, loose)) {
-        high = comparator;
-      } else if (ltfn(comparator.semver, low.semver, loose)) {
-        low = comparator;
+      high = high || comparator
+      low = low || comparator
+      if (gtfn(comparator.semver, high.semver, options)) {
+        high = comparator
+      } else if (ltfn(comparator.semver, low.semver, options)) {
+        low = comparator
       }
-    });
+    })
 
     // If the edge version comparator has a operator then our version
     // isn't outside it
     if (high.operator === comp || high.operator === ecomp) {
-      return false;
+      return false
     }
 
     // If the lowest version comparator has an operator and our version
     // is less than it then it isn't higher than the range
     if ((!low.operator || low.operator === comp) &&
         ltefn(version, low.semver)) {
-      return false;
+      return false
     } else if (low.operator === ecomp && ltfn(version, low.semver)) {
-      return false;
+      return false
     }
   }
-  return true;
+  return true
 }
 
-exports.prerelease = prerelease;
-function prerelease(version, loose) {
-  var parsed = parse(version, loose);
-  return (parsed && parsed.prerelease.length) ? parsed.prerelease : null;
+exports.prerelease = prerelease
+function prerelease (version, options) {
+  var parsed = parse(version, options)
+  return (parsed && parsed.prerelease.length) ? parsed.prerelease : null
 }
 
-exports.intersects = intersects;
-function intersects(r1, r2, loose) {
-  r1 = new Range(r1, loose)
-  r2 = new Range(r2, loose)
+exports.intersects = intersects
+function intersects (r1, r2, options) {
+  r1 = new Range(r1, options)
+  r2 = new Range(r2, options)
   return r1.intersects(r2)
+}
+
+exports.coerce = coerce
+function coerce (version) {
+  if (version instanceof SemVer) {
+    return version
+  }
+
+  if (typeof version !== 'string') {
+    return null
+  }
+
+  var match = version.match(re[COERCE])
+
+  if (match == null) {
+    return null
+  }
+
+  return parse(match[1] +
+    '.' + (match[2] || '0') +
+    '.' + (match[3] || '0'))
 }
 
 
@@ -32099,7 +32286,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _build_production_projects__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(372);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "buildProductionProjects", function() { return _build_production_projects__WEBPACK_IMPORTED_MODULE_0__["buildProductionProjects"]; });
 
-/* harmony import */ var _prepare_project_dependencies__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(553);
+/* harmony import */ var _prepare_project_dependencies__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(578);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "prepareExternalProjectDependencies", function() { return _prepare_project_dependencies__WEBPACK_IMPORTED_MODULE_1__["prepareExternalProjectDependencies"]; });
 
 /*
@@ -32279,8 +32466,8 @@ const EventEmitter = __webpack_require__(45);
 const path = __webpack_require__(16);
 const arrify = __webpack_require__(374);
 const globby = __webpack_require__(375);
-const cpFile = __webpack_require__(544);
-const CpyError = __webpack_require__(552);
+const cpFile = __webpack_require__(569);
+const CpyError = __webpack_require__(577);
 
 const preprocessSrcPath = (srcPath, options) => options.cwd ? path.resolve(options.cwd, srcPath) : srcPath;
 
@@ -32402,8 +32589,8 @@ module.exports = function (val) {
 const arrayUnion = __webpack_require__(141);
 const glob = __webpack_require__(36);
 const fastGlob = __webpack_require__(376);
-const dirGlob = __webpack_require__(539);
-const gitignore = __webpack_require__(540);
+const dirGlob = __webpack_require__(564);
+const gitignore = __webpack_require__(565);
 
 const DEFAULT_FILTER = () => false;
 
@@ -32541,6 +32728,8 @@ module.exports.async = pkg.async;
 module.exports.sync = pkg.sync;
 module.exports.stream = pkg.stream;
 
+module.exports.generateTasks = pkg.generateTasks;
+
 
 /***/ }),
 /* 377 */
@@ -32549,13 +32738,55 @@ module.exports.stream = pkg.stream;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var merge2 = __webpack_require__(378);
-var optionsManager = __webpack_require__(379);
-var taskManager = __webpack_require__(380);
-var reader_async_1 = __webpack_require__(518);
-var reader_stream_1 = __webpack_require__(537);
-var reader_sync_1 = __webpack_require__(538);
-var arrayUtils = __webpack_require__(534);
+var optionsManager = __webpack_require__(378);
+var taskManager = __webpack_require__(379);
+var reader_async_1 = __webpack_require__(534);
+var reader_stream_1 = __webpack_require__(558);
+var reader_sync_1 = __webpack_require__(559);
+var arrayUtils = __webpack_require__(561);
+var streamUtils = __webpack_require__(562);
+/**
+ * Synchronous API.
+ */
+function sync(source, opts) {
+    assertPatternsInput(source);
+    var works = getWorks(source, reader_sync_1.default, opts);
+    return arrayUtils.flatten(works);
+}
+exports.sync = sync;
+/**
+ * Asynchronous API.
+ */
+function async(source, opts) {
+    try {
+        assertPatternsInput(source);
+    }
+    catch (error) {
+        return Promise.reject(error);
+    }
+    var works = getWorks(source, reader_async_1.default, opts);
+    return Promise.all(works).then(arrayUtils.flatten);
+}
+exports.async = async;
+/**
+ * Stream API.
+ */
+function stream(source, opts) {
+    assertPatternsInput(source);
+    var works = getWorks(source, reader_stream_1.default, opts);
+    return streamUtils.merge(works);
+}
+exports.stream = stream;
+/**
+ * Return a set of tasks based on provided patterns.
+ */
+function generateTasks(source, opts) {
+    assertPatternsInput(source);
+    var patterns = [].concat(source);
+    var options = optionsManager.prepare(opts);
+    return taskManager.generate(patterns, options);
+}
+exports.generateTasks = generateTasks;
 /**
  * Returns a set of works based on provided tasks and class of the reader.
  */
@@ -32566,30 +32797,16 @@ function getWorks(source, _Reader, opts) {
     var reader = new _Reader(options);
     return tasks.map(reader.read, reader);
 }
-/**
- * Synchronous API.
- */
-function sync(source, opts) {
-    var works = getWorks(source, reader_sync_1.default, opts);
-    return arrayUtils.flatten(works);
+function assertPatternsInput(source) {
+    if ([].concat(source).every(isString)) {
+        return;
+    }
+    throw new TypeError('Patterns must be a string or an array of strings');
 }
-exports.sync = sync;
-/**
- * Asynchronous API.
- */
-function async(source, opts) {
-    var works = getWorks(source, reader_async_1.default, opts);
-    return Promise.all(works).then(arrayUtils.flatten);
+function isString(source) {
+    /* tslint:disable-next-line strict-type-predicates */
+    return typeof source === 'string';
 }
-exports.async = async;
-/**
- * Stream API.
- */
-function stream(source, opts) {
-    var works = getWorks(source, reader_stream_1.default, opts);
-    return merge2(works);
-}
-exports.stream = stream;
 
 
 /***/ }),
@@ -32598,112 +32815,36 @@ exports.stream = stream;
 
 "use strict";
 
-/*
- * merge2
- * https://github.com/teambition/merge2
- *
- * Copyright (c) 2014-2016 Teambition
- * Licensed under the MIT license.
- */
-const Stream = __webpack_require__(28)
-const PassThrough = Stream.PassThrough
-const slice = Array.prototype.slice
-
-module.exports = merge2
-
-function merge2 () {
-  const streamsQueue = []
-  let merging = false
-  let args = slice.call(arguments)
-  let options = args[args.length - 1]
-
-  if (options && !Array.isArray(options) && options.pipe == null) args.pop()
-  else options = {}
-
-  let doEnd = options.end !== false
-  if (options.objectMode == null) options.objectMode = true
-  if (options.highWaterMark == null) options.highWaterMark = 64 * 1024
-  const mergedStream = PassThrough(options)
-
-  function addStream () {
-    for (let i = 0, len = arguments.length; i < len; i++) {
-      streamsQueue.push(pauseStreams(arguments[i], options))
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+function prepare(options) {
+    var opts = __assign({ cwd: process.cwd(), deep: true, ignore: [], dot: false, stats: false, onlyFiles: true, onlyDirectories: false, followSymlinkedDirectories: true, unique: true, markDirectories: false, absolute: false, nobrace: false, brace: true, noglobstar: false, globstar: true, noext: false, extension: true, nocase: false, case: true, matchBase: false, transform: null }, options);
+    if (opts.onlyDirectories) {
+        opts.onlyFiles = false;
     }
-    mergeStream()
-    return this
-  }
-
-  function mergeStream () {
-    if (merging) return
-    merging = true
-
-    let streams = streamsQueue.shift()
-    if (!streams) {
-      process.nextTick(endStream)
-      return
+    opts.brace = !opts.nobrace;
+    opts.globstar = !opts.noglobstar;
+    opts.extension = !opts.noext;
+    opts.case = !opts.nocase;
+    if (options) {
+        opts.brace = ('brace' in options ? options.brace : opts.brace);
+        opts.globstar = ('globstar' in options ? options.globstar : opts.globstar);
+        opts.extension = ('extension' in options ? options.extension : opts.extension);
+        opts.case = ('case' in options ? options.case : opts.case);
     }
-    if (!Array.isArray(streams)) streams = [streams]
-
-    let pipesCount = streams.length + 1
-
-    function next () {
-      if (--pipesCount > 0) return
-      merging = false
-      mergeStream()
-    }
-
-    function pipe (stream) {
-      function onend () {
-        stream.removeListener('merge2UnpipeEnd', onend)
-        stream.removeListener('end', onend)
-        next()
-      }
-      // skip ended stream
-      if (stream._readableState.endEmitted) return next()
-
-      stream.on('merge2UnpipeEnd', onend)
-      stream.on('end', onend)
-      stream.pipe(mergedStream, {end: false})
-      // compatible for old stream
-      stream.resume()
-    }
-
-    for (let i = 0; i < streams.length; i++) pipe(streams[i])
-
-    next()
-  }
-
-  function endStream () {
-    merging = false
-    // emit 'queueDrain' when all streams merged.
-    mergedStream.emit('queueDrain')
-    return doEnd && mergedStream.end()
-  }
-
-  mergedStream.setMaxListeners(0)
-  mergedStream.add = addStream
-  mergedStream.on('unpipe', function (stream) {
-    stream.emit('merge2UnpipeEnd')
-  })
-
-  if (args.length) addStream.apply(null, args)
-  return mergedStream
+    return opts;
 }
-
-// check and pause streams for pipe.
-function pauseStreams (streams, options) {
-  if (!Array.isArray(streams)) {
-    // Backwards-compat with old-style streams
-    if (!streams._readableState && streams.pipe) streams = streams.pipe(PassThrough(options))
-    if (!streams._readableState || !streams.pause || !streams.pipe) {
-      throw new Error('Only readable stream can be merged.')
-    }
-    streams.pause()
-  } else {
-    for (let i = 0, len = streams.length; i < len; i++) streams[i] = pauseStreams(streams[i], options)
-  }
-  return streams
-}
+exports.prepare = prepare;
 
 
 /***/ }),
@@ -32713,32 +32854,94 @@ function pauseStreams (streams, options) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-function prepare(options) {
-    var opts = Object.assign({
-        cwd: process.cwd(),
-        deep: true,
-        ignore: [],
-        dot: false,
-        stats: false,
-        onlyFiles: true,
-        onlyDirectories: false,
-        followSymlinkedDirectories: true,
-        unique: true,
-        markDirectories: false,
-        absolute: false,
-        nobrace: false,
-        noglobstar: false,
-        noext: false,
-        nocase: false,
-        matchBase: false,
-        transform: null
-    }, options);
-    if (opts.onlyDirectories) {
-        opts.onlyFiles = false;
-    }
-    return opts;
+var patternUtils = __webpack_require__(380);
+/**
+ * Generate tasks based on parent directory of each pattern.
+ */
+function generate(patterns, options) {
+    var unixPatterns = patterns.map(patternUtils.unixifyPattern);
+    var unixIgnore = options.ignore.map(patternUtils.unixifyPattern);
+    var positivePatterns = getPositivePatterns(unixPatterns);
+    var negativePatterns = getNegativePatternsAsPositive(unixPatterns, unixIgnore);
+    /**
+     * When the `case` option is disabled, all patterns must be marked as dynamic, because we cannot check filepath
+     * directly (without read directory).
+     */
+    var staticPatterns = !options.case ? [] : positivePatterns.filter(patternUtils.isStaticPattern);
+    var dynamicPatterns = !options.case ? positivePatterns : positivePatterns.filter(patternUtils.isDynamicPattern);
+    var staticTasks = convertPatternsToTasks(staticPatterns, negativePatterns, /* dynamic */ false);
+    var dynamicTasks = convertPatternsToTasks(dynamicPatterns, negativePatterns, /* dynamic */ true);
+    return staticTasks.concat(dynamicTasks);
 }
-exports.prepare = prepare;
+exports.generate = generate;
+/**
+ * Convert patterns to tasks based on parent directory of each pattern.
+ */
+function convertPatternsToTasks(positive, negative, dynamic) {
+    var positivePatternsGroup = groupPatternsByBaseDirectory(positive);
+    // When we have a global group – there is no reason to divide the patterns into independent tasks.
+    // In this case, the global task covers the rest.
+    if ('.' in positivePatternsGroup) {
+        var task = convertPatternGroupToTask('.', positive, negative, dynamic);
+        return [task];
+    }
+    return convertPatternGroupsToTasks(positivePatternsGroup, negative, dynamic);
+}
+exports.convertPatternsToTasks = convertPatternsToTasks;
+/**
+ * Return only positive patterns.
+ */
+function getPositivePatterns(patterns) {
+    return patternUtils.getPositivePatterns(patterns);
+}
+exports.getPositivePatterns = getPositivePatterns;
+/**
+ * Return only negative patterns.
+ */
+function getNegativePatternsAsPositive(patterns, ignore) {
+    var negative = patternUtils.getNegativePatterns(patterns).concat(ignore);
+    var positive = negative.map(patternUtils.convertToPositivePattern);
+    return positive;
+}
+exports.getNegativePatternsAsPositive = getNegativePatternsAsPositive;
+/**
+ * Group patterns by base directory of each pattern.
+ */
+function groupPatternsByBaseDirectory(patterns) {
+    return patterns.reduce(function (collection, pattern) {
+        var base = patternUtils.getBaseDirectory(pattern);
+        if (base in collection) {
+            collection[base].push(pattern);
+        }
+        else {
+            collection[base] = [pattern];
+        }
+        return collection;
+    }, {});
+}
+exports.groupPatternsByBaseDirectory = groupPatternsByBaseDirectory;
+/**
+ * Convert group of patterns to tasks.
+ */
+function convertPatternGroupsToTasks(positive, negative, dynamic) {
+    return Object.keys(positive).map(function (base) {
+        return convertPatternGroupToTask(base, positive[base], negative, dynamic);
+    });
+}
+exports.convertPatternGroupsToTasks = convertPatternGroupsToTasks;
+/**
+ * Create a task for positive and negative patterns.
+ */
+function convertPatternGroupToTask(base, positive, negative, dynamic) {
+    return {
+        base: base,
+        dynamic: dynamic,
+        positive: positive,
+        negative: negative,
+        patterns: [].concat(positive, negative.map(patternUtils.convertToNegativePattern))
+    };
+}
+exports.convertPatternGroupToTask = convertPatternGroupToTask;
 
 
 /***/ }),
@@ -32748,151 +32951,25 @@ exports.prepare = prepare;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var objectUtils = __webpack_require__(381);
-var patternUtils = __webpack_require__(382);
-/**
- * Returns grouped patterns by base directory of each pattern.
- */
-function groupPatternsByParentDirectory(patterns) {
-    return patterns.reduce(function (collection, pattern) {
-        var parent = patternUtils.getBaseDirectory(pattern);
-        if (!collection[parent]) {
-            collection[parent] = [];
-        }
-        collection[parent].push(pattern);
-        return collection;
-    }, {});
-}
-exports.groupPatternsByParentDirectory = groupPatternsByParentDirectory;
-/**
- * Convert positive patterns to tasks.
- */
-function makePositiveTaskGroup(positive) {
-    return Object.keys(positive).reduce(function (collection, base) {
-        var positivePatterns = [].concat(positive[base]);
-        collection[base] = {
-            base: base,
-            patterns: positivePatterns,
-            positive: positivePatterns,
-            negative: []
-        };
-        return collection;
-    }, {});
-}
-exports.makePositiveTaskGroup = makePositiveTaskGroup;
-/**
- * Convert negative patterns to tasks.
- */
-function makeNegativeTaskGroup(negative) {
-    return Object.keys(negative).reduce(function (collection, base) {
-        var negativePatterns = [].concat(negative[base]);
-        collection[base] = {
-            base: base,
-            patterns: negativePatterns.map(patternUtils.convertToNegativePattern),
-            positive: [],
-            negative: negativePatterns
-        };
-        return collection;
-    }, {});
-}
-exports.makeNegativeTaskGroup = makeNegativeTaskGroup;
-/**
- * Returns merged positive and negative task groups.
- *
- * Just two rules:
- *   - If a positive task group has a pair in the negative group, then merge it.
- *   - If a negative task group has a global base task, then merge them to full positive group.
- */
-function mergeTaskGroups(positive, negative) {
-    var group = positive;
-    var globalNegativePatterns = '.' in negative ? negative['.'].negative : [];
-    Object.keys(group).forEach(function (base) {
-        if (base in negative) {
-            group[base].patterns = group[base].patterns.concat(negative[base].negative.map(patternUtils.convertToNegativePattern));
-            group[base].negative = group[base].negative.concat(negative[base].negative);
-        }
-        if (globalNegativePatterns.length !== 0) {
-            group[base].patterns = group[base].patterns.concat(globalNegativePatterns.map(patternUtils.convertToNegativePattern));
-            group[base].negative = group[base].negative.concat(globalNegativePatterns);
-        }
-    });
-    return group;
-}
-exports.mergeTaskGroups = mergeTaskGroups;
-/**
- * Returns builded tasks for provided patterns groups.
- */
-function makeTasks(positive, negative) {
-    var positiveTaskGroup = makePositiveTaskGroup(positive);
-    var negativeTaskGroup = makeNegativeTaskGroup(negative);
-    var groups = mergeTaskGroups(positiveTaskGroup, negativeTaskGroup);
-    return objectUtils.values(groups);
-}
-exports.makeTasks = makeTasks;
-/**
- * Generate tasks for provided patterns based on base directory of each pattern.
- */
-function generate(patterns, options) {
-    var unixPatterns = patterns.map(patternUtils.unixifyPattern);
-    var positive = patternUtils.getPositivePatterns(unixPatterns);
-    if (positive.length === 0) {
-        return [];
-    }
-    var ignore = options.ignore;
-    var negative = patternUtils.getNegativePatterns(unixPatterns)
-        .map(patternUtils.convertToPositivePattern)
-        .concat(ignore)
-        .map(patternUtils.trimTrailingSlashGlobStar);
-    var positiveGroup = groupPatternsByParentDirectory(positive);
-    var negativeGroup = groupPatternsByParentDirectory(negative);
-    // When we have a global group – there is no reason to divide the patterns into independent tasks because the first task covers the rest.
-    if ('.' in positiveGroup) {
-        var task = {
-            base: '.',
-            patterns: [].concat(positive, negative.map(patternUtils.convertToNegativePattern)),
-            positive: positive,
-            negative: negative
-        };
-        return [task];
-    }
-    return makeTasks(positiveGroup, negativeGroup);
-}
-exports.generate = generate;
-
-
-/***/ }),
-/* 381 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-function values(obj) {
-    return Object.keys(obj).map(function (key) { return obj[key]; });
-}
-exports.values = values;
-
-
-/***/ }),
-/* 382 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __values = (this && this.__values) || function (o) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
-    if (m) return m.call(o);
-    return {
-        next: function () {
-            if (o && i >= o.length) o = void 0;
-            return { value: o && o[i++], done: !o };
-        }
-    };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-var globParent = __webpack_require__(383);
+var path = __webpack_require__(16);
+var globParent = __webpack_require__(381);
+var isGlob = __webpack_require__(385);
 var micromatch = __webpack_require__(387);
 var GLOBSTAR = '**';
+/**
+ * Return true for static pattern.
+ */
+function isStaticPattern(pattern) {
+    return !isDynamicPattern(pattern);
+}
+exports.isStaticPattern = isStaticPattern;
+/**
+ * Return true for pattern that looks like glob.
+ */
+function isDynamicPattern(pattern) {
+    return isGlob(pattern, { strict: false });
+}
+exports.isDynamicPattern = isDynamicPattern;
 /**
  * Convert a windows «path» to a unix-style «path».
  */
@@ -32904,7 +32981,7 @@ exports.unixifyPattern = unixifyPattern;
  * Returns negative pattern as positive pattern.
  */
 function convertToPositivePattern(pattern) {
-    return pattern.slice(1);
+    return isNegativePattern(pattern) ? pattern.slice(1) : pattern;
 }
 exports.convertToPositivePattern = convertToPositivePattern;
 /**
@@ -32918,7 +32995,7 @@ exports.convertToNegativePattern = convertToNegativePattern;
  * Return true if provided pattern is negative pattern.
  */
 function isNegativePattern(pattern) {
-    return pattern.startsWith('!');
+    return pattern.startsWith('!') && pattern[1] !== '(';
 }
 exports.isNegativePattern = isNegativePattern;
 /**
@@ -32964,19 +33041,41 @@ function endsWithSlashGlobStar(pattern) {
 }
 exports.endsWithSlashGlobStar = endsWithSlashGlobStar;
 /**
- * Trim trailing globstar if provided pattern ends with slash and globstar.
+ * Returns «true» when pattern ends with a slash and globstar or the last partial of the pattern is static pattern.
  */
-function trimTrailingSlashGlobStar(pattern) {
-    return endsWithSlashGlobStar(pattern) ? pattern.slice(0, -3) : pattern;
+function isAffectDepthOfReadingPattern(pattern) {
+    var basename = path.basename(pattern);
+    return endsWithSlashGlobStar(pattern) || isStaticPattern(basename);
 }
-exports.trimTrailingSlashGlobStar = trimTrailingSlashGlobStar;
+exports.isAffectDepthOfReadingPattern = isAffectDepthOfReadingPattern;
 /**
- * Return naive depth of provided pattern.
+ * Return naive depth of provided pattern without depth of the base directory.
  */
-function getDepth(pattern) {
-    return pattern.split('/').length;
+function getNaiveDepth(pattern) {
+    var base = getBaseDirectory(pattern);
+    var patternDepth = pattern.split('/').length;
+    var patternBaseDepth = base.split('/').length;
+    /**
+     * This is a hack for pattern that has no base directory.
+     *
+     * This is related to the `*\something\*` pattern.
+     */
+    if (base === '.') {
+        return patternDepth - patternBaseDepth;
+    }
+    return patternDepth - patternBaseDepth - 1;
 }
-exports.getDepth = getDepth;
+exports.getNaiveDepth = getNaiveDepth;
+/**
+ * Return max naive depth of provided patterns without depth of the base directory.
+ */
+function getMaxNaivePatternsDepth(patterns) {
+    return patterns.reduce(function (max, pattern) {
+        var depth = getNaiveDepth(pattern);
+        return depth > max ? depth : max;
+    }, 0);
+}
+exports.getMaxNaivePatternsDepth = getMaxNaivePatternsDepth;
 /**
  * Make RegExp for provided pattern.
  */
@@ -32995,44 +33094,21 @@ exports.convertPatternsToRe = convertPatternsToRe;
  * Returns true if the entry match any of the given RegExp's.
  */
 function matchAny(entry, patternsRe) {
-    try {
-        for (var patternsRe_1 = __values(patternsRe), patternsRe_1_1 = patternsRe_1.next(); !patternsRe_1_1.done; patternsRe_1_1 = patternsRe_1.next()) {
-            var regexp = patternsRe_1_1.value;
-            if (regexp.test(entry)) {
-                return true;
-            }
-        }
-    }
-    catch (e_1_1) { e_1 = { error: e_1_1 }; }
-    finally {
-        try {
-            if (patternsRe_1_1 && !patternsRe_1_1.done && (_a = patternsRe_1.return)) _a.call(patternsRe_1);
-        }
-        finally { if (e_1) throw e_1.error; }
-    }
-    return false;
-    var e_1, _a;
+    return patternsRe.some(function (patternRe) { return patternRe.test(entry); });
 }
 exports.matchAny = matchAny;
-/**
- * Returns true if the entry doesn't match any of the given negative RegExp's and match any of the given positive RegExp's.
- */
-function match(entry, positiveRe, negativeRe) {
-    return matchAny(entry, negativeRe) ? false : matchAny(entry, positiveRe);
-}
-exports.match = match;
 
 
 /***/ }),
-/* 383 */
+/* 381 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var path = __webpack_require__(16);
-var isglob = __webpack_require__(384);
-var pathDirname = __webpack_require__(386);
+var isglob = __webpack_require__(382);
+var pathDirname = __webpack_require__(384);
 var isWin32 = __webpack_require__(11).platform() === 'win32';
 
 module.exports = function globParent(str) {
@@ -33055,7 +33131,7 @@ module.exports = function globParent(str) {
 
 
 /***/ }),
-/* 384 */
+/* 382 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*!
@@ -33065,7 +33141,7 @@ module.exports = function globParent(str) {
  * Licensed under the MIT License.
  */
 
-var isExtglob = __webpack_require__(385);
+var isExtglob = __webpack_require__(383);
 
 module.exports = function isGlob(str) {
   if (typeof str !== 'string' || str === '') {
@@ -33086,7 +33162,7 @@ module.exports = function isGlob(str) {
 
 
 /***/ }),
-/* 385 */
+/* 383 */
 /***/ (function(module, exports) {
 
 /*!
@@ -33112,7 +33188,7 @@ module.exports = function isExtglob(str) {
 
 
 /***/ }),
-/* 386 */
+/* 384 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -33262,6 +33338,84 @@ module.exports.win32 = win32;
 
 
 /***/ }),
+/* 385 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/*!
+ * is-glob <https://github.com/jonschlinkert/is-glob>
+ *
+ * Copyright (c) 2014-2017, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+var isExtglob = __webpack_require__(386);
+var chars = { '{': '}', '(': ')', '[': ']'};
+
+module.exports = function isGlob(str, options) {
+  if (typeof str !== 'string' || str === '') {
+    return false;
+  }
+
+  if (isExtglob(str)) {
+    return true;
+  }
+
+  var regex = /\\(.)|(^!|\*|[\].+)]\?|\[[^\\\]]+\]|\{[^\\}]+\}|\(\?[:!=][^\\)]+\)|\([^|]+\|[^\\)]+\))/;
+  var match;
+
+  // optionally relax regex
+  if (options && options.strict === false) {
+    regex = /\\(.)|(^!|[*?{}()[\]]|\(\?)/;
+  }
+
+  while ((match = regex.exec(str))) {
+    if (match[2]) return true;
+    var idx = match.index + match[0].length;
+
+    // if an open bracket/brace/paren is escaped,
+    // set the index to the next closing character
+    var open = match[1];
+    var close = open ? chars[open] : null;
+    if (open && close) {
+      var n = str.indexOf(close, idx);
+      if (n !== -1) {
+        idx = n + 1;
+      }
+    }
+
+    str = str.slice(idx);
+  }
+  return false;
+};
+
+
+/***/ }),
+/* 386 */
+/***/ (function(module, exports) {
+
+/*!
+ * is-extglob <https://github.com/jonschlinkert/is-extglob>
+ *
+ * Copyright (c) 2014-2016, Jon Schlinkert.
+ * Licensed under the MIT License.
+ */
+
+module.exports = function isExtglob(str) {
+  if (typeof str !== 'string' || str === '') {
+    return false;
+  }
+
+  var match;
+  while ((match = /(\\).|([@?!+*]\(.*\))/g.exec(str))) {
+    if (match[2]) return true;
+    str = str.slice(match.index + match[0].length);
+  }
+
+  return false;
+};
+
+
+/***/ }),
 /* 387 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -33274,17 +33428,17 @@ module.exports.win32 = win32;
 
 var util = __webpack_require__(29);
 var braces = __webpack_require__(388);
-var toRegex = __webpack_require__(389);
-var extend = __webpack_require__(398);
+var toRegex = __webpack_require__(492);
+var extend = __webpack_require__(500);
 
 /**
  * Local dependencies
  */
 
-var compilers = __webpack_require__(492);
-var parsers = __webpack_require__(514);
-var cache = __webpack_require__(515);
-var utils = __webpack_require__(516);
+var compilers = __webpack_require__(503);
+var parsers = __webpack_require__(530);
+var cache = __webpack_require__(531);
+var utils = __webpack_require__(532);
 var MAX_LENGTH = 1024 * 64;
 
 /**
@@ -33884,16 +34038,14 @@ micromatch.makeRe = function(pattern, options) {
  */
 
 micromatch.braces = function(pattern, options) {
-  if (typeof pattern !== 'string') {
-    throw new TypeError('expected a string');
+  if (typeof pattern !== 'string' && !Array.isArray(pattern)) {
+    throw new TypeError('expected pattern to be an array or string');
   }
 
   function expand() {
-    if (options && options.nobrace === true) return [pattern];
-    if (!/\{.*\}/.test(pattern)) return [pattern];
-    // if (/[!@*?+]\{/.test(pattern)) {
-    //   options = utils.extend({}, options, {expand: true});
-    // }
+    if (options && options.nobrace === true || !/\{.*\}/.test(pattern)) {
+      return utils.arrayify(pattern);
+    }
     return braces(pattern, options);
   }
 
@@ -48268,8 +48420,963 @@ module.exports = function Position(start, parser) {
 "use strict";
 
 
-var nanomatch = __webpack_require__(493);
-var extglob = __webpack_require__(504);
+var safe = __webpack_require__(493);
+var define = __webpack_require__(499);
+var extend = __webpack_require__(500);
+var not = __webpack_require__(502);
+var MAX_LENGTH = 1024 * 64;
+
+/**
+ * Session cache
+ */
+
+var cache = {};
+
+/**
+ * Create a regular expression from the given `pattern` string.
+ *
+ * @param {String|RegExp} `pattern` Pattern can be a string or regular expression.
+ * @param {Object} `options`
+ * @return {RegExp}
+ * @api public
+ */
+
+module.exports = function(patterns, options) {
+  if (!Array.isArray(patterns)) {
+    return makeRe(patterns, options);
+  }
+  return makeRe(patterns.join('|'), options);
+};
+
+/**
+ * Create a regular expression from the given `pattern` string.
+ *
+ * @param {String|RegExp} `pattern` Pattern can be a string or regular expression.
+ * @param {Object} `options`
+ * @return {RegExp}
+ * @api public
+ */
+
+function makeRe(pattern, options) {
+  if (pattern instanceof RegExp) {
+    return pattern;
+  }
+
+  if (typeof pattern !== 'string') {
+    throw new TypeError('expected a string');
+  }
+
+  if (pattern.length > MAX_LENGTH) {
+    throw new Error('expected pattern to be less than ' + MAX_LENGTH + ' characters');
+  }
+
+  var key = pattern;
+  // do this before shallow cloning options, it's a lot faster
+  if (!options || (options && options.cache !== false)) {
+    key = createKey(pattern, options);
+
+    if (cache.hasOwnProperty(key)) {
+      return cache[key];
+    }
+  }
+
+  var opts = extend({}, options);
+  if (opts.contains === true) {
+    if (opts.negate === true) {
+      opts.strictNegate = false;
+    } else {
+      opts.strict = false;
+    }
+  }
+
+  if (opts.strict === false) {
+    opts.strictOpen = false;
+    opts.strictClose = false;
+  }
+
+  var open = opts.strictOpen !== false ? '^' : '';
+  var close = opts.strictClose !== false ? '$' : '';
+  var flags = opts.flags || '';
+  var regex;
+
+  if (opts.nocase === true && !/i/.test(flags)) {
+    flags += 'i';
+  }
+
+  try {
+    if (opts.negate || typeof opts.strictNegate === 'boolean') {
+      pattern = not.create(pattern, opts);
+    }
+
+    var str = open + '(?:' + pattern + ')' + close;
+    regex = new RegExp(str, flags);
+
+    if (opts.safe === true && safe(regex) === false) {
+      throw new Error('potentially unsafe regular expression: ' + regex.source);
+    }
+
+  } catch (err) {
+    if (opts.strictErrors === true || opts.safe === true) {
+      err.key = key;
+      err.pattern = pattern;
+      err.originalOptions = options;
+      err.createdOptions = opts;
+      throw err;
+    }
+
+    try {
+      regex = new RegExp('^' + pattern.replace(/(\W)/g, '\\$1') + '$');
+    } catch (err) {
+      regex = /.^/; //<= match nothing
+    }
+  }
+
+  if (opts.cache !== false) {
+    memoize(regex, key, pattern, opts);
+  }
+  return regex;
+}
+
+/**
+ * Memoize generated regex. This can result in dramatic speed improvements
+ * and simplify debugging by adding options and pattern to the regex. It can be
+ * disabled by passing setting `options.cache` to false.
+ */
+
+function memoize(regex, key, pattern, options) {
+  define(regex, 'cached', true);
+  define(regex, 'pattern', pattern);
+  define(regex, 'options', options);
+  define(regex, 'key', key);
+  cache[key] = regex;
+}
+
+/**
+ * Create the key to use for memoization. The key is generated
+ * by iterating over the options and concatenating key-value pairs
+ * to the pattern string.
+ */
+
+function createKey(pattern, options) {
+  if (!options) return pattern;
+  var key = pattern;
+  for (var prop in options) {
+    if (options.hasOwnProperty(prop)) {
+      key += ';' + prop + '=' + String(options[prop]);
+    }
+  }
+  return key;
+}
+
+/**
+ * Expose `makeRe`
+ */
+
+module.exports.makeRe = makeRe;
+
+
+/***/ }),
+/* 493 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var parse = __webpack_require__(494);
+var types = parse.types;
+
+module.exports = function (re, opts) {
+    if (!opts) opts = {};
+    var replimit = opts.limit === undefined ? 25 : opts.limit;
+    
+    if (isRegExp(re)) re = re.source;
+    else if (typeof re !== 'string') re = String(re);
+    
+    try { re = parse(re) }
+    catch (err) { return false }
+    
+    var reps = 0;
+    return (function walk (node, starHeight) {
+        if (node.type === types.REPETITION) {
+            starHeight ++;
+            reps ++;
+            if (starHeight > 1) return false;
+            if (reps > replimit) return false;
+        }
+        
+        if (node.options) {
+            for (var i = 0, len = node.options.length; i < len; i++) {
+                var ok = walk({ stack: node.options[i] }, starHeight);
+                if (!ok) return false;
+            }
+        }
+        var stack = node.stack || (node.value && node.value.stack);
+        if (!stack) return true;
+        
+        for (var i = 0; i < stack.length; i++) {
+            var ok = walk(stack[i], starHeight);
+            if (!ok) return false;
+        }
+        
+        return true;
+    })(re, 0);
+};
+
+function isRegExp (x) {
+    return {}.toString.call(x) === '[object RegExp]';
+}
+
+
+/***/ }),
+/* 494 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var util      = __webpack_require__(495);
+var types     = __webpack_require__(496);
+var sets      = __webpack_require__(497);
+var positions = __webpack_require__(498);
+
+
+module.exports = function(regexpStr) {
+  var i = 0, l, c,
+      start = { type: types.ROOT, stack: []},
+
+      // Keep track of last clause/group and stack.
+      lastGroup = start,
+      last = start.stack,
+      groupStack = [];
+
+
+  var repeatErr = function(i) {
+    util.error(regexpStr, 'Nothing to repeat at column ' + (i - 1));
+  };
+
+  // Decode a few escaped characters.
+  var str = util.strToChars(regexpStr);
+  l = str.length;
+
+  // Iterate through each character in string.
+  while (i < l) {
+    c = str[i++];
+
+    switch (c) {
+      // Handle escaped characters, inclues a few sets.
+      case '\\':
+        c = str[i++];
+
+        switch (c) {
+          case 'b':
+            last.push(positions.wordBoundary());
+            break;
+
+          case 'B':
+            last.push(positions.nonWordBoundary());
+            break;
+
+          case 'w':
+            last.push(sets.words());
+            break;
+
+          case 'W':
+            last.push(sets.notWords());
+            break;
+
+          case 'd':
+            last.push(sets.ints());
+            break;
+
+          case 'D':
+            last.push(sets.notInts());
+            break;
+
+          case 's':
+            last.push(sets.whitespace());
+            break;
+
+          case 'S':
+            last.push(sets.notWhitespace());
+            break;
+
+          default:
+            // Check if c is integer.
+            // In which case it's a reference.
+            if (/\d/.test(c)) {
+              last.push({ type: types.REFERENCE, value: parseInt(c, 10) });
+
+            // Escaped character.
+            } else {
+              last.push({ type: types.CHAR, value: c.charCodeAt(0) });
+            }
+        }
+
+        break;
+
+
+      // Positionals.
+      case '^':
+          last.push(positions.begin());
+        break;
+
+      case '$':
+          last.push(positions.end());
+        break;
+
+
+      // Handle custom sets.
+      case '[':
+        // Check if this class is 'anti' i.e. [^abc].
+        var not;
+        if (str[i] === '^') {
+          not = true;
+          i++;
+        } else {
+          not = false;
+        }
+
+        // Get all the characters in class.
+        var classTokens = util.tokenizeClass(str.slice(i), regexpStr);
+
+        // Increase index by length of class.
+        i += classTokens[1];
+        last.push({
+          type: types.SET,
+          set: classTokens[0],
+          not: not,
+        });
+
+        break;
+
+
+      // Class of any character except \n.
+      case '.':
+        last.push(sets.anyChar());
+        break;
+
+
+      // Push group onto stack.
+      case '(':
+        // Create group.
+        var group = {
+          type: types.GROUP,
+          stack: [],
+          remember: true,
+        };
+
+        c = str[i];
+
+        // If if this is a special kind of group.
+        if (c === '?') {
+          c = str[i + 1];
+          i += 2;
+
+          // Match if followed by.
+          if (c === '=') {
+            group.followedBy = true;
+
+          // Match if not followed by.
+          } else if (c === '!') {
+            group.notFollowedBy = true;
+
+          } else if (c !== ':') {
+            util.error(regexpStr,
+              'Invalid group, character \'' + c +
+              '\' after \'?\' at column ' + (i - 1));
+          }
+
+          group.remember = false;
+        }
+
+        // Insert subgroup into current group stack.
+        last.push(group);
+
+        // Remember the current group for when the group closes.
+        groupStack.push(lastGroup);
+
+        // Make this new group the current group.
+        lastGroup = group;
+        last = group.stack;
+        break;
+
+
+      // Pop group out of stack.
+      case ')':
+        if (groupStack.length === 0) {
+          util.error(regexpStr, 'Unmatched ) at column ' + (i - 1));
+        }
+        lastGroup = groupStack.pop();
+
+        // Check if this group has a PIPE.
+        // To get back the correct last stack.
+        last = lastGroup.options ?
+          lastGroup.options[lastGroup.options.length - 1] : lastGroup.stack;
+        break;
+
+
+      // Use pipe character to give more choices.
+      case '|':
+        // Create array where options are if this is the first PIPE
+        // in this clause.
+        if (!lastGroup.options) {
+          lastGroup.options = [lastGroup.stack];
+          delete lastGroup.stack;
+        }
+
+        // Create a new stack and add to options for rest of clause.
+        var stack = [];
+        lastGroup.options.push(stack);
+        last = stack;
+        break;
+
+
+      // Repetition.
+      // For every repetition, remove last element from last stack
+      // then insert back a RANGE object.
+      // This design is chosen because there could be more than
+      // one repetition symbols in a regex i.e. `a?+{2,3}`.
+      case '{':
+        var rs = /^(\d+)(,(\d+)?)?\}/.exec(str.slice(i)), min, max;
+        if (rs !== null) {
+          if (last.length === 0) {
+            repeatErr(i);
+          }
+          min = parseInt(rs[1], 10);
+          max = rs[2] ? rs[3] ? parseInt(rs[3], 10) : Infinity : min;
+          i += rs[0].length;
+
+          last.push({
+            type: types.REPETITION,
+            min: min,
+            max: max,
+            value: last.pop(),
+          });
+        } else {
+          last.push({
+            type: types.CHAR,
+            value: 123,
+          });
+        }
+        break;
+
+      case '?':
+        if (last.length === 0) {
+          repeatErr(i);
+        }
+        last.push({
+          type: types.REPETITION,
+          min: 0,
+          max: 1,
+          value: last.pop(),
+        });
+        break;
+
+      case '+':
+        if (last.length === 0) {
+          repeatErr(i);
+        }
+        last.push({
+          type: types.REPETITION,
+          min: 1,
+          max: Infinity,
+          value: last.pop(),
+        });
+        break;
+
+      case '*':
+        if (last.length === 0) {
+          repeatErr(i);
+        }
+        last.push({
+          type: types.REPETITION,
+          min: 0,
+          max: Infinity,
+          value: last.pop(),
+        });
+        break;
+
+
+      // Default is a character that is not `\[](){}?+*^$`.
+      default:
+        last.push({
+          type: types.CHAR,
+          value: c.charCodeAt(0),
+        });
+    }
+
+  }
+
+  // Check if any groups have not been closed.
+  if (groupStack.length !== 0) {
+    util.error(regexpStr, 'Unterminated group');
+  }
+
+  return start;
+};
+
+module.exports.types = types;
+
+
+/***/ }),
+/* 495 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var types = __webpack_require__(496);
+var sets  = __webpack_require__(497);
+
+
+// All of these are private and only used by randexp.
+// It's assumed that they will always be called with the correct input.
+
+var CTRL = '@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^ ?';
+var SLSH = { '0': 0, 't': 9, 'n': 10, 'v': 11, 'f': 12, 'r': 13 };
+
+/**
+ * Finds character representations in str and convert all to
+ * their respective characters
+ *
+ * @param {String} str
+ * @return {String}
+ */
+exports.strToChars = function(str) {
+  /* jshint maxlen: false */
+  var chars_regex = /(\[\\b\])|(\\)?\\(?:u([A-F0-9]{4})|x([A-F0-9]{2})|(0?[0-7]{2})|c([@A-Z\[\\\]\^?])|([0tnvfr]))/g;
+  str = str.replace(chars_regex, function(s, b, lbs, a16, b16, c8, dctrl, eslsh) {
+    if (lbs) {
+      return s;
+    }
+
+    var code = b     ? 8 :
+               a16   ? parseInt(a16, 16) :
+               b16   ? parseInt(b16, 16) :
+               c8    ? parseInt(c8,   8) :
+               dctrl ? CTRL.indexOf(dctrl) :
+               SLSH[eslsh];
+
+    var c = String.fromCharCode(code);
+
+    // Escape special regex characters.
+    if (/[\[\]{}\^$.|?*+()]/.test(c)) {
+      c = '\\' + c;
+    }
+
+    return c;
+  });
+
+  return str;
+};
+
+
+/**
+ * turns class into tokens
+ * reads str until it encounters a ] not preceeded by a \
+ *
+ * @param {String} str
+ * @param {String} regexpStr
+ * @return {Array.<Array.<Object>, Number>}
+ */
+exports.tokenizeClass = function(str, regexpStr) {
+  /* jshint maxlen: false */
+  var tokens = [];
+  var regexp = /\\(?:(w)|(d)|(s)|(W)|(D)|(S))|((?:(?:\\)(.)|([^\]\\]))-(?:\\)?([^\]]))|(\])|(?:\\)?(.)/g;
+  var rs, c;
+
+
+  while ((rs = regexp.exec(str)) != null) {
+    if (rs[1]) {
+      tokens.push(sets.words());
+
+    } else if (rs[2]) {
+      tokens.push(sets.ints());
+
+    } else if (rs[3]) {
+      tokens.push(sets.whitespace());
+
+    } else if (rs[4]) {
+      tokens.push(sets.notWords());
+
+    } else if (rs[5]) {
+      tokens.push(sets.notInts());
+
+    } else if (rs[6]) {
+      tokens.push(sets.notWhitespace());
+
+    } else if (rs[7]) {
+      tokens.push({
+        type: types.RANGE,
+        from: (rs[8] || rs[9]).charCodeAt(0),
+          to: rs[10].charCodeAt(0),
+      });
+
+    } else if (c = rs[12]) {
+      tokens.push({
+        type: types.CHAR,
+        value: c.charCodeAt(0),
+      });
+
+    } else {
+      return [tokens, regexp.lastIndex];
+    }
+  }
+
+  exports.error(regexpStr, 'Unterminated character class');
+};
+
+
+/**
+ * Shortcut to throw errors.
+ *
+ * @param {String} regexp
+ * @param {String} msg
+ */
+exports.error = function(regexp, msg) {
+  throw new SyntaxError('Invalid regular expression: /' + regexp + '/: ' + msg);
+};
+
+
+/***/ }),
+/* 496 */
+/***/ (function(module, exports) {
+
+module.exports = {
+  ROOT       : 0,
+  GROUP      : 1,
+  POSITION   : 2,
+  SET        : 3,
+  RANGE      : 4,
+  REPETITION : 5,
+  REFERENCE  : 6,
+  CHAR       : 7,
+};
+
+
+/***/ }),
+/* 497 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var types = __webpack_require__(496);
+
+var INTS = function() {
+ return [{ type: types.RANGE , from: 48, to: 57 }];
+};
+
+var WORDS = function() {
+ return [
+    { type: types.CHAR, value: 95 },
+    { type: types.RANGE, from: 97, to: 122 },
+    { type: types.RANGE, from: 65, to: 90 }
+  ].concat(INTS());
+};
+
+var WHITESPACE = function() {
+ return [
+    { type: types.CHAR, value: 9 },
+    { type: types.CHAR, value: 10 },
+    { type: types.CHAR, value: 11 },
+    { type: types.CHAR, value: 12 },
+    { type: types.CHAR, value: 13 },
+    { type: types.CHAR, value: 32 },
+    { type: types.CHAR, value: 160 },
+    { type: types.CHAR, value: 5760 },
+    { type: types.CHAR, value: 6158 },
+    { type: types.CHAR, value: 8192 },
+    { type: types.CHAR, value: 8193 },
+    { type: types.CHAR, value: 8194 },
+    { type: types.CHAR, value: 8195 },
+    { type: types.CHAR, value: 8196 },
+    { type: types.CHAR, value: 8197 },
+    { type: types.CHAR, value: 8198 },
+    { type: types.CHAR, value: 8199 },
+    { type: types.CHAR, value: 8200 },
+    { type: types.CHAR, value: 8201 },
+    { type: types.CHAR, value: 8202 },
+    { type: types.CHAR, value: 8232 },
+    { type: types.CHAR, value: 8233 },
+    { type: types.CHAR, value: 8239 },
+    { type: types.CHAR, value: 8287 },
+    { type: types.CHAR, value: 12288 },
+    { type: types.CHAR, value: 65279 }
+  ];
+};
+
+var NOTANYCHAR = function() {
+  return [
+    { type: types.CHAR, value: 10 },
+    { type: types.CHAR, value: 13 },
+    { type: types.CHAR, value: 8232 },
+    { type: types.CHAR, value: 8233 },
+  ];
+};
+
+// Predefined class objects.
+exports.words = function() {
+  return { type: types.SET, set: WORDS(), not: false };
+};
+
+exports.notWords = function() {
+  return { type: types.SET, set: WORDS(), not: true };
+};
+
+exports.ints = function() {
+  return { type: types.SET, set: INTS(), not: false };
+};
+
+exports.notInts = function() {
+  return { type: types.SET, set: INTS(), not: true };
+};
+
+exports.whitespace = function() {
+  return { type: types.SET, set: WHITESPACE(), not: false };
+};
+
+exports.notWhitespace = function() {
+  return { type: types.SET, set: WHITESPACE(), not: true };
+};
+
+exports.anyChar = function() {
+  return { type: types.SET, set: NOTANYCHAR(), not: true };
+};
+
+
+/***/ }),
+/* 498 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var types = __webpack_require__(496);
+
+exports.wordBoundary = function() {
+  return { type: types.POSITION, value: 'b' };
+};
+
+exports.nonWordBoundary = function() {
+  return { type: types.POSITION, value: 'B' };
+};
+
+exports.begin = function() {
+  return { type: types.POSITION, value: '^' };
+};
+
+exports.end = function() {
+  return { type: types.POSITION, value: '$' };
+};
+
+
+/***/ }),
+/* 499 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*!
+ * define-property <https://github.com/jonschlinkert/define-property>
+ *
+ * Copyright (c) 2015-2018, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+
+
+var isobject = __webpack_require__(408);
+var isDescriptor = __webpack_require__(420);
+var define = (typeof Reflect !== 'undefined' && Reflect.defineProperty)
+  ? Reflect.defineProperty
+  : Object.defineProperty;
+
+module.exports = function defineProperty(obj, key, val) {
+  if (!isobject(obj) && typeof obj !== 'function' && !Array.isArray(obj)) {
+    throw new TypeError('expected an object, function, or array');
+  }
+
+  if (typeof key !== 'string') {
+    throw new TypeError('expected "key" to be a string');
+  }
+
+  if (isDescriptor(val)) {
+    define(obj, key, val);
+    return obj;
+  }
+
+  define(obj, key, {
+    configurable: true,
+    enumerable: false,
+    writable: true,
+    value: val
+  });
+
+  return obj;
+};
+
+
+/***/ }),
+/* 500 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var isExtendable = __webpack_require__(501);
+var assignSymbols = __webpack_require__(409);
+
+module.exports = Object.assign || function(obj/*, objects*/) {
+  if (obj === null || typeof obj === 'undefined') {
+    throw new TypeError('Cannot convert undefined or null to object');
+  }
+  if (!isObject(obj)) {
+    obj = {};
+  }
+  for (var i = 1; i < arguments.length; i++) {
+    var val = arguments[i];
+    if (isString(val)) {
+      val = toObject(val);
+    }
+    if (isObject(val)) {
+      assign(obj, val);
+      assignSymbols(obj, val);
+    }
+  }
+  return obj;
+};
+
+function assign(a, b) {
+  for (var key in b) {
+    if (hasOwn(b, key)) {
+      a[key] = b[key];
+    }
+  }
+}
+
+function isString(val) {
+  return (val && typeof val === 'string');
+}
+
+function toObject(str) {
+  var obj = {};
+  for (var i in str) {
+    obj[i] = str[i];
+  }
+  return obj;
+}
+
+function isObject(val) {
+  return (val && typeof val === 'object') || isExtendable(val);
+}
+
+/**
+ * Returns true if the given `key` is an own property of `obj`.
+ */
+
+function hasOwn(obj, key) {
+  return Object.prototype.hasOwnProperty.call(obj, key);
+}
+
+function isEnum(obj, key) {
+  return Object.prototype.propertyIsEnumerable.call(obj, key);
+}
+
+
+/***/ }),
+/* 501 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*!
+ * is-extendable <https://github.com/jonschlinkert/is-extendable>
+ *
+ * Copyright (c) 2015-2017, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+
+
+var isPlainObject = __webpack_require__(407);
+
+module.exports = function isExtendable(val) {
+  return isPlainObject(val) || typeof val === 'function' || Array.isArray(val);
+};
+
+
+/***/ }),
+/* 502 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var extend = __webpack_require__(500);
+var safe = __webpack_require__(493);
+
+/**
+ * The main export is a function that takes a `pattern` string and an `options` object.
+ *
+ * ```js
+ & var not = require('regex-not');
+ & console.log(not('foo'));
+ & //=> /^(?:(?!^(?:foo)$).)*$/
+ * ```
+ *
+ * @param {String} `pattern`
+ * @param {Object} `options`
+ * @return {RegExp} Converts the given `pattern` to a regex using the specified `options`.
+ * @api public
+ */
+
+function toRegex(pattern, options) {
+  return new RegExp(toRegex.create(pattern, options));
+}
+
+/**
+ * Create a regex-compatible string from the given `pattern` and `options`.
+ *
+ * ```js
+ & var not = require('regex-not');
+ & console.log(not.create('foo'));
+ & //=> '^(?:(?!^(?:foo)$).)*$'
+ * ```
+ * @param {String} `pattern`
+ * @param {Object} `options`
+ * @return {String}
+ * @api public
+ */
+
+toRegex.create = function(pattern, options) {
+  if (typeof pattern !== 'string') {
+    throw new TypeError('expected a string');
+  }
+
+  var opts = extend({}, options);
+  if (opts.contains === true) {
+    opts.strictNegate = false;
+  }
+
+  var open = opts.strictOpen !== false ? '^' : '';
+  var close = opts.strictClose !== false ? '$' : '';
+  var endChar = opts.endChar ? opts.endChar : '+';
+  var str = pattern;
+
+  if (opts.strictNegate === false) {
+    str = '(?:(?!(?:' + pattern + ')).)' + endChar;
+  } else {
+    str = '(?:(?!^(?:' + pattern + ')$).)' + endChar;
+  }
+
+  var res = open + str + close;
+  if (opts.safe === true && safe(res) === false) {
+    throw new Error('potentially unsafe regular expression: ' + res);
+  }
+
+  return res;
+};
+
+/**
+ * Expose `toRegex`
+ */
+
+module.exports = toRegex;
+
+
+/***/ }),
+/* 503 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var nanomatch = __webpack_require__(504);
+var extglob = __webpack_require__(519);
 
 module.exports = function(snapdragon) {
   var compilers = snapdragon.compiler.compilers;
@@ -48297,7 +49404,7 @@ module.exports = function(snapdragon) {
 
   snapdragon.use(function() {
     this.options.star = this.options.star || function(/*node*/) {
-      return '[^/]*?';
+      return '[^\\\\/]*?';
     };
   });
 
@@ -48318,7 +49425,7 @@ function escapeExtglobs(compiler) {
   compiler.set('paren', function(node) {
     var val = '';
     visit(node, function(tok) {
-      if (tok.val) val += '\\' + tok.val;
+      if (tok.val) val += (/^\W/.test(tok.val) ? '\\' : '') + tok.val;
     });
     return this.emit(val, node);
   });
@@ -48346,7 +49453,7 @@ function escapeExtglobs(compiler) {
 
 
 /***/ }),
-/* 493 */
+/* 504 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -48358,16 +49465,16 @@ function escapeExtglobs(compiler) {
 
 var util = __webpack_require__(29);
 var toRegex = __webpack_require__(389);
-var extend = __webpack_require__(398);
+var extend = __webpack_require__(505);
 
 /**
  * Local dependencies
  */
 
-var compilers = __webpack_require__(494);
-var parsers = __webpack_require__(495);
-var cache = __webpack_require__(497);
-var utils = __webpack_require__(499);
+var compilers = __webpack_require__(507);
+var parsers = __webpack_require__(508);
+var cache = __webpack_require__(511);
+var utils = __webpack_require__(513);
 var MAX_LENGTH = 1024 * 64;
 
 /**
@@ -48881,13 +49988,12 @@ nanomatch.matcher = function matcher(pattern, options) {
     };
   }
 
-  var fn = test(re);
-  Object.defineProperty(fn, 'result', {
-    configurable: true,
-    enumerable: false,
-    value: re.result
-  });
-  return fn;
+  // create matcher function
+  var matcherFn = test(re);
+  // set result object from compiler on matcher function,
+  // as a non-enumerable property. useful for debugging
+  utils.define(matcherFn, 'result', re.result);
+  return matcherFn;
 };
 
 /**
@@ -48960,13 +50066,9 @@ nanomatch.makeRe = function(pattern, options) {
 
   function makeRe() {
     var opts = utils.extend({wrap: false}, options);
-    var res = nanomatch.create(pattern, opts);
-    var regex = toRegex(res.output, opts);
-    Object.defineProperty(regex, 'result', {
-      configurable: true,
-      enumerable: false,
-      value: res
-    });
+    var result = nanomatch.create(pattern, opts);
+    var regex = toRegex(result.output, opts);
+    utils.define(regex, 'result', result);
     return regex;
   }
 
@@ -49196,18 +50298,124 @@ module.exports = nanomatch;
 
 
 /***/ }),
-/* 494 */
+/* 505 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var isExtendable = __webpack_require__(506);
+var assignSymbols = __webpack_require__(409);
+
+module.exports = Object.assign || function(obj/*, objects*/) {
+  if (obj === null || typeof obj === 'undefined') {
+    throw new TypeError('Cannot convert undefined or null to object');
+  }
+  if (!isObject(obj)) {
+    obj = {};
+  }
+  for (var i = 1; i < arguments.length; i++) {
+    var val = arguments[i];
+    if (isString(val)) {
+      val = toObject(val);
+    }
+    if (isObject(val)) {
+      assign(obj, val);
+      assignSymbols(obj, val);
+    }
+  }
+  return obj;
+};
+
+function assign(a, b) {
+  for (var key in b) {
+    if (hasOwn(b, key)) {
+      a[key] = b[key];
+    }
+  }
+}
+
+function isString(val) {
+  return (val && typeof val === 'string');
+}
+
+function toObject(str) {
+  var obj = {};
+  for (var i in str) {
+    obj[i] = str[i];
+  }
+  return obj;
+}
+
+function isObject(val) {
+  return (val && typeof val === 'object') || isExtendable(val);
+}
+
+/**
+ * Returns true if the given `key` is an own property of `obj`.
+ */
+
+function hasOwn(obj, key) {
+  return Object.prototype.hasOwnProperty.call(obj, key);
+}
+
+function isEnum(obj, key) {
+  return Object.prototype.propertyIsEnumerable.call(obj, key);
+}
+
+
+/***/ }),
+/* 506 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*!
+ * is-extendable <https://github.com/jonschlinkert/is-extendable>
+ *
+ * Copyright (c) 2015-2017, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+
+
+var isPlainObject = __webpack_require__(407);
+
+module.exports = function isExtendable(val) {
+  return isPlainObject(val) || typeof val === 'function' || Array.isArray(val);
+};
+
+
+/***/ }),
+/* 507 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 /**
- * Nanomatch compilers
- */
+* Nanomatch compilers
+*/
 
 module.exports = function(nanomatch, options) {
-  var star = '[^/]*?';
+  function slash() {
+    if (options && typeof options.slash === 'string') {
+      return options.slash;
+    }
+    if (options && typeof options.slash === 'function') {
+      return options.slash.call(nanomatch);
+    }
+    return '\\\\/';
+  }
+
+  function star() {
+    if (options && typeof options.star === 'string') {
+      return options.star;
+    }
+    if (options && typeof options.star === 'function') {
+      return options.star.call(nanomatch);
+    }
+    return '[^' + slash() + ']*?';
+  }
 
   var ast = nanomatch.ast = nanomatch.parser.ast;
   ast.state = nanomatch.parser.state;
@@ -49226,7 +50434,7 @@ module.exports = function(nanomatch, options) {
       return this.emit(node.val, node);
     })
     .set('escape', function(node) {
-      if (this.options.unescape && /^[\w_.-]/.test(node.val)) {
+      if (this.options.unescape && /^[-\w_.]/.test(node.val)) {
         return this.emit(node.val, node);
       }
       return this.emit('\\' + node.val, node);
@@ -49263,7 +50471,7 @@ module.exports = function(nanomatch, options) {
       return this.emit(node.val, node);
     })
     .set('slash', function(node, nodes, i) {
-      var val = '\\' + node.val;
+      var val = '[' + slash() + ']';
       var parent = node.parent;
       var prev = this.prev();
 
@@ -49331,7 +50539,7 @@ module.exports = function(nanomatch, options) {
      */
 
     .set('square', function(node) {
-      var val = !/^\w/.test(node.val) ? '\\' + node.val : node.val;
+      var val = (/^\W/.test(node.val) ? '\\' : '') + node.val;
       return this.emit(val, node);
     })
 
@@ -49341,6 +50549,8 @@ module.exports = function(nanomatch, options) {
 
     .set('qmark', function(node) {
       var prev = this.prev();
+      // don't use "slash" variable so that we always avoid
+      // matching backslashes and slashes with a qmark
       var val = '[^.\\\\/]';
       if (this.options.dot || (prev.type !== 'bos' && prev.type !== 'slash')) {
         val = '[^\\\\/]';
@@ -49387,18 +50597,18 @@ module.exports = function(nanomatch, options) {
         this.state.leadingGlobstar = true;
       }
 
-      var next = this.next();
       var prev = this.prev();
-      var next2 = this.next(2);
-      var prev2 = this.prev(2);
+      var before = this.prev(2);
+      var next = this.next();
+      var after = this.next(2);
       var type = prev.type;
       var val = node.val;
 
       if (prev.type === 'slash' && next.type === 'slash') {
-        if (prev2.type === 'text') {
+        if (before.type === 'text') {
           this.output += '?';
 
-          if (next2.type !== 'text') {
+          if (after.type !== 'text') {
             this.output += '\\b';
           }
         }
@@ -49411,19 +50621,19 @@ module.exports = function(nanomatch, options) {
 
       var isInside = node.isInside.paren || node.isInside.brace;
       if (parsed && type !== 'slash' && type !== 'bos' && !isInside) {
-        val = star;
+        val = star();
       } else {
         val = this.options.dot !== true
-          ? '(?:(?!(?:\\/|^)\\.).)*?'
-          : '(?:(?!(?:\\/|^)(?:\\.{1,2})($|\\/))(?!\\.{2}).)*?';
+          ? '(?:(?!(?:[' + slash() + ']|^)\\.).)*?'
+          : '(?:(?!(?:[' + slash() + ']|^)(?:\\.{1,2})($|[' + slash() + ']))(?!\\.{2}).)*?';
       }
 
       if ((type === 'slash' || type === 'bos') && this.options.dot !== true) {
         val = '(?!\\.)' + val;
       }
 
-      if (prev.type === 'slash' && next.type === 'slash' && prev2.type !== 'text') {
-        if (next2.type === 'text' || next2.type === 'star') {
+      if (prev.type === 'slash' && next.type === 'slash' && before.type !== 'text') {
+        if (after.type === 'text' || after.type === 'star') {
           node.addQmark = true;
         }
       }
@@ -49450,23 +50660,23 @@ module.exports = function(nanomatch, options) {
       }
 
       if (this.output === '' && this.options.contains !== true) {
-        this.output = '(?!\\/)';
+        this.output = '(?![' + slash() + '])';
       }
 
       if (type === 'bracket' && this.options.bash === false) {
-        var str = next && next.type === 'bracket' ? star : '*?';
+        var str = next && next.type === 'bracket' ? star() : '*?';
         if (!prev.nodes || prev.nodes[1].type !== 'posix') {
           return this.emit(str, node);
         }
       }
 
       var prefix = !this.dotfiles && type !== 'text' && type !== 'escape'
-        ? (this.options.dot ? '(?!(?:^|\\/)\\.{1,2}(?:$|\\/))' : '(?!\\.)')
+        ? (this.options.dot ? '(?!(?:^|[' + slash() + '])\\.{1,2}(?:$|[' + slash() + ']))' : '(?!\\.)')
         : '';
 
       if (isStart(prev) || (isStart(prior) && type === 'not')) {
         if (prefix !== '(?!\\.)') {
-          prefix += '(?!(\\.{2}|\\.\\/))(?=.)';
+          prefix += '(?!(\\.{2}|\\.[' + slash() + ']))(?=.)';
         } else {
           prefix += '(?=.)';
         }
@@ -49478,7 +50688,7 @@ module.exports = function(nanomatch, options) {
         this.output = '(?!\\.)' + this.output;
       }
 
-      var output = prefix + star;
+      var output = prefix + star();
       if (this.options.capture) {
         output = '(' + output + ')';
       }
@@ -49502,9 +50712,9 @@ module.exports = function(nanomatch, options) {
       var prev = this.prev();
       var val = node.val;
 
-      this.output = '(?:(?:\\.(?:\\/|\\\\))(?=.))?' + this.output;
+      this.output = '(?:\\.[' + slash() + '](?=.))?' + this.output;
       if (this.state.metachar && prev.type !== 'qmark' && prev.type !== 'slash') {
-        val += (this.options.contains ? '(?:\\/|\\\\)?' : '(?:(?:\\/|\\\\)|$)');
+        val += (this.options.contains ? '[' + slash() + ']?' : '(?:[' + slash() + ']|$)');
       }
 
       return this.emit(val, node);
@@ -49522,7 +50732,7 @@ module.exports = function(nanomatch, options) {
 
 
 /***/ }),
-/* 495 */
+/* 508 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -49530,7 +50740,7 @@ module.exports = function(nanomatch, options) {
 
 var regexNot = __webpack_require__(400);
 var toRegex = __webpack_require__(389);
-var isOdd = __webpack_require__(496);
+var isOdd = __webpack_require__(509);
 
 /**
  * Characters to use in negation regex (we want to "not" match
@@ -49538,7 +50748,7 @@ var isOdd = __webpack_require__(496);
  */
 
 var cached;
-var NOT_REGEX = '[!*+?$^"\'.\\\\/\\[]+';
+var NOT_REGEX = '[\\[!*+?$^"\'.\\\\/]+';
 var not = createTextRegex(NOT_REGEX);
 
 /**
@@ -49563,7 +50773,6 @@ module.exports = function(nanomatch, options) {
 
     .capture('prefix', function() {
       if (this.parsed) return;
-      var pos = this.position();
       var m = this.match(/^\.[\\/]/);
       if (!m) return;
       this.state.strictOpen = !!this.options.strictOpen;
@@ -49619,7 +50828,7 @@ module.exports = function(nanomatch, options) {
     .capture('not', function() {
       var parsed = this.parsed;
       var pos = this.position();
-      var m = this.match(this.notRegex || /^\!+/);
+      var m = this.match(this.notRegex || /^!+/);
       if (!m) return;
       var val = m[0];
 
@@ -49694,11 +50903,12 @@ module.exports = function(nanomatch, options) {
     .capture('globstar', function() {
       var parsed = this.parsed;
       var pos = this.position();
-      var m = this.match(/^\*{2}(?![*(])(?=[,\/)]|$)/);
+      var m = this.match(/^\*{2}(?![*(])(?=[,)/]|$)/);
       if (!m) return;
 
       var type = opts.noglobstar !== true ? 'globstar' : 'star';
       var node = pos({type: type, parsed: parsed});
+      this.state.metachar = true;
 
       while (this.input.slice(0, 4) === '/**/') {
         this.input = this.input.slice(3);
@@ -49718,7 +50928,6 @@ module.exports = function(nanomatch, options) {
         node.val = '*';
       }
 
-      this.state.metachar = true;
       return node;
     })
 
@@ -49728,7 +50937,7 @@ module.exports = function(nanomatch, options) {
 
     .capture('star', function() {
       var pos = this.position();
-      var starRe = /^(?:\*(?![*(])|[*]{3,}(?!\()|[*]{2}(?![(\/]|$)|\*(?=\*\())/;
+      var starRe = /^(?:\*(?![*(])|[*]{3,}(?!\()|[*]{2}(?![(/]|$)|\*(?=\*\())/;
       var m = this.match(starRe);
       if (!m) return;
 
@@ -49801,7 +51010,7 @@ module.exports = function(nanomatch, options) {
 
     .capture('bracket', function() {
       var pos = this.position();
-      var m = this.match(/^(?:\[([!^]?)([^\]]+|\]\-)(\]|[^*+?]+)|\[)/);
+      var m = this.match(/^(?:\[([!^]?)([^\]]+|\]-)(\]|[^*+?]+)|\[)/);
       if (!m) return;
 
       var val = m[0];
@@ -49905,7 +51114,7 @@ function createTextRegex(pattern) {
   if (cached) return cached;
   var opts = {contains: true, strictClose: false};
   var not = regexNot.create(pattern, opts);
-  var re = toRegex('^(?:[*]\\(|' + not + ')', opts);
+  var re = toRegex('^(?:[*]\\((?=.)|' + not + ')', opts);
   return (cached = re);
 }
 
@@ -49917,7 +51126,7 @@ module.exports.not = NOT_REGEX;
 
 
 /***/ }),
-/* 496 */
+/* 509 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -49930,7 +51139,7 @@ module.exports.not = NOT_REGEX;
 
 
 
-var isNumber = __webpack_require__(412);
+var isNumber = __webpack_require__(510);
 
 module.exports = function isOdd(i) {
   if (!isNumber(i)) {
@@ -49944,14 +51153,42 @@ module.exports = function isOdd(i) {
 
 
 /***/ }),
-/* 497 */
+/* 510 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = new (__webpack_require__(498))();
+"use strict";
+/*!
+ * is-number <https://github.com/jonschlinkert/is-number>
+ *
+ * Copyright (c) 2014-2017, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+
+
+module.exports = function isNumber(num) {
+  var type = typeof num;
+
+  if (type === 'string' || num instanceof String) {
+    // an empty string would be coerced to true with the below logic
+    if (!num.trim()) return false;
+  } else if (type !== 'number' && !(num instanceof Number)) {
+    return false;
+  }
+
+  return (num - num + 1) >= 0;
+};
 
 
 /***/ }),
-/* 498 */
+/* 511 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = new (__webpack_require__(512))();
+
+
+/***/ }),
+/* 512 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -50086,7 +51323,7 @@ exports = module.exports = FragmentCache;
 
 
 /***/ }),
-/* 499 */
+/* 513 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -50099,12 +51336,13 @@ var path = __webpack_require__(16);
  * Module dependencies
  */
 
+var isWindows = __webpack_require__(514)();
 var Snapdragon = __webpack_require__(428);
-utils.define = __webpack_require__(500);
-utils.diff = __webpack_require__(501);
-utils.extend = __webpack_require__(398);
-utils.pick = __webpack_require__(502);
-utils.typeOf = __webpack_require__(503);
+utils.define = __webpack_require__(515);
+utils.diff = __webpack_require__(516);
+utils.extend = __webpack_require__(505);
+utils.pick = __webpack_require__(517);
+utils.typeOf = __webpack_require__(518);
 utils.unique = __webpack_require__(401);
 
 /**
@@ -50123,7 +51361,7 @@ utils.isEmptyString = function(val) {
  */
 
 utils.isWindows = function() {
-  return path.sep === '\\' || process.platform === 'win32';
+  return path.sep === '\\' || isWindows === true;
 };
 
 /**
@@ -50152,7 +51390,7 @@ utils.instantiate = function(ast, options) {
   }
 
   utils.define(snapdragon, 'parse', function(str, options) {
-    var parsed = Snapdragon.prototype.parse.apply(this, arguments);
+    var parsed = Snapdragon.prototype.parse.call(this, str, options);
     parsed.input = str;
 
     // escape unmatched brace/bracket/parens
@@ -50240,7 +51478,7 @@ utils.isObject = function(val) {
  */
 
 utils.escapeRegex = function(str) {
-  return str.replace(/[-[\]{}()^$|*+?.\\\/\s]/g, '\\$&');
+  return str.replace(/[-[\]{}()^$|*+?.\\/\s]/g, '\\$&');
 };
 
 /**
@@ -50264,7 +51502,7 @@ utils.combineDupes = function(input, patterns) {
  */
 
 utils.hasSpecialChars = function(str) {
-  return /(?:(?:(^|\/)[!.])|[*?+()|\[\]{}]|[+@]\()/.test(str);
+  return /(?:(?:(^|\/)[!.])|[*?+()|[\]{}]|[+@]\()/.test(str);
 };
 
 /**
@@ -50296,7 +51534,7 @@ utils.unescape = function(str) {
  */
 
 utils.stripDrive = function(fp) {
-  return utils.isWindows() ? fp.replace(/^[a-z]:[\\\/]+?/i, '/') : fp;
+  return utils.isWindows() ? fp.replace(/^[a-z]:[\\/]+?/i, '/') : fp;
 };
 
 /**
@@ -50320,7 +51558,7 @@ utils.stripPrefix = function(str) {
  */
 
 utils.isSimpleChar = function(str) {
-  return str === '' || str === ' ' || str === '.';
+  return str.trim() === '' || str === '.';
 };
 
 /**
@@ -50471,45 +51709,80 @@ utils.unixify = function(options) {
 
 
 /***/ }),
-/* 500 */
+/* 514 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
+ * is-windows <https://github.com/jonschlinkert/is-windows>
+ *
+ * Copyright © 2015-2018, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+(function(factory) {
+  if (exports && typeof exports === 'object' && typeof module !== 'undefined') {
+    module.exports = factory();
+  } else if (true) {
+    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+  } else {}
+})(function() {
+  'use strict';
+  return function isWindows() {
+    return process && (process.platform === 'win32' || /^(msys|cygwin)$/.test(process.env.OSTYPE));
+  };
+});
+
+
+/***/ }),
+/* 515 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /*!
  * define-property <https://github.com/jonschlinkert/define-property>
  *
- * Copyright (c) 2015, 2017, Jon Schlinkert.
+ * Copyright (c) 2015-2018, Jon Schlinkert.
  * Released under the MIT License.
  */
 
 
 
+var isobject = __webpack_require__(408);
 var isDescriptor = __webpack_require__(420);
+var define = (typeof Reflect !== 'undefined' && Reflect.defineProperty)
+  ? Reflect.defineProperty
+  : Object.defineProperty;
 
-module.exports = function defineProperty(obj, prop, val) {
-  if (typeof obj !== 'object' && typeof obj !== 'function') {
-    throw new TypeError('expected an object or function.');
+module.exports = function defineProperty(obj, key, val) {
+  if (!isobject(obj) && typeof obj !== 'function' && !Array.isArray(obj)) {
+    throw new TypeError('expected an object, function, or array');
   }
 
-  if (typeof prop !== 'string') {
-    throw new TypeError('expected `prop` to be a string.');
+  if (typeof key !== 'string') {
+    throw new TypeError('expected "key" to be a string');
   }
 
-  if (isDescriptor(val) && ('set' in val || 'get' in val)) {
-    return Object.defineProperty(obj, prop, val);
+  if (isDescriptor(val)) {
+    define(obj, key, val);
+    return obj;
   }
 
-  return Object.defineProperty(obj, prop, {
+  define(obj, key, {
     configurable: true,
     enumerable: false,
     writable: true,
     value: val
   });
+
+  return obj;
 };
 
 
 /***/ }),
-/* 501 */
+/* 516 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -50563,7 +51836,7 @@ function diffArray(one, two) {
 
 
 /***/ }),
-/* 502 */
+/* 517 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -50605,145 +51878,126 @@ module.exports = function pick(obj, keys) {
 
 
 /***/ }),
-/* 503 */
+/* 518 */
 /***/ (function(module, exports) {
 
 var toString = Object.prototype.toString;
 
-/**
- * Get the native `typeof` a value.
- *
- * @param  {*} `val`
- * @return {*} Native javascript type
- */
-
 module.exports = function kindOf(val) {
+  if (val === void 0) return 'undefined';
+  if (val === null) return 'null';
+
   var type = typeof val;
-
-  // primitivies
-  if (type === 'undefined') {
-    return 'undefined';
-  }
-  if (val === null) {
-    return 'null';
-  }
-  if (val === true || val === false || val instanceof Boolean) {
-    return 'boolean';
-  }
-  if (type === 'string' || val instanceof String) {
-    return 'string';
-  }
-  if (type === 'number' || val instanceof Number) {
-    return 'number';
+  if (type === 'boolean') return 'boolean';
+  if (type === 'string') return 'string';
+  if (type === 'number') return 'number';
+  if (type === 'symbol') return 'symbol';
+  if (type === 'function') {
+    return isGeneratorFn(val) ? 'generatorfunction' : 'function';
   }
 
-  // functions
-  if (type === 'function' || val instanceof Function) {
-    if (typeof val.constructor.name !== 'undefined' && val.constructor.name.slice(0, 9) === 'Generator') {
-      return 'generatorfunction';
-    }
-    return 'function';
+  if (isArray(val)) return 'array';
+  if (isBuffer(val)) return 'buffer';
+  if (isArguments(val)) return 'arguments';
+  if (isDate(val)) return 'date';
+  if (isError(val)) return 'error';
+  if (isRegexp(val)) return 'regexp';
+
+  switch (ctorName(val)) {
+    case 'Symbol': return 'symbol';
+    case 'Promise': return 'promise';
+
+    // Set, Map, WeakSet, WeakMap
+    case 'WeakMap': return 'weakmap';
+    case 'WeakSet': return 'weakset';
+    case 'Map': return 'map';
+    case 'Set': return 'set';
+
+    // 8-bit typed arrays
+    case 'Int8Array': return 'int8array';
+    case 'Uint8Array': return 'uint8array';
+    case 'Uint8ClampedArray': return 'uint8clampedarray';
+
+    // 16-bit typed arrays
+    case 'Int16Array': return 'int16array';
+    case 'Uint16Array': return 'uint16array';
+
+    // 32-bit typed arrays
+    case 'Int32Array': return 'int32array';
+    case 'Uint32Array': return 'uint32array';
+    case 'Float32Array': return 'float32array';
+    case 'Float64Array': return 'float64array';
   }
 
-  // array
-  if (typeof Array.isArray !== 'undefined' && Array.isArray(val)) {
-    return 'array';
+  if (isGeneratorObj(val)) {
+    return 'generator';
   }
 
-  // check for instances of RegExp and Date before calling `toString`
-  if (val instanceof RegExp) {
-    return 'regexp';
-  }
-  if (val instanceof Date) {
-    return 'date';
-  }
-
-  // other objects
+  // Non-plain objects
   type = toString.call(val);
-
-  if (type === '[object RegExp]') {
-    return 'regexp';
-  }
-  if (type === '[object Date]') {
-    return 'date';
-  }
-  if (type === '[object Arguments]') {
-    return 'arguments';
-  }
-  if (type === '[object Error]') {
-    return 'error';
-  }
-  if (type === '[object Promise]') {
-    return 'promise';
+  switch (type) {
+    case '[object Object]': return 'object';
+    // iterators
+    case '[object Map Iterator]': return 'mapiterator';
+    case '[object Set Iterator]': return 'setiterator';
+    case '[object String Iterator]': return 'stringiterator';
+    case '[object Array Iterator]': return 'arrayiterator';
   }
 
-  // buffer
-  if (isBuffer(val)) {
-    return 'buffer';
-  }
-
-  // es6: Map, WeakMap, Set, WeakSet
-  if (type === '[object Set]') {
-    return 'set';
-  }
-  if (type === '[object WeakSet]') {
-    return 'weakset';
-  }
-  if (type === '[object Map]') {
-    return 'map';
-  }
-  if (type === '[object WeakMap]') {
-    return 'weakmap';
-  }
-  if (type === '[object Symbol]') {
-    return 'symbol';
-  }
-  
-  if (type === '[object Map Iterator]') {
-    return 'mapiterator';
-  }
-  if (type === '[object Set Iterator]') {
-    return 'setiterator';
-  }
-  if (type === '[object String Iterator]') {
-    return 'stringiterator';
-  }
-  if (type === '[object Array Iterator]') {
-    return 'arrayiterator';
-  }
-  
-  // typed arrays
-  if (type === '[object Int8Array]') {
-    return 'int8array';
-  }
-  if (type === '[object Uint8Array]') {
-    return 'uint8array';
-  }
-  if (type === '[object Uint8ClampedArray]') {
-    return 'uint8clampedarray';
-  }
-  if (type === '[object Int16Array]') {
-    return 'int16array';
-  }
-  if (type === '[object Uint16Array]') {
-    return 'uint16array';
-  }
-  if (type === '[object Int32Array]') {
-    return 'int32array';
-  }
-  if (type === '[object Uint32Array]') {
-    return 'uint32array';
-  }
-  if (type === '[object Float32Array]') {
-    return 'float32array';
-  }
-  if (type === '[object Float64Array]') {
-    return 'float64array';
-  }
-
-  // must be a plain object
-  return 'object';
+  // other
+  return type.slice(8, -1).toLowerCase().replace(/\s/g, '');
 };
+
+function ctorName(val) {
+  return val.constructor ? val.constructor.name : null;
+}
+
+function isArray(val) {
+  if (Array.isArray) return Array.isArray(val);
+  return val instanceof Array;
+}
+
+function isError(val) {
+  return val instanceof Error || (typeof val.message === 'string' && val.constructor && typeof val.constructor.stackTraceLimit === 'number');
+}
+
+function isDate(val) {
+  if (val instanceof Date) return true;
+  return typeof val.toDateString === 'function'
+    && typeof val.getDate === 'function'
+    && typeof val.setDate === 'function';
+}
+
+function isRegexp(val) {
+  if (val instanceof RegExp) return true;
+  return typeof val.flags === 'string'
+    && typeof val.ignoreCase === 'boolean'
+    && typeof val.multiline === 'boolean'
+    && typeof val.global === 'boolean';
+}
+
+function isGeneratorFn(name, val) {
+  return ctorName(name) === 'GeneratorFunction';
+}
+
+function isGeneratorObj(val) {
+  return typeof val.throw === 'function'
+    && typeof val.return === 'function'
+    && typeof val.next === 'function';
+}
+
+function isArguments(val) {
+  try {
+    if (typeof val.length === 'number' && typeof val.callee === 'function') {
+      return true;
+    }
+  } catch (err) {
+    if (err.message.indexOf('callee') !== -1) {
+      return true;
+    }
+  }
+  return false;
+}
 
 /**
  * If you need to support Safari 5-7 (8-10 yr-old browser),
@@ -50751,14 +52005,15 @@ module.exports = function kindOf(val) {
  */
 
 function isBuffer(val) {
-  return val.constructor
-    && typeof val.constructor.isBuffer === 'function'
-    && val.constructor.isBuffer(val);
+  if (val.constructor && typeof val.constructor.isBuffer === 'function') {
+    return val.constructor.isBuffer(val);
+  }
+  return false;
 }
 
 
 /***/ }),
-/* 504 */
+/* 519 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -50776,10 +52031,10 @@ var toRegex = __webpack_require__(389);
  * Local dependencies
  */
 
-var compilers = __webpack_require__(505);
-var parsers = __webpack_require__(511);
-var Extglob = __webpack_require__(513);
-var utils = __webpack_require__(512);
+var compilers = __webpack_require__(520);
+var parsers = __webpack_require__(526);
+var Extglob = __webpack_require__(529);
+var utils = __webpack_require__(528);
 var MAX_LENGTH = 1024 * 64;
 
 /**
@@ -51096,13 +52351,13 @@ module.exports = extglob;
 
 
 /***/ }),
-/* 505 */
+/* 520 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var brackets = __webpack_require__(506);
+var brackets = __webpack_require__(521);
 
 /**
  * Extglob compilers
@@ -51272,7 +52527,7 @@ module.exports = function(extglob) {
 
 
 /***/ }),
-/* 506 */
+/* 521 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -51282,8 +52537,8 @@ module.exports = function(extglob) {
  * Local dependencies
  */
 
-var compilers = __webpack_require__(507);
-var parsers = __webpack_require__(509);
+var compilers = __webpack_require__(522);
+var parsers = __webpack_require__(524);
 
 /**
  * Module dependencies
@@ -51490,13 +52745,13 @@ module.exports = brackets;
 
 
 /***/ }),
-/* 507 */
+/* 522 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var posix = __webpack_require__(508);
+var posix = __webpack_require__(523);
 
 module.exports = function(brackets) {
   brackets.compiler
@@ -51584,7 +52839,7 @@ module.exports = function(brackets) {
 
 
 /***/ }),
-/* 508 */
+/* 523 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -51613,13 +52868,13 @@ module.exports = {
 
 
 /***/ }),
-/* 509 */
+/* 524 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(510);
+var utils = __webpack_require__(525);
 var define = __webpack_require__(390);
 
 /**
@@ -51839,7 +53094,7 @@ module.exports.TEXT_REGEX = TEXT_REGEX;
 
 
 /***/ }),
-/* 510 */
+/* 525 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -51880,15 +53135,15 @@ exports.createRegex = function(pattern, include) {
 
 
 /***/ }),
-/* 511 */
+/* 526 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var brackets = __webpack_require__(506);
-var define = __webpack_require__(500);
-var utils = __webpack_require__(512);
+var brackets = __webpack_require__(521);
+var define = __webpack_require__(527);
+var utils = __webpack_require__(528);
 
 /**
  * Characters to use in text regex (we want to "not" match
@@ -52043,14 +53298,52 @@ module.exports = parsers;
 
 
 /***/ }),
-/* 512 */
+/* 527 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*!
+ * define-property <https://github.com/jonschlinkert/define-property>
+ *
+ * Copyright (c) 2015, 2017, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+
+
+var isDescriptor = __webpack_require__(420);
+
+module.exports = function defineProperty(obj, prop, val) {
+  if (typeof obj !== 'object' && typeof obj !== 'function') {
+    throw new TypeError('expected an object or function.');
+  }
+
+  if (typeof prop !== 'string') {
+    throw new TypeError('expected `prop` to be a string.');
+  }
+
+  if (isDescriptor(val) && ('set' in val || 'get' in val)) {
+    return Object.defineProperty(obj, prop, val);
+  }
+
+  return Object.defineProperty(obj, prop, {
+    configurable: true,
+    enumerable: false,
+    writable: true,
+    value: val
+  });
+};
+
+
+/***/ }),
+/* 528 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var regex = __webpack_require__(400);
-var Cache = __webpack_require__(498);
+var Cache = __webpack_require__(512);
 
 /**
  * Utils
@@ -52119,7 +53412,7 @@ utils.createRegex = function(str) {
 
 
 /***/ }),
-/* 513 */
+/* 529 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52130,15 +53423,15 @@ utils.createRegex = function(str) {
  */
 
 var Snapdragon = __webpack_require__(428);
-var define = __webpack_require__(500);
+var define = __webpack_require__(527);
 var extend = __webpack_require__(398);
 
 /**
  * Local dependencies
  */
 
-var compilers = __webpack_require__(505);
-var parsers = __webpack_require__(511);
+var compilers = __webpack_require__(520);
+var parsers = __webpack_require__(526);
 
 /**
  * Customize Snapdragon parser and renderer
@@ -52204,16 +53497,16 @@ module.exports = Extglob;
 
 
 /***/ }),
-/* 514 */
+/* 530 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var extglob = __webpack_require__(504);
-var nanomatch = __webpack_require__(493);
+var extglob = __webpack_require__(519);
+var nanomatch = __webpack_require__(504);
 var regexNot = __webpack_require__(400);
-var toRegex = __webpack_require__(389);
+var toRegex = __webpack_require__(492);
 var not;
 
 /**
@@ -52294,14 +53587,14 @@ function textRegex(pattern) {
 
 
 /***/ }),
-/* 515 */
+/* 531 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = new (__webpack_require__(498))();
+module.exports = new (__webpack_require__(512))();
 
 
 /***/ }),
-/* 516 */
+/* 532 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52315,11 +53608,11 @@ var path = __webpack_require__(16);
  */
 
 var Snapdragon = __webpack_require__(428);
-utils.define = __webpack_require__(500);
-utils.diff = __webpack_require__(501);
-utils.extend = __webpack_require__(398);
-utils.pick = __webpack_require__(502);
-utils.typeOf = __webpack_require__(517);
+utils.define = __webpack_require__(499);
+utils.diff = __webpack_require__(516);
+utils.extend = __webpack_require__(500);
+utils.pick = __webpack_require__(517);
+utils.typeOf = __webpack_require__(533);
 utils.unique = __webpack_require__(401);
 
 /**
@@ -52576,7 +53869,7 @@ utils.containsPattern = function(pattern, options) {
 
 utils.matchBasename = function(re) {
   return function(filepath) {
-    return re.test(filepath) || re.test(path.basename(filepath));
+    return re.test(path.basename(filepath));
   };
 };
 
@@ -52617,7 +53910,7 @@ utils.unixify = function(options) {
 
 
 /***/ }),
-/* 517 */
+/* 533 */
 /***/ (function(module, exports) {
 
 var toString = Object.prototype.toString;
@@ -52752,15 +54045,18 @@ function isBuffer(val) {
 
 
 /***/ }),
-/* 518 */
+/* 534 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -52768,21 +54064,26 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var readdir = __webpack_require__(519);
-var reader_1 = __webpack_require__(532);
+var readdir = __webpack_require__(535);
+var reader_1 = __webpack_require__(548);
+var fs_stream_1 = __webpack_require__(552);
 var ReaderAsync = /** @class */ (function (_super) {
     __extends(ReaderAsync, _super);
     function ReaderAsync() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
+    Object.defineProperty(ReaderAsync.prototype, "fsAdapter", {
+        /**
+         * Returns FileSystem adapter.
+         */
+        get: function () {
+            return new fs_stream_1.default(this.options);
+        },
+        enumerable: true,
+        configurable: true
+    });
     /**
-     * Returns founded paths.
-     */
-    ReaderAsync.prototype.api = function (root, options) {
-        return readdir.readdirStreamStat(root, options);
-    };
-    /**
-     * Use sync API to read entries for Task.
+     * Use async API to read entries for Task.
      */
     ReaderAsync.prototype.read = function (task) {
         var _this = this;
@@ -52790,7 +54091,7 @@ var ReaderAsync = /** @class */ (function (_super) {
         var options = this.getReaderOptions(task);
         var entries = [];
         return new Promise(function (resolve, reject) {
-            var stream = _this.api(root, options);
+            var stream = _this.api(root, task, options);
             stream.on('error', function (err) {
                 _this.isEnoentCodeError(err) ? resolve([]) : reject(err);
                 stream.pause();
@@ -52799,21 +54100,42 @@ var ReaderAsync = /** @class */ (function (_super) {
             stream.on('end', function () { return resolve(entries); });
         });
     };
+    /**
+     * Returns founded paths.
+     */
+    ReaderAsync.prototype.api = function (root, task, options) {
+        if (task.dynamic) {
+            return this.dynamicApi(root, options);
+        }
+        return this.staticApi(task, options);
+    };
+    /**
+     * Api for dynamic tasks.
+     */
+    ReaderAsync.prototype.dynamicApi = function (root, options) {
+        return readdir.readdirStreamStat(root, options);
+    };
+    /**
+     * Api for static tasks.
+     */
+    ReaderAsync.prototype.staticApi = function (task, options) {
+        return this.fsAdapter.read(task.patterns, options.filter);
+    };
     return ReaderAsync;
 }(reader_1.default));
 exports.default = ReaderAsync;
 
 
 /***/ }),
-/* 519 */
+/* 535 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-const readdirSync = __webpack_require__(520);
-const readdirAsync = __webpack_require__(528);
-const readdirStream = __webpack_require__(531);
+const readdirSync = __webpack_require__(536);
+const readdirAsync = __webpack_require__(544);
+const readdirStream = __webpack_require__(547);
 
 module.exports = exports = readdirAsyncPath;
 exports.readdir = exports.readdirAsync = exports.async = readdirAsyncPath;
@@ -52897,7 +54219,7 @@ function readdirStreamStat (dir, options) {
 
 
 /***/ }),
-/* 520 */
+/* 536 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52905,11 +54227,11 @@ function readdirStreamStat (dir, options) {
 
 module.exports = readdirSync;
 
-const DirectoryReader = __webpack_require__(521);
+const DirectoryReader = __webpack_require__(537);
 
 let syncFacade = {
-  fs: __webpack_require__(526),
-  forEach: __webpack_require__(527),
+  fs: __webpack_require__(542),
+  forEach: __webpack_require__(543),
   sync: true
 };
 
@@ -52938,7 +54260,7 @@ function readdirSync (dir, options, internalOptions) {
 
 
 /***/ }),
-/* 521 */
+/* 537 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52947,9 +54269,9 @@ function readdirSync (dir, options, internalOptions) {
 const Readable = __webpack_require__(28).Readable;
 const EventEmitter = __webpack_require__(45).EventEmitter;
 const path = __webpack_require__(16);
-const normalizeOptions = __webpack_require__(522);
-const stat = __webpack_require__(524);
-const call = __webpack_require__(525);
+const normalizeOptions = __webpack_require__(538);
+const stat = __webpack_require__(540);
+const call = __webpack_require__(541);
 
 /**
  * Asynchronously reads the contents of a directory and streams the results
@@ -53325,14 +54647,14 @@ module.exports = DirectoryReader;
 
 
 /***/ }),
-/* 522 */
+/* 538 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 const path = __webpack_require__(16);
-const globToRegExp = __webpack_require__(523);
+const globToRegExp = __webpack_require__(539);
 
 module.exports = normalizeOptions;
 
@@ -53509,7 +54831,7 @@ function normalizeOptions (options, internalOptions) {
 
 
 /***/ }),
-/* 523 */
+/* 539 */
 /***/ (function(module, exports) {
 
 module.exports = function (glob, opts) {
@@ -53646,13 +54968,13 @@ module.exports = function (glob, opts) {
 
 
 /***/ }),
-/* 524 */
+/* 540 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-const call = __webpack_require__(525);
+const call = __webpack_require__(541);
 
 module.exports = stat;
 
@@ -53727,7 +55049,7 @@ function symlinkStat (fs, path, lstats, callback) {
 
 
 /***/ }),
-/* 525 */
+/* 541 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53788,14 +55110,14 @@ function callOnce (fn) {
 
 
 /***/ }),
-/* 526 */
+/* 542 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 const fs = __webpack_require__(23);
-const call = __webpack_require__(525);
+const call = __webpack_require__(541);
 
 /**
  * A facade around {@link fs.readdirSync} that allows it to be called
@@ -53859,7 +55181,7 @@ exports.lstat = function (path, callback) {
 
 
 /***/ }),
-/* 527 */
+/* 543 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53888,7 +55210,7 @@ function syncForEach (array, iterator, done) {
 
 
 /***/ }),
-/* 528 */
+/* 544 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53896,12 +55218,12 @@ function syncForEach (array, iterator, done) {
 
 module.exports = readdirAsync;
 
-const maybe = __webpack_require__(529);
-const DirectoryReader = __webpack_require__(521);
+const maybe = __webpack_require__(545);
+const DirectoryReader = __webpack_require__(537);
 
 let asyncFacade = {
   fs: __webpack_require__(23),
-  forEach: __webpack_require__(530),
+  forEach: __webpack_require__(546),
   async: true
 };
 
@@ -53943,7 +55265,7 @@ function readdirAsync (dir, options, callback, internalOptions) {
 
 
 /***/ }),
-/* 529 */
+/* 545 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53970,7 +55292,7 @@ module.exports = function maybe (cb, promise) {
 
 
 /***/ }),
-/* 530 */
+/* 546 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54006,7 +55328,7 @@ function asyncForEach (array, iterator, done) {
 
 
 /***/ }),
-/* 531 */
+/* 547 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54014,11 +55336,11 @@ function asyncForEach (array, iterator, done) {
 
 module.exports = readdirStream;
 
-const DirectoryReader = __webpack_require__(521);
+const DirectoryReader = __webpack_require__(537);
 
 let streamFacade = {
   fs: __webpack_require__(23),
-  forEach: __webpack_require__(530),
+  forEach: __webpack_require__(546),
   async: true
 };
 
@@ -54038,15 +55360,16 @@ function readdirStream (dir, options, internalOptions) {
 
 
 /***/ }),
-/* 532 */
+/* 548 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var path = __webpack_require__(16);
-var deep_1 = __webpack_require__(533);
-var entry_1 = __webpack_require__(536);
+var deep_1 = __webpack_require__(549);
+var entry_1 = __webpack_require__(551);
+var pathUtil = __webpack_require__(550);
 var Reader = /** @class */ (function () {
     function Reader(options) {
         this.options = options;
@@ -54077,10 +55400,10 @@ var Reader = /** @class */ (function () {
     Reader.prototype.getMicromatchOptions = function () {
         return {
             dot: this.options.dot,
-            nobrace: this.options.nobrace,
-            noglobstar: this.options.noglobstar,
-            noext: this.options.noext,
-            nocase: this.options.nocase,
+            nobrace: !this.options.brace,
+            noglobstar: !this.options.globstar,
+            noext: !this.options.extension,
+            nocase: !this.options.case,
             matchBase: this.options.matchBase
         };
     };
@@ -54088,11 +55411,11 @@ var Reader = /** @class */ (function () {
      * Returns transformed entry.
      */
     Reader.prototype.transform = function (entry) {
+        if (this.options.absolute) {
+            entry.path = pathUtil.makeAbsolute(this.options.cwd, entry.path);
+        }
         if (this.options.markDirectories && entry.isDirectory()) {
             entry.path += '/';
-        }
-        if (this.options.absolute && !path.isAbsolute(entry.path)) {
-            entry.path = path.resolve(this.options.cwd, entry.path);
         }
         var item = this.options.stats ? entry : entry.path;
         if (this.options.transform === null) {
@@ -54112,15 +55435,14 @@ exports.default = Reader;
 
 
 /***/ }),
-/* 533 */
+/* 549 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var arrayUtils = __webpack_require__(534);
-var pathUtils = __webpack_require__(535);
-var patternUtils = __webpack_require__(382);
+var pathUtils = __webpack_require__(550);
+var patternUtils = __webpack_require__(380);
 var DeepFilter = /** @class */ (function () {
     function DeepFilter(options, micromatchOptions) {
         this.options = options;
@@ -54131,63 +55453,71 @@ var DeepFilter = /** @class */ (function () {
      */
     DeepFilter.prototype.getFilter = function (positive, negative) {
         var _this = this;
-        var depth = this.getMaxDeth(positive);
-        var negativeRe = patternUtils.convertPatternsToRe(negative, this.micromatchOptions);
-        return function (entry) { return _this.filter(entry, negativeRe, depth); };
+        var maxPatternDepth = this.getMaxPatternDepth(positive);
+        var negativeRe = this.getNegativePatternsRe(negative);
+        return function (entry) { return _this.filter(entry, negativeRe, maxPatternDepth); };
     };
     /**
-     * Returns true if directory must be read.
+     * Returns max depth of the provided patterns.
      */
-    DeepFilter.prototype.filter = function (entry, negativeRe, depth) {
-        // Skip reading, depending on the nesting level
-        if (!this.options.deep || this.skipByDeepOption(entry) || this.skipByPatternDepth(entry, depth)) {
-            return false;
-        }
-        // Skip reading if the directory is symlink and we don't want expand symlinks
-        if (this.isFollowedSymlink(entry)) {
-            return false;
-        }
-        // Skip reading if the directory name starting with a period and is not expected
-        if (this.isFollowedDotDirectory(entry)) {
-            return false;
-        }
-        // Skip by negative patterns
-        if (patternUtils.matchAny(entry.path, negativeRe)) {
-            return false;
-        }
-        return true;
+    DeepFilter.prototype.getMaxPatternDepth = function (patterns) {
+        var globstar = patterns.some(patternUtils.hasGlobStar);
+        return globstar ? Infinity : patternUtils.getMaxNaivePatternsDepth(patterns);
     };
     /**
-     * Returns max depth for reading.
+     * Returns RegExp's for patterns that can affect the depth of reading.
      */
-    DeepFilter.prototype.getMaxDeth = function (positive) {
-        var globstar = positive.some(patternUtils.hasGlobStar);
-        var patternDepths = positive.map(patternUtils.getDepth);
-        return globstar ? Infinity : arrayUtils.max(patternDepths);
+    DeepFilter.prototype.getNegativePatternsRe = function (patterns) {
+        var affectDepthOfReadingPatterns = patterns.filter(patternUtils.isAffectDepthOfReadingPattern);
+        return patternUtils.convertPatternsToRe(affectDepthOfReadingPatterns, this.micromatchOptions);
     };
     /**
-     * Returns true for dot directories if the «dot» option is enabled.
+     * Returns «true» for directory that should be read.
      */
-    DeepFilter.prototype.isFollowedDotDirectory = function (entry) {
-        return !this.options.dot && pathUtils.isDotDirectory(entry.path);
+    DeepFilter.prototype.filter = function (entry, negativeRe, maxPatternDepth) {
+        if (this.isSkippedByDeepOption(entry.depth)) {
+            return false;
+        }
+        if (this.isSkippedByMaxPatternDepth(entry.depth, maxPatternDepth)) {
+            return false;
+        }
+        if (this.isSkippedSymlinkedDirectory(entry)) {
+            return false;
+        }
+        if (this.isSkippedDotDirectory(entry)) {
+            return false;
+        }
+        return this.isSkippedByNegativePatterns(entry, negativeRe);
     };
     /**
-     * Returns true for symlinked directories if the «followSymlinks» option is enabled.
+     * Returns «true» when the «deep» option is disabled or number and depth of the entry is greater that the option value.
      */
-    DeepFilter.prototype.isFollowedSymlink = function (entry) {
+    DeepFilter.prototype.isSkippedByDeepOption = function (entryDepth) {
+        return !this.options.deep || (typeof this.options.deep === 'number' && entryDepth >= this.options.deep);
+    };
+    /**
+     * Returns «true» when depth parameter is not an Infinity and entry depth greater that the parameter value.
+     */
+    DeepFilter.prototype.isSkippedByMaxPatternDepth = function (entryDepth, maxPatternDepth) {
+        return maxPatternDepth !== Infinity && entryDepth >= maxPatternDepth;
+    };
+    /**
+     * Returns «true» for symlinked directory if the «followSymlinkedDirectories» option is disabled.
+     */
+    DeepFilter.prototype.isSkippedSymlinkedDirectory = function (entry) {
         return !this.options.followSymlinkedDirectories && entry.isSymbolicLink();
     };
     /**
-     * Returns true when the «deep» options is number and entry depth greater that the option value.
+     * Returns «true» for a directory whose name starts with a period if «dot» option is disabled.
      */
-    DeepFilter.prototype.skipByDeepOption = function (entry) {
-        return typeof this.options.deep === 'number' && entry.depth > this.options.deep;
+    DeepFilter.prototype.isSkippedDotDirectory = function (entry) {
+        return !this.options.dot && pathUtils.isDotDirectory(entry.path);
     };
     /**
-     * Return true when depth parameter is not an Infinity and entry depth greater that the parameter value.
+     * Returns «true» for a directory whose path math to any negative pattern.
      */
-    DeepFilter.prototype.skipByPatternDepth = function (entry, depth) {
-        return depth !== Infinity && entry.depth > depth;
+    DeepFilter.prototype.isSkippedByNegativePatterns = function (entry, negativeRe) {
+        return !patternUtils.matchAny(entry.path, negativeRe);
     };
     return DeepFilter;
 }());
@@ -54195,56 +55525,47 @@ exports.default = DeepFilter;
 
 
 /***/ }),
-/* 534 */
+/* 550 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+var path = __webpack_require__(16);
 /**
- * Flatten nested arrays (max depth is 2) into a non-nested array of non-array items.
+ * Returns «true» if the last partial of the path starting with a period.
  */
-function flatten(items) {
-    return items.reduce(function (collection, item) { return [].concat(collection, item); }, []);
-}
-exports.flatten = flatten;
-/**
- * Returns max number from array.
- */
-function max(items) {
-    return Math.max.apply(null, items);
-}
-exports.max = max;
-
-
-/***/ }),
-/* 535 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-/**
- * Returns true if the last partial of the path starting with a period.
- */
-function isDotDirectory(path) {
-    var pathPartials = path.split('/');
-    var lastPathPartial = pathPartials[pathPartials.length - 1];
-    return lastPathPartial.startsWith('.');
+function isDotDirectory(filepath) {
+    return path.basename(filepath).startsWith('.');
 }
 exports.isDotDirectory = isDotDirectory;
+/**
+ * Convert a windows-like path to a unix-style path.
+ */
+function normalize(filepath) {
+    return filepath.replace(/\\/g, '/');
+}
+exports.normalize = normalize;
+/**
+ * Returns normalized absolute path of provided filepath.
+ */
+function makeAbsolute(cwd, filepath) {
+    return normalize(path.resolve(cwd, filepath));
+}
+exports.makeAbsolute = makeAbsolute;
 
 
 /***/ }),
-/* 536 */
+/* 551 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var patternUtils = __webpack_require__(382);
-var DeepFilter = /** @class */ (function () {
-    function DeepFilter(options, micromatchOptions) {
+var pathUtils = __webpack_require__(550);
+var patternUtils = __webpack_require__(380);
+var EntryFilter = /** @class */ (function () {
+    function EntryFilter(options, micromatchOptions) {
         this.options = options;
         this.micromatchOptions = micromatchOptions;
         this.index = new Map();
@@ -54252,7 +55573,7 @@ var DeepFilter = /** @class */ (function () {
     /**
      * Returns filter for directories.
      */
-    DeepFilter.prototype.getFilter = function (positive, negative) {
+    EntryFilter.prototype.getFilter = function (positive, negative) {
         var _this = this;
         var positiveRe = patternUtils.convertPatternsToRe(positive, this.micromatchOptions);
         var negativeRe = patternUtils.convertPatternsToRe(negative, this.micromatchOptions);
@@ -54261,8 +55582,7 @@ var DeepFilter = /** @class */ (function () {
     /**
      * Returns true if entry must be added to result.
      */
-    DeepFilter.prototype.filter = function (entry, positiveRe, negativeRe) {
-        var entryPath = entry.path;
+    EntryFilter.prototype.filter = function (entry, positiveRe, negativeRe) {
         // Exclude duplicate results
         if (this.options.unique) {
             if (this.isDuplicateEntry(entry)) {
@@ -54270,59 +55590,76 @@ var DeepFilter = /** @class */ (function () {
             }
             this.createIndexRecord(entry);
         }
-        // Mark directory by the final slash. Need to micromatch to support «directory/**» patterns
-        if (entry.isDirectory()) {
-            entryPath += '/';
-        }
-        // Filter directories that will be excluded by deep filter
-        if (entry.isDirectory() && patternUtils.matchAny(entryPath, negativeRe)) {
-            return false;
-        }
         // Filter files and directories by options
         if (this.onlyFileFilter(entry) || this.onlyDirectoryFilter(entry)) {
             return false;
         }
-        return patternUtils.match(entryPath, positiveRe, negativeRe);
+        if (this.isSkippedByAbsoluteNegativePatterns(entry, negativeRe)) {
+            return false;
+        }
+        return this.isMatchToPatterns(entry.path, positiveRe) && !this.isMatchToPatterns(entry.path, negativeRe);
     };
     /**
      * Return true if the entry already has in the cross reader index.
      */
-    DeepFilter.prototype.isDuplicateEntry = function (entry) {
+    EntryFilter.prototype.isDuplicateEntry = function (entry) {
         return this.index.has(entry.path);
     };
     /**
      * Create record in the cross reader index.
      */
-    DeepFilter.prototype.createIndexRecord = function (entry) {
+    EntryFilter.prototype.createIndexRecord = function (entry) {
         this.index.set(entry.path, undefined);
     };
     /**
      * Returns true for non-files if the «onlyFiles» option is enabled.
      */
-    DeepFilter.prototype.onlyFileFilter = function (entry) {
+    EntryFilter.prototype.onlyFileFilter = function (entry) {
         return this.options.onlyFiles && !entry.isFile();
     };
     /**
      * Returns true for non-directories if the «onlyDirectories» option is enabled.
      */
-    DeepFilter.prototype.onlyDirectoryFilter = function (entry) {
+    EntryFilter.prototype.onlyDirectoryFilter = function (entry) {
         return this.options.onlyDirectories && !entry.isDirectory();
     };
-    return DeepFilter;
+    /**
+     * Return true when `absolute` option is enabled and matched to the negative patterns.
+     */
+    EntryFilter.prototype.isSkippedByAbsoluteNegativePatterns = function (entry, negativeRe) {
+        if (!this.options.absolute) {
+            return false;
+        }
+        var fullpath = pathUtils.makeAbsolute(this.options.cwd, entry.path);
+        return this.isMatchToPatterns(fullpath, negativeRe);
+    };
+    /**
+     * Return true when entry match to provided patterns.
+     *
+     * First, just trying to apply patterns to the path.
+     * Second, trying to apply patterns to the path with final slash (need to micromatch to support «directory/**» patterns).
+     */
+    EntryFilter.prototype.isMatchToPatterns = function (filepath, patternsRe) {
+        return patternUtils.matchAny(filepath, patternsRe) || patternUtils.matchAny(filepath + '/', patternsRe);
+    };
+    return EntryFilter;
 }());
-exports.default = DeepFilter;
+exports.default = EntryFilter;
 
 
 /***/ }),
-/* 537 */
+/* 552 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -54331,8 +55668,243 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var stream = __webpack_require__(28);
-var readdir = __webpack_require__(519);
-var reader_1 = __webpack_require__(532);
+var fsStat = __webpack_require__(553);
+var fs_1 = __webpack_require__(557);
+var FileSystemStream = /** @class */ (function (_super) {
+    __extends(FileSystemStream, _super);
+    function FileSystemStream() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Use stream API to read entries for Task.
+     */
+    FileSystemStream.prototype.read = function (patterns, filter) {
+        var _this = this;
+        var filepaths = patterns.map(this.getFullEntryPath, this);
+        var transform = new stream.Transform({ objectMode: true });
+        transform._transform = function (index, _enc, done) {
+            return _this.getEntry(filepaths[index], patterns[index]).then(function (entry) {
+                if (entry !== null && filter(entry)) {
+                    transform.push(entry);
+                }
+                if (index === filepaths.length - 1) {
+                    transform.end();
+                }
+                done();
+            });
+        };
+        for (var i = 0; i < filepaths.length; i++) {
+            transform.write(i);
+        }
+        return transform;
+    };
+    /**
+     * Return entry for the provided path.
+     */
+    FileSystemStream.prototype.getEntry = function (filepath, pattern) {
+        var _this = this;
+        return this.getStat(filepath)
+            .then(function (stat) { return _this.makeEntry(stat, pattern); })
+            .catch(function () { return null; });
+    };
+    /**
+     * Return fs.Stats for the provided path.
+     */
+    FileSystemStream.prototype.getStat = function (filepath) {
+        return fsStat.stat(filepath, { throwErrorOnBrokenSymlinks: false });
+    };
+    return FileSystemStream;
+}(fs_1.default));
+exports.default = FileSystemStream;
+
+
+/***/ }),
+/* 553 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const optionsManager = __webpack_require__(554);
+const statProvider = __webpack_require__(556);
+/**
+ * Asynchronous API.
+ */
+function stat(path, opts) {
+    return new Promise((resolve, reject) => {
+        statProvider.async(path, optionsManager.prepare(opts), (err, stats) => err ? reject(err) : resolve(stats));
+    });
+}
+exports.stat = stat;
+function statCallback(path, optsOrCallback, callback) {
+    if (typeof optsOrCallback === 'function') {
+        callback = optsOrCallback; /* tslint:disable-line: no-parameter-reassignment */
+        optsOrCallback = undefined; /* tslint:disable-line: no-parameter-reassignment */
+    }
+    if (typeof callback === 'undefined') {
+        throw new TypeError('The "callback" argument must be of type Function.');
+    }
+    statProvider.async(path, optionsManager.prepare(optsOrCallback), callback);
+}
+exports.statCallback = statCallback;
+/**
+ * Synchronous API.
+ */
+function statSync(path, opts) {
+    return statProvider.sync(path, optionsManager.prepare(opts));
+}
+exports.statSync = statSync;
+
+
+/***/ }),
+/* 554 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const fsAdapter = __webpack_require__(555);
+function prepare(opts) {
+    const options = Object.assign({
+        fs: fsAdapter.getFileSystemAdapter(opts ? opts.fs : undefined),
+        throwErrorOnBrokenSymlinks: true,
+        followSymlinks: true
+    }, opts);
+    return options;
+}
+exports.prepare = prepare;
+
+
+/***/ }),
+/* 555 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const fs = __webpack_require__(23);
+exports.FILE_SYSTEM_ADAPTER = {
+    lstat: fs.lstat,
+    stat: fs.stat,
+    lstatSync: fs.lstatSync,
+    statSync: fs.statSync
+};
+function getFileSystemAdapter(fsMethods) {
+    if (!fsMethods) {
+        return exports.FILE_SYSTEM_ADAPTER;
+    }
+    return Object.assign({}, exports.FILE_SYSTEM_ADAPTER, fsMethods);
+}
+exports.getFileSystemAdapter = getFileSystemAdapter;
+
+
+/***/ }),
+/* 556 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+function sync(path, options) {
+    const lstat = options.fs.lstatSync(path);
+    if (!isFollowedSymlink(lstat, options)) {
+        return lstat;
+    }
+    try {
+        const stat = options.fs.statSync(path);
+        stat.isSymbolicLink = () => true;
+        return stat;
+    }
+    catch (err) {
+        if (!options.throwErrorOnBrokenSymlinks) {
+            return lstat;
+        }
+        throw err;
+    }
+}
+exports.sync = sync;
+function async(path, options, callback) {
+    options.fs.lstat(path, (err0, lstat) => {
+        if (err0) {
+            return callback(err0, undefined);
+        }
+        if (!isFollowedSymlink(lstat, options)) {
+            return callback(null, lstat);
+        }
+        options.fs.stat(path, (err1, stat) => {
+            if (err1) {
+                return options.throwErrorOnBrokenSymlinks ? callback(err1) : callback(null, lstat);
+            }
+            stat.isSymbolicLink = () => true;
+            callback(null, stat);
+        });
+    });
+}
+exports.async = async;
+/**
+ * Returns `true` for followed symlink.
+ */
+function isFollowedSymlink(stat, options) {
+    return stat.isSymbolicLink() && options.followSymlinks;
+}
+exports.isFollowedSymlink = isFollowedSymlink;
+
+
+/***/ }),
+/* 557 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var path = __webpack_require__(16);
+var FileSystem = /** @class */ (function () {
+    function FileSystem(options) {
+        this.options = options;
+    }
+    /**
+     * Return full path to entry.
+     */
+    FileSystem.prototype.getFullEntryPath = function (filepath) {
+        return path.resolve(this.options.cwd, filepath);
+    };
+    /**
+     * Return an implementation of the Entry interface.
+     */
+    FileSystem.prototype.makeEntry = function (stat, pattern) {
+        stat.path = pattern;
+        stat.depth = pattern.split('/').length;
+        return stat;
+    };
+    return FileSystem;
+}());
+exports.default = FileSystem;
+
+
+/***/ }),
+/* 558 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var stream = __webpack_require__(28);
+var readdir = __webpack_require__(535);
+var reader_1 = __webpack_require__(548);
+var fs_stream_1 = __webpack_require__(552);
 var TransformStream = /** @class */ (function (_super) {
     __extends(TransformStream, _super);
     function TransformStream(reader) {
@@ -54350,12 +55922,16 @@ var ReaderStream = /** @class */ (function (_super) {
     function ReaderStream() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    /**
-     * Returns founded paths.
-     */
-    ReaderStream.prototype.api = function (root, options) {
-        return readdir.readdirStreamStat(root, options);
-    };
+    Object.defineProperty(ReaderStream.prototype, "fsAdapter", {
+        /**
+         * Returns FileSystem adapter.
+         */
+        get: function () {
+            return new fs_stream_1.default(this.options);
+        },
+        enumerable: true,
+        configurable: true
+    });
     /**
      * Use stream API to read entries for Task.
      */
@@ -54364,10 +55940,31 @@ var ReaderStream = /** @class */ (function (_super) {
         var root = this.getRootDirectory(task);
         var options = this.getReaderOptions(task);
         var transform = new TransformStream(this);
-        var readable = this.api(root, options);
+        var readable = this.api(root, task, options);
         return readable
-            .once('error', function (err) { return _this.isEnoentCodeError(err) ? null : transform.emit('error', err); })
+            .on('error', function (err) { return _this.isEnoentCodeError(err) ? null : transform.emit('error', err); })
             .pipe(transform);
+    };
+    /**
+     * Returns founded paths.
+     */
+    ReaderStream.prototype.api = function (root, task, options) {
+        if (task.dynamic) {
+            return this.dynamicApi(root, options);
+        }
+        return this.staticApi(task, options);
+    };
+    /**
+     * Api for dynamic tasks.
+     */
+    ReaderStream.prototype.dynamicApi = function (root, options) {
+        return readdir.readdirStreamStat(root, options);
+    };
+    /**
+     * Api for static tasks.
+     */
+    ReaderStream.prototype.staticApi = function (task, options) {
+        return this.fsAdapter.read(task.patterns, options.filter);
     };
     return ReaderStream;
 }(reader_1.default));
@@ -54375,15 +55972,18 @@ exports.default = ReaderStream;
 
 
 /***/ }),
-/* 538 */
+/* 559 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -54391,19 +55991,24 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var readdir = __webpack_require__(519);
-var reader_1 = __webpack_require__(532);
+var readdir = __webpack_require__(535);
+var reader_1 = __webpack_require__(548);
+var fs_sync_1 = __webpack_require__(560);
 var ReaderSync = /** @class */ (function (_super) {
     __extends(ReaderSync, _super);
     function ReaderSync() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    /**
-     * Returns founded paths.
-     */
-    ReaderSync.prototype.api = function (root, options) {
-        return readdir.readdirSyncStat(root, options);
-    };
+    Object.defineProperty(ReaderSync.prototype, "fsAdapter", {
+        /**
+         * Returns FileSystem adapter.
+         */
+        get: function () {
+            return new fs_sync_1.default(this.options);
+        },
+        enumerable: true,
+        configurable: true
+    });
     /**
      * Use sync API to read entries for Task.
      */
@@ -54411,7 +56016,7 @@ var ReaderSync = /** @class */ (function (_super) {
         var root = this.getRootDirectory(task);
         var options = this.getReaderOptions(task);
         try {
-            var entries = this.api(root, options);
+            var entries = this.api(root, task, options);
             return entries.map(this.transform, this);
         }
         catch (err) {
@@ -54421,13 +56026,251 @@ var ReaderSync = /** @class */ (function (_super) {
             throw err;
         }
     };
+    /**
+     * Returns founded paths.
+     */
+    ReaderSync.prototype.api = function (root, task, options) {
+        if (task.dynamic) {
+            return this.dynamicApi(root, options);
+        }
+        return this.staticApi(task, options);
+    };
+    /**
+     * Api for dynamic tasks.
+     */
+    ReaderSync.prototype.dynamicApi = function (root, options) {
+        return readdir.readdirSyncStat(root, options);
+    };
+    /**
+     * Api for static tasks.
+     */
+    ReaderSync.prototype.staticApi = function (task, options) {
+        return this.fsAdapter.read(task.patterns, options.filter);
+    };
     return ReaderSync;
 }(reader_1.default));
 exports.default = ReaderSync;
 
 
 /***/ }),
-/* 539 */
+/* 560 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var fsStat = __webpack_require__(553);
+var fs_1 = __webpack_require__(557);
+var FileSystemSync = /** @class */ (function (_super) {
+    __extends(FileSystemSync, _super);
+    function FileSystemSync() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Use sync API to read entries for Task.
+     */
+    FileSystemSync.prototype.read = function (patterns, filter) {
+        var _this = this;
+        var entries = [];
+        patterns.forEach(function (pattern) {
+            var filepath = _this.getFullEntryPath(pattern);
+            var entry = _this.getEntry(filepath, pattern);
+            if (entry === null || !filter(entry)) {
+                return;
+            }
+            entries.push(entry);
+        });
+        return entries;
+    };
+    /**
+     * Return entry for the provided path.
+     */
+    FileSystemSync.prototype.getEntry = function (filepath, pattern) {
+        try {
+            var stat = this.getStat(filepath);
+            return this.makeEntry(stat, pattern);
+        }
+        catch (err) {
+            return null;
+        }
+    };
+    /**
+     * Return fs.Stats for the provided path.
+     */
+    FileSystemSync.prototype.getStat = function (filepath) {
+        return fsStat.statSync(filepath, { throwErrorOnBrokenSymlinks: false });
+    };
+    return FileSystemSync;
+}(fs_1.default));
+exports.default = FileSystemSync;
+
+
+/***/ }),
+/* 561 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * Flatten nested arrays (max depth is 2) into a non-nested array of non-array items.
+ */
+function flatten(items) {
+    return items.reduce(function (collection, item) { return [].concat(collection, item); }, []);
+}
+exports.flatten = flatten;
+
+
+/***/ }),
+/* 562 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var merge2 = __webpack_require__(563);
+/**
+ * Merge multiple streams and propagate their errors into one stream in parallel.
+ */
+function merge(streams) {
+    var mergedStream = merge2(streams);
+    streams.forEach(function (stream) {
+        stream.on('error', function (err) { return mergedStream.emit('error', err); });
+    });
+    return mergedStream;
+}
+exports.merge = merge;
+
+
+/***/ }),
+/* 563 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+/*
+ * merge2
+ * https://github.com/teambition/merge2
+ *
+ * Copyright (c) 2014-2016 Teambition
+ * Licensed under the MIT license.
+ */
+const Stream = __webpack_require__(28)
+const PassThrough = Stream.PassThrough
+const slice = Array.prototype.slice
+
+module.exports = merge2
+
+function merge2 () {
+  const streamsQueue = []
+  let merging = false
+  const args = slice.call(arguments)
+  let options = args[args.length - 1]
+
+  if (options && !Array.isArray(options) && options.pipe == null) args.pop()
+  else options = {}
+
+  const doEnd = options.end !== false
+  if (options.objectMode == null) options.objectMode = true
+  if (options.highWaterMark == null) options.highWaterMark = 64 * 1024
+  const mergedStream = PassThrough(options)
+
+  function addStream () {
+    for (let i = 0, len = arguments.length; i < len; i++) {
+      streamsQueue.push(pauseStreams(arguments[i], options))
+    }
+    mergeStream()
+    return this
+  }
+
+  function mergeStream () {
+    if (merging) return
+    merging = true
+
+    let streams = streamsQueue.shift()
+    if (!streams) {
+      process.nextTick(endStream)
+      return
+    }
+    if (!Array.isArray(streams)) streams = [streams]
+
+    let pipesCount = streams.length + 1
+
+    function next () {
+      if (--pipesCount > 0) return
+      merging = false
+      mergeStream()
+    }
+
+    function pipe (stream) {
+      function onend () {
+        stream.removeListener('merge2UnpipeEnd', onend)
+        stream.removeListener('end', onend)
+        next()
+      }
+      // skip ended stream
+      if (stream._readableState.endEmitted) return next()
+
+      stream.on('merge2UnpipeEnd', onend)
+      stream.on('end', onend)
+      stream.pipe(mergedStream, { end: false })
+      // compatible for old stream
+      stream.resume()
+    }
+
+    for (let i = 0; i < streams.length; i++) pipe(streams[i])
+
+    next()
+  }
+
+  function endStream () {
+    merging = false
+    // emit 'queueDrain' when all streams merged.
+    mergedStream.emit('queueDrain')
+    return doEnd && mergedStream.end()
+  }
+
+  mergedStream.setMaxListeners(0)
+  mergedStream.add = addStream
+  mergedStream.on('unpipe', function (stream) {
+    stream.emit('merge2UnpipeEnd')
+  })
+
+  if (args.length) addStream.apply(null, args)
+  return mergedStream
+}
+
+// check and pause streams for pipe.
+function pauseStreams (streams, options) {
+  if (!Array.isArray(streams)) {
+    // Backwards-compat with old-style streams
+    if (!streams._readableState && streams.pipe) streams = streams.pipe(PassThrough(options))
+    if (!streams._readableState || !streams.pause || !streams.pipe) {
+      throw new Error('Only readable stream can be merged.')
+    }
+    streams.pause()
+  } else {
+    for (let i = 0, len = streams.length; i < len; i++) streams[i] = pauseStreams(streams[i], options)
+  }
+  return streams
+}
+
+
+/***/ }),
+/* 564 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54482,7 +56325,7 @@ module.exports.sync = (input, opts) => {
 
 
 /***/ }),
-/* 540 */
+/* 565 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54490,9 +56333,9 @@ module.exports.sync = (input, opts) => {
 const fs = __webpack_require__(23);
 const path = __webpack_require__(16);
 const fastGlob = __webpack_require__(376);
-const gitIgnore = __webpack_require__(541);
-const pify = __webpack_require__(542);
-const slash = __webpack_require__(543);
+const gitIgnore = __webpack_require__(566);
+const pify = __webpack_require__(567);
+const slash = __webpack_require__(568);
 
 const DEFAULT_IGNORE = [
 	'**/node_modules/**',
@@ -54584,7 +56427,7 @@ module.exports.sync = o => {
 
 
 /***/ }),
-/* 541 */
+/* 566 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -55016,7 +56859,7 @@ typeof process !== 'undefined' && (process.env && process.env.IGNORE_TEST_WIN32 
 
 
 /***/ }),
-/* 542 */
+/* 567 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -55107,7 +56950,7 @@ module.exports = (obj, opts) => {
 
 
 /***/ }),
-/* 543 */
+/* 568 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -55125,17 +56968,17 @@ module.exports = function (str) {
 
 
 /***/ }),
-/* 544 */
+/* 569 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 const path = __webpack_require__(16);
 const fsConstants = __webpack_require__(23).constants;
-const {Buffer} = __webpack_require__(545);
-const CpFileError = __webpack_require__(547);
-const fs = __webpack_require__(549);
-const ProgressEmitter = __webpack_require__(551);
+const {Buffer} = __webpack_require__(570);
+const CpFileError = __webpack_require__(572);
+const fs = __webpack_require__(574);
+const ProgressEmitter = __webpack_require__(576);
 
 module.exports = (src, dest, opts) => {
 	if (!src || !dest) {
@@ -55285,11 +57128,11 @@ module.exports.sync = (src, dest, opts) => {
 
 
 /***/ }),
-/* 545 */
+/* 570 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* eslint-disable node/no-deprecated-api */
-var buffer = __webpack_require__(546)
+var buffer = __webpack_require__(571)
 var Buffer = buffer.Buffer
 
 // alternative to using Object.keys for old browsers
@@ -55353,18 +57196,18 @@ SafeBuffer.allocUnsafeSlow = function (size) {
 
 
 /***/ }),
-/* 546 */
+/* 571 */
 /***/ (function(module, exports) {
 
 module.exports = require("buffer");
 
 /***/ }),
-/* 547 */
+/* 572 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const NestedError = __webpack_require__(548);
+const NestedError = __webpack_require__(573);
 
 class CpFileError extends NestedError {
 	constructor(message, nested) {
@@ -55378,7 +57221,7 @@ module.exports = CpFileError;
 
 
 /***/ }),
-/* 548 */
+/* 573 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var inherits = __webpack_require__(43);
@@ -55432,15 +57275,15 @@ module.exports = NestedError;
 
 
 /***/ }),
-/* 549 */
+/* 574 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 const fs = __webpack_require__(22);
 const makeDir = __webpack_require__(91);
-const pify = __webpack_require__(550);
-const CpFileError = __webpack_require__(547);
+const pify = __webpack_require__(575);
+const CpFileError = __webpack_require__(572);
 
 const fsP = pify(fs);
 
@@ -55585,7 +57428,7 @@ if (fs.copyFileSync) {
 
 
 /***/ }),
-/* 550 */
+/* 575 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -55676,7 +57519,7 @@ module.exports = (obj, opts) => {
 
 
 /***/ }),
-/* 551 */
+/* 576 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -55717,12 +57560,12 @@ module.exports = ProgressEmitter;
 
 
 /***/ }),
-/* 552 */
+/* 577 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const NestedError = __webpack_require__(548);
+const NestedError = __webpack_require__(573);
 
 class CpyError extends NestedError {
 	constructor(message, nested) {
@@ -55736,7 +57579,7 @@ module.exports = CpyError;
 
 
 /***/ }),
-/* 553 */
+/* 578 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
