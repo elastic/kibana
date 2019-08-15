@@ -29,7 +29,7 @@ import {
 
 import { isDraggedField } from './utils';
 import { LayerPanel } from './layerpanel';
-import { Datasource, DataType, StateSetter } from '..';
+import { Datasource, DataType } from '..';
 
 export type OperationType = IndexPatternColumn['operationType'];
 

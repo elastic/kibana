@@ -22,11 +22,11 @@ interface DataPanelWrapperProps {
 }
 
 export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
-  const setDatasourceState = useMemo(
-    () => (newState: unknown) => {
+  const setDatasourceState: StateSetter<unknown> = useMemo(
+    () => updater => {
       props.dispatch({
         type: 'UPDATE_DATASOURCE_STATE',
-        newState,
+        updater,
         datasourceId: props.activeDatasource!,
       });
     },
