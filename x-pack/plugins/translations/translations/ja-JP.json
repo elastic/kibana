@@ -5978,7 +5978,6 @@
     "xpack.ml.dataframe.transformList.startActionName": "開始",
     "xpack.ml.dataframe.transformList.startTransformErrorMessage": "データフレームジョブ {transformId} の開始中にエラーが発生しました: {error}",
     "xpack.ml.dataframe.transformList.startTransformSuccessMessage": "データフレームジョブ {transformId} が開始しました",
-    "xpack.ml.dataframe.transformList.startModalBody": "データフレームジョブは、クラスターの検索とインデックスによる負荷を増やします。過剰な負荷が生じた場合はジョブを停止してください。このジョブを開始してよろしいですか？",
     "xpack.ml.dataframe.transformList.startModalCancelButton": "キャンセル",
     "xpack.ml.dataframe.transformList.startModalStartButton": "開始",
     "xpack.ml.dataframe.transformList.startModalTitle": "{transformId} を開始",

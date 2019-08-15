@@ -6121,7 +6121,6 @@
     "xpack.ml.dataframe.transformList.startActionName": "开始",
     "xpack.ml.dataframe.transformList.startTransformErrorMessage": "启动数据帧作业 {transformId} 时发生错误：{error}",
     "xpack.ml.dataframe.transformList.startTransformSuccessMessage": "数据帧作业 {transformId} 启动成功。",
-    "xpack.ml.dataframe.transformList.startModalBody": "数据帧作业将增加集群的搜索和索引负荷。如果负荷超载，请停止作业。是否确定要启动此作业？",
     "xpack.ml.dataframe.transformList.startModalCancelButton": "取消",
     "xpack.ml.dataframe.transformList.startModalStartButton": "开始",
     "xpack.ml.dataframe.transformList.startModalTitle": "启动 {transformId}",
