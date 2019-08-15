@@ -40,7 +40,7 @@ export const AnalysisPage = () => {
             })}
           />
         ) : isSetupRequired ? (
-          <AnalysisSetupContent isSettingUp={isSettingUpMlModule} onCreateJobs={setupMlModule} />
+          <AnalysisSetupContent isSettingUp={isSettingUpMlModule} setupMlModule={setupMlModule} />
         ) : (
           <AnalysisResultsContent />
         )}
