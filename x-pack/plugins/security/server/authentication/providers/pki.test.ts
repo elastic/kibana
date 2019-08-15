@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PeerCertificate, TLSSocket } from 'tls';
-
 jest.mock('net');
 jest.mock('tls');
 
+import { PeerCertificate, TLSSocket } from 'tls';
 import { errors } from 'elasticsearch';
 
 import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
@@ -105,10 +104,7 @@ describe('PKIAuthenticationProvider', () => {
 
     it('does not handle unauthorized requests.', async () => {
       const request = httpServerMock.createKibanaRequest({
-        socket: getMockSocket({
-          // Not a real use case, but just to make sure we get `notHandled` because `authorized`.
-          peerCertificate: getMockPeerCertificate('2A:7A:C2:DD'),
-        }),
+        socket: getMockSocket({ peerCertificate: getMockPeerCertificate('2A:7A:C2:DD') }),
       });
 
       const authenticationResult = await provider.authenticate(request, null);
@@ -136,6 +132,23 @@ describe('PKIAuthenticationProvider', () => {
 
     it('invalidates token and fails with 401 if state is present, but peer certificate is not.', async () => {
       const request = httpServerMock.createKibanaRequest({ socket: getMockSocket() });
+      const state = { accessToken: 'token', peerCertificateFingerprint256: '2A:7A:C2:DD' };
+
+      const authenticationResult = await provider.authenticate(request, state);
+
+      expect(authenticationResult.failed()).toBe(true);
+      expect(getErrorStatusCode(authenticationResult.error)).toBe(401);
+
+      expect(mockOptions.tokens.invalidate).toHaveBeenCalledTimes(1);
+      expect(mockOptions.tokens.invalidate).toHaveBeenCalledWith({
+        accessToken: state.accessToken,
+      });
+    });
+
+    it('invalidates token and fails with 401 if new certificate is present, but not authorized.', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        socket: getMockSocket({ peerCertificate: getMockPeerCertificate('2A:7A:C2:DD') }),
+      });
       const state = { accessToken: 'token', peerCertificateFingerprint256: '2A:7A:C2:DD' };
 
       const authenticationResult = await provider.authenticate(request, state);
