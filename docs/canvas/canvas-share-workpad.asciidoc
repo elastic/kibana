@@ -1,3 +1,4 @@
+[role="xpack"]
 [[workpad-share-options]]
 == Share your workpad
 
