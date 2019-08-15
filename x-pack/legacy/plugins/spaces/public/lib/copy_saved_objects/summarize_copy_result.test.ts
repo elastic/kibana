@@ -38,7 +38,7 @@ const createCopyResult = (
   if (opts.withUnresolvableError) {
     failedImports.push({
       obj: { type: 'visualization', id: 'bar-viz' },
-      error: { type: 'missing_reference' },
+      error: { type: 'missing_references', blocking: [], references: [] },
     });
   }
 

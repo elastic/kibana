@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { SavedObjectRecord } from 'ui/management/saved_objects_management';
-import { SummarizedCopyToSpaceResponse } from 'plugins/spaces/lib/copy_to_space';
+import { SummarizedCopyToSpaceResponse } from 'plugins/spaces/lib/copy_saved_objects';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SavedObjectsImportRetry } from 'src/core/server';

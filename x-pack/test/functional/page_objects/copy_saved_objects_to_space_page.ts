@@ -10,7 +10,7 @@ function extractCountFromSummary(str: string) {
   return parseInt(str.split('\n')[1], 10);
 }
 
-export function CopyToSpacePageProvider({ getService }: FtrProviderContext) {
+export function CopySavedObjectsToSpacePageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const find = getService('find');

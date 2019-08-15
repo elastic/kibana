@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiLoadingSpinner, EuiIconTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { SummarizedCopyToSpaceResponse } from '../../../../lib/copy_to_space';
+import { SummarizedCopyToSpaceResponse } from '../../../../lib/copy_saved_objects';
 
 interface Props {
   spaceId: string;

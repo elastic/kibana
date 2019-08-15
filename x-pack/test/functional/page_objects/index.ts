@@ -43,7 +43,7 @@ import { IndexLifecycleManagementPageProvider } from './index_lifecycle_manageme
 import { SnapshotRestorePageProvider } from './snapshot_restore_page';
 import { CrossClusterReplicationPageProvider } from './cross_cluster_replication_page';
 import { RemoteClustersPageProvider } from './remote_clusters_page';
-import { CopyToSpacePageProvider } from './copy_to_space_page';
+import { CopySavedObjectsToSpacePageProvider } from './copy_saved_objects_to_space_page';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
@@ -73,5 +73,5 @@ export const pageObjects = {
   snapshotRestore: SnapshotRestorePageProvider,
   crossClusterReplication: CrossClusterReplicationPageProvider,
   remoteClusters: RemoteClustersPageProvider,
-  copyToSpace: CopyToSpacePageProvider,
+  copySavedObjectsToSpace: CopySavedObjectsToSpacePageProvider,
 };

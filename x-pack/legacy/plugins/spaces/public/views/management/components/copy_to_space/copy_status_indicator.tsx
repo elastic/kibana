@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   SummarizedCopyToSpaceResponse,
   SummarizedSavedObjectResult,
-} from '../../../../lib/copy_to_space';
+} from '../../../../lib/copy_saved_objects';
 
 interface Props {
   summarizedCopyResult: SummarizedCopyToSpaceResponse;

@@ -5,4 +5,4 @@
  */
 
 export * from './summarize_copy_result';
-export { CopyToSpaceSavedObjectsManagementAction } from './copy_to_space_action';
+export { CopyToSpaceSavedObjectsManagementAction } from './copy_saved_objects_to_space_action';

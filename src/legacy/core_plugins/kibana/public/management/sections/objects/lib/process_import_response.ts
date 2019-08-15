@@ -19,17 +19,21 @@
 
 import {
   SavedObjectsImportResponse,
-  ConflictError,
-  UnsupportedTypeError,
-  MissingReferencesError,
-  UnknownError,
+  SavedObjectsImportConflictError,
+  SavedObjectsImportUnsupportedTypeError,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportUnknownError,
   SavedObjectsImportError,
-} from 'src/core/server/saved_objects/import/types';
+} from 'src/core/server';
 
 export interface ProcessedImportResponse {
   failedImports: Array<{
     obj: Pick<SavedObjectsImportError, 'id' | 'type' | 'title'>;
-    error: ConflictError | UnsupportedTypeError | MissingReferencesError | UnknownError;
+    error:
+      | SavedObjectsImportConflictError
+      | SavedObjectsImportUnsupportedTypeError
+      | SavedObjectsImportMissingReferencesError
+      | SavedObjectsImportUnknownError;
   }>;
   unmatchedReferences: Array<{
     existingIndexPatternId: string;

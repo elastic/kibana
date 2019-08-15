@@ -18,7 +18,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { summarizeCopyResult } from '../../../../lib/copy_to_space';
+import { summarizeCopyResult } from '../../../../lib/copy_saved_objects';
 import { SpaceAvatar } from '../../../../components';
 import { Space } from '../../../../../common/model/space';
 import { CopyStatusSummaryIndicator } from './copy_status_summary_indicator';

@@ -14,11 +14,11 @@ export default function spaceSelectorFunctonalTests({
   const esArchiver = getService('esArchiver');
   const spaces: SpacesService = getService('spaces');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['security', 'settings', 'copyToSpace']);
+  const PageObjects = getPageObjects(['security', 'settings', 'copySavedObjectsToSpace']);
 
   describe('Copy Saved Objects to Space', function() {
     before(async () => {
-      await esArchiver.load('spaces/copy_to_space');
+      await esArchiver.load('spaces/copy_saved_objects');
 
       await spaces.create({
         id: 'marketing',
@@ -43,26 +43,26 @@ export default function spaceSelectorFunctonalTests({
     after(async () => {
       await spaces.delete('sales');
       await spaces.delete('marketing');
-      await esArchiver.unload('spaces/copy_to_space');
+      await esArchiver.unload('spaces/copy_saved_objects');
     });
 
     it('allows a dashboard to be copied to the marketing space, with all references', async () => {
       const destinationSpaceId = 'marketing';
 
-      await PageObjects.copyToSpace.openCopyToSpaceFlyoutForObject('A Dashboard');
+      await PageObjects.copySavedObjectsToSpace.openCopyToSpaceFlyoutForObject('A Dashboard');
 
-      await PageObjects.copyToSpace.setupForm({
+      await PageObjects.copySavedObjectsToSpace.setupForm({
         overwrite: true,
         destinationSpaceId,
       });
 
-      await PageObjects.copyToSpace.startCopy();
+      await PageObjects.copySavedObjectsToSpace.startCopy();
 
       // Wait for successful copy
       await testSubjects.waitForDeleted(`cts-summary-indicator-loading-${destinationSpaceId}`);
       await testSubjects.existOrFail(`cts-summary-indicator-success-${destinationSpaceId}`);
 
-      const summaryCounts = await PageObjects.copyToSpace.getSummaryCounts();
+      const summaryCounts = await PageObjects.copySavedObjectsToSpace.getSummaryCounts();
 
       expect(summaryCounts).to.eql({
         copied: 3,
@@ -71,26 +71,26 @@ export default function spaceSelectorFunctonalTests({
         overwrite: undefined,
       });
 
-      await PageObjects.copyToSpace.finishCopy();
+      await PageObjects.copySavedObjectsToSpace.finishCopy();
     });
 
     it('allows conflicts to be resolved', async () => {
       const destinationSpaceId = 'sales';
 
-      await PageObjects.copyToSpace.openCopyToSpaceFlyoutForObject('A Dashboard');
+      await PageObjects.copySavedObjectsToSpace.openCopyToSpaceFlyoutForObject('A Dashboard');
 
-      await PageObjects.copyToSpace.setupForm({
+      await PageObjects.copySavedObjectsToSpace.setupForm({
         overwrite: false,
         destinationSpaceId,
       });
 
-      await PageObjects.copyToSpace.startCopy();
+      await PageObjects.copySavedObjectsToSpace.startCopy();
 
       // Wait for successful copy with conflict warning
       await testSubjects.waitForDeleted(`cts-summary-indicator-loading-${destinationSpaceId}`);
       await testSubjects.existOrFail(`cts-summary-indicator-conflicts-${destinationSpaceId}`);
 
-      const summaryCounts = await PageObjects.copyToSpace.getSummaryCounts();
+      const summaryCounts = await PageObjects.copySavedObjectsToSpace.getSummaryCounts();
 
       expect(summaryCounts).to.eql({
         copied: 2,
@@ -104,7 +104,7 @@ export default function spaceSelectorFunctonalTests({
       await testSubjects.click(`cts-overwrite-conflict-logstash-*`);
 
       // Verify summary changed
-      const updatedSummaryCounts = await PageObjects.copyToSpace.getSummaryCounts(true);
+      const updatedSummaryCounts = await PageObjects.copySavedObjectsToSpace.getSummaryCounts(true);
 
       expect(updatedSummaryCounts).to.eql({
         copied: 2,
@@ -113,7 +113,7 @@ export default function spaceSelectorFunctonalTests({
         errors: 0,
       });
 
-      await PageObjects.copyToSpace.finishCopy();
+      await PageObjects.copySavedObjectsToSpace.finishCopy();
     });
   });
 }
