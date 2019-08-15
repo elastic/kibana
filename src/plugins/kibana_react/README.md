@@ -17,7 +17,7 @@ class MyPlugin {
 }
 ```
 
-You may also want to be explicit on which services you depend on.
+You may also want to be explicit about services you depend on.
 
 ```ts
 import { createContext } from 'kibana-react';
@@ -38,7 +38,7 @@ Wrap your React application in the created context.
 ```
 
 
-## Accessing `kibana-react` context
+## Accessing context
 
 Using `useKibana` hook.
 
@@ -114,9 +114,9 @@ const Demo = () => {
 ```
 
 
-## `notifications` service
+## `overlays` service
 
-Wrapper around Core's `notifications` service, allows you to render React elements
+Wrapper around Core's `overlays` service, allows you to display React modals and flyouts
 directly without having to use `react-dom` library to mount to DOM nodes.
 
 ```tsx
@@ -124,15 +124,19 @@ import { createContext } from 'kibana-react';
 
 class MyPlugin {
   start(core) {
-    const { notifications } = createContext(core);
+    const { overlays } = createContext(core);
 
-    notifications.toasts.show({
-      title: <div>Hello</div>,
-      body: <div>world!</div>
-    });
+    overlays.openModal(
+      <div>
+        Hello world!
+      </div>
+    );
   }
 }
 ```
+
+- `overlays.openModal` &mdash; opens modal window.
+- `overlays.openFlyout` &mdash; opens right side panel.
 
 
 ## `notifications` service
@@ -159,28 +163,3 @@ class MyPlugin {
 - `notifications.toasts.success()` &mdash; show positive toast message.
 - `notifications.toasts.warning()` &mdash; show warning toast message.
 - `notifications.toasts.danger()` &mdash; show error toast message.
-
-
-## `overlays` service
-
-Wrapper around Core's `overlays` service, allows you to display React modals and flyouts
-directly without having to use `react-dom` library to mount to DOM nodes.
-
-```tsx
-import { createContext } from 'kibana-react';
-
-class MyPlugin {
-  start(core) {
-    const { overlays } = createContext(core);
-
-    overlays.openModal(
-      <div>
-        Hello world!
-      </div>
-    );
-  }
-}
-```
-
-- `overlays.openModal` &mdash; opens modal window.
-- `overlays.openFlyout` &mdash; opens right side panel.
