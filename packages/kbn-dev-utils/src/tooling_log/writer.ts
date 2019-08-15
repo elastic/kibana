@@ -17,16 +17,8 @@
  * under the License.
  */
 
-export type LogLevel = 'silent' | 'error' | 'warning' | 'info' | 'debug' | 'verbose';
+import { Message } from './message';
 
-export interface ParsedLogLevel {
-  name: LogLevel;
-  flags: { [key in LogLevel]: boolean };
+export interface Writer {
+  write(msg: Message): boolean;
 }
-
-export function pickLevelFromFlags(
-  flags: { [key: string]: any },
-  options?: { default?: LogLevel }
-): LogLevel;
-
-export function parseLogLevel(level: LogLevel): ParsedLogLevel;

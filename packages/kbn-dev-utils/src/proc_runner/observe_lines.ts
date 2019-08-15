@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { Readable } from 'stream';
+
 import * as Rx from 'rxjs';
 import { scan, takeUntil, share, materialize, mergeMap, last, catchError } from 'rxjs/operators';
 
@@ -33,17 +35,25 @@ import { observeReadable } from './observe_readable';
  *  @param  {ReadableStream} readable
  *  @return {Rx.Observable}
  */
-export function observeLines(readable) {
+export function observeLines(readable: Readable): Rx.Observable<string> {
   const done$ = observeReadable(readable).pipe(share());
 
-  const scan$ = Rx.fromEvent(readable, 'data').pipe(
+  const scan$: Rx.Observable<{ buffer: string; lines?: string[] }> = Rx.fromEvent(
+    readable,
+    'data'
+  ).pipe(
     scan(
       ({ buffer }, chunk) => {
         buffer += chunk;
 
-        let match;
         const lines = [];
-        while ((match = buffer.match(SEP))) {
+        while (true) {
+          const match = buffer.match(SEP);
+
+          if (!match || match.index === undefined) {
+            break;
+          }
+
           lines.push(buffer.slice(0, match.index));
           buffer = buffer.slice(match.index + match[0].length);
         }
@@ -54,7 +64,9 @@ export function observeLines(readable) {
     ),
 
     // stop if done completes or errors
-    takeUntil(done$.pipe(materialize()))
+    takeUntil(done$.pipe(materialize())),
+
+    share()
   );
 
   return Rx.merge(
@@ -62,7 +74,7 @@ export function observeLines(readable) {
     done$,
 
     // merge in the "lines" from each step
-    scan$.pipe(mergeMap(({ lines }) => lines)),
+    scan$.pipe(mergeMap(({ lines }) => lines || [])),
 
     // inject the "unsplit" data at the end
     scan$.pipe(
