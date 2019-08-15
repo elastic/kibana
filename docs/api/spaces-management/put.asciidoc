@@ -15,8 +15,7 @@ Updates an existing {kib} space.
 ==== Request body
 
 `id`:: 
-  (Required, string) The space ID that is part of the {kib} URL when inside the space. 
-NOTE: You are unable to change the ID with the update operation.
+  (Required, string) The space ID that is part of the {kib} URL when inside the space. You are unable to change the ID with the update operation.
 
 `name`:: 
   (Required, string) The display name for the space.
@@ -28,8 +27,7 @@ NOTE: You are unable to change the ID with the update operation.
   (Optional, string array) The list of disabled features for the space. To get a list of available feature IDs, use the <<features-api-get, Features API>>.
 
 `initials`:: 
-  (Optional, string) Specifies the initials shown in the space avatar. By default, the initials are automatically generated from the space name. 
-TIP: Initials must be 1 or 2 characters.
+  (Optional, string) Specifies the initials shown in the space avatar. By default, the initials are automatically generated from the space name. Initials must be 1 or 2 characters.
 
 `color`:: 
   (Optional, string) Specifies the hexadecimal color code used in the space avatar. By default, the color is automatically generated from the space name.
