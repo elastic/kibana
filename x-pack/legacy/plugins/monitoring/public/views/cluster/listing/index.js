@@ -6,7 +6,6 @@
 
 import React from 'react';
 import uiRoutes from 'ui/routes';
-import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
 import { I18nContext } from 'ui/i18n';
 import template from './index.html';
@@ -22,24 +21,6 @@ const getPageData = $injector => {
 
 uiRoutes.when('/home', {
   template,
-  resolve: {
-    clusters: (Private, kbnUrl) => {
-      const routeInit = Private(routeInitProvider);
-      return routeInit({ codePaths: CODE_PATHS })
-        .then(clusters => {
-          if (!clusters || !clusters.length) {
-            kbnUrl.changePath('/no-data');
-            return Promise.reject();
-          }
-          if (clusters.length === 1) {
-            // Bypass the cluster listing if there is just 1 cluster
-            kbnUrl.changePath('/overview');
-            return Promise.reject();
-          }
-          return clusters;
-        });
-    }
-  },
   controllerAs: 'clusters',
   controller: class ClustersList extends MonitoringViewBaseEuiTableController {
 
@@ -82,4 +63,4 @@ uiRoutes.when('/home', {
     }
   }
 })
-  .otherwise({ redirectTo: '/no-data' });
+  .otherwise({ redirectTo: '/loading' });

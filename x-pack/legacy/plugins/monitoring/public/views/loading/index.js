@@ -12,6 +12,7 @@ import { I18nContext } from 'ui/i18n';
 import template from './index.html';
 import { toggleSetupMode, getSetupModeState, initSetupModeState } from '../../lib/setup_mode';
 import { CODE_PATH_LICENSE } from '../../../common/constants';
+import { AppStateProvider } from 'ui/state_management/app_state';
 
 const REACT_DOM_ID = 'monitoringLoadingReactApp';
 
@@ -25,15 +26,6 @@ uiRoutes
 
         initSetupModeState($scope, $injector);
 
-        const setupMode = getSetupModeState();
-        // For phase 3, this is not an valid route unless
-        // setup mode is currently enabled. For phase 4,
-        // we will remove this check.
-        if (!setupMode.enabled) {
-          kbnUrl.changePath('/no-data');
-          return;
-        }
-
         $scope.$on('$destroy', () => {
           unmountComponentAtNode(document.getElementById(REACT_DOM_ID));
         });
@@ -44,16 +36,31 @@ uiRoutes
 
         monitoringClusters(undefined, undefined, [CODE_PATH_LICENSE])
           .then(clusters => {
-            if (clusters && clusters.length) {
-              kbnUrl.changePath('/home');
+            const setupMode = getSetupModeState();
+            // For phase 3, this is not an valid route unless
+            // setup mode is currently enabled. For phase 4,
+            // we will remove this check.
+            if (!setupMode.enabled) {
+              if (clusters && clusters.length) {
+                if (clusters.length === 1) {
+                  kbnUrl.changePath('/overview');
+                } else {
+                  kbnUrl.changePath('/home');
+                }
+              } else {
+                kbnUrl.changePath('/no-data');
+              }
               return;
             }
-            initSetupModeState($scope, $injector);
-            return toggleSetupMode(true)
+            toggleSetupMode(true)
               .then(() => {
                 kbnUrl.changePath('/elasticsearch/nodes');
                 $scope.$apply();
               });
+          }).catch((error) => {
+            const Private = $injector.get('Private');
+            const AppState = Private(AppStateProvider);
+            kbnUrl.changePath('/no-data', null, new AppState({ error: error && error.data }));
           });
       }
 

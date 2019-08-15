@@ -18,6 +18,7 @@ import { timefilter } from 'ui/timefilter';
 import { I18nContext } from 'ui/i18n';
 import 'ui/directives/listen';
 import { CODE_PATH_LICENSE } from '../../../common/constants';
+import { AppStateProvider } from 'ui/state_management/app_state';
 
 const REACT_NODE_ID_NO_DATA = 'noDataReact';
 
@@ -28,12 +29,18 @@ export class NoDataController {
     this.registerCleanup($scope, $executor);
 
     Object.assign(this, this.getDefaultModel());
+
+    const Private = $injector.get('Private');
+    const AppState = Private(AppStateProvider);
+    const state = new AppState();
+    if (state.error) {
+      this.errors = [state.error];
+    }
     this.start($scope, $injector, $executor);
   }
 
   getDefaultModel() {
     return {
-      hasData: false, // control flag to control a redirect
       errors: [], // errors can happen from trying to check or set ES settings
       checkMessage: null, // message to show while waiting for api response
       isLoading: true, // flag for in-progress state of checking for no data reason
@@ -81,21 +88,17 @@ export class NoDataController {
       true // deep watch
     );
 
-    $scope.$watch(
-      () => model.hasData,
-      hasData => {
-        if (hasData) {
-          kbnUrl.redirect('/home'); // redirect if to cluster overview if data is found from background refreshes
-        }
-      }
-    );
 
     // register the monitoringClusters service.
     $executor.register({
       execute: () => monitoringClusters(undefined, undefined, [CODE_PATH_LICENSE]),
       handleResponse: clusters => {
-        if (clusters.length) {
-          model.hasData = true; // use the control flag because we can't redirect from inside here
+        if (clusters && clusters.length) {
+          if (clusters.length === 1) {
+            kbnUrl.changePath('/overview');
+          } else {
+            kbnUrl.changePath('/home');
+          }
         }
       }
     });

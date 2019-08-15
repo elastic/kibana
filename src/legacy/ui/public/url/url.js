@@ -65,8 +65,8 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
    * @param  {Object} [paramObj] - optional set of parameters for the path template
    * @return {undefined}
    */
-  self.changePath = function (path, paramObj) {
-    self._changeLocation('path', path, paramObj);
+  self.changePath = function (path, paramObj, appState) {
+    self._changeLocation('path', path, paramObj, false, appState);
   };
 
   /**
