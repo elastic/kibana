@@ -1,7 +1,3 @@
-.kbnQueryBar {
-  justify-content: flex-end;
-}
-
 @include euiBreakpoint('xs', 's') {
   .kbnQueryBar--withDatePicker {
     > :first-child {
