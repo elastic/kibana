@@ -17,7 +17,12 @@
  * under the License.
  */
 
-export const ORIGIN = {
-  EMS: 'elastic_maps_service',
-  KIBANA_YML: 'self_hosted'
-};
+import { FileLayer, VectorLayer } from 'ui/vis/map/service_settings';
+// TODO: reference to TILE_MAP plugin should be removed
+import { ORIGIN } from '../../../../legacy/core_plugins/tile_map/common/origin';
+
+export const mapToLayerWithId = (prefix: string, layer: FileLayer): VectorLayer => ({
+  ...layer,
+  layerId: `${prefix}.${layer.name}`,
+  isEMS: ORIGIN.EMS === prefix,
+});
