@@ -70,6 +70,7 @@ function MarkdownOptions({ stateParams, setValue }: VisOptionsProps<MarkdownVisP
         <EuiFlexItem>
           <EuiTextArea
             id="markdownVisInput"
+            className="visEditor--markdown__textarea"
             value={stateParams.markdown}
             onChange={({ target: { value } }) => onMarkdownUpdate(value)}
             fullWidth={true}
