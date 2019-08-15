@@ -181,58 +181,49 @@ export const MetricDetail = withMetricPageProviders(
                         );
                       }
                       return (
-                        <EuiPage style={{ flex: '1 0 auto' }}>
+                        <EuiPage style={{ flex: '1 0 100%' }}>
                           <MetricsSideNav
                             layouts={filteredLayouts}
                             loading={metadataLoading}
                             nodeName={name}
                             handleClick={handleClick}
                           />
-                          <AutoSizer content={false} bounds detectAnyWindowResize>
-                            {({ measureRef, bounds: { width = 0 } }) => {
-                              return (
-                                <MetricsDetailsPageColumn innerRef={measureRef}>
-                                  <EuiPageBody style={{ width: `${width}px` }}>
-                                    <EuiPageHeader style={{ flex: '0 0 auto' }}>
-                                      <EuiPageHeaderSection style={{ width: '100%' }}>
-                                        <MetricsTitleTimeRangeContainer>
-                                          <EuiHideFor sizes={['xs', 's']}>
-                                            <EuiTitle size="m">
-                                              <h1>{name}</h1>
-                                            </EuiTitle>
-                                          </EuiHideFor>
-                                          <MetricsTimeControls
-                                            currentTimeRange={timeRange}
-                                            isLiveStreaming={isAutoReloading}
-                                            refreshInterval={refreshInterval}
-                                            setRefreshInterval={setRefreshInterval}
-                                            onChangeTimeRange={setTimeRange}
-                                            setAutoReload={setAutoReload}
-                                          />
-                                        </MetricsTitleTimeRangeContainer>
-                                      </EuiPageHeaderSection>
-                                    </EuiPageHeader>
-
-                                    <EuiPageContentWithRelative>
-                                      <Metrics
-                                        label={name}
-                                        nodeId={nodeId}
-                                        layouts={filteredLayouts}
-                                        metrics={metrics}
-                                        loading={
-                                          metrics.length > 0 && isAutoReloading ? false : loading
-                                        }
-                                        refetch={refetch}
-                                        onChangeRangeTime={setTimeRange}
-                                        isLiveStreaming={isAutoReloading}
-                                        stopLiveStreaming={() => setAutoReload(false)}
-                                      />
-                                    </EuiPageContentWithRelative>
-                                  </EuiPageBody>
-                                </MetricsDetailsPageColumn>
-                              );
-                            }}
-                          </AutoSizer>
+                          <MetricsDetailsPageColumn>
+                            <EuiPageBody style={{ width: '100%' }}>
+                              <EuiPageHeader style={{ flex: '0 0 auto' }}>
+                                <EuiPageHeaderSection style={{ width: '100%' }}>
+                                  <MetricsTitleTimeRangeContainer>
+                                    <EuiHideFor sizes={['xs', 's']}>
+                                      <EuiTitle size="m">
+                                        <h1>{name}</h1>
+                                      </EuiTitle>
+                                    </EuiHideFor>
+                                    <MetricsTimeControls
+                                      currentTimeRange={timeRange}
+                                      isLiveStreaming={isAutoReloading}
+                                      refreshInterval={refreshInterval}
+                                      setRefreshInterval={setRefreshInterval}
+                                      onChangeTimeRange={setTimeRange}
+                                      setAutoReload={setAutoReload}
+                                    />
+                                  </MetricsTitleTimeRangeContainer>
+                                </EuiPageHeaderSection>
+                              </EuiPageHeader>
+                              <EuiPageContentWithRelative>
+                                <Metrics
+                                  label={name}
+                                  nodeId={nodeId}
+                                  layouts={filteredLayouts}
+                                  metrics={metrics}
+                                  loading={metrics.length > 0 && isAutoReloading ? false : loading}
+                                  refetch={refetch}
+                                  onChangeRangeTime={setTimeRange}
+                                  isLiveStreaming={isAutoReloading}
+                                  stopLiveStreaming={() => setAutoReload(false)}
+                                />
+                              </EuiPageContentWithRelative>
+                            </EuiPageBody>
+                          </MetricsDetailsPageColumn>
                         </EuiPage>
                       );
                     }}
