@@ -259,11 +259,12 @@ test('uses API key when provided', async () => {
   const runner = createTaskRunner({ taskInstance: mockedTaskInstance });
 
   await runner.run();
-  expect(getCreateTaskRunnerFunctionParams.getServices).toHaveBeenCalledTimes(1);
-  const firstCall = getCreateTaskRunnerFunctionParams.getServices.mock.calls[0][0];
-  expect(firstCall.headers).toEqual({
-    // base64 encoded "123:abc"
-    authorization: 'ApiKey MTIzOmFiYw==',
+  expect(getCreateTaskRunnerFunctionParams.getServices).toHaveBeenCalledWith({
+    getBasePath: expect.anything(),
+    headers: {
+      // base64 encoded "123:abc"
+      authorization: 'ApiKey MTIzOmFiYw==',
+    },
   });
 });
 
@@ -282,7 +283,9 @@ test(`doesn't use API key when not provided`, async () => {
   const runner = createTaskRunner({ taskInstance: mockedTaskInstance });
 
   await runner.run();
-  expect(getCreateTaskRunnerFunctionParams.getServices).toHaveBeenCalledTimes(1);
-  const firstCall = getCreateTaskRunnerFunctionParams.getServices.mock.calls[0][0];
-  expect(firstCall.headers).toEqual({});
+
+  expect(getCreateTaskRunnerFunctionParams.getServices).toHaveBeenCalledWith({
+    getBasePath: expect.anything(),
+    headers: {},
+  });
 });

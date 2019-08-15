@@ -20,15 +20,14 @@ const alertsClientParams = {
   alertTypeRegistry,
   savedObjectsClient,
   spaceId: 'default',
-  async getUserName() {
-    return 'elastic';
-  },
-  createAPIKey: jest.fn().mockResolvedValue({ created: false }),
+  getUserName: jest.fn(),
+  createAPIKey: jest.fn(),
 };
 
 beforeEach(() => {
   jest.resetAllMocks();
   alertsClientParams.createAPIKey.mockResolvedValue({ created: false });
+  alertsClientParams.getUserName.mockResolvedValue('elastic');
 });
 
 const mockedDate = new Date('2019-02-12T21:01:22.479Z');

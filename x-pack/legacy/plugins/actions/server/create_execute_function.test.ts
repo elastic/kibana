@@ -96,11 +96,12 @@ describe('execute()', () => {
       apiKeyId: '123',
       apiKeyValue: 'abc',
     });
-    expect(getScopedSavedObjectsClient).toHaveBeenCalledTimes(1);
-    const firstCall = getScopedSavedObjectsClient.mock.calls[0][0];
-    expect(firstCall.headers).toEqual({
-      // base64 encoded "123:abc"
-      authorization: 'ApiKey MTIzOmFiYw==',
+    expect(getScopedSavedObjectsClient).toHaveBeenCalledWith({
+      getBasePath: expect.anything(),
+      headers: {
+        // base64 encoded "123:abc"
+        authorization: 'ApiKey MTIzOmFiYw==',
+      },
     });
   });
 
@@ -133,8 +134,9 @@ describe('execute()', () => {
       apiKeyId: null,
       apiKeyValue: null,
     });
-    expect(getScopedSavedObjectsClient).toHaveBeenCalledTimes(1);
-    const firstCall = getScopedSavedObjectsClient.mock.calls[0][0];
-    expect(firstCall.headers).toEqual({});
+    expect(getScopedSavedObjectsClient).toHaveBeenCalledWith({
+      getBasePath: expect.anything(),
+      headers: {},
+    });
   });
 });

@@ -34,6 +34,8 @@ export async function execute({
   const {
     attributes: { actionTypeId, config, description },
   } = await services.savedObjectsClient.get<RawAction>('action', actionId);
+  // Only get encrypted attributes here, the remaining attributes can be fetched in
+  // the savedObjectsClient call
   const {
     attributes: { secrets },
   } = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<RawAction>('action', actionId, {

@@ -29,6 +29,7 @@ export function createExecuteFunction({
 }: CreateExecuteFunctionOptions) {
   return async function execute({ id, params, spaceId, apiKeyId, apiKeyValue }: ExecuteOptions) {
     const requestHeaders: Record<string, string> = {};
+
     if (apiKeyId && apiKeyValue) {
       const key = Buffer.from(`${apiKeyId}:${apiKeyValue}`).toString('base64');
       requestHeaders.authorization = `ApiKey ${key}`;
@@ -49,6 +50,7 @@ export function createExecuteFunction({
       apiKeyId,
       apiKeyValue,
     });
+
     await taskManager.schedule({
       taskType: `actions:${actionSavedObject.attributes.actionTypeId}`,
       params: {
