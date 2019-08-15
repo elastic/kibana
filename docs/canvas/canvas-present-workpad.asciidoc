@@ -1,3 +1,4 @@
+[role="xpack"]
 [[canvas-present-workpad]]
 == Present your workpad
 
