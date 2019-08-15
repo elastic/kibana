@@ -361,13 +361,12 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async setSelectByOptionText(selectId, optionText) {
+      const selectField = await find.byCssSelector(`#${selectId}`);
       const options = await find.allByCssSelector(`#${selectId} > option`);
-      const optionsTextPromises = options.map(async (optionElement) => {
-        return await optionElement.getVisibleText();
-      });
-      const optionsText = await Promise.all(optionsTextPromises);
-
+      const $ = await selectField.parseDomContent();
+      const optionsText = $('option').toArray().map(option => $(option).text());
       const optionIndex = optionsText.indexOf(optionText);
+
       if (optionIndex === -1) {
         throw new Error(`Unable to find option '${optionText}' in select ${selectId}. Available options: ${optionsText.join(',')}`);
       }
@@ -563,10 +562,6 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       const sortSelect = await testSubjects.find(`visDefaultEditorAggregateWith`);
       const sortMetric = await sortSelect.findByCssSelector(`option[value="${fieldValue}"]`);
       await sortMetric.click();
-    }
-
-    async selectFieldById(fieldValue, id) {
-      await find.clickByCssSelector(`#${id} > option[label="${fieldValue}"]`);
     }
 
     async getInterval() {
