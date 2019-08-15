@@ -100,7 +100,7 @@ For more information about Timelion, refer to <<timelion,Timelion>>.
 [[configure-display-options]]
 === Choose the display options
 
-
+Choose how you want the elements to appear on your workpad.
 
 [float]
 [[process-and-display]]
@@ -128,19 +128,20 @@ Further define the appearance of the element container and border.
  
 [float]
 [[apply-element-styles]]
-==== Apply a set of styles to the entire workpad
+==== Apply a set of styles
 
 To make your element look exactly the way you want, apply CSS overrides.
 
 . Next to *Element style*, click *+*, then select *CSS*.
 
 . Enter the *CSS*. For example, to center the Markdown element, enter:
-
-````
++
+[source,js]
+--------------------------------------------------
 .canvasRenderE1 h1 {
 text.align: center;
 }
-````
+--------------------------------------------------
 
 . Click *Apply stylesheet*.
 
@@ -163,7 +164,7 @@ TIP: To manually refresh the data, click the *Refresh data* icon.
 [[organize-element]]
 === Organize the elements on your workpad
 
-Choose where and how you want the elements to appear on your workpad.
+Choose where you want the elements to appear on your workpad.
 
 [float]
 [[move-canvas-elements]]
@@ -233,7 +234,7 @@ Change the order of how the elements are displayed on your workpad.
 [[element-save]]
 === Save elements
 
-After you have made changes to elements, save them so that you can reuse them across your workpads.
+After you have made changes to elements, save them so that you can reuse them across all of your workpads.
 
 . Select the element that you want to save.
 +
@@ -251,7 +252,7 @@ To access the element, click *Add element*, then select *My elements*.
 [[add-more-pages]]
 === Add more pages
 
-When you have run out of room on your workpad page, you can add more pages.
+When you have run out of room on your workpad page, add more pages.
 
 . Click *Page 1*, then click *+*.
 
@@ -259,26 +260,3 @@ When you have run out of room on your workpad page, you can add more pages.
 +
 [role="screenshot"]
 image::images/canvas-add-pages.gif[Add pages]
-
-[float]
-[[workpad-display-options]]
-=== Change the workpad display options
-
-To change the view of the elements on your workpad, change the display options.
-
-* To view your workpad in fullscreen mode, click the *Enter fullscreen mode* icon in the upper left corner.
-
-* To zoom in or out on the workpad, click the *Zoom controls* icon in the upper left corder, then select one of the options.
-
-[float]
-[[enable-autoplay]]
-=== Enable autoplay 
-
-Automatically cycle through your workpads pages in fullscreen mode.
-
-. In the upper left corner, click the *Control settings* icon.
-
-. Under *Change cycling interval*, select the interval you want to use.
-+
-[role="screenshot"]
-image::images/canvas-refresh-interval.png[Element data refresh interval]

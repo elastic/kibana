@@ -153,6 +153,8 @@ Here are some things to try:
 //* Learn more about:
 
 ** {kibana-ref}/canvas-workpad[Workpads]
+
+** {kibana-ref}/canvas-elements[Elements]
 //** Assets
 //** Expressions
 
