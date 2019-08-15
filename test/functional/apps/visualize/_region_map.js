@@ -65,14 +65,11 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickOptions();
         await  PageObjects.visualize.setSelectByOptionText('regionMapOptionsSelectLayer', 'World Countries');
 
-        await PageObjects.common.sleep(1000);//give angular time to go update UI state
-
         //ensure all fields are there
         await  PageObjects.visualize.setSelectByOptionText('regionMapOptionsSelectJoinField', 'ISO 3166-1 alpha-2 code');
         await  PageObjects.visualize.setSelectByOptionText('regionMapOptionsSelectJoinField', 'ISO 3166-1 alpha-3 code');
         await  PageObjects.visualize.setSelectByOptionText('regionMapOptionsSelectJoinField', 'name');
         await  PageObjects.visualize.setSelectByOptionText('regionMapOptionsSelectJoinField', 'ISO 3166-1 alpha-2 code');
-        await PageObjects.common.sleep(2000);//need some time for the data to load
 
         await inspector.open();
         const actualData = await inspector.getTableData();
@@ -82,10 +79,9 @@ export default function ({ getService, getPageObjects }) {
 
       it('should contain a dropdown with the default road_map base layer as an option',
         async () => {
-          const options = await find.allByCssSelector('#wmsOptionsSelectTmsLayer > option');
-          const optionsText = await Promise.all(options.map(async (optionElement) => {
-            return await optionElement.getVisibleText();
-          }));
+          const selectField = await find.byCssSelector('#wmsOptionsSelectTmsLayer');
+          const $ = await selectField.parseDomContent();
+          const optionsText = $('option').toArray().map(option => $(option).text());
 
           expect(optionsText.includes('road_map')).to.be(true);
         });
