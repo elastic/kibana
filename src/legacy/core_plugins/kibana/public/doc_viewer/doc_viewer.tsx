@@ -28,12 +28,13 @@ import { DocViewerTab } from './doc_viewer_tab';
  * a `render` function.
  */
 export function DocViewer(renderProps: DocViewRenderProps) {
-  const tabs = getDocViewsSorted(renderProps.hit).map(({ title, render, component }) => {
+  const tabs = getDocViewsSorted(renderProps.hit).map(({ title, render, component }, idx) => {
     return {
       id: title,
       name: title,
       content: (
         <DocViewerTab
+          id={idx}
           title={title}
           component={component}
           renderProps={renderProps}
