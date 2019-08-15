@@ -13,11 +13,11 @@ import * as Rx from 'rxjs';
 import { map, share, mergeMap, filter, partition, ignoreElements, tap } from 'rxjs/operators';
 import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 
+import { LevelLogger as Logger } from '../../../lib/level_logger';
 import { HeadlessChromiumDriver } from '../driver';
 import { args, IArgOptions } from './args';
 import { safeChildProcess } from '../../safe_child_process';
 import { getChromeLogLocation } from '../paths';
-import { Logger } from '../../../../types';
 
 type binaryPath = string;
 type queueTimeout = number;
@@ -31,27 +31,27 @@ const compactWhitespace = (str: string) => {
 
 export class HeadlessChromiumDriverFactory {
   private binaryPath: binaryPath;
-  private callerLogger: Logger;
+  private logger: Logger;
   private browserConfig: IBrowserConfig;
   private queueTimeout: queueTimeout;
 
   constructor(
     binaryPath: binaryPath,
-    logger: any,
+    logger: Logger,
     browserConfig: IBrowserConfig,
     queueTimeout: queueTimeout
   ) {
     this.binaryPath = binaryPath;
     this.browserConfig = browserConfig;
     this.queueTimeout = queueTimeout;
-    this.callerLogger = logger;
+    this.logger = logger;
   }
 
   type = 'chromium';
 
   test(
     { viewport, browserTimezone }: { viewport: IArgOptions['viewport']; browserTimezone: string },
-    logger: any
+    logger: Logger
   ) {
     const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-'));
     const chromiumArgs = args({
@@ -94,11 +94,13 @@ export class HeadlessChromiumDriverFactory {
     exit$: Rx.Observable<never>;
   }> {
     return Rx.Observable.create(async (observer: InnerSubscriber<any, any>) => {
+      this.logger.debug(`Creating browser driver factory`);
+
       const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-'));
       const chromiumArgs = args({
         userDataDir,
         viewport,
-        verboseLogging: this.callerLogger.isVerbose,
+        verboseLogging: this.logger.isVerbose,
         disableSandbox: this.browserConfig.disableSandbox,
         proxyConfig: this.browserConfig.proxy,
       });
@@ -125,6 +127,8 @@ export class HeadlessChromiumDriverFactory {
         // "TimeoutError: waiting for selector ".application" failed: timeout 30000ms exceeded"
         // @ts-ignore outdated typedefs for puppteer
         page.setDefaultTimeout(this.queueTimeout);
+
+        this.logger.debug(`Browser driver factory created`);
       } catch (err) {
         observer.error(new Error(`Error spawning Chromium browser: [${err}]`));
         throw err;
@@ -135,14 +139,12 @@ export class HeadlessChromiumDriverFactory {
           await browser.close();
         },
       };
-      const { terminate$ } = safeChildProcess(this.callerLogger, childProcess);
+      const { terminate$ } = safeChildProcess(this.logger, childProcess);
 
       // this is adding unsubscribe logic to our observer
       // so that if our observer unsubscribes, we terminate our child-process
       observer.add(() => {
-        this.callerLogger.debug(
-          `The browser process observer has unsubscribed. Closing the browser...`
-        );
+        this.logger.debug(`The browser process observer has unsubscribed. Closing the browser...`);
         childProcess.kill(); // ignore async
       });
 
@@ -151,7 +153,7 @@ export class HeadlessChromiumDriverFactory {
         terminate$
           .pipe(
             tap(signal => {
-              this.callerLogger.debug(`Observer got signal: ${signal}`);
+              this.logger.debug(`Observer got signal: ${signal}`);
             }),
             ignoreElements()
           )
@@ -174,7 +176,7 @@ export class HeadlessChromiumDriverFactory {
 
       const driver$ = Rx.of(
         new HeadlessChromiumDriver(page, {
-          logger: this.callerLogger,
+          logger: this.logger,
         })
       );
 
@@ -249,7 +251,7 @@ export class HeadlessChromiumDriverFactory {
         exit$,
       });
 
-      const factoryLogger = this.callerLogger.clone(['chromium-driver-factory']);
+      const factoryLogger = this.logger.clone(['chromium-driver-factory']);
       // unsubscribe logic makes a best-effort attempt to delete the user data directory used by chromium
       observer.add(() => {
         factoryLogger.debug(`deleting chromium user data directory at [${userDataDir}]`);
