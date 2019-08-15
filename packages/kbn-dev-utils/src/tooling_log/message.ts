@@ -17,14 +17,10 @@
  * under the License.
  */
 
-const $isCliError = Symbol('isCliError');
+export type MessageTypes = 'verbose' | 'debug' | 'info' | 'success' | 'warning' | 'error' | 'write';
 
-export function createCliError(message) {
-  const error = new Error(message);
-  error[$isCliError] = true;
-  return error;
-}
-
-export function isCliError(error) {
-  return error && !!error[$isCliError];
+export interface Message {
+  type: MessageTypes;
+  indent: number;
+  args: any[];
 }

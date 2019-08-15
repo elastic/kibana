@@ -17,4 +17,9 @@
  * under the License.
  */
 
-export { createAbsolutePathSerializer } from './absolute_path_serializer';
+export function createAbsolutePathSerializer(rootPath: string) {
+  return {
+    print: (value: string) => value.replace(rootPath, '<absolute path>').replace(/\\/g, '/'),
+    test: (value: any) => typeof value === 'string' && value.startsWith(rootPath),
+  };
+}

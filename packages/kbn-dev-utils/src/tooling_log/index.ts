@@ -18,5 +18,5 @@
  */
 
 export { ToolingLog } from './tooling_log';
-export { ToolingLogTextWriter, WriterConfig } from './tooling_log_text_writer';
+export { ToolingLogTextWriter, ToolingLogTextWriterConfig } from './tooling_log_text_writer';
 export { pickLevelFromFlags, LogLevel } from './log_levels';
