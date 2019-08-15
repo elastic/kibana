@@ -36,7 +36,7 @@
   },
   masterIssue: true,
   masterIssueApproval: true,
-  rangeStrategy: 'replace',
+  rangeStrategy: 'bump',
   npm: {
     lockFileMaintenance: {
       enabled: false,
@@ -880,7 +880,7 @@
       },
     ],
   },
-  prConcurrentLimit: 6,
+  prConcurrentLimit: 0,
   vulnerabilityAlerts: {
     enabled: false,
   },
