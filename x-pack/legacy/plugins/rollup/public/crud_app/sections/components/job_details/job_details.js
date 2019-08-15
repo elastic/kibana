@@ -14,6 +14,7 @@ import {
   TabMetrics,
   TabJson,
   TabHistogram,
+  TabRequest,
 } from './tabs';
 
 export const JOB_DETAILS_TAB_SUMMARY = 'JOB_DETAILS_TAB_SUMMARY';
@@ -21,6 +22,7 @@ export const JOB_DETAILS_TAB_TERMS = 'JOB_DETAILS_TAB_TERMS';
 export const JOB_DETAILS_TAB_HISTOGRAM = 'JOB_DETAILS_TAB_HISTOGRAM';
 export const JOB_DETAILS_TAB_METRICS = 'JOB_DETAILS_TAB_METRICS';
 export const JOB_DETAILS_TAB_JSON = 'JOB_DETAILS_TAB_JSON';
+export const JOB_DETAILS_TAB_REQUEST = 'JOB_DETAILS_TAB_REQUEST';
 
 export const tabToHumanizedMap = {
   [JOB_DETAILS_TAB_SUMMARY]: (
@@ -53,6 +55,12 @@ export const tabToHumanizedMap = {
       defaultMessage="JSON"
     />
   ),
+  [JOB_DETAILS_TAB_REQUEST]: (
+    <FormattedMessage
+      id="xpack.rollupJobs.create.jobDetails.tabRequestLabel"
+      defaultMessage="Request"
+    />
+  ),
 };
 
 const JOB_DETAILS_TABS = [
@@ -61,6 +69,7 @@ const JOB_DETAILS_TABS = [
   JOB_DETAILS_TAB_HISTOGRAM,
   JOB_DETAILS_TAB_METRICS,
   JOB_DETAILS_TAB_JSON,
+  JOB_DETAILS_TAB_REQUEST,
 ];
 
 export const JobDetails = ({
@@ -68,6 +77,7 @@ export const JobDetails = ({
   job,
   stats,
   json,
+  endpoint,
 }) => {
   const {
     metrics,
@@ -94,6 +104,9 @@ export const JobDetails = ({
     ),
     [JOB_DETAILS_TAB_JSON]: (
       <TabJson json={json} />
+    ),
+    [JOB_DETAILS_TAB_REQUEST]: (
+      <TabRequest json={json} endpoint={endpoint} />
     ),
   };
 

@@ -61,7 +61,9 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
   const deleteSnapshot = () => {
     const snapshotsToDelete = [...snapshotIds];
     setIsDeleting(true);
-    deleteSnapshots(snapshotsToDelete).then(({ data: { itemsDeleted, errors }, error }) => {
+    deleteSnapshots(snapshotsToDelete).then(({ data, error }) => {
+      const { itemsDeleted, errors } = data || { itemsDeleted: undefined, errors: undefined };
+
       // Wait until request is done to close modal; deleting snapshots take longer due to their sequential nature
       closeModal();
       setIsDeleting(false);

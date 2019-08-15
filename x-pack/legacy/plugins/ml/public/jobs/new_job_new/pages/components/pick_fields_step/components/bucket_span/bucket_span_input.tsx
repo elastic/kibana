@@ -11,15 +11,18 @@ interface Props {
   bucketSpan: string;
   setBucketSpan: (bs: string) => void;
   isInvalid: boolean;
+  disabled: boolean;
 }
 
-export const BucketSpanInput: FC<Props> = ({ bucketSpan, setBucketSpan, isInvalid }) => {
+export const BucketSpanInput: FC<Props> = ({ bucketSpan, setBucketSpan, isInvalid, disabled }) => {
   return (
     <EuiFieldText
+      disabled={disabled}
       placeholder="Bucket span"
       value={bucketSpan}
       onChange={e => setBucketSpan(e.target.value)}
       isInvalid={isInvalid}
+      data-test-subj="mlJobWizardInputBucketSpan"
     />
   );
 };

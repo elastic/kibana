@@ -130,6 +130,7 @@ export function buildFilter(
   indexPattern: IndexPattern,
   field: Field,
   operator: Operator,
+  disabled: boolean,
   params: any,
   alias: string | null,
   store: FilterStateStore
@@ -137,6 +138,7 @@ export function buildFilter(
   const filter = buildBaseFilter(indexPattern, field, operator, params);
   filter.meta.alias = alias;
   filter.meta.negate = operator.negate;
+  filter.meta.disabled = disabled;
   filter.$state = { store };
   return filter;
 }

@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import checkDiskSpace from 'check-disk-space';
 import { Server } from 'hapi';
+
+import { DiskWatermarkService } from './disk_watermark';
 import { EsClient, Esqueue } from './lib/esqueue';
 import { LspService } from './lsp/lsp_service';
 import { GitOperations } from './git_operations';
@@ -39,10 +42,11 @@ export function initWorkers(
     [lspIndexerFactory],
     gitOps,
     cancellationService
-  ).bind();
+  ).bind(codeServices);
 
   const repoServiceFactory: RepositoryServiceFactory = new RepositoryServiceFactory();
 
+  const watermarkService = new DiskWatermarkService(checkDiskSpace, serverOptions, log);
   const cloneWorker = new CloneWorker(
     queue,
     log,
@@ -51,8 +55,9 @@ export function initWorkers(
     gitOps,
     indexWorker,
     repoServiceFactory,
-    cancellationService
-  ).bind();
+    cancellationService,
+    watermarkService
+  ).bind(codeServices);
   const deleteWorker = new DeleteWorker(
     queue,
     log,
@@ -62,7 +67,7 @@ export function initWorkers(
     cancellationService,
     lspService,
     repoServiceFactory
-  ).bind();
+  ).bind(codeServices);
   const updateWorker = new UpdateWorker(
     queue,
     log,
@@ -70,9 +75,9 @@ export function initWorkers(
     serverOptions,
     gitOps,
     repoServiceFactory,
-    cancellationService
-  ).bind();
-
+    cancellationService,
+    watermarkService
+  ).bind(codeServices);
   codeServices.registerHandler(
     RepositoryServiceDefinition,
     getRepositoryHandler(cloneWorker, deleteWorker, indexWorker)
