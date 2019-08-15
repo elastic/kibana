@@ -76,7 +76,7 @@ export const DeleteAction: SFC<DeleteActionProps> = ({ items }) => {
     'xpack.ml.dataframe.transformList.bulkDeleteModalBody',
     {
       defaultMessage:
-        "Are you sure you want to delete {count, plural, one {this} other {these}} {count, plural, one {transform} other {transforms}}? The transform's destination index and optional Kibana index pattern will not be deleted.",
+        "Are you sure you want to delete {count, plural, one {this} other {these}} {count} {count, plural, one {transform} other {transforms}}? The transform's destination index and optional Kibana index pattern will not be deleted.",
       values: { count: items.length },
     }
   );
