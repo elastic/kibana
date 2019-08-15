@@ -27,11 +27,13 @@ For a quick overview of Canvas, watch link:https://www.youtube.com/watch?v=ZqvF_
 
 --
 
-include::canvas/canvas-getting-started.asciidoc[]
+include::canvas/canvas-tutorial.asciidoc[]
 
 include::canvas/canvas-workpad.asciidoc[]
 
 include::canvas/canvas-elements.asciidoc[]
+
+include::canvas/canvas-present-workpad.asciidoc[]
 
 include::canvas/canvas-share-workpad.asciidoc[]
 
