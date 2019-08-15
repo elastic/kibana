@@ -23,7 +23,6 @@ import {
   EuiFlexItem,
   EuiConfirmModal,
   EuiOverlayMask,
-  EuiScreenReaderOnly,
   EuiIconTip,
   EuiToolTip,
 } from '@elastic/eui';
