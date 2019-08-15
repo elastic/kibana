@@ -53,24 +53,14 @@ export const SavedQueryListItem = ({
     ? i18n.translate(
         'data.search.searchBar.savedQueryPopoverSavedQueryListItemSelectedButtonAriaLabel',
         {
-          defaultMessage: 'Saved query button selected {savedQueryName}',
+          defaultMessage:
+            'Saved query button selected {savedQueryName}. Press to clear any changes.',
           values: { savedQueryName: savedQuery.attributes.title },
         }
       )
     : i18n.translate('data.search.searchBar.savedQueryPopoverSavedQueryListItemButtonAriaLabel', {
         defaultMessage: 'Saved query button {savedQueryName}',
         values: { savedQueryName: savedQuery.attributes.title },
-      });
-
-  const selectButtonScreenReaderContent = isSelected
-    ? i18n.translate('data.search.searchBar.savedQueryScreenReaderSelectedText', {
-        defaultMessage: 'Selected saved query {savedQueryName}',
-        values: {
-          savedQueryName: `${savedQuery.attributes.title}`,
-        },
-      })
-    : i18n.translate('data.search.searchBar.savedQueryScreenReaderOpenText', {
-        defaultMessage: 'Open saved query',
       });
 
   const selectButtonDataTestSubj = isSelected
@@ -96,9 +86,6 @@ export const SavedQueryListItem = ({
               textProps={isSelected ? { className: 'saved-query-list-item-text' } : undefined}
               aria-label={selectButtonAriaLabelText}
             >
-              <EuiScreenReaderOnly>
-                <span>{selectButtonScreenReaderContent}</span>
-              </EuiScreenReaderOnly>
               {savedQuery.attributes.title}
             </EuiButtonEmpty>
           </EuiFlexItem>
