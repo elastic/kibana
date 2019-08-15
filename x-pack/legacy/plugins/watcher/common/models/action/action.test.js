@@ -5,7 +5,6 @@
  */
 
 import { Action } from './action';
-import { LoggingAction } from './logging_action';
 import { ACTION_TYPES } from '../../../common/constants';
 
 jest.mock('./logging_action', () => ({
@@ -18,11 +17,8 @@ jest.mock('./logging_action', () => ({
 }));
 
 describe('action', () => {
-
   describe('Action', () => {
-
     describe('fromUpstreamJson factory method', () => {
-
       let upstreamJson;
       beforeEach(() => {
         upstreamJson = {
@@ -35,43 +31,13 @@ describe('action', () => {
         };
       });
 
-      it(`throws an error if no 'id' property in json`, () => {
-        delete upstreamJson.id;
-        expect(() => {
-          Action.fromUpstreamJson(upstreamJson);
-        }).toThrowError('JSON argument must contain an id property');
-      });
-
-      it(`throws an error if no 'actionJson' property in json`, () => {
-        delete upstreamJson.actionJson;
-        expect(() => {
-          Action.fromUpstreamJson(upstreamJson);
-        }).toThrowError('JSON argument must contain an actionJson property');
-      });
-
-      it(`throws an error if an Action is invalid`, () => {
-        const message = 'Missing prop in Logging Action!';
-
-        LoggingAction.fromUpstreamJson.mockReturnValueOnce({
-          errors: [{ message }],
-          action: {},
-        });
-
-        expect(() => {
-          Action.fromUpstreamJson(upstreamJson);
-        }).toThrowError(message);
-      });
-
       it('returns correct Action instance', () => {
         const action = Action.fromUpstreamJson(upstreamJson);
-
         expect(action.id).toBe(upstreamJson.id);
       });
-
     });
 
     describe('type getter method', () => {
-
       it(`returns the correct known Action type`, () => {
         const options = { throwExceptions: { Action: false } };
 
@@ -81,7 +47,7 @@ describe('action', () => {
         const upstreamEmailJson = { id: 'action2', actionJson: { email: {} } };
         const emailAction = Action.fromUpstreamJson(upstreamEmailJson, options);
 
-        const upstreamSlackJson = { id: 'action3', actionJson: { slack: {} } };
+        const upstreamSlackJson = { id: 'action3', actionJson: { slack: { message: {} } } };
         const slackAction = Action.fromUpstreamJson(upstreamSlackJson, options);
 
         expect(loggingAction.type).toBe(ACTION_TYPES.LOGGING);
@@ -102,11 +68,9 @@ describe('action', () => {
 
         expect(action.type).toBe(ACTION_TYPES.UNKNOWN);
       });
-
     });
 
     describe('downstreamJson getter method', () => {
-
       let upstreamJson;
       beforeEach(() => {
         upstreamJson = {
@@ -120,17 +84,12 @@ describe('action', () => {
       });
 
       it('returns correct JSON for client', () => {
-
         const action = Action.fromUpstreamJson(upstreamJson);
-
         const json = action.downstreamJson;
 
         expect(json.id).toBe(action.id);
         expect(json.type).toBe(action.type);
       });
-
     });
-
   });
-
 });

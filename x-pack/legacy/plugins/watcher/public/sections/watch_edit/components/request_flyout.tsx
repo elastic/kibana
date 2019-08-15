@@ -20,12 +20,13 @@ import {
 } from '@elastic/eui';
 
 interface Props {
+  id: any;
   close: any;
-  watch: any;
+  payload: any;
 }
 
 export class RequestFlyout extends PureComponent<Props> {
-  getEsJson(payload) {
+  getEsJson(payload: any): string {
     return JSON.stringify(payload, null, 2);
   }
 
