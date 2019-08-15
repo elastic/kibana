@@ -295,6 +295,10 @@ files that should be trusted.
 Details on the format, and the valid options, are available via the
 https://www.openssl.org/docs/man1.0.2/apps/ciphers.html#CIPHER-LIST-FORMAT[OpenSSL cipher list format documentation].
 
+`server.ssl.clientAuthentication:`:: *Default: none* Controls the server’s behavior in regard to requesting a certificate from client
+connections. Valid values are `required`, `optional`, and `none`. `required` forces a client to present a certificate, while `optional`
+requests a client certificate but the client is not required to present one.
+
 `server.ssl.enabled:`:: *Default: "false"* Enables SSL for outgoing requests
 from the Kibana server to the browser. When set to `true`,
 `server.ssl.certificate` and `server.ssl.key` are required.
