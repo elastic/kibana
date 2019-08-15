@@ -10,7 +10,8 @@ import * as rt from 'io-ts';
 import { useUrlState } from '../../../utils/use_url_state';
 import { timeRangeRT } from '../../../../common/http_api/shared/time_range';
 
-const autoRefreshRT = rt.boolean;
+const autoRefreshRT = rt.union([rt.boolean, rt.undefined]);
+const urlTimeRangeRT = rt.union([timeRangeRT, rt.undefined]);
 
 const TIME_RANGE_URL_STATE_KEY = 'timeRange';
 const AUTOREFRESH_URL_STATE_KEY = 'autoRefresh';
@@ -24,8 +25,8 @@ export const useLogAnalysisResultsUrlState = () => {
         .valueOf(),
       endTime: moment.utc().valueOf(),
     },
-    decodeUrlState: (value: unknown) => timeRangeRT.decode(value).getOrElse(undefined),
-    encodeUrlState: timeRangeRT.encode,
+    decodeUrlState: (value: unknown) => urlTimeRangeRT.decode(value).getOrElse(undefined),
+    encodeUrlState: urlTimeRangeRT.encode,
     urlStateKey: TIME_RANGE_URL_STATE_KEY,
   });
 
