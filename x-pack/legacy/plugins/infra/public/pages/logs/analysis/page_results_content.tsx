@@ -68,7 +68,7 @@ export const AnalysisResultsContent = ({ sourceId }: { sourceId: string }) => {
     const msRange = timeRange.endTime - timeRange.startTime;
     const bucketIntervalInMs = msRange / 200;
     const bucketSpan = 900000; // TODO: Pull this from 'common' when setup hook PR is merged
-    const result = ((bucketIntervalInMs + bucketSpan / 2) / bucketSpan) * bucketSpan;
+    const result = bucketSpan * Math.round(bucketIntervalInMs / bucketSpan);
     const roundedResult = parseInt(Number(result).toFixed(0), 10);
     return roundedResult < bucketSpan ? bucketSpan : roundedResult;
   }, [timeRange]);

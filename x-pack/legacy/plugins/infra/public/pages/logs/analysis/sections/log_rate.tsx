@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { first, last } from 'lodash';
+import moment from 'moment';
 import {
   Axis,
   Chart,
@@ -16,6 +17,8 @@ import {
   LineSeries,
   niceTimeFormatter,
   Settings,
+  SpecId,
+  TooltipValue,
 } from '@elastic/charts';
 import {
   EuiTitle,
@@ -27,8 +30,9 @@ import {
 } from '@elastic/eui';
 import { GetLogEntryRateSuccessResponsePayload } from '../../../../../common/http_api/log_analysis/results/log_entry_rate';
 import { useLogEntryRateGraphData } from '../../../../containers/logs/log_analysis/log_analysis_graph_data/log_entry_rate';
+import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
 
-const getColorsMap = (color, specId) => {
+const getColorsMap = (color: string, specId: SpecId) => {
   const map = new Map();
   map.set({ colorValues: [], specId }, color);
   return map;
@@ -64,6 +68,14 @@ export const LogRateResults = ({
 
   const areaSpecId = getSpecId('modelBounds');
   const lineSpecId = getSpecId('averageValues');
+  const [dateFormat] = useKibanaUiSetting('dateFormat');
+
+  const tooltipProps = {
+    headerFormatter: useCallback(
+      (data: TooltipValue) => moment.utc(data.value).format(dateFormat || 'Y-MM-DD HH:mm:ss.SSS'),
+      [dateFormat]
+    ),
+  };
 
   return (
     <>
@@ -144,11 +156,7 @@ export const LogRateResults = ({
               }}
               customSeriesColors={getColorsMap('rgb(49, 133, 252)', lineSpecId)}
             />
-            {/* <Settings
-              tooltip={tooltipProps}
-              onBrushEnd={handleTimeChange}
-              theme={getChartTheme()}
-            /> */}
+            <Settings tooltip={tooltipProps} />
           </Chart>
         </div>
       )}
