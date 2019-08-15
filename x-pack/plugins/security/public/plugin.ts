@@ -13,19 +13,18 @@ import { UnauthorizedResponseInterceptor } from './unauthorized_response_interce
 
 export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPluginStart> {
   public setup(core: CoreSetup, deps: {}) {
-    const { basePath } = core.http;
-    const anonymousPaths = new AnonymousPaths(basePath, [
+    const { http, notifications } = core;
+    const sessionExpired = new SessionExpired(http.basePath);
+    const anonymousPaths = new AnonymousPaths(http.basePath, [
       '/login',
       '/logout',
       '/logged_out',
       '/status',
     ]);
-    core.http.intercept(
-      new UnauthorizedResponseInterceptor(new SessionExpired(basePath), anonymousPaths)
-    );
+    http.intercept(new UnauthorizedResponseInterceptor(sessionExpired, anonymousPaths));
 
-    const sessionTimeout = new SessionTimeout();
-    core.http.intercept(new SessionTimeoutInterceptor(sessionTimeout, anonymousPaths));
+    const sessionTimeout = new SessionTimeout(1.5 * 60 * 1000, notifications, sessionExpired, http);
+    http.intercept(new SessionTimeoutInterceptor(sessionTimeout, anonymousPaths));
 
     return {
       anonymousPaths,
