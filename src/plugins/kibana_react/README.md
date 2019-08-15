@@ -138,6 +138,21 @@ class MyPlugin {
 - `overlays.openModal` &mdash; opens modal window.
 - `overlays.openFlyout` &mdash; opens right side panel.
 
+You can access `overlays` service through React context.
+
+```tsx
+const Demo = () => {
+  const { overlays } = useKibana();
+  useEffect(() => {
+    overlays.openModal(
+      <div>
+        Oooops! {errorMessage}
+      </div>
+    );
+  }, [errorMessage]);
+};
+```
+
 
 ## `notifications` service
 
@@ -163,3 +178,17 @@ class MyPlugin {
 - `notifications.toasts.success()` &mdash; show positive toast message.
 - `notifications.toasts.warning()` &mdash; show warning toast message.
 - `notifications.toasts.danger()` &mdash; show error toast message.
+
+You can access `notifications` service through React context.
+
+```tsx
+const Demo = () => {
+  const { notifications } = useKibana();
+  useEffect(() => {
+    notifications.toasts.danger({
+      title: 'Oooops!',
+      body: errorMessage,
+    });
+  }, [errorMessage]);
+};
+```
