@@ -14,7 +14,6 @@ export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
-  const retry = getService('retry');
 
   const esTestIndexName = '.kibaka-alerting-test-data';
   const authorizationIndex = '.kibana-test-authorization';
@@ -65,6 +64,32 @@ export default function({ getService }: FtrProviderContext) {
       await es.indices.delete({ index: authorizationIndex });
     });
 
+    async function getTestIndexDoc(source: string, reference: string) {
+      const searchResult = await es.search({
+        index: esTestIndexName,
+        body: {
+          query: {
+            bool: {
+              must: [
+                {
+                  term: {
+                    source,
+                  },
+                },
+                {
+                  term: {
+                    reference,
+                  },
+                },
+              ],
+            },
+          },
+        },
+      });
+      expect(searchResult.hits.total.value).to.eql(1);
+      return searchResult.hits.hits[0];
+    }
+
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
@@ -113,31 +138,7 @@ export default function({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.be.an('object');
-              const indexedRecord = await retry.tryForTime(15000, async () => {
-                const searchResult = await es.search({
-                  index: esTestIndexName,
-                  body: {
-                    query: {
-                      bool: {
-                        must: [
-                          {
-                            term: {
-                              source: 'action:test.index-record',
-                            },
-                          },
-                          {
-                            term: {
-                              reference,
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  },
-                });
-                expect(searchResult.hits.total.value).to.eql(1);
-                return searchResult.hits.hits[0];
-              });
+              const indexedRecord = await getTestIndexDoc('action:test.index-record', reference);
               expect(indexedRecord._source).to.eql({
                 params: {
                   reference,
@@ -218,29 +219,7 @@ export default function({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.be.an('object');
-              const searchResult = await es.search({
-                index: esTestIndexName,
-                body: {
-                  query: {
-                    bool: {
-                      must: [
-                        {
-                          term: {
-                            source: 'action:test.index-record',
-                          },
-                        },
-                        {
-                          term: {
-                            reference,
-                          },
-                        },
-                      ],
-                    },
-                  },
-                },
-              });
-              expect(searchResult.hits.total.value).to.eql(1);
-              const indexedRecord = searchResult.hits.hits[0];
+              const indexedRecord = await getTestIndexDoc('action:test.index-record', reference);
               expect(indexedRecord._source).to.eql({
                 params: {
                   reference,
@@ -382,7 +361,6 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         it('callCluster and savedObjectsClient authorization', async () => {
-          let searchResult: any;
           let indexedRecord: any;
           const reference = `actions-execute-3:${user.username}`;
           const { body: createdAction } = await supertest
@@ -422,29 +400,7 @@ export default function({ getService }: FtrProviderContext) {
             case 'global_read at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
-              searchResult = await es.search({
-                index: esTestIndexName,
-                body: {
-                  query: {
-                    bool: {
-                      must: [
-                        {
-                          term: {
-                            source: 'action:test.authorization',
-                          },
-                        },
-                        {
-                          term: {
-                            reference,
-                          },
-                        },
-                      ],
-                    },
-                  },
-                },
-              });
-              expect(searchResult.hits.total.value).to.eql(1);
-              indexedRecord = searchResult.hits.hits[0];
+              indexedRecord = await getTestIndexDoc('action:test.authorization', reference);
               expect(indexedRecord._source.state).to.eql({
                 callClusterSuccess: false,
                 savedObjectsClientSuccess: false,
@@ -464,29 +420,7 @@ export default function({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
               expect(response.statusCode).to.eql(200);
-              searchResult = await es.search({
-                index: esTestIndexName,
-                body: {
-                  query: {
-                    bool: {
-                      must: [
-                        {
-                          term: {
-                            source: 'action:test.authorization',
-                          },
-                        },
-                        {
-                          term: {
-                            reference,
-                          },
-                        },
-                      ],
-                    },
-                  },
-                },
-              });
-              expect(searchResult.hits.total.value).to.eql(1);
-              indexedRecord = searchResult.hits.hits[0];
+              indexedRecord = await getTestIndexDoc('action:test.authorization', reference);
               expect(indexedRecord._source.state).to.eql({
                 callClusterSuccess: true,
                 savedObjectsClientSuccess: false,
