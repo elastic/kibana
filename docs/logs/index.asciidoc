@@ -4,11 +4,13 @@
 
 [partintro]
 --
-The Logs application enables you to explore logs for common servers, containers, and services.
-It has a compact, console-like display that you can customize.
+The Logs app in Kibana enables you to explore logs for common servers, containers, and services.
 
-// +++ add a bit about what it does and the kind of things you can see.
-// ++ also state that you can get in from infrastructure with specific log settings
+The Logs app has a compact, console-like display that you can customize.
+You can filter the logs by various fields, start and stop live streaming, and highlight text of interest.
+
+You can open the Logs app from the *Logs* tab in Kibana.
+You can also open the Logs app directly from a component in the Infrastructure app. In this case, you will see the logs for the selected component only.
 
 * <<xpack-logs-getting-started>>
 * <<xpack-logs-using>>
