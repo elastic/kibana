@@ -96,14 +96,16 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
     }
   );
 
-  const onDeleteSavedQuery = (savedQuery: SavedQuery) => {
+  const onDeleteSavedQuery = async (savedQuery: SavedQuery) => {
     setSavedQueries(savedQueries.filter(currentSavedQuery => currentSavedQuery !== savedQuery));
 
     if (loadedSavedQuery && loadedSavedQuery.id === savedQuery.id) {
       onClearSavedQuery();
     }
 
-    savedQueryService.deleteSavedQuery(savedQuery.id);
+    await savedQueryService.deleteSavedQuery(savedQuery.id);
+    // close the modal after delete
+    setIsOpen(false);
   };
 
   const savedQueryPopoverButton = (
@@ -124,6 +126,7 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
   );
 
   const savedQueryRows = () => {
+    // we should be recalculating the savedQueryRows after a delete action
     const savedQueriesWithoutCurrent = savedQueries.filter(savedQuery => {
       if (!loadedSavedQuery) return true;
       return savedQuery.id !== loadedSavedQuery.id;

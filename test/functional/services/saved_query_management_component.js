@@ -59,6 +59,7 @@ export function SavedQueryManagementComponentProvider({ getService }) {
       await this.openSavedQueryManagementComponent();
       await testSubjects.click(`delete-saved-query-${title}-button`);
       await testSubjects.click('confirmModalConfirmButton');
+      // await this.closeSavedQueryManagementComponent();
     }
 
     async clearCurrentlyLoadedQuery() {
@@ -94,8 +95,11 @@ export function SavedQueryManagementComponentProvider({ getService }) {
     }
 
     async savedQueryMissingOrFail(title) {
-      await this.openSavedQueryManagementComponent();
-      await testSubjects.missingOrFail(`load-saved-query-${title}-button`);
+      await retry.try(async () => {
+        await this.openSavedQueryManagementComponent();
+        await testSubjects.missingOrFail(`load-saved-query-${title}-button`);
+      });
+      await this.closeSavedQueryManagementComponent();
     }
 
     async openSavedQueryManagementComponent() {
