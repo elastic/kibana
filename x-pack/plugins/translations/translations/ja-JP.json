@@ -3905,7 +3905,6 @@
     "xpack.apm.transactions.chart.averageLabel": "平均",
     "xpack.apm.transactionsTable.95thPercentileColumnLabel": "95 パーセンタイル",
     "xpack.apm.transactionsTable.avgDurationColumnLabel": "平均期間",
-    "xpack.apm.transactionsTable.filterByTypeLabel": "タイプでフィルタリング",
     "xpack.apm.transactionsTable.impactColumnLabel": "インパクト",
     "xpack.apm.transactionsTable.nameColumnLabel": "名前",
     "xpack.apm.transactionsTable.transactionsPerMinuteColumnLabel": "1 分あたりのトランザクション",
