@@ -64,10 +64,13 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
     [currentLayerId]
   );
 
-  const setEmsHotLink = useCallback(async (layer: VectorLayer) => {
-    const emsHotLink = await serviceSettings.getEMSHotLink(layer);
-    setValue('emsHotLink', emsHotLink);
-  }, []);
+  const setEmsHotLink = useCallback(
+    async (layer: VectorLayer) => {
+      const emsHotLink = await serviceSettings.getEMSHotLink(layer);
+      setValue('emsHotLink', emsHotLink);
+    },
+    [setValue]
+  );
 
   const setLayer = useCallback(
     async (paramName: 'selectedLayer', value: VectorLayer['layerId']) => {
@@ -79,7 +82,7 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
         setEmsHotLink(newLayer);
       }
     },
-    [vectorLayers]
+    [vectorLayers, setValue]
   );
 
   const setField = useCallback(
@@ -88,7 +91,7 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
         setValue(paramName, stateParams.selectedLayer.fields.find(f => f.name === value));
       }
     },
-    [currentLayerId]
+    [currentLayerId, setValue]
   );
 
   useEffect(() => {
