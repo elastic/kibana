@@ -70,6 +70,7 @@ export interface ParamEditorProps {
 export interface OperationDefinition<C extends BaseIndexPatternColumn> {
   type: C['operationType'];
   displayName: string;
+  priority?: number;
   getPossibleOperationsForDocument: (indexPattern: IndexPattern) => OperationMetadata[];
   getPossibleOperationsForField: (field: IndexPatternField) => OperationMetadata[];
   buildColumn: (arg: {
@@ -161,6 +162,13 @@ export function getAvailableOperationsByMetadata(indexPattern: IndexPattern) {
   return Object.values(operationByMetadata);
 }
 
+function getDefinition(findFunction: (definition: PossibleOperationDefinition) => boolean) {
+  const candidates = operationDefinitions.filter(findFunction);
+  return candidates.reduce((a, b) =>
+    (a.priority || Number.NEGATIVE_INFINITY) > (b.priority || Number.NEGATIVE_INFINITY) ? a : b
+  );
+}
+
 export function buildColumn({
   op,
   columns,
@@ -183,11 +191,11 @@ export function buildColumn({
   if (op) {
     operationDefinition = operationDefinitionMap[op];
   } else if (asDocumentOperation) {
-    operationDefinition = operationDefinitions.find(
+    operationDefinition = getDefinition(
       definition => definition.getPossibleOperationsForDocument(indexPattern).length !== 0
     )!;
   } else if (field) {
-    operationDefinition = operationDefinitions.find(
+    operationDefinition = getDefinition(
       definition => definition.getPossibleOperationsForField(field).length !== 0
     )!;
   }

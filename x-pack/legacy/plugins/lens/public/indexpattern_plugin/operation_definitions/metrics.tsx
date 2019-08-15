@@ -14,12 +14,19 @@ import {
 } from '../indexpattern';
 import { OperationDefinition } from '../operations';
 
-function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
-  type: T['operationType'],
-  displayName: string,
-  ofName: (name: string) => string
-) {
+function buildMetricOperation<T extends FieldBasedIndexPatternColumn>({
+  type,
+  displayName,
+  ofName,
+  priority,
+}: {
+  type: T['operationType'];
+  displayName: string;
+  ofName: (name: string) => string;
+  priority?: number;
+}) {
   const operationDefinition: OperationDefinition<T> = {
+    priority,
     type,
     displayName,
     getPossibleOperationsForDocument: () => [],
@@ -74,50 +81,51 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
   return operationDefinition;
 }
 
-export const minOperation = buildMetricOperation<MinIndexPatternColumn>(
-  'min',
-  i18n.translate('xpack.lens.indexPattern.min', {
+export const minOperation = buildMetricOperation<MinIndexPatternColumn>({
+  type: 'min',
+  displayName: i18n.translate('xpack.lens.indexPattern.min', {
     defaultMessage: 'Minimum',
   }),
-  name =>
+  ofName: name =>
     i18n.translate('xpack.lens.indexPattern.minOf', {
       defaultMessage: 'Minimum of {name}',
       values: { name },
-    })
-);
+    }),
+});
 
-export const maxOperation = buildMetricOperation<MaxIndexPatternColumn>(
-  'max',
-  i18n.translate('xpack.lens.indexPattern.max', {
+export const maxOperation = buildMetricOperation<MaxIndexPatternColumn>({
+  type: 'max',
+  displayName: i18n.translate('xpack.lens.indexPattern.max', {
     defaultMessage: 'Maximum',
   }),
-  name =>
+  ofName: name =>
     i18n.translate('xpack.lens.indexPattern.maxOf', {
       defaultMessage: 'Maximum of {name}',
       values: { name },
-    })
-);
+    }),
+});
 
-export const averageOperation = buildMetricOperation<AvgIndexPatternColumn>(
-  'avg',
-  i18n.translate('xpack.lens.indexPattern.avg', {
+export const averageOperation = buildMetricOperation<AvgIndexPatternColumn>({
+  type: 'avg',
+  displayName: i18n.translate('xpack.lens.indexPattern.avg', {
     defaultMessage: 'Average',
   }),
-  name =>
+  ofName: name =>
     i18n.translate('xpack.lens.indexPattern.avgOf', {
       defaultMessage: 'Average of {name}',
       values: { name },
-    })
-);
+    }),
+});
 
-export const sumOperation = buildMetricOperation<SumIndexPatternColumn>(
-  'sum',
-  i18n.translate('xpack.lens.indexPattern.sum', {
+export const sumOperation = buildMetricOperation<SumIndexPatternColumn>({
+  type: 'sum',
+  priority: 1,
+  displayName: i18n.translate('xpack.lens.indexPattern.sum', {
     defaultMessage: 'Sum',
   }),
-  name =>
+  ofName: name =>
     i18n.translate('xpack.lens.indexPattern.sumOf', {
       defaultMessage: 'Sum of {name}',
       values: { name },
-    })
-);
+    }),
+});

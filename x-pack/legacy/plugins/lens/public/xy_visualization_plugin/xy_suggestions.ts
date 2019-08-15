@@ -5,15 +5,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { partition } from 'lodash';
+import { partition, isEqual } from 'lodash';
 import { Position } from '@elastic/charts';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import {
   SuggestionRequest,
   VisualizationSuggestion,
   TableSuggestionColumn,
   TableSuggestion,
 } from '../types';
-import { State, SeriesType } from './types';
+import { State, SeriesType, LayerConfig } from './types';
 import { generateId } from '../id_generator';
 import { buildExpression } from './to_expression';
 
@@ -23,6 +24,21 @@ const columnSortOrder = {
   boolean: 2,
   number: 3,
 };
+
+function getIconForSeries(type: SeriesType): EuiIconType {
+  switch (type) {
+    case 'area':
+    case 'area_stacked':
+      return 'visArea';
+    case 'bar':
+    case 'bar_stacked':
+      return 'visBarVertical';
+    case 'line':
+      return 'visLine';
+    default:
+      throw new Error('unknown series type');
+  }
+}
 
 /**
  * Generate suggestions for the xy chart.
@@ -123,30 +139,30 @@ function getSuggestion(
       });
   const seriesType: SeriesType =
     (currentState && currentState.preferredSeriesType) || (splitBy && isDate ? 'line' : 'bar');
+  const newLayer = {
+    layerId,
+    seriesType,
+    xAccessor: xValue.columnId,
+    splitAccessor: splitBy ? splitBy.columnId : generateId(),
+    accessors: yValues.map(col => col.columnId),
+    title: yTitle,
+  };
   const state: State = {
     isHorizontal: false,
     legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
     preferredSeriesType: seriesType,
     layers: [
       ...(currentState ? currentState.layers.filter(layer => layer.layerId !== layerId) : []),
-      {
-        layerId,
-        seriesType,
-        xAccessor: xValue.columnId,
-        splitAccessor: splitBy ? splitBy.columnId : generateId(),
-        accessors: yValues.map(col => col.columnId),
-        title: yTitle,
-      },
+      newLayer,
     ],
   };
-
-  return {
+  const suggestion = {
     title,
     // chart with multiple y values and split series will have a score of 1, single y value and no split series reduce score
     score: ((yValues.length > 1 ? 2 : 1) + (splitBy ? 1 : 0)) / 3,
     datasourceSuggestionId,
     state,
-    previewIcon: isDate ? 'visLine' : 'visBar',
+    previewIcon: getIconForSeries(seriesType),
     previewExpression: buildExpression(
       {
         ...state,
@@ -159,4 +175,23 @@ function getSuggestion(
       { xTitle, yTitle }
     ),
   };
+
+  // if current state is using the same data, suggest same chart with different series type
+  const oldLayer = currentState && currentState.layers.find(layer => layer.layerId === layerId);
+  if (oldLayer && isSameData(newLayer, oldLayer, Boolean(splitBy))) {
+    const currentSeriesType = oldLayer.seriesType;
+    const suggestedSeriesType = currentSeriesType === 'area' ? 'bar' : 'area';
+    suggestion.title = `${suggestedSeriesType} chart`;
+    newLayer.seriesType = suggestedSeriesType;
+  }
+
+  return suggestion;
+}
+
+function isSameData(newLayer: LayerConfig, oldLayer: LayerConfig, splitBy: boolean) {
+  return (
+    newLayer.xAccessor === oldLayer.xAccessor &&
+    isEqual(newLayer.accessors, oldLayer.accessors) &&
+    (!splitBy || newLayer.splitAccessor === oldLayer.splitAccessor)
+  );
 }
