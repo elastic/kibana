@@ -6,8 +6,9 @@
 
 import nodeCrypto from '@elastic/node-crypto';
 import { oncePerServer } from './once_per_server';
+import { KbnServer } from '../../types';
 
-function cryptoFn(server) {
+function cryptoFn(server: KbnServer) {
   const encryptionKey = server.config().get('xpack.reporting.encryptionKey');
   return nodeCrypto({ encryptionKey });
 }
