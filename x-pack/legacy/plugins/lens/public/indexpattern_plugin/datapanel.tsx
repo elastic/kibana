@@ -27,7 +27,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { npStart } from 'ui/new_platform';
-
 import { Query } from 'src/plugins/data/common';
 import { DatasourceDataPanelProps, DataType } from '../types';
 import { IndexPatternPrivateState, IndexPatternField, IndexPattern } from './indexpattern';
@@ -278,7 +277,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
           latest: dateRange.toDate,
           size: 500,
           timeFieldName: indexPatterns[currentIndexPatternId].timeFieldName,
-          maxExamples: 5,
           fields: allFields
             .filter(field => field.aggregatable)
             .map(field => ({

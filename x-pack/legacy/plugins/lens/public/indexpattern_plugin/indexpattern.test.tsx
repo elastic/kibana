@@ -176,6 +176,7 @@ describe('IndexPattern Data Source', () => {
         currentIndexPatternId: '1',
         indexPatterns: expectedIndexPatterns,
         layers: {},
+        showEmptyFields: false,
       });
     });
 
@@ -184,6 +185,7 @@ describe('IndexPattern Data Source', () => {
       expect(state).toEqual({
         ...persistedState,
         indexPatterns: expectedIndexPatterns,
+        showEmptyFields: false,
       });
     });
   });
