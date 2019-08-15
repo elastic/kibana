@@ -54,9 +54,28 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
     del.sync(generatedPath, { force: true });
   });
 
-  it(`should succeed on creating a plugin in a directory named ${snakeCased}`, async () => {
+  it(`should succeed on creating a plugin in a directory named 'plugins/${snakeCased}`, async () => {
     const stats = await fsP.stat(generatedPath);
     // eslint-disable-next-line no-undef
     expect(stats.isDirectory()).toBe(true);
+  });
+
+  describe(`and then running 'yarn lint' in the plugin's root dir`, () => {
+    it(
+      `should not show the '"@kbn/eslint/no-restricted-paths" is invalid' msg on stderr`,
+      done => {
+        const stdErrs = [];
+        const yarnLint = spawn('yarn', ['lint'], { cwd: generatedPath });
+        yarnLint.stderr.on('data', data => {
+          stdErrs.push(data + '');
+        });
+        yarnLint.on('close', () => {
+          // eslint-disable-next-line no-undef
+          expect(stdErrs.join('\n')).not.toContain('"@kbn/eslint/no-restricted-paths" is invalid');
+          done();
+        });
+      },
+      oneMinute * 3
+    );
   });
 });
