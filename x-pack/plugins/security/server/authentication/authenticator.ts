@@ -25,6 +25,7 @@ import {
   SAMLAuthenticationProvider,
   TokenAuthenticationProvider,
   OIDCAuthenticationProvider,
+  PKIAuthenticationProvider,
   isSAMLRequestQuery,
 } from './providers';
 import { AuthenticationResult } from './authentication_result';
@@ -91,6 +92,7 @@ const providerMap = new Map<
   ['saml', SAMLAuthenticationProvider],
   ['token', TokenAuthenticationProvider],
   ['oidc', OIDCAuthenticationProvider],
+  ['pki', PKIAuthenticationProvider],
 ]);
 
 function assertRequest(request: KibanaRequest) {

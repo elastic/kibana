@@ -7,10 +7,18 @@
 import sinon from 'sinon';
 import { ScopedClusterClient } from '../../../../../../src/core/server';
 import { Tokens } from '../tokens';
-import { loggingServiceMock, httpServiceMock } from '../../../../../../src/core/server/mocks';
+import {
+  loggingServiceMock,
+  httpServiceMock,
+  elasticsearchServiceMock,
+} from '../../../../../../src/core/server/mocks';
 
 export type MockAuthenticationProviderOptions = ReturnType<
   typeof mockAuthenticationProviderOptions
+>;
+
+export type MockAuthenticationProviderOptionsWithJest = ReturnType<
+  typeof mockAuthenticationProviderOptionsWithJest
 >;
 
 export function mockScopedClusterClient(
@@ -32,5 +40,18 @@ export function mockAuthenticationProviderOptions() {
     logger,
     basePath,
     tokens: sinon.createStubInstance(Tokens),
+  };
+}
+
+// Will be renamed to mockAuthenticationProviderOptions as soon as we migrate all providers tests to Jest.
+export function mockAuthenticationProviderOptionsWithJest() {
+  const basePath = httpServiceMock.createSetupContract().basePath;
+  basePath.get.mockReturnValue('/base-path');
+
+  return {
+    client: elasticsearchServiceMock.createClusterClient(),
+    logger: loggingServiceMock.create().get(),
+    basePath,
+    tokens: { refresh: jest.fn(), invalidate: jest.fn() },
   };
 }
