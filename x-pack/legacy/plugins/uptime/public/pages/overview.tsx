@@ -93,7 +93,8 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
   const linkParameters = stringifyUrlParams(params);
 
   const pagination: CursorPagination = {
-    cursorKey,
+    // TODO: extract this encoding/decoding process to a module called from inside the hook
+    cursorKey: atob(cursorKey || ''),
     cursorDirection: cursorDirection || CONTEXT_DEFAULTS.CURSOR_PAGINATION.cursorDirection,
     sortOrder: sortOrder || CONTEXT_DEFAULTS.CURSOR_PAGINATION.sortOrder,
   };

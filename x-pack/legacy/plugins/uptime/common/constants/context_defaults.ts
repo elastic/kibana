@@ -34,5 +34,5 @@ export const CONTEXT_DEFAULTS = {
   CURSOR_PAGINATION: {
     cursorDirection: CursorDirection.AFTER,
     sortOrder: SortOrder.ASC,
-  }
+  },
 };

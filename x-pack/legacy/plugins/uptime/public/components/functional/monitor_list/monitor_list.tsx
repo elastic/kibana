@@ -37,6 +37,7 @@ import { MonitorBarSeries } from '../charts';
 import { MonitorPageLink } from '../monitor_page_link';
 import { MonitorListActionsPopover } from './monitor_list_actions_popover';
 import { OverviewPageLink } from '../overview_page_link';
+import { useUrlParams } from '../../../hooks';
 
 interface MonitorListQueryResult {
   monitorStates?: MonitorSummaryResult;
@@ -65,6 +66,9 @@ export const MonitorListComponent = (props: Props) => {
     loading,
   } = props;
   const [drawerIds, updateDrawerIds] = useState<string[]>([]);
+  const [getUrlParams] = useUrlParams();
+
+  const { cursorKey } = getUrlParams();
 
   const items = get<MonitorSummary[]>(data, 'monitorStates.summaries', []);
 
@@ -73,25 +77,27 @@ export const MonitorListComponent = (props: Props) => {
       .concat()
       .sort()[0];
 
-    const linkPagination = {
-      cursorKey: JSON.stringify({
-        monitor_id: summary.monitor_id,
-        location,
-      }),
+    const { monitor_id } = summary;
+    const cursorKeyProp = {
+      monitor_id,
+      location,
+    };
+    const pagination = {
+      cursorKey: JSON.stringify(cursorKeyProp),
       cursorDirection,
       sortOrder: SortOrder.ASC,
     };
 
     if (CursorDirection.BEFORE === cursorDirection) {
       return (
-        <OverviewPageLink pagination={linkPagination} linkParameters={linkParameters}>
+        <OverviewPageLink pagination={pagination}>
           <EuiIcon type={'arrowLeft'} />
         </OverviewPageLink>
       );
     }
 
     return (
-      <OverviewPageLink pagination={linkPagination} linkParameters={linkParameters}>
+      <OverviewPageLink pagination={pagination}>
         <EuiIcon type={'arrowRight'} />
       </OverviewPageLink>
     );
@@ -102,7 +108,9 @@ export const MonitorListComponent = (props: Props) => {
     <EuiFlexGroup>
       <EuiFlexItem>
         <span>
-          {items.length > 0 && paginationLinkForSummary(items[0], CursorDirection.BEFORE)}
+          {items.length > 0 &&
+            cursorKey &&
+            paginationLinkForSummary(items[0], CursorDirection.BEFORE)}
           {items.length > 1 && paginationLinkForSummary(last(items), CursorDirection.AFTER)}
         </span>
       </EuiFlexItem>
