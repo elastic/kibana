@@ -54,6 +54,7 @@ export class TMSService {
       };
     }
     vectorJson.sources = inlinedSources;
+    vectorJson.sprite = this._getSpriteSheetRootPath();
     return vectorJson;
   });
 
@@ -110,16 +111,32 @@ export class TMSService {
   }
 
   async getSpriteSheetMeta(isRetina = false) {
-    const vectorStyleJson = await this._getVectorStyleJsonInlined();
-    const suffix = isRetina ? '@2x' : '';
-    const metaUrl = vectorStyleJson.sprite + suffix + '.json';
-    const spritePngs =  vectorStyleJson.sprite + suffix + '.png';
+    const metaUrl = await this.getSpriteSheetJsonPath(isRetina);
+    const spritePngs =  await this.getSpriteSheetPngPath(isRetina);
     const metaUrlExtended = this._emsClient.extendUrlWithParams(metaUrl);
     const jsonMeta = await this._emsClient.getManifest(metaUrlExtended);
     return {
       png: spritePngs,
       json: jsonMeta
     };
+  }
+
+  async _getSpriteSheetRootPath() {
+    const vectorStyleJson = await this._getVectorStyleJsonRaw();
+    return this._proxyPath + vectorStyleJson.sprite;
+  }
+
+  async getSpriteSheetJsonPath(isRetina = false) {
+    const spriteSheetRootPath = await this._getSpriteSheetRootPath();
+    const suffix = isRetina ? '@2x' : '';
+    return  spriteSheetRootPath + suffix + '.json';
+  }
+
+
+  async getSpriteSheetPngPath(isRetina = false) {
+    const spriteSheetRootPath = await this._getSpriteSheetRootPath();
+    const suffix = isRetina ? '@2x' : '';
+    return spriteSheetRootPath + suffix + '.png';
   }
 
   getDisplayName() {

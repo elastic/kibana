@@ -16,7 +16,7 @@ import {
   EMS_TILES_VECTOR_STYLE_PATH,
   EMS_TILES_VECTOR_SOURCE_PATH,
   EMS_TILES_VECTOR_TILE_PATH,
-  GIS_API_PATH
+  GIS_API_PATH, EMS_SPRITES_PATH
 } from '../common/constants';
 import fetch from 'node-fetch';
 import { i18n } from '@kbn/i18n';
@@ -284,9 +284,13 @@ export function initRoutes(server, licenseUid) {
           };
         }
       }
+
+      const spritePath = `${GIS_API_PATH}/${EMS_SPRITES_PATH}/${request.query.id}/sprite`;
+
       return {
         ...vectorStyle,
         glyphs: `${GIS_API_PATH}/${EMS_GLYPHS_PATH}/{fontstack}/{range}`,
+        sprite: spritePath,
         sources: newSources
       };
     }
@@ -396,38 +400,65 @@ export function initRoutes(server, licenseUid) {
     }
 
   });
-  //
-  //
-  // server.route({
-  //
-  //   method: 'GET',
-  //   path: `${ROOT}/${EMS_SPRITES_PATH}/sprite{scaling}.{extension}`,
-  //   handler: async (request, h) => {
-  //
-  //     checkEMSProxyConfig();
-  //
-  //     const fontUrl = mapConfig.emsFontLibraryUrl
-  //       .replace('{fontstack}', request.params.scaling)
-  //       .replace('{range}', request.params.extension);
-  //
-  //     // try {
-  //     //   const font = await fetch(fontUrl);
-  //     //   const arrayBuffer = await font.arrayBuffer();
-  //     //   const buffer = Buffer.from(arrayBuffer);
-  //     //   let response = h.response(buffer);
-  //     //   response = response.bytes(buffer.length);
-  //     //   response = response.header('Content-Disposition', 'inline');
-  //     //   response = response.encoding('binary');
-  //     //   return response;
-  //     // } catch(e) {
-  //     //   server.log('warning', `Cannot connect to EMS for font, error: ${e.message}`);
-  //     //   throw Boom.badRequest(`Cannot connect to EMS`);
-  //     // }
-  //
-  //
-  //   }
-  //
-  // });
+
+
+  server.route({
+
+    method: 'GET',
+    path: `${ROOT}/${EMS_SPRITES_PATH}/{id}/sprite.{extension}`,
+    handler: async (request, h) => {
+
+      server.log('before check!');
+      checkEMSProxyConfig();
+
+      server.log('do thing!');
+      server.log(request.params.extension);
+      server.log(request.params.id);
+
+      if (!request.params.id) {
+        server.log('warning', 'Must supply id parameter to retrieve EMS vector source sprite');
+        return null;
+      }
+
+      const tmsServices = await emsClient.getTMSServices();
+      const tmsService = tmsServices.find(layer => layer.getId() === request.params.id);
+      if (!tmsService) {
+        return null;
+      }
+
+
+      let proxyPathUrl;
+      // const isRetina = request.params.scaling === '@2x';
+      const isRetina = false;
+      if (request.params.extension === 'json') {
+        proxyPathUrl = await tmsService.getSpriteSheetJsonPath(isRetina);
+      } else if (request.params.extension === 'png') {
+        proxyPathUrl = await tmsService.getSpriteSheetPngPath(isRetina);
+      } else {
+        server.log('warning', `Must have png or json extension for spritesheet`);
+        return null;
+      }
+
+      console.log('proxy pat url', proxyPathUrl);
+
+      try {
+        const font = await fetch(proxyPathUrl);
+        const arrayBuffer = await font.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        let response = h.response(buffer);
+        response = response.bytes(buffer.length);
+        response = response.header('Content-Disposition', 'inline');
+        response = response.encoding('binary');
+        return response;
+      } catch(e) {
+        server.log('warning', `Cannot connect to EMS for sprites, error: ${e.message}`);
+        throw Boom.badRequest(`Cannot connect to EMS`);
+      }
+
+
+    }
+
+  });
 
 
   server.route({
@@ -449,7 +480,6 @@ export function initRoutes(server, licenseUid) {
       }
     }
   });
-
 
 
   function checkEMSProxyConfig() {
