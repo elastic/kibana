@@ -8,7 +8,6 @@ import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { first, last } from 'lodash';
 import moment from 'moment';
-import chrome from 'ui/chrome';
 import {
   Axis,
   Chart,
@@ -18,11 +17,7 @@ import {
   LineSeries,
   niceTimeFormatter,
   Settings,
-  SpecId,
   TooltipValue,
-  Theme,
-  LIGHT_THEME,
-  DARK_THEME,
 } from '@elastic/charts';
 import {
   EuiTitle,
@@ -35,18 +30,7 @@ import {
 import { GetLogEntryRateSuccessResponsePayload } from '../../../../../common/http_api/log_analysis/results/log_entry_rate';
 import { useLogEntryRateGraphData } from '../../../../containers/logs/log_analysis/log_analysis_graph_data/log_entry_rate';
 import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
-
-const getColorsMap = (color: string, specId: SpecId) => {
-  const map = new Map();
-  map.set({ colorValues: [], specId }, color);
-  return map;
-};
-
-const isDarkMode = () => chrome.getUiSettingsClient().get('theme:darkMode');
-
-const getChartTheme = (): Theme => {
-  return isDarkMode() ? DARK_THEME : LIGHT_THEME;
-};
+import { getColorsMap, isDarkMode, getChartTheme } from '../chart_helpers';
 
 const areaSeriesColour = 'rgb(224, 237, 255)';
 const lineSeriesColour = 'rgb(49, 133, 252)';
