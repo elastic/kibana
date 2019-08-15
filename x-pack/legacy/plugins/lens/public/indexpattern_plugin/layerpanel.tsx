@@ -18,13 +18,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
-import { DatasourceLayerPanelProps } from '../types';
+import { DatasourceLayerPanelProps, StateSetter } from '../types';
 import { IndexPatternPrivateState, IndexPatternLayer } from './indexpattern';
 import { isLayerTransferable, updateLayerIndexPattern } from './state_helpers';
 
 export interface IndexPatternLayerPanelProps extends DatasourceLayerPanelProps {
   state: IndexPatternPrivateState;
-  setState: (newState: IndexPatternPrivateState) => void;
+  setState: StateSetter<IndexPatternPrivateState>;
 }
 
 function LayerPanelChooser({

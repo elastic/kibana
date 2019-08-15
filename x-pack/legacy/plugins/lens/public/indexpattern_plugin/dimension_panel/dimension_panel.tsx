@@ -10,7 +10,7 @@ import { EuiButtonIcon } from '@elastic/eui';
 import { Storage } from 'ui/storage';
 import { i18n } from '@kbn/i18n';
 import { UiSettingsClientContract } from 'src/core/public';
-import { DatasourceDimensionPanelProps } from '../../types';
+import { DatasourceDimensionPanelProps, StateSetter } from '../../types';
 import {
   IndexPatternColumn,
   IndexPatternPrivateState,
@@ -26,7 +26,7 @@ import { isDraggedField } from '../utils';
 
 export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   state: IndexPatternPrivateState;
-  setState: (newState: IndexPatternPrivateState) => void;
+  setState: StateSetter<IndexPatternPrivateState>;
   dragDropContext: DragContextState;
   uiSettings: UiSettingsClientContract;
   storage: Storage;
