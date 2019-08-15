@@ -17,26 +17,22 @@
  * under the License.
  */
 
-import { LogLevel, ParsedLogLevel } from './log_levels';
-import { LogMessage } from './tooling_log';
+import { parseLogLevel } from './log_levels';
 
-export interface ToolingLogWriter {
-  write(msg: LogMessage): boolean;
-}
+it('parses valid log levels correctly', () => {
+  expect(parseLogLevel('silent')).toMatchSnapshot('silent');
+  expect(parseLogLevel('error')).toMatchSnapshot('error');
+  expect(parseLogLevel('warning')).toMatchSnapshot('warning');
+  expect(parseLogLevel('info')).toMatchSnapshot('info');
+  expect(parseLogLevel('debug')).toMatchSnapshot('debug');
+  expect(parseLogLevel('verbose')).toMatchSnapshot('verbose');
+});
 
-export interface WriteTarget {
-  write(chunk: string): void;
-}
-
-export interface WriterConfig {
-  level: LogLevel;
-  writeTo: WriteTarget;
-}
-
-export class ToolingLogTextWriter implements ToolingLogTextWriter {
-  public level: ParsedLogLevel;
-  public writeTo: WriteTarget;
-
-  constructor(config: WriterConfig);
-  public write(msg: LogMessage): boolean;
-}
+it('throws error for invalid levels', () => {
+  // @ts-ignore
+  expect(() => parseLogLevel('warn')).toThrowErrorMatchingSnapshot('warn');
+  // @ts-ignore
+  expect(() => parseLogLevel('foo')).toThrowErrorMatchingSnapshot('foo');
+  // @ts-ignore
+  expect(() => parseLogLevel('bar')).toThrowErrorMatchingSnapshot('bar');
+});

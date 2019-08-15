@@ -17,22 +17,18 @@
  * under the License.
  */
 
-import { ProcRunner } from './proc_runner';
+const $isCliError = Symbol('isCliError');
 
-/**
- *  Create a ProcRunner and pass it to an async function. When
- *  the async function finishes the ProcRunner is torn-down
- *  automatically
- *
- *  @param  {ToolingLog} log
- *  @param  {async Function} fn
- *  @return {Promise<undefined>}
- */
-export async function withProcRunner(log, fn) {
-  const procs = new ProcRunner({ log });
-  try {
-    await fn(procs);
-  } finally {
-    await procs.teardown();
-  }
+interface CliError extends Error {
+  [$isCliError]: boolean;
+}
+
+export function createCliError(message: string) {
+  const error: Partial<CliError> = new Error(message);
+  error[$isCliError] = true;
+  return error as CliError;
+}
+
+export function isCliError(error: any): error is CliError {
+  return error && !!error[$isCliError];
 }

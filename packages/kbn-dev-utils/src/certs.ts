@@ -17,5 +17,8 @@
  * under the License.
  */
 
-export { createConcatStream } from './concat_stream';
-export { createPromiseFromStreams } from './promise_from_streams';
+import { resolve } from 'path';
+
+export const CA_CERT_PATH = resolve(__dirname, '../certs/ca.crt');
+export const ES_KEY_PATH = resolve(__dirname, '../certs/elasticsearch.key');
+export const ES_CERT_PATH = resolve(__dirname, '../certs/elasticsearch.crt');

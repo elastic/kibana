@@ -21,6 +21,7 @@ import * as Rx from 'rxjs';
 import { toArray, takeUntil } from 'rxjs/operators';
 
 import { ToolingLog } from './tooling_log';
+import { Writer } from './writer';
 import { ToolingLogTextWriter } from './tooling_log_text_writer';
 
 it('creates zero writers without a config', () => {
@@ -31,7 +32,7 @@ it('creates zero writers without a config', () => {
 it('creates a single writer with a single object', () => {
   const log = new ToolingLog({ level: 'warning', writeTo: process.stdout });
   expect(log.getWriters()).toHaveLength(1);
-  const [writer] = log.getWriters();
+  const [writer] = log.getWriters() as [ToolingLogTextWriter];
   expect(writer.level).toHaveProperty('name', 'warning');
   expect(writer.writeTo).toBe(process.stdout);
 });
@@ -79,7 +80,7 @@ describe('#indent()', () => {
   });
 });
 
-['verbose', 'debug', 'info', 'success', 'warning', 'error', 'write'].forEach(method => {
+(['verbose', 'debug', 'info', 'success', 'warning', 'error', 'write'] as const).forEach(method => {
   describe(`#${method}()`, () => {
     it(`sends a msg of type "${method}" to each writer with indent and arguments`, () => {
       const log = new ToolingLog();
@@ -104,7 +105,7 @@ describe('#indent()', () => {
 });
 
 describe('#getWritten$()', () => {
-  async function testWrittenMsgs(writers) {
+  async function testWrittenMsgs(writers: Writer[]) {
     const log = new ToolingLog();
     log.setWriters(writers);
 
