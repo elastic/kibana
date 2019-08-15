@@ -41,9 +41,6 @@ export function runMochaCli() {
   // prevent globals injected from canvas plugins from triggering leak check
   process.argv.push('--globals', '__core-js_shared__,core,_, ');
 
-  // ensure that mocha requires the setup_node_env script
-  process.argv.push('--require', require.resolve('../../setup_node_env'));
-
   // set default test timeout
   if (opts.timeout == null && !opts['no-timeouts']) {
     if (runInBand) {
@@ -76,7 +73,7 @@ export function runMochaCli() {
           'tasks/**/__tests__/**/*.js',
         ],
         {
-          cwd: resolve(__dirname, '../../..'),
+          cwd: resolve(__dirname, '../../../..'),
           onlyFiles: true,
           absolute: true,
           ignore: ['**/__tests__/fixtures/**', 'src/**/public/**', '**/_*.js'],
