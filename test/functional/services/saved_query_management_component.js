@@ -59,7 +59,6 @@ export function SavedQueryManagementComponentProvider({ getService }) {
       await this.openSavedQueryManagementComponent();
       await testSubjects.click(`delete-saved-query-${title}-button`);
       await testSubjects.click('confirmModalConfirmButton');
-      // await this.closeSavedQueryManagementComponent();
     }
 
     async clearCurrentlyLoadedQuery() {
