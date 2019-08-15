@@ -19,7 +19,7 @@ export interface ArgumentHandlers {
 }
 
 export interface ArgumentSpec<ArgumentConfig = {}> {
-  /** The render type */
+  /** The argument type */
   name: string;
   /** The name to display */
   displayName: string;
@@ -42,3 +42,15 @@ export interface ArgumentSpec<ArgumentConfig = {}> {
 }
 
 export type ArgumentFactory<ArgumentConfig = {}> = () => ArgumentSpec<ArgumentConfig>;
+
+// Settings for the argument to display in the sidebar
+export interface ArgumentConfig<Arguments = {}> {
+  /** The name of the function argument configured by this argument form */
+  name: keyof Arguments;
+  /** The name to display */
+  displayName: string;
+  /** The argument type */
+  argType: string;
+  /** A description of the argument */
+  help?: string;
+}

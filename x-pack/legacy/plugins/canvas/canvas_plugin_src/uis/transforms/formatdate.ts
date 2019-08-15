@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const formatdate = () => ({
+import { TransformFactory } from '../../../types/transforms';
+import { Arguments } from '../../functions/common/formatdate';
+
+export const formatdate: TransformFactory<Arguments> = () => ({
   name: 'formatdate',
   displayName: 'Date format',
   args: [
     {
-      name: '_',
+      name: 'format',
       displayName: 'Format',
       argType: 'dateformat',
     },

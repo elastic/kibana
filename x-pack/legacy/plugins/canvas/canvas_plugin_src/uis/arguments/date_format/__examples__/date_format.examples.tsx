@@ -21,6 +21,7 @@ storiesOf('arguments/DateFormat', module)
       onValueChange={action('onValueChange')}
       argValue=""
       argId="DateFormatExample1"
+      renderError={action('renderError')}
     />
   ))
   .add('with preset format', () => (
@@ -29,6 +30,7 @@ storiesOf('arguments/DateFormat', module)
       onValueChange={action('onValueChange')}
       argValue="LLL"
       argId="DateFormatExample2"
+      renderError={action('renderError')}
     />
   ))
   .add('with custom format', () => (
@@ -37,5 +39,6 @@ storiesOf('arguments/DateFormat', module)
       onValueChange={action('onValueChange')}
       argValue="MM/DD/YYYY"
       argId="DateFormatExample3"
+      renderError={action('renderError')}
     />
   ));

@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const formatnumber = () => ({
+import { TransformFactory } from '../../../types/transforms';
+import { Arguments } from '../../functions/common/formatnumber';
+
+export const formatnumber: TransformFactory<Arguments> = () => ({
   name: 'formatnumber',
   displayName: 'Number format',
   args: [
     {
-      name: '_',
+      name: 'format',
       displayName: 'Format',
       argType: 'numberformat',
     },
