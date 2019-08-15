@@ -143,12 +143,11 @@ export type IndexPatternPrivateState = IndexPatternPersistedState & {
 };
 
 export function columnToOperation(column: IndexPatternColumn): Operation {
-  const { dataType, label, isBucketed, isHistogram, scale } = column;
+  const { dataType, label, isBucketed, scale } = column;
   return {
     label,
     dataType,
     isBucketed,
-    isHistogram,
     scale,
   };
 }

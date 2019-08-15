@@ -147,6 +147,13 @@ export const buildExpression = (
           const xAxisOperation =
             frame && frame.datasourceLayers[layer.layerId].getOperationForColumnId(layer.xAccessor);
 
+          const isHistogramDimension = Boolean(
+            xAxisOperation &&
+              xAxisOperation.isBucketed &&
+              xAxisOperation.scale &&
+              xAxisOperation.scale !== 'ordinal'
+          );
+
           return {
             type: 'expression',
             chain: [
@@ -166,7 +173,7 @@ export const buildExpression = (
                   xScaleType: [
                     getScaleType(metadata[layer.layerId][layer.xAccessor], ScaleType.Linear),
                   ],
-                  isHistogram: [Boolean(xAxisOperation && xAxisOperation.isHistogram)],
+                  isHistogram: [isHistogramDimension],
                   splitAccessor: [layer.splitAccessor],
                   seriesType: [layer.seriesType],
                   accessors: layer.accessors,

@@ -158,7 +158,6 @@ export interface OperationMetadata {
   // A bucketed operation is grouped by duplicate values, otherwise each row is
   // treated as unique
   isBucketed: boolean;
-  isHistogram?: boolean;
   scale?: 'ordinal' | 'interval' | 'ratio';
   // Extra meta-information like cardinality, color
 }
