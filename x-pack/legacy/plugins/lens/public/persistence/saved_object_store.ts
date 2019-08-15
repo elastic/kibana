@@ -61,12 +61,9 @@ export class SavedObjectIndexStore implements SavedObjectStore {
 
   async save(vis: Document) {
     const { id, type, ...rest } = vis;
-
-    // Any is the most straighforward way out here, since the saved
-    // object client doesn't allow unknowns, and we have them in
-    // our object.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const attributes: any = rest;
+    // TODO: SavedObjectAttributes should support this kind of object,
+    // remove this workaround when SavedObjectAttributes is updated.
+    const attributes = (rest as unknown) as SavedObjectAttributes;
     const result = await (id
       ? this.client.update(DOC_TYPE, id, attributes)
       : this.client.create(DOC_TYPE, attributes));
