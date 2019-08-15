@@ -13,17 +13,21 @@ import { throwErrors, createPlainError } from '../../../../../common/runtime_typ
 const MODULE_ID = 'logs_ui_analysis';
 
 export const callSetupMlModuleAPI = async (
+  start: number | null,
+  end: number | null,
   spaceId: string,
   sourceId: string,
   indexPattern: string,
   timeField: string,
   bucketSpan: number
 ) => {
+  const startEndProps = start && end ? { start, end } : {};
   const response = await kfetch({
     method: 'POST',
     pathname: `/api/ml/modules/setup/${MODULE_ID}`,
     body: JSON.stringify(
       setupMlModuleRequestPayloadRT.encode({
+        ...startEndProps,
         indexPatternName: indexPattern,
         prefix: getJobIdPrefix(spaceId, sourceId),
         startDatafeed: true,

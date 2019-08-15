@@ -39,8 +39,16 @@ export const useLogAnalysisJobs = ({
   const [setupMlModuleRequest, setupMlModule] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
-      createPromise: async () => {
-        return await callSetupMlModuleAPI(spaceId, sourceId, indexPattern, timeField, bucketSpan);
+      createPromise: async (start = null, end = null) => {
+        return await callSetupMlModuleAPI(
+          start,
+          end,
+          spaceId,
+          sourceId,
+          indexPattern,
+          timeField,
+          bucketSpan
+        );
       },
       onResolve: ({ datafeeds, jobs }) => {
         const hasSuccessfullyCreatedJobs = jobs.every(job => job.success);
@@ -99,12 +107,17 @@ export const useLogAnalysisJobs = ({
     fetchJobStatusRequest.state,
   ]);
 
+  const isSettingUpMlModule = useMemo(() => setupMlModuleRequest.state === 'pending', [
+    setupMlModuleRequest.state,
+  ]);
+
   return {
     jobStatus,
     isSetupRequired,
     isLoadingSetupStatus,
     setupMlModule,
     setupMlModuleRequest,
+    isSettingUpMlModule,
   };
 };
 

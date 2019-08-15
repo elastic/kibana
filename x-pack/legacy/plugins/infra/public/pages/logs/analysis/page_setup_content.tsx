@@ -21,10 +21,17 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
 
-export const AnalysisSetupContent = () => {
+interface AnalysisSetupContentProps {
+  onCreateJobs: () => void;
+  isSettingUp: boolean;
+}
+
+export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentProps> = ({
+  onCreateJobs,
+  isSettingUp,
+}) => {
   useTrackPageview({ app: 'infra_logs', path: 'analysis_setup' });
   useTrackPageview({ app: 'infra_logs', path: 'analysis_setup', delay: 15000 });
-
   return (
     <AnalysisSetupPage>
       <EuiPageBody>
@@ -32,7 +39,6 @@ export const AnalysisSetupContent = () => {
           verticalPosition="center"
           horizontalPosition="center"
           data-test-subj="analysisSetupContent"
-          style={{ maxWidth: '518px' }}
         >
           <EuiPageContentHeader>
             <EuiPageContentHeaderSection>
@@ -55,8 +61,17 @@ export const AnalysisSetupContent = () => {
             </EuiText>
             <EuiSpacer size="m" />
 
-            <EuiButton fill iconSide="right" iconType="check">
-              Create ML Job
+            <EuiButton
+              fill
+              isLoading={isSettingUp}
+              iconSide="right"
+              iconType="check"
+              onClick={onCreateJobs}
+            >
+              <FormattedMessage
+                id="xpack.infra.analysisSetup.createMlJobButton"
+                defaultMessage="Create ML Job"
+              />
             </EuiButton>
           </EuiPageContentBody>
         </AnalysisPageContent>
@@ -65,8 +80,10 @@ export const AnalysisSetupContent = () => {
   );
 };
 
-// https://github.com/elastic/eui/issues/2232
-const AnalysisPageContent = euiStyled(EuiPageContent)<{ style: object }>``;
+// !important due to https://github.com/elastic/eui/issues/2232
+const AnalysisPageContent = euiStyled(EuiPageContent)`
+  max-width: 518px !important;
+`;
 
 const AnalysisSetupPage = euiStyled(EuiPage)`
   height: 100%;
