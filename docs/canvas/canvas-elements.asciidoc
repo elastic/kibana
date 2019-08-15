@@ -1,3 +1,4 @@
+[role="xpack"]
 [[element-intro]]
 == Showcase your data with elements
 
