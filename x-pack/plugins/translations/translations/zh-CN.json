@@ -3925,7 +3925,6 @@
     "xpack.apm.transactions.chart.averageLabel": "平均",
     "xpack.apm.transactionsTable.95thPercentileColumnLabel": "第 95 个百分位",
     "xpack.apm.transactionsTable.avgDurationColumnLabel": "平均持续时间",
-    "xpack.apm.transactionsTable.filterByTypeLabel": "按类型筛选",
     "xpack.apm.transactionsTable.impactColumnLabel": "影响",
     "xpack.apm.transactionsTable.nameColumnLabel": "名称",
     "xpack.apm.transactionsTable.transactionsPerMinuteColumnLabel": "每分钟事务数",
