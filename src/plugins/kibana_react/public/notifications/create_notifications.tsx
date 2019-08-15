@@ -38,7 +38,7 @@ export const createNotifications = (services: KibanaServices): KibanaReactNotifi
   }) => {
     services.notifications!.toasts.add({
       title,
-      text: <>{body}</>,
+      text: <>{body || null}</>,
       color,
       iconType,
       toastLifeTimeMs,
