@@ -189,9 +189,9 @@ export const MetricDetail = withMetricPageProviders(
                             handleClick={handleClick}
                           />
                           <MetricsDetailsPageColumn>
-                            <EuiPageBody style={{ width: '100%' }}>
+                            <EuiPageBody>
                               <EuiPageHeader style={{ flex: '0 0 auto' }}>
-                                <EuiPageHeaderSection style={{ width: '100%' }}>
+                                <EuiPageHeaderSection>
                                   <MetricsTitleTimeRangeContainer>
                                     <EuiHideFor sizes={['xs', 's']}>
                                       <EuiTitle size="m">
