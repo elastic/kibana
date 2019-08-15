@@ -18,17 +18,14 @@
  */
 import { IndexPattern } from 'src/legacy/core_plugins/data/public';
 import { Component, FunctionComponent } from 'react';
+import { IScope } from 'angular';
 
 export interface AngularDirective {
   controller: (scope: AngularScope) => void;
   template: string;
 }
 
-export interface AngularScope {
-  $new: () => AngularScope;
-  $digest: () => void;
-  $destroy: () => void;
-}
+export type AngularScope = IScope;
 
 export type AngularController = (scope: AngularScope) => void;
 
