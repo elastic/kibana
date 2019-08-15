@@ -19,9 +19,9 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-import chrome from 'ui/chrome';
 
 import { EuiComboBox } from '@elastic/eui';
+import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../../core/public';
 
 interface IndexPatternSelectProps {
   onChange: (opt: any) => void;
@@ -29,6 +29,7 @@ interface IndexPatternSelectProps {
   placeholder: string;
   fieldTypes: string[];
   onNoIndexPatterns: () => void;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 interface IndexPatternSelectState {
@@ -38,8 +39,12 @@ interface IndexPatternSelectState {
   searchValue: string | undefined;
 }
 
-const getIndexPatterns = async (search: string, fields: string[]) => {
-  const resp = await chrome.getSavedObjectsClient().find({
+const getIndexPatterns = async (
+  client: SavedObjectsClientContract,
+  search: string,
+  fields: string[]
+) => {
+  const resp = await client.find({
     type: 'index-pattern',
     fields,
     search: `${search}*`,
@@ -49,13 +54,21 @@ const getIndexPatterns = async (search: string, fields: string[]) => {
   return resp.savedObjects;
 };
 
-const getIndexPatternTitle = async (indexPatternId: string) => {
-  const savedObject = await chrome.getSavedObjectsClient().get('index-pattern', indexPatternId);
+const getIndexPatternTitle = async (
+  client: SavedObjectsClientContract,
+  indexPatternId: string
+): Promise<SimpleSavedObject<any>> => {
+  const savedObject = (await client.get('index-pattern', indexPatternId)) as SimpleSavedObject<any>;
   if (savedObject.error) {
     throw new Error(`Unable to get index-pattern title: ${savedObject.error.message}`);
   }
   return savedObject.attributes.title;
 };
+
+// Takes in stateful runtime dependencies and pre-wires them to the component
+export function createIndexPatternSelect(savedObjectsClient: SavedObjectsClientContract) {
+  return (props: any) => <IndexPatternSelect savedObjectsClient={savedObjectsClient} {...props} />;
+}
 
 export class IndexPatternSelect extends Component<IndexPatternSelectProps> {
   private isMounted: boolean = false;
@@ -99,7 +112,7 @@ export class IndexPatternSelect extends Component<IndexPatternSelectProps> {
 
     let indexPatternTitle;
     try {
-      indexPatternTitle = await getIndexPatternTitle(indexPatternId);
+      indexPatternTitle = await getIndexPatternTitle(this.props.savedObjectsClient, indexPatternId);
     } catch (err) {
       // index pattern no longer exists
       return;
@@ -118,16 +131,16 @@ export class IndexPatternSelect extends Component<IndexPatternSelectProps> {
   };
 
   debouncedFetch = _.debounce(async (searchValue: string) => {
-    const { fieldTypes, onNoIndexPatterns } = this.props;
+    const { fieldTypes, onNoIndexPatterns, savedObjectsClient } = this.props;
 
     const savedObjectFields = ['title'];
     if (fieldTypes) {
       savedObjectFields.push('fields');
     }
-    let savedObjects = await getIndexPatterns(searchValue, savedObjectFields);
+    let savedObjects = await getIndexPatterns(savedObjectsClient, searchValue, savedObjectFields);
 
     if (fieldTypes) {
-      savedObjects = savedObjects.filter(savedObject => {
+      savedObjects = savedObjects.filter((savedObject: SimpleSavedObject<any>) => {
         try {
           const indexPatternFields = JSON.parse(savedObject.attributes.fields as any);
           return indexPatternFields.some((field: any) => {
@@ -147,7 +160,7 @@ export class IndexPatternSelect extends Component<IndexPatternSelectProps> {
     // We need this check to handle the case where search results come back in a different
     // order than they were sent out. Only load results for the most recent search.
     if (searchValue === this.state.searchValue) {
-      const options = savedObjects.map(indexPatternSavedObject => {
+      const options = savedObjects.map((indexPatternSavedObject: SimpleSavedObject<any>) => {
         return {
           label: indexPatternSavedObject.attributes.title,
           value: indexPatternSavedObject.id,
@@ -185,6 +198,7 @@ export class IndexPatternSelect extends Component<IndexPatternSelectProps> {
       indexPatternId, // eslint-disable-line no-unused-vars
       placeholder,
       onNoIndexPatterns, // eslint-disable-line no-unused-vars
+      savedObjectsClient, // eslint-disable-line no-unused-vars
       ...rest
     } = this.props;
 

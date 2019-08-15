@@ -33,13 +33,12 @@ export {
 } from '../../../core_plugins/data/public/index_patterns/index_patterns_service.mock';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
-// Field is only used as class in Index Patterns Management UI.
-// FieldList is only used in discover and StubIndexPattern.
-export const { FieldList, flattenHitWrapper, formatHitProvider } = data.indexPatterns;
-export const { IndexPatternsProvider } = data.indexPatterns.__LEGACY;
-
-// ui components
-export const { IndexPatternSelect } = data.indexPatterns.ui;
+export const {
+  FieldList, // only used in Discover and StubIndexPattern
+  flattenHitWrapper,
+  formatHitProvider,
+  IndexPatternSelect, // only used in x-pack/plugin/maps and input control vis
+} = data.indexPatterns;
 
 // static code
 export {
@@ -47,6 +46,7 @@ export {
   getFromSavedObject,
   getRoutes,
   isFilterable,
+  IndexPatternsProvider, // LEGACY
   validateIndexPattern,
   ILLEGAL_CHARACTERS,
   INDEX_PATTERN_ILLEGAL_CHARACTERS,
