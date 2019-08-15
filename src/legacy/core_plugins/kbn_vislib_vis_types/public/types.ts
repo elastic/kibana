@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { LegendPositions, ChartModes, ChartTypes } from './utils/legend_positions';
+import { LegendPositions, ChartModes, ChartTypes } from './utils/collections';
 
 export interface CommonVislibParams {
   addTooltip: boolean;
@@ -46,6 +46,7 @@ export interface SeriesParam {
   data: { label: string; id: string };
   drawLinesBetweenPoints: boolean;
   interpolate: string;
+  lineWidth: number | '';
   mode: ChartModes;
   show: boolean;
   showCircles: boolean;

@@ -21,6 +21,7 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { PointSeriesOptions } from './editors/point_series';
+import { SeriesOptions } from './controls/point_series/series_options';
 import {
   getLegendPositions,
   LegendPositions,
@@ -30,7 +31,7 @@ import {
   ChartModes,
   getInterpolationModes,
   InterpolationModes,
-} from './utils/legend_positions';
+} from './utils/collections';
 
 export default function PointSeriesVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
@@ -123,8 +124,7 @@ export default function PointSeriesVisType(Private) {
         {
           name: 'advanced',
           title: 'Metrics & Axes',
-          editor: '<div><vislib-series></vislib-series><vislib-value-axes>' +
-          '</vislib-value-axes><vislib-category-axis></vislib-category-axis></div>'
+          editor: SeriesOptions
         },
         { name: 'options', title: 'Panel Settings', editor: PointSeriesOptions },
       ],

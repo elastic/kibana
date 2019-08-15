@@ -17,12 +17,21 @@
  * under the License.
  */
 
-import { Vis, AggConfig } from './../..';
+import { LegendPositions } from '../../utils/collections';
 
-export interface VisOptionsProps<VisParamType = unknown> {
-  aggs: AggConfig[];
-  hasHistogramAgg: boolean;
-  stateParams: VisParamType;
-  vis: Vis;
-  setValue<T extends keyof VisParamType>(paramName: T, value: VisParamType[T]): void;
+function mapPositionOpposite(position: LegendPositions) {
+  switch (position) {
+    case 'bottom':
+      return LegendPositions.TOP;
+    case 'top':
+      return LegendPositions.BOTTOM;
+    case 'left':
+      return LegendPositions.RIGHT;
+    case 'right':
+      return LegendPositions.LEFT;
+    default:
+      throw new Error('Invalid legend position.');
+  }
 }
+
+export { mapPositionOpposite };

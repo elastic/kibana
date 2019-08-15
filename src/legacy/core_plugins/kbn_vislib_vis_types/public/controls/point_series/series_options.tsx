@@ -17,47 +17,116 @@
  * under the License.
  */
 
-import React, { useMemo } from 'react';
+import React, { useState } from 'react';
+import { cloneDeep, capitalize, get } from 'lodash';
 import { EuiPanel, EuiTitle, EuiSpacer, EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { AggConfig } from 'ui/vis';
 import { VisOptionsProps } from 'ui/vis/editors/default';
-import { BasicVislibParams, SeriesParam } from '../../types';
-import { ChartTypes } from '../../utils/legend_positions';
-import { SwitchOption } from '../switch';
-import { SelectOption } from '../select';
+import { BasicVislibParams, ValueAxis } from '../../types';
+import { ChartOptions } from './chart_options';
+import { mapPositionOpposite } from './utils';
 
 function SeriesOptions(props: VisOptionsProps<BasicVislibParams>) {
-  const { stateParams, setValue, vis } = props;
+  const { stateParams, setValue, aggs } = props;
 
-  const setChart = <T extends keyof BasicVislibParams['seriesParams']>(
-    index: number,
-    paramName: T,
-    value: BasicVislibParams['seriesParams'][T]
-  ) => {
-    const series = [...stateParams.seriesParams];
-    series[index] = {
-      ...series[index],
-      [paramName]: value,
-    };
-    setValue('seriesParams', series);
+  const [lastCustomLabels, setLastCustomLabels] = useState({} as { [key: string]: string });
+  // We track these so we can know when the agg is changed
+  const [lastMatchingSeriesAggType, setLastMatchingSeriesAggType] = useState('');
+  const [lastMatchingSeriesAggField, setLastMatchingSeriesAggField] = useState('');
+
+  const setValueAxes = (value: ValueAxis) => {
+    setValue('valueAxes', [...stateParams.valueAxes, value]);
   };
 
-  const changeValueAxis = () => {};
+  const addValueAxis = () => {
+    const firstAxis = stateParams.valueAxes[0];
+    const newAxis = cloneDeep(firstAxis);
+    newAxis.id =
+      'ValueAxis-' +
+      stateParams.valueAxes.reduce((value, axis) => {
+        if (axis.id.substr(0, 10) === 'ValueAxis-') {
+          const num = parseInt(axis.id.substr(10), 10);
+          if (num >= value) value = num + 1;
+        }
+        return value;
+      }, 1);
 
-  const valueAxesOptions = useMemo(
-    () => [
-      ...stateParams.valueAxes,
-      {
-        text: i18n.translate('kbnVislibVisTypes.controls.pointSeries.series.newAxisLabel', {
-          defaultMessage: 'New axis…',
-        }),
-        value: 'new',
-      },
-    ],
-    [stateParams.valueAxes]
-  );
+    newAxis.position = mapPositionOpposite(firstAxis.position);
+    const axisName = capitalize(newAxis.position) + 'Axis-';
+    newAxis.name =
+      axisName +
+      stateParams.valueAxes.reduce((value, axis) => {
+        if (axis.name.substr(0, axisName.length) === axisName) {
+          const num = parseInt(axis.name.substr(axisName.length), 10);
+          if (num >= value) value = num + 1;
+        }
+        return value;
+      }, 1);
+
+    setValueAxes(newAxis);
+    return newAxis;
+  };
+
+  const updateAxisTitle = () => {
+    stateParams.valueAxes.forEach((axis, axisNumber) => {
+      let newCustomLabel = '';
+      const isFirst = axisNumber === 0;
+      const matchingSeries: AggConfig[] = [];
+
+      stateParams.seriesParams.forEach((series, i) => {
+        const isMatchingSeries = (isFirst && !series.valueAxis) || series.valueAxis === axis.id;
+        if (isMatchingSeries) {
+          let seriesNumber = 0;
+          aggs.forEach((agg: AggConfig) => {
+            if (agg.schema.name === 'metric') {
+              if (seriesNumber === i) matchingSeries.push(agg);
+              seriesNumber++;
+            }
+          });
+        }
+      });
+
+      if (matchingSeries.length === 1) {
+        newCustomLabel = matchingSeries[0].makeLabel();
+      }
+
+      const matchingSeriesAggType = get(matchingSeries, '[0]type.name', '');
+      const matchingSeriesAggField = get(matchingSeries, '[0]params.field.name', '');
+
+      if (lastCustomLabels[axis.id] !== newCustomLabel && newCustomLabel !== '') {
+        const isFirstRender = Object.keys(lastCustomLabels).length === 0;
+        const aggTypeIsChanged = lastMatchingSeriesAggType !== matchingSeriesAggType;
+        const aggFieldIsChanged = lastMatchingSeriesAggField !== matchingSeriesAggField;
+        const aggIsChanged = aggTypeIsChanged || aggFieldIsChanged;
+        const axisTitleIsEmpty = axis.title.text === '';
+        const lastCustomLabelMatchesAxisTitle = lastCustomLabels[axis.id] === axis.title.text;
+
+        if (
+          !isFirstRender &&
+          (aggIsChanged || axisTitleIsEmpty || lastCustomLabelMatchesAxisTitle)
+        ) {
+          axis.title.text = newCustomLabel; // Override axis title with new custom label
+        }
+
+        setLastCustomLabels({ ...lastCustomLabels, [axis.id]: newCustomLabel });
+      }
+
+      setLastMatchingSeriesAggType(matchingSeriesAggType);
+      setLastMatchingSeriesAggField(matchingSeriesAggField);
+    });
+  };
+
+  const changeValueAxis = (index: number) => {
+    const series = stateParams.seriesParams[index];
+    if (series.valueAxis === 'new') {
+      const axis = addValueAxis();
+      series.valueAxis = axis.id;
+    }
+    updateAxisTitle();
+  };
 
   return (
     <>
@@ -75,6 +144,8 @@ function SeriesOptions(props: VisOptionsProps<BasicVislibParams>) {
         {stateParams.seriesParams.map((chart, index) => (
           <EuiAccordion
             id={`visEditorSeriesAccordion${chart.data.id}`}
+            key={index}
+            className="visEditorSidebar__section visEditorSidebar__collapsible"
             initialIsOpen={index === 0}
             buttonContent={chart.data.label}
             aria-label={i18n.translate(
@@ -88,75 +159,12 @@ function SeriesOptions(props: VisOptionsProps<BasicVislibParams>) {
             <>
               <EuiSpacer size="m" />
 
-              <SelectOption
-                id={`seriesType${index}`}
-                label={i18n.translate(
-                  'kbnVislibVisTypes.controls.pointSeries.series.chartTypeLabel',
-                  {
-                    defaultMessage: 'Chart type',
-                  }
-                )}
-                options={vis.type.editorConfig.collections.chartTypes}
-                paramName="type"
-                value={chart.type}
-                setValue={(...params) => setChart(index, ...params)}
+              <ChartOptions
+                index={index}
+                chart={chart}
+                {...props}
+                changeValueAxis={changeValueAxis}
               />
-
-              <SelectOption
-                id={`seriesMode${index}`}
-                label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.series.modeLabel', {
-                  defaultMessage: 'Mode',
-                })}
-                options={vis.type.editorConfig.collections.chartModes}
-                paramName="mode"
-                value={chart.mode}
-                setValue={(...params) => setChart(index, ...params)}
-              />
-
-              <SelectOption
-                id={`seriesValueAxis${index}`}
-                label={i18n.translate(
-                  'kbnVislibVisTypes.controls.pointSeries.series.valueAxisLabel',
-                  {
-                    defaultMessage: 'Value axis',
-                  }
-                )}
-                options={valueAxesOptions}
-                paramName="valueAxis"
-                value={chart.valueAxis}
-                setValue={changeValueAxis}
-              />
-
-              {(chart.type === ChartTypes.LINE || chart.type === ChartTypes.AREA) && (
-                <SelectOption
-                  id={`lineMode${index}`}
-                  label={i18n.translate(
-                    'kbnVislibVisTypes.controls.pointSeries.series.lineModeLabel',
-                    {
-                      defaultMessage: 'Line mode',
-                    }
-                  )}
-                  options={vis.type.editorConfig.collections.interpolationModes}
-                  paramName="interpolate"
-                  value={chart.interpolate}
-                  setValue={(...params) => setChart(index, ...params)}
-                />
-              )}
-
-              {chart.type === ChartTypes.LINE && (
-                <SwitchOption
-                  id={`drawLines${index}`}
-                  label={i18n.translate(
-                    'kbnVislibVisTypes.controls.pointSeries.series.showLineLabel',
-                    {
-                      defaultMessage: 'Show line',
-                    }
-                  )}
-                  paramName="drawLinesBetweenPoints"
-                  value={chart.drawLinesBetweenPoints}
-                  setValue={(...params) => setChart(index, ...params)}
-                />
-              )}
             </>
           </EuiAccordion>
         ))}
