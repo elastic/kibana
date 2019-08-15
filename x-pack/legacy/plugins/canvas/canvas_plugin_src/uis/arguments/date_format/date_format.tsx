@@ -7,6 +7,7 @@
 import React, { FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
 import { FormatSelect } from '../../../../public/components/format_select/format_select';
+import { ArgumentProps } from '../../../../types/arguments';
 
 interface DateFormatOption {
   /** A MomentJS format string */
@@ -15,7 +16,7 @@ interface DateFormatOption {
   text: string;
 }
 
-export interface Props {
+export interface Props extends ArgumentProps {
   /** An array of number formats options */
   dateFormats: DateFormatOption[];
   /** The handler to invoke when value changes */
