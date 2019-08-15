@@ -8,11 +8,11 @@
   top: $euiSizeL;
 }
 
-.expressionInput--editor {
+.canvasExpressionInput--editor {
   height: 250px;
   flex-grow: 1;
   flex-basis: auto;
-
+  border: $euiBorderThin;
   display: flex;
   flex-direction: row;
 
@@ -27,13 +27,13 @@
   display: flex;
   flex-direction: column;
 
-  .expressionInput {
+  .canvasExpressionInput {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
   }
 
-  .expressionInput--inner {
+  .canvasExpressionInput--inner {
     flex-grow: 1;
   }
 

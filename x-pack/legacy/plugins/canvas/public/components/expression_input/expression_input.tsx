@@ -249,15 +249,15 @@ export class ExpressionInput extends React.Component<Props> {
       ? null
       : 'This is the coded expression that backs this element. You better know what you are doing here.';
     return (
-      <div className="expressionInput">
+      <div className="canvasExpressionInput">
         <EuiFormRow
-          className="expressionInput--inner"
+          className="canvasExpressionInput--inner"
           fullWidth
           isInvalid={Boolean(error)}
           error={error}
           helpText={helpText}
         >
-          <div className="expressionInput--editor">
+          <div className="canvasExpressionInput--editor">
             <Editor
               languageId="expression"
               languageDef={language}
