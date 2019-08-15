@@ -48,7 +48,7 @@ class DocumentationLinksService {
   }
 
   public getSnapshotDocUrl() {
-    return `${this.esDocBasePath}/modules-snapshots.html#_snapshot`;
+    return `${this.esDocBasePath}/modules-snapshots.html#snapshots-take-snapshot`;
   }
 
   public getRestoreDocUrl() {
