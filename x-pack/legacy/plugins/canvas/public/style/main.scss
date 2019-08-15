@@ -14,17 +14,16 @@ $canvasElementCardWidth: 210px;
   top: 50%;
   left: 50%;
   transform: translateY(-50%);
-  transform: translateX(-50%);
   text-align: center;
 }
 
 .canvasCheckered {
   background-color: $euiColorGhost;
-  background-image: linear-gradient(45deg, #ddd 25%, transparent 25%),
-    linear-gradient(-45deg, #ddd 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, #ddd 75%),
-    linear-gradient(-45deg, transparent 75%, #ddd 75%);
-  background-size: 8px 8px;
+  background-image: linear-gradient(45deg, $euiColorLightShade 25%, transparent 25%),
+  linear-gradient(-45deg, $euiColorLightShade 25%, transparent 25%),
+  linear-gradient(45deg, transparent 75%, $euiColorLightShade 75%),
+  linear-gradient(-45deg, transparent 75%, $euiColorLightShade 75%);
+  background-size: $euiSizeS $euiSizeS;
   position: relative;
 }
 
@@ -40,22 +39,22 @@ $canvasElementCardWidth: 210px;
   border-top: $euiBorderThin;
 }
 
-#canvas-app {
+#canvas-app { // sass-lint:disable-line no-ids
   overflow-y: hidden;
 
   .window-error {
     position: absolute;
     bottom: 10px;
     right: 10px;
-    background-color: red;
-    color: white;
+    background-color: $euiColorDanger;
+    color: $euiColorEmptyShade;
     display: block;
     z-index: 2000;
     padding: 10px;
     max-width: 500px;
 
     a {
-      color: white;
+      color: $euiColorEmptyShade;
       font-weight: bold;
     }
   }
