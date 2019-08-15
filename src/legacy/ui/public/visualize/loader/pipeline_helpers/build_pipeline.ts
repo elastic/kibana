@@ -542,7 +542,8 @@ export const buildPipeline = async (
     const visConfig = visState.params;
     visConfig.dimensions = await buildVislibDimensions(vis, params);
 
-    pipeline += `vislib ${prepareJson('visConfig', visState.params)}`;
+    pipeline += `vislib type='${vis.type.name}'
+    ${prepareJson('visConfig', visState.params)}`;
   } else if (vis.type.toExpression) {
     pipeline += await vis.type.toExpression(vis, params);
   } else {
