@@ -36,9 +36,10 @@ import {
 import { CoreStart } from 'src/core/public';
 import { ViewMode, EmbeddableChildPanel } from '../../embeddable_api';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
-import { DashboardContainer } from '../dashboard_container';
+import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardPanelState, GridData } from '../types';
 import { Start as InspectorStartContract } from '../../../../../../../../../plugins/inspector/public';
+import { withKibana } from '../../../../../../../../../plugins/kibana_react/public';
 
 let lastValidGridSize = 0;
 
@@ -117,6 +118,7 @@ const config = { monitorWidth: true };
 const ResponsiveSizedGrid = sizeMe(config)(ResponsiveGrid);
 
 export interface DashboardGridProps extends ReactIntl.InjectedIntlProps {
+  kibana: DashboardReactContextValue;
   container: DashboardContainer;
   getActions: GetActionsCompatibleWithTrigger;
   getEmbeddableFactory: GetEmbeddableFactory;
@@ -172,12 +174,13 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       console.error(error); // eslint-disable-line no-console
 
       isLayoutInvalid = true;
-      this.props.notifications.toasts.addDanger({
+      this.props.kibana.notifications.toasts.danger({
         title: this.props.intl.formatMessage({
           id: 'dashboardEmbeddableContainer.dashboardGrid.toast.unableToLoadDashboardDangerMessage',
           defaultMessage: 'Unable to load dashboard.',
         }),
-        text: error.message,
+        body: error.message,
+        toastLifeTimeMs: 5000,
       });
     }
     this.setState({
@@ -241,7 +244,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     }
   };
 
-  public renderDOM() {
+  public renderPanels() {
     const { focusedPanelIndex, panels, expandedPanelId } = this.state;
 
     // Part of our unofficial API - need to render in a consistent order for plugins.
@@ -305,10 +308,10 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
         maximizedPanelId={this.state.expandedPanelId}
         useMargins={this.state.useMargins}
       >
-        {this.renderDOM()}
+        {this.renderPanels()}
       </ResponsiveSizedGrid>
     );
   }
 }
 
-export const DashboardGrid = injectI18n(DashboardGridUi);
+export const DashboardGrid = injectI18n(withKibana(DashboardGridUi));

@@ -72,6 +72,7 @@ function getProps(props?: Partial<DashboardGridProps>): DashboardGridProps {
   dashboardContainer = new DashboardContainer(initialInput, options, createContext(options));
   const defaultTestProps: DashboardGridProps = {
     container: dashboardContainer,
+    kibana: null as any,
     intl: null as any,
     getActions: (() => []) as any,
     getAllEmbeddableFactories: (() => []) as any,
