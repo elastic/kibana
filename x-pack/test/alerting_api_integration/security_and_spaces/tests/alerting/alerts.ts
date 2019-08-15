@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios } from '../../scenarios';
-import { getUrlPrefix } from '../../../common/lib/space_test_utils';
+import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { getTestAlertData, setupEsTestIndex, destroyEsTestIndex } from './utils';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
@@ -20,24 +20,14 @@ export default function alertTests({ getService }: FtrProviderContext) {
   describe('alerts', () => {
     let esTestIndexName: string;
     const authorizationIndex = '.kibana-test-authorization';
-    let createdObjects: Array<{ spaceId: string; id: string; type: string }> = [];
+    const objectRemover = new ObjectRemover(supertest);
 
     before(async () => {
       await destroyEsTestIndex(es);
       ({ name: esTestIndexName } = await setupEsTestIndex(es));
       await es.indices.create({ index: authorizationIndex });
     });
-    afterEach(async () => {
-      await Promise.all(
-        createdObjects.map(({ spaceId, id, type }) => {
-          return supertest
-            .delete(`${getUrlPrefix(spaceId)}/api/${type}/${id}`)
-            .set('kbn-xsrf', 'foo')
-            .expect(204);
-        })
-      );
-      createdObjects = [];
-    });
+    afterEach(() => objectRemover.removeAll());
     after(async () => {
       await destroyEsTestIndex(es);
       await es.indices.delete({ index: authorizationIndex });
@@ -90,7 +80,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          createdObjects.push({ spaceId: space.id, id: createdAction.id, type: 'action' });
+          objectRemover.add(space.id, createdAction.id, 'action');
 
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/alert`)
@@ -133,7 +123,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
-              createdObjects.push({ spaceId: space.id, id: response.body.id, type: 'alert' });
+              objectRemover.add(space.id, response.body.id, 'alert');
               const alertTestRecord = await waitForTestIndexDoc(
                 'alert:test.always-firing',
                 reference
@@ -187,7 +177,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               config: {},
             })
             .expect(200);
-          createdObjects.push({ spaceId: space.id, id: createdAction.id, type: 'action' });
+          objectRemover.add(space.id, createdAction.id, 'action');
 
           const reference = `create-test-2:${user.username}`;
           const response = await supertestWithoutAuth
@@ -230,7 +220,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
-              createdObjects.push({ spaceId: space.id, id: response.body.id, type: 'alert' });
+              objectRemover.add(space.id, response.body.id, 'alert');
               const scheduledActionTask = await retry.try(async () => {
                 const searchResult = await es.search({
                   index: '.kibana_task_manager',
@@ -308,7 +298,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               break;
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
-              createdObjects.push({ spaceId: space.id, id: response.body.id, type: 'alert' });
+              objectRemover.add(space.id, response.body.id, 'alert');
               alertTestRecord = await waitForTestIndexDoc('alert:test.authorization', reference);
               expect(alertTestRecord._source.state).to.eql({
                 callClusterSuccess: false,
@@ -329,7 +319,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
               expect(response.statusCode).to.eql(200);
-              createdObjects.push({ spaceId: space.id, id: response.body.id, type: 'alert' });
+              objectRemover.add(space.id, response.body.id, 'alert');
               alertTestRecord = await waitForTestIndexDoc('alert:test.authorization', reference);
               expect(alertTestRecord._source.state).to.eql({
                 callClusterSuccess: true,
@@ -359,7 +349,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               actionTypeId: 'test.authorization',
             })
             .expect(200);
-          createdObjects.push({ spaceId: space.id, id: createdAction.id, type: 'action' });
+          objectRemover.add(space.id, createdAction.id, 'action');
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')
@@ -400,7 +390,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               break;
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
-              createdObjects.push({ spaceId: space.id, id: response.body.id, type: 'alert' });
+              objectRemover.add(space.id, response.body.id, 'alert');
               actionTestRecord = await waitForTestIndexDoc('action:test.authorization', reference);
               expect(actionTestRecord._source.state).to.eql({
                 callClusterSuccess: false,
@@ -421,7 +411,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
               expect(response.statusCode).to.eql(200);
-              createdObjects.push({ spaceId: space.id, id: response.body.id, type: 'alert' });
+              objectRemover.add(space.id, response.body.id, 'alert');
               actionTestRecord = await waitForTestIndexDoc('action:test.authorization', reference);
               expect(actionTestRecord._source.state).to.eql({
                 callClusterSuccess: true,

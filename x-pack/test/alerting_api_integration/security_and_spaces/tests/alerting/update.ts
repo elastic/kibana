@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { getTestAlertData } from './utils';
 import { UserAtSpaceScenarios } from '../../scenarios';
-import { getUrlPrefix } from '../../../common/lib/space_test_utils';
+import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -16,18 +16,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('update', () => {
-    const createdObjects: Array<{ spaceId: string; id: string; type: string }> = [];
+    const objectRemover = new ObjectRemover(supertest);
 
-    after(async () => {
-      await Promise.all(
-        createdObjects.map(({ spaceId, id, type }) => {
-          return supertest
-            .delete(`${getUrlPrefix(spaceId)}/api/${type}/${id}`)
-            .set('kbn-xsrf', 'foo')
-            .expect(204);
-        })
-      );
-    });
+    after(() => objectRemover.removeAll());
 
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
@@ -38,7 +29,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          createdObjects.push({ spaceId: space.id, id: createdAlert.id, type: 'alert' });
+          objectRemover.add(space.id, createdAlert.id, 'alert');
 
           const updatedData = {
             alertTypeParams: {
@@ -90,7 +81,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          createdObjects.push({ spaceId: space.id, id: createdAlert.id, type: 'alert' });
+          objectRemover.add(space.id, createdAlert.id, 'alert');
 
           await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)
@@ -146,7 +137,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               })
             )
             .expect(200);
-          createdObjects.push({ spaceId: space.id, id: createdAlert.id, type: 'alert' });
+          objectRemover.add(space.id, createdAlert.id, 'alert');
 
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)

@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios } from '../../scenarios';
-import { getUrlPrefix } from '../../../common/lib/space_test_utils';
+import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -19,7 +19,7 @@ export default function({ getService }: FtrProviderContext) {
   const authorizationIndex = '.kibana-test-authorization';
 
   describe('execute', () => {
-    const actionsToDelete: Array<{ spaceId: string; id: string }> = [];
+    const objectRemover = new ObjectRemover(supertest);
 
     before(async () => {
       await es.indices.delete({ index: esTestIndexName, ignore: [404] });
@@ -54,14 +54,8 @@ export default function({ getService }: FtrProviderContext) {
     });
     after(async () => {
       await es.indices.delete({ index: esTestIndexName });
-      const promises = actionsToDelete.map(({ spaceId, id }) => {
-        return supertest
-          .delete(`${getUrlPrefix(spaceId)}/api/action/${id}`)
-          .set('kbn-xsrf', 'foo')
-          .expect(204);
-      });
-      await Promise.all(promises);
       await es.indices.delete({ index: authorizationIndex });
+      await objectRemover.removeAll();
     });
 
     async function getTestIndexDoc(source: string, reference: string) {
@@ -108,7 +102,7 @@ export default function({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          actionsToDelete.push({ spaceId: space.id, id: createdAction.id });
+          objectRemover.add(space.id, createdAction.id, 'action');
 
           const reference = `actions-execute-1:${user.username}`;
           const response = await supertestWithoutAuth
@@ -175,7 +169,7 @@ export default function({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          actionsToDelete.push({ spaceId: space.id, id: createdAction.id });
+          objectRemover.add(space.id, createdAction.id, 'action');
 
           await supertest
             .put(`${getUrlPrefix(space.id)}/api/action/${createdAction.id}`)
@@ -310,7 +304,7 @@ export default function({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          actionsToDelete.push({ spaceId: space.id, id: createdAction.id });
+          objectRemover.add(space.id, createdAction.id, 'action');
 
           await supertest
             .put(`${getUrlPrefix(space.id)}/api/action/${createdAction.id}`)
@@ -371,7 +365,7 @@ export default function({ getService }: FtrProviderContext) {
               actionTypeId: 'test.authorization',
             })
             .expect(200);
-          actionsToDelete.push({ spaceId: space.id, id: createdAction.id });
+          objectRemover.add(space.id, createdAction.id, 'action');
 
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/action/${createdAction.id}/_execute`)

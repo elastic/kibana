@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { getTestAlertData } from './utils';
 import { UserAtSpaceScenarios } from '../../scenarios';
-import { getUrlPrefix } from '../../../common/lib/space_test_utils';
+import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -16,19 +16,9 @@ export default function createGetTests({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('get', () => {
-    let createdObjects: Array<{ spaceId: string; id: string; type: string }> = [];
+    const objectRemover = new ObjectRemover(supertest);
 
-    afterEach(async () => {
-      await Promise.all(
-        createdObjects.map(({ spaceId, id, type }) => {
-          return supertest
-            .delete(`${getUrlPrefix(spaceId)}/api/${type}/${id}`)
-            .set('kbn-xsrf', 'foo')
-            .expect(204);
-        })
-      );
-      createdObjects = [];
-    });
+    afterEach(() => objectRemover.removeAll());
 
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
@@ -39,7 +29,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          createdObjects.push({ spaceId: space.id, id: createdAlert.id, type: 'alert' });
+          objectRemover.add(space.id, createdAlert.id, 'alert');
 
           const response = await supertestWithoutAuth
             .get(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)

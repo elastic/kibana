@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { getTestAlertData } from './utils';
 import { UserAtSpaceScenarios } from '../../scenarios';
-import { getUrlPrefix } from '../../../common/lib/space_test_utils';
+import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -17,18 +17,9 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('create', () => {
-    const createdObjects: Array<{ spaceId: string; id: string; type: string }> = [];
+    const objectRemover = new ObjectRemover(supertest);
 
-    after(async () => {
-      await Promise.all(
-        createdObjects.map(({ spaceId, id, type }) => {
-          return supertest
-            .delete(`${getUrlPrefix(spaceId)}/api/${type}/${id}`)
-            .set('kbn-xsrf', 'foo')
-            .expect(204);
-        })
-      );
-    });
+    after(() => objectRemover.removeAll());
 
     async function getScheduledTask(id: string) {
       return await es.get({
@@ -61,6 +52,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
+              objectRemover.add(space.id, response.body.id, 'alert');
               expect(response.body).to.eql({
                 id: response.body.id,
                 actions: [],
@@ -106,6 +98,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
+              objectRemover.add(space.id, response.body.id, 'alert');
               expect(response.body.scheduledTaskId).to.eql(undefined);
               break;
             default:

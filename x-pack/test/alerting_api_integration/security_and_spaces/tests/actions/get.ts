@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios } from '../../scenarios';
-import { getUrlPrefix } from '../../../common/lib/space_test_utils';
+import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -15,18 +15,9 @@ export default function getActionTests({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('get', () => {
-    let actionsToDelete: Array<{ spaceId: string; id: string }> = [];
+    const objectRemover = new ObjectRemover(supertest);
 
-    afterEach(async () => {
-      const promises = actionsToDelete.map(({ spaceId, id }) => {
-        return supertest
-          .delete(`${getUrlPrefix(spaceId)}/api/action/${id}`)
-          .set('kbn-xsrf', 'foo')
-          .expect(204);
-      });
-      await Promise.all(promises);
-      actionsToDelete = [];
-    });
+    afterEach(() => objectRemover.removeAll());
 
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
@@ -46,7 +37,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          actionsToDelete.push({ spaceId: space.id, id: createdAction.id });
+          objectRemover.add(space.id, createdAction.id, 'action');
 
           const response = await supertestWithoutAuth
             .get(`${getUrlPrefix(space.id)}/api/action/${createdAction.id}`)

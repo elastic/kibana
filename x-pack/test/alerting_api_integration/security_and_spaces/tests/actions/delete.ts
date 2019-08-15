@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 
 import { UserAtSpaceScenarios } from '../../scenarios';
-import { getUrlPrefix } from '../../../common/lib/space_test_utils';
+import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -16,17 +16,9 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('delete', () => {
-    const actionsToDelete: Array<{ spaceId: string; id: string }> = [];
+    const objectRemover = new ObjectRemover(supertest);
 
-    after(async () => {
-      const promises = actionsToDelete.map(({ spaceId, id }) => {
-        return supertest
-          .delete(`${getUrlPrefix(spaceId)}/api/action/${id}`)
-          .set('kbn-xsrf', 'foo')
-          .expect(204);
-      });
-      await Promise.all(promises);
-    });
+    after(() => objectRemover.removeAll());
 
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
@@ -62,7 +54,7 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
                 error: 'Forbidden',
                 message: 'Unable to delete action',
               });
-              actionsToDelete.push({ spaceId: space.id, id: createdAction.id });
+              objectRemover.add(space.id, createdAction.id, 'action');
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
