@@ -21,14 +21,10 @@ import React from 'react';
 import sinon from 'sinon';
 import { ExitFullScreenButton } from './exit_full_screen_button';
 import { keyCodes } from '@elastic/eui';
-
-// @ts-ignore
-import { mountWithIntl, renderWithIntl } from 'test_utils/enzyme_helpers';
+import { mount } from 'enzyme';
 
 test('is rendered', () => {
-  const component = renderWithIntl(
-    <ExitFullScreenButton.WrappedComponent onExitFullScreenMode={() => {}} />
-  );
+  const component = mount(<ExitFullScreenButton onExitFullScreenMode={() => {}} />);
 
   expect(component).toMatchSnapshot();
 });
@@ -37,9 +33,7 @@ describe('onExitFullScreenMode', () => {
   test('is called when the button is pressed', () => {
     const onExitHandler = sinon.stub();
 
-    const component = mountWithIntl(
-      <ExitFullScreenButton.WrappedComponent onExitFullScreenMode={onExitHandler} />
-    );
+    const component = mount(<ExitFullScreenButton onExitFullScreenMode={onExitHandler} />);
 
     component.find('button').simulate('click');
 
@@ -49,9 +43,9 @@ describe('onExitFullScreenMode', () => {
   test('is called when the ESC key is pressed', () => {
     const onExitHandler = sinon.stub();
 
-    mountWithIntl(<ExitFullScreenButton.WrappedComponent onExitFullScreenMode={onExitHandler} />);
+    mount(<ExitFullScreenButton onExitFullScreenMode={onExitHandler} />);
 
-    const escapeKeyEvent = new KeyboardEvent('keydown', { keyCode: keyCodes.ESCAPE });
+    const escapeKeyEvent = new KeyboardEvent('keydown', { keyCode: keyCodes.ESCAPE } as any);
     document.dispatchEvent(escapeKeyEvent);
 
     sinon.assert.calledOnce(onExitHandler);
