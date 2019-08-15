@@ -7,13 +7,13 @@
 
 The default source configuration for logs is specified in the {kibana-ref}/logs-ui-settings-kb.html[Logs app settings] in the {kibana-ref}/settings.html[Kibana configuration file].
 The default configuration uses the `filebeat-*` index pattern to query the data.
-The default configuration also defines field settings for things like timestamps and container names and the default columns to show in the logs pane.
+The default configuration also defines field settings for things like timestamps and container names, and the default columns to show in the logs pane.
 
-If your logs have custom index patterns, or use non-default field settings, or  contain parsed fields which you want to expose as individual columns, you can override the default settings.
+If your logs have custom index patterns, or use non-default field settings, or contain parsed fields which you want to expose as individual columns, you can override the default settings.
 Click *Configuration* to change the settings.
 This opens the *Configure source* fly-out dialog.
 
-NOTE: These settings are shared with metrics. Changes you make here may also affect the settings used in the *Metrics* tab.
+NOTE: These settings are shared with metrics. Changes you make here may also affect the settings used by the *Metrics* app.
 
 TIP: If <<xpack-spaces>> are enabled in your Kibana instance, any configuration changes you make here are specific to the current space.
 You can make different subsets of data available by creating multiple spaces with different data source configurations.

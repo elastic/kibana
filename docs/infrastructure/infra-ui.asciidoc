@@ -41,7 +41,8 @@ Examples of grouping options include *Availability Zone*, *Machine Type*, *Proje
 [[infra-search]]
 === Use the power of search
 
-Use the search bar to perform ad hoc or structured searches using {kibana-ref}/kuery-query.html[Kibana Query Language] which features autocomplete and a simple, easy to use syntax.
+Use the search bar to perform ad hoc searches for specific text.
+You can also create structured searches using {kibana-ref}/kuery-query.html[Kibana Query Language].
 For example, enter `host.hostname : "host1"` to see only the information for `host1`.
 
 [float]
@@ -69,7 +70,7 @@ If your metrics have custom index patterns, or use non-default field settings, y
 Click *Configuration* to change the settings.
 This opens the *Configure source* fly-out dialog.
 
-NOTE: These settings are shared with logs. Changes you make here may also affect the settings used in the *Logs* tab.
+NOTE: These settings are shared with logs. Changes you make here may also affect the settings used by the *Logs* app.
 
 In the *Configure source* dialog, you can change the following values:
 
