@@ -18,21 +18,24 @@
  */
 
 import { Observable } from 'rxjs';
-import { toArray, flatMap } from 'rxjs/operators';
-// @ts-ignore
-import { findPluginSpecs } from '../../../../legacy/plugin_discovery/find_plugin_specs.js';
-// @ts-ignore
-import { Config } from './../../../../legacy/server/config';
+import { toArray } from 'rxjs/operators';
+import {
+  findPluginSpecs,
+  defaultConfig,
+  // @ts-ignore
+} from '../../../../legacy/plugin_discovery/find_plugin_specs.js';
 // @ts-ignore
 import { transformDeprecations } from '../../../../../src/legacy/server/config/transform_deprecations.js';
 
-export function findLegacyPluginSpecs$(settings$: Observable<any>) {
-  return settings$.pipe(
-    flatMap(settings => {
-      const config = Config.withDefaultSchema(transformDeprecations(settings));
-      const { spec$ }: { spec$: Observable<unknown> } = findPluginSpecs(settings, config) as any;
-
-      return spec$.pipe(toArray());
-    })
-  );
+export async function findLegacyPluginSpecs(settings: unknown) {
+  const configToMutate = defaultConfig(settings);
+  const {
+    spec$,
+  }: {
+    spec$: Observable<unknown>;
+  } = findPluginSpecs(settings, configToMutate) as any;
+  return {
+    pluginSpecs: await spec$.pipe(toArray()).toPromise(),
+    pluginExtendedConfig: configToMutate,
+  };
 }

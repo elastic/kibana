@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
 // @ts-ignore
 import { collectUiExports } from '../../../../legacy/ui/ui_exports/collect_ui_exports';
 import { SavedObjectsSchemaDefinition } from '../../saved_objects/schema';
@@ -37,6 +35,6 @@ export interface SavedObjectsLegacyUiExports {
   savedObjectValidations: PropertyValidators;
 }
 
-export function collectLegacyUiExports$(pluginSpecs$: Observable<unknown[]>) {
-  return pluginSpecs$.pipe(map<unknown[], SavedObjectsLegacyUiExports>(collectUiExports));
+export function collectLegacyUiExports(pluginSpecs: unknown[]): SavedObjectsLegacyUiExports {
+  return collectUiExports(pluginSpecs);
 }

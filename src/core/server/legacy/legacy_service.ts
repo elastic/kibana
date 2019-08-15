@@ -28,11 +28,10 @@ import { BasePathProxyServer, HttpConfig, HttpConfigType } from '../http';
 import { Logger } from '../logging';
 import { PluginsServiceSetup, PluginsServiceStart } from '../plugins';
 import {
-  findLegacyPluginSpecs$,
-  collectLegacyUiExports$,
+  findLegacyPluginSpecs,
+  collectLegacyUiExports,
   SavedObjectsLegacyUiExports,
 } from './plugins';
-import { KibanaConfigType, KibanaConfig } from '../kibana_config';
 
 interface LegacyKbnServer {
   applyLoggingConfiguration: (settings: Readonly<Record<string, any>>) => void;
@@ -76,8 +75,9 @@ export interface LegacyServiceStartDeps {
 }
 
 export interface LegacyServiceSetup {
-  pluginSpecs$: Observable<unknown[]>;
-  uiExports$: Observable<SavedObjectsLegacyUiExports>;
+  pluginSpecs: unknown[];
+  uiExports: SavedObjectsLegacyUiExports;
+  pluginExtendedConfig: Config;
 }
 
 /** @internal */
@@ -85,7 +85,6 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
   private readonly log: Logger;
   private readonly devConfig$: Observable<DevConfig>;
   private readonly httpConfig$: Observable<HttpConfig>;
-  private readonly kibanaConfig$: Observable<KibanaConfig>;
   private kbnServer?: LegacyKbnServer;
   private configSubscription?: Subscription;
   private setupDeps?: LegacyServiceSetupDeps;
@@ -115,12 +114,21 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
 
     this.configSubscription = this.update$.connect();
 
-    const pluginSpecs$ = findLegacyPluginSpecs$(
-      this.update$.pipe(map(config => getLegacyRawConfig(config)))
-    );
+    const settings = await this.update$
+      .pipe(
+        first(),
+        map(config => getLegacyRawConfig(config))
+      )
+      .toPromise();
 
-    const uiExports$ = collectLegacyUiExports$(pluginSpecs$);
-    return { pluginSpecs$, uiExports$ };
+    const { pluginSpecs, pluginExtendedConfig } = await findLegacyPluginSpecs(settings);
+
+    const uiExports = collectLegacyUiExports(pluginSpecs);
+    return {
+      pluginSpecs,
+      uiExports,
+      pluginExtendedConfig,
+    };
   }
 
   public async start(startDeps: LegacyServiceStartDeps) {
