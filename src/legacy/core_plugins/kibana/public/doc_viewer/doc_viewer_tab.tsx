@@ -23,14 +23,15 @@ import { DocViewerError } from './doc_viewer_render_error';
 
 interface Props {
   component?: React.Component | React.FunctionComponent;
+  id: number;
   render?: DocViewRenderFn;
   renderProps: DocViewRenderProps;
   title: string;
 }
 
 interface State {
-  hasError: boolean;
   error: null | Error | string;
+  hasError: boolean;
 }
 /**
  * Renders the tab content of a doc view.
@@ -46,6 +47,13 @@ export class DocViewerTab extends React.Component<Props, State> {
   static getDerivedStateFromError(error: unknown) {
     // Update state so the next render will show the fallback UI.
     return { hasError: true, error };
+  }
+
+  shouldComponentUpdate(nextProps: Props) {
+    return (
+      nextProps.renderProps.hit._id !== this.props.renderProps.hit._id ||
+      nextProps.id !== this.props.id
+    );
   }
 
   render() {
