@@ -209,74 +209,80 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
                     state.checksByAgentIdIP = new HashMap();
                 `,
                   map_script: `
-                    Map curCheck = new HashMap();
-                    String agentId = doc["agent.id"][0];
-                    String ip = null;
-                    if (doc["monitor.ip"].length > 0) {
-                      ip = doc["monitor.ip"][0];
-                    }
-                    String agentIdIP = agentId + "-" + (ip == null ? "" : ip.toString());
-                    def ts = doc["@timestamp"][0].toInstant().toEpochMilli();
-                    
-                    def lastCheck = state.checksByAgentIdIP[agentId];
-                    Instant lastTs = lastCheck != null ? lastCheck["@timestamp"] : null;
-                    if (lastTs != null && lastTs > ts) {
-                      return;
-                    }
-                    
-                    curCheck.put("@timestamp", ts);
-                    
-                    Map agent = new HashMap();
-                    agent.id = agentId;
-                    curCheck.put("agent", agent);
-                    
-                    if (state.globals.url == null) {
-                      Map url = new HashMap();
-                      Collection fields = ["full", "original", "scheme", "username", "password", "domain", "port", "path", "query", "fragment"];
-                      for (field in fields) {
-                        String docPath = "url." + field;
-                        def val = doc[docPath];
-                        if (!val.isEmpty()) {
-                          url[field] = val[0];
-                        }
-                      }
-                      state.globals.url = url;
-                    }
-                    
-                    Map monitor = new HashMap();
-                    monitor.status = doc["monitor.status"][0];
-                    monitor.ip = ip;
-                    if (!doc["monitor.name"].isEmpty()) {
-                      String monitorName = doc["monitor.name"][0];
-                      if (monitor.name != "") {
-                        monitor.name = monitorName;
+                  Map curCheck = new HashMap();
+                  String agentId = doc["agent.id"][0];
+                  String ip = null;
+                  if (doc["monitor.ip"].length > 0) {
+                    ip = doc["monitor.ip"][0];
+                  }
+                  String agentIdIP = agentId + "-" + (ip == null ? "" : ip.toString());
+                  def ts = doc["@timestamp"][0].toInstant().toEpochMilli();
+                  
+                  def lastCheck = state.checksByAgentIdIP[agentId];
+                  Instant lastTs = lastCheck != null ? lastCheck["@timestamp"] : null;
+                  if (lastTs != null && lastTs > ts) {
+                    return;
+                  }
+                  
+                  curCheck.put("@timestamp", ts);
+                  
+                  Map agent = new HashMap();
+                  agent.id = agentId;
+                  curCheck.put("agent", agent);
+                  
+                  if (state.globals.url == null) {
+                    Map url = new HashMap();
+                    Collection fields = ["full", "original", "scheme", "username", "password", "domain", "port", "path", "query", "fragment"];
+                    for (field in fields) {
+                      String docPath = "url." + field;
+                      def val = doc[docPath];
+                      if (!val.isEmpty()) {
+                        url[field] = val[0];
                       }
                     }
-                    curCheck.monitor = monitor;
-                    
-                    if (curCheck.observer == null) {
-                      curCheck.observer = new HashMap();
+                    state.globals.url = url;
+                  }
+                  
+                  Map monitor = new HashMap();
+                  monitor.status = doc["monitor.status"][0];
+                  monitor.ip = ip;
+                  if (!doc["monitor.name"].isEmpty()) {
+                    String monitorName = doc["monitor.name"][0];
+                    if (monitor.name != "") {
+                      monitor.name = monitorName;
                     }
-                    if (curCheck.observer.geo == null) {
-                      curCheck.observer.geo = new HashMap();
-                    }
-                    if (!doc["observer.geo.name"].isEmpty()) {
-                      curCheck.observer.geo.name = doc["observer.geo.name"][0];
-                    }
-                    if (!doc["observer.geo.location"].isEmpty()) {
-                      curCheck.observer.geo.location = doc["observer.geo.location"][0];
-                    }
-                    if (!doc["kubernetes.pod.uid"].isEmpty() && curCheck.kubernetes == null) {
-                      curCheck.kubernetes = new HashMap();
-                      curCheck.kubernetes.pod = new HashMap();
-                      curCheck.kubernetes.pod.uid = doc["kubernetes.pod.uid"][0];
-                    }
-                    if (!doc["container.id"].isEmpty() && curCheck.container == null) {
-                      curCheck.container = new HashMap();
-                      curCheck.container.id = doc["container.id"][0];
-                    }
-                    
-                    state.checksByAgentIdIP[agentIdIP] = curCheck;
+                  }
+                  curCheck.monitor = monitor;
+                  
+                  if (curCheck.observer == null) {
+                    curCheck.observer = new HashMap();
+                  }
+                  if (curCheck.observer.geo == null) {
+                    curCheck.observer.geo = new HashMap();
+                  }
+                  if (!doc["observer.geo.name"].isEmpty()) {
+                    curCheck.observer.geo.name = doc["observer.geo.name"][0];
+                  }
+                  if (!doc["observer.geo.location"].isEmpty()) {
+                    curCheck.observer.geo.location = doc["observer.geo.location"][0];
+                  }
+                  if (!doc["kubernetes.pod.uid"].isEmpty() && curCheck.kubernetes == null) {
+                    curCheck.kubernetes = new HashMap();
+                    curCheck.kubernetes.pod = new HashMap();
+                    curCheck.kubernetes.pod.uid = doc["kubernetes.pod.uid"][0];
+                  }
+                  if (!doc["container.id"].isEmpty() && curCheck.container == null) {
+                    curCheck.container = new HashMap();
+                    curCheck.container.id = doc["container.id"][0];
+                  }
+                  if (curCheck.certificate == null) {
+                    curCheck.certificate = new HashMap();
+                  }
+                  if (!doc["tls.certificate_not_valid_after"].isEmpty()) {
+                    curCheck.certificate.expiration = doc["tls.certificate_not_valid_after"];
+                  }
+                  
+                  state.checksByAgentIdIP[agentIdIP] = curCheck;
                 `,
                   combine_script: 'return state;',
                   reduce_script: `
@@ -289,6 +295,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
                   Collection geoNames = new HashSet();
                   Collection podUids = new HashSet();
                   Collection containerIds = new HashSet();
+                  Collection certExpirations = new HashSet();
                   String name = null; 
                   for (state in states) {
                     result.putAll(state.globals);
@@ -319,6 +326,9 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
                       if (check.container != null) {
                         containerIds.add(check.container.id);
                       }
+                      if (check.certificate != null && check.certificate.expiration != null) {
+                        certExpirations.add(check.certificate.expiration);
+                      }
                     }
                   }
                   
@@ -340,6 +350,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
                   
                   Map observer = new HashMap();
                   Map geo = new HashMap();
+                  Map certificate = new HashMap();
                   observer.geo = geo;
                   geo.name = geoNames;
                   result.observer = observer;
@@ -353,6 +364,11 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
                   if (!containerIds.isEmpty()) {
                     result.container = new HashMap();
                     result.container.id = containerIds;
+                  }
+                  
+                  if (!certExpirations.isEmpty()) {
+                    result.tls = new HashMap();
+                    result.tls.certificate_not_valid_after = certExpirations;
                   }
 
                   return result;
@@ -404,8 +420,12 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       const monitorId = get<string>(monitor, 'key.monitor_id');
       monitorIds.push(monitorId);
       let state = get<any>(monitor, 'state.value');
+      const tls = get(state, 'tls.certificate_not_valid_after', Array<string[]>());
       state = {
         ...state,
+        tls: {
+          certificate_not_valid_after: flatten(tls),
+        },
         timestamp: state['@timestamp'],
       };
       const { checks } = state;

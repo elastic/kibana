@@ -231,8 +231,10 @@ export const pingsSchema = gql`
     rtt: RTT
   }
 
+  "Contains monitor transmission encryption information."
   type TLS {
-    certificate_not_valid_after: String
+    "The date and time after which the certificate is invalid."
+    certificate_not_valid_after: [String]
     certificate_not_valid_before: String
     certificates: String
     rtt: RTT

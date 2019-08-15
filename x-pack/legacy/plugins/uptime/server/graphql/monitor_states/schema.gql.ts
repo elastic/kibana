@@ -124,6 +124,8 @@ export const monitorStatesSchema = gql`
     monitor: MonitorState
     summary: Summary!
     timestamp: UnsignedInteger!
+    "Transport encryption information."
+    tls: TLS
     url: StateUrl
   }
 

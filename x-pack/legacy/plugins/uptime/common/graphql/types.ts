@@ -342,9 +342,10 @@ export interface Tcp {
 
   rtt?: Rtt | null;
 }
-
+/** Contains monitor transmission encryption information. */
 export interface Tls {
-  certificate_not_valid_after?: string | null;
+  /** The date and time after which the certificate is invalid. */
+  certificate_not_valid_after?: (string | null)[] | null;
 
   certificate_not_valid_before?: string | null;
 
@@ -534,6 +535,8 @@ export interface State {
   summary: Summary;
 
   timestamp: UnsignedInteger;
+  /** Transport encryption information. */
+  tls?: Tls | null;
 
   url?: StateUrl | null;
 }
