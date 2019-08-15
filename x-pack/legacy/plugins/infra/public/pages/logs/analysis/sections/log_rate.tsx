@@ -8,6 +8,7 @@ import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { first, last } from 'lodash';
 import moment from 'moment';
+import chrome from 'ui/chrome';
 import {
   Axis,
   Chart,
@@ -19,6 +20,9 @@ import {
   Settings,
   SpecId,
   TooltipValue,
+  Theme,
+  LIGHT_THEME,
+  DARK_THEME,
 } from '@elastic/charts';
 import {
   EuiTitle,
@@ -37,6 +41,15 @@ const getColorsMap = (color: string, specId: SpecId) => {
   map.set({ colorValues: [], specId }, color);
   return map;
 };
+
+const isDarkMode = () => chrome.getUiSettingsClient().get('theme:darkMode');
+
+const getChartTheme = (): Theme => {
+  return isDarkMode() ? DARK_THEME : LIGHT_THEME;
+};
+
+const areaSeriesColour = 'rgb(224, 237, 255)';
+const lineSeriesColour = 'rgb(49, 133, 252)';
 
 export const LogRateResults = ({
   isLoading,
@@ -134,11 +147,17 @@ export const LogRateResults = ({
               data={areaSeries}
               yScaleToDataExtent
               curve={2}
-              areaSeriesStyle={{
-                line: { stroke: 'rgb(224, 237, 255)' },
-                area: { fill: 'rgb(224, 237, 255)', visible: true, opacity: 0.8 },
-              }}
-              customSeriesColors={getColorsMap('rgb(224, 237, 255)', areaSpecId)}
+              areaSeriesStyle={
+                !isDarkMode
+                  ? {
+                      line: { stroke: areaSeriesColour },
+                      area: { fill: areaSeriesColour, visible: true, opacity: 0.8 },
+                    }
+                  : undefined
+              }
+              customSeriesColors={
+                !isDarkMode ? getColorsMap(areaSeriesColour, areaSpecId) : undefined
+              }
             />
             <LineSeries
               id={lineSpecId}
@@ -150,13 +169,19 @@ export const LogRateResults = ({
               data={lineSeries}
               yScaleToDataExtent
               curve={2}
-              lineSeriesStyle={{
-                line: { stroke: 'rgb(49, 133, 252)' },
-                point: { radius: 2, fill: 'rgb(49, 133, 252)' },
-              }}
-              customSeriesColors={getColorsMap('rgb(49, 133, 252)', lineSpecId)}
+              lineSeriesStyle={
+                !isDarkMode
+                  ? {
+                      line: { stroke: lineSeriesColour },
+                      point: { radius: 2, fill: lineSeriesColour },
+                    }
+                  : undefined
+              }
+              customSeriesColors={
+                !isDarkMode ? getColorsMap(lineSeriesColour, lineSpecId) : undefined
+              }
             />
-            <Settings tooltip={tooltipProps} />
+            <Settings tooltip={tooltipProps} theme={getChartTheme()} />
           </Chart>
         </div>
       )}

@@ -65,6 +65,13 @@ export const AnalysisResultsContent = ({ sourceId }: { sourceId: string }) => {
   useInterval(setTimeRangeToNow, autoRefreshEnabled ? refreshInterval : null);
 
   const bucketDuration = useMemo(() => {
+    // This function takes the current time range in ms,
+    // works out the bucket interval we'd need to always
+    // display 200 data points, and then takes that new
+    // value and works out the nearest multiple of
+    // 900000 (15 minutes) to it, so that we don't end up with
+    // jaggy bucket boundaries between the ML buckets and our
+    // aggregation buckets.
     const msRange = timeRange.endTime - timeRange.startTime;
     const bucketIntervalInMs = msRange / 200;
     const bucketSpan = 900000; // TODO: Pull this from 'common' when setup hook PR is merged
