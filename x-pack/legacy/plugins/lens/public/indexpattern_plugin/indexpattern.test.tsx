@@ -263,6 +263,7 @@ describe('IndexPattern Data Source', () => {
           },
         },
         currentIndexPatternId: '1',
+        showEmptyFields: false,
       };
       expect(indexPatternDatasource.insertLayer(state, 'newLayer')).toEqual({
         ...state,
@@ -281,6 +282,7 @@ describe('IndexPattern Data Source', () => {
   describe('#removeLayer', () => {
     it('should remove a layer', () => {
       const state = {
+        showEmptyFields: false,
         indexPatterns: expectedIndexPatterns,
         layers: {
           first: {
@@ -313,6 +315,7 @@ describe('IndexPattern Data Source', () => {
     it('should list the current layers', () => {
       expect(
         indexPatternDatasource.getLayers({
+          showEmptyFields: false,
           indexPatterns: expectedIndexPatterns,
           layers: {
             first: {
@@ -336,6 +339,7 @@ describe('IndexPattern Data Source', () => {
     it('should return the title of the index patterns', () => {
       expect(
         indexPatternDatasource.getMetaData({
+          showEmptyFields: false,
           indexPatterns: expectedIndexPatterns,
           layers: {
             first: {

@@ -18,6 +18,7 @@ jest.mock('./loader');
 
 const initialState: IndexPatternPrivateState = {
   currentIndexPatternId: '1',
+  showEmptyFields: false,
   layers: {
     first: {
       indexPatternId: '1',
@@ -203,6 +204,13 @@ describe('IndexPattern Data Panel', () => {
       showIndexPatternSwitcher: false,
       setShowIndexPatternSwitcher: jest.fn(),
       onChangeIndexPattern: jest.fn(),
+      dateRange: {
+        fromDate: 'now-7d',
+        toDate: 'now',
+      },
+      query: { query: '', language: 'lucene' },
+      showEmptyFields: false,
+      onToggleEmptyFields: jest.fn(),
     };
   });
 
@@ -210,6 +218,7 @@ describe('IndexPattern Data Panel', () => {
     const setStateSpy = jest.fn();
     const wrapper = shallow(
       <IndexPatternDataPanel
+        {...defaultProps}
         state={{
           ...initialState,
           layers: { first: { indexPatternId: '1', columnOrder: [], columns: {} } },
@@ -242,6 +251,7 @@ describe('IndexPattern Data Panel', () => {
     };
     const wrapper = shallow(
       <IndexPatternDataPanel
+        {...defaultProps}
         state={state}
         setState={setStateSpy}
         dragDropContext={{ dragging: {}, setDragging: () => {} }}
@@ -270,6 +280,7 @@ describe('IndexPattern Data Panel', () => {
     };
     const wrapper = shallow(
       <IndexPatternDataPanel
+        {...defaultProps}
         state={state}
         setState={setStateSpy}
         dragDropContext={{ dragging: {}, setDragging: () => {} }}

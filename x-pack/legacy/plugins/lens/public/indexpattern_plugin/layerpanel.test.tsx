@@ -18,6 +18,7 @@ jest.mock('./state_helpers');
 
 const initialState: IndexPatternPrivateState = {
   currentIndexPatternId: '1',
+  showEmptyFields: false,
   layers: {
     first: {
       indexPatternId: '1',

@@ -30,6 +30,7 @@ describe('filter_ratio', () => {
         },
       },
       currentIndexPatternId: '1',
+      showEmptyFields: false,
       layers: {
         first: {
           indexPatternId: '1',

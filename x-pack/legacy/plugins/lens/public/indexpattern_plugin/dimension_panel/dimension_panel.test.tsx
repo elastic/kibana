@@ -80,6 +80,7 @@ describe('IndexPatternDimensionPanel', () => {
     state = {
       indexPatterns: expectedIndexPatterns,
       currentIndexPatternId: '1',
+      showEmptyFields: false,
       layers: {
         first: {
           indexPatternId: '1',
@@ -947,6 +948,7 @@ describe('IndexPatternDimensionPanel', () => {
           },
         },
         currentIndexPatternId: '1',
+        showEmptyFields: false,
         layers: {
           myLayer: {
             indexPatternId: 'foo',
