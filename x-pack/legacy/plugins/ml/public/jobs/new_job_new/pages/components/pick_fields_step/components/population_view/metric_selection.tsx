@@ -115,7 +115,7 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
   // if the split field or by fields have changed
   useEffect(() => {
     loadCharts();
-  }, [JSON.stringify(fieldValuesPerDetector)]);
+  }, [JSON.stringify(fieldValuesPerDetector), splitField]);
 
   // watch for change in jobCreator
   useEffect(() => {
