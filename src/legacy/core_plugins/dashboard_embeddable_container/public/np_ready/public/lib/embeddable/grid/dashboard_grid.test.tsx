@@ -21,7 +21,7 @@
 import sizeMe from 'react-sizeme';
 
 import React from 'react';
-import { shallowWithIntl, nextTick, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { nextTick, mountWithIntl } from 'test_utils/enzyme_helpers';
 import { skip } from 'rxjs/operators';
 import { EmbeddableFactory, GetEmbeddableFactory } from '../../embeddable_api';
 import { DashboardGrid, DashboardGridProps } from './dashboard_grid';
@@ -35,7 +35,7 @@ import { createContext } from '../../../../../../../../../plugins/kibana_react/p
 
 let dashboardContainer: DashboardContainer | undefined;
 
-function getProps(props?: Partial<DashboardGridProps>): DashboardGridProps {
+function prepare(props?: Partial<DashboardGridProps>) {
   const embeddableFactories = new Map<string, EmbeddableFactory>();
   embeddableFactories.set(
     CONTACT_CARD_EMBEDDABLE,
@@ -69,20 +69,18 @@ function getProps(props?: Partial<DashboardGridProps>): DashboardGridProps {
     SavedObjectFinder: () => null,
     ExitFullScreenButton: () => null,
   };
-  dashboardContainer = new DashboardContainer(initialInput, options, createContext(options));
+  const context = createContext(options);
+  dashboardContainer = new DashboardContainer(initialInput, options, context);
   const defaultTestProps: DashboardGridProps = {
     container: dashboardContainer,
     kibana: null as any,
     intl: null as any,
-    getActions: (() => []) as any,
-    getAllEmbeddableFactories: (() => []) as any,
-    getEmbeddableFactory: (() => {}) as any,
-    notifications: {} as any,
-    overlays: {} as any,
-    inspector: {} as any,
-    SavedObjectFinder: () => null,
   };
-  return Object.assign(defaultTestProps, props);
+
+  return {
+    props: Object.assign(defaultTestProps, props),
+    context,
+  };
 }
 
 beforeAll(() => {
@@ -96,14 +94,25 @@ afterAll(() => {
 });
 
 test('renders DashboardGrid', () => {
-  const component = shallowWithIntl(<DashboardGrid.WrappedComponent {...getProps()} />);
-  const panelElements = component.find('InjectIntl(EmbeddableChildPanelUi)');
+  const { props, context } = prepare();
+  const component = mountWithIntl(
+    <context.Provider>
+      <DashboardGrid {...props} />
+    </context.Provider>
+  );
+
+  const panelElements = component.find('EmbeddableChildPanelUi');
   expect(panelElements.length).toBe(2);
 });
 
 test('renders DashboardGrid with no visualizations', async () => {
-  const props = getProps();
-  const component = shallowWithIntl(<DashboardGrid.WrappedComponent {...props} />);
+  const { props, context } = prepare();
+  const component = mountWithIntl(
+    <context.Provider>
+      <DashboardGrid {...props} />
+    </context.Provider>
+  );
+
   props.container.updateInput({ panels: {} });
   await nextTick();
   component.update();
@@ -111,8 +120,13 @@ test('renders DashboardGrid with no visualizations', async () => {
 });
 
 test('DashboardGrid removes panel when removed from container', async () => {
-  const props = getProps();
-  const component = shallowWithIntl(<DashboardGrid.WrappedComponent {...props} />);
+  const { props, context } = prepare();
+  const component = mountWithIntl(
+    <context.Provider>
+      <DashboardGrid {...props} />
+    </context.Provider>
+  );
+
   const originalPanels = props.container.getInput().panels;
   const filteredPanels = { ...originalPanels };
   delete filteredPanels['1'];
@@ -124,27 +138,41 @@ test('DashboardGrid removes panel when removed from container', async () => {
 });
 
 test('DashboardGrid renders expanded panel', async () => {
-  const props = getProps();
-  const component = shallowWithIntl(<DashboardGrid.WrappedComponent {...props} />);
+  const { props, context } = prepare();
+  const component = mountWithIntl(
+    <context.Provider>
+      <DashboardGrid {...props} />
+    </context.Provider>
+  );
+
   props.container.updateInput({ expandedPanelId: '1' });
   await nextTick();
   component.update();
   // Both panels should still exist in the dom, so nothing needs to be re-fetched once minimized.
   expect(component.find('InjectIntl(EmbeddableChildPanelUi)').length).toBe(2);
 
-  expect((component.state() as { expandedPanelId?: string }).expandedPanelId).toBe('1');
+  expect(
+    (component.find('DashboardGridUi').state() as { expandedPanelId?: string }).expandedPanelId
+  ).toBe('1');
 
   props.container.updateInput({ expandedPanelId: undefined });
   await nextTick();
   component.update();
   expect(component.find('InjectIntl(EmbeddableChildPanelUi)').length).toBe(2);
 
-  expect((component.state() as { expandedPanelId?: string }).expandedPanelId).toBeUndefined();
+  expect(
+    (component.find('DashboardGridUi').state() as { expandedPanelId?: string }).expandedPanelId
+  ).toBeUndefined();
 });
 
 test('DashboardGrid unmount unsubscribes', async done => {
-  const props = getProps();
-  const component = mountWithIntl(<DashboardGrid.WrappedComponent {...props} />);
+  const { props, context } = prepare();
+  const component = mountWithIntl(
+    <context.Provider>
+      <DashboardGrid {...props} />
+    </context.Provider>
+  );
+
   component.unmount();
 
   props.container
