@@ -27,4 +27,3 @@ Automatically cycle through your workpads pages in fullscreen mode.
 +
 [role="screenshot"]
 image::images/canvas-refresh-interval.png[Element data refresh interval]
-
