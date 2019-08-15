@@ -284,6 +284,7 @@ export const DataFrameTransformList: SFC = () => {
 
     const bulkActionIcon = (
       <EuiPopover
+        key="bulkActionIcon"
         id="transformBulkActionsMenu"
         button={buttonIcon}
         isOpen={isActionsMenuOpen}
@@ -304,7 +305,7 @@ export const DataFrameTransformList: SFC = () => {
           })}
         </h3>
       </EuiTitle>,
-      <div className="mlTransformBulkActionsBorder" />,
+      <div key="bulkActionsBorder" className="mlTransformBulkActionsBorder" />,
       bulkActionIcon,
     ];
   };

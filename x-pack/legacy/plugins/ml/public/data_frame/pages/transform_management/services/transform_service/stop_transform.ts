@@ -15,32 +15,7 @@ import {
   DataFrameTransformListRow,
 } from '../../components/transform_list/common';
 
-export const stopTransform = async (d: DataFrameTransformListRow) => {
-  try {
-    await ml.dataFrame.stopDataFrameTransform(
-      d.config.id,
-      d.stats.state === DATA_FRAME_TRANSFORM_STATE.FAILED,
-      true
-    );
-    toastNotifications.addSuccess(
-      i18n.translate('xpack.ml.dataframe.transformList.stopTransformSuccessMessage', {
-        defaultMessage: 'Data frame transform {transformId} stopped successfully.',
-        values: { transformId: d.config.id },
-      })
-    );
-  } catch (e) {
-    toastNotifications.addDanger(
-      i18n.translate('xpack.ml.dataframe.transformList.stopTransformErrorMessage', {
-        defaultMessage:
-          'An error occurred stopping the data frame transform {transformId}: {error}',
-        values: { transformId: d.config.id, error: JSON.stringify(e) },
-      })
-    );
-  }
-  refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.REFRESH);
-};
-
-export const bulkStopTransforms = async (dataFrames: DataFrameTransformListRow[]) => {
+export const stopTransforms = async (dataFrames: DataFrameTransformListRow[]) => {
   const results = await Promise.all(
     dataFrames.map(async df => {
       const dfId = df.config.id;

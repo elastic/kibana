@@ -15,31 +15,7 @@ import {
   DataFrameTransformListRow,
 } from '../../components/transform_list/common';
 
-export const startTransform = async (d: DataFrameTransformListRow) => {
-  try {
-    await ml.dataFrame.startDataFrameTransform(
-      d.config.id,
-      d.stats.state === DATA_FRAME_TRANSFORM_STATE.FAILED
-    );
-    toastNotifications.addSuccess(
-      i18n.translate('xpack.ml.dataframe.transformList.startTransformSuccessMessage', {
-        defaultMessage: 'Data frame transform {transformId} started successfully.',
-        values: { transformId: d.config.id },
-      })
-    );
-  } catch (e) {
-    toastNotifications.addDanger(
-      i18n.translate('xpack.ml.dataframe.transformList.startTransformErrorMessage', {
-        defaultMessage:
-          'An error occurred starting the data frame transform {transformId}: {error}',
-        values: { transformId: d.config.id, error: JSON.stringify(e) },
-      })
-    );
-  }
-  refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.REFRESH);
-};
-
-export const bulkStartTransforms = async (dataFrames: DataFrameTransformListRow[]) => {
+export const startTransforms = async (dataFrames: DataFrameTransformListRow[]) => {
   const results = await Promise.all(
     dataFrames.map(async df => {
       const dfId = df.config.id;

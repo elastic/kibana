@@ -16,14 +16,14 @@ export const getActions = () => {
       isPrimary: true,
       render: (item: DataFrameTransformListRow) => {
         if (item.stats.state === DATA_FRAME_TRANSFORM_STATE.STOPPED) {
-          return <StartAction item={item} />;
+          return <StartAction items={[item]} />;
         }
-        return <StopAction item={item} />;
+        return <StopAction items={[item]} />;
       },
     },
     {
       render: (item: DataFrameTransformListRow) => {
-        return <DeleteAction item={item} />;
+        return <DeleteAction items={[item]} />;
       },
     },
   ];

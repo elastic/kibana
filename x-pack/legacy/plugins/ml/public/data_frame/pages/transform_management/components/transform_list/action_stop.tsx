@@ -13,26 +13,20 @@ import {
   checkPermission,
   createPermissionFailureMessage,
 } from '../../../../../privilege/check_privilege';
-import { stopTransform, bulkStopTransforms } from '../../services/transform_service';
+import { stopTransforms } from '../../services/transform_service';
 
 interface StopActionProps {
-  item?: DataFrameTransformListRow;
-  items?: DataFrameTransformListRow[];
+  items: DataFrameTransformListRow[];
 }
 
-export const StopAction: SFC<StopActionProps> = ({ item, items }) => {
-  const isBulkAction = item === undefined && items !== undefined;
+export const StopAction: SFC<StopActionProps> = ({ items }) => {
   const canStartStopDataFrame: boolean = checkPermission('canStartStopDataFrame');
   const buttonStopText = i18n.translate('xpack.ml.dataframe.transformList.stopActionName', {
     defaultMessage: 'Stop',
   });
 
   const handleStop = () => {
-    if (isBulkAction === false && item) {
-      stopTransform(item);
-    } else if (isBulkAction === true && items) {
-      bulkStopTransforms(items);
-    }
+    stopTransforms(items);
   };
 
   const stopButton = (

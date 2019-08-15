@@ -14,7 +14,7 @@ import {
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
-import { deleteTransform, bulkDeleteTransforms } from '../../services/transform_service';
+import { deleteTransforms } from '../../services/transform_service';
 
 import {
   checkPermission,
@@ -24,21 +24,15 @@ import {
 import { DataFrameTransformListRow, DATA_FRAME_TRANSFORM_STATE } from './common';
 
 interface DeleteActionProps {
-  item?: DataFrameTransformListRow;
-  items?: DataFrameTransformListRow[];
+  items: DataFrameTransformListRow[];
 }
 
-export const DeleteAction: SFC<DeleteActionProps> = ({ item, items = [] }) => {
-  const isBulkAction = item === undefined && items !== undefined;
-  let disabled;
+export const DeleteAction: SFC<DeleteActionProps> = ({ items }) => {
+  const isBulkAction = items.length > 1;
 
-  if (isBulkAction === true) {
-    disabled = items.some(
-      (i: DataFrameTransformListRow) => i.stats.state !== DATA_FRAME_TRANSFORM_STATE.STOPPED
-    );
-  } else {
-    disabled = item && item.stats.state !== DATA_FRAME_TRANSFORM_STATE.STOPPED;
-  }
+  const disabled = items.some(
+    (i: DataFrameTransformListRow) => i.stats.state !== DATA_FRAME_TRANSFORM_STATE.STOPPED
+  );
 
   const canDeleteDataFrame: boolean = checkPermission('canDeleteDataFrame');
 
@@ -47,11 +41,7 @@ export const DeleteAction: SFC<DeleteActionProps> = ({ item, items = [] }) => {
   const closeModal = () => setModalVisible(false);
   const deleteAndCloseModal = () => {
     setModalVisible(false);
-    if (isBulkAction === false && item) {
-      deleteTransform(item);
-    } else if (isBulkAction === true && items) {
-      bulkDeleteTransforms(items);
-    }
+    deleteTransforms(items);
   };
   const openModal = () => setModalVisible(true);
 
@@ -80,7 +70,18 @@ export const DeleteAction: SFC<DeleteActionProps> = ({ item, items = [] }) => {
   );
   const deleteModalTitle = i18n.translate('xpack.ml.dataframe.transformList.deleteModalTitle', {
     defaultMessage: 'Delete {transformId}',
-    values: { transformId: item && item.config.id },
+    values: { transformId: items[0] && items[0].config.id },
+  });
+  const bulkDeleteModalMessage = i18n.translate(
+    'xpack.ml.dataframe.transformList.bulkDeleteModalBody',
+    {
+      defaultMessage:
+        "Are you sure you want to delete {count, plural, one {this} other {these}} {count, plural, one {transform} other {transforms}}? The transform's destination index and optional Kibana index pattern will not be deleted.",
+      values: { count: items.length },
+    }
+  );
+  const deleteModalMessage = i18n.translate('xpack.ml.dataframe.transformList.deleteModalBody', {
+    defaultMessage: `Are you sure you want to delete this transform? The transform's destination index and optional Kibana index pattern will not be deleted.`,
   });
 
   let deleteButton = (
@@ -135,13 +136,7 @@ export const DeleteAction: SFC<DeleteActionProps> = ({ item, items = [] }) => {
             defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
             buttonColor="danger"
           >
-            <p>
-              {i18n.translate('xpack.ml.dataframe.transformList.deleteModalBody', {
-                defaultMessage:
-                  "Are you sure you want to delete {count, plural, one {this} other {these}} {count, plural, one {transform} other {transforms}}? The transform's destination index and optional Kibana index pattern will not be deleted.",
-                values: { count: items ? items.length : 1 },
-              })}
-            </p>
+            <p>{isBulkAction === true ? bulkDeleteModalMessage : deleteModalMessage}</p>
           </EuiConfirmModal>
         </EuiOverlayMask>
       )}
