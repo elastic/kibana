@@ -137,21 +137,31 @@ export async function cleanKibanaIndices({ client, stats, log, kibanaPluginIds }
     });
   }
 
-  await client.deleteByQuery({
-    index: `.kibana`,
-    body: {
-      query: {
-        bool: {
-          must_not: {
-            ids: {
-              type: '_doc',
-              values: ['space:default'],
+  while (true) {
+    const resp = await client.deleteByQuery({
+      index: `.kibana`,
+      body: {
+        query: {
+          bool: {
+            must_not: {
+              ids: {
+                type: '_doc',
+                values: ['space:default'],
+              },
             },
           },
         },
       },
-    },
-  });
+      ignore: [409]
+    });
+
+    if (resp.total !== resp.deleted) {
+      log.warning('delete by query deleted %d of %d total documents, trying again', resp.deleted, resp.total);
+      continue;
+    }
+
+    break;
+  }
 
   log.warning(
     `since spaces are enabled, all objects other than the default space were deleted from ` +
