@@ -39,7 +39,7 @@ export const useLogAnalysisJobs = ({
   const [setupMlModuleRequest, setupMlModule] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
-      createPromise: async (start = null, end = null) => {
+      createPromise: async (start, end) => {
         return await callSetupMlModuleAPI(
           start,
           end,

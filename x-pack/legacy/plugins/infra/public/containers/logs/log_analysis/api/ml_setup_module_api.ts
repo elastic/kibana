@@ -13,21 +13,21 @@ import { throwErrors, createPlainError } from '../../../../../common/runtime_typ
 const MODULE_ID = 'logs_ui_analysis';
 
 export const callSetupMlModuleAPI = async (
-  start: number | null,
-  end: number | null,
+  start: number | undefined,
+  end: number | undefined,
   spaceId: string,
   sourceId: string,
   indexPattern: string,
   timeField: string,
   bucketSpan: number
 ) => {
-  const startEndProps = start && end ? { start, end } : {};
   const response = await kfetch({
     method: 'POST',
     pathname: `/api/ml/modules/setup/${MODULE_ID}`,
     body: JSON.stringify(
       setupMlModuleRequestPayloadRT.encode({
-        ...startEndProps,
+        start,
+        end,
         indexPatternName: indexPattern,
         prefix: getJobIdPrefix(spaceId, sourceId),
         startDatafeed: true,
@@ -78,13 +78,23 @@ export const callSetupMlModuleAPI = async (
   return setupMlModuleResponsePayloadRT.decode(response).getOrElseL(throwErrors(createPlainError));
 };
 
-const setupMlModuleRequestPayloadRT = rt.type({
+const setupMlModuleTimeParamsRT = rt.partial({
+  start: rt.number,
+  end: rt.number,
+});
+
+const setupMlModuleRequestParamsRT = rt.type({
   indexPatternName: rt.string,
   prefix: rt.string,
   startDatafeed: rt.boolean,
   jobOverrides: rt.array(rt.object),
   datafeedOverrides: rt.array(rt.object),
 });
+
+const setupMlModuleRequestPayloadRT = rt.intersection([
+  setupMlModuleTimeParamsRT,
+  setupMlModuleRequestParamsRT,
+]);
 
 const setupMlModuleResponsePayloadRT = rt.type({
   datafeeds: rt.array(

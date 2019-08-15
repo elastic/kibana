@@ -22,7 +22,7 @@ import euiStyled from '../../../../../../common/eui_styled_components';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
 
 interface AnalysisSetupContentProps {
-  onCreateJobs: () => void;
+  onCreateJobs: () => Promise<any>;
   isSettingUp: boolean;
 }
 
