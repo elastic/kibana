@@ -17,22 +17,9 @@
  * under the License.
  */
 
-// @ts-ignore
-import regenerate from 'regenerate';
-import stripAnsi from 'strip-ansi';
+// when the reporter is loaded by mocha in child process it might be before setup_node_env
+require('../../../../src/setup_node_env');
 
-// create a regular expression using regenerate() that selects any character that is explicitly allowed by https://www.w3.org/TR/xml/#NT-Char
-const validXmlCharsRE = new RegExp(
-  `(?:${regenerate()
-    .add(0x9, 0xa, 0xd)
-    .addRange(0x20, 0xd7ff)
-    .addRange(0xe000, 0xfffd)
-    .addRange(0x10000, 0x10ffff)
-    .toString()})*`,
-  'g'
-);
-
-export function escapeCdata(input: string) {
-  const match = stripAnsi(input).match(validXmlCharsRE) || [];
-  return match.join('');
-}
+module.exports = require('./auto_junit_reporter').createAutoJUnitReporter({
+  reportName: 'Server Mocha Tests',
+});
