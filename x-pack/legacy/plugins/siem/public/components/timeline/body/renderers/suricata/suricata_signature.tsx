@@ -27,15 +27,21 @@ const SignatureFlexItem = styled(EuiFlexItem)`
   min-width: 77px;
 `;
 
+SignatureFlexItem.displayName = 'SignatureFlexItem';
+
 // Ref: https://github.com/elastic/eui/issues/1655
 // const Badge = styled(EuiBadge)`
 //   vertical-align: top;
 // `;
 const Badge = (props: EuiBadgeProps) => <EuiBadge {...props} style={{ verticalAlign: 'top' }} />;
 
+Badge.displayName = 'Badge';
+
 const LinkFlexItem = styled(EuiFlexItem)`
   margin-left: 6px;
 `;
+
+LinkFlexItem.displayName = 'LinkFlexItem';
 
 export const Tokens = pure<{ tokens: string[] }>(({ tokens }) => (
   <>
@@ -48,6 +54,8 @@ export const Tokens = pure<{ tokens: string[] }>(({ tokens }) => (
     ))}
   </>
 ));
+
+Tokens.displayName = 'Tokens';
 
 export const DraggableSignatureId = pure<{ id: string; signatureId: number }>(
   ({ id, signatureId }) => (
@@ -87,6 +95,8 @@ export const DraggableSignatureId = pure<{ id: string; signatureId: number }>(
   )
 );
 
+DraggableSignatureId.displayName = 'DraggableSignatureId';
+
 export const SuricataSignature = pure<{
   contextId: string;
   id: string;
@@ -120,3 +130,5 @@ export const SuricataSignature = pure<{
     </EuiFlexGroup>
   );
 });
+
+SuricataSignature.displayName = 'SuricataSignature';

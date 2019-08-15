@@ -20,6 +20,8 @@ const Ja3FingerprintLabel = styled.span`
   margin-right: 5px;
 `;
 
+Ja3FingerprintLabel.displayName = 'Ja3FingerprintLabel';
+
 /**
  * Renders a ja3 fingerprint, which enables (some) clients and servers communicating
  * using TLS traffic to be identified, which is possible because SSL
@@ -46,3 +48,5 @@ export const Ja3Fingerprint = pure<{
     <ExternalLinkIcon />
   </DraggableBadge>
 ));
+
+Ja3Fingerprint.displayName = 'Ja3Fingerprint';

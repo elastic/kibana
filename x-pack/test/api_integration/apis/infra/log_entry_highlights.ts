@@ -55,9 +55,7 @@ export default function({ getService }: FtrProviderContext) {
               endKey: KEY_AFTER_END,
               highlights: [
                 {
-                  query: JSON.stringify({
-                    multi_match: { query: 'message of document 0', type: 'phrase', lenient: true },
-                  }),
+                  query: 'message of document 0',
                   countBefore: 0,
                   countAfter: 0,
                 },
@@ -103,13 +101,7 @@ export default function({ getService }: FtrProviderContext) {
               endKey: KEY_AFTER_END,
               highlights: [
                 {
-                  query: JSON.stringify({
-                    multi_match: {
-                      query: 'generate_test_data/simple_logs',
-                      type: 'phrase',
-                      lenient: true,
-                    },
-                  }),
+                  query: 'generate_test_data/simple_logs',
                   countBefore: 0,
                   countAfter: 0,
                 },
@@ -155,9 +147,7 @@ export default function({ getService }: FtrProviderContext) {
               }),
               highlights: [
                 {
-                  query: JSON.stringify({
-                    multi_match: { query: 'message', type: 'phrase', lenient: true },
-                  }),
+                  query: 'message',
                   countBefore: 0,
                   countAfter: 0,
                 },
@@ -201,9 +191,7 @@ export default function({ getService }: FtrProviderContext) {
               endKey: KEY_BEFORE_END,
               highlights: [
                 {
-                  query: JSON.stringify({
-                    multi_match: { query: 'message of document 0', type: 'phrase', lenient: true },
-                  }),
+                  query: 'message of document 0',
                   countBefore: 2,
                   countAfter: 2,
                 },

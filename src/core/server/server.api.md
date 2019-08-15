@@ -7,10 +7,12 @@
 import Boom from 'boom';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { ConfigOptions } from 'elasticsearch';
+import { DetailedPeerCertificate } from 'tls';
 import { Duration } from 'moment';
 import { IncomingHttpHeaders } from 'http';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
+import { PeerCertificate } from 'tls';
 import { Readable } from 'stream';
 import { Request } from 'hapi';
 import { ResponseObject } from 'hapi';
@@ -91,12 +93,8 @@ export class ConfigService {
     setSchema(path: ConfigPath, schema: Type<unknown>): Promise<void>;
     }
 
-// Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: The package "kibana" does not have an export "IContextContainer"
-// 
-// @public (undocumented)
+// @public
 export interface ContextSetup {
-    // Warning: (ae-forgotten-export) The symbol "IContextContainer" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "IContextContainer"
     createContextContainer<TContext extends {}, THandlerReturn, THandlerParmaters extends any[] = []>(): IContextContainer<TContext, THandlerReturn, THandlerParmaters>;
 }
 
@@ -123,6 +121,7 @@ export interface CoreSetup {
         registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
         basePath: HttpServiceSetup['basePath'];
         isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
+        createRouter: () => IRouter;
     };
 }
 
@@ -233,17 +232,42 @@ export interface HttpServerSetup {
     registerAuth: (handler: AuthenticationHandler) => void;
     registerOnPostAuth: (handler: OnPostAuthHandler) => void;
     registerOnPreAuth: (handler: OnPreAuthHandler) => void;
-    registerRouter: (router: Router) => void;
+    registerRouter: (router: IRouter) => void;
     // (undocumented)
     server: Server;
 }
 
 // @public (undocumented)
-export type HttpServiceSetup = HttpServerSetup;
+export type HttpServiceSetup = Omit<HttpServerSetup, 'registerRouter'> & {
+    createRouter: (path: string) => IRouter;
+};
 
 // @public (undocumented)
 export interface HttpServiceStart {
     isListening: (port: number) => boolean;
+}
+
+// @public
+export interface IContextContainer<TContext extends {}, THandlerReturn, THandlerParameters extends any[] = []> {
+    createHandler(pluginOpaqueId: PluginOpaqueId, handler: IContextHandler<TContext, THandlerReturn, THandlerParameters>): (...rest: THandlerParameters) => THandlerReturn extends Promise<any> ? THandlerReturn : Promise<THandlerReturn>;
+    registerContext<TContextName extends keyof TContext>(pluginOpaqueId: PluginOpaqueId, contextName: TContextName, provider: IContextProvider<TContext, TContextName, THandlerParameters>): this;
+}
+
+// @public
+export type IContextHandler<TContext extends {}, TReturn, THandlerParameters extends any[] = []> = (context: TContext, ...rest: THandlerParameters) => TReturn;
+
+// @public
+export type IContextProvider<TContext extends Record<string, any>, TContextName extends keyof TContext, TProviderParameters extends any[] = []> = (context: Partial<TContext>, ...rest: TProviderParameters) => Promise<TContext[TContextName]> | TContext[TContextName];
+
+// @public
+export interface IKibanaSocket {
+    readonly authorizationError?: Error;
+    readonly authorized?: boolean;
+    // (undocumented)
+    getPeerCertificate(detailed: true): DetailedPeerCertificate | null;
+    // (undocumented)
+    getPeerCertificate(detailed: false): PeerCertificate | null;
+    getPeerCertificate(detailed?: boolean): PeerCertificate | DetailedPeerCertificate | null;
 }
 
 // @internal (undocumented)
@@ -260,6 +284,19 @@ export interface InternalCoreSetup {
 export interface InternalCoreStart {
     // (undocumented)
     plugins: PluginsServiceStart;
+}
+
+// @public
+export interface IRouter {
+    delete: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) => void;
+    get: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) => void;
+    // Warning: (ae-forgotten-export) The symbol "RouterRoute" needs to be exported by the entry point index.d.ts
+    // 
+    // @internal
+    getRoutes: () => RouterRoute[];
+    post: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) => void;
+    put: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) => void;
+    routerPath: string;
 }
 
 // @public
@@ -282,6 +319,8 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     // (undocumented)
     readonly query: Query;
     readonly route: RecursiveReadonly<KibanaRequestRoute>;
+    // (undocumented)
+    readonly socket: IKibanaSocket;
     readonly url: Url;
     }
 
@@ -504,7 +543,7 @@ export type RedirectResponseOptions = HttpResponseOptions & {
 };
 
 // @public
-export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType> = (request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>, response: KibanaResponseFactory) => KibanaResponse<any> | Promise<KibanaResponse<any>>;
+export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType> = (context: {}, request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>, response: KibanaResponseFactory) => KibanaResponse<any> | Promise<KibanaResponse<any>>;
 
 // @public
 export type ResponseError = string | Error | {
@@ -537,21 +576,6 @@ export interface RouteConfigOptions {
 
 // @public
 export type RouteMethod = 'get' | 'post' | 'put' | 'delete';
-
-// @public
-export class Router {
-    constructor(path: string);
-    delete<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>): void;
-    get<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>): void;
-    // Warning: (ae-forgotten-export) The symbol "RouterRoute" needs to be exported by the entry point index.d.ts
-    // 
-    // @internal
-    getRoutes(): Readonly<RouterRoute>[];
-    // (undocumented)
-    readonly path: string;
-    post<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>): void;
-    put<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>): void;
-    }
 
 // @public (undocumented)
 export interface SavedObject<T extends SavedObjectAttributes = any> {
@@ -765,7 +789,7 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
     // (undocumented)
     sortOrder?: string;
     // (undocumented)
-    type?: string | string[];
+    type: string | string[];
 }
 
 // @public

@@ -5,18 +5,19 @@
  */
 
 import Boom from 'boom';
-import { callWithRequestFactory } from '../../lib/call_with_request_factory';
-import { isEsErrorFactory } from '../../lib/is_es_error_factory';
-import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';
+
 import {
   deserializeFollowerIndex,
   deserializeListFollowerIndices,
   serializeFollowerIndex,
   serializeAdvancedSettings,
-} from '../../lib/follower_index_serialization';
-import { licensePreRoutingFactory } from'../../lib/license_pre_routing_factory';
+} from '../../../common/services/follower_index_serialization';
 import { API_BASE_PATH } from '../../../common/constants';
 import { removeEmptyFields } from '../../../common/services/utils';
+import { callWithRequestFactory } from '../../lib/call_with_request_factory';
+import { isEsErrorFactory } from '../../lib/is_es_error_factory';
+import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';
+import { licensePreRoutingFactory } from'../../lib/license_pre_routing_factory';
 
 export const registerFollowerIndexRoutes = (server) => {
   const isEsError = isEsErrorFactory(server);
