@@ -389,6 +389,11 @@ export class QueryBarInputUI extends Component<Props, State> {
   };
 
   public componentDidMount() {
+    const parsedQuery = fromUser(toUser(this.props.query.query));
+    if (!isEqual(this.props.query.query, parsedQuery)) {
+      this.onChange({ ...this.props.query, query: parsedQuery });
+    }
+
     this.persistedLog = this.props.persistedLog
       ? this.props.persistedLog
       : getQueryLog(this.props.uiSettings, this.props.appName, this.props.query.language);
@@ -397,6 +402,11 @@ export class QueryBarInputUI extends Component<Props, State> {
   }
 
   public componentDidUpdate(prevProps: Props) {
+    const parsedQuery = fromUser(toUser(this.props.query.query));
+    if (!isEqual(this.props.query.query, parsedQuery)) {
+      this.onChange({ ...this.props.query, query: parsedQuery });
+    }
+
     this.persistedLog = this.props.persistedLog
       ? this.props.persistedLog
       : getQueryLog(this.props.uiSettings, this.props.appName, this.props.query.language);
