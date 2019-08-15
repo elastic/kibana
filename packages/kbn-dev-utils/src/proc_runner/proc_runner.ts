@@ -19,7 +19,6 @@
 
 import moment from 'moment';
 import { filter, first, catchError } from 'rxjs/operators';
-import supportsColor from 'supports-color';
 import exitHook from 'exit-hook';
 
 import { ToolingLog } from '../tooling_log';
@@ -72,14 +71,7 @@ export class ProcRunner {
       cwd = process.cwd(),
       stdin = undefined,
       wait = false,
-      env = supportsColor || process.env.FORCE_COLOR
-        ? {
-            ...process.env,
-            FORCE_COLOR: 'true',
-          }
-        : {
-            ...process.env,
-          },
+      env = process.env,
     } = options;
 
     if (this.closing) {
