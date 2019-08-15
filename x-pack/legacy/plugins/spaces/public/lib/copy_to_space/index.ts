@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './copy_to_space_utils';
+export * from './summarize_copy_result';
+export { CopyToSpaceSavedObjectsManagementAction } from './copy_to_space_action';

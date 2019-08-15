@@ -66,8 +66,8 @@ export const CopyToSpaceFlyout = ({ onClose, savedObject }: Props) => {
         const dummyResponse = copyOptions.selectedSpaceIds.reduce<
           Record<string, SavedObjectsImportResponse>
         >((acc, id) => {
-          const successCount = Math.floor(Math.random() * 10);
-          const hasErrors = successCount % 2 === 0;
+          const successCount = 17;
+          const hasErrors = id === 'sales';
           return {
             ...acc,
             [id]: {
@@ -76,8 +76,8 @@ export const CopyToSpaceFlyout = ({ onClose, savedObject }: Props) => {
               errors: hasErrors
                 ? [
                     {
-                      type: savedObject.type,
-                      id: savedObject.id,
+                      type: 'index-pattern',
+                      id: 'logstash-*',
                       error: {
                         type: copyOptions.overwrite ? 'missing_references' : 'conflict',
                         references: [],
@@ -91,9 +91,7 @@ export const CopyToSpaceFlyout = ({ onClose, savedObject }: Props) => {
 
         const processedResult = mapValues(dummyResponse, processImportResponse);
         setCopyResult(processedResult);
-        const inProgress = Object.values(processedResult).some(res => res.failedImports.length > 0);
-        setCopyInProgress(inProgress);
-      }, 5000);
+      }, 1000);
     }
   }, [copyInProgress]);
 
@@ -153,7 +151,7 @@ export const CopyToSpaceFlyout = ({ onClose, savedObject }: Props) => {
         }
 
         onClose();
-      }, 5000);
+      }, 1000);
     } else {
       toastNotifications.addSuccess(
         i18n.translate('xpack.spaces.management.copyToSpace.copySuccess', {
@@ -217,7 +215,7 @@ export const CopyToSpaceFlyout = ({ onClose, savedObject }: Props) => {
   };
 
   return (
-    <EuiFlyout onClose={onClose} maxWidth={600}>
+    <EuiFlyout onClose={onClose} maxWidth={600} data-test-subj="copy-to-space-flyout">
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="m">
           <EuiFlexItem grow={false}>

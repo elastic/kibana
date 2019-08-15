@@ -7,14 +7,7 @@
 import React, { Fragment } from 'react';
 import { ProcessedImportResponse } from 'ui/management/saved_objects_management';
 import { SavedObjectsImportRetry } from 'src/core/server';
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiStat,
-  EuiHorizontalRule,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiStat, EuiHorizontalRule } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 interface Props {
@@ -63,7 +56,7 @@ export const CopyToSpaceFlyoutFooter = (props: Props) => {
           fill
           isLoading={props.conflictResolutionInProgress}
           onClick={() => props.onCopyFinish()}
-          data-test-subj="finishCopyToSpacesButton"
+          data-test-subj="cts-finish-button"
         >
           <FormattedMessage
             id="xpack.spaces.management.copyToSpace.finishCopyToSpacesButton"
@@ -77,7 +70,7 @@ export const CopyToSpaceFlyoutFooter = (props: Props) => {
           fill
           isLoading={copyInProgress}
           onClick={() => props.onCopyStart()}
-          data-test-subj="initiateCopyToSpacesButton"
+          data-test-subj="cts-initiate-button"
           disabled={props.numberOfSelectedSpaces === 0 || copyInProgress}
         >
           {props.numberOfSelectedSpaces > 0 ? (
@@ -112,6 +105,7 @@ export const CopyToSpaceFlyoutFooter = (props: Props) => {
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiStat
+            data-test-subj={`cts-summary-success-count`}
             title={summarizedResults.successCount}
             titleSize="s"
             titleColor={initialCopyFinished ? 'secondary' : 'subdued'}
@@ -128,6 +122,7 @@ export const CopyToSpaceFlyoutFooter = (props: Props) => {
         {summarizedResults.overwriteConflictCount > 0 && (
           <EuiFlexItem>
             <EuiStat
+              data-test-subj={`cts-summary-overwrite-count`}
               title={summarizedResults.overwriteConflictCount}
               titleSize="s"
               titleColor={summarizedResults.overwriteConflictCount > 0 ? 'primary' : 'subdued'}
@@ -144,6 +139,7 @@ export const CopyToSpaceFlyoutFooter = (props: Props) => {
         )}
         <EuiFlexItem>
           <EuiStat
+            data-test-subj={`cts-summary-conflict-count`}
             title={summarizedResults.conflictCount}
             titleSize="s"
             titleColor={summarizedResults.conflictCount > 0 ? 'primary' : 'subdued'}
@@ -159,6 +155,7 @@ export const CopyToSpaceFlyoutFooter = (props: Props) => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiStat
+            data-test-subj={`cts-summary-error-count`}
             title={summarizedResults.unresolvableErrorCount}
             titleSize="s"
             titleColor={summarizedResults.unresolvableErrorCount > 0 ? 'danger' : 'subdued'}

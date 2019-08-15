@@ -10,14 +10,17 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { SummarizedCopyToSpaceResponse } from '../../../../lib/copy_to_space';
 
 interface Props {
+  spaceId: string;
   summarizedCopyResult: SummarizedCopyToSpaceResponse;
   conflictResolutionInProgress: boolean;
 }
 
 export const CopyStatusSummaryIndicator = (props: Props) => {
   const { summarizedCopyResult } = props;
+  const getDataTestSubj = (status: string) => `cts-summary-indicator-${status}-${props.spaceId}`;
+
   if (summarizedCopyResult.processing || props.conflictResolutionInProgress) {
-    return <EuiLoadingSpinner />;
+    return <EuiLoadingSpinner data-test-subj={getDataTestSubj('loading')} />;
   }
 
   if (summarizedCopyResult.successful) {
@@ -25,6 +28,9 @@ export const CopyStatusSummaryIndicator = (props: Props) => {
       <EuiIconTip
         type={'check'}
         color={'success'}
+        iconProps={{
+          'data-test-subj': getDataTestSubj('success'),
+        }}
         content={
           <FormattedMessage
             id="xpack.spaces.management.copyToSpace.copyStatusSummary.successMessage"
@@ -39,6 +45,9 @@ export const CopyStatusSummaryIndicator = (props: Props) => {
       <EuiIconTip
         type={'cross'}
         color={'danger'}
+        iconProps={{
+          'data-test-subj': getDataTestSubj('failed'),
+        }}
         content={
           <FormattedMessage
             id="xpack.spaces.management.copyToSpace.copyStatusSummary.failedMessage"
@@ -53,6 +62,9 @@ export const CopyStatusSummaryIndicator = (props: Props) => {
       <EuiIconTip
         type={'alert'}
         color={'warning'}
+        iconProps={{
+          'data-test-subj': getDataTestSubj('conflicts'),
+        }}
         content={
           <FormattedMessage
             id="xpack.spaces.management.copyToSpace.copyStatusSummary.conflictsMessage"

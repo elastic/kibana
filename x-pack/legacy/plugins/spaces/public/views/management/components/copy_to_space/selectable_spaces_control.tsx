@@ -36,6 +36,7 @@ export const SelectableSpacesControl = (props: Props) => {
           prepend: <SpaceAvatar space={space} size={'s'} />,
           checked: props.selectedSpaceIds.includes(space.id) ? 'on' : null,
           ['data-space-id']: space.id,
+          ['data-test-subj']: `cts-space-selector-row-${space.id}`,
         }))
       );
     }

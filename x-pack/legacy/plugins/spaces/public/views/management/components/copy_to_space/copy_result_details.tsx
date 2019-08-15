@@ -76,7 +76,11 @@ export const CopyResultDetails = (props: Props) => {
             {showOverwriteButton && (
               <EuiFlexItem grow={1}>
                 <EuiText size="s">
-                  <EuiButtonEmpty onClick={() => onOverwriteClick(object)} size="xs">
+                  <EuiButtonEmpty
+                    onClick={() => onOverwriteClick(object)}
+                    size="xs"
+                    data-test-subj={`cts-overwrite-conflict-${object.id}`}
+                  >
                     <FormattedMessage
                       id="xpack.spaces.management.copyToSpace.copyDetail.overwriteButton"
                       defaultMessage="Overwrite"
@@ -88,7 +92,11 @@ export const CopyResultDetails = (props: Props) => {
             {showSkipButton && (
               <EuiFlexItem grow={1}>
                 <EuiText size="s">
-                  <EuiButtonEmpty onClick={() => onOverwriteClick(object)} size="xs">
+                  <EuiButtonEmpty
+                    onClick={() => onOverwriteClick(object)}
+                    size="xs"
+                    data-test-subj={`cts-skip-conflict-${object.id}`}
+                  >
                     <FormattedMessage
                       id="xpack.spaces.management.copyToSpace.copyDetail.skipOverwriteButton"
                       defaultMessage="Skip"

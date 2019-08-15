@@ -6,7 +6,6 @@
 
 import React, { Fragment } from 'react';
 import { ProcessedImportResponse, SavedObjectRecord } from 'ui/management/saved_objects_management';
-import { SpaceAvatar } from 'plugins/spaces/components';
 import { SavedObjectsImportRetry } from 'src/core/server';
 import {
   EuiAccordion,
@@ -18,8 +17,9 @@ import {
   EuiListGroupItem,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { summarizeCopyResult } from 'plugins/spaces/lib/copy_to_space';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { summarizeCopyResult } from '../../../../lib/copy_to_space';
+import { SpaceAvatar } from '../../../../components';
 import { Space } from '../../../../../common/model/space';
 import { CopyStatusSummaryIndicator } from './copy_status_summary_indicator';
 import { CopyResultDetails } from './copy_result_details';
@@ -100,6 +100,7 @@ export const ProcessingCopyToSpace = (props: Props) => {
           <Fragment key={id}>
             <EuiAccordion
               id={`copyToSpace-${id}`}
+              data-test-subj={`cts-space-result-${id}`}
               className="spcCopyToSpaceResult"
               buttonContent={
                 <EuiFlexGroup responsive={false}>
@@ -113,6 +114,7 @@ export const ProcessingCopyToSpace = (props: Props) => {
               }
               extraAction={
                 <CopyStatusSummaryIndicator
+                  spaceId={id}
                   summarizedCopyResult={summarizedCopyResult}
                   conflictResolutionInProgress={
                     props.conflictResolutionInProgress && spaceHasPendingOverwrites

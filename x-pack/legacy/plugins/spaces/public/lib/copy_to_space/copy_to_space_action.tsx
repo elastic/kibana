@@ -9,7 +9,7 @@ import {
   SavedObjectRecord,
 } from 'ui/management/saved_objects_management';
 import { i18n } from '@kbn/i18n';
-import { CopyToSpaceFlyout } from '../components/copy_to_space';
+import { CopyToSpaceFlyout } from '../../views/management/components/copy_to_space';
 
 export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagementAction {
   public id: string = 'copy_saved_objects_to_space';
