@@ -7,7 +7,7 @@ Some of the features of Kibana are provided via a REST API, which is ideal for
 people that want to create an integration with Kibana or that want to automate
 certain aspects of configuring and deploying Kibana.
 
-NOTE: You cannot access these APIs via the Console in Kibana.
+NOTE: You cannot access the APIs via the Console in Kibana.
 
 Each API in this documentation should be clearly marked as either `stable`,
 `beta`, or `experimental`. If an API is not marked, it should be considered

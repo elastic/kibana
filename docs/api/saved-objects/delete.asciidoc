@@ -4,7 +4,9 @@
 <titleabbrev>Delete object</titleabbrev>
 ++++
 
-Remove a Kibana saved object. Once you delete a saved object, _it cannot be recovered_.
+Remove a Kibana saved object. 
+
+WARNING: Once you delete a saved object, _it cannot be recovered_.
 
 [[saved-objects-api-delete-request]]
 ==== Request
