@@ -32,15 +32,11 @@
               },
               "observer": {
                 "geo": {
-                  "name": [
-                    "us-east-2"
-                  ]
+                  "name": ["us-east-2"]
                 }
               },
               "monitor": {
-                "ip": [
-                  "127.0.0.1"
-                ],
+                "ip": ["127.0.0.1"],
                 "status": "down"
               },
               "checks": [
@@ -89,15 +85,11 @@
               },
               "observer": {
                 "geo": {
-                  "name": [
-                    "us-east-2"
-                  ]
+                  "name": ["us-east-2"]
                 }
               },
               "monitor": {
-                "ip": [
-                  "35.245.22.113"
-                ],
+                "ip": ["35.245.22.113"],
                 "status": "down"
               },
               "checks": [
@@ -122,6 +114,9 @@
                   }
                 }
               ],
+              "tls": {
+                "certificate_not_valid_after": ["2019-11-09T18:04:06.000Z"]
+              },
               "@timestamp": "2019-06-26T13:42:21.536Z",
               "url": {
                 "path": "/",
