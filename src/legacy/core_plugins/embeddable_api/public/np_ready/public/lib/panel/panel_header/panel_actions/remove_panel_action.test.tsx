@@ -102,7 +102,7 @@ test('Returns title', async () => {
   expect(action.getDisplayName()).toBeDefined();
 });
 
-test('Returns an icon', async () => {
+test('Returns an icon type', async () => {
   const action = new RemovePanelAction();
-  expect(action.getIcon()).toBeDefined();
+  expect(action.getIconType()).toBeDefined();
 });

@@ -37,10 +37,30 @@ export interface IKibanaSocket {
    * @returns An object representing the peer's certificate.
    */
   getPeerCertificate(detailed?: boolean): PeerCertificate | DetailedPeerCertificate | null;
+
+  /**
+   * Indicates whether or not the peer certificate was signed by one of the specified CAs. When TLS
+   * isn't used the value is `undefined`.
+   */
+  readonly authorized?: boolean;
+
+  /**
+   * The reason why the peer's certificate has not been verified. This property becomes available
+   * only when `authorized` is `false`.
+   */
+  readonly authorizationError?: Error;
 }
 
 export class KibanaSocket implements IKibanaSocket {
-  constructor(private readonly socket: Socket) {}
+  readonly authorized?: boolean;
+  readonly authorizationError?: Error;
+
+  constructor(private readonly socket: Socket) {
+    if (this.socket instanceof TLSSocket) {
+      this.authorized = this.socket.authorized;
+      this.authorizationError = this.socket.authorizationError;
+    }
+  }
 
   getPeerCertificate(detailed: true): DetailedPeerCertificate | null;
   getPeerCertificate(detailed: false): PeerCertificate | null;

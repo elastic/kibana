@@ -71,7 +71,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
 
     it('should return the message data when firing the __json service', async () => {
       await supertest
-        .post(`/api/action/${createdActionId}/_fire`)
+        .post(`/api/action/${createdActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -114,7 +114,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
 
     it('should render html from markdown', async () => {
       await supertest
-        .post(`/api/action/${createdActionId}/_fire`)
+        .post(`/api/action/${createdActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
