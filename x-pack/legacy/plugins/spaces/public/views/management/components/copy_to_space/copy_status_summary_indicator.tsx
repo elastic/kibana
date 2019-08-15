@@ -68,7 +68,7 @@ export const CopyStatusSummaryIndicator = (props: Props) => {
         content={
           <FormattedMessage
             id="xpack.spaces.management.copyToSpace.copyStatusSummary.conflictsMessage"
-            defaultMessage="One or more conflicts detected. Exand this section to resolve."
+            defaultMessage="One or more conflicts detected. Expand this section to resolve."
           />
         }
       />
