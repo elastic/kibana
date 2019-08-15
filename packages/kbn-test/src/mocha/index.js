@@ -20,3 +20,5 @@
 export { createAutoJUnitReporter } from './auto_junit_reporter';
 export { setupJUnitReportGeneration } from './junit_report_generation';
 export { runMochaCli } from './run_mocha_cli';
+export { recordLog, snapshotLogsForRunnable } from './log_cache';
+export { escapeCdata } from './xml';

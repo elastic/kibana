@@ -17,6 +17,9 @@
  * under the License.
  */
 
-export { ToolingLog } from './tooling_log';
-export { ToolingLogTextWriter, WriterConfig } from './tooling_log_text_writer';
-export { pickLevelFromFlags, LogLevel } from './log_levels';
+// when the reporter is loaded by mocha in child process it might be before setup_node_env
+require('../../../../src/setup_node_env');
+
+module.exports = require('./auto_junit_reporter').createAutoJUnitReporter({
+  reportName: 'Server Mocha Tests',
+});

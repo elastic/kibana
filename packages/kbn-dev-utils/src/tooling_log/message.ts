@@ -17,8 +17,10 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+export type MessageTypes = 'verbose' | 'debug' | 'info' | 'success' | 'warning' | 'error' | 'write';
 
-export const CA_CERT_PATH = resolve(__dirname, 'ca.crt');
-export const ES_KEY_PATH = resolve(__dirname, 'elasticsearch.key');
-export const ES_CERT_PATH = resolve(__dirname, 'elasticsearch.crt');
+export interface Message {
+  type: MessageTypes;
+  indent: number;
+  args: any[];
+}

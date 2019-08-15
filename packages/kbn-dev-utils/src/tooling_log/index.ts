@@ -17,14 +17,6 @@
  * under the License.
  */
 
-const $isCliError = Symbol('isCliError');
-
-export function createCliError(message) {
-  const error = new Error(message);
-  error[$isCliError] = true;
-  return error;
-}
-
-export function isCliError(error) {
-  return error && !!error[$isCliError];
-}
+export { ToolingLog } from './tooling_log';
+export { ToolingLogTextWriter, ToolingLogTextWriterConfig } from './tooling_log_text_writer';
+export { pickLevelFromFlags, LogLevel } from './log_levels';
