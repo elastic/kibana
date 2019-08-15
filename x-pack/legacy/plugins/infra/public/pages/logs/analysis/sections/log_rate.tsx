@@ -148,7 +148,7 @@ export const LogRateResults = ({
               yScaleToDataExtent
               curve={2}
               areaSeriesStyle={
-                !isDarkMode
+                !isDarkMode()
                   ? {
                       line: { stroke: areaSeriesColour },
                       area: { fill: areaSeriesColour, visible: true, opacity: 0.8 },
@@ -156,7 +156,7 @@ export const LogRateResults = ({
                   : undefined
               }
               customSeriesColors={
-                !isDarkMode ? getColorsMap(areaSeriesColour, areaSpecId) : undefined
+                !isDarkMode() ? getColorsMap(areaSeriesColour, areaSpecId) : undefined
               }
             />
             <LineSeries
@@ -170,7 +170,7 @@ export const LogRateResults = ({
               yScaleToDataExtent
               curve={2}
               lineSeriesStyle={
-                !isDarkMode
+                !isDarkMode()
                   ? {
                       line: { stroke: lineSeriesColour },
                       point: { radius: 2, fill: lineSeriesColour },
@@ -178,7 +178,7 @@ export const LogRateResults = ({
                   : undefined
               }
               customSeriesColors={
-                !isDarkMode ? getColorsMap(lineSeriesColour, lineSpecId) : undefined
+                !isDarkMode() ? getColorsMap(lineSeriesColour, lineSpecId) : undefined
               }
             />
             <Settings tooltip={tooltipProps} theme={getChartTheme()} />
