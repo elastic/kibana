@@ -8,12 +8,13 @@
   "author": "Ahmad Bamieh <ahmadbamieh@gmail.com>",
   "license": "Apache-2.0",
   "scripts": {
-    "build": "tsc",
+    "build": "babel src --out-dir target --delete-dir-on-start --extensions .ts,.js,.tsx",
     "kbn:bootstrap": "yarn build",
     "kbn:watch": "yarn build --watch"
   },
   "devDependencies": {
-    "typescript": "3.5.1"
+    "@kbn/babel-preset": "1.0.0",
+    "@babel/cli": "7.4.4"
   },
   "dependencies": {
     "@kbn/dev-utils": "1.0.0"
