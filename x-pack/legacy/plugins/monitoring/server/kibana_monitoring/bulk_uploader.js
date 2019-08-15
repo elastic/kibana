@@ -123,9 +123,10 @@ export class BulkUploader {
    */
   async _fetchAndUpload(collectorSet) {
     const collectorsReady = await collectorSet.areAllCollectorsReady();
+    const hasUsageCollectors = collectorSet.some(collectorSet.isUsageCollector);
     if (!collectorsReady) {
       this._log.debug('Skipping bulk uploading because not all collectors are ready');
-      if (collectorSet.some(collectorSet.isUsageCollector)) {
+      if (hasUsageCollectors) {
         this._lastFetchUsageTime = null;
         this._log.debug('Resetting lastFetchWithUsage because not all collectors are ready');
       }
@@ -138,8 +139,15 @@ export class BulkUploader {
     if (payload) {
       try {
         this._log.debug(`Uploading bulk stats payload to the local cluster`);
-        await this._onPayload(payload);
-        this._log.debug(`Uploaded bulk stats payload to the local cluster`);
+        const result = await this._onPayload(payload);
+        const sendSuccessful = !result.ignored && !result.errors;
+        if (!sendSuccessful && hasUsageCollectors) {
+          this._lastFetchUsageTime = null;
+          this._log.debug('Resetting lastFetchWithUsage because uploading to the cluster was not successful.');
+        }
+        if (sendSuccessful) {
+          this._log.debug(`Uploaded bulk stats payload to the local cluster`);
+        }
       } catch (err) {
         this._log.warn(err.stack);
         this._log.warn(`Unable to bulk upload the stats payload to the local cluster`);
@@ -149,8 +157,8 @@ export class BulkUploader {
     }
   }
 
-  _onPayload(payload) {
-    return sendBulkPayload(this._cluster, this._interval, payload);
+  async _onPayload(payload) {
+    return await sendBulkPayload(this._cluster, this._interval, payload);
   }
 
   /*
