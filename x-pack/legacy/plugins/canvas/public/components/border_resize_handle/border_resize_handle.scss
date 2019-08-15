@@ -1,4 +1,5 @@
 .canvasBorderResizeHandle {
+  @include euiSlightShadow;
   transform-origin: center center; /* the default, only for clarity */
   transform-style: preserve-3d;
   display: block;
@@ -9,5 +10,4 @@
   margin-top: -4px;
   background-color: $euiColorEmptyShade;
   border: 1px solid $euiColorDarkShade;
-  box-shadow: 0 2px 2px -1px transparentize($euiColorMediumShade, .7), 0 1px 5px -2px transparentize($euiColorMediumShade, .7);
 }
