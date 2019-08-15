@@ -17,21 +17,25 @@
  * under the License.
  */
 
-import uiRoutes from 'ui/routes';
-import template from './index.html';
+import { render, unmountComponentAtNode } from 'react-dom';
 
-require('brace');
+import { PluginInitializerContext, Plugin, CoreStart } from '../../../../../../core/public';
+import { boot } from './app';
+import { XCoreSetup } from './legacy';
 
-require('ui/autoload/styles');
-require('ui/capabilities/route_setup');
+export class ConsoleUIPlugin implements Plugin<any, any> {
+  // @ts-ignore
+  constructor(private readonly ctx: PluginInitializerContext) {}
 
-require('./src/controllers/sense_controller');
-require('./src/directives/sense_history');
-require('./src/directives/console_menu_directive');
+  async setup({ application, docLinkVersion, I18nContext }: XCoreSetup) {
+    application.register({
+      id: 'console',
+      async mount(ctx, targetElement) {
+        render(boot(I18nContext, { docLinkVersion }), targetElement);
+        return () => unmountComponentAtNode(targetElement);
+      },
+    });
+  }
 
-
-uiRoutes.when('/dev_tools/console', {
-  requireUICapability: 'dev_tools.show',
-  controller: 'SenseController',
-  template,
-});
+  async start(core: CoreStart) {}
+}

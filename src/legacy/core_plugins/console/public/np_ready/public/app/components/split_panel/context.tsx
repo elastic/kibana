@@ -17,19 +17,18 @@
  * under the License.
  */
 
-import { get, throttle } from 'lodash';
+import React, { createContext, useContext } from 'react';
+import { PanelRegistry } from './registry';
 
-export default function (editor) {
-  const resize = editor.resize;
-  const throttledResize = throttle(() => {
+const PanelContext = createContext({ registry: new PanelRegistry() });
 
-    resize.call(editor);
-
-    // Keep current top line in view when resizing to avoid losing user context
-    const userRow = get(throttledResize, 'topRow', 0);
-    if (userRow !== 0) {
-      editor.renderer.scrollToLine(userRow, false, false, () => {});
-    }
-  }, 35);
-  return throttledResize;
+interface ContextProps {
+  children: any;
+  registry: PanelRegistry;
 }
+
+export function PanelContextProvider({ children, registry }: ContextProps) {
+  return <PanelContext.Provider value={{ registry }}>{children}</PanelContext.Provider>;
+}
+
+export const usePanelContext = () => useContext(PanelContext);

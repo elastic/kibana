@@ -21,12 +21,11 @@ const $ = require('jquery');
 const storage = require('./storage');
 
 export default function (input, output) {
-
   const $left = input.$el.parent();
 
-  function readStoredEditorWidth() {
-    return storage.get('editorWidth');
-  }
+  // function readStoredEditorWidth() {
+  //   return storage.get('editorWidth');
+  // }
 
   function storeEditorWidth(editorWidth) {
     storage.set('editorWidth', editorWidth);
@@ -38,31 +37,29 @@ export default function (input, output) {
   }
 
   const $resizer = $('#ConAppResizer');
-  $resizer
-    .on('mousedown', function (event) {
-      $resizer.addClass('active');
-      const startWidth = $left.width();
-      const startX = event.pageX;
-      input.resize.topRow = input.renderer.layerConfig.firstRow;
-      output.resize.topRow = output.renderer.layerConfig.firstRow;
+  $resizer.on('mousedown', function (event) {
+    $resizer.addClass('active');
+    const startWidth = $left.width();
+    const startX = event.pageX;
+    input.resize.topRow = input.renderer.layerConfig.firstRow;
+    output.resize.topRow = output.renderer.layerConfig.firstRow;
 
-      function onMove(event) {
-        setEditorWidth(startWidth + event.pageX - startX);
-      }
+    function onMove(event) {
+      setEditorWidth(startWidth + event.pageX - startX);
+    }
 
-      $(document.body)
-        .on('mousemove', onMove)
-        .one('mouseup', function () {
-          $resizer.removeClass('active');
-          $(this).off('mousemove', onMove);
-          input.resize();
-          output.resize();
-        });
-    });
+    $(document.body)
+      .on('mousemove', onMove)
+      .one('mouseup', function () {
+        $resizer.removeClass('active');
+        $(this).off('mousemove', onMove);
+        input.resize();
+        output.resize();
+      });
+  });
 
-  const initialEditorWidth = readStoredEditorWidth();
-  if (initialEditorWidth != null) {
-    setEditorWidth(initialEditorWidth);
-  }
-
+  // const initialEditorWidth = readStoredEditorWidth();
+  // if (initialEditorWidth != null) {
+  //   setEditorWidth(initialEditorWidth);
+  // }
 }

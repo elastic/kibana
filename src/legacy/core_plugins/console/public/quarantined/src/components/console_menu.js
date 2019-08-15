@@ -19,16 +19,9 @@
 
 import PropTypes from 'prop-types';
 
-import React, {
-  Component,
-} from 'react';
+import React, { Component } from 'react';
 
-import {
-  EuiButtonIcon,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiPopover,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -47,7 +40,7 @@ export class ConsoleMenu extends Component {
     this.props.getCurl(text => {
       this.setState({ curlCode: text });
     });
-  }
+  };
 
   copyAsCurl() {
     this.copyText(this.state.curlCode);
@@ -74,11 +67,14 @@ export class ConsoleMenu extends Component {
     });
   };
 
-  openDocs = () => {
+  openDocs = async () => {
     this.closePopover();
-    this.props.getDocumentation();
-    this.props.openDocumentation();
-  }
+    const documentation = await this.props.getDocumentation();
+    if (!documentation) {
+      return;
+    }
+    window.open(documentation, '_blank');
+  };
 
   render() {
     const button = (
@@ -95,39 +91,43 @@ export class ConsoleMenu extends Component {
     );
 
     const items = [
-      (
-        <EuiContextMenuItem
-          key="Copy as cURL"
-          id="ConCopyAsCurl"
-          disabled={!document.queryCommandSupported('copy')}
-          onClick={() => { this.closePopover(); this.copyAsCurl(); }}
-        >
-          <FormattedMessage
-            id="console.requestOptions.copyAsUrlButtonLabel"
-            defaultMessage="Copy as cURL"
-          />
-        </EuiContextMenuItem>
-      ), (
-        <EuiContextMenuItem
-          key="Open documentation"
-          onClick={() => { this.openDocs(); }}
-        >
-          <FormattedMessage
-            id="console.requestOptions.openDocumentationButtonLabel"
-            defaultMessage="Open documentation"
-          />
-        </EuiContextMenuItem>
-      ), (
-        <EuiContextMenuItem
-          key="Auto indent"
-          onClick={(event) => { this.closePopover(); this.props.autoIndent(event); }}
-        >
-          <FormattedMessage
-            id="console.requestOptions.autoIndentButtonLabel"
-            defaultMessage="Auto indent"
-          />
-        </EuiContextMenuItem>
-      )
+      <EuiContextMenuItem
+        key="Copy as cURL"
+        id="ConCopyAsCurl"
+        disabled={!document.queryCommandSupported('copy')}
+        onClick={() => {
+          this.closePopover();
+          this.copyAsCurl();
+        }}
+      >
+        <FormattedMessage
+          id="console.requestOptions.copyAsUrlButtonLabel"
+          defaultMessage="Copy as cURL"
+        />
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        key="Open documentation"
+        onClick={() => {
+          this.openDocs();
+        }}
+      >
+        <FormattedMessage
+          id="console.requestOptions.openDocumentationButtonLabel"
+          defaultMessage="Open documentation"
+        />
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        key="Auto indent"
+        onClick={event => {
+          this.closePopover();
+          this.props.autoIndent(event);
+        }}
+      >
+        <FormattedMessage
+          id="console.requestOptions.autoIndentButtonLabel"
+          defaultMessage="Auto indent"
+        />
+      </EuiContextMenuItem>,
     ];
 
     return (
@@ -140,9 +140,7 @@ export class ConsoleMenu extends Component {
           panelPaddingSize="none"
           anchorPosition="downLeft"
         >
-          <EuiContextMenuPanel
-            items={items}
-          />
+          <EuiContextMenuPanel items={items} />
         </EuiPopover>
       </span>
     );

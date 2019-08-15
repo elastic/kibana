@@ -39,7 +39,7 @@ class MyPlugin {
       id: 'my-app',
       title: 'My Application',
       async mount(context, targetDomElement) {
-        const { renderApp } = await import('./applcation');
+        const { renderApp } = await import('./application');
         return renderApp(context, targetDomElement);
       }
     });
@@ -260,7 +260,7 @@ export class MyPlugin {
     application.register({
       id: 'my-app',
       async mount(context, targetDomElem) {
-        const { renderApp } = await import('./applcation');
+        const { renderApp } = await import('./application');
         return renderApp(context, targetDomElement);
       }
     });

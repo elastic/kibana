@@ -17,14 +17,4 @@
  * under the License.
  */
 
-import { DevToolsRegistryProvider } from 'ui/registry/dev_tools';
-import { i18n } from '@kbn/i18n';
-
-DevToolsRegistryProvider.register(() => ({
-  order: 1,
-  name: 'console',
-  display: i18n.translate('console.consoleDisplayName', {
-    defaultMessage: 'Console'
-  }),
-  url: '#/dev_tools/console'
-}));
+export { useAppContext, AppContextProvider } from './app_context';

@@ -1,20 +1,22 @@
+// TODO: Move all of the styles here (should be modularised by, e.g., CSS-in-JS or CSS modules).
+#consoleRoot {
+  height: 100%;
+  padding: $euiSizeS;
+}
+
 .conApp {
   display: flex;
   flex: 1 1 auto;
-  position: relative;
-  padding: $euiSizeS;
   // Make sure the editor actions don't create scrollbars on this container
   // SASSTODO: Uncomment when tooltips are EUI-ified (inside portals)
   // overflow: hidden;
 }
 
 .conApp__editor {
-  // Default size of left side is half the large breakpoint
-  // but this is inline overridden by the resizer
-  width: map-get($euiBreakpoints, "l") / 2;
+  width: 100%;
   display: flex;
   flex: 0 0 auto;
-  position: relative;
+  //position: relative;
 }
 
 .conApp__output {

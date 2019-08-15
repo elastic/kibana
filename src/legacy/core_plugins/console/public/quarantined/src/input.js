@@ -19,7 +19,7 @@
 
 require('brace');
 require('brace/ext/searchbox');
-import  Autocomplete from './autocomplete';
+import Autocomplete from './autocomplete';
 import mappings from './mappings';
 const SenseEditor = require('./sense_editor/editor');
 const settings = require('./settings');
@@ -29,7 +29,7 @@ const history = require('./history');
 import { uiModules } from 'ui/modules';
 
 let input;
-export function initializeInput($el, $actionsEl, $copyAsCurlEl, output, openDocumentation = () => {}) {
+export function initializeInput($el, $actionsEl, output, openDocumentation = () => {}) {
   input = new SenseEditor($el);
 
   // this may not exist if running from tests
@@ -47,23 +47,23 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output, openDocu
   input.commands.addCommand({
     name: 'auto indent request',
     bindKey: { win: 'Ctrl-I', mac: 'Command-I' },
-    exec: function () {
+    exec: () => {
       input.autoIndent();
-    }
+    },
   });
   input.commands.addCommand({
     name: 'move to previous request start or end',
     bindKey: { win: 'Ctrl-Up', mac: 'Command-Up' },
-    exec: function () {
+    exec: () => {
       input.moveToPreviousRequestEdge();
-    }
+    },
   });
   input.commands.addCommand({
     name: 'move to next request start or end',
     bindKey: { win: 'Ctrl-Down', mac: 'Command-Down' },
-    exec: function () {
+    exec: () => {
       input.moveToNextRequestEdge();
-    }
+    },
   });
 
   /**
@@ -73,10 +73,9 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output, openDocu
   let CURRENT_REQ_ID = 0;
 
   function sendCurrentRequestToES(addedToHistoryCb) {
-
     const reqId = ++CURRENT_REQ_ID;
 
-    input.getRequestsInRange(function (requests) {
+    input.getRequestsInRange(requests => {
       if (reqId !== CURRENT_REQ_ID) {
         return;
       }
@@ -87,11 +86,13 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output, openDocu
       }
 
       const isMultiRequest = requests.length > 1;
-      const finishChain = function () { /* noop */ };
+      const finishChain = () => {
+        /* noop */
+      };
 
       let isFirstRequest = true;
 
-      const sendNextRequest = function () {
+      const sendNextRequest = () => {
         if (reqId !== CURRENT_REQ_ID) {
           return;
         }
@@ -107,7 +108,7 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output, openDocu
           esData += '\n';
         } //append a new line for bulk requests.
 
-        es.send(esMethod, esPath, esData).always(function (dataOrjqXHR, textStatus, jqXhrORerrorThrown) {
+        es.send(esMethod, esPath, esData).always((dataOrjqXHR, textStatus, jqXhrORerrorThrown) => {
           if (reqId !== CURRENT_REQ_ID) {
             return;
           }
@@ -117,14 +118,14 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output, openDocu
           function modeForContentType(contentType) {
             if (contentType.indexOf('text/plain') >= 0) {
               return 'ace/mode/text';
-            }
-            else if (contentType.indexOf('application/yaml') >= 0) {
+            } else if (contentType.indexOf('application/yaml') >= 0) {
               return 'ace/mode/yaml';
             }
             return null;
           }
 
-          const isSuccess = typeof xhr.status === 'number' &&
+          const isSuccess =
+            typeof xhr.status === 'number' &&
             // Things like DELETE index where the index is not there are OK.
             ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 404);
 
@@ -151,8 +152,7 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output, openDocu
               // assume json - auto pretty
               try {
                 value = utils.expandLiteralStrings(value);
-              }
-              catch (e) {
+              } catch (e) {
                 // nothing to do here
               }
             }
@@ -168,8 +168,7 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output, openDocu
             }
             if (isFirstRequest) {
               output.update(value, mode);
-            }
-            else {
+            } else {
               output.append('\n' + value);
             }
             isFirstRequest = false;
@@ -184,8 +183,7 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output, openDocu
               if (value[0] === '{') {
                 try {
                   value = JSON.stringify(JSON.parse(value), null, 2);
-                }
-                catch (e) {
+                } catch (e) {
                   // nothing to do here
                 }
               }
@@ -198,8 +196,7 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output, openDocu
             }
             if (isFirstRequest) {
               output.update(value, mode);
-            }
-            else {
+            } else {
               output.append('\n' + value);
             }
             finishChain();
@@ -211,18 +208,17 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output, openDocu
     });
   }
 
-
   input.commands.addCommand({
     name: 'send to elasticsearch',
     bindKey: { win: 'Ctrl-Enter', mac: 'Command-Enter' },
-    exec: () => sendCurrentRequestToES()
+    exec: () => sendCurrentRequestToES(),
   });
   input.commands.addCommand({
     name: 'open documentation',
     bindKey: { win: 'Ctrl-/', mac: 'Command-/' },
     exec: () => {
       openDocumentation();
-    }
+    },
   });
 
   /**
