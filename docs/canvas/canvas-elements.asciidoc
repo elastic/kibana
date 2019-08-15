@@ -23,7 +23,7 @@ Choose the elements to display on your workpad, then familiarize yourself with t
 
 . Click *Add element*.
 
-. On the *Elements* window, select the element you want to use. 
+. In the *Elements* window, select the element you want to use. 
 +
 [role="screenshot"]
 image::images/canvas-element-select.gif[Canvas elements]
