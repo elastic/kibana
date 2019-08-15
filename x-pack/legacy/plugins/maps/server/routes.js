@@ -408,12 +408,12 @@ export function initRoutes(server, licenseUid) {
     path: `${ROOT}/${EMS_SPRITES_PATH}/{id}/sprite.{extension}`,
     handler: async (request, h) => {
 
-      server.log('before check!');
+      server.log('warning', 'before check!');
       checkEMSProxyConfig();
 
-      server.log('do thing!');
-      server.log(request.params.extension);
-      server.log(request.params.id);
+      server.log("warning",'do thing!');
+      server.log('warning',request.params.extension);
+      server.log('warning',request.params.id);
 
       if (!request.params.id) {
         server.log('warning', 'Must supply id parameter to retrieve EMS vector source sprite');
@@ -439,7 +439,7 @@ export function initRoutes(server, licenseUid) {
         return null;
       }
 
-      console.log('proxy pat url', proxyPathUrl);
+      server.log('warning',proxyPathUrl);
 
       try {
         const font = await fetch(proxyPathUrl);
@@ -449,6 +449,9 @@ export function initRoutes(server, licenseUid) {
         response = response.bytes(buffer.length);
         response = response.header('Content-Disposition', 'inline');
         response = response.encoding('binary');
+        if (request.params.extension === 'png') {
+          response = response.header('Content-type', 'image/png');
+        }
         return response;
       } catch(e) {
         server.log('warning', `Cannot connect to EMS for sprites, error: ${e.message}`);

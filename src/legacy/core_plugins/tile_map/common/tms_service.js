@@ -53,9 +53,11 @@ export class TMSService {
         tiles: extendedTileUrls
       };
     }
-    vectorJson.sources = inlinedSources;
-    vectorJson.sprite = this._getSpriteSheetRootPath();
-    return vectorJson;
+    return {
+      ...vectorJson,
+      sources: inlinedSources,
+      sprite: await this._getSpriteSheetRootPath(),
+    };
   });
 
   constructor(config, emsClient, proxyPath) {
@@ -123,6 +125,7 @@ export class TMSService {
 
   async _getSpriteSheetRootPath() {
     const vectorStyleJson = await this._getVectorStyleJsonRaw();
+    console.log('getp', vectorStyleJson);
     return this._proxyPath + vectorStyleJson.sprite;
   }
 
