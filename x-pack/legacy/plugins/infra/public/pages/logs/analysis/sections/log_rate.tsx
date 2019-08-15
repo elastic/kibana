@@ -109,20 +109,26 @@ export const LogRateResults = ({
           <Chart className="log-entry-rate-chart">
             <Axis
               id={getAxisId('timestamp')}
-              title="Time"
+              title={i18n.translate('xpack.infra.logs.analysis.logRateSectionXaxisTitle', {
+                defaultMessage: 'Time',
+              })}
               position="bottom"
               showOverlappingTicks
               tickFormat={dateFormatter}
             />
             <Axis
               id={getAxisId('values')}
-              title="Log entries"
+              title={i18n.translate('xpack.infra.logs.analysis.logRateSectionYaxisTitle', {
+                defaultMessage: 'Log entries',
+              })}
               position="left"
               tickFormat={value => Number(value).toFixed(0)}
             />
             <AreaSeries
               id={areaSpecId}
-              name="Expected"
+              name={i18n.translate('xpack.infra.logs.analysis.logRateSectionAreaSeriesName', {
+                defaultMessage: 'Expected',
+              })}
               xScaleType="time"
               yScaleType="linear"
               xAccessor="x"
@@ -145,7 +151,9 @@ export const LogRateResults = ({
             />
             <LineSeries
               id={lineSpecId}
-              name="Log entries (avg)"
+              name={i18n.translate('xpack.infra.logs.analysis.logRateSectionLineSeriesName', {
+                defaultMessage: 'Log entries (avg)',
+              })}
               xScaleType="time"
               yScaleType="linear"
               xAccessor={0}
