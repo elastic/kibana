@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "Kibana Analytics tool",
   "main": "target/index.js",
-  "types": "target/index.d.ts",
+  "types": "src/index.d.ts",
   "author": "Ahmad Bamieh <ahmadbamieh@gmail.com>",
   "license": "Apache-2.0",
   "scripts": {
