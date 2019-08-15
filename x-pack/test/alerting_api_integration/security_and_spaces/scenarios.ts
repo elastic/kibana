@@ -45,7 +45,10 @@ const GlobalRead: User = {
     name: 'global_read_role',
     kibana: [
       {
-        base: ['read'],
+        feature: {
+          alerting: ['read'],
+          actions: ['read'],
+        },
         spaces: ['*'],
       },
     ],
@@ -70,7 +73,10 @@ const Space1All: User = {
     name: 'space_1_all_role',
     kibana: [
       {
-        base: ['all'],
+        feature: {
+          alerting: ['all'],
+          actions: ['all'],
+        },
         spaces: ['space1'],
       },
     ],

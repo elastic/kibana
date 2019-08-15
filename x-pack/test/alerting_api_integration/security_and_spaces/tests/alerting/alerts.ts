@@ -301,7 +301,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 alertTypeId: 'test.authorization',
                 alertTypeParams: {
                   callClusterAuthorizationIndex: authorizationIndex,
-                  savedObjectsClientType: 'alert',
+                  savedObjectsClientType: 'dashboard',
                   savedObjectsClientId: '1',
                   index: esTestIndexName,
                   reference,
@@ -360,7 +360,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                   ...alertTestRecord._source.state.savedObjectsClientError,
                   output: {
                     ...alertTestRecord._source.state.savedObjectsClientError.output,
-                    statusCode: 404,
+                    statusCode: 403,
                   },
                 },
               });
@@ -430,9 +430,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
               getTestAlertData({
                 alertTypeId: 'test.always-firing',
                 alertTypeParams: {
-                  callClusterAuthorizationIndex: authorizationIndex,
-                  savedObjectsClientType: 'alert',
-                  savedObjectsClientId: '1',
                   index: esTestIndexName,
                   reference,
                 },
@@ -442,7 +439,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                     id: createdAction.id,
                     params: {
                       callClusterAuthorizationIndex: authorizationIndex,
-                      savedObjectsClientType: 'alert',
+                      savedObjectsClientType: 'dashboard',
                       savedObjectsClientId: '1',
                       index: esTestIndexName,
                       reference,
@@ -528,7 +525,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                   ...actionTestRecord._source.state.savedObjectsClientError,
                   output: {
                     ...actionTestRecord._source.state.savedObjectsClientError.output,
-                    statusCode: 404,
+                    statusCode: 403,
                   },
                 },
               });

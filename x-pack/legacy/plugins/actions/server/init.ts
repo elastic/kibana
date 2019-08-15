@@ -33,6 +33,28 @@ export function init(server: Legacy.Server) {
     'spaces'
   );
 
+  server.plugins.xpack_main.registerFeature({
+    id: 'actions',
+    name: 'Actions',
+    app: ['actions', 'kibana'],
+    privileges: {
+      all: {
+        savedObject: {
+          all: ['action', 'action_task_params'],
+          read: [],
+        },
+        ui: [],
+      },
+      read: {
+        savedObject: {
+          all: ['action_task_params'],
+          read: ['action'],
+        },
+        ui: [],
+      },
+    },
+  });
+
   // Encrypted attributes
   // - `secrets` properties will be encrypted
   // - `config` will be included in AAD

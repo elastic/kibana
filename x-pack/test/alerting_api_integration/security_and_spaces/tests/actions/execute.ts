@@ -402,7 +402,7 @@ export default function({ getService }: FtrProviderContext) {
             .send({
               params: {
                 callClusterAuthorizationIndex: authorizationIndex,
-                savedObjectsClientType: 'alert',
+                savedObjectsClientType: 'dashboard',
                 savedObjectsClientId: '1',
                 index: esTestIndexName,
                 reference,
@@ -457,7 +457,7 @@ export default function({ getService }: FtrProviderContext) {
                   ...indexedRecord._source.state.savedObjectsClientError,
                   output: {
                     ...indexedRecord._source.state.savedObjectsClientError.output,
-                    statusCode: 404,
+                    statusCode: 403,
                   },
                 },
               });

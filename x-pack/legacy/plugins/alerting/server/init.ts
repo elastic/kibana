@@ -42,6 +42,28 @@ export function init(server: Legacy.Server) {
     'security'
   );
 
+  server.plugins.xpack_main.registerFeature({
+    id: 'alerting',
+    name: 'Alerting',
+    app: ['alerting', 'kibana'],
+    privileges: {
+      all: {
+        savedObject: {
+          all: ['alert'],
+          read: [],
+        },
+        ui: [],
+      },
+      read: {
+        savedObject: {
+          all: [],
+          read: ['alert'],
+        },
+        ui: [],
+      },
+    },
+  });
+
   // Encrypted attributes
   server.plugins.encrypted_saved_objects!.registerType({
     type: 'alert',
