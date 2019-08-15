@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
-import { summarizeWorkpads } from '../workpad_collector';
-// @ts-ignore Missing local definition
-import { workpads } from '../../../__tests__/fixtures/workpads';
+import clonedeep from 'lodash.clonedeep';
+import { summarizeWorkpads } from './workpad_collector';
+import { workpads } from '../../__tests__/fixtures/workpads';
 
 describe('usage collector handle es response data', () => {
   it('should summarize workpads, pages, and elements', () => {
     const usage = summarizeWorkpads(workpads);
-    expect(usage).to.eql({
+    expect(usage).toEqual({
       workpads: {
         total: 6, // num workpad documents in .kibana index
       },
@@ -54,29 +53,12 @@ describe('usage collector handle es response data', () => {
   });
 
   it('should collect correctly if an expression has null as an argument (possible sub-expression)', () => {
-    const mockWorkpads = [
-      {
-        name: 'Tweet Data Workpad 1',
-        id: 'workpad-ae00567f-5510-4d68-b07f-6b1661948e03',
-        width: 792,
-        height: 612,
-        page: 0,
-        pages: [
-          {
-            elements: [
-              {
-                expression: 'toast butter=null',
-              },
-            ],
-          },
-        ],
-        '@timestamp': '2018-07-26T02:29:00.964Z',
-        '@created': '2018-07-25T22:56:31.460Z',
-        assets: {},
-      },
-    ];
+    const workpad = clonedeep(workpads[0]);
+    workpad.pages[0].elements[0].expression = 'toast butter=null';
+
+    const mockWorkpads = [workpad];
     const usage = summarizeWorkpads(mockWorkpads);
-    expect(usage).to.eql({
+    expect(usage).toEqual({
       workpads: { total: 1 },
       pages: { total: 1, per_workpad: { avg: 1, min: 1, max: 1 } },
       elements: { total: 1, per_page: { avg: 1, min: 1, max: 1 } },
@@ -85,21 +67,11 @@ describe('usage collector handle es response data', () => {
   });
 
   it('should fail gracefully if workpad has 0 pages (corrupted workpad)', () => {
-    const mockWorkpadsCorrupted = [
-      {
-        name: 'Tweet Data Workpad 2',
-        id: 'workpad-ae00567f-5510-4d68-b07f-6b1661948e03',
-        width: 792,
-        height: 612,
-        page: 0,
-        pages: [], // pages should never be empty, and *may* prevent the ui from rendering properly
-        '@timestamp': '2018-07-26T02:29:00.964Z',
-        '@created': '2018-07-25T22:56:31.460Z',
-        assets: {},
-      },
-    ];
+    const workpad = clonedeep(workpads[0]);
+    workpad.pages = [];
+    const mockWorkpadsCorrupted = [workpad];
     const usage = summarizeWorkpads(mockWorkpadsCorrupted);
-    expect(usage).to.eql({
+    expect(usage).toEqual({
       workpads: { total: 1 },
       pages: { total: 0, per_workpad: { avg: 0, min: 0, max: 0 } },
       elements: undefined,
@@ -109,6 +81,6 @@ describe('usage collector handle es response data', () => {
 
   it('should fail gracefully in general', () => {
     const usage = summarizeWorkpads([]);
-    expect(usage).to.eql({});
+    expect(usage).toEqual({});
   });
 });
