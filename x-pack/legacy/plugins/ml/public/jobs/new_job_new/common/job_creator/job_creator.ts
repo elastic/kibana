@@ -95,9 +95,17 @@ export class JobCreator {
     return agg !== undefined ? agg : null;
   }
 
+  public get aggregations(): Aggregation[] {
+    return this._aggs;
+  }
+
   public getField(index: number): Field | null {
     const field = this._fields[index];
     return field !== undefined ? field : null;
+  }
+
+  public get fields(): Field[] {
+    return this._fields;
   }
 
   public set bucketSpan(bucketSpan: BucketSpan) {
