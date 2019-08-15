@@ -20,6 +20,17 @@
 import _ from 'lodash';
 import { RawSavedObjectDoc } from '../../serialization';
 import { DocumentMigrator } from './document_migrator';
+import { Logger } from 'src/core/server/logging';
+
+const mockLogger: jest.Mocked<Logger> = {
+  debug: jest.fn(),
+  error: jest.fn(),
+  fatal: jest.fn(),
+  info: jest.fn(),
+  log: jest.fn(),
+  trace: jest.fn(),
+  warn: jest.fn(),
+};
 
 describe('DocumentMigrator', () => {
   function testOpts() {
@@ -27,7 +38,7 @@ describe('DocumentMigrator', () => {
       kibanaVersion: '25.2.3',
       migrations: {},
       validateDoc: _.noop,
-      log: jest.fn(),
+      log: mockLogger,
     };
   }
 
@@ -474,7 +485,7 @@ describe('DocumentMigrator', () => {
   });
 
   it('logs the document and transform that failed', () => {
-    const log = jest.fn();
+    const log = mockLogger;
     const migrator = new DocumentMigrator({
       ...testOpts(),
       migrations: {
@@ -497,14 +508,13 @@ describe('DocumentMigrator', () => {
       expect('Did not throw').toEqual('But it should have!');
     } catch (error) {
       expect(error.message).toMatch(/Dang diggity!/);
-      const warning = log.mock.calls.filter(([[level]]) => level === 'warning')[0][1];
+      const warning = log.warn.mock.calls[0][1];
       expect(warning).toContain(JSON.stringify(failedDoc));
       expect(warning).toContain('dog:1.2.3');
     }
   });
 
   it('logs message in transform function', () => {
-    const logStash: string[] = [];
     const logTestMsg = '...said the joker to the thief';
     const migrator = new DocumentMigrator({
       ...testOpts(),
@@ -516,9 +526,7 @@ describe('DocumentMigrator', () => {
           },
         },
       },
-      log: (path: string[], message: string) => {
-        logStash.push(message);
-      },
+      log: mockLogger,
     });
     const doc = {
       id: 'joker',
@@ -527,7 +535,7 @@ describe('DocumentMigrator', () => {
       migrationVersion: {},
     };
     migrator.migrate(doc);
-    expect(logStash[0]).toEqual(logTestMsg);
+    expect(mockLogger.info.mock.calls[0][1]).toEqual(logTestMsg);
   });
 
   test('extracts the latest migration version info', () => {

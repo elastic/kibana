@@ -23,42 +23,32 @@
  */
 
 import { once } from 'lodash';
+import { Logger } from 'src/core/server/logging';
+import { SavedObjectsMapping } from 'src/core/server/legacy/plugins/collect_legacy_ui_exports';
+import { KibanaConfig } from 'src/core/server/kibana_config';
 import { MappingProperties } from '../../mappings';
 import { SavedObjectsSchema, SavedObjectsSchemaDefinition } from '../../schema';
-import { SavedObjectsManagementDefinition } from '../../management';
 import { RawSavedObjectDoc, SavedObjectsSerializer } from '../../serialization';
-import { docValidator } from '../../validation';
-import { buildActiveMappings, CallCluster, IndexMigrator, LogFn } from '../core';
-import { DocumentMigrator, VersionedTransformer } from '../core/document_migrator';
+import { docValidator, PropertyValidators } from '../../validation';
+import { buildActiveMappings, CallCluster, IndexMigrator } from '../core';
+import {
+  DocumentMigrator,
+  VersionedTransformer,
+  MigrationDefinition,
+} from '../core/document_migrator';
 import { createIndexMap } from '../core/build_index_map';
 import { Config } from '../../../config';
-export interface KbnServer {
-  server: Server;
-  version: string;
-  ready: () => Promise<any>;
-  uiExports: {
-    savedObjectMappings: any[];
-    savedObjectMigrations: any;
-    savedObjectValidations: any;
-    savedObjectSchemas: SavedObjectsSchemaDefinition;
-    savedObjectsManagement: SavedObjectsManagementDefinition;
-  };
-}
 
-interface Server {
-  log: LogFn;
-  config: () => {
-    get: {
-      (path: 'kibana.index' | 'migrations.scrollDuration'): string;
-      (path: 'migrations.batchSize' | 'migrations.pollInterval'): number;
-    };
-  };
-  plugins: { elasticsearch: ElasticsearchPlugin | undefined };
-}
-
-interface ElasticsearchPlugin {
-  getCluster: (name: 'admin') => { callWithInternalUser: CallCluster };
-  waitUntilReady: () => Promise<any>;
+interface KibanaMigratorOptions {
+  callCluster: CallCluster;
+  config: Config;
+  kibanaConfig: KibanaConfig;
+  kibanaVersion: string;
+  logger: Logger;
+  savedObjectMappings: SavedObjectsMapping[];
+  savedObjectMigrations: MigrationDefinition;
+  savedObjectSchemas: SavedObjectsSchemaDefinition;
+  savedObjectValidations: PropertyValidators;
 }
 
 /**
@@ -68,6 +58,45 @@ interface ElasticsearchPlugin {
  * @class KibanaMigrator
  */
 export class KibanaMigrator {
+  private callCluster: CallCluster;
+  private config: Config;
+  private documentMigrator: VersionedTransformer;
+  private kibanaConfig: KibanaConfig;
+  private log: Logger;
+  private mappingProperties: MappingProperties;
+  private readonly schema: SavedObjectsSchema;
+  private serializer: SavedObjectsSerializer;
+
+  /**
+   * Creates an instance of KibanaMigrator.
+   *
+   */
+  constructor({
+    callCluster,
+    kibanaConfig,
+    config,
+    kibanaVersion,
+    logger,
+    savedObjectMappings,
+    savedObjectMigrations,
+    savedObjectSchemas,
+    savedObjectValidations,
+  }: KibanaMigratorOptions) {
+    this.callCluster = callCluster;
+    this.kibanaConfig = kibanaConfig;
+    this.config = config;
+    this.schema = new SavedObjectsSchema(savedObjectSchemas);
+    this.serializer = new SavedObjectsSerializer(this.schema);
+    this.mappingProperties = mergeProperties(savedObjectMappings || []);
+    this.log = logger;
+    this.documentMigrator = new DocumentMigrator({
+      kibanaVersion,
+      migrations: savedObjectMigrations || {},
+      validateDoc: docValidator(savedObjectValidations || {}),
+      log: this.log,
+    });
+  }
+
   /**
    * Migrates the mappings and documents in the Kibana index. This will run only
    * once and subsequent calls will return the result of the original call.
@@ -76,27 +105,9 @@ export class KibanaMigrator {
    * @memberof KibanaMigrator
    */
   public awaitMigration = once(async () => {
-    const { server } = this.kbnServer;
-
-    // Wait until the plugins have been found an initialized...
-    await this.kbnServer.ready();
-
-    // We can't do anything if the elasticsearch plugin has been disabled.
-    if (!server.plugins.elasticsearch) {
-      server.log(
-        ['warning', 'migration'],
-        'The elasticsearch plugin is disabled. Skipping migrations.'
-      );
-      return Object.keys(this.mappingProperties).map(() => ({ status: 'skipped' }));
-    }
-
-    // Wait until elasticsearch is green...
-    await server.plugins.elasticsearch.waitUntilReady();
-
-    const config = server.config() as Config;
-    const kibanaIndexName = config.get('kibana.index');
+    const kibanaIndexName = this.kibanaConfig.index;
     const indexMap = createIndexMap({
-      config,
+      config: this.config,
       kibanaIndexName,
       indexMap: this.mappingProperties,
       schema: this.schema,
@@ -104,14 +115,14 @@ export class KibanaMigrator {
 
     const migrators = Object.keys(indexMap).map(index => {
       return new IndexMigrator({
-        batchSize: config.get('migrations.batchSize'),
-        callCluster: server.plugins.elasticsearch!.getCluster('admin').callWithInternalUser,
+        batchSize: this.config.get('migrations.batchSize'),
+        callCluster: this.callCluster, // server.plugins.elasticsearch!.getCluster('admin').callWithInternalUser,
         documentMigrator: this.documentMigrator,
         index,
         log: this.log,
         mappingProperties: indexMap[index].typeMappings,
-        pollInterval: config.get('migrations.pollInterval'),
-        scrollDuration: config.get('migrations.scrollDuration'),
+        pollInterval: this.config.get('migrations.pollInterval'),
+        scrollDuration: this.config.get('migrations.scrollDuration'),
         serializer: this.serializer,
         // Only necessary for the migrator of the kibana index.
         obsoleteIndexTemplatePattern:
@@ -126,38 +137,6 @@ export class KibanaMigrator {
 
     return Promise.all(migrators.map(migrator => migrator.migrate()));
   });
-
-  private kbnServer: KbnServer;
-  private documentMigrator: VersionedTransformer;
-  private mappingProperties: MappingProperties;
-  private log: LogFn;
-  private serializer: SavedObjectsSerializer;
-  private readonly schema: SavedObjectsSchema;
-
-  /**
-   * Creates an instance of KibanaMigrator.
-   *
-   * @param opts
-   * @prop {KbnServer} kbnServer - An instance of the Kibana server object.
-   * @memberof KibanaMigrator
-   */
-  constructor({ kbnServer }: { kbnServer: KbnServer }) {
-    this.kbnServer = kbnServer;
-
-    this.schema = new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas);
-    this.serializer = new SavedObjectsSerializer(this.schema);
-
-    this.mappingProperties = mergeProperties(kbnServer.uiExports.savedObjectMappings || []);
-
-    this.log = (meta: string[], message: string) => kbnServer.server.log(meta, message);
-
-    this.documentMigrator = new DocumentMigrator({
-      kibanaVersion: kbnServer.version,
-      migrations: kbnServer.uiExports.savedObjectMigrations || {},
-      validateDoc: docValidator(kbnServer.uiExports.savedObjectValidations || {}),
-      log: this.log,
-    });
-  }
 
   /**
    * Gets all the index mappings defined by Kibana's enabled plugins.
@@ -185,7 +164,7 @@ export class KibanaMigrator {
  * Merges savedObjectMappings properties into a single object, verifying that
  * no mappings are redefined.
  */
-function mergeProperties(mappings: any[]): MappingProperties {
+function mergeProperties(mappings: SavedObjectsMapping[]): MappingProperties {
   return mappings.reduce((acc, { pluginId, properties }) => {
     const duplicate = Object.keys(properties).find(k => acc.hasOwnProperty(k));
     if (duplicate) {
