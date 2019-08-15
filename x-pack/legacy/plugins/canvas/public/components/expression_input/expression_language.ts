@@ -36,7 +36,7 @@ export const language: Language = {
         {
           cases: {
             '@keywords': 'keyword',
-            '@boolean': 'symbol',
+            '@boolean': 'keyword',
             '@default': 'identifier',
           },
         },
