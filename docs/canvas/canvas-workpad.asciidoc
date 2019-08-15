@@ -47,7 +47,7 @@ If you're unsure about where to start, you can use one of the preconfigured temp
 
 . On the *Canvas workpads* page, select *Templates*.
 
-. Click on the preconfigured template that you want to use.
+. Click the preconfigured template that you want to use.
 
 . Add your own *Name* to the workpad.
 
@@ -70,6 +70,8 @@ Each of the sample data sets comes with a Canvas workpad that you can use for yo
 . Add a {kibana-ref}/add-sample-data.html[sample data set]. 
 
 . On the *Add Data to Kibana* page, click the *View data* dropdown list, then select *Canvas*.
++
+Need some more workpad inspiration? Check out the link:https://www.elastic.co/blog/[Elastic Blog]. 
 
 [float]
 [[apply-workpad-styles]]
