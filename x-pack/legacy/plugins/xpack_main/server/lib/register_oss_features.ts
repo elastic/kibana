@@ -202,7 +202,7 @@ const buildKibanaFeatures = (savedObjectTypes: string[]) => {
       },
       privileges: {
         all: {
-          api: ['exportSavedObjects'],
+          api: ['copySavedObjectsToSpaces'],
           savedObject: {
             all: [...savedObjectTypes],
             read: [],
@@ -210,7 +210,7 @@ const buildKibanaFeatures = (savedObjectTypes: string[]) => {
           ui: ['read', 'edit', 'delete', 'copyIntoSpace'],
         },
         read: {
-          api: ['exportSavedObjects'],
+          api: ['copySavedObjectsToSpaces'],
           savedObject: {
             all: [],
             read: [...savedObjectTypes],
