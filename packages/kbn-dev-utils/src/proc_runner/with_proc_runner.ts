@@ -17,6 +17,27 @@
  * under the License.
  */
 
-export function createAbsolutePathSerializer(
-  rootPath: string
-): { print(...args: any[]): string; test(value: any): boolean };
+import { ProcRunner } from './proc_runner';
+import { ToolingLog } from '../tooling_log';
+
+/**
+ *  Create a ProcRunner and pass it to an async function. When
+ *  the async function finishes the ProcRunner is torn-down
+ *  automatically
+ *
+ *  @param  {ToolingLog} log
+ *  @param  {async Function} fn
+ *  @return {Promise<undefined>}
+ */
+export async function withProcRunner(
+  log: ToolingLog,
+  fn: (procs: ProcRunner) => Promise<void>
+): Promise<void> {
+  const procs = new ProcRunner(log);
+
+  try {
+    await fn(procs);
+  } finally {
+    await procs.teardown();
+  }
+}

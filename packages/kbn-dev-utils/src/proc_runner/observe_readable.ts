@@ -17,29 +17,26 @@
  * under the License.
  */
 
-// eslint-disable max-classes-per-file
+import { Readable } from 'stream';
 
 import * as Rx from 'rxjs';
+import { first, ignoreElements, mergeMap } from 'rxjs/operators';
 
-import { ToolingLogWriter, WriterConfig } from './tooling_log_text_writer';
+/**
+ *  Produces an Observable from a ReadableSteam that:
+ *   - completes on the first "end" event
+ *   - fails on the first "error" event
+ */
+export function observeReadable(readable: Readable): Rx.Observable<never> {
+  return Rx.race(
+    Rx.fromEvent(readable, 'end').pipe(
+      first(),
+      ignoreElements()
+    ),
 
-export interface LogMessage {
-  type: 'verbose' | 'debug' | 'info' | 'success' | 'warning' | 'error' | 'write';
-  indent: number;
-  args: any[];
-}
-
-export class ToolingLog {
-  constructor(config?: WriterConfig);
-  public verbose(...args: any[]): void;
-  public debug(...args: any[]): void;
-  public info(...args: any[]): void;
-  public success(...args: any[]): void;
-  public warning(...args: any[]): void;
-  public error(errOrMsg: string | Error): void;
-  public write(...args: any[]): void;
-  public indent(spaces?: number): void;
-  public getWriters(): ToolingLogWriter[];
-  public setWriters(reporters: ToolingLogWriter[]): void;
-  public getWritten$(): Rx.Observable<LogMessage>;
+    Rx.fromEvent(readable, 'error').pipe(
+      first(),
+      mergeMap(err => Rx.throwError(err))
+    )
+  );
 }

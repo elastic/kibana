@@ -20,12 +20,17 @@
 import moment from 'moment';
 import { filter, first, catchError } from 'rxjs/operators';
 import supportsColor from 'supports-color';
+import exitHook from 'exit-hook';
 
+import { ToolingLog } from '../tooling_log';
 import { createCliError } from './errors';
-import { createProc } from './proc';
-import { observeSignals } from './observe_signals';
+import { Proc, ProcOptions, startProc } from './proc';
 
 const noop = () => {};
+
+interface RunOptions extends ProcOptions {
+  wait: true | RegExp;
+}
 
 /**
  *  Helper for starting and managing processes. In many ways it resembles the
@@ -35,20 +40,15 @@ const noop = () => {};
  *  @class ProcRunner
  */
 export class ProcRunner {
-  constructor(options) {
-    const { log } = options;
+  private closing = false;
+  private procs: Proc[] = [];
+  private signalUnsubscribe: () => void;
 
-    this._closing = false;
-    this._procs = [];
-    this._log = log;
-    this._signalSubscription = observeSignals(process).subscribe({
-      next: async signal => {
-        await this.teardown(signal);
-        if (signal !== 'exit') {
-          // resend the signal
-          process.kill(process.pid, signal);
-        }
-      },
+  constructor(private log: ToolingLog) {
+    this.signalUnsubscribe = exitHook(() => {
+      this.teardown().catch(error => {
+        log.error(`ProcRunner teardown error: ${error.stack}`);
+      });
     });
   }
 
@@ -65,12 +65,12 @@ export class ProcRunner {
    *                                          is found
    *  @return {Promise<undefined>}
    */
-  async run(name, options) {
+  async run(name: string, options: RunOptions) {
     const {
       cmd,
       args = [],
       cwd = process.cwd(),
-      stdin = null,
+      stdin = undefined,
       wait = false,
       env = supportsColor || process.env.FORCE_COLOR
         ? {
@@ -82,7 +82,7 @@ export class ProcRunner {
           },
     } = options;
 
-    if (this._closing) {
+    if (this.closing) {
       throw new Error('ProcRunner is closing');
     }
 
@@ -90,15 +90,21 @@ export class ProcRunner {
       throw new TypeError('wait param should either be a RegExp or `true`');
     }
 
-    if (!!this._getProc(name)) {
+    if (!!this.getProc(name)) {
       throw new Error(`Process with name "${name}" already running`);
     }
 
-    const proc = this._createProc(name, { cmd, args, cwd, env, stdin });
+    const proc = this.startProc(name, {
+      cmd,
+      args,
+      cwd,
+      env,
+      stdin,
+    });
 
     try {
-      // wait for process to log matching line
       if (wait instanceof RegExp) {
+        // wait for process to log matching line
         await proc.lines$
           .pipe(
             filter(line => wait.test(line)),
@@ -114,15 +120,15 @@ export class ProcRunner {
           .toPromise();
       }
 
-      // wait for process to complete
       if (wait === true) {
-        await proc.getOutcomePromise();
+        // wait for process to complete
+        await proc.outcomePromise;
       }
     } finally {
       // while the procRunner closes promises will resolve/reject because
       // processes and stopping, but consumers of run() shouldn't have to
       // prepare for that, so just return a never-resolving promise
-      if (this._closing) {
+      if (this.closing) {
         await new Promise(noop);
       }
     }
@@ -130,16 +136,13 @@ export class ProcRunner {
 
   /**
    *  Stop a named proc
-   *  @param  {String}  name
-   *  @param  {String}  [signal='SIGTERM']
-   *  @return {Promise<undefined>}
    */
-  async stop(name, signal = 'SIGTERM') {
-    const proc = this._getProc(name);
+  async stop(name: string, signal: NodeJS.Signals = 'SIGTERM') {
+    const proc = this.getProc(name);
     if (proc) {
       await proc.stop(signal);
     } else {
-      this._log.warning('[%s] already stopped', name);
+      this.log.warning('[%s] already stopped', name);
     }
   }
 
@@ -148,7 +151,7 @@ export class ProcRunner {
    *  @return {Promise<undefined>}
    */
   async waitForAllToStop() {
-    await Promise.all(this._procs.map(proc => proc.getOutcomePromise()));
+    await Promise.all(this.procs.map(proc => proc.outcomePromise));
   }
 
   /**
@@ -158,53 +161,56 @@ export class ProcRunner {
    *  @param  {String} [signal=undefined]
    *  @return {Promise}
    */
-  async teardown(signal) {
-    if (this._closing) return;
+  async teardown(signal: NodeJS.Signals | 'exit' = 'exit') {
+    if (this.closing) {
+      return;
+    }
 
-    this._closing = true;
-    this._signalSubscription.unsubscribe();
-    this._signalSubscription = null;
+    this.closing = true;
+    this.signalUnsubscribe();
 
-    if (!signal && this._procs.length > 0) {
-      this._log.warning(
+    if (!signal && this.procs.length > 0) {
+      this.log.warning(
         '%d processes left running, stop them with procs.stop(name):',
-        this._procs.length,
-        this._procs.map(proc => proc.name)
+        this.procs.length,
+        this.procs.map(proc => proc.name)
       );
     }
 
-    const stopWith = signal === 'exit' ? 'SIGKILL' : signal;
-    await Promise.all(this._procs.map(proc => proc.stop(stopWith)));
+    await Promise.all(
+      this.procs.map(async proc => {
+        await proc.stop(signal === 'exit' ? 'SIGKILL' : signal);
+      })
+    );
   }
 
-  _getProc(name) {
-    return this._procs.find(proc => proc.name === name);
-  }
-
-  _createProc(name, options) {
-    const startMs = Date.now();
-    const proc = createProc(name, {
-      ...options,
-      log: this._log,
+  private getProc(name: string) {
+    return this.procs.find(proc => {
+      return proc.name === name;
     });
+  }
 
-    this._procs.push(proc);
+  private startProc(name: string, options: ProcOptions) {
+    const startMs = Date.now();
+    const proc = startProc(name, options, this.log);
+
+    this.procs.push(proc);
     const remove = () => {
-      this._procs.splice(this._procs.indexOf(proc), 1);
+      this.procs.splice(this.procs.indexOf(proc), 1);
     };
 
     // tie into proc outcome$, remove from _procs on compete
     proc.outcome$.subscribe({
       next: code => {
         const duration = moment.duration(Date.now() - startMs);
-        this._log.info('[%s] exited with %s after %s', name, code, duration.humanize());
+        this.log.info('[%s] exited with %s after %s', name, code, duration.humanize());
       },
       complete: () => {
         remove();
       },
       error: error => {
-        if (this._closing) {
-          this._log.error(error);
+        if (this.closing) {
+          this.log.error(error);
         }
         remove();
       },

@@ -17,6 +17,10 @@
  * under the License.
  */
 
-export { ToolingLog } from './tooling_log';
-export { ToolingLogTextWriter, WriterConfig } from './tooling_log_text_writer';
-export { pickLevelFromFlags, LogLevel } from './log_levels';
+export type MessageTypes = 'verbose' | 'debug' | 'info' | 'success' | 'warning' | 'error' | 'write';
+
+export interface Message {
+  type: MessageTypes;
+  indent: number;
+  args: any[];
+}

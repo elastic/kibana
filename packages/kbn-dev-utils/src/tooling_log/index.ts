@@ -17,6 +17,6 @@
  * under the License.
  */
 
-export * from './src/tooling_log';
-export * from './src/serializers';
-export * from './src/proc_runner';
+export { ToolingLog } from './tooling_log';
+export { ToolingLogTextWriter, ToolingLogTextWriterConfig } from './tooling_log_text_writer';
+export { pickLevelFromFlags, LogLevel } from './log_levels';

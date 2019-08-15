@@ -375,7 +375,7 @@
     "eslint-plugin-prettier": "3.1.0",
     "eslint-plugin-react": "7.13.0",
     "eslint-plugin-react-hooks": "1.6.0",
-    "exit-hook": "^2.1.0",
+    "exit-hook": "^2.2.0",
     "faker": "1.1.0",
     "fetch-mock": "7.3.3",
     "geckodriver": "1.16.2",

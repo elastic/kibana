@@ -22,14 +22,14 @@ import { withProcRunner } from './with_proc_runner';
 import { ProcRunner } from './proc_runner';
 
 it('passes proc runner to a function', async () => {
-  await withProcRunner(new ToolingLog(), proc => {
+  await withProcRunner(new ToolingLog(), async proc => {
     expect(proc).toBeInstanceOf(ProcRunner);
   });
 });
 
 it('calls procRunner.teardown() if function returns synchronously', async () => {
   let teardownSpy;
-  await withProcRunner(new ToolingLog(), proc => {
+  await withProcRunner(new ToolingLog(), async proc => {
     teardownSpy = jest.spyOn(proc, 'teardown');
   });
 
@@ -41,7 +41,7 @@ it('calls procRunner.teardown() if function throw synchronous error, and rejects
   let teardownSpy;
 
   await expect(
-    withProcRunner(new ToolingLog(), proc => {
+    withProcRunner(new ToolingLog(), async proc => {
       teardownSpy = jest.spyOn(proc, 'teardown');
       throw error;
     })
