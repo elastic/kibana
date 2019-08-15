@@ -7,12 +7,21 @@
 import { useMemo } from 'react';
 import { GetLogEntryRateSuccessResponsePayload } from '../../../../../common/http_api/log_analysis';
 
+interface LogRateAreaSeriesDataPoint {
+  x: number;
+  min: number | null;
+  max: number | null;
+}
+type LogRateAreaSeries = LogRateAreaSeriesDataPoint[];
+type LogRateLineSeriesDataPoint = [number, number | null];
+type LogRateLineSeries = LogRateLineSeriesDataPoint[];
+
 export const useLogEntryRateGraphData = ({
   data,
 }: {
   data: GetLogEntryRateSuccessResponsePayload['data'] | null;
 }) => {
-  const areaSeries = useMemo(() => {
+  const areaSeries: LogRateAreaSeries = useMemo(() => {
     if (!data || (data && data.histogramBuckets && !data.histogramBuckets.length)) {
       return [];
     }
@@ -26,7 +35,7 @@ export const useLogEntryRateGraphData = ({
     }, []);
   }, [data]);
 
-  const lineSeries = useMemo(() => {
+  const lineSeries: LogRateLineSeries = useMemo(() => {
     if (!data || (data && data.histogramBuckets && !data.histogramBuckets.length)) {
       return [];
     }
