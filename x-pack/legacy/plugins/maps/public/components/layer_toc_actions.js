@@ -51,28 +51,30 @@ export class LayerTocActions extends Component {
   };
 
   _renderPopoverToggleButton() {
-    const { icon, tooltipContent, areResultsTrimmed } = this.props.layer.getIconAndTooltipContent(this.props.zoom);
-    const infoButton = areResultsTrimmed
-      ? (<EuiIcon
-        color="subdued"
-        type="iInCircle"
-        size="s"
-      />)
-      : null;
-    const filterIcon = this.props.isUsingSearch && this.props.layer.getQueryableIndexPatternIds().length
-      ? (<EuiIcon
-        color="subdued"
-        type="filter"
-        size="s"
-      />)
-      : null;
-    const tooltip = <Fragment>{infoButton} {tooltipContent}</Fragment>;
+    const {
+      icon,
+      tooltipContent,
+      footnotes,
+    } = this.props.layer.getIconAndTooltipContent(this.props.zoom, this.props.isUsingSearch);
+
+    const footnoteIcons = footnotes.map((footnote, index) => {
+      return <Fragment key={index}>{''}{footnote.icon}</Fragment>;
+    });
+    const footnoteTooltipContent = footnotes.map((footnote, index) => {
+      return <div key={index}>{footnote.icon}{' '}{footnote.message}</div>;
+    });
+
     return (
       <EuiToolTip
         anchorClassName="mapLayTocActions__tooltipAnchor"
         position="top"
         title={this.props.displayName}
-        content={tooltip}
+        content={
+          <Fragment>
+            {tooltipContent}
+            {footnoteTooltipContent}
+          </Fragment>
+        }
       >
         <EuiButtonEmpty
           className="mapTocEntry__layerName eui-textLeft"
@@ -84,10 +86,9 @@ export class LayerTocActions extends Component {
         >
           <span className="mapTocEntry__layerNameIcon">{icon}</span>
           {this.props.displayName}
-          {infoButton}
-          {filterIcon}
+          {' '}
+          {footnoteIcons}
         </EuiButtonEmpty>
-
       </EuiToolTip>
     );
   }
