@@ -130,12 +130,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(queryString).to.eql('response:404');
       });
 
-      it('allows deleting a loaded saved query in the saved query management component ', async () => {
-        await savedQueryManagementComponent.deleteSavedQuery('foo2');
-        await savedQueryManagementComponent.savedQueryMissingOrFail('foo2');
-      });
-
-      it('allows deleting a loaded saved query in the saved query management component ', async () => {
+      it('allows deleting saved queries in the saved query management component ', async () => {
         await savedQueryManagementComponent.deleteSavedQuery('foo2');
         await savedQueryManagementComponent.savedQueryMissingOrFail('foo2');
       });
