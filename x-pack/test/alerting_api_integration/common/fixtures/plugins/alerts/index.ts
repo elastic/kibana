@@ -97,9 +97,71 @@ export default function(kibana: any) {
           };
         },
       };
+      const authorizationActionType: ActionType = {
+        id: 'test.authorization',
+        name: 'Test: Authorization',
+        validate: {
+          params: schema.object({
+            callClusterAuthorizationIndex: schema.string(),
+            savedObjectsClientType: schema.string(),
+            savedObjectsClientId: schema.string(),
+            index: schema.string(),
+            reference: schema.string(),
+          }),
+        },
+        async executor({ params, services }: ActionTypeExecutorOptions) {
+          // Call cluster
+          let callClusterSuccess = false;
+          let callClusterError;
+          try {
+            await services.callCluster('index', {
+              index: params.callClusterAuthorizationIndex,
+              refresh: 'wait_for',
+              body: {
+                param1: 'test',
+              },
+            });
+            callClusterSuccess = true;
+          } catch (e) {
+            callClusterError = e;
+          }
+          // Saved objects client
+          let savedObjectsClientSuccess = false;
+          let savedObjectsClientError;
+          try {
+            await services.savedObjectsClient.get(
+              params.savedObjectsClientType,
+              params.savedObjectsClientId
+            );
+            savedObjectsClientSuccess = true;
+          } catch (e) {
+            savedObjectsClientError = e;
+          }
+          // Save the result
+          await services.callCluster('index', {
+            index: params.index,
+            refresh: 'wait_for',
+            body: {
+              state: {
+                callClusterSuccess,
+                callClusterError,
+                savedObjectsClientSuccess,
+                savedObjectsClientError,
+              },
+              params,
+              reference: params.reference,
+              source: 'action:test.authorization',
+            },
+          });
+          return {
+            status: 'ok',
+          };
+        },
+      };
       server.plugins.actions.registerType(indexRecordActionType);
       server.plugins.actions.registerType(failingActionType);
       server.plugins.actions.registerType(rateLimitedActionType);
+      server.plugins.actions.registerType(authorizationActionType);
 
       // Alert types
       const alwaysFiringAlertType: AlertType = {
@@ -164,6 +226,64 @@ export default function(kibana: any) {
           throw new Error('Failed to execute alert type');
         },
       };
+      const authorizationAlertType: AlertType = {
+        id: 'test.authorization',
+        name: 'Test: Authorization',
+        validate: {
+          params: schema.object({
+            callClusterAuthorizationIndex: schema.string(),
+            savedObjectsClientType: schema.string(),
+            savedObjectsClientId: schema.string(),
+            index: schema.string(),
+            reference: schema.string(),
+          }),
+        },
+        async executor({ services, params, state }: AlertExecutorOptions) {
+          // Call cluster
+          let callClusterSuccess = false;
+          let callClusterError;
+          try {
+            await services.callCluster('index', {
+              index: params.callClusterAuthorizationIndex,
+              refresh: 'wait_for',
+              body: {
+                param1: 'test',
+              },
+            });
+            callClusterSuccess = true;
+          } catch (e) {
+            callClusterError = e;
+          }
+          // Saved objects client
+          let savedObjectsClientSuccess = false;
+          let savedObjectsClientError;
+          try {
+            await services.savedObjectsClient.get(
+              params.savedObjectsClientType,
+              params.savedObjectsClientId
+            );
+            savedObjectsClientSuccess = true;
+          } catch (e) {
+            savedObjectsClientError = e;
+          }
+          // Save the result
+          await services.callCluster('index', {
+            index: params.index,
+            refresh: 'wait_for',
+            body: {
+              state: {
+                callClusterSuccess,
+                callClusterError,
+                savedObjectsClientSuccess,
+                savedObjectsClientError,
+              },
+              params,
+              reference: params.reference,
+              source: 'alert:test.authorization',
+            },
+          });
+        },
+      };
       const validationAlertType: AlertType = {
         id: 'test.validation',
         name: 'Test: Validation',
@@ -183,6 +303,7 @@ export default function(kibana: any) {
       server.plugins.alerting.registerType(neverFiringAlertType);
       server.plugins.alerting.registerType(failingAlertType);
       server.plugins.alerting.registerType(validationAlertType);
+      server.plugins.alerting.registerType(authorizationAlertType);
       server.plugins.alerting.registerType(noopAlertType);
     },
   });

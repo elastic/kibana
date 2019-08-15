@@ -17,6 +17,7 @@ export default function({ getService }: FtrProviderContext) {
   const retry = getService('retry');
 
   const esTestIndexName = '.kibaka-alerting-test-data';
+  const authorizationIndex = '.kibana-test-authorization';
 
   describe('execute', () => {
     const actionsToDelete: Array<{ spaceId: string; id: string }> = [];
@@ -50,6 +51,7 @@ export default function({ getService }: FtrProviderContext) {
           },
         },
       });
+      await es.indices.create({ index: authorizationIndex });
     });
     after(async () => {
       await es.indices.delete({ index: esTestIndexName });
@@ -60,6 +62,7 @@ export default function({ getService }: FtrProviderContext) {
           .expect(204);
       });
       await Promise.all(promises);
+      await es.indices.delete({ index: authorizationIndex });
     });
 
     for (const scenario of UserAtSpaceScenarios) {
@@ -215,31 +218,29 @@ export default function({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.be.an('object');
-              const indexedRecord = await retry.tryForTime(15000, async () => {
-                const searchResult = await es.search({
-                  index: esTestIndexName,
-                  body: {
-                    query: {
-                      bool: {
-                        must: [
-                          {
-                            term: {
-                              source: 'action:test.index-record',
-                            },
+              const searchResult = await es.search({
+                index: esTestIndexName,
+                body: {
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            source: 'action:test.index-record',
                           },
-                          {
-                            term: {
-                              reference,
-                            },
+                        },
+                        {
+                          term: {
+                            reference,
                           },
-                        ],
-                      },
+                        },
+                      ],
                     },
                   },
-                });
-                expect(searchResult.hits.total.value).to.eql(1);
-                return searchResult.hits.hits[0];
+                },
               });
+              expect(searchResult.hits.total.value).to.eql(1);
+              const indexedRecord = searchResult.hits.hits[0];
               expect(indexedRecord._source).to.eql({
                 params: {
                   reference,
@@ -374,6 +375,129 @@ export default function({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('callCluster and savedObjectsClient authorization', async () => {
+          let searchResult: any;
+          let indexedRecord: any;
+          const reference = `actions-execute-3:${user.username}`;
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              description: 'My action',
+              actionTypeId: 'test.authorization',
+            })
+            .expect(200);
+          actionsToDelete.push({ spaceId: space.id, id: createdAction.id });
+
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/api/action/${createdAction.id}/_execute`)
+            .auth(user.username, user.password)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                callClusterAuthorizationIndex: authorizationIndex,
+                savedObjectsClientType: 'alert',
+                savedObjectsClientId: '1',
+                index: esTestIndexName,
+                reference,
+              },
+            });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unable to get action',
+              });
+              break;
+            case 'global_read at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(200);
+              searchResult = await es.search({
+                index: esTestIndexName,
+                body: {
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            source: 'action:test.authorization',
+                          },
+                        },
+                        {
+                          term: {
+                            reference,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              });
+              expect(searchResult.hits.total.value).to.eql(1);
+              indexedRecord = searchResult.hits.hits[0];
+              expect(indexedRecord._source.state).to.eql({
+                callClusterSuccess: false,
+                savedObjectsClientSuccess: false,
+                callClusterError: {
+                  ...indexedRecord._source.state.callClusterError,
+                  msg: `[security_exception] action [indices:data/write/bulk[s]] is unauthorized for user [${user.username}]`,
+                  statusCode: 403,
+                },
+                savedObjectsClientError: {
+                  ...indexedRecord._source.state.savedObjectsClientError,
+                  output: {
+                    ...indexedRecord._source.state.savedObjectsClientError.output,
+                    statusCode: 404,
+                  },
+                },
+              });
+              break;
+            case 'superuser at space1':
+              expect(response.statusCode).to.eql(200);
+              searchResult = await es.search({
+                index: esTestIndexName,
+                body: {
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            source: 'action:test.authorization',
+                          },
+                        },
+                        {
+                          term: {
+                            reference,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              });
+              expect(searchResult.hits.total.value).to.eql(1);
+              indexedRecord = searchResult.hits.hits[0];
+              expect(indexedRecord._source.state).to.eql({
+                callClusterSuccess: true,
+                savedObjectsClientSuccess: false,
+                savedObjectsClientError: {
+                  ...indexedRecord._source.state.savedObjectsClientError,
+                  output: {
+                    ...indexedRecord._source.state.savedObjectsClientError.output,
+                    statusCode: 404,
+                  },
+                },
+              });
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
