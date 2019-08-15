@@ -3,9 +3,6 @@
  * The .monitoringTable class is on the KuiControlledTable instance.
  * The table within it requires the shrinkToContent flag as well as width set to 100%
  */
-.monTable .kuiTable {
-  width: 100%;
-}
 
 .monTableCell__clusterCellExpired,
 .monTableCell__offline {
@@ -21,8 +18,7 @@
 }
 
 .monTableCell__name,
-.monTableCell__status,
-.monTableCell__version {
+.monTableCell__status {
   @include euiFontSizeM;
 }
 
@@ -42,23 +38,4 @@
 
 .monTableCell__splitNumber {
   @include euiFontSizeM;
-}
-
-.monTableCell__metricCellMetric {
-  display: inline-block;
-  @include euiFontSizeXL;
-}
-
-.monTableCell__metricCellSlopeArrow {
-  display: inline-block;
-  margin-left: $euiSizeXS;
-  @include euiFontSizeXL;
-}
-
-.monTableCell__metricCellMixMax {
-  display: inline-block;
-  text-align: right;
-  margin-left: $euiSizeXS;
-  color: $euiColorDarkShade;
-  @include euiFontSizeS;
 }
