@@ -58,8 +58,8 @@ export function GisPageProvider({ getService, getPageObjects }) {
     }
 
     // TODO combine with dashboard full screen into a service
-    async existFullScreen() {
-      log.debug(`existFullScreen`);
+    async exitFullScreen() {
+      log.debug(`exitFullScreen`);
       const isFullScreen = await testSubjects.exists('exitFullScreenModeLogo');
       if (isFullScreen) {
         await testSubjects.click('exitFullScreenModeLogo');
@@ -199,7 +199,13 @@ export function GisPageProvider({ getService, getPageObjects }) {
       const onPage = await this.onMapListingPage();
       if (!onPage) {
         await retry.try(async () => {
-          await PageObjects.common.navigateToUrl('maps', '/', { basePath: this.basePath, shouldAcceptAlert: options.isOnUnsavedMap });
+          if (options.isOnUnsavedMap === true) {
+            await find.clickByCssSelector('[data-test-subj="breadcrumb first"]');
+            const alert = await browser.getAlert();
+            await alert.accept();
+          } else {
+            await PageObjects.common.navigateToUrl('maps', '/', { basePath: this.basePath });
+          }
           const onMapListingPage = await this.onMapListingPage();
           if (!onMapListingPage) throw new Error('Not on map listing page.');
         });

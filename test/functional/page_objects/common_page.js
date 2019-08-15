@@ -38,18 +38,6 @@ export function CommonPageProvider({ getService, getPageObjects }) {
 
   class CommonPage {
 
-    static async navigateToUrlAndHandleAlert(url, shouldAcceptAlert) {
-      log.debug('Navigate to: ' + url);
-      await browser.get(url);
-      if (shouldAcceptAlert) {
-        const alert = await browser.getAlert();
-        if (alert) {
-          log.debug('Accepting alert');
-          await alert.accept();
-        }
-      }
-    }
-
     getHostPort() {
       return getUrl.baseUrl(config.get('servers.kibana'));
     }
@@ -65,8 +53,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     async navigateToUrl(appName, subUrl, {
       basePath = '',
       ensureCurrentUrl = true,
-      shouldLoginIfPrompted = true,
-      shouldAcceptAlert = false
+      shouldLoginIfPrompted = true
     } = {}) {
       // we onlt use the pathname from the appConfig and use the subUrl as the hash
       const appConfig = {
@@ -76,7 +63,9 @@ export function CommonPageProvider({ getService, getPageObjects }) {
 
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), appConfig);
       await retry.try(async () => {
-        await CommonPage.navigateToUrlAndHandleAlert(appUrl, shouldAcceptAlert);
+        log.debug(`navigateToUrl ${appUrl}`);
+        await browser.get(appUrl);
+
         const currentUrl = shouldLoginIfPrompted ? await this.loginIfPrompted(appUrl) : await browser.getCurrentUrl();
 
         if (ensureCurrentUrl && !currentUrl.includes(appUrl)) {
@@ -135,7 +124,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       return currentUrl;
     }
 
-    navigateToApp(appName, { basePath = '', shouldLoginIfPrompted = true, shouldAcceptAlert = false, hash = '' } = {}) {
+    navigateToApp(appName, { basePath = '', shouldLoginIfPrompted = true, hash = '' } = {}) {
       const self = this;
       const appConfig = config.get(['apps', appName]);
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), {
@@ -149,7 +138,8 @@ export function CommonPageProvider({ getService, getPageObjects }) {
           // since we're using hash URLs, always reload first to force re-render
           return kibanaServer.uiSettings.getDefaultIndex()
             .then(async function () {
-              return await CommonPage.navigateToUrlAndHandleAlert(url, shouldAcceptAlert);
+              log.debug('navigate to: ' + url);
+              await browser.get(url);
             })
             .then(function () {
               return self.sleep(700);
