@@ -7,21 +7,28 @@
 import createContainer from 'constate-latest';
 import { useMemo, useEffect, useState } from 'react';
 import { values } from 'lodash';
-import { getJobId } from '../../../../common/log_analysis';
+import { bucketSpan, getJobId } from '../../../../common/log_analysis';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
+import { callSetupMlModuleAPI } from './api/ml_setup_module_api';
 import { callJobsSummaryAPI } from './api/ml_get_jobs_summary_api';
 
-type JobStatus = 'unknown' | 'closed' | 'closing' | 'failed' | 'opened' | 'opening' | 'deleted';
+// combines and abstracts job and datafeed status
+type JobStatus = 'unknown' | 'missing' | 'inconsistent' | 'created' | 'started';
+
+// type JobStatus = 'unknown' | 'closed' | 'closing' | 'failed' | 'opened' | 'opening' | 'deleted';
+
 // type DatafeedStatus = 'unknown' | 'started' | 'starting' | 'stopped' | 'stopping' | 'deleted';
 
 export const useLogAnalysisJobs = ({
   indexPattern,
   sourceId,
   spaceId,
+  timeField,
 }: {
   indexPattern: string;
   sourceId: string;
   spaceId: string;
+  timeField: string;
 }) => {
   const [jobStatus, setJobStatus] = useState<{
     logEntryRate: JobStatus;
@@ -29,25 +36,30 @@ export const useLogAnalysisJobs = ({
     logEntryRate: 'unknown',
   });
 
-  // const [setupMlModuleRequest, setupMlModule] = useTrackedPromise(
-  //   {
-  //     cancelPreviousOn: 'resolution',
-  //     createPromise: async () => {
-  //       kfetch({
-  //         method: 'POST',
-  //         pathname: '/api/ml/modules/setup',
-  //         body: JSON.stringify(
-  //           setupMlModuleRequestPayloadRT.encode({
-  //             indexPatternName: indexPattern,
-  //             prefix: getJobIdPrefix(spaceId, sourceId),
-  //             startDatafeed: true,
-  //           })
-  //         ),
-  //       });
-  //     },
-  //   },
-  //   [indexPattern, spaceId, sourceId]
-  // );
+  const [setupMlModuleRequest, setupMlModule] = useTrackedPromise(
+    {
+      cancelPreviousOn: 'resolution',
+      createPromise: async () => {
+        return await callSetupMlModuleAPI(spaceId, sourceId, indexPattern, timeField, bucketSpan);
+      },
+      onResolve: ({ datafeeds, jobs }) => {
+        const hasSuccessfullyCreatedJobs = jobs.every(job => job.success);
+        const hasSuccessfullyStartedDatafeeds = datafeeds.every(
+          datafeed => datafeed.success && datafeed.started
+        );
+
+        setJobStatus(currentJobStatus => ({
+          ...currentJobStatus,
+          logEntryRate: hasSuccessfullyCreatedJobs
+            ? hasSuccessfullyStartedDatafeeds
+              ? 'started'
+              : 'created'
+            : 'inconsistent',
+        }));
+      },
+    },
+    [indexPattern, spaceId, sourceId]
+  );
 
   const [fetchJobStatusRequest, fetchJobStatus] = useTrackedPromise(
     {
@@ -91,6 +103,8 @@ export const useLogAnalysisJobs = ({
     jobStatus,
     isSetupRequired,
     isLoadingSetupStatus,
+    setupMlModule,
+    setupMlModuleRequest,
   };
 };
 
