@@ -302,7 +302,7 @@ export default function({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .send({})
             .expect(400, {
-              tatusCode: 400,
+              statusCode: 400,
               error: 'Bad Request',
               message: 'child "params" fails because ["params" is required]',
               validation: {
