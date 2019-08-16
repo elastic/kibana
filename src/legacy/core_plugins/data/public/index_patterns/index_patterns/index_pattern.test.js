@@ -21,15 +21,9 @@ import _ from 'lodash';
 import mockLogstashFields from '../../../../../../fixtures/logstash_fields';
 import { stubbedSavedObjectIndexPattern } from '../../../../../../fixtures/stubbed_saved_object_index_pattern';
 import { IndexedArray } from 'ui/indexed_array';
+import { DuplicateField } from 'ui/errors';
 
-import { createFieldsFetcher } from '../fields';
 import { IndexPattern } from './index_pattern';
-
-jest.mock('../errors', () => ({
-  SavedObjectNotFound: jest.fn(),
-  DuplicateField: jest.fn(),
-  IndexPatternMissingIndices: jest.fn(),
-}));
 
 jest.mock('ui/registry/field_formats', () => ({
   fieldFormats: {
@@ -60,14 +54,14 @@ jest.mock('ui/saved_objects', () => {
   };
 });
 
-let fields = [];
-jest.mock('../fields');
-
-createFieldsFetcher.mockImplementation(() => ({
-  fetch: jest.fn().mockImplementation(() => {
-    return new Promise(resolve => resolve(fields));
-  }),
-  every: jest.fn(),
+let mockFieldsFetcherResponse = [];
+jest.mock('./_fields_fetcher', () => ({
+  createFieldsFetcher: jest.fn().mockImplementation(() => ({
+    fetch: jest.fn().mockImplementation(() => {
+      return new Promise(resolve => resolve(mockFieldsFetcherResponse));
+    }),
+    every: jest.fn(),
+  }))
 }));
 
 let object;
@@ -185,14 +179,14 @@ describe('IndexPattern', () => {
     it('should fetch fields from the fieldsFetcher', async function () {
       expect(indexPattern.fields.length).toBeGreaterThan(2);
 
-      fields = [
+      mockFieldsFetcherResponse = [
         { name: 'foo' },
         { name: 'bar' }
       ];
 
-
       await indexPattern.refreshFields();
-      fields = [];
+
+      mockFieldsFetcherResponse = [];
 
       const newFields = indexPattern.getNonScriptedFields();
       expect(newFields).toHaveLength(2);
@@ -252,7 +246,7 @@ describe('IndexPattern', () => {
       try {
         await indexPattern.addScriptedField(scriptedField.name, '\'new script\'', 'string');
       } catch (e) {
-        expect(e).toEqual({});
+        expect(e).toBeInstanceOf(DuplicateField);
       }
     });
   });

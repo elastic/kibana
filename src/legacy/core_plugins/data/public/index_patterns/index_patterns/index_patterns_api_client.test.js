@@ -20,16 +20,6 @@
 import { http } from './index_patterns_api_client.test.mock';
 import { IndexPatternsApiClient } from './index_patterns_api_client';
 
-jest.mock('../../errors', () => ({
-  SavedObjectNotFound: jest.fn(),
-  DuplicateField: jest.fn(),
-  IndexPatternMissingIndices: jest.fn(),
-}));
-
-jest.mock('../errors', () => ({
-  IndexPatternMissingIndices: jest.fn(),
-}));
-
 describe('IndexPatternsApiClient', () => {
   it('uses the right URI to fetch fields for time patterns', async function () {
     const fetchSpy = jest.spyOn(http, 'fetch').mockImplementation(() => ({}));
