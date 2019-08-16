@@ -1,4 +1,4 @@
-.canvas-isFullscreen {
+body.canvas-isFullscreen { // sass-lint:disable-line no-qualifying-elements
   // hide global loading indicator
   .kbnLoadingIndicator {
     display: none;

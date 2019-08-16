@@ -47,14 +47,14 @@ $canvasElementCardWidth: 210px;
     bottom: 10px;
     right: 10px;
     background-color: $euiColorDanger;
-    color: $euiColorEmptyShade;
+    color: $euiColorGhost;
     display: block;
     z-index: 2000;
     padding: 10px;
     max-width: 500px;
 
     a {
-      color: $euiColorEmptyShade;
+      color: $euiColorGhost;
       font-weight: bold;
     }
   }
