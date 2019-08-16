@@ -82,7 +82,12 @@ export const ProcessingCopyToSpace = (props: Props) => {
       </EuiListGroup>
       <EuiHorizontalRule margin="m" />
       <EuiText size="s">
-        <h5>Copy results</h5>
+        <h5>
+          <FormattedMessage
+            id="xpack.spaces.management.copyToSpace.copyResultsLabel"
+            defaultMessage="Copy results"
+          />
+        </h5>
       </EuiText>
       <EuiSpacer size="m" />
       {props.copyOptions.selectedSpaceIds.map(id => {

@@ -84,9 +84,6 @@ export const CopyStatusIndicator = (props: Props) => {
               <FormattedMessage
                 id="xpack.spaces.management.copyToSpace.copyStatus.conflictsOverwriteMessage"
                 defaultMessage="Click 'Overwrite' to replace this version with the copied one."
-                values={{
-                  id: objectResult.conflicts[0].obj.id,
-                }}
               />
             </p>
           </EuiText>
