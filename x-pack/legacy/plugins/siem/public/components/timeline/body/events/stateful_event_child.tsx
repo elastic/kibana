@@ -110,3 +110,5 @@ export const StatefulEventChild = React.memo<Props>(
     </EuiFlexGroup>
   )
 );
+
+StatefulEventChild.displayName = 'StatefulEventChild';

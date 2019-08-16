@@ -91,6 +91,8 @@ const ToolTip = React.memo<ToolTipProps>(({ categoryId, onUpdateColumns, categor
   );
 });
 
+ToolTip.displayName = 'ToolTip';
+
 /** Renders a field name in it's non-dragging state */
 export const FieldName = React.memo<{
   categoryId: string;

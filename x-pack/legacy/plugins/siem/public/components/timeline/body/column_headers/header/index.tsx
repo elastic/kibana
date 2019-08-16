@@ -76,6 +76,8 @@ const HeaderComp = React.memo<HeaderCompProps>(({ children, onClick, isResizing 
   );
 });
 
+HeaderComp.displayName = 'HeaderComp';
+
 const TruncatableHeaderText = styled(TruncatableText)`
   font-weight: bold;
   padding: 5px;

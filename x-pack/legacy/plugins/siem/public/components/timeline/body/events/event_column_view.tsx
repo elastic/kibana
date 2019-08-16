@@ -121,3 +121,5 @@ export const EventColumnView = React.memo<Props>(
     );
   }
 );
+
+EventColumnView.displayName = 'EventColumnView';
