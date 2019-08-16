@@ -785,5 +785,6 @@ In other use cases the message field can be used to concatenate different values
     }
   }
   start={1521830963132}
+  toggleColumn={[MockFunction]}
 />
 `;
