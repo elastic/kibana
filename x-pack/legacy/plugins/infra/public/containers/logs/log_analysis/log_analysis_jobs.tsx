@@ -6,14 +6,20 @@
 
 import createContainer from 'constate-latest';
 import { useMemo, useEffect, useState } from 'react';
-import { values } from 'lodash';
 import { bucketSpan, getJobId } from '../../../../common/log_analysis';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { callSetupMlModuleAPI, SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
 import { callJobsSummaryAPI } from './api/ml_get_jobs_summary_api';
 
 // combines and abstracts job and datafeed status
-type JobStatus = 'unknown' | 'missing' | 'inconsistent' | 'created' | 'started';
+type JobStatus =
+  | 'unknown'
+  | 'missing'
+  | 'inconsistent'
+  | 'created'
+  | 'started'
+  | 'opening'
+  | 'opened';
 
 export const useLogAnalysisJobs = ({
   indexPattern,
@@ -93,9 +99,10 @@ export const useLogAnalysisJobs = ({
   }, []);
 
   const isSetupRequired = useMemo(() => {
-    const jobStates = values(jobStatus);
+    const jobStates = Object.values(jobStatus);
     return (
-      jobStates.filter(state => state === 'opened' || state === 'opening').length < jobStates.length
+      jobStates.filter(state => ['opened', 'opening', 'created', 'started'].includes(state))
+        .length < jobStates.length
     );
   }, [jobStatus]);
 
