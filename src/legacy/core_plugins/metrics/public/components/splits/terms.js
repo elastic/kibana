@@ -89,7 +89,11 @@ export const SplitByTermsUI = ({
   const selectedField = find(fields[indexPattern], ({ name }) => name === model.terms_field);
   const selectedFieldType = get(selectedField, 'type');
 
-  if (isPercentDisabled(seriesQuantity[model.id]) && model.stacked === STACKED_OPTIONS.PERCENT) {
+  if (
+    seriesQuantity &&
+    model.stacked === STACKED_OPTIONS.PERCENT &&
+    isPercentDisabled(seriesQuantity[model.id])
+  ) {
     onChange({ ['stacked']: STACKED_OPTIONS.NONE });
   }
 

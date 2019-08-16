@@ -48,6 +48,12 @@ export class TimeseriesVisualization extends Component {
     return formatter(val);
   };
 
+  yAxisStackedByPercentFormatter = val => {
+    const n = Number(val) * 100;
+
+    return `${(Number.isNaN(n) ? 0 : n).toFixed(0)}%`;
+  };
+
   applyDocTo = template => doc => {
     const vars = replaceVars(template, null, doc);
 
@@ -161,7 +167,7 @@ export class TimeseriesVisualization extends Component {
           position: seriesGroup.axis_position,
           tickFormatter:
             seriesGroup.stacked === STACKED_OPTIONS.PERCENT
-              ? d => `${Number(d * 100).toFixed(0)} %`
+              ? this.yAxisStackedByPercentFormatter
               : seriesGroupTickFormatter,
         };
 
