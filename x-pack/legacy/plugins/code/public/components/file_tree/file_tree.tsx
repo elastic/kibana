@@ -110,10 +110,17 @@ export class CodeFileTree extends React.Component<Props, { openPaths: string[] }
       this.toggleTree(path);
       this.onClick(node);
     };
+    const nodeTypeMap = {
+      [FileTreeItemType.Directory]: 'Directory',
+      [FileTreeItemType.File]: 'File',
+      [FileTreeItemType.Link]: 'Link',
+      [FileTreeItemType.Submodule]: 'Submodule',
+    };
     let bg = (
       <div
         tabIndex={0}
         className="codeFileTree__node--link"
+        data-test-subj={`codeFileTreeNode-${nodeTypeMap[node.type]}-${node.path}`}
         onClick={onClick}
         onKeyDown={onClick}
         role="button"
@@ -127,7 +134,6 @@ export class CodeFileTree extends React.Component<Props, { openPaths: string[] }
         return (
           <div className="codeFileTree__node">
             <div
-              data-test-subj={`codeFileTreeNode-Directory-${node.path}`}
               className={className}
               role="button"
               tabIndex={0}
@@ -159,7 +165,6 @@ export class CodeFileTree extends React.Component<Props, { openPaths: string[] }
         return (
           <div className="codeFileTree__node">
             <div
-              data-test-subj={`codeFileTreeNode-Submodule-${node.path}`}
               tabIndex={0}
               onKeyDown={onClick}
               onClick={onClick}
@@ -181,7 +186,6 @@ export class CodeFileTree extends React.Component<Props, { openPaths: string[] }
         return (
           <div className="codeFileTree__node">
             <div
-              data-test-subj={`codeFileTreeNode-Link-${node.path}`}
               tabIndex={0}
               onKeyDown={onClick}
               onClick={onClick}
@@ -203,7 +207,6 @@ export class CodeFileTree extends React.Component<Props, { openPaths: string[] }
         return (
           <div className="codeFileTree__node">
             <div
-              data-test-subj={`codeFileTreeNode-File-${node.path}`}
               tabIndex={0}
               onKeyDown={onClick}
               onClick={onClick}
