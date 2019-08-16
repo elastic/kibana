@@ -152,9 +152,9 @@ export async function getTransactionBreakdown({
 
   const kpiNames = kpis.map(kpi => kpi.name);
 
-  const timeseriesPerSubtype = (
-    idx(resp.aggregations, _ => _.by_date.buckets) || []
-  ).reduce(
+  const bucketsByDate = idx(resp.aggregations, _ => _.by_date.buckets) || [];
+
+  const timeseriesPerSubtype = bucketsByDate.reduce(
     (prev, bucket) => {
       const formattedValues = formatBucket(bucket);
       const time = bucket.key;

@@ -22,7 +22,7 @@ export function timeseriesTransformer({
   const aggs = timeseriesResponse.aggregations;
   const overallAvgDuration =
     idx(aggs, _ => _.overall_avg_duration.value) || null;
-  const responseTimeBuckets = idx(aggs, _ => _.response_times.buckets) || [];
+  const responseTimeBuckets = idx(aggs, _ => _.response_times.buckets);
   const { avg, p95, p99 } = getResponseTime(responseTimeBuckets);
   const transactionResultBuckets = idx(
     aggs,
