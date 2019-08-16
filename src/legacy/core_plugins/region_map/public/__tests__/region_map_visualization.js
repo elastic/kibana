@@ -102,7 +102,7 @@ describe('RegionMapsVisualizationTests', function () {
       uiSettings
     };
 
-    visualizations.types.VisTypesRegistryProvider.add(
+    visualizations.types.VisTypesRegistryProvider.register(
       createRegionMapTypeDefinition(dependencies)
     );
 

@@ -52,7 +52,6 @@ import { getVisualizeLoader } from 'ui/visualize/loader';
 import { Legacy } from 'kibana';
 import { VisTypesRegistry, VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
-import { IPrivate } from 'ui/private';
 import { SavedObjectAttributes } from 'kibana/server';
 import {
   EmbeddableFactory,
@@ -83,7 +82,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
 
   static async createVisualizeEmbeddableFactory(): Promise<VisualizeEmbeddableFactory> {
     const visTypes = VisTypesRegistryProvider;
-
+    // @ts-ignore
     return new VisualizeEmbeddableFactory(visTypes);
   }
 
@@ -97,6 +96,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
             return 'visualizeApp';
           }
           return (
+            // @ts-ignore
             visTypes.get(JSON.parse(savedObject.attributes.visState).type).icon || 'visualizeApp'
           );
         },
@@ -105,6 +105,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
             return '';
           }
           return `${savedObject.attributes.title} (
+            // @ts-ignore
             ${visTypes.get(JSON.parse(savedObject.attributes.visState).type).title})`;
         },
         showSavedObject: savedObject => {
@@ -181,6 +182,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     // TODO: This is a bit of a hack to preserve the original functionality. Ideally we will clean this up
     // to allow for in place creation of visualizations without having to navigate away to a new URL.
     if (this.visTypes) {
+      // @ts-ignore
       showNewVisModal(this.visTypes, {
         editorParams: ['addToDashboard'],
       });

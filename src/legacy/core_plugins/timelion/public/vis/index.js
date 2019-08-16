@@ -31,7 +31,7 @@ import visConfigTemplate from './timelion_vis.html';
 import editorConfigTemplate from './timelion_vis_params.html';
 
 // register the provider with the visTypes registry so that other know it exists
-VisTypesRegistryProvider.add(TimelionVisProvider);
+VisTypesRegistryProvider.register(TimelionVisProvider);
 
 export default function TimelionVisProvider(Private) {
   const VisFactory = Private(VisFactoryProvider);

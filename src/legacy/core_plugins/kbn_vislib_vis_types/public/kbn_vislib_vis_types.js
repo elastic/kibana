@@ -33,14 +33,14 @@ async function registerItems() {
   const $injector = await chrome.dangerouslyGetActiveInjector();
   const Private = $injector.get('Private');
 
-  VisTypesRegistryProvider.add(histogramVisTypeProvider(Private));
-  VisTypesRegistryProvider.add(lineVisTypeProvider(Private));
-  VisTypesRegistryProvider.add(pieVisTypeProvider(Private));
-  VisTypesRegistryProvider.add(areaVisTypeProvider(Private));
-  VisTypesRegistryProvider.add(heatmapVisTypeProvider(Private));
-  VisTypesRegistryProvider.add(horizontalBarVisTypeProvider(Private));
-  VisTypesRegistryProvider.add(gaugeVisTypeProvider(Private));
-  VisTypesRegistryProvider.add(goalVisTypeProvider(Private));
+  VisTypesRegistryProvider.register(histogramVisTypeProvider(Private));
+  VisTypesRegistryProvider.register(lineVisTypeProvider(Private));
+  VisTypesRegistryProvider.register(pieVisTypeProvider(Private));
+  VisTypesRegistryProvider.register(areaVisTypeProvider(Private));
+  VisTypesRegistryProvider.register(heatmapVisTypeProvider(Private));
+  VisTypesRegistryProvider.register(horizontalBarVisTypeProvider(Private));
+  VisTypesRegistryProvider.register(gaugeVisTypeProvider(Private));
+  VisTypesRegistryProvider.register(goalVisTypeProvider(Private));
 }
 
 registerItems();

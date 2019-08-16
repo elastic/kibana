@@ -19,11 +19,12 @@
 
 import { FiltersService, FiltersSetup } from './filters';
 import { TypesService, TypesSetup } from './types';
+import { VisType } from '../../../ui/public/vis';
 
 class VisualizationsPlugin {
   private readonly filters: FiltersService;
   private readonly types: TypesService;
-  private visualizations: Map<string, {}>;
+  private visualizations: Map<string, VisType>;
 
   constructor() {
     this.filters = new FiltersService();
@@ -37,7 +38,7 @@ class VisualizationsPlugin {
       types: this.types.setup(),
       visualizations: {
         getAll: () => new Map(this.visualizations),
-        add: obj => this.visualizations.set(obj.name, obj),
+        register: (obj: VisType): Map<string, VisType> => this.visualizations.set(obj.name, obj),
       },
     };
   }

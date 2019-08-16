@@ -50,4 +50,4 @@ function SelfChangingVisType(Private) {
   });
 }
 
-VisTypesRegistryProvider.add(SelfChangingVisType);
+VisTypesRegistryProvider.register(SelfChangingVisType);

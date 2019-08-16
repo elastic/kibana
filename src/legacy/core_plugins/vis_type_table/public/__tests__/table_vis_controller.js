@@ -51,7 +51,7 @@ describe('Table Vis - Controller', async function () {
       createAngularVisualization: VisFactoryProvider(Private).createAngularVisualization
     };
 
-    visualizations.types.VisTypesRegistryProvider.add(
+    visualizations.types.VisTypesRegistryProvider.register(
       createTableVisTypeDefinition(legacyDependencies)
     );
 

@@ -19,10 +19,12 @@
 
 import { VisType } from '../vis';
 
+export type VisTypesRegistry = Map<string, VisType>;
+
 const visTypes: Map<string, VisType> = new Map();
 
 export const VisTypesRegistryProvider = {
-  add: (obj: VisType) => visTypes.set(obj.name, obj),
+  register: (obj: VisType) => visTypes.set(obj.name, obj),
   get: (key: string) => visTypes.get(key),
   getAll: () => new Map(visTypes),
 };

@@ -85,7 +85,7 @@ describe('CoordinateMapsVisualizationTest', function () {
       $injector
     };
 
-    visualizations.types.VisTypesRegistryProvider.add(
+    visualizations.types.VisTypesRegistryProvider.register(
       createTileMapTypeDefinition(dependencies)
     );
 

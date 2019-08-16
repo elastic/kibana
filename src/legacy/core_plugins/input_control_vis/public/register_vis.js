@@ -74,7 +74,7 @@ const InputControlVisProvider =
   });
 
 // register the provider with the visTypes registry
-VisTypesRegistryProvider.add(InputControlVisProvider);
+VisTypesRegistryProvider.register(InputControlVisProvider);
 
 // export the provider so that the visType can be required with Private()
 export default InputControlVisProvider;

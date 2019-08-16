@@ -48,7 +48,7 @@ export class MetricVisPlugin implements Plugin<void, void> {
     __LEGACY.setup();
 
     data.expressions.registerFunction(createMetricVisFn);
-    visualizations.types.VisTypesRegistryProvider.add(createMetricVisTypeDefinition);
+    visualizations.types.VisTypesRegistryProvider.register(createMetricVisTypeDefinition);
   }
 
   public start(core: CoreStart) {
