@@ -49,12 +49,12 @@ export const callSetupMlModuleAPI = async (
               buckets: {
                 date_histogram: {
                   field: timeField,
-                  fixed_interval: `{bucketSpan}ms`,
+                  fixed_interval: `${bucketSpan}ms`,
                 },
                 aggregations: {
                   [timeField]: {
                     max: {
-                      field: [timeField],
+                      field: `${timeField}`,
                     },
                   },
                   doc_count_per_minute: {
