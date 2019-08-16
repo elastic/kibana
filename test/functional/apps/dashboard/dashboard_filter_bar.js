@@ -103,14 +103,6 @@ export default function ({ getService, getPageObjects }) {
         await pieChart.expectPieSliceCount(1);
       });
 
-      it('are added when pie chart legend item is clicked', async function () {
-        await dashboardAddPanel.addVisualization('Rendering Test: pie');
-        await PageObjects.dashboard.waitForRenderComplete();
-        await pieChart.filterByLegendItem('4,886');
-        const filterCount = await filterBar.getFilterCount();
-        expect(filterCount).to.equal(1);
-      });
-
       it('are preserved after saving a dashboard', async () => {
         await PageObjects.dashboard.saveDashboard('with filters');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -130,6 +122,24 @@ export default function ({ getService, getPageObjects }) {
         expect(filterCount).to.equal(1);
 
         await pieChart.expectPieSliceCount(1);
+      });
+    });
+
+    describe('saved search filtering', function () {
+      before(async () => {
+        await filterBar.ensureFieldEditorModalIsClosed();
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.clickNewDashboard();
+        await PageObjects.dashboard.setTimepickerInDataRange();
+      });
+
+      it('are added when pie chart legend item is clicked', async function () {
+        await dashboardAddPanel.addVisualization('Rendering Test: pie');
+        await PageObjects.dashboard.waitForRenderComplete();
+        await pieChart.filterByLegendItem('4,886');
+
+        const filterCount = await filterBar.getFilterCount();
+        expect(filterCount).to.equal(1);
       });
     });
   });
