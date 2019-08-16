@@ -546,6 +546,7 @@ function discoverController(
         $scope.$listen(timefilter, 'autoRefreshFetch', $scope.fetch);
         $scope.$listen(timefilter, 'refreshIntervalUpdate', $scope.updateRefreshInterval);
         $scope.$listen(timefilter, 'timeUpdate', $scope.updateTime);
+        $scope.$listen(timefilter, 'fetch', $scope.fetch);
 
         $scope.$watchCollection('state.sort', function (sort) {
           if (!sort) return;
