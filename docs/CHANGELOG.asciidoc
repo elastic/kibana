@@ -10,6 +10,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-7.3.1>>
 * <<release-notes-7.3.0>>
 * <<release-notes-7.2.1>>
 * <<release-notes-7.2.0>>
@@ -24,6 +25,54 @@ This section summarizes the changes in each release.
 * <<release-notes-7.0.0-alpha1>>
 
 --
+
+[[release-notes-7.3.1]]
+== {kib} 7.3.1
+
+See also <<breaking-changes-7.3, breaking changes in 7.3>>.
+
+[float]
+[[bug-7.3.1]]
+=== Bug fixes
+APM::
+* Makes sure tooltips for metric charts are synced {pull}42139[#42139]
+Canvas::
+* Fixes IE11 fullscreen behavior to properly position workpad {pull}42544[#42544]
+Geo::
+* Removes geojson deep clone logic, handle on maps side {pull}41835[#41835]
+* Fixes maps geojson upload hanging on index step {pull}42623[#42623]
+* Formats doc-ids as strings {pull}42011[#42011]
+* Fits only on visible features {pull}42020[#42020]
+Infra Logs UI::
+* Fixes section mapping bug in node detail page {pull}41641[#41641]
+* Fixes autocomplete to use proper derived index pattern {pull}42287[#42287]
+Machine Learning::
+* Fixes basic license redirect {pull}41876[#41876]
+* Fixes file datavisualizer mapping overrides {pull}42047[#42047]
+* Fixes ml when spaces feature is disabled {pull}42564[#42564]
+* Fixes check for watcher being enabled {pull}43025[#43025]
+Management::
+* Removes validation for email action body attribute in Watcher {pull}42009[#42009]
+* Fixes minor Console regressions introduced during EUIfication. {pull}41089[#41089]
+Monitoring::
+* Only fetches a single cluster data instead of all clusters when possible {pull}42469[#42469]
+* Uses async/await pattern which should address weird bug {pull}42876[#42876]
+* Uses fixed_interval explicitly for date_histogram aggregations {pull}37023[#37023]
+Operations::
+* Overrides `org.label-schema.license` Docker label {pull}42836[#42836]
+Platform::
+* Fixes CSV export of saved searches that have _source field {pull}43123[#43123]
+* Fixes Import API so it doesn't override SavedObjectClient errors {pull}41125[#41125]
+* Correctly sets `kibanaRoot` on {kib} plugin helpers for new generated plugins {pull}42616[#42616]
+* Fixes scaling logic to check agg type instead schema {pull}42574[#42574]
+Reporting::
+* Fixes an issue in the Reporting jobs listing page that sometimes prevented it from rendering {pull}42419[#42419]
+Visualizations::
+* Fixes problem in TSVB when group by &quot;Everything&quot; fails to calculate data with &quot;Overall&quot; metrics {pull}42074[#42074]
+* Fixes error when filters agg filters are a query_string query {pull}43310[#43310]
+* Fixes tooltip text overflow {pull}41703[#41703]
+* Restores discover histogram selection triggering fetch {pull}43097[#43097]
+* Fixes issue when removing scripted fields {pull}42838[#42838]
 
 [[release-notes-7.3.0]]
 == {kib} 7.3.0
