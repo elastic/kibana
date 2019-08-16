@@ -20,9 +20,9 @@
 import chalk from 'chalk';
 import Listr from 'listr';
 
+import { createFailError, run } from '@kbn/dev-utils';
 import { ErrorReporter, mergeConfigs } from './i18n';
 import { extractDefaultMessages, extractUntrackedMessages, checkCompatibility } from './i18n/tasks';
-import { createFailError, run } from './run';
 
 run(
   async ({

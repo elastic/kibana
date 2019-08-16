@@ -19,7 +19,7 @@
 
 import { resolve } from 'path';
 
-import { run } from '../dev/run';
+import { run } from '@kbn/dev-utils';
 import { FunctionalTestRunner } from './functional_test_runner';
 
 run(

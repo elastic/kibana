@@ -21,6 +21,7 @@ import chalk from 'chalk';
 import Listr from 'listr';
 import { resolve } from 'path';
 
+import { createFailError, run } from '@kbn/dev-utils';
 import {
   ErrorReporter,
   mergeConfigs,
@@ -29,7 +30,6 @@ import {
   writeFileAsync,
 } from './i18n';
 import { extractDefaultMessages } from './i18n/tasks';
-import { createFailError, run } from './run';
 
 run(
   async ({
