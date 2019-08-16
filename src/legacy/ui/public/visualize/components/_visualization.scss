@@ -2,7 +2,7 @@
 .visualize {
   display: flex;
   flex: 1 1 100%;
-  overflow: visible;
+  overflow: hidden;
 }
 
 // SASSTODO: Too risky to change to BEM naming
@@ -11,6 +11,7 @@
   flex-direction: column;
   width: 100%;
   height: 100%;
+  overflow: auto;
   position: relative;
   padding: $euiSizeS;
   flex: 1 1 100%;
@@ -25,7 +26,7 @@
     flex: 1 1 0; /* 1 */
     display: flex;
     flex-direction: row;
-    overflow: visible;
+    overflow: auto;
     transition: opacity 0.01s;
 
     // IE11 Hack
