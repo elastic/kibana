@@ -1,5 +1,5 @@
 {
-  "indices.split": {
+  "indices.clone": {
     "url_params": {
       "timeout": "",
       "master_timeout": "",
@@ -10,8 +10,8 @@
       "POST"
     ],
     "patterns": [
-      "{indices}/_split/{target}"
+      "{indices}/_clone/{target}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-split-index.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-clone-index.html"
   }
 }
