@@ -8,7 +8,7 @@ import React from 'react';
 import uuid from 'uuid/v4';
 
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
-import { AbstractESSource, COUNT_PROP_LABEL, COUNT_PROP_NAME } from '../es_source';
+import { AbstractESSource } from '../es_source';
 import { VectorLayer } from '../../vector_layer';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -20,6 +20,8 @@ import { convertToLines } from './convert_to_lines';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggConfigs } from 'ui/vis/agg_configs';
 
+const COUNT_PROP_LABEL = 'count';
+const COUNT_PROP_NAME = 'doc_count';
 const MAX_GEOTILE_LEVEL = 29;
 
 const aggSchemas = new Schemas([
@@ -241,6 +243,14 @@ export class ESPewPewSource extends AbstractESSource {
         areResultsTrimmed: false
       }
     };
+  }
+
+  _formatMetricKey(metric) {
+    return metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : COUNT_PROP_NAME;
+  }
+
+  _formatMetricLabel(metric) {
+    return metric.type !== 'count' ? `${metric.type} of ${metric.field}` : COUNT_PROP_LABEL;
   }
 
   async _getGeoField() {
