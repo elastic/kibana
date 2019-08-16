@@ -18,5 +18,4 @@
  */
 
 export { getFieldCapabilities } from './field_capabilities';
-export { resolveTimePattern } from './resolve_time_pattern';
-export { createNoMatchingIndicesError } from './errors';
+export { FieldCapsResponse } from './field_caps_response';

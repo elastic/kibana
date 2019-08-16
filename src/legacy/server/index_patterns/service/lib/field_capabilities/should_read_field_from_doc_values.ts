@@ -17,4 +17,6 @@
  * under the License.
  */
 
-export { IndexPatternsService } from './index_patterns_service';
+export function shouldReadFieldFromDocValues(aggregatable: boolean, esType: string) {
+  return aggregatable && esType !== 'text' && !esType.startsWith('_');
+}

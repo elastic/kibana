@@ -20,6 +20,20 @@
 import { uniq } from 'lodash';
 import { castEsToKbnFieldTypeName } from '../../../../../utils';
 import { shouldReadFieldFromDocValues } from './should_read_field_from_doc_values';
+import { FieldDescriptor } from '../..';
+
+interface FieldCapObject {
+  type: string;
+  searchable: boolean;
+  aggregatable: boolean;
+  indices?: string[];
+  non_searchable_indices?: string[];
+  non_aggregatable_indices?: string[];
+}
+
+export interface FieldCapsResponse {
+  fields: Record<string, Record<string, FieldCapObject>>;
+}
 
 /**
  *  Read the response from the _field_caps API to determine the type and
@@ -75,25 +89,30 @@ import { shouldReadFieldFromDocValues } from './should_read_field_from_doc_value
  *    }
  *
  *  @param {FieldCapsResponse} fieldCapsResponse
- *  @return {Promise<Array<FieldInfo>>}
+ *  @return {Array<FieldDescriptor>}
  */
-export function readFieldCapsResponse(fieldCapsResponse) {
+export function readFieldCapsResponse(fieldCapsResponse: FieldCapsResponse): FieldDescriptor[] {
   const capsByNameThenType = fieldCapsResponse.fields;
-  const kibanaFormattedCaps = Object.keys(capsByNameThenType).map(fieldName => {
+  const kibanaFormattedCaps: FieldDescriptor[] = Object.keys(capsByNameThenType).map(fieldName => {
     const capsByType = capsByNameThenType[fieldName];
     const types = Object.keys(capsByType);
 
     // If a single type is marked as searchable or aggregatable, all the types are searchable or aggregatable
     const isSearchable = types.some(type => {
-      return !!capsByType[type].searchable ||
-        (!!capsByType[type].non_searchable_indices && capsByType[type].non_searchable_indices.length > 0);
+      return (
+        !!capsByType[type].searchable ||
+        (!!capsByType[type].non_searchable_indices &&
+          capsByType[type].non_searchable_indices!.length > 0)
+      );
     });
 
     const isAggregatable = types.some(type => {
-      return !!capsByType[type].aggregatable ||
-        (!!capsByType[type].non_aggregatable_indices && capsByType[type].non_aggregatable_indices.length > 0);
+      return (
+        !!capsByType[type].aggregatable ||
+        (!!capsByType[type].non_aggregatable_indices &&
+          capsByType[type].non_aggregatable_indices!.length > 0)
+      );
     });
-
 
     // If there are multiple types but they all resolve to the same kibana type
     // ignore the conflict and carry on (my wayward son)
@@ -106,10 +125,13 @@ export function readFieldCapsResponse(fieldCapsResponse) {
         searchable: isSearchable,
         aggregatable: isAggregatable,
         readFromDocValues: false,
-        conflictDescriptions: types.reduce((acc, esType) => ({
-          ...acc,
-          [esType]: capsByType[esType].indices
-        }), {})
+        conflictDescriptions: types.reduce(
+          (acc, esType) => ({
+            ...acc,
+            [esType]: capsByType[esType].indices,
+          }),
+          {}
+        ),
       };
     }
 
@@ -132,7 +154,10 @@ export function readFieldCapsResponse(fieldCapsResponse) {
   // Discern which sub fields are multi fields. If the parent field is not an object or nested field
   // the child must be a multi field.
   subFields.forEach(field => {
-    const parentFieldName = field.name.split('.').slice(0, -1).join('.');
+    const parentFieldName = field.name
+      .split('.')
+      .slice(0, -1)
+      .join('.');
     const parentFieldCaps = kibanaFormattedCaps.find(caps => caps.name === parentFieldName);
 
     if (parentFieldCaps && !['object', 'nested'].includes(parentFieldCaps.type)) {
