@@ -6,7 +6,7 @@
 
 import { SavedObjectsClientContract } from 'src/core/server';
 import { ActionTypeRegistry } from './action_type_registry';
-import { FireOptions } from './create_fire_function';
+import { ExecuteOptions } from './create_execute_function';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (basePath: string, overwrites?: Partial<Services>) => Services;
@@ -21,7 +21,7 @@ export interface Services {
 export interface ActionsPlugin {
   registerType: ActionTypeRegistry['register'];
   listTypes: ActionTypeRegistry['list'];
-  fire(options: FireOptions): Promise<void>;
+  execute(options: ExecuteOptions): Promise<void>;
 }
 
 // the parameters passed to an action type executor function

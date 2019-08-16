@@ -31,8 +31,6 @@ module.exports = function (grunt) {
     }
   );
 
-  grunt.registerTask('test:mocha', ['checkPlugins', 'run:mocha']);
-
   grunt.registerTask('test:browser', ['checkPlugins', 'run:browserSCSS', 'run:browserTestServer', 'karma:unit']);
 
   grunt.registerTask('test:browser-ci', () => {
@@ -49,7 +47,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test:quick', [
     'checkPlugins',
-    'test:mocha',
+    'run:mocha',
     'run:functionalTests',
     'test:jest',
     'test:jest_integration',
