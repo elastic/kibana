@@ -23,14 +23,15 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'visualize', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
   };
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
+  const testSubjects = getService('testSubjects');
 
-  describe('saved queries saved objects test', function describeIndexTests() {
+  describe('saved queries as saved objects', function describeIndexTests() {
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
 
@@ -48,33 +49,17 @@ export default function ({ getService, getPageObjects }) {
 
     describe('saved query management component functionality', function () {
       this.tags(['skipFirefox']);
-      it('should allow saving a new saved query via the saved query management component popover with no query loaded', async () => {
-        await savedQueryManagementComponent.saveNewQuery('foo', 'bar', true, false);
-        await savedQueryManagementComponent.savedQueryExistOrFail('foo');
+      it('should show the saved query management component with no saved queries', async () => {
+        await savedQueryManagementComponent.openSavedQueryManagementComponent();
+        const descriptionText = await testSubjects.getVisibleText('saved-query-management-popover');
+        expect(descriptionText)
+          .to
+          .eql('SAVED QUERIES\nThere are no saved queries. Save query text and filters that you want to use again.');
       });
-
-      it('should allow saving a currently loaded saved query as a new query via the saved query management component ', async () => {
-        await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
-          'foo2',
-          'bar2',
-          true,
-          false
-        );
-        await savedQueryManagementComponent.savedQueryExistOrFail('foo2');
-      });
-
-      it('should allow saving changes to a currently loaded query via the saved query management component', async () => {
-        await queryBar.setQuery('response:404');
-        await savedQueryManagementComponent.updateCurrentlyLoadedQuery('bar2', false, false);
-        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
-        await savedQueryManagementComponent.loadSavedQuery('foo2');
-        const queryString = await queryBar.getQueryString();
-        expect(queryString).to.eql('response:404');
-      });
-
-      it('should allow deleting saved queries in the saved query management component ', async () => {
-        await savedQueryManagementComponent.deleteSavedQuery('foo2');
-        await savedQueryManagementComponent.savedQueryMissingOrFail('foo2');
+      it('should allow a query to be saved via the saved objects management component', async () => {
+        await queryBar.setQuery('response.keyword:200');
+        // await savedQueryManagementComponent.saveNewQuery('OkResponse', '200 responses', false, true);
+        // await savedQueryManagementComponent.savedQueryExistOrFail('OkResponse');
       });
     });
   });
