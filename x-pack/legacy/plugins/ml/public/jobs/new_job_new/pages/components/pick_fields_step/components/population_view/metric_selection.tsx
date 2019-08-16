@@ -233,7 +233,7 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
 
       {isActive === false && splitField === null && (
         <Fragment>
-          Population label TODO
+          {/* Population label TODO */}
           {splitField !== null && <EuiHorizontalRule margin="l" />}
         </Fragment>
       )}

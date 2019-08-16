@@ -14,7 +14,7 @@
     "test:browser:dev": "gulp testbrowser-dev",
     "test:browser": "gulp testbrowser",
     "test:jest": "node scripts/jest",
-    "test:mocha": "grunt test:mocha",
+    "test:mocha": "node scripts/mocha",
     "test:server": "gulp testserver"
   },
   "kibana": {
@@ -141,7 +141,6 @@
     "jest-cli": "^24.8.0",
     "jest-styled-components": "^6.2.2",
     "jsdom": "^12.0.0",
-    "js-yaml": "^3.13.1",
     "madge": "3.4.4",
     "mocha": "3.5.3",
     "mocha-junit-reporter": "^1.23.1",

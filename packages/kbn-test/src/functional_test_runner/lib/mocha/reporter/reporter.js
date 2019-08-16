@@ -23,12 +23,11 @@ import Mocha from 'mocha';
 import { ToolingLogTextWriter } from '@kbn/dev-utils';
 import moment from 'moment';
 
-import { setupJUnitReportGeneration } from '../../../../../../../src/dev';
+import { recordLog, snapshotLogsForRunnable, setupJUnitReportGeneration } from '../../../../mocha';
 import * as colors from './colors';
 import * as symbols from './symbols';
 import { ms } from './ms';
 import { writeEpilogue } from './write_epilogue';
-import { recordLog, snapshotLogsForRunnable } from '../../../../../../../src/dev/mocha/log_cache';
 
 export function MochaReporterProvider({ getService }) {
   const log = getService('log');

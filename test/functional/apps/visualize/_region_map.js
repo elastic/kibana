@@ -63,16 +63,13 @@ export default function ({ getService, getPageObjects }) {
       it('should change results after changing layer to world', async function () {
 
         await PageObjects.visualize.clickOptions();
-        await  PageObjects.visualize.selectFieldById('World Countries', 'regionMap');
-
-        await PageObjects.common.sleep(1000);//give angular time to go update UI state
+        await  PageObjects.visualize.setSelectByOptionText('regionMapOptionsSelectLayer', 'World Countries');
 
         //ensure all fields are there
-        await  PageObjects.visualize.selectFieldById('ISO 3166-1 alpha-2 code', 'joinField');
-        await  PageObjects.visualize.selectFieldById('ISO 3166-1 alpha-3 code', 'joinField');
-        await  PageObjects.visualize.selectFieldById('name', 'joinField');
-        await  PageObjects.visualize.selectFieldById('ISO 3166-1 alpha-2 code', 'joinField');
-        await PageObjects.common.sleep(2000);//need some time for the data to load
+        await  PageObjects.visualize.setSelectByOptionText('regionMapOptionsSelectJoinField', 'ISO 3166-1 alpha-2 code');
+        await  PageObjects.visualize.setSelectByOptionText('regionMapOptionsSelectJoinField', 'ISO 3166-1 alpha-3 code');
+        await  PageObjects.visualize.setSelectByOptionText('regionMapOptionsSelectJoinField', 'name');
+        await  PageObjects.visualize.setSelectByOptionText('regionMapOptionsSelectJoinField', 'ISO 3166-1 alpha-2 code');
 
         await inspector.open();
         const actualData = await inspector.getTableData();
@@ -82,8 +79,11 @@ export default function ({ getService, getPageObjects }) {
 
       it('should contain a dropdown with the default road_map base layer as an option',
         async () => {
-          const roadMapExists = await find.existsByCssSelector('[label="road_map"]');
-          expect(roadMapExists).to.be(true);
+          const selectField = await find.byCssSelector('#wmsOptionsSelectTmsLayer');
+          const $ = await selectField.parseDomContent();
+          const optionsText = $('option').toArray().map(option => $(option).text());
+
+          expect(optionsText.includes('road_map')).to.be(true);
         });
     });
   });

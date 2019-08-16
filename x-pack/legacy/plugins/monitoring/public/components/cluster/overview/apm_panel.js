@@ -23,7 +23,7 @@ import {
   EuiHorizontalRule,
   EuiFlexGroup,
   EuiToolTip,
-  EuiBadge
+  EuiIcon
 } from '@elastic/eui';
 import { formatTimestampToDuration } from '../../../../common';
 import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
@@ -39,35 +39,47 @@ export function ApmPanel(props) {
   const goToApm = () => props.changeUrl('apm');
   const goToInstances = () => props.changeUrl('apm/instances');
 
-  const setupModeApmData = get(setupMode.data, 'apm');
+  const setupModeAPMData = get(setupMode.data, 'apm');
   let setupModeInstancesData = null;
   if (setupMode.enabled && setupMode.data) {
-    const migratedNodesCount = Object.values(setupModeApmData.byUuid).filter(node => node.isFullyMigrated).length;
-    let totalNodesCount = Object.values(setupModeApmData.byUuid).length;
-    if (totalNodesCount === 0 && get(setupMode.data, 'apm.detected.mightExist', false)) {
-      totalNodesCount = 1;
+    const {
+      totalUniqueInstanceCount,
+      totalUniqueFullyMigratedCount,
+      totalUniquePartiallyMigratedCount
+    } = setupModeAPMData;
+    const hasInstances = totalUniqueInstanceCount > 0 || get(setupModeAPMData, 'detected.mightExist', false);
+    const allMonitoredByMetricbeat = totalUniqueInstanceCount > 0 &&
+      (totalUniqueFullyMigratedCount === totalUniqueInstanceCount || totalUniquePartiallyMigratedCount === totalUniqueInstanceCount);
+    const internalCollectionOn = totalUniquePartiallyMigratedCount > 0;
+    if (hasInstances && (!allMonitoredByMetricbeat || internalCollectionOn)) {
+      let tooltipText = null;
+
+      if (!allMonitoredByMetricbeat) {
+        tooltipText = i18n.translate('xpack.monitoring.cluster.overview.apmPanel.setupModeNodesTooltip.oneInternal', {
+          defaultMessage: `There's at least one server that isn't being monitored using Metricbeat. Click the flag
+          icon to visit the servers listing page and find out more information about the status of each server.`
+        });
+      }
+      else if (internalCollectionOn) {
+        tooltipText = i18n.translate('xpack.monitoring.cluster.overview.apmPanel.setupModeNodesTooltip.disableInternal', {
+          defaultMessage: `All servers are being monitored using Metricbeat but internal collection still needs to be turned
+          off. Click the flag icon to visit the servers listing page and disable internal collection.`
+        });
+      }
+
+      setupModeInstancesData = (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            position="top"
+            content={tooltipText}
+          >
+            <EuiLink onClick={goToInstances}>
+              <EuiIcon type="flag" color="warning"/>
+            </EuiLink>
+          </EuiToolTip>
+        </EuiFlexItem>
+      );
     }
-
-    const badgeColor = migratedNodesCount === totalNodesCount
-      ? 'secondary'
-      : 'danger';
-
-    setupModeInstancesData = (
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          position="top"
-          content={i18n.translate('xpack.monitoring.cluster.overview.apmPanel.setupModeNodesTooltip', {
-            defaultMessage: `These numbers indicate how many detected monitored APM servers versus how many ` +
-            `detected total APM servers. If there are more detected APM servers than monitored APM servers, click the Nodes ` +
-            `link and you will be guided in how to setup monitoring for the missing node.`
-          })}
-        >
-          <EuiBadge color={badgeColor}>
-            {migratedNodesCount}/{totalNodesCount}
-          </EuiBadge>
-        </EuiToolTip>
-      </EuiFlexItem>
-    );
   }
 
   return (
@@ -85,7 +97,7 @@ export function ApmPanel(props) {
               <h3>
                 <DisabledIfNoDataAndInSetupModeLink
                   setupModeEnabled={setupMode.enabled}
-                  setupModeData={setupModeApmData}
+                  setupModeData={setupModeAPMData}
                   onClick={goToApm}
                   aria-label={i18n.translate('xpack.monitoring.cluster.overview.apmPanel.overviewLinkAriaLabel', {
                     defaultMessage: 'APM Overview'
