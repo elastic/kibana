@@ -17,26 +17,6 @@
  * under the License.
  */
 
-import { LogLevel, ParsedLogLevel } from './log_levels';
-import { LogMessage } from './tooling_log';
-
-export interface ToolingLogWriter {
-  write(msg: LogMessage): boolean;
-}
-
-export interface WriteTarget {
-  write(chunk: string): void;
-}
-
-export interface WriterConfig {
-  level: LogLevel;
-  writeTo: WriteTarget;
-}
-
-export class ToolingLogTextWriter implements ToolingLogTextWriter {
-  public level: ParsedLogLevel;
-  public writeTo: WriteTarget;
-
-  constructor(config: WriterConfig);
-  public write(msg: LogMessage): boolean;
-}
+export { ToolingLog } from './tooling_log';
+export { ToolingLogTextWriter, ToolingLogTextWriterConfig } from './tooling_log_text_writer';
+export { pickLevelFromFlags, LogLevel } from './log_levels';

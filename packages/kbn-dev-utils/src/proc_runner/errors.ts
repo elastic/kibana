@@ -17,5 +17,18 @@
  * under the License.
  */
 
-export { createConcatStream } from './concat_stream';
-export { createPromiseFromStreams } from './promise_from_streams';
+const $isCliError = Symbol('isCliError');
+
+interface CliError extends Error {
+  [$isCliError]: boolean;
+}
+
+export function createCliError(message: string) {
+  const error: Partial<CliError> = new Error(message);
+  error[$isCliError] = true;
+  return error as CliError;
+}
+
+export function isCliError(error: any): error is CliError {
+  return error && !!error[$isCliError];
+}

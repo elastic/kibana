@@ -17,6 +17,22 @@
  * under the License.
  */
 
-export function createAbsolutePathSerializer(
-  rootPath: string
-): { print(...args: any[]): string; test(value: any): boolean };
+import { parseLogLevel } from './log_levels';
+
+it('parses valid log levels correctly', () => {
+  expect(parseLogLevel('silent')).toMatchSnapshot('silent');
+  expect(parseLogLevel('error')).toMatchSnapshot('error');
+  expect(parseLogLevel('warning')).toMatchSnapshot('warning');
+  expect(parseLogLevel('info')).toMatchSnapshot('info');
+  expect(parseLogLevel('debug')).toMatchSnapshot('debug');
+  expect(parseLogLevel('verbose')).toMatchSnapshot('verbose');
+});
+
+it('throws error for invalid levels', () => {
+  // @ts-ignore
+  expect(() => parseLogLevel('warn')).toThrowErrorMatchingSnapshot('warn');
+  // @ts-ignore
+  expect(() => parseLogLevel('foo')).toThrowErrorMatchingSnapshot('foo');
+  // @ts-ignore
+  expect(() => parseLogLevel('bar')).toThrowErrorMatchingSnapshot('bar');
+});

@@ -17,4 +17,8 @@
  * under the License.
  */
 
-export { createAbsolutePathSerializer } from './absolute_path_serializer';
+import { Message } from './message';
+
+export interface Writer {
+  write(msg: Message): boolean;
+}
