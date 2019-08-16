@@ -23,9 +23,9 @@ Variables should use <...> syntax.
 If an API supports both PUT and POST, include both here.
 ////
 
-`POST /api/spaces/copy_saved_objects`
+`POST /api/spaces/_copy_saved_objects`
 
-`POST /s/<space_id>/api/spaces/copy_saved_objects`
+`POST /s/<space_id>/api/spaces/_copy_saved_objects`
 
 
 ////
@@ -225,7 +225,7 @@ The following example attempts to copy a dashboard with id `my-dashboard`, inclu
 
 [source,js]
 ----
-POST /api/spaces/copy_saved_objects
+POST /api/spaces/_copy_saved_objects
 {
   "objects": [{
     "type": "dashboard",
@@ -264,7 +264,7 @@ The following example successfully copies a visualization with id `my-viz` from 
 
 [source,js]
 ----
-POST /s/marketing/api/spaces/copy_saved_objects
+POST /s/marketing/api/spaces/_copy_saved_objects
 {
   "objects": [{
     "type": "visualization",

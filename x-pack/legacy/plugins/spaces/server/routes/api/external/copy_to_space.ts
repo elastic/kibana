@@ -38,7 +38,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
 
   http.route({
     method: 'POST',
-    path: '/api/spaces/copy_saved_objects',
+    path: '/api/spaces/_copy_saved_objects',
     async handler(request: Legacy.Request, h: Legacy.ResponseToolkit) {
       const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(
         request,
@@ -89,7 +89,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
 
   http.route({
     method: 'POST',
-    path: '/api/spaces/copy_saved_objects/resolve_conflicts',
+    path: '/api/spaces/_resolve_copy_saved_objects_errors',
     async handler(request: Legacy.Request, h: Legacy.ResponseToolkit) {
       const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(
         request,

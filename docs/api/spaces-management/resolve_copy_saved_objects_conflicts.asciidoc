@@ -23,9 +23,9 @@ Variables should use <...> syntax.
 If an API supports both PUT and POST, include both here.
 ////
 
-`POST /api/spaces/copy_saved_objects/resolve_conflicts`
+`POST /api/spaces/_resolve_copy_saved_objects_errors`
 
-`POST /s/<space_id>/api/spaces/copy_saved_objects/resolve_conflicts`
+`POST /s/<space_id>/api/spaces/_resolve_copy_saved_objects_errors`
 
 
 
@@ -225,7 +225,7 @@ The following example overwrites an index pattern in the marketing space, and a 
 
 [source,js]
 ----
-POST api/spaces/copy_saved_objects/resolve_conflicts
+POST api/spaces/_resolve_copy_saved_objects_errors
 {
   "objects": [{
     "type": "dashboard",
