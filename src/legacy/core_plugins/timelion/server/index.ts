@@ -17,6 +17,9 @@
  * under the License.
  */
 
-export { createAutoJUnitReporter } from './auto_junit_reporter';
-export { setupJUnitReportGeneration } from './junit_report_generation';
-export { runMochaCli } from './run_mocha_cli';
+import { PluginInitializerContext } from 'kibana/server';
+import { TimelionServerPlugin as Plugin } from './plugin';
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new Plugin(initializerContext);
+}

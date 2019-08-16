@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 
 import { JobCreatorContext } from '../../../job_creator_context';
@@ -57,7 +58,10 @@ export const SingleMetricSettings: FC<Props> = ({ isActive, setIsValid }) => {
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty onClick={convertToMultiMetricJob}>
-                Convert to multi metric job
+                <FormattedMessage
+                  id="xpack.ml.newJob.wizard.pickFieldsStep.singleMetricView.convertToMultiMetricButton"
+                  defaultMessage="Convert to multi metric job"
+                />
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
