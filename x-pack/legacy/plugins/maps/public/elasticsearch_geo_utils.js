@@ -252,6 +252,23 @@ function createGeoBoundBoxFilter(geometry, geoFieldName, filterProps = {}) {
   };
 }
 
+function createGeoPolygonFilter(polygonCoordinates, geoFieldName, filterProps = {}) {
+  return {
+    geo_polygon: {
+      ignore_unmapped: true,
+      [geoFieldName]: {
+        points: polygonCoordinates[POLYGON_COORDINATES_EXTERIOR_INDEX].map(coordinatePair => {
+          return {
+            lon: coordinatePair[LON_INDEX],
+            lat: coordinatePair[LAT_INDEX]
+          };
+        })
+      }
+    },
+    ...filterProps
+  };
+}
+
 export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
   ensureGeoField(geoFieldType);
 
@@ -316,27 +333,26 @@ function createGeometryFilterWithMeta({
   }
 
   // geo_points supports limited geometry types
-  // TODO add support for multi_polygon
-  ensureGeometryType(geometry.type, [GEO_JSON_TYPE.POLYGON]);
+  ensureGeometryType(geometry.type, [GEO_JSON_TYPE.POLYGON, GEO_JSON_TYPE.MULTI_POLYGON]);
+
+  if (geometry.type === GEO_JSON_TYPE.MULTI_POLYGON) {
+    return {
+      meta,
+      query: {
+        bool: {
+          should: geometry.coordinates.map(polygonCoordinates => {
+            return createGeoPolygonFilter(polygonCoordinates, geoFieldName);
+          })
+        }
+      }
+    };
+  }
 
   if (isBoundingBox) {
     return createGeoBoundBoxFilter(geometry, geoFieldName, { meta });
   }
 
-  return {
-    meta,
-    geo_polygon: {
-      ignore_unmapped: true,
-      [geoFieldName]: {
-        points: geometry.coordinates[POLYGON_COORDINATES_EXTERIOR_INDEX].map(coordinatePair => {
-          return {
-            lon: coordinatePair[LON_INDEX],
-            lat: coordinatePair[LAT_INDEX]
-          };
-        })
-      }
-    }
-  };
+  return createGeoPolygonFilter(geometry.coordinates, geoFieldName, { meta });
 }
 
 export function roundCoordinates(coordinates) {

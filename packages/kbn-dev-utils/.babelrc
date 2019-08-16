@@ -1,3 +1,0 @@
-{
-  "presets": ["@kbn/babel-preset/node_preset"]
-}

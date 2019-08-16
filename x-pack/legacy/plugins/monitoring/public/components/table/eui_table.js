@@ -26,6 +26,7 @@ export class EuiMonitoringTable extends React.PureComponent {
       setupMode,
       uuidField,
       nameField,
+      setupNewButtonLabel,
       ...props
     } = this.props;
 
@@ -193,7 +194,7 @@ export class EuiMonitoringTable extends React.PureComponent {
         <Fragment>
           <EuiSpacer size="m"/>
           <EuiButton onClick={() => setupMode.openFlyout({}, true)}>
-            {props.setupNewButtonLabel}
+            {setupNewButtonLabel}
           </EuiButton>
         </Fragment>
       );

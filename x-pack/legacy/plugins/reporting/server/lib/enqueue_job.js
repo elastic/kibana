@@ -31,7 +31,7 @@ function enqueueJobFn(server) {
 
       job.on(esqueueEvents.EVENT_JOB_CREATED, (createdJob) => {
         if (createdJob.id === job.id) {
-          server.log(['reporting', 'debug'], `Saved object to process`);
+          server.log(['reporting', 'esqueue', 'info'], `Successfully queued job: ${createdJob.id}`);
           resolve(job);
         }
       });
