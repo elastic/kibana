@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
-import chrome from 'ui/chrome';
+import { npStart } from 'ui/new_platform';
 
 import {
   CommonProps,
@@ -120,12 +120,13 @@ class SavedObjectFinder extends React.Component<SavedObjectFinderProps, SavedObj
   private debouncedFetch = _.debounce(async (query: string) => {
     const metaDataMap = this.getSavedObjectMetaDataMap();
 
-    const resp = await chrome.getSavedObjectsClient().find({
+    const perPage = npStart.core.uiSettings.get('savedObjects:listingLimit');
+    const resp = await npStart.core.savedObjects.client.find({
       type: Object.keys(metaDataMap),
       fields: ['title', 'visState'],
       search: query ? `${query}*` : undefined,
       page: 1,
-      perPage: chrome.getUiSettingsClient().get('savedObjects:listingLimit'),
+      perPage,
       searchFields: ['title^3', 'description'],
       defaultSearchOperator: 'AND',
     });
