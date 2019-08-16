@@ -15,6 +15,8 @@ interface LogRateAreaSeriesDataPoint {
 type LogRateAreaSeries = LogRateAreaSeriesDataPoint[];
 type LogRateLineSeriesDataPoint = [number, number | null];
 type LogRateLineSeries = LogRateLineSeriesDataPoint[];
+type LogRateAnomalySeriesDataPoint = [number, number];
+type LogRateAnomalySeries = LogRateAnomalySeriesDataPoint[];
 
 export const useLogEntryRateGraphData = ({
   data,
@@ -45,8 +47,25 @@ export const useLogEntryRateGraphData = ({
     }, []);
   }, [data]);
 
+  const anomalySeries: LogRateAnomalySeries = useMemo(() => {
+    if (!data || (data && data.histogramBuckets && !data.histogramBuckets.length)) {
+      return [];
+    }
+    return data.histogramBuckets.reduce((acc: any, bucket) => {
+      if (bucket.anomalies.length > 0) {
+        bucket.anomalies.forEach(anomaly => {
+          acc.push([anomaly.startTime, anomaly.actualLogEntryRate]);
+        });
+        return acc;
+      } else {
+        return acc;
+      }
+    }, []);
+  }, [data]);
+
   return {
     areaSeries,
     lineSeries,
+    anomalySeries,
   };
 };

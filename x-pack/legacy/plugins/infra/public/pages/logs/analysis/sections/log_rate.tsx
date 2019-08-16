@@ -56,7 +56,7 @@ export const LogRateResults = ({
     { defaultMessage: 'Show model bounds' }
   );
 
-  const { areaSeries, lineSeries } = useLogEntryRateGraphData({
+  const { areaSeries, lineSeries, anomalySeries } = useLogEntryRateGraphData({
     data: results,
   });
 
@@ -70,6 +70,8 @@ export const LogRateResults = ({
 
   const areaSpecId = getSpecId('modelBounds');
   const lineSpecId = getSpecId('averageValues');
+  const anomalySpecId = getSpecId('anomalies');
+
   const [dateFormat] = useKibanaUiSetting('dateFormat');
 
   const tooltipProps = {
@@ -195,6 +197,28 @@ export const LogRateResults = ({
                 customSeriesColors={
                   !isDarkMode() ? getColorsMap(lineSeriesColour, lineSpecId) : undefined
                 }
+              />
+              <LineSeries
+                id={anomalySpecId}
+                name={i18n.translate('xpack.infra.logs.analysis.logRateSectionAnomalySeriesName', {
+                  defaultMessage: 'Anomalies',
+                })}
+                xScaleType="time"
+                yScaleType="linear"
+                xAccessor={0}
+                yAccessors={[1]}
+                data={anomalySeries}
+                yScaleToDataExtent
+                curve={2}
+                lineSeriesStyle={
+                  !isDarkMode()
+                    ? {
+                        line: { stroke: 'red', opacity: 0 },
+                        point: { radius: 3, fill: 'red' },
+                      }
+                    : undefined
+                }
+                customSeriesColors={!isDarkMode() ? getColorsMap('red', anomalySpecId) : undefined}
               />
               <Settings tooltip={tooltipProps} theme={getChartTheme()} />
             </Chart>
