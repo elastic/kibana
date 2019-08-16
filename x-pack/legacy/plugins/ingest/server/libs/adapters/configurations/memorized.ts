@@ -15,8 +15,9 @@ export class MemorizedConfigAdapter {
   public async create(
     configuration: NewConfigurationFile
   ): Promise<{ id: string; shared_id: string; version: number }> {
+    const { shared_id, ...config } = configuration;
     return await memorize(
-      `create - ${JSON.stringify(configuration)}`,
+      `create - ${JSON.stringify({ ...config, shared_id: 'string' })}`,
       async () => {
         if (!this.adapter) {
           throw new Error('An adapter must be provided when running tests online');
