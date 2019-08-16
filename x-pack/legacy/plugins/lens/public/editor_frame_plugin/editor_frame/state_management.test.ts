@@ -45,7 +45,6 @@ describe('editor_frame state management', () => {
       const initialState = getInitialState({
         ...props,
         doc: {
-          activeDatasourceId: 'testDatasource',
           expression: '',
           state: {
             datasourceStates: {
@@ -398,7 +397,6 @@ describe('editor_frame state management', () => {
           doc: {
             id: 'b',
             expression: '',
-            activeDatasourceId: 'a',
             state: {
               datasourceMetaData: { filterableIndexPatterns: [] },
               datasourceStates: { a: { foo: 'c' } },

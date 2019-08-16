@@ -198,7 +198,6 @@ export function EditorFrame(props: EditorFrameProps) {
       ),
       visualization,
       state,
-      activeDatasourceId: state.activeDatasourceId!,
       framePublicAPI,
     });
 

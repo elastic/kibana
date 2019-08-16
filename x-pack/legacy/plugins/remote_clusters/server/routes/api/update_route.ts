@@ -11,8 +11,8 @@ import {
   RouterRouteHandler,
   wrapCustomError,
 } from '../../../../../server/lib/create_router';
+import { serializeCluster, deserializeCluster } from '../../../common/cluster_serialization';
 import { doesClusterExist } from '../../lib/does_cluster_exist';
-import { serializeCluster, deserializeCluster } from '../../lib/cluster_serialization';
 
 export const register = (router: Router): void => {
   router.put('/{name}', updateHandler);

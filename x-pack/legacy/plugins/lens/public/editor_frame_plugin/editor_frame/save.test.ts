@@ -28,7 +28,6 @@ describe('save editor frame state', () => {
       activeDatasourceId: 'indexpattern',
       visualization: { activeId: '2', state: {} },
     },
-    activeDatasourceId: 'indexpattern',
     framePublicAPI: {
       addNewLayer: jest.fn(),
       removeLayers: jest.fn(),
@@ -71,7 +70,6 @@ describe('save editor frame state', () => {
     });
 
     expect(doc).toEqual({
-      activeDatasourceId: 'indexpattern',
       id: undefined,
       expression: '',
       state: {

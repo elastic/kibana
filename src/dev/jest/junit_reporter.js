@@ -23,7 +23,7 @@ import { writeFileSync } from 'fs';
 import mkdirp from 'mkdirp';
 import xmlBuilder from 'xmlbuilder';
 
-import { escapeCdata } from '../xml';
+import { escapeCdata } from '@kbn/test';
 
 const ROOT_DIR = dirname(require.resolve('../../../package.json'));
 
