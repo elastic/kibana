@@ -20,15 +20,18 @@ describe('Agent Adapter', () => {
   let servers: any;
 
   async function loadFixtures(agents: any[]): Promise<SavedObject[]> {
-    return await Promise.all(
-      agents.map(agent => {
-        return soAdapter.create('agents', {
+    const res: SavedObject[] = [];
+    for (const agent of agents) {
+      res.push(
+        await soAdapter.create('agents', {
           ...agent,
           local_metadata: JSON.stringify(agent.local_metadata || {}),
           user_provided_metadata: JSON.stringify(agent.user_provided_metadata || {}),
-        });
-      })
-    );
+        })
+      );
+    }
+
+    return res;
   }
 
   async function clearFixtures() {
@@ -297,7 +300,9 @@ describe('Agent Adapter', () => {
             user_provided_metadata: {
               color: 'red',
             },
-            enrolled_at: moment('2019-08-05T19:35:14.861Z').add(idx, 'day'),
+            enrolled_at: moment('2019-08-05T19:35:14.861Z')
+              .add(idx, 'day')
+              .toISOString(),
           };
         });
       await loadFixtures(agents);

@@ -30,7 +30,7 @@ export class MemorizeSODatabaseAdapter implements SODatabaseAdapterType {
     options?: SavedObjectsCreateOptions
   ) {
     return Slapshot.memorize(
-      'create',
+      `create:${type}`,
       () => {
         if (!this.soAdadpter) {
           throw new Error('An adapter must be provided when running tests online');
@@ -46,7 +46,7 @@ export class MemorizeSODatabaseAdapter implements SODatabaseAdapterType {
     options?: SavedObjectsCreateOptions
   ) {
     return Slapshot.memorize(
-      'bulkCreate',
+      `bulkCreate:${JSON.stringify(objects)}:${JSON.stringify(options || {})}`,
       () => {
         if (!this.soAdadpter) {
           throw new Error('An adapter must be provided when running tests online');
@@ -59,7 +59,7 @@ export class MemorizeSODatabaseAdapter implements SODatabaseAdapterType {
 
   async delete(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
     return Slapshot.memorize(
-      'delete',
+      `delete:${type}:${id}:${JSON.stringify(options)}`,
       () => {
         if (!this.soAdadpter) {
           throw new Error('An adapter must be provided when running tests online');
@@ -74,7 +74,7 @@ export class MemorizeSODatabaseAdapter implements SODatabaseAdapterType {
     options: SavedObjectsFindOptions
   ): Promise<SavedObjectsFindResponse<T>> {
     return Slapshot.memorize(
-      'find',
+      `find:${JSON.stringify(options)}`,
       () => {
         if (!this.soAdadpter) {
           throw new Error('An adapter must be provided when running tests online');
@@ -90,7 +90,7 @@ export class MemorizeSODatabaseAdapter implements SODatabaseAdapterType {
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
     return Slapshot.memorize(
-      'bulkGet',
+      `bulkCreate:${JSON.stringify(objects)}:${JSON.stringify(options || {})}`,
       () => {
         if (!this.soAdadpter) {
           throw new Error('An adapter must be provided when running tests online');
@@ -107,7 +107,7 @@ export class MemorizeSODatabaseAdapter implements SODatabaseAdapterType {
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObject<T> | null> {
     return Slapshot.memorize(
-      'get',
+      `get:${type}:${id}:${JSON.stringify(options)}`,
       () => {
         if (!this.soAdadpter) {
           throw new Error('An adapter must be provided when running tests online');
@@ -125,7 +125,7 @@ export class MemorizeSODatabaseAdapter implements SODatabaseAdapterType {
     options: SavedObjectsUpdateOptions = {}
   ): Promise<SavedObjectsUpdateResponse<T>> {
     return Slapshot.memorize(
-      'update',
+      `get:${type}:${id}:${JSON.stringify(attributes)}:${JSON.stringify(options)}`,
       () => {
         if (!this.soAdadpter) {
           throw new Error('An adapter must be provided when running tests online');

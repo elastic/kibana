@@ -8,10 +8,10 @@ export const mappings = {
   agents: {
     properties: {
       shared_id: {
-        type: 'text',
+        type: 'keyword',
       },
       type: {
-        type: 'text',
+        type: 'keyword',
       },
       active: {
         type: 'boolean',
@@ -23,7 +23,7 @@ export const mappings = {
         type: 'text',
       },
       version: {
-        type: 'text',
+        type: 'keyword',
       },
       user_provided_metadata: {
         type: 'text',
@@ -32,10 +32,10 @@ export const mappings = {
         type: 'text',
       },
       config_shared_id: {
-        type: 'text',
+        type: 'keyword',
       },
       config_id: {
-        type: 'text',
+        type: 'keyword',
       },
       last_updated: {
         type: 'date',
