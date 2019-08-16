@@ -31,7 +31,9 @@ export class RequestDetailsRequest extends Component<RequestDetailsProps> {
   static shouldShow = (request: Request) => Boolean(request && request.json);
 
   render() {
-    if (!this.props.request) {
+    const { json } = this.props.request;
+
+    if (!json) {
       return null;
     }
 
@@ -42,7 +44,7 @@ export class RequestDetailsRequest extends Component<RequestDetailsProps> {
         isCopyable
         data-test-subj="inspectorRequestBody"
       >
-        {JSON.stringify(this.props.request.json, null, 2)}
+        {JSON.stringify(json, null, 2)}
       </EuiCodeBlock>
     );
   }

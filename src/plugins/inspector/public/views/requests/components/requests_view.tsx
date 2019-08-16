@@ -37,6 +37,7 @@ interface RequestSelectorState {
 export class RequestsViewComponent extends Component<InspectorViewProps, RequestSelectorState> {
   static propTypes = {
     adapters: PropTypes.object.isRequired,
+    title: PropTypes.string.isRequired,
   };
 
   constructor(props: InspectorViewProps) {
@@ -71,7 +72,7 @@ export class RequestsViewComponent extends Component<InspectorViewProps, Request
     this.props.adapters.requests.removeListener('change', this._onRequestsChange);
   }
 
-  renderEmptyRequests() {
+  static renderEmptyRequests() {
     return (
       <EuiEmptyPrompt
         data-test-subj="inspectorNoRequestsMessage"
@@ -106,7 +107,7 @@ export class RequestsViewComponent extends Component<InspectorViewProps, Request
 
   render() {
     if (!this.state.requests || !this.state.requests.length) {
-      return this.renderEmptyRequests();
+      return RequestsViewComponent.renderEmptyRequests();
     }
 
     const failedCount = this.state.requests.filter(

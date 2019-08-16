@@ -52,6 +52,7 @@ export class RequestSelector extends Component<RequestSelectorProps, RequestSele
   static propTypes = {
     requests: PropTypes.array.isRequired,
     selectedRequest: PropTypes.object.isRequired,
+    onRequestChanged: PropTypes.func,
   };
 
   state = {
