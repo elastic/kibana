@@ -173,6 +173,15 @@
     ],
     "fields": [
       {
+        "id": "airline",
+        "name": "airline",
+        "type": "keyword",
+        "aggregatable": true,
+        "aggIds": [
+          "distinct_count"
+        ]
+      },
+      {
         "id": "responsetime",
         "name": "responsetime",
         "type": "float",
@@ -189,15 +198,6 @@
           "low_median",
           "min",
           "max",
-          "distinct_count"
-        ]
-      },
-      {
-        "id": "airline",
-        "name": "airline",
-        "type": "keyword",
-        "aggregatable": true,
-        "aggIds": [
           "distinct_count"
         ]
       }

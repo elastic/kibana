@@ -6,6 +6,7 @@
 
 import { SODatabaseAdapter } from '../so_database/default';
 import { RuntimeConfigurationFile, NewConfigurationFile } from './adapter_types';
+
 import { ConfigurationFile, DatasourceInput, BackupConfigurationFile } from './adapter_types';
 
 export class ConfigAdapter {

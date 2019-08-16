@@ -20,7 +20,9 @@
 import sinon from 'sinon';
 
 export const npSetup = {
-  core: {},
+  core: {
+    chrome: {}
+  },
   plugins: {
     data: {
       expressions: {
@@ -41,7 +43,9 @@ export const npSetup = {
 };
 
 export const npStart = {
-  core: {},
+  core: {
+    chrome: {}
+  },
   plugins: {
     data: {},
     inspector: {

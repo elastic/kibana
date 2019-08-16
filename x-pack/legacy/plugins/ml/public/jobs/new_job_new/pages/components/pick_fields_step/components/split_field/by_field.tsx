@@ -39,6 +39,10 @@ export const ByFieldSelector: FC<Props> = ({ detectorIndex }) => {
 
   useEffect(() => {
     jobCreator.setByField(byField, detectorIndex);
+    // add the by field to the influencers
+    if (byField !== null && jobCreator.influencers.includes(byField.name) === false) {
+      jobCreator.addInfluencer(byField.name);
+    }
     jobCreatorUpdate();
   }, [byField]);
 

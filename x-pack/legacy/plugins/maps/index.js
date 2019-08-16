@@ -45,6 +45,7 @@ export function maps(kibana) {
           showMapsInspectorAdapter: serverConfig.get('xpack.maps.showMapsInspectorAdapter'),
           preserveDrawingBuffer: serverConfig.get('xpack.maps.preserveDrawingBuffer'),
           isEmsEnabled: mapConfig.includeElasticMapsService,
+          emsFontLibraryUrl: mapConfig.emsFontLibraryUrl,
           emsTileLayerId: mapConfig.emsTileLayerId,
           proxyElasticMapsServiceInMaps: mapConfig.proxyElasticMapsServiceInMaps,
           emsManifestServiceUrl: mapConfig.manifestServiceUrl,

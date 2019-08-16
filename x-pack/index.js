@@ -44,6 +44,7 @@ import { snapshotRestore } from './legacy/plugins/snapshot_restore';
 import { actions } from './legacy/plugins/actions';
 import { alerting } from './legacy/plugins/alerting';
 import { ingest } from './legacy/plugins/ingest';
+import { advancedUiActions } from './legacy/plugins/advanced_ui_actions';
 
 module.exports = function (kibana) {
   return [
@@ -87,5 +88,6 @@ module.exports = function (kibana) {
     actions(kibana),
     alerting(kibana),
     ingest(kibana),
+    advancedUiActions(kibana),
   ];
 };

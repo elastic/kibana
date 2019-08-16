@@ -27,6 +27,10 @@ export function privilegesFactory(actions: Actions, xpackMainPlugin: XPackMainPl
         flatten(
           basePrivilegeFeatures.map(feature =>
             Object.values(feature.privileges).reduce<string[]>((acc, privilege) => {
+              if (privilege.excludeFromBasePrivileges) {
+                return acc;
+              }
+
               return [...acc, ...featurePrivilegeBuilder.getActions(privilege, feature)];
             }, [])
           )
@@ -37,7 +41,7 @@ export function privilegesFactory(actions: Actions, xpackMainPlugin: XPackMainPl
         flatten(
           basePrivilegeFeatures.map(feature =>
             Object.entries(feature.privileges).reduce<string[]>((acc, [privilegeId, privilege]) => {
-              if (privilegeId !== 'read') {
+              if (privilegeId !== 'read' || privilege.excludeFromBasePrivileges) {
                 return acc;
               }
 

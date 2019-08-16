@@ -64,6 +64,7 @@ export class BackendFrameworkAdapter {
     });
   }
 
+
   public getSetting(settingPath: string) {
     return this.server.config().get(settingPath);
   }
