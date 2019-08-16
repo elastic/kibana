@@ -7,6 +7,7 @@ import chrome from 'ui/chrome';
 import { SiemRootController } from './start_app';
 
 import 'uiExports/autocompleteProviders';
+import 'uiExports/embeddableFactories';
 
 // load the application
 chrome.setRootController('siem', SiemRootController);
