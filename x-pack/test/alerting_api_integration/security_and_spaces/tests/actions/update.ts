@@ -22,7 +22,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
-        it('update action as user', async () => {
+        it('should handle update action request appropriately', async () => {
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
@@ -108,7 +108,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
             });
         });
 
-        it('non existing document', async () => {
+        it(`should handle update action request appropriately when action doesn't exist`, async () => {
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/action/1`)
             .set('kbn-xsrf', 'foo')
@@ -162,7 +162,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
             });
         });
 
-        it('secrets are not valid', async () => {
+        it('should handle update action request appropriately when secrets are not valid', async () => {
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')

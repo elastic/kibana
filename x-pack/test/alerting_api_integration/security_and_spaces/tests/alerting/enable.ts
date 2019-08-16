@@ -31,7 +31,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
-        it('enable an alert as a user', async () => {
+        it('should handle enable alert request appropriately', async () => {
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')

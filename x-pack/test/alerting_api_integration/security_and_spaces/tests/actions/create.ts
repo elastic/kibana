@@ -22,7 +22,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
-        it('create an action', async () => {
+        it('should handle create action request appropriately', async () => {
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .auth(user.username, user.password)

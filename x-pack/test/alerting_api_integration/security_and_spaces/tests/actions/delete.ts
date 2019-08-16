@@ -23,7 +23,7 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
-        it('delete an action', async () => {
+        it('should handle delete action request appropriately', async () => {
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
@@ -66,7 +66,7 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it(`action doesn't exist`, async () => {
+        it(`should handle delete request appropriately when action doesn't exist`, async () => {
           const response = await supertestWithoutAuth
             .delete(`${getUrlPrefix(space.id)}/api/action/2`)
             .set('kbn-xsrf', 'foo')

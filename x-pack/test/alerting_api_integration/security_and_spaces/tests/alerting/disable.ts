@@ -31,7 +31,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
-        it('disable an alert as a user', async () => {
+        it('should handle disable alert request appropriately', async () => {
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')

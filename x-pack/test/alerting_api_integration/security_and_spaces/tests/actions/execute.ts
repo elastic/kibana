@@ -87,7 +87,7 @@ export default function({ getService }: FtrProviderContext) {
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
-        it('calls the execute API', async () => {
+        it('should handle execute request appropriately', async () => {
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
@@ -154,7 +154,7 @@ export default function({ getService }: FtrProviderContext) {
           }
         });
 
-        it('calls the execute API after action is updated', async () => {
+        it('should handle execute request appropriately after action is updated', async () => {
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
@@ -235,7 +235,7 @@ export default function({ getService }: FtrProviderContext) {
           }
         });
 
-        it(`action doesn't exist`, async () => {
+        it(`should handle execute request appropriately when action doesn't exist`, async () => {
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/action/1/_execute`)
             .auth(user.username, user.password)
@@ -286,7 +286,7 @@ export default function({ getService }: FtrProviderContext) {
             });
         });
 
-        it('changing config properties', async () => {
+        it('should handle execute request appropriately after changing config properties', async () => {
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
@@ -354,7 +354,7 @@ export default function({ getService }: FtrProviderContext) {
           }
         });
 
-        it('callCluster and savedObjectsClient authorization', async () => {
+        it('should handle execute request appropriately and have proper callCluster and savedObjectsClient authorization', async () => {
           let indexedRecord: any;
           const reference = `actions-execute-3:${user.username}`;
           const { body: createdAction } = await supertest

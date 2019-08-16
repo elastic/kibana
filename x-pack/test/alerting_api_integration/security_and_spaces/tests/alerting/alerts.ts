@@ -64,7 +64,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
-        it('schedule task, run alert and fire actions', async () => {
+        it('should schedule task, run alert and fire actions when appropriate', async () => {
           const reference = `create-test-1:${user.username}`;
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/action`)
@@ -162,7 +162,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it('custom retry logic', async () => {
+        it('should handle custom retry logic when appropriate', async () => {
           // We'll use this start time to query tasks created after this point
           const testStart = new Date();
           // We have to provide the test.rate-limit the next runAt, for testing purposes
@@ -265,7 +265,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it('callCluster and savedObjectsClient authorization for alert type executor', async () => {
+        it('should have proper callCluster and savedObjectsClient authorization for alert type executor when appropriate', async () => {
           let alertTestRecord: any;
           const reference = `create-test-3:${user.username}`;
           const response = await supertestWithoutAuth
@@ -338,7 +338,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it('callCluster and savedObjectsClient authorization for action type executor', async () => {
+        it('should have proper callCluster and savedObjectsClient authorization for action type executor when appropriate', async () => {
           let actionTestRecord: any;
           const reference = `create-test-4:${user.username}`;
           const { body: createdAction } = await supertest

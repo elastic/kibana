@@ -31,7 +31,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
-        it('create an alert', async () => {
+        it('should handle create alert request appropriately', async () => {
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')
@@ -77,7 +77,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it('disabled alert', async () => {
+        it('should handle create alert request appropriately when an alert is disabled ', async () => {
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')
@@ -106,7 +106,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it('unregistered alert type', async () => {
+        it('should handle create alert request appropriately when alert type is unregistered', async () => {
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')

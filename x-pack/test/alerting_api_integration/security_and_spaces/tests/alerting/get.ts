@@ -23,7 +23,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
-        it('get as user', async () => {
+        it('should handle get alert request appropriately', async () => {
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')
@@ -65,7 +65,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it('get non existing alert', async () => {
+        it(`should handle get alert request appropriately when alert doesn't exist`, async () => {
           const response = await supertestWithoutAuth
             .get(`${getUrlPrefix(space.id)}/api/alert/1`)
             .auth(user.username, user.password);
