@@ -17,14 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
-
-// TODO: reference to TILE_MAP plugin should be removed
-import { ORIGIN } from '../../../../legacy/core_plugins/tile_map/common/origin';
-
-export function mapToLayerWithId(prefix, layer) {
-  const clonedLayer = _.cloneDeep(layer);
-  clonedLayer.layerId = prefix + '.' + layer.name;
-  clonedLayer.isEMS = ORIGIN.EMS === prefix ?  true : false;
-  return clonedLayer;
+export enum ORIGIN {
+  EMS = 'elastic_maps_service',
+  KIBANA_YML = 'self_hosted',
 }
