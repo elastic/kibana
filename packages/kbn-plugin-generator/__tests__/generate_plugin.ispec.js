@@ -31,9 +31,7 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
   const pluginName = 'ispec-plugin';
   const snakeCased = snakeCase(pluginName);
   const generatedPath = resolve(ROOT_DIR, `plugins/${snakeCased}`);
-  const collect = xs => data => {
-    xs.push(data + ''); // Coerce from Buffer to String
-  };
+  const collect = xs => data => xs.push(data + ''); // Coerce from Buffer to String
 
   // eslint-disable-next-line no-undef
   beforeAll(() => {
@@ -64,20 +62,29 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
   });
 
   describe(`and then running 'yarn lint' in the plugin's root dir`, () => {
-    it(
-      `should not show the '"@kbn/eslint/no-restricted-paths" is invalid' msg on stderr`,
-      done => {
-        const stdErrs = [];
-        const yarnLint = spawn('yarn', ['lint'], { cwd: generatedPath });
-        yarnLint.stderr.on('data', collect(stdErrs));
-        yarnLint.on('close', () => {
-          // eslint-disable-next-line no-undef
-          expect(stdErrs.join('\n')).not.toContain('"@kbn/eslint/no-restricted-paths" is invalid');
-          done();
-        });
-      },
-      oneMinute * 3
-    );
+    const stdErrs = [];
+    const stdOuts = [];
+    let yarnLint;
+
+    // eslint-disable-next-line no-undef
+    beforeAll(done => {
+      yarnLint = spawn('yarn', ['lint'], { cwd: generatedPath });
+      yarnLint.stderr.on('data', collect(stdErrs));
+      yarnLint.stdout.on('data', collect(stdOuts));
+      yarnLint.on('close', () => {
+        done(); // TODO: Why isnt the handler running point-free?
+      });
+    }, oneMinute * 3);
+
+    it(`should not show the '"@kbn/eslint/no-restricted-paths" is invalid' msg on stderr`, () => {
+      // eslint-disable-next-line no-undef
+      expect(stdErrs.join('\n')).not.toContain('"@kbn/eslint/no-restricted-paths" is invalid');
+    });
+
+    it(`should not show the 'import/no-unresolved' msg on stdout`, () => {
+      // eslint-disable-next-line no-undef
+      expect(stdOuts.join('\n')).not.toContain('import/no-unresolved');
+    });
   });
 
   describe(`and then running 'yarn kbn --help'`, () => {
@@ -101,7 +108,7 @@ Global options:
    --oss                  Do not include the x-pack when running command.
    --skip-kibana-plugins  Filter all plugins in ./plugins and ../kibana-extra when running command.
 `;
-    it(`should print out the help msg`, done => {
+    it(`should print out the kbn help msg`, done => {
       const outData = [];
       const kbnHelp = spawn('yarn', ['kbn', '--help'], { cwd: generatedPath });
       kbnHelp.stdout.on('data', collect(outData));
