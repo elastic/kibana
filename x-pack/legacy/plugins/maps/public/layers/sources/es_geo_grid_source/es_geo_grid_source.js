@@ -8,7 +8,7 @@ import React from 'react';
 import uuid from 'uuid/v4';
 
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
-import { AbstractESSource, COUNT_PROP_LABEL, COUNT_PROP_NAME } from '../es_source';
+import { AbstractESSource } from '../es_source';
 import { HeatmapLayer } from '../../heatmap_layer';
 import { VectorLayer } from '../../vector_layer';
 import { Schemas } from 'ui/vis/editors/default/schemas';
@@ -24,6 +24,8 @@ import { SOURCE_DATA_ID_ORIGIN, ES_GEO_GRID } from '../../../../common/constants
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 
+const COUNT_PROP_LABEL = 'count';
+const COUNT_PROP_NAME = 'doc_count';
 const MAX_GEOTILE_LEVEL = 29;
 
 const aggSchemas = new Schemas([
@@ -205,6 +207,14 @@ export class ESGeoGridSource extends AbstractESSource {
 
   isFilterByMapBounds() {
     return true;
+  }
+
+  _formatMetricKey(metric) {
+    return metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : COUNT_PROP_NAME;
+  }
+
+  _formatMetricLabel(metric) {
+    return metric.type !== 'count' ? `${metric.type} of ${metric.field}` : COUNT_PROP_LABEL;
   }
 
   _makeAggConfigs(precision) {
