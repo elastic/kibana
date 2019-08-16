@@ -6,6 +6,7 @@
 
 import moment from 'moment';
 import React, { Fragment, FC, useState, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiDatePickerRange, EuiDatePicker } from '@elastic/eui';
 
 import { useKibanaContext } from '../../../../../contexts/kibana';
@@ -64,7 +65,12 @@ export const TimeRangePicker: FC<Props> = ({ setTimeRange, timeRange }) => {
               onChange={handleChangeStart}
               startDate={startMoment}
               endDate={endMoment}
-              aria-label="Start date"
+              aria-label={i18n.translate(
+                'xpack.ml.newJob.wizard.timeRangeStep.timeRangePicker.startDateLabel',
+                {
+                  defaultMessage: 'Start date',
+                }
+              )}
               showTimeSelect
               dateFormat={dateFormat}
               maxDate={endMoment}
@@ -76,7 +82,12 @@ export const TimeRangePicker: FC<Props> = ({ setTimeRange, timeRange }) => {
               onChange={handleChangeEnd}
               startDate={startMoment}
               endDate={endMoment}
-              aria-label="End date"
+              aria-label={i18n.translate(
+                'xpack.ml.newJob.wizard.timeRangeStep.timeRangePicker.endDateLabel',
+                {
+                  defaultMessage: 'End date',
+                }
+              )}
               showTimeSelect
               dateFormat={dateFormat}
               minDate={startMoment}

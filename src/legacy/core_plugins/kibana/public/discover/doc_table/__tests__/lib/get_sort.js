@@ -38,11 +38,15 @@ describe('docTable', function () {
       expect(getSort).to.be.a(Function);
     });
 
-    it('should return an array of objects if passed a 2 item array', function () {
-      expect(getSort(['bytes', 'desc'], indexPattern)).to.eql([{ bytes: 'desc' }]);
+    it('should return an array of objects', function () {
+      expect(getSort([['bytes', 'desc']], indexPattern)).to.eql([{ bytes: 'desc' }]);
 
       delete indexPattern.timeFieldName;
-      expect(getSort(['bytes', 'desc'], indexPattern)).to.eql([{ bytes: 'desc' }]);
+      expect(getSort([['bytes', 'desc']], indexPattern)).to.eql([{ bytes: 'desc' }]);
+    });
+
+    it('should passthrough arrays of objects', () => {
+      expect(getSort([{ bytes: 'desc' }], indexPattern)).to.eql([{ bytes: 'desc' }]);
     });
 
     it('should sort by the default when passed an unsortable field', function () {
@@ -74,7 +78,26 @@ describe('docTable', function () {
     });
 
     it('should return an array of arrays for sortable fields', function () {
-      expect(getSort.array(['bytes', 'desc'], indexPattern)).to.eql([[ 'bytes', 'desc' ]]);
+      expect(getSort.array([['bytes', 'desc']], indexPattern)).to.eql([[ 'bytes', 'desc' ]]);
+    });
+
+    it('should return an array of arrays from an array of elasticsearch sort objects', function () {
+      expect(getSort.array([{ bytes: 'desc' }], indexPattern)).to.eql([[ 'bytes', 'desc' ]]);
+    });
+
+    it('should sort by the default when passed an unsortable field', function () {
+      expect(getSort.array([{ 'non-sortable': 'asc' }], indexPattern)).to.eql([['time', 'desc']]);
+      expect(getSort.array([{ lol_nope: 'asc' }], indexPattern)).to.eql([['time', 'desc']]);
+
+      delete indexPattern.timeFieldName;
+      expect(getSort.array([{ 'non-sortable': 'asc' }], indexPattern)).to.eql([[ '_score', 'desc' ]]);
+    });
+
+    it('should sort by the default when passed an empty sort', () => {
+      expect(getSort.array([], indexPattern)).to.eql([['time', 'desc']]);
+
+      delete indexPattern.timeFieldName;
+      expect(getSort.array([], indexPattern)).to.eql([[ '_score', 'desc' ]]);
     });
   });
 });
