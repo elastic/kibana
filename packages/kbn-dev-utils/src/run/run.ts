@@ -20,7 +20,7 @@
 // @ts-ignore @types are outdated and module is super simple
 import exitHook from 'exit-hook';
 
-import { pickLevelFromFlags, ToolingLog } from '@kbn/dev-utils';
+import { pickLevelFromFlags, ToolingLog } from '../tooling_log';
 import { createFlagError, isFailError } from './fail';
 import { Flags, getFlags, getHelp } from './flags';
 
