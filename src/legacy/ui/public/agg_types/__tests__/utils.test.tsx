@@ -19,6 +19,8 @@
 
 import { isValidJson } from '../utils';
 
+jest.mock('ui/new_platform');
+
 const input = {
   valid: '{ "test": "json input" }',
   invalid: 'strings are not json',

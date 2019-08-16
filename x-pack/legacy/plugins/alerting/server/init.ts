@@ -47,11 +47,11 @@ export function init(server: Legacy.Server) {
     };
   }
 
-  const { taskManager } = server;
+  const taskManager = server.plugins.task_manager!;
   const alertTypeRegistry = new AlertTypeRegistry({
     getServices,
     taskManager: taskManager!,
-    fireAction: server.plugins.actions!.fire,
+    executeAction: server.plugins.actions!.execute,
     internalSavedObjectsRepository: savedObjectsRepositoryWithInternalUser,
     getBasePath(...args) {
       return spaces.isEnabled

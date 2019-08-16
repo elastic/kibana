@@ -23,37 +23,55 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { toastNotifications } from 'ui/notify';
-import { VisOptionsSetValue } from 'ui/vis/editors/default';
 import { TmsLayer } from 'ui/vis/map/service_settings';
-import { ExtendedVisOptionsProps } from '../../../kbn_vislib_vis_types/public/utils/with_injected_dependencies';
 import { SelectOption } from '../../../kbn_vislib_vis_types/public/controls/select';
 import { SwitchOption } from '../../../kbn_vislib_vis_types/public/controls/switch';
+import { RegionMapOptionsProps } from '../../../region_map/public/components/region_map_options';
 import { WmsInternalOptions } from './wms_internal_options';
+import { TileMapOptionsProps } from './tile_map_options';
+import { TileMapVisParams } from '../types';
 
-const mapLayerForOption = ({ id }: TmsLayer) => ({ text: id });
+const mapLayerForOption = ({ id }: TmsLayer) => ({ text: id, value: id });
 
-function WmsOptions({ serviceSettings, stateParams, setValue, vis }: ExtendedVisOptionsProps) {
+function WmsOptions({
+  serviceSettings,
+  stateParams,
+  setValue,
+  vis,
+}: TileMapOptionsProps | RegionMapOptionsProps) {
   const { wms } = stateParams;
   const { tmsLayers } = vis.type.editorConfig.collections;
-  const [tmsLayerOptions, setTmsLayersOptions] = useState(
-    vis.type.editorConfig.collections.tmsLayers.map(mapLayerForOption)
+  const [tmsLayerOptions, setTmsLayersOptions] = useState<Array<{ text: string; value: string }>>(
+    tmsLayers.map(mapLayerForOption)
   );
+  const [layers, setLayers] = useState<TmsLayer[]>([]);
 
-  const setWmsOption: VisOptionsSetValue = (paramName, value) =>
+  const setWmsOption = <T extends keyof TileMapVisParams['wms']>(
+    paramName: T,
+    value: TileMapVisParams['wms'][T]
+  ) =>
     setValue('wms', {
       ...wms,
       [paramName]: value,
     });
 
+  const selectTmsLayer = (id: string) => {
+    const layer = layers.find(l => l.id === id);
+    if (layer) {
+      setWmsOption('selectedTmsLayer', layer);
+    }
+  };
+
   useEffect(() => {
     serviceSettings
       .getTMSServices()
       .then(services => {
-        const newBaseLayers = [
+        const newBaseLayers: TmsLayer[] = [
           ...tmsLayers,
           ...services.filter(service => !tmsLayers.some(({ id }: TmsLayer) => service.id === id)),
         ];
 
+        setLayers(newBaseLayers);
         setTmsLayersOptions(newBaseLayers.map(mapLayerForOption));
 
         if (!wms.selectedTmsLayer && newBaseLayers.length) {
@@ -66,12 +84,12 @@ function WmsOptions({ serviceSettings, stateParams, setValue, vis }: ExtendedVis
   return (
     <EuiPanel paddingSize="s">
       <EuiTitle size="xs">
-        <div>
+        <h2>
           <FormattedMessage
             id="tileMap.wmsOptions.baseLayerSettingsTitle"
             defaultMessage="Base layer settings"
           />
-        </div>
+        </h2>
       </EuiTitle>
       <EuiSpacer size="s" />
 
@@ -91,13 +109,14 @@ function WmsOptions({ serviceSettings, stateParams, setValue, vis }: ExtendedVis
         <>
           <EuiSpacer size="s" />
           <SelectOption
+            id="wmsOptionsSelectTmsLayer"
             label={i18n.translate('tileMap.wmsOptions.layersLabel', {
               defaultMessage: 'Layers',
             })}
             options={tmsLayerOptions}
             paramName="selectedTmsLayer"
             value={wms.selectedTmsLayer && wms.selectedTmsLayer.id}
-            setValue={setWmsOption}
+            setValue={(param, value) => selectTmsLayer(value)}
           />
         </>
       )}
