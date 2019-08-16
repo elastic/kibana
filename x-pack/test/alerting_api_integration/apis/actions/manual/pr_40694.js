@@ -53,7 +53,7 @@ async function main() {
   response = await httpGet(`api/action/${actionId}`);
   console.log(`action after update: ${JSON.stringify(response, null, 4)}`);
 
-  response = await httpPost(`api/action/${actionId}/_fire`, {
+  response = await httpPost(`api/action/${actionId}/_execute`, {
     params: {
       to: ['patrick.mueller@elastic.co'],
       subject: 'the email subject',
@@ -61,7 +61,7 @@ async function main() {
     }
   });
 
-  console.log(`fire result: ${JSON.stringify(response, null, 4)}`);
+  console.log(`execute result: ${JSON.stringify(response, null, 4)}`);
 }
 
 async function httpGet(uri) {
