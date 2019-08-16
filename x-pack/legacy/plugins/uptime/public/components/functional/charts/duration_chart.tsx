@@ -80,16 +80,16 @@ export const DurationChart = ({
 
   return (
     <React.Fragment>
-      <EuiTitle size="xs">
-        <h4>
-          <FormattedMessage
-            id="xpack.uptime.monitorCharts.monitorDuration.titleLabel"
-            defaultMessage="Monitor duration"
-            description="The 'ms' is an abbreviation for milliseconds."
-          />
-        </h4>
-      </EuiTitle>
       <EuiPanel style={{ height: '170px' }}>
+        <EuiTitle size="xs">
+          <h4>
+            <FormattedMessage
+              id="xpack.uptime.monitorCharts.monitorDuration.titleLabel"
+              defaultMessage="Monitor duration"
+              description="The 'ms' is an abbreviation for milliseconds."
+            />
+          </h4>
+        </EuiTitle>
         <Chart>
           <Settings
             xDomain={{ min: absoluteStartDate, max: absoluteEndDate }}

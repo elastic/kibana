@@ -108,15 +108,15 @@ export const SnapshotHistogramComponent = ({
   const upSpecId = getSpecId(upMonitorsId);
   return (
     <Fragment>
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.uptime.snapshot.pingsOverTimeTitle"
-            defaultMessage="Pings over time"
-          />
-        </h5>
-      </EuiTitle>
-      <EuiPanel paddingSize="s" style={{ height: 170 }}>
+      <EuiPanel paddingSize="m" style={{ height: 170 }}>
+        <EuiTitle size="xs">
+          <h5>
+            <FormattedMessage
+              id="xpack.uptime.snapshot.pingsOverTimeTitle"
+              defaultMessage="Pings over time"
+            />
+          </h5>
+        </EuiTitle>
         <Chart>
           <Settings xDomain={{ min: absoluteStartDate, max: absoluteEndDate }} showLegend={false} />
           <Axis
