@@ -21,7 +21,7 @@ import { mockHttpServer } from './http_service.test.mocks';
 
 import { noop } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
-import { HttpService, Router } from '.';
+import { HttpService } from '.';
 import { HttpConfigType, config } from './http_config';
 import { httpServerMock } from './http_server.mocks';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
@@ -87,7 +87,7 @@ test('spins up notReady server until started if configured with `autoListen:true
   const configService = createConfigService();
   const httpServer = {
     isListening: () => false,
-    setup: jest.fn(),
+    setup: jest.fn().mockReturnValue({}),
     start: jest.fn(),
     stop: jest.fn(),
   };
@@ -216,9 +216,8 @@ test('register route handler', async () => {
 
   const service = new HttpService({ coreId, configService, env, logger });
 
-  const router = new Router('/foo');
-  const { registerRouter } = await service.setup();
-  registerRouter(router);
+  const { createRouter } = await service.setup();
+  const router = createRouter('/foo');
 
   expect(registerRouterMock).toHaveBeenCalledTimes(1);
   expect(registerRouterMock).toHaveBeenLastCalledWith(router);
@@ -235,15 +234,18 @@ test('returns http server contract on setup', async () => {
   }));
 
   const service = new HttpService({ coreId, configService, env, logger });
-  const setupHttpServer = await service.setup();
-  expect(setupHttpServer).toEqual(httpServer);
+  const setupContract = await service.setup();
+  expect(setupContract).toMatchObject(httpServer);
+  expect(setupContract).toMatchObject({
+    createRouter: expect.any(Function),
+  });
 });
 
 test('does not start http server if process is dev cluster master', async () => {
   const configService = createConfigService();
   const httpServer = {
     isListening: () => false,
-    setup: noop,
+    setup: jest.fn().mockReturnValue({}),
     start: jest.fn(),
     stop: noop,
   };
@@ -268,7 +270,7 @@ test('does not start http server if configured with `autoListen:false`', async (
   });
   const httpServer = {
     isListening: () => false,
-    setup: noop,
+    setup: jest.fn().mockReturnValue({}),
     start: jest.fn(),
     stop: noop,
   };

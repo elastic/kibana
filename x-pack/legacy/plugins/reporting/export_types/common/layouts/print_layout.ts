@@ -5,9 +5,9 @@
  */
 import path from 'path';
 import { HeadlessChromiumDriver } from '../../../server/browsers/chromium/driver';
-import { EvaluateOptions, KbnServer, Size } from '../../../types';
+import { EvaluateOptions, KbnServer } from '../../../types';
 import { LayoutTypes } from '../constants';
-import { Layout, LayoutSelectorDictionary } from './layout';
+import { Layout, LayoutSelectorDictionary, Size } from './layout';
 import { CaptureConfig } from './types';
 
 export class PrintLayout extends Layout {

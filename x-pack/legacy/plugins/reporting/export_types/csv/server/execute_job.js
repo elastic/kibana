@@ -5,9 +5,7 @@
  */
 
 import { CSV_JOB_TYPE, PLUGIN_ID } from '../../../common/constants';
-import { cryptoFactory } from '../../../server/lib/crypto';
-import { oncePerServer } from '../../../server/lib/once_per_server';
-import { LevelLogger } from '../../../server/lib/level_logger';
+import { cryptoFactory, oncePerServer, LevelLogger } from '../../../server/lib';
 import { createGenerateCsv } from './lib/generate_csv';
 import { fieldFormatMapFactory } from './lib/field_format_map';
 import { i18n } from '@kbn/i18n';
@@ -16,7 +14,7 @@ function executeJobFn(server) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   const crypto = cryptoFactory(server);
   const config = server.config();
-  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, CSV_JOB_TYPE]);
+  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, CSV_JOB_TYPE, 'execute-job']);
   const generateCsv = createGenerateCsv(logger);
   const serverBasePath = config.get('server.basePath');
 

@@ -12,7 +12,7 @@ exports[`AddToKql Component Rendering 1`] = `
     }
   }
 >
-  <pure(Component)
+  <AddToKql
     componentFilterType="hosts"
     expression="host.name: siem-kibana"
     indexPattern={
@@ -103,6 +103,6 @@ exports[`AddToKql Component Rendering 1`] = `
     type="page"
   >
     siem-kibana
-  </pure(Component)>
+  </AddToKql>
 </Component>
 `;
