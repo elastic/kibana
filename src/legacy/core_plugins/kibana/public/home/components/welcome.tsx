@@ -77,13 +77,13 @@ export class Welcome extends React.PureComponent<Props, State> {
   }
   onTelemetryOptInDecline = async () => {
     trackUiMetric(METRIC_TYPE.CLICK, 'telemetryOptInDecline');
-    this.setState(() => ({ step: 1 }));
     await this.props.setOptIn(false);
+    this.setState(() => ({ step: 1 }));
   };
   onTelemetryOptInConfirm = async () => {
     trackUiMetric(METRIC_TYPE.CLICK, 'telemetryOptInConfirm');
-    this.setState(() => ({ step: 1 }));
     await this.props.setOptIn(true);
+    this.setState(() => ({ step: 1 }));
   };
 
   onSampleDataDecline = () => {
