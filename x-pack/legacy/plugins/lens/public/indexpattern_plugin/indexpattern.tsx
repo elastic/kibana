@@ -104,6 +104,13 @@ export interface IndexPattern {
   title: string;
   timeFieldName?: string | null;
   hasExistence?: boolean;
+  fieldFormatMap?: Record<
+    string,
+    {
+      id: string;
+      params: unknown;
+    }
+  >;
 }
 
 export interface IndexPatternField {

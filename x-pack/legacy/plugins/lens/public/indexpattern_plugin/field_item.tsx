@@ -19,14 +19,21 @@ import {
   getAxisId,
   getSpecId,
   AreaSeries,
+  BarSeries,
   Position,
   ScaleType,
+  Settings,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { kfetch } from 'ui/kfetch';
+import { toElasticsearchQuery } from '@kbn/es-query';
+import { npStart } from 'ui/new_platform';
+import { Query } from 'src/plugins/data/common';
+// @ts-ignore
+import { fieldFormats } from '../../../../../../src/legacy/ui/public/registry/field_formats';
 import { IndexPattern, IndexPatternField, DraggedField } from './indexpattern';
 import { DragDrop } from '../drag_drop';
 import { FieldIcon } from './field_icon';
+import { DatasourceDataPanelProps } from '../types';
 import { DataType } from '..';
 
 export interface FieldItemProps {
@@ -39,6 +46,8 @@ export interface FieldItemProps {
   count?: number;
   sampleCount?: number;
   cardinality?: number;
+  query: Query;
+  dateRange: DatasourceDataPanelProps['dateRange'];
 }
 
 export interface DataVisResults {
@@ -62,8 +71,16 @@ export interface DataVisResults {
   };
 }
 
+export interface HistogramResult {
+  buckets: Array<{
+    key: number;
+    doc_count: number;
+  }>;
+}
+
 interface State {
   fieldMetadata?: DataVisResults;
+  fieldHistogram?: HistogramResult;
   isLoading: boolean;
 }
 
@@ -93,6 +110,8 @@ export function FieldItem({
   count,
   sampleCount,
   cardinality,
+  query,
+  dateRange,
 }: FieldItemProps) {
   const [infoIsOpen, setOpen] = useState(false);
 
@@ -116,38 +135,70 @@ export function FieldItem({
       </span>
     );
 
-  useEffect(() => {
-    if (infoIsOpen && !state.fieldMetadata && !state.isLoading) {
-      setState({ ...state, isLoading: true });
+  let formatter: { convert: (data: unknown) => string };
+  if (indexPattern.fieldFormatMap && indexPattern.fieldFormatMap[field.name]) {
+    const FormatType = fieldFormats.getType(indexPattern.fieldFormatMap[field.name].id);
+    formatter = new FormatType(
+      indexPattern.fieldFormatMap[field.name].params,
+      npStart.core.uiSettings.get.bind(npStart.core.uiSettings)
+    );
+  } else {
+    formatter = fieldFormats.getDefaultInstance(field.type, field.esTypes);
+  }
 
-      kfetch({
-        method: 'POST',
-        pathname: `/api/ml/data_visualizer/get_field_stats/${indexPattern.title}`,
-        body: JSON.stringify({
-          query: { match_all: {} },
-          fields: [
-            {
-              fieldName: field.name,
-              type: field.type === 'string' && field.esTypes ? field.esTypes[0] : field.type,
-              cardinality,
-            },
-          ],
-          samplerShardSize: 5000,
-          timeFieldName: indexPattern.timeFieldName,
-          earliest: 'now-14d',
-          latest: 'now',
-          interval: '1d',
-          maxExamples: 5,
-        }),
-      })
+  useEffect(() => {
+    // Re-fetches data when you close and reopen the popover
+    if (!infoIsOpen || state.isLoading) {
+      return;
+    }
+
+    setState(s => ({ ...s, isLoading: true }));
+
+    if (field.type !== 'number') {
+      npStart.core.http
+        .post(`/api/ml/data_visualizer/get_field_stats/${indexPattern.title}`, {
+          body: JSON.stringify({
+            query: toElasticsearchQuery(query, indexPattern),
+            fields: [
+              {
+                fieldName: field.name,
+                type: field.type === 'string' && field.esTypes ? field.esTypes[0] : field.type,
+                cardinality,
+              },
+            ],
+            samplerShardSize: 5000,
+            timeFieldName: indexPattern.timeFieldName,
+            earliest: dateRange.fromDate,
+            latest: dateRange.toDate,
+            interval: '1d',
+            maxExamples: 5,
+          }),
+        })
         .then((results: [DataVisResults]) => {
           setState(s => ({ ...s, isLoading: false, fieldMetadata: results[0] }));
         })
         .catch(() => {
-          setState(s => ({ ...state, isLoading: false }));
+          setState(s => ({ ...s, isLoading: false }));
+        });
+    } else {
+      npStart.core.http
+        .post(`/api/lens/index_stats/${indexPattern.title}/field`, {
+          body: JSON.stringify({
+            query: toElasticsearchQuery(query, indexPattern),
+            earliest: dateRange.fromDate,
+            latest: dateRange.toDate,
+            timeFieldName: indexPattern.timeFieldName,
+            field,
+          }),
+        })
+        .then((results: HistogramResult) => {
+          setState(s => ({ ...s, isLoading: false, fieldHistogram: results }));
+        })
+        .catch(() => {
+          setState(s => ({ ...s, isLoading: false }));
         });
     }
-  }, [infoIsOpen]);
+  }, [infoIsOpen, query, dateRange]);
 
   return (
     <DragDrop
@@ -175,6 +226,28 @@ export function FieldItem({
             <div>
               {state.isLoading && <EuiLoadingSpinner />}
 
+              {state.fieldHistogram && (
+                <Chart className="lnsDistributionChart">
+                  <Settings rotation={90} />
+
+                  <Axis
+                    id={getAxisId('key')}
+                    position={Position.Left}
+                    tickFormat={d => formatter.convert(d)}
+                  />
+                  <Axis id={getAxisId('doc_count')} position={Position.Bottom} />
+
+                  <BarSeries
+                    data={state.fieldHistogram.buckets}
+                    xAccessor={'key'}
+                    yAccessors={['doc_count']}
+                    id={getSpecId('distribution')}
+                    xScaleType={ScaleType.Linear}
+                    yScaleType={ScaleType.Linear}
+                  />
+                </Chart>
+              )}
+
               {state.fieldMetadata && cardinality && sampleCount && (
                 <div>
                   {state.fieldMetadata && (
@@ -192,7 +265,7 @@ export function FieldItem({
                         id={getAxisId('x')}
                         position={Position.Bottom}
                         title={'Values'}
-                        tickFormat={d => d.toFixed(2)}
+                        tickFormat={d => formatter.convert(d)}
                       />
 
                       <Axis
@@ -216,7 +289,7 @@ export function FieldItem({
                       <div>
                         {state.fieldMetadata.topValues.map(topValue => (
                           <EuiFlexGroup>
-                            <EuiFlexItem>{topValue.key}</EuiFlexItem>
+                            <EuiFlexItem>{formatter.convert(topValue.key)}</EuiFlexItem>
                             <EuiFlexItem grow={1}>
                               <EuiProgress value={topValue.doc_count / count} max={1} size={'m'} />
                             </EuiFlexItem>

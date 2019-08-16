@@ -272,7 +272,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     npStart.core.http
       .post(`/api/lens/index_stats/${indexPatterns[currentIndexPatternId].title}`, {
         body: JSON.stringify({
-          query: { match_all: {} },
           earliest: dateRange.fromDate,
           latest: dateRange.toDate,
           size: 500,
@@ -514,6 +513,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     cardinality={overallField && overallField.cardinality}
                     sampleCount={overallField ? 500 : undefined}
                     // sampleCount={overallField && overallField.stats.sampleCount}
+                    dateRange={dateRange}
+                    query={query}
                   />
                 );
               })}

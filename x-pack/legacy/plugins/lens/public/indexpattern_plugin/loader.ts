@@ -57,6 +57,9 @@ export const getIndexPatterns = (chrome: Chrome, toastNotifications: ToastNotifi
           typeMeta: attributes.typeMeta
             ? (JSON.parse(attributes.typeMeta) as SavedRestrictionsInfo)
             : undefined,
+          fieldFormatMap: attributes.fieldFormatMap
+            ? JSON.parse(attributes.fieldFormatMap)
+            : undefined,
         };
       });
     })
