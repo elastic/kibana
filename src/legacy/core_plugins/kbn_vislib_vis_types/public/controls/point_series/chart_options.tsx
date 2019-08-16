@@ -29,7 +29,7 @@ import { LineOptions } from './line_options';
 interface ChartOptionsParams extends VisOptionsProps<BasicVislibParams> {
   index: number;
   chart: SeriesParam;
-  changeValueAxis: (index: number) => void;
+  changeValueAxis: (index: number, selectedValueAxis: string) => void;
 }
 
 function ChartOptions({
@@ -101,10 +101,7 @@ function ChartOptions({
         options={valueAxesOptions}
         paramName="valueAxis"
         value={chart.valueAxis}
-        setValue={(...params) => {
-          setChart(index, ...params);
-          changeValueAxis(index);
-        }}
+        setValue={(paramName, value) => changeValueAxis(index, value)}
       />
 
       {(chart.type === ChartTypes.LINE || chart.type === ChartTypes.AREA) && (

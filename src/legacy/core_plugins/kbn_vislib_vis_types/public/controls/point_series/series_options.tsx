@@ -119,12 +119,20 @@ function SeriesOptions(props: VisOptionsProps<BasicVislibParams>) {
     });
   };
 
-  const changeValueAxis = (index: number) => {
-    const series = stateParams.seriesParams[index];
-    if (series.valueAxis === 'new') {
+  const changeValueAxis = (index: number, selectedValueAxis: string) => {
+    let newValueAxis = selectedValueAxis;
+    if (selectedValueAxis === 'new') {
       const axis = addValueAxis();
-      series.valueAxis = axis.id;
+      newValueAxis = axis.id;
     }
+    // setChart
+    const series = [...stateParams.seriesParams];
+    series[index] = {
+      ...series[index],
+      valueAxis: newValueAxis,
+    };
+    setValue('seriesParams', series);
+
     updateAxisTitle();
   };
 
