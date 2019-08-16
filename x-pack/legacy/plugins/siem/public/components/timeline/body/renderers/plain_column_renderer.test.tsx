@@ -81,6 +81,21 @@ describe('plain_column_renderer', () => {
       expect(wrapper.text()).toEqual('192.168.0.3');
     });
 
+    test('should return the value of destination.bytes if destination.bytes has a valid value', () => {
+      const column = plainColumnRenderer.renderColumn({
+        columnName: 'destination.bytes',
+        eventId: _id,
+        values: getValues('destination.bytes', mockDatum),
+        field: defaultHeaders.find(h => h.id === 'destination.bytes')!,
+      });
+      const wrapper = mount(
+        <TestProviders>
+          <span>{column}</span>
+        </TestProviders>
+      );
+      expect(wrapper.text()).toEqual('120.563KB');
+    });
+
     test('should return the value of event.action if event has a valid value', () => {
       const column = plainColumnRenderer.renderColumn({
         columnName: 'event.action',

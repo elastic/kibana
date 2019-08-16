@@ -197,6 +197,8 @@ export interface IndexField {
   aggregatable: boolean;
   /** Description of the field */
   description?: string | null;
+
+  format?: string | null;
 }
 
 export interface AuthenticationsData {
@@ -3564,6 +3566,8 @@ export namespace SourceQuery {
     type: string;
 
     aggregatable: boolean;
+
+    format?: string | null;
   };
 }
 
