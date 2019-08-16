@@ -46,6 +46,11 @@ export const awsNetworkBytes: InfraMetricModelCreator = (
           type: InfraMetricModelMetricType.derivative,
           field: 'csum-sum-net-out',
         },
+        {
+          id: 'posonly-deriv-csum-sum-net-out',
+          field: 'deriv-csum-sum-net-out',
+          type: InfraMetricModelMetricType.positive_only,
+        },
       ],
       split_mode: 'everything',
     },
@@ -69,9 +74,14 @@ export const awsNetworkBytes: InfraMetricModelCreator = (
           field: 'csum-sum-net-in',
         },
         {
-          id: 'inverted-deriv-csum-sum-net-in',
+          id: 'posonly-deriv-csum-sum-net-in',
+          field: 'deriv-csum-sum-net-in',
+          type: InfraMetricModelMetricType.positive_only,
+        },
+        {
+          id: 'inverted-posonly-deriv-csum-sum-net-in',
           type: InfraMetricModelMetricType.calculation,
-          variables: [{ id: 'var-rate', name: 'rate', field: 'deriv-csum-sum-net-in' }],
+          variables: [{ id: 'var-rate', name: 'rate', field: 'posonly-deriv-csum-sum-net-in' }],
           script: 'params.rate * -1',
         },
       ],

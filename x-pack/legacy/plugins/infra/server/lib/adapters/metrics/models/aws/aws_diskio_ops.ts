@@ -46,6 +46,11 @@ export const awsDiskioOps: InfraMetricModelCreator = (
           type: InfraMetricModelMetricType.derivative,
           field: 'csum-sum-diskio-writes',
         },
+        {
+          id: 'posonly-deriv-csum-sum-diskio-writes',
+          field: 'deriv-csum-sum-diskio-writes',
+          type: InfraMetricModelMetricType.positive_only,
+        },
       ],
       split_mode: 'everything',
     },
@@ -69,9 +74,16 @@ export const awsDiskioOps: InfraMetricModelCreator = (
           field: 'csum-sum-diskio-reads',
         },
         {
-          id: 'inverted-deriv-csum-sum-diskio-reads',
+          id: 'posonly-deriv-csum-sum-diskio-reads',
+          field: 'deriv-csum-sum-diskio-reads',
+          type: InfraMetricModelMetricType.positive_only,
+        },
+        {
+          id: 'inverted-posonly-deriv-csum-sum-diskio-reads',
           type: InfraMetricModelMetricType.calculation,
-          variables: [{ id: 'var-rate', name: 'rate', field: 'deriv-csum-sum-diskio-reads' }],
+          variables: [
+            { id: 'var-rate', name: 'rate', field: 'posonly-deriv-csum-sum-diskio-reads' },
+          ],
           script: 'params.rate * -1',
         },
       ],
