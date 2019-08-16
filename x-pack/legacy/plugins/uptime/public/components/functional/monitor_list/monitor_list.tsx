@@ -66,11 +66,10 @@ export const MonitorListComponent = (props: Props) => {
     loading,
   } = props;
   const [drawerIds, updateDrawerIds] = useState<string[]>([]);
-  const [getUrlParams] = useUrlParams();
-
-  const { cursorKey } = getUrlParams();
-
   const items = get<MonitorSummary[]>(data, 'monitorStates.summaries', []);
+  const [getUrlParams] = useUrlParams();
+  const { overviewPageIndex } = getUrlParams();
+
 
   const paginationLinkForSummary = (summary: MonitorSummary, cursorDirection: CursorDirection) => {
     const location = get(summary.state, 'observer.geo.name', [])
@@ -109,7 +108,7 @@ export const MonitorListComponent = (props: Props) => {
       <EuiFlexItem>
         <span>
           {items.length > 0 &&
-            cursorKey &&
+            overviewPageIndex !== 0 &&
             paginationLinkForSummary(items[0], CursorDirection.BEFORE)}
           {items.length > 1 && paginationLinkForSummary(last(items), CursorDirection.AFTER)}
         </span>

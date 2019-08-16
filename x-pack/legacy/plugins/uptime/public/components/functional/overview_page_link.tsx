@@ -6,7 +6,7 @@
 
 import { EuiLink } from '@elastic/eui';
 import React, { Fragment, FunctionComponent } from 'react';
-import { CursorPagination } from '../../../common/graphql/types';
+import { CursorPagination, CursorDirection } from '../../../common/graphql/types';
 import { useUrlParams } from '../../hooks';
 
 interface OverviewPageLinkProps {
@@ -17,13 +17,23 @@ export const OverviewPageLink: FunctionComponent<OverviewPageLinkProps> = ({
   children,
   pagination,
 }) => {
-  const [, updateUrlParams] = useUrlParams();
+  const [getUrlParams, updateUrlParams] = useUrlParams();
+  const { overviewPageIndex } = getUrlParams();
   if (pagination && pagination.cursorKey) {
     const { cursorKey, cursorDirection, sortOrder } = pagination;
+    const nextIndex =
+      cursorDirection === CursorDirection.BEFORE ? overviewPageIndex - 1 : overviewPageIndex + 1;
     return (
       <EuiLink
         // this needs to be base-64, because it could contain a URL
-        onClick={() => updateUrlParams({ cursorKey: btoa(cursorKey), cursorDirection, sortOrder })}
+        onClick={() => {
+          updateUrlParams({
+            cursorKey: btoa(cursorKey),
+            cursorDirection,
+            sortOrder,
+            overviewPageIndex: nextIndex,
+          });
+        }}
       >
         {children}
       </EuiLink>

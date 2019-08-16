@@ -18,6 +18,7 @@ export interface UptimeUrlParams {
   selectedPingStatus: string;
   cursorKey?: string;
   cursorDirection?: CursorDirection;
+  overviewPageIndex: number;
   sortOrder?: SortOrder;
 }
 
@@ -26,6 +27,7 @@ const {
   AUTOREFRESH_IS_PAUSED,
   DATE_RANGE_START,
   DATE_RANGE_END,
+  OVERVIEW_PAGE_INDEX,
   SEARCH,
   SELECTED_PING_LIST_STATUS,
 } = CLIENT_DEFAULTS;
@@ -69,6 +71,7 @@ export const getSupportedUrlParams = (params: {
     cursorKey,
     cursorDirection,
     sortOrder,
+    overviewPageIndex,
   } = filteredParams;
 
   return {
@@ -88,5 +91,6 @@ export const getSupportedUrlParams = (params: {
     cursorDirection:
       cursorDirection === CursorDirection.BEFORE ? CursorDirection.BEFORE : CursorDirection.AFTER,
     sortOrder: sortOrder === SortOrder.DESC ? SortOrder.DESC : SortOrder.ASC,
+    overviewPageIndex: parseUrlInt(overviewPageIndex, OVERVIEW_PAGE_INDEX),
   };
 };
