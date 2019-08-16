@@ -17,11 +17,11 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiButton,
-  EuiButtonIcon,
   EuiDescribedFormGroup,
   EuiFormRow,
   EuiDatePicker,
   EuiFlexGroup,
+  EuiFormControlLayout,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -51,12 +51,6 @@ const endTimeDefaultDescription = i18n.translate(
     defaultMessage: 'Indefinitely',
   }
 );
-const clearStartTimeLabel = i18n.translate('xpack.infra.analysisSetup.clearStartTimeLabel', {
-  defaultMessage: 'Clear start time',
-});
-const clearEndTimeLabel = i18n.translate('xpack.infra.analysisSetup.clearEndTimeLabel', {
-  defaultMessage: 'Clear end time',
-});
 
 function selectedDateToParam(selectedDate: Moment | null) {
   if (selectedDate) {
@@ -132,21 +126,17 @@ export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentP
                 label={startTimeLabel}
               >
                 <EuiFlexGroup gutterSize="s">
-                  <EuiDatePicker
-                    showTimeSelect
-                    selected={startTime}
-                    onChange={setStartTime}
-                    placeholder={startTimeDefaultDescription}
-                    maxDate={now}
-                  />
-                  {startTime && (
-                    <EuiButtonIcon
-                      color="danger"
-                      iconType="cross"
-                      aria-label={clearStartTimeLabel}
-                      onClick={() => setStartTime(null)}
+                  <EuiFormControlLayout
+                    clear={startTime ? { onClick: () => setStartTime(null) } : undefined}
+                  >
+                    <EuiDatePicker
+                      showTimeSelect
+                      selected={startTime}
+                      onChange={setStartTime}
+                      placeholder={startTimeDefaultDescription}
+                      maxDate={now}
                     />
-                  )}
+                  </EuiFormControlLayout>
                 </EuiFlexGroup>
               </EuiFormRow>
               <EuiFormRow
@@ -157,32 +147,28 @@ export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentP
                 label={endTimeLabel}
               >
                 <EuiFlexGroup gutterSize="s">
-                  <EuiDatePicker
-                    showTimeSelect
-                    selected={endTime}
-                    onChange={setEndTime}
-                    placeholder={endTimeDefaultDescription}
-                    openToDate={now}
-                    minDate={now}
-                    minTime={
-                      selectedEndTimeIsToday
-                        ? now
-                        : moment()
-                            .hour(0)
-                            .minutes(0)
-                    }
-                    maxTime={moment()
-                      .hour(23)
-                      .minutes(59)}
-                  />
-                  {endTime && (
-                    <EuiButtonIcon
-                      color="danger"
-                      iconType="cross"
-                      aria-label={clearEndTimeLabel}
-                      onClick={() => setEndTime(null)}
+                  <EuiFormControlLayout
+                    clear={endTime ? { onClick: () => setEndTime(null) } : undefined}
+                  >
+                    <EuiDatePicker
+                      showTimeSelect
+                      selected={endTime}
+                      onChange={setEndTime}
+                      placeholder={endTimeDefaultDescription}
+                      openToDate={now}
+                      minDate={now}
+                      minTime={
+                        selectedEndTimeIsToday
+                          ? now
+                          : moment()
+                              .hour(0)
+                              .minutes(0)
+                      }
+                      maxTime={moment()
+                        .hour(23)
+                        .minutes(59)}
                     />
-                  )}
+                  </EuiFormControlLayout>
                 </EuiFlexGroup>
               </EuiFormRow>
               <EuiButton
