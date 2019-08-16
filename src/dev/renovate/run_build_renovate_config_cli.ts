@@ -22,7 +22,7 @@ import { resolve } from 'path';
 import json5 from 'json5';
 import dedent from 'dedent';
 
-import { run } from '../run';
+import { run } from '@kbn/dev-utils';
 import { REPO_ROOT } from '../constants';
 import { RENOVATE_CONFIG } from './config';
 
