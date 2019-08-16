@@ -8,3 +8,4 @@ export { ExplainCollectionEnabled } from './collection_enabled/collection_enable
 export { ExplainCollectionInterval } from './collection_interval/collection_interval';
 export { ExplainPluginEnabled } from './plugin_enabled/plugin_enabled';
 export { ExplainExporters } from './exporters/exporters';
+export { ExplainExportersCloud } from './exporters/exporters';

@@ -39,6 +39,19 @@ describe('ReasonFound', () => {
     expect(component).toMatchSnapshot();
   });
 
+  test('should load ExplainExportersCloud component', () => {
+    const component = renderWithIntl(
+    <ReasonFound
+      reason={{
+        property: 'xpack.monitoring.exporters.cloud_enabled',
+          data: 'false',
+          context: 'fakeContext'
+      }}
+      enabled={enabler}
+    />
+  );
+})
+
   test('should load ExplainPluginEnabled component', () => {
     const component = renderWithIntl(
       <ReasonFound
