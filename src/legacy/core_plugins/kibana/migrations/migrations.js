@@ -383,6 +383,39 @@ function migrateSearchSortToNestedArray(doc) {
   };
 }
 
+function migrateFiltersAggQueryStringQueries(doc) {
+  const visStateJSON = get(doc, 'attributes.visState');
+
+  if (visStateJSON) {
+    try {
+      const visState = JSON.parse(visStateJSON);
+      if (visState && visState.aggs) {
+        visState.aggs.forEach(agg => {
+          if (agg.type !== 'filters') return doc;
+
+          agg.params.filters.forEach(filter => {
+            if (filter.input.query.query_string) {
+              filter.input.query = filter.input.query.query_string.query;
+            }
+          });
+        });
+
+        return {
+          ...doc,
+          attributes: {
+            ...doc.attributes,
+            visState: JSON.stringify(visState),
+          },
+        };
+      }
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+  }
+  return doc;
+
+}
+
 const executeMigrations720 = flow(
   migratePercentileRankAggregation,
   migrateDateHistogramAggregation
@@ -392,6 +425,10 @@ const executeMigrations730 = flow(
   transformFilterStringToQueryObject,
   migrateFiltersAggQuery,
   replaceMovAvgToMovFn
+);
+
+const executeVisualizationMigrations731 = flow(
+  migrateFiltersAggQueryStringQueries,
 );
 
 const executeSearchMigrations740 = flow(
@@ -503,6 +540,7 @@ export const migrations = {
     '7.0.1': removeDateHistogramTimeZones,
     '7.2.0': doc => executeMigrations720(doc),
     '7.3.0': executeMigrations730,
+    '7.3.1': executeVisualizationMigrations731,
   },
   dashboard: {
     '7.0.0': doc => {
