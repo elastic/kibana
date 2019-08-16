@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MonitorSummary, StatesIndexStatus, CursorPagination } from '../../../../common/graphql/types';
+import {
+  MonitorSummary,
+  StatesIndexStatus,
+  CursorPagination,
+} from '../../../../common/graphql/types';
 
 export interface UMMonitorStatesAdapter {
   getMonitorStates(
@@ -12,13 +16,14 @@ export interface UMMonitorStatesAdapter {
     dateRangeStart: string,
     dateRangeEnd: string,
     pagination?: CursorPagination,
-    filters?: string | null,
+    filters?: string | null
   ): Promise<GetMonitorStatesResult>;
   statesIndexExists(request: any): Promise<StatesIndexStatus>;
 }
 
 export interface GetMonitorStatesResult {
-  summaries: MonitorSummary[],
+  summaries: MonitorSummary[];
+  isFinalPage: boolean;
 }
 
 export interface LegacyMonitorStatesQueryResult {
@@ -30,4 +35,11 @@ export interface LegacyMonitorStatesQueryResult {
 export interface MonitorStatesCheckGroupsResult {
   checkGroups: string[];
   searchAfter: any;
+}
+
+export interface EnrichMonitorStatesResult {
+  // TODO: describe this return type better
+  monitors: any[];
+  // flag indicating if the result is the end of the index
+  isFinalPage: boolean;
 }

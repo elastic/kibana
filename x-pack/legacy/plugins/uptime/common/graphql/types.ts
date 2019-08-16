@@ -512,6 +512,8 @@ export interface MonitorSummaryResult {
   summaries?: MonitorSummary[] | null;
   /** The number of summaries. */
   totalSummaryCount: DocCount;
+  /** Flag indicating if this is the final page in the index for the given parameters. */
+  isFinalPage: boolean;
 }
 /** Represents the current state and associated data for an Uptime monitor. */
 export interface MonitorSummary {

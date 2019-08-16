@@ -11,6 +11,7 @@ import {
   MonitorStatesCheckGroupsResult,
   LegacyMonitorStatesQueryResult,
   GetMonitorStatesResult,
+  EnrichMonitorStatesResult,
 } from './adapter_types';
 import {
   MonitorSummary,
@@ -203,10 +204,34 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     dateRangeEnd: string,
     pagination: CursorPagination,
     filters?: string | null
-  ) {
+  ): Promise<EnrichMonitorStatesResult> {
     let monitors: any[] = [];
     let searchAfter = pagination.cursorKey || null;
+    let isFinalPage = true;
     do {
+      const queryRes: LegacyMonitorStatesQueryResult = await this.enrichAndCollapsePage(
+        request,
+        dateRangeStart,
+        dateRangeEnd,
+        searchAfter,
+        {
+          cursorKey: pagination.cursorKey,
+          cursorDirection: CursorDirection.AFTER,
+          sortOrder: pagination.sortOrder,
+        },
+        filters
+      );
+      const { result, statusFilter } = queryRes;
+      searchAfter = queryRes.searchAfter;
+      const monitorBucketsToAdd = this.getMonitorBuckets(result, statusFilter);
+      monitors.push(...monitorBucketsToAdd);
+      if (monitors.length > STATES.LEGACY_STATES_QUERY_SIZE) {
+        monitors = monitors.slice(0, STATES.LEGACY_STATES_QUERY_SIZE);
+        isFinalPage = false;
+      }
+    } while (!!searchAfter && monitors.length < STATES.LEGACY_STATES_QUERY_SIZE);
+
+    if (isFinalPage) {
       const queryRes: LegacyMonitorStatesQueryResult = await this.enrichAndCollapsePage(
         request,
         dateRangeStart,
@@ -216,15 +241,14 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
         filters
       );
       const { result, statusFilter } = queryRes;
-      searchAfter = queryRes.searchAfter;
       const monitorBucketsToAdd = this.getMonitorBuckets(result, statusFilter);
-      monitors.push(...monitorBucketsToAdd);
-      if (monitors.length > STATES.LEGACY_STATES_QUERY_SIZE) {
-        monitors = monitors.slice(0, STATES.LEGACY_STATES_QUERY_SIZE);
-      }
-    } while (!!searchAfter && monitors.length < STATES.LEGACY_STATES_QUERY_SIZE);
+      isFinalPage = monitorBucketsToAdd.length === 0;
+    }
 
-    return monitors;
+    return {
+      monitors,
+      isFinalPage,
+    };
   }
 
   private async enrichAndCollapsePage(
@@ -496,7 +520,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     pagination: CursorPagination = DefaultCursorPagination,
     filters?: string | null
   ): Promise<GetMonitorStatesResult> {
-    const monitors = await this.enrichAndCollapse(
+    const { monitors, isFinalPage } = await this.enrichAndCollapse(
       request,
       dateRangeStart,
       dateRangeEnd,
@@ -505,7 +529,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     );
 
     if (monitors.length === 0) {
-      return { summaries: [] };
+      return { summaries: [], isFinalPage: true };
     }
 
     const monitorIds: string[] = [];
@@ -560,6 +584,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
         ...summary,
         histogram: histogramMap[summary.monitor_id],
       })),
+      isFinalPage,
     };
   }
 

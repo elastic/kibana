@@ -101,6 +101,7 @@ query MonitorStates($dateRangeStart: String!, $dateRangeEnd: String!, $paginatio
         timestamp
       }
     }
+    isFinalPage
   }
 }
 `;

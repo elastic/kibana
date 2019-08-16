@@ -67,9 +67,9 @@ export const MonitorListComponent = (props: Props) => {
   } = props;
   const [drawerIds, updateDrawerIds] = useState<string[]>([]);
   const items = get<MonitorSummary[]>(data, 'monitorStates.summaries', []);
+  const isFinalPage = get<boolean>(data, 'monitorStates.isFinalPage', true);
   const [getUrlParams] = useUrlParams();
   const { overviewPageIndex } = getUrlParams();
-
 
   const paginationLinkForSummary = (summary: MonitorSummary, cursorDirection: CursorDirection) => {
     const location = get(summary.state, 'observer.geo.name', [])
@@ -101,20 +101,6 @@ export const MonitorListComponent = (props: Props) => {
       </OverviewPageLink>
     );
   };
-
-  // TODO This should be a new EUI component and get some additional help
-  const paginationLinks = (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <span>
-          {items.length > 0 &&
-            overviewPageIndex !== 0 &&
-            paginationLinkForSummary(items[0], CursorDirection.BEFORE)}
-          {items.length > 1 && paginationLinkForSummary(last(items), CursorDirection.AFTER)}
-        </span>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
 
   return (
     <Fragment>
@@ -271,7 +257,20 @@ export const MonitorListComponent = (props: Props) => {
             },
           ]}
         />
-        <EuiFlexItem grow={false}>{paginationLinks}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <span>
+                {items.length > 0 &&
+                  overviewPageIndex !== 0 &&
+                  paginationLinkForSummary(items[0], CursorDirection.BEFORE)}
+                {items.length > 1 &&
+                  !isFinalPage &&
+                  paginationLinkForSummary(last(items), CursorDirection.AFTER)}
+              </span>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </EuiPanel>
     </Fragment>
   );

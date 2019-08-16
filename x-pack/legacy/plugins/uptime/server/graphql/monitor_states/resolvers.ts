@@ -42,7 +42,7 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
         { dateRangeStart, dateRangeEnd, filters, pagination },
         { req }
       ): Promise<MonitorSummaryResult> {
-        const [totalSummaryCount, legacySummaries] = await Promise.all([
+        const [totalSummaryCount, { summaries, isFinalPage }] = await Promise.all([
           libs.pings.getDocCount(req),
           libs.monitorStates.getMonitorStates(
             req,
@@ -53,7 +53,8 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
           ),
         ]);
         return {
-          summaries: legacySummaries.summaries,
+          isFinalPage,
+          summaries,
           totalSummaryCount,
         };
       },

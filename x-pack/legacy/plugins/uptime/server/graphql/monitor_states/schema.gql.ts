@@ -127,7 +127,6 @@ export const monitorStatesSchema = gql`
     url: StateUrl
   }
 
-
   type MonitorCursorKey {
     monitor_id: String!
     location: String
@@ -152,6 +151,8 @@ export const monitorStatesSchema = gql`
     summaries: [MonitorSummary!]
     "The number of summaries."
     totalSummaryCount: DocCount!
+    "Flag indicating if this is the final page in the index for the given parameters."
+    isFinalPage: Boolean!
   }
 
   "Represents the current status of the uptime index."
