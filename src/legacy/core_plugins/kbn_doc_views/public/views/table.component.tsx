@@ -16,11 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// @ts-ignore
-import { EuiCodeEditor } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButtonEmpty, EuiToolTip, EuiButton, EuiButtonToggle } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldName } from 'ui/directives/field_name/field_name';
 
@@ -54,13 +52,26 @@ export function DocViewTable({
     }
   };
 
+  const formatValue = (field: string) => {
+    const value = flattened[field];
+    if (Array.isArray(value) && value.every(v => typeof v !== 'object')) {
+      return value.join(', ');
+    } else if (Array.isArray(value)) {
+      return <pre>{JSON.stringify(value, null, 2)}</pre>;
+    } else if (typeof value === 'object') {
+      return <pre>{JSON.stringify(value, null, 2)}</pre>;
+    } else {
+      return typeof formatted[field] === 'undefined' ? value : formatted[field];
+    }
+  };
+
   return (
     <table className="table table-condensed">
       <tbody>
         {fields.map(field => (
           <tr key={field} data-test-subj={`tableDocViewRow-${field}`}>
             {filter && (
-              <td>
+              <td style={{ width: '80px' }}>
                 {mapping[field] && mapping[field].filterable && (
                   <span>
                     <EuiToolTip
@@ -71,18 +82,19 @@ export function DocViewTable({
                         />
                       }
                     >
-                      <EuiButtonToggle
+                      <button
                         onClick={() => filter(mapping[field], flattened[field], '+')}
                         data-test-subj="addInclusiveFilterButton"
                         className="kbnDocViewer__actionButton"
-                        size="s"
-                        isIconOnly
-                        isEmpty
-                        label={i18n.translate('kbnDocViews.table.filterForValueButtonTooltip', {
-                          defaultMessage: 'Filter for value',
-                        })}
-                        iconType="plusInCircleFilled"
-                      />
+                        aria-label={i18n.translate(
+                          'kbnDocViews.table.filterForValueButtonTooltip',
+                          {
+                            defaultMessage: 'Filter for value',
+                          }
+                        )}
+                      >
+                        <i className="fa fa-search-plus"></i>
+                      </button>
                     </EuiToolTip>
                     <EuiToolTip
                       content={
@@ -92,17 +104,18 @@ export function DocViewTable({
                         />
                       }
                     >
-                      <EuiButtonToggle
+                      <button
                         onClick={() => filter(mapping[field], flattened[field], '-')}
                         className="kbnDocViewer__actionButton"
-                        size="s"
-                        isEmpty
-                        isIconOnly
-                        label={i18n.translate('kbnDocViews.table.filterOutValueButtonAriaLabel', {
-                          defaultMessage: 'Filter out value',
-                        })}
-                        iconType="minusInCircleFilled"
-                      />
+                        aria-label={i18n.translate(
+                          'kbnDocViews.table.filterOutValueButtonAriaLabel',
+                          {
+                            defaultMessage: 'Filter out value',
+                          }
+                        )}
+                      >
+                        <i className="fa fa-search-minus"></i>
+                      </button>
                     </EuiToolTip>
                   </span>
                 )}
@@ -130,14 +143,13 @@ export function DocViewTable({
                       />
                     }
                   >
-                    <EuiButtonEmpty
+                    <button
                       aria-pressed={isColumnActive(field)}
                       onClick={() => toggleColumn(field)}
                       className="kbnDocViewer__actionButton"
-                      size="s"
                     >
                       <i className="fa fa-columns" />
-                    </EuiButtonEmpty>
+                    </button>
                   </EuiToolTip>
                 )}
                 {mapping[field] &&
@@ -151,12 +163,12 @@ export function DocViewTable({
                         />
                       }
                     >
-                      <EuiButton
+                      <button
                         onClick={() => filter('_exists_', field, '+')}
                         className="kbnDocViewer__actionButton"
                       >
                         <i className="fa fa-asterisk" />
-                      </EuiButton>
+                      </button>
                     </EuiToolTip>
                   )}
                 {indexPattern.metaFields.includes(field) && (
@@ -193,13 +205,12 @@ export function DocViewTable({
               data-field-name={field}
               data-field-type={mapping[field] ? mapping[field].type : 'default'}
               className="kbnDocViewer__field"
+              style={{ width: '160px' }}
             >
-              <FieldName field={mapping[field]}></FieldName>
+              <FieldName field={mapping[field]} fieldName={field}></FieldName>
             </td>
             <td>
-              <div className="kbnDocViewer__value">
-                {typeof formatted[field] === 'undefined' ? hit[field] : formatted[field]}
-              </div>
+              <div className="kbnDocViewer__value">{formatValue(field)}</div>
             </td>
           </tr>
         ))}

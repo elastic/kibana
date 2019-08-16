@@ -18,33 +18,14 @@
  */
 
 import _ from 'lodash';
-import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
+import { addDocView } from 'ui/registry/doc_views';
 import { i18n } from '@kbn/i18n';
 import { DocViewTable } from './table.component';
 
-DocViewsRegistryProvider.register(function(reactDirective: any) {
-  const reactDir = reactDirective(DocViewTable, [
-    'columns',
-    'hit',
-    'filter',
-    'indexPattern',
-    'mapping',
-    'onAddColumn',
-    'onRemoveColumn',
-  ]);
-  reactDir.scope = {
-    hit: '=',
-    indexPattern: '=',
-    filter: '=',
-    columns: '=',
-    onAddColumn: '=',
-    onRemoveColumn: '=',
-  };
-  return {
-    title: i18n.translate('kbnDocViews.json.tableTitle', {
-      defaultMessage: 'Table New',
-    }),
-    order: 30,
-    directive: reactDir,
-  };
+addDocView({
+  title: i18n.translate('kbnDocViews.json.tableTitle', {
+    defaultMessage: 'Table New',
+  }),
+  order: 30,
+  component: DocViewTable,
 });
