@@ -7,7 +7,7 @@
 import { Request } from 'src/legacy/server/kbn_server';
 import { get } from 'lodash';
 import { BackendFrameworkAdapter } from './adapters/framework/default';
-import { LicenseType } from '../../../../../build/plugin/kibana/x-pack/plugins/beats_management/common/constants/security';
+import { LicenseType } from '../../common/types/security';
 
 export class BackendFrameworkLib {
   /**
