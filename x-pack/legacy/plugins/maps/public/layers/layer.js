@@ -340,6 +340,9 @@ export class AbstractLayer {
   }
 
   renderStyleEditor({ onStyleDescriptorChange }) {
+    if (!this._style) {
+      return null;
+    }
     return this._style.renderEditor({ layer: this, onStyleDescriptorChange });
   }
 
@@ -357,6 +360,10 @@ export class AbstractLayer {
 
   async getOrdinalFields() {
     return [];
+  }
+
+  syncVisibilityWithMb(mbMap, mbLayerId) {
+    mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
   }
 
 }

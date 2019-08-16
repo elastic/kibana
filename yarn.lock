@@ -1637,6 +1637,11 @@
     once "^1.4.0"
     pump "^3.0.0"
 
+"@elastic/eslint-plugin-eui@0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.1.tgz#c6a049cfbf1d8bfd0ac97a51d301b6cadbcb7e1c"
+  integrity sha512-EPfuRYibey9oxA7MqQLhKL8hFzwv9tPsx0Ng9hfesFZUreP/LrAb2luBWGQub5ZHDHjN9eUi/QO9UN0kYWOJQQ==
+
 "@elastic/eui@0.0.55":
   version "0.0.55"
   resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-0.0.55.tgz#95ff5b70ecb1d333e1a5570a0e4a4079fdf7887b"
