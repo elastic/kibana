@@ -295,7 +295,7 @@
 }
 
 .codeBranchSelectorTabs {
-  max-height: calc(100vh - 18rem);
+  max-height: calc(100vh - 19rem);
   overflow: auto;
 }
 
@@ -305,4 +305,14 @@
 
 .codeBranchSelectorPopover {
   margin-top: $euiSizeXS;
+  padding-top: $euiSizeS !important;
+}
+
+.codeBranchSelectorRevisionItem:hover *,
+.codeBranchSelectorRevisionItem:focus * {
+  text-decoration: none !important;
+  &:focus,
+  &:hover {
+    text-decoration: none !important;
+  }
 }

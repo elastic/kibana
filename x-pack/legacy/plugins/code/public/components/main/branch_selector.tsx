@@ -37,6 +37,8 @@ export const BranchSelector = (props: Props) => {
   const getListItem = (b: string) =>
     b === props.revision ? (
       <EuiListGroupItem
+        size="s"
+        className="codeBranchSelectorRevisionItem"
         label={b}
         isActive={true}
         iconType="check"
@@ -46,6 +48,8 @@ export const BranchSelector = (props: Props) => {
       ></EuiListGroupItem>
     ) : (
       <EuiListGroupItem
+        size="s"
+        className="codeBranchSelectorRevisionItem"
         label={b}
         key={b}
         href={props.getHrefFromRevision(b)}
@@ -108,7 +112,7 @@ export const BranchSelector = (props: Props) => {
       }
       closePopover={() => togglePopoverOpen(false)}
     >
-      <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} size={'m'} />
+      <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} size={'s'} />
     </EuiPopover>
   );
 };

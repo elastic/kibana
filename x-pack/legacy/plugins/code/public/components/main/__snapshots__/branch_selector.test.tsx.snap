@@ -36,13 +36,13 @@ exports[`render correctly 1`] = `
           >
             <span
               className="euiScreenReaderOnly"
-              id="jmjmrgrf"
+              id="35n06ekk"
             >
               Select an option: master, is selected
             </span>
             <button
               aria-haspopup="true"
-              aria-labelledby="undefined jmjmrgrf"
+              aria-labelledby="undefined 35n06ekk"
               aria-selected={true}
               className="euiSuperSelectControl"
               data-test-subj="codeBranchSelector"
