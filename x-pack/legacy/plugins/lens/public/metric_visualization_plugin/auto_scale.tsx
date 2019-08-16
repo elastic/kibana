@@ -74,16 +74,13 @@ export class AutoScale extends React.Component<Props, State> {
               alignItems: 'center',
               maxWidth: '100%',
               maxHeight: '100%',
+              overflow: 'hidden',
             }}
           >
             <div
               ref={this.setChild}
               style={{
                 transform: `scale(${scale})`,
-                // When we do a transform scale, it leaves a lot of
-                // white space above and below the element, so we pull
-                // that in with negative margins.
-                marginBottom: `-${(1 - scale) / 2}em`,
               }}
             >
               {children}
@@ -108,6 +105,9 @@ export function computeScale(
   parent: ClientDimensionable | null,
   child: ClientDimensionable | null
 ) {
+  const MAX_SCALE = 1;
+  const MIN_SCALE = 0.3;
+
   if (!parent || !child) {
     return 1;
   }
@@ -115,5 +115,5 @@ export function computeScale(
   const scaleX = parent.clientWidth / child.clientWidth;
   const scaleY = parent.clientHeight / child.clientHeight;
 
-  return Math.min(1, Math.min(scaleX, scaleY));
+  return Math.max(Math.min(MAX_SCALE, Math.min(scaleX, scaleY)), MIN_SCALE);
 }

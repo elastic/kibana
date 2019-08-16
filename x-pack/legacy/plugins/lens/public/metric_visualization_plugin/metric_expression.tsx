@@ -90,10 +90,13 @@ export function MetricChart({ data, args }: MetricChartProps) {
         alignItems: 'center',
         maxWidth: '100%',
         maxHeight: '100%',
+        textAlign: 'center',
       }}
     >
-      <AutoScale style={{ fontWeight: 600, fontSize: '60pt' }}>{value}</AutoScale>
-      <EuiText textAlign="center">{title}</EuiText>
+      <AutoScale>
+        <div style={{ fontSize: '60pt', fontWeight: 600 }}>{value}</div>
+        <div style={{ fontSize: '24pt' }}>{title}</div>
+      </AutoScale>
     </div>
   );
 }
