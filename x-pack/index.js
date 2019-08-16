@@ -46,7 +46,7 @@ import { alerting } from './legacy/plugins/alerting';
 import { advancedUiActions } from './legacy/plugins/advanced_ui_actions';
 import { fleet } from './legacy/plugins/fleet';
 
-module.exports = function(kibana) {
+module.exports = function (kibana) {
   return [
     xpackMain(kibana),
     telemetry(kibana),
