@@ -492,11 +492,14 @@ export class MBMapContainer extends React.Component {
     }
   }
 
+  _isLocked() {
+    return this.props.tooltipState.type === TOOLTIP_TYPE.LOCKED;
+  }
+
   _showTooltip() {
     if (!this._isMounted) {
       return;
     }
-    const isLocked = this.props.tooltipState.type === TOOLTIP_TYPE.LOCKED;
     ReactDOM.render((
       <I18nProvider>
         <FeatureTooltip
@@ -505,8 +508,8 @@ export class MBMapContainer extends React.Component {
           loadFeatureProperties={this._loadFeatureProperties}
           findLayerById={this._findLayerById}
           closeTooltip={this._onTooltipClose}
-          showFilterButtons={!!this.props.addFilters && isLocked}
-          isLocked={isLocked}
+          showFilterButtonForLayer={this._showFilterButtonForLayer}
+          isLocked={this._isLocked()}
           addFilters={this.props.addFilters}
           geoFields={this.props.geoFields}
           reevaluateTooltipPosition={this._reevaluateTooltipPosition}
@@ -532,9 +535,17 @@ export class MBMapContainer extends React.Component {
   };
 
   _findLayerById = (layerId) => {
-    return this.props.layerList.find(layer => {
-      return layer.getId() === layerId;
-    });
+    return this.props.layerList.find(layer => layer.getId() === layerId);
+  };
+
+
+  _showFilterButtonForLayer = (layerId) => {
+    const layer = this._findLayerById(layerId);
+    if (!layer) {
+      return false;
+    }
+    const ids = layer.getQueryableIndexPatternIds();
+    return !!this.props.addFilters && this._isLocked() && ids.length;
   };
 
   _syncTooltipState() {

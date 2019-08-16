@@ -151,7 +151,7 @@ export class FeatureTooltip extends React.Component {
         featureId={feature.id}
         layerId={feature.layerId}
         loadFeatureProperties={this.props.loadFeatureProperties}
-        showFilterButtons={this.props.showFilterButtons}
+        showFilterButtonForLayer={this.props.showFilterButtonForLayer}
         onCloseTooltip={this._onCloseTooltip}
         addFilters={this.props.addFilters}
         reevaluateTooltipPosition={this.props.reevaluateTooltipPosition}

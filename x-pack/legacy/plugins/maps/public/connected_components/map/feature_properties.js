@@ -83,7 +83,9 @@ export class FeatureProperties extends React.Component {
   };
 
   _renderFilterCell(tooltipProperty) {
-    if (!this.props.showFilterButtons || !tooltipProperty.isFilterable()) {
+
+    const showFilterButton = this.props.showFilterButtonForLayer(this.props.layerId);
+    if (!showFilterButton || !tooltipProperty.isFilterable()) {
       return null;
     }
 
