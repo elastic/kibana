@@ -42,13 +42,13 @@ const endTimeLabel = i18n.translate('xpack.infra.analysisSetup.endTimeLabel', {
 const startTimeDefaultDescription = i18n.translate(
   'xpack.infra.analysisSetup.startTimeDefaultDescription',
   {
-    defaultMessage: 'now',
+    defaultMessage: 'Start of log indices',
   }
 );
 const endTimeDefaultDescription = i18n.translate(
   'xpack.infra.analysisSetup.endTimeDefaultDescription',
   {
-    defaultMessage: 'indefinitely',
+    defaultMessage: 'Indefinitely',
   }
 );
 const clearStartTimeLabel = i18n.translate('xpack.infra.analysisSetup.clearStartTimeLabel', {
@@ -120,7 +120,7 @@ export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentP
               description={
                 <FormattedMessage
                   id="xpack.infra.analysisSetup.timeRangeDescription"
-                  defaultMessage="By default, Machine Learning will analyze log messages starting now and continue indefinitely. You can specify an earlier date to begin, a specific point in time to end, or both."
+                  defaultMessage="By default, Machine Learning analyzes log messages from the start of your log indices and continues indefinitely. You can specify an earlier date to begin, a specific point in time to end, or both."
                 />
               }
             >
