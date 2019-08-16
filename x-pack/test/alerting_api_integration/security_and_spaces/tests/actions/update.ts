@@ -162,7 +162,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
             });
         });
 
-        it('secrest are not valid', async () => {
+        it('secrets are not valid', async () => {
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
