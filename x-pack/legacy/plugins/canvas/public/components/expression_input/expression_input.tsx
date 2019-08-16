@@ -193,15 +193,28 @@ export class ExpressionInput extends React.Component<Props> {
       endColumn: word.endColumn,
     });
 
-    const { fnDef, argDef } = getFnArgDefAtPosition(
+    const { fnDef, argDef, argStart, argEnd } = getFnArgDefAtPosition(
       this.props.functionDefinitions,
       text,
       absPosition
     );
 
-    if (argDef) {
+    if (argDef && argStart && argEnd) {
+      // Use the start/end position of the arg to generate a complete range to highlight
+      // that includes the arg name and its complete value
+      const startPos = model.getPositionAt(argStart);
+      const endPos = model.getPositionAt(argEnd);
+
+      const argRange = new monacoEditor.Range(
+        startPos.lineNumber,
+        startPos.column,
+        endPos.lineNumber,
+        endPos.column
+      );
+
       return {
         contents: [{ value: getArgReferenceStr(argDef), isTrusted: true }],
+        range: argRange,
       };
     } else if (fnDef) {
       return {

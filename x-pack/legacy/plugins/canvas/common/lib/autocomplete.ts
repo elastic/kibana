@@ -84,17 +84,18 @@ export function getFnArgDefAtPosition(
   expression: string,
   position: number
 ) {
-  const text = expression.substr(0, position) + MARKER + expression.substr(position);
   try {
-    const ast: ExpressionASTWithMeta = parse(text, { addMeta: true }) as ExpressionASTWithMeta;
+    const ast: ExpressionASTWithMeta = parse(expression, {
+      addMeta: true,
+    }) as ExpressionASTWithMeta;
 
-    const { ast: newAst, fnIndex, argName } = getFnArgAtPosition(ast, position);
+    const { ast: newAst, fnIndex, argName, argStart, argEnd } = getFnArgAtPosition(ast, position);
     const fn = newAst.node.chain[fnIndex].node;
 
-    const fnDef = getByAlias(specs, fn.function.replace(MARKER, ''));
+    const fnDef = getByAlias(specs, fn.function);
     if (fnDef && argName) {
       const argDef = getByAlias(fnDef.args, argName);
-      return { fnDef, argDef };
+      return { fnDef, argDef, argStart, argEnd };
     }
     return { fnDef };
   } catch (e) {
@@ -151,17 +152,44 @@ export function getAutocompleteSuggestions(
 function getFnArgAtPosition(
   ast: ExpressionASTWithMeta,
   position: number
-): { ast: ExpressionASTWithMeta; fnIndex: number; argName?: string; argIndex?: number } {
+): {
+  ast: ExpressionASTWithMeta;
+  fnIndex: number;
+  argName?: string;
+  argIndex?: number;
+  argStart?: number;
+  argEnd?: number;
+} {
   const fnIndex = ast.node.chain.findIndex(fn => fn.start <= position && position <= fn.end);
   const fn = ast.node.chain[fnIndex];
   for (const [argName, argValues] of Object.entries(fn.node.arguments)) {
     for (let argIndex = 0; argIndex < argValues.length; argIndex++) {
       const value = argValues[argIndex];
-      if (value.start <= position && position <= value.end) {
+
+      let start = value.start;
+      let end = value.end;
+      if (argName !== '_') {
+        // If an arg name is specified, expand our start position to include
+        // the arg name and the `=`
+        start = start - (argName.length + 1);
+
+        // If the arg value is an expression, expand our start and end position
+        // to include the opening and closing braces
         if (value.node !== null && isExpression(value)) {
+          start--;
+          end++;
+        }
+      }
+
+      if (start <= position && position <= end) {
+        if (
+          value.node !== null &&
+          isExpression(value) &&
+          !(start <= position && position <= start + argName.length + 1)
+        ) {
           return getFnArgAtPosition(value, position);
         }
-        return { ast, fnIndex, argName, argIndex };
+        return { ast, fnIndex, argName, argIndex, argStart: start, argEnd: end };
       }
     }
   }
