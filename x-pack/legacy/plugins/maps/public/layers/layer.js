@@ -119,10 +119,10 @@ export class AbstractLayer {
     };
   }
 
-  getIconAndTooltipContent(zoomLevel) {
+  getIconAndTooltipContent(zoomLevel, isUsingSearch) {
     let icon;
     let tooltipContent = null;
-    let areResultsTrimmed = false;
+    const footnotes = [];
     if (this.hasErrors()) {
       icon = (
         <EuiIcon
@@ -161,15 +161,30 @@ export class AbstractLayer {
       const customIconAndTooltipContent = this.getCustomIconAndTooltipContent();
       if (customIconAndTooltipContent) {
         icon = customIconAndTooltipContent.icon;
-        tooltipContent = customIconAndTooltipContent.tooltipContent;
-        areResultsTrimmed = customIconAndTooltipContent.areResultsTrimmed;
+        if (!customIconAndTooltipContent.areResultsTrimmed) {
+          tooltipContent = customIconAndTooltipContent.tooltipContent;
+        } else {
+          footnotes.push({
+            icon: <EuiIcon color="subdued" type="iInCircle" />,
+            message: customIconAndTooltipContent.tooltipContent
+          });
+        }
+      }
+
+      if (isUsingSearch && this.getQueryableIndexPatternIds().length) {
+        footnotes.push({
+          icon: <EuiIcon color="subdued" type="filter" size="s" />,
+          message: i18n.translate('xpack.maps.layer.isUsingSearchMsg', {
+            defaultMessage: 'Results narrowed by search bar'
+          })
+        });
       }
     }
 
     return {
       icon,
       tooltipContent,
-      areResultsTrimmed
+      footnotes,
     };
   }
 
