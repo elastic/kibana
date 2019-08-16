@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, pick } from 'lodash';
+import { get } from 'lodash';
 import { mapNodesInfo } from './map_nodes_info';
 import { mapNodesMetrics } from './map_nodes_metrics';
 import { LISTING_METRICS_NAMES } from './nodes_listing_metrics';
+import { CONVERTED_TOKEN } from '../../convert_metric_names';
 
 /*
  * Process the response from the get_nodes query
@@ -31,10 +32,33 @@ export function handleResponse(response, clusterStats, shardStats, timeOptions =
    * with a sub-object for all the metrics buckets
    */
   const nodeBuckets = get(response, 'aggregations.nodes.buckets', []);
-  const metricsForNodes = nodeBuckets.reduce((accum, { key: nodeId, ...allAggBuckets }) => {
+  const metricsForNodes = nodeBuckets.reduce((accum, { key: nodeId, by_date: byDate }) => {
+    const grouping = {};
+    for (const metricName of LISTING_METRICS_NAMES) {
+      grouping[metricName] = {
+        buckets: byDate.buckets.map(bucket => {
+          const { key_as_string, key, doc_count, ...rest } = bucket; /* eslint-disable-line camelcase */
+          const metrics = Object.entries(rest).reduce((accum, [key, value]) => {
+            if (key.startsWith(`${CONVERTED_TOKEN}${metricName}`)) {
+              const name = key.split('__')[1];
+              accum[name] = value;
+            }
+            return accum;
+          }, {});
+
+          return {
+            key_as_string, /* eslint-disable-line camelcase */
+            key,
+            doc_count, /* eslint-disable-line camelcase */
+            ...metrics,
+          };
+        })
+      };
+    }
+
     return {
       ...accum,
-      [nodeId]: pick(allAggBuckets, LISTING_METRICS_NAMES) // "metrics" are just the date histogram aggs
+      [nodeId]: grouping,
     };
   }, {});
   const nodesMetrics = mapNodesMetrics(metricsForNodes, nodesInfo, timeOptions); // summarize the metrics of online nodes
