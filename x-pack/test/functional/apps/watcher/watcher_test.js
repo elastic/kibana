@@ -12,17 +12,28 @@ const watchName = 'watch Name';
 const updatedName = 'updatedName';
 export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
-  const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const log = getService('log');
+  const esSupertest = getService('esSupertest');
   const PageObjects = getPageObjects(['security', 'common', 'header', 'settings', 'watcher']);
 
   describe('watcher_test', function () {
     before('initialize tests', async () => {
+      // There may be system watches if monitoring was previously enabled
+      // These cannot be deleted via the UI, so we need to delete via the API
+      const watches = await esSupertest.get('/.watches/_search');
+
+      if (watches.status === 200) {
+        for (const hit of watches.body.hits.hits) {
+          if (hit._id) {
+            await esSupertest.delete(`/_watcher/watch/${hit._id}`);
+          }
+        }
+      }
+
       await browser.setWindowSize(1600, 1000);
       await PageObjects.common.navigateToApp('watcher');
-      await PageObjects.watcher.clearAllWatches();
     });
 
     it('create and save a new watch', async () => {
@@ -49,10 +60,10 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.watcher.deleteWatch(watchID);
       await testSubjects.click('confirmModalConfirmButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      retry.try(async () => {
-        const row = await find.byCssSelector('.euiTableRow');
-        const cell = await row.findByCssSelector('td:nth-child(1)');
-        expect(cell.getVisibleText()).to.equal('No watches to show');
+      await retry.try(async () => {
+        const emptyPrompt = await testSubjects.find('emptyPrompt');
+        const emptyPromptText = await emptyPrompt.getVisibleText();
+        expect(emptyPromptText).to.contain('You don’t have any watches yet\n');
       });
     });
   });
