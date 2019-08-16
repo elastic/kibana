@@ -37,6 +37,7 @@ import {
   EuiOverlayMask,
   EuiConfirmModal,
   EuiCallOut,
+  EuiButtonIcon,
 } from '@elastic/eui';
 
 export const EMPTY_FILTER = '';
@@ -308,6 +309,53 @@ class TableListViewUi extends React.Component {
     );
   }
 
+  columns() {
+    const canEdit = this.state.items.some(item => item.canEdit);
+    const originalColumns = this.props.tableColumns;
+
+    if (!canEdit) {
+      return originalColumns;
+    }
+
+    return [
+      ...originalColumns,
+      {
+        field: 'canEdit',
+        align: 'right',
+        width: '100px',
+        name: i18n.translate('kbn.table_list_view.listing.table.actionTitle', {
+          defaultMessage: 'Actions'
+        }),
+
+        render: (_field, record) => (
+          <EuiButtonIcon
+            className="kbnTableListView__actionIcon"
+            onClick={() => this.props.editItem(record)}
+            iconType="pencil"
+            aria-label={i18n.translate('kbn.table_list_view.listing.table.editActionDescription', {
+              defaultMessage: 'Edit',
+            })}
+            disabled={!record || !record.canEdit}
+          />
+        ),
+      }
+    ];
+  }
+
+  selection() {
+    const canDelete = this.state.items.some(item => item.canDelete);
+    if (!canDelete) {
+      return null;
+    }
+
+    return {
+      selectable: item => item.canDelete,
+      onSelectionChange: (selection) => {
+        this.setState({ selectedIds: selection.map(item => { return item.id; }) });
+      }
+    };
+  }
+
   renderTable() {
     const pagination = {
       pageIndex: this.state.page,
@@ -315,27 +363,6 @@ class TableListViewUi extends React.Component {
       totalItemCount: this.state.items.length,
       pageSizeOptions: PAGE_SIZE_OPTIONS,
     };
-
-    const selection = this.props.deleteItems ? {
-      selectable: this.props.selectable,
-      onSelectionChange: (selection) => {
-        this.setState({
-          selectedIds: selection.map(item => { return item.id; })
-        });
-      }
-    } : null;
-
-    const actions = [{
-      name: i18n.translate('kbn.table_list_view.listing.table.editActionName', {
-        defaultMessage: 'Edit'
-      }),
-      description: i18n.translate('kbn.table_list_view.listing.table.editActionDescription', {
-        defaultMessage: 'Edit'
-      }),
-      icon: 'pencil',
-      type: 'icon',
-      onClick: this.props.editItem
-    }];
 
     const search = {
       onChange: this.setFilter.bind(this),
@@ -345,17 +372,6 @@ class TableListViewUi extends React.Component {
         incremental: true,
       },
     };
-
-    const columns = this.props.tableColumns.slice();
-    if (this.props.editItem) {
-      columns.push({
-        name: i18n.translate('kbn.table_list_view.listing.table.actionTitle', {
-          defaultMessage: 'Actions'
-        }),
-        width: '100px',
-        actions
-      });
-    }
 
     const noItemsMessage = (
       <FormattedMessage
@@ -368,11 +384,11 @@ class TableListViewUi extends React.Component {
       <EuiInMemoryTable
         itemId="id"
         items={this.state.items}
-        columns={columns}
+        columns={this.columns()}
         pagination={pagination}
         loading={this.state.isFetchingItems}
         message={noItemsMessage}
-        selection={selection}
+        selection={this.selection()}
         search={search}
         sorting={true}
         data-test-subj="itemsInMemTable"
@@ -470,7 +486,6 @@ TableListViewUi.propTypes = {
   deleteItems: PropTypes.func,
   createItem: PropTypes.func,
   editItem: PropTypes.func,
-  selectable: PropTypes.func,
 
   listingLimit: PropTypes.number,
   initialFilter: PropTypes.string,

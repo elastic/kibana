@@ -26,7 +26,6 @@ import { TableListView } from './../../table_list_view';
 import {
   EuiIcon,
   EuiBetaBadge,
-  EuiButtonIcon,
   EuiLink,
   EuiButton,
   EuiEmptyPrompt,
@@ -49,7 +48,6 @@ class VisualizeListingTableUi extends Component {
         deleteItems={this.props.deleteItems}
         tableColumns={this.getTableColumns()}
         listingLimit={this.props.listingLimit}
-        selectable={item => item.canDelete}
         initialFilter={''}
         noItemsFragment={this.getNoItemsMessage()}
         entityName={
@@ -108,27 +106,6 @@ class VisualizeListingTableUi extends Component {
           </span>
         )
       },
-      {
-        field: 'canEdit',
-        name: intl.formatMessage({
-          id: 'kbn.visualize.listing.table.actionsColumnName',
-          defaultMessage: 'Actions',
-        }),
-        align: 'right',
-        width: '100px',
-        render: (_field, record) => (
-          <EuiButtonIcon
-            className="visListingTable__actionIcon"
-            onClick={() => this.props.editItem(record)}
-            iconType="pencil"
-            aria-label={intl.formatMessage({
-              id: 'kbn.visualize.listing.table.editActionDescription',
-              defaultMessage: 'Edit',
-            })}
-            disabled={!record.canEdit}
-          />
-        ),
-      }
     ];
 
     return tableColumns;

@@ -91,7 +91,17 @@ uiRoutes
         kbnUrl.redirect(DashboardConstants.CREATE_NEW_DASHBOARD_URL);
       };
       $scope.find = (search) => {
-        return services.dashboards.find(search, $scope.listingLimit);
+        const canEdit = !dashboardConfig.getHideWriteControls();
+        return services.dashboards.find(search, $scope.listingLimit).then(result => {
+          return {
+            ...result,
+            hits: result.hits.map(dashboard => ({
+              ...dashboard,
+              canEdit,
+              canDelete: canEdit,
+            })),
+          };
+        });
       };
       $scope.editItem = ({ id }) => {
         kbnUrl.redirect(`${createDashboardEditUrl(id)}?_a=(viewMode:edit)`);

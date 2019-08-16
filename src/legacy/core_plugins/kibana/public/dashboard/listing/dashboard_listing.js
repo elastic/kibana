@@ -48,8 +48,8 @@ class DashboardListingUi extends React.Component {
       <TableListView
         createItem={this.props.hideWriteControls ? null : this.props.createItem}
         findItems={this.props.findItems}
-        deleteItems={this.props.hideWriteControls ? null : this.props.deleteItems}
-        editItem={this.props.hideWriteControls ? null : this.props.editItem}
+        deleteItems={this.props.deleteItems}
+        editItem={this.props.editItem}
         tableColumns={this.getTableColumns()}
         listingLimit={this.props.listingLimit}
         initialFilter={this.props.initialFilter}

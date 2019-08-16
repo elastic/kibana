@@ -15,15 +15,3 @@
   padding: 0 $euiSizeS;    
   margin-left: $euiSizeS;
 }
-
-.visListingTable__actionIcon {
-  filter: grayscale(100%);
-}
-
-.visListingTable__actionIcon:hover {
-  filter: none;
-}
-
-.visListingTable__actionIcon:disabled {
-  visibility: hidden;
-}
