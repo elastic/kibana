@@ -23,9 +23,41 @@ import { ORIGIN } from './origin';
 export class TMSService {
 
   _getRasterStyleJson = _.once(async () => {
-    const rasterUrl = this._getRasterStyleUrl();
+    const rasterUrl = this._getStyleUrlForLocale('raster');
     const url = this._proxyPath + rasterUrl;
     return this._emsClient.getManifest(this._emsClient.extendUrlWithParams(url));
+  });
+
+  _getVectorStyleJsonRaw = _.once(async () => {
+    const vectorUrl = this._getStyleUrlForLocale('vector');
+    const url = this._proxyPath + vectorUrl;
+    const vectorJson =  await this._emsClient.getManifest(this._emsClient.extendUrlWithParams(url));
+    return { ...vectorJson };
+  });
+
+  _getVectorStyleJsonInlined = _.once(async () => {
+    const vectorJson = await this._getVectorStyleJsonRaw();
+    const inlinedSources = {};
+    for (const sourceName of Object.getOwnPropertyNames(vectorJson.sources)) {
+      const sourceUrl = this._proxyPath + vectorJson.sources[sourceName].url;
+      const extendedUrl =  this._emsClient.extendUrlWithParams(sourceUrl);
+      const sourceJson = await this._emsClient.getManifest(extendedUrl);
+
+      const extendedTileUrls = sourceJson.tiles.map(tileUrl => {
+        const url = this._proxyPath + tileUrl;
+        return this._emsClient.extendUrlWithParams(url);
+      });
+      inlinedSources[sourceName] = {
+        type: 'vector',
+        ...sourceJson,
+        tiles: extendedTileUrls
+      };
+    }
+    return {
+      ...vectorJson,
+      sources: inlinedSources,
+      sprite: await this._getSpriteSheetRootPath(),
+    };
   });
 
   constructor(config, emsClient, proxyPath) {
@@ -34,21 +66,20 @@ export class TMSService {
     this._proxyPath = proxyPath;
   }
 
-  _getRasterFormats(locale) {
-    return this._config.formats.filter(format => {
-      return format.locale === locale && format.format === 'raster';
-    });
+  _getFormats(formatType, locale) {
+    return this._config.formats.filter(format => format.locale === locale && format.format === formatType);
   }
 
-  _getRasterStyleUrl() {
-    let rasterFormats = this._getRasterFormats(this._emsClient.getLocale());
-    if (!rasterFormats.length) {//fallback to default locale
-      rasterFormats = this._getRasterFormats(this._emsClient.getDefaultLocale());
+  _getStyleUrlForLocale(formatType) {
+    let vectorFormats = this._getFormats(formatType, this._emsClient.getLocale());
+    if (!vectorFormats.length) {//fallback to default locale
+      vectorFormats = this._getFormats(formatType, this._emsClient.getDefaultLocale());
     }
-    if (!rasterFormats.length) {
-      throw new Error(`Cannot find raster tile layer for locale ${this._emsClient.getLocale()} or ${this._emsClient.getDefaultLocale()}`);
+    if (!vectorFormats.length) {
+      // eslint-disable-next-line max-len
+      throw new Error(`Cannot find ${formatType} tile layer for locale ${this._emsClient.getLocale()} or ${this._emsClient.getDefaultLocale()}`);
     }
-    const defaultStyle = rasterFormats[0];
+    const defaultStyle = vectorFormats[0];
     if (defaultStyle && defaultStyle.hasOwnProperty('url')) {
       return defaultStyle.url;
     }
@@ -62,6 +93,52 @@ export class TMSService {
     const tileJson = await this._getRasterStyleJson();
     const directUrl = this._proxyPath + tileJson.tiles[0];
     return this._emsClient.extendUrlWithParams(directUrl);
+  }
+
+  async getUrlTemplateForVector(sourceId) {
+    const tileJson = await this._getVectorStyleJsonInlined();
+    if (!tileJson.sources[sourceId] || !tileJson.sources[sourceId].tiles) {
+      return null;
+    }
+    const directUrl = this._proxyPath + tileJson.sources[sourceId].tiles[0];
+    return this._emsClient.extendUrlWithParams(directUrl);
+  }
+
+  async getVectorStyleSheet() {
+    return await this._getVectorStyleJsonInlined();
+  }
+
+  async getVectorStyleSheetRaw() {
+    return await this._getVectorStyleJsonRaw();
+  }
+
+  async getSpriteSheetMeta(isRetina = false) {
+    const metaUrl = await this.getSpriteSheetJsonPath(isRetina);
+    const spritePngs =  await this.getSpriteSheetPngPath(isRetina);
+    const metaUrlExtended = this._emsClient.extendUrlWithParams(metaUrl);
+    const jsonMeta = await this._emsClient.getManifest(metaUrlExtended);
+    return {
+      png: spritePngs,
+      json: jsonMeta
+    };
+  }
+
+  async _getSpriteSheetRootPath() {
+    const vectorStyleJson = await this._getVectorStyleJsonRaw();
+    return this._proxyPath + vectorStyleJson.sprite;
+  }
+
+  async getSpriteSheetJsonPath(isRetina = false) {
+    const spriteSheetRootPath = await this._getSpriteSheetRootPath();
+    const suffix = isRetina ? '@2x' : '';
+    return  spriteSheetRootPath + suffix + '.json';
+  }
+
+
+  async getSpriteSheetPngPath(isRetina = false) {
+    const spriteSheetRootPath = await this._getSpriteSheetRootPath();
+    const suffix = isRetina ? '@2x' : '';
+    return spriteSheetRootPath + suffix + '.png';
   }
 
   getDisplayName() {

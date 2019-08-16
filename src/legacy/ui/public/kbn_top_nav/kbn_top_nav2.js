@@ -57,7 +57,7 @@ module.directive('kbnTopNavV2', () => {
 
         // Watch config changes
         $scope.$watch(() => {
-          const config = $scope.$eval($attr.config);
+          const config = $scope.$eval($attr.config) || [];
           return config.map((item) => {
             // Copy key into id, as it's a reserved react propery.
             // This is done for Angular directive backward compatibility.

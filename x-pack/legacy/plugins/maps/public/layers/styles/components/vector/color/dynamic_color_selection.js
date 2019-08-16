@@ -17,8 +17,8 @@ export function DynamicColorSelection({ ordinalFields, onChange, styleOptions })
     onChange({ ...styleOptions, field });
   };
 
-  const onColorChange = ({ color }) => {
-    onChange({ ...styleOptions, color });
+  const onColorChange = colorOptions => {
+    onChange({ ...styleOptions, ...colorOptions });
   };
 
   return (
@@ -26,6 +26,8 @@ export function DynamicColorSelection({ ordinalFields, onChange, styleOptions })
       <ColorRampSelect
         onChange={onColorChange}
         color={styleOptions.color}
+        customColorRamp={styleOptions.customColorRamp}
+        useCustomColorRamp={_.get(styleOptions, 'useCustomColorRamp', false)}
       />
       <EuiSpacer size="s" />
       <FieldSelect
