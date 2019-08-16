@@ -264,4 +264,8 @@ export class ESPewPewSource extends AbstractESSource {
     }
     return geoField;
   }
+
+  canFormatFeatureProperties() {
+    return true;
+  }
 }
