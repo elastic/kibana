@@ -32,6 +32,13 @@ export function convertToLines(esResonse) {
         ...rest
       } = sourceBuckets[j];
 
+      // flatten metrics
+      Object.keys(rest).forEach(key => {
+        if (_.has(rest[key], 'value')) {
+          rest[key] = rest[key].value;
+        }
+      });
+
       lineFeatures.push({
         type: 'Feature',
         geometry: {

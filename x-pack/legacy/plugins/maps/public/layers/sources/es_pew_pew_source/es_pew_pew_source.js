@@ -8,18 +8,33 @@ import React from 'react';
 import uuid from 'uuid/v4';
 
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
-import { AbstractESSource } from '../es_source';
+import { AbstractESSource, COUNT_PROP_LABEL, COUNT_PROP_NAME } from '../es_source';
 import { VectorLayer } from '../../vector_layer';
 import { CreateSourceEditor } from './create_source_editor';
+import { UpdateSourceEditor } from './update_source_editor';
 import { VectorStyle } from '../../styles/vector_style';
 import { i18n } from '@kbn/i18n';
 import { SOURCE_DATA_ID_ORIGIN } from '../../../../common/constants';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { convertToLines } from './convert_to_lines';
+import { Schemas } from 'ui/vis/editors/default/schemas';
+import { AggConfigs } from 'ui/vis/agg_configs';
 
-const COUNT_PROP_LABEL = 'count';
-const COUNT_PROP_NAME = 'doc_count';
 const MAX_GEOTILE_LEVEL = 29;
+
+const aggSchemas = new Schemas([
+  {
+    group: 'metrics',
+    name: 'metric',
+    title: 'Value',
+    min: 1,
+    max: Infinity,
+    aggFilter: ['avg', 'count', 'max', 'min', 'sum'],
+    defaults: [
+      { schema: 'metric', type: 'count' }
+    ]
+  }
+]);
 
 export class ESPewPewSource extends AbstractESSource {
 
@@ -56,6 +71,16 @@ export class ESPewPewSource extends AbstractESSource {
     return (<CreateSourceEditor onSourceConfigChange={onSourceConfigChange}/>);
   }
 
+  renderSourceSettingsEditor({ onChange }) {
+    return (
+      <UpdateSourceEditor
+        indexPatternId={this._descriptor.indexPatternId}
+        onChange={onChange}
+        metrics={this._descriptor.metrics}
+      />
+    );
+  }
+
   isFilterByMapBounds() {
     return true;
   }
@@ -66,6 +91,12 @@ export class ESPewPewSource extends AbstractESSource {
 
   isGeoGridPrecisionAware() {
     return true;
+  }
+
+  async getNumberFields() {
+    return this.getMetricFields().map(({ propertyKey: name, propertyLabel: label }) => {
+      return { label, name };
+    });
   }
 
   async getSupportedShapeTypes() {
@@ -150,6 +181,22 @@ export class ESPewPewSource extends AbstractESSource {
   }
 
   async getGeoJsonWithMeta(layerName, searchFilters) {
+    const indexPattern = await this._getIndexPattern();
+    const metricAggConfigs = this.getMetricFields().map(metric => {
+      const metricAggConfig = {
+        id: metric.propertyKey,
+        enabled: true,
+        type: metric.type,
+        schema: 'metric',
+        params: {}
+      };
+      if (metric.type !== 'count') {
+        metricAggConfig.params = { field: metric.field };
+      }
+      return metricAggConfig;
+    });
+    const aggConfigs = new AggConfigs(indexPattern, metricAggConfigs, aggSchemas.all);
+
     const searchSource  = await this._makeSearchSource(searchFilters, 0);
     searchSource.setField('aggs', {
       destSplit: {
@@ -174,7 +221,8 @@ export class ESPewPewSource extends AbstractESSource {
                 geo_centroid: {
                   field: this._descriptor.sourceGeoField
                 }
-              }
+              },
+              ...aggConfigs.toDsl()
             }
           }
         }
