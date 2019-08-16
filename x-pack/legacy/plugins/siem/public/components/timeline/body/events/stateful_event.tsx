@@ -42,7 +42,7 @@ interface Props {
   toggleColumn: (column: ColumnHeader) => void;
   updateNote: UpdateNote;
   width: number;
-  maxDelay: number;
+  maxDelay?: number;
 }
 
 interface State {
@@ -75,7 +75,7 @@ export class StatefulEvent extends React.Component<Props, State> {
           this.setState({ initialRender: true });
         }
       },
-      { timeout: this.props.maxDelay }
+      { timeout: this.props.maxDelay ? this.props.maxDelay : 0 }
     );
   }
 

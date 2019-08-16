@@ -85,7 +85,7 @@ describe('selectors', () => {
       const result1 = getPolicySelector(inputState);
       const change: InputsRange = {
         ...inputState,
-        policy: { ...inputState.policy, ...{ kind: 'interval' } },
+        policy: { ...inputState.policy, kind: 'interval' },
       };
       const result2 = getPolicySelector(change);
       expect(result1).not.toBe(result2);
@@ -110,7 +110,7 @@ describe('selectors', () => {
       const result1 = getDurationSelector(inputState);
       const change: InputsRange = {
         ...inputState,
-        policy: { ...inputState.policy, ...{ duration: 1 } },
+        policy: { ...inputState.policy, duration: 1 },
       };
       const result2 = getDurationSelector(change);
       expect(result1).not.toBe(result2);
