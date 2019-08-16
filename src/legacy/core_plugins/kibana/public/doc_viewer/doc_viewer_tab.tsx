@@ -23,7 +23,7 @@ import { DocViewRenderTab } from './doc_viewer_render_tab';
 import { DocViewerError } from './doc_viewer_render_error';
 
 interface Props {
-  component?: React.Component | React.FunctionComponent;
+  component?: any;
   id: number;
   render?: DocViewRenderFn;
   renderProps: DocViewRenderProps;
@@ -77,8 +77,12 @@ export class DocViewerTab extends React.Component<Props, State> {
     }
 
     // doc view is provided by a react component
+
     const Component = component;
-    // @ts-ignore
-    return (<I18nProvider><Component {...renderProps}/></I18nProvider>);
+    return (
+      <I18nProvider>
+        <Component {...renderProps} />
+      </I18nProvider>
+    );
   }
 }
