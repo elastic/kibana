@@ -159,9 +159,10 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
 
         const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
+        console.log(`newDurationHours=${newDurationHours}`);
         expect(Math.round(newDurationHours)).to.be(3);
-        const rowData = await PageObjects.discover.getDocTableIndex(1);
-        expect(rowData).to.have.string('Sep 20, 2015 @ 02:56:02.323');
+        const rowData = await PageObjects.discover.getDocTableField(1);
+        expect(rowData).to.have.string('Sep 20, 2015 @ 04:11:49.921');
       });
 
       it('should show correct initial chart interval of Auto', async function () {

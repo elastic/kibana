@@ -227,7 +227,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
             data.offset = {};
           }
           return data.location instanceof WebElementWrapper
-            ? { x: data.offset.x || 10, y: data.offset.y || 10, origin: data.location._webElement }
+            ? { x: data.offset.x || 0, y: data.offset.y || 0, origin: data.location._webElement }
             : { x: data.location.x, y: data.location.y, origin: 'pointer' };
         };
         const startPoint = getPoint(from);
