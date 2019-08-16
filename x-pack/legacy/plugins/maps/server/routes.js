@@ -342,7 +342,7 @@ export function initRoutes(server, licenseUid) {
         .replace('{y}', request.query.y)
         .replace('{z}', request.query.z);
 
-      return proxyResource(h, { url });
+      return await proxyResource(h, { url });
 
     }
   });
@@ -359,8 +359,7 @@ export function initRoutes(server, licenseUid) {
         .replace('{fontstack}', request.params.fontstack)
         .replace('{range}', request.params.range);
 
-      return proxyResource(h, { url });
-
+      return await proxyResource(h, { url });
     }
 
   });
@@ -398,7 +397,7 @@ export function initRoutes(server, licenseUid) {
         return null;
       }
 
-      return proxyResource(h, {
+      return await proxyResource(h, {
         url: proxyPathUrl,
         contentType: request.params.extension === 'png' ? 'image/png' : ''
       });
