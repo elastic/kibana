@@ -52,6 +52,11 @@ interface Props {
    * Indicates whether or not this component is draggable.
    */
   draggable?: boolean;
+
+  /**
+   * The optional test subject associated with this DOM element.
+   */
+  dataTestSubj?: string;
 }
 
 /**
@@ -123,7 +128,7 @@ export function DragDrop(props: Props) {
 
   return (
     <div
-      data-test-subj="lnsDragDrop"
+      data-test-subj={props.dataTestSubj || 'lnsDragDrop'}
       className={classes}
       onDragOver={dragOver}
       onDragLeave={dragLeave}

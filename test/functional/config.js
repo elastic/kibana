@@ -35,6 +35,7 @@ export default async function ({ readConfigFile }) {
       require.resolve('./apps/status_page'),
       require.resolve('./apps/timelion'),
       require.resolve('./apps/visualize'),
+      require.resolve('./apps/lens'),
     ],
     pageObjects,
     services,
@@ -76,6 +77,9 @@ export default async function ({ readConfigFile }) {
       visualize: {
         pathname: '/app/kibana',
         hash: '/visualize',
+      },
+      lens: {
+        pathname: '/app/lens',
       },
       dashboard: {
         pathname: '/app/kibana',
