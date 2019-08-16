@@ -26,7 +26,7 @@ export const useIndexPatterns = (refreshToggle = false): Return => {
         'kbn-version': config.kbnVersion,
       });
 
-      setIndexPatterns(data.split(','));
+      setIndexPatterns(data);
       setIsLoading(false);
     } catch (error) {
       errorToToaster({ title: i18n.INDEX_PATTERN_FETCH_FAILURE, error, dispatchToaster });
