@@ -5,7 +5,6 @@
  */
 
 const path = require('path');
-// eslint-disable-next-line
 const webpack = require('webpack');
 
 const { KIBANA_ROOT, RUNTIME_OUTPUT } = require('./constants');
@@ -19,7 +18,6 @@ module.exports = {
   },
   mode: isProd ? 'production' : 'development',
   plugins: [new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 })],
-  // Output the DLL JS file
   output: {
     path: RUNTIME_OUTPUT,
     filename: '[name].js',

@@ -9,7 +9,6 @@ const path = require('path');
 const del = require('del');
 const devUtils = require('@kbn/dev-utils');
 const execa = require('execa');
-// eslint-disable-next-line import/no-extraneous-dependencies
 const getopts = require('getopts');
 
 const {
@@ -102,7 +101,7 @@ if (flags.run) {
       stdio: ['ignore', 'pipe', 'inherit'],
     }
   );
-  output.then(() => log.success('...stats written to', STATS_OUTPUT));
+  output.then(() => log.success('...output written to', STATS_OUTPUT));
   output.stdout.pipe(fs.createWriteStream(STATS_OUTPUT));
 } else {
   clean();
