@@ -66,7 +66,7 @@ describe('FieldParamEditor component', () => {
       aggParam: {
         name: 'field',
         type: 'field',
-        editorComponent: null as any,
+        editorComponent: () => null,
         onChange,
       },
       value: undefined,
@@ -116,12 +116,14 @@ describe('FieldParamEditor component', () => {
     expect(setValidity).toHaveBeenCalledWith(false);
   });
 
-  it('should set validity as false when there are errors', () => {
+  it('should set validity as false when there are no indexedFields', () => {
     defaultProps.indexedFields = [];
     mount(<FieldParamEditor {...defaultProps} />);
 
     expect(setValidity).toHaveBeenCalledWith(false);
+  });
 
+  it('should set validity as false when there are a custom error', () => {
     defaultProps.customError = 'customError';
     mount(<FieldParamEditor {...defaultProps} />);
 
@@ -183,6 +185,6 @@ describe('FieldParamEditor component', () => {
     });
 
     expect(setValue).toHaveBeenCalledTimes(2);
-    expect(setValue).toHaveBeenCalledWith(field);
+    expect(setValue).toHaveBeenLastCalledWith(field);
   });
 });
