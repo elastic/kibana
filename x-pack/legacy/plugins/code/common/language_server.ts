@@ -48,8 +48,6 @@ export const CTAGS_SUPPORT_LANGS = [
   'sql',
   'tcl',
   'typescript',
-  'xml',
-  'yaml',
   'java',
   'javascript',
 ];
