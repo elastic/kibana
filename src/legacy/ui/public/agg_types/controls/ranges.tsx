@@ -50,14 +50,20 @@ interface RangeValuesModel extends RangeValues {
 }
 
 interface RangesParamEditorProps {
-  value: RangeValues[];
-  setValue(value?: RangeValues[]): void;
+  value?: RangeValues[];
+  setValue(value: RangeValues[]): void;
+  addRangeValues?(): RangeValues;
+  validateFrom?(value: RangeValues['from'], index: number): boolean;
+  validateTo?(value: RangeValues['to']): boolean;
 }
 
 function RangesParamEditor({
+  addRangeValues,
   value = [],
   setValue,
-}: AggParamEditorProps<RangeValues[]> | RangesParamEditorProps) {
+  validateFrom,
+  validateTo,
+}: RangesParamEditorProps) {
   const [ranges, setRanges] = useState(() => value.map(range => ({ ...range, id: generateId() })));
 
   // set up an initial range when there is no default range
@@ -82,7 +88,10 @@ function RangesParamEditor({
     setValue(rangeValues.map(range => omit(range, 'id')));
     setRanges(rangeValues);
   };
-  const onAddRange = () => updateRanges([...ranges, { id: generateId() }]);
+  const onAddRange = () =>
+    addRangeValues
+      ? updateRanges([...ranges, { ...addRangeValues(), id: generateId() }])
+      : updateRanges([...ranges, { id: generateId() }]);
   const onRemoveRange = (id: string) => updateRanges(ranges.filter(range => range.id !== id));
   const onChangeRange = (id: string, key: string, newValue: string) =>
     updateRanges(
@@ -99,7 +108,7 @@ function RangesParamEditor({
   return (
     <EuiFormRow compressed fullWidth>
       <>
-        {ranges.map(({ from, to, id }) => {
+        {ranges.map(({ from, to, id }, index) => {
           const deleteBtnTitle = i18n.translate(
             'common.ui.aggTypes.ranges.removeRangeButtonAriaLabel',
             {
@@ -121,7 +130,12 @@ function RangesParamEditor({
                     })}
                     value={isEmpty(from) ? '' : from}
                     placeholder={FROM_PLACEHOLDER}
-                    onChange={ev => onChangeRange(id, 'from', ev.target.value)}
+                    onChange={ev => {
+                      if (validateFrom) {
+                        validateFrom(ev.target.valueAsNumber, index);
+                      }
+                      onChangeRange(id, 'from', ev.target.value);
+                    }}
                     fullWidth={true}
                     compressed={true}
                   />
@@ -136,7 +150,12 @@ function RangesParamEditor({
                     })}
                     value={isEmpty(to) ? '' : to}
                     placeholder={TO_PLACEHOLDER}
-                    onChange={ev => onChangeRange(id, 'to', ev.target.value)}
+                    onChange={ev => {
+                      if (validateTo) {
+                        validateTo(ev.target.valueAsNumber);
+                      }
+                      onChangeRange(id, 'to', ev.target.value);
+                    }}
                     fullWidth={true}
                     compressed={true}
                   />

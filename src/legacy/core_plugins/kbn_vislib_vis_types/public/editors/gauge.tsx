@@ -18,6 +18,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
+import { last } from 'lodash';
 import { EuiLink, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -62,6 +63,14 @@ function GaugeOptions(props: VisOptionsProps<GaugeVisParams>) {
     },
     [stateParams.gauge]
   );
+
+  const addRangeValues = useCallback(() => {
+    const previousRange = last(stateParams.gauge.colorsRange);
+    const from = previousRange ? previousRange.to : 0;
+    const to = previousRange ? from + (previousRange.to - previousRange.from) : 100;
+
+    return { from, to };
+  }, [stateParams.gauge.colorsRange]);
 
   const resetColorsButton = (
     <EuiText size="xs">
@@ -129,6 +138,12 @@ function GaugeOptions(props: VisOptionsProps<GaugeVisParams>) {
         <RangesParamEditor
           value={stateParams.gauge.colorsRange}
           setValue={value => setGaugeValue('colorsRange', value)}
+          addRangeValues={addRangeValues}
+          validateFrom={(value, index) => {
+            const greaterThan =
+              index === 0 ? -Infinity : stateParams.gauge.colorsRange[index - 1].to;
+          }}
+          validateTo={value => {}}
         />
 
         <SwitchOption
