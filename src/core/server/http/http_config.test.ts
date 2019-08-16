@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { config } from '.';
+import { config, HttpConfig } from '.';
+import { Env } from '../config';
+import { getEnvOptions } from '../config/__mocks__/env';
 
 test('has defaults for config', () => {
   const httpSchema = config.schema;
@@ -111,6 +113,46 @@ describe('with TLS', () => {
     expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
   });
 
+  test('throws if TLS is not enabled but `clientAuthentication` is `optional`', () => {
+    const httpSchema = config.schema;
+    const obj = {
+      port: 1234,
+      ssl: {
+        enabled: false,
+        clientAuthentication: 'optional',
+      },
+    };
+    expect(() => httpSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
+      `"[ssl]: must enable ssl to use [clientAuthentication]"`
+    );
+  });
+
+  test('throws if TLS is not enabled but `clientAuthentication` is `required`', () => {
+    const httpSchema = config.schema;
+    const obj = {
+      port: 1234,
+      ssl: {
+        enabled: false,
+        clientAuthentication: 'required',
+      },
+    };
+    expect(() => httpSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
+      `"[ssl]: must enable ssl to use [clientAuthentication]"`
+    );
+  });
+
+  test('can specify `none` for [clientAuthentication] if ssl is not enabled', () => {
+    const obj = {
+      ssl: {
+        enabled: false,
+        clientAuthentication: 'none',
+      },
+    };
+
+    const configValue = config.schema.validate(obj);
+    expect(configValue.ssl.clientAuthentication).toBe('none');
+  });
+
   test('can specify single `certificateAuthority` as a string', () => {
     const obj = {
       ssl: {
@@ -201,5 +243,56 @@ describe('with TLS', () => {
     expect(() =>
       httpSchema.validate(allKnownWithOneUnknownProtocols)
     ).toThrowErrorMatchingSnapshot();
+  });
+
+  test('HttpConfig instance should properly interpret `none` client authentication', () => {
+    const httpConfig = new HttpConfig(
+      config.schema.validate({
+        ssl: {
+          enabled: true,
+          key: 'some-key-path',
+          certificate: 'some-certificate-path',
+          clientAuthentication: 'none',
+        },
+      }),
+      Env.createDefault(getEnvOptions())
+    );
+
+    expect(httpConfig.ssl.requestCert).toBe(false);
+    expect(httpConfig.ssl.rejectUnauthorized).toBe(false);
+  });
+
+  test('HttpConfig instance should properly interpret `optional` client authentication', () => {
+    const httpConfig = new HttpConfig(
+      config.schema.validate({
+        ssl: {
+          enabled: true,
+          key: 'some-key-path',
+          certificate: 'some-certificate-path',
+          clientAuthentication: 'optional',
+        },
+      }),
+      Env.createDefault(getEnvOptions())
+    );
+
+    expect(httpConfig.ssl.requestCert).toBe(true);
+    expect(httpConfig.ssl.rejectUnauthorized).toBe(false);
+  });
+
+  test('HttpConfig instance should properly interpret `required` client authentication', () => {
+    const httpConfig = new HttpConfig(
+      config.schema.validate({
+        ssl: {
+          enabled: true,
+          key: 'some-key-path',
+          certificate: 'some-certificate-path',
+          clientAuthentication: 'required',
+        },
+      }),
+      Env.createDefault(getEnvOptions())
+    );
+
+    expect(httpConfig.ssl.requestCert).toBe(true);
+    expect(httpConfig.ssl.rejectUnauthorized).toBe(true);
   });
 });
