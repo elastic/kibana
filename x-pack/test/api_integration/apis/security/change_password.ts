@@ -6,9 +6,11 @@
 
 import { Cookie, cookie } from 'request';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { SecurityService } from '../../../common/services/security';
 
 export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
+  const security: SecurityService = getService('security');
 
   const mockUserName = 'test-user';
   const mockUserPassword = 'test-password';
@@ -16,12 +18,7 @@ export default function({ getService }: FtrProviderContext) {
   describe('Change password', () => {
     let sessionCookie: Cookie;
     beforeEach(async () => {
-      // Create mock user to change password for.
-      await getService('supertest')
-        .post(`/api/security/v1/users/${mockUserName}`)
-        .set('kbn-xsrf', 'xxx')
-        .send({ username: mockUserName, password: mockUserPassword, roles: [] })
-        .expect(200);
+      await security.user.create(mockUserName, { password: mockUserPassword, roles: [] });
 
       const loginResponse = await supertest
         .post('/api/security/v1/login')
@@ -31,13 +28,7 @@ export default function({ getService }: FtrProviderContext) {
       sessionCookie = cookie(loginResponse.headers['set-cookie'][0])!;
     });
 
-    afterEach(async () => {
-      // Remove mock user.
-      await getService('supertest')
-        .delete(`/api/security/v1/users/${mockUserName}`)
-        .set('kbn-xsrf', 'xxx')
-        .expect(204);
-    });
+    afterEach(async () => await security.user.delete(mockUserName));
 
     it('should reject password change if current password is wrong', async () => {
       const wrongPassword = `wrong-${mockUserPassword}`;
@@ -50,7 +41,7 @@ export default function({ getService }: FtrProviderContext) {
         .send({ password: wrongPassword, newPassword })
         .expect(401);
 
-      // Let's check that we can't login with wrong password (bug happen :shrug:).
+      // Let's check that we can't login with wrong password, just in case.
       await supertest
         .post('/api/security/v1/login')
         .set('kbn-xsrf', 'xxx')
