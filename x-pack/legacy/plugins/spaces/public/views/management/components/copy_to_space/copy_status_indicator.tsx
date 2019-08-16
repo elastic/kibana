@@ -8,12 +8,12 @@ import React from 'react';
 import { EuiLoadingSpinner, EuiText, EuiIconTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  SummarizedCopyToSpaceResponse,
+  SummarizedCopyToSpaceResult,
   SummarizedSavedObjectResult,
 } from '../../../../lib/copy_saved_objects';
 
 interface Props {
-  summarizedCopyResult: SummarizedCopyToSpaceResponse;
+  summarizedCopyResult: SummarizedCopyToSpaceResult;
   object: { type: string; id: string };
   overwritePending: boolean;
   conflictResolutionInProgress: boolean;

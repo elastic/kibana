@@ -34,7 +34,7 @@ interface ProcessingResponse {
   processing: true;
 }
 
-export type SummarizedCopyToSpaceResponse =
+export type SummarizedCopyToSpaceResult =
   | SuccessfulResponse
   | UnsuccessfulResponse
   | ProcessingResponse;
@@ -48,13 +48,13 @@ export function summarizeCopyResult(
   savedObject: SavedObjectRecord,
   copyResult: ProcessedImportResponse | undefined,
   includeRelated: boolean
-): SummarizedCopyToSpaceResponse;
+): SummarizedCopyToSpaceResult;
 
 export function summarizeCopyResult(
   savedObject: SavedObjectRecord,
   copyResult: ProcessedImportResponse | undefined,
   includeRelated: boolean
-): SummarizedCopyToSpaceResponse | null {
+): SummarizedCopyToSpaceResult | null {
   const successful = Boolean(copyResult && copyResult.failedImports.length === 0);
 
   const conflicts = copyResult

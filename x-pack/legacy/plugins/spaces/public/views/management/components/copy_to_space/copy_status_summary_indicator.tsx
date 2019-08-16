@@ -8,11 +8,11 @@ import React from 'react';
 import { EuiLoadingSpinner, EuiIconTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Space } from '../../../../../common/model/space';
-import { SummarizedCopyToSpaceResponse } from '../../../../lib/copy_saved_objects';
+import { SummarizedCopyToSpaceResult } from '../../../../lib/copy_saved_objects';
 
 interface Props {
   space: Space;
-  summarizedCopyResult: SummarizedCopyToSpaceResponse;
+  summarizedCopyResult: SummarizedCopyToSpaceResult;
   conflictResolutionInProgress: boolean;
 }
 

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { SavedObjectRecord } from 'ui/management/saved_objects_management';
-import { SummarizedCopyToSpaceResponse } from 'plugins/spaces/lib/copy_saved_objects';
+import { SummarizedCopyToSpaceResult } from 'plugins/spaces/lib/copy_saved_objects';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SavedObjectsImportRetry } from 'src/core/server';
@@ -15,14 +15,14 @@ import { CopyStatusIndicator } from './copy_status_indicator';
 
 interface Props {
   savedObject: SavedObjectRecord;
-  summarizedCopyResult: SummarizedCopyToSpaceResponse;
+  summarizedCopyResult: SummarizedCopyToSpaceResult;
   space: Space;
   retries: SavedObjectsImportRetry[];
   onRetriesChange: (retries: SavedObjectsImportRetry[]) => void;
   conflictResolutionInProgress: boolean;
 }
 
-export const CopyResultDetails = (props: Props) => {
+export const SpaceCopyResultDetails = (props: Props) => {
   const onOverwriteClick = (object: { type: string; id: string }) => {
     const retry = props.retries.find(r => r.type === object.type && r.id === object.id);
 
