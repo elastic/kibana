@@ -37,7 +37,7 @@ describe('metric_vis - createMetricVisTypeDefinition', () => {
       const Vis = Private(VisProvider);
       const metricVisType = createMetricVisTypeDefinition();
 
-      visualizations.types.VisTypesRegistryProvider.register(() =>
+      visualizations.types.VisTypesRegistryProvider.add(
         metricVisType
       );
 

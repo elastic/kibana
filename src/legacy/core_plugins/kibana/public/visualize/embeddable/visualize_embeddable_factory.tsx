@@ -82,9 +82,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   private readonly visTypes: VisTypesRegistry;
 
   static async createVisualizeEmbeddableFactory(): Promise<VisualizeEmbeddableFactory> {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const Private = $injector.get<IPrivate>('Private');
-    const visTypes = Private(VisTypesRegistryProvider);
+    const visTypes = VisTypesRegistryProvider;
 
     return new VisualizeEmbeddableFactory(visTypes);
   }
@@ -99,21 +97,22 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
             return 'visualizeApp';
           }
           return (
-            visTypes.byName[JSON.parse(savedObject.attributes.visState).type].icon || 'visualizeApp'
+            visTypes.get(JSON.parse(savedObject.attributes.visState).type).icon || 'visualizeApp'
           );
         },
         getTooltipForSavedObject: savedObject => {
           if (!visTypes) {
             return '';
           }
-          return `${savedObject.attributes.title} (${visTypes.byName[JSON.parse(savedObject.attributes.visState).type].title})`;
+          return `${savedObject.attributes.title} (
+            ${visTypes.get(JSON.parse(savedObject.attributes.visState).type).title})`;
         },
         showSavedObject: savedObject => {
           if (!visTypes) {
             return false;
           }
           const typeName: string = JSON.parse(savedObject.attributes.visState).type;
-          const visType = visTypes.byName[typeName];
+          const visType = visTypes.get(typeName);
           if (!visType) {
             return false;
           }

@@ -43,7 +43,7 @@ export function VisualizeListingController($injector, createNewVis) {
   const config = $injector.get('config');
   const kbnUrl = $injector.get('kbnUrl');
 
-  this.visTypeRegistry = Private(VisTypesRegistryProvider);
+  this.visTypeRegistry = VisTypesRegistryProvider.getAll();
   this.visTypeAliases = visualizations.types.visTypeAliasRegistry.get();
 
   timefilter.disableAutoRefreshSelector();

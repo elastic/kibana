@@ -39,7 +39,8 @@ export class MetricsPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(core: CoreSetup, { data, visualizations }: MetricsPluginSetupDependencies) {
     data.expressions.registerFunction(createMetricsFn);
-    visualizations.types.VisTypesRegistryProvider.register(createMetricsTypeDefinition);
+    const metricTypeDefitiion = createMetricsTypeDefinition();
+    visualizations.types.VisTypesRegistryProvider.add(metricTypeDefitiion);
   }
 
   public start(core: CoreStart) {

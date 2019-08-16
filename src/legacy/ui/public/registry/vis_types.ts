@@ -18,16 +18,11 @@
  */
 
 import { VisType } from '../vis';
-import { uiRegistry, UIRegistry } from './_registry';
 
-interface VisTypesRegistryAccessors {
-  byName: { [typeName: string]: VisType };
-}
+const visTypes: Map<string, VisType> = new Map();
 
-export type VisTypesRegistry = UIRegistry<VisType> & VisTypesRegistryAccessors;
-
-export const VisTypesRegistryProvider = uiRegistry<VisType, VisTypesRegistryAccessors>({
-  name: 'visTypes',
-  index: ['name'],
-  order: ['title'],
-});
+export const VisTypesRegistryProvider = {
+  add: (obj: VisType) => visTypes.set(obj.name, obj),
+  get: (key: string) => visTypes.get(key),
+  getAll: () => new Map(visTypes),
+};

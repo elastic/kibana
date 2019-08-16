@@ -82,13 +82,13 @@ export const visualization = () => ({
     const Private = $injector.get('Private');
     const requestHandlers = Private(RequestHandlersProvider);
     const responseHandlers = Private(ResponseHandlerProvider);
-    const visTypes = Private(VisTypesRegistryProvider);
+    const visTypes = VisTypesRegistryProvider;
     const indexPatterns = Private(IndexPatternsProvider);
     const queryFilter = Private(FilterBarQueryFilterProvider);
 
     const visConfigParams = JSON.parse(args.visConfig);
     const schemas = JSON.parse(args.schemas);
-    const visType = visTypes.byName[args.type || 'histogram'];
+    const visType = visTypes.get(args.type || 'histogram');
     const requestHandler = getHandler(requestHandlers, visType.requestHandler);
     const responseHandler = getHandler(responseHandlers, visType.responseHandler);
     const indexPattern = args.index ? await indexPatterns.get(args.index) : null;

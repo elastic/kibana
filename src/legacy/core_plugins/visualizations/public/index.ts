@@ -23,16 +23,22 @@ import { TypesService, TypesSetup } from './types';
 class VisualizationsPlugin {
   private readonly filters: FiltersService;
   private readonly types: TypesService;
+  private visualizations: Map<string, {}>;
 
   constructor() {
     this.filters = new FiltersService();
     this.types = new TypesService();
+    this.visualizations = new Map();
   }
 
   public setup() {
     return {
       filters: this.filters.setup(),
       types: this.types.setup(),
+      visualizations: {
+        getAll: () => new Map(this.visualizations),
+        add: obj => this.visualizations.set(obj.name, obj),
+      },
     };
   }
 

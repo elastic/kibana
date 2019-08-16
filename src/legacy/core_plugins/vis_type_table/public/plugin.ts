@@ -63,7 +63,7 @@ export class TableVisPlugin implements Plugin<Promise<void>, void> {
 
     data.expressions.registerFunction(createTableVisFn);
 
-    visualizations.types.VisTypesRegistryProvider.register(() =>
+    visualizations.types.VisTypesRegistryProvider.add(
       createTableVisTypeDefinition(visualizationDependencies)
     );
   }

@@ -65,7 +65,7 @@ describe('Table Vis - AggTableGroup Directive', function () {
       createAngularVisualization: VisFactoryProvider(Private).createAngularVisualization
     };
 
-    visualizations.types.VisTypesRegistryProvider.register(() =>
+    visualizations.types.VisTypesRegistryProvider.add(
       createTableVisTypeDefinition(legacyDependencies)
     );
 

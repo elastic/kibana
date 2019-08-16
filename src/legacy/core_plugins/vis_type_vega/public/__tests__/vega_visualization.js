@@ -64,7 +64,7 @@ describe('VegaVisualizations', () => {
       uiSettings: $injector.get('config'),
     };
 
-    visualizations.types.VisTypesRegistryProvider.register(() =>
+    visualizations.types.VisTypesRegistryProvider.add(
       createVegaTypeDefinition(vegaVisualizationDependencies)
     );
 
