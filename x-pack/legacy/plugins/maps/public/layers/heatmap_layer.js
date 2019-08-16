@@ -82,7 +82,7 @@ export class HeatmapLayer extends VectorLayer {
       mbSourceAfter.setData(featureCollection);
     }
 
-    mbMap.setLayoutProperty(heatmapLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+    this.syncVisibilityWithMb(mbMap, heatmapLayerId);
     this._style.setMBPaintProperties({
       mbMap,
       layerId: heatmapLayerId,
