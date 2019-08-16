@@ -1637,6 +1637,11 @@
     once "^1.4.0"
     pump "^3.0.0"
 
+"@elastic/eslint-plugin-eui@0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.1.tgz#c6a049cfbf1d8bfd0ac97a51d301b6cadbcb7e1c"
+  integrity sha512-EPfuRYibey9oxA7MqQLhKL8hFzwv9tPsx0Ng9hfesFZUreP/LrAb2luBWGQub5ZHDHjN9eUi/QO9UN0kYWOJQQ==
+
 "@elastic/eui@0.0.55":
   version "0.0.55"
   resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-0.0.55.tgz#95ff5b70ecb1d333e1a5570a0e4a4079fdf7887b"
@@ -6710,10 +6715,10 @@ backo2@1.0.2:
   resolved "https://registry.yarnpkg.com/backo2/-/backo2-1.0.2.tgz#31ab1ac8b129363463e35b3ebb69f4dfcfba7947"
   integrity sha1-MasayLEpNjRj41s+u2n038+6eUc=
 
-backport@4.6.1:
-  version "4.6.1"
-  resolved "https://registry.yarnpkg.com/backport/-/backport-4.6.1.tgz#9e48d53447fa026157f2dc395442960470d963a6"
-  integrity sha512-doReAW1xAHmpv98z+Zh4wDQX0T5/i2TGfkPsHbfmA9E9XGUYcMy2YljPBiCntHvE+/ncBtw4shZu8QJqJIww/w==
+backport@4.6.3:
+  version "4.6.3"
+  resolved "https://registry.yarnpkg.com/backport/-/backport-4.6.3.tgz#468e9d4ae7ec2848776c6739e1ddbd40beb42b33"
+  integrity sha512-jwcbQpC36CMV9VuMe4U/DFO+gFdlez3RM9+2Ce2aIzlvZw/OGHgtZWjjc1fXZIeb7bM4SXpF7l2buAwUAItL8g==
   dependencies:
     axios "^0.19.0"
     del "^5.0.0"
@@ -11946,10 +11951,10 @@ exit-hook@^1.0.0:
   resolved "https://registry.yarnpkg.com/exit-hook/-/exit-hook-1.1.1.tgz#f05ca233b48c05d54fff07765df8507e95c02ff8"
   integrity sha1-8FyiM7SMBdVP/wd2XfhQfpXAL/g=
 
-exit-hook@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/exit-hook/-/exit-hook-2.1.0.tgz#2be08d8d01220050878577bfa017e104a6c3bcf3"
-  integrity sha512-JCSm9Znc/KW6hoKYHOIqLxM2Z88+AQcabo07rJHZSyXcQIq6HsXkSWRVZRp13RFkGVIDcz1DRIbKR5cnU1uzCA==
+exit-hook@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/exit-hook/-/exit-hook-2.2.0.tgz#f5502f92179018e867f2d8ee4428392da7f3894e"
+  integrity sha512-YFH+2oGdldRH5GqGpnaiKbBxWHMmuXHmKTMtUC58kWSOrnTf95rKITVSFTTtas14DWvWpih429+ffAvFetPwNA==
 
 exit-on-epipe@~1.0.1:
   version "1.0.1"
@@ -13421,6 +13426,11 @@ getopts@^2.2.4:
   version "2.2.4"
   resolved "https://registry.yarnpkg.com/getopts/-/getopts-2.2.4.tgz#3137fe8a5fddf304904059a851bdc1c22f0f54fb"
   integrity sha512-Rz7DGyomZjrenu9Jx4qmzdlvJgvrEFHXHvjK0FcZtcTC1U5FmES7OdZHUwMuSnEE6QvBvwse1JODKj7TgbSEjQ==
+
+getopts@^2.2.5:
+  version "2.2.5"
+  resolved "https://registry.yarnpkg.com/getopts/-/getopts-2.2.5.tgz#67a0fe471cacb9c687d817cab6450b96dde8313b"
+  integrity sha512-9jb7AW5p3in+IiJWhQiZmmwkpLaR/ccTWdWQCtZM66HJcHHLegowh4q4tSD7gouUyeNvFWRavfK9GXosQHDpFA==
 
 getos@3.1.1:
   version "3.1.1"

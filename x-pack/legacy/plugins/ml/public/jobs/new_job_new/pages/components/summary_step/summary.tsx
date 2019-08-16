@@ -7,6 +7,7 @@
 import React, { Fragment, FC, useContext, useState, useEffect } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { toastNotifications } from 'ui/notify';
 import { WizardNav } from '../wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';
@@ -43,7 +44,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
     } catch (error) {
       // catch and display all job creation errors
       toastNotifications.addDanger({
-        title: i18n.translate('xpack.ml.newJob.wizard.createJobError', {
+        title: i18n.translate('xpack.ml.newJob.wizard.summaryStep.createJobError', {
           defaultMessage: `Job creation error`,
         }),
         text: error.message,
@@ -89,7 +90,10 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
                 isDisabled={creatingJob === true || isValid === false}
                 data-test-subj="mlJobWizardButtonCreateJob"
               >
-                Create job
+                <FormattedMessage
+                  id="xpack.ml.newJob.wizard.summaryStep.createJobButton"
+                  defaultMessage="Create job"
+                />
               </EuiButton>
               &emsp;
             </Fragment>
@@ -102,7 +106,10 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
                 isDisabled={progress > 0}
                 data-test-subj="mlJobWizardButtonPreviewJobJson"
               >
-                Preview job JSON
+                <FormattedMessage
+                  id="xpack.ml.newJob.wizard.summaryStep.previewJsonButton"
+                  defaultMessage="Preview job JSON"
+                />
               </EuiButtonEmpty>
               {showJsonFlyout && (
                 <JsonFlyout closeFlyout={() => setShowJsonFlyout(false)} jobCreator={jobCreator} />

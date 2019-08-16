@@ -5,6 +5,7 @@
  */
 
 import React, { FC } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiFieldText } from '@elastic/eui';
 
 interface Props {
@@ -18,7 +19,9 @@ export const BucketSpanInput: FC<Props> = ({ bucketSpan, setBucketSpan, isInvali
   return (
     <EuiFieldText
       disabled={disabled}
-      placeholder="Bucket span"
+      placeholder={i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.bucketSpan.placeholder', {
+        defaultMessage: 'Bucket span',
+      })}
       value={bucketSpan}
       onChange={e => setBucketSpan(e.target.value)}
       isInvalid={isInvalid}
