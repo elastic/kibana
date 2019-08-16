@@ -97,7 +97,7 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
 
   let stopCalled = false;
 
-  const outcome$: Rx.Observable<number | null> = Rx.race(
+  const outcome$: Rx.Observable<number | null> = Rx.race<number>(
     // observe first exit event
     Rx.fromEvent(childProcess, 'exit').pipe(
       take(1),

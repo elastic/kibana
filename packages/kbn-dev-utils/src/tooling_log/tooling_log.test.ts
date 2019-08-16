@@ -80,7 +80,15 @@ describe('#indent()', () => {
   });
 });
 
-(['verbose', 'debug', 'info', 'success', 'warning', 'error', 'write'] as const).forEach(method => {
+[
+  'verbose' as 'verbose',
+  'debug' as 'debug',
+  'info' as 'info',
+  'success' as 'success',
+  'warning' as 'warning',
+  'error' as 'error',
+  'write' as 'write',
+].forEach(method => {
   describe(`#${method}()`, () => {
     it(`sends a msg of type "${method}" to each writer with indent and arguments`, () => {
       const log = new ToolingLog();

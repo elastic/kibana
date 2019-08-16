@@ -47,8 +47,22 @@ it("throws error if writeTo config is not defined or doesn't have a write method
   }).toThrowErrorMatchingSnapshot();
 });
 
-const levels = ['silent', 'verbose', 'debug', 'info', 'warning', 'error'] as const;
-const types = ['verbose', 'debug', 'info', 'warning', 'error', 'success'] as const;
+const levels = [
+  'silent' as 'silent',
+  'verbose' as 'verbose',
+  'debug' as 'debug',
+  'info' as 'info',
+  'warning' as 'warning',
+  'error' as 'error',
+];
+const types = [
+  'verbose' as 'verbose',
+  'debug' as 'debug',
+  'info' as 'info',
+  'warning' as 'warning',
+  'error' as 'error',
+  'success' as 'success',
+];
 for (const level of levels) {
   for (const type of types) {
     it(`level:${level}/type:${type} snapshots`, () => {
