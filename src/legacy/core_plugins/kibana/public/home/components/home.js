@@ -250,6 +250,8 @@ export class Home extends Component {
 
 Home.propTypes = {
   addBasePath: PropTypes.func.isRequired,
+  fetchTelemetry: PropTypes.func.isRequired,
+  setOptIn: PropTypes.func.isRequired,
   showTelemetryOptIn: PropTypes.bool.isRequired,
   directories: PropTypes.arrayOf(
     PropTypes.shape({
