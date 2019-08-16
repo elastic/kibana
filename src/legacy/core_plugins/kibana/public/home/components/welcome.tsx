@@ -46,11 +46,11 @@ interface Props {
   urlBasePath: string;
   onSkip: () => {};
   fetchTelemetry: () => Promise<any[]>;
+  setOptIn: (enabled: boolean) => Promise<boolean>;
   showTelemetryOptIn: boolean;
 }
 interface State {
   step: number;
-  trySampleData: boolean;
 }
 
 /**
@@ -59,7 +59,6 @@ interface State {
 export class Welcome extends React.PureComponent<Props, State> {
   public readonly state: State = {
     step: 0,
-    trySampleData: false,
   };
 
   hideOnEsc = (e: KeyboardEvent) => {
@@ -68,7 +67,7 @@ export class Welcome extends React.PureComponent<Props, State> {
     }
   };
 
-  goToStep = (step: number) => () => {
+  navigateToStep = (step: number) => () => {
     trackUiMetric(METRIC_TYPE.CLICK, `welcomeScreenNavigate_${step}`);
     this.setState(() => ({ step }));
   };
@@ -77,31 +76,24 @@ export class Welcome extends React.PureComponent<Props, State> {
     const path = chrome.addBasePath('#/home/tutorial_directory/sampleData');
     window.location.href = path;
   }
-  onTelemetryOptInDecline = () => {
-    const { trySampleData } = this.state;
+  onTelemetryOptInDecline = async () => {
     trackUiMetric(METRIC_TYPE.CLICK, 'telemetryOptInDecline');
-    if (trySampleData) {
-      return this.redirecToSampleData();
-    }
-    this.props.onSkip();
+    this.setState(() => ({ step: 1 }));
+    await this.props.setOptIn(false);
   };
-  onTelemetryOptInConfirm = () => {
-    const { trySampleData } = this.state;
+  onTelemetryOptInConfirm = async () => {
     trackUiMetric(METRIC_TYPE.CLICK, 'telemetryOptInConfirm');
-    if (trySampleData) {
-      return this.redirecToSampleData();
-    }
-
-    this.props.onSkip();
+    this.setState(() => ({ step: 1 }));
+    await this.props.setOptIn(true);
   };
 
   onSampleDataDecline = () => {
     trackUiMetric(METRIC_TYPE.CLICK, 'sampleDataDecline');
-    this.setState(() => ({ step: 1, trySampleData: false }));
+    this.props.onSkip();
   };
   onSampleDataConfirm = () => {
     trackUiMetric(METRIC_TYPE.CLICK, 'sampleDataConfirm');
-    this.setState(() => ({ step: 1, trySampleData: true }));
+    this.redirecToSampleData();
   };
 
   componentDidMount() {
@@ -148,14 +140,7 @@ export class Welcome extends React.PureComponent<Props, State> {
           <div className="homWelcome__content homWelcome-body">
             <EuiFlexGroup gutterSize="l">
               <EuiFlexItem>
-                {step === 0 && (
-                  <SampleDataCard
-                    urlBasePath={urlBasePath}
-                    onConfirm={this.onSampleDataConfirm}
-                    onDecline={this.onSampleDataDecline}
-                  />
-                )}
-                {showTelemetryOptIn && step === 1 && (
+                {showTelemetryOptIn && step === 0 && (
                   <TelemetryOptInCard
                     urlBasePath={urlBasePath}
                     fetchTelemetry={fetchTelemetry}
@@ -163,23 +148,16 @@ export class Welcome extends React.PureComponent<Props, State> {
                     onDecline={this.onTelemetryOptInDecline}
                   />
                 )}
+                {(!showTelemetryOptIn || step === 1) && (
+                  <SampleDataCard
+                    urlBasePath={urlBasePath}
+                    onConfirm={this.onSampleDataConfirm}
+                    onDecline={this.onSampleDataDecline}
+                  />
+                )}
                 <EuiSpacer size="xs" />
               </EuiFlexItem>
             </EuiFlexGroup>
-            {showTelemetryOptIn && (
-              <EuiFlexGroup gutterSize="s" justifyContent="center">
-                {[0, 1].map(stepOpt => (
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      iconType="dot"
-                      onClick={this.goToStep(stepOpt)}
-                      size="s"
-                      disabled={step === stepOpt}
-                    />
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            )}
           </div>
         </div>
       </EuiPortal>

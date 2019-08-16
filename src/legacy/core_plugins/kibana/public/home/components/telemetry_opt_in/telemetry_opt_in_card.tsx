@@ -43,7 +43,6 @@ export function renderTelemetryOptInCard({
     <EuiCard
       image={`${urlBasePath}/plugins/kibana/assets/illo_telemetry.png`}
       textAlign="left"
-      g
       title={
         <FormattedMessage
           id="kbn.home.telemtery.optInCardTitle"
@@ -57,7 +56,6 @@ export function renderTelemetryOptInCard({
             onClick={onConfirm}
             className="homWelcome__footerAction"
             data-test-subj="WelcomeScreenOptInConfirm"
-            size="s"
             fill
           >
             <FormattedMessage
@@ -69,12 +67,11 @@ export function renderTelemetryOptInCard({
             className="homWelcome__footerAction"
             onClick={onDecline}
             data-test-subj="WelcomeScreenOptInCancel"
-            size="s"
             fill
           >
             <FormattedMessage
               id="kbn.home.telemtery.optInCardDeclineButtonLabel"
-              defaultMessage="Skip"
+              defaultMessage="No"
             />
           </EuiButton>
         </footer>

@@ -30,7 +30,7 @@ import {
 } from 'react-router-dom';
 import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
-import { fetchTelemetry, showTelemetryOptIn } from '../kibana_services';
+import { telemetryOptInProvider, showTelemetryOptIn } from '../kibana_services';
 import chrome from 'ui/chrome';
 
 export function HomeApp({ directories }) {
@@ -93,7 +93,8 @@ export function HomeApp({ directories }) {
             localStorage={localStorage}
             urlBasePath={chrome.getBasePath()}
             showTelemetryOptIn={showTelemetryOptIn}
-            fetchTelemetry={fetchTelemetry}
+            setOptIn={telemetryOptInProvider.setOptIn}
+            fetchTelemetry={telemetryOptInProvider.fetchExample}
           />
         </Route>
       </Switch>

@@ -227,6 +227,7 @@ export class Home extends Component {
         urlBasePath={this.props.urlBasePath}
         showTelemetryOptIn={this.props.showTelemetryOptIn}
         fetchTelemetry={this.props.fetchTelemetry}
+        setOptIn={this.props.setOptIn}
       />
     );
   }
