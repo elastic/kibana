@@ -17,19 +17,9 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { PluginInitializerContext } from 'kibana/server';
+import { TimelionServerPlugin as Plugin } from './plugin';
 
-export function functionsRoute(server) {
-  server.route({
-    method: 'GET',
-    path: '/api/timelion/functions',
-    handler: () => {
-      const functionArray = _.map(server.plugins.timelion.functions, function (val, key) {
-        // TODO: This won't work on frozen objects, it should be removed when everything is converted to datasources and chainables
-        return _.extend({}, val, { name: key });
-      });
-
-      return _.sortBy(functionArray, 'name');
-    }
-  });
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new Plugin(initializerContext);
 }
