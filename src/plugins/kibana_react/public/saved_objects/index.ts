@@ -18,3 +18,4 @@
  */
 
 export * from './saved_object_finder';
+export * from './saved_object_save_modal';
