@@ -5,6 +5,7 @@
  */
 
 import { flatten, sortByOrder } from 'lodash';
+import { idx } from '@kbn/elastic-idx';
 import {
   SERVICE_NAME,
   SPAN_SUBTYPE,
@@ -112,8 +113,8 @@ export async function getTransactionBreakdown({
 
   const formatBucket = (
     aggs:
-      | typeof resp['aggregations']
-      | typeof resp['aggregations']['by_date']['buckets'][0]
+      | Required<typeof resp>['aggregations']
+      | Required<typeof resp>['aggregations']['by_date']['buckets'][0]
   ) => {
     const sumAllSelfTimes = aggs.sum_all_self_times.value || 0;
 
@@ -135,11 +136,12 @@ export async function getTransactionBreakdown({
     return breakdowns;
   };
 
-  const visibleKpis = sortByOrder(
-    formatBucket(resp.aggregations),
-    'percentage',
-    'desc'
-  ).slice(0, MAX_KPIS);
+  const visibleKpis = resp.aggregations
+    ? sortByOrder(formatBucket(resp.aggregations), 'percentage', 'desc').slice(
+        0,
+        MAX_KPIS
+      )
+    : [];
 
   const kpis = sortByOrder(visibleKpis, 'name').map((kpi, index) => {
     return {
@@ -150,7 +152,9 @@ export async function getTransactionBreakdown({
 
   const kpiNames = kpis.map(kpi => kpi.name);
 
-  const timeseriesPerSubtype = resp.aggregations.by_date.buckets.reduce(
+  const timeseriesPerSubtype = (
+    idx(resp.aggregations, _ => _.by_date.buckets) || []
+  ).reduce(
     (prev, bucket) => {
       const formattedValues = formatBucket(bucket);
       const time = bucket.key;
