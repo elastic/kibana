@@ -20,9 +20,10 @@ import {
   SavedObjectsUpdateResponse,
 } from 'src/core/server';
 import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
+import { SODatabaseAdapter as SODatabaseAdapterType } from './adapter_types';
 
-export class SODatabaseAdapter {
-  private client: SavedObjectsClientType;
+export class SODatabaseAdapter implements SODatabaseAdapterType {
+  private readonly client: SavedObjectsClientType;
   constructor(savedObjects: SavedObjectsService, elasticsearch: ElasticsearchPlugin) {
     const { SavedObjectsClient, getSavedObjectsRepository } = savedObjects;
     const { callWithInternalUser } = elasticsearch.getCluster('admin');
@@ -110,8 +111,18 @@ export class SODatabaseAdapter {
     type: string,
     id: string,
     options: SavedObjectsBaseOptions = {}
-  ): Promise<SavedObject<T>> {
-    return await this.client.get(type, id, options);
+  ): Promise<SavedObject<T> | null> {
+    try {
+      const savedObject = await this.client.get(type, id, options);
+
+      return savedObject;
+    } catch (err) {
+      if (err.isBoom && err.output.statusCode === 404) {
+        return null;
+      }
+
+      throw err;
+    }
   }
 
   /**
