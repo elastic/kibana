@@ -20,7 +20,7 @@ export const mappings = {
         type: 'date',
       },
       access_token: {
-        type: 'text',
+        type: 'keyword',
       },
       version: {
         type: 'keyword',
