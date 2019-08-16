@@ -9,15 +9,11 @@ import { useMemo, useEffect, useState } from 'react';
 import { values } from 'lodash';
 import { bucketSpan, getJobId } from '../../../../common/log_analysis';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
-import { callSetupMlModuleAPI } from './api/ml_setup_module_api';
+import { callSetupMlModuleAPI, SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
 import { callJobsSummaryAPI } from './api/ml_get_jobs_summary_api';
 
 // combines and abstracts job and datafeed status
 type JobStatus = 'unknown' | 'missing' | 'inconsistent' | 'created' | 'started';
-
-// type JobStatus = 'unknown' | 'closed' | 'closing' | 'failed' | 'opened' | 'opening' | 'deleted';
-
-// type DatafeedStatus = 'unknown' | 'started' | 'starting' | 'stopped' | 'stopping' | 'deleted';
 
 export const useLogAnalysisJobs = ({
   indexPattern,
@@ -50,7 +46,7 @@ export const useLogAnalysisJobs = ({
           bucketSpan
         );
       },
-      onResolve: ({ datafeeds, jobs }) => {
+      onResolve: ({ datafeeds, jobs }: SetupMlModuleResponsePayload) => {
         const hasSuccessfullyCreatedJobs = jobs.every(job => job.success);
         const hasSuccessfullyStartedDatafeeds = datafeeds.every(
           datafeed => datafeed.success && datafeed.started

@@ -111,3 +111,5 @@ const setupMlModuleResponsePayloadRT = rt.type({
     })
   ),
 });
+
+export type SetupMlModuleResponsePayload = rt.TypeOf<typeof setupMlModuleResponsePayloadRT>;
