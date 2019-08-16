@@ -173,7 +173,7 @@ export interface VisualizationProps<T = unknown> {
   dragDropContext: DragContextState;
   frame: FramePublicAPI;
   state: T;
-  setState: StateSetter<T>;
+  setState: (newState: T) => void;
 }
 
 export interface SuggestionRequest<T = unknown> {
