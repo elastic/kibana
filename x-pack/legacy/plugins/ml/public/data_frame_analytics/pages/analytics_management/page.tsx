@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useState } from 'react';
+import React, { Fragment, FC } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -24,15 +24,11 @@ import {
 } from '@elastic/eui';
 
 import { NavigationMenu } from '../../../components/navigation_menu/navigation_menu';
-import { useRefreshAnalyticsList } from '../../common';
 import { CreateAnalyticsButton } from './components/create_analytics_button';
 import { DataFrameAnalyticsList } from './components/analytics_list';
 import { RefreshAnalyticsListButton } from './components/refresh_analytics_list_button';
 
 export const Page: FC = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const { refresh } = useRefreshAnalyticsList({ isLoading: setIsLoading });
-
   return (
     <Fragment>
       <NavigationMenu tabId="data_frame_analytics" />
@@ -68,7 +64,7 @@ export const Page: FC = () => {
               <EuiFlexGroup alignItems="center">
                 {/* grow={false} fixes IE11 issue with nested flex */}
                 <EuiFlexItem grow={false}>
-                  {<RefreshAnalyticsListButton onClick={refresh} isLoading={isLoading} />}
+                  <RefreshAnalyticsListButton />
                 </EuiFlexItem>
                 {/* grow={false} fixes IE11 issue with nested flex */}
                 <EuiFlexItem grow={false}>

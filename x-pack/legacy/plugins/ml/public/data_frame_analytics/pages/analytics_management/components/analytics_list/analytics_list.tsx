@@ -67,7 +67,7 @@ interface Props {
   isManagementTable?: boolean;
 }
 // isManagementTable - for use in Kibana managagement ML section
-export const DataFrameAnalyticsList: FC<Props> = ({ isManagementTable }) => {
+export const DataFrameAnalyticsList: FC<Props> = ({ isManagementTable = false }) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [blockRefresh, setBlockRefresh] = useState(false);
@@ -101,8 +101,11 @@ export const DataFrameAnalyticsList: FC<Props> = ({ isManagementTable }) => {
     isLoading: setIsLoading,
     onRefresh: () => getAnalytics(true),
   });
-  // Call useRefreshInterval() after the subscription above is set up.
-  useRefreshInterval(setBlockRefresh);
+
+  if (isManagementTable === false) {
+    // Call useRefreshInterval() after the subscription above is set up.
+    useRefreshInterval(setBlockRefresh);
+  }
 
   const onQueryChange = ({ query, error }: { query: Query; error: any }) => {
     if (error) {
