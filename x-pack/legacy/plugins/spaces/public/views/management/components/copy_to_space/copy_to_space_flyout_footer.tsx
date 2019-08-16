@@ -9,6 +9,7 @@ import { ProcessedImportResponse } from 'ui/management/saved_objects_management'
 import { SavedObjectsImportRetry } from 'src/core/server';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiStat, EuiHorizontalRule } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 interface Props {
   copyInProgress: boolean;
@@ -55,6 +56,16 @@ export const CopyToSpaceFlyoutFooter = (props: Props) => {
         <EuiButton
           fill
           isLoading={props.conflictResolutionInProgress}
+          aria-live="assertive"
+          aria-label={
+            props.conflictResolutionInProgress
+              ? i18n.translate('xpack.spaces.management.copyToSpace.inProgressButtonLabel', {
+                  defaultMessage: 'Copy is in progress. Please wait.',
+                })
+              : i18n.translate('xpack.spaces.management.copyToSpace.finishedButtonLabel', {
+                  defaultMessage: 'Copy finished.',
+                })
+          }
           onClick={() => props.onCopyFinish()}
           data-test-subj="cts-finish-button"
         >

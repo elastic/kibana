@@ -7,17 +7,18 @@
 import React from 'react';
 import { EuiLoadingSpinner, EuiIconTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Space } from '../../../../../common/model/space';
 import { SummarizedCopyToSpaceResponse } from '../../../../lib/copy_saved_objects';
 
 interface Props {
-  spaceId: string;
+  space: Space;
   summarizedCopyResult: SummarizedCopyToSpaceResponse;
   conflictResolutionInProgress: boolean;
 }
 
 export const CopyStatusSummaryIndicator = (props: Props) => {
   const { summarizedCopyResult } = props;
-  const getDataTestSubj = (status: string) => `cts-summary-indicator-${status}-${props.spaceId}`;
+  const getDataTestSubj = (status: string) => `cts-summary-indicator-${status}-${props.space.id}`;
 
   if (summarizedCopyResult.processing || props.conflictResolutionInProgress) {
     return <EuiLoadingSpinner data-test-subj={getDataTestSubj('loading')} />;
@@ -34,7 +35,8 @@ export const CopyStatusSummaryIndicator = (props: Props) => {
         content={
           <FormattedMessage
             id="xpack.spaces.management.copyToSpace.copyStatusSummary.successMessage"
-            defaultMessage="Copied successfully"
+            defaultMessage="Copied successfully to the {space} space."
+            values={{ space: props.space.name }}
           />
         }
       />
@@ -51,7 +53,8 @@ export const CopyStatusSummaryIndicator = (props: Props) => {
         content={
           <FormattedMessage
             id="xpack.spaces.management.copyToSpace.copyStatusSummary.failedMessage"
-            defaultMessage="Copy failed. Expand this section for details."
+            defaultMessage="Copy to the {space} space failed. Expand this section for details."
+            values={{ space: props.space.name }}
           />
         }
       />
@@ -68,7 +71,8 @@ export const CopyStatusSummaryIndicator = (props: Props) => {
         content={
           <FormattedMessage
             id="xpack.spaces.management.copyToSpace.copyStatusSummary.conflictsMessage"
-            defaultMessage="One or more conflicts detected. Expand this section to resolve."
+            defaultMessage="One or more conflicts detected in the {space} space. Expand this section to resolve."
+            values={{ space: props.space.name }}
           />
         }
       />

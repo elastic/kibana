@@ -119,7 +119,7 @@ export const ProcessingCopyToSpace = (props: Props) => {
               }
               extraAction={
                 <CopyStatusSummaryIndicator
-                  spaceId={id}
+                  space={space}
                   summarizedCopyResult={summarizedCopyResult}
                   conflictResolutionInProgress={
                     props.conflictResolutionInProgress && spaceHasPendingOverwrites
