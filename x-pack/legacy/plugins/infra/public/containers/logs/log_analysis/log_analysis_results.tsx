@@ -18,7 +18,7 @@ export const useLogAnalysisResults = ({
   sourceId: string;
   startTime: number;
   endTime: number;
-  bucketDuration?: number; // TODO: Get from hook state
+  bucketDuration?: number;
 }) => {
   const { isLoading: isLoadingLogEntryRate, logEntryRate, getLogEntryRate } = useLogEntryRate({
     sourceId,

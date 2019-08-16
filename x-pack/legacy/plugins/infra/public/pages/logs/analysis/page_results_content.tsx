@@ -7,6 +7,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiSuperDatePicker,
   EuiFlexGroup,
@@ -16,6 +17,7 @@ import {
   EuiPageContent,
   EuiPageContentBody,
   EuiPanel,
+  EuiBadge,
 } from '@elastic/eui';
 import dateMath from '@elastic/datemath';
 import moment from 'moment';
@@ -98,6 +100,29 @@ export const AnalysisResultsContent = ({ sourceId }: { sourceId: string }) => {
     [setTimeRange, timeRange]
   );
 
+  const anomaliesDetected = useMemo(() => {
+    if (!logEntryRate) {
+      return null;
+    } else {
+      if (logEntryRate.histogramBuckets && logEntryRate.histogramBuckets.length) {
+        return logEntryRate.histogramBuckets.reduce((acc: any, bucket) => {
+          if (bucket.anomalies.length > 0) {
+            return (
+              acc +
+              bucket.anomalies.reduce((anomalyAcc: any, anomaly) => {
+                return anomalyAcc + 1;
+              }, 0)
+            );
+          } else {
+            return acc;
+          }
+        }, 0);
+      } else {
+        return null;
+      }
+    }
+  }, [logEntryRate]);
+
   return (
     <>
       {isLoading && !logEntryRate ? (
@@ -108,8 +133,32 @@ export const AnalysisResultsContent = ({ sourceId }: { sourceId: string }) => {
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={7}>
                 <EuiFlexGroup alignItems="center">
-                  <EuiFlexItem>
-                    <span>Analysed x of x</span>
+                  <EuiFlexItem grow={false}>
+                    {anomaliesDetected !== null ? (
+                      <>
+                        <span>
+                          {anomaliesDetected === 0 ? (
+                            <FormattedMessage
+                              id="xpack.infra.logs.analysis.anomaliesDetectedZero"
+                              defaultMessage="Detected {formattedNumber} anomalies"
+                              values={{
+                                formattedNumber: <EuiBadge color="default">0</EuiBadge>,
+                              }}
+                            />
+                          ) : (
+                            <FormattedMessage
+                              id="xpack.infra.logs.analysis.anomaliesDetectedNumber"
+                              defaultMessage="Detected {formattedNumber} anomalies"
+                              values={{
+                                formattedNumber: (
+                                  <EuiBadge color="warning">{anomaliesDetected}</EuiBadge>
+                                ),
+                              }}
+                            />
+                          )}
+                        </span>
+                      </>
+                    ) : null}
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
