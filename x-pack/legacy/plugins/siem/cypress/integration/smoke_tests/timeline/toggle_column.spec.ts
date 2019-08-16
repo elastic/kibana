@@ -9,7 +9,7 @@ import { populateTimeline } from '../../lib/fields_browser/helpers';
 import { logout } from '../../lib/logout';
 import { toggleFirstEventDetails } from '../../lib/timeline/helpers';
 import { HOSTS_PAGE } from '../../lib/urls';
-import { loginAndWaitForPage } from '../../lib/util/helpers';
+import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../../lib/util/helpers';
 
 describe('toggle column in timeline', () => {
   beforeEach(() => {
@@ -72,6 +72,8 @@ describe('toggle column in timeline', () => {
 
     cy.get(`[data-test-subj="headers-group"]`).then(headersDropArea => drop(headersDropArea));
 
-    cy.get(`[data-test-subj="header-text-${idField}"]`).should('exist');
+    cy.get(`[data-test-subj="header-text-${idField}"]`, { timeout: DEFAULT_TIMEOUT }).should(
+      'exist'
+    );
   });
 });
