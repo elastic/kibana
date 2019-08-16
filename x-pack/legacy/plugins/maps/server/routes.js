@@ -368,7 +368,7 @@ export function initRoutes(server, licenseUid) {
   server.route({
 
     method: 'GET',
-    path: `${ROOT}/${EMS_SPRITES_PATH}/{id}/sprite.{extension}`,
+    path: `${ROOT}/${EMS_SPRITES_PATH}/{id}/sprite{scaling}.{extension}`,
     handler: async (request, h) => {
 
       checkEMSProxyConfig();
@@ -386,8 +386,7 @@ export function initRoutes(server, licenseUid) {
 
 
       let proxyPathUrl;
-      // const isRetina = request.params.scaling === '@2x';
-      const isRetina = false;
+      const isRetina = request.params.scaling === '@2x';
       if (request.params.extension === 'json') {
         proxyPathUrl = await tmsService.getSpriteSheetJsonPath(isRetina);
       } else if (request.params.extension === 'png') {
