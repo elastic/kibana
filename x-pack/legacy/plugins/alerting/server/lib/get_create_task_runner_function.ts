@@ -22,6 +22,7 @@ import {
 } from '../types';
 
 interface CreateTaskRunnerFunctionOptions {
+  useApiKey: boolean;
   getServices: GetServicesFunction;
   alertType: AlertType;
   executeAction: ActionsPlugin['execute'];
@@ -41,6 +42,7 @@ export function getCreateTaskRunnerFunction({
   encryptedSavedObjectsPlugin,
   spaceIdToNamespace,
   getBasePath,
+  useApiKey,
 }: CreateTaskRunnerFunctionOptions) {
   return ({ taskInstance }: TaskRunnerOptions) => {
     return {
@@ -58,7 +60,11 @@ export function getCreateTaskRunnerFunction({
           { namespace }
         );
 
-        if (apiKeyId && apiKeyValue) {
+        if (useApiKey && (!apiKeyId || !apiKeyValue)) {
+          throw new Error(
+            'API key is required. The attribute "apiKeyId" and / or "apiKeyValue" is missing.'
+          );
+        } else if (useApiKey) {
           const key = Buffer.from(`${apiKeyId}:${apiKeyValue}`).toString('base64');
           requestHeaders.authorization = `ApiKey ${key}`;
         }

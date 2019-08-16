@@ -91,6 +91,7 @@ export function init(server: Legacy.Server) {
     encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects!,
     getBasePath,
     spaceIdToNamespace,
+    useApiKey: config.get('xpack.security.enabled'),
   });
 
   registerBuiltInActionTypes(actionTypeRegistry);
@@ -112,6 +113,7 @@ export function init(server: Legacy.Server) {
     taskManager: taskManager!,
     getScopedSavedObjectsClient: server.savedObjects.getScopedSavedObjectsClient,
     getBasePath,
+    useApiKey: config.get('xpack.security.enabled'),
   });
 
   // Expose functions to server

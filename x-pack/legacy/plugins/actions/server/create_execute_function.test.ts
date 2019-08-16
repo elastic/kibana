@@ -18,6 +18,7 @@ describe('execute()', () => {
   test('schedules the action with all given parameters', async () => {
     const executeFn = createExecuteFunction({
       getBasePath,
+      useApiKey: true,
       taskManager: mockTaskManager,
       getScopedSavedObjectsClient: jest.fn().mockReturnValueOnce(savedObjectsClient),
     });
@@ -44,20 +45,20 @@ describe('execute()', () => {
     });
     expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
     expect(mockTaskManager.schedule.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "params": Object {
-            "actionTaskParamsId": "234",
-            "spaceId": "default",
-          },
-          "scope": Array [
-            "actions",
-          ],
-          "state": Object {},
-          "taskType": "actions:mock-action",
-        },
-      ]
-    `);
+            Array [
+              Object {
+                "params": Object {
+                  "actionTaskParamsId": "234",
+                  "spaceId": "default",
+                },
+                "scope": Array [
+                  "actions",
+                ],
+                "state": Object {},
+                "taskType": "actions:mock-action",
+              },
+            ]
+        `);
     expect(savedObjectsClient.get).toHaveBeenCalledWith('action', '123');
     expect(savedObjectsClient.create).toHaveBeenCalledWith('action_task_params', {
       actionId: '123',
@@ -73,6 +74,7 @@ describe('execute()', () => {
       getBasePath,
       taskManager: mockTaskManager,
       getScopedSavedObjectsClient,
+      useApiKey: true,
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '123',
@@ -108,6 +110,7 @@ describe('execute()', () => {
   test(`doesn't use API keys when not provided`, async () => {
     const getScopedSavedObjectsClient = jest.fn().mockReturnValueOnce(savedObjectsClient);
     const executeFn = createExecuteFunction({
+      useApiKey: false,
       getBasePath,
       taskManager: mockTaskManager,
       getScopedSavedObjectsClient,
@@ -131,12 +134,28 @@ describe('execute()', () => {
       id: '123',
       params: { baz: false },
       spaceId: 'default',
-      apiKeyId: null,
-      apiKeyValue: null,
     });
     expect(getScopedSavedObjectsClient).toHaveBeenCalledWith({
       getBasePath: expect.anything(),
       headers: {},
     });
+  });
+
+  test(`throws an error when useApiKey is true and key not passed in`, async () => {
+    const executeFn = createExecuteFunction({
+      getBasePath,
+      taskManager: mockTaskManager,
+      getScopedSavedObjectsClient: jest.fn().mockReturnValueOnce(savedObjectsClient),
+      useApiKey: true,
+    });
+    await expect(
+      executeFn({
+        id: '123',
+        params: { baz: false },
+        spaceId: 'default',
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"API key is required. The attribute \\"apiKeyId\\" and / or \\"apiKeyValue\\" is missing."`
+    );
   });
 });

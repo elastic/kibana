@@ -16,6 +16,7 @@ import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/
 const taskManager = taskManagerMock.create();
 
 const alertTypeRegistryParams = {
+  useApiKey: true,
   getServices() {
     return {
       log: jest.fn(),
@@ -51,15 +52,16 @@ describe('has()', () => {
 
 describe('register()', () => {
   test('registers the executor with the task manager', () => {
+    const alertType = {
+      id: 'test',
+      name: 'Test',
+      executor: jest.fn(),
+    };
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { getCreateTaskRunnerFunction } = require('./lib/get_create_task_runner_function');
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
     getCreateTaskRunnerFunction.mockReturnValue(jest.fn());
-    registry.register({
-      id: 'test',
-      name: 'Test',
-      executor: jest.fn(),
-    });
+    registry.register(alertType);
     expect(taskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
     expect(taskManager.registerTaskDefinitions.mock.calls[0]).toMatchInlineSnapshot(`
 Array [
@@ -72,20 +74,15 @@ Array [
   },
 ]
 `);
-    expect(getCreateTaskRunnerFunction).toHaveBeenCalledTimes(1);
-    const firstCall = getCreateTaskRunnerFunction.mock.calls[0][0];
-    expect(firstCall.alertType).toMatchInlineSnapshot(`
-Object {
-  "executor": [MockFunction],
-  "id": "test",
-  "name": "Test",
-}
-`);
-    expect(firstCall.getServices).toBeTruthy();
-    expect(firstCall.encryptedSavedObjectsPlugin).toBeTruthy();
-    expect(firstCall.getBasePath).toBeTruthy();
-    expect(firstCall.spaceIdToNamespace).toBeTruthy();
-    expect(firstCall.executeAction).toMatchInlineSnapshot(`[MockFunction]`);
+    expect(getCreateTaskRunnerFunction).toHaveBeenCalledWith({
+      alertType,
+      useApiKey: true,
+      getServices: alertTypeRegistryParams.getServices,
+      encryptedSavedObjectsPlugin: alertTypeRegistryParams.encryptedSavedObjectsPlugin,
+      getBasePath: alertTypeRegistryParams.getBasePath,
+      spaceIdToNamespace: alertTypeRegistryParams.spaceIdToNamespace,
+      executeAction: alertTypeRegistryParams.executeAction,
+    });
   });
 
   test('should throw an error if type is already registered', () => {

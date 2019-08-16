@@ -26,6 +26,7 @@ function getServices() {
 }
 const actionTypeRegistryParams = {
   getServices,
+  useApiKey: true,
   taskManager: mockTaskManager,
   encryptedSavedObjectsPlugin: encryptedSavedObjectsMock.create(),
   spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
@@ -64,11 +65,14 @@ describe('register()', () => {
         },
       ]
     `);
-    expect(getCreateTaskRunnerFunction).toHaveBeenCalledTimes(1);
-    const call = getCreateTaskRunnerFunction.mock.calls[0][0];
-    expect(call.actionTypeRegistry).toBeTruthy();
-    expect(call.encryptedSavedObjectsPlugin).toBeTruthy();
-    expect(call.getServices).toBeTruthy();
+    expect(getCreateTaskRunnerFunction).toHaveBeenCalledWith({
+      actionTypeRegistry,
+      useApiKey: true,
+      encryptedSavedObjectsPlugin: actionTypeRegistryParams.encryptedSavedObjectsPlugin,
+      getServices: actionTypeRegistryParams.getServices,
+      getBasePath: actionTypeRegistryParams.getBasePath,
+      spaceIdToNamespace: actionTypeRegistryParams.spaceIdToNamespace,
+    });
   });
 
   test('throws error if action type already registered', () => {

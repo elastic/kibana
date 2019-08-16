@@ -81,6 +81,6 @@ export interface RawAction extends SavedObjectAttributes {
 export interface ActionTaskParams extends SavedObjectAttributes {
   actionId: string;
   params: Record<string, any>;
-  apiKeyId: string | null;
-  apiKeyValue: string | null;
+  apiKeyId?: string;
+  apiKeyValue?: string;
 }

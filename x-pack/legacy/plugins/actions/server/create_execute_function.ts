@@ -9,6 +9,7 @@ import { TaskManager } from '../../task_manager';
 import { GetBasePathFunction } from './types';
 
 interface CreateExecuteFunctionOptions {
+  useApiKey: boolean;
   taskManager: TaskManager;
   getScopedSavedObjectsClient: (request: any) => SavedObjectsClientContract;
   getBasePath: GetBasePathFunction;
@@ -18,19 +19,24 @@ export interface ExecuteOptions {
   id: string;
   params: Record<string, any>;
   spaceId: string;
-  apiKeyId: string | null;
-  apiKeyValue: string | null;
+  apiKeyId?: string;
+  apiKeyValue?: string;
 }
 
 export function createExecuteFunction({
   getBasePath,
-  getScopedSavedObjectsClient,
   taskManager,
+  useApiKey,
+  getScopedSavedObjectsClient,
 }: CreateExecuteFunctionOptions) {
   return async function execute({ id, params, spaceId, apiKeyId, apiKeyValue }: ExecuteOptions) {
     const requestHeaders: Record<string, string> = {};
 
-    if (apiKeyId && apiKeyValue) {
+    if (useApiKey && (!apiKeyId || !apiKeyValue)) {
+      throw new Error(
+        'API key is required. The attribute "apiKeyId" and / or "apiKeyValue" is missing.'
+      );
+    } else if (useApiKey) {
       const key = Buffer.from(`${apiKeyId}:${apiKeyValue}`).toString('base64');
       requestHeaders.authorization = `ApiKey ${key}`;
     }

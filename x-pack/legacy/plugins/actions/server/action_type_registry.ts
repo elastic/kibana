@@ -17,6 +17,7 @@ import {
 } from './types';
 
 interface ConstructorOptions {
+  useApiKey: boolean;
   taskManager: TaskManager;
   getServices: GetServicesFunction;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
@@ -35,9 +36,11 @@ export class ActionTypeRegistry {
     encryptedSavedObjectsPlugin,
     spaceIdToNamespace,
     getBasePath,
+    useApiKey,
   }: ConstructorOptions) {
     this.taskManager = taskManager;
     this.taskRunCreatorFunction = getCreateTaskRunnerFunction({
+      useApiKey,
       getServices,
       actionTypeRegistry: this,
       encryptedSavedObjectsPlugin,

@@ -12,8 +12,8 @@ interface CreateFireHandlerOptions {
   executeAction: ActionsPlugin['execute'];
   actions: AlertAction[];
   spaceId: string;
-  apiKeyId: string | null;
-  apiKeyValue: string | null;
+  apiKeyId?: string;
+  apiKeyValue?: string;
 }
 
 export function createFireHandler({

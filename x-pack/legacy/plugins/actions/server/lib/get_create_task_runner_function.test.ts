@@ -37,6 +37,7 @@ const getCreateTaskRunnerFunctionParams = {
   spaceIdToNamespace,
   encryptedSavedObjectsPlugin: mockedEncryptedSavedObjectsPlugin,
   getBasePath: jest.fn().mockReturnValue(undefined),
+  useApiKey: true,
 };
 
 const taskInstanceMock = {
@@ -157,6 +158,64 @@ test('uses API key when provided', async () => {
 
 test(`doesn't use API key when not provided`, async () => {
   const { execute: mockExecute } = jest.requireMock('./execute');
+  const createTaskRunner = getCreateTaskRunnerFunction({
+    ...getCreateTaskRunnerFunctionParams,
+    useApiKey: false,
+  });
+  const runner = createTaskRunner({ taskInstance: taskInstanceMock });
+
+  mockExecute.mockResolvedValueOnce({ status: 'ok' });
+  spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+  mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+    },
+    references: [],
+  });
+
+  await runner.run();
+
+  expect(getCreateTaskRunnerFunctionParams.getServices).toHaveBeenCalledWith({
+    getBasePath: expect.anything(),
+    headers: {},
+  });
+});
+
+test(`doesn't use API key when provided and useApiKey is set to false`, async () => {
+  const { execute: mockExecute } = jest.requireMock('./execute');
+  const createTaskRunner = getCreateTaskRunnerFunction({
+    ...getCreateTaskRunnerFunctionParams,
+    useApiKey: false,
+  });
+  const runner = createTaskRunner({ taskInstance: taskInstanceMock });
+
+  mockExecute.mockResolvedValueOnce({ status: 'ok' });
+  spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+  mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      apiKeyId: '123',
+      apiKeyValue: 'abc',
+    },
+    references: [],
+  });
+
+  await runner.run();
+
+  expect(getCreateTaskRunnerFunctionParams.getServices).toHaveBeenCalledWith({
+    getBasePath: expect.anything(),
+    headers: {},
+  });
+});
+
+test(`throws an error when useApiKey is true but key isn't provided`, async () => {
+  const { execute: mockExecute } = jest.requireMock('./execute');
   const createTaskRunner = getCreateTaskRunnerFunction(getCreateTaskRunnerFunctionParams);
   const runner = createTaskRunner({ taskInstance: taskInstanceMock });
 
@@ -168,16 +227,11 @@ test(`doesn't use API key when not provided`, async () => {
     attributes: {
       actionId: '2',
       params: { baz: true },
-      apiKeyId: null,
-      apiKeyValue: null,
     },
     references: [],
   });
 
-  await runner.run();
-
-  expect(getCreateTaskRunnerFunctionParams.getServices).toHaveBeenCalledWith({
-    getBasePath: expect.anything(),
-    headers: {},
-  });
+  await expect(runner.run()).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"API key is required. The attribute \\"apiKeyId\\" and / or \\"apiKeyValue\\" is missing."`
+  );
 });

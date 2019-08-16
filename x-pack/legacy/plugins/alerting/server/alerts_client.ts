@@ -105,8 +105,8 @@ export class AlertsClient {
     const { alert: rawAlert, references } = this.getRawAlert({
       ...data,
       createdBy: await this.getUserName(),
-      apiKeyId: apiKey.created ? apiKey.result.id : null,
-      apiKeyValue: apiKey.created ? apiKey.result.api_key : null,
+      apiKeyId: apiKey.created ? apiKey.result.id : undefined,
+      apiKeyValue: apiKey.created ? apiKey.result.api_key : undefined,
       alertTypeParams: validatedAlertTypeParams,
     });
     const createdAlert = await this.savedObjectsClient.create('alert', rawAlert, {
