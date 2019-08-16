@@ -5,7 +5,6 @@
  */
 
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import { DefaultDraggable } from '../draggables';
 import { PreferenceFormattedBytes } from '../formatted_bytes';
@@ -16,7 +15,7 @@ export const BYTES_FORMAT = 'bytes';
  * Renders draggable text containing the value of a field representing a
  * duration of time, (e.g. `event.duration`)
  */
-export const Bytes = pure<{
+export const Bytes = React.memo<{
   contextId: string;
   eventId: string;
   fieldName: string;
