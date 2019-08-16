@@ -17,4 +17,8 @@
  * under the License.
  */
 
-export { indexPatternsMixin } from './mixin';
+export { getFieldCapabilities } from './field_capabilities';
+// @ts-ignore
+export { resolveTimePattern } from './resolve_time_pattern';
+// @ts-ignore
+export { createNoMatchingIndicesError } from './errors';

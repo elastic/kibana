@@ -16,5 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { TimelionFunctionInterface } from '../types';
 
-export { getFieldCapabilities } from './field_capabilities';
+declare function loadFunctions(directory: string): LoadFunctions;
+
+export interface LoadFunctions {
+  [key: string]: TimelionFunctionInterface;
+}
+
+// eslint-disable-next-line import/no-default-export
+export default loadFunctions;

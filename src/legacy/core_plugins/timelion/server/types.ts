@@ -17,4 +17,10 @@
  * under the License.
  */
 
-export { IndexPatternsService } from './index_patterns_service';
+export {
+  TimelionFunctionInterface,
+  TimelionFunctionConfig,
+  TimelionFunctionArgs,
+  TimelionFunctionArgsSuggestion,
+  TimelionFunctionArgsTypes,
+} from './lib/classes/timelion_function';
