@@ -103,6 +103,13 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -148,6 +155,13 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -193,6 +207,13 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
           <div
             className="euiSideNavItem__items"
@@ -240,6 +261,13 @@ exports[`render correctly 1`] = `
                     </div>
                   </span>
                 </div>
+                <div
+                  className="codeFileTree__node--link"
+                  onClick={[Function]}
+                  onKeyDown={[Function]}
+                  role="button"
+                  tabIndex={0}
+                />
               </div>
             </div>
             <div
@@ -279,6 +307,13 @@ exports[`render correctly 1`] = `
                     </div>
                   </span>
                 </div>
+                <div
+                  className="codeFileTree__node--link"
+                  onClick={[Function]}
+                  onKeyDown={[Function]}
+                  role="button"
+                  tabIndex={0}
+                />
               </div>
             </div>
             <div
@@ -374,6 +409,13 @@ exports[`render correctly 1`] = `
                         </div>
                       </span>
                     </div>
+                    <div
+                      className="codeFileTree__node--link"
+                      onClick={[Function]}
+                      onKeyDown={[Function]}
+                      role="button"
+                      tabIndex={0}
+                    />
                   </div>
                 </div>
                 <div
@@ -419,6 +461,13 @@ exports[`render correctly 1`] = `
                         </div>
                       </span>
                     </div>
+                    <div
+                      className="codeFileTree__node--link"
+                      onClick={[Function]}
+                      onKeyDown={[Function]}
+                      role="button"
+                      tabIndex={0}
+                    />
                   </div>
                 </div>
               </div>
@@ -468,6 +517,13 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -513,6 +569,13 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -558,6 +621,13 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -603,6 +673,13 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -648,6 +725,13 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -693,6 +777,13 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -732,6 +823,13 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -771,6 +869,13 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -810,6 +915,13 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -849,6 +961,13 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -888,6 +1007,13 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -927,6 +1053,13 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -966,6 +1099,13 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -1005,6 +1145,13 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -1044,6 +1191,13 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -1083,6 +1237,13 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
       </div>

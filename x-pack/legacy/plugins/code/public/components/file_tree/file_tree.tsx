@@ -105,15 +105,23 @@ export class CodeFileTree extends React.Component<Props, { openPaths: string[] }
 
   public getItemRenderer = (node: Tree, forceOpen: boolean, flattenFrom?: Tree) => () => {
     const className = 'codeFileTree__item kbn-resetFocusState';
-    let bg = null;
-    if (this.props.match.params.path === node.path) {
-      bg = <div ref={el => this.scrollIntoView(el)} className="codeFileTree__node--fullWidth" />;
-    }
     const onClick = () => {
       const path = flattenFrom ? flattenFrom.path! : node.path!;
       this.toggleTree(path);
       this.onClick(node);
     };
+    let bg = (
+      <div
+        tabIndex={0}
+        className="codeFileTree__node--link"
+        onClick={onClick}
+        onKeyDown={onClick}
+        role="button"
+      />
+    );
+    if (this.props.match.params.path === node.path) {
+      bg = <div ref={el => this.scrollIntoView(el)} className="codeFileTree__node--fullWidth" />;
+    }
     switch (node.type) {
       case FileTreeItemType.Directory: {
         return (
