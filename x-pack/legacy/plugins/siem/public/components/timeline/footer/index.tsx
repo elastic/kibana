@@ -134,7 +134,10 @@ export const EventsCount = pure<{
     </PopoverRowItems>
     <EuiToolTip content={`${serverSideEventCount} ${i18n.TOTAL_COUNT_OF_EVENTS}`}>
       <ServerSideEventCount>
-        <EuiBadge color="hollow">{serverSideEventCount}</EuiBadge> {i18n.EVENTS}
+        <EuiBadge color="hollow" data-test-subj="server-side-event-count">
+          {serverSideEventCount}
+        </EuiBadge>{' '}
+        {i18n.EVENTS}
       </ServerSideEventCount>
     </EuiToolTip>
   </h5>

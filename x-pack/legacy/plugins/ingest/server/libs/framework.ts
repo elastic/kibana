@@ -28,6 +28,7 @@ export class BackendFrameworkLib {
   public get securityIsEnabled() {
     return get(this.adapter, 'info.security.enabled', false);
   }
+
   public log = this.adapter.log;
   public on = this.adapter.on.bind(this.adapter);
   public internalUser = this.adapter.internalUser;

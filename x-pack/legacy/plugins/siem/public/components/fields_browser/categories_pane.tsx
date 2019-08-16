@@ -68,7 +68,7 @@ export const CategoriesPane = pure<Props>(
   }) => (
     <>
       <Title size="xxs">
-        <h5>{i18n.CATEGORIES}</h5>
+        <h5 data-test-subj="categories-pane-title">{i18n.CATEGORIES}</h5>
       </Title>
 
       <CategoryNames data-test-subj="categories-container" height={TABLE_HEIGHT} width={width}>

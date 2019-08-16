@@ -100,13 +100,14 @@ const TitleRow = pure<{ onOutsideClick: () => void; onUpdateColumns: OnUpdateCol
       gutterSize="none"
     >
       <EuiFlexItem grow={false}>
-        <EuiTitle size="s">
+        <EuiTitle data-test-subj="field-browser-title" size="s">
           <h2>{i18n.CUSTOMIZE_COLUMNS}</h2>
         </EuiTitle>
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
+          data-test-subj="reset-fields"
           onClick={() => {
             onUpdateColumns(defaultHeaders);
             onOutsideClick();
@@ -136,6 +137,7 @@ export const Header = pure<Props>(
       <SearchContainer>
         <EuiFieldSearch
           className={getFieldBrowserSearchInputClassName(timelineId)}
+          data-test-subj="field-search"
           isLoading={isSearching}
           onChange={onSearchInputChange}
           placeholder={i18n.FILTER_PLACEHOLDER}

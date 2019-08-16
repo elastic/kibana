@@ -5,6 +5,8 @@
  */
 
 import React, { FC } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlyout,
   EuiFlyoutFooter,
@@ -27,15 +29,28 @@ export const JsonFlyout: FC<Props> = ({ jobCreator, closeFlyout }) => {
     <EuiFlyout onClose={closeFlyout} hideCloseButton size="l">
       <EuiFlyoutBody>
         <EuiFlexGroup>
-          <Contents title="Job configuration JSON" value={jobCreator.formattedJobJson} />
-          <Contents title="Datafeed configuration JSON" value={jobCreator.formattedDatafeedJson} />
+          <Contents
+            title={i18n.translate('xpack.ml.newJob.wizard.summaryStep.jsonFlyout.job.title', {
+              defaultMessage: 'Job configuration JSON',
+            })}
+            value={jobCreator.formattedJobJson}
+          />
+          <Contents
+            title={i18n.translate('xpack.ml.newJob.wizard.summaryStep.jsonFlyout.datafeed.title', {
+              defaultMessage: 'Datafeed configuration JSON',
+            })}
+            value={jobCreator.formattedDatafeedJson}
+          />
         </EuiFlexGroup>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
-              Close
+              <FormattedMessage
+                id="xpack.ml.newJob.wizard.summaryStep.jsonFlyout.closeLink"
+                defaultMessage="Close"
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
