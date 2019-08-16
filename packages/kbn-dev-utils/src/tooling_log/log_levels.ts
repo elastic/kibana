@@ -17,9 +17,13 @@
  * under the License.
  */
 
-const LEVELS = ['silent', 'error', 'warning', 'info', 'debug', 'verbose'];
+export type LogLevel = 'silent' | 'error' | 'warning' | 'info' | 'debug' | 'verbose';
+const LEVELS: LogLevel[] = ['silent', 'error', 'warning', 'info', 'debug', 'verbose'];
 
-export function pickLevelFromFlags(flags, options = {}) {
+export function pickLevelFromFlags(
+  flags: Record<string, string | boolean | string[] | undefined>,
+  options: { default?: LogLevel } = {}
+) {
   if (flags.verbose) return 'verbose';
   if (flags.debug) return 'debug';
   if (flags.quiet) return 'error';
@@ -27,7 +31,9 @@ export function pickLevelFromFlags(flags, options = {}) {
   return options.default || 'info';
 }
 
-export function parseLogLevel(name) {
+export type ParsedLogLevel = ReturnType<typeof parseLogLevel>;
+
+export function parseLogLevel(name: LogLevel) {
   const i = LEVELS.indexOf(name);
 
   if (i === -1) {
@@ -35,10 +41,13 @@ export function parseLogLevel(name) {
     throw new Error(msg);
   }
 
-  const flags = {};
+  const flags: { [key: string]: boolean } = {};
   LEVELS.forEach((level, levelI) => {
     flags[level] = levelI <= i;
   });
 
-  return { name, flags };
+  return {
+    name,
+    flags: flags as { [key in LogLevel]: boolean },
+  };
 }

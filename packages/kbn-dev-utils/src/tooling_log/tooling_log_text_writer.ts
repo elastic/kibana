@@ -19,10 +19,13 @@
 
 import { format } from 'util';
 
-import { magentaBright, yellow, red, blue, green, dim } from 'chalk';
+import chalk from 'chalk';
 
-import { parseLogLevel } from './log_levels';
+import { LogLevel, parseLogLevel, ParsedLogLevel } from './log_levels';
+import { Writer } from './writer';
+import { Message, MessageTypes } from './message';
 
+const { magentaBright, yellow, red, blue, green, dim } = chalk;
 const PREFIX_INDENT = ' '.repeat(6);
 const MSG_PREFIXES = {
   verbose: ` ${magentaBright('sill')} `,
@@ -33,7 +36,16 @@ const MSG_PREFIXES = {
   error: `${red('ERROR')} `,
 };
 
-function shouldWriteType(level, type) {
+const has = <T extends object>(obj: T, key: any): key is keyof T => obj.hasOwnProperty(key);
+
+export interface ToolingLogTextWriterConfig {
+  level: LogLevel;
+  writeTo: {
+    write(s: string): void;
+  };
+}
+
+function shouldWriteType(level: ParsedLogLevel, type: MessageTypes) {
   if (type === 'write') {
     return true;
   }
@@ -41,16 +53,25 @@ function shouldWriteType(level, type) {
   return Boolean(level.flags[type === 'success' ? 'info' : type]);
 }
 
-function stringifyError(error) {
+function stringifyError(error: string | Error) {
   if (typeof error !== 'string' && !(error instanceof Error)) {
     error = new Error(`"${error}" thrown`);
+  }
+
+  if (typeof error === 'string') {
+    return error;
   }
 
   return error.stack || error.message || error;
 }
 
-export class ToolingLogTextWriter {
-  constructor(config) {
+export class ToolingLogTextWriter implements Writer {
+  public readonly level: ParsedLogLevel;
+  public readonly writeTo: {
+    write(msg: string): void;
+  };
+
+  constructor(config: ToolingLogTextWriterConfig) {
     this.level = parseLogLevel(config.level);
     this.writeTo = config.writeTo;
 
@@ -61,13 +82,13 @@ export class ToolingLogTextWriter {
     }
   }
 
-  write({ type, indent, args }) {
+  write({ type, indent, args }: Message) {
     if (!shouldWriteType(this.level, type)) {
       return false;
     }
 
-    const txt = type === 'error' ? stringifyError(args[0]) : format(...args);
-    const prefix = MSG_PREFIXES[type] || '';
+    const txt = type === 'error' ? stringifyError(args[0]) : format(args[0], ...args.slice(1));
+    const prefix = has(MSG_PREFIXES, type) ? MSG_PREFIXES[type] : '';
 
     (prefix + txt).split('\n').forEach((line, i) => {
       let lineIndent = '';

@@ -23,6 +23,7 @@ it('throws error if created with invalid level', () => {
   expect(
     () =>
       new ToolingLogTextWriter({
+        // @ts-ignore
         level: 'foo',
       })
   ).toThrowErrorMatchingSnapshot();
@@ -32,6 +33,7 @@ it("throws error if writeTo config is not defined or doesn't have a write method
   expect(() => {
     new ToolingLogTextWriter({
       level: 'verbose',
+      // @ts-ignore
       writeTo: null,
     });
   }).toThrowErrorMatchingSnapshot();
@@ -39,13 +41,14 @@ it("throws error if writeTo config is not defined or doesn't have a write method
   expect(() => {
     new ToolingLogTextWriter({
       level: 'verbose',
+      // @ts-ignore
       writeTo: 'foo',
     });
   }).toThrowErrorMatchingSnapshot();
 });
 
-const levels = ['silent', 'verbose', 'debug', 'info', 'warning', 'error'];
-const types = ['verbose', 'debug', 'info', 'warning', 'error', 'success'];
+const levels = ['silent', 'verbose', 'debug', 'info', 'warning', 'error'] as const;
+const types = ['verbose', 'debug', 'info', 'warning', 'error', 'success'] as const;
 for (const level of levels) {
   for (const type of types) {
     it(`level:${level}/type:${type} snapshots`, () => {
@@ -58,7 +61,7 @@ for (const level of levels) {
       });
 
       const written = writer.write({
-        type: type,
+        type,
         indent: 0,
         args: ['foo'],
       });
