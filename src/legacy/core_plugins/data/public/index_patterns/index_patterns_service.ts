@@ -78,6 +78,8 @@ export {
   INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
   isFilterable,
   validateIndexPattern,
+  mockFields,
+  mockIndexPattern,
 } from './utils';
 
 /** @public */

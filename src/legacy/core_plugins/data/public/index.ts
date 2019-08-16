@@ -63,4 +63,6 @@ export {
   IndexPatternMissingIndices,
   NoDefaultIndexPattern,
   NoDefinedIndexPatterns,
+  mockFields,
+  mockIndexPattern,
 } from './index_patterns';
