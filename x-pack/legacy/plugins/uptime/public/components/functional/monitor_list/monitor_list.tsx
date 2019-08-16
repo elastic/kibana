@@ -5,6 +5,7 @@
  */
 
 import { EuiBasicTable, EuiPanel, EuiTitle, EuiButtonIcon, EuiIcon, EuiLink } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
@@ -91,7 +92,8 @@ export const MonitorListComponent = (props: Props) => {
 
   return (
     <Fragment>
-      <EuiPanel paddingSize="s">
+      <EuiPanel>
+        <EuiSpacer size="s" />
         <EuiTitle size="xs">
           <h5>
             <FormattedMessage
@@ -100,6 +102,7 @@ export const MonitorListComponent = (props: Props) => {
             />
           </h5>
         </EuiTitle>
+        <EuiSpacer size="s" />
         <EuiBasicTable
           error={errors ? formatUptimeGraphQLErrorList(errors) : errors}
           loading={loading}
