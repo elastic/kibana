@@ -28,8 +28,8 @@ export function useHTTPRequest<Response>(
         pathname,
         body,
       });
-      setLoading(false);
       setResponse(decode(resp));
+      setLoading(false);
     } catch (err) {
       setLoading(false);
       setError(err);
