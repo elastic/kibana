@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('space attributes', () => {
@@ -18,18 +17,15 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           id: 'api-test-space',
           name: 'api test space',
-          disabledFeatures: [],  
-          color: '#aaBB78'
+          disabledFeatures: [],
+          color: '#aaBB78',
         })
-        .expect(200)
-        .then((response: Record<string, any>) => {
-          expect(response.body).to.eql({
-            id: 'api-test-space',
-            name: 'api test space',
-            disabledFeatures: [],
-            color: '#aaBB78'
-          });
+        .expect(200, {
+          id: 'api-test-space',
+          name: 'api test space',
+          disabledFeatures: [],
+          color: '#aaBB78',
         });
-    });  
+    });
   });
 }
