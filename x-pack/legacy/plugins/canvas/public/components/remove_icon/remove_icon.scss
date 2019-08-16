@@ -1,8 +1,8 @@
 .canvasRemove {
   $clearSize: $euiSize;
+  @include size($clearSize); // sass-lint:disable-line mixins-before-declarations
   position: absolute;
   pointer-events: all;
-  @include size($clearSize);
   background-color: $euiColorLightShade;
   border-radius: $clearSize;
   line-height: $clearSize;
