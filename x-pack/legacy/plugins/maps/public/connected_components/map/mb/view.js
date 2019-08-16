@@ -129,7 +129,7 @@ export class MBMapContainer extends React.Component {
       this.props.addFilters([filter]);
     } catch (error) {
       // TODO notify user why filter was not created
-      console.log(error);
+      console.error(error);
     } finally {
       this.props.disableDrawState();
     }

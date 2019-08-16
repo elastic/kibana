@@ -143,7 +143,6 @@ export class EMSTMSSource extends AbstractTMSSource {
     const emsTMSService = await this._getEMSTMSService();
     const styleSheet = await emsTMSService.getVectorStyleSheet();
     const spriteMeta = await emsTMSService.getSpriteSheetMeta(isRetina);
-    console.log(styleSheet, spriteMeta);
     return {
       vectorStyleSheet: styleSheet,
       spriteMeta: spriteMeta
