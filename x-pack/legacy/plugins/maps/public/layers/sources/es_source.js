@@ -21,6 +21,9 @@ import uuid from 'uuid/v4';
 import { copyPersistentState } from '../../reducers/util';
 import { ES_GEO_FIELD_TYPE } from '../../../common/constants';
 
+const COUNT_PROP_LABEL = 'count';
+const COUNT_PROP_NAME = 'doc_count';
+
 export class AbstractESSource extends AbstractVectorSource {
 
   static icon = 'logoElasticsearch';
@@ -73,12 +76,12 @@ export class AbstractESSource extends AbstractVectorSource {
     return metrics;
   }
 
-  _formatMetricKey() {
-    throw new Error('should implement');
+  _formatMetricKey(metric) {
+    return metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : COUNT_PROP_NAME;
   }
 
-  _formatMetricLabel() {
-    throw new Error('should implement');
+  _formatMetricLabel(metric) {
+    return metric.type !== 'count' ? `${metric.type} of ${metric.field}` : COUNT_PROP_LABEL;
   }
 
   getMetricFields() {
@@ -104,7 +107,6 @@ export class AbstractESSource extends AbstractVectorSource {
       return properties;
     }
 
-
     const metricFields = this.getMetricFields();
     const tooltipProperties = [];
     metricFields.forEach((metricField) => {
@@ -129,7 +131,6 @@ export class AbstractESSource extends AbstractVectorSource {
     return tooltipProperties;
 
   }
-
 
   async _runEsQuery(requestName, searchSource, requestDescription) {
     try {
@@ -290,5 +291,4 @@ export class AbstractESSource extends AbstractVectorSource {
   getId() {
     return this._descriptor.id;
   }
-
 }
