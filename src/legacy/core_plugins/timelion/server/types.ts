@@ -17,19 +17,10 @@
  * under the License.
  */
 
-import _ from 'lodash';
-
-export function functionsRoute(server) {
-  server.route({
-    method: 'GET',
-    path: '/api/timelion/functions',
-    handler: () => {
-      const functionArray = _.map(server.plugins.timelion.functions, function (val, key) {
-        // TODO: This won't work on frozen objects, it should be removed when everything is converted to datasources and chainables
-        return _.extend({}, val, { name: key });
-      });
-
-      return _.sortBy(functionArray, 'name');
-    }
-  });
-}
+export {
+  TimelionFunctionInterface,
+  TimelionFunctionConfig,
+  TimelionFunctionArgs,
+  TimelionFunctionArgsSuggestion,
+  TimelionFunctionArgsTypes,
+} from './lib/classes/timelion_function';
