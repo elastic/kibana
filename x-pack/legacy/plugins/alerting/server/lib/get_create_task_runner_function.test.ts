@@ -47,7 +47,7 @@ const services = {
 };
 
 const getCreateTaskRunnerFunctionParams = {
-  useApiKey: true,
+  isSecurityEnabled: true,
   getServices: jest.fn().mockReturnValue(services),
   alertType: {
     id: 'test',
@@ -287,7 +287,7 @@ test('uses API key when provided', async () => {
 test(`doesn't use API key when not provided`, async () => {
   const createTaskRunner = getCreateTaskRunnerFunction({
     ...getCreateTaskRunnerFunctionParams,
-    useApiKey: false,
+    isSecurityEnabled: false,
   });
   savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
   encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({

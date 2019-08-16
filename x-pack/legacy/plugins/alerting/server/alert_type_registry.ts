@@ -18,7 +18,7 @@ import {
 } from './types';
 
 interface ConstructorOptions {
-  useApiKey: boolean;
+  isSecurityEnabled: boolean;
   getServices: GetServicesFunction;
   taskManager: TaskManager;
   executeAction: ActionsPlugin['execute'];
@@ -35,7 +35,7 @@ export class AlertTypeRegistry {
   private readonly encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
   private readonly spaceIdToNamespace: SpaceIdToNamespaceFunction;
   private readonly getBasePath: GetBasePathFunction;
-  private readonly useApiKey: boolean;
+  private readonly isSecurityEnabled: boolean;
 
   constructor({
     encryptedSavedObjectsPlugin,
@@ -44,7 +44,7 @@ export class AlertTypeRegistry {
     getServices,
     spaceIdToNamespace,
     getBasePath,
-    useApiKey,
+    isSecurityEnabled,
   }: ConstructorOptions) {
     this.taskManager = taskManager;
     this.executeAction = executeAction;
@@ -52,7 +52,7 @@ export class AlertTypeRegistry {
     this.getServices = getServices;
     this.getBasePath = getBasePath;
     this.spaceIdToNamespace = spaceIdToNamespace;
-    this.useApiKey = useApiKey;
+    this.isSecurityEnabled = isSecurityEnabled;
   }
 
   public has(id: string) {
@@ -77,7 +77,7 @@ export class AlertTypeRegistry {
         type: `alerting:${alertType.id}`,
         createTaskRunner: getCreateTaskRunnerFunction({
           alertType,
-          useApiKey: this.useApiKey,
+          isSecurityEnabled: this.isSecurityEnabled,
           getServices: this.getServices,
           executeAction: this.executeAction,
           encryptedSavedObjectsPlugin: this.encryptedSavedObjectsPlugin,

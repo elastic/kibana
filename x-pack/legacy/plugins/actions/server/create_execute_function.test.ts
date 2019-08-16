@@ -18,7 +18,7 @@ describe('execute()', () => {
   test('schedules the action with all given parameters', async () => {
     const executeFn = createExecuteFunction({
       getBasePath,
-      useApiKey: true,
+      isSecurityEnabled: true,
       taskManager: mockTaskManager,
       getScopedSavedObjectsClient: jest.fn().mockReturnValueOnce(savedObjectsClient),
     });
@@ -74,7 +74,7 @@ describe('execute()', () => {
       getBasePath,
       taskManager: mockTaskManager,
       getScopedSavedObjectsClient,
-      useApiKey: true,
+      isSecurityEnabled: true,
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '123',
@@ -110,7 +110,7 @@ describe('execute()', () => {
   test(`doesn't use API keys when not provided`, async () => {
     const getScopedSavedObjectsClient = jest.fn().mockReturnValueOnce(savedObjectsClient);
     const executeFn = createExecuteFunction({
-      useApiKey: false,
+      isSecurityEnabled: false,
       getBasePath,
       taskManager: mockTaskManager,
       getScopedSavedObjectsClient,
@@ -141,12 +141,12 @@ describe('execute()', () => {
     });
   });
 
-  test(`throws an error when useApiKey is true and key not passed in`, async () => {
+  test(`throws an error when isSecurityEnabled is true and key not passed in`, async () => {
     const executeFn = createExecuteFunction({
       getBasePath,
       taskManager: mockTaskManager,
       getScopedSavedObjectsClient: jest.fn().mockReturnValueOnce(savedObjectsClient),
-      useApiKey: true,
+      isSecurityEnabled: true,
     });
     await expect(
       executeFn({

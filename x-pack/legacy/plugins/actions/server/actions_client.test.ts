@@ -29,7 +29,7 @@ function getServices() {
 
 const actionTypeRegistryParams = {
   getServices,
-  useApiKey: true,
+  isSecurityEnabled: true,
   taskManager: mockTaskManager,
   encryptedSavedObjectsPlugin: mockEncryptedSavedObjectsPlugin,
   spaceIdToNamespace: jest.fn().mockReturnValue(undefined),

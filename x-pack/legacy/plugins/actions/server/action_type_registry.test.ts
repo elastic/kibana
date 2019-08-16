@@ -26,7 +26,7 @@ function getServices() {
 }
 const actionTypeRegistryParams = {
   getServices,
-  useApiKey: true,
+  isSecurityEnabled: true,
   taskManager: mockTaskManager,
   encryptedSavedObjectsPlugin: encryptedSavedObjectsMock.create(),
   spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
@@ -67,7 +67,7 @@ describe('register()', () => {
     `);
     expect(getCreateTaskRunnerFunction).toHaveBeenCalledWith({
       actionTypeRegistry,
-      useApiKey: true,
+      isSecurityEnabled: true,
       encryptedSavedObjectsPlugin: actionTypeRegistryParams.encryptedSavedObjectsPlugin,
       getServices: actionTypeRegistryParams.getServices,
       getBasePath: actionTypeRegistryParams.getBasePath,

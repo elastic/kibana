@@ -95,7 +95,7 @@ export function init(server: Legacy.Server) {
 
   const alertTypeRegistry = new AlertTypeRegistry({
     getServices,
-    useApiKey: security.isEnabled,
+    isSecurityEnabled: security.isEnabled,
     taskManager: taskManager!,
     executeAction: server.plugins.actions!.execute,
     encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects!,

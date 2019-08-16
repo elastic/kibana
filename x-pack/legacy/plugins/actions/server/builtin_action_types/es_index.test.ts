@@ -38,7 +38,7 @@ const mockEncryptedSavedObjectsPlugin = encryptedSavedObjectsMock.create();
 beforeAll(() => {
   actionTypeRegistry = new ActionTypeRegistry({
     getServices,
-    useApiKey: true,
+    isSecurityEnabled: true,
     taskManager: taskManagerMock.create(),
     encryptedSavedObjectsPlugin: mockEncryptedSavedObjectsPlugin,
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
