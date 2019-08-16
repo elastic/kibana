@@ -25,8 +25,12 @@ describe('AutoScale', () => {
       expect(computeScale(mockElement(2000, 2000), mockElement(1000, 1000))).toBe(1);
     });
 
+    it('is never under 0.3', () => {
+      expect(computeScale(mockElement(2000, 1000), mockElement(1000, 10000))).toBe(0.3);
+    });
+
     it('is the lesser of the x or y scale', () => {
-      expect(computeScale(mockElement(1000, 2000), mockElement(3000, 8000))).toBe(0.25);
+      expect(computeScale(mockElement(2000, 2000), mockElement(3000, 5000))).toBe(0.4);
       expect(computeScale(mockElement(2000, 3000), mockElement(4000, 3200))).toBe(0.5);
     });
   });
@@ -41,10 +45,10 @@ describe('AutoScale', () => {
         )
       ).toMatchInlineSnapshot(`
         <div
-          style="display:flex;justify-content:center;align-items:center;max-width:100%;max-height:100%"
+          style="display:flex;justify-content:center;align-items:center;max-width:100%;max-height:100%;overflow:hidden"
         >
           <div
-            style="transform:scale(0);margin-bottom:-0.5em"
+            style="transform:scale(0)"
           >
             <h1>
               Hoi!

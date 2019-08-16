@@ -58,24 +58,31 @@ describe('metric_expression', () => {
               "justifyContent": "center",
               "maxHeight": "100%",
               "maxWidth": "100%",
+              "textAlign": "center",
             }
           }
         >
-          <AutoScale
-            style={
-              Object {
-                "fontSize": "60pt",
-                "fontWeight": 600,
+          <AutoScale>
+            <div
+              style={
+                Object {
+                  "fontSize": "60pt",
+                  "fontWeight": 600,
+                }
               }
-            }
-          >
-            10110
+            >
+              10110
+            </div>
+            <div
+              style={
+                Object {
+                  "fontSize": "24pt",
+                }
+              }
+            >
+              My fanci metric chart
+            </div>
           </AutoScale>
-          <EuiText
-            textAlign="center"
-          >
-            My fanci metric chart
-          </EuiText>
         </div>
       `);
     });
