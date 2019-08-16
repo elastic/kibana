@@ -24,11 +24,9 @@ interface UrlScreenshot {
 function generatePngObservableFn(server: KbnServer) {
   const screenshotsObservable = screenshotsObservableFactory(server);
   const captureConcurrency = 1;
-  const createPngWithScreenshots = async ({
-    urlScreenshots,
-  }: {
-    urlScreenshots: UrlScreenshot[];
-  }) => {
+
+  // prettier-ignore
+  const createPngWithScreenshots = async ({ urlScreenshots }: { urlScreenshots: UrlScreenshot[] }) => {
     if (urlScreenshots.length !== 1) {
       throw new Error(
         `Expected there to be 1 URL screenshot, but there are ${urlScreenshots.length}`
