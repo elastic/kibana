@@ -1960,10 +1960,10 @@
   resolved "https://registry.yarnpkg.com/@mapbox/whoots-js/-/whoots-js-3.1.0.tgz#497c67a1cef50d1a2459ba60f315e448d2ad87fe"
   integrity sha512-Es6WcD0nO5l+2BOQS4uLfNPYQaNDfbot3X1XUoloz+x0mPDS3eeORZJl06HXjwBG1fOGwCRnzK88LMdxKRrd6Q==
 
-"@mattapperson/slapshot@1.4.0":
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/@mattapperson/slapshot/-/slapshot-1.4.0.tgz#d1ba04ad23ca139601fcf7a74ef43ec3dd184d5e"
-  integrity sha512-P73fBpfevcMKAtDFsq2Z2VVW+tUZ2yNeNje3du5kb+ZH9RJUYFmpo+lCQpTJGyq9lzyhKlF3JIhfoGhz5RzgWg==
+"@mattapperson/slapshot@1.4.1":
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/@mattapperson/slapshot/-/slapshot-1.4.1.tgz#b9b36e8a4f0a10d323338d38621ef237a030d5c5"
+  integrity sha512-J10/RmnFZwCSSJRgJfkiXq0t+WkRv0+6t/cjGAoPQOPbk+eHHm6B7mI3bb/5HnbWFd0Qr5ONDuGVQTbkvXsCCw==
   dependencies:
     caller-callsite "^4.0.0"
     get-caller-file "^2.0.5"
