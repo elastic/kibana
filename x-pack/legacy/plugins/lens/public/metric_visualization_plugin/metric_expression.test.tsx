@@ -48,7 +48,8 @@ describe('metric_expression', () => {
     test('it renders the title and value', () => {
       const { data, args } = sampleArgs();
 
-      expect(shallow(<MetricChart data={data} args={args} />)).toMatchInlineSnapshot(`
+      expect(shallow(<MetricChart data={data} args={args} formatFactory={x => x} />))
+        .toMatchInlineSnapshot(`
         <div
           style={
             Object {
