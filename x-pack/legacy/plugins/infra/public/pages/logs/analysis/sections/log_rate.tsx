@@ -76,7 +76,7 @@ export const LogRateResults = ({
 
   const tooltipProps = {
     headerFormatter: useCallback(
-      (data: TooltipValue) => moment.utc(data.value).format(dateFormat || 'Y-MM-DD HH:mm:ss.SSS'),
+      (data: TooltipValue) => moment(data.value).format(dateFormat || 'Y-MM-DD HH:mm:ss.SSS'),
       [dateFormat]
     ),
   };
