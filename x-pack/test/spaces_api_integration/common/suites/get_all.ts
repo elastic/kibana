@@ -82,7 +82,7 @@ export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
         it(`should return ${tests.copySavedObjectsPurpose.statusCode}`, async () => {
           return supertest
             .get(`${getUrlPrefix(spaceId)}/api/spaces/space`)
-            .query({ purpose: 'copySavedObjects' })
+            .query({ purpose: 'copySavedObjectsIntoSpace' })
             .auth(user.username, user.password)
             .expect(tests.copySavedObjectsPurpose.statusCode)
             .then(tests.copySavedObjectsPurpose.response);

@@ -253,7 +253,7 @@ describe('#getAll', () => {
           mockAuthorization.actions.login,
       },
       {
-        purpose: 'copySavedObjects',
+        purpose: 'copySavedObjectsIntoSpace',
         expectedPrivilege: (mockAuthorization: MockedAuthorization) =>
           mockAuthorization.actions.ui.get('savedObjectsManagement', 'copyIntoSpace'),
       },

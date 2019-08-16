@@ -14,14 +14,14 @@ import { SpacesAuditLogger } from '../audit_logger';
 import { SpacesConfigType } from '../../new_platform/config';
 
 type SpacesClientRequestFacade = Legacy.Request | KibanaRequest;
-export type GetSpacePurpose = 'any' | 'copySavedObjects';
+export type GetSpacePurpose = 'any' | 'copySavedObjectsIntoSpace';
 
 const PURPOSE_PRIVILEGE_MAP: Record<
   GetSpacePurpose,
   (authorization: AuthorizationService) => string
 > = {
   any: authorization => authorization.actions.login,
-  copySavedObjects: authorization =>
+  copySavedObjectsIntoSpace: authorization =>
     authorization.actions.ui.get('savedObjectsManagement', 'copyIntoSpace'),
 };
 

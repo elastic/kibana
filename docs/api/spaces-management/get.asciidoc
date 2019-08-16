@@ -24,7 +24,7 @@ GET /api/spaces/space?purpose=copySavedObjects
 ===== Request Query Parameters
 purpose (optional) :: Retrieve the available spaces for a specific purpose. This parameter only has an effect when security is enabled.
 `any` (default) ::: Retrieves all spaces the user is authorized to access.
-`copySavedObjects` ::: Retrieves all spaces the user is authorized to copy saved objects into via Saved Objects Management.
+`copySavedObjectsIntoSpace` ::: Retrieves all spaces the user is authorized to copy saved objects into via Saved Objects Management.
 
 
 ===== Response

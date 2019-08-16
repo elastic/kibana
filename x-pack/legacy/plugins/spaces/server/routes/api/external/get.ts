@@ -43,7 +43,7 @@ export function initGetSpacesApi(deps: ExternalRouteDeps) {
       validate: {
         query: Joi.object().keys({
           purpose: Joi.string()
-            .valid('any', 'copySavedObjects')
+            .valid('any', 'copySavedObjectsIntoSpace')
             .default('any'),
         }),
       },

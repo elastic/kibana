@@ -22,7 +22,7 @@ exports[`#getAll useRbacForRequest is true throws Boom.badRequest when an invali
 
 exports[`#getAll useRbacForRequest is true with purpose='any' throws Boom.forbidden when user isn't authorized for any spaces 1`] = `"Forbidden"`;
 
-exports[`#getAll useRbacForRequest is true with purpose='copySavedObjects' throws Boom.forbidden when user isn't authorized for any spaces 1`] = `"Forbidden"`;
+exports[`#getAll useRbacForRequest is true with purpose='copySavedObjectsIntoSpace' throws Boom.forbidden when user isn't authorized for any spaces 1`] = `"Forbidden"`;
 
 exports[`#getAll useRbacForRequest is true with purpose='undefined' throws Boom.forbidden when user isn't authorized for any spaces 1`] = `"Forbidden"`;
 
