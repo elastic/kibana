@@ -10,21 +10,6 @@ exports[`PingList component renders sorted list without errors 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <EuiTitle
-        size="xs"
-      >
-        <h4>
-          <FormattedMessage
-            defaultMessage="History"
-            id="xpack.uptime.pingList.checkHistoryTitle"
-            values={Object {}}
-          />
-        </h4>
-      </EuiTitle>
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
       <EuiBadge
         color="hollow"
       >
@@ -32,11 +17,28 @@ exports[`PingList component renders sorted list without errors 1`] = `
       </EuiBadge>
     </EuiFlexItem>
   </EuiFlexGroup>
+  <EuiSpacer
+    size="s"
+  />
   <EuiPanel
     grow={true}
     hasShadow={false}
-    paddingSize="s"
+    paddingSize="m"
   >
+    <EuiTitle
+      size="xs"
+    >
+      <h4>
+        <FormattedMessage
+          defaultMessage="History"
+          id="xpack.uptime.pingList.checkHistoryTitle"
+          values={Object {}}
+        />
+      </h4>
+    </EuiTitle>
+    <EuiSpacer
+      size="s"
+    />
     <EuiFlexGroup
       justifyContent="spaceBetween"
     >
