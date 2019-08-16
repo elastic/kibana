@@ -60,7 +60,7 @@ const clearEndTimeLabel = i18n.translate('xpack.infra.analysisSetup.clearEndTime
 
 function selectedDateToParam(selectedDate: Moment | null) {
   if (selectedDate) {
-    return selectedDate.unix();
+    return selectedDate.valueOf(); // To ms unix timestamp
   }
   return undefined;
 }
