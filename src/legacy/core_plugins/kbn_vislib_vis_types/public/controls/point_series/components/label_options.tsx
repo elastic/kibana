@@ -29,20 +29,22 @@ import { SelectOption } from '../../select';
 import { NumberInputOption } from '../../number_input';
 import { rotateOptions } from './../utils';
 
-function LabelOptions({ stateParams, setValue }: VisOptionsProps<BasicVislibParams>) {
-  const setCategoryAxisLabel = <T extends keyof Axis['labels']>(
-    paramName: T,
-    value: Axis['labels'][T]
-  ) => {
-    const categoryAxes = [...stateParams.categoryAxes];
-    categoryAxes[0] = {
-      ...categoryAxes[0],
+interface LabelOptionsProps extends VisOptionsProps<BasicVislibParams> {
+  axis: Axis;
+  axisName: 'categoryAxes' | 'valueAxes';
+}
+
+function LabelOptions({ stateParams, setValue, axis, axisName }: LabelOptionsProps) {
+  const setAxisLabel = <T extends keyof Axis['labels']>(paramName: T, value: Axis['labels'][T]) => {
+    const axes = [...stateParams[axisName]];
+    axes[0] = {
+      ...axes[0],
       labels: {
-        ...categoryAxes[0].labels,
+        ...axes[0].labels,
         [paramName]: value,
       },
     };
-    setValue('categoryAxes', categoryAxes);
+    setValue(axisName, axes);
   };
 
   return (
@@ -64,11 +66,12 @@ function LabelOptions({ stateParams, setValue }: VisOptionsProps<BasicVislibPara
           }
         )}
         paramName="show"
-        value={stateParams.categoryAxes[0].labels.show}
-        setValue={setCategoryAxisLabel}
+        value={axis.labels.show}
+        setValue={setAxisLabel}
       />
 
       <SwitchOption
+        dataTestSubj={`${axisName === 'valueAxes' ? 'y' : 'x'}AxisFilterLabelsCheckbox-${axis.id}`}
         label={i18n.translate(
           'kbnVislibVisTypes.controls.pointSeries.categoryAxis.filterLabelsLabel',
           {
@@ -76,8 +79,8 @@ function LabelOptions({ stateParams, setValue }: VisOptionsProps<BasicVislibPara
           }
         )}
         paramName="filter"
-        value={stateParams.categoryAxes[0].labels.filter}
-        setValue={setCategoryAxisLabel}
+        value={axis.labels.filter}
+        setValue={setAxisLabel}
       />
 
       <SelectOption
@@ -86,8 +89,8 @@ function LabelOptions({ stateParams, setValue }: VisOptionsProps<BasicVislibPara
         })}
         options={rotateOptions}
         paramName="rotate"
-        value={stateParams.categoryAxes[0].labels.rotate}
-        setValue={setCategoryAxisLabel}
+        value={axis.labels.rotate}
+        setValue={setAxisLabel}
       />
 
       <NumberInputOption
@@ -95,8 +98,8 @@ function LabelOptions({ stateParams, setValue }: VisOptionsProps<BasicVislibPara
           defaultMessage: 'Truncate',
         })}
         paramName="truncate"
-        value={stateParams.categoryAxes[0].labels.truncate}
-        setValue={setCategoryAxisLabel}
+        value={axis.labels.truncate}
+        setValue={setAxisLabel}
       />
     </>
   );

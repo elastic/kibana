@@ -35,6 +35,8 @@ import {
   ScaleTypes,
   AxisModes,
   ROTATES,
+  getAxisModes,
+  getScaleTypes
 } from './utils/collections';
 
 export default function PointSeriesVisType(Private) {
@@ -119,8 +121,8 @@ export default function PointSeriesVisType(Private) {
         legendPositions: getLegendPositions(),
         positions: getLegendPositions(),
         chartTypes: getChartTypes(),
-        axisModes: ['normal', 'percentage', 'wiggle', 'silhouette'],
-        scaleTypes: ['linear', 'log', 'square root'],
+        axisModes: getAxisModes(),
+        scaleTypes: getScaleTypes(),
         chartModes: getChartModes(),
         interpolationModes: getInterpolationModes(),
       },

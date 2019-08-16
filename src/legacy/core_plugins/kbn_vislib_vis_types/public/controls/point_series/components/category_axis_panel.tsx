@@ -95,7 +95,7 @@ function CategoryAxisPanel(props: VisOptionsProps<BasicVislibParams>) {
         >
           <>
             <EuiSpacer size="m" />
-            <LabelOptions {...props} />
+            <LabelOptions axis={stateParams.categoryAxes[0]} axisName="categoryAxes" {...props} />
           </>
         </EuiAccordion>
       </EuiPanel>

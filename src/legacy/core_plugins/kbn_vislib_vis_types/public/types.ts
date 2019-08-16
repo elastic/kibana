@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { LegendPositions, ChartModes, ChartTypes } from './utils/collections';
+import { LegendPositions, ChartModes, ChartTypes, AxisModes } from './utils/collections';
 
 export interface CommonVislibParams {
   addTooltip: boolean;
@@ -34,7 +34,7 @@ export interface Axis {
   id: string;
   labels: Labels;
   position: LegendPositions;
-  scale: { type: string };
+  scale: { type: string; mode?: AxisModes; defaultYExtents?: boolean };
   show: boolean;
   style: object;
   title: { text: string };
