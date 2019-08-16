@@ -71,7 +71,7 @@ export const awsNetworkBytes: InfraMetricModelCreator = (
         {
           id: 'inverted-deriv-csum-sum-net-in',
           type: InfraMetricModelMetricType.calculation,
-          variables: [{ id: 'var-rate', name: 'rate', field: 'deriv-cumsum-sum-net-in' }],
+          variables: [{ id: 'var-rate', name: 'rate', field: 'deriv-csum-sum-net-in' }],
           script: 'params.rate * -1',
         },
       ],
