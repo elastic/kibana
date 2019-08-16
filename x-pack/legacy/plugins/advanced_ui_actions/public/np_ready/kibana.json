@@ -1,0 +1,9 @@
+{
+  "id": "advanced_ui_actions",
+  "version": "kibana",
+  "requiredPlugins": [
+    "embeddable"
+  ],
+  "server": false,
+  "ui": true
+}
