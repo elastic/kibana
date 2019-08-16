@@ -33,7 +33,7 @@
 
 // helper class that hides elements when rendered in percy
 @media only percy {
-  .hide-in-percy {
+  .hideInPercy {
     visibility: hidden;
   }
 }
