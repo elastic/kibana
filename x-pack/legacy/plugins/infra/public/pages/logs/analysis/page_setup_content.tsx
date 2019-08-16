@@ -22,6 +22,7 @@ import {
   EuiDatePicker,
   EuiFlexGroup,
   EuiFormControlLayout,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -31,6 +32,7 @@ import { useTrackPageview } from '../../../hooks/use_track_metric';
 interface AnalysisSetupContentProps {
   setupMlModule: (startTime: number | undefined, endTime: number | undefined) => Promise<any>;
   isSettingUp: boolean;
+  didSetupFail: boolean;
 }
 
 const startTimeLabel = i18n.translate('xpack.infra.analysisSetup.startTimeLabel', {
@@ -51,6 +53,9 @@ const endTimeDefaultDescription = i18n.translate(
     defaultMessage: 'Indefinitely',
   }
 );
+const errorTitle = i18n.translate('xpack.infra.analysisSetup.errorTitle', {
+  defaultMessage: 'Sorry, there was an error setting up Machine Learning',
+});
 
 function selectedDateToParam(selectedDate: Moment | null) {
   if (selectedDate) {
@@ -62,6 +67,7 @@ function selectedDateToParam(selectedDate: Moment | null) {
 export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentProps> = ({
   setupMlModule,
   isSettingUp,
+  didSetupFail,
 }) => {
   useTrackPageview({ app: 'infra_logs', path: 'analysis_setup' });
   useTrackPageview({ app: 'infra_logs', path: 'analysis_setup', delay: 15000 });
@@ -184,6 +190,16 @@ export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentP
                 />
               </EuiButton>
             </EuiDescribedFormGroup>
+            {didSetupFail && (
+              <EuiCallOut color="danger" iconType="alert" title={errorTitle}>
+                <EuiText>
+                  <FormattedMessage
+                    id="xpack.infra.analysisSetup.errorText"
+                    defaultMessage="Please try again"
+                  />
+                </EuiText>
+              </EuiCallOut>
+            )}
           </EuiPageContentBody>
         </AnalysisPageContent>
       </EuiPageBody>

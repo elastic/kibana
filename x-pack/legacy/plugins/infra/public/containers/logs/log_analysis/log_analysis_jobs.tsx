@@ -114,6 +114,11 @@ export const useLogAnalysisJobs = ({
     setupMlModuleRequest.state,
   ]);
 
+  const didSetupFail = useMemo(
+    () => !isSettingUpMlModule && setupMlModuleRequest.state !== 'uninitialized' && isSetupRequired,
+    [setupMlModuleRequest.state, jobStatus]
+  );
+
   return {
     jobStatus,
     isSetupRequired,
@@ -121,6 +126,7 @@ export const useLogAnalysisJobs = ({
     setupMlModule,
     setupMlModuleRequest,
     isSettingUpMlModule,
+    didSetupFail,
   };
 };
 

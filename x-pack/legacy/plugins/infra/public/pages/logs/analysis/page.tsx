@@ -23,6 +23,7 @@ export const AnalysisPage = () => {
     isLoadingSetupStatus,
     setupMlModule,
     isSettingUpMlModule,
+    didSetupFail,
   } = useLogAnalysisJobs({
     indexPattern: source ? source.configuration.logAlias : '',
     sourceId,
@@ -40,7 +41,11 @@ export const AnalysisPage = () => {
             })}
           />
         ) : isSetupRequired ? (
-          <AnalysisSetupContent isSettingUp={isSettingUpMlModule} setupMlModule={setupMlModule} />
+          <AnalysisSetupContent
+            didSetupFail={didSetupFail}
+            isSettingUp={isSettingUpMlModule}
+            setupMlModule={setupMlModule}
+          />
         ) : (
           <AnalysisResultsContent />
         )}
