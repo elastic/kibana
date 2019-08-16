@@ -90,8 +90,8 @@ export function findReason(settingsSource, context, isCloud) {
           return exporter.type !== 'local' && isEnabledOrDefault(exporter.enabled);
         });
         if (allEnabledRemote.length > 0 && allEnabledLocal.length === 0) {
-          let ret = {found: true};
-/          if (isCloud) {
+          let ret = {};
+          if (isCloud) {
             ret = {
               found: true,
               reason: {
