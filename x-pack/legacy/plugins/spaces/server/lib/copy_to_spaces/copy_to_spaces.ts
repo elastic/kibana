@@ -10,6 +10,7 @@ import { SavedObjectsClientProviderOptions } from 'src/core/server';
 import { spaceIdToNamespace } from '../utils/namespace';
 import { CopyOptions, CopyResponse } from './types';
 import { getEligibleTypes } from './lib/get_eligible_types';
+import { createReadableStreamFromArray } from './lib/readable_stream_from_array';
 import { createEmptyFailureResponse } from './lib/create_empty_failure_response';
 import { readStreamToCompletion } from './lib/read_stream_to_completion';
 
@@ -77,13 +78,7 @@ export function copySavedObjectsToSpacesFactory(
     for (const spaceId of destinationSpaceIds) {
       response[spaceId] = await importObjectsToSpace(
         spaceId,
-        new Readable({
-          objectMode: true,
-          read() {
-            exportedSavedObjects.forEach(object => this.push(object));
-            this.push(null);
-          },
-        }),
+        createReadableStreamFromArray(exportedSavedObjects),
         options
       );
     }

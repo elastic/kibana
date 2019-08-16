@@ -11,6 +11,7 @@ import { CopyOptions, ResolveConflictsOptions, CopyResponse } from './types';
 import { getEligibleTypes } from './lib/get_eligible_types';
 import { createEmptyFailureResponse } from './lib/create_empty_failure_response';
 import { readStreamToCompletion } from './lib/read_stream_to_completion';
+import { createReadableStreamFromArray } from './lib/readable_stream_from_array';
 
 export function resolveCopySavedObjectsToSpacesConflictsFactory(
   savedObjectsClient: SavedObjectsClientContract,
@@ -82,13 +83,7 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
 
       response[spaceId] = await resolveConflictsForSpace(
         spaceId,
-        new Readable({
-          objectMode: true,
-          read() {
-            exportedSavedObjects.forEach(object => this.push(object));
-            this.push(null);
-          },
-        }),
+        createReadableStreamFromArray(exportedSavedObjects),
         retries
       );
     }
