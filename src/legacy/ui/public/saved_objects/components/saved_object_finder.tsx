@@ -19,12 +19,15 @@
 
 import React from 'react';
 import { npStart } from 'ui/new_platform';
-
 import { IconType } from '@elastic/eui';
-
 import { SavedObjectAttributes } from 'src/core/server';
 import { SimpleSavedObject } from 'src/core/public';
 import { SavedObjectFinder as SavedObjectFinderNP } from '../../../../../plugins/kibana_react/public';
+
+/**
+ * DO NOT USE THIS COMPONENT, IT IS DEPRECATED.
+ * Use the one in `src/plugins/kibana_react` instead.
+ */
 
 export interface SavedObjectMetaData<T extends SavedObjectAttributes> {
   type: string;
@@ -35,23 +38,63 @@ export interface SavedObjectMetaData<T extends SavedObjectAttributes> {
 }
 
 interface BaseSavedObjectFinder {
+  /**
+   * @deprecated
+   *
+   * Use component in `src/plugins/kibana_react` instead.
+   */
   onChoose?: (
     id: SimpleSavedObject<SavedObjectAttributes>['id'],
     type: SimpleSavedObject<SavedObjectAttributes>['type'],
     name: string
   ) => void;
+  /**
+   * @deprecated
+   *
+   * Use component in `src/plugins/kibana_react` instead.
+   */
   noItemsMessage?: React.ReactNode;
+  /**
+   * @deprecated
+   *
+   * Use component in `src/plugins/kibana_react` instead.
+   */
   savedObjectMetaData: Array<SavedObjectMetaData<SavedObjectAttributes>>;
+  /**
+   * @deprecated
+   *
+   * Use component in `src/plugins/kibana_react` instead.
+   */
   showFilter?: boolean;
 }
 
 interface SavedObjectFinderFixedPage extends BaseSavedObjectFinder {
+  /**
+   * @deprecated
+   *
+   * Use component in `src/plugins/kibana_react` instead.
+   */
   initialPageSize?: undefined;
+  /**
+   * @deprecated
+   *
+   * Use component in `src/plugins/kibana_react` instead.
+   */
   fixedPageSize: number;
 }
 
 interface SavedObjectFinderInitialPageSize extends BaseSavedObjectFinder {
+  /**
+   * @deprecated
+   *
+   * Use component in `src/plugins/kibana_react` instead.
+   */
   initialPageSize?: 5 | 10 | 15 | 25;
+  /**
+   * @deprecated
+   *
+   * Use component in `src/plugins/kibana_react` instead.
+   */
   fixedPageSize?: undefined;
 }
 type SavedObjectFinderProps = SavedObjectFinderFixedPage | SavedObjectFinderInitialPageSize;
