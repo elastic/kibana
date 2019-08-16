@@ -21,7 +21,7 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { PointSeriesOptions } from './editors/point_series';
-import { SeriesOptions } from './controls/point_series/series_options';
+import { MetricsAxisOptions } from './controls/point_series/metrics_axis_options';
 import {
   getLegendPositions,
   LegendPositions,
@@ -31,6 +31,10 @@ import {
   ChartModes,
   getInterpolationModes,
   InterpolationModes,
+  AxisTypes,
+  ScaleTypes,
+  AxisModes,
+  ROTATES,
 } from './utils/collections';
 
 export default function PointSeriesVisType(Private) {
@@ -51,12 +55,12 @@ export default function PointSeriesVisType(Private) {
         categoryAxes: [
           {
             id: 'CategoryAxis-1',
-            type: 'category',
-            position: 'bottom',
+            type: AxisTypes.CATEGORY,
+            position: LegendPositions.BOTTOM,
             show: true,
             style: {},
             scale: {
-              type: 'linear'
+              type: ScaleTypes.LINEAR
             },
             labels: {
               show: true,
@@ -70,17 +74,17 @@ export default function PointSeriesVisType(Private) {
           {
             id: 'ValueAxis-1',
             name: 'LeftAxis-1',
-            type: 'value',
-            position: 'left',
+            type: AxisTypes.VALUE,
+            position: LegendPositions.LEFT,
             show: true,
             style: {},
             scale: {
-              type: 'linear',
-              mode: 'normal'
+              type: ScaleTypes.LINEAR,
+              mode: AxisModes.NORMAL
             },
             labels: {
               show: true,
-              rotate: 0,
+              rotate: ROTATES.HORIZONTAL,
               filter: false,
               truncate: 100
             },
@@ -113,7 +117,7 @@ export default function PointSeriesVisType(Private) {
     editorConfig: {
       collections: {
         legendPositions: getLegendPositions(),
-        positions: ['top', 'left', 'right', 'bottom'],
+        positions: getLegendPositions(),
         chartTypes: getChartTypes(),
         axisModes: ['normal', 'percentage', 'wiggle', 'silhouette'],
         scaleTypes: ['linear', 'log', 'square root'],
@@ -124,7 +128,7 @@ export default function PointSeriesVisType(Private) {
         {
           name: 'advanced',
           title: 'Metrics & Axes',
-          editor: SeriesOptions
+          editor: MetricsAxisOptions
         },
         { name: 'options', title: 'Panel Settings', editor: PointSeriesOptions },
       ],

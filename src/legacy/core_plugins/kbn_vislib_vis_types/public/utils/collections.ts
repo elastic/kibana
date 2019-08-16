@@ -127,4 +127,83 @@ const getInterpolationModes = () => [
   },
 ];
 
-export { getLegendPositions, getChartTypes, getChartModes, getInterpolationModes };
+export enum AxisTypes {
+  CATEGORY = 'category',
+  VALUE = 'value',
+}
+
+export enum ScaleTypes {
+  LINEAR = 'linear',
+  LOG = 'log',
+  SQUARE_ROOT = 'square root',
+}
+
+const getScaleTypes = () => [
+  {
+    text: i18n.translate('kbnVislibVisTypes.scaleTypes.linearText', {
+      defaultMessage: 'Linear',
+    }),
+    value: InterpolationModes.LINEAR,
+  },
+  {
+    text: i18n.translate('kbnVislibVisTypes.scaleTypes.logText', {
+      defaultMessage: 'Log',
+    }),
+    value: InterpolationModes.CARDINAL,
+  },
+  {
+    text: i18n.translate('kbnVislibVisTypes.scaleTypes.squareRootText', {
+      defaultMessage: 'Square root',
+    }),
+    value: InterpolationModes.STEP_AFTER,
+  },
+];
+
+export enum AxisModes {
+  NORMAL = 'normal',
+  PERCENTAGE = 'percentage',
+  WIGGLE = 'wiggle',
+  SILHOUETTE = 'silhouette',
+}
+
+const getAxisModes = () => [
+  {
+    text: i18n.translate('kbnVislibVisTypes.axisModes.normalText', {
+      defaultMessage: 'Normal',
+    }),
+    value: InterpolationModes.LINEAR,
+  },
+  {
+    text: i18n.translate('kbnVislibVisTypes.axisModes.percentageText', {
+      defaultMessage: 'Percentage',
+    }),
+    value: InterpolationModes.CARDINAL,
+  },
+  {
+    text: i18n.translate('kbnVislibVisTypes.axisModes.wiggleText', {
+      defaultMessage: 'Wiggle',
+    }),
+    value: InterpolationModes.STEP_AFTER,
+  },
+  {
+    text: i18n.translate('kbnVislibVisTypes.axisModes.silhouetteText', {
+      defaultMessage: 'Silhouette',
+    }),
+    value: InterpolationModes.STEP_AFTER,
+  },
+];
+
+export enum ROTATES {
+  HORIZONTAL = 0,
+  VERTICAL = 90,
+  ANGLED = 75,
+}
+
+export {
+  getLegendPositions,
+  getChartTypes,
+  getChartModes,
+  getInterpolationModes,
+  getScaleTypes,
+  getAxisModes,
+};

@@ -1,0 +1,105 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import React from 'react';
+import { EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import { VisOptionsProps } from 'ui/vis/editors/default';
+import { BasicVislibParams, Axis } from '../../../types';
+import { SwitchOption } from '../../switch';
+import { SelectOption } from '../../select';
+import { NumberInputOption } from '../../number_input';
+import { rotateOptions } from './../utils';
+
+function LabelOptions({ stateParams, setValue }: VisOptionsProps<BasicVislibParams>) {
+  const setCategoryAxisLabel = <T extends keyof Axis['labels']>(
+    paramName: T,
+    value: Axis['labels'][T]
+  ) => {
+    const categoryAxes = [...stateParams.categoryAxes];
+    categoryAxes[0] = {
+      ...categoryAxes[0],
+      labels: {
+        ...categoryAxes[0].labels,
+        [paramName]: value,
+      },
+    };
+    setValue('categoryAxes', categoryAxes);
+  };
+
+  return (
+    <>
+      <EuiTitle size="xs">
+        <h3>
+          <FormattedMessage
+            id="kbnVislibVisTypes.controls.pointSeries.categoryAxis.labelsTitle"
+            defaultMessage="Labels"
+          />
+        </h3>
+      </EuiTitle>
+
+      <SwitchOption
+        label={i18n.translate(
+          'kbnVislibVisTypes.controls.pointSeries.categoryAxis.showLabelsLabel',
+          {
+            defaultMessage: 'Show labels',
+          }
+        )}
+        paramName="show"
+        value={stateParams.categoryAxes[0].labels.show}
+        setValue={setCategoryAxisLabel}
+      />
+
+      <SwitchOption
+        label={i18n.translate(
+          'kbnVislibVisTypes.controls.pointSeries.categoryAxis.filterLabelsLabel',
+          {
+            defaultMessage: 'Filter labels',
+          }
+        )}
+        paramName="filter"
+        value={stateParams.categoryAxes[0].labels.filter}
+        setValue={setCategoryAxisLabel}
+      />
+
+      <SelectOption
+        label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.categoryAxis.rotateLabel', {
+          defaultMessage: 'Rotate',
+        })}
+        options={rotateOptions}
+        paramName="rotate"
+        value={stateParams.categoryAxes[0].labels.rotate}
+        setValue={setCategoryAxisLabel}
+      />
+
+      <NumberInputOption
+        label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.categoryAxis.truncateLabel', {
+          defaultMessage: 'Truncate',
+        })}
+        paramName="truncate"
+        value={stateParams.categoryAxes[0].labels.truncate}
+        setValue={setCategoryAxisLabel}
+      />
+    </>
+  );
+}
+
+export { LabelOptions };

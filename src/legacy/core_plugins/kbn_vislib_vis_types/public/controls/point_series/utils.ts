@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { LegendPositions } from '../../utils/collections';
+import { i18n } from '@kbn/i18n';
+import { LegendPositions, ROTATES } from '../../utils/collections';
 
 function mapPositionOpposite(position: LegendPositions) {
   switch (position) {
@@ -34,4 +35,25 @@ function mapPositionOpposite(position: LegendPositions) {
   }
 }
 
-export { mapPositionOpposite };
+const rotateOptions = [
+  {
+    text: i18n.translate('kbnVislibVisTypes.categoryAxis.rotate.horizontalText', {
+      defaultMessage: 'Horizontal',
+    }),
+    value: ROTATES.HORIZONTAL,
+  },
+  {
+    text: i18n.translate('kbnVislibVisTypes.categoryAxis.rotate.verticalText', {
+      defaultMessage: 'Vertical',
+    }),
+    value: ROTATES.VERTICAL,
+  },
+  {
+    text: i18n.translate('kbnVislibVisTypes.categoryAxis.rotate.angledText', {
+      defaultMessage: 'Angled',
+    }),
+    value: ROTATES.ANGLED,
+  },
+];
+
+export { mapPositionOpposite, rotateOptions };

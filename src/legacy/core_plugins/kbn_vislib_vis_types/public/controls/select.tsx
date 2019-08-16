@@ -20,7 +20,7 @@
 import React from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 
-interface SelectOptionProps<ParamName extends string, ValidParamValues extends string> {
+interface SelectOptionProps<ParamName extends string, ValidParamValues extends string | number> {
   id?: string;
   label: string;
   labelAppend?: React.ReactNode;
@@ -32,7 +32,7 @@ interface SelectOptionProps<ParamName extends string, ValidParamValues extends s
 
 const emptyValue = { text: '', value: 'EMPTY_VALUE', disabled: true, hidden: true };
 
-function SelectOption<ParamName extends string, ValidParamValues extends string>({
+function SelectOption<ParamName extends string, ValidParamValues extends string | number>({
   id,
   label,
   labelAppend,

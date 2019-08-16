@@ -28,18 +28,21 @@ interface Labels {
   filter: boolean;
   rotate?: number;
   show: boolean;
-  truncate: number;
+  truncate: number | '';
 }
-export interface ValueAxis {
+export interface Axis {
   id: string;
   labels: Labels;
-  name: string;
   position: LegendPositions;
   scale: { type: string };
   show: boolean;
   style: object;
   title: { text: string };
   type: string;
+}
+
+export interface ValueAxis extends Axis {
+  name: string;
 }
 
 export interface SeriesParam {
@@ -56,6 +59,7 @@ export interface SeriesParam {
 
 export interface BasicVislibParams extends CommonVislibParams {
   addTimeMarker: boolean;
+  categoryAxes: Axis[];
   orderBucketsBySum?: boolean;
   labels: Labels;
   valueAxes: ValueAxis[];
