@@ -7,6 +7,8 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import get from 'lodash/object/get';
 
 import {
   EuiButtonEmpty,
@@ -16,20 +18,15 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiPopover,
+  EuiButton,
 } from '@elastic/eui';
 
-import {
-  metricsDetailsUrl,
-} from '../../../services';
 
-import {
-  FieldList,
-} from '../../components';
-
-import {
-  FieldChooser,
-  StepError,
-} from './components';
+import { metricsDetailsUrl } from '../../../services';
+import { FieldList } from '../../components';
+import { FieldChooser, StepError } from './components';
+import { METRICS_CONFIG } from '../../../constants';
 
 const whiteListedMetricByFieldType = {
   numeric: {
@@ -47,6 +44,27 @@ const whiteListedMetricByFieldType = {
   },
 };
 
+const checkWhiteListedMetricByFieldType = (fieldType, metricType) => {
+  return !!get(whiteListedMetricByFieldType, [fieldType, metricType]);
+};
+
+// We use an IFFE to associate metricType configs with their
+// associated field types. After processing each of these
+// objects should have a fieldTypes: { date: true, numeric: true }
+// like object.
+const metricTypesConfig = (function () {
+  return METRICS_CONFIG.map(config => {
+    const fieldTypes = {};
+    for (const [fieldType, metrics] of Object.entries(whiteListedMetricByFieldType)) {
+      fieldTypes[fieldType] = !!metrics[config.type];
+    }
+    return {
+      ...config,
+      fieldTypes,
+    };
+  });
+}());
+
 export class StepMetricsUi extends Component {
   static propTypes = {
     fields: PropTypes.object.isRequired,
@@ -54,99 +72,218 @@ export class StepMetricsUi extends Component {
     fieldErrors: PropTypes.object.isRequired,
     areStepErrorsVisible: PropTypes.bool.isRequired,
     metricsFields: PropTypes.array.isRequired,
-  }
+  };
 
   constructor(props) {
     super(props);
 
-    this.chooserColumns = [{
-      field: 'name',
-      name: 'Field',
-      sortable: true,
-      width: '240px',
-    }, {
-      field: 'type',
-      name: 'Type',
-      truncateText: true,
-      sortable: true,
-      width: '100px',
-    }];
+    this.state = {
+      metricsPopoverOpen: false,
+      listColumns: [],
+      selectedMetricsMap: [],
+    };
+  }
 
-    const metricTypesConfig = [
-      {
-        type: 'avg',
-        label: (
-          <FormattedMessage
-            id="xpack.rollupJobs.create.stepMetrics.checkboxAverageLabel"
-            defaultMessage="Average"
-          />
-        ),
-      }, {
-        type: 'max',
-        label: (
-          <FormattedMessage
-            id="xpack.rollupJobs.create.stepMetrics.checkboxMaxLabel"
-            defaultMessage="Maximum"
-          />
-        ),
-      }, {
-        type: 'min',
-        label: (
-          <FormattedMessage
-            id="xpack.rollupJobs.create.stepMetrics.checkboxMinLabel"
-            defaultMessage="Minimum"
-          />
-        ),
-      }, {
-        type: 'sum',
-        label: (
-          <FormattedMessage
-            id="xpack.rollupJobs.create.stepMetrics.checkboxSumLabel"
-            defaultMessage="Sum"
-          />
-        ),
-      }, {
-        type: 'value_count',
-        label: (
-          <FormattedMessage
-            id="xpack.rollupJobs.create.stepMetrics.checkboxValueCountLabel"
-            defaultMessage="Value count"
-          />
-        ),
-      },
-    ];
+  openMetricsPopover = () => {
+    this.setState({
+      metricsPopoverOpen: true,
+    });
+  };
 
-    this.listColumns = this.chooserColumns.concat({
-      type: 'metrics',
-      name: 'Metrics',
-      render: ({ name: fieldName, type: fieldType, types }) => {
-        const checkboxes = metricTypesConfig.map(({ type, label }) => {
-          const isAllowed = whiteListedMetricByFieldType[fieldType][type];
+  closeMetricsPopover = () => {
+    this.setState({
+      metricsPopoverOpen: false,
+    });
+  };
 
-          if (!isAllowed) {
-            return;
+  renderMetricsSelectAllCheckboxes() {
+    const {
+      fields: { metrics },
+      onFieldsChange,
+    } = this.props;
+
+    let disabledCheckboxesCount = 0;
+
+    /**
+     * Look at all the metric configs and include the special "All" checkbox which adds the ability
+     * to select all the checkboxes across columns and rows.
+     */
+    const checkboxElements = [{
+      label: i18n.translate('xpack.rollupJobs.create.stepMetrics.allCheckbox', { defaultMessage: 'All' }),
+      type: 'all',
+    }].concat(metricTypesConfig).map(({ label, type: metricType, fieldTypes }, idx) => {
+      const isAllMetricTypes = metricType === 'all';
+      // For this config we are either considering all user selected metrics or a subset.
+      const applicableMetrics = isAllMetricTypes
+        ? metrics
+        : metrics
+          .filter(({ type }) => {
+            return fieldTypes[type];
+          });
+
+      let checkedCount = 0;
+      let isChecked = false;
+      let isDisabled = false;
+
+      if (isAllMetricTypes) {
+        applicableMetrics.forEach(({ types, type }) => {
+          const whiteListedSubset = Object.keys(whiteListedMetricByFieldType[type]);
+          if (whiteListedSubset.every(metricName => types.some(type => type === metricName))) {
+            ++checkedCount;
           }
+        });
 
-          const isSelected = types.includes(type);
+        isDisabled = metrics.length === 0;
+      } else {
+        applicableMetrics.forEach(({ types }) => {
+          const metricSelected = types.some(type => type === metricType);
+          if (metricSelected) {
+            ++checkedCount;
+          }
+        });
 
-          return (
-            <EuiFlexItem
-              grow={false}
-              key={`${fieldName}-${type}-checkbox`}
+        isDisabled = !metrics.some(({ type: fieldType }) =>
+          checkWhiteListedMetricByFieldType(fieldType, metricType),
+        );
+      }
+
+      // Determine if a select all checkbox is checked.
+      isChecked = checkedCount === applicableMetrics.length;
+
+      if (isDisabled) ++disabledCheckboxesCount;
+
+      return (
+        <EuiCheckbox
+          id={`${idx}-select-all-checkbox`}
+          data-test-subj={`rollupJobMetricsSelectAllCheckbox-${metricType}`}
+          disabled={isDisabled}
+          label={label}
+          checked={!isDisabled && isChecked}
+          onChange={() => {
+            if (isAllMetricTypes) {
+              const newMetrics = metricTypesConfig
+                .reduce((acc, { type }) => this.setMetrics(type, !isChecked), null);
+              onFieldsChange({ metrics: newMetrics });
+            } else {
+              onFieldsChange({ metrics: this.setMetrics(metricType, !isChecked) });
+            }
+          }}
+        />
+      );
+    });
+
+    return {
+      checkboxElements,
+      allCheckboxesDisabled: checkboxElements.length === disabledCheckboxesCount,
+    };
+  }
+
+  getMetricsSelectAllMenu() {
+    const {
+      checkboxElements,
+      allCheckboxesDisabled
+    } = this.renderMetricsSelectAllCheckboxes();
+
+    return (
+      <Fragment>
+        <EuiPopover
+          ownFocus
+          isOpen={this.state.metricsPopoverOpen}
+          closePopover={this.closeMetricsPopover}
+          button={
+            <EuiButton
+              disabled={allCheckboxesDisabled}
+              onClick={this.openMetricsPopover}
+              data-test-subj="rollupJobSelectAllMetricsPopoverButton"
             >
-              <EuiCheckbox
-                id={`${fieldName}-${type}-checkbox`}
-                data-test-subj={`rollupJobMetricsCheckbox-${type}`}
-                label={label}
-                checked={isSelected}
-                onChange={() => this.setMetric(fieldName, type, !isSelected)}
-              />
-            </EuiFlexItem>
-          );
-        }).filter(checkbox => checkbox !== undefined);
+              {
+                i18n.translate(
+                  'xpack.rollupJobs.create.stepMetrics.selectAllPopoverButtonLabel',
+                  { defaultMessage: 'Select metrics' })
+              }
+            </EuiButton>
+          }
+        >
+          <EuiFlexGroup alignItems="flexStart" direction="column">
+            {
+              checkboxElements
+                .map((item, idx) => <EuiFlexItem key={idx}>{item}</EuiFlexItem>)
+            }
+          </EuiFlexGroup>
+        </EuiPopover>
+      </Fragment>
+    );
+  }
+
+  renderRowSelectAll({ fieldName, fieldType, types }) {
+    const { onFieldsChange } = this.props;
+    const hasSelectedItems = Boolean(types.length);
+    const maxItemsToBeSelected = Object.keys(whiteListedMetricByFieldType[fieldType]).length;
+    const allSelected = maxItemsToBeSelected === types.length;
+
+    const label = i18n.translate(
+      'xpack.rollupJobs.create.stepMetrics.selectAllRowLabel',
+      { defaultMessage: 'All' },
+    );
+
+    const onChange = () => {
+      const isSelected = hasSelectedItems ? types.length !== maxItemsToBeSelected : true;
+      const newMetrics = metricTypesConfig
+        .filter(config => config.fieldTypes[fieldType])
+        .reduce((acc, { type: typeConfig }) => {
+          return this.setMetric(fieldName, typeConfig, isSelected);
+        }, null);
+      onFieldsChange({ metric: newMetrics });
+    };
+
+    return (
+      <EuiCheckbox
+        id={`${fieldName}-selectAll-checkbox`}
+        data-test-subj="rollupJobMetricsCheckbox-selectAll"
+        label={label}
+        checked={allSelected}
+        onChange={onChange}
+      />
+    );
+  }
+
+  getListColumns() {
+    return StepMetricsUi.chooserColumns.concat({
+      type: 'metrics',
+      name: i18n.translate('xpack.rollupJobs.create.stepMetrics.metricsColumnHeader', { defaultMessage: 'Metrics' }),
+      render: ({ name: fieldName, type: fieldType, types }) => {
+        const { onFieldsChange } = this.props;
+        const checkboxes = metricTypesConfig
+          .map(({ type, label }) => {
+            const isAllowed = checkWhiteListedMetricByFieldType(fieldType, type);
+
+            if (!isAllowed) {
+              return;
+            }
+
+            const isSelected = types.includes(type);
+
+            return (
+              <EuiFlexItem grow={false} key={`${fieldName}-${type}-checkbox`}>
+                <EuiCheckbox
+                  id={`${fieldName}-${type}-checkbox`}
+                  data-test-subj={`rollupJobMetricsCheckbox-${type}`}
+                  label={label}
+                  checked={isSelected}
+                  onChange={() =>
+                    onFieldsChange({ metrics: this.setMetric(fieldName, type, !isSelected) })
+                  }
+                />
+              </EuiFlexItem>
+            );
+          })
+          .filter(checkbox => checkbox !== undefined);
 
         return (
           <EuiFlexGroup wrap gutterSize="m">
+            <EuiFlexItem grow={false} key={`${fieldName}-selectAll-checkbox`}>
+              {this.renderRowSelectAll({ fieldName, fieldType, types })}
+            </EuiFlexItem>
             {checkboxes}
           </EuiFlexGroup>
         );
@@ -154,7 +291,7 @@ export class StepMetricsUi extends Component {
     });
   }
 
-  onSelectField = (field) => {
+  onSelectField = field => {
     const {
       fields: { metrics },
       onFieldsChange,
@@ -168,7 +305,7 @@ export class StepMetricsUi extends Component {
     onFieldsChange({ metrics: newMetrics });
   };
 
-  onRemoveField = (field) => {
+  onRemoveField = field => {
     const {
       fields: { metrics },
       onFieldsChange,
@@ -179,33 +316,42 @@ export class StepMetricsUi extends Component {
     onFieldsChange({ metrics: newMetrics });
   };
 
+  setMetrics(metricType, isSelected) {
+    const {
+      fields: { metrics: fields },
+    } = this.props;
+
+    return fields
+      .filter(field => checkWhiteListedMetricByFieldType(field.type, metricType))
+      .reduce((acc, metric) => {
+        return this.setMetric(metric.name, metricType, isSelected);
+      }, []);
+  }
+
   setMetric = (fieldName, metricType, isSelected) => {
     const {
       fields: { metrics },
-      onFieldsChange,
     } = this.props;
 
-    const newMetrics = [ ...metrics ];
-    const { types: updatedTypes } = newMetrics.find(({ name }) => name === fieldName);
+    const newMetrics = [...metrics];
+    const newMetric = newMetrics.find(({ name }) => name === fieldName);
 
+    // Update copied object by reference
     if (isSelected) {
-      updatedTypes.push(metricType);
+      // Don't add duplicates.
+      if (newMetric.types.indexOf(metricType) === -1) {
+        newMetric.types.push(metricType);
+      }
     } else {
-      updatedTypes.splice(updatedTypes.indexOf(metricType), 1);
+      newMetric.types.splice(newMetric.types.indexOf(metricType), 1);
     }
-
-    onFieldsChange({ metrics: newMetrics });
+    return newMetrics;
   };
 
   render() {
-    const {
-      fields,
-      metricsFields,
-    } = this.props;
+    const { fields, metricsFields } = this.props;
 
-    const {
-      metrics,
-    } = fields;
+    const { metrics } = fields;
 
     return (
       <Fragment>
@@ -220,7 +366,7 @@ export class StepMetricsUi extends Component {
               </h3>
             </EuiTitle>
 
-            <EuiSpacer size="s" />
+            <EuiSpacer size="s"/>
 
             <EuiText>
               <p>
@@ -250,28 +396,51 @@ export class StepMetricsUi extends Component {
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        <EuiSpacer />
+        <EuiSpacer/>
 
         <FieldList
-          columns={this.listColumns}
+          columns={this.getListColumns()}
           fields={metrics}
           onRemoveField={this.onRemoveField}
-          emptyMessage={<p>No metrics fields added</p>}
-          addButton={(
-            <FieldChooser
-              buttonLabel={(
-                <FormattedMessage
-                  id="xpack.rollupJobs.create.stepMetrics.fieldsChooserLabel"
-                  defaultMessage="Add metrics fields"
+          emptyMessage={
+            <p>
+              {
+                i18n.translate(
+                  'xpack.rollupJobs.create.stepMetrics.emptyListLabel',
+                  { defaultMessage: 'No metrics fields added' },
+                )
+              }
+            </p>
+          }
+
+          addButton={
+            <EuiFlexGroup
+              justifyContent="spaceEvenly"
+              alignItems="center"
+              gutterSize="s"
+            >
+              <EuiFlexItem>
+                <FieldChooser
+                  key="stepMetricsFieldChooser"
+                  buttonLabel={
+                    <FormattedMessage
+                      id="xpack.rollupJobs.create.stepMetrics.fieldsChooserLabel"
+                      defaultMessage="Add metrics fields"
+                    />
+                  }
+                  columns={StepMetricsUi.chooserColumns}
+                  fields={metricsFields}
+                  selectedFields={metrics}
+                  onSelectField={this.onSelectField}
+                  dataTestSubj="rollupJobMetricsFieldChooser"
                 />
-              )}
-              columns={this.chooserColumns}
-              fields={metricsFields}
-              selectedFields={metrics}
-              onSelectField={this.onSelectField}
-              dataTestSubj="rollupJobMetricsFieldChooser"
-            />
-          )}
+              </EuiFlexItem>
+              <EuiFlexItem>
+                {this.getMetricsSelectAllMenu()}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+
           dataTestSubj="rollupJobMetricsFieldList"
         />
 
@@ -290,8 +459,30 @@ export class StepMetricsUi extends Component {
       return null;
     }
 
-    return <StepError title={errorMetrics} />;
-  }
+    return <StepError title={errorMetrics}/>;
+  };
+
+  static chooserColumns = [
+    {
+      field: 'name',
+      name: i18n.translate(
+        'xpack.rollupJobs.create.stepMetrics.fieldColumnLabel',
+        { defaultMessage: 'Field' }
+      ),
+      sortable: true,
+      width: '240px',
+    },
+    {
+      field: 'type',
+      name: i18n.translate(
+        'xpack.rollupJobs.create.stepMetrics.typeColumnLabel',
+        { defaultMessage: 'Type' }
+      ),
+      truncateText: true,
+      sortable: true,
+      width: '100px',
+    },
+  ];
 }
 
 export const StepMetrics = injectI18n(StepMetricsUi);

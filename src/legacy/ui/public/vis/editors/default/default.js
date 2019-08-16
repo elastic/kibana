@@ -126,7 +126,9 @@ const defaultEditor = function ($rootScope, $compile) {
             return $scope.vis.getSerializableState($scope.state);
           }, function (newState) {
             $scope.vis.dirty = !angular.equals(newState, $scope.oldState);
-            $scope.metricAggs = $scope.state.aggs.getResponseAggs().filter(agg =>
+            const responseAggs = $scope.state.aggs.getResponseAggs();
+            $scope.hasHistogramAgg = responseAggs.some(agg => agg.type.name === 'histogram');
+            $scope.metricAggs = responseAggs.filter(agg =>
               _.get(agg, 'schema.group') === AggGroupNames.Metrics);
             const lastParentPipelineAgg = _.findLast($scope.metricAggs, ({ type }) => type.subtype === parentPipelineAggHelper.subtype);
             $scope.lastParentPipelineAggTitle = lastParentPipelineAgg && lastParentPipelineAgg.type.title;

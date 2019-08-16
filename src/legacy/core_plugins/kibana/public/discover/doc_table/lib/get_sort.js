@@ -29,6 +29,9 @@ function createSortObject(sortPair, indexPattern) {
     const [ field, direction ] = sortPair;
     return { [field]: direction };
   }
+  else if (_.isPlainObject(sortPair) && isSortable(Object.keys(sortPair)[0], indexPattern)) {
+    return sortPair;
+  }
   else {
     return undefined;
   }
@@ -36,7 +39,8 @@ function createSortObject(sortPair, indexPattern) {
 
 /**
  * Take a sorting array and make it into an object
- * @param {array} sort 2 item array [fieldToSort, directionToSort]
+ * @param {array} sort two dimensional array [[fieldToSort, directionToSort]]
+ *  or an array of objects [{fieldToSort: directionToSort}]
  * @param {object} indexPattern used for determining default sort
  * @returns {object} a sort object suitable for returning to elasticsearch
  */
@@ -44,9 +48,6 @@ export function getSort(sort, indexPattern, defaultSortOrder = 'desc') {
 
   let sortObjects;
   if (Array.isArray(sort)) {
-    if (sort.length > 0 && !Array.isArray(sort[0])) {
-      sort = [sort];
-    }
     sortObjects = _.compact(sort.map((sortPair) => createSortObject(sortPair, indexPattern)));
   }
 

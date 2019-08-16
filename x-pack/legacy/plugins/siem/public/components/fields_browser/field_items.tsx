@@ -36,6 +36,13 @@ const TypeIcon = styled(EuiIcon)`
 
 TypeIcon.displayName = 'TypeIcon';
 
+export const Description = styled.span`
+  user-select: text;
+  width: 150px;
+`;
+
+Description.displayName = 'Description';
+
 /**
  * An item rendered in the table
  */
@@ -73,8 +80,8 @@ export const getFieldItems = ({
     ...Object.values(category != null && category.fields != null ? category.fields : {}),
   ]).map(field => ({
     description: (
-      <SelectableText>
-        {`${field.description || getEmptyValue()} ${getExampleText(field.example)}`}{' '}
+      <SelectableText data-test-subj={`field-${field.name}-description`}>
+        {`${field.description || getEmptyValue()} ${getExampleText(field.example)}`}
       </SelectableText>
     ),
     field: (
@@ -107,22 +114,28 @@ export const getFieldItems = ({
               {!snapshot.isDragging ? (
                 <EuiFlexGroup alignItems="center" gutterSize="none">
                   <EuiFlexItem grow={false}>
-                    <EuiCheckbox
-                      checked={columnHeaders.findIndex(c => c.id === field.name) !== -1}
-                      id={field.name || ''}
-                      onChange={() =>
-                        toggleColumn({
-                          columnHeaderType: defaultColumnHeaderType,
-                          id: field.name || '',
-                          width: DEFAULT_COLUMN_MIN_WIDTH,
-                        })
-                      }
-                    />
+                    <EuiToolTip content={i18n.TOGGLE_COLUMN_TOOLTIP}>
+                      <EuiCheckbox
+                        checked={columnHeaders.findIndex(c => c.id === field.name) !== -1}
+                        data-test-subj={`field-${field.name}-checkbox`}
+                        id={field.name || ''}
+                        onChange={() =>
+                          toggleColumn({
+                            columnHeaderType: defaultColumnHeaderType,
+                            id: field.name || '',
+                            width: DEFAULT_COLUMN_MIN_WIDTH,
+                          })
+                        }
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
 
                   <EuiFlexItem grow={false}>
                     <EuiToolTip content={field.type}>
-                      <TypeIcon type={getIconFromType(field.type || '')} />
+                      <TypeIcon
+                        data-test-subj={`field-${field.name}-icon`}
+                        type={getIconFromType(field.type || '')}
+                      />
                     </EuiToolTip>
                   </EuiFlexItem>
 
@@ -170,7 +183,7 @@ export const getFieldColumns = () => [
     name: i18n.DESCRIPTION,
     render: (description: string) => (
       <EuiToolTip position="top" content={description}>
-        <TruncatableText size="s" width="300px">
+        <TruncatableText size="s" width="390px">
           {description}
         </TruncatableText>
       </EuiToolTip>

@@ -22,7 +22,7 @@ import {
   EuiHorizontalRule,
   EuiIconTip,
   EuiToolTip,
-  EuiBadge
+  EuiIcon
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -45,32 +45,44 @@ export function LogstashPanel(props) {
   const setupModeLogstashData = get(setupMode.data, 'logstash');
   let setupModeInstancesData = null;
   if (setupMode.enabled && setupMode.data) {
-    const migratedNodesCount = Object.values(setupModeLogstashData.byUuid).filter(node => node.isFullyMigrated).length;
-    let totalNodesCount = Object.values(setupModeLogstashData.byUuid).length;
-    if (totalNodesCount === 0 && get(setupMode.data, 'logstash.detected.mightExist', false)) {
-      totalNodesCount = 1;
+    const {
+      totalUniqueInstanceCount,
+      totalUniqueFullyMigratedCount,
+      totalUniquePartiallyMigratedCount
+    } = setupModeLogstashData;
+    const hasInstances = totalUniqueInstanceCount > 0 || get(setupModeLogstashData, 'detected.mightExist', false);
+    const allMonitoredByMetricbeat = totalUniqueInstanceCount > 0 &&
+      (totalUniqueFullyMigratedCount === totalUniqueInstanceCount || totalUniquePartiallyMigratedCount === totalUniqueInstanceCount);
+    const internalCollectionOn = totalUniquePartiallyMigratedCount > 0;
+    if (hasInstances && (!allMonitoredByMetricbeat || internalCollectionOn)) {
+      let tooltipText = null;
+
+      if (!allMonitoredByMetricbeat) {
+        tooltipText = i18n.translate('xpack.monitoring.cluster.overview.logstashPanel.setupModeNodesTooltip.oneInternal', {
+          defaultMessage: `There's at least one node that isn't being monitored using Metricbeat. Click the flag
+          icon to visit the nodes listing page and find out more information about the status of each node.`
+        });
+      }
+      else if (internalCollectionOn) {
+        tooltipText = i18n.translate('xpack.monitoring.cluster.overview.logstashPanel.setupModeNodesTooltip.disableInternal', {
+          defaultMessage: `All nodes are being monitored using Metricbeat but internal collection still needs to be turned
+          off. Click the flag icon to visit the nodes listing page and disable internal collection.`
+        });
+      }
+
+      setupModeInstancesData = (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            position="top"
+            content={tooltipText}
+          >
+            <EuiLink onClick={goToNodes}>
+              <EuiIcon type="flag" color="warning"/>
+            </EuiLink>
+          </EuiToolTip>
+        </EuiFlexItem>
+      );
     }
-
-    const badgeColor = migratedNodesCount === totalNodesCount
-      ? 'secondary'
-      : 'danger';
-
-    setupModeInstancesData = (
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          position="top"
-          content={i18n.translate('xpack.monitoring.cluster.overview.logstashPanel.setupModeNodesTooltip', {
-            defaultMessage: `These numbers indicate how many detected monitored nodes versus how many ` +
-            `detected total nodes. If there are more detected nodes than monitored nodes, click the Nodes ` +
-            `link and you will be guided in how to setup monitoring for the missing node.`
-          })}
-        >
-          <EuiBadge color={badgeColor}>
-            {formatNumber(migratedNodesCount, 'int_commas')}/{formatNumber(totalNodesCount, 'int_commas')}
-          </EuiBadge>
-        </EuiToolTip>
-      </EuiFlexItem>
-    );
   }
 
   return (
