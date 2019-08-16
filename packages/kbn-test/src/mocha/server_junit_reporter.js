@@ -17,27 +17,9 @@
  * under the License.
  */
 
-import { createFlagError } from '@kbn/dev-utils';
+// when the reporter is loaded by mocha in child process it might be before setup_node_env
+require('../../../../src/setup_node_env');
 
-const isNum = (input: string) => {
-  return /^\d+$/.test(input);
-};
-
-export class Pr {
-  static parseInput(input: string) {
-    if (!isNum(input)) {
-      throw createFlagError(`invalid pr number [${input}], expected a number`);
-    }
-
-    return parseInt(input, 10);
-  }
-
-  public readonly remoteRef = `pull/${this.number}/head`;
-
-  constructor(
-    public readonly number: number,
-    public readonly targetRef: string,
-    public readonly owner: string,
-    public readonly sourceBranch: string
-  ) {}
-}
+module.exports = require('./auto_junit_reporter').createAutoJUnitReporter({
+  reportName: 'Server Mocha Tests',
+});

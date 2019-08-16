@@ -16,28 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Legacy } from 'kibana';
 
-import { createFlagError } from '@kbn/dev-utils';
+// @ts-ignore
+import { runRoute } from './run';
+// @ts-ignore
+import { functionsRoute } from './functions';
+// @ts-ignore
+import { validateEsRoute } from './validate_es';
 
-const isNum = (input: string) => {
-  return /^\d+$/.test(input);
-};
-
-export class Pr {
-  static parseInput(input: string) {
-    if (!isNum(input)) {
-      throw createFlagError(`invalid pr number [${input}], expected a number`);
-    }
-
-    return parseInt(input, 10);
-  }
-
-  public readonly remoteRef = `pull/${this.number}/head`;
-
-  constructor(
-    public readonly number: number,
-    public readonly targetRef: string,
-    public readonly owner: string,
-    public readonly sourceBranch: string
-  ) {}
+export function initRoutes(server: Legacy.Server) {
+  runRoute(server);
+  functionsRoute(server);
+  validateEsRoute(server);
 }

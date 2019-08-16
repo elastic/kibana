@@ -17,27 +17,8 @@
  * under the License.
  */
 
-import { createFlagError } from '@kbn/dev-utils';
-
-const isNum = (input: string) => {
-  return /^\d+$/.test(input);
-};
-
-export class Pr {
-  static parseInput(input: string) {
-    if (!isNum(input)) {
-      throw createFlagError(`invalid pr number [${input}], expected a number`);
-    }
-
-    return parseInt(input, 10);
-  }
-
-  public readonly remoteRef = `pull/${this.number}/head`;
-
-  constructor(
-    public readonly number: number,
-    public readonly targetRef: string,
-    public readonly owner: string,
-    public readonly sourceBranch: string
-  ) {}
-}
+export { createAutoJUnitReporter } from './auto_junit_reporter';
+export { setupJUnitReportGeneration } from './junit_report_generation';
+export { runMochaCli } from './run_mocha_cli';
+export { recordLog, snapshotLogsForRunnable } from './log_cache';
+export { escapeCdata } from './xml';

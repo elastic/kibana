@@ -16,28 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { TimelionFunctionInterface } from '../types';
 
-import { createFlagError } from '@kbn/dev-utils';
+declare function loadFunctions(directory: string): LoadFunctions;
 
-const isNum = (input: string) => {
-  return /^\d+$/.test(input);
-};
-
-export class Pr {
-  static parseInput(input: string) {
-    if (!isNum(input)) {
-      throw createFlagError(`invalid pr number [${input}], expected a number`);
-    }
-
-    return parseInt(input, 10);
-  }
-
-  public readonly remoteRef = `pull/${this.number}/head`;
-
-  constructor(
-    public readonly number: number,
-    public readonly targetRef: string,
-    public readonly owner: string,
-    public readonly sourceBranch: string
-  ) {}
+export interface LoadFunctions {
+  [key: string]: TimelionFunctionInterface;
 }
+
+// eslint-disable-next-line import/no-default-export
+export default loadFunctions;
