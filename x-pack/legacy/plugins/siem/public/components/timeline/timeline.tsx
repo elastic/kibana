@@ -52,6 +52,8 @@ const TimelineContainer = styled(EuiFlexGroup)`
 
 TimelineContainer.displayName = 'TimelineContainer';
 
+export const isCompactFooter = (width: number): boolean => width < 600;
+
 interface Props {
   browserFields: BrowserFields;
   columns: ColumnHeader[];
@@ -198,7 +200,7 @@ export const Timeline = React.memo<Props>(
                         nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
                         tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
                         getUpdatedAt={getUpdatedAt}
-                        width={width}
+                        compact={isCompactFooter(width)}
                       />
                     </TimelineContext.Provider>
                   </TimelineRefetch>
