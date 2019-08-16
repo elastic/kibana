@@ -68,8 +68,7 @@ test('executes the task by calling the executor with proper parameters', async (
     attributes: {
       actionId: '2',
       params: { baz: true },
-      apiKeyId: '123',
-      apiKeyValue: 'abc',
+      apiKey: 'MTIzOmFiYw==',
     },
     references: [],
   });
@@ -104,8 +103,7 @@ test('throws an error with suggested retry logic when return status is error', a
     attributes: {
       actionId: '2',
       params: { baz: true },
-      apiKeyId: '123',
-      apiKeyValue: 'abc',
+      apiKey: 'MTIzOmFiYw==',
     },
     references: [],
   });
@@ -139,8 +137,7 @@ test('uses API key when provided', async () => {
     attributes: {
       actionId: '2',
       params: { baz: true },
-      apiKeyId: '123',
-      apiKeyValue: 'abc',
+      apiKey: 'MTIzOmFiYw==',
     },
     references: [],
   });
@@ -200,8 +197,7 @@ test(`doesn't use API key when provided and isSecurityEnabled is set to false`, 
     attributes: {
       actionId: '2',
       params: { baz: true },
-      apiKeyId: '123',
-      apiKeyValue: 'abc',
+      apiKey: 'MTIzOmFiYw==',
     },
     references: [],
   });
@@ -232,6 +228,6 @@ test(`throws an error when isSecurityEnabled is true but key isn't provided`, as
   });
 
   await expect(runner.run()).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"API key is required. The attribute \\"apiKeyId\\" and / or \\"apiKeyValue\\" is missing."`
+    `"API key is required. The attribute \\"apiKey\\" is missing."`
   );
 });

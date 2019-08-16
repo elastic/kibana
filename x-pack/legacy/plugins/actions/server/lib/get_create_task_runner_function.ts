@@ -44,7 +44,7 @@ export function getCreateTaskRunnerFunction({
         const namespace = spaceIdToNamespace(spaceId);
 
         const {
-          attributes: { actionId, params, apiKeyId, apiKeyValue },
+          attributes: { actionId, params, apiKey },
         } = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<ActionTaskParams>(
           'action_task_params',
           actionTaskParamsId,
@@ -52,15 +52,14 @@ export function getCreateTaskRunnerFunction({
         );
 
         const requestHeaders: Record<string, string> = {};
-        if (isSecurityEnabled && (!apiKeyId || !apiKeyValue)) {
+        if (isSecurityEnabled && !apiKey) {
           throw new ExecutorError(
-            'API key is required. The attribute "apiKeyId" and / or "apiKeyValue" is missing.',
+            'API key is required. The attribute "apiKey" is missing.',
             undefined,
             false
           );
         } else if (isSecurityEnabled) {
-          const key = Buffer.from(`${apiKeyId}:${apiKeyValue}`).toString('base64');
-          requestHeaders.authorization = `ApiKey ${key}`;
+          requestHeaders.authorization = `ApiKey ${apiKey}`;
         }
 
         // Since we're using API keys and accessing elasticsearch can only be done

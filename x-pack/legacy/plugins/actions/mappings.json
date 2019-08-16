@@ -25,10 +25,7 @@
         "enabled": false,
         "type": "object"
       },
-      "apiKeyId": {
-        "type": "binary"
-      },
-      "apiKeyValue": {
+      "apiKey": {
         "type": "binary"
       }
     }

@@ -53,20 +53,17 @@ export function getCreateTaskRunnerFunction({
         // Only fetch encrypted attributes here, we'll create a saved objects client
         // scoped with the API key to fetch the remaining data.
         const {
-          attributes: { apiKeyId, apiKeyValue },
+          attributes: { apiKey },
         } = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<RawAlert>(
           'alert',
           alertId,
           { namespace }
         );
 
-        if (isSecurityEnabled && (!apiKeyId || !apiKeyValue)) {
-          throw new Error(
-            'API key is required. The attribute "apiKeyId" and / or "apiKeyValue" is missing.'
-          );
+        if (isSecurityEnabled && !apiKey) {
+          throw new Error('API key is required. The attribute "apiKey" is missing.');
         } else if (isSecurityEnabled) {
-          const key = Buffer.from(`${apiKeyId}:${apiKeyValue}`).toString('base64');
-          requestHeaders.authorization = `ApiKey ${key}`;
+          requestHeaders.authorization = `ApiKey ${apiKey}`;
         }
 
         const fakeRequest = {
@@ -100,8 +97,7 @@ export function getCreateTaskRunnerFunction({
 
         const fireHandler = createFireHandler({
           executeAction,
-          apiKeyId,
-          apiKeyValue,
+          apiKey,
           actions: actionsWithIds,
           spaceId,
         });

@@ -19,8 +19,7 @@ export interface ExecuteOptions {
   id: string;
   params: Record<string, any>;
   spaceId: string;
-  apiKeyId?: string;
-  apiKeyValue?: string;
+  apiKey?: string;
 }
 
 export function createExecuteFunction({
@@ -29,16 +28,13 @@ export function createExecuteFunction({
   isSecurityEnabled,
   getScopedSavedObjectsClient,
 }: CreateExecuteFunctionOptions) {
-  return async function execute({ id, params, spaceId, apiKeyId, apiKeyValue }: ExecuteOptions) {
+  return async function execute({ id, params, spaceId, apiKey }: ExecuteOptions) {
     const requestHeaders: Record<string, string> = {};
 
-    if (isSecurityEnabled && (!apiKeyId || !apiKeyValue)) {
-      throw new Error(
-        'API key is required. The attribute "apiKeyId" and / or "apiKeyValue" is missing.'
-      );
+    if (isSecurityEnabled && !apiKey) {
+      throw new Error('API key is required. The attribute "apiKey" is missing.');
     } else if (isSecurityEnabled) {
-      const key = Buffer.from(`${apiKeyId}:${apiKeyValue}`).toString('base64');
-      requestHeaders.authorization = `ApiKey ${key}`;
+      requestHeaders.authorization = `ApiKey ${apiKey}`;
     }
 
     // Since we're using API keys and accessing elasticsearch can only be done
@@ -53,8 +49,7 @@ export function createExecuteFunction({
     const actionTaskParamsRecord = await savedObjectsClient.create('action_task_params', {
       actionId: id,
       params,
-      apiKeyId,
-      apiKeyValue,
+      apiKey,
     });
 
     await taskManager.schedule({

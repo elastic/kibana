@@ -54,7 +54,7 @@ interface FindResult {
 }
 
 interface CreateOptions {
-  data: Pick<Alert, Exclude<keyof Alert, 'createdBy' | 'apiKeyId' | 'apiKeyValue'>>;
+  data: Pick<Alert, Exclude<keyof Alert, 'createdBy' | 'apiKey'>>;
   options?: {
     migrationVersion?: Record<string, string>;
   };
@@ -105,8 +105,9 @@ export class AlertsClient {
     const { alert: rawAlert, references } = this.getRawAlert({
       ...data,
       createdBy: await this.getUserName(),
-      apiKeyId: apiKey.created ? apiKey.result.id : undefined,
-      apiKeyValue: apiKey.created ? apiKey.result.api_key : undefined,
+      apiKey: apiKey.created
+        ? Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64')
+        : undefined,
       alertTypeParams: validatedAlertTypeParams,
     });
     const createdAlert = await this.savedObjectsClient.create('alert', rawAlert, {

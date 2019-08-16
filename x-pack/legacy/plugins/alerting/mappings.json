@@ -35,10 +35,7 @@
       "createdBy": {
         "type": "keyword"
       },
-      "apiKeyId": {
-        "type": "binary"
-      },
-      "apiKeyValue": {
+      "apiKey": {
         "type": "binary"
       }
     }

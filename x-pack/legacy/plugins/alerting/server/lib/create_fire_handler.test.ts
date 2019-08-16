@@ -9,8 +9,7 @@ import { createFireHandler } from './create_fire_handler';
 const createFireHandlerParams = {
   executeAction: jest.fn(),
   spaceId: 'default',
-  apiKeyId: '123',
-  apiKeyValue: 'abc',
+  apiKey: 'MTIzOmFiYw==',
   spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
   getBasePath: jest.fn().mockReturnValue(undefined),
   actions: [
@@ -35,8 +34,7 @@ test('calls executeAction per selected action', async () => {
   expect(createFireHandlerParams.executeAction.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
       Object {
-        "apiKeyId": "123",
-        "apiKeyValue": "abc",
+        "apiKey": "MTIzOmFiYw==",
         "id": "1",
         "params": Object {
           "contextVal": "My  goes here",
@@ -62,8 +60,7 @@ test('context attribute gets parameterized', async () => {
   expect(createFireHandlerParams.executeAction.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
       Object {
-        "apiKeyId": "123",
-        "apiKeyValue": "abc",
+        "apiKey": "MTIzOmFiYw==",
         "id": "1",
         "params": Object {
           "contextVal": "My context-val goes here",
@@ -83,8 +80,7 @@ test('state attribute gets parameterized', async () => {
   expect(createFireHandlerParams.executeAction.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
       Object {
-        "apiKeyId": "123",
-        "apiKeyValue": "abc",
+        "apiKey": "MTIzOmFiYw==",
         "id": "1",
         "params": Object {
           "contextVal": "My  goes here",

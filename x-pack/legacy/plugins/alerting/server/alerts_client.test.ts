@@ -162,8 +162,7 @@ describe('create()', () => {
         "alertTypeParams": Object {
           "bar": true,
         },
-        "apiKeyId": undefined,
-        "apiKeyValue": undefined,
+        "apiKey": undefined,
         "createdBy": "elastic",
         "enabled": true,
         "interval": "10s",
@@ -515,8 +514,7 @@ describe('create()', () => {
               "alertTypeParams": Object {
                 "bar": true,
               },
-              "apiKeyId": "123",
-              "apiKeyValue": "abc",
+              "apiKey": "MTIzOmFiYw==",
               "createdBy": "elastic",
               "enabled": true,
               "interval": "10s",

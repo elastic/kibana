@@ -101,8 +101,7 @@ test('successfully executes the task', async () => {
     id: '1',
     type: 'alert',
     attributes: {
-      apiKeyId: '123',
-      apiKeyValue: 'abc',
+      apiKey: 'MTIzOmFiYw==',
     },
     references: [],
   });
@@ -144,8 +143,7 @@ test('fireAction is called per alert instance that fired', async () => {
     id: '1',
     type: 'alert',
     attributes: {
-      apiKeyId: '123',
-      apiKeyValue: 'abc',
+      apiKey: 'MTIzOmFiYw==',
     },
     references: [],
   });
@@ -155,8 +153,7 @@ test('fireAction is called per alert instance that fired', async () => {
   expect(getCreateTaskRunnerFunctionParams.executeAction.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
       Object {
-        "apiKeyId": "123",
-        "apiKeyValue": "abc",
+        "apiKey": "MTIzOmFiYw==",
         "id": "1",
         "params": Object {
           "foo": true,
@@ -179,8 +176,7 @@ test('persists alertInstances passed in from state, only if they fire', async ()
     id: '1',
     type: 'alert',
     attributes: {
-      apiKeyId: '123',
-      apiKeyValue: 'abc',
+      apiKey: 'MTIzOmFiYw==',
     },
     references: [],
   });
@@ -228,8 +224,7 @@ test('validates params before executing the alert type', async () => {
     id: '1',
     type: 'alert',
     attributes: {
-      apiKeyId: '123',
-      apiKeyValue: 'abc',
+      apiKey: 'MTIzOmFiYw==',
     },
     references: [],
   });
@@ -249,8 +244,7 @@ test('throws error if reference not found', async () => {
     id: '1',
     type: 'alert',
     attributes: {
-      apiKeyId: '123',
-      apiKeyValue: 'abc',
+      apiKey: 'MTIzOmFiYw==',
     },
     references: [],
   });
@@ -267,8 +261,7 @@ test('uses API key when provided', async () => {
     id: '1',
     type: 'alert',
     attributes: {
-      apiKeyId: '123',
-      apiKeyValue: 'abc',
+      apiKey: 'MTIzOmFiYw==',
     },
     references: [],
   });

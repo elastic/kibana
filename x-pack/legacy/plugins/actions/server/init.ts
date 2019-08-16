@@ -66,7 +66,7 @@ export function init(server: Legacy.Server) {
   });
   server.plugins.encrypted_saved_objects!.registerType({
     type: 'action_task_params',
-    attributesToEncrypt: new Set(['apiKeyId', 'apiKeyValue']),
+    attributesToEncrypt: new Set(['apiKey']),
   });
 
   function getServices(request: any): Services {

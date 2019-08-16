@@ -40,8 +40,7 @@ describe('execute()', () => {
       id: '123',
       params: { baz: false },
       spaceId: 'default',
-      apiKeyId: '123',
-      apiKeyValue: 'abc',
+      apiKey: 'MTIzOmFiYw==',
     });
     expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
     expect(mockTaskManager.schedule.mock.calls[0]).toMatchInlineSnapshot(`
@@ -63,8 +62,7 @@ describe('execute()', () => {
     expect(savedObjectsClient.create).toHaveBeenCalledWith('action_task_params', {
       actionId: '123',
       params: { baz: false },
-      apiKeyId: '123',
-      apiKeyValue: 'abc',
+      apiKey: 'MTIzOmFiYw==',
     });
   });
 
@@ -95,8 +93,7 @@ describe('execute()', () => {
       id: '123',
       params: { baz: false },
       spaceId: 'default',
-      apiKeyId: '123',
-      apiKeyValue: 'abc',
+      apiKey: 'MTIzOmFiYw==',
     });
     expect(getScopedSavedObjectsClient).toHaveBeenCalledWith({
       getBasePath: expect.anything(),
@@ -155,7 +152,7 @@ describe('execute()', () => {
         spaceId: 'default',
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"API key is required. The attribute \\"apiKeyId\\" and / or \\"apiKeyValue\\" is missing."`
+      `"API key is required. The attribute \\"apiKey\\" is missing."`
     );
   });
 });
