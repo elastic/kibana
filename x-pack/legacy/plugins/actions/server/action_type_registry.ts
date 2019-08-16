@@ -55,12 +55,15 @@ export class ActionTypeRegistry {
   public register(actionType: ActionType) {
     if (this.has(actionType.id)) {
       throw new Error(
-        i18n.translate('xpack.actions.actionTypeRegistry.register.duplicateActionTypeError', {
-          defaultMessage: 'Action type "{id}" is already registered.',
-          values: {
-            id: actionType.id,
-          },
-        })
+        i18n.translate(
+          'xpack.actions.actionTypeRegistry.register.duplicateActionTypeErrorMessage',
+          {
+            defaultMessage: 'Action type "{id}" is already registered.',
+            values: {
+              id: actionType.id,
+            },
+          }
+        )
       );
     }
     this.actionTypes.set(actionType.id, actionType);
@@ -87,7 +90,7 @@ export class ActionTypeRegistry {
   public get(id: string): ActionType {
     if (!this.has(id)) {
       throw Boom.badRequest(
-        i18n.translate('xpack.actions.actionTypeRegistry.get.missingActionTypeError', {
+        i18n.translate('xpack.actions.actionTypeRegistry.get.missingActionTypeErrorMessage', {
           defaultMessage: 'Action type "{id}" is not registered.',
           values: {
             id,

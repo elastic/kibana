@@ -53,7 +53,7 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
   const services = execOptions.services;
 
   if (config.index == null && params.index == null) {
-    const message = i18n.translate('xpack.actions.builtin.es_index.indexParamRequired', {
+    const message = i18n.translate('xpack.actions.builtin.esIndex.indexParamRequiredErrorMessage', {
       defaultMessage: 'index param needs to be set because not set in config for action {id}',
       values: {
         id,
@@ -97,7 +97,7 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
   try {
     result = await services.callCluster('bulk', bulkParams);
   } catch (err) {
-    const message = i18n.translate('xpack.actions.builtin.es_index.errorIndexing', {
+    const message = i18n.translate('xpack.actions.builtin.esIndex.errorIndexingErrorMessage', {
       defaultMessage: 'error in action "{id}" indexing data: {errorMessage}',
       values: {
         id,

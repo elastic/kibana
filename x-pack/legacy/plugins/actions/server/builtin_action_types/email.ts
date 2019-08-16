@@ -152,7 +152,7 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
   try {
     result = await sendEmail(services, sendEmailOptions);
   } catch (err) {
-    const message = i18n.translate('xpack.actions.builtin.email.errorSending', {
+    const message = i18n.translate('xpack.actions.builtin.email.errorSendingErrorMessage', {
       defaultMessage: 'error in action "{id}" sending email: {errorMessage}',
       values: {
         id,

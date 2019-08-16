@@ -41,7 +41,7 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
   try {
     services.log(params.tags, params.message);
   } catch (err) {
-    const message = i18n.translate('xpack.actions.builtin.server_log.errorLogging', {
+    const message = i18n.translate('xpack.actions.builtin.serverLog.errorLoggingErrorMessage', {
       defaultMessage: 'error in action "{id}" logging message: {errorMessage}',
       values: {
         id,
