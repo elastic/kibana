@@ -59,6 +59,7 @@ function getTabs(isMlEnabledInSpace: boolean): Tab[] {
           <span className="mlKibanaManagement__analyticsRefreshButton">
             <RefreshAnalyticsListButton />
           </span>
+          <EuiSpacer size="s" className="mlKibanaManagement__analyticsSpacer" />
           <DataFrameAnalyticsList isManagementTable={true} />
         </Fragment>
       ),
