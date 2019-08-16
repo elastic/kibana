@@ -38,11 +38,15 @@ APM::
 * Makes sure tooltips for metric charts are synced {pull}42139[#42139]
 Canvas::
 * Fixes IE11 fullscreen behavior to properly position workpad {pull}42544[#42544]
+Discover::
+* Fixes a bug where selecting a period in the discover histogram did not result in a refresh. {pull}43097[#43097]
 Geo::
-* Removes geojson deep clone logic, handle on maps side {pull}41835[#41835]
-* Fixes maps geojson upload hanging on index step {pull}42623[#42623]
+* Moves Geojson deep clone logic to Elasticsearch, making Geojson 
+upload more stable when uploading large geometries. {pull}41835[#41835]
+* Fixes maps Geojson upload hanging on index step {pull}42623[#42623]
 * Formats doc-ids as strings {pull}42011[#42011]
-* Fits only on visible features {pull}42020[#42020]
+* Modifies Fit-to-data action to fit to all visible features, even ones 
+without a corresponding result in the join. {pull}42020[#42020]
 Infra Logs UI::
 * Fixes section mapping bug in node detail page {pull}41641[#41641]
 * Fixes autocomplete to use proper derived index pattern {pull}42287[#42287]
@@ -54,6 +58,7 @@ Machine Learning::
 Management::
 * Removes validation for email action body attribute in Watcher {pull}42009[#42009]
 * Fixes minor Console regressions introduced during EUIfication. {pull}41089[#41089]
+* Fixes issue when removing scripted fields {pull}42838[#42838]
 Monitoring::
 * Only fetches a single cluster data instead of all clusters when possible {pull}42469[#42469]
 * Uses async/await pattern which should address weird bug {pull}42876[#42876]
@@ -71,8 +76,6 @@ Visualizations::
 * Fixes problem in TSVB when group by &quot;Everything&quot; fails to calculate data with &quot;Overall&quot; metrics {pull}42074[#42074]
 * Fixes error when filters agg filters are a query_string query {pull}43310[#43310]
 * Fixes tooltip text overflow {pull}41703[#41703]
-* Restores discover histogram selection triggering fetch {pull}43097[#43097]
-* Fixes issue when removing scripted fields {pull}42838[#42838]
 
 [[release-notes-7.3.0]]
 == {kib} 7.3.0
