@@ -68,7 +68,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
       return h.response(copyResponse);
     },
     options: {
-      tags: ['access:exportSavedObjects'],
+      tags: ['access:copySavedObjectsToSpaces'],
       validate: {
         payload: {
           spaces: Joi.array()
@@ -117,7 +117,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
       return h.response(resolveConflictsResponse);
     },
     options: {
-      tags: ['access:exportSavedObjects'],
+      tags: ['access:copySavedObjectsToSpaces'],
       validate: {
         payload: Joi.object({
           objects: Joi.array()
