@@ -47,3 +47,10 @@ export {
   NoDefaultIndexPattern,
   NoDefinedIndexPatterns,
 } from '../../../../core_plugins/data/public';
+
+/* eslint-disable @kbn/eslint/no-restricted-paths */
+export {
+  mockFields,
+  mockIndexPattern,
+} from '../../../../core_plugins/data/public/index_patterns/index_patterns_service.mock';
+/* eslint-enable @kbn/eslint/no-restricted-paths */
