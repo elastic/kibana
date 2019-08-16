@@ -11,7 +11,6 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('space attributes', () => {
-
     it('should allow a space to be created with a mixed-case hex color code', async () => {
       await supertest
         .post('/api/spaces/space')
