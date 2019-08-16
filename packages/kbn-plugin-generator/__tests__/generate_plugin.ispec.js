@@ -31,6 +31,9 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
   const pluginName = 'ispec-plugin';
   const snakeCased = snakeCase(pluginName);
   const generatedPath = resolve(ROOT_DIR, `plugins/${snakeCased}`);
+  const collect = xs => data => {
+    xs.push(data + ''); // Coerce from Buffer to String
+  };
 
   // eslint-disable-next-line no-undef
   beforeAll(() => {
@@ -66,9 +69,7 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
       done => {
         const stdErrs = [];
         const yarnLint = spawn('yarn', ['lint'], { cwd: generatedPath });
-        yarnLint.stderr.on('data', data => {
-          stdErrs.push(data + '');
-        });
+        yarnLint.stderr.on('data', collect(stdErrs));
         yarnLint.on('close', () => {
           // eslint-disable-next-line no-undef
           expect(stdErrs.join('\n')).not.toContain('"@kbn/eslint/no-restricted-paths" is invalid');
@@ -77,5 +78,38 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
       },
       oneMinute * 3
     );
+  });
+
+  describe(`and then running 'yarn kbn --help'`, () => {
+    const helpMsg = `
+usage: kbn <command> [<args>]
+
+By default commands are run for Kibana itself, all packages in the 'packages/'
+folder and for all plugins in './plugins' and '../kibana-extra'.
+
+Available commands:
+
+   bootstrap - Install dependencies and crosslink projects
+   clean - Remove the node_modules and target directories from all projects.
+   run - Run script defined in package.json in each package that contains that script.
+   watch - Runs \`kbn:watch\` script for every project.
+
+Global options:
+
+   -e, --exclude          Exclude specified project. Can be specified multiple times to exclude multiple projects, e.g. '-e kibana -e @kbn/pm'.
+   -i, --include          Include only specified projects. If left unspecified, it defaults to including all projects.
+   --oss                  Do not include the x-pack when running command.
+   --skip-kibana-plugins  Filter all plugins in ./plugins and ../kibana-extra when running command.
+`;
+    it(`should print out the help msg`, done => {
+      const outData = [];
+      const kbnHelp = spawn('yarn', ['kbn', '--help'], { cwd: generatedPath });
+      kbnHelp.stdout.on('data', collect(outData));
+      kbnHelp.on('close', () => {
+        // eslint-disable-next-line no-undef
+        expect(outData.join('\n')).toContain(helpMsg);
+        done();
+      });
+    });
   });
 });
