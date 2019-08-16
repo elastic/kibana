@@ -20,10 +20,11 @@
 import moment from 'moment';
 import { setCanTrackUiMetrics } from 'ui/ui_metric';
 import { toastNotifications } from 'ui/notify';
+import { npStart } from 'ui/new_platform';
 import { i18n } from '@kbn/i18n';
 
 export function TelemetryOptInProvider($injector, chrome) {
-  let currentOptInStatus = $injector.get('telemetryOptedIn');
+  let currentOptInStatus = npStart.core.injectedMetadata.getInjectedVar('telemetryOptedIn');
   setCanTrackUiMetrics(currentOptInStatus);
 
   const provider = {

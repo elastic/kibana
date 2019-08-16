@@ -31,7 +31,6 @@ import {
   EuiFlexItem,
   EuiText,
   EuiIcon,
-  EuiButtonIcon,
   EuiPortal,
 } from '@elastic/eui';
 
