@@ -17,7 +17,8 @@ export default function manageRepositoriesFunctionalTests({
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
-  describe('Manage Repositories', () => {
+  describe('Manage Repositories', function() {
+    this.tags('smoke');
     const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
 
     describe('Manage Repositories', () => {
