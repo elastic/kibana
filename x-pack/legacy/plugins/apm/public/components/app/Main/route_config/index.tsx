@@ -15,6 +15,7 @@ import { BreadcrumbRoute } from '../ProvideBreadcrumbs';
 import { RouteName } from './route_names';
 import { SettingsList } from '../../Settings/SettingsList';
 import { toQuery } from '../../../shared/Links/url_helpers';
+import { RegionMapChart } from '../../../shared/charts/TransactionCharts/RegionMapChart';
 
 interface RouteParams {
   serviceName: string;
@@ -125,5 +126,19 @@ export const routes: BreadcrumbRoute[] = [
       defaultMessage: 'Metrics'
     }),
     name: RouteName.METRICS
+  },
+
+  // dev
+  {
+    exact: true,
+    path: '/dev',
+    component: () => (
+      <div>
+        <h1>Dev</h1>
+        <RegionMapChart />
+      </div>
+    ),
+    breadcrumb: 'Dev',
+    name: 'dev' as RouteName
   }
 ];

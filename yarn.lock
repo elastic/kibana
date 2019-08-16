@@ -3317,6 +3317,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/geojson@*":
+  version "7946.0.7"
+  resolved "https://registry.yarnpkg.com/@types/geojson/-/geojson-7946.0.7.tgz#c8fa532b60a0042219cdf173ca21a975ef0666ad"
+  integrity sha512-wE2v81i4C4Ol09RtsWFAqg3BUitWbHSpSlIo+bNdsCJijO9sjme+zm+73ZMCa/qMC8UEERxzGbvmr1cffo2SiQ==
+
 "@types/getopts@^2.0.1":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@types/getopts/-/getopts-2.0.1.tgz#b7e5478fe7571838b45aff736a59ab69b8bcda18"
@@ -3612,6 +3617,13 @@
   version "1.12.0"
   resolved "https://registry.yarnpkg.com/@types/luxon/-/luxon-1.12.0.tgz#acf14294d18e6eba427a5e5d7dfce0f5cd2a9400"
   integrity sha512-+UzPmwHSEEyv7aGlNkVpuFxp/BirXgl8NnPGCtmyx2KXIzAapoW3IqSVk87/Z3PUk8vEL8Pe1HXEMJbNBOQgtg==
+
+"@types/mapbox-gl@^0.54.1":
+  version "0.54.2"
+  resolved "https://registry.yarnpkg.com/@types/mapbox-gl/-/mapbox-gl-0.54.2.tgz#989bfc70c7f58455e12757c5ebc5ba887eebaaee"
+  integrity sha512-F46GW9xeGSS1WQhWMPqiHF33zmHpL6ek+lLw/kQbMay4ZQ+fhK3uWDBF7AG0SYRoSmMBIYth03FR4GMpBy9Tyw==
+  dependencies:
+    "@types/geojson" "*"
 
 "@types/markdown-it@^0.0.7":
   version "0.0.7"

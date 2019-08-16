@@ -33,6 +33,7 @@ import { LicenseContext } from '../../../../context/LicenseContext';
 import { TransactionLineChart } from './TransactionLineChart';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
 import { getTimeFormatter } from '../../../../utils/formatters';
+import { RegionMapChart } from './RegionMapChart';
 
 interface TransactionChartProps {
   hasMLJob: boolean;
@@ -184,6 +185,31 @@ export class TransactionCharts extends Component<TransactionChartProps> {
             <React.Fragment>
               <EuiTitle size="xs">
                 <span>{tpmLabel(transactionType)}</span>
+              </EuiTitle>
+              <TransactionLineChart
+                series={tpmSeries}
+                tickFormatY={this.getTPMFormatter}
+                formatTooltipValue={this.getTPMTooltipFormatter}
+                truncateLegends
+              />
+            </React.Fragment>
+          </EuiPanel>
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <EuiPanel>
+            <EuiTitle size="xs">
+              <span>Avg. page load duration distribution by country</span>
+            </EuiTitle>
+            <RegionMapChart />
+          </EuiPanel>
+        </EuiFlexItem>
+
+        <EuiFlexItem style={{ flexShrink: 1 }}>
+          <EuiPanel>
+            <React.Fragment>
+              <EuiTitle size="xs">
+                <span>Avg. page load duration distribution by browser</span>
               </EuiTitle>
               <TransactionLineChart
                 series={tpmSeries}
