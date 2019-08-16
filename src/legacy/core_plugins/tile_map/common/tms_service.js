@@ -125,7 +125,6 @@ export class TMSService {
 
   async _getSpriteSheetRootPath() {
     const vectorStyleJson = await this._getVectorStyleJsonRaw();
-    console.log('getp', vectorStyleJson);
     return this._proxyPath + vectorStyleJson.sprite;
   }
 
