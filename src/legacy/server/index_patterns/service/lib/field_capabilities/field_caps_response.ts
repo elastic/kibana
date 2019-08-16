@@ -76,7 +76,8 @@ export interface FieldCapsResponse {
  *    {
  *      "name": "<fieldName>",
  *      "type": "conflict",
- *      "aggregatable": false, *      "searchable": false,
+ *      "aggregatable": false,
+ *      "searchable": false,
  *      conflictDescriptions: {
  *        "<esType1>": [
  *          "<index1>"
