@@ -117,20 +117,8 @@ export function initRoutes(server, licenseUid) {
         .replace('{y}', request.query.y)
         .replace('{z}', request.query.z);
 
-      try {
-        const tile = await fetch(url);
-        const arrayBuffer = await tile.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        let response = h.response(buffer);
-        response = response.bytes(buffer.length);
-        response = response.header('Content-Disposition', 'inline');
-        response = response.header('Content-type', 'image/png');
-        response = response.encoding('binary');
-        return response;
-      } catch(e) {
-        server.log('warning', `Cannot connect to EMS for tile, error: ${e.message}`);
-        throw Boom.badRequest(`Cannot connect to EMS`);
-      }
+      return await proxyResource(h, { url, contentType: 'image/png' });
+
     }
   });
 
@@ -354,19 +342,8 @@ export function initRoutes(server, licenseUid) {
         .replace('{y}', request.query.y)
         .replace('{z}', request.query.z);
 
-      try {
-        const tile = await fetch(url);
-        const arrayBuffer = await tile.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        let response = h.response(buffer);
-        response = response.bytes(buffer.length);
-        response = response.header('Content-Disposition', 'inline');
-        response = response.encoding('binary');
-        return response;
-      } catch(e) {
-        server.log('warning', `Cannot connect to EMS for vector tile, error: ${e.message}`);
-        throw Boom.badRequest(`Cannot connect to EMS`);
-      }
+      return proxyResource(h, { url });
+
     }
   });
 
@@ -378,23 +355,11 @@ export function initRoutes(server, licenseUid) {
 
       checkEMSProxyConfig();
 
-      const fontUrl = mapConfig.emsFontLibraryUrl
+      const url = mapConfig.emsFontLibraryUrl
         .replace('{fontstack}', request.params.fontstack)
         .replace('{range}', request.params.range);
 
-      try {
-        const font = await fetch(fontUrl);
-        const arrayBuffer = await font.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        let response = h.response(buffer);
-        response = response.bytes(buffer.length);
-        response = response.header('Content-Disposition', 'inline');
-        response = response.encoding('binary');
-        return response;
-      } catch(e) {
-        server.log('warning', `Cannot connect to EMS for font, error: ${e.message}`);
-        throw Boom.badRequest(`Cannot connect to EMS`);
-      }
+      return proxyResource(h, { url });
 
     }
 
@@ -433,22 +398,10 @@ export function initRoutes(server, licenseUid) {
         return null;
       }
 
-      try {
-        const font = await fetch(proxyPathUrl);
-        const arrayBuffer = await font.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        let response = h.response(buffer);
-        response = response.bytes(buffer.length);
-        response = response.header('Content-Disposition', 'inline');
-        response = response.encoding('binary');
-        if (request.params.extension === 'png') {
-          response = response.header('Content-type', 'image/png');
-        }
-        return response;
-      } catch(e) {
-        server.log('warning', `Cannot connect to EMS for sprites, error: ${e.message}`);
-        throw Boom.badRequest(`Cannot connect to EMS`);
-      }
+      return proxyResource(h, {
+        url: proxyPathUrl,
+        contentType: request.params.extension === 'png' ? 'image/png' : ''
+      });
 
     }
 
@@ -480,6 +433,25 @@ export function initRoutes(server, licenseUid) {
     if (!mapConfig.proxyElasticMapsServiceInMaps) {
       server.log('warning', `Cannot load content from EMS when map.proxyElasticMapsServiceInMaps is turned off`);
       throw Boom.notFound();
+    }
+  }
+
+  async function proxyResource(h, { url, contentType }) {
+    try {
+      const resource = await fetch(url);
+      const arrayBuffer = await resource.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      let response = h.response(buffer);
+      response = response.bytes(buffer.length);
+      response = response.header('Content-Disposition', 'inline');
+      if (contentType) {
+        response = response.header('Content-type', contentType);
+      }
+      response = response.encoding('binary');
+      return response;
+    } catch(e) {
+      server.log('warning', `Cannot connect to EMS for resource, error: ${e.message}`);
+      throw Boom.badRequest(`Cannot connect to EMS`);
     }
   }
 
