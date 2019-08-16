@@ -159,6 +159,7 @@
         packagePatterns: [
           '(\\b|_)vega(\\b|_)',
         ],
+        enabled: false,
       },
       {
         groupSlug: 'language server',
