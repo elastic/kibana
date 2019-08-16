@@ -29,3 +29,4 @@ describe('ExplainExportersCloud', () => {
     );
     expect(component).toMatchSnapshot();
   });
+});
