@@ -19,11 +19,11 @@ export default function copyToSpaceSpacesAndSecuritySuite({ getService }: TestIn
     copyToSpaceTest,
     expectNoConflictsWithoutReferencesResult,
     expectNoConflictsWithReferencesResult,
+    expectNoConflictsForNonExistentSpaceResult,
     createExpectWithConflictsOverwritingResult,
     createExpectWithConflictsWithoutOverwritingResult,
-    createExpectUnauthorizedAtSpaceResult,
-    expectNonExistentSpaceResult,
-    createExpectSpaceNotFoundResult,
+    createExpectUnauthorizedAtSpaceWithReferencesResult,
+    createExpectUnauthorizedAtSpaceWithoutReferencesResult,
     expectNotFoundResponse,
   } = copyToSpaceTestSuiteFactory(es, esArchiver, supertestWithoutAuth);
 
@@ -115,7 +115,7 @@ export default function copyToSpaceSpacesAndSecuritySuite({ getService }: TestIn
           },
           nonExistentSpace: {
             statusCode: 200,
-            response: expectNonExistentSpaceResult,
+            response: expectNoConflictsForNonExistentSpaceResult,
           },
         },
       });
@@ -147,7 +147,7 @@ export default function copyToSpaceSpacesAndSecuritySuite({ getService }: TestIn
           },
           nonExistentSpace: {
             statusCode: 200,
-            response: expectNonExistentSpaceResult,
+            response: expectNoConflictsForNonExistentSpaceResult,
           },
         },
       });
@@ -179,7 +179,7 @@ export default function copyToSpaceSpacesAndSecuritySuite({ getService }: TestIn
           },
           nonExistentSpace: {
             statusCode: 200,
-            response: expectNonExistentSpaceResult,
+            response: expectNoConflictsForNonExistentSpaceResult,
           },
         },
       });
@@ -222,34 +222,49 @@ export default function copyToSpaceSpacesAndSecuritySuite({ getService }: TestIn
         tests: {
           noConflictsWithoutReferences: {
             statusCode: 200,
-            response: createExpectUnauthorizedAtSpaceResult(scenario.spaceId, 'without-conflicts'),
+            response: createExpectUnauthorizedAtSpaceWithoutReferencesResult(
+              scenario.spaceId,
+              'without-conflicts'
+            ),
           },
           noConflictsWithReferences: {
             statusCode: 200,
-            response: createExpectUnauthorizedAtSpaceResult(scenario.spaceId, 'without-conflicts'),
+            response: createExpectUnauthorizedAtSpaceWithReferencesResult(
+              scenario.spaceId,
+              'without-conflicts'
+            ),
           },
           withConflictsOverwriting: {
             statusCode: 200,
-            response: createExpectUnauthorizedAtSpaceResult(scenario.spaceId, 'with-conflicts'),
-          },
-          withConflictsWithoutOverwriting: {
-            statusCode: 200,
-            response: createExpectUnauthorizedAtSpaceResult(scenario.spaceId, 'with-conflicts'),
-          },
-          multipleSpaces: {
-            statusCode: 200,
-            withConflictsResponse: createExpectUnauthorizedAtSpaceResult(
+            response: createExpectUnauthorizedAtSpaceWithReferencesResult(
               scenario.spaceId,
               'with-conflicts'
             ),
-            noConflictsResponse: createExpectUnauthorizedAtSpaceResult(
+          },
+          withConflictsWithoutOverwriting: {
+            statusCode: 200,
+            response: createExpectUnauthorizedAtSpaceWithReferencesResult(
+              scenario.spaceId,
+              'with-conflicts'
+            ),
+          },
+          multipleSpaces: {
+            statusCode: 200,
+            withConflictsResponse: createExpectUnauthorizedAtSpaceWithReferencesResult(
+              scenario.spaceId,
+              'with-conflicts'
+            ),
+            noConflictsResponse: createExpectUnauthorizedAtSpaceWithReferencesResult(
               scenario.spaceId,
               'without-conflicts'
             ),
           },
           nonExistentSpace: {
             statusCode: 200,
-            response: createExpectSpaceNotFoundResult(scenario.spaceId),
+            response: createExpectUnauthorizedAtSpaceWithoutReferencesResult(
+              scenario.spaceId,
+              'non-existent'
+            ),
           },
         },
       });
@@ -260,34 +275,49 @@ export default function copyToSpaceSpacesAndSecuritySuite({ getService }: TestIn
         tests: {
           noConflictsWithoutReferences: {
             statusCode: 200,
-            response: createExpectUnauthorizedAtSpaceResult(scenario.spaceId, 'without-conflicts'),
+            response: createExpectUnauthorizedAtSpaceWithoutReferencesResult(
+              scenario.spaceId,
+              'without-conflicts'
+            ),
           },
           noConflictsWithReferences: {
             statusCode: 200,
-            response: createExpectUnauthorizedAtSpaceResult(scenario.spaceId, 'without-conflicts'),
+            response: createExpectUnauthorizedAtSpaceWithReferencesResult(
+              scenario.spaceId,
+              'without-conflicts'
+            ),
           },
           withConflictsOverwriting: {
             statusCode: 200,
-            response: createExpectUnauthorizedAtSpaceResult(scenario.spaceId, 'with-conflicts'),
-          },
-          withConflictsWithoutOverwriting: {
-            statusCode: 200,
-            response: createExpectUnauthorizedAtSpaceResult(scenario.spaceId, 'with-conflicts'),
-          },
-          multipleSpaces: {
-            statusCode: 200,
-            withConflictsResponse: createExpectUnauthorizedAtSpaceResult(
+            response: createExpectUnauthorizedAtSpaceWithReferencesResult(
               scenario.spaceId,
               'with-conflicts'
             ),
-            noConflictsResponse: createExpectUnauthorizedAtSpaceResult(
+          },
+          withConflictsWithoutOverwriting: {
+            statusCode: 200,
+            response: createExpectUnauthorizedAtSpaceWithReferencesResult(
+              scenario.spaceId,
+              'with-conflicts'
+            ),
+          },
+          multipleSpaces: {
+            statusCode: 200,
+            withConflictsResponse: createExpectUnauthorizedAtSpaceWithReferencesResult(
+              scenario.spaceId,
+              'with-conflicts'
+            ),
+            noConflictsResponse: createExpectUnauthorizedAtSpaceWithReferencesResult(
               scenario.spaceId,
               'without-conflicts'
             ),
           },
           nonExistentSpace: {
             statusCode: 200,
-            response: createExpectSpaceNotFoundResult(scenario.spaceId),
+            response: createExpectUnauthorizedAtSpaceWithoutReferencesResult(
+              scenario.spaceId,
+              'non-existent'
+            ),
           },
         },
       });
@@ -298,34 +328,49 @@ export default function copyToSpaceSpacesAndSecuritySuite({ getService }: TestIn
         tests: {
           noConflictsWithoutReferences: {
             statusCode: 200,
-            response: createExpectSpaceNotFoundResult(scenario.spaceId, 'without-conflicts'),
+            response: createExpectUnauthorizedAtSpaceWithoutReferencesResult(
+              scenario.spaceId,
+              'without-conflicts'
+            ),
           },
           noConflictsWithReferences: {
             statusCode: 200,
-            response: createExpectSpaceNotFoundResult(scenario.spaceId, 'without-conflicts'),
+            response: createExpectUnauthorizedAtSpaceWithReferencesResult(
+              scenario.spaceId,
+              'without-conflicts'
+            ),
           },
           withConflictsOverwriting: {
             statusCode: 200,
-            response: createExpectSpaceNotFoundResult(scenario.spaceId, 'with-conflicts'),
-          },
-          withConflictsWithoutOverwriting: {
-            statusCode: 200,
-            response: createExpectSpaceNotFoundResult(scenario.spaceId, 'with-conflicts'),
-          },
-          multipleSpaces: {
-            statusCode: 200,
-            withConflictsResponse: createExpectSpaceNotFoundResult(
+            response: createExpectUnauthorizedAtSpaceWithReferencesResult(
               scenario.spaceId,
               'with-conflicts'
             ),
-            noConflictsResponse: createExpectSpaceNotFoundResult(
+          },
+          withConflictsWithoutOverwriting: {
+            statusCode: 200,
+            response: createExpectUnauthorizedAtSpaceWithReferencesResult(
+              scenario.spaceId,
+              'with-conflicts'
+            ),
+          },
+          multipleSpaces: {
+            statusCode: 200,
+            withConflictsResponse: createExpectUnauthorizedAtSpaceWithReferencesResult(
+              scenario.spaceId,
+              'with-conflicts'
+            ),
+            noConflictsResponse: createExpectUnauthorizedAtSpaceWithReferencesResult(
               scenario.spaceId,
               'without-conflicts'
             ),
           },
           nonExistentSpace: {
             statusCode: 200,
-            response: createExpectSpaceNotFoundResult(scenario.spaceId, 'non-existent'),
+            response: createExpectUnauthorizedAtSpaceWithoutReferencesResult(
+              scenario.spaceId,
+              'non-existent'
+            ),
           },
         },
       });

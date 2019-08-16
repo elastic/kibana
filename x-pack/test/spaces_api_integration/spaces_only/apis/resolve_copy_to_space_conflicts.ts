@@ -19,7 +19,7 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Ftr
     createExpectNonOverriddenResponseWithoutReferences,
     createExpectOverriddenResponseWithReferences,
     createExpectOverriddenResponseWithoutReferences,
-    expectNotFoundResponse,
+    NON_EXISTENT_SPACE_ID,
     originSpaces,
   } = resolveCopyToSpaceConflictsSuite(esArchiver, supertestWithAuth, supertestWithoutAuth);
 
@@ -46,7 +46,10 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Ftr
           },
           nonExistentSpace: {
             statusCode: 200,
-            response: expectNotFoundResponse,
+            response: createExpectOverriddenResponseWithoutReferences(
+              spaceId,
+              NON_EXISTENT_SPACE_ID
+            ),
           },
         },
       });

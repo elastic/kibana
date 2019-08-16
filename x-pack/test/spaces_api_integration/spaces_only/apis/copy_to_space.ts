@@ -17,9 +17,9 @@ export default function copyToSpacesOnlySuite({ getService }: FtrProviderContext
     copyToSpaceTest,
     expectNoConflictsWithoutReferencesResult,
     expectNoConflictsWithReferencesResult,
+    expectNoConflictsForNonExistentSpaceResult,
     createExpectWithConflictsOverwritingResult,
     createExpectWithConflictsWithoutOverwritingResult,
-    expectNonExistentSpaceResult,
     originSpaces,
   } = copyToSpaceTestSuiteFactory(es, esArchiver, supertestWithoutAuth);
 
@@ -51,7 +51,7 @@ export default function copyToSpacesOnlySuite({ getService }: FtrProviderContext
           },
           nonExistentSpace: {
             statusCode: 200,
-            response: expectNonExistentSpaceResult,
+            response: expectNoConflictsForNonExistentSpaceResult,
           },
         },
       });

@@ -179,21 +179,33 @@ export function copyToSpaceTestSuiteFactory(
     });
   };
 
-  const expectNoConflictsWithoutReferencesResult = async (resp: TestResponse) => {
-    const destination = getDestinationWithoutConflicts();
+  const createExpectNoConflictsWithoutReferencesForSpace = (
+    spaceId: string,
+    expectedDashboardCount: number
+  ) => async (resp: TestResponse) => {
     const result = resp.body as CopyResponse;
     expect(result).to.eql({
-      [destination]: {
+      [spaceId]: {
         success: true,
         successCount: 1,
       },
     } as CopyResponse);
 
     // Query ES to ensure that we copied everything we expected
-    await assertSpaceCounts(destination, {
-      dashboard: 2,
+    await assertSpaceCounts(spaceId, {
+      dashboard: expectedDashboardCount,
     });
   };
+
+  const expectNoConflictsWithoutReferencesResult = createExpectNoConflictsWithoutReferencesForSpace(
+    getDestinationWithoutConflicts(),
+    2
+  );
+
+  const expectNoConflictsForNonExistentSpaceResult = createExpectNoConflictsWithoutReferencesForSpace(
+    'non_existent_space',
+    1
+  );
 
   const expectNoConflictsWithReferencesResult = async (resp: TestResponse) => {
     const destination = getDestinationWithoutConflicts();
@@ -225,33 +237,8 @@ export function copyToSpaceTestSuiteFactory(
       ? getDestinationWithConflicts(sourceSpaceId)
       : getDestinationWithoutConflicts();
   };
-  const createExpectSpaceNotFoundResult = (
-    spaceId: string = DEFAULT_SPACE_ID,
-    type: 'with-conflicts' | 'without-conflicts' | 'non-existent' = 'non-existent'
-  ) => async (resp: TestResponse) => {
-    const destination = getDestinationSpace(spaceId, type);
 
-    const result = resp.body as CopyResponse;
-    expect(result).to.eql({
-      [destination]: {
-        success: false,
-        successCount: 0,
-        errors: [
-          {
-            error: {
-              spaceId: destination,
-              type: 'space_not_found',
-            },
-          },
-        ],
-      },
-    } as CopyResponse);
-
-    // Query ES to ensure that nothing was copied
-    await assertSpaceCounts(destination, INITIAL_COUNTS[destination]);
-  };
-
-  const createExpectUnauthorizedAtSpaceResult = (
+  const createExpectUnauthorizedAtSpaceWithReferencesResult = (
     spaceId: string = DEFAULT_SPACE_ID,
     type: 'with-conflicts' | 'without-conflicts'
   ) => async (resp: TestResponse) => {
@@ -264,10 +251,34 @@ export function copyToSpaceTestSuiteFactory(
         successCount: 0,
         errors: [
           {
-            error: {
-              spaceId: destination,
-              type: 'unauthorized_to_manage_saved_objects',
-            },
+            statusCode: 403,
+            error: 'Forbidden',
+            message: 'Unable to bulk_create dashboard,index-pattern,visualization',
+          },
+        ],
+      },
+    } as CopyResponse);
+
+    // Query ES to ensure that nothing was copied
+    await assertSpaceCounts(destination, INITIAL_COUNTS[destination]);
+  };
+
+  const createExpectUnauthorizedAtSpaceWithoutReferencesResult = (
+    spaceId: string = DEFAULT_SPACE_ID,
+    type: 'with-conflicts' | 'without-conflicts' | 'non-existent'
+  ) => async (resp: TestResponse) => {
+    const destination = getDestinationSpace(spaceId, type);
+
+    const result = resp.body as CopyResponse;
+    expect(result).to.eql({
+      [destination]: {
+        success: false,
+        successCount: 0,
+        errors: [
+          {
+            statusCode: 403,
+            error: 'Forbidden',
+            message: 'Unable to bulk_create dashboard',
           },
         ],
       },
@@ -349,27 +360,6 @@ export function copyToSpaceTestSuiteFactory(
       visualization: 5,
       'index-pattern': 1,
     });
-  };
-
-  const expectNonExistentSpaceResult = async (resp: TestResponse) => {
-    const result = resp.body as CopyResponse;
-    expect(result).to.eql({
-      non_existent_space: {
-        success: false,
-        successCount: 0,
-        errors: [
-          {
-            error: {
-              type: 'space_not_found',
-              spaceId: 'non_existent_space',
-            },
-          },
-        ],
-      },
-    } as CopyResponse);
-
-    // Query ES to ensure that nothing was copied
-    await assertSpaceCounts('non_existent_space', {});
   };
 
   const makeCopyToSpaceTest = (describeFn: DescribeFn) => (
@@ -532,7 +522,7 @@ export function copyToSpaceTestSuiteFactory(
               },
             ],
             spaces: ['non_existent_space'],
-            includeReferences: true,
+            includeReferences: false,
             overwrite: true,
           })
           .expect(tests.nonExistentSpace.statusCode)
@@ -549,13 +539,13 @@ export function copyToSpaceTestSuiteFactory(
     copyToSpaceTest,
     expectNoConflictsWithoutReferencesResult,
     expectNoConflictsWithReferencesResult,
+    expectNoConflictsForNonExistentSpaceResult,
     createExpectWithConflictsOverwritingResult,
     createExpectWithConflictsWithoutOverwritingResult,
-    expectNonExistentSpaceResult,
     expectRbacForbiddenResponse,
     expectNotFoundResponse,
-    createExpectUnauthorizedAtSpaceResult,
-    createExpectSpaceNotFoundResult,
+    createExpectUnauthorizedAtSpaceWithReferencesResult,
+    createExpectUnauthorizedAtSpaceWithoutReferencesResult,
     originSpaces: ['default', 'space_1'],
   };
 }

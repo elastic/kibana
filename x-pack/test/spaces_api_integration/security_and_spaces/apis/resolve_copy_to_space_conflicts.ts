@@ -22,8 +22,10 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Tes
     createExpectOverriddenResponseWithReferences,
     createExpectOverriddenResponseWithoutReferences,
     expectNotFoundResponse,
-    createExpectSpaceNotFoundResult,
-    createExpectUnauthorizedAtSpaceResult,
+    createExpectUnauthorizedAtSpaceWithReferencesResult,
+    createExpectReadonlyAtSpaceWithReferencesResult,
+    createExpectUnauthorizedAtSpaceWithoutReferencesResult,
+    NON_EXISTENT_SPACE_ID,
   } = resolveCopyToSpaceConflictsSuite(esArchiver, supertestWithAuth, supertestWithoutAuth);
 
   describe('resolve copy to spaces conflicts', () => {
@@ -104,7 +106,10 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Tes
           },
           nonExistentSpace: {
             statusCode: 200,
-            response: expectNotFoundResponse,
+            response: createExpectOverriddenResponseWithoutReferences(
+              scenario.spaceId,
+              NON_EXISTENT_SPACE_ID
+            ),
           },
         },
       });
@@ -131,7 +136,10 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Tes
           },
           nonExistentSpace: {
             statusCode: 200,
-            response: expectNotFoundResponse,
+            response: createExpectOverriddenResponseWithoutReferences(
+              scenario.spaceId,
+              NON_EXISTENT_SPACE_ID
+            ),
           },
         },
       });
@@ -158,7 +166,10 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Tes
           },
           nonExistentSpace: {
             statusCode: 200,
-            response: expectNotFoundResponse,
+            response: createExpectOverriddenResponseWithoutReferences(
+              scenario.spaceId,
+              NON_EXISTENT_SPACE_ID
+            ),
           },
         },
       });
@@ -196,23 +207,26 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Tes
         tests: {
           withReferencesNotOverwriting: {
             statusCode: 200,
-            response: createExpectUnauthorizedAtSpaceResult(scenario.spaceId),
+            response: createExpectReadonlyAtSpaceWithReferencesResult(scenario.spaceId),
           },
           withReferencesOverwriting: {
             statusCode: 200,
-            response: createExpectUnauthorizedAtSpaceResult(scenario.spaceId),
+            response: createExpectReadonlyAtSpaceWithReferencesResult(scenario.spaceId),
           },
           withoutReferencesOverwriting: {
             statusCode: 200,
-            response: createExpectUnauthorizedAtSpaceResult(scenario.spaceId),
+            response: createExpectUnauthorizedAtSpaceWithoutReferencesResult(scenario.spaceId),
           },
           withoutReferencesNotOverwriting: {
             statusCode: 200,
-            response: createExpectUnauthorizedAtSpaceResult(scenario.spaceId),
+            response: createExpectUnauthorizedAtSpaceWithoutReferencesResult(scenario.spaceId),
           },
           nonExistentSpace: {
             statusCode: 200,
-            response: createExpectSpaceNotFoundResult(scenario.spaceId),
+            response: createExpectUnauthorizedAtSpaceWithoutReferencesResult(
+              scenario.spaceId,
+              NON_EXISTENT_SPACE_ID
+            ),
           },
         },
       });
@@ -223,23 +237,26 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Tes
         tests: {
           withReferencesNotOverwriting: {
             statusCode: 200,
-            response: createExpectUnauthorizedAtSpaceResult(scenario.spaceId),
+            response: createExpectReadonlyAtSpaceWithReferencesResult(scenario.spaceId),
           },
           withReferencesOverwriting: {
             statusCode: 200,
-            response: createExpectUnauthorizedAtSpaceResult(scenario.spaceId),
+            response: createExpectReadonlyAtSpaceWithReferencesResult(scenario.spaceId),
           },
           withoutReferencesOverwriting: {
             statusCode: 200,
-            response: createExpectUnauthorizedAtSpaceResult(scenario.spaceId),
+            response: createExpectUnauthorizedAtSpaceWithoutReferencesResult(scenario.spaceId),
           },
           withoutReferencesNotOverwriting: {
             statusCode: 200,
-            response: createExpectUnauthorizedAtSpaceResult(scenario.spaceId),
+            response: createExpectUnauthorizedAtSpaceWithoutReferencesResult(scenario.spaceId),
           },
           nonExistentSpace: {
             statusCode: 200,
-            response: createExpectSpaceNotFoundResult(scenario.spaceId),
+            response: createExpectUnauthorizedAtSpaceWithoutReferencesResult(
+              scenario.spaceId,
+              NON_EXISTENT_SPACE_ID
+            ),
           },
         },
       });
@@ -250,23 +267,26 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Tes
         tests: {
           withReferencesNotOverwriting: {
             statusCode: 200,
-            response: createExpectSpaceNotFoundResult(scenario.spaceId),
+            response: createExpectUnauthorizedAtSpaceWithReferencesResult(scenario.spaceId),
           },
           withReferencesOverwriting: {
             statusCode: 200,
-            response: createExpectSpaceNotFoundResult(scenario.spaceId),
+            response: createExpectUnauthorizedAtSpaceWithReferencesResult(scenario.spaceId),
           },
           withoutReferencesOverwriting: {
             statusCode: 200,
-            response: createExpectSpaceNotFoundResult(scenario.spaceId),
+            response: createExpectUnauthorizedAtSpaceWithoutReferencesResult(scenario.spaceId),
           },
           withoutReferencesNotOverwriting: {
             statusCode: 200,
-            response: createExpectSpaceNotFoundResult(scenario.spaceId),
+            response: createExpectUnauthorizedAtSpaceWithoutReferencesResult(scenario.spaceId),
           },
           nonExistentSpace: {
             statusCode: 200,
-            response: createExpectSpaceNotFoundResult(scenario.spaceId),
+            response: createExpectUnauthorizedAtSpaceWithoutReferencesResult(
+              scenario.spaceId,
+              NON_EXISTENT_SPACE_ID
+            ),
           },
         },
       });

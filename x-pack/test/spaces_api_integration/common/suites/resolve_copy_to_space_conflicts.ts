@@ -34,6 +34,8 @@ interface ResolveCopyToSpaceTestDefinition {
   tests: ResolveCopyToSpaceTests;
 }
 
+const NON_EXISTENT_SPACE_ID = 'non_existent_space';
+
 const getDestinationSpace = (originSpaceId?: string) => {
   if (!originSpaceId || originSpaceId === DEFAULT_SPACE_ID) {
     return 'space_1';
@@ -81,22 +83,26 @@ export function resolveCopyToSpaceConflictsSuite(
     expect(visualization.attributes.title).to.eql(`CTS vis 3 from ${sourceSpaceId} space`);
   };
 
-  const createExpectOverriddenResponseWithoutReferences = (sourceSpaceId: string) => async (
-    response: TestResponse
-  ) => {
-    const destination = getDestinationSpace(sourceSpaceId);
+  const createExpectOverriddenResponseWithoutReferences = (
+    sourceSpaceId: string,
+    destinationSpaceId: string = getDestinationSpace(sourceSpaceId)
+  ) => async (response: TestResponse) => {
     const result = response.body;
     expect(result).to.eql({
-      [destination]: {
+      [destinationSpaceId]: {
         success: true,
         successCount: 1,
       },
     });
-    const [dashboard, visualization] = await getObjectsAtSpace(destination);
+    const [dashboard, visualization] = await getObjectsAtSpace(destinationSpaceId);
     expect(dashboard.attributes.title).to.eql(
       `This is the ${sourceSpaceId} test space CTS dashboard`
     );
-    expect(visualization.attributes.title).to.eql(`CTS vis 3 from ${destination} space`);
+    if (destinationSpaceId === NON_EXISTENT_SPACE_ID) {
+      expect((visualization as any).statusCode).to.eql(404);
+    } else {
+      expect(visualization.attributes.title).to.eql(`CTS vis 3 from ${destinationSpaceId} space`);
+    }
   };
 
   const createExpectNonOverriddenResponseWithReferences = (sourceSpaceId: string) => async (
@@ -167,9 +173,9 @@ export function resolveCopyToSpaceConflictsSuite(
     });
   };
 
-  const createExpectSpaceNotFoundResult = (spaceId: string = DEFAULT_SPACE_ID) => async (
-    resp: TestResponse
-  ) => {
+  const createExpectUnauthorizedAtSpaceWithReferencesResult = (
+    spaceId: string = DEFAULT_SPACE_ID
+  ) => async (resp: TestResponse) => {
     const destination = getDestinationSpace(spaceId);
 
     const result = resp.body as CopyResponse;
@@ -179,32 +185,9 @@ export function resolveCopyToSpaceConflictsSuite(
         successCount: 0,
         errors: [
           {
-            error: {
-              spaceId: destination,
-              type: 'space_not_found',
-            },
-          },
-        ],
-      },
-    } as CopyResponse);
-  };
-
-  const createExpectUnauthorizedAtSpaceResult = (spaceId: string = DEFAULT_SPACE_ID) => async (
-    resp: TestResponse
-  ) => {
-    const destination = getDestinationSpace(spaceId);
-
-    const result = resp.body as CopyResponse;
-    expect(result).to.eql({
-      [destination]: {
-        success: false,
-        successCount: 0,
-        errors: [
-          {
-            error: {
-              spaceId: destination,
-              type: 'unauthorized_to_manage_saved_objects',
-            },
+            statusCode: 403,
+            error: 'Forbidden',
+            message: 'Unable to bulk_get index-pattern',
           },
         ],
       },
@@ -216,6 +199,67 @@ export function resolveCopyToSpaceConflictsSuite(
       `This is the ${destination} test space CTS dashboard`
     );
     expect(visualization.attributes.title).to.eql(`CTS vis 3 from ${destination} space`);
+  };
+
+  const createExpectReadonlyAtSpaceWithReferencesResult = (
+    spaceId: string = DEFAULT_SPACE_ID
+  ) => async (resp: TestResponse) => {
+    const destination = getDestinationSpace(spaceId);
+
+    const result = resp.body as CopyResponse;
+    expect(result).to.eql({
+      [destination]: {
+        success: false,
+        successCount: 0,
+        errors: [
+          {
+            statusCode: 403,
+            error: 'Forbidden',
+            message: 'Unable to bulk_create visualization',
+          },
+        ],
+      },
+    } as CopyResponse);
+
+    // Query ES to ensure that nothing was copied
+    const [dashboard, visualization] = await getObjectsAtSpace(destination);
+    expect(dashboard.attributes.title).to.eql(
+      `This is the ${destination} test space CTS dashboard`
+    );
+    expect(visualization.attributes.title).to.eql(`CTS vis 3 from ${destination} space`);
+  };
+
+  const createExpectUnauthorizedAtSpaceWithoutReferencesResult = (
+    sourceSpaceId: string = DEFAULT_SPACE_ID,
+    destinationSpaceId: string = getDestinationSpace(sourceSpaceId)
+  ) => async (resp: TestResponse) => {
+    const result = resp.body as CopyResponse;
+    expect(result).to.eql({
+      [destinationSpaceId]: {
+        success: false,
+        successCount: 0,
+        errors: [
+          {
+            statusCode: 403,
+            error: 'Forbidden',
+            message: 'Unable to bulk_create dashboard',
+          },
+        ],
+      },
+    } as CopyResponse);
+
+    // Query ES to ensure that nothing was copied
+    const [dashboard, visualization] = await getObjectsAtSpace(destinationSpaceId);
+
+    if (destinationSpaceId === NON_EXISTENT_SPACE_ID) {
+      expect((dashboard as any).statusCode).to.eql(404);
+      expect((visualization as any).statusCode).to.eql(404);
+    } else {
+      expect(dashboard.attributes.title).to.eql(
+        `This is the ${destinationSpaceId} test space CTS dashboard`
+      );
+      expect(visualization.attributes.title).to.eql(`CTS vis 3 from ${destinationSpaceId} space`);
+    }
   };
 
   const makeCopyToSpaceTest = (describeFn: DescribeFn) => (
@@ -342,6 +386,34 @@ export function resolveCopyToSpaceConflictsSuite(
           .expect(tests.withoutReferencesNotOverwriting.statusCode)
           .then(tests.withoutReferencesNotOverwriting.response);
       });
+
+      it(`should return ${tests.nonExistentSpace.statusCode} when resolving within a non-existent space`, async () => {
+        const destination = NON_EXISTENT_SPACE_ID;
+
+        return supertestWithoutAuth
+          .post(`${getUrlPrefix(spaceId)}/api/spaces/_resolve_copy_saved_objects_errors`)
+          .auth(user.username, user.password)
+          .send({
+            objects: [
+              {
+                type: 'dashboard',
+                id: 'cts_dashboard',
+              },
+            ],
+            includeReferences: false,
+            retries: {
+              [destination]: [
+                {
+                  type: 'dashboard',
+                  id: 'cts_dashboard',
+                  overwrite: true,
+                },
+              ],
+            },
+          })
+          .expect(tests.nonExistentSpace.statusCode)
+          .then(tests.nonExistentSpace.response);
+      });
     });
   };
 
@@ -356,8 +428,10 @@ export function resolveCopyToSpaceConflictsSuite(
     createExpectOverriddenResponseWithoutReferences,
     createExpectNonOverriddenResponseWithReferences,
     createExpectNonOverriddenResponseWithoutReferences,
-    createExpectUnauthorizedAtSpaceResult,
-    createExpectSpaceNotFoundResult,
+    createExpectUnauthorizedAtSpaceWithReferencesResult,
+    createExpectReadonlyAtSpaceWithReferencesResult,
+    createExpectUnauthorizedAtSpaceWithoutReferencesResult,
     originSpaces: ['default', 'space_1'],
+    NON_EXISTENT_SPACE_ID,
   };
 }
