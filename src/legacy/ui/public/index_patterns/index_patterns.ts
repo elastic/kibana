@@ -18,15 +18,17 @@
  */
 
 import { idx } from '@kbn/elastic-idx';
-import { SavedObjectsClientContract, SimpleSavedObject } from 'src/core/public';
+import {
+  SavedObjectsClientContract,
+  SimpleSavedObject,
+  UiSettingsClientContract,
+} from 'src/core/public';
 // @ts-ignore
 import { fieldFormats } from '../registry/field_formats';
 
 import { IndexPattern } from './_index_pattern';
 import { createIndexPatternCache } from './_pattern_cache';
 import { IndexPatternsApiClient } from './index_patterns_api_client';
-import { UiSettingsClientContract } from '../../../../core/public';
-
 const indexPatternCache = createIndexPatternCache();
 const apiClient = new IndexPatternsApiClient();
 
