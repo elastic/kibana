@@ -202,6 +202,7 @@ export const getColumns = ({
                       <FormattedFieldValue
                         contextId={'event-details-field-value'}
                         eventId={eventId}
+                        fieldFormat={data.format}
                         fieldName={data.field}
                         fieldType={data.type}
                         value={value}
