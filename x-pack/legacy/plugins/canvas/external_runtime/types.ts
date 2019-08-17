@@ -7,6 +7,8 @@
 // @ts-ignore Unlinked Webpack Type
 import ContainerStyle from 'types/interpreter';
 import { CSSProperties } from 'react';
+import { SavedObject, SavedObjectAttributes } from 'src/core/server';
+
 import { CanvasElement, CanvasPage, CanvasWorkpad } from '../types';
 
 /**
@@ -32,6 +34,10 @@ export interface CanvasRenderedPage extends CanvasPage {
 export interface CanvasRenderedWorkpad extends CanvasWorkpad {
   pages: CanvasRenderedPage[];
 }
+
+export type CanvasRenderedWorkpadSavedObject = SavedObject<
+  CanvasRenderedWorkpad & SavedObjectAttributes
+>;
 
 /**
  * Represents the success/failure of the initial evaluation of a Canvas

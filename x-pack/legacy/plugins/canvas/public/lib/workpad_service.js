@@ -25,7 +25,7 @@ export function create(workpad) {
 export function get(workpadId) {
   return fetch.get(`${apiPath}/${workpadId}`).then(({ data: workpad }) => {
     // shim old workpads with new properties
-    return { css: DEFAULT_WORKPAD_CSS, ...workpad };
+    return { css: DEFAULT_WORKPAD_CSS, isShared: false, ...workpad };
   });
 }
 

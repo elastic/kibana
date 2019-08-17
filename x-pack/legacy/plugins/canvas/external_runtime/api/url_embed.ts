@@ -29,7 +29,7 @@ export class EmbedFromURL extends BaseEmbed {
 
   async _getWorkpad() {
     const workpadResponse = await fetch(this.workpadURL);
-    if (workpadResponse) {
+    if (workpadResponse.ok) {
       return await workpadResponse.json();
     }
     return null;
