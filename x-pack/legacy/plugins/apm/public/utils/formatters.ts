@@ -187,40 +187,25 @@ export function asPercent(
   return numeral(decimal).format('0.0%');
 }
 
-type ByteFormatter = (value: number | null) => string;
+type ByteFormatter = (value: number | null | undefined) => string;
 
-function asKilobytes(value: number | null) {
-  if (value === null || isNaN(value)) {
-    return '';
-  }
+function asKilobytes(value: number) {
   return `${asDecimal(value / 1000)} KB`;
 }
 
-function asMegabytes(value: number | null) {
-  if (value === null || isNaN(value)) {
-    return '';
-  }
+function asMegabytes(value: number) {
   return `${asDecimal(value / 1e6)} MB`;
 }
 
-function asGigabytes(value: number | null) {
-  if (value === null || isNaN(value)) {
-    return '';
-  }
+function asGigabytes(value: number) {
   return `${asDecimal(value / 1e9)} GB`;
 }
 
-function asTerabytes(value: number | null) {
-  if (value === null || isNaN(value)) {
-    return '';
-  }
+function asTerabytes(value: number) {
   return `${asDecimal(value / 1e12)} TB`;
 }
 
-export function asBytes(value: number | null | undefined) {
-  if (value === null || value === undefined || isNaN(value)) {
-    return '';
-  }
+function asBytes(value: number) {
   return `${asDecimal(value)} B`;
 }
 
@@ -233,24 +218,33 @@ export function asDynamicBytes(value: number | null | undefined) {
 
 type GetByteFormatter = (max: number) => ByteFormatter;
 
+const bailIfNumberInvalid = (cb: (val: number) => string) => {
+  return (val: number | null | undefined) => {
+    if (val === null || val === undefined || isNaN(val)) {
+      return '';
+    }
+    return cb(val);
+  };
+};
+
 const unmemoizedFixedByteFormatter: GetByteFormatter = max => {
   if (max > 1e12) {
-    return asTerabytes;
+    return bailIfNumberInvalid(asTerabytes);
   }
 
   if (max > 1e9) {
-    return asGigabytes;
+    return bailIfNumberInvalid(asGigabytes);
   }
 
   if (max > 1e6) {
-    return asMegabytes;
+    return bailIfNumberInvalid(asMegabytes);
   }
 
   if (max > 1000) {
-    return asKilobytes;
+    return bailIfNumberInvalid(asKilobytes);
   }
 
-  return asBytes;
+  return bailIfNumberInvalid(asBytes);
 };
 
 export const getFixedByteFormatter = memoize(unmemoizedFixedByteFormatter);
