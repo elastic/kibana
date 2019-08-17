@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { EuiFieldText, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import styled, { keyframes } from 'styled-components';
 
 const fadeInEffect = keyframes`
@@ -73,18 +73,6 @@ export const StyledStar = styled(EuiIcon)`
 `;
 
 StyledStar.displayName = 'StyledStar';
-
-export const PropertiesLeft = styled(EuiFlexGroup)`
-  width: 100%;
-`;
-
-PropertiesLeft.displayName = 'PropertiesLeft';
-
-export const PropertiesRight = styled(EuiFlexGroup)`
-  margin-right: 5px;
-`;
-
-PropertiesRight.displayName = 'PropertiesRight';
 
 export const Facet = styled.div`
   align-items: center;
