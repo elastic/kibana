@@ -18,6 +18,7 @@ export default function exploreRepositoryFunctionalTests({
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
   describe('File Tree', function() {
+    this.tags('smoke');
     const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
 
     before(async () => {
@@ -100,7 +101,7 @@ export default function exploreRepositoryFunctionalTests({
 
       await browser.refresh();
 
-      await retry.tryForTime(5000, async () => {
+      await retry.tryForTime(15000, async () => {
         // should only open one folder at this time
         expect(
           await testSubjects.exists('codeFileTreeNode-Directory-Icon-elastic/src/code-open')
