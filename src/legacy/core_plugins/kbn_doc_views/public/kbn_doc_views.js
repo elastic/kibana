@@ -18,5 +18,4 @@
  */
 
 import './views/table';
-import './views/table.new';
 import './views/json';
