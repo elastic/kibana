@@ -16,16 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiToolTip } from '@elastic/eui';
 
-import _ from 'lodash';
-import { addDocView } from 'ui/registry/doc_views';
-import { i18n } from '@kbn/i18n';
-import { DocViewTable } from './table.component';
+export interface Props {
+  active: boolean;
+  disabled: boolean;
+  onClick: () => void;
+}
 
-addDocView({
-  title: i18n.translate('kbnDocViews.json.tableTitle', {
-    defaultMessage: 'Table New',
-  }),
-  order: 30,
-  component: DocViewTable,
-});
+export function DocViewTableRowBtnToggleColumn({ onClick, active, disabled = false }: Props) {
+  if (disabled) {
+    return <i className="fa fa-columns text-muted" />;
+  }
+  return (
+    <EuiToolTip
+      content={
+        <FormattedMessage
+          id="kbnDocViews.table.toggleColumnInTableButtonTooltip"
+          defaultMessage="Toggle column in table"
+        />
+      }
+    >
+      <button aria-pressed={active} onClick={onClick} className="kbnDocViewer__actionButton">
+        <i className="fa fa-columns" />
+      </button>
+    </EuiToolTip>
+  );
+}
