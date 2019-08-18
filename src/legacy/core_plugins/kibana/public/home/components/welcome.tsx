@@ -33,7 +33,7 @@ import {
   EuiIcon,
   EuiPortal,
 } from '@elastic/eui';
-
+// @ts-ignore
 import { banners } from 'ui/notify';
 
 import { FormattedMessage } from '@kbn/i18n/react';
