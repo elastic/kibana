@@ -34,6 +34,10 @@ describe('home', () => {
       apmUiEnabled: true,
       mlEnabled: true,
       kibanaVersion: '99.2.1',
+      fetchTelemetry: jest.fn(),
+      getTelemetryBannerId: jest.fn(),
+      setOptIn: jest.fn(),
+      showTelemetryOptIn: false,
       addBasePath(url) {
         return `base_path/${url}`;
       },
