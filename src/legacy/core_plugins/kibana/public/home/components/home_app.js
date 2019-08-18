@@ -95,6 +95,7 @@ export function HomeApp({ directories }) {
             showTelemetryOptIn={showTelemetryOptIn}
             setOptIn={telemetryOptInProvider.setOptIn}
             fetchTelemetry={telemetryOptInProvider.fetchExample}
+            getTelemetryBannerId={telemetryOptInProvider.getBannerId}
           />
         </Route>
       </Switch>

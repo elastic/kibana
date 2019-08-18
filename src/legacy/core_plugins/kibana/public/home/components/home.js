@@ -228,6 +228,7 @@ export class Home extends Component {
         showTelemetryOptIn={this.props.showTelemetryOptIn}
         fetchTelemetry={this.props.fetchTelemetry}
         setOptIn={this.props.setOptIn}
+        getTelemetryBannerId={this.props.getTelemetryBannerId}
       />
     );
   }
@@ -251,6 +252,7 @@ export class Home extends Component {
 Home.propTypes = {
   addBasePath: PropTypes.func.isRequired,
   fetchTelemetry: PropTypes.func.isRequired,
+  getTelemetryBannerId: PropTypes.func.isRequired,
   setOptIn: PropTypes.func.isRequired,
   showTelemetryOptIn: PropTypes.bool.isRequired,
   directories: PropTypes.arrayOf(

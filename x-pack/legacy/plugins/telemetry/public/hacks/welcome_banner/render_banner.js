@@ -22,10 +22,12 @@ export function renderBanner(telemetryOptInProvider, fetchTelemetry, { _banners 
   const bannerId = _banners.add({
     component: (
       <OptInBanner
-        optInClick={optIn => clickBanner(bannerId, telemetryOptInProvider, optIn)}
+        optInClick={optIn => clickBanner(telemetryOptInProvider, optIn)}
         fetchTelemetry={fetchTelemetry}
       />
     ),
     priority: 10000
   });
+
+  telemetryOptInProvider.setBannerId(bannerId);
 }

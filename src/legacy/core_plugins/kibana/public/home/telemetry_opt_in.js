@@ -25,10 +25,12 @@ import { i18n } from '@kbn/i18n';
 
 export function TelemetryOptInProvider($injector, chrome) {
   let currentOptInStatus = npStart.core.injectedMetadata.getInjectedVar('telemetryOptedIn');
+  let bannerId = null;
   setCanTrackUiMetrics(currentOptInStatus);
-
   const provider = {
+    getBannerId: () => bannerId,
     getOptIn: () => currentOptInStatus,
+    setBannerId(id) { bannerId = id; },
     setOptIn: async (enabled) => {
       setCanTrackUiMetrics(enabled);
       const $http = $injector.get('$http');

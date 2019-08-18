@@ -34,6 +34,8 @@ import {
   EuiPortal,
 } from '@elastic/eui';
 
+import { banners } from 'ui/notify';
+
 import { FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
 import { SampleDataCard } from './sample_data';
@@ -46,6 +48,7 @@ interface Props {
   onSkip: () => {};
   fetchTelemetry: () => Promise<any[]>;
   setOptIn: (enabled: boolean) => Promise<boolean>;
+  getTelemetryBannerId: () => string;
   showTelemetryOptIn: boolean;
 }
 interface State {
@@ -60,13 +63,13 @@ export class Welcome extends React.PureComponent<Props, State> {
     step: 0,
   };
 
-  hideOnEsc = (e: KeyboardEvent) => {
+  private hideOnEsc = (e: KeyboardEvent) => {
     if (e.key === 'Escape') {
       this.props.onSkip();
     }
   };
 
-  navigateToStep = (step: number) => () => {
+  private navigateToStep = (step: number) => () => {
     trackUiMetric(METRIC_TYPE.CLICK, `welcomeScreenNavigate_${step}`);
     this.setState(() => ({ step }));
   };
@@ -75,22 +78,20 @@ export class Welcome extends React.PureComponent<Props, State> {
     const path = chrome.addBasePath('#/home/tutorial_directory/sampleData');
     window.location.href = path;
   }
-  onTelemetryOptInDecline = async () => {
-    trackUiMetric(METRIC_TYPE.CLICK, 'telemetryOptInDecline');
-    await this.props.setOptIn(false);
+  private async handleTelemetrySelection(confirm: boolean) {
+    const metricName = `telemetryOptIn${confirm ? 'Confirm' : 'Decline'}`;
+    trackUiMetric(METRIC_TYPE.CLICK, metricName);
+    await this.props.setOptIn(confirm);
+    const bannerId = this.props.getTelemetryBannerId();
+    banners.remove(bannerId);
     this.setState(() => ({ step: 1 }));
-  };
-  onTelemetryOptInConfirm = async () => {
-    trackUiMetric(METRIC_TYPE.CLICK, 'telemetryOptInConfirm');
-    await this.props.setOptIn(true);
-    this.setState(() => ({ step: 1 }));
-  };
+  }
 
-  onSampleDataDecline = () => {
+  private onSampleDataDecline = () => {
     trackUiMetric(METRIC_TYPE.CLICK, 'sampleDataDecline');
     this.props.onSkip();
   };
-  onSampleDataConfirm = () => {
+  private onSampleDataConfirm = () => {
     trackUiMetric(METRIC_TYPE.CLICK, 'sampleDataConfirm');
     this.redirecToSampleData();
   };
@@ -143,8 +144,8 @@ export class Welcome extends React.PureComponent<Props, State> {
                   <TelemetryOptInCard
                     urlBasePath={urlBasePath}
                     fetchTelemetry={fetchTelemetry}
-                    onConfirm={this.onTelemetryOptInConfirm}
-                    onDecline={this.onTelemetryOptInDecline}
+                    onConfirm={this.handleTelemetrySelection.bind(this, true)}
+                    onDecline={this.handleTelemetrySelection.bind(this, false)}
                   />
                 )}
                 {(!showTelemetryOptIn || step === 1) && (
