@@ -4,17 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { mockInjectedMetadata } from '../../services/telemetry_opt_in.test.mocks';
+
 import sinon from 'sinon';
 
-import { CONFIG_TELEMETRY } from '../../../../common/constants';
-import { shouldShowBanner } from '../should_show_banner';
-import { TelemetryOptInProvider } from '../../../services/telemetry_opt_in';
+import { CONFIG_TELEMETRY } from '../../../common/constants';
+import { shouldShowBanner } from './should_show_banner';
+import { TelemetryOptInProvider } from '../../services/telemetry_opt_in';
 
-const getMockInjector = ({ telemetryEnabled }) => {
+const getMockInjector = () => {
   const get = sinon.stub();
-
-  get.withArgs('telemetryOptedIn').returns(telemetryEnabled);
 
   const mockHttp = {
     post: sinon.stub()
@@ -25,8 +30,9 @@ const getMockInjector = ({ telemetryEnabled }) => {
   return { get };
 };
 
-const getTelemetryOptInProvider = ({ telemetryEnabled = null } = {}) => {
-  const injector = getMockInjector({ telemetryEnabled });
+const getTelemetryOptInProvider = ({ telemetryOptedIn = null } = {}) => {
+  mockInjectedMetadata({ telemetryOptedIn });
+  const injector = getMockInjector();
   const chrome = {
     addBasePath: (url) => url
   };
@@ -49,28 +55,28 @@ describe('should_show_banner', () => {
     const showBannerTrue = await shouldShowBanner(telemetryOptInProvider, config, { _handleOldSettings: handleOldSettingsTrue });
     const showBannerFalse = await shouldShowBanner(telemetryOptInProvider, config, { _handleOldSettings: handleOldSettingsFalse });
 
-    expect(showBannerTrue).to.be(true);
-    expect(showBannerFalse).to.be(false);
+    expect(showBannerTrue).toBe(true);
+    expect(showBannerFalse).toBe(false);
 
-    expect(config.get.callCount).to.be(0);
-    expect(handleOldSettingsTrue.calledOnce).to.be(true);
-    expect(handleOldSettingsFalse.calledOnce).to.be(true);
+    expect(config.get.callCount).toBe(0);
+    expect(handleOldSettingsTrue.calledOnce).toBe(true);
+    expect(handleOldSettingsFalse.calledOnce).toBe(true);
   });
 
   it('returns false if telemetry opt-in setting is set to true', async () => {
     const config = { get: sinon.stub() };
 
-    const telemetryOptInProvider = getTelemetryOptInProvider({ telemetryEnabled: true });
+    const telemetryOptInProvider = getTelemetryOptInProvider({ telemetryOptedIn: true });
 
-    expect(await shouldShowBanner(telemetryOptInProvider, config)).to.be(false);
+    expect(await shouldShowBanner(telemetryOptInProvider, config)).toBe(false);
   });
 
   it('returns false if telemetry opt-in setting is set to false', async () => {
     const config = { get: sinon.stub() };
 
-    const telemetryOptInProvider = getTelemetryOptInProvider({ telemetryEnabled: false });
+    const telemetryOptInProvider = getTelemetryOptInProvider({ telemetryOptedIn: false });
 
-    expect(await shouldShowBanner(telemetryOptInProvider, config)).to.be(false);
+    expect(await shouldShowBanner(telemetryOptInProvider, config)).toBe(false);
   });
 
 });
