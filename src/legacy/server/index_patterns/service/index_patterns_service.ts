@@ -17,27 +17,41 @@
  * under the License.
  */
 
-import {
-  getFieldCapabilities,
-  resolveTimePattern,
-  createNoMatchingIndicesError,
-} from './lib';
+import { APICaller } from 'src/core/server';
+
+import { getFieldCapabilities, resolveTimePattern, createNoMatchingIndicesError } from './lib';
+
+export interface FieldDescriptor {
+  aggregatable: boolean;
+  name: string;
+  readFromDocValues: boolean;
+  searchable: boolean;
+  type: string;
+  esTypes: string[];
+  parent?: string;
+  subType?: string;
+}
 
 export class IndexPatternsService {
-  constructor(callDataCluster) {
+  private _callDataCluster: APICaller;
+
+  constructor(callDataCluster: APICaller) {
     this._callDataCluster = callDataCluster;
   }
 
   /**
    *  Get a list of field objects for an index pattern that may contain wildcards
    *
-   *  @param {Object} [options={}]
+   *  @param {Object} [options]
    *  @property {String} options.pattern The index pattern
    *  @property {Number} options.metaFields The list of underscore prefixed fields that should
    *                                        be left in the field list (all others are removed).
    *  @return {Promise<Array<Fields>>}
    */
-  async getFieldsForWildcard(options = {}) {
+  async getFieldsForWildcard(options: {
+    pattern: string | string[];
+    metaFields?: string[];
+  }): Promise<FieldDescriptor[]> {
     const { pattern, metaFields } = options;
     return await getFieldCapabilities(this._callDataCluster, pattern, metaFields);
   }
@@ -52,7 +66,12 @@ export class IndexPatternsService {
    *                                        be left in the field list (all others are removed).
    *  @return {Promise<Array<Fields>>}
    */
-  async getFieldsForTimePattern(options = {}) {
+  async getFieldsForTimePattern(options: {
+    pattern: string;
+    metaFields: string[];
+    lookBack: number;
+    interval: string;
+  }) {
     const { pattern, lookBack, metaFields } = options;
     const { matches } = await resolveTimePattern(this._callDataCluster, pattern);
     const indices = matches.slice(0, lookBack);
@@ -61,5 +80,4 @@ export class IndexPatternsService {
     }
     return await getFieldCapabilities(this._callDataCluster, indices, metaFields);
   }
-
 }
