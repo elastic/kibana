@@ -69,11 +69,6 @@ export class Welcome extends React.PureComponent<Props, State> {
     }
   };
 
-  private navigateToStep = (step: number) => () => {
-    trackUiMetric(METRIC_TYPE.CLICK, `welcomeScreenNavigate_${step}`);
-    this.setState(() => ({ step }));
-  };
-
   private redirecToSampleData() {
     const path = chrome.addBasePath('#/home/tutorial_directory/sampleData');
     window.location.href = path;

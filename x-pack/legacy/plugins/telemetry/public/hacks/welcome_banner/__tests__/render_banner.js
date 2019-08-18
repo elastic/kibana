@@ -12,14 +12,17 @@ import { renderBanner } from '../render_banner';
 describe('render_banner', () => {
 
   it('adds a banner to banners with priority of 10000', () => {
-    const config = { };
+    let bannerId;
+    const telemetryOptInProvider = {
+      setBannerId: (id) => { bannerId = id; },
+    };
     const banners = {
       add: sinon.stub()
     };
     const fetchTelemetry = sinon.stub();
     banners.add.returns('brucer-banner');
 
-    renderBanner(config, fetchTelemetry, { _banners: banners });
+    renderBanner(telemetryOptInProvider, fetchTelemetry, { _banners: banners });
 
     expect(banners.add.calledOnce).to.be(true);
     expect(fetchTelemetry.called).to.be(false);
@@ -27,6 +30,7 @@ describe('render_banner', () => {
     const bannerConfig = banners.add.getCall(0).args[0];
 
     expect(bannerConfig.component).not.to.be(undefined);
+    expect(bannerId).to.eql(bannerConfig.id);
     expect(bannerConfig.priority).to.be(10000);
   });
 
