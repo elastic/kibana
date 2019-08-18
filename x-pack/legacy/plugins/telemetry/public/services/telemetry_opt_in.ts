@@ -5,6 +5,4 @@
  */
 
 // @ts-ignore
-export {
-  TelemetryOptInProvider,
-} from '../../../../../../src/legacy/core_plugins/kibana/public/home/telemetry_opt_in';
+export { TelemetryOptInProvider } from '../../../../../../src/legacy/core_plugins/kibana/public/home/telemetry_opt_in'; // eslint-disable-line
