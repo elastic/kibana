@@ -223,6 +223,10 @@ export class IndexWorker extends AbstractWorker {
     };
   }
 
+  // 1. Try to load checkpointed requests for all indexers to the `checkpointReqs` field
+  // of the return value.
+  // 2. Make a decision on if the index job should proceed indicate by the boolean `resume`
+  // field of the return value.
   private async shouldJobResume(
     payload: any
   ): Promise<{
@@ -259,11 +263,10 @@ export class IndexWorker extends AbstractWorker {
         currentUri === uri &&
         currentRevision === revision
       ) {
-        // If
-        // * no checkpoint exist (undefined or empty string) for either LSP or commit indexer
-        // * index progress is ongoing
-        // * the uri and revision match the current job
-        // Then we can safely dedup this index job request.
+        // Dedup this index job request if:
+        // 1. no checkpoint exist (undefined or empty string) for either LSP or commit indexer
+        // 2. index progress is ongoing
+        // 3. the uri and revision match the current job
         return {
           resume: false,
           checkpointReqs,
@@ -271,6 +274,7 @@ export class IndexWorker extends AbstractWorker {
       }
     }
 
+    // Add the checkpoints into the map as a result to return. They could be undefined.
     checkpointReqs.set(IndexerType.LSP, lspCheckpointReq);
     checkpointReqs.set(IndexerType.LSP_INC, lspCheckpointReq);
     checkpointReqs.set(IndexerType.COMMIT, commitCheckpointReq);
