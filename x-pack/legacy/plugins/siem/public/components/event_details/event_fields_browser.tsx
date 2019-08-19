@@ -10,7 +10,6 @@ import {
   EuiInMemoryTable,
 } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { BrowserFields, getAllFieldsByName } from '../../containers/source';
@@ -25,24 +24,14 @@ interface Props {
   columnHeaders: ColumnHeader[];
   data: DetailItem[];
   eventId: string;
-  isLoading: boolean;
   onUpdateColumns: OnUpdateColumns;
   timelineId: string;
   toggleColumn: (column: ColumnHeader) => void;
 }
 
 /** Renders a table view or JSON view of the `ECS` `data` */
-export const EventFieldsBrowser = pure<Props>(
-  ({
-    browserFields,
-    columnHeaders,
-    data,
-    eventId,
-    isLoading,
-    onUpdateColumns,
-    timelineId,
-    toggleColumn,
-  }) => {
+export const EventFieldsBrowser = React.memo<Props>(
+  ({ browserFields, columnHeaders, data, eventId, onUpdateColumns, timelineId, toggleColumn }) => {
     const fieldsByName = getAllFieldsByName(browserFields);
     return (
       <EuiInMemoryTable
@@ -57,7 +46,6 @@ export const EventFieldsBrowser = pure<Props>(
           browserFields,
           columnHeaders,
           eventId,
-          isLoading,
           onUpdateColumns,
           timelineId,
           toggleColumn,

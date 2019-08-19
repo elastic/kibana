@@ -26,7 +26,7 @@ export const getScreenshots = async ({
   browser: HeadlessBrowser;
   elementsPositionAndAttributes: ElementsPositionAndAttribute[];
 }): Promise<Screenshot[]> => {
-  logger.debug(`taking screenshots`);
+  logger.info(`taking screenshots`);
 
   const asyncDurationLogger = getAsyncDurationLogger(logger);
   const screenshots: Screenshot[] = [];
@@ -45,7 +45,7 @@ export const getScreenshots = async ({
     });
   }
 
-  logger.debug(`screenshots taken: ${screenshots.length}`);
+  logger.info(`screenshots taken: ${screenshots.length}`);
 
   return screenshots;
 };
