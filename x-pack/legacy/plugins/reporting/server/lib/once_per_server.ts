@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { memoize } from 'lodash';
+import { memoize, MemoizedFunction } from 'lodash';
+import { KbnServer } from '../../types';
+
+type ServerFn = (server: KbnServer) => any;
+type Memo = ((server: KbnServer) => any) & MemoizedFunction;
 
 /**
  * allow this function to be called multiple times, but
@@ -17,8 +21,8 @@ import { memoize } from 'lodash';
  * @param  {Function} fn - the factory function
  * @return {any}
  */
-export function oncePerServer(fn) {
-  const memoized = memoize(function (server) {
+export function oncePerServer(fn: ServerFn) {
+  const memoized: Memo = memoize(function(server: KbnServer) {
     if (arguments.length !== 1) {
       throw new TypeError('This function expects to be called with a single argument');
     }
@@ -27,13 +31,17 @@ export function oncePerServer(fn) {
       throw new TypeError('This function expects to be passed the server');
     }
 
+    // @ts-ignore
     return fn.call(this, server);
   });
+
+  // @ts-ignore
+  // Type 'WeakMap<object, any>' is not assignable to type 'MapCache
 
   // use a weak map a the cache so that:
   //  1. return values mapped to the actual server instance
   //  2. return value lifecycle matches that of the server
-  memoized.cache = new WeakMap;
+  memoized.cache = new WeakMap();
 
   return memoized;
 }
