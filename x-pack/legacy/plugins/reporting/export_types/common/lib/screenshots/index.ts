@@ -41,8 +41,6 @@ export function screenshotsObservableFactory(server: KbnServer) {
     layout,
     browserTimezone,
   }: ScreenshotObservableOpts): Rx.Observable<void> {
-    logger.debug(`Creating browser driver factory`);
-
     const create$ = browserDriverFactory.create({
       viewport: layout.getBrowserViewport(),
       browserTimezone,
@@ -50,7 +48,6 @@ export function screenshotsObservableFactory(server: KbnServer) {
 
     return create$.pipe(
       mergeMap(({ driver$, exit$, message$, consoleMessage$ }) => {
-        logger.debug('Driver factory created');
         message$.subscribe((line: string) => {
           logger.debug(line, ['browser']);
         });
@@ -92,10 +89,8 @@ export function screenshotsObservableFactory(server: KbnServer) {
             ({ browser, itemsCount }) => ({ browser, itemsCount })
           ),
           mergeMap(
-            ({ browser, itemsCount }) => {
-              logger.debug(`waiting for ${itemsCount} to be in the DOM`);
-              return waitForElementsToBeInDOM(browser, itemsCount, layout);
-            },
+            ({ browser, itemsCount }) =>
+              waitForElementsToBeInDOM(browser, itemsCount, layout, logger),
             ({ browser, itemsCount }) => ({ browser, itemsCount })
           ),
           mergeMap(

@@ -35,6 +35,12 @@ export const metricsSchema: any = gql`
     nginxRequestRate
     nginxActiveConnections
     nginxRequestsPerConnection
+    awsOverview
+    awsCpuUtilization
+    awsNetworkBytes
+    awsNetworkPackets
+    awsDiskioBytes
+    awsDiskioOps
     custom
   }
 
@@ -53,9 +59,14 @@ export const metricsSchema: any = gql`
     value: Float
   }
 
+  input InfraNodeIdsInput {
+    nodeId: ID!
+    cloudId: ID
+  }
+
   extend type InfraSource {
     metrics(
-      nodeId: ID!
+      nodeIds: InfraNodeIdsInput!
       nodeType: InfraNodeType!
       timerange: InfraTimerangeInput!
       metrics: [InfraMetric!]!

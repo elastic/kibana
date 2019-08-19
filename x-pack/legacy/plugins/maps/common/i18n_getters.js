@@ -39,7 +39,7 @@ export function getEsSpatialRelationLabel(spatialRelation) {
       });
     case ES_SPATIAL_RELATIONS.WITHIN:
       return i18n.translate('xpack.maps.common.esSpatialRelation.withinLabel', {
-        defaultMessage: 'WITHIN'
+        defaultMessage: 'within'
       });
     case ES_SPATIAL_RELATIONS.CONTAINS:
       return i18n.translate('xpack.maps.common.esSpatialRelation.containsLabel', {
