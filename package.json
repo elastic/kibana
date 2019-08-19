@@ -159,6 +159,7 @@
     "d3-cloud": "1.2.5",
     "deepmerge": "^4.2.2",
     "del": "^5.1.0",
+    "elastic-apm-node": "^3.2.0",
     "elasticsearch": "^16.5.0",
     "elasticsearch-browser": "^16.5.0",
     "encode-uri-query": "1.0.1",
