@@ -74,7 +74,7 @@ export const MAPBOX_STYLES = {
         '#072f6b'
       ],
       'circle-opacity': 0.75,
-      'circle-stroke-color': '#FFFFFF',
+      'circle-stroke-color': '#b8143c', // Derived color. The darkened version of #e6194b
       'circle-stroke-opacity': 0.75,
       'circle-stroke-width': 1,
       'circle-radius': 10
@@ -200,7 +200,7 @@ export const MAPBOX_STYLES = {
       'visibility': 'visible'
     },
     'paint': {
-      'line-color': '#FFFFFF',
+      'line-color': '#b8143c', // Derived color. The darkened version of #e6194b
       'line-opacity': 0.75,
       'line-width': 1
     }
