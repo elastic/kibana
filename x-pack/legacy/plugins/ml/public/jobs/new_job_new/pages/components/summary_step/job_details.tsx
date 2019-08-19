@@ -5,6 +5,8 @@
  */
 
 import React, { FC, useContext } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiDescriptionList } from '@elastic/eui';
 import { JobCreatorContext } from '../job_creator_context';
 import { isMultiMetricJobCreator, isPopulationJobCreator } from '../../../common/job_creator';
@@ -19,83 +21,140 @@ export const JobDetails: FC = () => {
 
   const jobDetails: ListItems[] = [
     {
-      title: 'Job ID',
+      title: i18n.translate('xpack.ml.newJob.wizard.summaryStep.jobDetails.jobDetails.title', {
+        defaultMessage: 'Job ID',
+      }),
       description: jobCreator.jobId,
     },
     {
-      title: 'Job description',
+      title: i18n.translate('xpack.ml.newJob.wizard.summaryStep.jobDetails.jobDescription.title', {
+        defaultMessage: 'Job description',
+      }),
       description:
         jobCreator.description.length > 0 ? (
           jobCreator.description
         ) : (
-          <span style={{ fontStyle: 'italic' }}>No description provided</span>
+          <span style={{ fontStyle: 'italic' }}>
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.summaryStep.jobDetails.jobDescription.placeholder"
+              defaultMessage="No description provided"
+            />
+          </span>
         ),
     },
     {
-      title: 'Groups',
+      title: i18n.translate('xpack.ml.newJob.wizard.summaryStep.jobDetails.groups.title', {
+        defaultMessage: 'Groups',
+      }),
       description:
         jobCreator.groups.length > 0 ? (
           jobCreator.groups.join(', ')
         ) : (
-          <span style={{ fontStyle: 'italic' }}>No groups selected</span>
+          <span style={{ fontStyle: 'italic' }}>
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.summaryStep.jobDetails.groups.placeholder"
+              defaultMessage="No groups selected"
+            />
+          </span>
         ),
     },
   ];
 
   const detectorDetails: ListItems[] = [
     {
-      title: 'Bucket span',
+      title: i18n.translate('xpack.ml.newJob.wizard.summaryStep.jobDetails.bucketSpan.title', {
+        defaultMessage: 'Bucket span',
+      }),
       description: jobCreator.bucketSpan,
     },
   ];
 
   if (isMultiMetricJobCreator(jobCreator)) {
     detectorDetails.push({
-      title: 'Split field',
+      title: i18n.translate('xpack.ml.newJob.wizard.summaryStep.jobDetails.splitField.title', {
+        defaultMessage: 'Split field',
+      }),
       description:
         isMultiMetricJobCreator(jobCreator) && jobCreator.splitField !== null ? (
           jobCreator.splitField.name
         ) : (
-          <span style={{ fontStyle: 'italic' }}>No split field selected</span>
+          <span style={{ fontStyle: 'italic' }}>
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.summaryStep.jobDetails.splitField.placeholder"
+              defaultMessage="No split field selected"
+            />
+          </span>
         ),
     });
   }
 
   if (isPopulationJobCreator(jobCreator)) {
     detectorDetails.push({
-      title: 'Population field',
+      title: i18n.translate('xpack.ml.newJob.wizard.summaryStep.jobDetails.populationField.title', {
+        defaultMessage: 'Population field',
+      }),
       description:
         isPopulationJobCreator(jobCreator) && jobCreator.splitField !== null ? (
           jobCreator.splitField.name
         ) : (
           <span style={{ fontStyle: jobCreator.splitField !== null ? 'inherit' : 'italic' }}>
-            No population field selected
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.summaryStep.jobDetails.populationField.placeholder"
+              defaultMessage="No population field selected"
+            />
           </span>
         ),
     });
   }
 
   detectorDetails.push({
-    title: 'Influencers',
+    title: i18n.translate('xpack.ml.newJob.wizard.summaryStep.jobDetails.influencers.title', {
+      defaultMessage: 'Influencers',
+    }),
     description:
       jobCreator.influencers.length > 0 ? (
         jobCreator.influencers.join(', ')
       ) : (
-        <span style={{ fontStyle: 'italic' }}>No split field selected</span>
+        <span style={{ fontStyle: 'italic' }}>
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.summaryStep.jobDetails.influencers.placeholder"
+            defaultMessage="No influencers selected"
+          />
+        </span>
       ),
+  });
+
+  const trueLabel = i18n.translate('xpack.ml.newJob.wizard.summaryStep.jobDetails.trueLabel', {
+    defaultMessage: 'True',
+  });
+
+  const falseLabel = i18n.translate('xpack.ml.newJob.wizard.summaryStep.jobDetails.falseLabel', {
+    defaultMessage: 'False',
   });
 
   const advancedDetails: ListItems[] = [
     {
-      title: 'Enable model plot',
-      description: jobCreator.modelPlot ? 'True' : 'False',
+      title: i18n.translate('xpack.ml.newJob.wizard.summaryStep.jobDetails.enableModelPlot.title', {
+        defaultMessage: 'Enable model plot',
+      }),
+      description: jobCreator.modelPlot ? trueLabel : falseLabel,
     },
     {
-      title: 'Use dedicated index',
-      description: jobCreator.useDedicatedIndex ? 'True' : 'False',
+      title: i18n.translate(
+        'xpack.ml.newJob.wizard.summaryStep.jobDetails.useDedicatedIndex.title',
+        {
+          defaultMessage: 'Use dedicated index',
+        }
+      ),
+      description: jobCreator.useDedicatedIndex ? trueLabel : falseLabel,
     },
     {
-      title: 'Model memory limit',
+      title: i18n.translate(
+        'xpack.ml.newJob.wizard.summaryStep.jobDetails.modelMemoryLimit.title',
+        {
+          defaultMessage: 'Model memory limit',
+        }
+      ),
       description: jobCreator.modelMemoryLimit !== null ? jobCreator.modelMemoryLimit : '',
     },
   ];
