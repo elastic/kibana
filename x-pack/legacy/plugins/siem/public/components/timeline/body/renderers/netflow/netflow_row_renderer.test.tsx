@@ -24,6 +24,8 @@ export const justIdAndTimestamp: Ecs = {
   timestamp: '2018-11-12T19:03:25.936Z',
 };
 
+jest.mock('../../../../../lib/settings/use_kibana_ui_setting');
+
 describe('netflowRowRenderer', () => {
   test('renders correctly against snapshot', () => {
     const browserFields: BrowserFields = {};
