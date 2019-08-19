@@ -17,7 +17,14 @@
  * under the License.
  */
 
-/** @internal */
-export { LegacyObjectToConfigAdapter } from './config/legacy_object_to_config_adapter';
-/** @internal */
-export { LegacyService, LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy_service';
+export default function ({ getService }) {
+  const supertest = getService('supertest');
+
+  describe('core', () => {
+    it('provides access to request context', async () => (
+      await supertest
+        .get('/testbed/ping')
+        .expect(200, 'Pong: true')
+    ));
+  });
+}

@@ -17,7 +17,19 @@
  * under the License.
  */
 
-/** @internal */
-export { LegacyObjectToConfigAdapter } from './config/legacy_object_to_config_adapter';
-/** @internal */
-export { LegacyService, LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy_service';
+import expect from '@kbn/expect';
+
+export default function ({ getService, getPageObjects }) {
+  const PageObjects = getPageObjects(['common']);
+  const browser = getService('browser');
+
+  describe('server plugins', function describeIndexTests() {
+    it('extend request handler context', async () => {
+      const url = `${PageObjects.common.getHostPort()}/core_plugin_b/`;
+      await browser.get(url);
+
+      const pageSource = await browser.execute('return window.document.body.textContent;');
+      expect(pageSource).to.equal('Pong via plugin A: true');
+    });
+  });
+}

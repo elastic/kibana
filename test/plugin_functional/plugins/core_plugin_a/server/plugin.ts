@@ -17,7 +17,28 @@
  * under the License.
  */
 
-/** @internal */
-export { LegacyObjectToConfigAdapter } from './config/legacy_object_to_config_adapter';
-/** @internal */
-export { LegacyService, LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy_service';
+import { Plugin, CoreSetup } from 'kibana/server';
+
+export interface PluginARequestContext {
+  ping: () => Promise<string>;
+}
+
+declare module 'kibana/server' {
+  interface RequestHandlerContext {
+    pluginA?: PluginARequestContext;
+  }
+}
+
+export class CorePluginAPlugin implements Plugin {
+  public setup(core: CoreSetup, deps: {}) {
+    core.http.registerRouteHandlerContext('pluginA', context => {
+      return {
+        ping: () =>
+          context.core!.elasticsearch.adminClient.callAsInternalUser('ping') as Promise<string>,
+      };
+    });
+  }
+
+  public start() {}
+  public stop() {}
+}

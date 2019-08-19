@@ -17,7 +17,6 @@
  * under the License.
  */
 
-/** @internal */
-export { LegacyObjectToConfigAdapter } from './config/legacy_object_to_config_adapter';
-/** @internal */
-export { LegacyService, LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy_service';
+import { CorePluginBPlugin } from './plugin';
+
+export const plugin = () => new CorePluginBPlugin();
