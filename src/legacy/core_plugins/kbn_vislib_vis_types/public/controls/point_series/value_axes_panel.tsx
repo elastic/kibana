@@ -33,8 +33,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
-import { BasicVislibParams, ValueAxis } from '../../../types';
-import { ValueAxisOptions } from './value_axis_options';
+import { BasicVislibParams, ValueAxis } from '../../types';
+import { ValueAxisOptions } from './components/value_axis_options';
 
 interface ValueAxesPanelProps extends VisOptionsProps<BasicVislibParams> {
   addValueAxis: () => ValueAxis;

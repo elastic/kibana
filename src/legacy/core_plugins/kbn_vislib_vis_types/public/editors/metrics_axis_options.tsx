@@ -18,15 +18,15 @@
  */
 
 import React from 'react';
-import { cloneDeep, capitalize, get } from 'lodash';
+import { cloneDeep, capitalize } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
-import { BasicVislibParams } from '../../types';
-import { SeriesOptions } from './series_options';
-import { CategoryAxisPanel } from './components/category_axis_panel';
-import { ValueAxesPanel } from './components/value_axes_panel';
-import { mapPositionOpposite } from './utils';
+import { BasicVislibParams } from '../types';
+import { SeriesPanel } from '../controls/point_series/series_panel';
+import { CategoryAxisPanel } from '../controls/point_series/category_axis_panel';
+import { ValueAxesPanel } from '../controls/point_series/value_axes_panel';
+import { mapPositionOpposite } from '../controls/point_series/utils';
 
 function MetricsAxisOptions(props: VisOptionsProps<BasicVislibParams>) {
   const { stateParams, setValue } = props;
@@ -62,7 +62,7 @@ function MetricsAxisOptions(props: VisOptionsProps<BasicVislibParams>) {
 
   return (
     <>
-      <SeriesOptions addValueAxis={addValueAxis} {...props} />
+      <SeriesPanel addValueAxis={addValueAxis} {...props} />
       <EuiSpacer size="s" />
       <ValueAxesPanel addValueAxis={addValueAxis} {...props} />
       <EuiSpacer size="s" />

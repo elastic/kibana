@@ -35,7 +35,7 @@ interface LabelOptionsProps extends VisOptionsProps<BasicVislibParams> {
   index: number;
 }
 
-function LabelOptions({ stateParams, setValue, axis, axisName, index = 0 }: LabelOptionsProps) {
+function LabelOptions({ stateParams, setValue, axis, axisName, index }: LabelOptionsProps) {
   const setAxisLabel = <T extends keyof Axis['labels']>(paramName: T, value: Axis['labels'][T]) => {
     const axes = [...stateParams[axisName]];
     axes[index] = {

@@ -20,8 +20,8 @@
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { PointSeriesOptions } from './editors/point_series';
-import { MetricsAxisOptions } from './controls/point_series/metrics_axis_options';
+import { PointSeriesOptions } from './editors/point_series_options';
+import { MetricsAxisOptions } from './editors/metrics_axis_options';
 import {
   getLegendPositions,
   LegendPositions,

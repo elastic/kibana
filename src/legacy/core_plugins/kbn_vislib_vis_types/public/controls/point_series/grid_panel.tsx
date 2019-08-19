@@ -26,11 +26,7 @@ import { SwitchOption } from '../switch';
 import { SelectOption } from '../select';
 import { BasicVislibParams, ValueAxis } from '../../types';
 
-function GridOptions({
-  stateParams,
-  setValue,
-  hasHistogramAgg,
-}: VisOptionsProps<BasicVislibParams>) {
+function GridPanel({ stateParams, setValue, hasHistogramAgg }: VisOptionsProps<BasicVislibParams>) {
   const setGrid = <T extends keyof BasicVislibParams['grid']>(
     paramName: T,
     value: BasicVislibParams['grid'][T]
@@ -104,4 +100,4 @@ function GridOptions({
   );
 }
 
-export { GridOptions };
+export { GridPanel };

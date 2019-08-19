@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
 import { SwitchOption } from '../controls/switch';
-import { GridOptions } from '../controls/point_series/grid_options';
+import { GridPanel } from '../controls/point_series/grid_panel';
 import { BasicOptions } from '../controls/basic_options';
 import { BasicVislibParams } from '../types';
 
@@ -81,7 +81,7 @@ function PointSeriesOptions(props: VisOptionsProps<BasicVislibParams>) {
 
       <EuiSpacer size="s" />
 
-      <GridOptions {...props} />
+      <GridPanel {...props} />
     </>
   );
 }

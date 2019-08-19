@@ -26,13 +26,13 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { AggConfig } from 'ui/vis';
 import { VisOptionsProps } from 'ui/vis/editors/default';
 import { BasicVislibParams, ValueAxis } from '../../types';
-import { ChartOptions } from './chart_options';
+import { ChartOptions } from './components/chart_options';
 
-interface SeriesOptionsProps extends VisOptionsProps<BasicVislibParams> {
+interface SeriesPanelProps extends VisOptionsProps<BasicVislibParams> {
   addValueAxis: () => ValueAxis;
 }
 
-function SeriesOptions(props: SeriesOptionsProps) {
+function SeriesPanel(props: SeriesPanelProps) {
   const { stateParams, setValue, aggs, addValueAxis } = props;
 
   const [lastCustomLabels, setLastCustomLabels] = useState({} as { [key: string]: string });
@@ -151,4 +151,4 @@ function SeriesOptions(props: SeriesOptionsProps) {
   );
 }
 
-export { SeriesOptions };
+export { SeriesPanel };

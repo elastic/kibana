@@ -23,10 +23,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
-import { BasicVislibParams, Axis } from '../../../types';
-import { SwitchOption } from '../../switch';
-import { SelectOption } from '../../select';
-import { LabelOptions } from './label_options';
+import { BasicVislibParams, Axis } from '../../types';
+import { SwitchOption } from '../switch';
+import { SelectOption } from '../select';
+import { LabelOptions } from './components/label_options';
 
 function CategoryAxisPanel(props: VisOptionsProps<BasicVislibParams>) {
   const { stateParams, setValue, vis } = props;
@@ -95,7 +95,12 @@ function CategoryAxisPanel(props: VisOptionsProps<BasicVislibParams>) {
         >
           <>
             <EuiSpacer size="m" />
-            <LabelOptions axis={stateParams.categoryAxes[0]} axisName="categoryAxes" {...props} />
+            <LabelOptions
+              axis={stateParams.categoryAxes[0]}
+              axisName="categoryAxes"
+              index={0}
+              {...props}
+            />
           </>
         </EuiAccordion>
       </EuiPanel>

@@ -20,9 +20,9 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { SeriesParam } from '../../types';
-import { SwitchOption } from '../switch';
-import { NumberInputOption } from '../number_input';
+import { SeriesParam } from '../../../types';
+import { SwitchOption } from '../../switch';
+import { NumberInputOption } from '../../number_input';
 
 interface LineOptionsParams {
   chart: SeriesParam;

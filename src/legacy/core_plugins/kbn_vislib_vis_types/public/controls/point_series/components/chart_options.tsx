@@ -21,9 +21,9 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
-import { BasicVislibParams, SeriesParam, ValueAxis } from '../../types';
-import { ChartTypes } from '../../utils/collections';
-import { SelectOption } from '../select';
+import { BasicVislibParams, SeriesParam, ValueAxis } from '../../../types';
+import { ChartTypes } from '../../../utils/collections';
+import { SelectOption } from '../../select';
 import { LineOptions } from './line_options';
 
 interface ChartOptionsParams extends VisOptionsProps<BasicVislibParams> {
