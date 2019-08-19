@@ -76,6 +76,7 @@ export function OpenSearchPanel(props) {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
+            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
             <EuiButton
               fill
               onClick={props.onClose}

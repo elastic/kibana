@@ -1,7 +1,7 @@
 <div id="maps-plugin"  ng-class="{mapFullScreen: isFullScreen}">
   <div id="maps-top-nav">
     <div>
-      <kbn-top-nav-v2
+      <kbn-top-nav
         ng-show="chrome.getVisible()"
         app-name="'maps'"
         config="topNavMenu"
@@ -19,7 +19,7 @@
         refresh-interval="refreshConfig.interval"
         on-refresh-change="onRefreshChange"
       >
-      </kbn-top-nav-v2>
+      </kbn-top-nav>
     </div>
   </div>
 

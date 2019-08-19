@@ -94,7 +94,7 @@ export default function testWithSecurity({ getService, getPageObjects }: FtrProv
           expect(buttons).to.have.length(1);
         });
         await PageObjects.code.fillImportRepositoryUrlInputBox(
-          'https://github.com/Microsoft/TypeScript-Node-Starter'
+          'https://github.com/elastic/TypeScript-Node-Starter'
         );
         // Click the import repository button.
         await PageObjects.code.clickImportRepositoryButton();

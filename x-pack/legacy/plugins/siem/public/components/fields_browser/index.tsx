@@ -97,7 +97,6 @@ export class StatefulFieldsBrowserComponent extends React.PureComponent<
       columnHeaders,
       browserFields,
       height,
-      isLoading,
       onFieldSelected,
       timelineId,
       toggleColumn,
@@ -144,7 +143,6 @@ export class StatefulFieldsBrowserComponent extends React.PureComponent<
             }
             searchInput={filterInput}
             height={height}
-            isLoading={isLoading}
             isSearching={isSearching}
             onCategorySelected={this.updateSelectedCategoryId}
             onFieldSelected={onFieldSelected}

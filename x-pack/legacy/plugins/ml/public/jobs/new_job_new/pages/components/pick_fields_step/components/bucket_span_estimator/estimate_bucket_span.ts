@@ -56,7 +56,7 @@ export function useEstimateBucketSpan() {
         }
       }
       toastNotifications.addDanger({
-        title: i18n.translate('xpack.ml.newJob.wizard.estimateBucketSpanError', {
+        title: i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.bucketSpanEstimatorError', {
           defaultMessage: `Bucket span estimation error`,
         }),
         text,
