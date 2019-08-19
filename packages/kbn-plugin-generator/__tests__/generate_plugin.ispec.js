@@ -61,6 +61,23 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
     expect(stats.isDirectory()).toBe(true);
   });
 
+  describe(`and then running 'yarn build' in the plugin's root dir`, () => {
+    let build;
+    const stdErrs = [];
+
+    // eslint-disable-next-line no-undef
+    beforeAll(done => {
+      build = spawn('yarn', ['build'], { cwd: generatedPath });
+      build.stderr.on('data', collect(stdErrs));
+      build.on('close', () => done());
+    });
+
+    it(`should result in only having 'warning package.json: No license field' on stderr`, () => {
+      // eslint-disable-next-line no-undef
+      expect(stdErrs.join('\n')).toEqual('warning package.json: No license field\n');
+    });
+  });
+
   describe(`and then running 'yarn preinstall' in the plugin's root dir`, () => {
     let preinstall;
     const stdOuts = [];
