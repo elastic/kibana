@@ -142,7 +142,14 @@ export class MultiMetricJobCreator extends JobCreator {
     this._overrideConfigs(job, datafeed);
     this.jobId = '';
     this.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
-    const detectors = getRichDetectors(job.analysis_config.detectors);
+    const detectors = getRichDetectors(job, datafeed);
+
+    if (datafeed.aggregations !== undefined) {
+      // if we've converting from a single metric job,
+      // delete the aggregations.
+      delete datafeed.aggregations;
+      delete job.analysis_config.summary_count_field_name;
+    }
 
     this.removeAllDetectors();
 

@@ -38,7 +38,7 @@ export class GisMap extends Component {
     }
 
     if (!!this.props.addFilters) {
-      this._loadGeoFields(this.props.uniqueIndexPatternIds);
+      this._loadGeoFields(this.props.indexPatternIds);
     }
   }
 
@@ -47,17 +47,17 @@ export class GisMap extends Component {
     this._clearRefreshTimer();
   }
 
-  _loadGeoFields = async (nextUniqueIndexPatternIds) => {
-    if (_.isEqual(nextUniqueIndexPatternIds, this._prevUniqueIndexPatternIds)) {
+  _loadGeoFields = async (nextIndexPatternIds) => {
+    if (_.isEqual(nextIndexPatternIds, this._prevIndexPatternIds)) {
       // all ready loaded index pattern ids
       return;
     }
 
-    this._prevUniqueIndexPatternIds = nextUniqueIndexPatternIds;
+    this._prevIndexPatternIds = nextIndexPatternIds;
 
     const geoFields = [];
     try {
-      const indexPatterns = await getIndexPatternsFromIds(nextUniqueIndexPatternIds);
+      const indexPatterns = await getIndexPatternsFromIds(nextIndexPatternIds);
       indexPatterns.forEach((indexPattern) => {
         indexPattern.fields.forEach(field => {
           if (field.type === ES_GEO_FIELD_TYPE.GEO_POINT || field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE) {
