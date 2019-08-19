@@ -18,19 +18,35 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
         it('should return 200 with list of alert types', async () => {
-          await supertestWithoutAuth
+          const response = await supertestWithoutAuth
             .get(`${getUrlPrefix(space.id)}/api/alert/types`)
-            .auth(user.username, user.password)
-            .expect(200)
-            .then((resp: any) => {
-              const fixtureAlertType = resp.body.find(
+            .auth(user.username, user.password);
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(200);
+              const fixtureAlertType = response.body.find(
                 (alertType: any) => alertType.id === 'test.noop'
               );
               expect(fixtureAlertType).to.eql({
                 id: 'test.noop',
                 name: 'Test: Noop',
               });
-            });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
         });
       });
     }

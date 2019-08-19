@@ -53,6 +53,7 @@ export function init(server: Legacy.Server) {
           read: [],
         },
         ui: [],
+        api: ['alerting'],
       },
       read: {
         savedObject: {
@@ -60,6 +61,7 @@ export function init(server: Legacy.Server) {
           read: ['alert'],
         },
         ui: [],
+        api: ['alerting'],
       },
     },
   });
