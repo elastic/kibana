@@ -130,7 +130,7 @@ export function getAvailableOperationsByMetadata(indexPattern: IndexPattern) {
   > = {};
 
   const addToMap = (operation: OperationFieldTuple) => (operationMetadata: OperationMetadata) => {
-    const key = `${operationMetadata.dataType}-${operationMetadata.isBucketed ? 'true' : ''}`;
+    const key = JSON.stringify(operationMetadata);
 
     if (operationByMetadata[key]) {
       operationByMetadata[key].operations.push(operation);

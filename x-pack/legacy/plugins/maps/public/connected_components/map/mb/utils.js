@@ -10,29 +10,30 @@ import { RGBAImage } from './image_utils';
 export function removeOrphanedSourcesAndLayers(mbMap, layerList) {
 
   const mbStyle = mbMap.getStyle();
+
+  const mbLayerIdsToRemove = [];
+  mbStyle.layers.forEach(mbLayer => {
+    const layer = layerList.find(layer => {
+      return layer.ownsMbLayerId(mbLayer.id);
+    });
+    if (!layer) {
+      mbLayerIdsToRemove.push(mbLayer.id);
+    }
+  });
+  mbLayerIdsToRemove.forEach((mbLayerId) => mbMap.removeLayer(mbLayerId));
+
   const mbSourcesToRemove = [];
-  for (const sourceId in mbStyle.sources) {
-    if (mbStyle.sources.hasOwnProperty(sourceId)) {
+  for (const mbSourceId in mbStyle.sources) {
+    if (mbStyle.sources.hasOwnProperty(mbSourceId)) {
       const layer = layerList.find(layer => {
-        return layer.ownsMbSourceId(sourceId);
+        return layer.ownsMbSourceId(mbSourceId);
       });
       if (!layer) {
-        mbSourcesToRemove.push(sourceId);
+        mbSourcesToRemove.push(mbSourceId);
       }
     }
   }
-  const mbLayersToRemove = [];
-  mbStyle.layers.forEach(layer => {
-    if (mbSourcesToRemove.indexOf(layer.source) >= 0) {
-      mbLayersToRemove.push(layer.id);
-    }
-  });
-  mbLayersToRemove.forEach((layerId) => {
-    mbMap.removeLayer(layerId);
-  });
-  mbSourcesToRemove.forEach(sourceId => {
-    mbMap.removeSource(sourceId);
-  });
+  mbSourcesToRemove.forEach(mbSourceId => mbMap.removeSource(mbSourceId));
 
 }
 
@@ -58,7 +59,7 @@ export function syncLayerOrderForSingleLayer(mbMap, layerList) {
   const currentLayerOrderLayerIds = _.uniq(layerIds);
 
   const newLayerOrderLayerIdsUnfiltered = layerList.map(l => l.getId());
-  const newLayerOrderLayerIds  = newLayerOrderLayerIdsUnfiltered.filter(layerId =>  currentLayerOrderLayerIds.includes(layerId));
+  const newLayerOrderLayerIds = newLayerOrderLayerIdsUnfiltered.filter(layerId => currentLayerOrderLayerIds.includes(layerId));
 
   let netPos = 0;
   let netNeg = 0;
@@ -72,7 +73,7 @@ export function syncLayerOrderForSingleLayer(mbMap, layerList) {
     return;
   }
   const movedLayerId = (netPos >= netNeg) && movementArr.find(l => l.movement < 0).id ||
-      (netPos < netNeg) && movementArr.find(l => l.movement > 0).id;
+    (netPos < netNeg) && movementArr.find(l => l.movement > 0).id;
   const nextLayerIdx = newLayerOrderLayerIds.findIndex(layerId => layerId === movedLayerId) + 1;
 
   let nextMbLayerId;
@@ -108,19 +109,25 @@ function getImageData(img) {
   return context.getImageData(0, 0, img.width, img.height);
 }
 
-export async function addSpritesheetToMap(json, img, mbMap) {
+export async function addSpritesheetToMap(json, imgUrl, mbMap) {
+
   const image = new Image();
+  image.crossOrigin = 'Anonymous';
   image.onload = (el) => {
     const imgData = getImageData(el.currentTarget);
     for (const imageId in json) {
-      if (json.hasOwnProperty(imageId)) {
-        const { width, height, x, y, sdf, pixelRatio } = json[imageId];
-        const data = new RGBAImage({ width, height });
-        RGBAImage.copy(imgData, data, { x, y }, { x: 0, y: 0 }, { width, height });
-        // TODO not sure how to catch errors?
-        mbMap.addImage(imageId, data, { pixelRatio, sdf });
+      if (!(json.hasOwnProperty(imageId) && !mbMap.hasImage(imageId))) {
+        continue;
       }
+      const { width, height, x, y, sdf, pixelRatio } = json[imageId];
+      if (typeof width !== 'number' || typeof height !== 'number') {
+        continue;
+      }
+
+      const data = new RGBAImage({ width, height });
+      RGBAImage.copy(imgData, data, { x, y }, { x: 0, y: 0 }, { width, height });
+      mbMap.addImage(imageId, data, { pixelRatio, sdf });
     }
   };
-  image.src = img;
+  image.src = imgUrl;
 }

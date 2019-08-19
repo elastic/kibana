@@ -91,6 +91,7 @@ describe('terms', () => {
         {
           dataType: 'string',
           isBucketed: true,
+          scale: 'ordinal',
         },
       ]);
 
@@ -105,6 +106,7 @@ describe('terms', () => {
         {
           dataType: 'boolean',
           isBucketed: true,
+          scale: 'ordinal',
         },
       ]);
     });

@@ -19,6 +19,7 @@ import { Datasource, Visualization, EditorFrameSetup, EditorFrameInstance } from
 import { EditorFrame } from './editor_frame';
 import { mergeTables } from './merge_tables';
 import { EmbeddableFactory } from './embeddable/embeddable_factory';
+import { getActiveDatasourceIdFromDoc } from './editor_frame/state_management';
 
 export interface EditorFrameSetupPlugins {
   data: typeof data;
@@ -67,7 +68,7 @@ export class EditorFramePlugin {
                 onError={onError}
                 datasourceMap={this.datasources}
                 visualizationMap={this.visualizations}
-                initialDatasourceId={(doc && doc.activeDatasourceId) || firstDatasourceId || null}
+                initialDatasourceId={getActiveDatasourceIdFromDoc(doc) || firstDatasourceId || null}
                 initialVisualizationId={
                   (doc && doc.visualizationType) || firstVisualizationId || null
                 }

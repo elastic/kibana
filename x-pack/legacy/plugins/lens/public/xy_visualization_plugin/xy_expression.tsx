@@ -16,7 +16,6 @@ import {
   AreaSeries,
   BarSeries,
   Position,
-  ScaleType,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
@@ -91,7 +90,10 @@ export interface XYChartProps {
   args: XYArgs;
 }
 
-export const getXyChartRenderer = (formatFactory: FormatFactory): RenderFunction<XYChartProps> => ({
+export const getXyChartRenderer = (dependencies: {
+  formatFactory: FormatFactory;
+  timeZone: string;
+}): RenderFunction<XYChartProps> => ({
   name: 'lens_xy_chart_renderer',
   displayName: 'XY Chart',
   help: i18n.translate('xpack.lens.xyChart.renderer.help', {
@@ -102,7 +104,7 @@ export const getXyChartRenderer = (formatFactory: FormatFactory): RenderFunction
   render: async (domNode: Element, config: XYChartProps, _handlers: unknown) => {
     ReactDOM.render(
       <I18nProvider>
-        <XYChart {...config} formatFactory={formatFactory} />
+        <XYChart {...config} {...dependencies} />
       </I18nProvider>,
       domNode
     );
@@ -117,8 +119,10 @@ export function XYChart({
   data,
   args,
   formatFactory,
+  timeZone,
 }: XYChartProps & {
   formatFactory: FormatFactory;
+  timeZone: string;
 }) {
   const { legend, layers, isHorizontal } = args;
 
@@ -186,7 +190,20 @@ export function XYChart({
       />
 
       {layers.map(
-        ({ splitAccessor, seriesType, accessors, xAccessor, layerId, columnToLabel }, index) => {
+        (
+          {
+            splitAccessor,
+            seriesType,
+            accessors,
+            xAccessor,
+            layerId,
+            columnToLabel,
+            yScaleType,
+            xScaleType,
+            isHistogram,
+          },
+          index
+        ) => {
           if (!data.tables[layerId] || data.tables[layerId].rows.length === 0) {
             return;
           }
@@ -219,9 +236,10 @@ export function XYChart({
             xAccessor,
             yAccessors,
             data: rows,
-            xScaleType:
-              typeof rows[0][xAccessor] === 'number' ? ScaleType.Linear : ScaleType.Ordinal,
-            yScaleType: ScaleType.Linear,
+            xScaleType,
+            yScaleType,
+            enableHistogramMode: isHistogram && (seriesType.includes('stacked') || !splitAccessor),
+            timeZone,
           };
 
           return seriesType === 'line' ? (
