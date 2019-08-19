@@ -20,9 +20,7 @@ export function useServiceMetricCharts(
 ) {
   const { serviceName, start, end } = urlParams;
   const uiFilters = useUiFilters(urlParams);
-  const { data = INITIAL_DATA, error, status } = useFetcher<
-    MetricsChartsByAgentAPIResponse
-  >(() => {
+  const { data = INITIAL_DATA, error, status } = useFetcher(() => {
     if (serviceName && start && end && agentName) {
       return callApmApi({
         pathname: '/api/apm/services/{serviceName}/metrics/charts',

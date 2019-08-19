@@ -64,9 +64,7 @@ export function AddSettingsFlyout({
       preservePreviousResponse: false
     }
   );
-  const { data: environments = [], status: environmentStatus } = useFetcher<
-    Array<{ name: string; available: boolean }>
-  >(
+  const { data: environments = [], status: environmentStatus } = useFetcher(
     () => {
       if (serviceName) {
         return callApmApi({

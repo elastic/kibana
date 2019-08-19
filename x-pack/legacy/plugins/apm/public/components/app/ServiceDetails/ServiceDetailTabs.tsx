@@ -29,7 +29,7 @@ export function ServiceDetailTabs({ urlParams }: Props) {
           path: { serviceName },
           query: { start, end }
         }
-      });
+      }).then(res => res.agentName);
     }
   }, [serviceName, start, end]);
 

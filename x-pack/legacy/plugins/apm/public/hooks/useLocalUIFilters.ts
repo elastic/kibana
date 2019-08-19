@@ -53,7 +53,7 @@ export function useLocalUIFilters({
     });
   };
 
-  const { data = initialData, status } = useFetcher(async () => {
+  const { data = initialData, status } = useFetcher(() => {
     return callApi<LocalUIFiltersAPIResponse>({
       method: 'GET',
       pathname: `/api/apm/ui_filters/local_filters/${projection}`,
