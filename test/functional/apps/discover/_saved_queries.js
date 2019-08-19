@@ -68,15 +68,22 @@ export default function ({ getService, getPageObjects }) {
           .to
           .eql('SAVED QUERIES\nThere are no saved queries. Save query text and filters that you want to use again.\nSave');
       });
+
       it('should allow a query to be saved via the saved objects management component', async () => {
         await savedQueryManagementComponent.saveNewQuery('OkResponse', '200 responses for .jpg over 24 hours', true, true);
         await savedQueryManagementComponent.savedQueryExistOrFail('OkResponse');
       });
 
-      it('reinstates filters when a saved query has filters included', async () => {
+      it('reinstates filters and the time filter when a saved query has filters and a time filter included', async () => {
+        const fromTime = '2015-09-19 06:31:44.000';
+        const toTime = '2015-09-23 18:31:44.000';
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
+        const timePickerValues = await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
+        expect(timePickerValues.start).to.not.eql(fromTime);
+        expect(timePickerValues.end).to.not.eql(toTime);
       });
 
       it('allows saving changes to a currently loaded query via the saved query management component', async () => {
