@@ -162,13 +162,13 @@ describe('Elasticsearch Settings Find Reason for No Data', () => {
       });
     });
 
-    it('should detect if we are on cloud and remote exporters are enabled but local exporters are not enabled', async() => {
+    it('should detect if we are on cloud and remote exporters are enabled but local exporters are not enabled', async () => {
       const input = {
         exporters: {
           my_http: {
             type: 'http',
             enabled: true,
-            },
+          },
           my_local: {
             type: 'local',
             enabled: false
