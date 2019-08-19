@@ -80,7 +80,7 @@ export class SingleMetricJobCreator extends JobCreator {
             buckets: {
               date_histogram: {
                 field: timeField,
-                interval: `${interval}ms`,
+                fixed_interval: `${interval}ms`,
               },
               aggregations: {
                 [timeField]: {
@@ -106,7 +106,7 @@ export class SingleMetricJobCreator extends JobCreator {
               buckets: {
                 date_histogram: {
                   field: timeField,
-                  interval: `${interval * 0.1}ms`, // use 10% of bucketSpan to allow for better sampling
+                  fixed_interval: `${interval * 0.1}ms`, // use 10% of bucketSpan to allow for better sampling
                 },
                 aggregations: {
                   [fieldName]: {
@@ -135,7 +135,7 @@ export class SingleMetricJobCreator extends JobCreator {
               buckets: {
                 date_histogram: {
                   field: timeField,
-                  interval: `${interval}ms`,
+                  fixed_interval: `${interval}ms`,
                 },
                 aggregations: {
                   [timeField]: {
@@ -182,7 +182,7 @@ export class SingleMetricJobCreator extends JobCreator {
     this._overrideConfigs(job, datafeed);
     this.jobId = '';
     this.createdBy = CREATED_BY_LABEL.SINGLE_METRIC;
-    const detectors = getRichDetectors(job.analysis_config.detectors);
+    const detectors = getRichDetectors(job, datafeed);
 
     this.removeAllDetectors();
 
