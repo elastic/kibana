@@ -112,6 +112,15 @@ export const code = (kibana: any) =>
         enableGlobalReference: Joi.boolean().default(false), // Global reference as optional feature for now
         enableCommitIndexing: Joi.boolean().default(false),
         codeNodeUrl: Joi.string(),
+        clusterEnabled: Joi.bool().default(false),
+        codeNodes: Joi.array()
+          .items(
+            Joi.object({
+              id: Joi.string(),
+              address: Joi.string(),
+            })
+          )
+          .default([]),
       }).default();
     },
     init(server: ServerFacade, options: any) {
