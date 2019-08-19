@@ -5,8 +5,15 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { SideNavLinks } from './side_nav_links';
 import { IntegrationInfo } from '../../../common/types';
 import { AssetAccordion } from '../../components/asset_accordion';
@@ -19,9 +26,8 @@ import { DEFAULT_PANEL, DetailProps } from '.';
 
 type ContentProps = IntegrationInfo & Pick<DetailProps, 'panel'> & { hasIconPanel: boolean };
 export function Content(props: ContentProps) {
-  const { assets, hasIconPanel, name, panel, requirement, version } = props;
+  const { hasIconPanel, name, panel, version } = props;
   const { theme } = useCore();
-  const isOverviewPanel = panel === 'overview';
   const SideNavColumn = hasIconPanel
     ? styled(LeftColumn)`
         /* 🤢🤷 https://www.styled-components.com/docs/faqs#how-can-i-override-styles-with-higher-specificity */
@@ -40,19 +46,7 @@ export function Content(props: ContentProps) {
         <ContentPanel {...props} />
       </CenterColumn>
       <RightColumn>
-        {isOverviewPanel && (
-          <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <Requirements requirements={requirement} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiHorizontalRule margin="xl" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <AssetsFacetGroup assets={assets} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
+        <RightColumnContent {...props} />
       </RightColumn>
     </EuiFlexGroup>
   );
@@ -75,5 +69,28 @@ export function ContentPanel(props: ContentPanelProps) {
     case 'overview':
     default:
       return <OverviewPanel {...props} />;
+  }
+}
+
+type RightColumnContentProps = IntegrationInfo & Pick<DetailProps, 'panel'>;
+function RightColumnContent(props: RightColumnContentProps) {
+  const { assets, requirement, panel } = props;
+  switch (panel) {
+    case 'overview':
+      return (
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <Requirements requirements={requirement} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiHorizontalRule margin="xl" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <AssetsFacetGroup assets={assets} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    default:
+      return <EuiSpacer />;
   }
 }
