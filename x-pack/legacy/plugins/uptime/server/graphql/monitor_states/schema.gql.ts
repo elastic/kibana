@@ -151,6 +151,8 @@ export const monitorStatesSchema = gql`
     summaries: [MonitorSummary!]
     "The number of summaries."
     totalSummaryCount: DocCount!
+    "Flag indicating if this page is the initial page in the index for the given parameters."
+    isFirstPage: Boolean!
     "Flag indicating if this is the final page in the index for the given parameters."
     isFinalPage: Boolean!
   }
