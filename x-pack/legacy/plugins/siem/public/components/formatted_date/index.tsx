@@ -8,9 +8,12 @@ import moment from 'moment-timezone';
 import * as React from 'react';
 import { pure } from 'recompose';
 
-import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../common/constants';
+import {
+  DEFAULT_DATE_FORMAT,
+  DEFAULT_DATE_FORMAT_TZ,
+  DEFAULT_TIMEZONE_BROWSER,
+} from '../../../common/constants';
 import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
-import { useTimezoneBrowser } from '../../lib/settings/use_timezone_setting';
 import { getOrEmptyTagFromValue } from '../empty_value';
 import { LocalizedDateTooltip } from '../localized_date_tooltip';
 import { getMaybeDate } from './maybe_date';
@@ -18,7 +21,7 @@ import { getMaybeDate } from './maybe_date';
 export const PreferenceFormattedDate = pure<{ value: Date }>(({ value }) => {
   const [dateFormat] = useKibanaUiSetting(DEFAULT_DATE_FORMAT);
   const [dateFormatTz] = useKibanaUiSetting(DEFAULT_DATE_FORMAT_TZ);
-  const [timezone] = useTimezoneBrowser();
+  const [timezone] = useKibanaUiSetting(DEFAULT_TIMEZONE_BROWSER);
 
   return (
     <>

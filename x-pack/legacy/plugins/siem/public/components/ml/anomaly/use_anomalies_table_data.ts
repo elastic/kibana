@@ -5,7 +5,6 @@
  */
 
 import { useState, useEffect, useContext } from 'react';
-import chrome from 'ui/chrome';
 import { anomaliesTableData } from '../api/anomalies_table_data';
 import { InfluencerInput, Anomalies, CriteriaFields } from '../types';
 import { hasMlUserPermissions } from '../permissions/has_ml_user_permissions';
@@ -15,9 +14,12 @@ import { useStateToaster } from '../../toasters';
 import { errorToToaster } from '../api/error_to_toaster';
 
 import * as i18n from './translations';
-import { useTimezoneBrowser } from '../../../lib/settings/use_timezone_setting';
 import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
-import { DEFAULT_ANOMALY_SCORE } from '../../../../common/constants';
+import {
+  DEFAULT_ANOMALY_SCORE,
+  DEFAULT_TIMEZONE_BROWSER,
+  DEFAULT_KBN_VERSION,
+} from '../../../../common/constants';
 
 interface Args {
   influencers?: InfluencerInput[];
@@ -65,8 +67,9 @@ export const useAnomaliesTableData = ({
   const capabilities = useContext(MlCapabilitiesContext);
   const userPermissions = hasMlUserPermissions(capabilities);
   const [, dispatchToaster] = useStateToaster();
-  const [timezone] = useTimezoneBrowser();
+  const [timezone] = useKibanaUiSetting(DEFAULT_TIMEZONE_BROWSER);
   const [anomalyScore] = useKibanaUiSetting(DEFAULT_ANOMALY_SCORE);
+  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
 
   const fetchFunc = async (
     influencersInput: InfluencerInput[],
@@ -90,7 +93,7 @@ export const useAnomaliesTableData = ({
             maxExamples: 10,
           },
           {
-            'kbn-version': chrome.getXsrfToken(),
+            'kbn-version': kbnVersion,
           }
         );
         setTableData(data);

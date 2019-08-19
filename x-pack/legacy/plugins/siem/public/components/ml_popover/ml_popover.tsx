@@ -8,7 +8,6 @@ import { EuiButton, EuiPopover, EuiPopoverTitle, EuiSpacer } from '@elastic/eui'
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import styled from 'styled-components';
 import moment from 'moment';
-import chrome from 'ui/chrome';
 
 import { useJobSummaryData } from './hooks/use_job_summary_data';
 import * as i18n from './translations';
@@ -26,6 +25,8 @@ import { getConfigTemplatesToInstall, getJobsToDisplay, getJobsToInstall } from 
 import { configTemplates, siemJobPrefix } from './config_templates';
 import { useStateToaster } from '../toasters';
 import { errorToToaster } from '../ml/api/error_to_toaster';
+import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
+import { DEFAULT_KBN_VERSION } from '../../../common/constants';
 
 const PopoverContentsDiv = styled.div`
   max-width: 550px;
@@ -96,7 +97,8 @@ export const MlPopover = React.memo(() => {
   const [, dispatchToaster] = useStateToaster();
   const [, configuredIndexPatterns] = useIndexPatterns(refreshToggle);
   const capabilities = useContext(MlCapabilitiesContext);
-  const headers = { 'kbn-version': chrome.getXsrfToken() };
+  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+  const headers = { 'kbn-version': kbnVersion };
 
   // Enable/Disable Job & Datafeed -- passed to JobsTable for use as callback on JobSwitch
   const enableDatafeed = async (jobName: string, latestTimestampMs: number, enable: boolean) => {

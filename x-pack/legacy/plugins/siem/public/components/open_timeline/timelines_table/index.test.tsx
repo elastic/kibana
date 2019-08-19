@@ -17,7 +17,6 @@ import * as i18n from '../translations';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
 
 jest.mock('../../../lib/settings/use_kibana_ui_setting');
-jest.mock('../../../lib/settings/use_timezone_setting');
 
 describe('TimelinesTable', () => {
   let mockResults: OpenTimelineResult[];

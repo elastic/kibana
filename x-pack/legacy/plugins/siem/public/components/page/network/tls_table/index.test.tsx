@@ -18,7 +18,6 @@ import { TlsTable } from '.';
 import { mockTlsData } from './mock';
 
 jest.mock('../../../../lib/settings/use_kibana_ui_setting');
-jest.mock('../../../../lib/settings/use_timezone_setting');
 
 describe('Tls Table Component', () => {
   const loadPage = jest.fn();

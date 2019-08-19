@@ -18,7 +18,6 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import { cloneDeep } from 'lodash/fp';
 
 jest.mock('../../lib/settings/use_kibana_ui_setting');
-jest.mock('../../lib/settings/use_timezone_setting');
 
 jest.mock('ui/documentation_links', () => ({
   documentationLinks: {

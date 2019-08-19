@@ -24,7 +24,6 @@ import { NetworkTopNFlowTable, NetworkTopNFlowTableId } from '.';
 import { mockData } from './mock';
 
 jest.mock('../../../../lib/settings/use_kibana_ui_setting');
-jest.mock('../../../../lib/settings/use_timezone_setting');
 
 describe('NetworkTopNFlow Table Component', () => {
   const loadPage = jest.fn();

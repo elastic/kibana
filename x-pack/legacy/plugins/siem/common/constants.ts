@@ -14,3 +14,5 @@ export const DEFAULT_INDEX_KEY = 'siem:defaultIndex';
 export const DEFAULT_ANOMALY_SCORE = 'siem:defaultAnomalyScore';
 export const DEFAULT_MAX_TABLE_QUERY_SIZE = 10000;
 export const DEFAULT_SCALE_DATE_FORMAT = 'dateFormat:scaled';
+export const DEFAULT_KBN_VERSION = 'kbnVersion';
+export const DEFAULT_TIMEZONE_BROWSER = 'timezoneBrowser';

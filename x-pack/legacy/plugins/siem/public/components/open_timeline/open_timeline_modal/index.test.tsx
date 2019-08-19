@@ -19,7 +19,6 @@ import * as i18n from '../translations';
 import { OpenTimelineModalButton } from '.';
 
 jest.mock('../../../lib/settings/use_kibana_ui_setting');
-jest.mock('../../../lib/settings/use_timezone_setting');
 
 const getStateChildComponent = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

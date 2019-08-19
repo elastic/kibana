@@ -25,7 +25,6 @@ export const justIdAndTimestamp: Ecs = {
 };
 
 jest.mock('../../../../../lib/settings/use_kibana_ui_setting');
-jest.mock('../../../../../lib/settings/use_timezone_setting');
 
 describe('netflowRowRenderer', () => {
   test('renders correctly against snapshot', () => {

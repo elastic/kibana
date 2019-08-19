@@ -5,7 +5,6 @@
  */
 
 import { useContext, useEffect, useState } from 'react';
-import chrome from 'ui/chrome';
 
 import { jobsSummary } from '../api';
 import { Job } from '../types';
@@ -13,6 +12,8 @@ import { hasMlUserPermissions } from '../../ml/permissions/has_ml_user_permissio
 import { MlCapabilitiesContext } from '../../ml/permissions/ml_capabilities_provider';
 import { useStateToaster } from '../../toasters';
 import { errorToToaster } from '../../ml/api/error_to_toaster';
+import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
+import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
 
 import * as i18n from './translations';
 
@@ -29,12 +30,13 @@ export const useJobSummaryData = (jobIds: string[] = [], refreshToggle = false):
   const capabilities = useContext(MlCapabilitiesContext);
   const userPermissions = hasMlUserPermissions(capabilities);
   const [, dispatchToaster] = useStateToaster();
+  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
 
   const fetchFunc = async () => {
     if (userPermissions) {
       try {
         const data: Job[] = await jobsSummary(jobIds, {
-          'kbn-version': chrome.getXsrfToken(),
+          'kbn-version': kbnVersion,
         });
 
         // TODO: API returns all jobs even though we specified jobIds -- jobsSummary call seems to match request in ML App?

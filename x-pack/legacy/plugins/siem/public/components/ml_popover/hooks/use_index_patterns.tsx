@@ -5,11 +5,12 @@
  */
 
 import { useEffect, useState } from 'react';
-import chrome from 'ui/chrome';
 
 import { getIndexPatterns } from '../api';
 import { useStateToaster } from '../../toasters';
 import { errorToToaster } from '../../ml/api/error_to_toaster';
+import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
+import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
 
 import * as i18n from './translations';
 
@@ -19,11 +20,12 @@ export const useIndexPatterns = (refreshToggle = false): Return => {
   const [indexPatterns, setIndexPatterns] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [, dispatchToaster] = useStateToaster();
+  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
 
   const fetchFunc = async () => {
     try {
       const data = await getIndexPatterns({
-        'kbn-version': chrome.getXsrfToken(),
+        'kbn-version': kbnVersion,
       });
 
       setIndexPatterns(data);

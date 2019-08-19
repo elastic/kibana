@@ -5,8 +5,11 @@
  */
 
 import { useCallback, useMemo } from 'react';
+import { npSetup, npStart } from 'ui/new_platform';
+// @ts-ignore: path dynamic for kibana
+import { timezoneProvider } from 'ui/vis/lib/timezone';
 
-import { npSetup } from 'ui/new_platform';
+import { DEFAULT_KBN_VERSION, DEFAULT_TIMEZONE_BROWSER } from '../../../common/constants';
 import { useObservable } from './use_observable';
 
 type GenericValue = string | boolean | number;
@@ -29,10 +32,20 @@ type GenericValue = string | boolean | number;
  */
 export const useKibanaUiSetting = (key: string, defaultValue?: GenericValue) => {
   const uiSettingsClient = npSetup.core.uiSettings;
+  const uiInjectedMetadata = npStart.core.injectedMetadata;
+
+  if (key === DEFAULT_KBN_VERSION) {
+    return [uiInjectedMetadata.getKibanaVersion()];
+  }
+
+  if (key === DEFAULT_TIMEZONE_BROWSER) {
+    return [
+      useMemo(() => timezoneProvider(uiSettingsClient)(), [timezoneProvider, uiSettingsClient]),
+    ];
+  }
 
   const uiSetting$ = useMemo(() => uiSettingsClient.get$(key, defaultValue), [uiSettingsClient]);
   const uiSetting = useObservable(uiSetting$);
-
   const setUiSetting = useCallback((value: GenericValue) => uiSettingsClient.set(key, value), [
     uiSettingsClient,
   ]);

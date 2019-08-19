@@ -7,6 +7,8 @@ import {
   DEFAULT_DATE_FORMAT,
   DEFAULT_DATE_FORMAT_TZ,
   DEFAULT_BYTES_FORMAT,
+  DEFAULT_KBN_VERSION,
+  DEFAULT_TIMEZONE_BROWSER,
 } from '../../common/constants';
 
 export interface MockFrameworks {
@@ -23,6 +25,10 @@ export const getMockKibanaUiSetting = (config: MockFrameworks) => (key: string) 
     return [config.dateFormatTz];
   } else if (key === DEFAULT_BYTES_FORMAT) {
     return [config.bytesFormat];
+  } else if (key === DEFAULT_KBN_VERSION) {
+    return ['8.0.0'];
+  } else if (key === DEFAULT_TIMEZONE_BROWSER) {
+    return config && config.timezone ? [config.timezone] : ['America/New_York'];
   }
   return [null];
 };

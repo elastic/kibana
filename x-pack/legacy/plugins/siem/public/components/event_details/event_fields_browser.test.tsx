@@ -15,7 +15,6 @@ import { mockBrowserFields } from '../../containers/source/mock';
 import { defaultHeaders } from '../../mock/header';
 
 jest.mock('../../lib/settings/use_kibana_ui_setting');
-jest.mock('../../lib/settings/use_timezone_setting');
 
 describe('EventFieldsBrowser', () => {
   describe('column headers', () => {
