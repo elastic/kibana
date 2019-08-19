@@ -10,7 +10,7 @@ import Joi from 'joi';
 import { getClient } from '../../../../../../server/lib/get_client_shield';
 import { userSchema } from '../../../lib/user_schema';
 import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
-import { BasicCredentials, wrapError } from '../../../../../../../plugins/security/server';
+import { wrapError } from '../../../../../../../plugins/security/server';
 import { KibanaRequest } from '../../../../../../../../src/core/server';
 
 export function initUsersApi({ authc: { login }, config }, server) {
@@ -88,14 +88,27 @@ export function initUsersApi({ authc: { login }, config }, server) {
       const { password, newPassword } = request.payload;
       const isCurrentUser = username === request.auth.credentials.username;
 
-      // If user tries to change own password, let's check if old password is valid first.
+      // We should prefer `token` over `basic` if possible.
+      const providerToLoginWith = config.authc.providers.includes('token')
+        ? 'token'
+        : 'basic';
+
+      // If user tries to change own password, let's check if old password is valid first by trying
+      // to login.
       if (isCurrentUser) {
         try {
-          await server.plugins.security.getUser(
-            BasicCredentials.decorateRequest(request, username, password)
-          );
+          const authenticationResult = await login(KibanaRequest.from(request), {
+            provider: providerToLoginWith,
+            value: { username, password },
+            // We shouldn't alter authentication state just yet.
+            stateless: true,
+          });
+
+          if (!authenticationResult.succeeded()) {
+            return Boom.unauthorized(authenticationResult.error);
+          }
         } catch(err) {
-          throw Boom.unauthorized(err);
+          return Boom.unauthorized(err);
         }
       }
 
@@ -105,21 +118,17 @@ export function initUsersApi({ authc: { login }, config }, server) {
 
         // Now we authenticate user with the new password again updating current session if any.
         if (isCurrentUser) {
-          // We should prefer `token` over `basic` if possible.
-          const providerToLoginWith = config.authc.providers.includes('token')
-            ? 'token'
-            : 'basic';
           const authenticationResult = await login(KibanaRequest.from(request), {
             provider: providerToLoginWith,
             value: { username, password: newPassword }
           });
 
           if (!authenticationResult.succeeded()) {
-            throw Boom.unauthorized((authenticationResult.error));
+            return Boom.unauthorized((authenticationResult.error));
           }
         }
       } catch(err) {
-        throw wrapError(err);
+        return wrapError(err);
       }
 
       return h.response().code(204);

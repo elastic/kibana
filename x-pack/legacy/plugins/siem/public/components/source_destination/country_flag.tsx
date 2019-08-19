@@ -13,7 +13,7 @@ import { pure } from 'recompose';
  * Example: `US` -> 🇺🇸
  */
 export const getFlag = (countryCode: string): string | null =>
-  countryCode.length === 2
+  countryCode && countryCode.length === 2
     ? countryCode
         .toUpperCase()
         .replace(/./g, c => String.fromCharCode(55356, 56741 + c.charCodeAt(0)))
