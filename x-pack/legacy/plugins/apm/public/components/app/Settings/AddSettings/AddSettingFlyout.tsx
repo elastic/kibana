@@ -25,14 +25,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { AddSettingFlyoutBody } from './AddSettingFlyoutBody';
 import { Config } from '../SettingsList';
 import { useFetcher } from '../../../../hooks/useFetcher';
-import {
-  loadAgentConfigurationServices,
-  loadAgentConfigurationEnvironments,
-  deleteAgentConfiguration,
-  updateAgentConfiguration,
-  createAgentConfiguration
-} from '../../../../services/rest/apm/settings';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../../common/environment_filter_values';
+import { callApmApi } from '../../../../services/rest/callApi';
 
 interface Props {
   onClose: () => void;
@@ -60,17 +54,28 @@ export function AddSettingsFlyout({
       ? selectedConfig.settings.transaction_sample_rate.toString()
       : ''
   );
-  const { data: serviceNames = [], status: serviceNamesStatus } = useFetcher<
-    string[]
-  >(async () => (await loadAgentConfigurationServices()).sort(), [], {
-    preservePreviousResponse: false
-  });
+  const { data: serviceNames = [], status: serviceNamesStatus } = useFetcher(
+    async () =>
+      (await callApmApi({
+        pathname: '/api/apm/settings/agent-configuration/services'
+      })).sort(),
+    [],
+    {
+      preservePreviousResponse: false
+    }
+  );
   const { data: environments = [], status: environmentStatus } = useFetcher<
     Array<{ name: string; available: boolean }>
   >(
     () => {
       if (serviceName) {
-        return loadAgentConfigurationEnvironments({ serviceName });
+        return callApmApi({
+          pathname:
+            '/api/apm/settings/agent-configuration/services/{serviceName}/environments',
+          params: {
+            path: { serviceName }
+          }
+        });
       }
     },
     [serviceName],
@@ -211,7 +216,13 @@ export function AddSettingsFlyout({
 }
 async function deleteConfig(selectedConfig: Config) {
   try {
-    await deleteAgentConfiguration(selectedConfig.id);
+    await callApmApi({
+      pathname: '/api/apm/settings/agent-configuration/{configurationId}',
+      method: 'DELETE',
+      params: {
+        path: { configurationId: selectedConfig.id }
+      }
+    });
     toastNotifications.addSuccess({
       title: i18n.translate(
         'xpack.apm.settings.agentConf.deleteConfigSucceededTitle',
@@ -279,7 +290,15 @@ async function saveConfig({
     };
 
     if (configurationId) {
-      await updateAgentConfiguration(configurationId, configuration);
+      await callApmApi({
+        pathname: '/api/apm/settings/agent-configuration/{configurationId}',
+        method: 'PUT',
+        params: {
+          path: { configurationId },
+          body: configuration
+        }
+      });
+
       toastNotifications.addSuccess({
         title: i18n.translate(
           'xpack.apm.settings.agentConf.editConfigSucceededTitle',
@@ -298,7 +317,13 @@ async function saveConfig({
         )
       });
     } else {
-      await createAgentConfiguration(configuration);
+      await callApmApi({
+        pathname: '/api/apm/settings/agent-configuration/new',
+        method: 'POST',
+        params: {
+          body: configuration
+        }
+      });
       toastNotifications.addSuccess({
         title: i18n.translate(
           'xpack.apm.settings.agentConf.createConfigSucceededTitle',

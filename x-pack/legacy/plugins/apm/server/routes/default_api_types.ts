@@ -9,7 +9,7 @@ import { either } from 'fp-ts/lib/Either';
 
 const dateRt = new t.Type<string, string, unknown>(
   'DateAsString',
-  (u): u is string => typeof u === 'string',
+  t.string.is,
   (u, c) =>
     either.chain(t.string.validate(u, c), s => {
       const d = new Date(s);
@@ -30,3 +30,17 @@ export const debugRt = t.partial({ debug: t.boolean });
 export const minimalRt = debugRt;
 
 export const uiQueryRt = t.intersection([minimalRt, rangeRt, uiFilterRt]);
+
+export const jsonRt = new t.Type<any, string, unknown>(
+  'JSONAsString',
+  t.string.is,
+  (u, c) =>
+    either.chain(t.string.validate(u, c), s => {
+      try {
+        return t.success(JSON.parse(s));
+      } catch (e) {
+        return t.failure(u, c);
+      }
+    }),
+  a => a
+);

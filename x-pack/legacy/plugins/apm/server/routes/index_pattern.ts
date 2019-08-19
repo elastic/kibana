@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { getAPMIndexPattern } from '../lib/index_pattern';
 import { createRoute } from './create_route';
 import { minimalRt } from './default_api_types';

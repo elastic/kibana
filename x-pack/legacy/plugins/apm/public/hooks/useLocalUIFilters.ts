@@ -54,7 +54,7 @@ export function useLocalUIFilters({
   };
 
   const { data = initialData, status } = useFetcher(async () => {
-    const foo = await callApi<LocalUIFiltersAPIResponse>({
+    return callApi<LocalUIFiltersAPIResponse>({
       method: 'GET',
       pathname: `/api/apm/ui_filters/local_filters/${projection}`,
       query: {
@@ -65,7 +65,6 @@ export function useLocalUIFilters({
         ...params
       }
     });
-    return foo;
   }, [uiFilters, urlParams, params, filterNames, projection]);
 
   const filters = data.map(filter => ({

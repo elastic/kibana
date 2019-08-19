@@ -58,11 +58,7 @@ export async function callApi<T = void>(
 }
 
 export const callApmApi: Client<APMAPI['_S']> = (options => {
-  const {
-    pathname,
-    params = { path: null, body: null, query: null },
-    ...opts
-  } = options;
+  const { pathname, params = {}, ...opts } = options;
 
   const path = (params.path || {}) as Record<string, any>;
   const body = params.body ? JSON.stringify(params.body) : undefined;

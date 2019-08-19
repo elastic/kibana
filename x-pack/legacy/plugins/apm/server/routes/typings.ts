@@ -5,9 +5,10 @@
  */
 
 import t from 'io-ts';
-import { Request } from 'hapi';
+import { Request, ResponseToolkit } from 'hapi';
 import { InternalCoreSetup } from 'src/core/server';
 import { KFetchOptions } from 'ui/kfetch';
+import { PickByValue, Optional } from 'utility-types';
 
 export interface Params {
   query?: t.HasProps;
@@ -32,7 +33,11 @@ export interface Route<
   path: TPath;
   method?: TMethod;
   params?: TParams;
-  handler: (req: Request, params: DecodeParams<TParams>) => Promise<TReturn>;
+  handler: (
+    req: Request,
+    params: DecodeParams<TParams>,
+    h: ResponseToolkit
+  ) => Promise<TReturn>;
 }
 
 export type RouteFactoryFn<
@@ -75,9 +80,28 @@ export interface ServerAPI<TRouteState extends RouteState> {
 }
 
 // without this, TS does not recognize possible existence of `params` in `options` below
-interface NoParams {
-  params?: undefined;
+interface NoParams<TParams extends Params> {
+  params?: TParams;
 }
+
+type GetOptionalParamKeys<TParams extends Params> = keyof PickByValue<
+  {
+    [key in keyof TParams]: TParams[key] extends t.PartialType<any>
+      ? false
+      : (TParams[key] extends t.Any ? true : false);
+  },
+  false
+>;
+
+// this type makes the params object optional if no required props are found
+type GetParams<TParams extends Params> = Exclude<
+  keyof TParams,
+  GetOptionalParamKeys<TParams>
+> extends never
+  ? NoParams<Optional<DecodeParams<TParams>>>
+  : {
+      params: Optional<DecodeParams<TParams>, GetOptionalParamKeys<TParams>>;
+    };
 
 export type Client<TRouteState> = <
   TPath extends keyof TRouteState & string,
@@ -93,10 +117,8 @@ export type Client<TRouteState> = <
   options: Omit<KFetchOptions, 'query' | 'body' | 'pathname' | 'method'> & {
     pathname: TPath;
   } & (TMethod extends 'GET' ? { method?: TMethod } : { method: TMethod }) &
-    // Makes sure params can only be passed when types were defined,
+    // Makes sure params can only be set when types were defined
     (TParams extends Params
-      ? (keyof TParams extends never
-          ? NoParams
-          : { params: DecodeParams<TParams> })
-      : NoParams)
+      ? GetParams<TParams>
+      : NoParams<Record<string, any>>)
 ) => Promise<TReturn>;

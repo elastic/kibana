@@ -6,7 +6,7 @@
 import { merge } from 'lodash';
 import Boom from 'boom';
 import { InternalCoreSetup } from 'src/core/server';
-import { Request } from 'hapi';
+import { Request, ResponseToolkit } from 'hapi';
 import * as t from 'io-ts';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import {
@@ -45,7 +45,7 @@ export function createApi() {
             },
             route,
             {
-              handler: async (request: Request) => {
+              handler: async (request: Request, h: ResponseToolkit) => {
                 const paramMap = {
                   path: request.params,
                   body: request.payload,
@@ -76,7 +76,7 @@ export function createApi() {
                   {} as Record<keyof typeof params, any>
                 );
 
-                return route.handler(request, parsedParams);
+                return route.handler(request, parsedParams, h);
               }
             }
           )
