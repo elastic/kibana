@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiSpacer,
@@ -12,26 +12,37 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPageContent,
+  EuiHorizontalRule,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiText
 } from '@elastic/eui';
-import { CheckingSettings } from './checking_settings';
-import { ReasonFound, WeTried } from './reasons';
-import { CheckerErrors } from './checker_errors';
+import { WhatIs } from './blurbs';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { toggleSetupMode } from '../../lib/setup_mode';
 
-function NoDataMessage(props) {
-  const { isLoading, reason, checkMessage } = props;
+// function NoDataMessage(props) {
+//   const { isLoading, reason, checkMessage } = props;
 
-  if (isLoading && checkMessage !== null) {
-    return <CheckingSettings checkMessage={checkMessage} />;
+//   if (isLoading && checkMessage !== null) {
+//     return <CheckingSettings checkMessage={checkMessage} />;
+//   }
+
+//   if (reason) {
+//     return <ReasonFound {...props} />;
+//   }
+
+//   return <WeTried />;
+// }
+
+export function NoData({ changePath }) {
+  const [isLoading, setIsLoading] = useState(false);
+  async function startSetup() {
+    setIsLoading(true);
+    await toggleSetupMode(true);
+    changePath('/elasticsearch/nodes');
   }
-
-  if (reason) {
-    return <ReasonFound {...props} />;
-  }
-
-  return <WeTried />;
-}
-
-export function NoData(props) {
 
   return (
     <EuiPage>
@@ -43,8 +54,43 @@ export function NoData(props) {
         >
           <EuiIcon type="monitoringApp" size="xxl" />
           <EuiSpacer size="m" />
-          <NoDataMessage {...props} />
-          <CheckerErrors errors={props.errors} />
+          <WhatIs />
+          <EuiHorizontalRule size="half" />
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.monitoring.noData.noMonitoringDataFound"
+                defaultMessage="We did not find any monitoring data in the currently selected time period."
+              />
+            </p>
+            <p>
+              <FormattedMessage
+                id="xpack.monitoring.noData.noMonitoringDataFound2"
+                defaultMessage="Either adjust your time period or click the button below to setup monitoring."
+              />
+            </p>
+          </EuiText>
+          <EuiSpacer />
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="spaceAround"
+            gutterSize="s"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill={true}
+                onClick={startSetup}
+                type="button"
+                data-test-subj="enableCollectionInterval"
+                isLoading={isLoading}
+              >
+                <FormattedMessage
+                  id="xpack.monitoring.noData.explanations.collectionInterval.turnOnMonitoringButtonLabel"
+                  defaultMessage="Start monitoring setup"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>
@@ -52,7 +98,5 @@ export function NoData(props) {
 }
 
 NoData.propTypes = {
-  isLoading: PropTypes.bool.isRequired,
-  reason: PropTypes.object,
-  checkMessage: PropTypes.string
+  changePath: PropTypes.func.isRequired,
 };

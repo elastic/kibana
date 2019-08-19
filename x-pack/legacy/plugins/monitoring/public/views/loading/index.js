@@ -11,7 +11,6 @@ import uiRoutes from 'ui/routes';
 import { I18nContext } from 'ui/i18n';
 import template from './index.html';
 import { CODE_PATH_LICENSE } from '../../../common/constants';
-import { toggleSetupMode, getSetupModeState } from '../../lib/setup_mode';
 
 const REACT_DOM_ID = 'monitoringLoadingReactApp';
 
@@ -22,15 +21,6 @@ uiRoutes
       constructor($injector, $scope) {
         const monitoringClusters = $injector.get('monitoringClusters');
         const kbnUrl = $injector.get('kbnUrl');
-
-        const setupMode = getSetupModeState();
-        // For phase 3, this is not an valid route unless
-        // setup mode is currently enabled. For phase 4,
-        // we will remove this check.
-        if (!setupMode.enabled) {
-          kbnUrl.changePath('/no-data');
-          return;
-        }
 
         $scope.$on('$destroy', () => {
           unmountComponentAtNode(document.getElementById(REACT_DOM_ID));
@@ -46,11 +36,8 @@ uiRoutes
               kbnUrl.changePath('/home');
               return;
             }
-            return toggleSetupMode(true)
-              .then(() => {
-                kbnUrl.changePath('/elasticsearch/nodes');
-                $scope.$apply();
-              });
+            kbnUrl.changePath('/no-data');
+            return;
           });
       }
 
