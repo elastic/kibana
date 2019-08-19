@@ -104,7 +104,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         <Switch>
           <Route exact path={`${BASE_PATH}indices`} component={IndexList} />
           <Route exact path={`${BASE_PATH}indices/filter/:filter?`} component={IndexList} />
-          <Route exact path={`${BASE_PATH}templates`} component={TemplatesList} />
+          <Route exact path={`${BASE_PATH}templates/:templateName*`} component={TemplatesList} />
         </Switch>
       </EuiPageContent>
     </EuiPageBody>

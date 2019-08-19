@@ -30,8 +30,11 @@ interface IndexedArrayConfig<T> {
 declare class IndexedArray<T> extends Array<T> {
   public immutable: boolean;
   public raw: T[];
-  // May not actually be present, is dynamically defined.
+
+  // These may not actually be present, as they are dynamically defined
   public inOrder: T[];
+  public byType: Record<string, T[]>;
+  public byName: Record<string, T>;
 
   constructor(config: IndexedArrayConfig<T>);
 

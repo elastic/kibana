@@ -39,16 +39,17 @@ import {
 // the nature of a change in defaults during a PR review.
 test('default CSP rules', () => {
   expect(DEFAULT_CSP_RULES).toMatchInlineSnapshot(`
-Array [
-  "script-src 'unsafe-eval' 'nonce-{nonce}'",
-  "worker-src blob:",
-  "child-src blob:",
-]
-`);
+    Array [
+      "script-src 'unsafe-eval' 'nonce-{nonce}'",
+      "worker-src blob:",
+      "child-src blob:",
+      "style-src 'unsafe-inline' 'self'",
+    ]
+  `);
 });
 
 test('CSP strict mode defaults to disabled', () => {
-  expect(DEFAULT_CSP_STRICT).toBe(false);
+  expect(DEFAULT_CSP_STRICT).toBe(true);
 });
 
 test('CSP legacy browser warning defaults to enabled', () => {

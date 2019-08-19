@@ -17,7 +17,6 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   urlParams: IUrlParams;
-  serviceTransactionTypes: string[];
 }
 
 interface State {
@@ -155,7 +154,7 @@ export class MachineLearningFlyout extends Component<Props, State> {
   };
 
   public render() {
-    const { isOpen, onClose, urlParams, serviceTransactionTypes } = this.props;
+    const { isOpen, onClose, urlParams } = this.props;
     const { serviceName } = urlParams;
     const { isCreatingJob, hasIndexPattern } = this.state;
 
@@ -169,8 +168,7 @@ export class MachineLearningFlyout extends Component<Props, State> {
         isCreatingJob={isCreatingJob}
         onClickCreate={this.onClickCreate}
         onClose={onClose}
-        serviceName={serviceName}
-        serviceTransactionTypes={serviceTransactionTypes}
+        urlParams={urlParams}
       />
     );
   }

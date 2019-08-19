@@ -31,7 +31,7 @@ const ELASTIC_LICENSE_HEADER = `
 `;
 
 module.exports = {
-  extends: ['@elastic/eslint-config-kibana'],
+  extends: ['@elastic/eslint-config-kibana', 'plugin:@elastic/eui/recommended'],
 
   overrides: [
     /**
@@ -40,6 +40,7 @@ module.exports = {
     {
       files: [
         '.eslintrc.js',
+        'packages/kbn-utility-types/**/*',
         'packages/kbn-eslint-plugin-eslint/**/*',
         'packages/kbn-config-schema/**/*',
         'packages/kbn-pm/**/*',
@@ -186,8 +187,10 @@ module.exports = {
         'x-pack/legacy/plugins/apm/**/*.js',
         'test/*/config.ts',
         'test/visual_regression/tests/**/*',
-        'x-pack/test/visual_regression/tests/**/*',
-        'x-pack/test/*/config.ts',
+        'x-pack/test/*/{tests,test_suites,apis,apps}/**/*',
+        'x-pack/test/*/*config.*ts',
+        'x-pack/test/saved_object_api_integration/*/apis/**/*',
+        'x-pack/test/ui_capabilities/*/tests/**/*',
       ],
       rules: {
         'import/no-default-export': 'off',
@@ -394,6 +397,14 @@ module.exports = {
       rules: {
         'no-unused-vars': ['error', { ignoreRestSiblings: true }],
         'no-console': ['warn', { allow: ['error'] }],
+      },
+    },
+    {
+      plugins: ['react-hooks'],
+      files: ['x-pack/legacy/plugins/apm/**/*.{ts,tsx}'],
+      rules: {
+        'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
+        'react-hooks/exhaustive-deps': ['error', { additionalHooks: '^useFetcher$' }],
       },
     },
 

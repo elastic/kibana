@@ -4,28 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
-
 import React from 'react';
 
 import { EuiBadge, EuiText } from '@elastic/eui';
 
-import { getSelectableFields, EsDoc } from '../../../../common';
+import { EsDoc } from '../../../../common';
 
-interface ExpandedRowProps {
-  item: EsDoc;
-}
-
-export const ExpandedRow: React.SFC<ExpandedRowProps> = ({ item }) => {
-  const keys = getSelectableFields([item]);
-  const list = keys.map(k => {
-    const value = get(item._source, k, '');
-    return (
+export const ExpandedRow: React.SFC<{ item: EsDoc }> = ({ item }) => (
+  <EuiText>
+    {Object.entries(item._source).map(([k, value]) => (
       <span key={k}>
         <EuiBadge>{k}:</EuiBadge>
         <small> {typeof value === 'string' ? value : JSON.stringify(value)}&nbsp;&nbsp;</small>
       </span>
-    );
-  });
-  return <EuiText>{list}</EuiText>;
-};
+    ))}
+  </EuiText>
+);

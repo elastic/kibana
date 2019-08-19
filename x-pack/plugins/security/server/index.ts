@@ -16,8 +16,8 @@ export { wrapError } from './errors';
 export {
   canRedirectRequest,
   AuthenticationResult,
-  BasicCredentials,
   DeauthenticationResult,
+  OIDCAuthenticationFlow,
 } from './authentication';
 
 export { PluginSetupContract } from './plugin';

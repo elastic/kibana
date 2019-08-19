@@ -100,7 +100,6 @@ class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps>
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}
-        loadingTitle={i18n.TOP_DNS_DOMAINS}
         loadPage={newActivePage => loadPage(newActivePage)}
         onChange={this.onChange}
         pageOfItems={data}

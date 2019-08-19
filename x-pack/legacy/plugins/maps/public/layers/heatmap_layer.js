@@ -37,11 +37,15 @@ export class HeatmapLayer extends VectorLayer {
   }
 
   _getHeatmapLayerId() {
-    return this.getId() + '_heatmap';
+    return this.makeMbLayerId('heatmap');
   }
 
   getMbLayerIds() {
     return [this._getHeatmapLayerId()];
+  }
+
+  ownsMbLayerId(mbLayerId) {
+    return this._getHeatmapLayerId() === mbLayerId;
   }
 
   syncLayerWithMB(mbMap) {
@@ -78,7 +82,7 @@ export class HeatmapLayer extends VectorLayer {
       mbSourceAfter.setData(featureCollection);
     }
 
-    mbMap.setLayoutProperty(heatmapLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+    this.syncVisibilityWithMb(mbMap, heatmapLayerId);
     this._style.setMBPaintProperties({
       mbMap,
       layerId: heatmapLayerId,

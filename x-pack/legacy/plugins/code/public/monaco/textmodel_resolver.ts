@@ -5,7 +5,7 @@
  */
 
 import { editor, IDisposable, Uri } from 'monaco-editor';
-import chrome from 'ui/chrome';
+import { npStart } from 'ui/new_platform';
 
 import { ImmortalReference } from './immortal_reference';
 
@@ -55,7 +55,7 @@ export class TextModelResolverService implements ITextModelService {
     const revision = resource.query;
     const file = resource.fragment;
     const response = await fetch(
-      chrome.addBasePath(`/api/code/repo/${repo}/blob/${revision}/${file}`)
+      npStart.core.http.basePath.prepend(`/api/code/repo/${repo}/blob/${revision}/${file}`)
     );
     if (response.status === 200) {
       const contentType = response.headers.get('Content-Type');

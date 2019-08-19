@@ -116,7 +116,7 @@ class UncommonProcessesComponentQuery extends QueryTemplatePaginated<
             loadPage: this.wrappedLoadMore,
             pageInfo: getOr({}, 'source.UncommonProcesses.pageInfo', data),
             refetch,
-            totalCount: getOr(0, 'source.UncommonProcesses.totalCount', data),
+            totalCount: getOr(-1, 'source.UncommonProcesses.totalCount', data),
             uncommonProcesses,
           });
         }}

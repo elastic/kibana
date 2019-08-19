@@ -7,10 +7,9 @@
 import { EuiButtonIcon, EuiModal, EuiToolTip, EuiOverlayMask } from '@elastic/eui';
 import * as React from 'react';
 
-import { DeleteTimelines } from '../types';
 import { DeleteTimelineModal, DELETE_TIMELINE_MODAL_WIDTH } from './delete_timeline_modal';
-
 import * as i18n from '../translations';
+import { DeleteTimelines } from '../types';
 
 interface Props {
   deleteTimelines?: DeleteTimelines;
@@ -40,7 +39,7 @@ export class DeleteTimelineModalButton extends React.PureComponent<Props, State>
         <EuiToolTip content={i18n.DELETE}>
           <EuiButtonIcon
             aria-label={i18n.DELETE}
-            color="subdued"
+            color="danger"
             data-test-subj="delete-timeline"
             iconSize="s"
             iconType="trash"

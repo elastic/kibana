@@ -196,7 +196,12 @@ export class VectorLayer extends AbstractLayer {
     if (!featureCollection) {
       return null;
     }
-    const bbox = turf.bbox(featureCollection);
+
+    const visibleFeatures = featureCollection.features.filter(feature => feature.properties[FEATURE_VISIBLE_PROPERTY_NAME]);
+    const bbox = turf.bbox({
+      type: 'FeatureCollection',
+      features: visibleFeatures
+    });
     return {
       min_lon: bbox[0],
       min_lat: bbox[1],
@@ -206,11 +211,14 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async getBounds(dataFilters) {
-    if (this._source.isBoundsAware()) {
-      const searchFilters = this._getSearchFilters(dataFilters);
-      return await this._source.getBoundsForFilters(searchFilters);
+
+    const isStaticLayer = !this._source.isBoundsAware() || !this._source.isFilterByMapBounds();
+    if (isStaticLayer) {
+      return this._getBoundsBasedOnData();
     }
-    return this._getBoundsBasedOnData();
+
+    const searchFilters = this._getSearchFilters(dataFilters);
+    return await this._source.getBoundsForFilters(searchFilters);
   }
 
   async getLeftJoinFields() {
@@ -558,23 +566,23 @@ export class VectorLayer extends AbstractLayer {
     const pointLayer = mbMap.getLayer(pointLayerId);
     const symbolLayer = mbMap.getLayer(symbolLayerId);
 
-    let layerId;
+    let mbLayerId;
     if (this._style.arePointsSymbolizedAsCircles()) {
-      layerId = pointLayerId;
+      mbLayerId = pointLayerId;
       if (symbolLayer) {
         mbMap.setLayoutProperty(symbolLayerId, 'visibility', 'none');
       }
       this._setMbCircleProperties(mbMap);
     } else {
-      layerId = symbolLayerId;
+      mbLayerId = symbolLayerId;
       if (pointLayer) {
         mbMap.setLayoutProperty(pointLayerId, 'visibility', 'none');
       }
       this._setMbSymbolProperties(mbMap);
     }
 
-    mbMap.setLayoutProperty(layerId, 'visibility', this.isVisible() ? 'visible' : 'none');
-    mbMap.setLayerZoomRange(layerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    this.syncVisibilityWithMb(mbMap, mbLayerId);
+    mbMap.setLayerZoomRange(mbLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
   }
 
   _setMbCircleProperties(mbMap) {
@@ -648,8 +656,9 @@ export class VectorLayer extends AbstractLayer {
       fillLayerId,
       lineLayerId,
     });
-    mbMap.setLayoutProperty(fillLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
-    mbMap.setLayoutProperty(lineLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+
+    this.syncVisibilityWithMb(mbMap, fillLayerId);
+    this.syncVisibilityWithMb(mbMap, lineLayerId);
     mbMap.setLayerZoomRange(lineLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
     mbMap.setLayerZoomRange(fillLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
   }
@@ -676,23 +685,34 @@ export class VectorLayer extends AbstractLayer {
   }
 
   _getMbPointLayerId() {
-    return this.getId() + '_circle';
+    return this.makeMbLayerId('circle');
   }
 
   _getMbSymbolLayerId() {
-    return this.getId() + '_symbol';
+    return this.makeMbLayerId('symbol');
   }
 
   _getMbLineLayerId() {
-    return this.getId() + '_line';
+    return this.makeMbLayerId('line');
   }
 
   _getMbPolygonLayerId() {
-    return this.getId() + '_fill';
+    return this.makeMbLayerId('fill');
   }
 
   getMbLayerIds() {
     return [this._getMbPointLayerId(), this._getMbSymbolLayerId(), this._getMbLineLayerId(), this._getMbPolygonLayerId()];
+  }
+
+  ownsMbLayerId(mbLayerId) {
+    return this._getMbPointLayerId() === mbLayerId ||
+      this._getMbLineLayerId() === mbLayerId ||
+      this._getMbPolygonLayerId() === mbLayerId ||
+      this._getMbSymbolLayerId() === mbLayerId;
+  }
+
+  ownsMbSourceId(mbSourceId) {
+    return this.getId() === mbSourceId;
   }
 
   _addJoinsToSourceTooltips(tooltipsFromSource) {

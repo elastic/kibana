@@ -5,100 +5,129 @@
  */
 
 import _ from 'lodash';
-import mapboxgl from 'mapbox-gl';
-import chrome from 'ui/chrome';
-import { MAKI_SPRITE_PATH } from '../../../../common/constants';
-
-function relativeToAbsolute(url) {
-  const a = document.createElement('a');
-  a.setAttribute('href', url);
-  return a.href;
-}
-
-export async function createMbMapInstance({ node, initialView, scrollZoom }) {
-  const makiUrl = relativeToAbsolute(chrome.addBasePath(MAKI_SPRITE_PATH));
-  return new Promise((resolve) => {
-    const options = {
-      attributionControl: false,
-      container: node,
-      style: {
-        version: 8,
-        sources: {},
-        layers: [],
-        sprite: makiUrl
-      },
-      scrollZoom,
-      preserveDrawingBuffer: chrome.getInjected('preserveDrawingBuffer', false)
-    };
-    if (initialView) {
-      options.zoom = initialView.zoom;
-      options.center = {
-        lng: initialView.lon,
-        lat: initialView.lat
-      };
-    }
-    const mbMap = new mapboxgl.Map(options);
-    mbMap.dragRotate.disable();
-    mbMap.touchZoomRotate.disableRotation();
-    mbMap.addControl(
-      new mapboxgl.NavigationControl({ showCompass: false }), 'top-left'
-    );
-    mbMap.on('load', () => {
-      resolve(mbMap);
-    });
-  });
-}
+import { RGBAImage } from './image_utils';
 
 export function removeOrphanedSourcesAndLayers(mbMap, layerList) {
-  const layerIds = layerList.map((layer) => layer.getId());
+
   const mbStyle = mbMap.getStyle();
+
+  const mbLayerIdsToRemove = [];
+  mbStyle.layers.forEach(mbLayer => {
+    const layer = layerList.find(layer => {
+      return layer.ownsMbLayerId(mbLayer.id);
+    });
+    if (!layer) {
+      mbLayerIdsToRemove.push(mbLayer.id);
+    }
+  });
+  mbLayerIdsToRemove.forEach((mbLayerId) => mbMap.removeLayer(mbLayerId));
+
   const mbSourcesToRemove = [];
-  for (const sourceId in mbStyle.sources) {
-    if (layerIds.indexOf(sourceId) === -1) {
-      mbSourcesToRemove.push(sourceId);
+  for (const mbSourceId in mbStyle.sources) {
+    if (mbStyle.sources.hasOwnProperty(mbSourceId)) {
+      const layer = layerList.find(layer => {
+        return layer.ownsMbSourceId(mbSourceId);
+      });
+      if (!layer) {
+        mbSourcesToRemove.push(mbSourceId);
+      }
     }
   }
-  const mbLayersToRemove = [];
-  mbStyle.layers.forEach(layer => {
-    if (mbSourcesToRemove.indexOf(layer.source) >= 0) {
-      mbLayersToRemove.push(layer.id);
+  mbSourcesToRemove.forEach(mbSourceId => mbMap.removeSource(mbSourceId));
+
+}
+
+/**
+ * This is function assumes only a single layer moved in the layerList, compared to mbMap
+ * It is optimized to minimize the amount of mbMap.moveLayer calls.
+ * @param mbMap
+ * @param layerList
+ */
+export function syncLayerOrderForSingleLayer(mbMap, layerList) {
+
+  if (!layerList || layerList.length === 0) {
+    return;
+  }
+
+
+  const mbLayers = mbMap.getStyle().layers.slice();
+  const layerIds = mbLayers.map(mbLayer => {
+    const layer = layerList.find(layer => layer.ownsMbLayerId(mbLayer.id));
+    return layer.getId();
+  });
+
+  const currentLayerOrderLayerIds = _.uniq(layerIds);
+
+  const newLayerOrderLayerIdsUnfiltered = layerList.map(l => l.getId());
+  const newLayerOrderLayerIds = newLayerOrderLayerIdsUnfiltered.filter(layerId => currentLayerOrderLayerIds.includes(layerId));
+
+  let netPos = 0;
+  let netNeg = 0;
+  const movementArr = currentLayerOrderLayerIds.reduce((accu, id, idx) => {
+    const movement = newLayerOrderLayerIds.findIndex(newOId => newOId === id) - idx;
+    movement > 0 ? netPos++ : movement < 0 && netNeg++;
+    accu.push({ id, movement });
+    return accu;
+  }, []);
+  if (netPos === 0 && netNeg === 0) {
+    return;
+  }
+  const movedLayerId = (netPos >= netNeg) && movementArr.find(l => l.movement < 0).id ||
+    (netPos < netNeg) && movementArr.find(l => l.movement > 0).id;
+  const nextLayerIdx = newLayerOrderLayerIds.findIndex(layerId => layerId === movedLayerId) + 1;
+
+  let nextMbLayerId;
+  if (nextLayerIdx === newLayerOrderLayerIds.length) {
+    nextMbLayerId = null;
+  } else {
+    const foundLayer = mbLayers.find(({ id: mbLayerId }) => {
+      const layerId = newLayerOrderLayerIds[nextLayerIdx];
+      const layer = layerList.find(layer => layer.getId() === layerId);
+      return layer.ownsMbLayerId(mbLayerId);
+    });
+    nextMbLayerId = foundLayer.id;
+  }
+
+  const movedLayer = layerList.find(layer => layer.getId() === movedLayerId);
+  mbLayers.forEach(({ id: mbLayerId }) => {
+    if (movedLayer.ownsMbLayerId(mbLayerId)) {
+      mbMap.moveLayer(mbLayerId, nextMbLayerId);
     }
-  });
-  mbLayersToRemove.forEach((layerId) => {
-    mbMap.removeLayer(layerId);
-  });
-  mbSourcesToRemove.forEach(sourceId => {
-    mbMap.removeSource(sourceId);
   });
 
 }
 
-export function syncLayerOrder(mbMap, layerList) {
-  if (layerList && layerList.length) {
-    const mbLayers = mbMap.getStyle().layers.slice();
-    const currentLayerOrder = _.uniq( // Consolidate layers and remove suffix
-      mbLayers.map(({ id }) => id.substring(0, id.lastIndexOf('_'))));
-    const newLayerOrder = layerList.map(l => l.getId())
-      .filter(layerId => currentLayerOrder.includes(layerId));
-    let netPos = 0;
-    let netNeg = 0;
-    const movementArr = currentLayerOrder.reduce((accu, id, idx) => {
-      const movement = newLayerOrder.findIndex(newOId => newOId === id) - idx;
-      movement > 0 ? netPos++ : movement < 0 && netNeg++;
-      accu.push({ id, movement });
-      return accu;
-    }, []);
-    if (netPos === 0 && netNeg === 0) { return; }
-    const movedLayer = (netPos >= netNeg) && movementArr.find(l => l.movement < 0).id ||
-      (netPos < netNeg) && movementArr.find(l => l.movement > 0).id;
-    const nextLayerIdx = newLayerOrder.findIndex(layerId => layerId === movedLayer) + 1;
-    const nextLayerId = nextLayerIdx === newLayerOrder.length ? null :
-      mbLayers.find(({ id }) => id.startsWith(newLayerOrder[nextLayerIdx])).id;
-
-    mbLayers.forEach(({ id }) => {
-      if (id.startsWith(movedLayer)) {
-        mbMap.moveLayer(id, nextLayerId);
-      }
-    });
+function getImageData(img) {
+  const canvas = window.document.createElement('canvas');
+  const context = canvas.getContext('2d');
+  if (!context) {
+    throw new Error('failed to create canvas 2d context');
   }
+  canvas.width = img.width;
+  canvas.height = img.height;
+  context.drawImage(img, 0, 0, img.width, img.height);
+  return context.getImageData(0, 0, img.width, img.height);
+}
+
+export async function addSpritesheetToMap(json, imgUrl, mbMap) {
+
+  const image = new Image();
+  image.crossOrigin = 'Anonymous';
+  image.onload = (el) => {
+    const imgData = getImageData(el.currentTarget);
+    for (const imageId in json) {
+      if (!(json.hasOwnProperty(imageId) && !mbMap.hasImage(imageId))) {
+        continue;
+      }
+      const { width, height, x, y, sdf, pixelRatio } = json[imageId];
+      if (typeof width !== 'number' || typeof height !== 'number') {
+        continue;
+      }
+
+      const data = new RGBAImage({ width, height });
+      RGBAImage.copy(imgData, data, { x, y }, { x: 0, y: 0 }, { width, height });
+      mbMap.addImage(imageId, data, { pixelRatio, sdf });
+    }
+  };
+  image.src = imgUrl;
 }

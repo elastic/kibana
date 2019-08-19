@@ -9,7 +9,7 @@ import { EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
 import { DataRequest } from './util/data_request';
-import { SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
+import { MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER, SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
 import uuid from 'uuid/v4';
 import { copyPersistentState } from '../reducers/util';
 import { i18n } from '@kbn/i18n';
@@ -73,6 +73,10 @@ export class AbstractLayer {
     return clonedDescriptor;
   }
 
+  makeMbLayerId(layerNameSuffix) {
+    return `${this.getId()}${MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER}${layerNameSuffix}`;
+  }
+
   isJoinable() {
     return this._source.isJoinable();
   }
@@ -115,10 +119,10 @@ export class AbstractLayer {
     };
   }
 
-  getIconAndTooltipContent(zoomLevel) {
+  getIconAndTooltipContent(zoomLevel, isUsingSearch) {
     let icon;
     let tooltipContent = null;
-    let areResultsTrimmed = false;
+    const footnotes = [];
     if (this.hasErrors()) {
       icon = (
         <EuiIcon
@@ -157,15 +161,30 @@ export class AbstractLayer {
       const customIconAndTooltipContent = this.getCustomIconAndTooltipContent();
       if (customIconAndTooltipContent) {
         icon = customIconAndTooltipContent.icon;
-        tooltipContent = customIconAndTooltipContent.tooltipContent;
-        areResultsTrimmed = customIconAndTooltipContent.areResultsTrimmed;
+        if (!customIconAndTooltipContent.areResultsTrimmed) {
+          tooltipContent = customIconAndTooltipContent.tooltipContent;
+        } else {
+          footnotes.push({
+            icon: <EuiIcon color="subdued" type="iInCircle" />,
+            message: customIconAndTooltipContent.tooltipContent
+          });
+        }
+      }
+
+      if (isUsingSearch && this.getQueryableIndexPatternIds().length) {
+        footnotes.push({
+          icon: <EuiIcon color="subdued" type="filter" size="s" />,
+          message: i18n.translate('xpack.maps.layer.isUsingSearchMsg', {
+            defaultMessage: 'Results narrowed by search bar'
+          })
+        });
       }
     }
 
     return {
       icon,
       tooltipContent,
-      areResultsTrimmed
+      footnotes,
     };
   }
 
@@ -264,6 +283,14 @@ export class AbstractLayer {
     throw new Error('Should implement AbstractLayer#getMbLayerIds');
   }
 
+  ownsMbLayerId() {
+    throw new Error('Should implement AbstractLayer#ownsMbLayerId');
+  }
+
+  ownsMbSourceId() {
+    throw new Error('Should implement AbstractLayer#ownsMbSourceId');
+  }
+
   canShowTooltip() {
     return false;
   }
@@ -328,6 +355,9 @@ export class AbstractLayer {
   }
 
   renderStyleEditor({ onStyleDescriptorChange }) {
+    if (!this._style) {
+      return null;
+    }
     return this._style.renderEditor({ layer: this, onStyleDescriptorChange });
   }
 
@@ -345,6 +375,10 @@ export class AbstractLayer {
 
   async getOrdinalFields() {
     return [];
+  }
+
+  syncVisibilityWithMb(mbMap, mbLayerId) {
+    mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
   }
 
 }

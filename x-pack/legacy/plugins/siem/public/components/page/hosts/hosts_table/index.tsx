@@ -134,7 +134,6 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}
-        loadingTitle={i18n.HOSTS}
         loadPage={newActivePage => loadPage(newActivePage)}
         onChange={this.onChange}
         pageOfItems={data}

@@ -29,12 +29,14 @@ import { getTime } from 'ui/timefilter/get_time';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
 import { Filter, FilterStateStore } from '@kbn/es-query';
+import { TimeRange } from 'ui/timefilter/time_history';
+import { Query, onlyDisabledFiltersChanged } from '../../../../data/public';
 import {
   APPLY_FILTER_TRIGGER,
   Embeddable,
-  executeTriggerActions,
   Container,
-} from '../../../../embeddable_api/public';
+  ExecuteTriggerActions,
+} from '../../../../embeddable_api/public/np_ready/public';
 import * as columnActions from '../doc_table/actions/columns';
 import { SavedSearch } from '../types';
 import searchTemplate from './search_template.html';
@@ -43,11 +45,11 @@ import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 interface SearchScope extends ng.IScope {
   columns?: string[];
   description?: string;
-  sort?: string[];
+  sort?: string[][];
   searchSource?: SearchSource;
   sharedItemTitle?: string;
   inspectorAdapters?: Adapters;
-  setSortOrder?: (column: string, columnDirection: string) => void;
+  setSortOrder?: (sortPair: [[string, string]]) => void;
   removeColumn?: (column: string) => void;
   addColumn?: (column: string) => void;
   moveColumn?: (column: string, index: number) => void;
@@ -94,6 +96,10 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
   private filterGen: FilterManager;
 
+  private prevTimeRange?: TimeRange;
+  private prevFilters?: Filter[];
+  private prevQuery?: Query;
+
   constructor(
     {
       $rootScope,
@@ -106,6 +112,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       queryFilter,
     }: SearchEmbeddableConfig,
     initialInput: SearchInput,
+    private readonly executeTriggerActions: ExecuteTriggerActions,
     parent?: Container
   ) {
     super(
@@ -195,8 +202,8 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
 
     this.pushContainerStateParamsToScope(searchScope);
 
-    searchScope.setSortOrder = (columnName, direction) => {
-      searchScope.sort = [columnName, direction];
+    searchScope.setSortOrder = sortPair => {
+      searchScope.sort = sortPair;
       this.updateInput({ sort: searchScope.sort });
     };
 
@@ -237,7 +244,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
         $state: { store: FilterStateStore.APP_STATE },
       }));
 
-      await executeTriggerActions(APPLY_FILTER_TRIGGER, {
+      await this.executeTriggerActions(APPLY_FILTER_TRIGGER, {
         embeddable: this,
         triggerContext: {
           filters,
@@ -259,10 +266,20 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     searchScope.sort = this.input.sort || this.savedSearch.sort;
     searchScope.sharedItemTitle = this.panelTitle;
 
-    this.filtersSearchSource.setField('filter', this.input.filters);
-    this.filtersSearchSource.setField('query', this.input.query);
+    if (
+      !onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
+      !_.isEqual(this.prevQuery, this.input.query) ||
+      !_.isEqual(this.prevTimeRange, this.input.timeRange)
+    ) {
+      this.filtersSearchSource.setField('filter', this.input.filters);
+      this.filtersSearchSource.setField('query', this.input.query);
 
-    // Sadly this is neccessary to tell the angular component to refetch the data.
-    this.courier.fetch();
+      // Sadly this is neccessary to tell the angular component to refetch the data.
+      this.courier.fetch();
+
+      this.prevFilters = this.input.filters;
+      this.prevQuery = this.input.query;
+      this.prevTimeRange = this.input.timeRange;
+    }
   }
 }

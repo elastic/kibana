@@ -10,14 +10,14 @@ import path from 'path';
 import puppeteer from 'puppeteer-core';
 import rimraf from 'rimraf';
 import * as Rx from 'rxjs';
-import { map, share, mergeMap, filter, partition } from 'rxjs/operators';
+import { map, share, mergeMap, filter, partition, ignoreElements, tap } from 'rxjs/operators';
 import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 
+import { LevelLogger as Logger } from '../../../lib/level_logger';
 import { HeadlessChromiumDriver } from '../driver';
 import { args, IArgOptions } from './args';
 import { safeChildProcess } from '../../safe_child_process';
 import { getChromeLogLocation } from '../paths';
-import { Logger } from '../../../../types';
 
 type binaryPath = string;
 type queueTimeout = number;
@@ -37,21 +37,21 @@ export class HeadlessChromiumDriverFactory {
 
   constructor(
     binaryPath: binaryPath,
-    logger: any,
+    logger: Logger,
     browserConfig: IBrowserConfig,
     queueTimeout: queueTimeout
   ) {
     this.binaryPath = binaryPath;
-    this.logger = logger.clone(['chromium-driver-factory']);
     this.browserConfig = browserConfig;
     this.queueTimeout = queueTimeout;
+    this.logger = logger;
   }
 
   type = 'chromium';
 
   test(
     { viewport, browserTimezone }: { viewport: IArgOptions['viewport']; browserTimezone: string },
-    logger: any
+    logger: Logger
   ) {
     const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-'));
     const chromiumArgs = args({
@@ -87,8 +87,15 @@ export class HeadlessChromiumDriverFactory {
   }: {
     viewport: IArgOptions['viewport'];
     browserTimezone: string;
-  }): Rx.Observable<any> {
+  }): Rx.Observable<{
+    driver$: Rx.Observable<HeadlessChromiumDriver>;
+    consoleMessage$: Rx.Observable<string>;
+    message$: Rx.Observable<string>;
+    exit$: Rx.Observable<never>;
+  }> {
     return Rx.Observable.create(async (observer: InnerSubscriber<any, any>) => {
+      this.logger.debug(`Creating browser driver factory`);
+
       const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-'));
       const chromiumArgs = args({
         userDataDir,
@@ -102,6 +109,7 @@ export class HeadlessChromiumDriverFactory {
       let page: puppeteer.Page;
       try {
         browser = await puppeteer.launch({
+          pipe: true,
           userDataDir,
           executablePath: this.binaryPath,
           ignoreHTTPSErrors: true,
@@ -119,18 +127,37 @@ export class HeadlessChromiumDriverFactory {
         // "TimeoutError: waiting for selector ".application" failed: timeout 30000ms exceeded"
         // @ts-ignore outdated typedefs for puppteer
         page.setDefaultTimeout(this.queueTimeout);
+
+        this.logger.debug(`Browser driver factory created`);
       } catch (err) {
         observer.error(new Error(`Error spawning Chromium browser: [${err}]`));
         throw err;
       }
 
-      safeChildProcess(
-        {
-          async kill() {
-            await browser.close();
-          },
+      const childProcess = {
+        async kill() {
+          await browser.close();
         },
-        observer
+      };
+      const { terminate$ } = safeChildProcess(this.logger, childProcess);
+
+      // this is adding unsubscribe logic to our observer
+      // so that if our observer unsubscribes, we terminate our child-process
+      observer.add(() => {
+        this.logger.debug(`The browser process observer has unsubscribed. Closing the browser...`);
+        childProcess.kill(); // ignore async
+      });
+
+      // make the observer subscribe to terminate$
+      observer.add(
+        terminate$
+          .pipe(
+            tap(signal => {
+              this.logger.debug(`Observer got signal: ${signal}`);
+            }),
+            ignoreElements()
+          )
+          .subscribe(observer)
       );
 
       // Register with a few useful puppeteer event handlers:
@@ -225,14 +252,15 @@ export class HeadlessChromiumDriverFactory {
         exit$,
       });
 
+      const factoryLogger = this.logger.clone(['chromium-driver-factory']);
       // unsubscribe logic makes a best-effort attempt to delete the user data directory used by chromium
       observer.add(() => {
-        this.logger.debug(`deleting chromium user data directory at [${userDataDir}]`);
+        factoryLogger.debug(`deleting chromium user data directory at [${userDataDir}]`);
         // the unsubscribe function isn't `async` so we're going to make our best effort at
         // deleting the userDataDir and if it fails log an error.
         rimraf(userDataDir, err => {
           if (err) {
-            return this.logger.error(
+            return factoryLogger.error(
               `error deleting user data directory at [${userDataDir}]: [${err}]`
             );
           }

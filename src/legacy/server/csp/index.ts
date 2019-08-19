@@ -26,9 +26,10 @@ export const DEFAULT_CSP_RULES = Object.freeze([
   `script-src 'unsafe-eval' 'nonce-{nonce}'`,
   'worker-src blob:',
   'child-src blob:',
+  `style-src 'unsafe-inline' 'self'`,
 ]);
 
-export const DEFAULT_CSP_STRICT = false;
+export const DEFAULT_CSP_STRICT = true;
 
 export const DEFAULT_CSP_WARN_LEGACY_BROWSERS = true;
 
