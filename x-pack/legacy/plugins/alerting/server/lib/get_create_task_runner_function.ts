@@ -92,7 +92,17 @@ export function getCreateTaskRunnerFunction({
             }
 
             const { actionGroup, context, state } = alertInstance.getFireOptions()!;
-            alertInstance.replaceMeta({ lastFired: Date.now() });
+            const previousMeta = alertInstance.getMeta();
+            alertInstance.replaceMeta({
+              ...previousMeta,
+              groups: {
+                ...(previousMeta.groups || {}),
+                [actionGroup]: {
+                  ...((previousMeta.groups && previousMeta.groups[actionGroup]) || {}),
+                  lastFired: Date.now(),
+                },
+              },
+            });
             alertInstance.resetFire();
             return fireHandler(actionGroup, context, state);
           })

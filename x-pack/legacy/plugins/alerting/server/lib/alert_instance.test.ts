@@ -25,17 +25,46 @@ describe('shouldFire()', () => {
 describe('isThrottled', () => {
   test('defaults to false', () => {
     const alertInstance = new AlertInstance();
-    expect(alertInstance.isThrottled('1m')).toEqual(false);
+    expect(alertInstance.isThrottled('default', '1m')).toEqual(false);
   });
 
   test('returns true when throttle expiry greater than now', () => {
-    const alertInstance = new AlertInstance({ meta: { lastFired: Date.now() - 50000 } });
-    expect(alertInstance.isThrottled('1m')).toEqual(true);
+    const alertInstance = new AlertInstance({
+      meta: {
+        groups: {
+          defualt: {
+            lastFired: Date.now() - 50000,
+          },
+        },
+      },
+    });
+    expect(alertInstance.isThrottled('defualt', '1m')).toEqual(true);
   });
 
   test('returns false when throttle expiry less than now', () => {
-    const alertInstance = new AlertInstance({ meta: { lastFired: Date.now() - 60000 } });
-    expect(alertInstance.isThrottled('1m')).toEqual(false);
+    const alertInstance = new AlertInstance({
+      meta: {
+        groups: {
+          default: {
+            lastFired: Date.now() - 60000,
+          },
+        },
+      },
+    });
+    expect(alertInstance.isThrottled('default', '1m')).toEqual(false);
+  });
+
+  test('returns false when throttle is for old action group', () => {
+    const alertInstance = new AlertInstance({
+      meta: {
+        groups: {
+          defualt: {
+            lastFired: Date.now() - 50000,
+          },
+        },
+      },
+    });
+    expect(alertInstance.isThrottled('warning', '1m')).toEqual(false);
   });
 });
 

@@ -26,12 +26,21 @@ export class AlertInstance {
     return this.fireOptions !== undefined;
   }
 
-  isThrottled(duration?: string) {
-    if (!duration || !this.meta.lastFired) {
+  isThrottled(actionGroup: string, duration?: string) {
+    // No duration when throttling isn't used
+    if (!duration) {
+      return false;
+    }
+    // No throttling if there's no record of when it fired last for given group
+    if (
+      !this.meta.groups ||
+      !this.meta.groups[actionGroup] ||
+      this.meta.groups[actionGroup].lastFired === undefined
+    ) {
       return false;
     }
     const throttle = parseDuration(duration);
-    return this.meta.lastFired + throttle > Date.now();
+    return this.meta.groups[actionGroup].lastFired + throttle > Date.now();
   }
 
   getFireOptions() {
