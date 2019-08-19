@@ -21,7 +21,7 @@ import { loginAndWaitForPage } from '../../lib/util/helpers';
 import { toggleTimelineVisibility } from '../../lib/timeline/helpers';
 import { NAVIGATION_NETWORK } from '../../lib/navigation/selectors';
 
-describe('top-level navigation common to all pages in the SIEM app', () => {
+describe('url state', () => {
   afterEach(() => {
     logout();
   });
@@ -49,7 +49,7 @@ describe('top-level navigation common to all pages in the SIEM app', () => {
       .first()
       .click({ force: true });
 
-    cy.get(DATE_PICKER_ABSOLUTE_INPUT, { timeout: 3000 }).type(
+    cy.get(DATE_PICKER_ABSOLUTE_INPUT, { timeout: 5000 }).type(
       `{selectall}{backspace}${ABSOLUTE_DATE_RANGE.newStartTimeTyped}`
     );
 
@@ -61,7 +61,7 @@ describe('top-level navigation common to all pages in the SIEM app', () => {
       .first()
       .click({ force: true });
 
-    cy.get(DATE_PICKER_ABSOLUTE_INPUT, { timeout: 3000 }).type(
+    cy.get(DATE_PICKER_ABSOLUTE_INPUT, { timeout: 5000 }).type(
       `{selectall}{backspace}${ABSOLUTE_DATE_RANGE.newEndTimeTyped}`
     );
 
@@ -124,7 +124,7 @@ describe('top-level navigation common to all pages in the SIEM app', () => {
       .first()
       .click({ force: true });
 
-    cy.get(DATE_PICKER_ABSOLUTE_INPUT, { timeout: 3000 }).type(
+    cy.get(DATE_PICKER_ABSOLUTE_INPUT, { timeout: 5000 }).type(
       `{selectall}{backspace}${ABSOLUTE_DATE_RANGE.newStartTimeTyped}`
     );
 
@@ -136,7 +136,7 @@ describe('top-level navigation common to all pages in the SIEM app', () => {
       .first()
       .click({ force: true });
 
-    cy.get(DATE_PICKER_ABSOLUTE_INPUT, { timeout: 3000 }).type(
+    cy.get(DATE_PICKER_ABSOLUTE_INPUT, { timeout: 5000 }).type(
       `{selectall}{backspace}${ABSOLUTE_DATE_RANGE.newEndTimeTyped}{enter}`
     );
 
@@ -150,27 +150,27 @@ describe('top-level navigation common to all pages in the SIEM app', () => {
 
   it('sets kql on network page when queryLocation == network.page', () => {
     loginAndWaitForPage(ABSOLUTE_DATE_RANGE.urlKqlNetworkNetwork);
-    cy.get(KQL_INPUT).should('have.attr', 'value', 'source.ip: "10.142.0.9"');
+    cy.get(KQL_INPUT, { timeout: 5000 }).should('have.attr', 'value', 'source.ip: "10.142.0.9"');
   });
 
   it('does not set kql on network page when queryLocation != network.page', () => {
     loginAndWaitForPage(ABSOLUTE_DATE_RANGE.urlKqlNetworkHosts);
-    cy.get(KQL_INPUT).should('have.attr', 'value', '');
+    cy.get(KQL_INPUT, { timeout: 5000 }).should('have.attr', 'value', '');
   });
 
   it('sets kql on hosts page when queryLocation == hosts.page', () => {
     loginAndWaitForPage(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
-    cy.get(KQL_INPUT).should('have.attr', 'value', 'source.ip: "10.142.0.9"');
+    cy.get(KQL_INPUT, { timeout: 5000 }).should('have.attr', 'value', 'source.ip: "10.142.0.9"');
   });
 
   it('does not set kql on hosts page when queryLocation != hosts.page', () => {
     loginAndWaitForPage(ABSOLUTE_DATE_RANGE.urlKqlHostsNetwork);
-    cy.get(KQL_INPUT).should('have.attr', 'value', '');
+    cy.get(KQL_INPUT, { timeout: 5000 }).should('have.attr', 'value', '');
   });
 
   it('sets the url state when kql is set', () => {
     loginAndWaitForPage(ABSOLUTE_DATE_RANGE.url);
-    cy.get(KQL_INPUT).type('source.ip: "10.142.0.9" {enter}');
+    cy.get(KQL_INPUT, { timeout: 5000 }).type('source.ip: "10.142.0.9" {enter}');
     cy.url().should(
       'include',
       `kqlQuery=(filterQuery:(expression:'source.ip:%20%2210.142.0.9%22%20',kind:kuery),queryLocation:network.page,type:page)`
@@ -180,6 +180,6 @@ describe('top-level navigation common to all pages in the SIEM app', () => {
   it('clears kql when navigating to a new page', () => {
     loginAndWaitForPage(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
     cy.get(NAVIGATION_NETWORK).click({ force: true });
-    cy.get(KQL_INPUT).should('have.attr', 'value', '');
+    cy.get(KQL_INPUT, { timeout: 5000 }).should('have.attr', 'value', '');
   });
 });
