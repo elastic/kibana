@@ -217,6 +217,7 @@ export class ESPewPewSource extends AbstractESSource {
             geotile_grid: {
               field: this._descriptor.sourceGeoField,
               precision: searchFilters.geogridPrecision,
+              size: 500,
             },
             aggs: {
               sourceCentroid: {
@@ -267,5 +268,9 @@ export class ESPewPewSource extends AbstractESSource {
 
   canFormatFeatureProperties() {
     return true;
+  }
+
+  async filterAndFormatPropertiesToHtml(properties) {
+    return await this.filterAndFormatPropertiesToHtmlForMetricFields(properties);
   }
 }
