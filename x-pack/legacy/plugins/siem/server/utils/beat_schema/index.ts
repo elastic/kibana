@@ -30,7 +30,7 @@ export const convertSchemaToAssociativeArray = (schema: Schema): OutputSchema =>
     return accumulator;
   }, {});
 
-const paramsToPick = ['description', 'example', 'name', 'type'];
+const paramsToPick = ['description', 'example', 'name', 'type', 'format'];
 
 const onlyStringOrNumber = (fields: object) =>
   Object.keys(fields).reduce((acc, item) => {

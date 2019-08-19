@@ -9,8 +9,14 @@ exports[`LayerTocActions is rendered 1`] = `
       anchorClassName="mapLayTocActions__tooltipAnchor"
       content={
         <React.Fragment>
-           
           simulated tooltip content at zoom: 0
+          <div>
+            <span>
+              mockFootnoteIcon
+            </span>
+             
+            simulated footnote at isUsingSearch: true
+          </div>
         </React.Fragment>
       }
       delay="regular"
@@ -35,6 +41,13 @@ exports[`LayerTocActions is rendered 1`] = `
           </span>
         </span>
         layer 1
+         
+        <React.Fragment>
+          
+          <span>
+            mockFootnoteIcon
+          </span>
+        </React.Fragment>
       </EuiButtonEmpty>
     </EuiToolTip>
   }
@@ -112,8 +125,14 @@ exports[`LayerTocActions should disable fit to data when supportsFitToBounds is 
       anchorClassName="mapLayTocActions__tooltipAnchor"
       content={
         <React.Fragment>
-           
           simulated tooltip content at zoom: 0
+          <div>
+            <span>
+              mockFootnoteIcon
+            </span>
+             
+            simulated footnote at isUsingSearch: true
+          </div>
         </React.Fragment>
       }
       delay="regular"
@@ -138,6 +157,13 @@ exports[`LayerTocActions should disable fit to data when supportsFitToBounds is 
           </span>
         </span>
         layer 1
+         
+        <React.Fragment>
+          
+          <span>
+            mockFootnoteIcon
+          </span>
+        </React.Fragment>
       </EuiButtonEmpty>
     </EuiToolTip>
   }
@@ -215,8 +241,14 @@ exports[`LayerTocActions should not show edit actions in read only mode 1`] = `
       anchorClassName="mapLayTocActions__tooltipAnchor"
       content={
         <React.Fragment>
-           
           simulated tooltip content at zoom: 0
+          <div>
+            <span>
+              mockFootnoteIcon
+            </span>
+             
+            simulated footnote at isUsingSearch: true
+          </div>
         </React.Fragment>
       }
       delay="regular"
@@ -241,6 +273,13 @@ exports[`LayerTocActions should not show edit actions in read only mode 1`] = `
           </span>
         </span>
         layer 1
+         
+        <React.Fragment>
+          
+          <span>
+            mockFootnoteIcon
+          </span>
+        </React.Fragment>
       </EuiButtonEmpty>
     </EuiToolTip>
   }

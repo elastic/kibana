@@ -5,6 +5,7 @@
  */
 
 import React, { FC } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Field, AggFieldPair } from '../../../../../../../../common/types/fields';
 import { AggSelect, DropDownLabel, DropDownProps } from '../agg_select';
@@ -29,7 +30,11 @@ export const MetricSelector: FC<Props> = ({
   return (
     <EuiFlexGroup style={{ maxWidth: maxWidth !== undefined ? maxWidth : MAX_WIDTH }}>
       <EuiFlexItem>
-        <EuiFormRow label="Add metric">
+        <EuiFormRow
+          label={i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.populationView.addMetric', {
+            defaultMessage: 'Add metric',
+          })}
+        >
           <AggSelect
             fields={fields}
             changeHandler={detectorChangeHandler}
