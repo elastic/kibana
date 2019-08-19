@@ -17,24 +17,35 @@
  * under the License.
  */
 
-import React from 'react';
-import {
-  EuiCodeBlock,
-} from '@elastic/eui';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { EuiCodeBlock } from '@elastic/eui';
+import { Request } from '../../../../adapters/request/types';
+import { RequestDetailsProps } from '../types';
 
-function RequestDetailsResponse(props) {
-  return (
-    <EuiCodeBlock
-      language="json"
-      paddingSize="s"
-      isCopyable
-      data-test-subj="inspectorResponseBody"
-    >
-      { JSON.stringify(props.request.response.json, null, 2) }
-    </EuiCodeBlock>
-  );
+export class RequestDetailsRequest extends Component<RequestDetailsProps> {
+  static propTypes = {
+    request: PropTypes.object.isRequired,
+  };
+
+  static shouldShow = (request: Request) => Boolean(request && request.json);
+
+  render() {
+    const { json } = this.props.request;
+
+    if (!json) {
+      return null;
+    }
+
+    return (
+      <EuiCodeBlock
+        language="json"
+        paddingSize="s"
+        isCopyable
+        data-test-subj="inspectorRequestBody"
+      >
+        {JSON.stringify(json, null, 2)}
+      </EuiCodeBlock>
+    );
+  }
 }
-
-RequestDetailsResponse.shouldShow = (request) => request.response && request.response.json;
-
-export { RequestDetailsResponse };

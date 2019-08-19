@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { IndexPatternsService } from './index_patterns_service';
+export * from './index_patterns_service';

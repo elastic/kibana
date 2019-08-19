@@ -16,5 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Request } from '../../../adapters/request/types';
 
-export { indexPatternsMixin } from './mixin';
+export interface RequestDetailsProps {
+  request: Request;
+}

@@ -17,19 +17,5 @@
  * under the License.
  */
 
-export interface IndexPatternsService {
-  // ATTENTION: this interface is incomplete
-
-  getFieldsForWildcard(options: { pattern: string | string[] }): Promise<FieldDescriptor[]>;
-}
-
-export interface FieldDescriptor {
-  aggregatable: boolean;
-  name: string;
-  readFromDocValues: boolean;
-  searchable: boolean;
-  type: string;
-  esTypes: string[];
-  parent?: string;
-  subType?: string;
-}
+export { getFieldCapabilities } from './field_capabilities';
+export { FieldCapsResponse } from './field_caps_response';

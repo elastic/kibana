@@ -17,6 +17,6 @@
  * under the License.
  */
 
-export { getFieldCapabilities } from './field_capabilities';
-export { resolveTimePattern } from './resolve_time_pattern';
-export { createNoMatchingIndicesError } from './errors';
+export function shouldReadFieldFromDocValues(aggregatable: boolean, esType: string) {
+  return aggregatable && esType !== 'text' && !esType.startsWith('_');
+}

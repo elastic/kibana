@@ -17,6 +17,6 @@
  * under the License.
  */
 
-export function shouldReadFieldFromDocValues(aggregatable, esType) {
-  return aggregatable && esType !== 'text' && !esType.startsWith('_');
-}
+export { RequestDetailsRequest } from './req_details_request';
+export { RequestDetailsResponse } from './req_details_response';
+export { RequestDetailsStats } from './req_details_stats';
