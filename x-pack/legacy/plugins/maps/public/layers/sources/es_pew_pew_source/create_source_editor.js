@@ -8,7 +8,7 @@ import _ from 'lodash';
 import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 
-import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
+import { IndexPatternSelect } from 'ui/index_patterns';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { indexPatternService } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
