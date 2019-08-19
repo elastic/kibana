@@ -22,25 +22,42 @@ export class AlertInstance {
     this.meta = meta;
   }
 
-  shouldFire() {
-    return this.fireOptions !== undefined;
-  }
-
-  isThrottled(actionGroup: string, duration?: string) {
-    // No duration when throttling isn't used
-    if (!duration) {
+  shouldFire(throttle?: string) {
+    // Fire function wasn't called
+    if (this.fireOptions === undefined) {
       return false;
     }
-    // No throttling if there's no record of when it fired last for given group
+    // Should be throttled and not fire
     if (
-      !this.meta.groups ||
-      !this.meta.groups[actionGroup] ||
-      this.meta.groups[actionGroup].lastFired === undefined
+      throttle &&
+      this.meta.groups &&
+      this.meta.groups[this.fireOptions.actionGroup] &&
+      this.meta.groups[this.fireOptions.actionGroup].lastFired !== undefined &&
+      this.meta.groups[this.fireOptions.actionGroup].lastFired + parseDuration(throttle) >
+        Date.now()
     ) {
       return false;
     }
-    const throttle = parseDuration(duration);
-    return this.meta.groups[actionGroup].lastFired + throttle > Date.now();
+    return true;
+  }
+
+  isObsolete(throttle?: string) {
+    const isNotFiring = !this.shouldFire(throttle);
+    let hasNoGroupThrottled = true;
+
+    if (throttle) {
+      for (const group of this.meta.groups || {}) {
+        if (
+          this.meta.groups[group].lastFired !== undefined &&
+          this.meta.groups[group].lastFired + parseDuration(throttle) < Date.now()
+        ) {
+          // This group is still throttled and makes this instance not obsolete
+          hasNoGroupThrottled = false;
+        }
+      }
+    }
+
+    return isNotFiring && hasNoGroupThrottled;
   }
 
   getFireOptions() {

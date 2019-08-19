@@ -81,30 +81,28 @@ export function getCreateTaskRunnerFunction({
           Object.keys(alertInstances).map(alertInstanceId => {
             const alertInstance = alertInstances[alertInstanceId];
 
-            // Unpersist any alert instances that were not explicitly fired in this alert execution
-            if (!alertInstance.shouldFire()) {
+            // Cleanup obsolete alert instances to avoid over populating the object
+            if (alertInstance.isObsolete(alertSavedObject.attributes.throttle)) {
               delete alertInstances[alertInstanceId];
               return;
             }
 
-            if (alertInstance.isThrottled(alertSavedObject.attributes.throttle)) {
-              return;
-            }
-
-            const { actionGroup, context, state } = alertInstance.getFireOptions()!;
-            const previousMeta = alertInstance.getMeta();
-            alertInstance.replaceMeta({
-              ...previousMeta,
-              groups: {
-                ...(previousMeta.groups || {}),
-                [actionGroup]: {
-                  ...((previousMeta.groups && previousMeta.groups[actionGroup]) || {}),
-                  lastFired: Date.now(),
+            if (alertInstance.shouldFire(alertSavedObject.attributes.throttle)) {
+              const { actionGroup, context, state } = alertInstance.getFireOptions()!;
+              const previousMeta = alertInstance.getMeta();
+              alertInstance.replaceMeta({
+                ...previousMeta,
+                groups: {
+                  ...(previousMeta.groups || {}),
+                  [actionGroup]: {
+                    ...((previousMeta.groups && previousMeta.groups[actionGroup]) || {}),
+                    lastFired: Date.now(),
+                  },
                 },
-              },
-            });
-            alertInstance.resetFire();
-            return fireHandler(actionGroup, context, state);
+              });
+              alertInstance.resetFire();
+              return fireHandler(actionGroup, context, state);
+            }
           })
         );
 
