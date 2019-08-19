@@ -4,14 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BasePath } from 'src/core/public/http/base_path_service';
+import { coreMock } from 'src/core/public/mocks';
 import { SessionExpired } from './session_expired';
 
 const mockCurrentUrl = (url: string) => window.history.pushState({}, '', url);
 
 it('redirects user to "/logout" when there is no basePath', async () => {
-  mockCurrentUrl('/foo/bar?baz=quz#quuz');
-  const sessionExpired = new SessionExpired(new BasePath());
+  const { basePath } = coreMock.createSetup().http;
+  basePath.remove.mockImplementation(url => url);
+  basePath.prepend.mockImplementation(url => url);
+  const currentUrl = '/foo/bar?baz=quz#quuz';
+  mockCurrentUrl(currentUrl);
+  const sessionExpired = new SessionExpired(basePath);
   const newUrlPromise = new Promise<string>(resolve => {
     jest.spyOn(window.location, 'assign').mockImplementation(url => {
       resolve(url);
@@ -24,11 +28,19 @@ it('redirects user to "/logout" when there is no basePath', async () => {
   expect(url).toBe(
     `/logout?next=${encodeURIComponent('/foo/bar?baz=quz#quuz')}&msg=SESSION_EXPIRED`
   );
+  expect(basePath.remove).toHaveBeenCalledWith(currentUrl);
+  expect(basePath.prepend).toHaveBeenCalled();
 });
 
 it('redirects user to "/${basePath}/logout" and removes basePath from next parameter when there is a basePath', async () => {
-  mockCurrentUrl('/foo/bar?baz=quz#quuz');
-  const sessionExpired = new SessionExpired(new BasePath('/foo'));
+  const { basePath } = coreMock.createSetup().http;
+  const currentBasePath = '/foo';
+  const currentNonBasePathUrl = '/bar?baz=quz#quuz';
+  const currentUrl = `${currentBasePath}/${currentNonBasePathUrl}`;
+  basePath.remove.mockReturnValue(currentNonBasePathUrl);
+  basePath.prepend.mockImplementation((url: string) => `${currentBasePath}${url}`);
+  mockCurrentUrl(currentUrl);
+  const sessionExpired = new SessionExpired(basePath);
   const newUrlPromise = new Promise<string>(resolve => {
     jest.spyOn(window.location, 'assign').mockImplementation(url => {
       resolve(url);
@@ -41,4 +53,5 @@ it('redirects user to "/${basePath}/logout" and removes basePath from next param
   expect(url).toBe(
     `/foo/logout?next=${encodeURIComponent('/bar?baz=quz#quuz')}&msg=SESSION_EXPIRED`
   );
+  expect(basePath.remove).toHaveBeenCalledWith(currentUrl);
 });
