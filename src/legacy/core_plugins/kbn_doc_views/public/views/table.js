@@ -76,7 +76,7 @@ DocViewsRegistryProvider.register(function () {
 
         $scope.enableDocValueCollapse = function (docValueField) {
           const html = (typeof $scope.formatted[docValueField] === 'undefined') ?
-            $scope.hit[docValueField] : $scope.formatted[docValueField] || $scope.trustAsHtml;
+            $scope.hit[docValueField] : $scope.formatted[docValueField];
           return html.length > MIN_LINE_LENGTH;
         };
 
