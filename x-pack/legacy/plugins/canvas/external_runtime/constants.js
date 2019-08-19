@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require('path');
 
 const RUNTIME_NAME = 'canvas_external_runtime';
