@@ -71,9 +71,7 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
       yarnLint = spawn('yarn', ['lint'], { cwd: generatedPath });
       yarnLint.stderr.on('data', collect(stdErrs));
       yarnLint.stdout.on('data', collect(stdOuts));
-      yarnLint.on('close', () => {
-        done(); // TODO: Why isnt the handler running point-free?
-      });
+      yarnLint.on('close', () => done());
     }, oneMinute * 3);
 
     it(`should not show the '"@kbn/eslint/no-restricted-paths" is invalid' msg on stderr`, () => {
