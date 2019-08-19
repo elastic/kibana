@@ -8,9 +8,17 @@ import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import { setBreadcrumbs } from './breadcrumbs';
-import { TabNavigation } from './tab_navigation';
+import { TabNavigation, NavTab } from './tab_navigation';
 
-export class SiemNavigationComponent extends React.Component<RouteComponentProps> {
+export interface TabNavigationComponentProps {
+  navTabs: NavTab[];
+  display?: 'default' | 'condensed' | undefined;
+  showBorder?: boolean;
+}
+
+export class SiemNavigationComponent extends React.Component<
+  RouteComponentProps & TabNavigationComponentProps
+> {
   public shouldComponentUpdate(nextProps: Readonly<RouteComponentProps>): boolean {
     if (
       this.props.location.pathname === nextProps.location.pathname &&
@@ -35,10 +43,8 @@ export class SiemNavigationComponent extends React.Component<RouteComponentProps
   }
 
   public render() {
-    const { location, navTabs } = this.props;
-    return (
-      <TabNavigation location={location.pathname} search={location.search} navTabs={navTabs} />
-    );
+    const { location, ...rest } = this.props;
+    return <TabNavigation location={location.pathname} search={location.search} {...rest} />;
   }
 }
 
