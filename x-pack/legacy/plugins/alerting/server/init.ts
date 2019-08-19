@@ -4,8 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Hapi from 'hapi';
 import { Legacy } from 'kibana';
 import KbnServer from 'src/legacy/server/kbn_server';
+import { ActionsPlugin } from '../../actions';
+import { TaskManager } from '../../task_manager';
+import { AlertingPlugin, Services } from './types';
+import { AlertTypeRegistry } from './alert_type_registry';
+import { AlertsClient, CreateAPIKeyResult } from './alerts_client';
+import { SpacesPlugin } from '../../spaces';
+import { KibanaRequest } from '../../../../../src/core/server';
+import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
+import { PluginSetupContract as SecurityPluginSetupContract } from '../../../../plugins/security/server';
+import { createOptionalPlugin } from '../../../server/lib/optional_plugin';
 import {
   createAlertRoute,
   deleteAlertRoute,
@@ -16,18 +27,23 @@ import {
   enableAlertRoute,
   disableAlertRoute,
 } from './routes';
-import { AlertingPlugin, Services } from './types';
-import { AlertTypeRegistry } from './alert_type_registry';
-import { AlertsClient, CreateAPIKeyResult } from './alerts_client';
-import { SpacesPlugin } from '../../spaces';
-import { KibanaRequest } from '../../../../../src/core/server';
-import { PluginSetupContract as SecurityPluginSetupContract } from '../../../../plugins/security/server';
-import { createOptionalPlugin } from '../../../server/lib/optional_plugin';
 
-export function init(server: Legacy.Server) {
+// Extend PluginProperties to indicate which plugins are guaranteed to exist
+// due to being marked as dependencies
+interface Plugins extends Hapi.PluginProperties {
+  actions: ActionsPlugin;
+  task_manager: TaskManager;
+  encrypted_saved_objects: EncryptedSavedObjectsPlugin;
+}
+
+interface Server extends Legacy.Server {
+  plugins: Plugins;
+}
+
+export function init(server: Server) {
   const config = server.config();
   const kbnServer = (server as unknown) as KbnServer;
-  const taskManager = server.plugins.task_manager!;
+  const taskManager = server.plugins.task_manager;
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
   const spaces = createOptionalPlugin<SpacesPlugin>(
     config,
@@ -67,7 +83,7 @@ export function init(server: Legacy.Server) {
   });
 
   // Encrypted attributes
-  server.plugins.encrypted_saved_objects!.registerType({
+  server.plugins.encrypted_saved_objects.registerType({
     type: 'alert',
     attributesToEncrypt: new Set(['apiKey']),
     attributesToExcludeFromAAD: new Set([
@@ -98,9 +114,9 @@ export function init(server: Legacy.Server) {
   const alertTypeRegistry = new AlertTypeRegistry({
     getServices,
     isSecurityEnabled: security.isEnabled,
-    taskManager: taskManager!,
-    executeAction: server.plugins.actions!.execute,
-    encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects!,
+    taskManager,
+    executeAction: server.plugins.actions.execute,
+    encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects,
     getBasePath,
     spaceIdToNamespace,
   });
@@ -124,7 +140,7 @@ export function init(server: Legacy.Server) {
       log: server.log.bind(server),
       savedObjectsClient,
       alertTypeRegistry,
-      taskManager: taskManager!,
+      taskManager,
       spaceId: spaces.isEnabled ? spaces.getSpaceId(request) : undefined,
       async getUserName(): Promise<string | null> {
         if (!security.isEnabled) {

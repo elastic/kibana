@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Hapi from 'hapi';
 import { Legacy } from 'kibana';
+import { TaskManager } from '../../task_manager';
 import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
 import { createExecuteFunction } from './create_execute_function';
 import { ActionsPlugin, Services } from './types';
+import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
 import {
   createRoute,
   deleteRoute,
@@ -22,9 +25,20 @@ import { registerBuiltInActionTypes } from './builtin_action_types';
 import { SpacesPlugin } from '../../spaces';
 import { createOptionalPlugin } from '../../../server/lib/optional_plugin';
 
-export function init(server: Legacy.Server) {
+// Extend PluginProperties to indicate which plugins are guaranteed to exist
+// due to being marked as dependencies
+interface Plugins extends Hapi.PluginProperties {
+  task_manager: TaskManager;
+  encrypted_saved_objects: EncryptedSavedObjectsPlugin;
+}
+
+interface Server extends Legacy.Server {
+  plugins: Plugins;
+}
+
+export function init(server: Server) {
   const config = server.config();
-  const taskManager = server.plugins.task_manager!;
+  const taskManager = server.plugins.task_manager;
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
   const spaces = createOptionalPlugin<SpacesPlugin>(
     config,
@@ -61,12 +75,12 @@ export function init(server: Legacy.Server) {
   // - `secrets` properties will be encrypted
   // - `config` will be included in AAD
   // - everything else excluded from AAD
-  server.plugins.encrypted_saved_objects!.registerType({
+  server.plugins.encrypted_saved_objects.registerType({
     type: 'action',
     attributesToEncrypt: new Set(['secrets']),
     attributesToExcludeFromAAD: new Set(['description']),
   });
-  server.plugins.encrypted_saved_objects!.registerType({
+  server.plugins.encrypted_saved_objects.registerType({
     type: 'action_task_params',
     attributesToEncrypt: new Set(['apiKey']),
   });
@@ -89,8 +103,8 @@ export function init(server: Legacy.Server) {
 
   const actionTypeRegistry = new ActionTypeRegistry({
     getServices,
-    taskManager: taskManager!,
-    encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects!,
+    taskManager,
+    encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects,
     getBasePath,
     spaceIdToNamespace,
     isSecurityEnabled: config.get('xpack.security.enabled'),
@@ -112,7 +126,7 @@ export function init(server: Legacy.Server) {
   });
 
   const executeFn = createExecuteFunction({
-    taskManager: taskManager!,
+    taskManager,
     getScopedSavedObjectsClient: server.savedObjects.getScopedSavedObjectsClient,
     getBasePath,
     isSecurityEnabled: config.get('xpack.security.enabled'),
