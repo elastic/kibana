@@ -19,16 +19,16 @@ export const getJobsToInstall = (templates: ConfigTemplate[]): string[] =>
  *
  * @param templates ConfigTemplates as provided by ML Team
  * @param installedJobIds list of installed JobIds
- * @param indexPattern Comma separated string of the user's currently configured IndexPattern
+ * @param indexPatterns list of the user's currently configured IndexPatterns
  */
 export const getConfigTemplatesToInstall = (
   templates: ConfigTemplate[],
   installedJobIds: string[],
-  indexPattern: string
+  indexPatterns: string[]
 ): ConfigTemplate[] =>
   templates
     .filter(ct => !ct.jobs.every(ctJobId => installedJobIds.includes(ctJobId)))
-    .filter(ct => indexPattern.indexOf(ct.defaultIndexPattern) >= 0);
+    .filter(ct => indexPatterns.includes(ct.defaultIndexPattern));
 
 /**
  * Returns a filtered array of Jobs that based on filterGroup selection (Elastic vs Custom Jobs) and any user provided filterQuery

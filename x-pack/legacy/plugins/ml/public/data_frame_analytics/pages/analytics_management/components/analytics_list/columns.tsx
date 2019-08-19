@@ -59,7 +59,8 @@ export const getTaskStateBadge = (
 
 export const getColumns = (
   expandedRowItemIds: DataFrameAnalyticsId[],
-  setExpandedRowItemIds: React.Dispatch<React.SetStateAction<DataFrameAnalyticsId[]>>
+  setExpandedRowItemIds: React.Dispatch<React.SetStateAction<DataFrameAnalyticsId[]>>,
+  isManagementTable: boolean = false
 ) => {
   const actions = getActions();
 
@@ -75,8 +76,8 @@ export const getColumns = (
     // spread to a new array otherwise the component wouldn't re-render
     setExpandedRowItemIds([...expandedRowItemIds]);
   }
-
-  return [
+  // update possible column types to something like (FieldDataColumn | ComputedColumn | ActionsColumn)[] when they have been added to EUI
+  const columns: any[] = [
     {
       align: RIGHT_ALIGNMENT,
       width: '40px',
@@ -205,12 +206,17 @@ export const getColumns = (
       },
       width: '100px',
     },
-    {
+  ];
+
+  if (isManagementTable === false) {
+    columns.push({
       name: i18n.translate('xpack.ml.dataframe.analyticsList.tableActionLabel', {
         defaultMessage: 'Actions',
       }),
       actions,
       width: '200px',
-    },
-  ];
+    });
+  }
+
+  return columns;
 };

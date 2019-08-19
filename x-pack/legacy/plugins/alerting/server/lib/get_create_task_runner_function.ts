@@ -18,7 +18,7 @@ import { SpacesPlugin } from '../../../spaces';
 interface CreateTaskRunnerFunctionOptions {
   getServices: (basePath: string) => Services;
   alertType: AlertType;
-  fireAction: ActionsPlugin['fire'];
+  executeAction: ActionsPlugin['execute'];
   internalSavedObjectsRepository: SavedObjectsClientContract;
   spaceIdToNamespace: SpacesPlugin['spaceIdToNamespace'];
   getBasePath: SpacesPlugin['getBasePath'];
@@ -31,7 +31,7 @@ interface TaskRunnerOptions {
 export function getCreateTaskRunnerFunction({
   getServices,
   alertType,
-  fireAction,
+  executeAction,
   internalSavedObjectsRepository,
   spaceIdToNamespace,
   getBasePath,
@@ -54,7 +54,7 @@ export function getCreateTaskRunnerFunction({
 
         const fireHandler = createFireHandler({
           alertSavedObject,
-          fireAction,
+          executeAction,
           spaceId: taskInstance.params.spaceId,
         });
         const alertInstances: Record<string, AlertInstance> = {};

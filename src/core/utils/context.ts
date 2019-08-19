@@ -56,8 +56,6 @@ export type IContextHandler<TContext extends {}, TReturn, THandlerParameters ext
   ...rest: THandlerParameters
 ) => TReturn;
 
-type Promisify<T> = T extends Promise<infer U> ? Promise<U> : Promise<T>;
-
 /**
  * An object that handles registration of context providers and configuring handlers with context.
  *
@@ -163,7 +161,9 @@ export interface IContextContainer<
   createHandler(
     pluginOpaqueId: PluginOpaqueId,
     handler: IContextHandler<TContext, THandlerReturn, THandlerParameters>
-  ): (...rest: THandlerParameters) => Promisify<THandlerReturn>;
+  ): (
+    ...rest: THandlerParameters
+  ) => THandlerReturn extends Promise<any> ? THandlerReturn : Promise<THandlerReturn>;
 }
 
 /** @internal */
@@ -228,7 +228,9 @@ export class ContextContainer<
     return (async (...args: THandlerParameters) => {
       const context = await this.buildContext(source, ...args);
       return handler(context, ...args);
-    }) as (...args: THandlerParameters) => Promisify<THandlerReturn>;
+    }) as (
+      ...args: THandlerParameters
+    ) => THandlerReturn extends Promise<any> ? THandlerReturn : Promise<THandlerReturn>;
   };
 
   private async buildContext(

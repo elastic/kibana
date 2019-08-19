@@ -20,13 +20,11 @@
 import { Moment } from 'moment';
 import { Observable } from 'rxjs';
 import { TimeRange } from './time_history';
+import { RefreshInterval } from '../../../../plugins/data/public';
 
 // NOTE: These types are somewhat guessed, they may be incorrect.
 
-export interface RefreshInterval {
-  pause: boolean;
-  value: number;
-}
+export { RefreshInterval };
 
 export interface Timefilter {
   time: TimeRange;

@@ -43,7 +43,7 @@ import moment from 'moment';
 import { Subscription } from 'rxjs';
 import { StaticIndexPattern, Query } from '../../../data/public';
 
-import { ViewMode } from '../../../embeddable_api/public';
+import { ViewMode } from '../../../embeddable_api/public/np_ready/public';
 import { SavedObjectDashboard } from './saved_dashboard/saved_dashboard';
 import { DashboardAppState, SavedDashboardPanel, ConfirmModalFn } from './types';
 
