@@ -117,4 +117,32 @@ Global options:
       });
     });
   });
+  describe(`and then running 'yarn es --help'`, () => {
+    const helpMsg = `
+usage: es <command> [<args>]
+
+Assists with running Elasticsearch for Kibana development
+
+Available commands:
+
+  snapshot - Downloads and run from a nightly snapshot
+  source - Build and run from source
+  archive - Install and run from an Elasticsearch tar
+  build_snapshots - Build and collect ES snapshots
+
+Global options:
+
+  --help
+`;
+    it(`should print out the es help msg`, done => {
+      const outData = [];
+      const kbnHelp = spawn('yarn', ['es', '--help'], { cwd: generatedPath });
+      kbnHelp.stdout.on('data', collect(outData));
+      kbnHelp.on('close', () => {
+        // eslint-disable-next-line no-undef
+        expect(outData.join('\n')).toContain(helpMsg);
+        done();
+      });
+    });
+  });
 });
