@@ -262,7 +262,7 @@ export function resolveCopyToSpaceConflictsSuite(
     }
   };
 
-  const makeCopyToSpaceTest = (describeFn: DescribeFn) => (
+  const makeResolveCopyToSpaceConflictsTest = (describeFn: DescribeFn) => (
     description: string,
     { user = {}, spaceId = DEFAULT_SPACE_ID, tests }: ResolveCopyToSpaceTestDefinition
   ) => {
