@@ -21,24 +21,10 @@ export interface ResolveConflictsOptions {
   };
 }
 
-export interface SpaceNotFoundError {
-  type: 'space_not_found';
-  spaceId: string;
-}
-
-export interface UnauthorizedToManageSavedObjectsError {
-  type: 'unauthorized_to_manage_saved_objects';
-  spaceId: string;
-}
-
-export interface CopyToSpaceError {
-  error: SpaceNotFoundError | UnauthorizedToManageSavedObjectsError;
-}
-
 export interface CopyResponse {
   [spaceId: string]: {
     success: boolean;
     successCount: number;
-    errors?: Array<SavedObjectsImportError | CopyToSpaceError | Payload>;
+    errors?: Array<SavedObjectsImportError | Payload>;
   };
 }
