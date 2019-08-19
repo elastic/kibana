@@ -23,7 +23,6 @@ import { DataAdapter } from '../../../adapters/data';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { UiSettingsClientContract } from '../../../../../../core/public';
 
-jest.mock('ui/new_platform');
 jest.mock('../lib/export_csv', () => ({
   exportAsCsv: jest.fn(),
 }));

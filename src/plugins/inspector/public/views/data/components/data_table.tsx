@@ -58,6 +58,8 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
     isFormatted: PropTypes.bool,
   };
 
+  csvSeparator = this.props.uiSettings.get('csv:separator', ',');
+  quoteValues = this.props.uiSettings.get('csv:quoteValues', true);
   state = {} as DataTableFormatState;
 
   static renderCell(dataColumn: any, value: any, isFormatted: boolean = false) {
@@ -152,7 +154,8 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
             <DataDownloadOptions
               isFormatted={this.props.isFormatted}
               title={this.props.exportTitle}
-              uiSettings={this.props.uiSettings}
+              csvSeparator={this.csvSeparator}
+              quoteValues={this.quoteValues}
               columns={columns}
               rows={rows}
             />

@@ -23,7 +23,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { DataViewColumn, DataViewRow } from '../types';
-import { UiSettingsClientContract } from '../../../../../../core/public';
 
 import { exportAsCsv } from '../lib/export_csv';
 
@@ -33,27 +32,26 @@ interface DataDownloadOptionsState {
 
 interface DataDownloadOptionsProps {
   title: string;
-  isFormatted?: boolean;
   columns: DataViewColumn[];
   rows: DataViewRow[];
-  uiSettings: UiSettingsClientContract;
+  csvSeparator: string;
+  quoteValues: boolean;
+  isFormatted?: boolean;
 }
 
 class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownloadOptionsState> {
   static propTypes = {
     title: PropTypes.string.isRequired,
+    csvSeparator: PropTypes.string.isRequired,
+    quoteValues: PropTypes.bool.isRequired,
     isFormatted: PropTypes.bool,
     columns: PropTypes.array,
     rows: PropTypes.array,
-    uiSettings: PropTypes.object.isRequired,
   };
 
   state = {
     isPopoverOpen: false,
   };
-
-  csvSeparator = this.props.uiSettings.get('csv:separator', ',');
-  quoteValues = this.props.uiSettings.get('csv:quoteValues', true);
 
   onTogglePopover = () => {
     this.setState(state => ({
@@ -72,8 +70,8 @@ class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownlo
       filename: `${this.props.title}.csv`,
       columns: this.props.columns,
       rows: this.props.rows,
-      csvSeparator: this.csvSeparator,
-      quoteValues: this.quoteValues,
+      csvSeparator: this.props.csvSeparator,
+      quoteValues: this.props.quoteValues,
       ...customParams,
     });
   };
