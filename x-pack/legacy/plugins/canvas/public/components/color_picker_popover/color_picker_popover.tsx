@@ -18,7 +18,7 @@ export interface Props extends ColorPickerProps {
 
 export const ColorPickerPopover: FunctionComponent<Props> = (props: Props) => {
   const { value, anchorPosition, ...rest } = props;
-  const button = (handleClick: () => void) => (
+  const button = (handleClick: React.MouseEventHandler<HTMLButtonElement>) => (
     <EuiLink style={{ fontSize: 0 }} onClick={handleClick}>
       <ColorDot value={value} />
     </EuiLink>
