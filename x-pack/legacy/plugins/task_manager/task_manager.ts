@@ -99,6 +99,9 @@ export class TaskManager {
     this.poller = poller;
   }
 
+  /**
+   * Starts up the task manager and starts picking up tasks.
+   */
   public start() {
     this.isInitialized = true;
     const startPoller = async () => {
@@ -117,6 +120,9 @@ export class TaskManager {
     startPoller();
   }
 
+  /**
+   * Stops the task manager and cancels running tasks.
+   */
   public stop() {
     this.pool.cancelRunningTasks();
   }

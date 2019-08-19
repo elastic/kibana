@@ -15,7 +15,7 @@ export interface PluginSetupContract {
   registerTaskDefinitions: TaskManager['registerTaskDefinitions'];
 }
 
-interface LegacyDeps {
+export interface LegacyDeps {
   config: any;
   serializer: any;
   elasticsearch: any;
