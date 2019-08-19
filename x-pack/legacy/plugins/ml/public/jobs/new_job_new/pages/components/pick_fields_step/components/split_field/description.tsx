@@ -48,7 +48,7 @@ export const Description: FC<Props> = memo(({ children, jobType }) => {
         description={
           <FormattedMessage
             id="xpack.ml.newJob.wizard.pickFieldsStep.populationField.description"
-            defaultMessage="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam."
+            defaultMessage="Select a field to partition data into populations for analysis."
           />
         }
       >
