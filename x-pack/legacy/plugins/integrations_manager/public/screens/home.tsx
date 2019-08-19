@@ -15,11 +15,12 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import styled from 'styled-components';
 import { PLUGIN } from '../../common/constants';
 import { IntegrationsGroupedByStatus } from '../../common/types';
 import { IntegrationsGridByStatus } from '../components/integration_list_grid';
 import { getIntegrationsGroupedByStatus } from '../data';
-import { useBreadcrumbs, useLinks } from '../hooks';
+import { useBreadcrumbs, useCore, useLinks } from '../hooks';
 
 export function Home() {
   const { toListView } = useLinks();
@@ -42,13 +43,19 @@ type LayoutProps = {
 } & EuiPageWidthProps;
 function HomeLayout(props: LayoutProps) {
   const { map, restrictWidth } = props;
+  const { theme } = useCore();
+  const FullWidthHeader = styled(EuiPage)`
+    border-bottom: ${theme.eui.euiBorderThin};
+    padding-bottom: ${theme.eui.paddingSizes.s};
+  `;
+
   return (
     <Fragment>
-      <EuiPage style={{ borderBottom: '1px solid #D3DAE6', paddingBottom: '7px' }}>
+      <FullWidthHeader>
         <EuiPageBody restrictWidth={restrictWidth}>
           <Header />
         </EuiPageBody>
-      </EuiPage>
+      </FullWidthHeader>
       <EuiPage>
         <EuiPageBody restrictWidth={restrictWidth}>
           <IntegrationsGridByStatus map={map} />
@@ -72,19 +79,18 @@ function Header() {
 }
 
 function HeroCopy() {
+  const { theme } = useCore();
+  const Subtitle = styled(EuiText)`
+    color: ${theme.eui.euiColorDarkShade};
+  `;
+
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
         <EuiTitle size="l">
           <h1>Add Your Data</h1>
         </EuiTitle>
-        <EuiText
-          style={{
-            color: '#69707D', // euiColorDarkShade
-          }}
-        >
-          Some creative copy about integrations goes here.
-        </EuiText>
+        <Subtitle>Some creative copy about integrations goes here.</Subtitle>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -92,12 +98,12 @@ function HeroCopy() {
 
 function HeroImage() {
   const { toAssets } = useLinks();
+
   return (
     <EuiFlexGroup justifyContent="flexEnd">
       <EuiImage
         alt="Illustration of computer"
         url={toAssets('illustration_kibana_getting_started@2x.png')}
-        style={{ width: '475px', height: '273px' }}
       />
     </EuiFlexGroup>
   );

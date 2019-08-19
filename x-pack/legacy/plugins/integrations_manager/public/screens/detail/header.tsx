@@ -14,26 +14,36 @@ import {
   EuiTitle,
   IconType,
 } from '@elastic/eui';
+import styled from 'styled-components';
 import { PLUGIN } from '../../../common/constants';
 import { IntegrationInfo } from '../../../common/types';
 import { VersionBadge } from '../../components/version_badge';
 import { IconPanel } from '../../components/icon_panel';
-import { useBreadcrumbs, useLinks } from '../../hooks';
+import { useBreadcrumbs, useCore, useLinks } from '../../hooks';
 import { CenterColumn, LeftColumn, RightColumn } from './layout';
 
 type HeaderProps = IntegrationInfo & { iconType?: IconType };
 
 export function Header(props: HeaderProps) {
   const { iconType, title, version } = props;
+  const { theme } = useCore();
   const { toListView } = useLinks();
   useBreadcrumbs([{ text: PLUGIN.TITLE, href: toListView() }, { text: title }]);
 
+  const FullWidthNavRow = styled(EuiPage)`
+    /* no left padding so link is against column left edge  */
+    padding-left: 0;
+  `;
+
+  const Text = styled.span`
+    margin-right: ${theme.eui.spacerSizes.xl};
+  `;
+
   return (
     <Fragment>
-      {/* no left padding so link is against column left edge  */}
-      <EuiPage style={{ paddingLeft: '0' }}>
+      <FullWidthNavRow>
         <NavButtonBack />
-      </EuiPage>
+      </FullWidthNavRow>
       <EuiFlexGroup>
         {iconType ? (
           <LeftColumn>
@@ -43,7 +53,7 @@ export function Header(props: HeaderProps) {
         <CenterColumn>
           <EuiTitle size="l">
             <h1>
-              <span style={{ marginRight: '1rem' }}>{title}</span>
+              <Text>{title}</Text>
               <VersionBadge version={version} />
             </h1>
           </EuiTitle>
@@ -62,16 +72,17 @@ export function Header(props: HeaderProps) {
 
 function NavButtonBack() {
   const { toListView } = useLinks();
+  const { theme } = useCore();
+  const ButtonEmpty = styled(EuiButtonEmpty).attrs<typeof EuiButtonEmpty>({
+    href: toListView(),
+  })`
+    margin-right: ${theme.eui.spacerSizes.xl};
+  `;
+
   return (
-    <EuiButtonEmpty
-      href={toListView()}
-      iconType="arrowLeft"
-      size="xs"
-      flush="left"
-      style={{ marginRight: '32px' }}
-    >
+    <ButtonEmpty iconType="arrowLeft" size="xs" flush="left">
       Browse Integrations
-    </EuiButtonEmpty>
+    </ButtonEmpty>
   );
 }
 

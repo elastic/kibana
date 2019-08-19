@@ -17,18 +17,26 @@ import {
   EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';
+import styled from 'styled-components';
 import { entries } from '../../common/type_utils';
 import { AssetsGroupedByServiceByType } from '../../common/types';
 import { AssetIcons, AssetTitleMap, ServiceIcons, ServiceTitleMap } from '../constants';
+import { useCore } from '../hooks/use_core';
 
 export function AssetAccordion({ assets }: { assets: AssetsGroupedByServiceByType }) {
+  const { theme } = useCore();
+
+  const FlexGroup = styled(EuiFlexGroup)`
+    margin: ${theme.eui.ruleMargins.marginSmall};
+  `;
+
   return (
     <Fragment>
       {entries(assets).map(([service, typeToParts], assetIndex) => {
         return (
           <Fragment key={service}>
             <EuiPanel grow={false} paddingSize="none">
-              <EuiFlexGroup gutterSize="s" alignItems="center" style={{ margin: '12px ' }}>
+              <FlexGroup gutterSize="s" alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiIcon type={ServiceIcons[service]} />
                 </EuiFlexItem>
@@ -40,15 +48,18 @@ export function AssetAccordion({ assets }: { assets: AssetsGroupedByServiceByTyp
                     </EuiText>
                   </EuiTitle>
                 </EuiFlexItem>
-              </EuiFlexGroup>
+              </FlexGroup>
               <EuiHorizontalRule margin="none" />
 
               {entries(typeToParts).map(([type, parts], typeIndex, typeEntries) => {
                 const iconType = AssetIcons[type];
+                // @types/styled-components@3 does yet support `defaultProps`, which EuiAccordion uses
+                // Ref: https://github.com/DefinitelyTyped/DefinitelyTyped/pull/31903
+                // we're a major version behind; nearly 2
                 return (
                   <Fragment key={type}>
                     <EuiAccordion
-                      style={{ margin: '12px ' }}
+                      style={{ margin: theme.eui.euiFormControlPadding }}
                       id={type}
                       buttonContent={
                         <EuiFlexGroup gutterSize="s" alignItems="center">

@@ -6,9 +6,11 @@
 
 import React, { Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiTitle } from '@elastic/eui';
+import styled from 'styled-components';
 import { entries } from '../../common/type_utils';
 import { RequirementsByServiceName } from '../../common/types';
 import { ServiceTitleMap } from '../constants';
+import { useCore } from '../hooks/use_core';
 import { VersionBadge } from './version_badge';
 
 export interface RequirementsProps {
@@ -17,10 +19,16 @@ export interface RequirementsProps {
 
 export function Requirements(props: RequirementsProps) {
   const { requirements } = props;
+  const { theme } = useCore();
+
+  const Text = styled.span`
+    padding-bottom: ${theme.eui.paddingSizes.m};
+  `;
+
   return (
     <Fragment>
       <EuiTitle size="xs">
-        <span style={{ paddingBottom: '16px' }}>Compatibility</span>
+        <Text>Compatibility</Text>
       </EuiTitle>
       {entries(requirements).map(([service, requirement]) => (
         <EuiFlexGroup key={service}>

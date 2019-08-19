@@ -15,21 +15,33 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
+import styled from 'styled-components';
 import { entries } from '../../common/type_utils';
 import { AssetIcons, AssetTitleMap, ServiceIcons, ServiceTitleMap } from '../constants';
 import { AssetsGroupedByServiceByType } from '../../common/types';
+import { useCore } from '../hooks/use_core';
 
 export function AssetsFacetGroup({ assets }: { assets: AssetsGroupedByServiceByType }) {
+  const { theme } = useCore();
+  const FirstHeaderRow = styled(EuiFlexGroup)`
+    padding: 0 0 ${theme.eui.paddingSizes.m} 0;
+  `;
+
+  const HeaderRow = styled(EuiFlexGroup)`
+    padding: ${theme.eui.paddingSizes.m} 0;
+  `;
+
+  const FacetGroup = styled(EuiFacetGroup)`
+    flex-grow: 0;
+  `;
+
   return (
     <Fragment>
       {entries(assets).map(([service, typeToParts], index) => {
+        const Header = index === 0 ? FirstHeaderRow : HeaderRow;
         return (
           <Fragment key={service}>
-            <EuiFlexGroup
-              gutterSize="s"
-              alignItems="center"
-              style={{ padding: index === 0 ? '0 0 1em 0' : '1em 0' }}
-            >
+            <Header gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiIcon type={ServiceIcons[service]} />
               </EuiFlexItem>
@@ -41,26 +53,30 @@ export function AssetsFacetGroup({ assets }: { assets: AssetsGroupedByServiceByT
                   </EuiText>
                 </EuiTitle>
               </EuiFlexItem>
-            </EuiFlexGroup>
+            </Header>
 
-            <EuiFacetGroup style={{ flexGrow: 0 }}>
+            <FacetGroup>
               {entries(typeToParts).map(([type, parts]) => {
                 const iconType = AssetIcons[type];
                 const iconNode = iconType ? <EuiIcon type={iconType} size="s" /> : '';
+                const FacetButton = styled(EuiFacetButton)`
+                  padding: '${theme.eui.paddingSizes.xs} 0';
+                  height: 'unset';
+                `;
+
                 return (
-                  <EuiFacetButton
+                  <FacetButton
                     key={type}
-                    style={{ padding: '4px 0', height: 'unset' }}
                     quantity={parts.length}
                     icon={iconNode}
                     // https://github.com/elastic/eui/issues/2216
                     buttonRef={() => {}}
                   >
                     <EuiTextColor color="subdued">{AssetTitleMap[type]}</EuiTextColor>
-                  </EuiFacetButton>
+                  </FacetButton>
                 );
               })}
-            </EuiFacetGroup>
+            </FacetGroup>
           </Fragment>
         );
       })}

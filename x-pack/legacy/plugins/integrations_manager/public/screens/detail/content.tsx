@@ -5,29 +5,37 @@
  */
 
 import React from 'react';
-import classNames from 'classnames';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel, EuiTitle } from '@elastic/eui';
-import { IntegrationInfo } from '../../../../common/types';
-import { AssetAccordion } from '../../../components/asset_accordion';
-import { AssetsFacetGroup } from '../../../components/assets_facet_group';
-import { Requirements } from '../../../components/requirements';
-import { CenterColumn, LeftColumn, RightColumn } from '.././layout';
-import { OverviewPanel } from '.././overview_panel';
-import { SideNavLinks } from '../side_nav_links';
-import { DEFAULT_PANEL, DetailProps } from '../index';
+import styled from 'styled-components';
+import { SideNavLinks } from './side_nav_links';
+import { IntegrationInfo } from '../../../common/types';
+import { AssetAccordion } from '../../components/asset_accordion';
+import { AssetsFacetGroup } from '../../components/assets_facet_group';
+import { Requirements } from '../../components/requirements';
+import { CenterColumn, LeftColumn, RightColumn } from './layout';
+import { OverviewPanel } from './overview_panel';
+import { useCore } from '../../hooks/use_core';
+import { DEFAULT_PANEL, DetailProps } from '.';
 
 type ContentProps = IntegrationInfo & Pick<DetailProps, 'panel'> & { hasIconPanel: boolean };
 export function Content(props: ContentProps) {
   const { assets, hasIconPanel, name, panel, requirement, version } = props;
-  const leftColRoot = 'content__leftColumn';
-  const leftColClasses = classNames(leftColRoot, hasIconPanel ? `${leftColRoot}-hasIconPanel` : '');
+  const { theme } = useCore();
   const isOverviewPanel = panel === 'overview';
+  const SideNavColumn = hasIconPanel
+    ? styled(LeftColumn)`
+        /* 🤢🤷 https://www.styled-components.com/docs/faqs#how-can-i-override-styles-with-higher-specificity */
+        &&& {
+          margin-top: ${theme.eui.euiKeyPadMenuSize};
+        }
+      `
+    : LeftColumn;
 
   return (
     <EuiFlexGroup>
-      <LeftColumn className={leftColClasses}>
+      <SideNavColumn>
         <SideNavLinks name={name} version={version} active={panel || DEFAULT_PANEL} />
-      </LeftColumn>
+      </SideNavColumn>
       <CenterColumn>
         <ContentPanel {...props} />
       </CenterColumn>

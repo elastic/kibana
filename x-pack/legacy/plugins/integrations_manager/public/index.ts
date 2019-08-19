@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import ReactDOM from 'react-dom';
+import euiLight from '@elastic/eui/dist/eui_theme_light.json';
 import 'ui/autoload/all';
 import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
@@ -32,6 +33,7 @@ async function main(): Promise<void> {
   const { root }: PluginStart = plugin.start({
     ...npStart.core,
     routes,
+    theme: { eui: euiLight },
   });
   const container = getRootEl();
 

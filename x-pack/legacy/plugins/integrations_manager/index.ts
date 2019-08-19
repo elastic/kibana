@@ -57,7 +57,6 @@ const pluginOptions: LegacyPluginOptions = {
       euiIconType: PLUGIN.ICON,
       order: 8100,
     },
-    styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     // This defines what shows up in the registry found at /app/kibana#/home and /app/kibana#/home/feature_directory
     home: [`${ROOT}/register_feature`],
     mappings,

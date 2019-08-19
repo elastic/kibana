@@ -9,7 +9,6 @@ import { EuiFlexItem } from '@elastic/eui';
 
 interface ColumnProps {
   children?: ReactNode;
-  style?: object;
   className?: string;
 }
 

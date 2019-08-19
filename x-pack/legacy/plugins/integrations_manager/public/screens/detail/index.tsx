@@ -5,9 +5,11 @@
  */
 import React, { Fragment, useState, useEffect } from 'react';
 import { EuiPage, EuiPageBody, EuiPageWidthProps, ICON_TYPES } from '@elastic/eui';
+import styled from 'styled-components';
 import { IntegrationInfo } from '../../../common/types';
 import { DetailViewPanelName } from '../../';
 import { getIntegrationInfoByKey } from '../../data';
+import { useCore } from '../../hooks/use_core';
 import { Header } from './header';
 import { Content } from './content';
 
@@ -36,34 +38,44 @@ export function Detail({ pkgkey, panel = DEFAULT_PANEL }: DetailProps) {
 type LayoutProps = IntegrationInfo & Pick<DetailProps, 'panel'> & EuiPageWidthProps;
 export function DetailLayout(props: LayoutProps) {
   const { name, restrictWidth, panel } = props;
+  const { theme } = useCore();
   const iconType = ICON_TYPES.find(key => key.toLowerCase() === `logo${name}`);
-  const headerStyles = { borderBottom: '1px solid #D3DAE6', paddingBottom: '32px' };
-  const contentStyles = panel === 'overview' ? overviewContentStyles() : {};
+
+  const FullWidthHeader = styled(EuiPage)`
+    border-bottom: ${theme.eui.euiBorderThin}
+    padding-bottom: ${theme.eui.paddingSizes.xl};
+  `;
+
+  const FullWidthRemainingHeight = styled(EuiPage)`
+    background-color: white;
+    height: calc(100vh - ${topBarsHeight()}px);
+  `;
+
+  const FullWidthContent = panel === 'overview' ? FullWidthRemainingHeight : EuiPage;
 
   return (
     <Fragment>
-      <EuiPage style={headerStyles}>
+      <FullWidthHeader>
         <EuiPageBody restrictWidth={restrictWidth}>
           <Header iconType={iconType} {...props} />
         </EuiPageBody>
-      </EuiPage>
-      <EuiPage style={contentStyles}>
+      </FullWidthHeader>
+      <FullWidthContent>
         <EuiPageBody restrictWidth={restrictWidth}>
           <Content hasIconPanel={!!iconType} {...props} />
         </EuiPageBody>
-      </EuiPage>
+      </FullWidthContent>
     </Fragment>
   );
 }
 
-function overviewContentStyles() {
-  const headerGlobalNav = 49;
+function topBarsHeight() {
+  const { theme } = useCore();
+  const globalNav = parseInt(theme.eui.euiHeaderChildSize, 10);
   const pageTopNav = /* line-height */ 24 + /* padding-top */ 16 + /* padding-bottom */ 16;
-  const header = /* line-height */ 48 + /* padding-top */ 16 + /* padding-bottom */ 32;
-  const topBarsTotal = headerGlobalNav + pageTopNav + header;
+  const title = /* line-height */ 48;
+  const header = /* padding-top */ 16 + pageTopNav + title + /* padding-bottom */ 16;
+  const topBarsTotal = globalNav + header;
 
-  return {
-    backgroundColor: 'white',
-    height: `calc(100vh - ${topBarsTotal}px)`,
-  };
+  return topBarsTotal;
 }
