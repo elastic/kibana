@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }) {
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
   const testSubjects = getService('testSubjects');
 
-  describe('saved queries as saved objects', function describeIndexTests() {
+  describe('saved queries saved objects', function describeIndexTests() {
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
 
@@ -51,6 +51,16 @@ export default function ({ getService, getPageObjects }) {
 
     describe('saved query management component functionality', function () {
       this.tags(['skipFirefox']);
+      before(async function () {
+        // set up a query with filters and a time filter
+        log.debug('set up a query with filters to save');
+        await queryBar.setQuery('response:200');
+        await filterBar.addFilter('extension.raw', 'is one of', 'jpg');
+        const fromTime = '2015-09-20 08:00:00.000';
+        const toTime = '2015-09-21 08:00:00.000';
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      });
+
       it('should show the saved query management component when there are no saved queries', async () => {
         await savedQueryManagementComponent.openSavedQueryManagementComponent();
         const descriptionText = await testSubjects.getVisibleText('saved-query-management-popover');
@@ -59,67 +69,44 @@ export default function ({ getService, getPageObjects }) {
           .eql('SAVED QUERIES\nThere are no saved queries. Save query text and filters that you want to use again.\nSave');
       });
       it('should allow a query to be saved via the saved objects management component', async () => {
-        await queryBar.setQuery('response:200');
-        await savedQueryManagementComponent.saveNewQuery('OkResponse', '200 responses', false, true);
+        await savedQueryManagementComponent.saveNewQuery('OkResponse', '200 responses for .jpg over 24 hours', true, true);
         await savedQueryManagementComponent.savedQueryExistOrFail('OkResponse');
       });
-      it('allow saving a currently loaded saved query as a new query via the saved query management component ', async () => {
-        await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
-          'OkResponseCopy',
-          '200 responses copy',
-          true,
+
+      it('reinstates filters when a saved query has filters included', async () => {
+        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
+        await savedQueryManagementComponent.loadSavedQuery('OkResponse');
+        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
+      });
+
+      it('allows saving changes to a currently loaded query via the saved query management component', async () => {
+        await savedQueryManagementComponent.updateCurrentlyLoadedQuery(
+          'OkResponse',
+          '200 responses',
+          false,
           false
         );
+        await savedQueryManagementComponent.savedQueryExistOrFail('OkResponse');
+      });
+
+      it('allows saving the currently loaded query as a new query', async () => {
+        await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery('OkResponseCopy', '200 responses', false, false);
         await savedQueryManagementComponent.savedQueryExistOrFail('OkResponseCopy');
       });
 
-      it('allow saving changes to a currently loaded query via the saved query management component', async () => {
-        await queryBar.setQuery('response:404');
-        await savedQueryManagementComponent.updateCurrentlyLoadedQuery('Not found', false, false);
-        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
-        await savedQueryManagementComponent.loadSavedQuery('OkResponseCopy');
-        const queryString = await queryBar.getQueryString();
-        expect(queryString).to.eql('response:404');
-      });
-
-      it('allows deleting saved queries in the saved query management component ', async () => {
+      it('allows deleting the currently loaded saved query in the saved query management component and clears the query', async () => {
         await savedQueryManagementComponent.deleteSavedQuery('OkResponseCopy');
         await savedQueryManagementComponent.savedQueryMissingOrFail('OkResponseCopy');
+        expect(await queryBar.getQueryString()).to.eql('');
+      });
+
+      it('does not allow saving a query with a non-unique name', async () => {
+        await savedQueryManagementComponent.saveNewQueryWithDuplicateName('OkResponse');
       });
 
       it('allows clearing the currently loaded saved query', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
-      });
-
-      it('saves a filter as part of the saved query when include filters is selected', async () => {
-        await queryBar.setQuery('response:404');
-        await filterBar.addFilter('extension.raw', 'is one of', 'jpg');
-        await savedQueryManagementComponent.saveNewQuery('NotFoundForJpgs', 'Jpg not found\'s', true, false);
-        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
-        await savedQueryManagementComponent.loadSavedQuery('NotFoundForJpgs');
-        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
-      });
-
-      it('allows saving a query with a date filter', async () => {
-        await savedQueryManagementComponent.loadSavedQuery('OkResponse');
-        await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
-          'OkResponseWithTimeFilter',
-          'timefilter enabled',
-          false,
-          true
-        );
-        await savedQueryManagementComponent.savedQueryExistOrFail('OkResponseWithTimeFilter');
-      });
-
-      it('sets the timefilter when a saved query is loaded that has a timefilter saved', async () => {
-        const fromTime = '2015-09-20 06:31:44.000';
-        const toTime = '2015-09-20 18:31:44.000';
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        await savedQueryManagementComponent.loadSavedQuery('OkResponseWithTimeFilter');
-        const timePickerValues = await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
-        expect(timePickerValues.start).to.not.eql(fromTime);
-        expect(timePickerValues.end).to.not.eql(toTime);
       });
     });
   });

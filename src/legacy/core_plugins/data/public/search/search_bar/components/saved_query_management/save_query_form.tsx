@@ -192,7 +192,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
         <EuiModalBody>{saveQueryForm}</EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={onClose}>
+          <EuiButtonEmpty onClick={onClose} data-test-subj="savedQueryFormCancelButton">
             {i18n.translate('data.search.searchBar.savedQueryFormCancelButtonText', {
               defaultMessage: 'Cancel',
             })}
