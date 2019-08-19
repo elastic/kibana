@@ -15,6 +15,7 @@ import { getEnvironments } from '../lib/settings/agent_configuration/get_environ
 import { deleteConfiguration } from '../lib/settings/agent_configuration/delete_configuration';
 import { createApmAgentConfigurationIndex } from '../lib/settings/agent_configuration/create_agent_config_index';
 import { createRoute } from './create_route';
+import { createRangeType } from '../../common/util/create_range_type';
 
 // get list of configurations
 export const agentConfigurationRoute = createRoute(core => ({
@@ -80,20 +81,9 @@ export const listAgentConfigurationEnvironmentsRoute = createRoute(() => ({
 }));
 
 // create configuration
-const transactionSampleRateRt = new t.Type<number, number, unknown>(
-  'TransactionSampleRate',
-  (u): u is number => typeof u === 'number',
-  (u, c) => {
-    return Number(u) >= 0 && Number(u) <= 1
-      ? t.success(Number(u))
-      : t.failure(u, c);
-  },
-  a => Number(a.toPrecision(3))
-);
-
 const agentPayloadRt = t.type({
   settings: t.type({
-    transaction_sample_rate: transactionSampleRateRt
+    transaction_sample_rate: createRangeType(0, 1, 3)
   }),
   service: t.intersection([
     t.type({ name: t.string }),
