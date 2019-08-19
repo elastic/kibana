@@ -14,15 +14,11 @@ import { listConfigurations } from '../lib/settings/agent_configuration/list_con
 import { getEnvironments } from '../lib/settings/agent_configuration/get_environments';
 import { deleteConfiguration } from '../lib/settings/agent_configuration/delete_configuration';
 import { createApmAgentConfigurationIndex } from '../lib/settings/agent_configuration/create_agent_config_index';
-import { minimalRt } from './default_api_types';
 import { createRoute } from './create_route';
 
 // get list of configurations
 export const agentConfigurationRoute = createRoute(core => ({
   path: '/api/apm/settings/agent-configuration',
-  params: {
-    query: minimalRt
-  },
   handler: async req => {
     await createApmAgentConfigurationIndex(core.http.server);
 
@@ -40,8 +36,7 @@ export const deleteAgentConfigurationRoute = createRoute(() => ({
   params: {
     path: t.type({
       configurationId: t.string
-    }),
-    query: minimalRt
+    })
   },
   handler: async (req, { path }) => {
     const setup = await setupRequest(req);
@@ -57,9 +52,6 @@ export const deleteAgentConfigurationRoute = createRoute(() => ({
 export const listAgentConfigurationServicesRoute = createRoute(() => ({
   method: 'GET',
   path: '/api/apm/settings/agent-configuration/services',
-  params: {
-    query: minimalRt
-  },
   handler: async req => {
     const setup = await setupRequest(req);
     return await getServiceNames({
@@ -75,8 +67,7 @@ export const listAgentConfigurationEnvironmentsRoute = createRoute(() => ({
   params: {
     path: t.type({
       serviceName: t.string
-    }),
-    query: minimalRt
+    })
   },
   handler: async (req, { path }) => {
     const setup = await setupRequest(req);
@@ -114,8 +105,7 @@ export const createAgentConfigurationRoute = createRoute(() => ({
   method: 'POST',
   path: '/api/apm/settings/agent-configuration/new',
   params: {
-    body: agentPayloadRt,
-    query: minimalRt
+    body: agentPayloadRt
   },
   handler: async (req, { body }) => {
     const setup = await setupRequest(req);
@@ -133,8 +123,7 @@ export const updateAgentConfigurationRoute = createRoute(() => ({
     path: t.type({
       configurationId: t.string
     }),
-    body: agentPayloadRt,
-    query: minimalRt
+    body: agentPayloadRt
   },
   handler: async (req, { path, body }) => {
     const setup = await setupRequest(req);
@@ -148,11 +137,9 @@ export const updateAgentConfigurationRoute = createRoute(() => ({
 }));
 
 // Lookup single configuration
-const searchRoute = createRoute(core => ({
-  method: 'POST' as const,
-  path: '',
+export const agentConfigurationSearchRoute = createRoute(core => ({
+  path: '/api/apm/settings/agent-configuration/search',
   params: {
-    query: minimalRt,
     body: t.type({
       service: t.intersection([
         t.type({ name: t.string }),
@@ -178,15 +165,4 @@ const searchRoute = createRoute(core => ({
 
     return config;
   }
-}));
-
-export const agentConfigurationSearchRoute = createRoute(core => ({
-  ...searchRoute(core),
-  path: '/api/apm/settings/agent-configuration/search'
-}));
-
-// backward compatible api route for apm-server
-export const legacyAgentConfigurationSearchRoute = createRoute(core => ({
-  ...searchRoute(core),
-  path: '/api/apm/settings/cm/search'
 }));

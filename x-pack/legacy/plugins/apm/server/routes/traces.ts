@@ -9,12 +9,12 @@ import { setupRequest } from '../lib/helpers/setup_request';
 import { getTrace } from '../lib/traces/get_trace';
 import { getTransactionGroupList } from '../lib/transaction_groups';
 import { createRoute } from './create_route';
-import { rangeRt, uiQueryRt } from './default_api_types';
+import { rangeRt, uiFiltersRt } from './default_api_types';
 
 export const tracesRoute = createRoute(() => ({
   path: '/api/apm/traces',
   params: {
-    query: uiQueryRt
+    query: t.intersection([rangeRt, uiFiltersRt])
   },
   handler: async req => {
     const setup = await setupRequest(req);

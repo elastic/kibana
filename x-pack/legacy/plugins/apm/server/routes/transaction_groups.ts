@@ -11,7 +11,7 @@ import { getTransactionDistribution } from '../lib/transactions/distribution';
 import { getTransactionBreakdown } from '../lib/transactions/breakdown';
 import { getTransactionGroupList } from '../lib/transaction_groups';
 import { createRoute } from './create_route';
-import { uiQueryRt } from './default_api_types';
+import { uiFiltersRt, rangeRt } from './default_api_types';
 
 export const transactionGroupsRoute = createRoute(() => ({
   path: '/api/apm/services/{serviceName}/transaction_groups',
@@ -23,7 +23,8 @@ export const transactionGroupsRoute = createRoute(() => ({
       t.type({
         transactionType: t.string
       }),
-      uiQueryRt
+      uiFiltersRt,
+      rangeRt
     ])
   },
   handler: async (req, { path, query }) => {
@@ -53,7 +54,8 @@ export const transactionGroupsChartsRoute = createRoute(() => ({
         transactionType: t.string,
         transactionName: t.string
       }),
-      uiQueryRt
+      uiFiltersRt,
+      rangeRt
     ])
   },
   handler: async (req, { path, query }) => {
@@ -85,7 +87,8 @@ export const transactionGroupsDistributionRoute = createRoute(() => ({
         transactionId: t.string,
         traceId: t.string
       }),
-      uiQueryRt
+      uiFiltersRt,
+      rangeRt
     ])
   },
   handler: async (req, { path, query }) => {
@@ -122,7 +125,8 @@ export const transactionGroupsBreakdownRoute = createRoute(() => ({
       t.partial({
         transactionName: t.string
       }),
-      uiQueryRt
+      uiFiltersRt,
+      rangeRt
     ])
   },
   handler: async (req, { path, query }) => {

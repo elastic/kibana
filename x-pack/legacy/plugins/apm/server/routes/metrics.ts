@@ -8,7 +8,7 @@ import * as t from 'io-ts';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getMetricsChartDataByAgent } from '../lib/metrics/get_metrics_chart_data_by_agent';
 import { createRoute } from './create_route';
-import { uiQueryRt } from './default_api_types';
+import { uiFiltersRt, rangeRt } from './default_api_types';
 
 export const metricsChartsRoute = createRoute(() => ({
   path: `/api/apm/services/{serviceName}/metrics/charts`,
@@ -20,7 +20,8 @@ export const metricsChartsRoute = createRoute(() => ({
       t.type({
         agentName: t.string
       }),
-      uiQueryRt
+      uiFiltersRt,
+      rangeRt
     ])
   },
   handler: async (req, { path, query }) => {

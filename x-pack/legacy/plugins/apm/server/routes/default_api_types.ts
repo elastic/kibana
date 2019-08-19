@@ -23,13 +23,9 @@ export const rangeRt = t.type({
   end: dateRt
 });
 
-export const uiFilterRt = t.type({ uiFilters: t.string });
+export const uiFiltersRt = t.type({ uiFilters: t.string });
 
 export const debugRt = t.partial({ debug: t.boolean });
-
-export const minimalRt = debugRt;
-
-export const uiQueryRt = t.intersection([minimalRt, rangeRt, uiFilterRt]);
 
 export const jsonRt = new t.Type<any, string, unknown>(
   'JSONAsString',

@@ -18,7 +18,7 @@ import { getMetricsProjection } from '../../common/projections/metrics';
 import { getErrorGroupsProjection } from '../../common/projections/errors';
 import { getTransactionsProjection } from '../../common/projections/transactions';
 import { createRoute } from './create_route';
-import { uiQueryRt, rangeRt, jsonRt } from './default_api_types';
+import { uiFiltersRt, rangeRt, jsonRt } from './default_api_types';
 
 export const uiFiltersEnvironmentsRoute = createRoute(() => ({
   path: '/api/apm/ui_filters/environments',
@@ -43,7 +43,11 @@ const filterNamesRt = t.type({
   )
 });
 
-const localUiBaseQueryRt = t.intersection([filterNamesRt, uiQueryRt]);
+const localUiBaseQueryRt = t.intersection([
+  filterNamesRt,
+  uiFiltersRt,
+  rangeRt
+]);
 
 function createLocalFiltersRoute<
   TPath extends string,

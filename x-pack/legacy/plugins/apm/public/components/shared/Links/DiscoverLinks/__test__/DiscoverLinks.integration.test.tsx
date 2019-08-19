@@ -21,7 +21,7 @@ jest.mock('ui/kfetch');
 
 jest
   .spyOn(savedObjects, 'getAPMIndexPattern')
-  .mockReturnValue(Promise.resolve({ id: 'apm-index-pattern-id' } as any));
+  .mockResolvedValue({ id: 'apm-index-pattern-id' } as any);
 
 beforeAll(() => {
   jest.spyOn(console, 'error').mockImplementation(() => null);

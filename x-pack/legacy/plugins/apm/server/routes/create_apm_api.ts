@@ -19,7 +19,6 @@ import {
   agentConfigurationSearchRoute,
   createAgentConfigurationRoute,
   deleteAgentConfigurationRoute,
-  legacyAgentConfigurationSearchRoute,
   listAgentConfigurationEnvironmentsRoute,
   listAgentConfigurationServicesRoute,
   updateAgentConfigurationRoute
@@ -57,7 +56,6 @@ const createApmApi = () => {
     .add(agentConfigurationSearchRoute)
     .add(createAgentConfigurationRoute)
     .add(deleteAgentConfigurationRoute)
-    .add(legacyAgentConfigurationSearchRoute)
     .add(listAgentConfigurationEnvironmentsRoute)
     .add(listAgentConfigurationServicesRoute)
     .add(updateAgentConfigurationRoute)

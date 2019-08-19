@@ -55,10 +55,10 @@ export function AddSettingsFlyout({
       : ''
   );
   const { data: serviceNames = [], status: serviceNamesStatus } = useFetcher(
-    async () =>
-      (await callApmApi({
+    () =>
+      callApmApi({
         pathname: '/api/apm/settings/agent-configuration/services'
-      })).sort(),
+      }),
     [],
     {
       preservePreviousResponse: false

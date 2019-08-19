@@ -10,7 +10,7 @@ import { getErrorDistribution } from '../lib/errors/distribution/get_distributio
 import { getErrorGroup } from '../lib/errors/get_error_group';
 import { getErrorGroups } from '../lib/errors/get_error_groups';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { uiQueryRt } from './default_api_types';
+import { uiFiltersRt, rangeRt } from './default_api_types';
 
 export const errorsRoute = createRoute(core => ({
   path: '/api/apm/services/{serviceName}/errors',
@@ -23,7 +23,8 @@ export const errorsRoute = createRoute(core => ({
         sortField: t.string,
         sortDirection: t.string
       }),
-      uiQueryRt
+      uiFiltersRt,
+      rangeRt
     ])
   },
   handler: async (req, { query, path }) => {
@@ -47,7 +48,7 @@ export const errorGroupsRoute = createRoute(() => ({
       serviceName: t.string,
       groupId: t.string
     }),
-    query: uiQueryRt
+    query: t.intersection([uiFiltersRt, rangeRt])
   },
   handler: async (req, { path }) => {
     const setup = await setupRequest(req);
@@ -66,7 +67,8 @@ export const errorDistributionRoute = createRoute(() => ({
       t.partial({
         groupId: t.string
       }),
-      uiQueryRt
+      uiFiltersRt,
+      rangeRt
     ])
   },
   handler: async (req, { path, query }) => {

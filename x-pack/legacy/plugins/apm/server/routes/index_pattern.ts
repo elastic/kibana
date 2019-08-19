@@ -5,13 +5,9 @@
  */
 import { getAPMIndexPattern } from '../lib/index_pattern';
 import { createRoute } from './create_route';
-import { minimalRt } from './default_api_types';
 
 export const indexPatternRoute = createRoute(core => ({
   path: '/api/apm/index_pattern',
-  params: {
-    query: minimalRt
-  },
   handler: async () => {
     const { server } = core.http;
     return await getAPMIndexPattern(server);

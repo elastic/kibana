@@ -12,12 +12,12 @@ import { getServiceAgentName } from '../lib/services/get_service_agent_name';
 import { getServices } from '../lib/services/get_services';
 import { getServiceTransactionTypes } from '../lib/services/get_service_transaction_types';
 import { createRoute } from './create_route';
-import { uiQueryRt, minimalRt, rangeRt } from './default_api_types';
+import { uiFiltersRt, rangeRt } from './default_api_types';
 
 export const servicesRoute = createRoute(core => ({
   path: '/api/apm/services',
   params: {
-    query: uiQueryRt
+    query: t.intersection([uiFiltersRt, rangeRt])
   },
   handler: async req => {
     const setup = await setupRequest(req);
@@ -41,7 +41,7 @@ export const serviceAgentNameRoute = createRoute(() => ({
     path: t.type({
       serviceName: t.string
     }),
-    query: t.intersection([minimalRt, rangeRt])
+    query: rangeRt
   },
   handler: async (req, { path }) => {
     const setup = await setupRequest(req);
@@ -56,7 +56,7 @@ export const serviceTransactionTypesRoute = createRoute(() => ({
     path: t.type({
       serviceName: t.string
     }),
-    query: t.intersection([minimalRt, rangeRt])
+    query: rangeRt
   },
   handler: async (req, { path }) => {
     const setup = await setupRequest(req);
