@@ -23,20 +23,20 @@
     'release_note:skip',
     'renovate',
     'v8.0.0',
-    'v7.3.0',
+    'v7.4.0',
   ],
   major: {
     labels: [
       'release_note:skip',
       'renovate',
       'v8.0.0',
-      'v7.3.0',
+      'v7.4.0',
       'renovate:major',
     ],
   },
   masterIssue: true,
   masterIssueApproval: true,
-  rangeStrategy: 'replace',
+  rangeStrategy: 'bump',
   npm: {
     lockFileMaintenance: {
       enabled: false,
@@ -208,7 +208,7 @@
           'release_note:skip',
           'renovate',
           'v8.0.0',
-          'v7.3.0',
+          'v7.4.0',
           ':ml',
         ],
       },
@@ -888,7 +888,7 @@
       },
     ],
   },
-  prConcurrentLimit: 6,
+  prConcurrentLimit: 0,
   vulnerabilityAlerts: {
     enabled: false,
   },

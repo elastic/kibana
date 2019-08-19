@@ -1,6 +1,6 @@
 .canvasTray {
-  flex-direction: column;
   @include euiBottomShadowFlat;
+  flex-direction: column;
 }
 
 .canvasTray__panel {
