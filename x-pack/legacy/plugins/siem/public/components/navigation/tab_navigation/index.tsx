@@ -19,37 +19,13 @@ interface NavTab {
   disabled: boolean;
 }
 
-interface TabNavigationProps {
+export type GlobalNavTabs = NavTab[];
+
+interface TabNavigationProps<T> {
   location: string;
   search: string;
+  navTabs: T;
 }
-
-const navTabs: NavTab[] = [
-  {
-    id: 'overview',
-    name: i18n.OVERVIEW,
-    href: getOverviewUrl(),
-    disabled: false,
-  },
-  {
-    id: 'hosts',
-    name: i18n.HOSTS,
-    href: getHostsUrl(),
-    disabled: false,
-  },
-  {
-    id: 'network',
-    name: i18n.NETWORK,
-    href: getNetworkUrl(),
-    disabled: false,
-  },
-  {
-    id: 'timelines',
-    name: i18n.TIMELINES,
-    href: getTimelinesUrl(),
-    disabled: false,
-  },
-];
 
 const TabContainer = styled.div`
   .euiLink {
@@ -63,14 +39,17 @@ interface TabNavigationState {
   selectedTabId: string;
 }
 
-export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNavigationState> {
-  constructor(props: TabNavigationProps) {
+export class TabNavigation extends React.PureComponent<
+  TabNavigationProps<GlobalNavTabs>,
+  TabNavigationState
+> {
+  constructor(props: TabNavigationProps<GlobalNavTabs>) {
     super(props);
     const pathname = props.location;
     const selectedTabId = this.mapLocationToTab(pathname);
     this.state = { selectedTabId };
   }
-  public componentWillReceiveProps(nextProps: TabNavigationProps): void {
+  public componentWillReceiveProps(nextProps: TabNavigationProps<GlobalNavTabs>): void {
     const pathname = nextProps.location;
     const selectedTabId = this.mapLocationToTab(pathname);
 
@@ -86,7 +65,7 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
   }
 
   public mapLocationToTab = (pathname: string) =>
-    navTabs.reduce((res, tab) => {
+    this.props.navTabs.reduce((res, tab) => {
       if (pathname.includes(tab.id)) {
         res = tab.id;
       }
@@ -94,7 +73,7 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
     }, '');
 
   private renderTabs = () =>
-    navTabs.map((tab: NavTab) => (
+    this.props.navTabs.map((tab: NavTab) => (
       <TabContainer className="euiTab" key={`navigation-${tab.id}`}>
         <EuiLink data-test-subj={`navigation-link-${tab.id}`} href={tab.href + this.props.search}>
           <EuiTab
