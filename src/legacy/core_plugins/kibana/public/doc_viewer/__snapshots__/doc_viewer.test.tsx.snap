@@ -5,26 +5,12 @@ exports[`Render <DocViewer/> with 3 different tabs 1`] = `
   className="kbnDocViewer"
 >
   <EuiTabbedContent
-    autoFocus="selected"
-    initialSelectedTab={
-      Object {
-        "content": <DocViewerTab
-          render={[MockFunction]}
-          renderProps={
-            Object {
-              "hit": Object {},
-            }
-          }
-          title="Render function"
-        />,
-        "id": "Render function",
-        "name": "Render function",
-      }
-    }
+    autoFocus="initial"
     tabs={
       Array [
         Object {
           "content": <DocViewerTab
+            id={0}
             render={[MockFunction]}
             renderProps={
               Object {
@@ -39,6 +25,7 @@ exports[`Render <DocViewer/> with 3 different tabs 1`] = `
         Object {
           "content": <DocViewerTab
             component={[Function]}
+            id={1}
             renderProps={
               Object {
                 "hit": Object {},
@@ -51,6 +38,7 @@ exports[`Render <DocViewer/> with 3 different tabs 1`] = `
         },
         Object {
           "content": <DocViewerTab
+            id={2}
             renderProps={
               Object {
                 "hit": Object {},
