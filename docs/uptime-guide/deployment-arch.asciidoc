@@ -4,7 +4,7 @@
 
 There are infinite ways to deploy Uptime and Heartbeat, some of which work better than others. A guiding principle in these recommendations is that an outage that takes down the service being monitored should not also take down Heartbeat. You will want Heartbeat to be functioning even when your site is not, so the guidelines that follow attempt to minimize this possibility.
 
-Heartbeat is generally run as a centralized service within a datacenter. While it is possible to run it as a separate "sidecar" process paired with each process/container we recommend against it. Running Heartbeat centrally ensures you will still be able to see monitoring data in the event of an overloaded, disconnected, or otherwise malfunctioning server. 
+Heartbeat is generally run as a centralized service within a datacenter. While it is possible to run it as a separate "sidecar" process paired with each process/container, we recommend against it. Running Heartbeat centrally ensures you will still be able to see monitoring data in the event of an overloaded, disconnected, or otherwise malfunctioning server. 
 
 For further redundancy, you may want to deploy multiple Heartbeats across geographic and/or network boundaries to provide more data. Specify Heartbeat's observer https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-observer-options.html[geo options] to do so. Some examples might be:
 
