@@ -12,6 +12,8 @@ import { PreferenceFormattedBytes } from '../formatted_bytes';
 
 import { Bytes } from '.';
 
+jest.mock('../../lib/settings/use_kibana_ui_setting');
+
 describe('Bytes', () => {
   test('it renders the expected formatted bytes', () => {
     const wrapper = mount(

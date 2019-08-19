@@ -31,7 +31,6 @@
         "dfs_query_then_fetch"
       ],
       "search_timeout": "",
-      "size": "",
       "max_docs": "all documents",
       "sort": [],
       "_source": [],
