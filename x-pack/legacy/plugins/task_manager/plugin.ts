@@ -36,7 +36,7 @@ export class Plugin {
     this.logger = initializerContext.logger.get();
   }
 
-  // TODO: Make sync like new platform
+  // TODO: Make asynchronous like new platform
   public setup(
     core: {},
     { config, serializer, elasticsearch, savedObjects }: LegacyDeps
