@@ -28,7 +28,7 @@ interface Labels {
   filter: boolean;
   rotate?: number;
   show: boolean;
-  truncate: number | '';
+  truncate: number | null;
 }
 
 export interface Scale {

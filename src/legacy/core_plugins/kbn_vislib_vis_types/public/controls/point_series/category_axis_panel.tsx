@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiPanel, EuiTitle, EuiSpacer, EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -31,14 +31,17 @@ import { LabelOptions } from './components/label_options';
 function CategoryAxisPanel(props: VisOptionsProps<BasicVislibParams>) {
   const { stateParams, setValue, vis } = props;
 
-  const setCategoryAxis = <T extends keyof Axis>(paramName: T, value: Axis[T]) => {
-    const categoryAxes = [...stateParams.categoryAxes];
-    categoryAxes[0] = {
-      ...categoryAxes[0],
-      [paramName]: value,
-    };
-    setValue('categoryAxes', categoryAxes);
-  };
+  const setCategoryAxis = useCallback(
+    <T extends keyof Axis>(paramName: T, value: Axis[T]) => {
+      const categoryAxes = [...stateParams.categoryAxes];
+      categoryAxes[0] = {
+        ...categoryAxes[0],
+        [paramName]: value,
+      };
+      setValue('categoryAxes', categoryAxes);
+    },
+    [setValue, stateParams.categoryAxes]
+  );
 
   return (
     <>
@@ -87,7 +90,7 @@ function CategoryAxisPanel(props: VisOptionsProps<BasicVislibParams>) {
             }
           )}
           aria-label={i18n.translate(
-            'kbnVislibVisTypes.controls.pointSeries.categoryAxis.toggleAdvancedOptionsLabel',
+            'kbnVislibVisTypes.controls.pointSeries.categoryAxis.toggleAdvancedOptionsAriaLabel',
             {
               defaultMessage: 'Toggle advanced options',
             }

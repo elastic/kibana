@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { capitalize } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiAccordion } from '@elastic/eui';

@@ -25,4 +25,6 @@ export interface VisOptionsProps<VisParamType = unknown> {
   stateParams: VisParamType;
   vis: Vis;
   setValue<T extends keyof VisParamType>(paramName: T, value: VisParamType[T]): void;
+  setValidity(isValid: boolean): void;
+  setTouched(isTouched: boolean): void;
 }

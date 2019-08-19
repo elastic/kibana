@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -26,7 +26,7 @@ import { VisOptionsProps } from 'ui/vis/editors/default';
 import { BasicVislibParams, Axis } from '../../../types';
 import { SwitchOption } from '../../switch';
 import { SelectOption } from '../../select';
-import { NumberInputOption } from '../../number_input';
+import { TruncateLabelsOption } from '../../truncate_labels';
 import { rotateOptions } from './../utils';
 
 interface LabelOptionsProps extends VisOptionsProps<BasicVislibParams> {
@@ -36,17 +36,21 @@ interface LabelOptionsProps extends VisOptionsProps<BasicVislibParams> {
 }
 
 function LabelOptions({ stateParams, setValue, axis, axisName, index }: LabelOptionsProps) {
-  const setAxisLabel = <T extends keyof Axis['labels']>(paramName: T, value: Axis['labels'][T]) => {
-    const axes = [...stateParams[axisName]];
-    axes[index] = {
-      ...axes[index],
-      labels: {
-        ...axes[index].labels,
-        [paramName]: value,
-      },
-    };
-    setValue(axisName, axes);
-  };
+  const setAxisLabel = useCallback(
+    <T extends keyof Axis['labels']>(paramName: T, value: Axis['labels'][T]) => {
+      const axes = [...stateParams[axisName]];
+      axes[index] = {
+        ...axes[index],
+        labels: {
+          ...axes[index].labels,
+          [paramName]: value,
+        },
+      };
+      setValue(axisName, axes);
+    },
+    // setValue is changed when stateParams[axisName] is updated, so it's no need to watch stateParams[axisName] here.
+    [setValue]
+  );
 
   return (
     <>
@@ -94,14 +98,7 @@ function LabelOptions({ stateParams, setValue, axis, axisName, index }: LabelOpt
         setValue={setAxisLabel}
       />
 
-      <NumberInputOption
-        label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.categoryAxis.truncateLabel', {
-          defaultMessage: 'Truncate',
-        })}
-        paramName="truncate"
-        value={axis.labels.truncate}
-        setValue={setAxisLabel}
-      />
+      <TruncateLabelsOption value={axis.labels.truncate} setValue={setAxisLabel} />
     </>
   );
 }

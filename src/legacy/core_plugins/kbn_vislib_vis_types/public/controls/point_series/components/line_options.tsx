@@ -56,6 +56,7 @@ function LineOptions({ chart, setChart }: LineOptionsParams) {
         })}
         paramName="lineWidth"
         step={0.5}
+        min={0}
         value={chart.lineWidth}
         setValue={setChart}
       />
