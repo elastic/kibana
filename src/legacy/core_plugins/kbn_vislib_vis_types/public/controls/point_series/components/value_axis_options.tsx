@@ -18,18 +18,18 @@
  */
 
 import React, { useMemo } from 'react';
+import { capitalize } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiAccordion } from '@elastic/eui';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
 import { BasicVislibParams, ValueAxis } from '../../../types';
-import { ChartTypes } from '../../../utils/collections';
+import { LegendPositions } from '../../../utils/collections';
 import { SelectOption } from '../../select';
-import { LineOptions } from './../line_options';
 import { SwitchOption } from './../../switch';
 import { TextInputOption } from './../../text_input';
 import { LabelOptions } from './label_options';
-import { ValueAxisCustomOptions } from './value_axis_custom_options';
+import { CustomExtentsOptions } from './custom_extents_options';
 
 export interface ValueAxisOptionsParams extends VisOptionsProps<BasicVislibParams> {
   axis: ValueAxis;
@@ -81,17 +81,35 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
     setValue('valueAxes', valueAxes);
   };
 
-  const isPositionDisabled = position => {
+  const onPositionChanged = (paramName: 'position', value: ValueAxis['position']) => {
+    setValueAxis(paramName, value);
+
+    let axisName = capitalize(axis.position) + 'Axis-';
+    axisName += stateParams.valueAxes.reduce((numberValue: number, axisItem: ValueAxis) => {
+      if (axisItem.name.substr(0, axisName.length) === axisName) {
+        const num = parseInt(axisItem.name.substr(axisName.length), 10);
+        if (num >= numberValue) {
+          numberValue = num + 1;
+        }
+      }
+      return numberValue;
+    }, 1);
+    setValueAxis('name', axisName);
+  };
+
+  const isPositionDisabled = (position: LegendPositions) => {
     if ('isCategoryAxisHorizontal') {
       return ['top', 'bottom'].includes(position);
     }
     return ['left', 'right'].includes(position);
   };
 
-  const positions = vis.type.editorConfig.collections.positions.map(position => ({
-    ...position,
-    disabled: isPositionDisabled(position.value),
-  }));
+  const positions = vis.type.editorConfig.collections.positions.map(
+    (position: { text: string; value: LegendPositions }) => ({
+      ...position,
+      disabled: isPositionDisabled(position.value),
+    })
+  );
 
   return (
     <>
@@ -122,7 +140,7 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
         options={positions}
         paramName="position"
         value={axis.position}
-        setValue={setValueAxis}
+        setValue={onPositionChanged}
       />
 
       <SelectOption
@@ -166,8 +184,13 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
       >
         <>
           <EuiSpacer size="m" />
-          <LabelOptions axis={axis} axisName="valueAxes" {...props} />
-          <ValueAxisCustomOptions axis={axis} {...props} setValue={setValueAxisScale} />
+          <LabelOptions axis={axis} axisName="valueAxes" index={index} {...props} />
+          <CustomExtentsOptions
+            axis={axis}
+            {...props}
+            setValueAxisScale={setValueAxisScale}
+            setValueAxis={setValueAxis}
+          />
         </>
       </EuiAccordion>
     </>

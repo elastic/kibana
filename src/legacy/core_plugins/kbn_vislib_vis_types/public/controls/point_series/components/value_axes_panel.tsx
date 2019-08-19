@@ -33,27 +33,34 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
-import { BasicVislibParams, Axis, ValueAxis } from '../../../types';
-import { SwitchOption } from '../../switch';
-import { SelectOption } from '../../select';
-import { LabelOptions } from './label_options';
+import { BasicVislibParams, ValueAxis } from '../../../types';
+import { ValueAxisOptions } from './value_axis_options';
 
-function ValueAxesPanel(props: VisOptionsProps<BasicVislibParams>) {
-  const { stateParams, setValue, vis } = props;
+interface ValueAxesPanelProps extends VisOptionsProps<BasicVislibParams> {
+  addValueAxis: () => ValueAxis;
+}
 
-  const setCategoryAxis = <T extends keyof Axis>(paramName: T, value: Axis[T]) => {
-    const categoryAxes = [...stateParams.categoryAxes];
-    categoryAxes[0] = {
-      ...categoryAxes[0],
-      [paramName]: value,
-    };
-    setValue('categoryAxes', categoryAxes);
+function ValueAxesPanel(props: ValueAxesPanelProps) {
+  const { stateParams, addValueAxis, setValue } = props;
+
+  const getSeries = (axis: ValueAxis) => {
+    const isFirst = stateParams.valueAxes[0] === axis;
+    const series = stateParams.seriesParams.filter(
+      serie => serie.valueAxis === axis.id || (isFirst && !serie.valueAxis)
+    );
+    return series.map(serie => serie.data.label).join(', ');
   };
 
-  const getSeries = (axis: ValueAxis) => '';
-  const getSeriesShort = (axis: ValueAxis) => '';
-  const addValueAxis = () => {};
-  const removeValueAxis = (axis: ValueAxis) => {};
+  const getSeriesShort = (axis: ValueAxis) => {
+    const maxStringLength = 30;
+    return getSeries(axis).substring(0, maxStringLength);
+  };
+
+  const removeValueAxis = (axis: ValueAxis) => {
+    if (stateParams.valueAxes.length > 1) {
+      setValue('valueAxes', stateParams.valueAxes.filter(valAxis => valAxis.id !== axis.id));
+    }
+  };
 
   const renderRemoveButton = (axis: ValueAxis) => (
     <EuiToolTip
@@ -129,7 +136,7 @@ function ValueAxesPanel(props: VisOptionsProps<BasicVislibParams>) {
 
         <EuiSpacer size="s" />
 
-        {stateParams.valueAxes.map(axis => (
+        {stateParams.valueAxes.map((axis, index) => (
           <EuiAccordion
             id="yAxisOptionsAccordion"
             key={axis.id}
@@ -148,7 +155,7 @@ function ValueAxesPanel(props: VisOptionsProps<BasicVislibParams>) {
           >
             <>
               <EuiSpacer size="m" />
-              <LabelOptions {...props} />
+              <ValueAxisOptions axis={axis} index={index} {...props} />
             </>
           </EuiAccordion>
         ))}

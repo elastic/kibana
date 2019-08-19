@@ -30,11 +30,21 @@ interface Labels {
   show: boolean;
   truncate: number | '';
 }
+
+export interface Scale {
+  boundsMargin?: number | '';
+  defaultYExtents?: boolean;
+  max?: number | '';
+  min?: number | '';
+  mode?: AxisModes;
+  setYExtents?: boolean;
+  type: string;
+}
 export interface Axis {
   id: string;
   labels: Labels;
   position: LegendPositions;
-  scale: { type: string; mode?: AxisModes; defaultYExtents?: boolean };
+  scale: Scale;
   show: boolean;
   style: object;
   title: { text: string };

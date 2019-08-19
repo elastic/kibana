@@ -32,15 +32,16 @@ import { rotateOptions } from './../utils';
 interface LabelOptionsProps extends VisOptionsProps<BasicVislibParams> {
   axis: Axis;
   axisName: 'categoryAxes' | 'valueAxes';
+  index: number;
 }
 
-function LabelOptions({ stateParams, setValue, axis, axisName }: LabelOptionsProps) {
+function LabelOptions({ stateParams, setValue, axis, axisName, index = 0 }: LabelOptionsProps) {
   const setAxisLabel = <T extends keyof Axis['labels']>(paramName: T, value: Axis['labels'][T]) => {
     const axes = [...stateParams[axisName]];
-    axes[0] = {
-      ...axes[0],
+    axes[index] = {
+      ...axes[index],
       labels: {
-        ...axes[0].labels,
+        ...axes[index].labels,
         [paramName]: value,
       },
     };

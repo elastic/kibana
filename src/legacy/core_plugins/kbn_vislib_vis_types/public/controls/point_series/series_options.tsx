@@ -18,7 +18,7 @@
  */
 
 import React, { useState } from 'react';
-import { cloneDeep, capitalize, get } from 'lodash';
+import { get } from 'lodash';
 import { EuiPanel, EuiTitle, EuiSpacer, EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -27,48 +27,18 @@ import { AggConfig } from 'ui/vis';
 import { VisOptionsProps } from 'ui/vis/editors/default';
 import { BasicVislibParams, ValueAxis } from '../../types';
 import { ChartOptions } from './chart_options';
-import { mapPositionOpposite } from './utils';
 
-function SeriesOptions(props: VisOptionsProps<BasicVislibParams>) {
-  const { stateParams, setValue, aggs } = props;
+interface SeriesOptionsProps extends VisOptionsProps<BasicVislibParams> {
+  addValueAxis: () => ValueAxis;
+}
+
+function SeriesOptions(props: SeriesOptionsProps) {
+  const { stateParams, setValue, aggs, addValueAxis } = props;
 
   const [lastCustomLabels, setLastCustomLabels] = useState({} as { [key: string]: string });
   // We track these so we can know when the agg is changed
   const [lastMatchingSeriesAggType, setLastMatchingSeriesAggType] = useState('');
   const [lastMatchingSeriesAggField, setLastMatchingSeriesAggField] = useState('');
-
-  const setValueAxes = (value: ValueAxis) => {
-    setValue('valueAxes', [...stateParams.valueAxes, value]);
-  };
-
-  const addValueAxis = () => {
-    const firstAxis = stateParams.valueAxes[0];
-    const newAxis = cloneDeep(firstAxis);
-    newAxis.id =
-      'ValueAxis-' +
-      stateParams.valueAxes.reduce((value, axis) => {
-        if (axis.id.substr(0, 10) === 'ValueAxis-') {
-          const num = parseInt(axis.id.substr(10), 10);
-          if (num >= value) value = num + 1;
-        }
-        return value;
-      }, 1);
-
-    newAxis.position = mapPositionOpposite(firstAxis.position);
-    const axisName = capitalize(newAxis.position) + 'Axis-';
-    newAxis.name =
-      axisName +
-      stateParams.valueAxes.reduce((value, axis) => {
-        if (axis.name.substr(0, axisName.length) === axisName) {
-          const num = parseInt(axis.name.substr(axisName.length), 10);
-          if (num >= value) value = num + 1;
-        }
-        return value;
-      }, 1);
-
-    setValueAxes(newAxis);
-    return newAxis;
-  };
 
   const updateAxisTitle = () => {
     stateParams.valueAxes.forEach((axis, axisNumber) => {
@@ -177,8 +147,6 @@ function SeriesOptions(props: VisOptionsProps<BasicVislibParams>) {
           </EuiAccordion>
         ))}
       </EuiPanel>
-
-      <EuiSpacer size="s" />
     </>
   );
 }

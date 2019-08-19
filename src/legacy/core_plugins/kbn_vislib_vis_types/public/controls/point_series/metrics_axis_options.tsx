@@ -18,16 +18,54 @@
  */
 
 import React from 'react';
+import { cloneDeep, capitalize, get } from 'lodash';
+import { EuiSpacer } from '@elastic/eui';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
 import { BasicVislibParams } from '../../types';
 import { SeriesOptions } from './series_options';
 import { CategoryAxisPanel } from './components/category_axis_panel';
+import { ValueAxesPanel } from './components/value_axes_panel';
+import { mapPositionOpposite } from './utils';
 
 function MetricsAxisOptions(props: VisOptionsProps<BasicVislibParams>) {
+  const { stateParams, setValue } = props;
+
+  const addValueAxis = () => {
+    const firstAxis = stateParams.valueAxes[0];
+    const newAxis = cloneDeep(firstAxis);
+    newAxis.id =
+      'ValueAxis-' +
+      stateParams.valueAxes.reduce((value, axis) => {
+        if (axis.id.substr(0, 10) === 'ValueAxis-') {
+          const num = parseInt(axis.id.substr(10), 10);
+          if (num >= value) value = num + 1;
+        }
+        return value;
+      }, 1);
+
+    newAxis.position = mapPositionOpposite(firstAxis.position);
+    const axisName = capitalize(newAxis.position) + 'Axis-';
+    newAxis.name =
+      axisName +
+      stateParams.valueAxes.reduce((value, axis) => {
+        if (axis.name.substr(0, axisName.length) === axisName) {
+          const num = parseInt(axis.name.substr(axisName.length), 10);
+          if (num >= value) value = num + 1;
+        }
+        return value;
+      }, 1);
+
+    setValue('valueAxes', [...stateParams.valueAxes, newAxis]);
+    return newAxis;
+  };
+
   return (
     <>
-      <SeriesOptions {...props} />
+      <SeriesOptions addValueAxis={addValueAxis} {...props} />
+      <EuiSpacer size="s" />
+      <ValueAxesPanel addValueAxis={addValueAxis} {...props} />
+      <EuiSpacer size="s" />
       <CategoryAxisPanel {...props} />
     </>
   );
