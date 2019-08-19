@@ -103,13 +103,14 @@ const getValueForField = (metadata: InfraMetadata, { field, isBoolean }: FieldDe
 
 export const NodeDetails = ({ metadata }: Props) => {
   const [isOpen, setControlState] = useState<boolean>(false);
-  if (!metadata) {
-    return null;
-  }
 
   const handleClick = useCallback(() => (isOpen ? setControlState(false) : setControlState(true)), [
     isOpen,
   ]);
+
+  if (!metadata) {
+    return null;
+  }
 
   return (
     <NodeDetailsContainer>
