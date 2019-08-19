@@ -60,7 +60,7 @@ module.exports = spec => {
     convertedSpec.methods = convertMethods(Array.from(methodSet));
     convertedSpec.patterns = patterns;
 
-    if (Object.keys(urlComponents)) {
+    if (Object.keys(urlComponents).length) {
       const components = convertParts(urlComponents);
       const hasComponents =
         Object.keys(components).filter(c => {
