@@ -13,8 +13,6 @@ import {
 import { copySavedObjectsToSpacesFactory } from './copy_to_spaces';
 import { Readable } from 'stream';
 
-const NOT_FOUND_ERROR = Symbol('not-found-error');
-
 interface SetupOpts {
   objects: Array<{ type: string; id: string; attributes: Record<string, any> }>;
   importSavedObjectsImpl?: (opts: SavedObjectsImportOptions) => Promise<SavedObjectsImportResponse>;
@@ -52,11 +50,7 @@ describe('copySavedObjectsToSpaces', () => {
       }),
     } as unknown) as SavedObjectsService;
 
-    const savedObjectsClient: SavedObjectsClientContract = ({
-      errors: {
-        isNotFoundError: (e: unknown) => e === NOT_FOUND_ERROR,
-      },
-    } as unknown) as SavedObjectsClientContract;
+    const savedObjectsClient = (null as unknown) as SavedObjectsClientContract;
 
     return {
       savedObjectsClient,
@@ -102,157 +96,145 @@ describe('copySavedObjectsToSpaces', () => {
     });
 
     expect(result).toMatchInlineSnapshot(`
-                                                Object {
-                                                  "destination1": Object {
-                                                    "errors": undefined,
-                                                    "success": true,
-                                                    "successCount": 3,
-                                                  },
-                                                  "destination2": Object {
-                                                    "errors": undefined,
-                                                    "success": true,
-                                                    "successCount": 3,
-                                                  },
-                                                }
-                                `);
+                                                            Object {
+                                                              "destination1": Object {
+                                                                "errors": undefined,
+                                                                "success": true,
+                                                                "successCount": 3,
+                                                              },
+                                                              "destination2": Object {
+                                                                "errors": undefined,
+                                                                "success": true,
+                                                                "successCount": 3,
+                                                              },
+                                                            }
+                                        `);
 
     expect((savedObjectsService.importExport.getSortedObjectsForExport as jest.Mock).mock.calls)
       .toMatchInlineSnapshot(`
-                              Array [
-                                Array [
-                                  Object {
-                                    "exportSizeLimit": 1000,
-                                    "includeReferencesDeep": true,
-                                    "namespace": "sourceSpace",
-                                    "objects": Array [
-                                      Object {
-                                        "id": "my-dashboard",
-                                        "type": "dashboard",
-                                      },
-                                    ],
-                                    "savedObjectsClient": Object {
-                                      "errors": Object {
-                                        "isNotFoundError": [Function],
-                                      },
-                                    },
-                                    "types": Array [
-                                      "dashboard",
-                                      "visualization",
-                                    ],
-                                  },
-                                ],
-                              ]
-                    `);
+      Array [
+        Array [
+          Object {
+            "exportSizeLimit": 1000,
+            "includeReferencesDeep": true,
+            "namespace": "sourceSpace",
+            "objects": Array [
+              Object {
+                "id": "my-dashboard",
+                "type": "dashboard",
+              },
+            ],
+            "savedObjectsClient": null,
+            "types": Array [
+              "dashboard",
+              "visualization",
+            ],
+          },
+        ],
+      ]
+    `);
 
     expect((savedObjectsService.importExport.importSavedObjects as jest.Mock).mock.calls)
       .toMatchInlineSnapshot(`
-                  Array [
-                    Array [
-                      Object {
-                        "namespace": "destination1",
-                        "objectLimit": 1000,
-                        "overwrite": true,
-                        "readStream": Readable {
-                          "_events": Object {},
-                          "_eventsCount": 0,
-                          "_maxListeners": undefined,
-                          "_read": [Function],
-                          "_readableState": ReadableState {
-                            "awaitDrain": 0,
-                            "buffer": BufferList {
-                              "head": null,
-                              "length": 0,
-                              "tail": null,
-                            },
-                            "decoder": null,
-                            "defaultEncoding": "utf8",
-                            "destroyed": false,
-                            "emitClose": true,
-                            "emittedReadable": false,
-                            "encoding": null,
-                            "endEmitted": false,
-                            "ended": false,
-                            "flowing": null,
-                            "highWaterMark": 16,
-                            "length": 0,
-                            "needReadable": false,
-                            "objectMode": true,
-                            "paused": true,
-                            "pipes": null,
-                            "pipesCount": 0,
-                            "readableListening": false,
-                            "reading": false,
-                            "readingMore": false,
-                            "resumeScheduled": false,
-                            "sync": true,
-                          },
-                          "readable": true,
-                        },
-                        "savedObjectsClient": Object {
-                          "errors": Object {
-                            "isNotFoundError": [Function],
-                          },
-                        },
-                        "supportedTypes": Array [
-                          "dashboard",
-                          "visualization",
-                        ],
-                      },
-                    ],
-                    Array [
-                      Object {
-                        "namespace": "destination2",
-                        "objectLimit": 1000,
-                        "overwrite": true,
-                        "readStream": Readable {
-                          "_events": Object {},
-                          "_eventsCount": 0,
-                          "_maxListeners": undefined,
-                          "_read": [Function],
-                          "_readableState": ReadableState {
-                            "awaitDrain": 0,
-                            "buffer": BufferList {
-                              "head": null,
-                              "length": 0,
-                              "tail": null,
-                            },
-                            "decoder": null,
-                            "defaultEncoding": "utf8",
-                            "destroyed": false,
-                            "emitClose": true,
-                            "emittedReadable": false,
-                            "encoding": null,
-                            "endEmitted": false,
-                            "ended": false,
-                            "flowing": null,
-                            "highWaterMark": 16,
-                            "length": 0,
-                            "needReadable": false,
-                            "objectMode": true,
-                            "paused": true,
-                            "pipes": null,
-                            "pipesCount": 0,
-                            "readableListening": false,
-                            "reading": false,
-                            "readingMore": false,
-                            "resumeScheduled": false,
-                            "sync": true,
-                          },
-                          "readable": true,
-                        },
-                        "savedObjectsClient": Object {
-                          "errors": Object {
-                            "isNotFoundError": [Function],
-                          },
-                        },
-                        "supportedTypes": Array [
-                          "dashboard",
-                          "visualization",
-                        ],
-                      },
-                    ],
-                  ]
-            `);
+      Array [
+        Array [
+          Object {
+            "namespace": "destination1",
+            "objectLimit": 1000,
+            "overwrite": true,
+            "readStream": Readable {
+              "_events": Object {},
+              "_eventsCount": 0,
+              "_maxListeners": undefined,
+              "_read": [Function],
+              "_readableState": ReadableState {
+                "awaitDrain": 0,
+                "buffer": BufferList {
+                  "head": null,
+                  "length": 0,
+                  "tail": null,
+                },
+                "decoder": null,
+                "defaultEncoding": "utf8",
+                "destroyed": false,
+                "emitClose": true,
+                "emittedReadable": false,
+                "encoding": null,
+                "endEmitted": false,
+                "ended": false,
+                "flowing": null,
+                "highWaterMark": 16,
+                "length": 0,
+                "needReadable": false,
+                "objectMode": true,
+                "paused": true,
+                "pipes": null,
+                "pipesCount": 0,
+                "readableListening": false,
+                "reading": false,
+                "readingMore": false,
+                "resumeScheduled": false,
+                "sync": true,
+              },
+              "readable": true,
+            },
+            "savedObjectsClient": null,
+            "supportedTypes": Array [
+              "dashboard",
+              "visualization",
+            ],
+          },
+        ],
+        Array [
+          Object {
+            "namespace": "destination2",
+            "objectLimit": 1000,
+            "overwrite": true,
+            "readStream": Readable {
+              "_events": Object {},
+              "_eventsCount": 0,
+              "_maxListeners": undefined,
+              "_read": [Function],
+              "_readableState": ReadableState {
+                "awaitDrain": 0,
+                "buffer": BufferList {
+                  "head": null,
+                  "length": 0,
+                  "tail": null,
+                },
+                "decoder": null,
+                "defaultEncoding": "utf8",
+                "destroyed": false,
+                "emitClose": true,
+                "emittedReadable": false,
+                "encoding": null,
+                "endEmitted": false,
+                "ended": false,
+                "flowing": null,
+                "highWaterMark": 16,
+                "length": 0,
+                "needReadable": false,
+                "objectMode": true,
+                "paused": true,
+                "pipes": null,
+                "pipesCount": 0,
+                "readableListening": false,
+                "reading": false,
+                "readingMore": false,
+                "resumeScheduled": false,
+                "sync": true,
+              },
+              "readable": true,
+            },
+            "savedObjectsClient": null,
+            "supportedTypes": Array [
+              "dashboard",
+              "visualization",
+            ],
+          },
+        ],
+      ]
+    `);
   });
 
   it(`doesn't stop copy if some spaces fail`, async () => {
@@ -275,7 +257,7 @@ describe('copySavedObjectsToSpaces', () => {
         },
       ],
       importSavedObjectsImpl: opts => {
-        if (opts.namespace === 'no-manage') {
+        if (opts.namespace === 'failure-space') {
           throw new Error(`Some error occurred!`);
         }
         return Promise.resolve({
@@ -292,7 +274,7 @@ describe('copySavedObjectsToSpaces', () => {
 
     const result = await copySavedObjectsToSpaces(
       'sourceSpace',
-      ['no-manage', 'not-found', 'marketing'],
+      ['failure-space', 'non-existent-space', 'marketing'],
       {
         includeReferences: true,
         overwrite: true,
@@ -306,25 +288,25 @@ describe('copySavedObjectsToSpaces', () => {
     );
 
     expect(result).toMatchInlineSnapshot(`
-      Object {
-        "marketing": Object {
-          "errors": undefined,
-          "success": true,
-          "successCount": 3,
-        },
-        "no-manage": Object {
-          "errors": Array [
-            [Error: Some error occurred!],
-          ],
-          "success": false,
-          "successCount": 0,
-        },
-        "not-found": Object {
-          "errors": undefined,
-          "success": true,
-          "successCount": 3,
-        },
-      }
-    `);
+            Object {
+              "failure-space": Object {
+                "errors": Array [
+                  [Error: Some error occurred!],
+                ],
+                "success": false,
+                "successCount": 0,
+              },
+              "marketing": Object {
+                "errors": undefined,
+                "success": true,
+                "successCount": 3,
+              },
+              "non-existent-space": Object {
+                "errors": undefined,
+                "success": true,
+                "successCount": 3,
+              },
+            }
+        `);
   });
 });
