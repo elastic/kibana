@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { shallow, render, mount } from 'enzyme';
+import { render } from 'enzyme';
 import { IndexPattern } from 'ui/index_patterns';
 // @ts-ignore
 import { flattenHitWrapper } from 'ui/index_patterns/_flatten_hit';
