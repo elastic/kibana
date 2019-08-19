@@ -48,7 +48,7 @@ function buildSuggestion({
         columnId,
         operation: columnToOperation(columns[columnId]),
       })),
-      isMultiRow: isMultiRow || true,
+      isMultiRow: typeof isMultiRow === 'undefined' || isMultiRow,
       datasourceSuggestionId: datasourceSuggestionId || 0,
       layerId,
     },
@@ -306,13 +306,27 @@ export function getDatasourceSuggestionsFromCurrentState(
           return [];
         }
 
+        const indexPattern = state.indexPatterns[layer.indexPatternId];
         const onlyMetric = layer.columnOrder.every(columnId => !layer.columns[columnId].isBucketed);
         const onlyBucket = layer.columnOrder.every(columnId => layer.columns[columnId].isBucketed);
         const timeDimension = layer.columnOrder.find(
           columnId => layer.columns[columnId].isBucketed && layer.columns[columnId].dataType
         );
-        if (onlyMetric || onlyBucket) {
+        if (onlyBucket) {
           // intermediary chart, don't try to suggest reduced versions
+          return buildSuggestion({
+            state,
+            layerId,
+            isMultiRow: false,
+            datasourceSuggestionId: index,
+          });
+        }
+
+        if (onlyMetric) {
+          if (!timeDimension && indexPattern.timeFieldName) {
+            // TODO suggestion metric over time
+          }
+          // suggest only metric
           return buildSuggestion({
             state,
             layerId,
@@ -323,7 +337,6 @@ export function getDatasourceSuggestionsFromCurrentState(
 
         const simplifiedSuggestions = createSimplifiedTableSuggestions(state, layerId);
 
-        const indexPattern = state.indexPatterns[layer.indexPatternId];
         if (!timeDimension && indexPattern.timeFieldName) {
           const newId = generateId();
           const availableBucketedColumns = layer.columnOrder.filter(

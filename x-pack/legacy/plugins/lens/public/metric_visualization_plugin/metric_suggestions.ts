@@ -21,6 +21,7 @@ export function getSuggestions(
         // We only render metric charts for single-row queries. We require a single, numeric column.
         !isMultiRow && columns.length === 1 && columns[0].operation.dataType === 'number'
     )
+    .filter(({ columns }) => !opts.state || opts.state.accessor !== columns[0].columnId)
     .map(table => getSuggestion(table));
 }
 
