@@ -17,7 +17,7 @@ To retrieve all spaces, issue a GET request to the
 [source,js]
 --------------------------------------------------
 GET /api/spaces/space
-GET /api/spaces/space?purpose=copySavedObjects
+GET /api/spaces/space?purpose= copySavedObjectsIntoSpace
 --------------------------------------------------
 // KIBANA
 

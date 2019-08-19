@@ -375,7 +375,7 @@ export function copyToSpaceTestSuiteFactory(
       beforeEach(() => esArchiver.load('saved_objects/spaces'));
       afterEach(() => esArchiver.unload('saved_objects/spaces'));
 
-      it(`should return ${tests.noConflictsWithoutReferences.statusCode} with copying to space without conflicts or references`, async () => {
+      it(`should return ${tests.noConflictsWithoutReferences.statusCode} when copying to space without conflicts or references`, async () => {
         const destination = getDestinationWithoutConflicts();
 
         await assertSpaceCounts(destination, INITIAL_COUNTS[destination]);
@@ -398,7 +398,7 @@ export function copyToSpaceTestSuiteFactory(
           .then(tests.noConflictsWithoutReferences.response);
       });
 
-      it(`should return ${tests.noConflictsWithReferences.statusCode} with copying to space without conflicts with references`, async () => {
+      it(`should return ${tests.noConflictsWithReferences.statusCode} when copying to space without conflicts with references`, async () => {
         const destination = getDestinationWithoutConflicts();
 
         await assertSpaceCounts(destination, INITIAL_COUNTS[destination]);
@@ -421,7 +421,7 @@ export function copyToSpaceTestSuiteFactory(
           .then(tests.noConflictsWithReferences.response);
       });
 
-      it(`should return ${tests.withConflictsOverwriting.statusCode} with copying to space with conflicts when overwriting`, async () => {
+      it(`should return ${tests.withConflictsOverwriting.statusCode} when copying to space with conflicts when overwriting`, async () => {
         const destination = getDestinationWithConflicts(spaceId);
 
         await assertSpaceCounts(destination, INITIAL_COUNTS[destination]);
@@ -444,7 +444,7 @@ export function copyToSpaceTestSuiteFactory(
           .then(tests.withConflictsOverwriting.response);
       });
 
-      it(`should return ${tests.withConflictsWithoutOverwriting.statusCode} with copying to space with conflicts without overwriting`, async () => {
+      it(`should return ${tests.withConflictsWithoutOverwriting.statusCode} when copying to space with conflicts without overwriting`, async () => {
         const destination = getDestinationWithConflicts(spaceId);
 
         await assertSpaceCounts(destination, INITIAL_COUNTS[destination]);
@@ -467,7 +467,7 @@ export function copyToSpaceTestSuiteFactory(
           .then(tests.withConflictsWithoutOverwriting.response);
       });
 
-      it(`should return ${tests.multipleSpaces.statusCode} with copying to multiple spaces`, async () => {
+      it(`should return ${tests.multipleSpaces.statusCode} when copying to multiple spaces`, async () => {
         const conflictDestination = getDestinationWithConflicts(spaceId);
         const noConflictDestination = getDestinationWithoutConflicts();
 
@@ -510,7 +510,7 @@ export function copyToSpaceTestSuiteFactory(
           });
       });
 
-      it(`should return ${tests.nonExistentSpace.statusCode} with copying to non-existent space`, async () => {
+      it(`should return ${tests.nonExistentSpace.statusCode} when copying to non-existent space`, async () => {
         return supertest
           .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
           .auth(user.username, user.password)
