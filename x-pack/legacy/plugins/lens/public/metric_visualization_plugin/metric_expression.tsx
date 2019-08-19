@@ -7,6 +7,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
+import { FormatFactory } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { MetricConfig } from './types';
 import { LensMultiTable } from '../types';
 import { RenderFunction } from './plugin';
@@ -63,22 +64,38 @@ export const metricChart: ExpressionFunction<
   MetricRender
 >;
 
-export const metricChartRenderer: RenderFunction<MetricChartProps> = {
+export const getMetricChartRenderer = (
+  formatFactory: FormatFactory
+): RenderFunction<MetricChartProps> => ({
   name: 'lens_metric_chart_renderer',
   displayName: 'Metric Chart',
   help: 'Metric Chart Renderer',
   validate: () => {},
   reuseDomNode: true,
   render: async (domNode: Element, config: MetricChartProps, _handlers: unknown) => {
-    ReactDOM.render(<MetricChart {...config} />, domNode);
+    ReactDOM.render(<MetricChart {...config} formatFactory={formatFactory} />, domNode);
   },
-};
+});
 
-export function MetricChart({ data, args }: MetricChartProps) {
+export function MetricChart({
+  data,
+  args,
+  formatFactory,
+}: MetricChartProps & { formatFactory: FormatFactory }) {
   const { title, accessor } = args;
-  const [row] = Object.values(data.tables)[0].rows;
-  // TODO: Use field formatters here...
-  const value = Number(Number(row[accessor]).toFixed(3)).toString();
+  let value = '-';
+  const firstTable = Object.values(data.tables)[0];
+
+  if (firstTable) {
+    const column = firstTable.columns[0];
+    const row = firstTable.rows[0];
+    if (row[accessor]) {
+      value =
+        column && column.formatHint
+          ? formatFactory(column.formatHint).convert(row[accessor])
+          : Number(Number(row[accessor]).toFixed(3)).toString();
+    }
+  }
 
   return (
     <div

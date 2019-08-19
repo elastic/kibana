@@ -6,13 +6,14 @@
 
 import { Registry } from '@kbn/interpreter/target/common';
 import { CoreSetup } from 'src/core/public';
+import { FormatFactory, getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { metricVisualization } from './metric_visualization';
 import {
   renderersRegistry,
   functionsRegistry,
 } from '../../../../../../src/legacy/core_plugins/interpreter/public/registries';
 import { ExpressionFunction } from '../../../../../../src/legacy/core_plugins/interpreter/public';
-import { metricChart, metricChartRenderer } from './metric_expression';
+import { metricChart, getMetricChartRenderer } from './metric_expression';
 
 // TODO these are intermediary types because interpreter is not typed yet
 // They can get replaced by references to the real interfaces as soon as they
@@ -41,15 +42,25 @@ export interface InterpreterSetup {
 
 export interface MetricVisualizationPluginSetupPlugins {
   interpreter: InterpreterSetup;
+  // TODO this is a simulated NP plugin.
+  // Once field formatters are actually migrated, the actual shim can be used
+  fieldFormat: {
+    formatFactory: FormatFactory;
+  };
 }
 
 class MetricVisualizationPlugin {
   constructor() {}
 
-  setup(_core: CoreSetup | null, { interpreter }: MetricVisualizationPluginSetupPlugins) {
+  setup(
+    _core: CoreSetup | null,
+    { interpreter, fieldFormat }: MetricVisualizationPluginSetupPlugins
+  ) {
     interpreter.functionsRegistry.register(() => metricChart);
 
-    interpreter.renderersRegistry.register(() => metricChartRenderer as RenderFunction<unknown>);
+    interpreter.renderersRegistry.register(
+      () => getMetricChartRenderer(fieldFormat.formatFactory) as RenderFunction<unknown>
+    );
 
     return metricVisualization;
   }
@@ -64,6 +75,9 @@ export const metricVisualizationSetup = () =>
     interpreter: {
       renderersRegistry,
       functionsRegistry,
+    },
+    fieldFormat: {
+      formatFactory: getFormat,
     },
   });
 
