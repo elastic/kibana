@@ -24,7 +24,7 @@ For example, enter `host.hostname : "host1"` to see only the information for `ho
 === Configure the data to use for your logs
 Are you using a custom index pattern to store the log entries?
 Do you want to limit the entries shown or change the fields displayed in the columns?
-If so, <<xpack-logs-configuring,configure the logs source data>> to change the index pattern and other settings.
+If so, <<xpack-logs-configuring, configure the logs source data>> to change the index pattern and other settings.
 
 [float]
 [[logs-time]]
