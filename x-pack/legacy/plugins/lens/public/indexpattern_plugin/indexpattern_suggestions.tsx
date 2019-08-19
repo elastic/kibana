@@ -308,6 +308,9 @@ export function getDatasourceSuggestionsFromCurrentState(
 
         const onlyMetric = layer.columnOrder.every(columnId => !layer.columns[columnId].isBucketed);
         const onlyBucket = layer.columnOrder.every(columnId => layer.columns[columnId].isBucketed);
+        const timeDimension = layer.columnOrder.find(
+          columnId => layer.columns[columnId].isBucketed && layer.columns[columnId].dataType
+        );
         if (onlyMetric || onlyBucket) {
           // intermediary chart, don't try to suggest reduced versions
           return buildSuggestion({
@@ -318,7 +321,39 @@ export function getDatasourceSuggestionsFromCurrentState(
           });
         }
 
-        return createSimplifiedTableSuggestions(state, layerId);
+        const simplifiedSuggestions = createSimplifiedTableSuggestions(state, layerId);
+
+        const indexPattern = state.indexPatterns[layer.indexPatternId];
+        if (!timeDimension && indexPattern.timeFieldName) {
+          const newId = generateId();
+          const availableBucketedColumns = layer.columnOrder.filter(
+            columnId => layer.columns[columnId].isBucketed
+          );
+          const availableMetricColumns = layer.columnOrder.filter(
+            columnId => !layer.columns[columnId].isBucketed
+          );
+          const timeColumn = buildColumn({
+            layerId,
+            op: 'date_histogram',
+            indexPattern,
+            columns: layer.columns,
+            field: indexPattern.fields.find(({ name }) => name === indexPattern.timeFieldName),
+            suggestedPriority: undefined,
+          });
+          const updatedLayer = buildLayerByColumnOrder(
+            { ...layer, columns: { ...layer.columns, [newId]: timeColumn } },
+            [...availableBucketedColumns, newId, ...availableMetricColumns]
+          );
+          const timedSuggestion = buildSuggestion({
+            state,
+            layerId,
+            isMultiRow: true,
+            updatedLayer,
+          });
+          return [...simplifiedSuggestions, timedSuggestion];
+        }
+
+        return simplifiedSuggestions;
       })
   ).map(
     (suggestion, index): DatasourceSuggestion<IndexPatternPrivateState> => ({
@@ -355,7 +390,20 @@ function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layer
         return allMetricsSuggestion;
       }
     })
-  ).map(updatedLayer => buildSuggestion({ state, layerId, isMultiRow: true, updatedLayer }));
+  )
+    .concat(
+      availableMetricColumns.map(columnId => {
+        return buildLayerByColumnOrder(layer, [columnId]);
+      })
+    )
+    .map(updatedLayer =>
+      buildSuggestion({
+        state,
+        layerId,
+        isMultiRow: updatedLayer.columnOrder.length > 1,
+        updatedLayer,
+      })
+    );
 }
 
 function buildLayerByColumnOrder(layer: IndexPatternLayer, columnOrder: string[]) {

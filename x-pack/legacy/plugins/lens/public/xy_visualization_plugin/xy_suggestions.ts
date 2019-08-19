@@ -181,6 +181,7 @@ function getSuggestion(
   if (oldLayer && isSameData(newLayer, oldLayer, Boolean(splitBy))) {
     const currentSeriesType = oldLayer.seriesType;
     const suggestedSeriesType = currentSeriesType === 'area' ? 'bar' : 'area';
+    // TODO i18n
     suggestion.title = `${suggestedSeriesType} chart`;
     newLayer.seriesType = suggestedSeriesType;
   }
