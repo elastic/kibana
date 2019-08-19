@@ -17,7 +17,25 @@
  * under the License.
  */
 
-/** @internal */
-export { LegacyObjectToConfigAdapter } from './config/legacy_object_to_config_adapter';
-/** @internal */
-export { LegacyService, LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy_service';
+import { Plugin, CoreSetup } from 'kibana/server';
+import { PluginARequestContext } from '../../core_plugin_a/server';
+
+declare module 'kibana/server' {
+  interface RequestHandlerContext {
+    pluginA?: PluginARequestContext;
+  }
+}
+
+export class CorePluginBPlugin implements Plugin {
+  public setup(core: CoreSetup, deps: {}) {
+    const router = core.http.createRouter();
+    router.get({ path: '/', validate: false }, async (context, req, res) => {
+      if (!context.pluginA) return res.internalError('pluginA is disabled');
+      const response = await context.pluginA.ping();
+      return res.ok(`Pong via plugin A: ${response}`);
+    });
+  }
+
+  public start() {}
+  public stop() {}
+}
