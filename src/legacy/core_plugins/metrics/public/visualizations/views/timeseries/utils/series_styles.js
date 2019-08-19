@@ -45,12 +45,15 @@ export const getAreaStyles = ({ points, lines, color }) => ({
 
 export const getBarStyles = ({ show = true, lineWidth = 0, fill = 1 }, color) => ({
   barSeriesStyle: {
-    border: {
+    rectBorder: {
       stroke: color || DEFAULT_COLOR,
       strokeWidth: lineWidth,
       visible: show,
     },
-    opacity: fill,
+    rect: {
+      fill: color || DEFAULT_COLOR,
+      opacity: fill,
+    },
   },
 });
 

@@ -287,7 +287,7 @@ export const TimeseriesConfig = injectI18n(function(props) {
             }
           >
             <EuiFieldNumber
-              step={0.5}
+              step={0.1}
               onChange={handleTextChange('fill')}
               value={Number(model.fill)}
             />
