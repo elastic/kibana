@@ -16,7 +16,6 @@ export { wrapError } from './errors';
 export {
   canRedirectRequest,
   AuthenticationResult,
-  BasicCredentials,
   DeauthenticationResult,
   OIDCAuthenticationFlow,
   CreateAPIKeyResult,
