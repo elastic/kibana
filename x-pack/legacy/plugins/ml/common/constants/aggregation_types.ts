@@ -20,6 +20,11 @@ export enum ML_JOB_AGGREGATION {
   MIN = 'min',
   MAX = 'max',
   DISTINCT_COUNT = 'distinct_count',
+  HIGH_DISTINCT_COUNT = 'high_distinct_count',
+  LOW_DISTINCT_COUNT = 'low_distinct_count',
+  NON_ZERO_COUNT = 'non_zero_count',
+  HIGH_NON_ZERO_COUNT = 'high_non_zero_count',
+  LOW_NON_ZERO_COUNT = 'low_non_zero_count',
 }
 
 export enum KIBANA_AGGREGATION {
