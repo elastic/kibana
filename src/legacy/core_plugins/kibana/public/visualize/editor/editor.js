@@ -54,7 +54,7 @@ import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 import { npStart } from 'ui/new_platform';
-import { data } from 'plugins/data/setup';
+import { setup as data } from '../../../../../core_plugins/data/public/legacy';
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 
 const { savedQueryService } = data.search.services;

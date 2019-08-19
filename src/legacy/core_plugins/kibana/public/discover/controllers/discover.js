@@ -72,7 +72,7 @@ import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/buil
 import 'ui/capabilities/route_setup';
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
 
-import { data } from 'plugins/data/setup';
+import { setup as data } from '../../../../../core_plugins/data/public/legacy';
 
 const { savedQueryService } = data.search.services;
 
