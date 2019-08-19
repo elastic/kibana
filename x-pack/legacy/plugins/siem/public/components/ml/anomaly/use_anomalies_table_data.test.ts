@@ -6,7 +6,6 @@
 
 import { InfluencerInput } from '../types';
 import { influencersOrCriteriaToString, getThreshold } from './use_anomalies_table_data';
-import { AppKibanaFrameworkAdapter } from '../../../lib/adapters/framework/kibana_framework_adapter';
 
 describe('use_anomalies_table_data', () => {
   test('should return a reduced single influencer to string', () => {
@@ -43,43 +42,32 @@ describe('use_anomalies_table_data', () => {
 
   describe('#getThreshold', () => {
     test('should return 0 if given something below -1', () => {
-      const config: Partial<AppKibanaFrameworkAdapter> = {
-        anomalyScore: -100,
-      };
-      expect(getThreshold(config, -1)).toEqual(0);
+      const anomalyScore = -100;
+      expect(getThreshold(anomalyScore, -1)).toEqual(0);
     });
 
     test('should return 100 if given something above 100', () => {
-      const config: Partial<AppKibanaFrameworkAdapter> = {
-        anomalyScore: 1000,
-      };
-      expect(getThreshold(config, -1)).toEqual(100);
+      const anomalyScore = 1000;
+      expect(getThreshold(anomalyScore, -1)).toEqual(100);
     });
 
     test('should return overridden value if passed in as non negative 1', () => {
-      const config: Partial<AppKibanaFrameworkAdapter> = {
-        anomalyScore: 75,
-      };
-      expect(getThreshold(config, 50)).toEqual(50);
+      const anomalyScore = 75;
+      expect(getThreshold(anomalyScore, 50)).toEqual(50);
     });
 
     test('should return 50 if no anomalyScore was set', () => {
-      const config: Partial<AppKibanaFrameworkAdapter> = {};
-      expect(getThreshold(config, -1)).toEqual(50);
+      expect(getThreshold(undefined, -1)).toEqual(50);
     });
 
     test('should return custom setting', () => {
-      const config: Partial<AppKibanaFrameworkAdapter> = {
-        anomalyScore: 75,
-      };
-      expect(getThreshold(config, -1)).toEqual(75);
+      const anomalyScore = 75;
+      expect(getThreshold(anomalyScore, -1)).toEqual(75);
     });
 
     test('should round down a value up if sent in a floating point number', () => {
-      const config: Partial<AppKibanaFrameworkAdapter> = {
-        anomalyScore: 75.01,
-      };
-      expect(getThreshold(config, -1)).toEqual(75);
+      const anomalyScore = 75.01;
+      expect(getThreshold(anomalyScore, -1)).toEqual(75);
     });
   });
 });
