@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BasePath } from 'src/core/public/http/base_path_service';
+import { coreMock } from 'src/core/public/mocks';
 import { SessionExpired } from './session_expired';
 
 const mockCurrentUrl = (url: string) => window.history.pushState({}, '', url);
 
 it('redirects user to "/logout" when there is no basePath', async () => {
+  const { basePath } = coreMock.createSetup().http;
   mockCurrentUrl('/foo/bar?baz=quz#quuz');
-  const sessionExpired = new SessionExpired(new BasePath());
+  const sessionExpired = new SessionExpired(basePath);
   const newUrlPromise = new Promise<string>(resolve => {
     jest.spyOn(window.location, 'assign').mockImplementation(url => {
       resolve(url);
@@ -27,8 +28,9 @@ it('redirects user to "/logout" when there is no basePath', async () => {
 });
 
 it('redirects user to "/${basePath}/logout" and removes basePath from next parameter when there is a basePath', async () => {
+  const { basePath } = coreMock.createSetup('/foo').http;
   mockCurrentUrl('/foo/bar?baz=quz#quuz');
-  const sessionExpired = new SessionExpired(new BasePath('/foo'));
+  const sessionExpired = new SessionExpired(basePath);
   const newUrlPromise = new Promise<string>(resolve => {
     jest.spyOn(window.location, 'assign').mockImplementation(url => {
       resolve(url);
