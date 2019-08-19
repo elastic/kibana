@@ -19,6 +19,8 @@ import { cloneDeep } from 'lodash/fp';
 import { SiemNavigation } from '../../components/navigation';
 import { wait } from '../../lib/helpers';
 
+jest.mock('../../lib/settings/use_kibana_ui_setting');
+
 jest.mock('ui/documentation_links', () => ({
   documentationLinks: {
     kibana: 'http://www.example.com',

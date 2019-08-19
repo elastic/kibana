@@ -73,6 +73,7 @@ export function siem(kibana: any) {
       mappings: savedObjectMappings,
     },
     init(server: Server) {
+      server.injectUiAppVars('siem', async () => server.getInjectedUiAppVars('kibana'));
       initServerWithKibana(server);
     },
   });
