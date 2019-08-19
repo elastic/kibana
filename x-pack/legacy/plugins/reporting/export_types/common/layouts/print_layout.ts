@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import path from 'path';
-import { SerializableOrJSHandle, EvaluateFn } from 'puppeteer';
+import { EvaluateFn, SerializableOrJSHandle } from 'puppeteer';
 import { HeadlessChromiumDriver } from '../../../server/browsers/chromium/driver';
 import { KbnServer } from '../../../types';
 import { LayoutTypes } from '../constants';
