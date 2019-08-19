@@ -46,7 +46,9 @@
     "totalUniqueInstanceCount": 0,
     "totalUniqueFullyMigratedCount": 0,
     "totalUniquePartiallyMigratedCount": 0,
-    "detected": null,
+    "detected": {
+      "mightExist": false
+    },
     "byUuid": {}
   },
   "elasticsearch": {
@@ -65,6 +67,6 @@
   "_meta": {
     "secondsAgo": 30,
     "isOnCloud": false,
-    "clusterUuid": null
+    "liveClusterUuid": null
   }
 }

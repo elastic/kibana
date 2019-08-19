@@ -12,9 +12,9 @@ import { resolve } from 'path';
 
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { APP_TITLE } from './common/constants';
-import { LanguageServers, LanguageServersDeveloping } from './server/lsp/language_servers';
 import { codePlugin } from './server';
 import { DEFAULT_WATERMARK_LOW_PERCENTAGE } from './server/disk_watermark';
+import { LanguageServers, LanguageServersDeveloping } from './server/lsp/language_servers';
 
 export type RequestFacade = Legacy.Request;
 export type RequestQueryFacade = RequestQuery;
@@ -88,6 +88,7 @@ export const code = (kibana: any) =>
         security: Joi.object({
           enableMavenImport: Joi.boolean().default(true),
           enableGradleImport: Joi.boolean().default(false),
+          installGoDependency: Joi.boolean().default(false),
           installNodeDependency: Joi.boolean().default(true),
           gitHostWhitelist: Joi.array()
             .items(Joi.string())

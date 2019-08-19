@@ -174,6 +174,7 @@ export class PolicyTable extends Component {
   buildRowCell(fieldName, value) {
     if (fieldName === 'name') {
       return (
+        /* eslint-disable-next-line @elastic/eui/href-or-on-click */
         <EuiLink
           className="policyTable__link"
           data-test-subj="policyTablePolicyNameLink"
