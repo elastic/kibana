@@ -34,16 +34,14 @@ export default function ({ getService }) {
         return [key, parts];
       }));
 
-      // ensure script-src uses a nonce, and remove it so we can .eql everything else
+      // ensure script-src uses self
       const scriptSrc = parsed.get('script-src');
       expect(scriptSrc).to.be.an(Array);
-      const nonceIndex = scriptSrc.findIndex(value => value.startsWith(`'nonce-`));
-      expect(nonceIndex).greaterThan(-1);
-      scriptSrc.splice(nonceIndex, 1);
+      expect(scriptSrc.find(value => value.startsWith(`'self'`))).to.not.be(undefined);
 
       const entries = Array.from(parsed.entries());
       expect(entries).to.eql([
-        [ 'script-src', [ '\'unsafe-eval\'' ] ],
+        [ 'script-src', [ '\'unsafe-eval\'', '\'self\'' ] ],
         [ 'worker-src', [ 'blob:' ] ],
         [ 'child-src', [ 'blob:' ] ],
         [ 'style-src', [ '\'unsafe-inline\'', '\'self\'' ] ]
