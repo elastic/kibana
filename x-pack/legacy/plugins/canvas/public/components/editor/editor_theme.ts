@@ -85,7 +85,7 @@ export const theme: monacoEditor.editor.IStandaloneThemeData = {
     { token: 'attribute.value.html', foreground: themeName.euiColorPrimary },
     { token: 'attribute.value.xml', foreground: themeName.euiColorPrimary },
 
-    { token: 'string', foreground: themeName.euiColorLightestShade },
+    { token: 'string', foreground: themeName.euiColorDanger },
     { token: 'string.html', foreground: themeName.euiColorPrimary },
     { token: 'string.sql', foreground: themeName.euiColorDanger },
     { token: 'string.yaml', foreground: themeName.euiColorPrimary },
