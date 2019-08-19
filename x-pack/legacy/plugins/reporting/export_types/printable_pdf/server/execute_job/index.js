@@ -7,7 +7,7 @@
 import * as Rx from 'rxjs';
 import { mergeMap, catchError, map, takeUntil } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import { oncePerServer } from '../../../../server/lib/once_per_server';
+import { oncePerServer } from '../../../../server/lib';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
 import { compatibilityShimFactory } from './compatibility_shim';
 import {
@@ -55,7 +55,8 @@ function executeJobFn(server) {
         content_type: 'application/pdf',
         content: buffer.toString('base64'),
         size: buffer.byteLength,
-      }))
+      })),
+      catchError(err => Rx.throwError(err))
     );
 
     const stop$ = Rx.fromEventPattern(cancellationToken.on);

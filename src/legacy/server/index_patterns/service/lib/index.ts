@@ -17,6 +17,8 @@
  * under the License.
  */
 
-export function shouldReadFieldFromDocValues(aggregatable, esType) {
-  return aggregatable && esType !== 'text' && !esType.startsWith('_');
-}
+export { getFieldCapabilities } from './field_capabilities';
+// @ts-ignore
+export { resolveTimePattern } from './resolve_time_pattern';
+// @ts-ignore
+export { createNoMatchingIndicesError } from './errors';
