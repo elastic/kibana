@@ -208,30 +208,8 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     let monitors: any[] = [];
     let searchAfter = pagination.cursorKey || null;
     let isFinalPage = true;
+    let firstPromise: Promise<any>;
     do {
-      const queryRes: LegacyMonitorStatesQueryResult = await this.enrichAndCollapsePage(
-        request,
-        dateRangeStart,
-        dateRangeEnd,
-        searchAfter,
-        {
-          cursorKey: pagination.cursorKey,
-          cursorDirection: CursorDirection.AFTER,
-          sortOrder: pagination.sortOrder,
-        },
-        filters
-      );
-      const { result, statusFilter } = queryRes;
-      searchAfter = queryRes.searchAfter;
-      const monitorBucketsToAdd = this.getMonitorBuckets(result, statusFilter);
-      monitors.push(...monitorBucketsToAdd);
-      if (monitors.length > STATES.LEGACY_STATES_QUERY_SIZE) {
-        monitors = monitors.slice(0, STATES.LEGACY_STATES_QUERY_SIZE);
-        isFinalPage = false;
-      }
-    } while (!!searchAfter && monitors.length < STATES.LEGACY_STATES_QUERY_SIZE);
-
-    if (isFinalPage) {
       const queryRes: LegacyMonitorStatesQueryResult = await this.enrichAndCollapsePage(
         request,
         dateRangeStart,
@@ -241,8 +219,21 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
         filters
       );
       const { result, statusFilter } = queryRes;
+      searchAfter = queryRes.searchAfter;
       const monitorBucketsToAdd = this.getMonitorBuckets(result, statusFilter);
-      isFinalPage = monitorBucketsToAdd.length === 0;
+      monitors.push(...monitorBucketsToAdd);
+      if (!firstPromise) {
+        // do stuff here
+      }
+      if (monitors.length > STATES.LEGACY_STATES_QUERY_SIZE) {
+        monitors = monitors.slice(0, STATES.LEGACY_STATES_QUERY_SIZE);
+        isFinalPage = false;
+      }
+    // we search for an extra item that we then drop to know if there are additional items
+    } while (!!searchAfter && monitors.length < STATES.LEGACY_STATES_QUERY_SIZE + 1);
+
+    if (monitors.length === STATES.LEGACY_STATES_QUERY_SIZE + 1) {
+      monitors = monitors.slice(0, STATES.LEGACY_STATES_QUERY_SIZE);
     }
 
     return {
