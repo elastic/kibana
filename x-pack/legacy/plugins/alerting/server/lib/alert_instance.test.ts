@@ -69,9 +69,52 @@ describe('getMeta()', () => {
 
 describe('fire()', () => {
   test('makes shouldFire() return true', () => {
-    const alertInstance = new AlertInstance({ state: { foo: true }, meta: { bar: true } });
+    const alertInstance = new AlertInstance({
+      state: { foo: true },
+      meta: {
+        bar: true,
+        groups: {
+          default: {
+            lastFired: Date.now(),
+          },
+        },
+      },
+    });
     alertInstance.replaceState({ otherField: true }).fire('default', { field: true });
     expect(alertInstance.shouldFire()).toEqual(true);
+  });
+
+  test('makes shouldFire() return false when throttled', () => {
+    const alertInstance = new AlertInstance({
+      state: { foo: true },
+      meta: {
+        bar: true,
+        groups: {
+          default: {
+            lastFired: Date.now(),
+          },
+        },
+      },
+    });
+    alertInstance.replaceState({ otherField: true }).fire('default', { field: true });
+    expect(alertInstance.shouldFire('1m')).toEqual(false);
+  });
+
+  test('make shouldFire() return true when throttled expired', () => {
+    const alertInstance = new AlertInstance({
+      state: { foo: true },
+      meta: {
+        bar: true,
+        groups: {
+          default: {
+            lastFired: Date.now(),
+          },
+        },
+      },
+    });
+    clock.tick(120000);
+    alertInstance.replaceState({ otherField: true }).fire('default', { field: true });
+    expect(alertInstance.shouldFire('1m')).toEqual(true);
   });
 
   test('makes getFireOptions() return given options', () => {
@@ -120,5 +163,55 @@ describe('toJSON', () => {
       meta: { bar: true },
     });
     expect(JSON.stringify(alertInstance)).toEqual('{"state":{"foo":true},"meta":{"bar":true}}');
+  });
+});
+
+describe('isObsolete', () => {
+  test('returns true by default', () => {
+    const alertInstance = new AlertInstance({
+      state: { foo: true },
+      meta: { bar: true },
+    });
+    expect(alertInstance.isObsolete()).toEqual(true);
+  });
+
+  test('returns false when fired', () => {
+    const alertInstance = new AlertInstance({
+      state: { foo: true },
+      meta: { bar: true },
+    });
+    alertInstance.fire('default');
+    expect(alertInstance.isObsolete()).toEqual(false);
+  });
+
+  test('returns false when some groups are still throttled', () => {
+    const alertInstance = new AlertInstance({
+      state: { foo: true },
+      meta: {
+        bar: true,
+        groups: {
+          default: {
+            lastFired: Date.now(),
+          },
+        },
+      },
+    });
+    expect(alertInstance.isObsolete('1m')).toEqual(false);
+  });
+
+  test('returns true when throttle is expired', () => {
+    const alertInstance = new AlertInstance({
+      state: { foo: true },
+      meta: {
+        bar: true,
+        groups: {
+          default: {
+            lastFired: Date.now(),
+          },
+        },
+      },
+    });
+    clock.tick(120000);
+    expect(alertInstance.isObsolete('1m')).toEqual(true);
   });
 });

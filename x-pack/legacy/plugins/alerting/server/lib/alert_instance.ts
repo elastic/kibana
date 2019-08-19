@@ -54,10 +54,10 @@ export class AlertInstance {
     let hasNoGroupThrottled = true;
 
     if (throttle) {
-      for (const group of this.meta.groups || {}) {
+      for (const group of Object.keys(this.meta.groups || {})) {
         if (
           this.meta.groups[group].lastFired !== undefined &&
-          this.meta.groups[group].lastFired + parseDuration(throttle) < Date.now()
+          this.meta.groups[group].lastFired + parseDuration(throttle) > Date.now()
         ) {
           // This group is still throttled and makes this instance not obsolete
           hasNoGroupThrottled = false;
