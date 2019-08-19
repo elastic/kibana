@@ -19,7 +19,7 @@ import {
   EuiHorizontalRule,
   EuiFlexGroup,
   EuiToolTip,
-  EuiBadge
+  EuiIcon
 } from '@elastic/eui';
 import { ClusterItemContainer, DisabledIfNoDataAndInSetupModeLink } from './helpers';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -39,32 +39,44 @@ export function BeatsPanel(props) {
   const setupModeBeatsData = get(setupMode.data, 'beats');
   let setupModeInstancesData = null;
   if (setupMode.enabled && setupMode.data) {
-    const migratedNodesCount = Object.values(setupModeBeatsData.byUuid).filter(node => node.isFullyMigrated).length;
-    let totalNodesCount = Object.values(setupModeBeatsData.byUuid).length;
-    if (totalNodesCount === 0 && get(setupMode.data, 'beats.detected.mightExist', false)) {
-      totalNodesCount = 1;
+    const {
+      totalUniqueInstanceCount,
+      totalUniqueFullyMigratedCount,
+      totalUniquePartiallyMigratedCount
+    } = setupModeBeatsData;
+    const hasInstances = totalUniqueInstanceCount > 0 || get(setupModeBeatsData, 'detected.mightExist', false);
+    const allMonitoredByMetricbeat = totalUniqueInstanceCount > 0 &&
+      (totalUniqueFullyMigratedCount === totalUniqueInstanceCount || totalUniquePartiallyMigratedCount === totalUniqueInstanceCount);
+    const internalCollectionOn = totalUniquePartiallyMigratedCount > 0;
+    if (hasInstances && (!allMonitoredByMetricbeat || internalCollectionOn)) {
+      let tooltipText = null;
+
+      if (!allMonitoredByMetricbeat) {
+        tooltipText = i18n.translate('xpack.monitoring.cluster.overview.beatsPanel.setupModeNodesTooltip.oneInternal', {
+          defaultMessage: `There's at least one instance that isn't being monitored using Metricbeat. Click the flag
+          icon to visit the instances listing page and find out more information about the status of each instance.`
+        });
+      }
+      else if (internalCollectionOn) {
+        tooltipText = i18n.translate('xpack.monitoring.cluster.overview.beatsPanel.setupModeNodesTooltip.disableInternal', {
+          defaultMessage: `All instances are being monitored using Metricbeat but internal collection still needs to be turned
+          off. Click the flag icon to visit the instances listing page and disable internal collection.`
+        });
+      }
+
+      setupModeInstancesData = (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            position="top"
+            content={tooltipText}
+          >
+            <EuiLink onClick={goToInstances}>
+              <EuiIcon type="flag" color="warning"/>
+            </EuiLink>
+          </EuiToolTip>
+        </EuiFlexItem>
+      );
     }
-
-    const badgeColor = migratedNodesCount === totalNodesCount
-      ? 'secondary'
-      : 'danger';
-
-    setupModeInstancesData = (
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          position="top"
-          content={i18n.translate('xpack.monitoring.cluster.overview.beatsPanel.setupModeNodesTooltip', {
-            defaultMessage: `These numbers indicate how many detected monitored Beats versus how many ` +
-            `detected total Beats. If there are more detected Beats than monitored Beats, click the Nodes ` +
-            `link and you will be guided in how to setup monitoring for the missing node.`
-          })}
-        >
-          <EuiBadge color={badgeColor}>
-            {migratedNodesCount}/{totalNodesCount}
-          </EuiBadge>
-        </EuiToolTip>
-      </EuiFlexItem>
-    );
   }
 
   const beatTypes = props.beats.types.map((beat, index) => {

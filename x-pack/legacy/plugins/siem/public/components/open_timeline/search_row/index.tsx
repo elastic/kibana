@@ -27,9 +27,13 @@ const SearchRowContainer = styled.div`
   }
 `;
 
+SearchRowContainer.displayName = 'SearchRowContainer';
+
 const SearchRowFlexGroup = styled(EuiFlexGroup)`
   margin-bottom: ${props => props.theme.eui.euiSizeXS};
 `;
+
+SearchRowFlexGroup.displayName = 'SearchRowFlexGroup';
 
 type Props = Pick<
   OpenTimelineProps,
@@ -87,3 +91,5 @@ export const SearchRow = pure<Props>(
     </SearchRowContainer>
   )
 );
+
+SearchRow.displayName = 'SearchRow';

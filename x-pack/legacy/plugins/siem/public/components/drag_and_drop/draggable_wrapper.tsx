@@ -26,12 +26,16 @@ import { getDraggableId, getDroppableId } from './helpers';
 // As right now, we do not know what we want there, we will keep it as a placeholder
 export const DragEffects = styled.div``;
 
+DragEffects.displayName = 'DragEffects';
+
 const ProviderContainer = styled.div`
   &:hover {
     transition: background-color 0.7s ease;
     background-color: ${props => props.theme.eui.euiColorLightShade};
   }
 `;
+
+ProviderContainer.displayName = 'ProviderContainer';
 
 interface OwnProps {
   dataProvider: DataProvider;

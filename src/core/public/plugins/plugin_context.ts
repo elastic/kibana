@@ -115,5 +115,6 @@ export function createPluginStartContext<
     notifications: deps.notifications,
     overlays: deps.overlays,
     uiSettings: deps.uiSettings,
+    savedObjects: deps.savedObjects,
   };
 }

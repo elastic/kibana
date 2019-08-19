@@ -16,7 +16,7 @@
 
   button {
     padding: $euiSizeXS $euiSizeM;
-    box-shadow: 0 -2px 1px rgba($euiColorFullShade, .10)
+    box-shadow: 0 -2px 1px transparentize($euiColorFullShade, .9);
   }
 }
 

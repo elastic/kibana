@@ -277,7 +277,7 @@ const mergeTimelineFieldsWithHit = <T>(
 
 const getDataFromHits = (sources: EventSource, category?: string, path?: string): DetailItem[] =>
   Object.keys(sources).reduce<DetailItem[]>((accumulator, source) => {
-    const item = get(source, sources);
+    const item: EventSource = get(source, sources);
     if (Array.isArray(item) || isString(item) || isNumber(item)) {
       const field = path ? `${path}.${source}` : source;
       category = field.split('.')[0];
