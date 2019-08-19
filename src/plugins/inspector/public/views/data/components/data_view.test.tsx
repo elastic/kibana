@@ -18,49 +18,47 @@
  */
 
 import React from 'react';
-import { DataView } from './data_view';
-import { DataAdapter } from 'ui/inspector/adapters';
+import { getDataViewDescription } from '../index';
+import { DataAdapter } from '../../../adapters/data';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { UiSettingsClientContract } from '../../../../../../core/public';
 
 jest.mock('ui/new_platform');
-jest.mock('./lib/export_csv', () => ({
+jest.mock('../lib/export_csv', () => ({
   exportAsCsv: jest.fn(),
 }));
 
 describe('Inspector Data View', () => {
+  let DataView: any;
+
+  beforeEach(() => {
+    const uiSettings = {} as UiSettingsClientContract;
+
+    DataView = getDataViewDescription(uiSettings);
+  });
 
   it('should only show if data adapter is present', () => {
     const adapter = new DataAdapter();
+
     expect(DataView.shouldShow({ data: adapter })).toBe(true);
     expect(DataView.shouldShow({})).toBe(false);
   });
 
   describe('component', () => {
-
-    let adapters;
+    let adapters: any;
 
     beforeEach(() => {
       adapters = { data: new DataAdapter() };
     });
 
     it('should render loading state', () => {
-      const component = mountWithIntl(
-        <DataView.component
-          title="Test Data"
-          adapters={adapters}
-        />
-      );
+      const component = mountWithIntl(<DataView.component title="Test Data" adapters={adapters} />);
 
       expect(component).toMatchSnapshot();
     });
 
     it('should render empty state', async () => {
-      const component = mountWithIntl(
-        <DataView.component
-          title="Test Data"
-          adapters={adapters}
-        />
-      );
+      const component = mountWithIntl(<DataView.component title="Test Data" adapters={adapters} />);
       const tabularLoader = Promise.resolve(null);
       adapters.data.setTabularLoader(() => tabularLoader);
       await tabularLoader;

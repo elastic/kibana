@@ -24,6 +24,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  // @ts-ignore
   EuiInMemoryTable,
   EuiSpacer,
   EuiToolTip,
@@ -33,75 +34,92 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { DataDownloadOptions } from './download_options';
+import { DataViewRow, DataViewColumn } from '../types';
+import { TabularData } from '../../../adapters/data/types';
+import { UiSettingsClientContract } from '../../../../../../core/public';
 
-class DataTableFormat extends Component {
-  state = { };
+interface DataTableFormatState {
+  columns: DataViewColumn[];
+  rows: DataViewRow[];
+}
 
-  static renderCell(col, value, isFormatted) {
+interface DataTableFormatProps {
+  data: TabularData;
+  exportTitle: string;
+  uiSettings: UiSettingsClientContract;
+  isFormatted?: boolean;
+}
+
+export class DataTableFormat extends Component<DataTableFormatProps, DataTableFormatState> {
+  static propTypes = {
+    data: PropTypes.object.isRequired,
+    exportTitle: PropTypes.string.isRequired,
+    uiSettings: PropTypes.object.isRequired,
+    isFormatted: PropTypes.bool,
+  };
+
+  state = {} as DataTableFormatState;
+
+  static renderCell(dataColumn: any, value: any, isFormatted: boolean = false) {
     return (
-      <EuiFlexGroup
-        responsive={false}
-        gutterSize="s"
-        alignItems="center"
-      >
+      <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>{isFormatted ? value.formatted : value}</EuiFlexItem>
         <EuiFlexItem grow={false}>
-          { isFormatted ? value.formatted : value }
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup
-            responsive={false}
-            gutterSize="none"
-            alignItems="center"
-          >
-            { col.filter &&
+          <EuiFlexGroup responsive={false} gutterSize="none" alignItems="center">
+            {dataColumn.filter && (
               <EuiToolTip
                 position="bottom"
-                content={<FormattedMessage
-                  id="inspectorViews.data.filterForValueButtonTooltip"
-                  defaultMessage="Filter for value"
-                />}
+                content={
+                  <FormattedMessage
+                    id="inspector.data.filterForValueButtonTooltip"
+                    defaultMessage="Filter for value"
+                  />
+                }
               >
                 <EuiButtonIcon
                   iconType="plusInCircle"
                   color="text"
-                  aria-label={i18n.translate('inspectorViews.data.filterForValueButtonAriaLabel', {
-                    defaultMessage: 'Filter for value'
+                  aria-label={i18n.translate('inspector.data.filterForValueButtonAriaLabel', {
+                    defaultMessage: 'Filter for value',
                   })}
                   data-test-subj="filterForInspectorCellValue"
                   className="insDataTableFormat__filter"
-                  onClick={() => col.filter(value)}
+                  onClick={() => dataColumn.filter(value)}
                 />
               </EuiToolTip>
-            }
-            { col.filterOut &&
+            )}
+
+            {dataColumn.filterOut && (
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   position="bottom"
-                  content={<FormattedMessage
-                    id="inspectorViews.data.filterOutValueButtonTooltip"
-                    defaultMessage="Filter out value"
-                  />}
+                  content={
+                    <FormattedMessage
+                      id="inspector.data.filterOutValueButtonTooltip"
+                      defaultMessage="Filter out value"
+                    />
+                  }
                 >
                   <EuiButtonIcon
                     iconType="minusInCircle"
                     color="text"
-                    aria-label={i18n.translate('inspectorViews.data.filterOutValueButtonAriaLabel', {
-                      defaultMessage: 'Filter out value'
+                    aria-label={i18n.translate('inspector.data.filterOutValueButtonAriaLabel', {
+                      defaultMessage: 'Filter out value',
                     })}
                     data-test-subj="filterOutInspectorCellValue"
                     className="insDataTableFormat__filter"
-                    onClick={() => col.filterOut(value)}
+                    onClick={() => dataColumn.filterOut(value)}
                   />
                 </EuiToolTip>
               </EuiFlexItem>
-            }
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
   }
 
-  static getDerivedStateFromProps({ data, isFormatted }) {
+  static getDerivedStateFromProps({ data, isFormatted }: DataTableFormatProps) {
     if (!data) {
       return {
         columns: null,
@@ -109,11 +127,11 @@ class DataTableFormat extends Component {
       };
     }
 
-    const columns = data.columns.map(col => ({
-      name: col.name,
-      field: col.field,
-      sortable: isFormatted ? row => row[col.field].raw : true,
-      render: (value) => DataTableFormat.renderCell(col, value, isFormatted),
+    const columns = data.columns.map((dataColumn: any) => ({
+      name: dataColumn.name,
+      field: dataColumn.field,
+      sortable: isFormatted ? (row: DataViewRow) => row[dataColumn.field].raw : true,
+      render: (value: any) => DataTableFormat.renderCell(dataColumn, value, isFormatted),
     }));
 
     return { columns, rows: data.rows };
@@ -121,45 +139,35 @@ class DataTableFormat extends Component {
 
   render() {
     const { columns, rows } = this.state;
-
     const pagination = {
       pageSizeOptions: [10, 20, 50],
       initialPageSize: 20,
     };
 
     return (
-      <React.Fragment>
+      <>
         <EuiFlexGroup>
           <EuiFlexItem grow={true} />
           <EuiFlexItem grow={false}>
             <DataDownloadOptions
-              columns={this.state.columns}
-              rows={this.state.rows}
               isFormatted={this.props.isFormatted}
               title={this.props.exportTitle}
+              uiSettings={this.props.uiSettings}
+              columns={columns}
+              rows={rows}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <EuiInMemoryTable
-          responsive={false}
           className="insDataTableFormat__table"
           data-test-subj="inspectorTable"
           columns={columns}
           items={rows}
           sorting={true}
           pagination={pagination}
-          compressed={true}
         />
-      </React.Fragment>
+      </>
     );
   }
 }
-
-DataTableFormat.propTypes = {
-  data: PropTypes.object.isRequired,
-  exportTitle: PropTypes.string.isRequired,
-  isFormatted: PropTypes.bool,
-};
-
-export { DataTableFormat };
