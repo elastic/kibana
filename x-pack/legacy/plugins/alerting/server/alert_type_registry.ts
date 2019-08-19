@@ -16,7 +16,7 @@ import { SpacesPlugin } from '../../spaces';
 interface ConstructorOptions {
   getServices: (basePath: string) => Services;
   taskManager: TaskManager;
-  fireAction: ActionsPlugin['fire'];
+  executeAction: ActionsPlugin['execute'];
   internalSavedObjectsRepository: SavedObjectsClientContract;
   spaceIdToNamespace: SpacesPlugin['spaceIdToNamespace'];
   getBasePath: SpacesPlugin['getBasePath'];
@@ -25,7 +25,7 @@ interface ConstructorOptions {
 export class AlertTypeRegistry {
   private readonly getServices: (basePath: string) => Services;
   private readonly taskManager: TaskManager;
-  private readonly fireAction: ActionsPlugin['fire'];
+  private readonly executeAction: ActionsPlugin['execute'];
   private readonly alertTypes: Map<string, AlertType> = new Map();
   private readonly internalSavedObjectsRepository: SavedObjectsClientContract;
   private readonly spaceIdToNamespace: SpacesPlugin['spaceIdToNamespace'];
@@ -33,14 +33,14 @@ export class AlertTypeRegistry {
 
   constructor({
     internalSavedObjectsRepository,
-    fireAction,
+    executeAction,
     taskManager,
     getServices,
     spaceIdToNamespace,
     getBasePath,
   }: ConstructorOptions) {
     this.taskManager = taskManager;
-    this.fireAction = fireAction;
+    this.executeAction = executeAction;
     this.internalSavedObjectsRepository = internalSavedObjectsRepository;
     this.getServices = getServices;
     this.getBasePath = getBasePath;
@@ -70,7 +70,7 @@ export class AlertTypeRegistry {
         createTaskRunner: getCreateTaskRunnerFunction({
           alertType,
           getServices: this.getServices,
-          fireAction: this.fireAction,
+          executeAction: this.executeAction,
           internalSavedObjectsRepository: this.internalSavedObjectsRepository,
           getBasePath: this.getBasePath,
           spaceIdToNamespace: this.spaceIdToNamespace,

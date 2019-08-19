@@ -53,6 +53,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
         {
           dataType: type,
           isBucketed: true,
+          scale: 'ordinal',
         },
       ];
     }
@@ -80,6 +81,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       label: ofName(field.name),
       dataType: field.type as DataType,
       operationType: 'terms',
+      scale: 'ordinal',
       suggestedPriority,
       sourceField: field.name,
       isBucketed: true,

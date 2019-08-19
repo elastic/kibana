@@ -234,6 +234,7 @@ describe('getOperationTypesForField', () => {
             "operationMetaData": Object {
               "dataType": "string",
               "isBucketed": true,
+              "scale": "ordinal",
             },
             "operations": Array [
               Object {
@@ -247,6 +248,7 @@ describe('getOperationTypesForField', () => {
             "operationMetaData": Object {
               "dataType": "date",
               "isBucketed": true,
+              "scale": "interval",
             },
             "operations": Array [
               Object {
@@ -260,6 +262,7 @@ describe('getOperationTypesForField', () => {
             "operationMetaData": Object {
               "dataType": "number",
               "isBucketed": false,
+              "scale": "ratio",
             },
             "operations": Array [
               Object {

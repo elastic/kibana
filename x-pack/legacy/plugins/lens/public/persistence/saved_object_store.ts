@@ -14,7 +14,6 @@ export interface Document {
   type?: string;
   visualizationType: string | null;
   title: string;
-  activeDatasourceId: string;
   expression: string;
   state: {
     datasourceMetaData: {
@@ -62,18 +61,14 @@ export class SavedObjectIndexStore implements SavedObjectStore {
 
   async save(vis: Document) {
     const { id, type, ...rest } = vis;
-    const attributes = {
-      ...rest,
-      state: JSON.stringify(rest.state),
-    };
+    // TODO: SavedObjectAttributes should support this kind of object,
+    // remove this workaround when SavedObjectAttributes is updated.
+    const attributes = (rest as unknown) as SavedObjectAttributes;
     const result = await (id
       ? this.client.update(DOC_TYPE, id, attributes)
       : this.client.create(DOC_TYPE, attributes));
 
-    return {
-      ...vis,
-      id: result.id,
-    };
+    return { ...vis, id: result.id };
   }
 
   async load(id: string): Promise<Document> {
@@ -87,7 +82,6 @@ export class SavedObjectIndexStore implements SavedObjectStore {
       ...attributes,
       id,
       type,
-      state: JSON.parse(((attributes as unknown) as { state: string }).state as string),
     } as Document;
   }
 }

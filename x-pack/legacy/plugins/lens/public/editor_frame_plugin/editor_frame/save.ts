@@ -16,7 +16,6 @@ export interface Props {
   state: EditorFrameState;
   visualization: Visualization;
   framePublicAPI: FramePublicAPI;
-  activeDatasourceId: string;
 }
 
 export function getSavedObjectFormat({
@@ -24,7 +23,6 @@ export function getSavedObjectFormat({
   state,
   visualization,
   framePublicAPI,
-  activeDatasourceId,
 }: Props): Document {
   const expression = buildExpression({
     visualization,
@@ -53,7 +51,6 @@ export function getSavedObjectFormat({
     type: 'lens',
     visualizationType: state.visualization.activeId,
     expression: expression ? toExpression(expression) : '',
-    activeDatasourceId,
     state: {
       datasourceStates,
       datasourceMetaData: {
