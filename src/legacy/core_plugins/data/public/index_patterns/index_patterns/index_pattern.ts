@@ -28,16 +28,15 @@ import { expandShorthand } from 'ui/utils/mapping_setup';
 import { toastNotifications } from 'ui/notify';
 import { findObjectByTitle } from 'ui/saved_objects';
 import { SavedObjectsClientContract } from 'src/core/public';
+
+import { IndexPatternMissingIndices } from '../errors';
+import { Field, FieldList, FieldType } from '../fields';
+import { createFieldsFetcher } from './_fields_fetcher';
+import { getRoutes } from '../utils';
+import { formatHitProvider } from './format_hit';
+// @ts-ignore
+import { flattenHitWrapper } from './flatten_hit';
 import { IndexPatternsApiClient } from './index_patterns_api_client';
-import { IndexPatternMissingIndices } from './errors';
-import { getRoutes } from './get_routes';
-import { FieldList } from './_field_list';
-import { createFieldsFetcher } from './fields_fetcher';
-import { Field, FieldType } from './_field';
-// @ts-ignore
-import { flattenHitWrapper } from './_flatten_hit';
-// @ts-ignore
-import { formatHitProvider } from './_format_hit';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
@@ -455,7 +454,7 @@ export class IndexPattern implements StaticIndexPattern {
 
             if (unresolvedCollision) {
               const message = i18n.translate(
-                'common.ui.indexPattern.unableWriteLabel',
+                'data.indexPatterns.unableWriteLabel',
                 {
                   defaultMessage:
                     'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.',
@@ -505,7 +504,7 @@ export class IndexPattern implements StaticIndexPattern {
         }
 
         toastNotifications.addError(err, {
-          title: i18n.translate('common.ui.indexPattern.fetchFieldErrorTitle', {
+          title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
             defaultMessage: 'Error fetching fields',
           }),
         });

@@ -17,6 +17,35 @@
  * under the License.
  */
 
-import './_get_computed_fields';
-describe('Index Patterns', function () {
-});
+import { IndexPattern } from './index_pattern';
+
+export interface PatternCache {
+  get: (id: string) => IndexPattern;
+  set: (id: string, value: Promise<IndexPattern>) => Promise<IndexPattern>;
+  clear: (id: string) => void;
+  clearAll: () => void;
+}
+
+export function createIndexPatternCache(): PatternCache {
+  const vals: Record<string, any> = {};
+  const cache: PatternCache = {
+    get: (id: string) => {
+      return vals[id];
+    },
+    set: (id: string, prom: any) => {
+      vals[id] = prom;
+      return prom;
+    },
+    clear: (id: string) => {
+      delete vals[id];
+    },
+    clearAll: () => {
+      for (const id in vals) {
+        if (vals.hasOwnProperty(id)) {
+          delete vals[id];
+        }
+      }
+    },
+  };
+  return cache;
+}

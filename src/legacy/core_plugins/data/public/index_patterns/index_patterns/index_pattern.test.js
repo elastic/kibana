@@ -18,30 +18,20 @@
  */
 
 import _ from 'lodash';
-import { IndexedArray } from '../../indexed_array';
-import { IndexPattern } from '../_index_pattern';
-import { createFieldsFetcher } from '../fields_fetcher';
-import mockLogstashFields from '../../../../../fixtures/logstash_fields';
-import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_saved_object_index_pattern';
+import mockLogstashFields from '../../../../../../fixtures/logstash_fields';
+import { stubbedSavedObjectIndexPattern } from '../../../../../../fixtures/stubbed_saved_object_index_pattern';
+import { IndexedArray } from 'ui/indexed_array';
+import { DuplicateField } from 'ui/errors';
 
-jest.mock('../../errors', () => ({
-  SavedObjectNotFound: jest.fn(),
-  DuplicateField: jest.fn(),
-  IndexPatternMissingIndices: jest.fn(),
-}));
+import { IndexPattern } from './index_pattern';
 
-jest.mock('../errors', () => ({
-  IndexPatternMissingIndices: jest.fn(),
-}));
-
-
-jest.mock('../../registry/field_formats', () => ({
+jest.mock('ui/registry/field_formats', () => ({
   fieldFormats: {
     getDefaultInstance: jest.fn(),
   }
 }));
 
-jest.mock('../../utils/mapping_setup', () => ({
+jest.mock('ui/utils/mapping_setup', () => ({
   expandShorthand: jest.fn().mockImplementation(() => ({
     id: true,
     title: true,
@@ -51,27 +41,27 @@ jest.mock('../../utils/mapping_setup', () => ({
   }))
 }));
 
-jest.mock('../../notify', () => ({
+jest.mock('ui/notify', () => ({
   toastNotifications: {
     addDanger: jest.fn(),
     addError: jest.fn(),
   }
 }));
 
-jest.mock('../../saved_objects', () => {
+jest.mock('ui/saved_objects', () => {
   return {
     findObjectByTitle: jest.fn(),
   };
 });
 
-let fields = [];
-jest.mock('../fields_fetcher');
-
-createFieldsFetcher.mockImplementation(() => ({
-  fetch: jest.fn().mockImplementation(() => {
-    return new Promise(resolve => resolve(fields));
-  }),
-  every: jest.fn(),
+let mockFieldsFetcherResponse = [];
+jest.mock('./_fields_fetcher', () => ({
+  createFieldsFetcher: jest.fn().mockImplementation(() => ({
+    fetch: jest.fn().mockImplementation(() => {
+      return new Promise(resolve => resolve(mockFieldsFetcherResponse));
+    }),
+    every: jest.fn(),
+  }))
 }));
 
 let object;
@@ -189,14 +179,14 @@ describe('IndexPattern', () => {
     it('should fetch fields from the fieldsFetcher', async function () {
       expect(indexPattern.fields.length).toBeGreaterThan(2);
 
-      fields = [
+      mockFieldsFetcherResponse = [
         { name: 'foo' },
         { name: 'bar' }
       ];
 
-
       await indexPattern.refreshFields();
-      fields = [];
+
+      mockFieldsFetcherResponse = [];
 
       const newFields = indexPattern.getNonScriptedFields();
       expect(newFields).toHaveLength(2);
@@ -256,7 +246,7 @@ describe('IndexPattern', () => {
       try {
         await indexPattern.addScriptedField(scriptedField.name, '\'new script\'', 'string');
       } catch (e) {
-        expect(e).toEqual({});
+        expect(e).toBeInstanceOf(DuplicateField);
       }
     });
   });
