@@ -5,6 +5,7 @@
  */
 
 import Hapi from 'hapi';
+import uuid from 'uuid';
 import { Legacy } from 'kibana';
 import KbnServer from 'src/legacy/server/kbn_server';
 import { ActionsPlugin } from '../../actions';
@@ -150,7 +151,7 @@ export function init(server: Server) {
         return {
           created: true,
           result: (await security.authc.createAPIKey(KibanaRequest.from(request), {
-            name: Date.now().toString(),
+            name: `source: alerting, generated uuid: "${uuid.v4()}"`,
             role_descriptors: {},
           }))!,
         };
