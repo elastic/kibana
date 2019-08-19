@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ILocationProvider } from 'angular';
 import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
 import ApolloClient from 'apollo-client';
 import { ApolloLink } from 'apollo-link';
@@ -12,12 +13,8 @@ import 'ui/autoload/all';
 import chrome from 'ui/chrome';
 // @ts-ignore: path dynamic for kibana
 import { uiModules } from 'ui/modules';
-import uiRoutes from 'ui/routes';
-// @ts-ignore: path dynamic for kibana
-import { timezoneProvider } from 'ui/vis/lib/timezone';
 
 import introspectionQueryResultData from '../../graphql/introspection.json';
-import { AppKibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
 import { AppFrontendLibs } from '../lib';
 import { getLinks } from './helpers';
 
@@ -39,11 +36,19 @@ export function compose(): AppFrontendLibs {
 
   const appModule = uiModules.get('app/siem');
 
-  const framework = new AppKibanaFrameworkAdapter(appModule, uiRoutes, timezoneProvider);
+  // disable angular's location provider
+  appModule.config(($locationProvider: ILocationProvider) => {
+    $locationProvider.html5Mode({
+      enabled: false,
+      requireBase: false,
+      rewriteLinks: false,
+    });
+  });
+
+  // const framework = new AppKibanaFrameworkAdapter(appModule, uiRoutes, timezoneProvider);
 
   const libs: AppFrontendLibs = {
     apolloClient,
-    framework,
   };
   return libs;
 }

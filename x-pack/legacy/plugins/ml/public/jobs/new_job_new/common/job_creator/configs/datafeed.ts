@@ -10,7 +10,7 @@ export type DatafeedId = string;
 
 export interface Datafeed {
   datafeed_id: DatafeedId;
-  aggregations?: object;
+  aggregations?: Aggregation;
   chunking_config?: ChunkingConfig;
   frequency?: string;
   indices: IndexPatternTitle[];
@@ -25,4 +25,14 @@ export interface Datafeed {
 export interface ChunkingConfig {
   mode: 'auto' | 'manual' | 'off';
   time_span?: string;
+}
+
+interface Aggregation {
+  buckets: {
+    date_histogram: {
+      field: string;
+      fixed_interval: string;
+    };
+    aggregations: Record<string, any>;
+  };
 }
