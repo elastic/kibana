@@ -4,12 +4,15 @@ exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/
 <BarSeries
   barSeriesStyle={
     Object {
-      "border": Object {
+      "rect": Object {
+        "fill": "rgb(0, 156, 224)",
+        "opacity": 0.5,
+      },
+      "rectBorder": Object {
         "stroke": "rgb(0, 156, 224)",
         "strokeWidth": 2,
         "visible": true,
       },
-      "opacity": 0.5,
     }
   }
   customSeriesColors={

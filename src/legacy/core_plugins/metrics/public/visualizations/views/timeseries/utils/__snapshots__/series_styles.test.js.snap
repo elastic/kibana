@@ -51,12 +51,15 @@ Object {
 exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/utils/series_styles.js getBarStyles() should match a snapshot 1`] = `
 Object {
   "barSeriesStyle": Object {
-    "border": Object {
+    "rect": Object {
+      "fill": "rgb(224, 0, 221)",
+      "opacity": 0.5,
+    },
+    "rectBorder": Object {
       "stroke": "rgb(224, 0, 221)",
       "strokeWidth": 2,
       "visible": true,
     },
-    "opacity": 0.5,
   },
 }
 `;
@@ -64,12 +67,15 @@ Object {
 exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/utils/series_styles.js getBarStyles() should set default values if bars and colors are empty 1`] = `
 Object {
   "barSeriesStyle": Object {
-    "border": Object {
+    "rect": Object {
+      "fill": "#000",
+      "opacity": 1,
+    },
+    "rectBorder": Object {
       "stroke": "#000",
       "strokeWidth": 0,
       "visible": true,
     },
-    "opacity": 1,
   },
 }
 `;

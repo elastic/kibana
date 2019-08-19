@@ -45,7 +45,9 @@ const generateAnnotationData = (values, formatter) =>
   values.map(({ key, docs }) => ({
     dataValue: key,
     details: docs[0],
-    header: formatter(key),
+    header: formatter({
+      value: key,
+    }),
   }));
 
 const decorateFormatter = formatter => ({ value }) => formatter(value);
