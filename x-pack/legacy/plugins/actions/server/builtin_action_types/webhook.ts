@@ -4,12 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { schema, TypeOf } from '@kbn/config-schema';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
+
+// secrets definition
+export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
+const SecretsSchema = schema.object({
+  username: schema.string(),
+  password: schema.string(),
+});
 
 // action type definition
 export const actionType: ActionType = {
   id: '.webhook',
   name: 'webhook',
+  validate: {
+    secrets: SecretsSchema,
+  },
   executor,
 };
 
