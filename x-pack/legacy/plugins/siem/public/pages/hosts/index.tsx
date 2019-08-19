@@ -33,6 +33,20 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
         )}
       />
       <Route
+        strict
+        exact
+        path={`${match.url}/:tabName(hosts|authentications|uncommon_processes|anomalies|events)`}
+        render={props => (
+          <PageRoute
+            {...props}
+            component={Hosts}
+            title={i18n.translate('xpack.siem.pages.hosts.hostsTitle', {
+              defaultMessage: 'Hosts',
+            })}
+          />
+        )}
+      />
+      <Route
         path={`${match.url}/:hostName`}
         render={props => {
           return (

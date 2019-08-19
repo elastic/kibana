@@ -7,29 +7,31 @@ import { EuiTab, EuiTabs, EuiLink } from '@elastic/eui';
 import * as React from 'react';
 import styled from 'styled-components';
 
-import { getHostsUrl, getNetworkUrl, getOverviewUrl, getTimelinesUrl } from '../../link_to';
+import classnames from 'classnames';
 import { trackUiAction as track, METRIC_TYPE } from '../../../lib/track_usage';
 
-import * as i18n from '../translations';
+import { TabNavigationComponentProps } from '..';
 
-interface NavTab {
+export interface NavTab {
   id: string;
   name: string;
   href: string;
   disabled: boolean;
 }
-
-export type GlobalNavTabs = NavTab[];
-
-interface TabNavigationProps<T> {
+interface TabNavigationRouteProps {
   location: string;
   search: string;
-  navTabs: T;
 }
+
+type TabNavigationProps = TabNavigationRouteProps & TabNavigationComponentProps;
 
 const TabContainer = styled.div`
   .euiLink {
     color: inherit !important;
+  }
+
+  &.showBorder {
+    padding: 8px 8px 0;
   }
 `;
 
@@ -39,17 +41,14 @@ interface TabNavigationState {
   selectedTabId: string;
 }
 
-export class TabNavigation extends React.PureComponent<
-  TabNavigationProps<GlobalNavTabs>,
-  TabNavigationState
-> {
-  constructor(props: TabNavigationProps<GlobalNavTabs>) {
+export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNavigationState> {
+  constructor(props: TabNavigationProps) {
     super(props);
     const pathname = props.location;
     const selectedTabId = this.mapLocationToTab(pathname);
     this.state = { selectedTabId };
   }
-  public componentWillReceiveProps(nextProps: TabNavigationProps<GlobalNavTabs>): void {
+  public componentWillReceiveProps(nextProps: TabNavigationProps): void {
     const pathname = nextProps.location;
     const selectedTabId = this.mapLocationToTab(pathname);
 
@@ -61,7 +60,13 @@ export class TabNavigation extends React.PureComponent<
     }
   }
   public render() {
-    return <EuiTabs display="condensed">{this.renderTabs()}</EuiTabs>;
+    let { display } = this.props;
+    display = display || 'condensed';
+    return (
+      <EuiTabs display={display} size="s">
+        {this.renderTabs()}
+      </EuiTabs>
+    );
   }
 
   public mapLocationToTab = (pathname: string) =>
@@ -74,7 +79,10 @@ export class TabNavigation extends React.PureComponent<
 
   private renderTabs = () =>
     this.props.navTabs.map((tab: NavTab) => (
-      <TabContainer className="euiTab" key={`navigation-${tab.id}`}>
+      <TabContainer
+        className={classnames({ euiTab: true, showBorder: this.props.showBorder })}
+        key={`navigation-${tab.id}`}
+      >
         <EuiLink data-test-subj={`navigation-link-${tab.id}`} href={tab.href + this.props.search}>
           <EuiTab
             data-href={tab.href}

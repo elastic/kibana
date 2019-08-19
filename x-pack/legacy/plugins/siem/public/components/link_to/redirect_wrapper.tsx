@@ -7,12 +7,15 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { scrollToTop } from '../scroll_to_top';
+import { HostsTabName } from '../../pages/hosts/hosts';
 
+type TabName = HostsTabName;
 export interface RedirectWrapperProps {
   to: string;
+  tabName: TabName | undefined;
 }
 
-export const RedirectWrapper = ({ to }: RedirectWrapperProps) => {
-  scrollToTop();
+export const RedirectWrapper = ({ to, tabName }: RedirectWrapperProps) => {
+  if (!tabName) scrollToTop();
   return <Redirect to={to} />;
 };
