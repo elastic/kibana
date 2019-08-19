@@ -27,6 +27,8 @@ import { LegacyService } from '.';
 import MockClusterManager from '../../../cli/cluster/cluster_manager';
 import KbnServer from '../../../legacy/server/kbn_server';
 import { Config, Env, ObjectToConfigAdapter } from '../config';
+import { ContextSetup } from '../context';
+import { contextServiceMock } from '../context/context_service.mock';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { configServiceMock } from '../config/config_service.mock';
 import { ElasticsearchServiceSetup } from '../elasticsearch';
@@ -42,6 +44,7 @@ let env: Env;
 let config$: BehaviorSubject<Config>;
 let setupDeps: {
   core: {
+    context: ContextSetup;
     elasticsearch: ElasticsearchServiceSetup;
     http: any;
     plugins: PluginsServiceSetup;
@@ -69,6 +72,7 @@ beforeEach(() => {
 
   setupDeps = {
     core: {
+      context: contextServiceMock.createSetupContract(),
       elasticsearch: { legacy: {} } as any,
       http: {
         auth: {
