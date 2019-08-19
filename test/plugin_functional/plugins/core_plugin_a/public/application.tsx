@@ -38,7 +38,7 @@ import {
 import { AppMountContext, AppMountParameters } from 'kibana/public';
 
 const Home = () => (
-  <EuiPageBody data-test-subj="foo-app-home">
+  <EuiPageBody data-test-subj="fooAppHome">
     <EuiPageHeader>
       <EuiPageHeaderSection>
         <EuiTitle size="l">
@@ -60,7 +60,7 @@ const Home = () => (
 );
 
 const PageA = () => (
-  <EuiPageBody data-test-subj="foo-app-page-a">
+  <EuiPageBody data-test-subj="fooAppPageA">
     <EuiPageHeader>
       <EuiPageHeaderSection>
         <EuiTitle size="l">
@@ -95,19 +95,19 @@ const Nav = withRouter(({ history, navigateToApp }: NavProps) => (
             id: 'home',
             name: 'Home',
             onClick: () => history.push('/'),
-            'data-test-subj': 'foo-nav-home',
+            'data-test-subj': 'fooNavHome',
           },
           {
             id: 'page-a',
             name: 'Page A',
             onClick: () => history.push('/page-a'),
-            'data-test-subj': 'foo-nav-page-a',
+            'data-test-subj': 'fooNavPageA',
           },
           {
             id: 'linktobar',
             name: 'Open Bar / Page B',
             onClick: () => navigateToApp('bar', { path: 'page-b?query=here', state: 'foo!!' }),
-            'data-test-subj': 'foo-nav-bar-page-b',
+            'data-test-subj': 'fooNavBarPageB',
           },
         ],
       },

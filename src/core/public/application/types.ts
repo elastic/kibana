@@ -118,9 +118,6 @@ export interface AppMountContext {
 }
 
 /** @public */
-export type AppMountContextNames = keyof AppMountContext;
-
-/** @public */
 export interface AppMountParameters {
   /**
    * The container element to render the application into.
@@ -194,7 +191,7 @@ export interface ApplicationSetup {
    * @param contextName - The key of {@link AppMountContext} this provider's return value should be attached to.
    * @param provider - A {@link IContextProvider} function
    */
-  registerMountContext<T extends AppMountContextNames>(
+  registerMountContext<T extends keyof AppMountContext>(
     contextName: T,
     provider: IContextProvider<AppMountContext, T>
   ): void;
@@ -224,7 +221,7 @@ export interface InternalApplicationSetup {
    * @param contextName - The key of {@link AppMountContext} this provider's return value should be attached to.
    * @param provider - A {@link IContextProvider} function
    */
-  registerMountContext<T extends AppMountContextNames>(
+  registerMountContext<T extends keyof AppMountContext>(
     pluginOpaqueId: PluginOpaqueId,
     contextName: T,
     provider: IContextProvider<AppMountContext, T>
@@ -255,7 +252,7 @@ export interface ApplicationStart {
    * @param contextName - The key of {@link AppMountContext} this provider's return value should be attached to.
    * @param provider - A {@link IContextProvider} function
    */
-  registerMountContext<T extends AppMountContextNames>(
+  registerMountContext<T extends keyof AppMountContext>(
     contextName: T,
     provider: IContextProvider<AppMountContext, T>
   ): void;
@@ -284,7 +281,7 @@ export interface InternalApplicationStart
    * @param contextName - The key of {@link AppMountContext} this provider's return value should be attached to.
    * @param provider - A {@link IContextProvider} function
    */
-  registerMountContext<T extends AppMountContextNames>(
+  registerMountContext<T extends keyof AppMountContext>(
     pluginOpaqueId: PluginOpaqueId,
     contextName: T,
     provider: IContextProvider<AppMountContext, T>

@@ -27,8 +27,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 
 import { AppMounter, LegacyApp, AppMountParameters } from '../types';
 import { httpServiceMock } from '../../http/http_service.mock';
-import { AppRouter } from './app_router';
-import { AppNotFound } from './app_not_found_screen';
+import { AppRouter, AppNotFound } from '../ui';
 
 const createMountHandler = (htmlString: string) =>
   jest.fn(async ({ appBasePath: basename, element: el }: AppMountParameters) => {

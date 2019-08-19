@@ -38,7 +38,7 @@ import {
 import { AppMountContext, AppMountParameters } from 'kibana/public';
 
 const Home = () => (
-  <EuiPageBody data-test-subj="bar-app-home">
+  <EuiPageBody data-test-subj="barAppHome">
     <EuiPageHeader>
       <EuiPageHeaderSection>
         <EuiTitle size="l">
@@ -64,7 +64,7 @@ const PageB = ({ location }: RouteComponentProps) => {
   new URLSearchParams(location.search).forEach((value, key) => searchParams.push([key, value]));
 
   return (
-    <EuiPageBody data-test-subj="bar-app-page-b">
+    <EuiPageBody data-test-subj="barAppPageB">
       <EuiPageHeader>
         <EuiPageHeaderSection>
           <EuiTitle size="l">
@@ -78,7 +78,7 @@ const PageB = ({ location }: RouteComponentProps) => {
             <EuiTitle>
               <h2>
                 Search params:{' '}
-                <span data-test-subj="bar-app-page-b-query">{JSON.stringify(searchParams)}</span>
+                <span data-test-subj="barAppPageBQuery">{JSON.stringify(searchParams)}</span>
               </h2>
             </EuiTitle>
           </EuiPageContentHeaderSection>
@@ -102,19 +102,19 @@ const Nav = withRouter(({ history, navigateToApp }: NavProps) => (
             id: 'home',
             name: 'Home',
             onClick: () => navigateToApp('bar', { path: '/' }),
-            'data-test-subj': 'bar-nav-home',
+            'data-test-subj': 'barNavHome',
           },
           {
             id: 'page-b',
             name: 'Page B',
             onClick: () => history.push('/page-b', { bar: 'page-b' }),
-            'data-test-subj': 'bar-nav-page-b',
+            'data-test-subj': 'barNavPageB',
           },
           {
             id: 'linktofoo',
             name: 'Open Foo',
             onClick: () => navigateToApp('foo'),
-            'data-test-subj': 'bar-nav-foo-home',
+            'data-test-subj': 'barNavFooHome',
           },
         ],
       },

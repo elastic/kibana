@@ -26,57 +26,71 @@ export default function ({ getService, getPageObjects }) {
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
 
+  const loadingScreenNotShown = async () =>
+    expect(await testSubjects.exists('kbnLoadingMessage')).to.be(false);
+
+  const loadingScreenShown = () =>
+    testSubjects.existOrFail('kbnLoadingMessage');
+
   describe('ui applications', function describeIndexTests() {
     before(async () => {
       await PageObjects.common.navigateToApp('foo');
     });
 
     it('starts on home page', async () => {
-      await testSubjects.existOrFail('foo-app-home');
+      await testSubjects.existOrFail('fooAppHome');
     });
 
     it('navigates to its own pages', async () => {
       // Go to page A
-      await testSubjects.click('foo-nav-page-a');
+      await testSubjects.click('fooNavPageA');
       expect(await browser.getCurrentUrl()).to.eql(`http://localhost:5620/app/foo/page-a`);
-      await testSubjects.existOrFail('foo-app-page-a');
+      await loadingScreenNotShown();
+      await testSubjects.existOrFail('fooAppPageA');
+
       // Go to home page
-      await testSubjects.click('foo-nav-home');
+      await testSubjects.click('fooNavHome');
       expect(await browser.getCurrentUrl()).to.eql(`http://localhost:5620/app/foo/`);
-      await testSubjects.existOrFail('foo-app-home');
+      await loadingScreenNotShown();
+      await testSubjects.existOrFail('fooAppHome');
     });
 
     it('can use the back button to navigate within an app', async () => {
       await browser.goBack();
       expect(await browser.getCurrentUrl()).to.eql(`http://localhost:5620/app/foo/page-a`);
-      await testSubjects.existOrFail('foo-app-page-a');
+      await loadingScreenNotShown();
+      await testSubjects.existOrFail('fooAppPageA');
     });
 
     it('navigates to other apps', async () => {
-      await testSubjects.click('foo-nav-bar-page-b');
-      await testSubjects.existOrFail('bar-app-page-b');
+      await testSubjects.click('fooNavBarPageB');
+      await loadingScreenNotShown();
+      await testSubjects.existOrFail('barAppPageB');
       expect(await browser.getCurrentUrl()).to.eql(`http://localhost:5620/app/bar/page-b?query=here`);
     });
 
     it('preserves query parameters across apps', async () => {
-      const querySpan = await testSubjects.find('bar-app-page-b-query');
+      const querySpan = await testSubjects.find('barAppPageBQuery');
       expect(await querySpan.getVisibleText()).to.eql(`[["query","here"]]`);
     });
 
     it('can use the back button to navigate back to previous app', async () => {
       await browser.goBack();
       expect(await browser.getCurrentUrl()).to.eql(`http://localhost:5620/app/foo/page-a`);
-      await testSubjects.existOrFail('foo-app-page-a');
+      await loadingScreenNotShown();
+      await testSubjects.existOrFail('fooAppPageA');
     });
 
     it('can navigate from NP apps to legacy apps', async () => {
       await appsMenu.clickLink('Management');
+      await loadingScreenShown();
       await testSubjects.existOrFail('managementNav');
     });
 
     it('can navigate from legacy apps to NP apps', async () => {
       await appsMenu.clickLink('Foo');
-      await testSubjects.existOrFail('foo-app-home');
+      await loadingScreenShown();
+      await testSubjects.existOrFail('fooAppHome');
     });
   });
 }

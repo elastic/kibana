@@ -24,7 +24,6 @@ export {
   AppBase,
   AppUnmount,
   AppMountContext,
-  AppMountContextNames,
   AppMountParameters,
   ApplicationSetup,
   ApplicationStart,

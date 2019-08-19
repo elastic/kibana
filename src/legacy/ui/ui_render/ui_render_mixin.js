@@ -164,7 +164,7 @@ export function uiRenderMixin(kbnServer, server, config) {
   });
 
   server.route({
-    path: '/app/{id}/{path?}',
+    path: '/app/{id}/{any*}',
     method: 'GET',
     async handler(req, h) {
       const id = req.params.id;
