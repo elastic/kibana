@@ -184,6 +184,7 @@ export class AlertsClient {
     const existingObject = await this.savedObjectsClient.get('alert', id);
     const { alertTypeId } = existingObject.attributes;
     const alertType = this.alertTypeRegistry.get(alertTypeId);
+    const apiKey = await this.createAPIKey();
 
     // Validate
     const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.alertTypeParams);
@@ -196,6 +197,9 @@ export class AlertsClient {
         ...data,
         alertTypeParams: validatedAlertTypeParams,
         actions,
+        apiKey: apiKey.created
+          ? Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64')
+          : undefined,
       },
       {
         ...options,

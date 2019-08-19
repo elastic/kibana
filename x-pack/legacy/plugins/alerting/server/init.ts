@@ -86,13 +86,7 @@ export function init(server: Server) {
   server.plugins.encrypted_saved_objects.registerType({
     type: 'alert',
     attributesToEncrypt: new Set(['apiKey']),
-    attributesToExcludeFromAAD: new Set([
-      'enabled',
-      'interval',
-      'actions',
-      'alertTypeParams',
-      'scheduledTaskId',
-    ]),
+    attributesToExcludeFromAAD: new Set(['enabled', 'interval', 'scheduledTaskId']),
   });
 
   function getServices(request: any): Services {
