@@ -22,7 +22,7 @@ import { DocViewRenderTab } from './doc_viewer_render_tab';
 import { DocViewerError } from './doc_viewer_render_error';
 
 interface Props {
-  component?: React.Component<DocViewRenderProps>;
+  component?: React.ComponentType<DocViewRenderProps>;
   id: number;
   render?: DocViewRenderFn;
   renderProps: DocViewRenderProps;
