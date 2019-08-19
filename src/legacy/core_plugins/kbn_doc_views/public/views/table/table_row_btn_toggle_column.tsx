@@ -16,29 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import angular from 'angular';
-import chrome from 'ui/chrome';
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiToolTip } from '@elastic/eui';
 
-/**
- * compiling and injecting the give angular template into the given dom node
- * returning a function to cleanup the injected angular element
- */
-export async function injectAngularElement(domNode, template, scopeProps, controller) {
-  const $injector = await chrome.dangerouslyGetActiveInjector();
-  const rootScope = $injector.get('$rootScope');
-  const newScope = Object.assign(rootScope.$new(), scopeProps);
-  if(typeof controller === 'function') {
-    controller(newScope);
+export interface Props {
+  active: boolean;
+  disabled: boolean;
+  onClick: () => void;
+}
+
+export function DocViewTableRowBtnToggleColumn({ onClick, active, disabled = false }: Props) {
+  if (disabled) {
+    return <i className="fa fa-columns text-muted" />;
   }
-
-  const linkFn = $injector.get('$compile')(template)(newScope);
-  newScope.$digest();
-  angular
-    .element(domNode)
-    .empty()
-    .append(linkFn);
-
-  return () => {
-    newScope.$destroy();
-  };
+  return (
+    <EuiToolTip
+      content={
+        <FormattedMessage
+          id="kbnDocViews.table.toggleColumnInTableButtonTooltip"
+          defaultMessage="Toggle column in table"
+        />
+      }
+    >
+      <button aria-pressed={active} onClick={onClick} className="kbnDocViewer__actionButton">
+        <i className="fa fa-columns" />
+      </button>
+    </EuiToolTip>
+  );
 }

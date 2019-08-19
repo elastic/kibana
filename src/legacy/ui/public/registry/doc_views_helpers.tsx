@@ -18,7 +18,7 @@
  */
 import React from 'react';
 import { render } from 'react-dom';
-import angular from 'angular';
+import angular, { ICompileService } from 'angular';
 import chrome from 'ui/chrome';
 import {
   DocViewRenderProps,
@@ -36,21 +36,29 @@ export async function injectAngularElement(
   domNode: Element,
   template: string,
   scopeProps: DocViewRenderProps,
-  controller: AngularController
+  Controller: AngularController
 ): Promise<() => void> {
   const $injector = await chrome.dangerouslyGetActiveInjector();
   const rootScope: AngularScope = $injector.get('$rootScope');
+  const $compile: ICompileService = $injector.get('$compile');
   const newScope = Object.assign(rootScope.$new(), scopeProps);
-  if (typeof controller === 'function') {
-    controller(newScope);
+
+  if (typeof Controller === 'function') {
+    // when a controller is defined, expose the value it produces to the view as `$ctrl`
+    // see: https://docs.angularjs.org/api/ng/provider/$compileProvider#component
+    (newScope as any).$ctrl = $injector.instantiate(Controller, {
+      $scope: newScope,
+    });
   }
-  // @ts-ignore
-  const linkFn = $injector.get('$compile')(template)(newScope);
-  newScope.$digest();
-  angular
-    .element(domNode)
-    .empty()
-    .append(linkFn);
+
+  const $target = angular.element(domNode);
+  const $element = angular.element(template);
+
+  newScope.$apply(() => {
+    const linkFn = $compile($element);
+    $target.empty().append($element);
+    linkFn(newScope);
+  });
 
   return () => {
     newScope.$destroy();

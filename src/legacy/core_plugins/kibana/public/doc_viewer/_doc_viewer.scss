@@ -6,6 +6,7 @@
     word-wrap: break-word;
     white-space: pre-wrap;
     color: $euiColorFullShade;
+    vertical-align: top;
   }
 
   .dscFieldName {
@@ -28,14 +29,24 @@
   }
 }
 
-.kbnDocViewer__content {
-  background-color: $euiColorEmptyShade;
-  padding: $euiSizeS 0 0 0;
-}
-
 .kbnDocViewer__buttons,
 .kbnDocViewer__field {
   white-space: nowrap;
+}
+.kbnDocViewer__buttons{
+  width: 80px;
+}
+
+.kbnDocViewer__buttons > * + * {
+  margin-left: $euiSizeS;
+}
+
+.kbnDocViewer__field {
+  width: 160px;
+}
+
+.kbnDocViewer__collapseButton {
+  margin-right: $euiSizeS;
 }
 
 .kbnDocViewer__actionButton {
