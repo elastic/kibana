@@ -263,6 +263,8 @@ export type IContextProvider<TContext extends Record<string, any>, TContextName 
 
 // @public
 export interface IKibanaSocket {
+    readonly authorizationError?: Error;
+    readonly authorized?: boolean;
     // (undocumented)
     getPeerCertificate(detailed: true): DetailedPeerCertificate | null;
     // (undocumented)

@@ -21,8 +21,7 @@ export default function codeIntelligenceFunctionalTests({
   const FIND_TIME = config.get('timeouts.find');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
-  // FAILING: https://github.com/elastic/kibana/issues/36480
-  describe.skip('Code Intelligence', () => {
+  describe('Code Intelligence', () => {
     describe('Code intelligence in source view page', () => {
       const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
       const testGoToDefinition = async () => {
@@ -32,7 +31,7 @@ export default function codeIntelligenceFunctionalTests({
 
         // Hover on the 'UserModel' reference on line 5.
         await retry.tryForTime(300000, async () => {
-          const spans = await find.allByCssSelector('.mtk31', FIND_TIME);
+          const spans = await find.allByCssSelector('.mtk32', FIND_TIME);
           expect(spans.length).to.greaterThan(1);
           const userModelSpan = spans[1];
           expect(await userModelSpan.getVisibleText()).to.equal('UserModel');
@@ -86,7 +85,7 @@ export default function codeIntelligenceFunctionalTests({
 
         // Prepare a git repository for the test
         await PageObjects.code.fillImportRepositoryUrlInputBox(
-          'https://github.com/Microsoft/TypeScript-Node-Starter'
+          'https://github.com/elastic/TypeScript-Node-Starter'
         );
         // Click the import repository button.
         await PageObjects.code.clickImportRepositoryButton();
@@ -95,7 +94,7 @@ export default function codeIntelligenceFunctionalTests({
           const repositoryItems = await testSubjects.findAll(repositoryListSelector);
           expect(repositoryItems).to.have.length(1);
           expect(await repositoryItems[0].getVisibleText()).to.equal(
-            'Microsoft/TypeScript-Node-Starter'
+            'elastic/TypeScript-Node-Starter'
           );
 
           // Wait for the index to start.
@@ -179,7 +178,7 @@ export default function codeIntelligenceFunctionalTests({
 
         // Hover on the 'UserModel' reference on line 5.
         await retry.tryForTime(300000, async () => {
-          const spans = await find.allByCssSelector('.mtk31', FIND_TIME);
+          const spans = await find.allByCssSelector('.mtk32', FIND_TIME);
           expect(spans.length).to.greaterThan(1);
           const userModelSpan = spans[0];
           expect(await userModelSpan.getVisibleText()).to.equal('UserModel');
@@ -234,7 +233,7 @@ export default function codeIntelligenceFunctionalTests({
 
         // Hover on the 'async' reference on line 1.
         await retry.tryForTime(300000, async () => {
-          const spans = await find.allByCssSelector('.mtk17', FIND_TIME);
+          const spans = await find.allByCssSelector('.mtk9', FIND_TIME);
           expect(spans.length).to.greaterThan(1);
           const asyncSpan = spans[1];
           expect(await asyncSpan.getVisibleText()).to.equal('async');
@@ -258,7 +257,7 @@ export default function codeIntelligenceFunctionalTests({
           // await browser.goBack();
 
           // await retry.try(async () => {
-          //   const $spans = await find.allByCssSelector('.mtk31', FIND_TIME);
+          //   const $spans = await find.allByCssSelector('.mtk32', FIND_TIME);
           //   expect($spans.length).to.greaterThan(1);
           //   const $userModelSpan = $spans[1];
           //   expect(await $userModelSpan.getVisibleText()).to.equal('UserModel');

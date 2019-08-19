@@ -9,6 +9,7 @@ import { noop } from 'lodash/fp';
 import * as React from 'react';
 import styled from 'styled-components';
 
+import { useContext } from 'react';
 import { FieldNameContainer } from '../../../../draggables/field_badge';
 import { OnResize, Resizeable } from '../../../../resize_handle';
 import {
@@ -26,6 +27,7 @@ import { Filter } from '../filter';
 import { HeaderToolTipContent } from '../header_tooltip_content';
 
 import { getNewSortDirectionOnClick } from './helpers';
+import { TimelineContext } from '../../../timeline_context';
 
 const TITLE_PADDING = 10; // px
 const RESIZE_HANDLE_HEIGHT = 35; // px
@@ -55,6 +57,27 @@ const HeaderDiv = styled.div<{ isLoading: boolean }>`
 
 HeaderDiv.displayName = 'HeaderDiv';
 
+interface HeaderCompProps {
+  children: React.ReactNode;
+  isResizing: boolean;
+  onClick: () => void;
+}
+
+const HeaderComp = React.memo<HeaderCompProps>(({ children, onClick, isResizing }) => {
+  const { isLoading } = useContext(TimelineContext);
+  return (
+    <HeaderDiv
+      data-test-subj="header"
+      onClick={!isResizing && !isLoading ? onClick : noop}
+      isLoading={isLoading}
+    >
+      {children}
+    </HeaderDiv>
+  );
+});
+
+HeaderComp.displayName = 'HeaderComp';
+
 const TruncatableHeaderText = styled(TruncatableText)`
   font-weight: bold;
   padding: 5px;
@@ -64,7 +87,6 @@ TruncatableHeaderText.displayName = 'TruncatableHeaderText';
 
 interface Props {
   header: ColumnHeader;
-  isLoading: boolean;
   onColumnRemoved: OnColumnRemoved;
   onColumnResized: OnColumnResized;
   onColumnSorted: OnColumnSorted;
@@ -102,14 +124,7 @@ export class Header extends React.PureComponent<Props> {
   }
 
   private renderActions = (isResizing: boolean) => {
-    const {
-      header,
-      isLoading,
-      onColumnRemoved,
-      onFilterChange = noop,
-      setIsResizing,
-      sort,
-    } = this.props;
+    const { header, onColumnRemoved, onFilterChange = noop, setIsResizing, sort } = this.props;
 
     setIsResizing(isResizing);
 
@@ -118,11 +133,7 @@ export class Header extends React.PureComponent<Props> {
         <WithHoverActions
           render={showHoverContent => (
             <>
-              <HeaderDiv
-                data-test-subj="header"
-                isLoading={isLoading}
-                onClick={!isResizing ? this.onClick : noop}
-              >
+              <HeaderComp isResizing={isResizing} data-test-subj="header" onClick={this.onClick}>
                 <EuiToolTip
                   data-test-subj="header-tooltip"
                   content={<HeaderToolTipContent header={header} />}
@@ -147,7 +158,6 @@ export class Header extends React.PureComponent<Props> {
                     <FullHeightFlexItem>
                       <Actions
                         header={header}
-                        isLoading={isLoading}
                         onColumnRemoved={onColumnRemoved}
                         show={header.id !== '@timestamp' ? showHoverContent : false}
                         sort={sort}
@@ -155,7 +165,7 @@ export class Header extends React.PureComponent<Props> {
                     </FullHeightFlexItem>
                   </FullHeightFlexGroup>
                 </EuiToolTip>
-              </HeaderDiv>
+              </HeaderComp>
               <Filter header={header} onFilterChange={onFilterChange} />
             </>
           )}
@@ -165,9 +175,9 @@ export class Header extends React.PureComponent<Props> {
   };
 
   private onClick = () => {
-    const { header, isLoading, onColumnSorted, sort } = this.props;
+    const { header, onColumnSorted, sort } = this.props;
 
-    if (!isLoading && header.aggregatable) {
+    if (header.aggregatable) {
       onColumnSorted!({
         columnId: header.id,
         sortDirection: getNewSortDirectionOnClick({

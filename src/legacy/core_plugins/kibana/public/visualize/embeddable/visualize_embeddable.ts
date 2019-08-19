@@ -65,6 +65,7 @@ export interface VisualizeOutput extends EmbeddableOutput {
   editUrl: string;
   indexPatterns?: StaticIndexPattern[];
   savedObjectId: string;
+  visTypeName: string;
 }
 
 export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
@@ -99,6 +100,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         indexPatterns,
         editable,
         savedObjectId: savedVisualization.id!,
+        visTypeName: savedVisualization.vis.type.name,
       },
       parent
     );
