@@ -16,7 +16,6 @@ import {
 // @ts-ignore untyped dependency
 import { events as esqueueEvents } from './esqueue';
 import { LevelLogger } from './level_logger';
-// @ts-ignore untyped dependency
 import { oncePerServer } from './once_per_server';
 
 function createWorkerFn(server: KbnServer) {

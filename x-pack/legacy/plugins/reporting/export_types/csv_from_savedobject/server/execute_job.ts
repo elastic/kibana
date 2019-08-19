@@ -8,7 +8,12 @@ import { Request } from 'hapi';
 import { i18n } from '@kbn/i18n';
 
 import { cryptoFactory, LevelLogger, oncePerServer } from '../../../server/lib';
-import { JobDocOutputExecuted, JobDocPayload, KbnServer } from '../../../types';
+import {
+  JobDocOutputExecuted,
+  JobDocPayload,
+  KbnServer,
+  ExecuteImmediateJobFactory,
+} from '../../../types';
 import {
   CONTENT_TYPE_CSV,
   CSV_FROM_SAVEDOBJECT_JOB_TYPE,
@@ -107,4 +112,6 @@ function executeJobFactoryFn(server: KbnServer): ExecuteJobFn {
   };
 }
 
-export const executeJobFactory = oncePerServer(executeJobFactoryFn);
+export const executeJobFactory: ExecuteImmediateJobFactory = oncePerServer(
+  executeJobFactoryFn as ExecuteImmediateJobFactory
+);

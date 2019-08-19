@@ -15,6 +15,6 @@
     "patterns": [
       "_cat/repositories"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cat-repositories.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cat-repositories.html"
   }
 }
