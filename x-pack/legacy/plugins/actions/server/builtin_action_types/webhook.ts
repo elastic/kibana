@@ -78,6 +78,13 @@ const SecretsSchema = schema.object({
   password: schema.string(),
 });
 
+// params definition
+
+export type ActionParamsType = TypeOf<typeof ParamsSchema>;
+const ParamsSchema = schema.object({
+  body: schema.maybe(schema.string()),
+});
+
 // action type definition
 export const actionType: ActionType = {
   id: '.webhook',
@@ -85,6 +92,7 @@ export const actionType: ActionType = {
   validate: {
     config: ConfigSchema,
     secrets: SecretsSchema,
+    params: ParamsSchema,
   },
   executor,
 };

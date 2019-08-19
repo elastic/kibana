@@ -5,7 +5,7 @@
  */
 
 import { actionType } from './webhook';
-import { validateConfig, validateSecrets } from '../lib';
+import { validateConfig, validateSecrets, validateParams } from '../lib';
 
 describe('actionType', () => {
   test('exposes the action as `webhook` on its Id and Name', () => {
@@ -132,13 +132,11 @@ describe('config validation', () => {
 `);
   });
 
-  test('config validation passes when valid headers are provided', () => {
+  test('config validation passes when a url is specified', () => {
     const config: Record<string, any> = {
       host: 'mylisteningserver',
       port: 9200,
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      url: 'http://mylisteningserver:9200/endpoint',
     };
     expect(validateConfig(actionType, config)).toEqual({
       ...defaultValues,
@@ -146,11 +144,13 @@ describe('config validation', () => {
     });
   });
 
-  test('config validation passes when a url is specified', () => {
+  test('config validation passes when valid headers are provided', () => {
     const config: Record<string, any> = {
       host: 'mylisteningserver',
       port: 9200,
-      url: 'http://mylisteningserver:9200/endpoint',
+      headers: {
+        'Content-Type': 'application/json',
+      },
     };
     expect(validateConfig(actionType, config)).toEqual({
       ...defaultValues,
@@ -271,5 +271,21 @@ describe('config validation', () => {
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [read_timeout]: Invalid interval \\"10 seconds\\". Intervals must be of the form {number}m. Example: 5m."`
     );
+  });
+});
+
+describe('params validation', () => {
+  test('param validation passes when no fields are provided as none are required', () => {
+    const params: Record<string, any> = {};
+    expect(validateParams(actionType, params)).toEqual({});
+  });
+
+  test('params validation passes when a valid body is provided', () => {
+    const params: Record<string, any> = {
+      body: 'count: {{ctx.payload.hits.total}}',
+    };
+    expect(validateParams(actionType, params)).toEqual({
+      ...params,
+    });
   });
 });
