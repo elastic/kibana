@@ -17,8 +17,7 @@
  * under the License.
  */
 
-export { withProcRunner, ProcRunner } from './proc_runner';
-export { ToolingLog, ToolingLogTextWriter, pickLevelFromFlags } from './tooling_log';
-export { createAbsolutePathSerializer } from './serializers';
-export { CA_CERT_PATH, ES_KEY_PATH, ES_CERT_PATH } from './certs';
-export { run, createFailError, createFlagError, combineErrors, isFailError } from './run';
+export const absoluteToParsedUrl = () => {
+  getAbsoluteUrl: () =>
+    'http://localhost:5601/kbp/app/canvas#/workpad/workpad-24d56dad-ae70-42b8-9ef1-c5350ecd426c/page/1';
+}; // noop

@@ -17,8 +17,7 @@
  * under the License.
  */
 
-export { withProcRunner, ProcRunner } from './proc_runner';
-export { ToolingLog, ToolingLogTextWriter, pickLevelFromFlags } from './tooling_log';
-export { createAbsolutePathSerializer } from './serializers';
-export { CA_CERT_PATH, ES_KEY_PATH, ES_CERT_PATH } from './certs';
-export { run, createFailError, createFlagError, combineErrors, isFailError } from './run';
+import '@storybook/addon-options/register';
+import '@storybook/addon-actions/register';
+import '@storybook/addon-knobs/register';
+import '@storybook/addon-console';

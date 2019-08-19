@@ -17,8 +17,12 @@
  * under the License.
  */
 
-export { withProcRunner, ProcRunner } from './proc_runner';
-export { ToolingLog, ToolingLogTextWriter, pickLevelFromFlags } from './tooling_log';
-export { createAbsolutePathSerializer } from './serializers';
-export { CA_CERT_PATH, ES_KEY_PATH, ES_CERT_PATH } from './certs';
-export { run, createFailError, createFlagError, combineErrors, isFailError } from './run';
+export class Storage {
+  get(key) {
+    return this[key];
+  }
+
+  set(key, value) {
+    this[key] = value;
+  }
+}

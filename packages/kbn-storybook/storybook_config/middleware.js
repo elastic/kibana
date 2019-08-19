@@ -17,8 +17,10 @@
  * under the License.
  */
 
-export { withProcRunner, ProcRunner } from './proc_runner';
-export { ToolingLog, ToolingLogTextWriter, pickLevelFromFlags } from './tooling_log';
-export { createAbsolutePathSerializer } from './serializers';
-export { CA_CERT_PATH, ES_KEY_PATH, ES_CERT_PATH } from './certs';
-export { run, createFailError, createFlagError, combineErrors, isFailError } from './run';
+const serve = require('serve-static');
+const path = require('path');
+
+// Extend the Storybook Middleware to include a route to access Legacy UI assets
+module.exports = function(router) {
+  router.get('/ui', serve(path.resolve(__dirname, '../../../../src/legacy/ui/public/assets')));
+};

@@ -17,8 +17,11 @@
  * under the License.
  */
 
-export { withProcRunner, ProcRunner } from './proc_runner';
-export { ToolingLog, ToolingLogTextWriter, pickLevelFromFlags } from './tooling_log';
-export { createAbsolutePathSerializer } from './serializers';
-export { CA_CERT_PATH, ES_KEY_PATH, ES_CERT_PATH } from './certs';
-export { run, createFailError, createFlagError, combineErrors, isFailError } from './run';
+const { resolve, dirname } = require('path');
+
+exports.REPO_ROOT = dirname(require.resolve('../../../package.json'));
+exports.ASSET_DIR = resolve(exports.REPO_ROOT, 'built_assets/storybook');
+exports.CURRENT_CONFIG = resolve(exports.ASSET_DIR, 'current.config.js');
+exports.STORY_ENTRY_PATH = resolve(exports.ASSET_DIR, 'stories.entry.js');
+exports.DLL_DIST_DIR = resolve(exports.ASSET_DIR, 'dll');
+exports.DLL_NAME = 'storybook_dll';

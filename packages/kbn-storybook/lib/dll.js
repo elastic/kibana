@@ -17,8 +17,25 @@
  * under the License.
  */
 
-export { withProcRunner, ProcRunner } from './proc_runner';
-export { ToolingLog, ToolingLogTextWriter, pickLevelFromFlags } from './tooling_log';
-export { createAbsolutePathSerializer } from './serializers';
-export { CA_CERT_PATH, ES_KEY_PATH, ES_CERT_PATH } from './certs';
-export { run, createFailError, createFlagError, combineErrors, isFailError } from './run';
+const { resolve } = require('path');
+const { existsSync } = require('fs');
+
+const { REPO_ROOT, DLL_DIST_DIR } = require('./constants');
+
+exports.buildDll = async ({ rebuildDll, log, procRunner }) => {
+  if (rebuildDll) {
+    log.info('rebuilding dll');
+  } else if (!existsSync(resolve(DLL_DIST_DIR, 'dll.js'))) {
+    log.info('dll missing, rebuilding');
+  } else {
+    log.info('dll exists');
+    return;
+  }
+
+  await procRunner.run('build dll ', {
+    cmd: require.resolve('webpack/bin/webpack'),
+    args: ['--config', require.resolve('./webpack.dll.config.js')],
+    cwd: REPO_ROOT,
+    wait: true,
+  });
+};
