@@ -24,6 +24,7 @@ import {
   EuiFieldNumber,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiFormErrorText,
   EuiIcon,
   EuiSpacer,
   EuiButtonEmpty,
@@ -46,16 +47,16 @@ interface RangeValues {
 
 interface RangeValuesModel extends RangeValues {
   id: string;
-  isInvalid: boolean;
 }
 
 interface RangesParamEditorProps {
   value?: RangeValues[];
   hidePlaceholders?: boolean;
   setValue(value: RangeValues[]): void;
-  setTouched(isTouched: boolean): void;
+  setValidity?(isValid: boolean): void;
+  setTouched?(isTouched: boolean): void;
   addRangeValues?(): RangeValues;
-  validateRange?(range: RangeValues, index: number): boolean;
+  validateRange?(range: RangeValues, index: number): boolean[];
 }
 
 function RangesParamEditor({
@@ -64,11 +65,10 @@ function RangesParamEditor({
   hidePlaceholders,
   setValue,
   setTouched,
+  setValidity,
   validateRange,
 }: RangesParamEditorProps) {
-  const [ranges, setRanges] = useState(() =>
-    value.map(range => ({ ...range, id: generateId(), isInvalid: false }))
-  );
+  const [ranges, setRanges] = useState(() => value.map(range => ({ ...range, id: generateId() })));
 
   // set up an initial range when there is no default range
   useEffect(() => {
@@ -81,40 +81,56 @@ function RangesParamEditor({
     // responsible for discarding changes
     if (
       value.length !== ranges.length ||
-      value.some((range, index) => !isEqual(range, omit(ranges[index], ['id', 'isInvalid'])))
+      value.some((range, index) => !isEqual(range, omit(ranges[index], 'id')))
     ) {
-      setRanges(value.map(range => ({ ...range, id: generateId(), isInvalid: false })));
+      setRanges(value.map(range => ({ ...range, id: generateId() })));
     }
   }, [value]);
 
   const updateRanges = (rangeValues: RangeValuesModel[]) => {
     // do not set internal id parameter into saved object
-    setValue(rangeValues.map(range => omit(range, ['id', 'isInvalid'])));
+    setValue(rangeValues.map(range => omit(range, 'id')));
     setRanges(rangeValues);
-    setTouched(true);
+
+    if (setTouched) {
+      setTouched(true);
+    }
   };
   const onAddRange = () =>
     addRangeValues
-      ? updateRanges([...ranges, { ...addRangeValues(), id: generateId(), isInvalid: false }])
-      : updateRanges([...ranges, { id: generateId(), isInvalid: false }]);
+      ? updateRanges([...ranges, { ...addRangeValues(), id: generateId() }])
+      : updateRanges([...ranges, { id: generateId() }]);
   const onRemoveRange = (id: string) => updateRanges(ranges.filter(range => range.id !== id));
-  const onChangeRange = (id: string, key: string, newValue: string, isInvalid: boolean = false) =>
+  const onChangeRange = (id: string, key: string, newValue: string) =>
     updateRanges(
       ranges.map(range =>
         range.id === id
           ? {
               ...range,
               [key]: newValue === '' ? undefined : parseFloat(newValue),
-              isInvalid,
             }
           : range
       )
     );
 
+  const hasInvalidRange =
+    validateRange &&
+    ranges.some(({ from, to, id }, index) => {
+      const [isFromValid, isToValid] = validateRange({ from, to }, index);
+
+      return !isFromValid || !isToValid;
+    });
+
+  useEffect(() => {
+    if (setValidity) {
+      setValidity(!hasInvalidRange);
+    }
+  }, [hasInvalidRange, setValidity]);
+
   return (
     <EuiFormRow compressed fullWidth>
       <>
-        {ranges.map(({ from, to, id, isInvalid }, index) => {
+        {ranges.map(({ from, to, id }, index) => {
           const deleteBtnTitle = i18n.translate(
             'common.ui.aggTypes.ranges.removeRangeButtonAriaLabel',
             {
@@ -126,6 +142,13 @@ function RangesParamEditor({
             }
           );
 
+          let isFromValid = true;
+          let isToValid = true;
+
+          if (validateRange) {
+            [isFromValid, isToValid] = validateRange({ from, to }, index);
+          }
+
           return (
             <Fragment key={id}>
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -136,20 +159,10 @@ function RangesParamEditor({
                     })}
                     value={isEmpty(from) ? '' : from}
                     placeholder={hidePlaceholders ? undefined : FROM_PLACEHOLDER}
-                    onChange={ev => {
-                      let isRangeInvalid;
-
-                      if (validateRange) {
-                        isRangeInvalid = validateRange(
-                          { from: ev.target.valueAsNumber, to },
-                          index
-                        );
-                      }
-                      onChangeRange(id, 'from', ev.target.value, isRangeInvalid);
-                    }}
+                    onChange={ev => onChangeRange(id, 'from', ev.target.value)}
                     fullWidth={true}
                     compressed={true}
-                    isInvalid={isInvalid}
+                    isInvalid={!isFromValid}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -162,20 +175,10 @@ function RangesParamEditor({
                     })}
                     value={isEmpty(to) ? '' : to}
                     placeholder={hidePlaceholders ? undefined : TO_PLACEHOLDER}
-                    onChange={ev => {
-                      let isRangeInvalid;
-
-                      if (validateRange) {
-                        isRangeInvalid = validateRange(
-                          { from, to: ev.target.valueAsNumber },
-                          index
-                        );
-                      }
-                      onChangeRange(id, 'to', ev.target.value, isRangeInvalid);
-                    }}
+                    onChange={ev => onChangeRange(id, 'to', ev.target.value)}
                     fullWidth={true}
                     compressed={true}
-                    isInvalid={isInvalid}
+                    isInvalid={!isToValid}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -193,6 +196,15 @@ function RangesParamEditor({
             </Fragment>
           );
         })}
+
+        {hasInvalidRange && (
+          <EuiFormErrorText>
+            <FormattedMessage
+              id="kbnVislibVisTypes.controls.gaugeOptions.errorText"
+              defaultMessage="Each range should be greater than previous."
+            />
+          </EuiFormErrorText>
+        )}
 
         <EuiSpacer size="s" />
         <EuiFlexItem>

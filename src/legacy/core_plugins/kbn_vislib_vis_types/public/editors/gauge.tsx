@@ -30,8 +30,14 @@ import { SwitchOption } from '../controls/switch';
 import { TextInputOption } from '../controls/text_input';
 import { GaugeVisParams } from '../gauge';
 
-function GaugeOptions(props: VisOptionsProps<GaugeVisParams>) {
-  const { stateParams, setValue, setValidity, setTouched, vis, uiState } = props;
+function GaugeOptions({
+  stateParams,
+  setValue,
+  setValidity,
+  setTouched,
+  vis,
+  uiState,
+}: VisOptionsProps<GaugeVisParams>) {
   const [isCustomColors, setIsCustomColors] = useState(false);
 
   useEffect(() => {
@@ -72,18 +78,13 @@ function GaugeOptions(props: VisOptionsProps<GaugeVisParams>) {
     return { from, to };
   }, [stateParams.gauge.colorsRange]);
 
-  const validateRangeValues = useCallback(
+  const validateRange = useCallback(
     ({ from, to }, index) => {
       const leftBound = index === 0 ? -Infinity : stateParams.gauge.colorsRange[index - 1].to;
-      const rightBound =
-        index === stateParams.gauge.colorsRange.length - 1
-          ? Infinity
-          : stateParams.gauge.colorsRange[index + 1].from;
-      const isValid = from >= leftBound && to >= from && to <= rightBound;
+      const isFromValid = from >= leftBound;
+      const isToValid = to >= from;
 
-      setValidity(isValid);
-
-      return !isValid;
+      return [isFromValid, isToValid];
     },
     [stateParams.gauge.colorsRange]
   );
@@ -156,8 +157,9 @@ function GaugeOptions(props: VisOptionsProps<GaugeVisParams>) {
           value={stateParams.gauge.colorsRange}
           setValue={value => setGaugeValue('colorsRange', value)}
           setTouched={setTouched}
+          setValidity={setValidity}
           addRangeValues={addRangeValues}
-          validateRange={validateRangeValues}
+          validateRange={validateRange}
         />
 
         <SwitchOption
