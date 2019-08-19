@@ -250,6 +250,7 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
           label={i18n.translate('regionMap.visParams.outlineWeightLabel', {
             defaultMessage: 'Border thickness',
           })}
+          min={0}
           paramName="outlineWeight"
           value={stateParams.outlineWeight}
           setValue={setValue}
