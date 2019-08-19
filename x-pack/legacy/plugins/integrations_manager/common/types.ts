@@ -5,30 +5,19 @@
  */
 
 import { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/server';
-import {
-  ASSET_TYPE_CONFIG,
-  ASSET_TYPE_DASHBOARD,
-  ASSET_TYPE_INGEST_PIPELINE,
-  ASSET_TYPE_INDEX_PATTERN,
-  ASSET_TYPE_SEARCH,
-  ASSET_TYPE_TIMELION_SHEET,
-  ASSET_TYPE_VISUALIZATION,
-  STATUS_INSTALLED,
-  STATUS_NOT_INSTALLED,
-} from './constants';
 
 export { Request, ResponseToolkit, ServerRoute } from 'hapi';
 
-export type InstallationStatus = typeof STATUS_INSTALLED | typeof STATUS_NOT_INSTALLED;
+export type InstallationStatus = Installed['status'] | NotInstalled['status'];
 
 export type AssetType =
-  | typeof ASSET_TYPE_CONFIG
-  | typeof ASSET_TYPE_DASHBOARD
-  | typeof ASSET_TYPE_INDEX_PATTERN
-  | typeof ASSET_TYPE_INGEST_PIPELINE
-  | typeof ASSET_TYPE_SEARCH
-  | typeof ASSET_TYPE_TIMELION_SHEET
-  | typeof ASSET_TYPE_VISUALIZATION;
+  | 'config'
+  | 'dashboard'
+  | 'index-pattern'
+  | 'ingest-pipeline'
+  | 'search'
+  | 'timelion-sheet'
+  | 'visualization';
 
 // Registry's response types
 // from /list
@@ -44,29 +33,42 @@ export interface RegistryListItem {
 
 // from /package/{name}
 // https://github.com/elastic/integrations-registry/blob/master/docs/api/package.json
+export type ServiceName = 'kibana' | 'elasticsearch' | 'filebeat' | 'metricbeat';
+export type RequirementVersion = string;
+export interface ServiceRequirements {
+  'version.min': RequirementVersion;
+  'version.max': RequirementVersion;
+}
+
+export type RequirementsByServiceName = Record<ServiceName, ServiceRequirements>;
+export interface AssetParts {
+  pkgkey: string;
+  service: ServiceName;
+  type: AssetType;
+  file: string;
+}
+
+export type AssetsGroupedByServiceByType = Record<ServiceName, Record<AssetType, AssetParts[]>>;
 export interface RegistryPackage {
   name: string;
   version: string;
   description: string;
   icon: string;
-  requirement: {
-    kibana: {
-      min: string;
-      max: string;
-    };
-  };
+  requirement: RequirementsByServiceName;
 }
 
 // Managers public HTTP response types
 // from API_LIST_PATTERN
 export type IntegrationList = IntegrationListItem[];
-export type IntegrationListItem = Installable<RegistryListItem>;
-export type IntegrationsGroupedByStatus = {
-  [key in InstallationStatus]: IntegrationList;
-};
+// add title here until it's a part of registry response
+export type IntegrationListItem = Installable<RegistryListItem & { title: string }>;
+export type IntegrationsGroupedByStatus = Record<InstallationStatus, IntegrationList>;
 
 // from API_INFO_PATTERN
-export type IntegrationInfo = Installable<RegistryPackage>;
+// add title here until it's a part of registry response
+export type IntegrationInfo = Installable<
+  RegistryPackage & { assets: AssetsGroupedByServiceByType; title: string }
+>;
 
 // from API_INSTALL_PATTERN
 // returns Installation
@@ -78,12 +80,12 @@ export interface InstallationAttributes extends SavedObjectAttributes {
 export type Installable<T> = Installed<T> | NotInstalled<T>;
 
 export type Installed<T = {}> = T & {
-  status: typeof STATUS_INSTALLED;
+  status: 'installed';
   savedObject: Installation;
 };
 
 export type NotInstalled<T = {}> = T & {
-  status: typeof STATUS_NOT_INSTALLED;
+  status: 'not_installed';
 };
 
 // from API_DELETE_PATTERN

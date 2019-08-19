@@ -13,14 +13,12 @@ type IntegrationCardProps = IntegrationListItem | IntegrationInfo;
 export function IntegrationCard({
   description,
   name,
+  title,
   version,
   icon: iconUrl,
 }: IntegrationCardProps) {
   const { toDetailView } = useLinks();
   const url = toDetailView({ name, version });
-
-  // TODO: Need title or something which uses correct capitalization (e.g. PostgreSQL)
-  const title = description.split(' ')[0];
 
   // try to find a logo in EUI
   const iconType = ICON_TYPES.find(key => key.toLowerCase() === `logo${name}`);
@@ -30,12 +28,7 @@ export function IntegrationCard({
     optionalIcon = <EuiIcon type={iconType} size="l" />;
   } else if (iconUrl) {
     // skipping b/c images from registry are Not Good
-    // no consistency re: sizing / format
-    // most are placeholders of broken/missing image used in browsers
-    // also, EuiCard doesn't treat <img> the same as svg
-    // and matted (extra whitespace around sides) so they look very bad next to icons
-    // TODO: Open issue/discussion in registry repo re: above items
-    // and possibly supporting EUI icon types
+    // https://github.com/elastic/integrations-registry/issues/45
     // optionalIcon = (
     //   <img
     //     width="24"

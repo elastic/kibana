@@ -12,7 +12,9 @@ import { createInstallableFrom } from './index';
 
 export async function getIntegrations(options: { savedObjectsClient: SavedObjectsClientContract }) {
   const { savedObjectsClient } = options;
-  const registryItems = await Registry.fetchList();
+  const registryItems = await Registry.fetchList().then(items =>
+    items.map(item => Object.assign({}, item, { title: item.description.split(' ')[0] }))
+  );
   const searchObjects = registryItems.map(({ name, version }) => ({
     type: SAVED_OBJECT_TYPE,
     id: `${name}-${version}`,
@@ -35,12 +37,19 @@ export async function getIntegrationInfo(options: {
   pkgkey: string;
 }) {
   const { savedObjectsClient, pkgkey } = options;
-  const [item, savedObject] = await Promise.all([
+  const [item, savedObject, paths] = await Promise.all([
     Registry.fetchInfo(pkgkey),
     getInstallationObject({ savedObjectsClient, pkgkey }),
+    Registry.getArchiveInfo(pkgkey),
   ]);
-  const installation = createInstallableFrom(item, savedObject);
-  return installation;
+
+  // add properties that aren't (or aren't yet) on Registry response
+  const updated = Object.assign({}, item, {
+    title: item.description.split(' ')[0],
+    assets: Registry.groupPathsByService(paths),
+  });
+
+  return createInstallableFrom(updated, savedObject);
 }
 
 export async function getInstallationObject(options: {

@@ -6,6 +6,9 @@
 
 import React from 'react';
 import { HashRouter, Switch } from 'react-router-dom';
+import { ThemeProvider } from 'styled-components';
+import { EuiErrorBoundary } from '@elastic/eui';
+import euiLight from '@elastic/eui/dist/eui_theme_light.json';
 import { ChromeStart, CoreSetup, HttpStart, I18nStart } from 'src/core/public';
 import { CoreProvider } from './contexts/core';
 import { setClient } from './data';
@@ -16,11 +19,16 @@ export interface PluginInitializerContext {}
 export type PluginSetup = ReturnType<Plugin['setup']>;
 export type PluginStart = ReturnType<Plugin['start']>;
 
+export interface PluginTheme {
+  eui: typeof euiLight;
+}
+
 export interface PluginCore {
   chrome: ChromeStart;
   http: HttpStart;
   i18n: I18nStart;
   routes: JSX.Element[];
+  theme: PluginTheme;
 }
 
 export class Plugin {
@@ -41,12 +49,16 @@ function Root(props: { core: PluginCore }) {
   const { i18n, routes } = props.core;
 
   return (
-    <CoreProvider core={props.core}>
-      <i18n.Context>
-        <HashRouter>
-          <Switch>{routes}</Switch>
-        </HashRouter>
-      </i18n.Context>
-    </CoreProvider>
+    <EuiErrorBoundary>
+      <CoreProvider core={props.core}>
+        <i18n.Context>
+          <ThemeProvider theme={props.core.theme}>
+            <HashRouter>
+              <Switch>{routes}</Switch>
+            </HashRouter>
+          </ThemeProvider>
+        </i18n.Context>
+      </CoreProvider>
+    </EuiErrorBoundary>
   );
 }
