@@ -24,6 +24,7 @@ interface OwnProps {
 
 export function manageQuery<T>(WrappedComponent: React.ComponentClass<T> | React.ComponentType<T>) {
   class ManageQuery extends React.PureComponent<OwnProps & T> {
+    static displayName: string;
     public componentDidUpdate(prevProps: OwnProps) {
       const { loading, id, refetch, setQuery, inspect = null } = this.props;
       if (prevProps.loading !== loading) {
@@ -36,6 +37,6 @@ export function manageQuery<T>(WrappedComponent: React.ComponentClass<T> | React
       return <WrappedComponent {...otherProps} />;
     }
   }
-
+  ManageQuery.displayName = `ManageQuery (${WrappedComponent.displayName || 'Unknown'})`;
   return ManageQuery;
 }

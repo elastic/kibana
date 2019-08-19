@@ -126,6 +126,8 @@ export const SystemGenericLine = pure<Props>(
   )
 );
 
+SystemGenericLine.displayName = 'SystemGenericLine';
+
 interface GenericDetailsProps {
   browserFields: BrowserFields;
   data: Ecs;
@@ -174,3 +176,5 @@ export const SystemGenericDetails = pure<GenericDetailsProps>(({ data, contextId
     </Details>
   );
 });
+
+SystemGenericDetails.displayName = 'SystemGenericDetails';

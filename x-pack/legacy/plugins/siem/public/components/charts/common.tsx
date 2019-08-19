@@ -30,6 +30,9 @@ const chartDefaultRendering: Rendering = 'canvas';
 const FlexGroup = styled(EuiFlexGroup)`
   height: 100%;
 `;
+
+FlexGroup.displayName = 'FlexGroup';
+
 export type UpdateDateRange = (min: number, max: number) => void;
 
 export const ChartHolder = () => (
@@ -88,6 +91,8 @@ export const WrappedByAutoSizer = styled.div`
     z-index: 100;
   }
 `;
+
+WrappedByAutoSizer.displayName = 'WrappedByAutoSizer';
 
 export enum SeriesType {
   BAR = 'bar',
