@@ -17,7 +17,8 @@ export default function exploreRepositoryFunctionalTests({
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
-  describe('File Tree', function() {
+  // FLAKY: https://github.com/elastic/kibana/issues/43492
+  describe.skip('File Tree', function() {
     this.tags('smoke');
     const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
 
