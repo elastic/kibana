@@ -31,7 +31,12 @@ function buildSuggestion({
   datasourceSuggestionId?: number;
 }) {
   const columnOrder = (updatedLayer || state.layers[layerId]).columnOrder;
-  const columns = (updatedLayer || state.layers[layerId]).columns;
+  const columnMap = (updatedLayer || state.layers[layerId]).columns;
+  const columns = columnOrder.map(columnId => ({
+    columnId,
+    operation: columnToOperation(columnMap[columnId]),
+  }));
+
   return {
     state: updatedLayer
       ? {
@@ -44,11 +49,8 @@ function buildSuggestion({
       : state,
 
     table: {
-      columns: columnOrder.map(columnId => ({
-        columnId,
-        operation: columnToOperation(columns[columnId]),
-      })),
-      isMultiRow: isMultiRow || true,
+      columns,
+      isMultiRow: isMultiRow || columns.some(col => !columnMap[col.columnId].isMetric),
       datasourceSuggestionId: datasourceSuggestionId || 0,
       layerId,
     },
@@ -100,6 +102,7 @@ function getExistingLayerSuggestionsForField(
   } else if (!usableAsBucketOperation && operations.length > 0) {
     updatedLayer = addFieldAsMetricOperation(layer, layerId, indexPattern, field);
   }
+
   return updatedLayer
     ? [
         buildSuggestion({

@@ -54,15 +54,21 @@ describe('MetricConfigPanel', () => {
     const exampleOperation: Operation = {
       dataType: 'number',
       isBucketed: false,
+      isMetric: false,
       label: 'bar',
     };
     const ops: Operation[] = [
-      { ...exampleOperation, dataType: 'number' },
+      { ...exampleOperation, isMetric: true, dataType: 'number' },
+      { ...exampleOperation, isMetric: false, dataType: 'number' },
       { ...exampleOperation, dataType: 'string' },
-      { ...exampleOperation, dataType: 'boolean' },
+      { ...exampleOperation, isMetric: true, dataType: 'boolean' },
+      { ...exampleOperation, isMetric: false, dataType: 'boolean' },
       { ...exampleOperation, dataType: 'date' },
     ];
     expect(columnId).toEqual('shazm');
-    expect(ops.filter(filterOperations)).toEqual([{ ...exampleOperation, dataType: 'number' }]);
+    expect(ops.filter(filterOperations)).toEqual([
+      { ...exampleOperation, isMetric: true, dataType: 'number' },
+      { ...exampleOperation, isMetric: true, dataType: 'boolean' },
+    ]);
   });
 });

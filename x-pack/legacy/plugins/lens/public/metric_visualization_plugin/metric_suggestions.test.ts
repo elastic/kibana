@@ -15,6 +15,7 @@ describe('metric_suggestions', () => {
         dataType: 'number',
         label: `Avg ${columnId}`,
         isBucketed: false,
+        isMetric: true,
       },
     };
   }
@@ -26,6 +27,7 @@ describe('metric_suggestions', () => {
         dataType: 'string',
         label: `Top 5 ${columnId}`,
         isBucketed: true,
+        isMetric: false,
       },
     };
   }
@@ -36,6 +38,7 @@ describe('metric_suggestions', () => {
       operation: {
         dataType: 'date',
         isBucketed: true,
+        isMetric: false,
         label: `${columnId} histogram`,
       },
     };

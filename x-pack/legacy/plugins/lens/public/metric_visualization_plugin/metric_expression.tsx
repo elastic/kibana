@@ -7,7 +7,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { MetricConfig } from './types';
 import { LensMultiTable } from '../types';
 import { RenderFunction } from './plugin';

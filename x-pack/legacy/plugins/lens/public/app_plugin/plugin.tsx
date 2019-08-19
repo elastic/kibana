@@ -7,7 +7,7 @@
 import React from 'react';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { HashRouter, Switch, Route, RouteComponentProps } from 'react-router-dom';
-import chrome, { Chrome } from 'ui/chrome';
+import chrome from 'ui/chrome';
 import { Storage } from 'ui/storage';
 import { editorFrameSetup, editorFrameStop } from '../editor_frame_plugin';
 import { indexPatternDatasourceSetup, indexPatternDatasourceStop } from '../indexpattern_plugin';
