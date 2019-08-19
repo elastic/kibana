@@ -12,7 +12,7 @@
 
 import Joi from 'joi';
 import { intervalFromDate, intervalFromNow } from './lib/intervals';
-import { Logger } from './lib/logger';
+import { Logger } from './types';
 import { BeforeRunFunction } from './lib/middleware';
 import {
   CancelFunction,
@@ -205,14 +205,14 @@ export class TaskManagerRunner implements TaskRunner {
       return task.cancel();
     }
 
-    this.logger.warning(`The task ${this} is not cancellable.`);
+    this.logger.warn(`The task ${this} is not cancellable.`);
   }
 
   private validateResult(result?: RunResult | void): RunResult {
     const { error } = Joi.validate(result, validateRunResult);
 
     if (error) {
-      this.logger.warning(`Invalid task result for ${this}: ${error.message}`);
+      this.logger.warn(`Invalid task result for ${this}: ${error.message}`);
     }
 
     return result || { state: {} };
@@ -267,9 +267,7 @@ export class TaskManagerRunner implements TaskRunner {
       await this.store.remove(this.instance.id);
     } catch (err) {
       if (err.statusCode === 404) {
-        this.logger.warning(
-          `Task cleanup of ${this} failed in processing. Was remove called twice?`
-        );
+        this.logger.warn(`Task cleanup of ${this} failed in processing. Was remove called twice?`);
       } else {
         throw err;
       }
