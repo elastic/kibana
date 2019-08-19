@@ -40,6 +40,7 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>({
           {
             dataType: 'number',
             isBucketed: false,
+            scale: 'ratio',
           },
         ];
       }
@@ -66,6 +67,7 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>({
         suggestedPriority,
         sourceField: field ? field.name : '',
         isBucketed: false,
+        scale: 'ratio',
       } as T;
     },
     toEsAggsConfig: (column, columnId) => ({

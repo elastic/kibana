@@ -19,6 +19,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
       {
         dataType: 'number',
         isBucketed: false,
+        scale: 'ratio',
       },
     ];
   },
@@ -31,6 +32,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
       operationType: 'count',
       suggestedPriority,
       isBucketed: false,
+      scale: 'ratio',
     };
   },
   toEsAggsConfig: (column, columnId) => ({

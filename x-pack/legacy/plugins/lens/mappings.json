@@ -7,14 +7,13 @@
       "visualizationType": {
         "type": "keyword"
       },
-      "activeDatasourceId": {
-        "type": "keyword"
-      },
       "state": {
-        "type": "text"
+        "enabled": false,
+        "type": "object"
       },
       "expression": {
-        "type": "text"
+        "index": false,
+        "type": "keyword"
       }
     }
   }

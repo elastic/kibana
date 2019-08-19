@@ -50,6 +50,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
         {
           dataType: 'date',
           isBucketed: true,
+          scale: 'interval',
         },
       ];
     }
@@ -79,6 +80,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       suggestedPriority,
       sourceField: field.name,
       isBucketed: true,
+      scale: 'interval',
       params: {
         interval,
         timeZone,
