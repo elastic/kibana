@@ -7,15 +7,23 @@
 import { State, Context } from '../types';
 import { parseDuration } from './parse_duration';
 
+type Meta = Record<string, any>;
+
+interface FireOptions {
+  actionGroup: string;
+  context: Context;
+  state: State;
+}
+
 interface ConstructorOptions {
-  state?: Record<string, any>;
-  meta?: Record<string, any>;
+  state?: State;
+  meta?: Meta;
 }
 
 export class AlertInstance {
-  private fireOptions?: Record<string, any>;
-  private meta: Record<string, any>;
-  private state: Record<string, any>;
+  private fireOptions?: FireOptions;
+  private meta: Meta;
+  private state: State;
 
   constructor({ state = {}, meta = {} }: ConstructorOptions = {}) {
     this.state = state;
@@ -90,7 +98,7 @@ export class AlertInstance {
     return this;
   }
 
-  replaceMeta(meta: Record<string, any>) {
+  replaceMeta(meta: Meta) {
     this.meta = meta;
     return this;
   }
