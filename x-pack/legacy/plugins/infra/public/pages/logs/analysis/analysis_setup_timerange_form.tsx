@@ -14,6 +14,7 @@ import {
   EuiFormRow,
   EuiDatePicker,
   EuiFlexGroup,
+  EuiFormControlLayout,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CreateMLJobsButton } from './create_ml_jobs_button';
@@ -82,14 +83,17 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
           label={startTimeLabel}
         >
           <EuiFlexGroup gutterSize="s">
-            <EuiDatePicker
-              showTimeSelect
-              selected={startTime}
-              onChange={setStartTime}
-              placeholder={startTimeDefaultDescription}
-              maxDate={now}
-              onClear={() => setStartTime(null)}
-            />
+            <EuiFormControlLayout
+              clear={startTime ? { onClick: () => setStartTime(null) } : undefined}
+            >
+              <EuiDatePicker
+                showTimeSelect
+                selected={startTime}
+                onChange={setStartTime}
+                placeholder={startTimeDefaultDescription}
+                maxDate={now}
+              />
+            </EuiFormControlLayout>
           </EuiFlexGroup>
         </EuiFormRow>
         <EuiFormRow
@@ -100,25 +104,26 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
           label={endTimeLabel}
         >
           <EuiFlexGroup gutterSize="s">
-            <EuiDatePicker
-              showTimeSelect
-              selected={endTime}
-              onChange={setEndTime}
-              placeholder={endTimeDefaultDescription}
-              openToDate={now}
-              minDate={now}
-              minTime={
-                selectedEndTimeIsToday
-                  ? now
-                  : moment()
-                      .hour(0)
-                      .minutes(0)
-              }
-              maxTime={moment()
-                .hour(23)
-                .minutes(59)}
-              onClear={() => setEndTime(null)}
-            />
+            <EuiFormControlLayout clear={endTime ? { onClick: () => setEndTime(null) } : undefined}>
+              <EuiDatePicker
+                showTimeSelect
+                selected={endTime}
+                onChange={setEndTime}
+                placeholder={endTimeDefaultDescription}
+                openToDate={now}
+                minDate={now}
+                minTime={
+                  selectedEndTimeIsToday
+                    ? now
+                    : moment()
+                        .hour(0)
+                        .minutes(0)
+                }
+                maxTime={moment()
+                  .hour(23)
+                  .minutes(59)}
+              />
+            </EuiFormControlLayout>
           </EuiFlexGroup>
         </EuiFormRow>
         <CreateMLJobsButton isLoading={isSettingUp} onClick={onClickCreateJob} />
