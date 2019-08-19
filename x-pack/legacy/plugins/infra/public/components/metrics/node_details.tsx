@@ -15,6 +15,12 @@ interface Props {
   metadata?: InfraMetadata | null;
 }
 
+interface FieldDef {
+  field: string;
+  label: string;
+  isBoolean?: boolean;
+}
+
 const FIELDS = [
   {
     field: 'cloud.instance.id',
@@ -51,6 +57,7 @@ const FIELDS = [
     label: i18n.translate('xpack.infra.nodeDetails.labels.containerized', {
       defaultMessage: 'Containerized',
     }),
+    isBoolean: true,
   },
   {
     field: 'cloud.project.id',
@@ -76,22 +83,22 @@ const FIELDS = [
       defaultMessage: 'Instance Name',
     }),
   },
-];
+] as FieldDef[];
 
-const getLabelForField = (field: string) => {
+const getLabelForField = ({ field }: FieldDef) => {
   const fieldDef = FIELDS.find(f => f.field === field);
   if (!fieldDef) return field;
   return fieldDef.label;
 };
 
-const getValueForField = (metadata: InfraMetadata, field: string) => {
-  const value = get(metadata.info, field, '--');
-  if (field !== 'host.containerized') {
-    return value;
+const getValueForField = (metadata: InfraMetadata, { field, isBoolean }: FieldDef) => {
+  if (isBoolean) {
+    return get(metadata.info, field, false)
+      ? i18n.translate('xpack.infra.nodeDetails.yes', { defaultMessage: 'Yes' })
+      : i18n.translate('xpack.infra.nodeDetails.no', { defaultMessage: 'No' });
   }
-  return value !== '--'
-    ? i18n.translate('xpack.infra.nodeDetails.yes', { defaultMessage: 'Yes' })
-    : i18n.translate('xpack.infra.nodeDetails.no', { defaultMessage: 'No' });
+  const value = get(metadata.info, field, '--');
+  return value;
 };
 
 export const NodeDetails = ({ metadata }: Props) => {
@@ -116,8 +123,8 @@ export const NodeDetails = ({ metadata }: Props) => {
         />
       </Controls>
       <EuiFlexGrid columns={4} style={{ flexGrow: 1 }}>
-        {FIELDS.slice(0, isOpen ? FIELDS.length : 4).map(({ field }) => (
-          <EuiFlexItem key={field} style={{ minWidth: 0 }}>
+        {FIELDS.slice(0, isOpen ? FIELDS.length : 4).map(field => (
+          <EuiFlexItem key={field.field} style={{ minWidth: 0 }}>
             <EuiTitle size="xs">
               <h4>{getLabelForField(field)}</h4>
             </EuiTitle>
@@ -130,8 +137,10 @@ export const NodeDetails = ({ metadata }: Props) => {
 };
 
 const NodeDetailsContainer = euiStyled.div`
-border-top: 1px solid ${props => props.theme.eui.euiBorderColor};
-border-bottom: 1px solid ${props => props.theme.eui.euiBorderColor};
+border-top: ${props => props.theme.eui.euiBorderWidthThin} solid ${props =>
+  props.theme.eui.euiBorderColor};
+border-bottom: ${props => props.theme.eui.euiBorderWidthThin} solid ${props =>
+  props.theme.eui.euiBorderColor};
 padding: ${props => props.theme.eui.paddingSizes.m} 0;
 margin-bottom: ${props => props.theme.eui.paddingSizes.m};
 display: flex;
