@@ -209,6 +209,48 @@ describe('PKIAuthenticationProvider', () => {
       });
     });
 
+    it('gets an access token in exchange to a self-signed certificate and stores it in the state.', async () => {
+      const user = mockAuthenticatedUser();
+      const request = httpServerMock.createKibanaRequest({
+        headers: {},
+        socket: getMockSocket({
+          authorized: true,
+          peerCertificate: getMockPeerCertificate('2A:7A:C2:DD'),
+        }),
+      });
+
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
+      mockOptions.client.asScoped.mockReturnValue(
+        (mockScopedClusterClient as unknown) as jest.Mocked<ScopedClusterClient>
+      );
+      mockOptions.client.callAsInternalUser.mockResolvedValue({ access_token: 'access-token' });
+
+      const authenticationResult = await provider.authenticate(request);
+
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.delegatePKI', {
+        body: { x509_certificate_chain: ['fingerprint:2A:7A:C2:DD:base64'] },
+      });
+
+      expect(mockOptions.client.asScoped).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.asScoped).toHaveBeenCalledWith({
+        headers: { authorization: `Bearer access-token` },
+      });
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
+
+      expect(request.headers).not.toHaveProperty('authorization');
+      expect(authenticationResult.succeeded()).toBe(true);
+      expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.authHeaders).toEqual({ authorization: 'Bearer access-token' });
+      expect(authenticationResult.authResponseHeaders).toBeUndefined();
+      expect(authenticationResult.state).toEqual({
+        accessToken: 'access-token',
+        peerCertificateFingerprint256: '2A:7A:C2:DD',
+      });
+    });
+
     it('invalidates existing token and gets a new one if fingerprints do not match.', async () => {
       const user = mockAuthenticatedUser();
       const request = httpServerMock.createKibanaRequest({
