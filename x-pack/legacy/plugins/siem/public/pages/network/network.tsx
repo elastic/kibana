@@ -50,7 +50,7 @@ interface NetworkComponentReduxProps {
 
 type NetworkComponentProps = NetworkComponentReduxProps;
 const NetworkComponent = pure<NetworkComponentProps>(
-  ({ filterQuery, setAbsoluteRangeDatePicker }) => (
+  ({ filterQuery, queryExpression, setAbsoluteRangeDatePicker }) => (
     <WithSource sourceId="default">
       {({ indicesExist, indexPattern }) =>
         indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
@@ -69,7 +69,7 @@ const NetworkComponent = pure<NetworkComponentProps>(
                 <UseUrlState indexPattern={indexPattern}>
                   {({ isInitializing }) => (
                     <>
-                      <SavedMap />
+                      <SavedMap filterQuery={queryExpression} startDate={from} endDate={to} />
                       <KpiNetworkQuery
                         endDate={to}
                         filterQuery={filterQuery}
@@ -215,8 +215,10 @@ NetworkComponent.displayName = 'NetworkComponent';
 
 const makeMapStateToProps = () => {
   const getNetworkFilterQueryAsJson = networkSelectors.networkFilterQueryAsJson();
+  const getNetworkFilterExpression = networkSelectors.networkFilterExpression();
   const mapStateToProps = (state: State) => ({
     filterQuery: getNetworkFilterQueryAsJson(state, networkModel.NetworkType.page) || '',
+    queryExpression: getNetworkFilterExpression(state, networkModel.NetworkType.page) || '',
   });
   return mapStateToProps;
 };

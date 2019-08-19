@@ -39,6 +39,12 @@ export const networkFilterQueryAsJson = () =>
     network => (network.filterQuery ? network.filterQuery.serializedQuery : null)
   );
 
+export const networkFilterExpression = () =>
+  createSelector(
+    selectNetworkByType,
+    network => (network.filterQuery ? network.filterQuery.kuery.expression : null)
+  );
+
 export const networkFilterQueryAsKuery = () =>
   createSelector(
     selectNetworkByType,
