@@ -35,10 +35,13 @@ uiModules
     ['vis', { watchDepth: 'collection' }],
     ['uiState', { watchDepth: 'collection' }],
     ['setValue', { watchDepth: 'reference' }],
+    ['setValidity', { watchDepth: 'reference' }],
+    ['setTouched', { watchDepth: 'reference' }],
   ]))
   .directive('visEditorVisOptions', function ($compile) {
     return {
       restrict: 'E',
+      require: '?^ngModel',
       scope: {
         vis: '=',
         visData: '=',
@@ -48,9 +51,21 @@ uiModules
         editorState: '=',
         onAggParamsChange: '=',
       },
-      link: function ($scope, $el) {
+      link: function ($scope, $el, attrs, ngModelCtrl) {
         $scope.setValue = (paramName, value) =>
           $scope.onAggParamsChange($scope.editorState.params, paramName, value);
+
+        $scope.setValidity = isValid => {
+          ngModelCtrl.$setValidity(`visOptions`, isValid);
+        };
+
+        $scope.setTouched = isTouched => {
+          if (isTouched) {
+            ngModelCtrl.$setTouched();
+          } else {
+            ngModelCtrl.$setUntouched();
+          }
+        };
 
         const comp = typeof $scope.editor === 'string' ?
           $scope.editor :
@@ -59,7 +74,9 @@ uiModules
             state-params="editorState.params"
             vis="vis"
             ui-state="uiState"
-            set-value="setValue">
+            set-value="setValue"
+            set-validity="setValidity"
+            set-touched="setTouched">
           </vis-options-react-wrapper>`;
         const $editor = $compile(comp)($scope);
         $el.append($editor);

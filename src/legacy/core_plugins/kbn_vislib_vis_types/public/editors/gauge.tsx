@@ -31,7 +31,7 @@ import { TextInputOption } from '../controls/text_input';
 import { GaugeVisParams } from '../gauge';
 
 function GaugeOptions(props: VisOptionsProps<GaugeVisParams>) {
-  const { stateParams, setValue, vis, uiState } = props;
+  const { stateParams, setValue, setValidity, setTouched, vis, uiState } = props;
   const [isCustomColors, setIsCustomColors] = useState(false);
 
   useEffect(() => {
@@ -66,11 +66,27 @@ function GaugeOptions(props: VisOptionsProps<GaugeVisParams>) {
 
   const addRangeValues = useCallback(() => {
     const previousRange = last(stateParams.gauge.colorsRange);
-    const from = previousRange ? previousRange.to : 0;
-    const to = previousRange ? from + (previousRange.to - previousRange.from) : 100;
+    const from = previousRange.to ? previousRange.to : 0;
+    const to = previousRange.to ? from + (previousRange.to - (previousRange.from || 0)) : 100;
 
     return { from, to };
   }, [stateParams.gauge.colorsRange]);
+
+  const validateRangeValues = useCallback(
+    ({ from, to }, index) => {
+      const leftBound = index === 0 ? -Infinity : stateParams.gauge.colorsRange[index - 1].to;
+      const rightBound =
+        index === stateParams.gauge.colorsRange.length - 1
+          ? Infinity
+          : stateParams.gauge.colorsRange[index + 1].from;
+      const isValid = from >= leftBound && to >= from && to <= rightBound;
+
+      setValidity(isValid);
+
+      return !isValid;
+    },
+    [stateParams.gauge.colorsRange]
+  );
 
   const resetColorsButton = (
     <EuiText size="xs">
@@ -136,14 +152,12 @@ function GaugeOptions(props: VisOptionsProps<GaugeVisParams>) {
         <EuiSpacer size="s" />
 
         <RangesParamEditor
+          hidePlaceholders={true}
           value={stateParams.gauge.colorsRange}
           setValue={value => setGaugeValue('colorsRange', value)}
+          setTouched={setTouched}
           addRangeValues={addRangeValues}
-          validateFrom={(value, index) => {
-            const greaterThan =
-              index === 0 ? -Infinity : stateParams.gauge.colorsRange[index - 1].to;
-          }}
-          validateTo={value => {}}
+          validateRange={validateRangeValues}
         />
 
         <SwitchOption
