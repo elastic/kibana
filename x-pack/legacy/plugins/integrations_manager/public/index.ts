@@ -4,16 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import ReactDOM from 'react-dom';
+import euiLight from '@elastic/eui/dist/eui_theme_light.json';
 import 'ui/autoload/all';
 import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
 import { npSetup, npStart } from 'ui/new_platform';
-import { PLUGIN } from '../common/constants';
 import { Plugin, PluginInitializerContext, PluginStart } from './plugin';
 import { routes } from './routes';
 
-const REACT_APP_ROOT_ID = `react-${PLUGIN.ID}-root`;
-const template = `<div id="${REACT_APP_ROOT_ID}" class="integrationsManagerReactRoot"></div>`;
+// create './types' later and move there?
+export type DetailViewPanelName = 'overview' | 'assets' | 'data-sources';
+
+const REACT_APP_ROOT_ID = 'integrationsManager__root';
+const template = `<div id="${REACT_APP_ROOT_ID}"></div>`;
 const getRootEl = () => document.getElementById(REACT_APP_ROOT_ID);
 
 main();
@@ -30,6 +33,7 @@ async function main(): Promise<void> {
   const { root }: PluginStart = plugin.start({
     ...npStart.core,
     routes,
+    theme: { eui: euiLight },
   });
   const container = getRootEl();
 

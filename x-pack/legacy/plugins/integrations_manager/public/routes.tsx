@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { Route } from 'react-router-dom';
-import { Detail } from './screens/detail';
+import { Detail, DetailProps } from './screens/detail';
 import { Home } from './screens/home';
 import { PLUGIN } from '../common/constants';
 
@@ -14,16 +14,8 @@ import { PLUGIN } from '../common/constants';
 export const patterns = {
   APP_ROOT: `/app/${PLUGIN.ID}`,
   LIST_VIEW: '/',
-  DETAIL_VIEW: '/detail/:pkgkey',
+  DETAIL_VIEW: '/detail/:pkgkey/:panel?',
 };
-
-interface DetailMatch {
-  match: {
-    params: {
-      pkgkey: string;
-    };
-  };
-}
 
 export const routes = [
   <Route key="home" path={patterns.LIST_VIEW} exact={true} component={Home} />,
@@ -31,6 +23,12 @@ export const routes = [
     key="detail"
     path={patterns.DETAIL_VIEW}
     exact={true}
-    render={(props: DetailMatch) => <Detail package={props.match.params.pkgkey} />}
+    render={(props: DetailMatch) => <Detail {...props.match.params} />}
   />,
 ];
+
+interface DetailMatch {
+  match: {
+    params: DetailProps;
+  };
+}

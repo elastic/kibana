@@ -4,8 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RegistryList, RegistryPackage } from '../../common/types';
-import { cacheGet, cacheSet, cacheHas } from './cache';
+import {
+  AssetsGroupedByServiceByType,
+  AssetParts,
+  RegistryList,
+  RegistryPackage,
+} from '../../common/types';
+import { cacheGet, cacheSet } from './cache';
 import { ArchiveEntry, untarBuffer, unzipBuffer } from './extract';
 import { fetchUrl, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
@@ -33,7 +38,6 @@ export async function getArchiveInfo(
     const { path, buffer } = entry;
     const { file } = pathParts(path);
     if (!file) return;
-    if (cacheHas(path)) return;
     if (buffer) {
       cacheSet(path, buffer);
       paths.push(path);
@@ -45,10 +49,11 @@ export async function getArchiveInfo(
   return paths;
 }
 
-export function pathParts(path: string) {
+export function pathParts(path: string): AssetParts {
   const [pkgkey, service, type, file] = path.split('/');
+  const parts = { pkgkey, service, type, file, path } as AssetParts;
 
-  return { pkgkey, service, type, file };
+  return parts;
 }
 
 async function extract(
@@ -85,4 +90,18 @@ export function getAsset(key: string) {
   if (buffer === undefined) throw new Error(`Cannot find asset ${key}`);
 
   return buffer;
+}
+
+export function groupPathsByService(paths: string[]) {
+  // ASK: best way, if any, to avoid `any`?
+  const byServiceByType: AssetsGroupedByServiceByType = paths.reduce((map: any, path) => {
+    const parts = pathParts(path);
+    if (!map[parts.service]) map[parts.service] = {};
+    if (!map[parts.service][parts.type]) map[parts.service][parts.type] = [];
+    map[parts.service][parts.type].push(parts);
+
+    return map;
+  }, {});
+
+  return byServiceByType;
 }

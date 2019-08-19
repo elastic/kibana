@@ -18,14 +18,3 @@ export const PLUGIN = {
 };
 
 export const SAVED_OBJECT_TYPE = 'integrations-manager';
-
-export const ASSET_TYPE_CONFIG = 'config';
-export const ASSET_TYPE_DASHBOARD = 'dashboard';
-export const ASSET_TYPE_INGEST_PIPELINE = 'ingest-pipeline';
-export const ASSET_TYPE_INDEX_PATTERN = 'index-pattern';
-export const ASSET_TYPE_SEARCH = 'search';
-export const ASSET_TYPE_TIMELION_SHEET = 'timelion-sheet';
-export const ASSET_TYPE_VISUALIZATION = 'visualization';
-
-export const STATUS_INSTALLED = 'installed';
-export const STATUS_NOT_INSTALLED = 'not_installed';

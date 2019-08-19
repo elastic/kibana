@@ -5,7 +5,6 @@
  */
 
 import { HttpHandler } from 'src/core/public';
-import { STATUS_INSTALLED, STATUS_NOT_INSTALLED } from '../common/constants';
 import { getInstallPath, getInfoPath, getListPath, getRemovePath } from '../common/routes';
 import { IntegrationInfo, IntegrationList, IntegrationsGroupedByStatus } from '../common/types';
 
@@ -26,8 +25,8 @@ export async function getIntegrationsGroupedByStatus() {
   const path = getListPath();
   const list: IntegrationList = await _fetch(path);
   const initialValue: IntegrationsGroupedByStatus = {
-    [STATUS_INSTALLED]: [],
-    [STATUS_NOT_INSTALLED]: [],
+    installed: [],
+    not_installed: [],
   };
 
   const groupedByStatus = list.reduce((grouped, item) => {

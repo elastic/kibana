@@ -3,15 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { Fragment } from 'react';
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
-import { STATUS_INSTALLED, STATUS_NOT_INSTALLED } from '../../common/constants';
 import {
   InstallationStatus,
   IntegrationsGroupedByStatus,
   IntegrationList,
   IntegrationListItem,
 } from '../../common/types';
+import { entries } from '../../common/type_utils';
 import { IntegrationCard } from './integration_card';
 
 interface GridProps {
@@ -23,30 +23,24 @@ interface ListProps {
   list: IntegrationList;
 }
 
-// Calling Object.entries(IntegrationsGroupedByStatus) gave `status: string`
-// which causes a "string is not assignable to type InstallationStatus` error
-// see https://github.com/Microsoft/TypeScript/issues/20322
-// and https://github.com/Microsoft/TypeScript/pull/12253#issuecomment-263132208
-const entries = Object.entries as <T>(o: T) => Array<[Extract<keyof T, string>, T[keyof T]]>;
-
 export function IntegrationsGridByStatus({ map }: GridProps) {
   if (!map) return null;
   return (
-    <>
+    <Fragment>
       {entries(map).map(([status, list]) => (
         <IntegrationListGrid key={status} status={status} list={list} />
       ))}
-    </>
+    </Fragment>
   );
 }
 
 export function IntegrationListGrid({ status, list }: ListProps) {
-  const titles = {
-    [STATUS_INSTALLED]: 'Your Integrations',
-    [STATUS_NOT_INSTALLED]: 'Available Integrations',
+  const titles: Record<InstallationStatus, string> = {
+    installed: 'Your Integrations',
+    not_installed: 'Available Integrations',
   };
   return (
-    <>
+    <Fragment>
       <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
@@ -63,7 +57,7 @@ export function IntegrationListGrid({ status, list }: ListProps) {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-    </>
+    </Fragment>
   );
 }
 

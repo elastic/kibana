@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -11,41 +11,57 @@ import {
   EuiImage,
   EuiPage,
   EuiPageBody,
+  EuiPageWidthProps,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { PLUGIN, STATUS_INSTALLED, STATUS_NOT_INSTALLED } from '../../common/constants';
+import styled from 'styled-components';
+import { PLUGIN } from '../../common/constants';
 import { IntegrationsGroupedByStatus } from '../../common/types';
 import { IntegrationsGridByStatus } from '../components/integration_list_grid';
 import { getIntegrationsGroupedByStatus } from '../data';
-import { useBreadcrumbs, useLinks } from '../hooks';
+import { useBreadcrumbs, useCore, useLinks } from '../hooks';
 
 export function Home() {
   const { toListView } = useLinks();
   useBreadcrumbs([{ text: PLUGIN.TITLE, href: toListView() }]);
 
   const [map, setMap] = useState<IntegrationsGroupedByStatus>({
-    [STATUS_INSTALLED]: [],
-    [STATUS_NOT_INSTALLED]: [],
+    installed: [],
+    not_installed: [],
   });
 
   useEffect(() => {
     getIntegrationsGroupedByStatus().then(setMap);
   }, []);
 
+  return <HomeLayout map={map} restrictWidth={1200} />;
+}
+
+type LayoutProps = {
+  map: IntegrationsGroupedByStatus;
+} & EuiPageWidthProps;
+function HomeLayout(props: LayoutProps) {
+  const { map, restrictWidth } = props;
+  const { theme } = useCore();
+  const FullWidthHeader = styled(EuiPage)`
+    border-bottom: ${theme.eui.euiBorderThin};
+    padding-bottom: ${theme.eui.paddingSizes.s};
+  `;
+
   return (
-    <>
-      <EuiPage style={{ borderBottom: '1px solid #D3DAE6', paddingBottom: '7px' }}>
-        <EuiPageBody restrictWidth={1200}>
+    <Fragment>
+      <FullWidthHeader>
+        <EuiPageBody restrictWidth={restrictWidth}>
           <Header />
         </EuiPageBody>
-      </EuiPage>
+      </FullWidthHeader>
       <EuiPage>
-        <EuiPageBody restrictWidth={1200}>
+        <EuiPageBody restrictWidth={restrictWidth}>
           <IntegrationsGridByStatus map={map} />
         </EuiPageBody>
       </EuiPage>
-    </>
+    </Fragment>
   );
 }
 
@@ -63,19 +79,18 @@ function Header() {
 }
 
 function HeroCopy() {
+  const { theme } = useCore();
+  const Subtitle = styled(EuiText)`
+    color: ${theme.eui.euiColorDarkShade};
+  `;
+
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
         <EuiTitle size="l">
           <h1>Add Your Data</h1>
         </EuiTitle>
-        <EuiText
-          style={{
-            color: '#69707D', // euiColorDarkShade
-          }}
-        >
-          Some creative copy about integrations goes here.
-        </EuiText>
+        <Subtitle>Some creative copy about integrations goes here.</Subtitle>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -83,12 +98,12 @@ function HeroCopy() {
 
 function HeroImage() {
   const { toAssets } = useLinks();
+
   return (
     <EuiFlexGroup justifyContent="flexEnd">
       <EuiImage
         alt="Illustration of computer"
         url={toAssets('illustration_kibana_getting_started@2x.png')}
-        style={{ width: '475px', height: '273px' }}
       />
     </EuiFlexGroup>
   );

@@ -5,7 +5,7 @@
  */
 
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server/';
-import { SAVED_OBJECT_TYPE, ASSET_TYPE_INGEST_PIPELINE } from '../../common/constants';
+import { SAVED_OBJECT_TYPE } from '../../common/constants';
 import { AssetReference, AssetType, InstallationAttributes } from '../../common/types';
 import * as Registry from '../registry';
 import { CallESAsCurrentUser, assetUsesObjects, getInstallationObject } from './index';
@@ -44,7 +44,7 @@ export async function installAssets(options: {
     const references = await installObjects({ savedObjectsClient, pkgkey, asset });
     return references;
   }
-  if (asset === ASSET_TYPE_INGEST_PIPELINE) {
+  if (asset === 'ingest-pipeline') {
     const references = await installPipelines({ callCluster, pkgkey });
     return references;
   }
@@ -102,7 +102,7 @@ async function installPipelines({
   pkgkey: string;
 }) {
   const isPipeline = ({ path }: Registry.ArchiveEntry) =>
-    Registry.pathParts(path).type === ASSET_TYPE_INGEST_PIPELINE;
+    Registry.pathParts(path).type === 'ingest-pipeline';
   const paths = await Registry.getArchiveInfo(pkgkey, isPipeline);
   const installationPromises = paths.map(path => installPipeline({ callCluster, path }));
   const references = await Promise.all(installationPromises);
