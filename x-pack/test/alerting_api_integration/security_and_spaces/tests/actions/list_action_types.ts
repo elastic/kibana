@@ -35,7 +35,7 @@ export default function listActionTypesTests({ getService }: FtrProviderContext)
               expect(response.body).to.eql({
                 statusCode: 404,
                 error: 'Not Found',
-                message: 'Not Found'
+                message: 'Not Found',
               });
               break;
             case 'global_read at space1':
