@@ -20,6 +20,6 @@
       "_flush",
       "{indices}/_flush"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-flush.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-flush.html"
   }
 }
