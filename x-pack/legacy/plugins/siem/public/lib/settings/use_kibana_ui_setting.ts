@@ -39,9 +39,7 @@ export const useKibanaUiSetting = (key: string, defaultValue?: GenericValue) => 
   }
 
   if (key === DEFAULT_TIMEZONE_BROWSER) {
-    return [
-      useMemo(() => timezoneProvider(uiSettingsClient)(), [timezoneProvider, uiSettingsClient]),
-    ];
+    return [useMemo(() => timezoneProvider(uiSettingsClient)(), [uiSettingsClient])];
   }
 
   const uiSetting$ = useMemo(() => uiSettingsClient.get$(key, defaultValue), [uiSettingsClient]);
