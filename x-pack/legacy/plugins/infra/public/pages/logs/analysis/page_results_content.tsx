@@ -137,25 +137,18 @@ export const AnalysisResultsContent = ({ sourceId }: { sourceId: string }) => {
                     {anomaliesDetected !== null ? (
                       <>
                         <span>
-                          {anomaliesDetected === 0 ? (
-                            <FormattedMessage
-                              id="xpack.infra.logs.analysis.anomaliesDetectedZero"
-                              defaultMessage="Detected {formattedNumber} anomalies"
-                              values={{
-                                formattedNumber: <EuiBadge color="default">0</EuiBadge>,
-                              }}
-                            />
-                          ) : (
-                            <FormattedMessage
-                              id="xpack.infra.logs.analysis.anomaliesDetectedNumber"
-                              defaultMessage="Detected {formattedNumber} anomalies"
-                              values={{
-                                formattedNumber: (
+                          <FormattedMessage
+                            id="xpack.infra.logs.analysis.anomaliesDetectedText"
+                            defaultMessage="Detected {formattedNumber} anomalies"
+                            values={{
+                              formattedNumber:
+                                anomaliesDetected === 0 ? (
+                                  <EuiBadge color="default">0</EuiBadge>
+                                ) : (
                                   <EuiBadge color="warning">{anomaliesDetected}</EuiBadge>
                                 ),
-                              }}
-                            />
-                          )}
+                            }}
+                          />
                         </span>
                       </>
                     ) : null}
