@@ -52,7 +52,7 @@ interface VisTypeAliasListEntry extends VisTypeAlias {
 
 interface TypeSelectionProps {
   onVisTypeSelected: (visType: VisType) => void;
-  visTypesRegistry: VisType[];
+  visTypesRegistry: Map<string, VisType>;
   visTypeAliases?: VisTypeAlias[];
   showExperimental: boolean;
 }
