@@ -25,7 +25,7 @@ uiRoutes.when('/home', {
   resolve: {
     clusters: (Private, kbnUrl) => {
       const routeInit = Private(routeInitProvider);
-      return routeInit({ codePaths: CODE_PATHS })
+      return routeInit({ codePaths: CODE_PATHS, fetchAllClusters: true })
         .then(clusters => {
           if (!clusters || !clusters.length) {
             kbnUrl.changePath('/no-data');

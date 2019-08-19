@@ -45,7 +45,7 @@ export const MultiMetricSettings: FC<Props> = ({ isActive, setIsValid }) => {
           </EuiFlexGroup>
           <EuiFlexGroup gutterSize="xl">
             <EuiFlexItem>
-              <BucketSpan />
+              <BucketSpan setIsValid={setIsValid} />
             </EuiFlexItem>
             <EuiFlexItem />
           </EuiFlexGroup>
