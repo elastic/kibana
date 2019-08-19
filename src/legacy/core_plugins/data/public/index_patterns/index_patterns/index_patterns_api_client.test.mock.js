@@ -17,7 +17,11 @@
  * under the License.
  */
 
-export const INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE = ['\\', '/', '?', '"', '<', '>', '|'];
-export const INDEX_PATTERN_ILLEGAL_CHARACTERS = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.concat(
-  ' '
-);
+
+import { setup } from '../../../../../../test_utils/public/http_test_setup';
+
+export const { http } = setup(injectedMetadata => {
+  injectedMetadata.getBasePath.mockReturnValue('/hola/daro/');
+});
+
+jest.doMock('ui/new_platform', () => ({ npSetup: { core: { http } } }));

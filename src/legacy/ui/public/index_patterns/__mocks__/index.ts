@@ -17,32 +17,35 @@
  * under the License.
  */
 
-// @ts-ignore
-import { get } from 'lodash';
-// @ts-ignore
-import { KBN_FIELD_TYPES } from '../../../../utils/kbn_field_types';
-import { Field } from '../_field';
+import { dataPluginMock } from '../../../../core_plugins/data/public/mocks';
 
-const filterableTypes = KBN_FIELD_TYPES.filter((type: any) => type.filterable).map(
-  (type: any) => type.name
-);
+const dataSetup = dataPluginMock.createSetup();
 
-export function isFilterable(field: Field): boolean {
-  return (
-    field.name === '_id' ||
-    field.scripted ||
-    (field.searchable && filterableTypes.includes(field.type))
-  );
-}
+// mocks for stateful code
+export const { FieldImpl } = dataSetup.indexPatterns!.__LEGACY;
+export const {
+  FieldList,
+  flattenHitWrapper,
+  formatHitProvider,
+  indexPatterns,
+} = dataSetup.indexPatterns!;
 
-export function getFromSavedObject(savedObject: any) {
-  if (get(savedObject, 'attributes.fields') === undefined) {
-    return;
-  }
-
-  return {
-    id: savedObject.id,
-    fields: JSON.parse(savedObject.attributes.fields),
-    title: savedObject.attributes.title,
-  };
-}
+// static code
+export {
+  CONTAINS_SPACES,
+  getFromSavedObject,
+  getRoutes,
+  isFilterable,
+  IndexPatternsProvider, // LEGACY
+  IndexPatternSelect,
+  validateIndexPattern,
+  ILLEGAL_CHARACTERS,
+  INDEX_PATTERN_ILLEGAL_CHARACTERS,
+  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
+  IndexPatternAlreadyExists,
+  IndexPatternMissingIndices,
+  NoDefaultIndexPattern,
+  NoDefinedIndexPatterns,
+  mockFields,
+  mockIndexPattern,
+} from '../../../../core_plugins/data/public';

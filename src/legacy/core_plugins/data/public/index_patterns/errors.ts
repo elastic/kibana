@@ -16,9 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 /* eslint-disable */
+
 // @ts-ignore
-import { KbnError } from '../errors';
+import { KbnError } from 'ui/errors';
 
 /**
  * when a mapping already exists for a field the user is attempting to add

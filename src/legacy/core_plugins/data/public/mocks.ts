@@ -17,8 +17,26 @@
  * under the License.
  */
 
-export {
-  ILLEGAL_CHARACTERS,
-  CONTAINS_SPACES,
-  validateIndexPattern,
-} from './validate_index_pattern';
+import { DataSetup } from '.';
+import { filterServiceMock } from './filter/filter_service.mock';
+import { indexPatternsServiceMock } from './index_patterns/index_patterns_service.mock';
+import { queryServiceMock } from './query/query_service.mock';
+
+function createDataSetupMock() {
+  const mock: MockedKeys<Partial<DataSetup>> = {
+    filter: filterServiceMock.createSetupContract(),
+    indexPatterns: indexPatternsServiceMock.createSetupContract(),
+    query: queryServiceMock.createSetupContract(),
+  };
+
+  return mock;
+}
+
+function createDataStartMock() {
+  return {};
+}
+
+export const dataPluginMock = {
+  createSetup: createDataSetupMock,
+  createStart: createDataStartMock,
+};

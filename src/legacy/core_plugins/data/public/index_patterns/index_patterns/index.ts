@@ -17,11 +17,9 @@
  * under the License.
  */
 
-
-import { setup } from '../../../../../test_utils/public/http_test_setup';
-
-export const { http } = setup(injectedMetadata => {
-  injectedMetadata.getBasePath.mockReturnValue('/hola/daro/');
-});
-
-jest.doMock('ui/new_platform', () => ({ npSetup: { core: { http } } }));
+// @ts-ignore
+export * from './flatten_hit';
+export * from './format_hit';
+export * from './index_pattern';
+export * from './index_patterns';
+export * from './index_patterns_api_client';

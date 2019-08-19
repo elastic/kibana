@@ -17,18 +17,8 @@
  * under the License.
  */
 
-import { http } from './_index_patterns_api_client.test.mock';
-import { IndexPatternsApiClient } from '../index_patterns_api_client';
-
-jest.mock('../../errors', () => ({
-  SavedObjectNotFound: jest.fn(),
-  DuplicateField: jest.fn(),
-  IndexPatternMissingIndices: jest.fn(),
-}));
-
-jest.mock('../errors', () => ({
-  IndexPatternMissingIndices: jest.fn(),
-}));
+import { http } from './index_patterns_api_client.test.mock';
+import { IndexPatternsApiClient } from './index_patterns_api_client';
 
 describe('IndexPatternsApiClient', () => {
   it('uses the right URI to fetch fields for time patterns', async function () {
