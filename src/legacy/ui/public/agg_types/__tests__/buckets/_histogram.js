@@ -25,7 +25,7 @@ import chrome from '../../../chrome';
 import AggParamWriterProvider from '../agg_param_writer';
 
 const config = chrome.getUiSettingsClient();
-const histogram = aggTypes.byName.histogram;
+const histogram = aggTypes.get('histogram');
 describe('Histogram Agg', function () {
 
   describe('ordered', function () {

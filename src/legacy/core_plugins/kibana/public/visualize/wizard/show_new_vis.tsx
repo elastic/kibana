@@ -29,7 +29,7 @@ interface ShowNewVisModalParams {
 }
 
 export function showNewVisModal(
-  visTypeRegistry: VisType[],
+  visTypeRegistry: Map<string, VisType>,
   { editorParams = [] }: ShowNewVisModalParams = {}
 ) {
   const container = document.createElement('div');
@@ -44,7 +44,7 @@ export function showNewVisModal(
       <NewVisModal
         isOpen={true}
         onClose={onClose}
-        visTypesRegistry={visTypeRegistry}
+        visTypesRegistry={[...visTypeRegistry.values()]}
         editorParams={editorParams}
       />
     </I18nContext>

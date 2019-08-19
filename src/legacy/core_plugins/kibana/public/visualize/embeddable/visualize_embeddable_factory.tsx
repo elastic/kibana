@@ -82,8 +82,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
 
   static async createVisualizeEmbeddableFactory(): Promise<VisualizeEmbeddableFactory> {
     const visTypes = VisTypesRegistryProvider;
-    // @ts-ignore
-    return new VisualizeEmbeddableFactory(visTypes);
+    return new VisualizeEmbeddableFactory(visTypes.getAll());
   }
 
   constructor(visTypes: VisTypesRegistry) {
@@ -182,7 +181,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     // TODO: This is a bit of a hack to preserve the original functionality. Ideally we will clean this up
     // to allow for in place creation of visualizations without having to navigate away to a new URL.
     if (this.visTypes) {
-      // @ts-ignore
+      // showNewVisModal(this.visTypes.values(), {
       showNewVisModal(this.visTypes, {
         editorParams: ['addToDashboard'],
       });
