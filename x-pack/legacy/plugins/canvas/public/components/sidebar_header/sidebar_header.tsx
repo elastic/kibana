@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, Fragment, MouseEvent } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiFlexGroup,
@@ -135,7 +135,7 @@ interface MenuTuple {
   panel: EuiContextMenuPanelDescriptor;
 }
 
-const contextMenuButton = (handleClick: (event: MouseEvent) => void) => (
+const contextMenuButton = (handleClick: React.MouseEventHandler<HTMLButtonElement>) => (
   <EuiButtonIcon
     color="text"
     iconType="boxesVertical"
