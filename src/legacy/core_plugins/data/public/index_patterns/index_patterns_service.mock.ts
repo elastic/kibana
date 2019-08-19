@@ -18,8 +18,6 @@
  */
 
 import { IndexPatternsService, IndexPatternsSetup } from '.';
-import { FieldType } from './fields';
-import { StaticIndexPattern } from './index_patterns';
 // @ts-ignore
 import { flattenHitWrapper } from './index_patterns/flatten_hit';
 
