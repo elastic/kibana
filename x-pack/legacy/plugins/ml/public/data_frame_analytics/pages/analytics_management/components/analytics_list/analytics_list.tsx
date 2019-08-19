@@ -64,10 +64,13 @@ function stringMatch(str: string | undefined, substr: string) {
 
 interface Props {
   isManagementTable?: boolean;
-  blockRefresh: boolean;
+  blockRefresh?: boolean;
 }
 // isManagementTable - for use in Kibana managagement ML section
-export const DataFrameAnalyticsList: FC<Props> = ({ isManagementTable = false, blockRefresh }) => {
+export const DataFrameAnalyticsList: FC<Props> = ({
+  isManagementTable = false,
+  blockRefresh = false,
+}) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [filterActive, setFilterActive] = useState(false);
