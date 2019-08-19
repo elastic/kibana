@@ -46,6 +46,7 @@ export class TaskManager {
   private store: TaskStore;
   private poller: TaskPoller;
   private logger: Logger;
+  private pool: TaskPool;
   private middleware = {
     beforeSave: async (saveOpts: BeforeSaveMiddlewareParams) => saveOpts,
     beforeRun: async (runOpts: RunContext) => runOpts,
@@ -93,6 +94,7 @@ export class TaskManager {
       },
     });
 
+    this.pool = pool;
     this.store = store;
     this.poller = poller;
   }
@@ -113,6 +115,10 @@ export class TaskManager {
       }
     };
     startPoller();
+  }
+
+  public stop() {
+    this.pool.cancelRunningTasks();
   }
 
   /**

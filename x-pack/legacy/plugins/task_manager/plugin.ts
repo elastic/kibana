@@ -71,6 +71,8 @@ export class Plugin {
   }
 
   public stop() {
-    // TODO: Cancel running tasks
+    if (this.taskManager) {
+      this.taskManager.stop();
+    }
   }
 }
