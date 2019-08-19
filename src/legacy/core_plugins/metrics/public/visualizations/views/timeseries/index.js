@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useEffect, createRef } from 'react';
 import PropTypes from 'prop-types';
+
 import {
   Axis,
   Chart,
@@ -34,7 +35,9 @@ import {
   TooltipType,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
+
 import { timezoneProvider } from 'ui/vis/lib/timezone';
+import { eventBus, ACTIVE_CURSOR } from '../../lib/active_cursor';
 import chrome from 'ui/chrome';
 import { GRID_LINE_CONFIG, ICON_TYPES_MAP, STACKED_OPTIONS } from '../../constants';
 import { AreaSeriesDecorator } from './decorators/area_decorator';
@@ -52,6 +55,10 @@ const generateAnnotationData = (values, formatter) =>
 
 const decorateFormatter = formatter => ({ value }) => formatter(value);
 
+const handleCursorUpdate = cursor => {
+  eventBus.trigger(ACTIVE_CURSOR, cursor);
+};
+
 export const TimeSeries = ({
   isDarkMode,
   showGrid,
@@ -65,21 +72,38 @@ export const TimeSeries = ({
   annotations,
   enableHistogramMode,
 }) => {
+  const chartRef = createRef();
+  const updateCursor = (_, cursor) => {
+    if (chartRef.current) {
+      chartRef.current.dispatchExternalCursorEvent(cursor);
+    }
+  };
+
+  useEffect(() => {
+    eventBus.on(ACTIVE_CURSOR, updateCursor);
+
+    return () => {
+      eventBus.off(ACTIVE_CURSOR);
+    };
+  }, []); // eslint-disable-line
+
   const tooltipFormatter = decorateFormatter(xAxisFormatter);
   const uiSettings = chrome.getUiSettingsClient();
   const timeZone = timezoneProvider(uiSettings)();
 
   return (
-    <Chart renderer="canvas" className="tvbVisTimeSeries">
+    <Chart ref={chartRef} renderer="canvas" className="tvbVisTimeSeries">
       <Settings
         showLegend={legend}
         legendPosition={legendPosition}
         onBrushEnd={onBrush}
         animateData={false}
+        onCursorUpdate={handleCursorUpdate}
         theme={isDarkMode ? DARK_THEME : LIGHT_THEME}
         tooltip={{
           type: TooltipType.VerticalCursor,
           headerFormatter: tooltipFormatter,
+          type: 'vertical',
         }}
       />
 
@@ -116,11 +140,12 @@ export const TimeSeries = ({
         }) => {
           const stackAccessors = getStackAccessors(stack);
           const isPercentage = stack === STACKED_OPTIONS.PERCENT;
+          const key = `${id}-${label}`;
 
           if (bars.show) {
             return (
               <BarSeriesDecorator
-                key={`${id}-${label}`}
+                key={key}
                 seriesId={id}
                 seriesGroupId={groupId}
                 name={label.toString()}
@@ -141,7 +166,7 @@ export const TimeSeries = ({
           if (lines.show) {
             return (
               <AreaSeriesDecorator
-                key={`${id}-${label}`}
+                key={key}
                 seriesId={id}
                 seriesGroupId={groupId}
                 name={label.toString()}
