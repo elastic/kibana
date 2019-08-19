@@ -74,6 +74,7 @@ test('calls the update function with proper parameters', async () => {
             "otherField": false,
           },
           "interval": "12s",
+          "throttle": null,
         },
         "id": "1",
       },
