@@ -24,8 +24,7 @@ describe('ExplainExporters', () => {
 describe('ExplainExportersCloud', () => {
   test('should explain about xpack.monitoring.exporters setting in a cloud environment', () => {
     const component = renderWithIntl(
-      <ExplainExportersCloud
-      />
+      <ExplainExportersCloud />
     );
     expect(component).toMatchSnapshot();
   });
