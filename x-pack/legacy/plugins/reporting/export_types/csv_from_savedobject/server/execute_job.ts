@@ -9,7 +9,11 @@ import { i18n } from '@kbn/i18n';
 
 import { cryptoFactory, LevelLogger, oncePerServer } from '../../../server/lib';
 import { JobDocOutputExecuted, JobDocPayload, KbnServer } from '../../../types';
-import { CONTENT_TYPE_CSV } from '../../../common/constants';
+import {
+  CONTENT_TYPE_CSV,
+  CSV_FROM_SAVEDOBJECT_JOB_TYPE,
+  PLUGIN_ID,
+} from '../../../common/constants';
 import { CsvResultFromSearch, createGenerateCsv } from './lib';
 
 interface FakeRequest {
@@ -20,11 +24,15 @@ interface FakeRequest {
 
 type ExecuteJobFn = (job: JobDocPayload, realRequest?: Request) => Promise<JobDocOutputExecuted>;
 
-function executeJobFn(server: KbnServer): ExecuteJobFn {
+function executeJobFactoryFn(server: KbnServer): ExecuteJobFn {
   const crypto = cryptoFactory(server);
   const config = server.config();
   const serverBasePath = config.get('server.basePath');
-  const logger = LevelLogger.createForServer(server, ['reporting', 'savedobject-csv']);
+  const logger = LevelLogger.createForServer(server, [
+    PLUGIN_ID,
+    CSV_FROM_SAVEDOBJECT_JOB_TYPE,
+    'execute-job',
+  ]);
   const generateCsv = createGenerateCsv(logger);
 
   return async function executeJob(
@@ -38,10 +46,10 @@ function executeJobFn(server: KbnServer): ExecuteJobFn {
 
     let requestObject: Request | FakeRequest;
     if (isImmediate && realRequest) {
-      logger.debug(`executing job from immediate API`);
+      logger.info(`Executing job from immediate API`);
       requestObject = realRequest;
     } else {
-      logger.debug(`executing job async using encrypted headers`);
+      logger.info(`Executing job async using encrypted headers`);
       let decryptedHeaders;
       const serializedEncryptedHeaders = job.headers;
       try {
@@ -99,4 +107,4 @@ function executeJobFn(server: KbnServer): ExecuteJobFn {
   };
 }
 
-export const executeJobFactory = oncePerServer(executeJobFn);
+export const executeJobFactory = oncePerServer(executeJobFactoryFn);

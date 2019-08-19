@@ -4,5 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { clustersSetupStatusRoute } from './clusters_setup_status';
 export { clusterSetupStatusRoute } from './cluster_setup_status';
+export { nodeSetupStatusRoute } from './node_setup_status';
+export { disableElasticsearchInternalCollectionRoute } from './disable_elasticsearch_internal_collection';

@@ -10,3 +10,5 @@ import { pure } from 'recompose';
 import { OverviewComponent } from './overview';
 
 export const Overview = pure(() => <OverviewComponent />);
+
+Overview.displayName = 'Overview';

@@ -12,7 +12,7 @@ import {
   DetailItem,
   GetTimelineDetailsQuery,
 } from '../../../../legacy/plugins/siem/public/graphql/types';
-import { KbnTestProvider } from './types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 type DetailsData = Array<
   Pick<DetailItem, 'field' | 'values' | 'originalValue'> & {
@@ -298,7 +298,7 @@ const EXPECTED_DATA: DetailItem[] = [
   { field: '_score', values: ['1'], originalValue: 1 },
 ];
 
-const timelineDetailsTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
 
@@ -329,7 +329,4 @@ const timelineDetailsTests: KbnTestProvider = ({ getService }) => {
         });
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default timelineDetailsTests;
+}

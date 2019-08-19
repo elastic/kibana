@@ -46,6 +46,7 @@
   },
   "_meta": {
     "secondsAgo": 30,
-    "clusterUuid": null
+    "isOnCloud": false,
+    "liveClusterUuid": null
   }
 }

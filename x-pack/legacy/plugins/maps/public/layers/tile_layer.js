@@ -6,7 +6,6 @@
 
 import { AbstractLayer } from './layer';
 import _ from 'lodash';
-import { TileStyle } from '../layers/styles/tile_style';
 import { SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
 
 export class TileLayer extends AbstractLayer {
@@ -15,17 +14,12 @@ export class TileLayer extends AbstractLayer {
 
   constructor({ layerDescriptor, source, style }) {
     super({ layerDescriptor, source, style });
-    if (!style) {
-      this._style = new TileStyle();
-    }
   }
 
   static createDescriptor(options) {
     const tileLayerDescriptor = super.createDescriptor(options);
     tileLayerDescriptor.type = TileLayer.type;
     tileLayerDescriptor.alpha = _.get(options, 'alpha', 1);
-    tileLayerDescriptor.style =
-      TileStyle.createDescriptor(tileLayerDescriptor.style.properties);
     return tileLayerDescriptor;
   }
 
@@ -53,6 +47,14 @@ export class TileLayer extends AbstractLayer {
 
   getMbLayerIds() {
     return [this._getMbLayerId()];
+  }
+
+  ownsMbLayerId(mbLayerId) {
+    return this._getMbLayerId() === mbLayerId;
+  }
+
+  ownsMbSourceId(mbSourceId) {
+    return this.getId() === mbSourceId;
   }
 
   syncLayerWithMB(mbMap) {
@@ -94,7 +96,7 @@ export class TileLayer extends AbstractLayer {
   }
 
   _setTileLayerProperties(mbMap, mbLayerId) {
-    mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+    this.syncVisibilityWithMb(mbMap, mbLayerId);
     mbMap.setLayerZoomRange(mbLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
     mbMap.setPaintProperty(mbLayerId, 'raster-opacity', this.getAlpha());
   }
