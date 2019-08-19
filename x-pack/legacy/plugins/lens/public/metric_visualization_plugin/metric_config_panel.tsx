@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiForm, EuiFormRow } from '@elastic/eui';
+import { EuiForm, EuiFormRow, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { State } from './types';
 import { VisualizationProps, OperationMetadata } from '../types';
 import { NativeRenderer } from '../native_renderer';
@@ -19,8 +19,13 @@ export function MetricConfigPanel(props: VisualizationProps<State>) {
   const [layerId] = Object.keys(frame.datasourceLayers);
 
   return (
-    <EuiForm className="lnsConfigPanel">
+    <EuiPanel className="lnsConfigPanel__panel" paddingSize="s">
+      <NativeRenderer render={datasource.renderLayerPanel} nativeProps={{ layerId }} />
+
+      <EuiSpacer size="s" />
+
       <EuiFormRow
+        className="lnsConfigPanel__axis"
         label={i18n.translate('xpack.lens.metric.valueLabel', {
           defaultMessage: 'Value',
         })}
@@ -36,6 +41,6 @@ export function MetricConfigPanel(props: VisualizationProps<State>) {
           }}
         />
       </EuiFormRow>
-    </EuiForm>
+    </EuiPanel>
   );
 }
