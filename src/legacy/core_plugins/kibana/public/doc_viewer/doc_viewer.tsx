@@ -46,7 +46,7 @@ export function DocViewer(renderProps: DocViewRenderProps) {
 
   return (
     <div className="kbnDocViewer">
-      <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
+      <EuiTabbedContent tabs={tabs} />
     </div>
   );
 }
