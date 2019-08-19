@@ -16,9 +16,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
-  EuiText
+  EuiText,
+  EuiTitle,
+  EuiTextColor,
 } from '@elastic/eui';
-import { WhatIs } from './blurbs';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { toggleSetupMode } from '../../lib/setup_mode';
 
@@ -54,7 +55,24 @@ export function NoData({ changePath }) {
         >
           <EuiIcon type="monitoringApp" size="xxl" />
           <EuiSpacer size="m" />
-          <WhatIs />
+          <EuiTitle size="l">
+            <h2>
+              <FormattedMessage
+                id="xpack.monitoring.noData.noMonitoringDetected"
+                defaultMessage="No monitoring data found"
+              />
+            </h2>
+          </EuiTitle>
+          <EuiTextColor color="subdued">
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="xpack.monitoring.noData.blurbs.monitoringIsOffDescription"
+                  defaultMessage="Monitoring provides insight to your hardware performance and load."
+                />
+              </p>
+            </EuiText>
+          </EuiTextColor>
           <EuiHorizontalRule size="half" />
           <EuiText>
             <p>
