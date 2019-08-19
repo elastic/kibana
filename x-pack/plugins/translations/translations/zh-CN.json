@@ -2442,7 +2442,6 @@
     "kbnDocViews.table.filterOutValueButtonAriaLabel": "筛除值",
     "kbnDocViews.table.filterOutValueButtonTooltip": "筛除值",
     "kbnDocViews.table.noCachedMappingForThisFieldTooltip": "此字段没有任何已缓存映射。从“管理”>“索引模式”页面刷新字段列表",
-    "kbnDocViews.table.objectsInArraysAreNotWellSupportedTooltip": "对数组中的对象的支持不是很好。",
     "kbnDocViews.table.tableTitle": "表",
     "kbnDocViews.table.toggleColumnInTableButtonAriaLabel": "在表中切换列",
     "kbnDocViews.table.toggleColumnInTableButtonTooltip": "在表中切换列",
