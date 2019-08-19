@@ -21,7 +21,6 @@ import {
   EuiFormRow,
   EuiDatePicker,
   EuiFlexGroup,
-  EuiFormControlLayout,
   EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -105,7 +104,7 @@ export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentP
             <EuiText size="s">
               <FormattedMessage
                 id="xpack.infra.analysisSetup.analysisSetupDescription"
-                defaultMessage="Use Machine Learning to automatically categorize log messages, and detect anomalous event counts and rare log messages."
+                defaultMessage="Use Machine Learning to automatically detect anomalous log rate counts"
               />
             </EuiText>
             <EuiSpacer size="l" />
@@ -132,17 +131,14 @@ export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentP
                 label={startTimeLabel}
               >
                 <EuiFlexGroup gutterSize="s">
-                  <EuiFormControlLayout
-                    clear={startTime ? { onClick: () => setStartTime(null) } : undefined}
-                  >
-                    <EuiDatePicker
-                      showTimeSelect
-                      selected={startTime}
-                      onChange={setStartTime}
-                      placeholder={startTimeDefaultDescription}
-                      maxDate={now}
-                    />
-                  </EuiFormControlLayout>
+                  <EuiDatePicker
+                    showTimeSelect
+                    selected={startTime}
+                    onChange={setStartTime}
+                    placeholder={startTimeDefaultDescription}
+                    maxDate={now}
+                    onClear={() => setStartTime(null)}
+                  />
                 </EuiFlexGroup>
               </EuiFormRow>
               <EuiFormRow
@@ -153,28 +149,25 @@ export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentP
                 label={endTimeLabel}
               >
                 <EuiFlexGroup gutterSize="s">
-                  <EuiFormControlLayout
-                    clear={endTime ? { onClick: () => setEndTime(null) } : undefined}
-                  >
-                    <EuiDatePicker
-                      showTimeSelect
-                      selected={endTime}
-                      onChange={setEndTime}
-                      placeholder={endTimeDefaultDescription}
-                      openToDate={now}
-                      minDate={now}
-                      minTime={
-                        selectedEndTimeIsToday
-                          ? now
-                          : moment()
-                              .hour(0)
-                              .minutes(0)
-                      }
-                      maxTime={moment()
-                        .hour(23)
-                        .minutes(59)}
-                    />
-                  </EuiFormControlLayout>
+                  <EuiDatePicker
+                    showTimeSelect
+                    selected={endTime}
+                    onChange={setEndTime}
+                    placeholder={endTimeDefaultDescription}
+                    openToDate={now}
+                    minDate={now}
+                    minTime={
+                      selectedEndTimeIsToday
+                        ? now
+                        : moment()
+                            .hour(0)
+                            .minutes(0)
+                    }
+                    maxTime={moment()
+                      .hour(23)
+                      .minutes(59)}
+                    onClear={() => setEndTime(null)}
+                  />
                 </EuiFlexGroup>
               </EuiFormRow>
               <EuiButton
