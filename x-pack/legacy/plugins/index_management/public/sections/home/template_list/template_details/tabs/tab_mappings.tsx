@@ -15,7 +15,6 @@ interface Props {
 
 export const TabMappings: React.FunctionComponent<Props> = ({ templateDetails }) => {
   const { mappings } = templateDetails;
-  const mappingsJsonString = JSON.stringify(mappings, null, 2);
 
   return (
     <div data-test-subj="mappingsTab">
@@ -24,7 +23,7 @@ export const TabMappings: React.FunctionComponent<Props> = ({ templateDetails })
         theme="textmate"
         width="100%"
         isReadOnly
-        value={mappingsJsonString}
+        value={mappings}
         aria-label={i18n.translate(
           'xpack.idxMgmt.templateDetails.mappingsTab.mappingsEditorAriaLabel',
           {
