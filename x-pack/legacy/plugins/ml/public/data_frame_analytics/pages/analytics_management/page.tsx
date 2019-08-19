@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC } from 'react';
+import React, { Fragment, FC, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -27,8 +27,13 @@ import { NavigationMenu } from '../../../components/navigation_menu/navigation_m
 import { CreateAnalyticsButton } from './components/create_analytics_button';
 import { DataFrameAnalyticsList } from './components/analytics_list';
 import { RefreshAnalyticsListButton } from './components/refresh_analytics_list_button';
+import { useRefreshInterval } from './components/analytics_list/use_refresh_interval';
 
 export const Page: FC = () => {
+  const [blockRefresh, setBlockRefresh] = useState(false);
+
+  useRefreshInterval(setBlockRefresh);
+
   return (
     <Fragment>
       <NavigationMenu tabId="data_frame_analytics" />
@@ -76,7 +81,7 @@ export const Page: FC = () => {
           <EuiPageContentBody>
             <EuiSpacer size="l" />
             <EuiPanel>
-              <DataFrameAnalyticsList />
+              <DataFrameAnalyticsList blockRefresh={blockRefresh} />
             </EuiPanel>
           </EuiPageContentBody>
         </EuiPageBody>
