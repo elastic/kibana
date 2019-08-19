@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 
 import { JobCreatorContext } from '../../../job_creator_context';
@@ -38,8 +39,6 @@ export const SingleMetricSettings: FC<Props> = ({ isActive, setIsValid }) => {
       ...jobCreator.jobConfig,
       datafeed_config: jobCreator.datafeedConfig,
     };
-    delete mlJobService.tempJobCloningObjects.job.datafeed_config.aggregations;
-    delete mlJobService.tempJobCloningObjects.job.analysis_config.summary_count_field_name;
 
     mlJobService.tempJobCloningObjects.skipTimeRangeStep = true;
     window.location.href = window.location.href.replace('single_metric', 'multi_metric');
@@ -51,13 +50,16 @@ export const SingleMetricSettings: FC<Props> = ({ isActive, setIsValid }) => {
         <Fragment>
           <EuiFlexGroup gutterSize="xl">
             <EuiFlexItem>
-              <BucketSpan />
+              <BucketSpan setIsValid={setIsValid} />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty onClick={convertToMultiMetricJob}>
-                Convert to multi metric job
+                <FormattedMessage
+                  id="xpack.ml.newJob.wizard.pickFieldsStep.singleMetricView.convertToMultiMetricButton"
+                  defaultMessage="Convert to multi metric job"
+                />
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>

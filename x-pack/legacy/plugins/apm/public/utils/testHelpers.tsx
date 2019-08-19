@@ -15,7 +15,9 @@ import { Moment } from 'moment-timezone';
 import React from 'react';
 import { render, waitForElement } from 'react-testing-library';
 import { MemoryRouter } from 'react-router-dom';
+import { ESFilter } from 'elasticsearch';
 import { LocationProvider } from '../context/LocationContext';
+import { PromiseReturnType } from '../../typings/common';
 
 export function toJson(wrapper: ReactWrapper) {
   return enzymeToJson(wrapper, {
@@ -90,3 +92,53 @@ export function expectTextsInDocument(output: any, texts: string[]) {
     expect(output.getByText(text)).toBeInTheDocument();
   });
 }
+
+interface MockSetup {
+  start: number;
+  end: number;
+  client: any;
+  config: {
+    get: any;
+    has: any;
+  };
+  uiFiltersES: ESFilter[];
+}
+
+export async function inspectSearchParams(
+  fn: (mockSetup: MockSetup) => Promise<any>
+) {
+  const clientSpy = jest.fn().mockReturnValueOnce({
+    hits: {
+      total: 0
+    }
+  });
+
+  const mockSetup = {
+    start: 1528113600000,
+    end: 1528977600000,
+    client: {
+      search: clientSpy
+    } as any,
+    config: {
+      get: () => 'myIndex' as any,
+      has: () => true
+    },
+    uiFiltersES: [
+      {
+        term: { 'service.environment': 'prod' }
+      }
+    ]
+  };
+  try {
+    await fn(mockSetup);
+  } catch {
+    // we're only extracting the search params
+  }
+
+  return {
+    params: clientSpy.mock.calls[0][0],
+    teardown: () => clientSpy.mockClear()
+  };
+}
+
+export type SearchParamsMock = PromiseReturnType<typeof inspectSearchParams>;
