@@ -21,6 +21,7 @@ import { PersistedState } from 'ui/persisted_state';
 import { Vis } from './../..';
 
 export interface VisOptionsProps<VisParamType = unknown> {
+  hasHistogramAgg: boolean;
   stateParams: VisParamType;
   vis: Vis;
   uiState: PersistedState;

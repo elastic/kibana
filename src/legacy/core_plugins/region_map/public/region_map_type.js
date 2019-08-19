@@ -16,24 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
+import { colorSchemas } from 'ui/vislib/components/color/truncated_colormaps';
 import { mapToLayerWithId } from './util';
 import { createRegionMapVisualization } from './region_map_visualization';
 import { Status } from 'ui/vis/update_status';
+import { RegionMapOptions } from './components/region_map_options';
 
 import { visFactory } from '../../visualizations/public';
 
 // TODO: reference to TILE_MAP plugin should be removed
-import { ORIGIN } from '../../../../legacy/core_plugins/tile_map/common/origin';
+import { ORIGIN } from '../../tile_map/common/origin';
 
 export function createRegionMapTypeDefinition(dependencies) {
-  const { uiSettings, regionmapsConfig } = dependencies;
-  const RegionMapsVisualization = createRegionMapVisualization(dependencies);
+  const { uiSettings, regionmapsConfig, serviceSettings } = dependencies;
+  const visualization = createRegionMapVisualization(dependencies);
   const vectorLayers = regionmapsConfig.layers.map(mapToLayerWithId.bind(null, ORIGIN.KIBANA_YML));
   const selectedLayer = vectorLayers[0];
-  const selectedJoinField = selectedLayer ? vectorLayers[0].fields[0] : null;
+  const selectedJoinField = selectedLayer ? selectedLayer.fields[0] : null;
 
   return visFactory.createBaseVisualization({
     name: 'region_map',
@@ -46,9 +48,9 @@ provided base maps, or add your own. Darker colors represent higher values.' }),
         legendPosition: 'bottomright',
         addTooltip: true,
         colorSchema: 'Yellow to Red',
-        selectedLayer: selectedLayer,
         emsHotLink: '',
-        selectedJoinField: selectedJoinField,
+        selectedLayer,
+        selectedJoinField,
         isDisplayWarning: true,
         wms: uiSettings.get('visualization:tileMap:WMSdefaults'),
         mapZoom: 2,
@@ -58,25 +60,17 @@ provided base maps, or add your own. Darker colors represent higher values.' }),
       }
     },
     requiresUpdateStatus: [Status.AGGS, Status.PARAMS, Status.RESIZE, Status.DATA, Status.UI_STATE],
-    visualization: RegionMapsVisualization,
+    visualization,
     editorConfig: {
-      optionsTemplate: '<region_map-vis-params></region_map-vis-params>',
+      optionsTemplate: (props) =>
+        (<RegionMapOptions
+          {...props}
+          serviceSettings={serviceSettings}
+          includeElasticMapsService={regionmapsConfig.includeElasticMapsService}
+        />),
       collections: {
-        legendPositions: [{
-          value: 'bottomleft',
-          text: i18n.translate('regionMap.mapVis.regionMapEditorConfig.bottomLeftText', { defaultMessage: 'bottom left' }),
-        }, {
-          value: 'bottomright',
-          text: i18n.translate('regionMap.mapVis.regionMapEditorConfig.bottomRightText', { defaultMessage: 'bottom right' }),
-        }, {
-          value: 'topleft',
-          text: i18n.translate('regionMap.mapVis.regionMapEditorConfig.topLeftText', { defaultMessage: 'top left' }),
-        }, {
-          value: 'topright',
-          text: i18n.translate('regionMap.mapVis.regionMapEditorConfig.topRightText', { defaultMessage: 'top right' }),
-        }],
-        colorSchemas: Object.values(truncatedColorMaps).map(value => ({ id: value.id, label: value.label })),
-        vectorLayers: vectorLayers,
+        colorSchemas,
+        vectorLayers,
         tmsLayers: []
       },
       schemas: new Schemas([

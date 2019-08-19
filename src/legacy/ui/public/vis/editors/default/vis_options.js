@@ -37,6 +37,7 @@ uiModules
     ['setValue', { watchDepth: 'reference' }],
     ['setValidity', { watchDepth: 'reference' }],
     ['setTouched', { watchDepth: 'reference' }],
+    'hasHistogramAgg',
   ]))
   .directive('visEditorVisOptions', function ($compile) {
     return {
@@ -50,6 +51,7 @@ uiModules
         visualizeEditor: '=',
         editorState: '=',
         onAggParamsChange: '=',
+        hasHistogramAgg: '=',
       },
       link: function ($scope, $el, attrs, ngModelCtrl) {
         $scope.setValue = (paramName, value) =>
@@ -71,6 +73,7 @@ uiModules
           $scope.editor :
           `<vis-options-react-wrapper
             component="editor"
+            has-histogram-agg="hasHistogramAgg"
             state-params="editorState.params"
             vis="vis"
             ui-state="uiState"

@@ -23,6 +23,7 @@ import { EuiFormRow, EuiSelect } from '@elastic/eui';
 interface SelectOptionProps<ParamName extends string, ValidParamValues extends string> {
   disabled?: boolean;
   helpText?: React.ReactNode;
+  id?: string;
   label: string;
   labelAppend?: React.ReactNode;
   options: Array<{ value: ValidParamValues; text: string }>;
@@ -31,9 +32,12 @@ interface SelectOptionProps<ParamName extends string, ValidParamValues extends s
   setValue: (paramName: ParamName, value: ValidParamValues) => void;
 }
 
+const emptyValue = { text: '', value: 'EMPTY_VALUE', disabled: true, hidden: true };
+
 function SelectOption<ParamName extends string, ValidParamValues extends string>({
   disabled,
   helpText,
+  id,
   label,
   labelAppend,
   options,
@@ -42,11 +46,11 @@ function SelectOption<ParamName extends string, ValidParamValues extends string>
   setValue,
 }: SelectOptionProps<ParamName, ValidParamValues>) {
   return (
-    <EuiFormRow compressed fullWidth helpText={helpText} label={label} labelAppend={labelAppend}>
+    <EuiFormRow compressed fullWidth helpText={helpText} id={id} label={label} labelAppend={labelAppend}>
       <EuiSelect
-        disabled={disabled}
-        options={options}
-        value={value}
+		disabled={disabled}
+        options={[emptyValue, ...options]}
+        value={value || emptyValue.value}
         onChange={ev => setValue(paramName, ev.target.value as ValidParamValues)}
         fullWidth={true}
       />
