@@ -16,25 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { i18n } from '@kbn/i18n';
 
-import React from 'react';
-import {
-  EuiCodeBlock,
-} from '@elastic/eui';
+import { RequestsViewComponent } from './components/requests_view';
+import { Adapters, InspectorViewDescription } from '../../types';
 
-function RequestDetailsRequest(props) {
-  return (
-    <EuiCodeBlock
-      language="json"
-      paddingSize="s"
-      isCopyable
-      data-test-subj="inspectorRequestBody"
-    >
-      { JSON.stringify(props.request.json, null, 2) }
-    </EuiCodeBlock>
-  );
-}
-
-RequestDetailsRequest.shouldShow = (request) => !!request.json;
-
-export { RequestDetailsRequest };
+export const RequestsView: InspectorViewDescription = {
+  title: i18n.translate('inspector.requests.requestsTitle', {
+    defaultMessage: 'Requests',
+  }),
+  order: 20,
+  help: i18n.translate('inspector.requests.requestsDescriptionTooltip', {
+    defaultMessage: 'View the requests that collected the data',
+  }),
+  shouldShow(adapters: Adapters) {
+    return Boolean(adapters.requests);
+  },
+  component: RequestsViewComponent,
+};
