@@ -129,51 +129,53 @@ export const AnalysisResultsContent = ({ sourceId }: { sourceId: string }) => {
         <>{getLoadingState()}</>
       ) : (
         <>
-          <EuiPanel paddingSize="l" grow={false}>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={7}>
-                <EuiFlexGroup alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    {anomaliesDetected !== null ? (
-                      <>
-                        <span>
-                          <FormattedMessage
-                            id="xpack.infra.logs.analysis.anomaliesDetectedText"
-                            defaultMessage="Detected {formattedNumber} anomalies"
-                            values={{
-                              formattedNumber:
-                                anomaliesDetected === 0 ? (
-                                  <EuiBadge color="default">0</EuiBadge>
-                                ) : (
-                                  <EuiBadge color="warning">{anomaliesDetected}</EuiBadge>
-                                ),
-                            }}
-                          />
-                        </span>
-                      </>
-                    ) : null}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiSuperDatePicker
-                  start={moment.utc(timeRange.startTime).format(DATE_PICKER_FORMAT)}
-                  end={moment.utc(timeRange.endTime).format(DATE_PICKER_FORMAT)}
-                  onTimeChange={handleTimeRangeChange}
-                  isPaused={!autoRefreshEnabled}
-                  refreshInterval={refreshInterval}
-                  onRefreshChange={({ isPaused, refreshInterval: interval }) => {
-                    if (isPaused) {
-                      setAutoRefresh(false);
-                    } else {
-                      setRefreshInterval(interval);
-                      setAutoRefresh(true);
-                    }
-                  }}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
+          <EuiPage>
+            <EuiPanel paddingSize="l">
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem grow={7}>
+                  <EuiFlexGroup alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      {anomaliesDetected !== null ? (
+                        <>
+                          <span>
+                            <FormattedMessage
+                              id="xpack.infra.logs.analysis.anomaliesDetectedText"
+                              defaultMessage="Detected {formattedNumber} anomalies"
+                              values={{
+                                formattedNumber:
+                                  anomaliesDetected === 0 ? (
+                                    <EuiBadge color="default">0</EuiBadge>
+                                  ) : (
+                                    <EuiBadge color="warning">{anomaliesDetected}</EuiBadge>
+                                  ),
+                              }}
+                            />
+                          </span>
+                        </>
+                      ) : null}
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiSuperDatePicker
+                    start={moment.utc(timeRange.startTime).format(DATE_PICKER_FORMAT)}
+                    end={moment.utc(timeRange.endTime).format(DATE_PICKER_FORMAT)}
+                    onTimeChange={handleTimeRangeChange}
+                    isPaused={!autoRefreshEnabled}
+                    refreshInterval={refreshInterval}
+                    onRefreshChange={({ isPaused, refreshInterval: interval }) => {
+                      if (isPaused) {
+                        setAutoRefresh(false);
+                      } else {
+                        setRefreshInterval(interval);
+                        setAutoRefresh(true);
+                      }
+                    }}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          </EuiPage>
           <EuiPage style={{ minHeight: '100vh' }}>
             <EuiPageBody>
               <EuiPageContent>
