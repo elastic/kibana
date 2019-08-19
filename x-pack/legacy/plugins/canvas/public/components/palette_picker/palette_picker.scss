@@ -12,7 +12,7 @@
 }
 
 .canvasPalettePicker__swatchesPanel {
-  padding: $euiSizeS 0 !important;
+  padding: $euiSizeS 0 !important; // sass-lint:disable-line no-important
 }
 
 .canvasPalettePicker__swatch {
@@ -27,6 +27,7 @@
     .canvasPaletteSwatch__background {
       transform: scaleY(2);
     }
+
     .canvasPalettePicker__label {
       color: $euiTextColor;
     }

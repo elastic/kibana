@@ -57,6 +57,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
       sortable: true,
       render: (name: SlmPolicy['name']) => {
         return (
+          /* eslint-disable-next-line @elastic/eui/href-or-on-click */
           <EuiLink
             onClick={() => trackUiMetric(UIM_POLICY_SHOW_DETAILS_CLICK)}
             href={openPolicyDetailsUrl(name)}
