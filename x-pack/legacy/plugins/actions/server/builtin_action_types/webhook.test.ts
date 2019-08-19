@@ -5,7 +5,7 @@
  */
 
 import { actionType } from './webhook';
-import { validateSecrets } from '../lib';
+import { validateConfig, validateSecrets } from '../lib';
 
 describe('actionType', () => {
   test('exposes the action as `webhook` on its Id and Name', () => {
@@ -37,5 +37,123 @@ describe('secrets validation', () => {
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type secrets: [username]: expected value of type [string] but got [undefined]"`
     );
+  });
+});
+
+describe('config validation', () => {
+  const defaultValues: Record<string, any> = {
+    scheme: 'http',
+    method: 'get',
+    path: null,
+    headers: null,
+  };
+
+  test('config validation passes when only required fields are provided', () => {
+    const config: Record<string, any> = {
+      host: 'mylisteningserver',
+      port: 9200,
+    };
+    expect(validateConfig(actionType, config)).toEqual({
+      ...defaultValues,
+      ...config,
+    });
+  });
+
+  test('config validation passes when valid schemes are provided', () => {
+    const httpConfig: Record<string, any> = {
+      host: 'mylisteningserver',
+      port: 9200,
+      scheme: 'http',
+    };
+    expect(validateConfig(actionType, httpConfig)).toEqual({
+      ...defaultValues,
+      ...httpConfig,
+    });
+
+    const httpsConfig: Record<string, any> = {
+      host: 'mylisteningserver',
+      port: 9200,
+      scheme: 'https',
+    };
+    expect(validateConfig(actionType, httpsConfig)).toEqual({
+      ...defaultValues,
+      ...httpsConfig,
+    });
+  });
+
+  test('should validate and throw error when scheme on config is invalid', () => {
+    const config: Record<string, any> = {
+      host: 'mylisteningserver',
+      port: 9200,
+      scheme: 'ftp',
+    };
+    expect(() => {
+      validateConfig(actionType, config);
+    }).toThrowErrorMatchingInlineSnapshot(`
+"error validating action type config: [scheme]: types that failed validation:
+- [scheme.0]: expected value to equal [http] but got [ftp]
+- [scheme.1]: expected value to equal [https] but got [ftp]"
+`);
+  });
+
+  test('config validation passes when valid methods are provided', () => {
+    ['head', 'get', 'post', 'put', 'delete'].forEach(method => {
+      const config: Record<string, any> = {
+        host: 'mylisteningserver',
+        port: 9200,
+        method,
+      };
+      expect(validateConfig(actionType, config)).toEqual({
+        ...defaultValues,
+        ...config,
+      });
+    });
+  });
+
+  test('should validate and throw error when method on config is invalid', () => {
+    const config: Record<string, any> = {
+      host: 'mylisteningserver',
+      port: 9200,
+      method: 'https',
+    };
+    expect(() => {
+      validateConfig(actionType, config);
+    }).toThrowErrorMatchingInlineSnapshot(`
+"error validating action type config: [method]: types that failed validation:
+- [method.0]: expected value to equal [head] but got [https]
+- [method.1]: expected value to equal [get] but got [https]
+- [method.2]: expected value to equal [post] but got [https]
+- [method.3]: expected value to equal [put] but got [https]
+- [method.4]: expected value to equal [delete] but got [https]"
+`);
+  });
+
+  test('config validation passes when valid headers are provided', () => {
+    const config: Record<string, any> = {
+      host: 'mylisteningserver',
+      port: 9200,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+    expect(validateConfig(actionType, config)).toEqual({
+      ...defaultValues,
+      ...config,
+    });
+  });
+
+  test('should validate and throw error when headers on config is invalid', () => {
+    const config: Record<string, any> = {
+      host: 'mylisteningserver',
+      port: 9200,
+      headers: 'application/json',
+    };
+    expect(() => {
+      validateConfig(actionType, config);
+    }).toThrowErrorMatchingInlineSnapshot(`
+"error validating action type config: [headers]: types that failed validation:
+- [headers.0]: expected value of type [object] but got [string]
+- [headers.1]: expected value to equal [null] but got [application/json]"
+`);
   });
 });
