@@ -27,7 +27,7 @@ import * as del from 'del';
 const ROOT_DIR = resolve(__dirname, '../../../');
 const oneMinute = 60000;
 
-describe(`running the plugin-generator via 'node scripts/generate_plugin.js plugin-name'`, () => {
+describe(`running the plugin-generator via 'node scripts/generate_plugin.js plugin-name' with default config`, () => {
   const pluginName = 'ispec-plugin';
   const snakeCased = snakeCase(pluginName);
   const generatedPath = resolve(ROOT_DIR, `plugins/${snakeCased}`);
@@ -59,6 +59,25 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
     const stats = await fsP.stat(generatedPath);
     // eslint-disable-next-line no-undef
     expect(stats.isDirectory()).toBe(true);
+  });
+
+  describe(`and then running 'yarn preinstall' in the plugin's root dir`, () => {
+    let preinstall;
+    const stdOuts = [];
+    const stdErrs = [];
+
+    // eslint-disable-next-line no-undef
+    beforeAll(done => {
+      preinstall = spawn('yarn', ['preinstall'], { cwd: generatedPath });
+      preinstall.stderr.on('data', collect(stdErrs));
+      preinstall.stdout.on('data', collect(stdOuts));
+      preinstall.on('close', () => done());
+    });
+
+    it(`should result in only having 'warning package.json: No license field' on stderr`, () => {
+      // eslint-disable-next-line no-undef
+      expect(stdErrs.join('\n')).toEqual('warning package.json: No license field\n');
+    });
   });
 
   describe(`and then running 'yarn lint' in the plugin's root dir`, () => {
@@ -117,6 +136,7 @@ Global options:
       });
     });
   });
+
   describe(`and then running 'yarn es --help'`, () => {
     const helpMsg = `
 usage: es <command> [<args>]
