@@ -88,7 +88,7 @@ class NewJobCapsService {
       if (this._includeCountAgg === true) {
         const { countField, countAggs } = createCountFieldAndAggs();
 
-        fields.push(countField);
+        fields.splice(0, 0, countField);
         aggs.push(...countAggs);
       }
 
