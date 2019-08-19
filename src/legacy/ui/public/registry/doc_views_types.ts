@@ -45,7 +45,7 @@ export type DocViewRenderFn = (
 ) => () => void;
 
 export interface DocViewInput {
-  component?: Component<any, any> | FunctionComponent<any>;
+  component?: Component<DocViewRenderProps>;
   directive?: AngularDirective;
   order: number;
   render?: DocViewRenderFn;
