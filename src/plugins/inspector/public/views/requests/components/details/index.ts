@@ -17,50 +17,6 @@
  * under the License.
  */
 
-/**
- * The status a request can have.
- */
-export enum RequestStatus {
-  /**
-   * The request hasn't finished yet.
-   */
-  PENDING,
-  /**
-   * The request has successfully finished.
-   */
-  OK,
-  /**
-   * The request failed.
-   */
-  ERROR,
-}
-
-export interface Request extends RequestParams {
-  id: string;
-  name: string;
-  json?: object;
-  response?: Response;
-  startTime: number;
-  stats?: RequestStatistics;
-  status: RequestStatus;
-  time?: number;
-}
-
-export interface RequestParams {
-  id?: string;
-  description?: string;
-}
-
-export interface RequestStatistics {
-  [key: string]: RequestStatistic;
-}
-
-export interface RequestStatistic {
-  label: string;
-  description?: string;
-  value: any;
-}
-
-export interface Response {
-  json?: object;
-}
+export { RequestDetailsRequest } from './req_details_request';
+export { RequestDetailsResponse } from './req_details_response';
+export { RequestDetailsStats } from './req_details_stats';

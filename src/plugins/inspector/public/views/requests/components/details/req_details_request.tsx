@@ -17,6 +17,35 @@
  * under the License.
  */
 
-export * from './req_details_request';
-export * from './req_details_response';
-export * from './req_details_stats';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { EuiCodeBlock } from '@elastic/eui';
+import { Request } from '../../../../adapters/request/types';
+import { RequestDetailsProps } from '../types';
+
+export class RequestDetailsRequest extends Component<RequestDetailsProps> {
+  static propTypes = {
+    request: PropTypes.object.isRequired,
+  };
+
+  static shouldShow = (request: Request) => Boolean(request && request.json);
+
+  render() {
+    const { json } = this.props.request;
+
+    if (!json) {
+      return null;
+    }
+
+    return (
+      <EuiCodeBlock
+        language="json"
+        paddingSize="s"
+        isCopyable
+        data-test-subj="inspectorRequestBody"
+      >
+        {JSON.stringify(json, null, 2)}
+      </EuiCodeBlock>
+    );
+  }
+}

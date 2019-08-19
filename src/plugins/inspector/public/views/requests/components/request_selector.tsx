@@ -18,7 +18,9 @@
  */
 
 import React, { Component } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiBadge,
@@ -33,29 +35,43 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
+import { RequestStatus } from '../../../adapters';
+import { Request } from '../../../adapters/request/types';
 
-import { RequestStatus } from 'ui/inspector/adapters';
+interface RequestSelectorState {
+  isPopoverOpen: boolean;
+}
 
-class RequestSelector extends Component {
+interface RequestSelectorProps {
+  requests: Request[];
+  selectedRequest: Request;
+  onRequestChanged: Function;
+}
+
+export class RequestSelector extends Component<RequestSelectorProps, RequestSelectorState> {
+  static propTypes = {
+    requests: PropTypes.array.isRequired,
+    selectedRequest: PropTypes.object.isRequired,
+    onRequestChanged: PropTypes.func,
+  };
+
   state = {
     isPopoverOpen: false,
   };
 
   togglePopover = () => {
-    this.setState((prevState) => ({
+    this.setState((prevState: RequestSelectorState) => ({
       isPopoverOpen: !prevState.isPopoverOpen,
     }));
-  }
+  };
 
   closePopover = () => {
     this.setState({
       isPopoverOpen: false,
     });
-  }
+  };
 
-  renderRequestDropdownItem = (request, index) => {
+  renderRequestDropdownItem = (request: Request, index: number) => {
     const hasFailed = request.status === RequestStatus.ERROR;
     const inProgress = request.status === RequestStatus.PENDING;
 
@@ -73,23 +89,24 @@ class RequestSelector extends Component {
       >
         <EuiTextColor color={hasFailed ? 'danger' : 'default'}>
           {request.name}
-          { hasFailed && <FormattedMessage
-            id="inspectorViews.requests.failedLabel"
-            defaultMessage=" (failed)"
-          />}
-          { inProgress &&
+
+          {hasFailed && (
+            <FormattedMessage id="inspector.requests.failedLabel" defaultMessage=" (failed)" />
+          )}
+
+          {inProgress && (
             <EuiLoadingSpinner
               size="s"
-              aria-label={i18n.translate('inspectorViews.requests.requestInProgressAriaLabel', {
-                defaultMessage: 'Request in progress'
+              aria-label={i18n.translate('inspector.requests.requestInProgressAriaLabel', {
+                defaultMessage: 'Request in progress',
               })}
               className="insRequestSelector__menuSpinner"
             />
-          }
+          )}
         </EuiTextColor>
       </EuiContextMenuItem>
     );
-  }
+  };
 
   renderRequestDropdown() {
     const button = (
@@ -124,78 +141,71 @@ class RequestSelector extends Component {
 
   render() {
     const { selectedRequest, requests } = this.props;
+
     return (
-      <EuiFlexGroup
-        alignItems="center"
-        gutterSize="xs"
-      >
-        <EuiFlexItem
-          grow={false}
-        >
+      <EuiFlexGroup alignItems="center" gutterSize="xs">
+        <EuiFlexItem grow={false}>
           <strong>
-            <FormattedMessage
-              id="inspectorViews.requests.requestLabel"
-              defaultMessage="Request:"
-            />
+            <FormattedMessage id="inspector.requests.requestLabel" defaultMessage="Request:" />
           </strong>
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
-          {requests.length <= 1 &&
-            <div className="insRequestSelector__singleRequest" data-test-subj="inspectorRequestName">
+          {requests.length <= 1 && (
+            <div
+              className="insRequestSelector__singleRequest"
+              data-test-subj="inspectorRequestName"
+            >
               {selectedRequest.name}
             </div>
-          }
+          )}
           {requests.length > 1 && this.renderRequestDropdown()}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          { selectedRequest.status !== RequestStatus.PENDING &&
+          {selectedRequest.status !== RequestStatus.PENDING && (
             <EuiToolTip
               position="left"
-              title={selectedRequest.status === RequestStatus.OK ?
+              title={
+                selectedRequest.status === RequestStatus.OK ? (
+                  <FormattedMessage
+                    id="inspector.requests.requestSucceededTooltipTitle"
+                    defaultMessage="Request succeeded"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="inspector.requests.requestFailedTooltipTitle"
+                    defaultMessage="Request failed"
+                  />
+                )
+              }
+              content={
                 <FormattedMessage
-                  id="inspectorViews.requests.requestSucceededTooltipTitle"
-                  defaultMessage="Request succeeded"
-                /> :
-                <FormattedMessage
-                  id="inspectorViews.requests.requestFailedTooltipTitle"
-                  defaultMessage="Request failed"
+                  id="inspector.requests.requestTooltipDescription"
+                  defaultMessage="The total time the request took."
                 />
               }
-              content={<FormattedMessage
-                id="inspectorViews.requests.requestTooltipDescription"
-                defaultMessage="The total time the request took."
-              />}
             >
               <EuiBadge
                 color={selectedRequest.status === RequestStatus.OK ? 'secondary' : 'danger'}
                 iconType={selectedRequest.status === RequestStatus.OK ? 'check' : 'cross'}
               >
-
                 <FormattedMessage
-                  id="inspectorViews.requests.requestTimeLabel"
+                  id="inspector.requests.requestTimeLabel"
                   defaultMessage="{requestTime}ms"
                   values={{ requestTime: selectedRequest.time }}
                 />
               </EuiBadge>
             </EuiToolTip>
-          }
-          { selectedRequest.status === RequestStatus.PENDING &&
+          )}
+          {selectedRequest.status === RequestStatus.PENDING && (
             <EuiLoadingSpinner
               size="m"
-              aria-label={i18n.translate('inspectorViews.requests.requestInProgressAriaLabel', {
-                defaultMessage: 'Request in progress'
+              aria-label={i18n.translate('inspector.requests.requestInProgressAriaLabel', {
+                defaultMessage: 'Request in progress',
               })}
             />
-          }
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     );
   }
 }
-
-RequestSelector.propTypes = {
-  requests: PropTypes.array.isRequired,
-  selectedRequest: PropTypes.object.isRequired,
-};
-
-export { RequestSelector };
