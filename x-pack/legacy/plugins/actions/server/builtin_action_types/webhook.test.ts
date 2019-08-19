@@ -45,6 +45,7 @@ describe('config validation', () => {
     scheme: 'http',
     method: 'get',
     path: null,
+    url: null,
     headers: null,
     proxy: null,
     connection_timeout: null,
@@ -138,6 +139,18 @@ describe('config validation', () => {
       headers: {
         'Content-Type': 'application/json',
       },
+    };
+    expect(validateConfig(actionType, config)).toEqual({
+      ...defaultValues,
+      ...config,
+    });
+  });
+
+  test('config validation passes when a url is specified', () => {
+    const config: Record<string, any> = {
+      host: 'mylisteningserver',
+      port: 9200,
+      url: 'http://mylisteningserver:9200/endpoint',
     };
     expect(validateConfig(actionType, config)).toEqual({
       ...defaultValues,

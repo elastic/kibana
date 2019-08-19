@@ -42,6 +42,7 @@ const ConfigSchema = schema.object(
       }
     ),
     path: nullableType(schema.string()),
+    url: nullableType(schema.string()),
     headers: nullableType(HeadersSchema),
     proxy: nullableType(ProxySchema),
     connection_timeout: nullableType(schema.string()),
