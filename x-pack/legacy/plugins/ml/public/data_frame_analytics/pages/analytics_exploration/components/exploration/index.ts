@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './pages/analytics_exploration/directive';
-import './pages/analytics_exploration/route';
-import './pages/analytics_management/directive';
-import './pages/analytics_management/route';
+export { Exploration } from './exploration';

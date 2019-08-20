@@ -16,9 +16,9 @@ import { loadCurrentIndexPattern, loadCurrentSavedSearch } from '../../../util/i
 import { loadIndexPatterns } from '../../../util/index_utils';
 import { getDataFrameAnalyticsBreadcrumbs } from '../../breadcrumbs';
 
-const template = `<ml-data-frame-analytics-management />`;
+const template = `<ml-data-frame-analytics-exploration />`;
 
-uiRoutes.when('/data_frame_analytics/?', {
+uiRoutes.when('/data_frame_analytics/exploration?', {
   template,
   k7Breadcrumbs: getDataFrameAnalyticsBreadcrumbs,
   resolve: {
