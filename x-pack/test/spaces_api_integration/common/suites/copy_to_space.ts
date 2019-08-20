@@ -488,6 +488,7 @@ export function copyToSpaceTestSuiteFactory(
           .expect(tests.multipleSpaces.statusCode)
           .then((response: TestResponse) => {
             if (tests.multipleSpaces.statusCode === 200) {
+              expect(Object.keys(response.body).length).to.eql(2);
               return Promise.all([
                 tests.multipleSpaces.noConflictsResponse({
                   body: {
