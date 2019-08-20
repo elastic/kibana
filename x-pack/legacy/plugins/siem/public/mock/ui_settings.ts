@@ -22,3 +22,11 @@ chrome.getUiSettingsClient().get.mockImplementation((key: string) => {
       throw new Error(`Unexpected config key: ${key}`);
   }
 });
+
+chrome.breadcrumbs = {
+  set: jest.fn(() => {}),
+  get$: jest.fn(),
+  push: jest.fn(),
+  filter: jest.fn(),
+  pop: jest.fn(),
+};

@@ -6,7 +6,7 @@
 
 import { mount } from 'enzyme';
 import * as React from 'react';
-import { Router } from 'react-router-dom';
+import { Router, RouteComponentProps } from 'react-router-dom';
 
 import '../../mock/match_media';
 import '../../mock/ui_settings';
@@ -60,11 +60,21 @@ const mockHistory = {
   listen: jest.fn(),
 };
 
+const mockMatch = {
+  isExact: false,
+  url: '/',
+  path: '/',
+};
+
 // Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
 /* eslint-disable no-console */
 const originalError = console.error;
 
 describe('Hosts - rendering', () => {
+  const hostProps = {
+    match: mockMatch,
+  } as RouteComponentProps;
+
   beforeAll(() => {
     console.error = jest.fn();
   });
@@ -82,7 +92,7 @@ describe('Hosts - rendering', () => {
       <TestProviders>
         <MockedProvider mocks={localSource} addTypename={false}>
           <Router history={mockHistory}>
-            <Hosts />
+            <Hosts {...hostProps} />
           </Router>
         </MockedProvider>
       </TestProviders>
@@ -99,7 +109,7 @@ describe('Hosts - rendering', () => {
       <TestProviders>
         <MockedProvider mocks={localSource} addTypename={false}>
           <Router history={mockHistory}>
-            <Hosts />
+            <Hosts {...hostProps} />
           </Router>
         </MockedProvider>
       </TestProviders>
@@ -108,5 +118,21 @@ describe('Hosts - rendering', () => {
     await new Promise(resolve => setTimeout(resolve));
     wrapper.update();
     expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(false);
+  });
+
+  test('it should render the hosts tab by default', async () => {
+    localSource[0].result.data.source.status.indicesExist = true;
+    const wrapper = mount(
+      <TestProviders>
+        <MockedProvider mocks={localSource} addTypename={false}>
+          <Router history={mockHistory}>
+            <Hosts {...hostProps} />
+          </Router>
+        </MockedProvider>
+      </TestProviders>
+    );
+    await new Promise(resolve => setTimeout(resolve));
+    wrapper.update();
+    expect(wrapper.find('HostsQueryTabBody').exists()).toBe(true);
   });
 });

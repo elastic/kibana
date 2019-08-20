@@ -63,7 +63,7 @@ export enum HostsTabName {
   events = 'events',
 }
 
-const navTabs: NavTab[] = [
+export const navTabs: NavTab[] = [
   {
     id: HostsTabName.hosts,
     name: i18n.NAVIGATION_HOSTS_TITLE,
