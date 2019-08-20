@@ -5,5 +5,5 @@
  */
 
 export function getUrlPrefix(spaceId: string) {
-  return spaceId && spaceId !== 'defualt' ? `/s/${spaceId}` : ``;
+  return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
 }
