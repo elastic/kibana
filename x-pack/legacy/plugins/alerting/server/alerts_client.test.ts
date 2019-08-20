@@ -496,41 +496,33 @@ describe('create()', () => {
     await alertsClient.create({ data });
 
     expect(alertsClientParams.createAPIKey).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.create.mock.calls[0]).toHaveLength(3);
-    expect(savedObjectsClient.create.mock.calls[0][0]).toEqual('alert');
-    expect(savedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
-                        Object {
-                          "actions": Array [
-                            Object {
-                              "actionRef": "action_0",
-                              "group": "default",
-                              "params": Object {
-                                "foo": true,
-                              },
-                            },
-                          ],
-                          "alertTypeId": "123",
-                          "alertTypeParams": Object {
-                            "bar": true,
-                          },
-                          "apiKey": "MTIzOmFiYw==",
-                          "createdBy": "elastic",
-                          "enabled": true,
-                          "interval": "10s",
-                        }
-                `);
-    expect(savedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
-                        Object {
-                          "references": Array [
-                            Object {
-                              "id": "1",
-                              "name": "action_0",
-                              "type": "action",
-                            },
-                          ],
-                        }
-                `);
+    expect(savedObjectsClient.create).toHaveBeenCalledWith(
+      'alert',
+      {
+        actions: [
+          {
+            actionRef: 'action_0',
+            group: 'default',
+            params: { foo: true },
+          },
+        ],
+        alertTypeId: '123',
+        alertTypeParams: { bar: true },
+        apiKey: Buffer.from('123:abc').toString('base64'),
+        createdBy: 'elastic',
+        enabled: true,
+        interval: '10s',
+      },
+      {
+        references: [
+          {
+            id: '1',
+            name: 'action_0',
+            type: 'action',
+          },
+        ],
+      }
+    );
   });
 });
 
