@@ -20,6 +20,8 @@
 import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import vislibValueAxesTemplate from './value_axes.html';
+import { safeMakeLabel } from 'ui/agg_types/agg_utils';
+
 const module = uiModules.get('kibana');
 
 module.directive('vislibValueAxes', function () {
@@ -125,6 +127,12 @@ module.directive('vislibValueAxes', function () {
         }
       };
 
+      $scope.updateBoundsMargin = function (axis) {
+        if (!axis.scale.defaultYExtents) {
+          delete axis.scale.boundsMargin;
+        }
+      };
+
       $scope.updateAxisName = function (axis) {
         const axisName = _.capitalize(axis.position) + 'Axis-';
         axis.name = axisName + $scope.editorState.params.valueAxes.reduce((value, axis) => {
@@ -187,7 +195,7 @@ module.directive('vislibValueAxes', function () {
 
       $scope.$watch(() => {
         return $scope.editorState.aggs.map(agg => {
-          return agg.makeLabel();
+          return safeMakeLabel(agg);
         }).join();
       }, () => {
         $scope.updateAxisTitle();

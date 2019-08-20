@@ -40,4 +40,3 @@ describe('getLastValue(data)', () => {
     expect(getLastValue(null, '-')).toBe('-');
   });
 });
-

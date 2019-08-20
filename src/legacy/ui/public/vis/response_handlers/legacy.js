@@ -28,7 +28,7 @@ import { getFormat } from '../../visualize/loader/pipeline_helpers/utilities';
  * function.
  */
 
-const LegacyResponseHandlerProvider = function () {
+export const legacyResponseHandlerProvider = function () {
 
   return {
     name: 'legacy',
@@ -87,4 +87,3 @@ const LegacyResponseHandlerProvider = function () {
   };
 };
 
-export { LegacyResponseHandlerProvider };

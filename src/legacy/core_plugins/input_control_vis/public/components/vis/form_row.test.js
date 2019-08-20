@@ -37,6 +37,20 @@ test('renders enabled control', () => {
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
+test('renders control with warning', () => {
+  const component = shallow(
+    <FormRow
+      label="test control"
+      id="controlId"
+      controlIndex={0}
+      warningMsg="This is a warning"
+    >
+      <div>My Control</div>
+    </FormRow>
+  );
+  expect(component).toMatchSnapshot(); // eslint-disable-line
+});
+
 test('renders disabled control with tooltip', () => {
   const component = shallow(
     <FormRow

@@ -23,7 +23,7 @@ import { EuiModal, EuiOverlayMask } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
-import { I18nSetup } from '../i18n';
+import { I18nStart } from '../i18n';
 import { OverlayRef } from './overlay_service';
 
 /**
@@ -69,7 +69,7 @@ export class ModalService {
    * @return {FlyoutRef} A reference to the opened flyout panel.
    */
   public openModal = (
-    i18n: I18nSetup,
+    i18n: I18nStart,
     modalChildren: React.ReactNode,
     modalProps: {
       closeButtonAriaLabel?: string;

@@ -26,9 +26,11 @@ import { HttpFetchError } from './http_fetch_error';
 /** @public */
 export interface HttpServiceBase {
   stop(): void;
-  getBasePath(): string;
-  prependBasePath(path: string): string;
-  removeBasePath(path: string): string;
+  basePath: {
+    get: () => string;
+    prepend: (url: string) => string;
+    remove: (url: string) => string;
+  };
   intercept(interceptor: HttpInterceptor): () => void;
   removeAllInterceptors(): void;
   fetch: HttpHandler;

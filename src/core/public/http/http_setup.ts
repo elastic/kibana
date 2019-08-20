@@ -31,11 +31,11 @@ import { merge } from 'lodash';
 import { format } from 'url';
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { FatalErrorsSetup } from '../fatal_errors';
-import { modifyUrl } from '../utils';
 import { HttpFetchOptions, HttpServiceBase, HttpInterceptor, HttpResponse } from './types';
 import { HttpInterceptController } from './http_intercept_controller';
 import { HttpFetchError } from './http_fetch_error';
 import { HttpInterceptHaltError } from './http_intercept_halt_error';
+import { BasePath } from './base_path_service';
 
 const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x-json)(;.*)?$/;
 const NDJSON_CONTENT = /^(application\/ndjson)(;.*)?$/;
@@ -48,7 +48,7 @@ export const setup = (
   const stop$ = new Subject();
   const interceptors = new Set<HttpInterceptor>();
   const kibanaVersion = injectedMetadata.getKibanaVersion();
-  const basePath = injectedMetadata.getBasePath() || '';
+  const basePath = new BasePath(injectedMetadata.getBasePath());
 
   function intercept(interceptor: HttpInterceptor) {
     interceptors.add(interceptor);
@@ -58,14 +58,6 @@ export const setup = (
 
   function removeAllInterceptors() {
     interceptors.clear();
-  }
-
-  function prependBasePath(path: string): string {
-    return modifyUrl(path, parts => {
-      if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
-        parts.pathname = `${basePath}${parts.pathname}`;
-      }
-    });
   }
 
   function createRequest(path: string, options?: HttpFetchOptions) {
@@ -82,7 +74,7 @@ export const setup = (
       options || {}
     );
     const url = format({
-      pathname: shouldPrependBasePath ? prependBasePath(path) : path,
+      pathname: shouldPrependBasePath ? basePath.prepend(path) : path,
       query,
     });
 
@@ -255,26 +247,6 @@ export const setup = (
     loadingCount$.complete();
   }
 
-  function getBasePath() {
-    return basePath;
-  }
-
-  function removeBasePath(path: string): string {
-    if (!basePath) {
-      return path;
-    }
-
-    if (path === basePath) {
-      return '/';
-    }
-
-    if (path.startsWith(`${basePath}/`)) {
-      return path.slice(basePath.length);
-    }
-
-    return path;
-  }
-
   function addLoadingCount(count$: Observable<number>) {
     count$
       .pipe(
@@ -314,9 +286,7 @@ export const setup = (
 
   return {
     stop,
-    getBasePath,
-    prependBasePath,
-    removeBasePath,
+    basePath,
     intercept,
     removeAllInterceptors,
     fetch,

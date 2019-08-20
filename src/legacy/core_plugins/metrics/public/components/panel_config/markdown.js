@@ -44,11 +44,9 @@ import {
 } from '@elastic/eui';
 const lessC = less(window, { env: 'production' });
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import { Storage } from 'ui/storage';
-import { data } from 'plugins/data';
+import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
-const { QueryBarInput } = data.query.ui;
-const localStorage = new Storage(window.localStorage);
+import { VisDataContext } from './../../contexts/vis_data_context';
 
 class MarkdownPanelConfigUi extends Component {
   constructor(props) {
@@ -86,24 +84,37 @@ class MarkdownPanelConfigUi extends Component {
 
     const alignOptions = [
       {
-        label: intl.formatMessage({ id: 'tsvb.markdown.alignOptions.topLabel', defaultMessage: 'Top' }),
-        value: 'top'
+        label: intl.formatMessage({
+          id: 'tsvb.markdown.alignOptions.topLabel',
+          defaultMessage: 'Top',
+        }),
+        value: 'top',
       },
       {
-        label: intl.formatMessage({ id: 'tsvb.markdown.alignOptions.middleLabel', defaultMessage: 'Middle' }),
-        value: 'middle'
+        label: intl.formatMessage({
+          id: 'tsvb.markdown.alignOptions.middleLabel',
+          defaultMessage: 'Middle',
+        }),
+        value: 'middle',
       },
       {
-        label: intl.formatMessage({ id: 'tsvb.markdown.alignOptions.bottomLabel', defaultMessage: 'Bottom' }),
-        value: 'bottom'
-      }
+        label: intl.formatMessage({
+          id: 'tsvb.markdown.alignOptions.bottomLabel',
+          defaultMessage: 'Bottom',
+        }),
+        value: 'bottom',
+      },
     ];
     const selectedAlignOption = alignOptions.find(option => {
       return model.markdown_vertical_align === option.value;
     });
     let view;
     if (selectedTab === 'markdown') {
-      view = (<MarkdownEditor {...this.props}/>);
+      view = (
+        <VisDataContext.Consumer>
+          {visData => <MarkdownEditor visData={visData} {...this.props} />}
+        </VisDataContext.Consumer>
+      );
     } else if (selectedTab === 'data') {
       view = (
         <SeriesEditor
@@ -111,7 +122,6 @@ class MarkdownPanelConfigUi extends Component {
           fields={this.props.fields}
           model={this.props.model}
           name={this.props.name}
-          visData$={this.props.visData$}
           onChange={this.props.onChange}
         />
       );
@@ -121,10 +131,7 @@ class MarkdownPanelConfigUi extends Component {
           <EuiPanel>
             <EuiTitle size="s">
               <span>
-                <FormattedMessage
-                  id="tsvb.markdown.optionsTab.dataLabel"
-                  defaultMessage="Data"
-                />
+                <FormattedMessage id="tsvb.markdown.optionsTab.dataLabel" defaultMessage="Data" />
               </span>
             </EuiTitle>
             <EuiSpacer size="m" />
@@ -141,21 +148,23 @@ class MarkdownPanelConfigUi extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('panelFilter')}
-                  label={(<FormattedMessage
-                    id="tsvb.markdown.optionsTab.panelFilterLabel"
-                    defaultMessage="Panel filter"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.markdown.optionsTab.panelFilterLabel"
+                      defaultMessage="Panel filter"
+                    />
+                  }
                   fullWidth
                 >
-                  <QueryBarInput
+                  <QueryBarWrapper
                     query={{
-                      language: model.filter.language ? model.filter.language : getDefaultQueryLanguage(),
+                      language: model.filter.language
+                        ? model.filter.language
+                        : getDefaultQueryLanguage(),
                       query: model.filter.query || '',
                     }}
                     onChange={filter => this.props.onChange({ filter })}
-                    appName={'VisEditor'}
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
-                    store={localStorage}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -181,10 +190,7 @@ class MarkdownPanelConfigUi extends Component {
           <EuiPanel>
             <EuiTitle size="s">
               <span>
-                <FormattedMessage
-                  id="tsvb.markdown.optionsTab.styleLabel"
-                  defaultMessage="Style"
-                />
+                <FormattedMessage id="tsvb.markdown.optionsTab.styleLabel" defaultMessage="Style" />
               </span>
             </EuiTitle>
             <EuiSpacer size="m" />
@@ -296,10 +302,7 @@ class MarkdownPanelConfigUi extends Component {
             isSelected={selectedTab === 'data'}
             onClick={() => this.switchTab('data')}
           >
-            <FormattedMessage
-              id="tsvb.markdown.dataTab.dataButtonLabel"
-              defaultMessage="Data"
-            />
+            <FormattedMessage id="tsvb.markdown.dataTab.dataButtonLabel" defaultMessage="Data" />
           </EuiTab>
           <EuiTab
             isSelected={selectedTab === 'options'}
@@ -323,7 +326,6 @@ MarkdownPanelConfigUi.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func,
   dateFormat: PropTypes.string,
-  visData$: PropTypes.object,
 };
 
 export const MarkdownPanelConfig = injectI18n(MarkdownPanelConfigUi);

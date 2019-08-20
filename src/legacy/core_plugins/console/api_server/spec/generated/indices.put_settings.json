@@ -1,5 +1,5 @@
 {
-  "put_settings": {
+  "indices.put_settings": {
     "url_params": {
       "master_timeout": "",
       "timeout": "",
@@ -21,6 +21,6 @@
       "_settings",
       "{indices}/_settings"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-update-settings.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-update-settings.html"
   }
 }

@@ -18,7 +18,7 @@
  */
 
 import { ToolingLog } from '@kbn/dev-utils';
-import { Config, Lifecycle } from '../../../src/functional_test_runner/lib';
+import { Config, Lifecycle } from '../src/functional_test_runner/lib';
 
 interface AsyncInstance<T> {
   /**
@@ -43,7 +43,7 @@ type MaybeAsyncInstance<T> = T extends Promise<infer X> ? AsyncInstance<X> & X :
 type ProvidedTypeMap<T extends {}> = {
   [K in keyof T]: T[K] extends (...args: any[]) => any
     ? MaybeAsyncInstance<ReturnType<T[K]>>
-    : unknown
+    : unknown;
 };
 
 export interface GenericFtrProviderContext<
@@ -82,4 +82,9 @@ export interface GenericFtrProviderContext<
    * @param path
    */
   loadTestFile(path: string): void;
+}
+
+export interface FtrConfigProviderContext {
+  log: ToolingLog;
+  readConfigFile(path: string): Promise<Config>;
 }

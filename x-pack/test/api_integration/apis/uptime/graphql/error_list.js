@@ -4,12 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
-import { errorListQueryString } from '../../../../../plugins/uptime/public/queries';
-import errorList from './fixtures/error_list';
-import errorListFilteredById from './fixtures/error_list_filtered_by_id';
-import errorListFilteredByPort from './fixtures/error_list_filtered_by_port';
-import errorListFilteredByPortAndType from './fixtures/error_list_filtered_by_port_and_type';
+import { errorListQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
+import { expectFixtureEql } from './expect_fixture_eql';
 
 export default function ({ getService }) {
   describe('errorList query', () => {
@@ -30,7 +26,7 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getErrorListQuery });
-      expect(data).to.eql(errorList);
+      expectFixtureEql(data, 'error_list');
     });
 
     it('returns an error list filtered by monitor id', async () => {
@@ -49,7 +45,7 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getErrorListQuery });
-      expect(data).to.eql(errorListFilteredById);
+      expectFixtureEql(data, 'error_list_filtered_by_id');
     });
 
     it('returns an error list filtered by port', async () => {
@@ -68,7 +64,7 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getErrorListQuery });
-      expect(data).to.eql(errorListFilteredByPort);
+      expectFixtureEql(data, 'error_list_filtered_by_port');
     });
 
     it('returns an error list filtered by port/type', async () => {
@@ -89,7 +85,7 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getErrorListQuery });
-      expect(data).to.eql(errorListFilteredByPortAndType);
+      expectFixtureEql(data, 'error_list_filtered_by_port_and_type');
     });
   });
 }

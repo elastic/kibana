@@ -20,7 +20,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { MarkdownSimple } from 'ui/markdown';
+import { MarkdownSimple } from '../../../core_plugins/kibana_react/public/markdown';
 import { toastNotifications } from 'ui/notify';
 import { SavedObjectNotFound } from '../errors';
 import { uiModules } from '../modules';
@@ -28,7 +28,7 @@ import { uiModules } from '../modules';
 uiModules.get('kibana/url')
   .service('redirectWhenMissing', function (Private) { return Private(RedirectWhenMissingProvider); });
 
-export function RedirectWhenMissingProvider($location, kbnUrl, Promise) {
+export function RedirectWhenMissingProvider(kbnUrl, Promise) {
   /**
    * Creates an error handler that will redirect to a url when a SavedObjectNotFound
    * error is thrown

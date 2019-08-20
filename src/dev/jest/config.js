@@ -30,7 +30,7 @@ export default {
     '<rootDir>/src/cli',
     '<rootDir>/src/cli_keystore',
     '<rootDir>/src/cli_plugin',
-    '<rootDir>/src/functional_test_runner',
+    '<rootDir>/packages/kbn-test/target/functional_test_runner',
     '<rootDir>/src/dev',
     '<rootDir>/src/legacy/utils',
     '<rootDir>/src/setup_node_env',
@@ -45,10 +45,13 @@ export default {
     'packages/kbn-ui-framework/src/services/**/*.js',
     '!packages/kbn-ui-framework/src/services/index.js',
     '!packages/kbn-ui-framework/src/services/**/*/index.js',
-    'src/legacy/core_plugins/metrics/**/*.js'
+    'src/legacy/core_plugins/**/*.{js,jsx,ts,tsx}',
+    '!src/legacy/core_plugins/**/{__test__,__snapshots__}/**/*',
+    'src/legacy/ui/public/{agg_types,vis}/**/*.{ts,tsx}',
+    '!src/legacy/ui/public/{agg_types,vis}/**/*.d.ts',
   ],
   moduleNameMapper: {
-    '^plugins/([^\/.]*)/(.*)': '<rootDir>/src/legacy/core_plugins/$1/public/$2',
+    '^plugins/([^\/.]*)(.*)': '<rootDir>/src/legacy/core_plugins/$1/public$2',
     '^ui/(.*)': '<rootDir>/src/legacy/ui/public/$1',
     '^uiExports/(.*)': '<rootDir>/src/dev/jest/mocks/file_mock.js',
     '^test_utils/(.*)': '<rootDir>/src/test_utils/public/$1',
@@ -59,6 +62,9 @@ export default {
     '<rootDir>/src/dev/jest/setup/babel_polyfill.js',
     '<rootDir>/src/dev/jest/setup/polyfills.js',
     '<rootDir>/src/dev/jest/setup/enzyme.js',
+  ],
+  setupFilesAfterEnv: [
+    '<rootDir>/src/dev/jest/setup/mocks.js',
   ],
   coverageDirectory: '<rootDir>/target/jest-coverage',
   coverageReporters: [

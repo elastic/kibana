@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { npSetup } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 import { ChromeHelpExtension } from '../../../../../core/public';
 
-const newPlatformChrome = npSetup.core.chrome;
+const newPlatformChrome = npStart.core.chrome;
 
 export type HelpExtensionApi = ReturnType<typeof createHelpExtensionApi>['helpExtension'];
 export type HelpExtension = ChromeHelpExtension;

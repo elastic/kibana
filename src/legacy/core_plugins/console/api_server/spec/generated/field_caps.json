@@ -9,7 +9,8 @@
         "closed",
         "none",
         "all"
-      ]
+      ],
+      "include_unmapped": "__flag__"
     },
     "methods": [
       "GET",
@@ -19,6 +20,6 @@
       "_field_caps",
       "{indices}/_field_caps"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/search-field-caps.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-field-caps.html"
   }
 }

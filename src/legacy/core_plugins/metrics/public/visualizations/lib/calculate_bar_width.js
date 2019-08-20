@@ -24,7 +24,7 @@ import _ from 'lodash';
 export const calculateBarWidth = (series, multiplier = 0.7) => {
   const first = _.first(series);
   try {
-    return ((first.data[1][0] - first.data[0][0])) * multiplier;
+    return (first.data[1][0] - first.data[0][0]) * multiplier;
   } catch (e) {
     return 1000; // 1000 ms
   }

@@ -27,11 +27,3 @@ jest.doMock('ui/new_platform', () => ({
     }
   },
 }));
-
-// Make importing the ui/notify module work in jest
-jest.doMock('ui/metadata', () => ({
-  metadata: {
-    branch: 'my-metadata-branch',
-    version: 'my-metadata-version'
-  }
-}));

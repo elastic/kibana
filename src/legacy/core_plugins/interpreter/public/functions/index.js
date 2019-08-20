@@ -19,11 +19,13 @@
 
 import { clog } from './clog';
 import { esaggs } from './esaggs';
+import { font } from './font';
 import { kibana } from './kibana';
 import { kibanaContext } from './kibana_context';
+import { range } from './range';
 import { visualization } from './visualization';
 import { visDimension } from './vis_dimension';
 
 export const functions = [
-  clog, esaggs, kibana, kibanaContext, visualization, visDimension,
+  clog, esaggs, font, kibana, kibanaContext, range, visualization, visDimension,
 ];

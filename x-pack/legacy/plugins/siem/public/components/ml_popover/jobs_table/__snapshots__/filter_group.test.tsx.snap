@@ -1,0 +1,52 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FilterGroup renders correctly against snapshot 1`] = `
+<EuiFlexGroup
+  gutterSize="m"
+  justifyContent="flexEnd"
+>
+  <EuiFlexItem
+    grow={true}
+  >
+    <EuiSearchBar
+      box={
+        Object {
+          "incremental": true,
+          "placeholder": "e.g. rare_process_linux",
+        }
+      }
+      data-test-subj="jobs-filter-bar"
+      onChange={[Function]}
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiFilterGroup>
+      <EuiFilterButton
+        color="text"
+        data-test-subj="show-custom-jobs-filter-button"
+        grow={true}
+        hasActiveFilters={true}
+        iconSide="right"
+        onClick={[Function]}
+        type="button"
+        withNext={true}
+      >
+        Elastic jobs
+      </EuiFilterButton>
+      <EuiFilterButton
+        color="text"
+        data-test-subj="show-elastic-jobs-filter-button"
+        grow={true}
+        hasActiveFilters={true}
+        iconSide="right"
+        onClick={[Function]}
+        type="button"
+      >
+        Custom jobs
+      </EuiFilterButton>
+    </EuiFilterGroup>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

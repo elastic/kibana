@@ -45,8 +45,8 @@ import {
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { i18n } from '@kbn/i18n';
 
-import { SavedObjectAttributes } from '../../../../server/saved_objects';
-import { SimpleSavedObject } from '../simple_saved_object';
+import { SavedObjectAttributes } from 'src/core/server';
+import { SimpleSavedObject } from 'src/core/public';
 
 // TODO the typings for EuiListGroup are incorrect - maxWidth is missing. This can be removed when the types are adjusted
 const FixedEuiListGroup = (EuiListGroup as any) as React.FunctionComponent<

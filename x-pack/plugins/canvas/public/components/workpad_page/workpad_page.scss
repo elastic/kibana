@@ -1,8 +1,0 @@
-.canvasPage {
-  z-index: initial;
-  @include euiBottomShadowFlat($opacity: 0.4);
-  position: absolute;
-  top: 0;
-  transform-style: preserve-3d !important;
-  background-color: $euiColorEmptyShade;
-}

@@ -49,7 +49,7 @@ class VisualizeListingTableUi extends Component {
         deleteItems={capabilities.get().visualize.delete ? this.props.deleteItems : null}
         editItem={capabilities.get().visualize.save ? this.props.editItem : null}
         tableColumns={this.getTableColumns()}
-        listingLimit={100}
+        listingLimit={this.props.listingLimit}
         initialFilter={''}
         noItemsFragment={this.getNoItemsMessage()}
         entityName={
@@ -222,6 +222,7 @@ VisualizeListingTableUi.propTypes = {
   createItem: PropTypes.func.isRequired,
   getViewUrl: PropTypes.func.isRequired,
   editItem: PropTypes.func.isRequired,
+  listingLimit: PropTypes.number.isRequired,
 };
 
 export const VisualizeListingTable = injectI18n(VisualizeListingTableUi);

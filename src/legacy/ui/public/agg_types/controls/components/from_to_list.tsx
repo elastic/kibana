@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { EuiFieldText, EuiFlexItem } from '@elastic/eui';
+import { EuiFieldText, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import Ipv4Address from '../../../utils/ipv4_address';
 import { InputList, InputListConfig, InputModel, InputObject, InputItem } from './input_list';
@@ -49,12 +49,8 @@ function FromToList({ showValidation, onBlur, ...rest }: FromToListProps) {
       from: { value: '0.0.0.0', model: '0.0.0.0', isInvalid: false },
       to: { value: '255.255.255.255', model: '255.255.255.255', isInvalid: false },
     },
-    defaultEmptyValue: {
-      from: { value: EMPTY_STRING, model: EMPTY_STRING, isInvalid: false },
-      to: { value: EMPTY_STRING, model: EMPTY_STRING, isInvalid: false },
-    },
     validateClass: Ipv4Address,
-    getModelValue: (item: FromToObject) => ({
+    getModelValue: (item: FromToObject = {}) => ({
       from: {
         value: item.from || EMPTY_STRING,
         model: item.from || EMPTY_STRING,
@@ -86,6 +82,7 @@ function FromToList({ showValidation, onBlur, ...rest }: FromToListProps) {
               defaultMessage: 'IP range from: {value}',
               values: { value: item.from.value || '*' },
             })}
+            compressed
             isInvalid={showValidation ? item.from.isInvalid : false}
             placeholder="*"
             onChange={ev => {
@@ -95,12 +92,16 @@ function FromToList({ showValidation, onBlur, ...rest }: FromToListProps) {
             onBlur={onBlur}
           />
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="sortRight" color="subdued" />
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiFieldText
             aria-label={i18n.translate('common.ui.aggTypes.ipRanges.ipRangeToAriaLabel', {
               defaultMessage: 'IP range to: {value}',
               values: { value: item.to.value || '*' },
             })}
+            compressed
             isInvalid={showValidation ? item.to.isInvalid : false}
             placeholder="*"
             onChange={ev => {
@@ -112,10 +113,7 @@ function FromToList({ showValidation, onBlur, ...rest }: FromToListProps) {
         </EuiFlexItem>
       </>
     ),
-    validateModel: (validateFn, object: FromToObject, model: FromToModel) => {
-      validateFn(object.from, model.from);
-      validateFn(object.to, model.to);
-    },
+    modelNames: ['from', 'to'],
   };
 
   return <InputList config={fromToListConfig} {...rest} />;

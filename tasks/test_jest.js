@@ -33,7 +33,7 @@ module.exports = function (grunt) {
   function runJest(jestScript) {
     const serverCmd = {
       cmd: 'node',
-      args: [jestScript, '--no-cache', '--ci'],
+      args: [jestScript, '--ci'],
       opts: { stdio: 'inherit' }
     };
 

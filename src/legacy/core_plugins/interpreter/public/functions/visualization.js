@@ -23,7 +23,7 @@ import chrome from 'ui/chrome';
 import { VisRequestHandlersRegistryProvider as RequestHandlersProvider } from 'ui/registry/vis_request_handlers';
 import { VisResponseHandlersRegistryProvider as ResponseHandlerProvider } from 'ui/registry/vis_response_handlers';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import { IndexPatternsProvider } from 'ui/index_patterns';
+import { IndexPatternsProvider } from '../../../data/public';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { PersistedState } from 'ui/persisted_state';
 
@@ -116,17 +116,21 @@ export const visualization = () => ({
       if (context.columns) {
         // assign schemas to aggConfigs
         context.columns.forEach(column => {
-          column.aggConfig.aggConfigs.schemas = visType.schemas.all;
+          if (column.aggConfig) {
+            column.aggConfig.aggConfigs.schemas = visType.schemas.all;
+          }
         });
 
         Object.keys(schemas).forEach(key => {
           schemas[key].forEach(i => {
-            context.columns[i].aggConfig.schema = key;
+            if (context.columns[i] && context.columns[i].aggConfig) {
+              context.columns[i].aggConfig.schema = key;
+            }
           });
         });
       }
 
-      context = await responseHandler(context);
+      context = await responseHandler(context, visConfigParams.dimensions);
     }
 
     return {

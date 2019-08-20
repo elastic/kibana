@@ -5,11 +5,11 @@
  */
 
 import expect from '@kbn/expect';
-import { overviewHostQuery } from '../../../../plugins/siem/public/containers/overview/overview_host/index.gql_query';
-import { GetOverviewHostQuery } from '../../../../plugins/siem/public/graphql/types';
-import { KbnTestProvider } from './types';
+import { overviewHostQuery } from '../../../../legacy/plugins/siem/public/containers/overview/overview_host/index.gql_query';
+import { GetOverviewHostQuery } from '../../../../legacy/plugins/siem/public/graphql/types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-const overviewHostTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
   describe('Overview Host', () => {
@@ -43,6 +43,7 @@ const overviewHostTests: KbnTestProvider = ({ getService }) => {
                 from: FROM,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -52,7 +53,4 @@ const overviewHostTests: KbnTestProvider = ({ getService }) => {
       });
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default overviewHostTests;
+}

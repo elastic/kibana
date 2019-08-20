@@ -20,14 +20,13 @@
 import { i18n } from '@kbn/i18n';
 
 import { Subscription } from 'rxjs';
-import { I18nStart, I18nSetup } from '../i18n';
+import { I18nStart } from '../i18n';
 import { ToastsService, ToastsSetup, ToastsStart } from './toasts';
-import { UiSettingsSetup } from '../ui_settings';
+import { UiSettingsClientContract } from '../ui_settings';
 import { OverlayStart } from '../overlays';
 
 interface SetupDeps {
-  i18n: I18nSetup;
-  uiSettings: UiSettingsSetup;
+  uiSettings: UiSettingsClientContract;
 }
 
 interface StartDeps {
@@ -46,8 +45,8 @@ export class NotificationsService {
     this.toasts = new ToastsService();
   }
 
-  public setup({ i18n: i18nSetup, uiSettings }: SetupDeps): NotificationsSetup {
-    const notificationSetup = { toasts: this.toasts.setup({ i18n: i18nSetup, uiSettings }) };
+  public setup({ uiSettings }: SetupDeps): NotificationsSetup {
+    const notificationSetup = { toasts: this.toasts.setup({ uiSettings }) };
 
     this.uiSettingsErrorSubscription = uiSettings.getUpdateErrors$().subscribe(error => {
       notificationSetup.toasts.addDanger({

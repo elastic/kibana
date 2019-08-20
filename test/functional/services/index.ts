@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { services as commonServiceProviders } from '../../common/services';
+
 import { AppsMenuProvider } from './apps_menu';
 import { BrowserProvider } from './browser';
 import { ComboBoxProvider } from './combo_box';
@@ -60,6 +62,8 @@ import { PieChartProvider } from './visualizations';
 import { VisualizeListingTableProvider } from './visualize_listing_table';
 
 export const services = {
+  ...commonServiceProviders,
+
   __webdriver__: RemoteProvider,
   filterBar: FilterBarProvider,
   queryBar: QueryBarProvider,

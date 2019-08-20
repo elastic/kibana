@@ -38,14 +38,13 @@ import {
 } from './query';
 import { timefilter } from 'ui/timefilter';
 
-import { data } from 'plugins/data';
-data.filter.loadLegacyDirectives();
+// load directives
+import '../../../data/public/legacy';
 
 const module = uiModules.get('apps/context', [
   'elasticsearch',
   'kibana',
   'kibana/config',
-  'kibana/notify',
   'ngRoute',
 ]);
 

@@ -36,6 +36,7 @@ import 'whatwg-fetch';
 import 'abortcontroller-polyfill';
 import 'childnode-remove-polyfill';
 import fetchMock from 'fetch-mock/es5/client';
+import Symbol_observable from 'symbol-observable';
 
 import { CoreSystem } from '__kibanaCore__';
 
@@ -57,6 +58,13 @@ const uiCapabilities = {
   timelion: {
     save: true
   },
+  management: {
+    kibana: {
+      settings: true,
+      index_patterns: true,
+      objects: true
+    }
+  }
 };
 
 // Mock fetch for CoreSystem calls.
@@ -67,10 +75,10 @@ fetchMock.post(/\\/api\\/capabilities/, {
   headers: { 'Content-Type': 'application/json' },
 });
 
-// render the core system in a child of the body as the default children of the body
-// in the browser tests are needed for mocha and other test components to work
+// render the core system in a element not attached to the document as the
+// default children of the body in the browser tests are needed for mocha and
+// other test components to work
 const rootDomElement = document.createElement('div');
-document.body.appendChild(rootDomElement)
 
 const coreSystem = new CoreSystem({
   injectedMetadata: {

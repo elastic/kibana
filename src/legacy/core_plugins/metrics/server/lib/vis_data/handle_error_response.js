@@ -29,20 +29,20 @@ export const handleErrorResponse = panel => error => {
   if (!errorResponse && !(error.name === 'KQLSyntaxError')) {
     errorResponse = {
       message: error.message,
-      stack: error.stack
+      stack: error.stack,
     };
   }
   if (error.name === 'KQLSyntaxError') {
     errorResponse = {
       message: error.shortMessage,
-      stack: error.stack
+      stack: error.stack,
     };
   }
   result[panel.id] = {
     id: panel.id,
     statusCode: error.statusCode,
     error: errorResponse,
-    series: []
+    series: [],
   };
   return result;
 };

@@ -32,10 +32,7 @@ export function timeShift(resp, panel, series) {
 
         results.forEach(item => {
           if (_.startsWith(item.id, series.id)) {
-            item.data = item.data.map(([time, value]) => [
-              time + offset,
-              value
-            ]);
+            item.data = item.data.map(([time, value]) => [time + offset, value]);
           }
         });
       }

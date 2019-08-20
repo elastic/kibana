@@ -51,10 +51,7 @@ export const SerialDiffAgg = props => {
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
-            <FormattedMessage
-              id="tsvb.serialDiff.aggregationLabel"
-              defaultMessage="Aggregation"
-            />
+            <FormattedMessage id="tsvb.serialDiff.aggregationLabel" defaultMessage="Aggregation" />
           </EuiFormLabel>
           <AggSelect
             id={htmlId('aggregation')}
@@ -67,10 +64,7 @@ export const SerialDiffAgg = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('metric')}
-            label={(<FormattedMessage
-              id="tsvb.serialDiff.metricLabel"
-              defaultMessage="Metric"
-            />)}
+            label={<FormattedMessage id="tsvb.serialDiff.metricLabel" defaultMessage="Metric" />}
           >
             <MetricSelect
               onChange={handleSelectChange('field')}
@@ -83,13 +77,15 @@ export const SerialDiffAgg = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('lag')}
-            label={(<FormattedMessage
-              id="tsvb.serialDiff.lagLabel"
-              defaultMessage="Lag"
-              description="'Lag' refers to the parameter name of the serial diff translation
+            label={
+              <FormattedMessage
+                id="tsvb.serialDiff.lagLabel"
+                defaultMessage="Lag"
+                description="'Lag' refers to the parameter name of the serial diff translation
                 https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-pipeline-serialdiff-aggregation.html.
                 This should only be translated if there is a reasaonable word explaining what that parameter does."
-            />)}
+              />
+            }
           >
             {/*
               EUITODO: The following input couldn't be converted to EUI because of type mis-match.

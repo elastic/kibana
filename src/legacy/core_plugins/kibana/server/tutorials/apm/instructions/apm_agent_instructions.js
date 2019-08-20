@@ -348,7 +348,7 @@ var apm = initApm({curlyOpen}
 {curlyClose})`.split('\n'),
     textPost: i18n.translate('kbn.server.tutorials.apm.jsClient.configure.textPost', {
       defaultMessage: 'See the [documentation]({documentationLink}) for advanced usage.',
-      values: { documentationLink: '{config.docs.base_url}guide/en/apm/agent/js-base/current/index.html' },
+      values: { documentationLink: '{config.docs.base_url}guide/en/apm/agent/rum-js/current/index.html' },
     }),
   },
 ];
@@ -472,17 +472,16 @@ export const createDotNetAgentInstructions = (apmServerUrl = '', secretToken = '
       defaultMessage: 'Download the APM agent',
     }),
     textPre: i18n.translate('kbn.server.tutorials.apm.dotNetClient.download.textPre', {
-      defaultMessage: '**Warning: The .NET agent is currently in Beta and not meant for production use.** \n\n \
-      Add the the agent package(s) from [NuGet]({allNuGetPacakgesLink}) to your .NET application. There are multiple \
-      NuGet packages available for different use cases. \n\n  For an ASP.NET Core application with Entity Framework \
-      Core download the [Elastic.Apm.All]({allApmPackageLink}) package. This package will automatically add every agent component to \
-      your application. \n\n In case you would like to to minimize the dependencies, you can use the \
+      defaultMessage: 'Add the the agent package(s) from [NuGet]({allNuGetPackagesLink}) to your .NET application. There are multiple \
+      NuGet packages available for different use cases. \n\nFor an ASP.NET Core application with Entity Framework \
+      Core download the [Elastic.Apm.NetCoreAll]({netCoreAllApmPackageLink}) package. This package will automatically add every \
+      agent component to your application. \n\n In case you would like to to minimize the dependencies, you can use the \
       [Elastic.Apm.AspNetCore]({aspNetCorePackageLink}) package for just \
       ASP.NET Core monitoring or the [Elastic.Apm.EfCore]({efCorePackageLink}) package for just Entity Framework Core monitoring. \n\n \
       In case you only want to use the public Agent API for manual instrumentation use the [Elastic.Apm]({elasticApmPackageLink}) package.',
       values: {
-        allNuGetPacakgesLink: 'https://www.nuget.org/packages?q=Elastic.apm',
-        allApmPackageLink: 'https://www.nuget.org/packages/Elastic.Apm.All',
+        allNuGetPackagesLink: 'https://www.nuget.org/packages?q=Elastic.apm',
+        netCoreAllApmPackageLink: 'https://www.nuget.org/packages/Elastic.Apm.NetCoreAll',
         aspNetCorePackageLink: 'https://www.nuget.org/packages/Elastic.Apm.AspNetCore',
         efCorePackageLink: 'https://www.nuget.org/packages/Elastic.Apm.EntityFrameworkCore',
         elasticApmPackageLink: 'https://www.nuget.org/packages/Elastic.Apm',
@@ -494,13 +493,14 @@ export const createDotNetAgentInstructions = (apmServerUrl = '', secretToken = '
       defaultMessage: 'Add the agent to the application',
     }),
     textPre: i18n.translate('kbn.server.tutorials.apm.dotNetClient.configureApplication.textPre', {
-      defaultMessage: 'In case of ASP.NET Core, call the `UseElasticApm` method in the `Configure` method within the `Startup.cs` file.'
+      defaultMessage: 'In case of ASP.NET Core with the `Elastic.Apm.NetCoreAll` package, call the `UseAllElasticApm` \
+      method in the `Configure` method within the `Startup.cs` file.'
     }),
     commands: `public class Startup
 {curlyOpen}
   public void Configure(IApplicationBuilder app, IHostingEnvironment env)
   {curlyOpen}
-    app.UseElasticApm(Configuration);
+    app.UseAllElasticApm(Configuration);
     //…rest of the method
   {curlyClose}
   //…rest of the class
@@ -515,8 +515,7 @@ export const createDotNetAgentInstructions = (apmServerUrl = '', secretToken = '
       defaultMessage: 'Sample appsettings.json file:',
     }),
     commands: `{curlyOpen}
-  "ElasticApm": {curlyOpen}
-    "LogLevel": "Error",
+    "ElasticApm": {curlyOpen}
     "SecretToken": "${secretToken}",
     "ServerUrls": "${apmServerUrl || 'http://localhost:8200'}", //Set custom APM Server URL (default: http://localhost:8200)
     "ServiceName" : "MyApp", //allowed characters: a-z, A-Z, 0-9, -, _, and space. Default is the entry assembly of the application

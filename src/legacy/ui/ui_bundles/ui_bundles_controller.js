@@ -96,6 +96,7 @@ export class UiBundlesController {
       id,
       modules,
       template,
+      extendConfig,
     } = bundleSpec;
 
     if (this._filter.test(id)) {
@@ -104,6 +105,7 @@ export class UiBundlesController {
         modules,
         template,
         controller: this,
+        extendConfig,
       }));
     }
   }
@@ -222,5 +224,9 @@ export class UiBundlesController {
   getIds() {
     return this._bundles
       .map(bundle => bundle.getId());
+  }
+
+  getExtendedConfig(webpackConfig) {
+    return this._bundles.reduce((acc, bundle) => bundle.getExtendedConfig(acc), webpackConfig);
   }
 }

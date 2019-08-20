@@ -5,15 +5,11 @@
  */
 
 import { SecurityService } from '../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { isCustomRoleSpecification } from '../../common/types';
 import { UserScenarios } from '../scenarios';
 
-// eslint-disable-next-line import/no-default-export
-export default function uiCapabilitesTests({
-  loadTestFile,
-  getService,
-}: KibanaFunctionalTestDefaultProviders) {
+export default function uiCapabilitesTests({ loadTestFile, getService }: FtrProviderContext) {
   const securityService: SecurityService = getService('security');
 
   describe('ui capabilities', function() {
@@ -55,6 +51,5 @@ export default function uiCapabilitesTests({
     loadTestFile(require.resolve('./catalogue'));
     loadTestFile(require.resolve('./foo'));
     loadTestFile(require.resolve('./nav_links'));
-    loadTestFile(require.resolve('./saved_objects_management'));
   });
 }

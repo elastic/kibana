@@ -22,7 +22,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 jest.mock('ui/new_platform', () => ({
-  npSetup: {
+  npStart: {
     core: {
       i18n: { Context: ({ children }: any) => <div>Context: {children}</div> },
     },

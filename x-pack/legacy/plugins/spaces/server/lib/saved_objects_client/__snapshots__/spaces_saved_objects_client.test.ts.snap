@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`default space #bulkCreate throws error if options.namespace is specified 1`] = `"Spaces currently determines the namespaces"`;
+
+exports[`default space #bulkGet throws error if options.namespace is specified 1`] = `"Spaces currently determines the namespaces"`;
+
+exports[`default space #create throws error if options.namespace is specified 1`] = `"Spaces currently determines the namespaces"`;
+
+exports[`default space #delete throws error if options.namespace is specified 1`] = `"Spaces currently determines the namespaces"`;
+
+exports[`default space #find throws error if options.namespace is specified 1`] = `"Spaces currently determines the namespaces"`;
+
+exports[`default space #get throws error if options.namespace is specified 1`] = `"Spaces currently determines the namespaces"`;
+
+exports[`default space #update throws error if options.namespace is specified 1`] = `"Spaces currently determines the namespaces"`;
+
+exports[`space_1 space #bulkCreate throws error if options.namespace is specified 1`] = `"Spaces currently determines the namespaces"`;
+
+exports[`space_1 space #bulkGet throws error if options.namespace is specified 1`] = `"Spaces currently determines the namespaces"`;
+
+exports[`space_1 space #create throws error if options.namespace is specified 1`] = `"Spaces currently determines the namespaces"`;
+
+exports[`space_1 space #delete throws error if options.namespace is specified 1`] = `"Spaces currently determines the namespaces"`;
+
+exports[`space_1 space #find throws error if options.namespace is specified 1`] = `"Spaces currently determines the namespaces"`;
+
+exports[`space_1 space #get throws error if options.namespace is specified 1`] = `"Spaces currently determines the namespaces"`;
+
+exports[`space_1 space #update throws error if options.namespace is specified 1`] = `"Spaces currently determines the namespaces"`;

@@ -16,63 +16,67 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import Boom from 'boom';
-import { noop } from 'lodash';
 import { Lifecycle, Request, ResponseToolkit } from 'hapi';
-import { SessionStorage, SessionStorageFactory } from '../session_storage';
+import { Logger } from '../../logging';
+import {
+  HapiResponseAdapter,
+  KibanaRequest,
+  KibanaResponse,
+  lifecycleResponseFactory,
+  LifecycleResponseFactory,
+} from '../router';
 
 enum ResultType {
   authenticated = 'authenticated',
-  redirected = 'redirected',
-  rejected = 'rejected',
 }
 
-interface Authenticated {
+interface Authenticated extends AuthResultParams {
   type: ResultType.authenticated;
-  state: object;
 }
 
-interface Redirected {
-  type: ResultType.redirected;
-  url: string;
-}
-
-interface Rejected {
-  type: ResultType.rejected;
-  error: Error;
-  statusCode?: number;
-}
-
-type AuthResult = Authenticated | Rejected | Redirected;
+type AuthResult = Authenticated;
 
 const authResult = {
-  authenticated(state: object): AuthResult {
-    return { type: ResultType.authenticated, state };
-  },
-  redirected(url: string): AuthResult {
-    return { type: ResultType.redirected, url };
-  },
-  rejected(error: Error, options: { statusCode?: number } = {}): AuthResult {
-    return { type: ResultType.rejected, error, statusCode: options.statusCode };
-  },
-  isValid(candidate: any): candidate is AuthResult {
-    return (
-      candidate &&
-      (candidate.type === ResultType.authenticated ||
-        candidate.type === ResultType.rejected ||
-        candidate.type === ResultType.redirected)
-    );
+  authenticated(data: Partial<AuthResultParams> = {}): AuthResult {
+    return {
+      type: ResultType.authenticated,
+      state: data.state,
+      requestHeaders: data.requestHeaders,
+      responseHeaders: data.responseHeaders,
+    };
   },
   isAuthenticated(result: AuthResult): result is Authenticated {
-    return result.type === ResultType.authenticated;
-  },
-  isRedirected(result: AuthResult): result is Redirected {
-    return result.type === ResultType.redirected;
-  },
-  isRejected(result: AuthResult): result is Rejected {
-    return result.type === ResultType.rejected;
+    return result && result.type === ResultType.authenticated;
   },
 };
+
+/**
+ * Auth Headers map
+ * @public
+ * */
+
+export type AuthHeaders = Record<string, string | string[]>;
+
+/**
+ * Result of an incoming request authentication.
+ * @public
+ * */
+export interface AuthResultParams {
+  /**
+   * Data to associate with an incoming request. Any downstream plugin may get access to the data.
+   */
+  state?: Record<string, any>;
+  /**
+   * Auth specific headers to attach to a request object.
+   * Used to perform a request to Elasticsearch on behalf of an authenticated user.
+   */
+  requestHeaders?: AuthHeaders;
+  /**
+   * Auth specific headers to attach to a response object.
+   * Used to send back authentication mechanism related headers to a client when needed.
+   */
+  responseHeaders?: AuthHeaders;
+}
 
 /**
  * @public
@@ -80,54 +84,54 @@ const authResult = {
  */
 export interface AuthToolkit {
   /** Authentication is successful with given credentials, allow request to pass through */
-  authenticated: (state: object) => AuthResult;
-  /** Authentication requires to interrupt request handling and redirect to a configured url */
-  redirected: (url: string) => AuthResult;
-  /** Authentication is unsuccessful, fail the request with specified error. */
-  rejected: (error: Error, options?: { statusCode?: number }) => AuthResult;
+  authenticated: (data?: AuthResultParams) => AuthResult;
 }
 
 const toolkit: AuthToolkit = {
   authenticated: authResult.authenticated,
-  redirected: authResult.redirected,
-  rejected: authResult.rejected,
 };
 
 /** @public */
-export type AuthenticationHandler<T> = (
-  request: Readonly<Request>,
-  sessionStorage: SessionStorage<T>,
-  t: AuthToolkit
-) => AuthResult | Promise<AuthResult>;
+export type AuthenticationHandler = (
+  request: KibanaRequest,
+  response: LifecycleResponseFactory,
+  toolkit: AuthToolkit
+) => AuthResult | KibanaResponse | Promise<AuthResult | KibanaResponse>;
 
 /** @public */
-export function adoptToHapiAuthFormat<T = any>(
-  fn: AuthenticationHandler<T>,
-  sessionStorage: SessionStorageFactory<T>,
-  onSuccess: (req: Request, state: unknown) => void = noop
+export function adoptToHapiAuthFormat(
+  fn: AuthenticationHandler,
+  log: Logger,
+  onSuccess: (req: Request, data: AuthResultParams) => void = () => undefined
 ) {
   return async function interceptAuth(
-    req: Request,
-    h: ResponseToolkit
+    request: Request,
+    responseToolkit: ResponseToolkit
   ): Promise<Lifecycle.ReturnValue> {
+    const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
-      const result = await fn(req, sessionStorage.asScoped(req), toolkit);
-      if (!authResult.isValid(result)) {
-        throw new Error(
-          `Unexpected result from Authenticate. Expected AuthResult, but given: ${result}.`
-        );
+      const result = await fn(
+        KibanaRequest.from(request, undefined, false),
+        lifecycleResponseFactory,
+        toolkit
+      );
+      if (result instanceof KibanaResponse) {
+        return hapiResponseAdapter.handle(result);
       }
       if (authResult.isAuthenticated(result)) {
-        onSuccess(req, result.state);
-        return h.authenticated({ credentials: result.state });
+        onSuccess(request, {
+          state: result.state,
+          requestHeaders: result.requestHeaders,
+          responseHeaders: result.responseHeaders,
+        });
+        return responseToolkit.authenticated({ credentials: result.state || {} });
       }
-      if (authResult.isRedirected(result)) {
-        return h.redirect(result.url).takeover();
-      }
-      const { error, statusCode } = result;
-      return Boom.boomify(error, { statusCode });
+      throw new Error(
+        `Unexpected result from Authenticate. Expected AuthResult or KibanaResponse, but given: ${result}.`
+      );
     } catch (error) {
-      return Boom.internal(error.message, { statusCode: 500 });
+      log.error(error);
+      return hapiResponseAdapter.toInternalError();
     }
   };
 }

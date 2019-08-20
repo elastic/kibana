@@ -19,50 +19,48 @@
 
 import d3 from 'd3';
 
-export function VislibLibLayoutSplitsPieChartChartSplitProvider() {
-  /*
-   * Adds div DOM elements to the `.visWrapper__chart` element based on the data layout.
-   * For example, if the data has rows, it returns the same number of
-   * `.chart` elements as row objects.
-   */
+/*
+ * Adds div DOM elements to the `.visWrapper__chart` element based on the data layout.
+ * For example, if the data has rows, it returns the same number of
+ * `.chart` elements as row objects.
+ */
 
-  return function split(selection) {
-    selection.each(function (data) {
-      const div = d3.select(this)
-        .attr('class', function () {
-          if (data.rows) {
-            return 'visWrapper__splitCharts--row';
-          } else if (data.columns) {
-            return 'visWrapper__splitCharts--column';
-          } else {
-            return 'visWrapper__chart';
-          }
-        });
-      let divClass;
+export function chartSplit(selection) {
+  selection.each(function (data) {
+    const div = d3.select(this)
+      .attr('class', function () {
+        if (data.rows) {
+          return 'visWrapper__splitCharts--row';
+        } else if (data.columns) {
+          return 'visWrapper__splitCharts--column';
+        } else {
+          return 'visWrapper__chart';
+        }
+      });
+    let divClass;
 
-      const charts = div.selectAll('charts')
-        .append('div')
-        .data(function (d) {
-          if (d.rows) {
-            divClass = 'chart-row';
-            return d.rows;
-          } else if (d.columns) {
-            divClass = 'chart-column';
-            return d.columns;
-          } else {
-            divClass = 'chart';
-            return [d];
-          }
-        })
-        .enter()
-        .append('div')
-        .attr('class', function () {
-          return divClass;
-        });
+    const charts = div.selectAll('charts')
+      .append('div')
+      .data(function (d) {
+        if (d.rows) {
+          divClass = 'chart-row';
+          return d.rows;
+        } else if (d.columns) {
+          divClass = 'chart-column';
+          return d.columns;
+        } else {
+          divClass = 'chart';
+          return [d];
+        }
+      })
+      .enter()
+      .append('div')
+      .attr('class', function () {
+        return divClass;
+      });
 
-      if (!data.slices) {
-        charts.call(split);
-      }
-    });
-  };
+    if (!data.slices) {
+      charts.call(chartSplit);
+    }
+  });
 }

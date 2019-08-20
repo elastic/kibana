@@ -5,11 +5,11 @@
  */
 
 import expect from '@kbn/expect';
-import { flyoutItemQuery } from '../../../../plugins/infra/public/containers/logs/flyout_item.gql_query';
-import { FlyoutItemQuery } from '../../../../plugins/infra/public/graphql/types';
-import { KbnTestProvider } from './types';
+import { flyoutItemQuery } from '../../../../legacy/plugins/infra/public/containers/logs/flyout_item.gql_query';
+import { FlyoutItemQuery } from '../../../../legacy/plugins/infra/public/graphql/types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-const logItemTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('infraOpsGraphQLClient');
   describe('Log Item GraphQL Endpoint', () => {
@@ -169,7 +169,4 @@ const logItemTests: KbnTestProvider = ({ getService }) => {
         });
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default logItemTests;
+}

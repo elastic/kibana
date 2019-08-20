@@ -102,7 +102,7 @@ export default function GoalVisType(Private) {
         {
           group: 'buckets',
           name: 'group',
-          title: i18n.translate('kbnVislibVisTypes.goal.groupTitle', { defaultMessage: 'Split Group' }),
+          title: i18n.translate('kbnVislibVisTypes.goal.groupTitle', { defaultMessage: 'Split group' }),
           min: 0,
           max: 1,
           aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']

@@ -6,9 +6,9 @@
 
 import expect from '@kbn/expect';
 
-import { uncommonProcessesQuery } from '../../../../plugins/siem/public/containers/uncommon_processes/index.gql_query';
-import { GetUncommonProcessesQuery } from '../../../../plugins/siem/public/graphql/types';
-import { KbnTestProvider } from './types';
+import { uncommonProcessesQuery } from '../../../../legacy/plugins/siem/public/containers/uncommon_processes/index.gql_query';
+import { GetUncommonProcessesQuery } from '../../../../legacy/plugins/siem/public/graphql/types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
 const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
@@ -16,7 +16,7 @@ const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
 // typical values that have to change after an update from "scripts/es_archiver"
 const TOTAL_COUNT = 80;
 
-const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
 
@@ -39,9 +39,13 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
             from: FROM,
           },
           pagination: {
-            limit: 1,
+            activePage: 0,
+            cursorStart: 0,
+            fakePossibleCount: 3,
+            querySize: 1,
           },
           defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          inspect: false,
         },
       });
       expect(UncommonProcesses.edges.length).to.be(1);
@@ -62,9 +66,13 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
             from: FROM,
           },
           pagination: {
-            limit: 2,
+            activePage: 0,
+            cursorStart: 0,
+            fakePossibleCount: 3,
+            querySize: 2,
           },
           defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          inspect: false,
         },
       });
       expect(UncommonProcesses.edges.length).to.be(2);
@@ -85,9 +93,13 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
             from: FROM,
           },
           pagination: {
-            limit: 1,
+            activePage: 0,
+            cursorStart: 0,
+            fakePossibleCount: 3,
+            querySize: 1,
           },
           defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          inspect: false,
         },
       });
       expect(UncommonProcesses.totalCount).to.be(TOTAL_COUNT);
@@ -108,9 +120,13 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
             from: FROM,
           },
           pagination: {
-            limit: 1,
+            activePage: 0,
+            cursorStart: 0,
+            fakePossibleCount: 3,
+            querySize: 1,
           },
           defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          inspect: false,
         },
       });
       const expected: GetUncommonProcessesQuery.Node = {
@@ -144,7 +160,4 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
       expect(UncommonProcesses.edges[0].node).to.eql(expected);
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default uncommonProcessesTests;
+}

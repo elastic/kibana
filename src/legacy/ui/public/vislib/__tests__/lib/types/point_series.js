@@ -19,13 +19,11 @@
 
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
-import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
-import { VislibTypesPointSeries } from '../../../lib/types/point_series';
+import { vislibPointSeriesTypes as pointSeriesConfig } from '../../../lib/types/point_series';
 import percentileTestdata from './testdata_linechart_percentile.json';
 import percentileTestdataResult from './testdata_linechart_percentile_result.json';
 
 describe('Point Series Config Type Class Test Suite', function () {
-  let pointSeriesConfig;
   let parsedConfig;
   const histogramConfig = {
     type: 'histogram',
@@ -46,18 +44,6 @@ describe('Point Series Config Type Class Test Suite', function () {
       labels: {},
       title: {}
     }]
-  };
-
-  const heatmapConfig = {
-    type: 'heatmap',
-    addLegend: true,
-    addTooltip: true,
-    colorsNumber: 4,
-    colorSchema: 'Greens',
-    setColorRange: false,
-    percentageMode: true,
-    invertColors: false,
-    colorsRange: []
   };
 
   const data = {
@@ -107,9 +93,6 @@ describe('Point Series Config Type Class Test Suite', function () {
   };
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    pointSeriesConfig = Private(VislibTypesPointSeries);
-  }));
 
   describe('histogram chart', function () {
     beforeEach(function () {
@@ -139,32 +122,4 @@ describe('Point Series Config Type Class Test Suite', function () {
     });
   });
 
-
-  describe('heatmap chart', function () {
-    beforeEach(function () {
-      const stackedData = {
-        get: (prop) => { return data[prop] || null; },
-        getLabels: () => [],
-        data: stackedSeries
-      };
-      parsedConfig = pointSeriesConfig.heatmap(heatmapConfig, stackedData);
-    });
-
-    it('should throw an error when more than 25 series are provided', function () {
-      parsedConfig = pointSeriesConfig.heatmap(heatmapConfig, data);
-      expect(parsedConfig.error).to.be('There are too many series defined.');
-    });
-
-    it('should not throw an error when less than 25 series are provided', function () {
-      expect(parsedConfig.error).to.be.undefined;
-    });
-
-    it('should hide first value axis', function () {
-      expect(parsedConfig.valueAxes[0].show).to.be(false);
-    });
-
-    it('should add second category axis', function () {
-      expect(parsedConfig.categoryAxes.length).to.equal(2);
-    });
-  });
 });

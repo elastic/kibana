@@ -281,3 +281,12 @@ in order to register the value provided. This helper takes care of that.
 ##### `getErrorsMessages()`
 
 Find all the DOM nodes with the `.euiFormErrorText` css class from EUI and return an Array with its text content.
+
+#### `router`
+
+An object with the following methods:
+
+##### `navigateTo(url)`
+
+If you need to navigate to a different route inside your test and you are not using the `<Link />` component from `react-router`
+in your component, you need to use the `router.navigateTo()` method from the testBed in order to trigger the route change on the `MemoryRouter`.

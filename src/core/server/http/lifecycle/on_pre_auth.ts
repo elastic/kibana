@@ -17,60 +17,44 @@
  * under the License.
  */
 
-import Boom from 'boom';
-import { Lifecycle, Request, ResponseToolkit } from 'hapi';
-import { KibanaRequest } from '../router';
+import { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from 'hapi';
+import { Logger } from '../../logging';
+import {
+  HapiResponseAdapter,
+  KibanaRequest,
+  KibanaResponse,
+  lifecycleResponseFactory,
+  LifecycleResponseFactory,
+} from '../router';
 
 enum ResultType {
   next = 'next',
-  redirected = 'redirected',
-  rejected = 'rejected',
+  rewriteUrl = 'rewriteUrl',
 }
 
 interface Next {
   type: ResultType.next;
 }
 
-interface Redirected {
-  type: ResultType.redirected;
+interface RewriteUrl {
+  type: ResultType.rewriteUrl;
   url: string;
-  forward?: boolean;
 }
 
-interface Rejected {
-  type: ResultType.rejected;
-  error: Error;
-  statusCode?: number;
-}
-
-type OnPreAuthResult = Next | Rejected | Redirected;
+type OnPreAuthResult = Next | RewriteUrl;
 
 const preAuthResult = {
   next(): OnPreAuthResult {
     return { type: ResultType.next };
   },
-  redirected(url: string, options: { forward?: boolean } = {}): OnPreAuthResult {
-    return { type: ResultType.redirected, url, forward: options.forward };
-  },
-  rejected(error: Error, options: { statusCode?: number } = {}): OnPreAuthResult {
-    return { type: ResultType.rejected, error, statusCode: options.statusCode };
-  },
-  isValid(candidate: any): candidate is OnPreAuthResult {
-    return (
-      candidate &&
-      (candidate.type === ResultType.next ||
-        candidate.type === ResultType.rejected ||
-        candidate.type === ResultType.redirected)
-    );
+  rewriteUrl(url: string): OnPreAuthResult {
+    return { type: ResultType.rewriteUrl, url };
   },
   isNext(result: OnPreAuthResult): result is Next {
-    return result.type === ResultType.next;
+    return result && result.type === ResultType.next;
   },
-  isRedirected(result: OnPreAuthResult): result is Redirected {
-    return result.type === ResultType.redirected;
-  },
-  isRejected(result: OnPreAuthResult): result is Rejected {
-    return result.type === ResultType.rejected;
+  isRewriteUrl(result: OnPreAuthResult): result is RewriteUrl {
+    return result && result.type === ResultType.rewriteUrl;
   },
 };
 
@@ -81,26 +65,21 @@ const preAuthResult = {
 export interface OnPreAuthToolkit {
   /** To pass request to the next handler */
   next: () => OnPreAuthResult;
-  /**
-   * To interrupt request handling and redirect to a configured url.
-   * If "options.forwarded" = true, request will be forwarded to another url right on the server.
-   * */
-  redirected: (url: string, options?: { forward: boolean }) => OnPreAuthResult;
-  /** Fail the request with specified error. */
-  rejected: (error: Error, options?: { statusCode?: number }) => OnPreAuthResult;
+  /** Rewrite requested resources url before is was authenticated and routed to a handler */
+  rewriteUrl: (url: string) => OnPreAuthResult;
 }
 
 const toolkit: OnPreAuthToolkit = {
   next: preAuthResult.next,
-  redirected: preAuthResult.redirected,
-  rejected: preAuthResult.rejected,
+  rewriteUrl: preAuthResult.rewriteUrl,
 };
 
 /** @public */
-export type OnPreAuthHandler<Params = any, Query = any, Body = any> = (
-  request: KibanaRequest<Params, Query, Body>,
-  t: OnPreAuthToolkit
-) => OnPreAuthResult | Promise<OnPreAuthResult>;
+export type OnPreAuthHandler = (
+  request: KibanaRequest,
+  response: LifecycleResponseFactory,
+  toolkit: OnPreAuthToolkit
+) => OnPreAuthResult | KibanaResponse | Promise<OnPreAuthResult | KibanaResponse>;
 
 /**
  * @public
@@ -108,38 +87,36 @@ export type OnPreAuthHandler<Params = any, Query = any, Body = any> = (
  * @param fn - an extension point allowing to perform custom logic for
  * incoming HTTP requests.
  */
-export function adoptToHapiOnPreAuthFormat(fn: OnPreAuthHandler) {
+export function adoptToHapiOnPreAuthFormat(fn: OnPreAuthHandler, log: Logger) {
   return async function interceptPreAuthRequest(
     request: Request,
-    h: ResponseToolkit
+    responseToolkit: HapiResponseToolkit
   ): Promise<Lifecycle.ReturnValue> {
+    const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
+
     try {
-      const result = await fn(KibanaRequest.from(request, undefined), toolkit);
-
-      if (!preAuthResult.isValid(result)) {
-        throw new Error(
-          `Unexpected result from OnPreAuth. Expected OnPreAuthResult, but given: ${result}.`
-        );
+      const result = await fn(KibanaRequest.from(request), lifecycleResponseFactory, toolkit);
+      if (result instanceof KibanaResponse) {
+        return hapiResponseAdapter.handle(result);
       }
+
       if (preAuthResult.isNext(result)) {
-        return h.continue;
+        return responseToolkit.continue;
       }
 
-      if (preAuthResult.isRedirected(result)) {
-        const { url, forward } = result;
-        if (forward) {
-          request.setUrl(url);
-          // We should update raw request as well since it can be proxied to the old platform
-          request.raw.req.url = url;
-          return h.continue;
-        }
-        return h.redirect(url).takeover();
+      if (preAuthResult.isRewriteUrl(result)) {
+        const { url } = result;
+        request.setUrl(url);
+        // We should update raw request as well since it can be proxied to the old platform
+        request.raw.req.url = url;
+        return responseToolkit.continue;
       }
-
-      const { error, statusCode } = result;
-      return Boom.boomify(error, { statusCode });
+      throw new Error(
+        `Unexpected result from OnPreAuth. Expected OnPreAuthResult or KibanaResponse, but given: ${result}.`
+      );
     } catch (error) {
-      return Boom.internal(error.message, { statusCode: 500 });
+      log.error(error);
+      return hapiResponseAdapter.toInternalError();
     }
   };
 }

@@ -54,4 +54,3 @@ export function stdMetric(bucket, panel, series) {
     return next(results);
   };
 }
-

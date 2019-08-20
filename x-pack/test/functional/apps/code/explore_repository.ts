@@ -5,13 +5,12 @@
  */
 
 import expect from '@kbn/expect';
-import { TestInvoker } from './lib/types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function exploreRepositoryFunctionalTests({
   getService,
   getPageObjects,
-}: TestInvoker) {
+}: FtrProviderContext) {
   // const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
@@ -23,7 +22,8 @@ export default function exploreRepositoryFunctionalTests({
 
   const FIND_TIME = config.get('timeouts.find');
 
-  describe('Explore Repository', () => {
+  describe('Explore Repository', function() {
+    this.tags('smoke');
     describe('Explore a repository', () => {
       const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
 
@@ -64,6 +64,13 @@ export default function exploreRepositoryFunctionalTests({
 
         // Clean up the imported repository
         await PageObjects.code.clickDeleteRepositoryButton();
+
+        await retry.try(async () => {
+          expect(await testSubjects.exists('confirmModalConfirmButton')).to.be(true);
+        });
+
+        await testSubjects.click('confirmModalConfirmButton');
+
         await retry.tryForTime(300000, async () => {
           const repositoryItems = await testSubjects.findAll(repositoryListSelector);
           expect(repositoryItems).to.have.length(0);
@@ -165,9 +172,7 @@ export default function exploreRepositoryFunctionalTests({
           expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-doc-open')).ok();
         });
 
-        // click src again to focus on this folder
-        await testSubjects.click('codeFileTreeNode-Directory-src');
-        // then click again to close this folder.
+        // click src again to focus on this folder and close this folder.
         await testSubjects.click('codeFileTreeNode-Directory-src');
 
         await retry.tryForTime(5000, async () => {
@@ -304,6 +309,40 @@ export default function exploreRepositoryFunctionalTests({
         });
         await retry.tryForTime(5000, async () => {
           expect(await testSubjects.exists('codeNotFoundErrorPage')).ok();
+        });
+      });
+
+      it('goes to a branch of a project', async () => {
+        log.debug('it goes to a branch of the repo');
+        await retry.try(async () => {
+          expect(testSubjects.exists('codeBranchSelector'));
+        });
+        await testSubjects.click('codeBranchSelector');
+        const branch = 'addAzure';
+        const branchOptionSelector = `codeBranchSelectOption-${branch}`;
+        await retry.try(async () => {
+          expect(testSubjects.exists(branchOptionSelector));
+        });
+        await testSubjects.click(branchOptionSelector);
+        await retry.try(async () => {
+          const currentUrl: string = await browser.getCurrentUrl();
+          expect(currentUrl.indexOf(branch.replace(/\//g, ':'))).to.greaterThan(0);
+          expect(testSubjects.exists(`codeBranchSelectOption-${branch}Active`)).to.be.ok();
+        });
+        await retry.try(async () => {
+          expect(testSubjects.exists('codeBranchSelector'));
+        });
+        await testSubjects.click('codeBranchSelector');
+        const anotherBranch = 'noDatabase';
+        const anotherBranchOptionSelector = `codeBranchSelectOption-${anotherBranch}`;
+        await retry.try(async () => {
+          expect(testSubjects.exists(anotherBranchOptionSelector));
+        });
+        await testSubjects.click(anotherBranchOptionSelector);
+        await retry.try(async () => {
+          const currentUrl: string = await browser.getCurrentUrl();
+          expect(currentUrl.indexOf(anotherBranch.replace(/\//g, ':'))).to.greaterThan(0);
+          expect(testSubjects.exists(`codeBranchSelectOption-${anotherBranch}Active`)).to.be.ok();
         });
       });
     });

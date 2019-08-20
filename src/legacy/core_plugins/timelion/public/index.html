@@ -1,23 +1,38 @@
 <div class="timApp app-container" ng-controller="timelion">
+  <span class="kuiLocalTitle">
+    <span class="timApp__stats" ng-show="stats">
+      <span
+        i18n-id="timelion.topNavMenu.statsDescription"
+        i18n-default-message="Query Time {queryTime}ms / Processing Time {processingTime}ms"
+        i18n-values="{
+          queryTime: stats.queryTime - stats.invokeTime,
+          processingTime: stats.sheetTime - stats.queryTime,
+        }"></span>
+    </span>
+  </span>
   <!-- Local nav. -->
-  <kbn-top-nav name="timelion" config="topNavMenu">
-    <!-- Transcluded elements. -->
-    <div data-transclude-slots>
-      <div data-transclude-slot="topLeftCorner">
-        <span class="kuiLocalTitle">
-          <span class="timApp__stats" ng-show="stats">
-            <span
-              i18n-id="timelion.topNavMenu.statsDescription"
-              i18n-default-message="Query Time {queryTime}ms / Processing Time {processingTime}ms"
-              i18n-values="{
-                queryTime: stats.queryTime - stats.invokeTime,
-                processingTime: stats.sheetTime - stats.queryTime,
-              }"></span>
-          </span>
-        </span>
-      </div>
-    </div>
+  <kbn-top-nav 
+    app-name="'timelion'"
+    config="topNavMenu"
+    show-search-bar="true"
+    show-search-bar-inline="true"
+    show-filter-bar="false"
+    show-query-input="false"
+    date-range-from="model.timeRange.from"
+    date-range-to="model.timeRange.to"
+    is-refresh-paused="model.refreshInterval.pause"
+    refresh-interval="model.refreshInterval.value"
+    on-refresh-change="onRefreshChange"
+    on-query-submit="onTimeUpdate">
   </kbn-top-nav>
+
+
+  <div class="timApp__menus">
+    <timelion-help ng-show="menus.showHelp"></timelion-help>
+    <timelion-save ng-show="menus.showSave"></timelion-save>
+    <timelion-load ng-show="menus.showLoad"></timelion-load>
+    <timelion-options ng-show="menus.showOptions"></timelion-options>
+  </div>
 
   <div class="timApp__container">
     <div>

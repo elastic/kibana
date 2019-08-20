@@ -20,7 +20,7 @@
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import pieTemplate from './editors/pie.html';
+import { PieOptions } from './editors/pie';
 
 export default function HistogramVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
@@ -50,26 +50,39 @@ export default function HistogramVisType(Private) {
     },
     editorConfig: {
       collections: {
-        legendPositions: [{
-          value: 'left',
-          text: 'left',
-        }, {
-          value: 'right',
-          text: 'right',
-        }, {
-          value: 'top',
-          text: 'top',
-        }, {
-          value: 'bottom',
-          text: 'bottom',
-        }],
+        legendPositions: [
+          {
+            text: i18n.translate('kbnVislibVisTypes.pie.editorConfig.legendPositions.leftText', {
+              defaultMessage: 'Left'
+            }),
+            value: 'left'
+          },
+          {
+            text: i18n.translate('kbnVislibVisTypes.pie.editorConfig.legendPositions.rightText', {
+              defaultMessage: 'Right'
+            }),
+            value: 'right'
+          },
+          {
+            text: i18n.translate('kbnVislibVisTypes.pie.editorConfig.legendPositions.topText', {
+              defaultMessage: 'Top'
+            }),
+            value: 'top'
+          },
+          {
+            text: i18n.translate('kbnVislibVisTypes.pie.editorConfig.legendPositions.bottomText', {
+              defaultMessage: 'Bottom'
+            }),
+            value: 'bottom'
+          },
+        ],
       },
-      optionsTemplate: pieTemplate,
+      optionsTemplate: PieOptions,
       schemas: new Schemas([
         {
           group: 'metrics',
           name: 'metric',
-          title: i18n.translate('kbnVislibVisTypes.pie.metricTitle', { defaultMessage: 'Slice Size' }),
+          title: i18n.translate('kbnVislibVisTypes.pie.metricTitle', { defaultMessage: 'Slice size' }),
           min: 1,
           max: 1,
           aggFilter: ['sum', 'count', 'cardinality', 'top_hits'],
@@ -80,8 +93,7 @@ export default function HistogramVisType(Private) {
         {
           group: 'buckets',
           name: 'segment',
-          icon: 'fa fa-scissors',
-          title: i18n.translate('kbnVislibVisTypes.pie.segmentTitle', { defaultMessage: 'Split Slices' }),
+          title: i18n.translate('kbnVislibVisTypes.pie.segmentTitle', { defaultMessage: 'Split slices' }),
           min: 0,
           max: Infinity,
           aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
@@ -89,8 +101,7 @@ export default function HistogramVisType(Private) {
         {
           group: 'buckets',
           name: 'split',
-          icon: 'fa fa-th',
-          title: i18n.translate('kbnVislibVisTypes.pie.splitTitle', { defaultMessage: 'Split Chart' }),
+          title: i18n.translate('kbnVislibVisTypes.pie.splitTitle', { defaultMessage: 'Split chart' }),
           mustBeFirst: true,
           min: 0,
           max: 1,

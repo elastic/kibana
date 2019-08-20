@@ -41,12 +41,13 @@ import {
 } from '@elastic/eui';
 
 export class CalculationAgg extends Component {
-
   componentWillMount() {
     if (!this.props.model.variables) {
-      this.props.onChange(_.assign({}, this.props.model, {
-        variables: [{ id: uuid.v1() }]
-      }));
+      this.props.onChange(
+        _.assign({}, this.props.model, {
+          variables: [{ id: uuid.v1() }],
+        })
+      );
     }
   }
 
@@ -90,10 +91,7 @@ export class CalculationAgg extends Component {
 
           <EuiFlexItem>
             <EuiFormLabel htmlFor={htmlId('variables')}>
-              <FormattedMessage
-                id="tsvb.calculation.variablesLabel"
-                defaultMessage="Variables"
-              />
+              <FormattedMessage id="tsvb.calculation.variablesLabel" defaultMessage="Variables" />
             </EuiFormLabel>
             <CalculationVars
               id={htmlId('variables')}
@@ -107,10 +105,12 @@ export class CalculationAgg extends Component {
           <EuiFlexItem>
             <EuiFormRow
               id={htmlId('painless')}
-              label={(<FormattedMessage
-                id="tsvb.calculation.painlessScriptLabel"
-                defaultMessage="Painless Script"
-              />)}
+              label={
+                <FormattedMessage
+                  id="tsvb.calculation.painlessScriptLabel"
+                  defaultMessage="Painless Script"
+                />
+              }
               fullWidth
               helpText={
                 <div>
@@ -119,26 +119,21 @@ export class CalculationAgg extends Component {
                     defaultMessage="Variables are keys on the {params} object, i.e. {paramsName}. To access the bucket
                     interval (in milliseconds) use {paramsInterval}."
                     values={{
-                      params: (<EuiCode>params</EuiCode>),
-                      paramsName: (<EuiCode>params.&lt;name&gt;</EuiCode>),
-                      paramsInterval: (<EuiCode>params._interval</EuiCode>)
+                      params: <EuiCode>params</EuiCode>,
+                      paramsName: <EuiCode>params.&lt;name&gt;</EuiCode>,
+                      paramsInterval: <EuiCode>params._interval</EuiCode>,
                     }}
                   />
                 </div>
               }
             >
-              <EuiTextArea
-                onChange={handleTextChange('script')}
-                value={model.script}
-                fullWidth
-              />
+              <EuiTextArea onChange={handleTextChange('script')} value={model.script} fullWidth />
             </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
       </AggRow>
     );
   }
-
 }
 
 CalculationAgg.propTypes = {

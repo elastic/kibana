@@ -18,16 +18,21 @@
  */
 
 import { calculateAuto } from './calculate_auto';
-import moment from 'moment';
-import { getUnitValue } from './unit_to_seconds';
 import {
-  INTERVAL_STRING_RE,
-  GTE_INTERVAL_RE,
-} from '../../../../common/interval_regexp';
+  getUnitValue,
+  parseInterval,
+  convertIntervalToUnit,
+  ASCENDING_UNIT_ORDER,
+} from './unit_to_seconds';
+import { getTimerangeDuration } from '../helpers/get_timerange';
+import { INTERVAL_STRING_RE, GTE_INTERVAL_RE } from '../../../../common/interval_regexp';
 
 const calculateBucketData = (timeInterval, capabilities) => {
-  const intervalString = capabilities ? capabilities.getValidTimeInterval(timeInterval) : timeInterval;
+  let intervalString = capabilities
+    ? capabilities.getValidTimeInterval(timeInterval)
+    : timeInterval;
   const intervalStringMatch = intervalString.match(INTERVAL_STRING_RE);
+  const parsedInterval = parseInterval(intervalString);
 
   let bucketSize = Number(intervalStringMatch[1]) * getUnitValue(intervalStringMatch[2]);
 
@@ -36,22 +41,34 @@ const calculateBucketData = (timeInterval, capabilities) => {
     bucketSize = 1;
   }
 
+  // Check decimal
+  if (parsedInterval.value % 1 !== 0) {
+    if (parsedInterval.unit !== 'ms') {
+      const { value, unit } = convertIntervalToUnit(
+        intervalString,
+        ASCENDING_UNIT_ORDER[ASCENDING_UNIT_ORDER.indexOf(parsedInterval.unit) - 1]
+      );
+
+      intervalString = value + unit;
+    } else {
+      intervalString = '1ms';
+    }
+  }
+
   return {
     bucketSize,
     intervalString,
   };
 };
 
-const getTimeRangeBucketSize = ({ min, max }) => {
-  const from = moment.utc(min);
-  const to = moment.utc(max);
-  const duration = moment.duration(to.valueOf() - from.valueOf(), 'ms');
+const calculateBucketSizeForAutoInterval = req => {
+  const duration = getTimerangeDuration(req);
 
   return calculateAuto.near(100, duration).asSeconds();
 };
 
 export const getBucketSize = (req, interval, capabilities) => {
-  const bucketSize = getTimeRangeBucketSize(req.payload.timerange);
+  const bucketSize = calculateBucketSizeForAutoInterval(req);
   let intervalString = `${bucketSize}s`;
 
   const gteAutoMatch = Boolean(interval) && interval.match(GTE_INTERVAL_RE);

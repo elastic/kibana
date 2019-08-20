@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import React from 'react';
+
 import { FlyoutService } from './flyout';
 import { ModalService } from './modal';
 import { I18nStart } from '../i18n';
@@ -75,6 +77,7 @@ export interface OverlayStart {
   openModal: (
     modalChildren: React.ReactNode,
     modalProps?: {
+      className?: string;
       closeButtonAriaLabel?: string;
       'data-test-subj'?: string;
     }

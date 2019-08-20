@@ -57,8 +57,39 @@ export default function ({ getService, getPageObjects }) {
       kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
     });
 
-    describe('6.0 urls', () => {
+    describe('5.6 urls', () => {
+      it('url with filters and query', async () => {
+        const url56 = `` +
+          `_g=(refreshInterval:(display:Off,pause:!f,value:0),` +
+              `time:(from:'2012-11-17T00:00:00.000Z',mode:absolute,to:'2015-11-17T18:01:36.621Z'))&` +
+          `_a=(` +
+            `description:'',` +
+            `filters:!(('$state':(store:appState),` +
+                `meta:(alias:!n,disabled:!f,index:'logstash-*',key:bytes,negate:!f,type:phrase,value:'12345'),` +
+                `query:(match:(bytes:(query:12345,type:phrase))))),` +
+            `fullScreenMode:!f,` +
+            `options:(),` +
+            `panels:!((col:1,id:Visualization-MetricChart,panelIndex:1,row:1,size_x:6,size_y:3,type:visualization),` +
+                    `(col:7,id:Visualization-PieChart,panelIndex:2,row:1,size_x:6,size_y:3,type:visualization)),` +
+            `query:(query_string:(analyze_wildcard:!t,query:'memory:>220000')),` +
+            `timeRestore:!f,` +
+            `title:'New+Dashboard',` +
+            `uiState:(),` +
+            `viewMode:edit)`;
+        const url = `${kibanaBaseUrl}#/dashboard?${url56}`;
+        log.debug(`Navigating to ${url}`);
+        await browser.get(url, true);
+        await PageObjects.header.waitUntilLoadingHasFinished();
 
+        const query = await queryBar.getQueryString();
+        expect(query).to.equal('memory:>220000');
+
+        await pieChart.expectPieSliceCount(0);
+        await dashboardExpect.panelCount(2);
+      });
+    });
+
+    describe('6.0 urls', () => {
       it('loads an unsaved dashboard', async function () {
         const url = `${kibanaBaseUrl}#/dashboard?${urlQuery}`;
         log.debug(`Navigating to ${url}`);

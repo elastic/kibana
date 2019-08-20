@@ -19,7 +19,7 @@
 
 import { scanCopy, untar, deleteAll } from '../lib';
 import { createWriteStream } from 'fs';
-import { binaryInfo } from '../../../../x-pack/plugins/code/tasks/nodegit_info';
+import { binaryInfo } from '../../../../x-pack/legacy/plugins/code/tasks/nodegit_info';
 import wreck from '@hapi/wreck';
 import mkdirp from 'mkdirp';
 import { dirname, join, basename } from 'path';

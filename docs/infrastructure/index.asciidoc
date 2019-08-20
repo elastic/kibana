@@ -4,82 +4,31 @@
 
 [partintro]
 --
-Use the interactive Infrastructure UI to monitor your infrastructure and
-identify problems in real time. You can explore metrics and logs for common
-servers, containers, and services. 
+The Infrastructure app enables you to monitor your infrastructure and identify problems in real time.
+You start with a visual summary of your infrastructure where you can view basic metrics for common servers, containers, and services.
+Then you can drill down to view more detailed metrics or other information for that component.
+
+You can:
+
+* View an inventory of your infrastructure by hosts, Kubernetes pod or Docker containers.
+You can group and filter the data in various ways to help you identify the items that interest you.
+
+* View current and historic values for metrics such as CPU usage, memory usage, and network traffic for each component.
+The available metrics depend on the kind of component being inspected.
+
+* Use *Metrics Explorer* to group and visualize multiple customizable metrics for one or more components in a graphical format.
+You can optionally save these views and add them to {kibana-ref}/dashboard.html[dashboards].
+
+* Seamlessly switch to view the corresponding logs, application traces or uptime information for a component.
+
+To get started, you need to <<xpack-metrics-getting-started, start collecting metrics data from your infrastructure>>. Then you can <<infra-ui, use the Infrastructure application to inspect and analyze your data>>.
 
 [role="screenshot"]
-image::infrastructure/images/infra-sysmon.jpg[Infrastructure Overview in Kibana]
-
-
-[float]
-== Add data
-
-Kibana provides step-by-step instructions to help you add log data. The
-{infra-guide}[Infrastructure Monitoring Guide] is a good source for more
-detailed information and instructions.
-
-[float]
-== Configure data sources 
-
-The `metricbeat-*` index pattern is used to query the data by default.
-If your metrics are located in a different set of indices, or use a
-different timestamp field, you can adjust the source configuration via the user
-interface or the {kib} configuration file.
-
-NOTE: Logs and Infrastructure share a common data source definition in
-each space. Changes in one of them can influence the data displayed in the
-other.
-
-[float]
-=== Configure source
-
-Configure source can be accessed via the corresponding
-image:logs/images/logs-configure-source-gear-icon.png[Configure source icon]
-button in the toolbar:
-
-[role="screenshot"]
-image::infrastructure/images/infrastructure-configure-source.png[Configure Infrastructure UI source button in Kibana]
-
-This opens the source configuration fly-out dialog, in which the following
-configuration items can be inspected and adjusted:
-
-* *Name*: The name of the source configuration.
-* *Indices*: The patterns of the elasticsearch indices to read metrics and logs
-  from.
-* *Fields*: The names of particular fields in the indices that need to be known
-  to the Infrastructure and Logs UIs in order to query and interpret the data
-  correctly.
-
-[role="screenshot"]
-image::infrastructure/images/infrastructure-configure-source-dialog.png[Configure Infrastructure UI source dialog in Kibana]
-
-TIP: If <<xpack-spaces>> are enabled in your Kibana instance, any configuration
-changes performed via Configure source are specific to that space. You can
-therefore easily make different subsets of the data available by creating
-multiple spaces with different data source configurations.
-
-[float]
-[[infra-read-only-access]]
-=== Read only access
-When you have insufficient privileges to change the source configuration, the following
-indicator in Kibana will be displayed. The buttons to change the source configuration
-won't be visible. For more information on granting access to
-Kibana see <<xpack-security-authorization>>.
-
-[role="screenshot"]
-image::infrastructure/images/read-only-badge.png[Example of Infrastructure's read only access indicator in Kibana's header]
-
-
-[float]
-=== Configuration file
-
-The settings in the configuration file are used as a fallback when no other
-configuration for that space has been defined. They are located in the
-configuration namespace `xpack.infra.sources.default`. See
-<<infrastructure-ui-settings-kb>> for a complete list of the possible entries.
+image::infrastructure/images/infra-sysmon.png[Infrastructure Overview in Kibana]
 
 --
 
-include::monitor.asciidoc[]
+include::getting-started.asciidoc[]
 include::infra-ui.asciidoc[]
+include::view-metrics.asciidoc[]
+include::metrics-explorer.asciidoc[]

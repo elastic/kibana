@@ -17,16 +17,22 @@
  * under the License.
  */
 
-import { KibanaMigrator } from './migrations';
-import { SavedObjectsSchema } from './schema';
-import { SavedObjectsSerializer } from './serialization';
+// Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
+/* eslint-disable @kbn/eslint/no-restricted-paths */
+
+import { KibanaMigrator } from '../../../core/server/saved_objects/migrations';
+import { SavedObjectsSchema } from '../../../core/server/saved_objects/schema';
+import { SavedObjectsSerializer } from '../../../core/server/saved_objects/serialization';
 import {
   SavedObjectsClient,
   SavedObjectsRepository,
   ScopedSavedObjectsClientProvider,
-} from './service';
-import { getRootPropertiesObjects } from '../mappings';
-import { SavedObjectsManagement } from './management';
+  getSortedObjectsForExport,
+  importSavedObjects,
+  resolveImportErrors,
+} from '../../../core/server/saved_objects';
+import { getRootPropertiesObjects } from '../../../core/server/saved_objects/mappings';
+import { SavedObjectsManagement } from '../../../core/server/saved_objects/management';
 
 import {
   createBulkCreateRoute,
@@ -108,9 +114,11 @@ export function savedObjectsMixin(kbnServer, server) {
     });
     const combinedTypes = visibleTypes.concat(extraTypes);
     const allowedTypes = [...new Set(combinedTypes)];
+    const config = server.config();
 
     return new SavedObjectsRepository({
-      index: server.config().get('kibana.index'),
+      index: config.get('kibana.index'),
+      config,
       migrator,
       mappings,
       schema,
@@ -141,18 +149,25 @@ export function savedObjectsMixin(kbnServer, server) {
     setScopedSavedObjectsClientFactory: (...args) => provider.setClientFactory(...args),
     addScopedSavedObjectsClientWrapperFactory: (...args) =>
       provider.addClientWrapperFactory(...args),
+    importExport: {
+      objectLimit: server.config().get('savedObjects.maxImportExportSize'),
+      importSavedObjects,
+      resolveImportErrors,
+      getSortedObjectsForExport,
+    },
+    schema,
   };
   server.decorate('server', 'savedObjects', service);
 
   const savedObjectsClientCache = new WeakMap();
-  server.decorate('request', 'getSavedObjectsClient', function() {
+  server.decorate('request', 'getSavedObjectsClient', function(options) {
     const request = this;
 
     if (savedObjectsClientCache.has(request)) {
       return savedObjectsClientCache.get(request);
     }
 
-    const savedObjectsClient = server.savedObjects.getScopedSavedObjectsClient(request);
+    const savedObjectsClient = server.savedObjects.getScopedSavedObjectsClient(request, options);
 
     savedObjectsClientCache.set(request, savedObjectsClient);
     return savedObjectsClient;

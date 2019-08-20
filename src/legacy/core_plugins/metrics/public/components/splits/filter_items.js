@@ -24,13 +24,10 @@ import { collectionActions } from '../lib/collection_actions';
 import { AddDeleteButtons } from '../add_delete_buttons';
 import { ColorPicker } from '../color_picker';
 import uuid from 'uuid';
-import { data } from 'plugins/data';
-const { QueryBarInput } = data.query.ui;
-import { Storage } from 'ui/storage';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
-const localStorage = new Storage(window.localStorage);
+import { QueryBarWrapper } from '../query_bar_wrapper';
 class FilterItemsUi extends Component {
   constructor(props) {
     super(props);
@@ -38,22 +35,24 @@ class FilterItemsUi extends Component {
   }
 
   handleChange(item, name) {
-    return (e) => {
+    return e => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
-      handleChange(_.assign({}, item, {
-        [name]: _.get(e, 'value', _.get(e, 'target.value'))
-      }));
+      handleChange(
+        _.assign({}, item, {
+          [name]: _.get(e, 'value', _.get(e, 'target.value')),
+        })
+      );
     };
   }
   handleQueryChange = (model, filter) => {
     const part = { filter };
     collectionActions.handleChange(this.props, _.assign({}, model, part));
-  }
+  };
   renderRow(row, i, items) {
     const indexPatterns = this.props.indexPatterns;
     const defaults = { filter: '', label: '' };
     const model = { ...defaults, ...row };
-    const handleChange = (part) => {
+    const handleChange = part => {
       const fn = collectionActions.handleChange.bind(null, this.props);
       fn(_.assign({}, model, part));
     };
@@ -63,13 +62,11 @@ class FilterItemsUi extends Component {
       id: uuid.v1(),
       filter: { language: model.filter.language || getDefaultQueryLanguage(), query: '' },
     });
-    const handleAdd = collectionActions.handleAdd
-      .bind(null, this.props, newFilter);
-    const handleDelete = collectionActions.handleDelete
-      .bind(null, this.props, model);
+    const handleAdd = collectionActions.handleAdd.bind(null, this.props, newFilter);
+    const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
     const { intl } = this.props;
 
-    return  (
+    return (
       <EuiFlexGroup gutterSize="s" className="tvbAggRow" alignItems="center" key={model.id}>
         <EuiFlexItem grow={false}>
           <ColorPicker
@@ -80,21 +77,25 @@ class FilterItemsUi extends Component {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <QueryBarInput
+          <QueryBarWrapper
             query={{
               language: model.filter.language || getDefaultQueryLanguage(),
               query: model.filter.query || '',
             }}
-            onChange={(query) => this.handleQueryChange(model, query)}
-            appName={'VisEditor'}
+            onChange={query => this.handleQueryChange(model, query)}
             indexPatterns={[indexPatterns]}
-            store={localStorage}
           />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFieldText
-            placeholder={intl.formatMessage({ id: 'tsvb.splits.filterItems.labelPlaceholder', defaultMessage: 'Label' })}
-            aria-label={intl.formatMessage({ id: 'tsvb.splits.filterItems.labelAriaLabel', defaultMessage: 'Label' })}
+            placeholder={intl.formatMessage({
+              id: 'tsvb.splits.filterItems.labelPlaceholder',
+              defaultMessage: 'Label',
+            })}
+            aria-label={intl.formatMessage({
+              id: 'tsvb.splits.filterItems.labelAriaLabel',
+              defaultMessage: 'Label',
+            })}
             onChange={this.handleChange(model, 'label')}
             value={model.label}
             fullWidth
@@ -114,15 +115,10 @@ class FilterItemsUi extends Component {
 
   render() {
     const { model, name } = this.props;
-    if (!model[name]) return (<div/>);
+    if (!model[name]) return <div />;
     const rows = model[name].map(this.renderRow);
-    return (
-      <div>
-        { rows }
-      </div>
-    );
+    return <div>{rows}</div>;
   }
-
 }
 
 FilterItemsUi.propTypes = {

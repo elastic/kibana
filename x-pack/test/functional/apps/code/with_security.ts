@@ -5,10 +5,9 @@
  */
 
 import expect from '@kbn/expect';
-import { TestInvoker } from './lib/types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function testWithSecurity({ getService, getPageObjects }: TestInvoker) {
+export default function testWithSecurity({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -95,7 +94,7 @@ export default function testWithSecurity({ getService, getPageObjects }: TestInv
           expect(buttons).to.have.length(1);
         });
         await PageObjects.code.fillImportRepositoryUrlInputBox(
-          'https://github.com/Microsoft/TypeScript-Node-Starter'
+          'https://github.com/elastic/TypeScript-Node-Starter'
         );
         // Click the import repository button.
         await PageObjects.code.clickImportRepositoryButton();
@@ -135,9 +134,17 @@ export default function testWithSecurity({ getService, getPageObjects }: TestInv
             const deleteButton = await testSubjects.findAll('deleteRepositoryButton');
             if (deleteButton.length > 0) {
               await PageObjects.code.clickDeleteRepositoryButton();
+              await retry.try(async () => {
+                expect(await testSubjects.exists('confirmModalConfirmButton')).to.be(true);
+              });
+
+              await testSubjects.click('confirmModalConfirmButton');
             }
           }
-          expect(repositoryItems).to.have.length(0);
+          await retry.try(async () => {
+            const repoItems = await testSubjects.findAll(repositoryListSelector);
+            expect(repoItems).to.have.length(0);
+          });
         });
       }
 

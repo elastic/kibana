@@ -9,3 +9,20 @@ declare module '*.html' {
   // eslint-disable-next-line import/no-default-export
   export default template;
 }
+
+declare module 'lodash/internal/toPath' {
+  function toPath(value: string | string[]): string[];
+  export = toPath;
+}
+
+declare module '*.json' {
+  const json: any;
+  // eslint-disable-next-line import/no-default-export
+  export default json;
+}
+
+type MethodKeysOf<T> = {
+  [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never;
+}[keyof T];
+
+type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;

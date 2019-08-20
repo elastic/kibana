@@ -6,9 +6,9 @@
 
 import expect from '@kbn/expect';
 
-import { timelineQuery } from '../../../../plugins/siem/public/containers/timeline/index.gql_query';
-import { Direction, GetTimelineQuery } from '../../../../plugins/siem/public/graphql/types';
-import { KbnTestProvider } from './types';
+import { timelineQuery } from '../../../../legacy/plugins/siem/public/containers/timeline/index.gql_query';
+import { Direction, GetTimelineQuery } from '../../../../legacy/plugins/siem/public/graphql/types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 const LTE = new Date('3000-01-01T00:00:00.000Z').valueOf();
 const GTE = new Date('2000-01-01T00:00:00.000Z').valueOf();
@@ -51,7 +51,7 @@ const FILTER_VALUE = {
   },
 };
 
-const timelineTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
 
@@ -77,6 +77,7 @@ const timelineTests: KbnTestProvider = ({ getService }) => {
             },
             fieldRequested: ['@timestamp', 'host.name'],
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            inspect: false,
           },
         })
         .then(resp => {
@@ -106,6 +107,7 @@ const timelineTests: KbnTestProvider = ({ getService }) => {
             },
             fieldRequested: ['@timestamp', 'host.name'],
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            inspect: false,
           },
         })
         .then(resp => {
@@ -117,7 +119,4 @@ const timelineTests: KbnTestProvider = ({ getService }) => {
         });
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default timelineTests;
+}

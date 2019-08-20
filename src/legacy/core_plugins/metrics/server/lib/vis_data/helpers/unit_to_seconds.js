@@ -19,6 +19,8 @@
 import { INTERVAL_STRING_RE } from '../../../../common/interval_regexp';
 import { sortBy, isNumber } from 'lodash';
 
+export const ASCENDING_UNIT_ORDER = ['ms', 's', 'm', 'h', 'd', 'w', 'M', 'y'];
+
 const units = {
   ms: 0.001,
   s: 1,
@@ -32,7 +34,7 @@ const units = {
 
 const sortedUnits = sortBy(Object.keys(units), key => units[key]);
 
-export const parseInterval = (intervalString) => {
+export const parseInterval = intervalString => {
   let value;
   let unit;
 
@@ -54,20 +56,25 @@ export const convertIntervalToUnit = (intervalString, newUnit) => {
   let unit;
 
   if (parsedInterval.value && units[newUnit]) {
-    value = Number((parsedInterval.value * units[parsedInterval.unit] / units[newUnit]).toFixed(2));
+    value = Number(
+      ((parsedInterval.value * units[parsedInterval.unit]) / units[newUnit]).toFixed(2)
+    );
     unit = newUnit;
   }
 
   return { value, unit };
 };
 
-export const getSuitableUnit = intervalInSeconds => sortedUnits.find((key, index, array) => {
-  const nextUnit = array[index + 1];
-  const isValidInput = isNumber(intervalInSeconds) && intervalInSeconds > 0;
-  const isLastItem = index + 1 === array.length;
+export const getSuitableUnit = intervalInSeconds =>
+  sortedUnits.find((key, index, array) => {
+    const nextUnit = array[index + 1];
+    const isValidInput = isNumber(intervalInSeconds) && intervalInSeconds > 0;
+    const isLastItem = index + 1 === array.length;
 
-  return isValidInput && (intervalInSeconds >= units[key] && intervalInSeconds < units[nextUnit] || isLastItem);
-});
+    return (
+      isValidInput &&
+      ((intervalInSeconds >= units[key] && intervalInSeconds < units[nextUnit]) || isLastItem)
+    );
+  });
 
-export const getUnitValue  = unit => units[unit];
-
+export const getUnitValue = unit => units[unit];

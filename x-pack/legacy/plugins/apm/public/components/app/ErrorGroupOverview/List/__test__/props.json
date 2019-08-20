@@ -1,0 +1,42 @@
+{
+  "urlParams": {
+    "page": 0,
+    "serviceName": "opbeans-python",
+    "transactionType": "request",
+    "start": "2018-01-10T09:51:41.050Z",
+    "end": "2018-01-10T10:06:41.050Z"
+  },
+  "items": [
+    {
+      "message": "About to blow up!",
+      "occurrenceCount": 75,
+      "culprit": "elasticapm.contrib.django.client.capture",
+      "groupId": "a0ce2c8978ef92cdf2ff163ae28576ee",
+      "latestOccurrenceAt": "2018-01-10T10:06:37.561Z"
+    },
+    {
+      "message": "AssertionError: ",
+      "occurrenceCount": 75,
+      "culprit": "opbeans.views.oopsie",
+      "groupId": "f3ac95493913cc7a3cfec30a19d2120a",
+      "latestOccurrenceAt": "2018-01-10T10:06:37.630Z"
+    },
+    {
+      "message": "AssertionError: Bad luck!",
+      "occurrenceCount": 24,
+      "culprit": "opbeans.tasks.update_stats",
+      "groupId": "e90863d04b7a692435305f09bbe8c840",
+      "latestOccurrenceAt": "2018-01-10T10:06:36.859Z"
+    },
+    {
+      "message": "Customer with ID 8517 not found",
+      "occurrenceCount": 15,
+      "culprit": "opbeans.views.customer",
+      "groupId": "8673d8bf7a032e387c101bafbab0d2bc",
+      "latestOccurrenceAt": "2018-01-10T10:06:13.211Z"
+    }
+  ],
+  "location": {
+    "search": "?transactionId=abcdef0123456789"
+  }
+}

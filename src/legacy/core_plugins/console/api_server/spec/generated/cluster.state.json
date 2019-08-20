@@ -4,6 +4,8 @@
       "local": "__flag__",
       "master_timeout": "",
       "flat_settings": "__flag__",
+      "wait_for_metadata_version": "",
+      "wait_for_timeout": "",
       "ignore_unavailable": "__flag__",
       "allow_no_indices": "__flag__",
       "expand_wildcards": [
@@ -22,7 +24,6 @@
       "_cluster/state/{metrics}/{indices}"
     ],
     "url_components": {
-      "indices": null,
       "metrics": [
         "_all",
         "blocks",
@@ -32,8 +33,9 @@
         "routing_nodes",
         "routing_table",
         "version"
-      ]
+      ],
+      "indices": null
     },
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-state.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-state.html"
   }
 }

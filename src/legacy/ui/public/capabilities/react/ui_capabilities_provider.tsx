@@ -18,8 +18,8 @@
  */
 
 import React, { ReactNode } from 'react';
-import { capabilities } from '..';
 import { UICapabilitiesContext } from './ui_capabilities_context';
+import { capabilities } from '..';
 
 interface Props {
   children: ReactNode;

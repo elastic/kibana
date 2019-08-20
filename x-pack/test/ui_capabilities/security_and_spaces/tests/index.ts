@@ -6,16 +6,12 @@
 
 import { SpacesService } from '../../../common/services';
 import { SecurityService } from '../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { FeaturesService } from '../../common/services';
 import { isCustomRoleSpecification } from '../../common/types';
 import { Spaces, Users } from '../scenarios';
 
-// eslint-disable-next-line import/no-default-export
-export default function uiCapabilitiesTests({
-  loadTestFile,
-  getService,
-}: KibanaFunctionalTestDefaultProviders) {
+export default function uiCapabilitiesTests({ loadTestFile, getService }: FtrProviderContext) {
   const securityService: SecurityService = getService('security');
   const spacesService: SpacesService = getService('spaces');
   const featuresService: FeaturesService = getService('features');
@@ -73,6 +69,5 @@ export default function uiCapabilitiesTests({
     loadTestFile(require.resolve('./catalogue'));
     loadTestFile(require.resolve('./foo'));
     loadTestFile(require.resolve('./nav_links'));
-    loadTestFile(require.resolve('./saved_objects_management'));
   });
 }

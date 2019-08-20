@@ -18,3 +18,4 @@
  */
 
 export { timefilter, Timefilter } from './timefilter';
+export { timeHistory, TimeRange } from './time_history';

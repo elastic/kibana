@@ -29,6 +29,7 @@ import { errors } from 'elasticsearch';
 import { get } from 'lodash';
 import { Logger } from '../logging';
 import { loggingServiceMock } from '../logging/logging_service.mock';
+import { httpServerMock } from '../http/http_server.mocks';
 import { ClusterClient } from './cluster_client';
 
 const logger = loggingServiceMock.create();
@@ -165,6 +166,25 @@ describe('#callAsInternalUser', () => {
     ).rejects.toStrictEqual(mockAuthenticationError);
   });
 
+  test('aborts the request and rejects if a signal is provided and aborted', async () => {
+    const controller = new AbortController();
+
+    // The ES client returns a promise with an additional `abort` method to abort the request
+    const mockValue: any = Promise.resolve();
+    mockValue.abort = jest.fn();
+    mockEsClientInstance.ping.mockReturnValue(mockValue);
+
+    const promise = clusterClient.callAsInternalUser('ping', undefined, {
+      wrap401Errors: false,
+      signal: controller.signal,
+    });
+
+    controller.abort();
+
+    expect(mockValue.abort).toHaveBeenCalled();
+    await expect(promise).rejects.toThrowErrorMatchingInlineSnapshot(`"Request was aborted"`);
+  });
+
   test('does not override WWW-Authenticate if returned by Elasticsearch', async () => {
     const mockAuthenticationError = new (errors.AuthenticationException as any)(
       'Authentication Exception',
@@ -222,7 +242,9 @@ describe('#asScoped', () => {
   });
 
   test('creates additional Elasticsearch client only once', () => {
-    const firstScopedClusterClient = clusterClient.asScoped({ headers: { one: '1' } });
+    const firstScopedClusterClient = clusterClient.asScoped(
+      httpServerMock.createRawRequest({ headers: { one: '1' } })
+    );
 
     expect(firstScopedClusterClient).toBeDefined();
     expect(mockParseElasticsearchClientConfig).toHaveBeenCalledTimes(1);
@@ -238,7 +260,9 @@ describe('#asScoped', () => {
 
     jest.clearAllMocks();
 
-    const secondScopedClusterClient = clusterClient.asScoped({ headers: { two: '2' } });
+    const secondScopedClusterClient = clusterClient.asScoped(
+      httpServerMock.createRawRequest({ headers: { two: '2' } })
+    );
 
     expect(secondScopedClusterClient).toBeDefined();
     expect(secondScopedClusterClient).not.toBe(firstScopedClusterClient);
@@ -251,7 +275,7 @@ describe('#asScoped', () => {
     clusterClient = new ClusterClient(mockEsConfig, mockLogger);
 
     mockParseElasticsearchClientConfig.mockClear();
-    clusterClient.asScoped({ headers: { one: '1' } });
+    clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { one: '1' } }));
 
     expect(mockParseElasticsearchClientConfig).toHaveBeenCalledTimes(1);
     expect(mockParseElasticsearchClientConfig).toHaveBeenLastCalledWith(mockEsConfig, mockLogger, {
@@ -264,7 +288,7 @@ describe('#asScoped', () => {
     clusterClient = new ClusterClient(mockEsConfig, mockLogger);
 
     mockParseElasticsearchClientConfig.mockClear();
-    clusterClient.asScoped({ headers: { one: '1' } });
+    clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { one: '1' } }));
 
     expect(mockParseElasticsearchClientConfig).toHaveBeenCalledTimes(1);
     expect(mockParseElasticsearchClientConfig).toHaveBeenLastCalledWith(mockEsConfig, mockLogger, {
@@ -277,7 +301,7 @@ describe('#asScoped', () => {
     clusterClient = new ClusterClient(mockEsConfig, mockLogger);
 
     mockParseElasticsearchClientConfig.mockClear();
-    clusterClient.asScoped({ headers: { one: '1' } });
+    clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { one: '1' } }));
 
     expect(mockParseElasticsearchClientConfig).toHaveBeenCalledTimes(1);
     expect(mockParseElasticsearchClientConfig).toHaveBeenLastCalledWith(mockEsConfig, mockLogger, {
@@ -287,7 +311,9 @@ describe('#asScoped', () => {
   });
 
   test('passes only filtered headers to the scoped cluster client', () => {
-    clusterClient.asScoped({ headers: { zero: '0', one: '1', two: '2', three: '3' } });
+    clusterClient.asScoped(
+      httpServerMock.createRawRequest({ headers: { zero: '0', one: '1', two: '2', three: '3' } })
+    );
 
     expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
     expect(MockScopedClusterClient).toHaveBeenCalledWith(
@@ -298,7 +324,9 @@ describe('#asScoped', () => {
   });
 
   test('both scoped and internal API caller fail if cluster client is closed', async () => {
-    clusterClient.asScoped({ headers: { zero: '0', one: '1', two: '2', three: '3' } });
+    clusterClient.asScoped(
+      httpServerMock.createRawRequest({ headers: { zero: '0', one: '1', two: '2', three: '3' } })
+    );
 
     clusterClient.close();
 
@@ -309,6 +337,70 @@ describe('#asScoped', () => {
 
     await expect(scopedAPICaller('ping', {})).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Cluster client cannot be used after it has been closed."`
+    );
+  });
+
+  test('does not fail when scope to not defined request', async () => {
+    clusterClient = new ClusterClient(mockEsConfig, mockLogger);
+    clusterClient.asScoped();
+    expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
+    expect(MockScopedClusterClient).toHaveBeenCalledWith(
+      expect.any(Function),
+      expect.any(Function),
+      {}
+    );
+  });
+
+  test('does not fail when scope to a request without headers', async () => {
+    clusterClient = new ClusterClient(mockEsConfig, mockLogger);
+    clusterClient.asScoped({} as any);
+    expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
+    expect(MockScopedClusterClient).toHaveBeenCalledWith(
+      expect.any(Function),
+      expect.any(Function),
+      {}
+    );
+  });
+
+  test('calls getAuthHeaders and filters results for a real request', async () => {
+    clusterClient = new ClusterClient(mockEsConfig, mockLogger, () => ({ one: '1', three: '3' }));
+    clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { two: '2' } }));
+    expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
+    expect(MockScopedClusterClient).toHaveBeenCalledWith(
+      expect.any(Function),
+      expect.any(Function),
+      { one: '1', two: '2' }
+    );
+  });
+
+  test('getAuthHeaders results rewrite extends a request headers', async () => {
+    clusterClient = new ClusterClient(mockEsConfig, mockLogger, () => ({ one: 'foo' }));
+    clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { one: '1', two: '2' } }));
+    expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
+    expect(MockScopedClusterClient).toHaveBeenCalledWith(
+      expect.any(Function),
+      expect.any(Function),
+      { one: 'foo', two: '2' }
+    );
+  });
+
+  test("doesn't call getAuthHeaders for a fake request", async () => {
+    const getAuthHeaders = jest.fn();
+    clusterClient = new ClusterClient(mockEsConfig, mockLogger, getAuthHeaders);
+    clusterClient.asScoped({ headers: { one: '1', two: '2', three: '3' } });
+
+    expect(getAuthHeaders).not.toHaveBeenCalled();
+  });
+
+  test('filters a fake request headers', async () => {
+    clusterClient = new ClusterClient(mockEsConfig, mockLogger);
+    clusterClient.asScoped({ headers: { one: '1', two: '2', three: '3' } });
+
+    expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
+    expect(MockScopedClusterClient).toHaveBeenCalledWith(
+      expect.any(Function),
+      expect.any(Function),
+      { one: '1', two: '2' }
     );
   });
 });
@@ -340,7 +432,7 @@ describe('#close', () => {
   });
 
   test('closes both internal and scoped underlying Elasticsearch clients', () => {
-    clusterClient.asScoped({ headers: { one: '1' } });
+    clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { one: '1' } }));
 
     expect(mockEsClientInstance.close).not.toHaveBeenCalled();
     expect(mockScopedEsClientInstance.close).not.toHaveBeenCalled();
@@ -351,7 +443,7 @@ describe('#close', () => {
   });
 
   test('does not call close on already closed client', () => {
-    clusterClient.asScoped({ headers: { one: '1' } });
+    clusterClient.asScoped(httpServerMock.createRawRequest({ headers: { one: '1' } }));
 
     clusterClient.close();
     mockEsClientInstance.close.mockClear();

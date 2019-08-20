@@ -20,9 +20,11 @@
 import expect from '@kbn/expect';
 
 import { PIE_CHART_VIS_NAME, AREA_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
+
+// eslint-disable-next-line
 import {
-  DEFAULT_PANEL_WIDTH,
-} from '../../../../src/legacy/core_plugins/kibana/public/dashboard/dashboard_constants';
+  DEFAULT_PANEL_WIDTH
+} from '../../../../src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public/lib/embeddable/dashboard_constants';
 
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'visualize', 'header', 'discover']);

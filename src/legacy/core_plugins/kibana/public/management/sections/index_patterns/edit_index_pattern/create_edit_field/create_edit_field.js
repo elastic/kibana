@@ -17,9 +17,11 @@
  * under the License.
  */
 
-import { Field } from 'ui/index_patterns/_field';
+import { setup as data } from '../../../../../../../data/public/legacy';
+const { FieldImpl: Field } = data.indexPatterns.__LEGACY;
+
 import { RegistryFieldFormatEditorsProvider } from 'ui/registry/field_format_editors';
-import { DocTitleProvider } from 'ui/doc_title';
+import { docTitle } from 'ui/doc_title';
 import { KbnUrlProvider } from 'ui/url';
 import uiRoutes from 'ui/routes';
 import { toastNotifications } from 'ui/notify';
@@ -96,15 +98,14 @@ uiRoutes
       });
     },
     resolve: {
-      indexPattern: function ($route, redirectWhenMissing, indexPatterns) {
-        return indexPatterns.get($route.current.params.indexPatternId)
+      indexPattern: function ($route, Promise, redirectWhenMissing, indexPatterns) {
+        return Promise.resolve(indexPatterns.get($route.current.params.indexPatternId))
           .catch(redirectWhenMissing('/management/kibana/index_patterns'));
       }
     },
     controllerAs: 'fieldSettings',
     controller: function FieldEditorPageController($scope, $route, $timeout, $http, Private, config) {
       const getConfig = (...args) => config.get(...args);
-      const docTitle = Private(DocTitleProvider);
       const fieldFormatEditors = Private(RegistryFieldFormatEditorsProvider);
       const kbnUrl = Private(KbnUrlProvider);
 

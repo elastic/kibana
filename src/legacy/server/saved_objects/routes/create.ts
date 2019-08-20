@@ -19,7 +19,7 @@
 
 import Hapi from 'hapi';
 import Joi from 'joi';
-import { SavedObjectAttributes, SavedObjectsClient } from '../';
+import { SavedObjectAttributes, SavedObjectsClient } from 'src/core/server';
 import { Prerequisites, SavedObjectReference, WithoutQueryAndParams } from './types';
 
 interface CreateRequest extends WithoutQueryAndParams<Hapi.Request> {

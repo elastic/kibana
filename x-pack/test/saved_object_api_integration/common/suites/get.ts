@@ -5,7 +5,7 @@
  */
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
+import { DEFAULT_SPACE_ID } from '../../../../legacy/plugins/spaces/common/constants';
 import { getIdPrefix, getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -17,6 +17,7 @@ interface GetTest {
 interface GetTests {
   spaceAware: GetTest;
   notSpaceAware: GetTest;
+  hiddenType: GetTest;
   doesntExist: GetTest;
 }
 
@@ -33,22 +34,24 @@ const doesntExistId = 'foobar';
 
 export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
   const createExpectDoesntExistNotFound = (spaceId = DEFAULT_SPACE_ID) => {
-    return createExpectNotFound(doesntExistId, spaceId);
+    return createExpectNotFound('visualization', doesntExistId, spaceId);
   };
 
-  const createExpectNotFound = (id: string, spaceId = DEFAULT_SPACE_ID) => (resp: {
+  const createExpectNotFound = (type: string, id: string, spaceId = DEFAULT_SPACE_ID) => (resp: {
     [key: string]: any;
   }) => {
     expect(resp.body).to.eql({
       error: 'Not Found',
-      message: `Saved object [visualization/${getIdPrefix(spaceId)}${id}] not found`,
+      message: `Saved object [${type}/${getIdPrefix(spaceId)}${id}] not found`,
       statusCode: 404,
     });
   };
 
-  const createExpectNotSpaceAwareNotFound = (spaceId = DEFAULT_SPACE_ID) => {
-    return createExpectNotFound(spaceAwareId, spaceId);
-  };
+  const expectHiddenTypeNotFound = createExpectNotFound(
+    'hiddentype',
+    'hiddentype_1',
+    DEFAULT_SPACE_ID
+  );
 
   const createExpectNotSpaceAwareRbacForbidden = () => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
@@ -82,11 +85,12 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
   };
 
   const createExpectSpaceAwareNotFound = (spaceId = DEFAULT_SPACE_ID) => {
-    return createExpectNotFound(spaceAwareId, spaceId);
+    return createExpectNotFound('visualization', spaceAwareId, spaceId);
   };
 
   const expectSpaceAwareRbacForbidden = createExpectRbacForbidden('visualization');
   const expectNotSpaceAwareRbacForbidden = createExpectRbacForbidden('globaltype');
+  const expectHiddenTypeRbacForbidden = createExpectRbacForbidden('hiddentype');
   const expectDoesntExistRbacForbidden = createExpectRbacForbidden('visualization');
 
   const createExpectSpaceAwareResults = (spaceId = DEFAULT_SPACE_ID) => (resp: {
@@ -127,9 +131,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
       before(() => esArchiver.load('saved_objects/spaces'));
       after(() => esArchiver.unload('saved_objects/spaces'));
 
-      it(`should return ${
-        tests.spaceAware.statusCode
-      } when getting a space aware doc`, async () => {
+      it(`should return ${tests.spaceAware.statusCode} when getting a space aware doc`, async () => {
         await supertest
           .get(
             `${getUrlPrefix(spaceId)}/api/saved_objects/visualization/${getIdPrefix(
@@ -141,14 +143,20 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
           .then(tests.spaceAware.response);
       });
 
-      it(`should return ${
-        tests.notSpaceAware.statusCode
-      } when deleting a non-space-aware doc`, async () => {
+      it(`should return ${tests.notSpaceAware.statusCode} when getting a non-space-aware doc`, async () => {
         await supertest
           .get(`${getUrlPrefix(spaceId)}/api/saved_objects/globaltype/${notSpaceAwareId}`)
           .auth(user.username, user.password)
           .expect(tests.notSpaceAware.statusCode)
           .then(tests.notSpaceAware.response);
+      });
+
+      it(`should return ${tests.hiddenType.statusCode} when getting a hiddentype doc`, async () => {
+        await supertest
+          .get(`${getUrlPrefix(spaceId)}/api/saved_objects/hiddentype/hiddentype_1`)
+          .auth(user.username, user.password)
+          .expect(tests.hiddenType.statusCode)
+          .then(tests.hiddenType.response);
       });
 
       describe('document does not exist', () => {
@@ -173,14 +181,15 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
 
   return {
     createExpectDoesntExistNotFound,
-    createExpectNotSpaceAwareNotFound,
     createExpectNotSpaceAwareRbacForbidden,
     createExpectNotSpaceAwareResults,
     createExpectSpaceAwareNotFound,
     createExpectSpaceAwareResults,
+    expectHiddenTypeNotFound,
     expectSpaceAwareRbacForbidden,
     expectNotSpaceAwareRbacForbidden,
     expectDoesntExistRbacForbidden,
+    expectHiddenTypeRbacForbidden,
     getTest,
   };
 }

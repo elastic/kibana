@@ -61,10 +61,7 @@ export const Static = props => {
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
-            <FormattedMessage
-              id="tsvb.static.aggregationLabel"
-              defaultMessage="Aggregation"
-            />
+            <FormattedMessage id="tsvb.static.aggregationLabel" defaultMessage="Aggregation" />
           </EuiFormLabel>
           <AggSelect
             id={htmlId('aggregation')}
@@ -77,10 +74,9 @@ export const Static = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('staticValue')}
-            label={(<FormattedMessage
-              id="tsvb.static.staticValuesLabel"
-              defaultMessage="Static Value"
-            />)}
+            label={
+              <FormattedMessage id="tsvb.static.staticValuesLabel" defaultMessage="Static Value" />
+            }
           >
             <EuiFieldNumber
               onChange={handleTextChange('value')}

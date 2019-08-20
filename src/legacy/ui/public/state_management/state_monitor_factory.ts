@@ -20,7 +20,10 @@ import { cloneDeep, isEqual, isPlainObject, set } from 'lodash';
 import { State } from './state';
 
 export const stateMonitorFactory = {
-  create: (state: State, customInitialState: State) => stateMonitor(state, customInitialState),
+  create: <TStateDefault extends { [key: string]: unknown }>(
+    state: State,
+    customInitialState: TStateDefault
+  ) => stateMonitor<TStateDefault>(state, customInitialState),
 };
 
 interface StateStatus {
@@ -28,22 +31,32 @@ interface StateStatus {
   dirty: boolean;
 }
 
+export interface StateMonitor<TStateDefault extends { [key: string]: unknown }> {
+  setInitialState: (innerCustomInitialState: TStateDefault) => void;
+  ignoreProps: (props: string[] | string) => void;
+  onChange: (callback: ChangeHandlerFn) => StateMonitor<TStateDefault>;
+  destroy: () => void;
+}
+
 type ChangeHandlerFn = (status: StateStatus, type: string | null, keys: string[]) => void;
 
-function stateMonitor(state: State, customInitialState: State) {
+function stateMonitor<TStateDefault extends { [key: string]: unknown }>(
+  state: State,
+  customInitialState: TStateDefault
+): StateMonitor<TStateDefault> {
   let destroyed = false;
   let ignoredProps: string[] = [];
   let changeHandlers: ChangeHandlerFn[] | undefined = [];
-  let initialState: State;
+  let initialState: TStateDefault;
 
   setInitialState(customInitialState);
 
-  function setInitialState(innerCustomInitialState: State) {
+  function setInitialState(innerCustomInitialState: TStateDefault) {
     // state.toJSON returns a reference, clone so we can mutate it safely
     initialState = cloneDeep(innerCustomInitialState) || cloneDeep(state.toJSON());
   }
 
-  function removeIgnoredProps(innerState: State) {
+  function removeIgnoredProps(innerState: TStateDefault) {
     ignoredProps.forEach(path => {
       set(innerState, path, true);
     });
@@ -84,7 +97,7 @@ function stateMonitor(state: State, customInitialState: State) {
   }
 
   return {
-    setInitialState(innerCustomInitialState: State) {
+    setInitialState(innerCustomInitialState: TStateDefault) {
       if (!isPlainObject(innerCustomInitialState)) {
         throw new TypeError('The default state must be an object');
       }
@@ -102,7 +115,7 @@ function stateMonitor(state: State, customInitialState: State) {
       }
     },
 
-    ignoreProps(props: string[]) {
+    ignoreProps(props: string[] | string) {
       ignoredProps = ignoredProps.concat(props);
       removeIgnoredProps(initialState);
       return this;

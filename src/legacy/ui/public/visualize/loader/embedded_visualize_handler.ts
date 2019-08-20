@@ -18,7 +18,7 @@
  */
 
 import { EventEmitter } from 'events';
-import { debounce, forEach, get } from 'lodash';
+import { debounce, forEach, get, isEqual } from 'lodash';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
@@ -33,9 +33,12 @@ import { RenderCompleteHelper } from '../../render_complete';
 import { AppState } from '../../state_management/app_state';
 import { timefilter } from '../../timefilter';
 import { RequestHandlerParams, Vis } from '../../vis';
+// @ts-ignore untyped dependency
+import { VisFiltersProvider } from '../../vis/vis_filters';
 import { PipelineDataLoader } from './pipeline_data_loader';
 import { visualizationLoader } from './visualization_loader';
 import { VisualizeDataLoader } from './visualize_data_loader';
+import { onlyDisabledFiltersChanged } from '../../../../core_plugins/data/public';
 
 import { DataAdapter, RequestAdapter } from '../../inspector/adapters';
 
@@ -180,6 +183,7 @@ export class EmbeddedVisualizeHandler {
     this.dataLoader = pipelineDataLoader
       ? new PipelineDataLoader(vis)
       : new VisualizeDataLoader(vis, Private);
+    const visFilters: any = Private(VisFiltersProvider);
     this.renderCompleteHelper = new RenderCompleteHelper(element);
     this.inspectorAdapters = this.getActiveInspectorAdapters();
     this.vis.openInspector = this.openInspector;
@@ -200,7 +204,8 @@ export class EmbeddedVisualizeHandler {
     this.events$.subscribe(event => {
       if (this.actions[event.name]) {
         event.data.aggConfigs = getTableAggs(this.vis);
-        this.actions[event.name](event.data);
+        const newFilters = this.actions[event.name](event.data) || [];
+        visFilters.pushFilters(newFilters);
       }
     });
 
@@ -232,15 +237,21 @@ export class EmbeddedVisualizeHandler {
     }
 
     let fetchRequired = false;
-    if (params.hasOwnProperty('timeRange')) {
+    if (
+      params.hasOwnProperty('timeRange') &&
+      !isEqual(this.dataLoaderParams.timeRange, params.timeRange)
+    ) {
       fetchRequired = true;
       this.dataLoaderParams.timeRange = params.timeRange;
     }
-    if (params.hasOwnProperty('filters')) {
+    if (
+      params.hasOwnProperty('filters') &&
+      !onlyDisabledFiltersChanged(this.dataLoaderParams.filters, params.filters)
+    ) {
       fetchRequired = true;
       this.dataLoaderParams.filters = params.filters;
     }
-    if (params.hasOwnProperty('query')) {
+    if (params.hasOwnProperty('query') && !isEqual(this.dataLoaderParams.query, params.query)) {
       fetchRequired = true;
       this.dataLoaderParams.query = params.query;
     }

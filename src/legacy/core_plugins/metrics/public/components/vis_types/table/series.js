@@ -22,7 +22,14 @@ import PropTypes from 'prop-types';
 import { AddDeleteButtons } from '../../add_delete_buttons';
 import { TableSeriesConfig as SeriesConfig } from './config';
 import { SeriesDragHandler } from '../../series_drag_handler';
-import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiTabs,
+  EuiTab,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldText,
+  EuiButtonIcon,
+} from '@elastic/eui';
 import { createTextHandler } from '../../lib/create_text_handler';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { Aggs } from '../../aggs/aggs';
@@ -80,24 +87,15 @@ function TableSeriesUI(props) {
     body = (
       <div className="tvbSeries__body">
         <EuiTabs size="s">
-          <EuiTab
-            isSelected={selectedTab === 'metrics'}
-            onClick={() => props.switchTab('metrics')}
-          >
-            <FormattedMessage
-              id="tsvb.table.tab.metricsLabel"
-              defaultMessage="Metrics"
-            />
+          <EuiTab isSelected={selectedTab === 'metrics'} onClick={() => props.switchTab('metrics')}>
+            <FormattedMessage id="tsvb.table.tab.metricsLabel" defaultMessage="Metrics" />
           </EuiTab>
           <EuiTab
             data-test-subj="seriesOptions"
             isSelected={selectedTab === 'options'}
             onClick={() => props.switchTab('options')}
           >
-            <FormattedMessage
-              id="tsvb.table.tab.optionsLabel"
-              defaultMessage="Options"
-            />
+            <FormattedMessage id="tsvb.table.tab.optionsLabel" defaultMessage="Options" />
           </EuiTab>
         </EuiTabs>
         {seriesBody}
@@ -106,17 +104,17 @@ function TableSeriesUI(props) {
   }
 
   return (
-    <div
-      className={`${props.className}`}
-      style={props.style}
-    >
+    <div className={`${props.className}`} style={props.style}>
       <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             iconType={caretIcon}
             color="text"
             onClick={props.toggleVisible}
-            aria-label={intl.formatMessage({ id: 'tsvb.table.toggleSeriesEditorAriaLabel', defaultMessage: 'Toggle series editor' })}
+            aria-label={intl.formatMessage({
+              id: 'tsvb.table.toggleSeriesEditorAriaLabel',
+              defaultMessage: 'Toggle series editor',
+            })}
             aria-expanded={props.visible}
           />
         </EuiFlexItem>
@@ -124,20 +122,38 @@ function TableSeriesUI(props) {
         <EuiFlexItem>
           <EuiFieldText
             fullWidth
-            aria-label={intl.formatMessage({ id: 'tsvb.table.labelAriaLabel', defaultMessage: 'Label' })}
+            aria-label={intl.formatMessage({
+              id: 'tsvb.table.labelAriaLabel',
+              defaultMessage: 'Label',
+            })}
             onChange={handleChange('label')}
-            placeholder={intl.formatMessage({ id: 'tsvb.table.labelPlaceholder', defaultMessage: 'Label' })}
+            placeholder={intl.formatMessage({
+              id: 'tsvb.table.labelPlaceholder',
+              defaultMessage: 'Label',
+            })}
             value={model.label}
           />
         </EuiFlexItem>
 
-        <SeriesDragHandler dragHandleProps={props.dragHandleProps} hideDragHandler={props.disableDelete} />
+        <SeriesDragHandler
+          dragHandleProps={props.dragHandleProps}
+          hideDragHandler={props.disableDelete}
+        />
 
         <EuiFlexItem grow={false}>
           <AddDeleteButtons
-            addTooltip={intl.formatMessage({ id: 'tsvb.table.addSeriesTooltip', defaultMessage: 'Add Series' })}
-            deleteTooltip={intl.formatMessage({ id: 'tsvb.table.deleteSeriesTooltip', defaultMessage: 'Delete Series' })}
-            cloneTooltip={intl.formatMessage({ id: 'tsvb.table.cloneSeriesTooltip', defaultMessage: 'Clone Series' })}
+            addTooltip={intl.formatMessage({
+              id: 'tsvb.table.addSeriesTooltip',
+              defaultMessage: 'Add Series',
+            })}
+            deleteTooltip={intl.formatMessage({
+              id: 'tsvb.table.deleteSeriesTooltip',
+              defaultMessage: 'Delete Series',
+            })}
+            cloneTooltip={intl.formatMessage({
+              id: 'tsvb.table.cloneSeriesTooltip',
+              defaultMessage: 'Clone Series',
+            })}
             onDelete={onDelete}
             onClone={props.onClone}
             onAdd={onAdd}
@@ -150,7 +166,7 @@ function TableSeriesUI(props) {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      { body }
+      {body}
     </div>
   );
 }

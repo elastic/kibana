@@ -9,6 +9,9 @@
         },
         "name": {
           "type": "keyword"
+        },
+        "prop1": {
+          "type": "byte"
         }
       }
     },
@@ -69,6 +72,32 @@
       "properties": {
         "location": {
           "type": "geo_shape"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": "flights",
+    "mappings": {
+      "properties": {
+        "location": {
+          "type": "geo_point"
+        },
+        "heading": {
+          "type": "integer"
+        },
+        "altitude": {
+          "type": "integer"
         }
       }
     },

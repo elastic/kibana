@@ -1,3 +1,10 @@
+@import 'src/legacy/ui/public/styles/_styling_constants';
+
+.conHistory {
+  @include euiBottomShadow;
+  padding: $euiSizeM;
+}
+
 .conHistory__body {
   display: flex;
   height: $euiSizeXL * 10;
@@ -5,8 +12,13 @@
 
 
 .conHistory__footer {
-  text-align: right;
+  display: flex;
+  justify-content: space-between;
   padding-top: $euiSize;
+}
+
+.conHistory__footerButtonsRight {
+  text-align: right;
 }
 
 .conHistory__reqs,

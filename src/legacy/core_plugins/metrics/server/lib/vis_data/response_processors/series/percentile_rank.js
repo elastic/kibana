@@ -33,12 +33,13 @@ export function percentileRank(resp, panel, series, meta) {
 
     getSplits(resp, panel, series, meta).forEach(split => {
       (metric.values || []).forEach(percentileRank => {
-        const data = split.timeseries.buckets.map(bucket => (
-          [bucket.key, getAggValue(bucket, {
+        const data = split.timeseries.buckets.map(bucket => [
+          bucket.key,
+          getAggValue(bucket, {
             ...metric,
-            value: toPercentileNumber(percentileRank)
-          })]
-        ));
+            value: toPercentileNumber(percentileRank),
+          }),
+        ]);
 
         results.push({
           data,

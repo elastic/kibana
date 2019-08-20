@@ -19,9 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import {
-  EuiComboBox,
-} from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
 import { isFieldEnabled } from '../../lib/check_ui_restrictions';
 import { i18n } from '@kbn/i18n';
@@ -41,35 +39,39 @@ function FieldSelectUi({
   uiRestrictions,
   ...rest
 }) {
-
   if (type === 'count') {
     return null;
   }
 
   const selectedOptions = [];
-  const options = Object.values((fields[indexPattern] || []).reduce((acc, field) => {
-    if (isFieldTypeEnabled(restrict, field.type) && isFieldEnabled(field.name, type, uiRestrictions)) {
-      const item = {
-        label: field.name,
-        value: field.name
-      };
-
-      if (acc[field.type]) {
-        acc[field.type].options.push(item);
-      } else {
-        acc[field.type] = {
-          options: [item],
-          label: field.type,
+  const options = Object.values(
+    (fields[indexPattern] || []).reduce((acc, field) => {
+      if (
+        isFieldTypeEnabled(restrict, field.type) &&
+        isFieldEnabled(field.name, type, uiRestrictions)
+      ) {
+        const item = {
+          label: field.name,
+          value: field.name,
         };
+
+        if (acc[field.type]) {
+          acc[field.type].options.push(item);
+        } else {
+          acc[field.type] = {
+            options: [item],
+            label: field.type,
+          };
+        }
+
+        if (value === item.value) {
+          selectedOptions.push(item);
+        }
       }
 
-      if (value === item.value) {
-        selectedOptions.push(item);
-      }
-    }
-
-    return acc;
-  }, {}));
+      return acc;
+    }, {})
+  );
 
   if (onChange && value && !selectedOptions.length) {
     onChange();
@@ -94,7 +96,7 @@ FieldSelectUi.defaultProps = {
   restrict: [],
   placeholder: i18n.translate('tsvb.fieldSelect.selectFieldPlaceholder', {
     defaultMessage: 'Select field...',
-  })
+  }),
 };
 
 FieldSelectUi.propTypes = {

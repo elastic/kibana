@@ -30,8 +30,7 @@ export function InspectorProvider({ getService }) {
 
   return new class Inspector {
     async getIsEnabled() {
-      const button = await testSubjects.find('openInspectorButton');
-      const ariaDisabled = await button.getAttribute('aria-disabled');
+      const ariaDisabled = await testSubjects.getAttribute('openInspectorButton', 'disabled');
       return ariaDisabled !== 'true';
     }
 
@@ -86,7 +85,7 @@ export function InspectorProvider({ getService }) {
       // The buttons for setting table page size are in a popover element. This popover
       // element appears as if it's part of the inspectorPanel but it's really attached
       // to the body element by a portal.
-      const tableSizesPopover = await find.byCssSelector('.euiPanel');
+      const tableSizesPopover = await find.byCssSelector('.euiPanel .euiContextMenuPanel');
       await find.clickByButtonText(`${size} rows`, tableSizesPopover);
     }
 

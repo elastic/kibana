@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'settings', 'security', 'maps']);
@@ -15,7 +14,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const testSubjects = getService('testSubjects');
   const globalNav = getService('globalNav');
 
-  describe('security feature controls', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/38414
+  describe.skip('security feature controls', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('maps/data');
       await esArchiver.load('maps/kibana');

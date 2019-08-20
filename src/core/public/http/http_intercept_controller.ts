@@ -20,7 +20,7 @@
 export class HttpInterceptController {
   private _halted = false;
 
-  get halted() {
+  public get halted() {
     return this._halted;
   }
 

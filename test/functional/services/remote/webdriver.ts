@@ -22,7 +22,7 @@ import { delay } from 'bluebird';
 import chromeDriver from 'chromedriver';
 // @ts-ignore types not available
 import geckoDriver from 'geckodriver';
-import { Builder, By, Key, logging, until } from 'selenium-webdriver';
+import { Builder, Capabilities, By, Key, logging, until } from 'selenium-webdriver';
 // @ts-ignore types not available
 import chrome from 'selenium-webdriver/chrome';
 // @ts-ignore types not available
@@ -38,10 +38,11 @@ import { preventParallelCalls } from './prevent_parallel_calls';
 
 import { Browsers } from './browsers';
 
-const throttleOption = process.env.TEST_THROTTLE_NETWORK;
+const throttleOption: string = process.env.TEST_THROTTLE_NETWORK as string;
+const headlessBrowser: string = process.env.TEST_BROWSER_HEADLESS as string;
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
-const NO_QUEUE_COMMANDS = ['getStatus', 'newSession', 'quit'];
+const NO_QUEUE_COMMANDS = ['getLog', 'getStatus', 'newSession', 'quit'];
 
 /**
  * Best we can tell WebDriver locks up sometimes when we send too many
@@ -64,23 +65,33 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
   const buildDriverInstance = async () => {
     switch (browserType) {
       case 'chrome':
-        const chromeOptions = new chrome.Options();
-        const loggingPref = new logging.Preferences();
-        loggingPref.setLevel(logging.Type.BROWSER, logging.Level.ALL);
-        chromeOptions.setLoggingPrefs(loggingPref);
-        if (process.env.TEST_BROWSER_HEADLESS) {
+        const chromeCapabilities = Capabilities.chrome();
+        const chromeOptions = [
+          'disable-translate',
+          'new-window',
+          'no-sandbox',
+          'allow-file-access-from-files',
+          'use-fake-device-for-media-stream',
+          'use-fake-ui-for-media-stream',
+        ];
+        if (headlessBrowser === '1') {
           // Use --disable-gpu to avoid an error from a missing Mesa library, as per
           // See: https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md
-          chromeOptions.addArguments('headless', 'disable-gpu');
+          chromeOptions.push('headless', 'disable-gpu');
         }
+        chromeCapabilities.set('goog:chromeOptions', {
+          w3c: false,
+          args: chromeOptions,
+        });
+        chromeCapabilities.set('goog:loggingPrefs', { browser: 'ALL' });
         return new Builder()
           .forBrowser(browserType)
-          .setChromeOptions(chromeOptions)
+          .withCapabilities(chromeCapabilities)
           .setChromeService(new chrome.ServiceBuilder(chromeDriver.path).enableVerboseLogging())
           .build();
       case 'firefox':
         const firefoxOptions = new firefox.Options();
-        if (process.env.TEST_BROWSER_HEADLESS) {
+        if (headlessBrowser === '1') {
           // See: https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode
           firefoxOptions.addArguments('-headless');
         }
@@ -96,7 +107,7 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
 
   const session = await buildDriverInstance();
 
-  if (throttleOption === 'true' && browserType === 'chrome') {
+  if (throttleOption === '1' && browserType === 'chrome') {
     // Only chrome supports this option.
     log.debug('NETWORK THROTTLED: 768k down, 256k up, 100ms latency.');
 
@@ -119,6 +130,11 @@ export async function initWebDriver(log: ToolingLog, browserType: Browsers) {
   const logger = getLogger('webdriver.http.Executor');
   logger.setLevel(logging.Level.FINEST);
   logger.addHandler((entry: { message: string }) => {
+    if (entry.message.match(/\/session\/\w+\/log\b/)) {
+      // ignore polling requests for logs
+      return;
+    }
+
     log.verbose(entry.message);
   });
 

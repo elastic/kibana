@@ -157,7 +157,11 @@ export default class BaseOptimizer {
 
   getThreadLoaderPoolConfig() {
     // Calculate the node options from the NODE_OPTIONS env var
-    const parsedNodeOptions = process.env.NODE_OPTIONS ? process.env.NODE_OPTIONS.split(/\s/) : [];
+    const parsedNodeOptions = process.env.NODE_OPTIONS
+      // thread-loader could not receive empty string as options
+      // or it would break that's why we need to filter here
+      ? process.env.NODE_OPTIONS.split(/\s/).filter(opt => !!opt)
+      : [];
 
     return {
       name: 'optimizer-thread-loader-main-pool',
@@ -472,14 +476,16 @@ export default class BaseOptimizer {
       }
     };
 
-    return webpackMerge(
-      commonConfig,
-      IS_KIBANA_DISTRIBUTABLE
-        ? isDistributableConfig
-        : {},
-      this.uiBundles.isDevMode()
-        ? webpackMerge(watchingConfig, supportEnzymeConfig)
-        : productionConfig
+    return this.uiBundles.getExtendedConfig(
+      webpackMerge(
+        commonConfig,
+        IS_KIBANA_DISTRIBUTABLE
+          ? isDistributableConfig
+          : {},
+        this.uiBundles.isDevMode()
+          ? webpackMerge(watchingConfig, supportEnzymeConfig)
+          : productionConfig
+      )
     );
   }
 

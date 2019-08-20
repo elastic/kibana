@@ -23,8 +23,6 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { ErrorToast } from './error_toast';
 
-import { i18nServiceMock } from '../../i18n/i18n_service.mock';
-
 interface ErrorToastProps {
   error?: Error;
   title?: string;
@@ -42,7 +40,6 @@ function render(props: ErrorToastProps = {}) {
       error={props.error || new Error('error message')}
       title={props.title || 'An error occured'}
       toastMessage={props.toastMessage || 'This is the toast message'}
-      i18nContext={i18nServiceMock.createSetupContract().Context}
     />
   );
 }

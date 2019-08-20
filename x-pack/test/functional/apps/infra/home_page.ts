@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
 
-const DATE_WITH_DATA = new Date(DATES.metricsAndLogs.hosts.withData);
-const DATE_WITHOUT_DATA = new Date(DATES.metricsAndLogs.hosts.withoutData);
+const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;
+const DATE_WITHOUT_DATA = DATES.metricsAndLogs.hosts.withoutData;
 
-// eslint-disable-next-line import/no-default-export
-export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) => {
+export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const pageObjects = getPageObjects(['common', 'infraHome']);
 
-  describe('Home page', () => {
+  describe('Home page', function() {
+    this.tags('smoke');
     before(async () => {
       await esArchiver.load('empty_kibana');
     });

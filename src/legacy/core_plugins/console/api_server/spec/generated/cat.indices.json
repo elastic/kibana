@@ -19,7 +19,8 @@
       "help": "__flag__",
       "pri": "__flag__",
       "s": [],
-      "v": "__flag__"
+      "v": "__flag__",
+      "include_unloaded_segments": "__flag__"
     },
     "methods": [
       "GET"
@@ -28,6 +29,6 @@
       "_cat/indices",
       "_cat/indices/{indices}"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cat-indices.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cat-indices.html"
   }
 }

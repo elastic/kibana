@@ -24,20 +24,19 @@ import { CourierRequestHandlerProvider } from 'ui/vis/request_handlers/courier';
 // @ts-ignore
 import { AggConfigs } from 'ui/vis/agg_configs.js';
 
+import chrome from 'ui/chrome';
+
 // need to get rid of angular from these
-// @ts-ignore
-import { IndexPatternsProvider } from 'ui/index_patterns';
 // @ts-ignore
 import { SearchSourceProvider } from 'ui/courier/search_source';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
-
-import chrome from 'ui/chrome';
+import { IndexPatternsProvider } from '../../../data/public';
 
 const courierRequestHandlerProvider = CourierRequestHandlerProvider;
 const courierRequestHandler = courierRequestHandlerProvider().handler;
 
 import { ExpressionFunction } from '../../types';
-import { KibanaContext, KibanaDatatable } from '../../common/types';
+import { KibanaContext, KibanaDatatable } from '../../common';
 
 const name = 'esaggs';
 

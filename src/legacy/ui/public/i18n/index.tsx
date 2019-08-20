@@ -22,9 +22,9 @@ import React from 'react';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
-import { npSetup } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 
-export const I18nContext = npSetup.core.i18n.Context;
+export const I18nContext = npStart.core.i18n.Context;
 
 export function wrapInI18nContext<P>(ComponentToWrap: React.ComponentType<P>) {
   const ContextWrapper: React.SFC<P> = props => {

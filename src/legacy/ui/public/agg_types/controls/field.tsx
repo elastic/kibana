@@ -23,14 +23,13 @@ import React, { useEffect } from 'react';
 import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggConfig } from 'ui/vis';
+import { Field } from 'ui/index_patterns';
+import { AggParamEditorProps, ComboBoxGroupedOptions } from 'ui/vis/editors/default';
 import { formatListAsProse, parseCommaSeparatedList } from '../../../../utils';
-import { AggParamEditorProps } from '../../vis/editors/default';
-import { ComboBoxGroupedOption } from '../../vis/editors/default/default_editor_utils';
-import { FieldParamType } from '../param_types';
 
 const label = i18n.translate('common.ui.aggTypes.field.fieldLabel', { defaultMessage: 'Field' });
 
-interface FieldParamEditorProps extends AggParamEditorProps<FieldParamType> {
+export interface FieldParamEditorProps extends AggParamEditorProps<Field> {
   customError?: string;
   customLabel?: string;
 }
@@ -47,12 +46,12 @@ function FieldParamEditor({
   setValidity,
   setValue,
 }: FieldParamEditorProps) {
-  const selectedOptions: ComboBoxGroupedOption[] = value
-    ? [{ label: value.displayName, value }]
+  const selectedOptions: ComboBoxGroupedOptions<Field> = value
+    ? [{ label: value.displayName || value.name, target: value }]
     : [];
 
   const onChange = (options: EuiComboBoxOptionProps[]) => {
-    const selectedOption = get(options, '0.value');
+    const selectedOption: Field = get(options, '0.target');
     if (!(aggParam.required && !selectedOption)) {
       setValue(selectedOption);
     }
@@ -61,11 +60,7 @@ function FieldParamEditor({
       aggParam.onChange(agg);
     }
   };
-  const errors = [];
-
-  if (customError) {
-    errors.push(customError);
-  }
+  const errors = customError ? [customError] : [];
 
   if (!indexedFields.length) {
     errors.push(
@@ -78,17 +73,17 @@ function FieldParamEditor({
         },
       })
     );
-    setTouched();
   }
 
   const isValid = !!value && !errors.length;
 
-  useEffect(
-    () => {
-      setValidity(isValid);
-    },
-    [isValid]
-  );
+  useEffect(() => {
+    setValidity(isValid);
+
+    if (!!errors.length) {
+      setTouched();
+    }
+  }, [isValid]);
 
   useEffect(() => {
     // set field if only one available
@@ -96,12 +91,12 @@ function FieldParamEditor({
       return;
     }
 
-    const options = indexedFields[0].options;
+    const indexedField = indexedFields[0];
 
-    if (!options) {
-      setValue(indexedFields[0].value);
-    } else if (options.length === 1) {
-      setValue(options[0].value);
+    if (!('options' in indexedField)) {
+      setValue(indexedField.target);
+    } else if (indexedField.options.length === 1) {
+      setValue(indexedField.options[0].target);
     }
   }, []);
 
@@ -111,7 +106,7 @@ function FieldParamEditor({
       isInvalid={showValidation ? !isValid : false}
       fullWidth={true}
       error={errors}
-      className="visEditorSidebar__aggParamFormRow"
+      compressed
     >
       <EuiComboBox
         placeholder={i18n.translate('common.ui.aggTypes.field.selectFieldPlaceholder', {

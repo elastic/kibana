@@ -18,9 +18,9 @@
  */
 
 import { httpServiceMock } from './http/http_service.mock';
-export const httpService = httpServiceMock.create();
+export const mockHttpService = httpServiceMock.create();
 jest.doMock('./http/http_service', () => ({
-  HttpService: jest.fn(() => httpService),
+  HttpService: jest.fn(() => mockHttpService),
 }));
 
 import { pluginServiceMock } from './plugins/plugins_service.mock';
@@ -30,9 +30,9 @@ jest.doMock('./plugins/plugins_service', () => ({
 }));
 
 import { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
-export const elasticsearchService = elasticsearchServiceMock.create();
+export const mockElasticsearchService = elasticsearchServiceMock.create();
 jest.doMock('./elasticsearch/elasticsearch_service', () => ({
-  ElasticsearchService: jest.fn(() => elasticsearchService),
+  ElasticsearchService: jest.fn(() => mockElasticsearchService),
 }));
 
 export const mockLegacyService = { setup: jest.fn(), start: jest.fn(), stop: jest.fn() };
@@ -41,7 +41,7 @@ jest.mock('./legacy/legacy_service', () => ({
 }));
 
 import { configServiceMock } from './config/config_service.mock';
-export const configService = configServiceMock.create();
+export const mockConfigService = configServiceMock.create();
 jest.doMock('./config/config_service', () => ({
-  ConfigService: jest.fn(() => configService),
+  ConfigService: jest.fn(() => mockConfigService),
 }));

@@ -1,90 +1,112 @@
 [[index-patterns]]
-== Index Patterns
+== Index patterns
 
-To use Kibana, you have to tell it about the Elasticsearch indices that you want to explore by configuring one or more
-index patterns. You can also:
+To visualize and explore data in {kib}, you must create an index pattern. 
+An index pattern tells {kib} which {es} indices contain the data that you want to work with. 
+An index pattern can match a single index, multiple indices, and a rollup index. 
 
-* Create scripted fields that are computed on the fly from your data. You can browse and visualize scripted fields, but
-you cannot search them.
-* Set advanced options such as the number of rows to show in a table and how many of the most popular fields to show.
-Use caution when modifying advanced options, as it's possible to set values that are incompatible with one another.
-* Configure Kibana for a production environment
+[float]
+[[index-patterns-read-only-access]]
+=== [xpack]#Read-only access#
+If you have insufficient privileges to create or save index patterns, a read-only 
+indicator appears in Kibana. The buttons to create new index patterns or save
+existing index patterns are not visible. For more information on granting access to
+Kibana see <<xpack-security-authorization>>.
+
+[role="screenshot"]
+image::images/management-index-read-only-badge.png[Example of Index Pattern Management's read only access indicator in Kibana's header]
 
 [float]
 [[settings-create-pattern]]
-== Creating an Index Pattern to Connect to Elasticsearch
-An _index pattern_ identifies one or more Elasticsearch indices that you want to explore with Kibana. Kibana looks for
-index names that match the specified pattern.
-An asterisk (*) in the pattern matches zero or more characters. For example, the pattern `myindex-*` matches all
-indices whose names start with `myindex-`, such as `myindex-1` and `myindex-2`.
+=== Create an index pattern
 
-An index pattern can also simply be the name of a single index.
+To get started, go to *Management > Kibana > Index Patterns*.  You begin with
+an overview of your index patterns, including any that were added when you 
+downloaded sample data sets. 
 
-To create an index pattern to connect to Elasticsearch:
+You can create a standard index pattern, and if a rollup index is detected in the 
+cluster, a rollup index pattern.
 
-. Go to the *Settings > Indices* tab.
-. Specify an index pattern that matches the name of one or more of your Elasticsearch indices. By default, Kibana
-guesses that you're working with log data being fed into Elasticsearch by Logstash.
+[role="screenshot"]
+image:management/index-patterns/images/rollup-index-pattern.png["Menu with rollup index pattern"]
+
+[float]
+==== Standard index pattern
+
+{kib} makes it easy for you to create an index pattern by walking you through 
+the process. Just start typing in the *Index pattern* field, and {kib} looks for 
+the names of {es} indices that match your input. If you want to include 
+system indices in your search, toggle the switch in the upper right.
+
+[role="screenshot"]
+image:management/index-patterns/images/create-index-pattern.png["Create index pattern"]
+
+Your index pattern can match multiple {es} indices.  
+Use a comma to separate the names, with no space after the comma. The notation for 
+wildcards (`*`) and the ability to "exclude" (`-`) also apply 
+(for example, `test*,-test3`).
+
+When {kib} detects an index with a timestamp, you’re asked to choose a field to 
+filter your data by time. If you don’t specify a field, you won’t be able 
+to use the time filter.
+
+Once you’ve created your index pattern, you can start working with 
+your {es} data in {kib}.  Here are some things to try:
+
+* Interactively explore your data in <<discover, Discover>>.
+* Present your data in charts, tables, gauges, tag clouds, and more in <<visualize, Visualize>>.
+* Show off your data in a <<canvas, Canvas>> presentation.
+* If your data includes geo data, visualize it using <<maps, Maps>>.
+
+For a walkthrough of creating an index pattern and visualizing the data, 
+see <<getting-started, Getting Started>>. 
+
+[float]
+==== Rollup index pattern
+
+If a rollup index is detected in the cluster, clicking *Create index pattern* 
+includes an item for creating a rollup index pattern. You create an 
+index pattern for rolled up data the same way you do for any data.  
+
+You can match an index pattern to only rolled up data, or mix both rolled 
+up and raw data to visualize all data together. An index pattern can match 
+only one rollup index, not multiple. There is no restriction on the 
+number of standard indices that an index pattern can match.
+
+See <<visualize-rollup-data, Creating a visualization using rolled up data>> 
+for more detailed information.
+
+[float]
+=== Manage your index pattern
+
+Once you’ve created an index pattern, you’re presented a table of all fields 
+and associated data types in the index. 
+
+[role="screenshot"]
+image:management/index-patterns/images/new-index-pattern.png["Index files and data types"]
+
+You can perform the following actions:
+
+* *Manage the index fields.* Click a column header to sort the table by that column. 
+Use the field dropdown menu to limit to display to a specific field. 
+See <<managing-fields, Managing fields>> for more detailed information. 
+
+* [[set-default-pattern]]*Set the default index pattern.* {kib} uses a badge to make users 
+aware of which index pattern is the default. The first pattern 
+you create is automatically designated as the default pattern. The default 
+index pattern is loaded when you view the Discover tab.  
+
+* [[reload-fields]]*Reload the index fields list.* You can reload the index fields list to 
+pick up any newly-added fields. Doing so also resets Kibana’s popularity counters 
+for the fields. The popularity counters keep track of the fields 
+you’ve used most often in {kib} and are used to sort fields in lists.
+
+* [[delete-pattern]]*Delete the index pattern.* This action removes the pattern from the list of 
+Saved Objects in {kib}. You will not be able to recover field formatters, 
+scripted fields, source filters, and field popularity data associated with the index pattern.
 +
-NOTE: When you switch between top-level tabs, Kibana remembers where you were. For example, if you view a particular
-index pattern from the Settings tab, switch to the Discover tab, and then go back to the Settings tab, Kibana displays
-the index pattern you last looked at. To get to the create pattern form, click the *Add* button in the Index Patterns
-list.
-
-. If your index contains a timestamp field that you want to use to perform time-based comparisons, select the *Index
-contains time-based events* option and select the index field that contains the timestamp. Kibana reads the index
-mapping to list all of the fields that contain a timestamp.
-
-. Click *Create* to add the index pattern.
-
-. To designate the new pattern as the default pattern to load when you view the Discover tab, click the *favorite*
-button.
-
-[float]
-[[set-default-pattern]]
-== Setting the Default Index Pattern
-The default index pattern is loaded automatically when you view the *Discover* tab. Kibana displays a star to the
-left of the name of the default pattern in the Index Patterns list on the *Settings > Indices* tab. The first pattern
-you create is automatically designated as the default pattern.
-
-To set a different pattern as the default index pattern:
-
-. Go to the *Settings > Indices* tab.
-. Select the pattern you want to set as the default in the Index Patterns list.
-. Click the pattern's *Favorite* button.
-
-NOTE: You can also manually set the default index pattern in *Advanced > Settings*.
-
-[float]
-[[reload-fields]]
-== Reloading the Index Fields List
-When you add an index mapping, Kibana automatically scans the indices that match the pattern to display a list of the
-index fields. You can reload the index fields list to pick up any newly-added fields.
-
-Reloading the index fields list also resets Kibana's popularity counters for the fields. The popularity counters keep
-track of the fields you've used most often within Kibana and are used to sort fields within lists.
-
-To reload the index fields list:
-
-. Go to the *Settings > Indices* tab.
-. Select an index pattern from the Index Patterns list.
-. Click the pattern's *Reload* button.
-
-[float]
-[[delete-pattern]]
-== Deleting an Index Pattern
-Deleting an index pattern removes the pattern from the list of Saved Objects in Kibana.
-You will not be able to recover field formatters, scripted fields, source filters, and field popularity data
-associated with the index pattern.
-
-Deleting an index pattern breaks all visualizations, saved searches, and other saved objects that reference the pattern.
-Deleting a pattern does not remove any indices or data documents from Elasticsearch.
-
-To delete an index pattern:
-
-. Go to the *Settings > Indices* tab.
-. Select the pattern you want to remove in the Index Patterns list.
-. Click the pattern's *Delete* button.
-. Confirm that you want to remove the index pattern.
+Deleting an index pattern breaks all visualizations, saved searches, and 
+other saved objects that reference the pattern. Deleting an index pattern does 
+not remove any indices or data documents from {es}.
 
 include::index-patterns/management-cross-cluster-search.asciidoc[]

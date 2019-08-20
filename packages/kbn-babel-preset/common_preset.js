@@ -39,8 +39,8 @@ module.exports = {
       //
       // See https://github.com/babel/babel/issues/8244#issuecomment-466548733
       test: [
-        /x-pack[\/\\]plugins[\/\\]infra[\/\\].*[\/\\]graphql/,
-        /x-pack[\/\\]plugins[\/\\]siem[\/\\].*[\/\\]graphql/,
+        /x-pack[\/\\]legacy[\/\\]plugins[\/\\]infra[\/\\].*[\/\\]graphql/,
+        /x-pack[\/\\]legacy[\/\\]plugins[\/\\]siem[\/\\].*[\/\\]graphql/,
       ],
       plugins: [[require.resolve('babel-plugin-typescript-strip-namespaces')]],
     },

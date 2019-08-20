@@ -32,7 +32,7 @@ import angular from 'angular';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { toastNotifications } from 'ui/notify';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import { DocTitleProvider } from 'ui/doc_title';
+import { docTitle } from 'ui/doc_title';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { migrateAppState } from './lib';
@@ -44,6 +44,7 @@ import { VisualizeConstants } from '../visualize_constants';
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
+import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { timefilter } from 'ui/timefilter';
 import { getVisualizeLoader } from '../../../../../ui/public/visualize/loader';
@@ -53,6 +54,7 @@ import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 import { npStart } from 'ui/new_platform';
+import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 
 
 uiRoutes
@@ -105,7 +107,6 @@ uiRoutes
 
 uiModules
   .get('app/visualize', [
-    'kibana/notify',
     'kibana/url'
   ])
   .directive('visualizeApp', function () {
@@ -130,9 +131,11 @@ function VisEditor(
   Promise,
   config,
   kbnBaseUrl,
-  localStorage
+  localStorage,
+  // unused but required to initialize auto refresh :-\
+  /* eslint-disable no-unused-vars */
+  courier,
 ) {
-  const docTitle = Private(DocTitleProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const getUnhashableStates = Private(getUnhashableStatesProvider);
   const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
@@ -150,7 +153,8 @@ function VisEditor(
   };
 
   $scope.topNavMenu = [...(capabilities.get().visualize.save ? [{
-    key: i18n.translate('kbn.topNavMenu.saveVisualizationButtonLabel', { defaultMessage: 'save' }),
+    id: 'save',
+    label: i18n.translate('kbn.topNavMenu.saveVisualizationButtonLabel', { defaultMessage: 'save' }),
     description: i18n.translate('kbn.visualize.topNavMenu.saveVisualizationButtonAriaLabel', {
       defaultMessage: 'Save Visualization',
     }),
@@ -203,12 +207,13 @@ function VisEditor(
       showSaveModal(saveModal);
     }
   }] : []), {
-    key: i18n.translate('kbn.topNavMenu.shareVisualizationButtonLabel', { defaultMessage: 'share' }),
+    id: 'share',
+    label: i18n.translate('kbn.topNavMenu.shareVisualizationButtonLabel', { defaultMessage: 'share' }),
     description: i18n.translate('kbn.visualize.topNavMenu.shareVisualizationButtonAriaLabel', {
       defaultMessage: 'Share Visualization',
     }),
     testId: 'shareTopNavButton',
-    run: (menuItem, navController, anchorElement) => {
+    run: (anchorElement) => {
       const hasUnappliedChanges = vis.dirty;
       const hasUnsavedChanges = $appStatus.dirty;
       showShareContextMenu({
@@ -226,7 +231,8 @@ function VisEditor(
       });
     }
   }, {
-    key: i18n.translate('kbn.topNavMenu.openInspectorButtonLabel', { defaultMessage: 'inspect' }),
+    id: 'inspector',
+    label: i18n.translate('kbn.topNavMenu.openInspectorButtonLabel', { defaultMessage: 'inspect' }),
     description: i18n.translate('kbn.visualize.topNavMenu.openInspectorButtonAriaLabel', {
       defaultMessage: 'Open Inspector for visualization',
     }),
@@ -249,7 +255,8 @@ function VisEditor(
       }
     }
   }, {
-    key: i18n.translate('kbn.topNavMenu.refreshButtonLabel', { defaultMessage: 'refresh' }),
+    id: 'refresh',
+    label: i18n.translate('kbn.topNavMenu.refreshButtonLabel', { defaultMessage: 'refresh' }),
     description: i18n.translate('kbn.visualize.topNavMenu.refreshButtonAriaLabel', {
       defaultMessage: 'Refresh',
     }),
@@ -351,8 +358,16 @@ function VisEditor(
 
     $scope.isAddToDashMode = () => addToDashMode;
 
-    $scope.showQueryBar = () => {
+    $scope.showFilterBar = () => {
+      return vis.type.options.showFilterBar;
+    };
+
+    $scope.showQueryInput = () => {
       return vis.type.requiresSearch && vis.type.options.showQueryBar;
+    };
+
+    $scope.showQueryBarTimePicker = () => {
+      return vis.type.options.showTimePicker;
     };
 
     $scope.timeRange = timefilter.getTime();
@@ -369,33 +384,6 @@ function VisEditor(
     });
 
     $state.replace();
-
-    $scope.$watchMulti([
-      'searchSource.getField("index")',
-      'vis.type.options.showTimePicker',
-      $scope.showQueryBar,
-    ], function ([index, requiresTimePicker, showQueryBar]) {
-      const showTimeFilter = Boolean((!index || index.timeFieldName) && requiresTimePicker);
-
-      if (showQueryBar) {
-        timefilter.disableTimeRangeSelector();
-        timefilter.disableAutoRefreshSelector();
-        $scope.enableQueryBarTimeRangeSelector = true;
-        $scope.showAutoRefreshOnlyInQueryBar = !showTimeFilter;
-      }
-      else if (showTimeFilter) {
-        timefilter.enableTimeRangeSelector();
-        timefilter.enableAutoRefreshSelector();
-        $scope.enableQueryBarTimeRangeSelector = false;
-        $scope.showAutoRefreshOnlyInQueryBar = false;
-      }
-      else {
-        timefilter.disableTimeRangeSelector();
-        timefilter.enableAutoRefreshSelector();
-        $scope.enableQueryBarTimeRangeSelector = false;
-        $scope.showAutoRefreshOnlyInQueryBar = false;
-      }
-    });
 
     const updateTimeRange = () => {
       $scope.timeRange = timefilter.getTime();
@@ -415,22 +403,24 @@ function VisEditor(
     $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', updateTimeRange);
     $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', updateRefreshInterval);
 
-    // update the searchSource when filters update
-    const filterUpdateSubscription = queryFilter.getUpdates$().subscribe(
-      () => {
-        $scope.filters = queryFilter.getFilters();
-        $scope.fetch();
-      },
-    );
-
     // update the searchSource when query updates
     $scope.fetch = function () {
       $state.save();
       savedVis.searchSource.setField('query', $state.query);
       savedVis.searchSource.setField('filter', $state.filters);
-      $scope.globalFilters = queryFilter.getGlobalFilters();
       $scope.vis.forceReload();
     };
+
+    // update the searchSource when filters update
+    const filterUpdateSubscription = subscribeWithScope($scope, queryFilter.getUpdates$(), {
+      next: () => {
+        $scope.filters = queryFilter.getFilters();
+        $scope.globalFilters = queryFilter.getGlobalFilters();
+      }
+    });
+    const filterFetchSubscription = subscribeWithScope($scope, queryFilter.getFetches$(), {
+      next: $scope.fetch
+    });
 
     $scope.$on('$destroy', function () {
       if ($scope._handler) {
@@ -439,6 +429,7 @@ function VisEditor(
       savedVis.destroy();
       stateMonitor.destroy();
       filterUpdateSubscription.unsubscribe();
+      filterFetchSubscription.unsubscribe();
     });
 
     if (!$scope.chrome.getVisible()) {
@@ -454,9 +445,16 @@ function VisEditor(
   }
 
   $scope.updateQueryAndFetch = function ({ query, dateRange }) {
-    timefilter.setTime(dateRange);
+    const isUpdate = (
+      (query && !_.isEqual(query, $state.query)) ||
+      (dateRange && !_.isEqual(dateRange, $scope.timeRange))
+    );
+
     $state.query = query;
-    $scope.fetch();
+    timefilter.setTime(dateRange);
+
+    // If nothing has changed, trigger the fetch manually, otherwise it will happen as a result of the changes
+    if (!isUpdate) $scope.fetch();
   };
 
   $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
@@ -570,6 +568,8 @@ function VisEditor(
     ' ' +
     vis.type.feedbackMessage;
   };
+
+  addHelpMenuToAppChrome(chrome);
 
   init();
 }

@@ -27,9 +27,9 @@ describe('getSiblingAggValue', () => {
       std_deviation: 1.5,
       std_deviation_bounds: {
         upper: 2,
-        lower: 1
-      }
-    }
+        lower: 1,
+      },
+    },
   };
 
   it('returns the value for std_deviation_bounds.upper', () => {
@@ -51,5 +51,4 @@ describe('getSiblingAggValue', () => {
     const metric = { id: 'test', type: 'max_bucket' };
     expect(getSiblingAggValue(row, metric)).to.equal(3);
   });
-
 });

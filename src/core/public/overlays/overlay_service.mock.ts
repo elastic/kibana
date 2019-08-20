@@ -23,6 +23,10 @@ const createStartContractMock = () => {
     openFlyout: jest.fn(),
     openModal: jest.fn(),
   };
+  startContract.openModal.mockReturnValue({
+    close: jest.fn(),
+    onClose: Promise.resolve(),
+  });
   return startContract;
 };
 
