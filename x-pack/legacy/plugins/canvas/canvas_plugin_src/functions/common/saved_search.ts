@@ -5,13 +5,13 @@
  */
 
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { SearchInput } from 'src/legacy/core_plugins/kibana/public/discover/embeddable';
 import {
   EmbeddableTypes,
   EmbeddableExpressionType,
   EmbeddableExpression,
 } from '../../expression_types';
 
-import { SearchInput } from '../../../../../../../src/legacy/core_plugins/kibana/public/discover/embeddable';
 import { buildEmbeddableFilters } from '../../../server/lib/build_embeddable_filters';
 import { Filter } from '../../../types';
 import { getFunctionHelp } from '../../strings';

@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { VisualizeInput } from 'src/legacy/core_plugins/kibana/public/visualize/embeddable';
 import {
   EmbeddableTypes,
   EmbeddableExpressionType,
   EmbeddableExpression,
 } from '../../expression_types';
-import { VisualizeInput } from '../../../../../../../src/legacy/core_plugins/kibana/public/visualize/embeddable';
 import { buildEmbeddableFilters } from '../../../server/lib/build_embeddable_filters';
 import { Filter } from '../../../types';
 import { getFunctionHelp } from '../../strings';
