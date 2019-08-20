@@ -5,6 +5,7 @@
  */
 
 import { ESFilter } from 'elasticsearch';
+import { idx } from '@kbn/elastic-idx';
 import {
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,
@@ -63,7 +64,9 @@ export async function getBuckets({
 
   const resp = await client.search(params);
 
-  const buckets = resp.aggregations.distribution.buckets.map(bucket => ({
+  const buckets = (
+    idx(resp.aggregations, _ => _.distribution.buckets) || []
+  ).map(bucket => ({
     key: bucket.key,
     count: bucket.doc_count
   }));
