@@ -20,7 +20,7 @@ import React from 'react';
 import { render } from 'enzyme';
 import { IndexPattern } from 'ui/index_patterns';
 // @ts-ignore
-import { flattenHitWrapper } from 'ui/index_patterns/_flatten_hit';
+import { flattenHitWrapper } from '../../../../data/public/index_patterns/index_patterns/flatten_hit';
 import { DocViewTable } from './table';
 
 // @ts-ignore

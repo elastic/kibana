@@ -20,7 +20,6 @@ import React, { useState } from 'react';
 import { DocViewRenderProps } from 'ui/registry/doc_views';
 import { DocViewTableRow } from './table_row';
 
-
 const COLLAPSE_LINE_LENGTH = 350;
 
 export function DocViewTable({
