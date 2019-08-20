@@ -20,4 +20,4 @@ checks-reporter-with-killswitch "X-Pack accessibility tests" \
   node scripts/functional_tests \
     --debug --bail \
     --kibana-install-dir "$installDir" \
-    --config test/accessibility/config.js;
+    --config test/accessibility/config.ts;
