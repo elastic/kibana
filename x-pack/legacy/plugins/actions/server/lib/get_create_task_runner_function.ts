@@ -53,11 +53,7 @@ export function getCreateTaskRunnerFunction({
 
         const requestHeaders: Record<string, string> = {};
         if (isSecurityEnabled && !apiKey) {
-          throw new ExecutorError(
-            'API key is required. The attribute "apiKey" is missing.',
-            undefined,
-            false
-          );
+          throw new ExecutorError('API key is required. The attribute "apiKey" is missing.');
         } else if (isSecurityEnabled) {
           requestHeaders.authorization = `ApiKey ${apiKey}`;
         }
@@ -83,7 +79,7 @@ export function getCreateTaskRunnerFunction({
           throw new ExecutorError(
             executorResult.message,
             executorResult.data,
-            executorResult.retry
+            executorResult.retry == null ? false : executorResult.retry
           );
         }
       },
