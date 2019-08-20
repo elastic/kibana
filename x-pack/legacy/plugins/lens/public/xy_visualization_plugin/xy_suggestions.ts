@@ -198,6 +198,8 @@ function getSuggestion(
     title,
     // chart with multiple y values and split series will have a score of 1, single y value and no split series reduce score
     score: ((yValues.length > 1 ? 2 : 1) + (splitBy ? 1 : 0)) / 3,
+    // don't advertise chart of same type but with less data
+    hide: currentState && changeType === 'reduced',
     datasourceSuggestionId,
     state,
     previewIcon: getIconForSeries(seriesType),

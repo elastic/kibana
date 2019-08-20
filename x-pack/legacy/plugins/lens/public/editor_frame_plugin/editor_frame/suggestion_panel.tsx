@@ -122,7 +122,9 @@ function InnerSuggestionPanel({
     visualizationMap,
     activeVisualizationId,
     visualizationState,
-  }).slice(0, MAX_SUGGESTIONS_DISPLAYED);
+  })
+    .filter(suggestion => !suggestion.hide)
+    .slice(0, MAX_SUGGESTIONS_DISPLAYED);
 
   if (suggestions.length === 0) {
     return null;

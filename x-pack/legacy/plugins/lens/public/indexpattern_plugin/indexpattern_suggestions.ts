@@ -495,7 +495,7 @@ function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layer
         label:
           updatedLayer.columnOrder.length === 1
             ? getMetricSuggestionTitle(updatedLayer, availableMetricColumns.length === 1)
-            : getBucketSuggestionTitle(updatedLayer),
+            : undefined,
       });
     });
 }
@@ -508,14 +508,6 @@ function getMetricSuggestionTitle(layer: IndexPatternLayer, onlyMetric: boolean)
   } else {
     return `${label} overall`;
   }
-}
-
-function getBucketSuggestionTitle(layer: IndexPatternLayer) {
-  const { operationType } = layer.columns[
-    layer.columnOrder.find(columnId => layer.columns[columnId].isBucketed)!
-  ];
-  // TODO i18n
-  return `By ${operationDefinitionMap[operationType].displayName}`;
 }
 
 function buildLayerByColumnOrder(

@@ -20,6 +20,7 @@ export interface Suggestion {
   visualizationState: unknown;
   previewExpression?: Ast | string;
   previewIcon: string;
+  hide?: boolean;
 }
 
 /**

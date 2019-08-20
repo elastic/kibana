@@ -173,6 +173,8 @@ export const datatableVisualization: Visualization<
               ],
             },
             previewIcon: 'visTable',
+            // dont show suggestions for reduced versions
+            hide: table.changeType === 'reduced',
           };
         })
     );

@@ -186,6 +186,7 @@ export interface SuggestionRequest<T = unknown> {
 
 export interface VisualizationSuggestion<T = unknown> {
   score: number;
+  hide?: boolean;
   title: string;
   state: T;
   datasourceSuggestionId: number;
