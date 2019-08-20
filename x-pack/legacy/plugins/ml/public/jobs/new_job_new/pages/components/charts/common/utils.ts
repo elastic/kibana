@@ -14,7 +14,11 @@ export function getCustomColor(specId: string, color: string): CustomSeriesColor
   return new Map([[lineDataSeriesColorValues, color]]);
 }
 
-export function getYRange(chartData: any) {
+export function getYRange(chartData: any[]) {
+  if (chartData.length === 0) {
+    return { min: 0, max: 0 };
+  }
+
   let max: number = Number.MIN_VALUE;
   let min: number = Number.MAX_VALUE;
   chartData.forEach((r: any) => {
@@ -32,7 +36,10 @@ export function getYRange(chartData: any) {
   };
 }
 
-export function getXRange(lineChartData: any) {
+export function getXRange(lineChartData: any[]) {
+  if (lineChartData.length === 0) {
+    return { min: 0, max: 0 };
+  }
   return {
     min: lineChartData[0].time,
     max: lineChartData[lineChartData.length - 1].time,

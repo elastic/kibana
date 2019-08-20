@@ -6,7 +6,6 @@
 
 import { EuiText } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../../containers/source';
@@ -41,7 +40,6 @@ interface Props {
   getNotesByIds: (noteIds: string[]) => Note[];
   height: number;
   id: string;
-  isLoading: boolean;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   onColumnRemoved: OnColumnRemoved;
   onColumnResized: OnColumnResized;
@@ -85,7 +83,7 @@ const VerticalScrollContainer = styled.div<{
 VerticalScrollContainer.displayName = 'VerticalScrollContainer';
 
 /** Renders the timeline body */
-export const Body = pure<Props>(
+export const Body = React.memo<Props>(
   ({
     addNoteToEvent,
     browserFields,
@@ -96,7 +94,6 @@ export const Body = pure<Props>(
     getNotesByIds,
     height,
     id,
-    isLoading,
     onColumnRemoved,
     onColumnResized,
     onColumnSorted,
@@ -123,7 +120,6 @@ export const Body = pure<Props>(
             actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
             browserFields={browserFields}
             columnHeaders={columnHeaders}
-            isLoading={isLoading}
             onColumnRemoved={onColumnRemoved}
             onColumnResized={onColumnResized}
             onColumnSorted={onColumnSorted}
@@ -151,7 +147,6 @@ export const Body = pure<Props>(
               eventIdToNoteIds={eventIdToNoteIds}
               getNotesByIds={getNotesByIds}
               id={id}
-              isLoading={isLoading}
               onColumnResized={onColumnResized}
               onPinEvent={onPinEvent}
               onUpdateColumns={onUpdateColumns}
