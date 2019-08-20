@@ -19,37 +19,19 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
-export interface Props {
-  active: boolean;
-  disabled: boolean;
-  onClick: () => void;
-}
-
-export function DocViewTableRowBtnToggleColumn({ onClick, active, disabled = false }: Props) {
-  if (disabled) {
-    return <i className="fa fa-columns text-muted" />;
-  }
+export function DocViewTableRowIconUnderscore() {
   return (
     <EuiToolTip
       content={
         <FormattedMessage
-          id="kbnDocViews.table.toggleColumnInTableButtonTooltip"
-          defaultMessage="Toggle column in table"
+          id="kbnDocViews.table.fieldNamesBeginningWithUnderscoreUnsupportedTooltip"
+          defaultMessage="Field names beginning with {underscoreSign} are not supported"
+          values={{ underscoreSign: '_' }}
         />
       }
     >
-      <button
-        aria-label={i18n.translate('kbnDocViews.table.toggleColumnInTableButtonAriaLabel', {
-          defaultMessage: 'Toggle column in table',
-        })}
-        aria-pressed={active}
-        onClick={onClick}
-        className="kbnDocViewer__actionButton"
-      >
-        <i className="fa fa-columns" />
-      </button>
+      <i className="fa fa-warning text-color-warning kbnDocViewer__underscore" />
     </EuiToolTip>
   );
 }

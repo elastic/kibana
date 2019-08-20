@@ -56,3 +56,8 @@
     opacity: 1;
   }
 }
+
+.kbnDocViewer__noMapping,
+.kbnDocViewer__underscore {
+  margin-right: $euiSizeS;
+}

@@ -19,21 +19,34 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export interface Props {
   onClick: () => void;
   disabled?: boolean;
+  scripted?: boolean;
 }
 
-export function DocViewTableRowBtnFilterExists({ onClick, disabled = false }: Props) {
+export function DocViewTableRowBtnFilterExists({
+  onClick,
+  disabled = false,
+  scripted = false,
+}: Props) {
   if (disabled) {
     return (
       <EuiToolTip
         content={
-          <FormattedMessage
-            id="kbnDocViews.table.unableToFilterForPresenceOfMetaFieldsTooltip"
-            defaultMessage="Unable to filter for presence of meta fields"
-          />
+          scripted ? (
+            <FormattedMessage
+              id="kbnDocViews.table.unableToFilterForPresenceOfScriptedFieldsTooltip"
+              defaultMessage="Unable to filter for presence of scripted fields"
+            />
+          ) : (
+            <FormattedMessage
+              id="kbnDocViews.table.unableToFilterForPresenceOfMetaFieldsTooltip"
+              defaultMessage="Unable to filter for presence of meta fields"
+            />
+          )
         }
       >
         <span className="kbnDocViewer__actionButton">
@@ -52,7 +65,13 @@ export function DocViewTableRowBtnFilterExists({ onClick, disabled = false }: Pr
         />
       }
     >
-      <button onClick={onClick} className="kbnDocViewer__actionButton">
+      <button
+        onClick={onClick}
+        className="kbnDocViewer__actionButton"
+        aria-label={i18n.translate('kbnDocViews.table.filterForFieldPresentButtonAriaLabel', {
+          defaultMessage: 'Filter for field present',
+        })}
+      >
         <i className="fa fa-asterisk" />
       </button>
     </EuiToolTip>

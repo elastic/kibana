@@ -48,7 +48,7 @@ export function DocViewTableRowBtnFilterRemove({ onClick, disabled = false }: Pr
     <EuiToolTip
       content={
         <FormattedMessage
-          id="kbnDocViews.table.filterOutValueButtonAriaLabel"
+          id="kbnDocViews.table.filterOutValueButtonTooltip"
           defaultMessage="Filter out value"
         />
       }

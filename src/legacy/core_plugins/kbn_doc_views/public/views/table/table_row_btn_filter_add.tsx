@@ -54,7 +54,7 @@ export function DocViewTableRowBtnFilterAdd({ onClick, disabled = false }: Props
       }
     >
       <button
-        aria-label={i18n.translate('kbnDocViews.table.filterForValueButtonTooltip', {
+        aria-label={i18n.translate('kbnDocViews.table.filterForValueButtonAriaLabel', {
           defaultMessage: 'Filter for value',
         })}
         data-test-subj="addInclusiveFilterButton"

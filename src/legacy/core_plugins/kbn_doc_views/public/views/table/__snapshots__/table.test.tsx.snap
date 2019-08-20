@@ -41,6 +41,7 @@ exports[`renders the \`DocViewTable\` component 1`] = `
           class="euiToolTipAnchor"
         >
           <button
+            aria-label="Toggle column in table"
             aria-pressed="false"
             class="kbnDocViewer__actionButton"
           >
@@ -53,6 +54,7 @@ exports[`renders the \`DocViewTable\` component 1`] = `
           class="euiToolTipAnchor"
         >
           <button
+            aria-label="Filter for field present"
             class="kbnDocViewer__actionButton"
           >
             <i
@@ -130,6 +132,7 @@ exports[`renders the \`DocViewTable\` component 1`] = `
           class="euiToolTipAnchor"
         >
           <button
+            aria-label="Toggle column in table"
             aria-pressed="true"
             class="kbnDocViewer__actionButton"
           >
@@ -142,6 +145,7 @@ exports[`renders the \`DocViewTable\` component 1`] = `
           class="euiToolTipAnchor"
         >
           <button
+            aria-label="Filter for field present"
             class="kbnDocViewer__actionButton"
           >
             <i
@@ -215,6 +219,7 @@ exports[`renders the \`DocViewTable\` component 1`] = `
           class="euiToolTipAnchor"
         >
           <button
+            aria-label="Toggle column in table"
             aria-pressed="false"
             class="kbnDocViewer__actionButton"
           >
@@ -227,6 +232,7 @@ exports[`renders the \`DocViewTable\` component 1`] = `
           class="euiToolTipAnchor"
         >
           <button
+            aria-label="Filter for field present"
             class="kbnDocViewer__actionButton"
           >
             <i
@@ -314,6 +320,7 @@ exports[`renders the \`DocViewTable\` component 1`] = `
           class="euiToolTipAnchor"
         >
           <button
+            aria-label="Toggle column in table"
             aria-pressed="false"
             class="kbnDocViewer__actionButton"
           >
@@ -401,6 +408,7 @@ exports[`renders the \`DocViewTable\` component 1`] = `
           class="euiToolTipAnchor"
         >
           <button
+            aria-label="Toggle column in table"
             aria-pressed="false"
             class="kbnDocViewer__actionButton"
           >
