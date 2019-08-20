@@ -5,38 +5,13 @@
  */
 
 import * as t from 'io-ts';
-import { either } from 'fp-ts/lib/Either';
-
-const dateRt = new t.Type<string, string, unknown>(
-  'DateAsString',
-  t.string.is,
-  (u, c) =>
-    either.chain(t.string.validate(u, c), s => {
-      const d = new Date(s);
-      return isNaN(d.getTime()) ? t.failure(u, c) : t.success(s);
-    }),
-  a => a
-);
+import { dateAsString } from '../../common/runtime_types/date_as_string';
 
 export const rangeRt = t.type({
-  start: dateRt,
-  end: dateRt
+  start: dateAsString,
+  end: dateAsString
 });
 
 export const uiFiltersRt = t.type({ uiFilters: t.string });
 
 export const debugRt = t.partial({ debug: t.boolean });
-
-export const jsonRt = new t.Type<any, string, unknown>(
-  'JSONAsString',
-  t.string.is,
-  (u, c) =>
-    either.chain(t.string.validate(u, c), s => {
-      try {
-        return t.success(JSON.parse(s));
-      } catch (e) {
-        return t.failure(u, c);
-      }
-    }),
-  a => a
-);

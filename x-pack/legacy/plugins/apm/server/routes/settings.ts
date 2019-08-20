@@ -15,7 +15,7 @@ import { getEnvironments } from '../lib/settings/agent_configuration/get_environ
 import { deleteConfiguration } from '../lib/settings/agent_configuration/delete_configuration';
 import { createApmAgentConfigurationIndex } from '../lib/settings/agent_configuration/create_agent_config_index';
 import { createRoute } from './create_route';
-import { createRangeType } from '../../common/util/create_range_type';
+import { createRangeType } from '../../common/runtime_types/create_range_type';
 
 // get list of configurations
 export const agentConfigurationRoute = createRoute(core => ({
