@@ -12,9 +12,13 @@ import {
   EuiSelectable,
   EuiHighlight,
   EuiTextColor,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DRAW_TYPE } from '../../../actions/map_actions';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const RESET_STATE = {
   isPopoverOpen: false,
@@ -181,7 +185,7 @@ export class ToolsControl extends Component {
   }
 
   render() {
-    return (
+    const toolsPopoverButton = (
       <EuiPopover
         id="contextMenu"
         button={this._renderToolsButton()}
@@ -196,6 +200,30 @@ export class ToolsControl extends Component {
           panels={this._getDrawPanels()}
         />
       </EuiPopover>
+    );
+
+    if (!this.props.drawState) {
+      return toolsPopoverButton;
+    }
+
+    return (
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          {toolsPopoverButton}
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButton
+            size="s"
+            fill
+            onClick={this.props.cancelDraw}
+          >
+            <FormattedMessage
+              id="xpack.maps.tooltip.toolsControl.cancelDrawButtonLabel"
+              defaultMessage="Cancel"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 }

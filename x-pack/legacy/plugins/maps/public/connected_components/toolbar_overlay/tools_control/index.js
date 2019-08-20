@@ -19,6 +19,9 @@ function mapDispatchToProps(dispatch) {
   return {
     initiateDraw: (options) => {
       dispatch(updateDrawState(options));
+    },
+    cancelDraw: () => {
+      dispatch(updateDrawState(null));
     }
   };
 }
