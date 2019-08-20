@@ -40,7 +40,7 @@ describe('execute()', () => {
       id: '123',
       params: { baz: false },
       spaceId: 'default',
-      apiKey: 'MTIzOmFiYw==',
+      apiKey: Buffer.from('123:abc').toString('base64'),
     });
     expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
     expect(mockTaskManager.schedule.mock.calls[0]).toMatchInlineSnapshot(`

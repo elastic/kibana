@@ -137,7 +137,7 @@ test('uses API key when provided', async () => {
     attributes: {
       actionId: '2',
       params: { baz: true },
-      apiKey: 'MTIzOmFiYw==',
+      apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [],
   });
