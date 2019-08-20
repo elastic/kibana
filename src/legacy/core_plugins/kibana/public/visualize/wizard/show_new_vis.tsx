@@ -44,7 +44,7 @@ export function showNewVisModal(
       <NewVisModal
         isOpen={true}
         onClose={onClose}
-        visTypesRegistry={[...visTypeRegistry.values()]}
+        visTypesRegistry={visTypeRegistry}
         editorParams={editorParams}
       />
     </I18nContext>
