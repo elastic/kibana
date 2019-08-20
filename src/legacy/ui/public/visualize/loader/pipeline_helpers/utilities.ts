@@ -20,7 +20,6 @@
 import { i18n } from '@kbn/i18n';
 import { identity } from 'lodash';
 import { AggConfig, Vis } from 'ui/vis';
-import { SerializedFieldFormat } from 'src/plugins/data/common';
 // @ts-ignore
 import { FieldFormat } from '../../../../field_formats/field_format';
 // @ts-ignore
@@ -28,6 +27,7 @@ import { tabifyGetColumns } from '../../../agg_response/tabify/_get_columns';
 import chrome from '../../../chrome';
 // @ts-ignore
 import { fieldFormats } from '../../../registry/field_formats';
+import { SerializedFieldFormat } from './build_pipeline';
 
 interface TermsFieldFormatParams {
   otherBucketLabel: string;
