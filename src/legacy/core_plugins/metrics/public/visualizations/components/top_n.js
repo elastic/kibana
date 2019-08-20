@@ -61,13 +61,14 @@ export class TopN extends Component {
 
   renderRow({ min, max }) {
     return item => {
+      const ONE_PERCENT_OFFSET = 1.01;
       const key = `${item.id || item.label}`;
       const lastValue = getLastValue(item.data);
       const formatter = item.tickFormatter || this.props.tickFormatter;
       const value = formatter(lastValue);
-
-      const intervalLength = max - min;
-      const inIntervalLength = lastValue - min;
+      const minWithOffset = min < 0 ? min * ONE_PERCENT_OFFSET : 0;
+      const intervalLength = max - minWithOffset;
+      const inIntervalLength = lastValue - minWithOffset;
       const width = `${100 * (inIntervalLength / intervalLength)}%`;
 
       const backgroundColor = item.color;
