@@ -13,7 +13,6 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiIcon,
-  EuiText,
 } from '@elastic/eui';
 
 import { SlmPolicy } from '../../../../../../../common/types';
