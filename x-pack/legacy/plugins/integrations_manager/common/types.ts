@@ -29,6 +29,7 @@ export interface RegistryListItem {
   icon: string;
   name: string;
   version: string;
+  title?: string;
 }
 
 // from /package/{name}
@@ -55,19 +56,20 @@ export interface RegistryPackage {
   description: string;
   icon: string;
   requirement: RequirementsByServiceName;
+  title?: string;
 }
 
 // Managers public HTTP response types
 // from API_LIST_PATTERN
 export type IntegrationList = IntegrationListItem[];
 // add title here until it's a part of registry response
-export type IntegrationListItem = Installable<RegistryListItem & { title: string }>;
+export type IntegrationListItem = Installable<RegistryListItem>;
 export type IntegrationsGroupedByStatus = Record<InstallationStatus, IntegrationList>;
 
 // from API_INFO_PATTERN
 // add title here until it's a part of registry response
 export type IntegrationInfo = Installable<
-  RegistryPackage & { assets: AssetsGroupedByServiceByType; title: string }
+  RegistryPackage & { assets: AssetsGroupedByServiceByType }
 >;
 
 // from API_INSTALL_PATTERN
