@@ -42,6 +42,7 @@ import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_uti
 import { ml } from '../../../../../services/ml_api_service';
 
 import {
+  sortColumns,
   toggleSelectedField,
   DataFrameAnalyticsOutlierConfig,
   EsFieldName,
@@ -147,9 +148,11 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
   }
 
   function toggleColumn(column: EsFieldName) {
-    // spread to a new array otherwise the component wouldn't re-render
-    setClearTable(true);
-    setSelectedFields([...toggleSelectedField(selectedFields, column)]);
+    if (tableItems.length > 0 && jobConfig !== undefined) {
+      setClearTable(true);
+      // spread to a new array otherwise the component wouldn't re-render
+      setSelectedFields([...toggleSelectedField(selectedFields, column)]);
+    }
   }
 
   const { errorMessage, status, tableItems } = useExploreData(
@@ -208,114 +211,133 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
     docFieldsCount = docFields.length;
   }
 
-  const columns = selectedFields.map(k => {
-    const column = {
-      field: `_source["${k}"]`,
-      name: k,
-      sortable: true,
-      truncateText: true,
-    } as Record<string, any>;
+  const columns = [];
 
-    const render = (d: any, fullItem: EsDoc) => {
-      if (Array.isArray(d) && d.every(item => typeof item === 'string')) {
-        // If the cells data is an array of strings, return as a comma separated list.
-        // The list will get limited to 5 items with `…` at the end if there's more in the original array.
-        return `${d.slice(0, 5).join(', ')}${d.length > 5 ? ', …' : ''}`;
-      } else if (Array.isArray(d)) {
-        // If the cells data is an array of e.g. objects, display a 'array' badge with a
-        // tooltip that explains that this type of field is not supported in this table.
-        return (
-          <EuiToolTip
-            content={i18n.translate(
-              'xpack.ml.dataframe.analytics.exploration.indexArrayToolTipContent',
-              {
-                defaultMessage: 'The full content of this array based column cannot be displayed.',
-              }
-            )}
-          >
-            <EuiBadge>
-              {i18n.translate('xpack.ml.dataframe.analytics.exploration.indexArrayBadgeContent', {
-                defaultMessage: 'array',
-              })}
-            </EuiBadge>
-          </EuiToolTip>
-        );
-      } else if (typeof d === 'object' && d !== null) {
-        // If the cells data is an object, display a 'object' badge with a
-        // tooltip that explains that this type of field is not supported in this table.
-        return (
-          <EuiToolTip
-            content={i18n.translate(
-              'xpack.ml.dataframe.analytics.exploration.indexObjectToolTipContent',
-              {
-                defaultMessage: 'The full content of this object based column cannot be displayed.',
-              }
-            )}
-          >
-            <EuiBadge>
-              {i18n.translate('xpack.ml.dataframe.analytics.exploration.indexObjectBadgeContent', {
-                defaultMessage: 'object',
-              })}
-            </EuiBadge>
-          </EuiToolTip>
-        );
-      }
+  if (selectedFields.length > 0 && tableItems.length > 0) {
+    columns.push(
+      ...selectedFields
+        .sort(sortColumns(tableItems[0]._source, jobConfig.dest.results_field))
+        .map(k => {
+          const column = {
+            field: `_source["${k}"]`,
+            name: k,
+            sortable: true,
+            truncateText: true,
+          } as Record<string, any>;
 
-      const split = k.split('.');
-      let backgroundColor;
-      const color = undefined;
-      const resultsField = jobConfig.dest.results_field;
+          const render = (d: any, fullItem: EsDoc) => {
+            if (Array.isArray(d) && d.every(item => typeof item === 'string')) {
+              // If the cells data is an array of strings, return as a comma separated list.
+              // The list will get limited to 5 items with `…` at the end if there's more in the original array.
+              return `${d.slice(0, 5).join(', ')}${d.length > 5 ? ', …' : ''}`;
+            } else if (Array.isArray(d)) {
+              // If the cells data is an array of e.g. objects, display a 'array' badge with a
+              // tooltip that explains that this type of field is not supported in this table.
+              return (
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.ml.dataframe.analytics.exploration.indexArrayToolTipContent',
+                    {
+                      defaultMessage:
+                        'The full content of this array based column cannot be displayed.',
+                    }
+                  )}
+                >
+                  <EuiBadge>
+                    {i18n.translate(
+                      'xpack.ml.dataframe.analytics.exploration.indexArrayBadgeContent',
+                      {
+                        defaultMessage: 'array',
+                      }
+                    )}
+                  </EuiBadge>
+                </EuiToolTip>
+              );
+            } else if (typeof d === 'object' && d !== null) {
+              // If the cells data is an object, display a 'object' badge with a
+              // tooltip that explains that this type of field is not supported in this table.
+              return (
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.ml.dataframe.analytics.exploration.indexObjectToolTipContent',
+                    {
+                      defaultMessage:
+                        'The full content of this object based column cannot be displayed.',
+                    }
+                  )}
+                >
+                  <EuiBadge>
+                    {i18n.translate(
+                      'xpack.ml.dataframe.analytics.exploration.indexObjectBadgeContent',
+                      {
+                        defaultMessage: 'object',
+                      }
+                    )}
+                  </EuiBadge>
+                </EuiToolTip>
+              );
+            }
 
-      if (fullItem._source[`${resultsField}.feature_influence.${k}`] !== undefined) {
-        backgroundColor = cellBgColor(fullItem._source[`${resultsField}.feature_influence.${k}`]);
-      }
+            const split = k.split('.');
+            let backgroundColor;
+            const color = undefined;
+            const resultsField = jobConfig.dest.results_field;
 
-      if (split[0] === resultsField) {
-        backgroundColor = cellBgColor(d);
-      }
+            if (fullItem._source[`${resultsField}.feature_influence.${k}`] !== undefined) {
+              backgroundColor = cellBgColor(
+                fullItem._source[`${resultsField}.feature_influence.${k}`]
+              );
+            }
 
-      return (
-        <div
-          className="mlColoredTableCell"
-          style={{
-            backgroundColor,
-            color,
-          }}
-        >
-          {d}
-        </div>
-      );
-    };
+            if (split[0] === resultsField) {
+              backgroundColor = cellBgColor(d);
+            }
 
-    let columnType;
+            return (
+              <div
+                className="mlColoredTableCell"
+                style={{
+                  backgroundColor,
+                  color,
+                }}
+              >
+                {d}
+              </div>
+            );
+          };
 
-    if (tableItems.length > 0) {
-      columnType = typeof tableItems[0]._source[k];
-    }
+          let columnType;
 
-    if (typeof columnType !== 'undefined') {
-      switch (columnType) {
-        case 'boolean':
-          column.dataType = 'boolean';
-          break;
-        case 'Date':
-          column.align = 'right';
-          column.render = (d: any) => formatHumanReadableDateTimeSeconds(moment(d).unix() * 1000);
-          break;
-        case 'number':
-          column.dataType = 'number';
-          column.render = render;
-          break;
-        default:
-          column.render = render;
-          break;
-      }
-    } else {
-      column.render = render;
-    }
+          if (tableItems.length > 0) {
+            columnType = typeof tableItems[0]._source[k];
+          }
 
-    return column;
-  });
+          if (typeof columnType !== 'undefined') {
+            switch (columnType) {
+              case 'boolean':
+                column.dataType = 'boolean';
+                break;
+              case 'Date':
+                column.align = 'right';
+                column.render = (d: any) =>
+                  formatHumanReadableDateTimeSeconds(moment(d).unix() * 1000);
+                break;
+              case 'number':
+                column.dataType = 'number';
+                column.render = render;
+                break;
+              default:
+                column.render = render;
+                break;
+            }
+          } else {
+            column.render = render;
+          }
+
+          return column;
+        })
+    );
+  }
 
   let sorting: TableSorting = false;
 

@@ -1,5 +1,8 @@
 .mlDataFrameAnalyticsExploration {
   /* Overwrite to give table cells a more grid-like appearance */
+  .euiTableHeaderCell {
+    padding: 0 4px;
+  }
   .euiTableCellContent {
     padding: 0;
     text-overflow: ellipsis;

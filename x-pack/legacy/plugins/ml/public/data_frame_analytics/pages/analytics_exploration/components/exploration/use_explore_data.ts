@@ -55,7 +55,6 @@ export const useExploreData = (
           const resp: SearchResponse<any> = await ml.esSearch({
             index: jobConfig.dest.index,
             size: SEARCH_SIZE,
-            // Instead of using the default query (`*`), fall back to a more efficient `match_all` query.
             body: {
               query: { match_all: {} },
               sort: [
@@ -84,7 +83,7 @@ export const useExploreData = (
           // Create a version of the doc's source with flattened field names.
           // This avoids confusion later on if a field name has dots in its name
           // or is a nested fields when displaying it via EuiInMemoryTable.
-          const flattenedFields = getFlattenedFields(docs[0]._source);
+          const flattenedFields = getFlattenedFields(docs[0]._source, resultsField);
           const transformedTableItems = docs.map(doc => {
             const item = {} as Record<string, any>;
             flattenedFields.forEach(ff => {

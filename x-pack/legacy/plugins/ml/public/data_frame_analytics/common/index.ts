@@ -20,7 +20,7 @@ export {
 export {
   getDefaultSelectableFields,
   getFlattenedFields,
-  getSelectableFields,
+  sortColumns,
   toggleSelectedField,
   EsId,
   EsDoc,
