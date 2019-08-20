@@ -12,7 +12,7 @@ import { HostsTabName } from '../../pages/hosts/hosts';
 type TabName = HostsTabName;
 export interface RedirectWrapperProps {
   to: string;
-  tabName: TabName | undefined;
+  tabName?: TabName | undefined;
 }
 
 export const RedirectWrapper = ({ to, tabName }: RedirectWrapperProps) => {

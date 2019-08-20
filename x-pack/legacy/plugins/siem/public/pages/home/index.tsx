@@ -37,7 +37,7 @@ import { WithSource } from '../../containers/source';
 import { MlPopover } from '../../components/ml_popover/ml_popover';
 import { MlHostConditionalContainer } from '../../components/ml/conditional_links/ml_host_conditional_container';
 import { MlNetworkConditionalContainer } from '../../components/ml/conditional_links/ml_network_conditional_container';
-import { GlobalNavTabs } from '../../components/navigation/tab_navigation';
+import { NavTab } from '../../components/navigation/tab_navigation';
 
 const WrappedByAutoSizer = styled.div`
   height: 100%;
@@ -81,7 +81,7 @@ const calculateFlyoutHeight = ({
   windowHeight: number;
 }): number => Math.max(0, windowHeight - globalHeaderSize);
 
-const navTabs: GlobalNavTabs = [
+const navTabs: NavTab[] = [
   {
     id: 'overview',
     name: i18n.translate('xpack.siem.navigation.overview', {

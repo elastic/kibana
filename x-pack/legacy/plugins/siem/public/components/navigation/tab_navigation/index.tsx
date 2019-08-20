@@ -63,7 +63,7 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
     let { display } = this.props;
     display = display || 'condensed';
     return (
-      <EuiTabs display={display} size="s">
+      <EuiTabs display={display} size="m">
         {this.renderTabs()}
       </EuiTabs>
     );
