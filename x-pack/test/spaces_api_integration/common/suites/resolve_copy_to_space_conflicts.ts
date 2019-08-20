@@ -419,7 +419,7 @@ export function resolveCopyToSpaceConflictsSuite(
 
   const resolveCopyToSpaceConflictsTest = makeResolveCopyToSpaceConflictsTest(describe);
   // @ts-ignore
-  resolveCopyToSpaceConflictsTest.only = makeCopyToSpaceTest(describe.only);
+  resolveCopyToSpaceConflictsTest.only = resolveCopyToSpaceConflictsTest(describe.only);
 
   return {
     resolveCopyToSpaceConflictsTest,
