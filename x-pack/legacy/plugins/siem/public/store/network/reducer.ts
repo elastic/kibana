@@ -11,7 +11,6 @@ import {
   DomainsFields,
   FlowDirection,
   FlowTarget,
-  FlowTargetNew,
   NetworkDnsFields,
   NetworkTopNFlowFields,
   TlsFields,

@@ -6,10 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const TOP_TALKERS = i18n.translate('xpack.siem.networkTopNFlowTable.title', {
-  defaultMessage: 'Top Talkers',
-});
-
 export const UNIT = (totalCount: number) =>
   i18n.translate('xpack.siem.networkTopNFlowTable.unit', {
     values: { totalCount },
@@ -43,55 +39,9 @@ export const BYTES_OUT = i18n.translate('xpack.siem.networkTopNFlowTable.column.
   defaultMessage: 'Bytes Out',
 });
 
-export const LOCATION = i18n.translate('xpack.siem.networkTopNFlowTable.column.locationTitle', {
-  defaultMessage: 'Location',
-});
-
 export const AUTONOMOUS_SYSTEM = i18n.translate('xpack.siem.networkTopNFlowTable.column.asTitle', {
   defaultMessage: 'Autonomous System',
 });
-
-export const UNIQUE_SOURCE_IP = i18n.translate(
-  'xpack.siem.networkTopNFlowTable.column.uniqueSourceIpsTitle',
-  {
-    defaultMessage: 'Unique Source IPs',
-  }
-);
-
-export const UNIQUE_DESTINATION_IP = i18n.translate(
-  'xpack.siem.networkTopNFlowTable.column.uniqueDestinationIpsTitle',
-  {
-    defaultMessage: 'Unique Destination IPs',
-  }
-);
-
-export const UNIQUE_CLIENT_IP = i18n.translate(
-  'xpack.siem.networkTopNFlowTable.column.uniqueClientIpsTitle',
-  {
-    defaultMessage: 'Unique Client IPs',
-  }
-);
-
-export const UNIQUE_SERVER_IP = i18n.translate(
-  'xpack.siem.networkTopNFlowTable.column.uniqueServerIpsTitle',
-  {
-    defaultMessage: 'Unique Server IPs',
-  }
-);
-
-export const BY_SOURCE_IP = i18n.translate(
-  'xpack.siem.networkTopNFlowTable.select.bySourceIpDropDownOptionLabel',
-  {
-    defaultMessage: 'By Source IP',
-  }
-);
-
-export const BY_DESTINATION_IP = i18n.translate(
-  'xpack.siem.networkTopNFlowTable.select.byDestinationIpDropDownOptionLabel',
-  {
-    defaultMessage: 'By Destination IP',
-  }
-);
 
 export const FLOWS = i18n.translate('xpack.siem.networkTopNFlowTable.flows', {
   defaultMessage: 'Flows',
