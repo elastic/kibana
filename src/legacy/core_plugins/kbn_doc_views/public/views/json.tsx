@@ -16,5 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { addDocView } from 'ui/registry/doc_views';
+import { i18n } from '@kbn/i18n';
+import { JsonCodeEditor } from './json_code_editor';
 
-import './doc_viewer_directive';
+/*
+ * Registration of the the doc view: json
+ * - used to display an ES hit as pretty printed JSON at Discover
+ */
+addDocView({
+  title: i18n.translate('kbnDocViews.json.jsonTitle', {
+    defaultMessage: 'JSON',
+  }),
+  order: 20,
+  component: JsonCodeEditor,
+});
