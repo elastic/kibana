@@ -15,14 +15,17 @@ import { State } from './types';
 export function getSuggestions(
   opts: SuggestionRequest<State>
 ): Array<VisualizationSuggestion<State>> {
-  return opts.tables
-    .filter(
-      ({ isMultiRow, columns }) =>
-        // We only render metric charts for single-row queries. We require a single, numeric column.
-        !isMultiRow && columns.length === 1 && columns[0].operation.dataType === 'number'
-    )
-    .filter(({ columns }) => !opts.state || opts.state.accessor !== columns[0].columnId)
-    .map(table => getSuggestion(table));
+  return (
+    opts.tables
+      .filter(
+        ({ isMultiRow, columns }) =>
+          // We only render metric charts for single-row queries. We require a single, numeric column.
+          !isMultiRow && columns.length === 1 && columns[0].operation.dataType === 'number'
+      )
+      // don't suggest current table if visualization is active
+      .filter(({ changeType }) => !opts.state || changeType !== 'unchanged')
+      .map(table => getSuggestion(table))
+  );
 }
 
 function getSuggestion(table: TableSuggestion): VisualizationSuggestion<State> {

@@ -14,6 +14,7 @@ import {
   TableSuggestionColumn,
   TableSuggestion,
   OperationMetadata,
+  TableChangeType,
 } from '../types';
 import { State, SeriesType, LayerConfig } from './types';
 import { generateId } from '../id_generator';
@@ -78,20 +79,24 @@ function getSuggestionForColumns(
     return getSuggestion(
       table.datasourceSuggestionId,
       table.layerId,
+      table.changeType,
       x,
       values,
       splitBy,
-      currentState
+      currentState,
+      table.label
     );
   } else if (buckets.length === 0) {
     const [x, ...yValues] = values;
     return getSuggestion(
       table.datasourceSuggestionId,
       table.layerId,
+      table.changeType,
       x,
       yValues,
       undefined,
-      currentState
+      currentState,
+      table.label
     );
   }
 }
@@ -108,10 +113,12 @@ function prioritizeColumns(columns: TableSuggestionColumn[]) {
 function getSuggestion(
   datasourceSuggestionId: number,
   layerId: string,
+  changeType: TableChangeType,
   xValue: TableSuggestionColumn,
   yValues: TableSuggestionColumn[],
   splitBy?: TableSuggestionColumn,
-  currentState?: State
+  currentState?: State,
+  tableLabel?: string
 ): VisualizationSuggestion<State> {
   const yTitle = yValues
     .map(col => col.operation.label)
@@ -125,7 +132,7 @@ function getSuggestion(
   const xTitle = xValue.operation.label;
   const isDate = xValue.operation.dataType === 'date';
 
-  const title = isDate
+  let title = isDate
     ? i18n.translate('xpack.lens.xySuggestions.dateSuggestion', {
         defaultMessage: '{yTitle} over {xTitle}',
         description:
@@ -138,9 +145,18 @@ function getSuggestion(
           'Chart description for a value of some groups, like "Top URLs of top 5 countries"',
         values: { xTitle, yTitle },
       });
+
+  if (currentState && changeType === 'extended' && tableLabel) {
+    title = tableLabel;
+  }
+  const oldLayer = currentState && currentState.layers.find(layer => layer.layerId === layerId);
   const seriesType: SeriesType =
-    (currentState && currentState.preferredSeriesType) || (splitBy && isDate ? 'line' : 'bar');
-  const newLayer = {
+    (oldLayer && oldLayer.seriesType) ||
+    (currentState && currentState.preferredSeriesType) ||
+    (splitBy && isDate ? 'line' : 'bar');
+  let isHorizontal = currentState ? currentState.isHorizontal : false;
+  let newLayer = {
+    ...(oldLayer || {}),
     layerId,
     seriesType,
     xAccessor: xValue.columnId,
@@ -148,8 +164,22 @@ function getSuggestion(
     accessors: yValues.map(col => col.columnId),
     title: yTitle,
   };
+  // if current state is using the same data, suggest same chart with different series type
+  if (oldLayer && changeType === 'unchanged') {
+    if (xValue.operation.scale && xValue.operation.scale !== 'ordinal') {
+      const currentSeriesType = oldLayer.seriesType;
+      const newSeriesType = currentSeriesType === 'area' ? 'bar' : 'area';
+      // TODO i18n
+      title = `${newSeriesType} chart`;
+      newLayer = { ...newLayer, seriesType: newSeriesType };
+    } else {
+      // todo i18n
+      title = 'Flip';
+      isHorizontal = !isHorizontal;
+    }
+  }
   const state: State = {
-    isHorizontal: false,
+    isHorizontal,
     legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
     preferredSeriesType: seriesType,
     layers: [
@@ -188,23 +218,5 @@ function getSuggestion(
     ),
   };
 
-  // if current state is using the same data, suggest same chart with different series type
-  const oldLayer = currentState && currentState.layers.find(layer => layer.layerId === layerId);
-  if (oldLayer && isSameData(newLayer, oldLayer, Boolean(splitBy))) {
-    const currentSeriesType = oldLayer.seriesType;
-    const suggestedSeriesType = currentSeriesType === 'area' ? 'bar' : 'area';
-    // TODO i18n
-    suggestion.title = `${suggestedSeriesType} chart`;
-    newLayer.seriesType = suggestedSeriesType;
-  }
-
   return suggestion;
-}
-
-function isSameData(newLayer: LayerConfig, oldLayer: LayerConfig, splitBy: boolean) {
-  return (
-    newLayer.xAccessor === oldLayer.xAccessor &&
-    isEqual(newLayer.accessors, oldLayer.accessors) &&
-    (!splitBy || newLayer.splitAccessor === oldLayer.splitAccessor)
-  );
 }

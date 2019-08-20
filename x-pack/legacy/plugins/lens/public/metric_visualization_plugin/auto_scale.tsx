@@ -64,8 +64,10 @@ export class AutoScale extends React.Component<Props, State> {
           <div
             {...this.props}
             ref={el => {
-              this.setParent(el);
-              resizeRef(el);
+              if (el !== null) {
+                this.setParent(el);
+                resizeRef(el);
+              }
             }}
             style={{
               ...style,

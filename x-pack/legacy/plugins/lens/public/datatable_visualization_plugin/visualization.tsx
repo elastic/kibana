@@ -127,42 +127,53 @@ export const datatableVisualization: Visualization<
 
   getSuggestions({
     tables,
+    state,
   }: SuggestionRequest<DatatableVisualizationState>): Array<
     VisualizationSuggestion<DatatableVisualizationState>
   > {
     const maxColumnCount = Math.max.apply(undefined, tables.map(table => table.columns.length));
-    return tables.map(table => {
-      const title = i18n.translate('xpack.lens.datatable.visualizationOf', {
-        defaultMessage: 'Table: {operations}',
-        values: {
-          operations: table.columns
-            .map(col => col.operation.label)
-            .join(
-              i18n.translate('xpack.lens.datatable.conjunctionSign', {
-                defaultMessage: ' & ',
-                description:
-                  'A character that can be used for conjunction of multiple enumarated items. Make sure to include spaces around it if needed.',
-              })
-            ),
-        },
-      });
+    return (
+      tables
+        // don't suggest current table if visualization is active
+        .filter(({ changeType }) => !state || changeType !== 'unchanged')
+        .map(table => {
+          const title =
+            table.changeType === 'unchanged'
+              ? i18n.translate('xpack.lens.datatable.suggestionLabel', { defaultMessage: 'Table' })
+              : i18n.translate('xpack.lens.datatable.visualizationOf', {
+                  defaultMessage: 'Table: {operations}',
+                  values: {
+                    operations:
+                      table.label ||
+                      table.columns
+                        .map(col => col.operation.label)
+                        .join(
+                          i18n.translate('xpack.lens.datatable.conjunctionSign', {
+                            defaultMessage: ' & ',
+                            description:
+                              'A character that can be used for conjunction of multiple enumarated items. Make sure to include spaces around it if needed.',
+                          })
+                        ),
+                  },
+                });
 
-      return {
-        title,
-        // largest possible table will have a score of 0.2, less columns reduce score
-        score: (table.columns.length / maxColumnCount) * 0.2,
-        datasourceSuggestionId: table.datasourceSuggestionId,
-        state: {
-          layers: [
-            {
-              layerId: table.layerId,
-              columns: table.columns.map(col => col.columnId),
+          return {
+            title,
+            // largest possible table will have a score of 0.2, less columns reduce score
+            score: (table.columns.length / maxColumnCount) * 0.2,
+            datasourceSuggestionId: table.datasourceSuggestionId,
+            state: {
+              layers: [
+                {
+                  layerId: table.layerId,
+                  columns: table.columns.map(col => col.columnId),
+                },
+              ],
             },
-          ],
-        },
-        previewIcon: 'visTable',
-      };
-    });
+            previewIcon: 'visTable',
+          };
+        })
+    );
   },
 
   renderConfigPanel: (domElement, props) =>

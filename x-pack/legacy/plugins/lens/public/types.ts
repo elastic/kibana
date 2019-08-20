@@ -52,7 +52,11 @@ export interface TableSuggestion {
   isMultiRow: boolean;
   columns: TableSuggestionColumn[];
   layerId: string;
+  label?: string;
+  changeType: TableChangeType;
 }
+
+export type TableChangeType = 'initial' | 'unchanged' | 'reduced' | 'extended';
 
 export interface DatasourceSuggestion<T = unknown> {
   state: T;

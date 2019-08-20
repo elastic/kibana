@@ -16,7 +16,7 @@ import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins
 import { prependDatasourceExpression } from './expression_helpers';
 import { debouncedComponent } from '../../debounced_component';
 
-const MAX_SUGGESTIONS_DISPLAYED = 3;
+const MAX_SUGGESTIONS_DISPLAYED = 5;
 
 export interface SuggestionPanelProps {
   activeDatasourceId: string | null;
@@ -139,12 +139,20 @@ function InnerSuggestionPanel({
         </h3>
       </EuiTitle>
       <div className="lnsSuggestionsPanel__suggestions">
-        {suggestions.map(suggestion => {
+        {suggestions.map((suggestion: Suggestion) => {
           const previewExpression = suggestion.previewExpression
             ? prependDatasourceExpression(
                 suggestion.previewExpression,
                 datasourceMap,
-                datasourceStates
+                suggestion.datasourceId
+                  ? {
+                      ...datasourceStates,
+                      [suggestion.datasourceId]: {
+                        isLoading: false,
+                        state: suggestion.datasourceState,
+                      },
+                    }
+                  : datasourceStates
               )
             : null;
           return (

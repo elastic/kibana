@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import { generateId } from '../id_generator';
-import { DatasourceSuggestion } from '../types';
+import { DatasourceSuggestion, TableChangeType, TableSuggestion } from '../types';
 import {
   columnToOperation,
   IndexPatternField,
@@ -23,12 +23,16 @@ function buildSuggestion({
   layerId,
   isMultiRow,
   datasourceSuggestionId,
+  label,
+  changeType,
 }: {
   state: IndexPatternPrivateState;
   layerId: string;
+  changeType: TableChangeType;
   updatedLayer?: IndexPatternLayer;
   isMultiRow?: boolean;
   datasourceSuggestionId?: number;
+  label?: string;
 }) {
   const columnOrder = (updatedLayer || state.layers[layerId]).columnOrder;
   const columns = (updatedLayer || state.layers[layerId]).columns;
@@ -51,6 +55,8 @@ function buildSuggestion({
       isMultiRow: typeof isMultiRow === 'undefined' || isMultiRow,
       datasourceSuggestionId: datasourceSuggestionId || 0,
       layerId,
+      changeType,
+      label,
     },
   };
 }
@@ -106,6 +112,7 @@ function getExistingLayerSuggestionsForField(
           state,
           updatedLayer,
           layerId,
+          changeType: 'extended',
         }),
       ]
     : [];
@@ -219,6 +226,7 @@ function getEmptyLayerSuggestionsForField(
           state,
           updatedLayer: newLayer,
           layerId,
+          changeType: 'initial',
         }),
       ]
     : [];
@@ -237,13 +245,16 @@ function createNewLayerWithBucketAggregation(
     suggestedPriority: undefined,
   });
 
+  const col1 = generateId();
+  const col2 = generateId();
+
   // let column know about count column
   const column = buildColumn({
     layerId,
     op: getBucketOperation(field),
     indexPattern,
     columns: {
-      col2: countColumn,
+      [col2]: countColumn,
     },
     field,
     suggestedPriority: undefined,
@@ -252,10 +263,10 @@ function createNewLayerWithBucketAggregation(
   return {
     indexPatternId: indexPattern.id,
     columns: {
-      col1: column,
-      col2: countColumn,
+      [col1]: column,
+      [col2]: countColumn,
     },
-    columnOrder: ['col1', 'col2'],
+    columnOrder: [col1, col2],
   };
 }
 
@@ -285,13 +296,16 @@ function createNewLayerWithMetricAggregation(
     layerId,
   });
 
+  const col1 = generateId();
+  const col2 = generateId();
+
   return {
     indexPatternId: indexPattern.id,
     columns: {
-      col1: dateColumn,
-      col2: column,
+      [col1]: dateColumn,
+      [col2]: column,
     },
-    columnOrder: ['col1', 'col2'],
+    columnOrder: [col1, col2],
   };
 }
 
@@ -310,7 +324,8 @@ export function getDatasourceSuggestionsFromCurrentState(
         const onlyMetric = layer.columnOrder.every(columnId => !layer.columns[columnId].isBucketed);
         const onlyBucket = layer.columnOrder.every(columnId => layer.columns[columnId].isBucketed);
         const timeDimension = layer.columnOrder.find(
-          columnId => layer.columns[columnId].isBucketed && layer.columns[columnId].dataType
+          columnId =>
+            layer.columns[columnId].isBucketed && layer.columns[columnId].dataType === 'date'
         );
         if (onlyBucket) {
           // intermediary chart, don't try to suggest reduced versions
@@ -319,12 +334,35 @@ export function getDatasourceSuggestionsFromCurrentState(
             layerId,
             isMultiRow: false,
             datasourceSuggestionId: index,
+            changeType: 'unchanged',
           });
         }
 
         if (onlyMetric) {
-          if (!timeDimension && indexPattern.timeFieldName) {
-            // TODO suggestion metric over time
+          if (indexPattern.timeFieldName) {
+            const newId = generateId();
+            const timeColumn = buildColumn({
+              layerId,
+              op: 'date_histogram',
+              indexPattern,
+              columns: layer.columns,
+              field: indexPattern.fields.find(({ name }) => name === indexPattern.timeFieldName),
+              suggestedPriority: undefined,
+            });
+            const updatedLayer = buildLayerByColumnOrder(
+              { ...layer, columns: { ...layer.columns, [newId]: timeColumn } },
+              [newId, ...layer.columnOrder]
+            );
+            return buildSuggestion({
+              state,
+              layerId,
+              isMultiRow: true,
+              updatedLayer,
+              datasourceSuggestionId: index,
+              // TODO i18n
+              label: 'over time',
+              changeType: 'extended',
+            });
           }
           // suggest only metric
           return buildSuggestion({
@@ -332,6 +370,7 @@ export function getDatasourceSuggestionsFromCurrentState(
             layerId,
             isMultiRow: false,
             datasourceSuggestionId: index,
+            changeType: 'unchanged',
           });
         }
 
@@ -362,6 +401,9 @@ export function getDatasourceSuggestionsFromCurrentState(
             layerId,
             isMultiRow: true,
             updatedLayer,
+            // TODO i18n
+            label: 'over time',
+            changeType: 'extended',
           });
           return [...simplifiedSuggestions, timedSuggestion];
         }
@@ -415,6 +457,8 @@ function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layer
         layerId,
         isMultiRow: updatedLayer.columnOrder.length > 1,
         updatedLayer,
+        changeType:
+          layer.columnOrder.length === updatedLayer.columnOrder.length ? 'unchanged' : 'reduced',
       })
     );
 }
