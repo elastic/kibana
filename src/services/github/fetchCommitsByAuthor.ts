@@ -67,6 +67,7 @@ export async function fetchCommitsByAuthor(
     accessToken,
     apiHostname,
     commitsCount,
+    path,
     repoName,
     repoOwner
   } = options;
@@ -77,12 +78,17 @@ export async function fetchCommitsByAuthor(
       $repoName: String!
       $commitsCount: Int!
       $authorId: ID
+      $historyPath: String
     ) {
       repository(owner: $repoOwner, name: $repoName) {
         ref(qualifiedName: "master") {
           target {
             ... on Commit {
-              history(first: $commitsCount, author: { id: $authorId }) {
+              history(
+                first: $commitsCount
+                author: { id: $authorId }
+                path: $historyPath
+              ) {
                 edges {
                   node {
                     oid
@@ -140,7 +146,8 @@ export async function fetchCommitsByAuthor(
       repoOwner,
       repoName,
       commitsCount: commitsCount || 10,
-      authorId
+      authorId,
+      historyPath: path || null
     }
   });
 

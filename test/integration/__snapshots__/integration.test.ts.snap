@@ -23,12 +23,17 @@ Object {
       $repoName: String!
       $commitsCount: Int!
       $authorId: ID
+      $historyPath: String
     ) {
       repository(owner: $repoOwner, name: $repoName) {
         ref(qualifiedName: \\"master\\") {
           target {
             ... on Commit {
-              history(first: $commitsCount, author: { id: $authorId }) {
+              history(
+                first: $commitsCount
+                author: { id: $authorId }
+                path: $historyPath
+              ) {
                 edges {
                   node {
                     oid
@@ -79,6 +84,7 @@ Object {
   "variables": Object {
     "authorId": "sqren_author_id",
     "commitsCount": 10,
+    "historyPath": null,
     "repoName": "backport-demo",
     "repoOwner": "elastic",
   },
@@ -119,12 +125,17 @@ Object {
       $repoName: String!
       $commitsCount: Int!
       $authorId: ID
+      $historyPath: String
     ) {
       repository(owner: $repoOwner, name: $repoName) {
         ref(qualifiedName: \\"master\\") {
           target {
             ... on Commit {
-              history(first: $commitsCount, author: { id: $authorId }) {
+              history(
+                first: $commitsCount
+                author: { id: $authorId }
+                path: $historyPath
+              ) {
                 edges {
                   node {
                     oid
@@ -175,6 +186,7 @@ Object {
   "variables": Object {
     "authorId": "sqren_author_id",
     "commitsCount": 10,
+    "historyPath": null,
     "repoName": "backport-demo",
     "repoOwner": "elastic",
   },

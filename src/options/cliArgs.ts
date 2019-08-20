@@ -77,6 +77,11 @@ export function getOptionsFromCliArgs(
       description: 'Backport to multiple branches',
       type: 'boolean'
     })
+    .option('path', {
+      default: configOptions.path,
+      description: 'Only list commits touching files under the specified path',
+      type: 'string'
+    })
     .option('prTitle', {
       default: configOptions.prTitle,
       description: 'Title of pull request',
@@ -121,6 +126,7 @@ export function getOptionsFromCliArgs(
     multiple: cliArgs.multiple,
     multipleBranches: cliArgs.multipleBranches || cliArgs.multiple,
     multipleCommits: cliArgs.multipleCommits || cliArgs.multiple,
+    path: cliArgs.path,
     prTitle: cliArgs.prTitle,
     prDescription: cliArgs.prDescription,
     sha: cliArgs.sha,

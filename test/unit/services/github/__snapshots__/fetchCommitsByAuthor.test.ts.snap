@@ -30,12 +30,17 @@ Array [
       $repoName: String!
       $commitsCount: Int!
       $authorId: ID
+      $historyPath: String
     ) {
       repository(owner: $repoOwner, name: $repoName) {
         ref(qualifiedName: \\"master\\") {
           target {
             ... on Commit {
-              history(first: $commitsCount, author: { id: $authorId }) {
+              history(
+                first: $commitsCount
+                author: { id: $authorId }
+                path: $historyPath
+              ) {
                 edges {
                   node {
                     oid
@@ -86,6 +91,7 @@ Array [
     "variables": Object {
       "authorId": "myUserId",
       "commitsCount": 10,
+      "historyPath": null,
       "repoName": "kibana",
       "repoOwner": "elastic",
     },

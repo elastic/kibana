@@ -24,6 +24,7 @@ export interface Config {
   multiple?: boolean;
   multipleBranches?: boolean;
   multipleCommits?: boolean;
+  path?: string;
   prDescription?: string;
   prTitle?: string;
 }

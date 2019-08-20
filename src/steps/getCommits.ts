@@ -33,9 +33,13 @@ async function getCommitsByPrompt(options: BackportOptions) {
   try {
     const commits = await fetchCommitsByAuthor(options);
     if (isEmpty(commits)) {
+      const pathText = options.path
+        ? ` touching files in path: "${options.path}"`
+        : '';
+
       const warningText = options.all
-        ? 'There are no commits in this repository'
-        : `There are no commits by "${options.author}" in this repository. Try with \`--all\` for commits by all users or \`--author=<username>\` for commits from a specific user`;
+        ? `There are no commits in this repository${pathText}`
+        : `There are no commits by "${options.author}" in this repository${pathText}. Try with \`--all\` for commits by all users or \`--author=<username>\` for commits from a specific user`;
 
       spinner.fail(warningText);
       process.exit(1);

@@ -16,6 +16,7 @@ const validOptions: OptionsFromCliArgs = {
   multiple: false,
   multipleBranches: true,
   multipleCommits: false,
+  path: undefined,
   prTitle: 'myPrTitle',
   prDescription: undefined,
   sha: undefined,

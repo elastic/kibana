@@ -41,6 +41,7 @@ describe('run through steps', () => {
       multiple: false,
       multipleBranches: false,
       multipleCommits: false,
+      path: undefined,
       prDescription: 'myPrDescription',
       prTitle: 'myPrTitle {baseBranch} {commitMessages}',
       repoName: 'kibana',
