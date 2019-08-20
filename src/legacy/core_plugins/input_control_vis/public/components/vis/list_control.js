@@ -122,7 +122,7 @@ class ListControlUi extends Component {
       'inputControl.vis.listControl.partialResultsWarningMessage',
       {
         defaultMessage:
-          'Terms list may be incomplete because the request is taking too long. ' +
+          'Terms list might be incomplete because the request is taking too long. ' +
           'Adjust the autocomplete settings in kibana.yml for complete results.',
       }
     );
