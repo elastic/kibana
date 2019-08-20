@@ -5,17 +5,30 @@
  */
 
 import { Request } from 'src/legacy/server/kbn_server';
+import { get } from 'lodash';
 import { BackendFrameworkAdapter } from './adapters/framework/default';
+import { LicenseType } from '../../common/types/security';
 
 export class BackendFrameworkLib {
   /**
    * Expired `null` happens when we have no xpack info
    */
-  public license = {
-    type: this.adapter.info ? this.adapter.info.license.type : 'unknown',
-    expired: this.adapter.info ? this.adapter.info.license.expired : null,
-  };
-  public securityIsEnabled = this.adapter.info ? this.adapter.info.security.enabled : false;
+  public get license() {
+    return {
+      type: get<LicenseType>(this.adapter, 'info.license.type', 'oss'),
+      expired: get<number | null>(this.adapter, 'info.license.expired', null),
+    };
+  }
+  public get info() {
+    return this.adapter.info;
+  }
+  public get version() {
+    return get(this.adapter, 'info.kibana.version', null) as string | null;
+  }
+  public get securityIsEnabled() {
+    return get(this.adapter, 'info.security.enabled', false);
+  }
+
   public log = this.adapter.log;
   public on = this.adapter.on.bind(this.adapter);
   public internalUser = this.adapter.internalUser;
@@ -30,5 +43,8 @@ export class BackendFrameworkLib {
   }
   public exposeMethod(name: string, method: () => any) {
     return this.adapter.exposeMethod(name, method);
+  }
+  public async waitForStack() {
+    return await this.adapter.waitForStack();
   }
 }

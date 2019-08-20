@@ -12,7 +12,6 @@ import chrome from 'ui/chrome';
 // @ts-ignore not typed yet
 import { management } from 'ui/management';
 import routes from 'ui/routes';
-import { INDEX_NAMES } from '../../../common/constants/index_names';
 import { RestAgentAdapter } from '../adapters/agent/rest_agent_adapter';
 import { RestElasticsearchAdapter } from '../adapters/elasticsearch/rest';
 import { KibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
@@ -22,6 +21,7 @@ import { ElasticsearchLib } from '../elasticsearch';
 import { FrontendLibs } from '../types';
 import { PLUGIN } from '../../../common/constants/plugin';
 import { FrameworkLib } from '../framework';
+import { INDEX_NAMES } from '../../../common/constants';
 
 // A super early spot in kibana loading that we can use to hook before most other things
 const onKibanaReady = chrome.dangerouslyGetActiveInjector;

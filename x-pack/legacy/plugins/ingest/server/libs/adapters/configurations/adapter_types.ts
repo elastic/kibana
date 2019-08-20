@@ -10,7 +10,7 @@ export const RuntimeDatasourceInput = t.interface(
   {
     id: t.string,
     meta: t.union([t.undefined, t.string]),
-    config: t.string,
+    config_id: t.string,
   },
   'DatasourceInput'
 );
@@ -29,6 +29,8 @@ export const NewRuntimeConfigurationFile = t.interface(
     description: t.string,
     output: t.string,
     monitoring_enabled: t.boolean,
+    shared_id: t.string,
+    version: t.number,
     agent_version: t.string,
     data_sources: t.array(DataSource),
   },
@@ -51,7 +53,7 @@ const ExistingDocument = t.interface({
   id: t.string,
   shared_id: t.string,
   version: t.number,
-  active: t.boolean,
+  status: t.union(['active', 'locked', 'inactive'].map(s => t.literal(s))),
   updated_at: t.string,
   created_by: t.union([t.undefined, t.string]),
   updated_on: t.string,
