@@ -17,18 +17,29 @@
  * under the License.
  */
 
-import { fatalErrorsServiceMock, notificationServiceMock, overlayServiceMock } from '../../../../../core/public/mocks';
+import { OverlayBannersStart, OverlayBannersService } from './banners_service';
 
-jest.doMock('ui/new_platform', () => ({
-  npSetup: {
-    core: {
-      fatalErrors: fatalErrorsServiceMock.createSetupContract(),
-      notifications: notificationServiceMock.createSetupContract(),
-    }
-  },
-  npStart: {
-    core: {
-      overlays: overlayServiceMock.createStartContract(),
-    },
-  },
-}));
+const createStartContractMock = () => {
+  const startContract: jest.Mocked<OverlayBannersStart> = {
+    add: jest.fn(),
+    remove: jest.fn(),
+    replace: jest.fn(),
+    get$: jest.fn(),
+    getComponent: jest.fn(),
+  };
+  return startContract;
+};
+
+const createMock = () => {
+  const mocked: jest.Mocked<PublicMethodsOf<OverlayBannersService>> = {
+    start: jest.fn(),
+    stop: jest.fn(),
+  };
+  mocked.start.mockReturnValue(createStartContractMock());
+  return mocked;
+};
+
+export const overlayBannersServiceMock = {
+  create: createMock,
+  createStartContract: createStartContractMock,
+};

@@ -596,6 +596,25 @@ export interface NotificationsStart {
     toasts: ToastsStart;
 }
 
+// @public
+export type OverlayBannerMount = (element: HTMLElement) => OverlayBannerUnmount;
+
+// @public (undocumented)
+export interface OverlayBannersStart {
+    add(mount: OverlayBannerMount, priority?: number): symbol;
+    // Warning: (ae-forgotten-export) The symbol "OverlayBanner" needs to be exported by the entry point index.d.ts
+    // 
+    // @internal (undocumented)
+    get$(): Observable<OverlayBanner[]>;
+    // (undocumented)
+    getComponent(): JSX.Element;
+    remove(id: symbol): boolean;
+    replace(id: symbol, mount: OverlayBannerMount, priority?: number): symbol;
+}
+
+// @public
+export type OverlayBannerUnmount = () => void;
+
 // Warning: (ae-missing-release-tag) "OverlayRef" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 // 
 // @public (undocumented)
@@ -606,6 +625,8 @@ export interface OverlayRef {
 
 // @public (undocumented)
 export interface OverlayStart {
+    // (undocumented)
+    banners: OverlayBannersStart;
     // (undocumented)
     openFlyout: (flyoutChildren: React.ReactNode, flyoutProps?: {
         closeButtonAriaLabel?: string;

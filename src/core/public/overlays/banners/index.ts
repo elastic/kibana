@@ -17,18 +17,9 @@
  * under the License.
  */
 
-import { fatalErrorsServiceMock, notificationServiceMock, overlayServiceMock } from '../../../../../core/public/mocks';
-
-jest.doMock('ui/new_platform', () => ({
-  npSetup: {
-    core: {
-      fatalErrors: fatalErrorsServiceMock.createSetupContract(),
-      notifications: notificationServiceMock.createSetupContract(),
-    }
-  },
-  npStart: {
-    core: {
-      overlays: overlayServiceMock.createStartContract(),
-    },
-  },
-}));
+export {
+  OverlayBannerMount,
+  OverlayBannerUnmount,
+  OverlayBannersStart,
+  OverlayBannersService,
+} from './banners_service';

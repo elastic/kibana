@@ -98,6 +98,7 @@ describe('SearchBar', () => {
       <SearchBar.WrappedComponent
         savedObjectsClient={startMock.savedObjects.client}
         uiSettings={startMock.uiSettings}
+        toasts={startMock.notifications.toasts}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
@@ -114,6 +115,7 @@ describe('SearchBar', () => {
       <SearchBar.WrappedComponent
         savedObjectsClient={startMock.savedObjects.client}
         uiSettings={startMock.uiSettings}
+        toasts={startMock.notifications.toasts}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
@@ -131,6 +133,7 @@ describe('SearchBar', () => {
       <SearchBar.WrappedComponent
         savedObjectsClient={startMock.savedObjects.client}
         uiSettings={startMock.uiSettings}
+        toasts={startMock.notifications.toasts}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
@@ -150,6 +153,7 @@ describe('SearchBar', () => {
       <SearchBar.WrappedComponent
         savedObjectsClient={startMock.savedObjects.client}
         uiSettings={startMock.uiSettings}
+        toasts={startMock.notifications.toasts}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
@@ -170,6 +174,7 @@ describe('SearchBar', () => {
       <SearchBar.WrappedComponent
         savedObjectsClient={startMock.savedObjects.client}
         uiSettings={startMock.uiSettings}
+        toasts={startMock.notifications.toasts}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
@@ -190,6 +195,7 @@ describe('SearchBar', () => {
       <SearchBar.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        toasts={startMock.notifications.toasts}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
@@ -211,6 +217,7 @@ describe('SearchBar', () => {
       <SearchBar.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        toasts={startMock.notifications.toasts}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}

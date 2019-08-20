@@ -190,6 +190,7 @@ export class CoreSystem {
   public async start() {
     try {
       const injectedMetadata = await this.injectedMetadata.start();
+      const uiSettings = await this.uiSettings.start();
       const docLinks = await this.docLinks.start({ injectedMetadata });
       const http = await this.http.start({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const savedObjects = await this.savedObjects.start({ http });
@@ -208,7 +209,11 @@ export class CoreSystem {
       this.rootDomElement.appendChild(notificationsTargetDomElement);
       this.rootDomElement.appendChild(overlayTargetDomElement);
 
-      const overlays = this.overlay.start({ i18n, targetDomElement: overlayTargetDomElement });
+      const overlays = this.overlay.start({
+        i18n,
+        targetDomElement: overlayTargetDomElement,
+        uiSettings,
+      });
       const notifications = await this.notifications.start({
         i18n,
         overlays,
@@ -221,7 +226,6 @@ export class CoreSystem {
         injectedMetadata,
         notifications,
       });
-      const uiSettings = await this.uiSettings.start();
 
       application.registerMountContext(this.coreContext.coreId, 'core', () => ({
         application: pick(application, ['capabilities', 'navigateToApp']),
