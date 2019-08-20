@@ -1143,6 +1143,43 @@ Array [
       expect(series[0].filter).toEqual(params.series[0].filter);
     });
   });
+
+  describe('7.3.1', () => {
+    const migrate = migrations.visualization['7.3.1'];
+
+    it('should migrate filters agg query string queries', () => {
+      const state = {
+        aggs: [
+          { type: 'count', params: {} },
+          {
+            type: 'filters',
+            params: {
+              filters: [{
+                input: {
+                  query: {
+                    query_string: { query: 'machine.os.keyword:\"win 8\"' }
+                  }
+                }
+              }]
+            }
+          }
+        ],
+      };
+      const expected = {
+        aggs: [
+          { type: 'count', params: {} },
+          {
+            type: 'filters',
+            params: {
+              filters: [{ input: { query: 'machine.os.keyword:\"win 8\"' } }]
+            }
+          }
+        ],
+      };
+      const migratedDoc = migrate({ attributes: { visState: JSON.stringify(state) } });
+      expect(migratedDoc).toEqual({ attributes: { visState: JSON.stringify(expected) } });
+    });
+  });
 });
 
 describe('dashboard', () => {

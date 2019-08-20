@@ -49,7 +49,7 @@ Currently there are two patterns used to test packages, one using Mocha and one 
 ### 1. Mocha
 Today a package can follow the pattern of having a `__tests__` directory in each source code directory of a package which contains the tests for that module. These are usually run by Mocha.
 
-If a package's tests should be run with Mocha, you'll have to opt-in to run them by appending the package's test file pattern(s) to Kibana's `tasks/config/simplemocha.js` file. These will then be run by the unit test runner.
+If a package's tests should be run with Mocha, you'll have to opt-in to run them by appending the package's test file pattern(s) to Kibana's `src/dev/mocha/run_mocha_cli.js` file. These will then be run by the unit test runner.
 
 * `yarn test` or `yarn grunt test` runs all unit tests.
 * `node scripts/mocha` runs all Mocha tests.
