@@ -46,9 +46,16 @@ function SelectOption<ParamName extends string, ValidParamValues extends string>
   setValue,
 }: SelectOptionProps<ParamName, ValidParamValues>) {
   return (
-    <EuiFormRow compressed fullWidth helpText={helpText} id={id} label={label} labelAppend={labelAppend}>
+    <EuiFormRow
+      compressed
+      fullWidth
+      helpText={helpText}
+      id={id}
+      label={label}
+      labelAppend={labelAppend}
+    >
       <EuiSelect
-		disabled={disabled}
+        disabled={disabled}
         options={[emptyValue, ...options]}
         value={value || emptyValue.value}
         onChange={ev => setValue(paramName, ev.target.value as ValidParamValues)}

@@ -50,6 +50,7 @@ interface RangeValuesModel extends RangeValues {
 }
 
 interface RangesParamEditorProps {
+  dataTestSubj?: string;
   value?: RangeValues[];
   hidePlaceholders?: boolean;
   setValue(value: RangeValues[]): void;
@@ -61,6 +62,7 @@ interface RangesParamEditorProps {
 
 function RangesParamEditor({
   addRangeValues,
+  dataTestSubj = 'range',
   value = [],
   hidePlaceholders,
   setValue,
@@ -157,6 +159,7 @@ function RangesParamEditor({
                     aria-label={i18n.translate('common.ui.aggTypes.ranges.fromLabel', {
                       defaultMessage: 'From',
                     })}
+                    data-test-subj={`${dataTestSubj}${index}__left`}
                     value={isEmpty(from) ? '' : from}
                     placeholder={hidePlaceholders ? undefined : FROM_PLACEHOLDER}
                     onChange={ev => onChangeRange(id, 'from', ev.target.value)}
@@ -173,6 +176,7 @@ function RangesParamEditor({
                     aria-label={i18n.translate('common.ui.aggTypes.ranges.toLabel', {
                       defaultMessage: 'To',
                     })}
+                    data-test-subj={`${dataTestSubj}${index}__right`}
                     value={isEmpty(to) ? '' : to}
                     placeholder={hidePlaceholders ? undefined : TO_PLACEHOLDER}
                     onChange={ev => onChangeRange(id, 'to', ev.target.value)}

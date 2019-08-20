@@ -153,6 +153,7 @@ function GaugeOptions({
         <EuiSpacer size="s" />
 
         <RangesParamEditor
+          dataTestSubj="gaugeColorRange"
           hidePlaceholders={true}
           value={stateParams.gauge.colorsRange}
           setValue={value => setGaugeValue('colorsRange', value)}
@@ -176,6 +177,7 @@ function GaugeOptions({
         />
 
         <SwitchOption
+          dataTestSubj="gaugePercentageMode"
           label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.percentageModeLabel', {
             defaultMessage: 'Percentage mode',
           })}

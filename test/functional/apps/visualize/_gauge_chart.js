@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const inspector = getService('inspector');
-  const find = getService('find');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
 
   describe('gauge chart', function indexPatternCreation() {
@@ -100,12 +100,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.selectAggregation('Average', 'metrics');
       await PageObjects.visualize.selectField('bytes', 'metrics');
       await PageObjects.visualize.clickOptionsTab();
-      const table = await find.byClassName('visEditorAgg__rangesTable');
-      const lastRow = await table.findByCssSelector('tr:last-child');
-      const toCell = await lastRow.findByCssSelector('td:nth-child(2) input');
-      await toCell.clearValue();
-      await toCell.type('10000', { charByChar: true });
-      await find.clickByCssSelector('#percentageMode');
+      await testSubjects.setValue('gaugeColorRange2__right', '10000');
+      await testSubjects.click('gaugePercentageMode');
       await PageObjects.visualize.waitForVisualizationRenderingStabilized();
       await PageObjects.visualize.clickGo();
 
