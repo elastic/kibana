@@ -4,16 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Page } from 'puppeteer';
+import { Page, SerializableOrJSHandle, EvaluateFn } from 'puppeteer';
 import { parse as parseUrl } from 'url';
 import { ViewZoomWidthHeight } from '../../../../export_types/common/layouts/layout';
 import {
   ConditionalHeaders,
   ConditionalHeadersConditions,
   ElementPosition,
-  EvalArgs,
-  EvalFn,
-  EvaluateOptions,
   Logger,
 } from '../../../../types';
 
@@ -96,7 +93,7 @@ export class HeadlessChromiumDriver {
     return screenshot.toString('base64');
   }
 
-  public async evaluate({ fn, args = [] }: EvaluateOptions) {
+  public async evaluate({ fn, args = [] }: { fn: EvaluateFn; args: SerializableOrJSHandle[] }) {
     const result = await this.page.evaluate(fn, ...args);
     return result;
   }
@@ -126,7 +123,15 @@ export class HeadlessChromiumDriver {
     return resp;
   }
 
-  public async waitFor<T>({ fn, args, toEqual }: { fn: EvalFn<T>; args: EvalArgs; toEqual: T }) {
+  public async waitFor<T>({
+    fn,
+    args,
+    toEqual,
+  }: {
+    fn: EvaluateFn;
+    args: SerializableOrJSHandle[];
+    toEqual: T;
+  }) {
     while (true) {
       const result = await this.evaluate({ fn, args });
       if (result === toEqual) {
