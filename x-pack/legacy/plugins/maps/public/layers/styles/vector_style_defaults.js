@@ -6,19 +6,12 @@
 
 import { VectorStyle } from './vector_style';
 import { SYMBOLIZE_AS_CIRCLE, DEFAULT_ICON_SIZE } from './vector_constants';
-import { COLOR_GRADIENTS } from './color_utils';
-import tinycolor from 'tinycolor2';
+import {
+  COLOR_GRADIENTS,
+  DEFAULT_FILL_COLORS,
+  DEFAULT_LINE_COLORS
+} from './color_utils';
 
-export const DEFAULT_FILL_COLORS = [
-  '#E6194B', '#3CB44B', '#FFE119', '#F58231', '#911EB4',
-  '#FEB6DB', '#00B3A4', '#BFA180', '#461A0A', '#3185FC'
-];
-export const DEFAULT_LINE_COLORS = [
-  ...DEFAULT_FILL_COLORS.map(color => tinycolor(color).darken().toHexString()),
-  // Explicitly add black & white as border color options
-  '#000',
-  '#FFF'
-];
 const DEFAULT_ICON = 'airfield';
 
 export const DEFAULT_MIN_SIZE = 1;

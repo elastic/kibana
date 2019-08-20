@@ -14,10 +14,12 @@ import { VectorStyleSymbolEditor } from './vector_style_symbol_editor';
 import { OrientationEditor } from './orientation/orientation_editor';
 import {
   getDefaultDynamicProperties,
-  getDefaultStaticProperties,
+  getDefaultStaticProperties
+} from '../../vector_style_defaults';
+import {
   DEFAULT_FILL_COLORS,
   DEFAULT_LINE_COLORS
-} from '../../vector_style_defaults';
+} from '../../color_utils';
 import { VECTOR_SHAPE_TYPES } from '../../../sources/vector_feature_types';
 import { SYMBOLIZE_AS_ICON } from '../../vector_constants';
 import { i18n } from '@kbn/i18n';
