@@ -295,6 +295,7 @@
 }
 
 .codeBranchSelectorTabs {
+  @include euiScrollBar;
   max-height: calc(100vh - 19rem);
   overflow: auto;
 }

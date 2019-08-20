@@ -3,7 +3,6 @@
 exports[`render correctly 1`] = `
 <div
   className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock"
-  id=""
   onKeyDown={[Function]}
   onMouseDown={[Function]}
   onMouseUp={[Function]}
@@ -36,13 +35,13 @@ exports[`render correctly 1`] = `
           >
             <span
               className="euiScreenReaderOnly"
-              id="q8vlfxrd"
+              id="generated-id"
             >
               Select an option: master, is selected
             </span>
             <button
               aria-haspopup="true"
-              aria-labelledby="undefined q8vlfxrd"
+              aria-labelledby="undefined generated-id"
               aria-selected={true}
               className="euiSuperSelectControl"
               data-test-subj="codeBranchSelector"

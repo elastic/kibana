@@ -99,7 +99,6 @@ export const BranchSelector = (props: Props) => {
       anchorPosition="downLeft"
       panelClassName="codeBranchSelectorPopover"
       display="block"
-      id={''}
       isOpen={isPopoverOpen}
       hasArrow={false}
       button={
