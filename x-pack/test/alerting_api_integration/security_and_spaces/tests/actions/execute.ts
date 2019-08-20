@@ -120,11 +120,11 @@ export default function({ getService }: FtrProviderContext) {
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(403);
+              expect(response.statusCode).to.eql(404);
               expect(response.body).to.eql({
-                statusCode: 403,
-                error: 'Forbidden',
-                message: 'Unable to get action',
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
               });
               break;
             case 'global_read at space1':
@@ -201,11 +201,11 @@ export default function({ getService }: FtrProviderContext) {
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(403);
+              expect(response.statusCode).to.eql(404);
               expect(response.body).to.eql({
-                statusCode: 403,
-                error: 'Forbidden',
-                message: 'Unable to get action',
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
               });
               break;
             case 'global_read at space1':
@@ -247,11 +247,11 @@ export default function({ getService }: FtrProviderContext) {
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(403);
+              expect(response.statusCode).to.eql(404);
               expect(response.body).to.eql({
-                statusCode: 403,
-                error: 'Forbidden',
-                message: 'Unable to get action',
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
               });
               break;
             case 'global_read at space1':
@@ -269,21 +269,40 @@ export default function({ getService }: FtrProviderContext) {
           }
         });
 
-        it('should return 400 when payload is empty and invalid', async () => {
-          await supertestWithoutAuth
+        it('should handle execute request appropriately when payload is empty and invalid', async () => {
+          const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/action/1/_execute`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
-            .send({})
-            .expect(400, {
-              statusCode: 400,
-              error: 'Bad Request',
-              message: 'child "params" fails because ["params" is required]',
-              validation: {
-                source: 'payload',
-                keys: ['params'],
-              },
-            });
+            .send({});
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(400);
+              expect(response.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message: 'child "params" fails because ["params" is required]',
+                validation: {
+                  source: 'payload',
+                  keys: ['params'],
+                },
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
         });
 
         it('should handle execute request appropriately after changing config properties', async () => {
@@ -337,11 +356,11 @@ export default function({ getService }: FtrProviderContext) {
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(403);
+              expect(response.statusCode).to.eql(404);
               expect(response.body).to.eql({
-                statusCode: 403,
-                error: 'Forbidden',
-                message: 'Unable to get action',
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
               });
               break;
             case 'global_read at space1':
@@ -384,11 +403,11 @@ export default function({ getService }: FtrProviderContext) {
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(403);
+              expect(response.statusCode).to.eql(404);
               expect(response.body).to.eql({
-                statusCode: 403,
-                error: 'Forbidden',
-                message: 'Unable to get action',
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
               });
               break;
             case 'global_read at space1':

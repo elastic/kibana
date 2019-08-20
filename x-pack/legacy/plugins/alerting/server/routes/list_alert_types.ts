@@ -11,7 +11,7 @@ export function listAlertTypesRoute(server: Hapi.Server) {
     method: 'GET',
     path: `/api/alert/types`,
     options: {
-      tags: ['access:alerting'],
+      tags: ['access:alerting-read'],
     },
     async handler(request: Hapi.Request) {
       return request.server.plugins.alerting!.listTypes();

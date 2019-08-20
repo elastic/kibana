@@ -29,6 +29,7 @@ export function executeRoute({ server, actionTypeRegistry, getServices }: Execut
     method: 'POST',
     path: '/api/action/{id}/_execute',
     options: {
+      tags: ['access:actions-read'],
       response: {
         emptyStatusCode: 204,
       },

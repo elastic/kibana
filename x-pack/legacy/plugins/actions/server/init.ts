@@ -58,7 +58,7 @@ export function init(server: Server) {
           read: [],
         },
         ui: [],
-        api: ['actions'],
+        api: ['actions-read', 'actions-all'],
       },
       read: {
         savedObject: {
@@ -66,7 +66,7 @@ export function init(server: Server) {
           read: ['action'],
         },
         ui: [],
-        api: ['actions'],
+        api: ['actions-read'],
       },
     },
   });

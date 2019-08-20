@@ -47,19 +47,12 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
-                statusCode: 403,
-                error: 'Forbidden',
-                message: 'Unable to get alert',
-              });
-              break;
             case 'global_read at space1':
-              expect(response.statusCode).to.eql(403);
+              expect(response.statusCode).to.eql(404);
               expect(response.body).to.eql({
-                statusCode: 403,
-                error: 'Forbidden',
-                message: 'Unable to update alert',
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
               });
               break;
             case 'superuser at space1':
@@ -68,6 +61,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 ...updatedData,
                 id: createdAlert.id,
+                updatedBy: user.username,
               });
               break;
             default:
@@ -75,7 +69,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it('should return 400 when attempting to change alert type', async () => {
+        it('should handle update alert request appropriately when attempting to change alert type', async () => {
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')
@@ -83,7 +77,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'alert');
 
-          await supertestWithoutAuth
+          const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
@@ -94,37 +88,75 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               },
               interval: '12s',
               actions: [],
-            })
-            .expect(400, {
-              statusCode: 400,
-              error: 'Bad Request',
-              message: '"alertTypeId" is not allowed',
-              validation: {
-                source: 'payload',
-                keys: ['alertTypeId'],
-              },
             });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(400);
+              expect(response.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message: '"alertTypeId" is not allowed',
+                validation: {
+                  source: 'payload',
+                  keys: ['alertTypeId'],
+                },
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
         });
 
-        it('should return 400 when payload is empty and invalid', async () => {
-          await supertestWithoutAuth
-            .put(`/api/alert/1`)
+        it('should handle update alert request appropriately when payload is empty and invalid', async () => {
+          const response = await supertestWithoutAuth
+            .put(`${getUrlPrefix(space.id)}/api/alert/1`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
-            .send({})
-            .expect(400, {
-              statusCode: 400,
-              error: 'Bad Request',
-              message:
-                'child "interval" fails because ["interval" is required]. child "alertTypeParams" fails because ["alertTypeParams" is required]. child "actions" fails because ["actions" is required]',
-              validation: {
-                source: 'payload',
-                keys: ['interval', 'alertTypeParams', 'actions'],
-              },
-            });
+            .send({});
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(400);
+              expect(response.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message:
+                  'child "interval" fails because ["interval" is required]. child "alertTypeParams" fails because ["alertTypeParams" is required]. child "actions" fails because ["actions" is required]',
+                validation: {
+                  source: 'payload',
+                  keys: ['interval', 'alertTypeParams', 'actions'],
+                },
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
         });
 
-        it(`should return 400 when alertTypeConfig isn't valid`, async () => {
+        it(`should handle update alert request appropriately when alertTypeConfig isn't valid`, async () => {
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')
@@ -152,14 +184,14 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(403);
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(404);
               expect(response.body).to.eql({
-                statusCode: 403,
-                error: 'Forbidden',
-                message: 'Unable to get alert',
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
               });
               break;
-            case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(400);
@@ -175,22 +207,41 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it('should return 400 when interval is wrong syntax', async () => {
-          await supertestWithoutAuth
+        it('sshould handle update alert request appropriately when interval is wrong syntax', async () => {
+          const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alert/1`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
-            .send(getTestAlertData({ interval: '10x', enabled: undefined }))
-            .expect(400, {
-              statusCode: 400,
-              error: 'Bad Request',
-              message:
-                'child "interval" fails because ["interval" with value "10x" fails to match the seconds pattern, "interval" with value "10x" fails to match the minutes pattern, "interval" with value "10x" fails to match the hours pattern, "interval" with value "10x" fails to match the days pattern]. "alertTypeId" is not allowed',
-              validation: {
-                source: 'payload',
-                keys: ['interval', 'interval', 'interval', 'interval', 'alertTypeId'],
-              },
-            });
+            .send(getTestAlertData({ interval: '10x', enabled: undefined }));
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(400);
+              expect(response.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message:
+                  'child "interval" fails because ["interval" with value "10x" fails to match the seconds pattern, "interval" with value "10x" fails to match the minutes pattern, "interval" with value "10x" fails to match the hours pattern, "interval" with value "10x" fails to match the days pattern]. "alertTypeId" is not allowed',
+                validation: {
+                  source: 'payload',
+                  keys: ['interval', 'interval', 'interval', 'interval', 'alertTypeId'],
+                },
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
         });
       });
     }

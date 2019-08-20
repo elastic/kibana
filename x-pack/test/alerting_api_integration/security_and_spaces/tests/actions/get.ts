@@ -46,11 +46,11 @@ export default function getActionTests({ getService }: FtrProviderContext) {
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(403);
+              expect(response.statusCode).to.eql(404);
               expect(response.body).to.eql({
-                statusCode: 403,
-                error: 'Forbidden',
-                message: 'Unable to get action',
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
               });
               break;
             case 'global_read at space1':

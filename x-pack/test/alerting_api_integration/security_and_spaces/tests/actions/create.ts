@@ -42,11 +42,11 @@ export default function createActionTests({ getService }: FtrProviderContext) {
             case 'no_kibana_privileges at space1':
             case 'global_read at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(403);
+              expect(response.statusCode).to.eql(404);
               expect(response.body).to.eql({
-                statusCode: 403,
-                error: 'Forbidden',
-                message: 'Unable to create action',
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
               });
               break;
             case 'superuser at space1':
@@ -68,8 +68,8 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it(`should return 400 when action type isn't registered`, async () => {
-          await supertestWithoutAuth
+        it(`should handle create action request appropriately when action type isn't registered`, async () => {
+          const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
@@ -77,34 +77,72 @@ export default function createActionTests({ getService }: FtrProviderContext) {
               description: 'My action',
               actionTypeId: 'test.unregistered-action-type',
               config: {},
-            })
-            .expect(400, {
-              statusCode: 400,
-              error: 'Bad Request',
-              message: 'Action type "test.unregistered-action-type" is not registered.',
             });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(400);
+              expect(response.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message: 'Action type "test.unregistered-action-type" is not registered.',
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
         });
 
-        it('should return 400 when payload is empty and invalid', async () => {
-          await supertestWithoutAuth
+        it('should handle create action request appropriately when payload is empty and invalid', async () => {
+          const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
-            .send({})
-            .expect(400, {
-              statusCode: 400,
-              error: 'Bad Request',
-              message:
-                'child "description" fails because ["description" is required]. child "actionTypeId" fails because ["actionTypeId" is required]',
-              validation: {
-                source: 'payload',
-                keys: ['description', 'actionTypeId'],
-              },
-            });
+            .send({});
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(400);
+              expect(response.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message:
+                  'child "description" fails because ["description" is required]. child "actionTypeId" fails because ["actionTypeId" is required]',
+                validation: {
+                  source: 'payload',
+                  keys: ['description', 'actionTypeId'],
+                },
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
         });
 
-        it(`should return 400 when config isn't valid`, async () => {
-          await supertestWithoutAuth
+        it(`should handle create action request appropriately when config isn't valid`, async () => {
+          const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
@@ -114,13 +152,32 @@ export default function createActionTests({ getService }: FtrProviderContext) {
               config: {
                 unencrypted: 'my unencrypted text',
               },
-            })
-            .expect(400, {
-              statusCode: 400,
-              error: 'Bad Request',
-              message:
-                'error validating action type secrets: [encrypted]: expected value of type [string] but got [undefined]',
             });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(400);
+              expect(response.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message:
+                  'error validating action type secrets: [encrypted]: expected value of type [string] but got [undefined]',
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
         });
       });
     }

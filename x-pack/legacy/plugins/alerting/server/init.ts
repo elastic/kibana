@@ -70,7 +70,7 @@ export function init(server: Server) {
           read: [],
         },
         ui: [],
-        api: ['alerting'],
+        api: ['alerting-read', 'alerting-all'],
       },
       read: {
         savedObject: {
@@ -78,7 +78,7 @@ export function init(server: Server) {
           read: ['alert'],
         },
         ui: [],
-        api: ['alerting'],
+        api: ['alerting-read'],
       },
     },
   });

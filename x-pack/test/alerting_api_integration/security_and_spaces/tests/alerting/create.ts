@@ -42,11 +42,11 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'no_kibana_privileges at space1':
             case 'global_read at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(403);
+              expect(response.statusCode).to.eql(404);
               expect(response.body).to.eql({
-                statusCode: 403,
-                error: 'Forbidden',
-                message: 'Unable to create alert',
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
               });
               break;
             case 'superuser at space1':
@@ -62,6 +62,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 createdBy: user.username,
                 interval: '10s',
                 scheduledTaskId: response.body.scheduledTaskId,
+                updatedBy: user.username,
               });
               expect(typeof response.body.scheduledTaskId).to.be('string');
               const { _source: taskRecord } = await getScheduledTask(response.body.scheduledTaskId);
@@ -88,11 +89,11 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'no_kibana_privileges at space1':
             case 'global_read at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(403);
+              expect(response.statusCode).to.eql(404);
               expect(response.body).to.eql({
-                statusCode: 403,
-                error: 'Forbidden',
-                message: 'Unable to create alert',
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
               });
               break;
             case 'superuser at space1':
@@ -121,6 +122,13 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'no_kibana_privileges at space1':
             case 'global_read at space1':
             case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(400);
@@ -135,26 +143,45 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it('should return 400 when payload is empty and invalid', async () => {
-          await supertestWithoutAuth
+        it('should handle create alert request appropriately when payload is empty and invalid', async () => {
+          const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
-            .send({})
-            .expect(400, {
-              statusCode: 400,
-              error: 'Bad Request',
-              message:
-                'child "alertTypeId" fails because ["alertTypeId" is required]. child "interval" fails because ["interval" is required]. child "alertTypeParams" fails because ["alertTypeParams" is required]. child "actions" fails because ["actions" is required]',
-              validation: {
-                source: 'payload',
-                keys: ['alertTypeId', 'interval', 'alertTypeParams', 'actions'],
-              },
-            });
+            .send({});
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(400);
+              expect(response.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message:
+                  'child "alertTypeId" fails because ["alertTypeId" is required]. child "interval" fails because ["interval" is required]. child "alertTypeParams" fails because ["alertTypeParams" is required]. child "actions" fails because ["actions" is required]',
+                validation: {
+                  source: 'payload',
+                  keys: ['alertTypeId', 'interval', 'alertTypeParams', 'actions'],
+                },
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
         });
 
-        it(`should return 400 when alertTypeParams isn't valid`, async () => {
-          await supertestWithoutAuth
+        it(`should handle create alert request appropriately when alertTypeParams isn't valid`, async () => {
+          const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
@@ -162,49 +189,106 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               getTestAlertData({
                 alertTypeId: 'test.validation',
               })
-            )
-            .expect(400, {
-              statusCode: 400,
-              error: 'Bad Request',
-              message:
-                'alertTypeParams invalid: [param1]: expected value of type [string] but got [undefined]',
-            });
+            );
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(400);
+              expect(response.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message:
+                  'alertTypeParams invalid: [param1]: expected value of type [string] but got [undefined]',
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
         });
 
-        it('should return 400 when interval is wrong syntax', async () => {
-          await supertestWithoutAuth
+        it('should handle create alert request appropriately when interval is wrong syntax', async () => {
+          const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
-            .send(getTestAlertData(getTestAlertData({ interval: '10x' })))
-            .expect(400, {
-              statusCode: 400,
-              error: 'Bad Request',
-              message:
-                'child "interval" fails because ["interval" with value "10x" fails to match the seconds (5s) pattern, "interval" with value "10x" fails to match the minutes (5m) pattern, "interval" with value "10x" fails to match the hours (5h) pattern, "interval" with value "10x" fails to match the days (5d) pattern]',
-              validation: {
-                source: 'payload',
-                keys: ['interval', 'interval', 'interval', 'interval'],
-              },
-            });
+            .send(getTestAlertData(getTestAlertData({ interval: '10x' })));
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(400);
+              expect(response.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message:
+                  'child "interval" fails because ["interval" with value "10x" fails to match the seconds (5s) pattern, "interval" with value "10x" fails to match the minutes (5m) pattern, "interval" with value "10x" fails to match the hours (5h) pattern, "interval" with value "10x" fails to match the days (5d) pattern]',
+                validation: {
+                  source: 'payload',
+                  keys: ['interval', 'interval', 'interval', 'interval'],
+                },
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
         });
 
-        it('should return 400 when interval is 0', async () => {
-          await supertestWithoutAuth
+        it('should handle create alert request appropriately when interval is 0', async () => {
+          const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
-            .send(getTestAlertData(getTestAlertData({ interval: '0s' })))
-            .expect(400, {
-              statusCode: 400,
-              error: 'Bad Request',
-              message:
-                'child "interval" fails because ["interval" with value "0s" fails to match the seconds (5s) pattern, "interval" with value "0s" fails to match the minutes (5m) pattern, "interval" with value "0s" fails to match the hours (5h) pattern, "interval" with value "0s" fails to match the days (5d) pattern]',
-              validation: {
-                source: 'payload',
-                keys: ['interval', 'interval', 'interval', 'interval'],
-              },
-            });
+            .send(getTestAlertData(getTestAlertData({ interval: '0s' })));
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(400);
+              expect(response.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message:
+                  'child "interval" fails because ["interval" with value "0s" fails to match the seconds (5s) pattern, "interval" with value "0s" fails to match the minutes (5m) pattern, "interval" with value "0s" fails to match the hours (5h) pattern, "interval" with value "0s" fails to match the days (5d) pattern]',
+                validation: {
+                  source: 'payload',
+                  keys: ['interval', 'interval', 'interval', 'interval'],
+                },
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
         });
       });
     }
