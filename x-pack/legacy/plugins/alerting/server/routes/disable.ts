@@ -11,6 +11,7 @@ export function disableAlertRoute(server: Hapi.Server) {
     method: 'POST',
     path: '/api/alert/{id}/_disable',
     options: {
+      tags: ['access:alerting-all'],
       response: {
         emptyStatusCode: 204,
       },
