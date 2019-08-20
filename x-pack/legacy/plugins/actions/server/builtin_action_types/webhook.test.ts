@@ -43,7 +43,7 @@ describe('secrets validation', () => {
 describe('config validation', () => {
   const defaultValues: Record<string, any> = {
     scheme: 'http',
-    method: 'get',
+    method: 'post',
     path: null,
     url: null,
     headers: null,
@@ -101,7 +101,7 @@ describe('config validation', () => {
   });
 
   test('config validation passes when valid methods are provided', () => {
-    ['head', 'get', 'post', 'put', 'delete'].forEach(method => {
+    ['post', 'put'].forEach(method => {
       const config: Record<string, any> = {
         host: 'mylisteningserver',
         port: 9200,
@@ -124,11 +124,8 @@ describe('config validation', () => {
       validateConfig(actionType, config);
     }).toThrowErrorMatchingInlineSnapshot(`
 "error validating action type config: [method]: types that failed validation:
-- [method.0]: expected value to equal [head] but got [https]
-- [method.1]: expected value to equal [get] but got [https]
-- [method.2]: expected value to equal [post] but got [https]
-- [method.3]: expected value to equal [put] but got [https]
-- [method.4]: expected value to equal [delete] but got [https]"
+- [method.0]: expected value to equal [post] but got [https]
+- [method.1]: expected value to equal [put] but got [https]"
 `);
   });
 

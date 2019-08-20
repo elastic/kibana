@@ -29,18 +29,9 @@ const ConfigSchema = schema.object(
     scheme: schema.oneOf([schema.literal('http'), schema.literal('https')], {
       defaultValue: 'http',
     }),
-    method: schema.oneOf(
-      [
-        schema.literal('head'),
-        schema.literal('get'),
-        schema.literal('post'),
-        schema.literal('put'),
-        schema.literal('delete'),
-      ],
-      {
-        defaultValue: 'get',
-      }
-    ),
+    method: schema.oneOf([schema.literal('post'), schema.literal('put')], {
+      defaultValue: 'post',
+    }),
     path: nullableType(schema.string()),
     url: nullableType(schema.string()),
     headers: nullableType(HeadersSchema),
