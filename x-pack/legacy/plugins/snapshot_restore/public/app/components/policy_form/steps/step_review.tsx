@@ -5,7 +5,7 @@
  */
 import React, { Fragment, useState } from 'react';
 import {
-  EuiCodeEditor,
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiDescriptionList,
@@ -282,25 +282,18 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
     </Fragment>
   );
 
-  const renderJsonTab = () => (
-    <Fragment>
-      <EuiSpacer size="m" />
-      <EuiCodeEditor
-        mode="json"
-        theme="textmate"
-        isReadOnly
-        setOptions={{ maxLines: Infinity }}
-        value={JSON.stringify(serializePolicy(policy), null, 2)}
-        editorProps={{ $blockScrolling: Infinity }}
-        aria-label={
-          <FormattedMessage
-            id="xpack.snapshotRestore.policyForm.stepReview.jsonTab.jsonAriaLabel"
-            defaultMessage="Policy to be saved"
-          />
-        }
-      />
-    </Fragment>
-  );
+  const renderRequestTab = () => {
+    const endpoint = `PUT _slm/policy/${name}`;
+    const json = JSON.stringify(serializePolicy(policy), null, 2);
+    return (
+      <Fragment>
+        <EuiSpacer size="m" />
+        <EuiCodeBlock language="json" isCopyable>
+          {`${endpoint}\n${json}`}
+        </EuiCodeBlock>
+      </Fragment>
+    );
+  };
 
   return (
     <Fragment>
@@ -324,10 +317,10 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
           },
           {
             id: 'json',
-            name: i18n.translate('xpack.snapshotRestore.policyForm.stepReview.jsonTabTitle', {
-              defaultMessage: 'JSON',
+            name: i18n.translate('xpack.snapshotRestore.policyForm.stepReview.requestTabTitle', {
+              defaultMessage: 'Request',
             }),
-            content: renderJsonTab(),
+            content: renderRequestTab(),
           },
         ]}
       />
