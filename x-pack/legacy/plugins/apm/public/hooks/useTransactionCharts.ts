@@ -8,7 +8,7 @@ import { useMemo } from 'react';
 import { getTransactionCharts } from '../selectors/chartSelectors';
 import { useFetcher } from './useFetcher';
 import { useUrlParams } from './useUrlParams';
-import { callApmApi } from '../services/rest/callApi';
+import { callApmApi } from '../services/rest/callApmApi';
 
 export function useTransactionCharts() {
   const {

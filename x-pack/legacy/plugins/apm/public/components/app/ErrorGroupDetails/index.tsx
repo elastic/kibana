@@ -27,7 +27,7 @@ import { ErrorDistribution } from './Distribution';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useTrackPageview } from '../../../../../infra/public';
-import { callApmApi } from '../../../services/rest/callApi';
+import { callApmApi } from '../../../services/rest/callApmApi';
 
 const Titles = styled.div`
   margin-bottom: ${px(units.plus)};

@@ -18,7 +18,7 @@ import { useTrackPageview } from '../../../../../infra/public';
 import { useCore } from '../../../hooks/useCore';
 import { PROJECTION } from '../../../../common/projections/typings';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
-import { callApmApi } from '../../../services/rest/callApi';
+import { callApmApi } from '../../../services/rest/callApmApi';
 
 const initalData = {
   items: [],

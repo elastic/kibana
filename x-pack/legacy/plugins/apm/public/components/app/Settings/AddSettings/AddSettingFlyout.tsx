@@ -27,7 +27,7 @@ import { AddSettingFlyoutBody } from './AddSettingFlyoutBody';
 import { Config } from '../SettingsList';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../../common/environment_filter_values';
-import { callApmApi } from '../../../../services/rest/callApi';
+import { callApmApi } from '../../../../services/rest/callApmApi';
 
 interface Props {
   onClose: () => void;

@@ -8,7 +8,7 @@ import { MetricsChartsByAgentAPIResponse } from '../../server/lib/metrics/get_me
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useUiFilters } from '../context/UrlParamsContext';
 import { useFetcher } from './useFetcher';
-import { callApmApi } from '../services/rest/callApi';
+import { callApmApi } from '../services/rest/callApmApi';
 
 const INITIAL_DATA: MetricsChartsByAgentAPIResponse = {
   charts: []

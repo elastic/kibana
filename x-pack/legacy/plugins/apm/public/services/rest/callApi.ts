@@ -10,8 +10,6 @@ import LRU from 'lru-cache';
 import hash from 'object-hash';
 import { kfetch, KFetchOptions } from 'ui/kfetch';
 import { KFetchKibanaOptions } from 'ui/kfetch/kfetch';
-import { APMAPI } from '../../../server/routes/create_apm_api';
-import { Client } from '../../../server/routes/typings';
 
 function fetchOptionsWithDebug(fetchOptions: KFetchOptions) {
   const debugEnabled =
@@ -56,26 +54,6 @@ export async function callApi<T = void>(
 
   return res;
 }
-
-export const callApmApi: Client<APMAPI['_S']> = (options => {
-  const { pathname, params = {}, ...opts } = options;
-
-  const path = (params.path || {}) as Record<string, any>;
-  const body = params.body ? JSON.stringify(params.body) : undefined;
-  const query = params.query || {};
-
-  return callApi({
-    ...opts,
-    pathname: Object.keys(path || {}).reduce((acc, paramName) => {
-      if (!(paramName in path)) {
-        throw new Error(`Specified unexpected path parameter ${paramName}`);
-      }
-      return acc.replace(`{${paramName}}`, path[paramName]);
-    }, pathname),
-    body,
-    query
-  }) as any;
-}) as Client<APMAPI['_S']>;
 
 // only cache items that has a time range with `start` and `end` params,
 // and where `end` is not a timestamp in the future

@@ -12,7 +12,7 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useTrackPageview } from '../../../../../infra/public';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { PROJECTION } from '../../../../common/projections/typings';
-import { callApmApi } from '../../../services/rest/callApi';
+import { callApmApi } from '../../../services/rest/callApmApi';
 
 export function TraceOverview() {
   const { urlParams, uiFilters } = useUrlParams();

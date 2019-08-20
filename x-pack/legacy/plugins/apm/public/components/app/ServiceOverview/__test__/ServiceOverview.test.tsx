@@ -8,7 +8,7 @@ import React from 'react';
 import { render, wait, waitForElement } from 'react-testing-library';
 import 'react-testing-library/cleanup-after-each';
 import { toastNotifications } from 'ui/notify';
-import * as callApi from '../../../../services/rest/callApi';
+import * as callApmApi from '../../../../services/rest/callApmApi';
 import { ServiceOverview } from '..';
 import * as urlParamsHooks from '../../../../hooks/useUrlParams';
 import * as coreHooks from '../../../../hooks/useCore';
@@ -66,7 +66,7 @@ describe('Service Overview -> View', () => {
   it('should render services, when list is not empty', async () => {
     // mock rest requests
     const dataFetchingSpy = jest
-      .spyOn(callApi, 'callApmApi')
+      .spyOn(callApmApi, 'callApmApi')
       .mockResolvedValue({
         hasLegacyData: false,
         hasHistoricalData: true,
@@ -101,7 +101,7 @@ describe('Service Overview -> View', () => {
 
   it('should render getting started message, when list is empty and no historical data is found', async () => {
     const dataFetchingSpy = jest
-      .spyOn(callApi, 'callApmApi')
+      .spyOn(callApmApi, 'callApmApi')
       .mockResolvedValue({
         hasLegacyData: false,
         hasHistoricalData: false,
@@ -125,7 +125,7 @@ describe('Service Overview -> View', () => {
 
   it('should render empty message, when list is empty and historical data is found', async () => {
     const dataFetchingSpy = jest
-      .spyOn(callApi, 'callApmApi')
+      .spyOn(callApmApi, 'callApmApi')
       .mockResolvedValue({
         hasLegacyData: false,
         hasHistoricalData: true,
@@ -145,7 +145,7 @@ describe('Service Overview -> View', () => {
     // create spies
     const toastSpy = jest.spyOn(toastNotifications, 'addWarning');
     const dataFetchingSpy = jest
-      .spyOn(callApi, 'callApmApi')
+      .spyOn(callApmApi, 'callApmApi')
       .mockResolvedValue({
         hasLegacyData: true,
         hasHistoricalData: true,
@@ -168,7 +168,7 @@ describe('Service Overview -> View', () => {
     // create spies
     const toastSpy = jest.spyOn(toastNotifications, 'addWarning');
     const dataFetchingSpy = jest
-      .spyOn(callApi, 'callApmApi')
+      .spyOn(callApmApi, 'callApmApi')
       .mockResolvedValue({
         hasLegacyData: false,
         hasHistoricalData: true,

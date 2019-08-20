@@ -9,7 +9,7 @@ import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useUiFilters } from '../context/UrlParamsContext';
 import { useFetcher } from './useFetcher';
 import { TransactionGroupListAPIResponse } from '../../server/lib/transaction_groups';
-import { callApmApi } from '../services/rest/callApi';
+import { callApmApi } from '../services/rest/callApmApi';
 
 const getRelativeImpact = (
   impact: number,

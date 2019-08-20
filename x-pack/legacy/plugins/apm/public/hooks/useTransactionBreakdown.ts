@@ -7,7 +7,7 @@
 import { useRef } from 'react';
 import { useFetcher } from './useFetcher';
 import { useUrlParams } from './useUrlParams';
-import { callApmApi } from '../services/rest/callApi';
+import { callApmApi } from '../services/rest/callApmApi';
 
 export function useTransactionBreakdown() {
   const {

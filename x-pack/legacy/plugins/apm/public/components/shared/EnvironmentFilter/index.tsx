@@ -16,7 +16,7 @@ import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED
 } from '../../../../common/environment_filter_values';
-import { callApmApi } from '../../../services/rest/callApi';
+import { callApmApi } from '../../../services/rest/callApmApi';
 
 function updateEnvironmentUrl(
   location: ReturnType<typeof useLocation>,

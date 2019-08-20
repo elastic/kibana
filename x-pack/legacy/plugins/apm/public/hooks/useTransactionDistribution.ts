@@ -7,7 +7,7 @@
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
 import { useUiFilters } from '../context/UrlParamsContext';
-import { callApmApi } from '../services/rest/callApi';
+import { callApmApi } from '../services/rest/callApmApi';
 
 const INITIAL_DATA = {
   buckets: [],

@@ -5,7 +5,7 @@
  */
 
 import { memoize } from 'lodash';
-import { callApmApi } from './callApi';
+import { callApmApi } from './callApmApi';
 
 export interface ISavedObject {
   attributes: {

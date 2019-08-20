@@ -13,7 +13,7 @@ import { TransactionOverview } from '../TransactionOverview';
 import { ServiceMetrics } from '../ServiceMetrics';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { isRumAgentName } from '../../../../common/agent_name';
-import { callApmApi } from '../../../services/rest/callApi';
+import { callApmApi } from '../../../services/rest/callApmApi';
 
 interface Props {
   urlParams: IUrlParams;

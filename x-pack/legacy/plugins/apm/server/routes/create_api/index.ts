@@ -15,7 +15,8 @@ import {
   HttpMethod,
   Route,
   Params
-} from './typings';
+} from '../typings';
+import { debugRt } from '../default_api_types';
 
 export function createApi() {
   const factoryFns: Array<RouteFactoryFn<any, any, any, any>> = [];
@@ -45,7 +46,7 @@ export function createApi() {
             },
             route,
             {
-              handler: async (request: Request, h: ResponseToolkit) => {
+              handler: (request: Request, h: ResponseToolkit) => {
                 const paramMap = {
                   path: request.params,
                   body: request.payload,
@@ -57,6 +58,8 @@ export function createApi() {
                 >).reduce(
                   (acc, key) => {
                     let codec = params[key];
+                    const value = paramMap[key];
+
                     if (!codec) return acc;
 
                     // Use exact props where possible (only possible for types with props)
@@ -64,10 +67,17 @@ export function createApi() {
                       codec = t.exact(codec);
                     }
 
-                    const result = codec.decode(paramMap[key]);
+                    // add _debug query parameter to all routes
+                    if (key === 'query') {
+                      codec = t.intersection([codec, debugRt]);
+                    }
+
+                    const result = codec.decode(value);
+
                     if (result.isLeft()) {
                       throw Boom.badRequest(PathReporter.report(result)[0]);
                     }
+
                     return {
                       ...acc,
                       [key]: result.value

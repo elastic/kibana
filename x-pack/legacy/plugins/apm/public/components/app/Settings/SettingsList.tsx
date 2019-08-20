@@ -28,7 +28,7 @@ import { AgentConfigurationListAPIResponse } from '../../../../server/lib/settin
 import { AddSettingsFlyout } from './AddSettings/AddSettingFlyout';
 import { APMLink } from '../../shared/Links/apm/APMLink';
 import { LoadingStatePrompt } from '../../shared/LoadingStatePrompt';
-import { callApmApi } from '../../../services/rest/callApi';
+import { callApmApi } from '../../../services/rest/callApmApi';
 
 export type Config = AgentConfigurationListAPIResponse[0];
 
