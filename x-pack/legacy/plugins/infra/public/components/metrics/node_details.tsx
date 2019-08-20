@@ -116,7 +116,7 @@ export const NodeDetails = ({ metadata }: Props) => {
     <NodeDetailsContainer>
       <Controls>
         <EuiButtonIcon
-          iconType={isOpen ? 'arrowDown' : 'arrowUp'}
+          iconType={isOpen ? 'arrowUp' : 'arrowDown'}
           onClick={handleClick}
           aria-label={i18n.translate('xpack.infra.nodeDetails.labels.showMoreDetails', {
             defaultMessage: 'Show more details',
