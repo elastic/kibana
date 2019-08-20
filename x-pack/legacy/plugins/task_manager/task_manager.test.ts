@@ -42,26 +42,6 @@ describe('TaskManager', () => {
 
   afterEach(() => clock.restore());
 
-  test('disallows schedule before init', async () => {
-    const client = new TaskManager(taskManagerOpts);
-    const task = {
-      taskType: 'foo',
-      params: {},
-      state: {},
-    };
-    await expect(client.schedule(task)).rejects.toThrow(/^NotInitialized: .*/i);
-  });
-
-  test('disallows fetch before init', async () => {
-    const client = new TaskManager(taskManagerOpts);
-    await expect(client.fetch({})).rejects.toThrow(/^NotInitialized: .*/i);
-  });
-
-  test('disallows remove before init', async () => {
-    const client = new TaskManager(taskManagerOpts);
-    await expect(client.remove('23')).rejects.toThrow(/^NotInitialized: .*/i);
-  });
-
   test('allows middleware registration before init', () => {
     const client = new TaskManager(taskManagerOpts);
     const middleware = {
