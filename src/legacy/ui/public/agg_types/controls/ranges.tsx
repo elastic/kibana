@@ -51,6 +51,7 @@ interface RangeValuesModel extends RangeValues {
 
 interface RangesParamEditorProps {
   dataTestSubj?: string;
+  error?: React.ReactNode;
   value?: RangeValues[];
   hidePlaceholders?: boolean;
   setValue(value: RangeValues[]): void;
@@ -63,6 +64,7 @@ interface RangesParamEditorProps {
 function RangesParamEditor({
   addRangeValues,
   dataTestSubj = 'range',
+  error,
   value = [],
   hidePlaceholders,
   setValue,
@@ -201,14 +203,7 @@ function RangesParamEditor({
           );
         })}
 
-        {hasInvalidRange && (
-          <EuiFormErrorText>
-            <FormattedMessage
-              id="kbnVislibVisTypes.controls.gaugeOptions.errorText"
-              defaultMessage="Each range should be greater than previous."
-            />
-          </EuiFormErrorText>
-        )}
+        {hasInvalidRange && error && <EuiFormErrorText>{error}</EuiFormErrorText>}
 
         <EuiSpacer size="s" />
         <EuiFlexItem>

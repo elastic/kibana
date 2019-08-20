@@ -30,7 +30,7 @@ export interface GaugeVisParams {
     readonly orientation: 'vertical';
     readonly type: 'meter';
     alignment: 'automatic' | 'horizontal' | 'vertical';
-    colorsRange: Array<{ from: number; to: number }>;
+    colorsRange: Array<{ from?: number; to?: number }>;
     colorSchema: ColorSchemas;
     extendRange: boolean;
     invertColors: boolean;
