@@ -5,11 +5,13 @@
  */
 import Hapi from 'hapi';
 import { initPlugin as initSlack } from './slack_simulation';
+import { initPlugin as initWebhook } from './webhook_simulation';
 
 const NAME = 'actions-FTS-external-service-simulators';
 
 export enum ExternalServiceSimulator {
   SLACK = 'slack',
+  WEBHOOK = 'webhook',
 }
 
 export function getExternalServiceSimulatorPath(service: ExternalServiceSimulator): string {
@@ -25,6 +27,7 @@ export default function(kibana: any) {
     name: NAME,
     init: (server: Hapi.Server) => {
       initSlack(server, getExternalServiceSimulatorPath(ExternalServiceSimulator.SLACK));
+      initWebhook(server, getExternalServiceSimulatorPath(ExternalServiceSimulator.WEBHOOK));
     },
   });
 }
