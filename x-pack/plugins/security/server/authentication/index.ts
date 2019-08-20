@@ -14,7 +14,12 @@ import { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 import { Authenticator, ProviderSession } from './authenticator';
 import { LegacyAPI } from '../plugin';
-import { createAPIKey, CreateAPIKeyOptions } from './api_keys';
+import {
+  createAPIKey,
+  CreateAPIKeyOptions,
+  invalidateAPIKey,
+  InvalidateAPIKeyOptions,
+} from './api_keys';
 
 export { canRedirectRequest } from './can_redirect_request';
 export { Authenticator, ProviderLoginAttempt } from './authenticator';
@@ -141,6 +146,13 @@ export async function setupAuthentication({
     getCurrentUser,
     createAPIKey: (request: KibanaRequest, body: CreateAPIKeyOptions['body']) =>
       createAPIKey({
+        body,
+        loggers,
+        isSecurityFeatureDisabled,
+        callAsCurrentUser: clusterClient.asScoped(request).callAsCurrentUser,
+      }),
+    invalidateAPIKey: (request: KibanaRequest, body: InvalidateAPIKeyOptions['body']) =>
+      invalidateAPIKey({
         body,
         loggers,
         isSecurityFeatureDisabled,

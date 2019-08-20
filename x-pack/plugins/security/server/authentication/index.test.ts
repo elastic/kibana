@@ -5,7 +5,7 @@
  */
 
 jest.mock('./authenticator');
-jest.mock('./api_keys', () => ({ createAPIKey: jest.fn() }));
+jest.mock('./api_keys', () => ({ createAPIKey: jest.fn(), invalidateAPIKey: jest.fn() }));
 
 import Boom from 'boom';
 import { errors } from 'elasticsearch';
@@ -35,7 +35,12 @@ import { ConfigType, createConfig$ } from '../config';
 import { LegacyAPI } from '../plugin';
 import { AuthenticationResult } from './authentication_result';
 import { setupAuthentication } from '.';
-import { CreateAPIKeyResult, CreateAPIKeyOptions } from './api_keys';
+import {
+  CreateAPIKeyResult,
+  CreateAPIKeyOptions,
+  InvalidateAPIKeyResult,
+  InvalidateAPIKeyOptions,
+} from './api_keys';
 
 function mockXPackFeature({ isEnabled = true }: Partial<{ isEnabled: boolean }> = {}) {
   return {
@@ -376,6 +381,39 @@ describe('setupAuthentication()', () => {
         success: true,
       });
       expect(createAPIKeyMock).toHaveBeenCalledWith({
+        body: options,
+        loggers: mockSetupAuthenticationParams.loggers,
+        callAsCurrentUser: mockScopedClusterClient.callAsCurrentUser,
+        isSecurityFeatureDisabled: expect.any(Function),
+      });
+    });
+  });
+
+  describe('invalidateAPIKey()', () => {
+    let invalidateAPIKey: (
+      request: KibanaRequest,
+      body: InvalidateAPIKeyOptions['body']
+    ) => Promise<InvalidateAPIKeyResult | null>;
+    beforeEach(async () => {
+      invalidateAPIKey = (await setupAuthentication(mockSetupAuthenticationParams))
+        .invalidateAPIKey;
+    });
+
+    it('calls invalidateAPIKey with given arguments', async () => {
+      const { invalidateAPIKey: invalidateAPIKeyMock } = jest.requireMock('./api_keys');
+      const options = {
+        id: '123',
+        name: 'my-api-key',
+        realm_name: 'native1',
+        username: 'myuser',
+      };
+      invalidateAPIKeyMock.mockResolvedValueOnce({ success: true });
+      await expect(
+        invalidateAPIKey(httpServerMock.createKibanaRequest(), options)
+      ).resolves.toEqual({
+        success: true,
+      });
+      expect(invalidateAPIKeyMock).toHaveBeenCalledWith({
         body: options,
         loggers: mockSetupAuthenticationParams.loggers,
         callAsCurrentUser: mockScopedClusterClient.callAsCurrentUser,

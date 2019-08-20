@@ -18,7 +18,12 @@ import { XPackInfo } from '../../../legacy/plugins/xpack_main/server/lib/xpack_i
 import { AuthenticatedUser } from '../common/model';
 import { Authenticator, setupAuthentication } from './authentication';
 import { createConfig$ } from './config';
-import { CreateAPIKeyOptions, CreateAPIKeyResult } from './authentication/api_keys';
+import {
+  CreateAPIKeyOptions,
+  CreateAPIKeyResult,
+  InvalidateAPIKeyOptions,
+  InvalidateAPIKeyResult,
+} from './authentication/api_keys';
 
 /**
  * Describes a set of APIs that is available in the legacy platform only and required by this plugin
@@ -42,6 +47,10 @@ export interface PluginSetupContract {
       request: KibanaRequest,
       body: CreateAPIKeyOptions['body']
     ) => Promise<CreateAPIKeyResult | null>;
+    invalidateAPIKey: (
+      request: KibanaRequest,
+      body: InvalidateAPIKeyOptions['body']
+    ) => Promise<InvalidateAPIKeyResult | null>;
   };
 
   config: RecursiveReadonly<{
