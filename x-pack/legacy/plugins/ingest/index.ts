@@ -8,6 +8,7 @@ import { resolve } from 'path';
 import { PLUGIN } from './common/constants';
 import { CONFIG_PREFIX } from './common/constants/plugin';
 import { initServerWithKibana } from './server/kibana.index';
+import { mappings } from './server/mappings';
 
 export const config = Joi.object({
   enabled: Joi.boolean().default(true),
@@ -20,6 +21,9 @@ export function ingest(kibana: any) {
     publicDir: resolve(__dirname, 'public'),
     config: () => config,
     configPrefix: CONFIG_PREFIX,
+    uiExports: {
+      mappings,
+    },
     init(server: any) {
       initServerWithKibana(server);
     },

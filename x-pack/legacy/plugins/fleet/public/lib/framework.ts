@@ -31,30 +31,6 @@ export class FrameworkLib {
     );
   }
 
-  public versionGreaterThen(version: string) {
-    const pa = this.adapter.version.split('.');
-    const pb = version.split('.');
-    for (let i = 0; i < 3; i++) {
-      const na = Number(pa[i]);
-      const nb = Number(pb[i]);
-      // version is greater
-      if (na > nb) {
-        return true;
-      }
-      // version is less then
-      if (nb > na) {
-        return false;
-      }
-      if (!isNaN(na) && isNaN(nb)) {
-        return true;
-      }
-      if (isNaN(na) && !isNaN(nb)) {
-        return false;
-      }
-    }
-    return true;
-  }
-
   public currentUserHasOneOfRoles(roles: string[]) {
     // If the user has at least one of the roles requested, the returnd difference will be less
     // then the orig array size. difference only compares based on the left side arg
