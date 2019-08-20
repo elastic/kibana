@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import { Storage } from 'ui/storage';
 import { UiSettingsClientContract } from 'src/core/public';
-import { DimensionPriority, OperationMetadata } from '../types';
+import { DimensionPriority, OperationMetadata, StateSetter } from '../types';
 import {
   IndexPatternColumn,
   IndexPatternField,
@@ -60,7 +60,7 @@ export function getOperations(): OperationType[] {
 
 export interface ParamEditorProps {
   state: IndexPatternPrivateState;
-  setState: (newState: IndexPatternPrivateState) => void;
+  setState: StateSetter<IndexPatternPrivateState>;
   columnId: string;
   layerId: string;
   uiSettings: UiSettingsClientContract;

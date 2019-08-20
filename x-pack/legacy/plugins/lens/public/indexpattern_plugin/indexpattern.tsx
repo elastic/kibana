@@ -302,7 +302,7 @@ export function getIndexPatternDatasource({
             <I18nProvider>
               <IndexPatternDimensionPanel
                 state={state}
-                setState={newState => setState(newState)}
+                setState={setState}
                 uiSettings={uiSettings}
                 storage={storage}
                 layerId={props.layerId}
@@ -314,10 +314,7 @@ export function getIndexPatternDatasource({
         },
 
         renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps) => {
-          render(
-            <LayerPanel state={state} setState={newState => setState(newState)} {...props} />,
-            domElement
-          );
+          render(<LayerPanel state={state} setState={setState} {...props} />, domElement);
         },
 
         removeColumnInTableSpec: (columnId: string) => {
