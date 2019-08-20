@@ -5,8 +5,7 @@
  */
 
 import open from 'opn';
-// @ts-ignore
-import * as puppeteer from 'puppeteer-core';
+import { Page } from 'puppeteer';
 import { parse as parseUrl } from 'url';
 import { ViewZoomWidthHeight } from '../../../../export_types/common/layouts/layout';
 import {
@@ -31,11 +30,11 @@ interface WaitForSelectorOpts {
 const WAIT_FOR_DELAY_MS: number = 100;
 
 export class HeadlessChromiumDriver {
-  private readonly page: puppeteer.Page;
+  private readonly page: Page;
   private readonly logger: Logger;
   private readonly inspect: boolean;
 
-  constructor(page: puppeteer.Page, { logger, inspect }: ChromiumDriverOptions) {
+  constructor(page: Page, { logger, inspect }: ChromiumDriverOptions) {
     this.page = page;
     // @ts-ignore https://github.com/elastic/kibana/issues/32140
     this.logger = logger.clone(['headless-chromium-driver']);
