@@ -23,7 +23,7 @@ import { Legacy } from '../../../../kibana';
 // eslint-disable-next-line import/no-default-export
 export default function DataPlugin(kibana: any) {
   const config: Legacy.PluginSpecOptions = {
-    id: 'data',
+    id: 'data2',
     require: ['elasticsearch'],
     publicDir: resolve(__dirname, 'public'),
     config: (Joi: any) => {
