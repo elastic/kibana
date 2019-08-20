@@ -56,22 +56,7 @@ export class AlertInstance {
   }
 
   isObsolete(throttle?: string) {
-    const isNotFiring = !this.shouldFire(throttle);
-    let isAGroupStillThrottled = false;
-
-    if (throttle && this.meta.groups) {
-      for (const group of Object.keys(this.meta.groups)) {
-        if (
-          this.meta.groups[group].lastFired !== undefined &&
-          this.meta.groups[group].lastFired! + parseDuration(throttle) > Date.now()
-        ) {
-          // This group is still throttled and makes this instance not obsolete
-          isAGroupStillThrottled = true;
-        }
-      }
-    }
-
-    return isNotFiring && !isAGroupStillThrottled;
+    return !this.shouldFire(throttle);
   }
 
   getFireOptions() {

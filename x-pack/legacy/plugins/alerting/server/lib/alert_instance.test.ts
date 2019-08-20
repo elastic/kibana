@@ -180,7 +180,7 @@ describe('isObsolete', () => {
     expect(alertInstance.isObsolete()).toEqual(false);
   });
 
-  test('returns false when some groups are still throttled', () => {
+  test(`returns true when some groups are still throttled but didn't fire`, () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
       meta: {
@@ -191,10 +191,10 @@ describe('isObsolete', () => {
         },
       },
     });
-    expect(alertInstance.isObsolete('1m')).toEqual(false);
+    expect(alertInstance.isObsolete('1m')).toEqual(true);
   });
 
-  test('returns true when throttle is expired', () => {
+  test(`returns true when throttle is expired and didn't fire`, () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
       meta: {
