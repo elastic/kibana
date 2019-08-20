@@ -202,7 +202,7 @@ export class ToolsControl extends Component {
       </EuiPopover>
     );
 
-    if (!this.props.drawState) {
+    if (!this.props.isDrawingFilter) {
       return toolsPopoverButton;
     }
 
