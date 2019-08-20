@@ -17,16 +17,36 @@
  * under the License.
  */
 
-import './courier';
+import { SearchSource } from 'ui/courier';
 
-export { SearchSourceProvider } from './search_source';
+interface InspectorStat {
+  label: string;
+  value: string;
+  description: string;
+}
 
-export {
-  addSearchStrategy,
-  hasSearchStategyForIndexPattern,
-  isDefaultTypeIndexPattern,
-  SearchError,
-  getSearchErrorType,
-} from './search_strategy';
+interface RequestInspectorStats {
+  indexPattern: InspectorStat;
+  indexPatternId: InspectorStat;
+}
 
-export * from './utils/courier_inspector_utils';
+interface ResponseInspectorStats {
+  queryTime: InspectorStat;
+  hitsTotal: InspectorStat;
+  hits: InspectorStat;
+  requestTime: InspectorStat;
+}
+
+interface Response {
+  took: number;
+  hits: {
+    total: number;
+    hits: any[];
+  };
+}
+
+export function getRequestInspectorStats(searchSource: SearchSource): RequestInspectorStats;
+export function getResponseInspectorStats(
+  searchSource: SearchSource,
+  resp: Response
+): ResponseInspectorStats;

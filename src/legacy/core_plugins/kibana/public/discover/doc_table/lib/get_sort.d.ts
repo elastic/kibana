@@ -17,16 +17,11 @@
  * under the License.
  */
 
-import './courier';
+import { StaticIndexPattern } from 'ui/index_patterns';
+import { SortOrder } from '../components/table_header/helpers';
 
-export { SearchSourceProvider } from './search_source';
-
-export {
-  addSearchStrategy,
-  hasSearchStategyForIndexPattern,
-  isDefaultTypeIndexPattern,
-  SearchError,
-  getSearchErrorType,
-} from './search_strategy';
-
-export * from './utils/courier_inspector_utils';
+export function getSort(
+  sort?: SortOrder[],
+  indexPattern?: StaticIndexPattern,
+  defaultSortOrder?: SortOrder
+): any;
