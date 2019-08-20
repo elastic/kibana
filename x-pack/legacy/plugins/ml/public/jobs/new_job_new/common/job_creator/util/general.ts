@@ -7,7 +7,11 @@
 import { idx } from '@kbn/elastic-idx';
 import { Job, Datafeed } from '../configs';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
-import { ML_JOB_AGGREGATION } from '../../../../../../common/constants/aggregation_types';
+import {
+  ML_JOB_AGGREGATION,
+  SPARSE_DATA_AGGREGATIONS,
+} from '../../../../../../common/constants/aggregation_types';
+import { EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
 
 // populate the detectors with Field and Agg objects loaded from the job capabilities service
 export function getRichDetectors(job: Job, datafeed: Datafeed) {
@@ -30,12 +34,14 @@ export function getRichDetectors(job: Job, datafeed: Datafeed) {
 
 function getDetectors(job: Job, datafeed: Datafeed) {
   let detectors = job.analysis_config.detectors;
+  const sparseData = determineSparseDataJob(job, datafeed);
 
   // if aggregations have been used in a single metric job and a distinct count detector
   // was used, we need to rebuild the detector.
   if (
     datafeed.aggregations !== undefined &&
-    job.analysis_config.detectors[0].function === ML_JOB_AGGREGATION.NON_ZERO_COUNT
+    job.analysis_config.detectors[0].function === ML_JOB_AGGREGATION.NON_ZERO_COUNT &&
+    sparseData === false
   ) {
     // distinct count detector, field has been removed.
     // determine field from datafeed aggregations
@@ -51,6 +57,64 @@ function getDetectors(job: Job, datafeed: Datafeed) {
         },
       ];
     }
+  } else {
+    // all other detectors.
+    detectors = detectors.map(d => {
+      // if a count function is used, add EVENT_RATE_FIELD_ID as its field
+      if (d.function === ML_JOB_AGGREGATION.COUNT) {
+        return { ...d, field_name: EVENT_RATE_FIELD_ID };
+      }
+      if (d.function === ML_JOB_AGGREGATION.HIGH_COUNT) {
+        return { ...d, field_name: EVENT_RATE_FIELD_ID };
+      }
+      if (d.function === ML_JOB_AGGREGATION.LOW_COUNT) {
+        return { ...d, field_name: EVENT_RATE_FIELD_ID };
+      }
+      // if sparse data functions were used, replace them with their non-sparse versions
+      // the sparse data flag has already been determined and set, so this information is not being lost.
+      if (d.function === ML_JOB_AGGREGATION.NON_ZERO_COUNT) {
+        return { ...d, field_name: EVENT_RATE_FIELD_ID, function: ML_JOB_AGGREGATION.COUNT };
+      }
+      if (d.function === ML_JOB_AGGREGATION.HIGH_NON_ZERO_COUNT) {
+        return { ...d, field_name: EVENT_RATE_FIELD_ID, function: ML_JOB_AGGREGATION.HIGH_COUNT };
+      }
+      if (d.function === ML_JOB_AGGREGATION.LOW_NON_ZERO_COUNT) {
+        return { ...d, field_name: EVENT_RATE_FIELD_ID, function: ML_JOB_AGGREGATION.LOW_COUNT };
+      }
+      if (d.function === ML_JOB_AGGREGATION.NON_NULL_SUM) {
+        return { ...d, function: ML_JOB_AGGREGATION.SUM };
+      }
+      if (d.function === ML_JOB_AGGREGATION.HIGH_NON_NULL_SUM) {
+        return { ...d, function: ML_JOB_AGGREGATION.HIGH_SUM };
+      }
+      if (d.function === ML_JOB_AGGREGATION.LOW_NON_NULL_SUM) {
+        return { ...d, function: ML_JOB_AGGREGATION.LOW_SUM };
+      }
+      return d;
+    });
   }
   return detectors;
+}
+
+// determine whether the job has been configured to run on sparse data
+// by looking to see whether the datafeed contains a dc_region field in an aggregation
+// if it does, it is a distinct count single metric job and no a sparse data job.
+// this check is needed because distinct count jobs also use NON_ZERO_COUNT
+export function determineSparseDataJob(job: Job, datafeed: Datafeed) {
+  const detectors = job.analysis_config.detectors;
+
+  const distinctCountField = idx<Datafeed, string>(
+    datafeed,
+    _ => _.aggregations.buckets.aggregations.dc_region.cardinality.field
+  );
+  // if distinctCountField is undefined, and any detectors contain a sparse data function
+  // return true
+  if (distinctCountField === undefined) {
+    for (const detector of detectors) {
+      if (SPARSE_DATA_AGGREGATIONS.includes(detector.function as ML_JOB_AGGREGATION)) {
+        return true;
+      }
+    }
+  }
+  return false;
 }

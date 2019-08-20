@@ -11,7 +11,10 @@ import { JobCreator } from './job_creator';
 import { Field, Aggregation, AggFieldPair } from '../../../../../common/types/fields';
 import { Job, Datafeed, Detector, BucketSpan } from './configs';
 import { createBasicDetector } from './util/default_configs';
-import { KIBANA_AGGREGATION } from '../../../../../common/constants/aggregation_types';
+import {
+  KIBANA_AGGREGATION,
+  ML_JOB_AGGREGATION,
+} from '../../../../../common/constants/aggregation_types';
 import { JOB_TYPE, CREATED_BY_LABEL } from './util/constants';
 import { getRichDetectors } from './util/general';
 
@@ -154,7 +157,7 @@ export class SingleMetricJobCreator extends JobCreator {
 
             const dtr = this._detectors[0];
             // finally, modify the detector before saving
-            dtr.function = 'non_zero_count';
+            dtr.function = ML_JOB_AGGREGATION.NON_ZERO_COUNT;
             // add a description using the original function name rather 'non_zero_count'
             // as the user may not be aware it's been changed
             dtr.detector_description = `${functionName} (${fieldName})`;
