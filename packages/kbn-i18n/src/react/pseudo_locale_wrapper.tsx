@@ -55,6 +55,10 @@ function translateFormattedMessageUsingPseudoLocale(message: string) {
 export class PseudoLocaleWrapper extends React.PureComponent {
   public static propTypes = { children: PropTypes.element.isRequired };
 
+  public static contextTypes = {
+    intl: PropTypes.object.isRequired,
+  };
+
   constructor(props: { children: React.ReactNode }, context: any) {
     super(props, context);
 
