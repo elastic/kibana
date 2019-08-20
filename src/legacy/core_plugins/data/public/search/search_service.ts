@@ -25,7 +25,7 @@ import { search } from './search';
 
 export class SearchService {
   public setup() {
-    return { search };
+    return search;
   }
 
   public stop() {}

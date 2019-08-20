@@ -23,7 +23,7 @@ export function rollup(kibana) {
     id: PLUGIN.ID,
     configPrefix: 'xpack.rollup',
     publicDir: resolve(__dirname, 'public'),
-    require: ['kibana', 'elasticsearch', 'xpack_main', 'data'],
+    require: ['kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       managementSections: [

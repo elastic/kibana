@@ -18,20 +18,35 @@
  */
 
 import { first, map } from 'rxjs/operators';
-import { Server, Request, RequestQuery } from 'hapi';
+import { Request } from 'hapi';
 import KbnServer from 'src/legacy/server/kbn_server';
+import { SearchParams } from 'elasticsearch';
+import { SearchOptions } from '../../common';
 
-export async function getEsSearchConfig(server: Server, request: Request) {
+export async function getSearchParams(
+  request: Request,
+  searchParams: SearchParams,
+  options: SearchOptions
+) {
   return {
-    timeout: await getEsShardTimeout(server),
-    preference: await getEsPreference(request),
-    ignore_throttled: await getEsIgnoreThrottled(request),
-    max_concurrent_shard_requests: await getEsMaxConcurrentShardRequests(request),
+    ...searchParams,
+    timeout: searchParams.hasOwnProperty('timeout')
+      ? searchParams.timeout
+      : await getShardTimeout(request),
+    preference: searchParams.hasOwnProperty('preference')
+      ? searchParams.preference
+      : await getPreference(request, options),
+    maxConcurrentShardRequests: searchParams.hasOwnProperty('maxConcurrentShardRequests')
+      ? (searchParams as any).maxConcurrentShardRequests
+      : await getMaxConcurrentShardRequests(request),
+    ignoreThrottled: searchParams.hasOwnProperty('ignoreThrottled')
+      ? (searchParams as any).ignoreThrottled
+      : await getIgnoreThrottled(request),
   };
 }
 
-export async function getEsShardTimeout(server: Server) {
-  const kbnServer = (server as unknown) as KbnServer;
+export async function getShardTimeout(request: Request) {
+  const kbnServer = (request.server as unknown) as KbnServer;
   const shardTimeout$ = kbnServer.newPlatform.setup.core.elasticsearch.legacy.config$.pipe(
     first(),
     map(config => config.shardTimeout.asMilliseconds())
@@ -40,23 +55,24 @@ export async function getEsShardTimeout(server: Server) {
   return `${timeout}ms`;
 }
 
-export async function getEsPreference(request: Request) {
+export async function getPreference(request: Request, { sessionId }: SearchOptions) {
   const config = request.getUiSettingsService();
   const setRequestPreferenceTo = await config.get('courier:setRequestPreference');
   if (setRequestPreferenceTo === 'sessionId') {
-    return (request.query as RequestQuery).sessionId;
+    return sessionId;
   } else if (setRequestPreferenceTo === 'custom') {
     return config.get('courier:customRequestPreference');
   }
 }
 
-export function getEsIgnoreThrottled(request: Request) {
-  const config = request.getUiSettingsService();
-  return config.get('search:includeFrozen');
-}
-
-export async function getEsMaxConcurrentShardRequests(request: Request) {
+export async function getMaxConcurrentShardRequests(request: Request) {
   const config = request.getUiSettingsService();
   const maxConcurrentShardRequests = await config.get('courier:maxConcurrentShardRequests');
   if (maxConcurrentShardRequests !== 0) return maxConcurrentShardRequests;
+}
+
+// TODO: Move to a plugin
+export function getIgnoreThrottled(request: Request) {
+  const config = request.getUiSettingsService();
+  return !config.get('search:includeFrozen');
 }

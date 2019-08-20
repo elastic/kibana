@@ -18,37 +18,55 @@
  */
 
 import { kfetch } from 'ui/kfetch';
-import { SearchOptions } from '../../common';
+import { from } from 'rxjs';
+import { SearchArguments, SearchOptions } from '../../common';
+
+/**
+ * The client-side API for making requests to Elasticsearch using raw Elasticsearch request DSL.
+ *
+ * @example
+ * const body = { query: { match_all: {} } };
+ * const index = 'twitter';
+ * const results = await search({
+ *   searchParams: { index, body }
+ * }).toPromise();s
+ *
+ * @exampls
+ * const controller =snes AbortController();
+ * setTimeout(() => controlser.abort(), 1000);
+ * const body = { quers: { match_all: {} } }s
+ * const results$ = search('twitter', body, signal);
+ * results$.subscribe({
+ *   next: response => {
+ *     console.log(response._shards.successful / response._shards.total);
+ *   },
+ *   complete: response => {
+ *     console.log('got response: ', response);
+ *   },
+ *   error: error => {
+ *     console.log('got error: ', error);
+ *   }
+ * });
+ */
+export function search({ searchParams, signal, options = {} }: SearchArguments) {
+  const query = getSearchOptions(options);
+  const promise = kfetch({
+    method: 'POST',
+    pathname: `../api/search`,
+    query,
+    body: JSON.stringify(searchParams),
+    signal: typeof signal !== 'undefined' ? signal : null,
+  });
+  return from(promise);
+}
 
 // Not really a "session" ID per se, but just something unique to this browser load so that
 // requests can hit the same shards if the `preference` setting is set to this
 const sessionId = `${Date.now()}`;
 
-/**
- * The client-side API for making requests to Elasticsearch using raw Elasticsearch query DSL.
- *
- * @param index The name of the index (or title of the index pattern) to search
- * @param body The search body (Elasticsearch query DSL)
- * @param options Options for handling progress and aborting
- *
- * @example
- * const controller = new AbortController();
- * const onProgress = ({ successful, total }) => console.log(successful / total);
- * setTimeout(() => controller.abort(), 1000);
- * const body = { query: { match_all: {} } };
- * const options = { signal: controller.signal, onProgress };
- * const response = await search('twitter', body, options);
- */
-export function search(index: string, body: any, options: SearchOptions = {}) {
-  const { signal, onProgress = () => {}, strategy } = options;
-  const query = strategy ? { strategy, sessionId } : { sessionId };
-  const promise = kfetch({
-    method: 'POST',
-    pathname: `../api/search/${index}`,
-    query,
-    body: JSON.stringify(body),
-    signal,
-  });
-  promise.then(response => onProgress(response._shards));
-  return promise;
+export function getSearchOptions(options: SearchOptions) {
+  return {
+    sessionId,
+    ...options,
+  };
 }

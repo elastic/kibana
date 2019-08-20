@@ -18,23 +18,20 @@
  */
 
 import { Server, Request } from 'hapi';
-import { SearchOptions } from '../../common';
-import { registerSearchStrategy } from './search_strategies';
-import { getEsSearchConfig } from './get_es_search_config';
+import { from } from 'rxjs';
+import { SearchArguments } from '../../common';
+import { getSearchParams } from './get_search_params';
 
-export function registerDefaultSearchStrategy(server: Server) {
-  registerSearchStrategy('default', async function defaultSearchStrategy(
+export function defaultSearchStrategyProvider(server: Server) {
+  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+  return function defaultSearchStrategy(
     request: Request,
-    index: string,
-    body: any,
-    { signal, onProgress = () => {} }: SearchOptions = {}
+    { searchParams, signal, options = {} }: SearchArguments
   ) {
-    const config = await getEsSearchConfig(server, request);
-    const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-    const promise = callWithRequest(request, 'search', { index, body, ...config }, { signal });
-    return promise.then(response => {
-      onProgress(response._shards);
-      return response;
-    }, server.plugins.kibana.handleEsError);
-  });
+    const searchParamsPromise = getSearchParams(request, searchParams, options);
+    const responsePromise = searchParamsPromise.then(params =>
+      callWithRequest(request, 'search', params, { signal })
+    );
+    return from(responsePromise);
+  };
 }

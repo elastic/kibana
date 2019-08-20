@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export * from './get_es_search_config';
+export * from './get_search_params';
 export * from './default_search_strategy';
 export * from './search';
-export * from './search_strategies';
+export * from './search_strategy';

@@ -20,3 +20,4 @@
 export { SearchService, SearchSetup } from './search_service';
 
 export * from './search_bar';
+export * from './search';

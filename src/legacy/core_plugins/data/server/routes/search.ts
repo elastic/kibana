@@ -18,21 +18,22 @@
  */
 
 import 'abortcontroller-polyfill';
-import { Server, RequestQuery } from 'hapi';
+import { Server } from 'hapi';
+import { SearchParams } from 'elasticsearch';
 import { search } from '../lib';
+import { SearchOptions } from '../../common';
 
 export function registerSearchApi(server: Server): void {
   server.route({
-    path: '/api/search/{index}',
+    path: '/api/search',
     method: 'POST',
-    handler: async request => {
-      const { index } = request.params;
-      const strategy = (request.query as RequestQuery).strategy as string;
-      const body = request.payload;
+    handler: request => {
+      const searchParams = request.payload as SearchParams;
+      const options = request.query as SearchOptions;
       const controller = new AbortController();
       const { signal } = controller;
       request.events.once('disconnect', () => controller.abort());
-      return search(request, index, body, { strategy, signal });
+      return search(request, { searchParams, signal, options }).toPromise();
     },
   });
 }

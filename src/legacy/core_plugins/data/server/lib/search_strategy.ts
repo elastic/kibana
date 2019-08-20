@@ -18,17 +18,21 @@
  */
 
 import { Request } from 'hapi';
-import { SearchOptions } from '../../common';
+import { Observable } from 'rxjs';
+import { SearchResponse } from 'elasticsearch';
+import { SearchArguments } from '../../common';
 
 export type SearchStrategy = (
   request: Request,
-  index: string,
-  body: any,
-  options?: SearchOptions
-) => Promise<any>;
+  searchArguments: SearchArguments
+) => Observable<SearchResponse<any>>;
 
-export const searchStrategies: Map<string, SearchStrategy> = new Map<string, SearchStrategy>();
+let searchStrategy: SearchStrategy;
 
-export function registerSearchStrategy(name: string, strategy: SearchStrategy) {
-  searchStrategies.set(name, strategy);
+export function setSearchStrategy(strategy: SearchStrategy) {
+  searchStrategy = strategy;
+}
+
+export function getSearchStrategy() {
+  return searchStrategy;
 }

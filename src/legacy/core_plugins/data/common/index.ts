@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { SearchParams } from 'elasticsearch';
+
 /** @public static code */
 export { dateHistogramInterval } from './date_histogram_interval';
 /** @public static code */
@@ -28,16 +30,20 @@ export {
   ParsedInterval,
 } from './parse_es_interval';
 
-export interface SearchOptions {
-  onProgress?: (shards: ShardProgress) => void;
+export interface SearchArguments {
+  // The Elasticsearch search parameters
+  searchParams: SearchParams;
+
+  // An optional signal to abort the request
   signal?: AbortSignal;
-  strategy?: string;
-  sessionId?: string;
+
+  // Additional search options to customize the behavior of the request
+  options?: SearchOptions;
 }
 
-export interface ShardProgress {
-  failed: number;
-  skipped: number;
-  successful: number;
-  total: number;
+export interface SearchOptions {
+  [propName: string]: any;
+
+  // If courier:setRequestPreference is set to "sessionId", this will be used as the preference
+  sessionId?: string;
 }

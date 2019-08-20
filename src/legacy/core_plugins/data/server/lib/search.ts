@@ -18,35 +18,37 @@
  */
 
 import { Request } from 'hapi';
-import { SearchOptions } from '../../common';
-import { searchStrategies } from './search_strategies';
+import { SearchArguments } from '../../common';
+import { getSearchStrategy } from './search_strategy';
 
 /**
- * The server-side API for making requests to Elasticsearch using raw Elasticsearch query DSL.
+ * The server-side API for making requests to Elasticsearch using raw Elasticsearch request DSL.
  *
- * @param request The original request the client made (used to forward user credentials to Elasticsearch)
- * @param index The name of the index (or title of the index pattern) to search
- * @param body The search body (Elasticsearch query DSL)
- * @param options Options for handling progress and aborting
+ * @example
+ * const body = { query: { match_all: {} } };
+ * const results = await search(request, 'twitter', body).toPromise();
  *
  * @example
  * const controller = new AbortController();
- * const onProgress = ({ successful, total }) => console.log(successful / total);
  * setTimeout(() => controller.abort(), 1000);
  * const body = { query: { match_all: {} } };
- * const options = { signal: controller.signal, onProgress };
- * const response = await search(request, 'twitter', body, options);
+ * const results$ = search(request, 'twitter', body, signal);
+ * results$.subscribe({
+ *   next: response => {
+ *     console.log(response._shards.successful / response._shards.total);
+ *   },
+ *   complete: response => {
+ *     console.log('got response: ', response);
+ *   },
+ *   error: error => {
+ *     console.log('got error: ', error);
+ *   }
+ * });
  */
-export async function search(
-  request: Request,
-  index: string,
-  body: any,
-  options: SearchOptions = {}
-) {
-  const { strategy = 'default' } = options;
-  const searchStrategy = searchStrategies.get(strategy);
+export function search(request: Request, searchArguments: SearchArguments) {
+  const searchStrategy = getSearchStrategy();
   if (typeof searchStrategy !== 'function') {
-    throw new Error(`No search strategy registered with name "${strategy}"`);
+    throw new Error(`No search strategy registered`);
   }
-  return searchStrategy(request, index, body, options);
+  return searchStrategy(request, searchArguments);
 }

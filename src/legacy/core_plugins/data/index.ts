@@ -21,9 +21,9 @@ import { resolve } from 'path';
 import { Legacy } from 'kibana';
 import { registerSearchApi } from './server/routes/search';
 import {
-  getEsSearchConfig,
-  registerDefaultSearchStrategy,
-  registerSearchStrategy,
+  getSearchParams,
+  defaultSearchStrategyProvider,
+  setSearchStrategy,
   search,
 } from './server/lib';
 
@@ -40,9 +40,9 @@ export default function DataPlugin(kibana: any) {
     },
     init: (server: Legacy.Server) => {
       registerSearchApi(server);
-      registerDefaultSearchStrategy(server);
-      server.expose('getEsSearchConfig', getEsSearchConfig);
-      server.expose('registerSearchStrategy', registerSearchStrategy);
+      setSearchStrategy(defaultSearchStrategyProvider(server));
+      server.expose('getSearchParams', getSearchParams);
+      server.expose('setSearchStrategy', setSearchStrategy);
       server.expose('search', search);
     },
     uiExports: {
