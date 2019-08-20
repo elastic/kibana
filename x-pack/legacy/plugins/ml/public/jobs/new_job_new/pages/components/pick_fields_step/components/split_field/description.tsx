@@ -48,7 +48,7 @@ export const Description: FC<Props> = memo(({ children, jobType }) => {
         description={
           <FormattedMessage
             id="xpack.ml.newJob.wizard.pickFieldsStep.populationField.description"
-            defaultMessage="Select a field to partition data into populations for analysis."
+            defaultMessage="All values in the selected field will be modeled together as a population. This analysis type is recommended for high cardinality data."
           />
         }
       >
