@@ -29,9 +29,13 @@ export class BackendFrameworkAdapter {
     private readonly CONFIG_PREFIX?: string
   ) {
     const xpackMainPlugin = this.server.plugins.xpack_main;
-    const thisPlugin = this.server.plugins.ingest;
+    const thisPlugin = (this.server.plugins as any)[this.PLUGIN_ID];
 
-    mirrorPluginStatus(xpackMainPlugin, thisPlugin);
+    if (thisPlugin) {
+      mirrorPluginStatus(xpackMainPlugin, thisPlugin);
+    } else {
+      throw new Error('Plugin is not initalized in Kibana');
+    }
 
     xpackMainPlugin.status.on('green', () => {
       this.xpackInfoWasUpdatedHandler(xpackMainPlugin.info);
@@ -52,12 +56,24 @@ export class BackendFrameworkAdapter {
     }
   }
 
+  public async waitForStack() {
+    return new Promise(resolve => {
+      this.on('xpack.status.green', () => {
+        resolve();
+      });
+    });
+  }
+
   public getSetting(settingPath: string) {
     return this.server.config().get(settingPath);
   }
 
   public log(text: string) {
-    this.server.log(text);
+    if (this.server) {
+      this.server.log(text);
+    } else {
+      console.log(text); // eslint-disable-line
+    }
   }
 
   public exposeMethod(name: string, method: () => any) {
@@ -128,6 +144,7 @@ export class BackendFrameworkAdapter {
         `Error parsing xpack info in ${this.PLUGIN_ID},   ${PathReporter.report(assertData)[0]}`
       );
     }
+
     this.info = xpackInfoUnpacked;
 
     return {
