@@ -74,12 +74,12 @@ describe('server/config', function () {
           const log = jest.fn();
           transformDeprecations(settings, log);
           expect(log.mock.calls).toMatchInlineSnapshot(`
-                        Array [
-                          Array [
-                            "csp.rules no longer supports the {nonce} syntax",
-                          ],
-                        ]
-                    `);
+            Array [
+              Array [
+                "csp.rules no longer supports the {nonce} syntax. Replacing with 'self' in script-src",
+              ],
+            ]
+          `);
         });
 
         it('removes a quoted nonce', () => {
@@ -124,9 +124,14 @@ describe('server/config', function () {
         it('removes multiple nonces', () => {
           expect(
             transformDeprecations(
-              { csp: { rules: [
-                `script-src 'nonce-{nonce}' 'self' blah-{nonce}-wow`, `style-src 'nonce-{nonce}' 'self'`
-              ] } },
+              {
+                csp: {
+                  rules: [
+                    `script-src 'nonce-{nonce}' 'self' blah-{nonce}-wow`,
+                    `style-src 'nonce-{nonce}' 'self'`,
+                  ],
+                },
+              },
               jest.fn()
             ).csp.rules
           ).toEqual([`script-src 'self'`, `style-src 'self'`]);
@@ -140,7 +145,7 @@ describe('server/config', function () {
           expect(log.mock.calls).toMatchInlineSnapshot(`
             Array [
               Array [
-                "csp.rules must contain the 'self' source. Automatically adding.",
+                "csp.rules must contain the 'self' source. Automatically adding to script-src.",
               ],
             ]
           `);
@@ -148,20 +153,15 @@ describe('server/config', function () {
 
         it('adds self', () => {
           expect(
-            transformDeprecations(
-              { csp: { rules: [`script-src 'unsafe-eval'`] } },
-              jest.fn()
-            ).csp.rules
+            transformDeprecations({ csp: { rules: [`script-src 'unsafe-eval'`] } }, jest.fn()).csp
+              .rules
           ).toEqual([`script-src 'unsafe-eval' 'self'`]);
         });
       });
 
       it('does not add self to other policies', () => {
         expect(
-          transformDeprecations(
-            { csp: { rules: [`worker-src blob:`] } },
-            jest.fn()
-          ).csp.rules
+          transformDeprecations({ csp: { rules: [`worker-src blob:`] } }, jest.fn()).csp.rules
         ).toEqual([`worker-src blob:`]);
       });
     });

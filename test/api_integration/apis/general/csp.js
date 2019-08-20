@@ -34,11 +34,6 @@ export default function ({ getService }) {
         return [key, parts];
       }));
 
-      // ensure script-src uses self
-      const scriptSrc = parsed.get('script-src');
-      expect(scriptSrc).to.be.an(Array);
-      expect(scriptSrc.find(value => value.startsWith(`'self'`))).to.not.be(undefined);
-
       const entries = Array.from(parsed.entries());
       expect(entries).to.eql([
         [ 'script-src', [ '\'unsafe-eval\'', '\'self\'' ] ],
