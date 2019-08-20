@@ -57,6 +57,12 @@ const dataPath = (settings, log) => {
   }
 };
 
+const defaultRoute = (settings, log) => {
+  if (_.has(settings, 'server.defaultRoute')) {
+    log(`server.defaultRoute is deprecated. It has been replaced with an Advanced Setting`);
+  }
+};
+
 const NONCE_STRING = `{nonce}`;
 // Policies that should include the 'self' source
 const SELF_POLICIES = Object.freeze(['script-src', 'style-src']);
@@ -106,7 +112,8 @@ const deprecations = [
   rewriteBasePath,
   configPath,
   dataPath,
-  cspRules
+  cspRules,
+  defaultRoute
 ];
 
 export const transformDeprecations = createTransform(deprecations);

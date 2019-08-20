@@ -55,6 +55,17 @@ export function getUiSettingDefaults() {
     'buildNum': {
       readonly: true
     },
+    'defaultRoute': {
+      name: i18n.translate('kbn.advancedSettings.defaultRoute.defaultRouteTitle', {
+        defaultMessage: 'Default route',
+      }),
+      value: '/app/kibana',
+      description:
+        i18n.translate('kbn.advancedSettings.defaultRoute.defaultRouteText', {
+          defaultMessage: 'This setting specifies the default route when opening Kibana. ' +
+          'You can use this setting to modify the landing page when opening Kibana.',
+        }),
+    },
     'query:queryString:options': {
       name: i18n.translate('kbn.advancedSettings.query.queryStringOptionsTitle', {
         defaultMessage: 'Query string options',

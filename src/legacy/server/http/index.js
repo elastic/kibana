@@ -86,10 +86,22 @@ export default async function (kbnServer, server, config) {
   server.route({
     path: '/',
     method: 'GET',
-    handler(req, h) {
+    async handler(req, h) {
       const basePath = req.getBasePath();
+
+      const defaultRouteSetting = await req.getUiSettingsService().get('defaultRoute');
+      if (defaultRouteSetting && defaultRouteSetting.startsWith('/')) {
+        console.log('redirecting using defaultRouteSetting to', defaultRouteSetting);
+        return h.redirect(`${basePath}${defaultRouteSetting}`);
+      }
+
       const defaultRoute = config.get('server.defaultRoute');
-      return h.redirect(`${basePath}${defaultRoute}`);
+      if (defaultRoute) {
+        console.log('redirecting using defaultRoute to', defaultRoute);
+        return h.redirect(`${basePath}${defaultRoute}`);
+      }
+
+      return h.redirect(`${basePath}/app/kibana`);
     }
   });
 

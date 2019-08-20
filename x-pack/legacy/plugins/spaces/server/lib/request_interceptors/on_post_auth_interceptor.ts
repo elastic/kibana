@@ -50,7 +50,9 @@ export function initSpacesOnPostAuthRequestInterceptor({
         const spaces = await spacesClient.getAll();
 
         const basePath: string = config.get('server.basePath');
-        const defaultRoute: string = config.get('server.defaultRoute');
+        const defaultRoute: string =
+          (await request.getUiSettingsService().get('defaultRoute')) ||
+          config.get('server.defaultRoute');
 
         if (spaces.length === 1) {
           // If only one space is available, then send user there directly.
