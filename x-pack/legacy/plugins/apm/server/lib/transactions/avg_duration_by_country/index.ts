@@ -45,7 +45,7 @@ export async function getTransactionAvgDurationByCountry({
         }
       },
       aggs: {
-        foo: {
+        country_code: {
           terms: {
             field: CLIENT_GEO_COUNTRY_ISO_CODE,
             size: 500
@@ -61,14 +61,17 @@ export async function getTransactionAvgDurationByCountry({
   };
 
   const resp = await client.search(params);
-  const buckets = resp.aggregations.foo.buckets;
-  const avgDurationsByCountry = buckets.map(
-    ({ key, doc_count, avg_duration: { value } }) => ({
-      country_iso2_code: key,
-      count: doc_count,
-      avg_duration_us: value === null ? 0 : Math.round(value)
-    })
-  );
+  if (resp.aggregations) {
+    const buckets = resp.aggregations.country_code.buckets;
+    const avgDurationsByCountry = buckets.map(
+      ({ key, doc_count, avg_duration: { value } }) => ({
+        country_iso2_code: key,
+        count: doc_count,
+        avg_duration_us: value === null ? 0 : Math.round(value)
+      })
+    );
 
-  return avgDurationsByCountry;
+    return avgDurationsByCountry;
+  }
+  return [];
 }
