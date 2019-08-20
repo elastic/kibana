@@ -44,6 +44,12 @@ export function PieChartProvider({ getService }) {
       }
     }
 
+    async filterByLegendItem(label) {
+      log.debug(`PieChart.filterByLegendItem(${label})`);
+      await testSubjects.click(`legend-${label}`);
+      await testSubjects.click(`legend-${label}-filterIn`);
+    }
+
     async getPieSlice(name) {
       return await testSubjects.find(`pieSlice-${name.split(' ').join('-')}`);
     }

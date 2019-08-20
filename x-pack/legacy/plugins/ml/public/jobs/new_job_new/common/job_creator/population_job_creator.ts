@@ -131,7 +131,7 @@ export class PopulationJobCreator extends JobCreator {
     this._overrideConfigs(job, datafeed);
     this.jobId = '';
     this.createdBy = CREATED_BY_LABEL.POPULATION;
-    const detectors = getRichDetectors(job.analysis_config.detectors);
+    const detectors = getRichDetectors(job, datafeed);
 
     this.removeAllDetectors();
 
