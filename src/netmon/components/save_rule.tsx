@@ -30,7 +30,12 @@ import {
   EuiTextColor,
   EuiOverlayMask,
 } from '@elastic/eui';
-import { getTriggerCount, save as saveQueryRule, QueryRule } from '../services/query_rules';
+import { convertQuery } from '@logrhythm/nm-web-shared/services/query_mapping';
+import {
+  getTriggerCount,
+  save as saveQueryRule,
+  QueryRule,
+} from '@logrhythm/nm-web-shared/services/query_rules';
 import { SaveRuleForm, SaveRuleFormDataValidation } from './save_rule_form';
 
 const validateForm = (value: QueryRule | null): SaveRuleFormDataValidation | null => {
@@ -158,7 +163,7 @@ export const SaveRule = (props: SaveRuleProps) => {
     dispatch({ type: 'CANCEL_SAVE_RULE' });
   };
 
-  const submitRuleToSave = () => {
+  const checkTriggerCount = async () => {
     dispatch({ type: 'DATA_SUBMITTED' });
 
     const validation = validateForm(saveRuleData);
@@ -169,17 +174,29 @@ export const SaveRule = (props: SaveRuleProps) => {
 
     dispatch({ type: 'LOOKUP_START' });
 
-    getTriggerCount(saveRuleData.query)
-      .then(triggerCountRes => {
-        dispatch({ type: 'CHECK_TRIGGER_COUNT_FINISH', triggerCount: triggerCountRes });
-      })
-      .catch(err => {
-        console.error( // eslint-disable-line
-          `An error occurred checking the trigger count for query '${saveRuleData.query}'`,
-          err
-        );
-        dispatch({ type: 'CHECK_TRIGGER_COUNT_FINISH', triggerCount: null });
-      });
+    try {
+      const newQuery = await convertQuery(saveRuleData.query);
+      saveRuleData.query = newQuery;
+      dispatch({ type: 'UPDATE_RULE_DATA', ruleData: saveRuleData });
+    } catch (err) {
+      console.error( // eslint-disable-line
+        `An error occurred converting the query: '${saveRuleData.query}'`,
+        err
+      );
+      dispatch({ type: 'CHECK_TRIGGER_COUNT_FINISH', triggerCount: null });
+      return;
+    }
+
+    try {
+      const triggerCountRes = await getTriggerCount(saveRuleData.query);
+      dispatch({ type: 'CHECK_TRIGGER_COUNT_FINISH', triggerCount: triggerCountRes });
+    } catch (err) {
+      console.error( // eslint-disable-line
+        `An error occurred checking the trigger count for query '${saveRuleData.query}'`,
+        err
+      );
+      dispatch({ type: 'CHECK_TRIGGER_COUNT_FINISH', triggerCount: null });
+    }
   };
 
   const saveRule = () => {
@@ -202,7 +219,7 @@ export const SaveRule = (props: SaveRuleProps) => {
   const rawValidation = validateForm(saveRuleData);
   const validation = dataSubmitted ? rawValidation : null;
 
-  const handleModalConfirm = triggerCount === null ? submitRuleToSave : saveRule;
+  const handleModalConfirm = triggerCount === null ? checkTriggerCount : saveRule;
 
   const modal = !!saveRuleData && (
     <EuiOverlayMask>
