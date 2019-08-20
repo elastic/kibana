@@ -92,15 +92,25 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
     const needsConflictResolution = Object.values(retries).some(spaceRetry =>
       spaceRetry.some(retry => retry.overwrite)
     );
+
+    const closeWithSuccess = () => {
+      toastNotifications.addSuccess(
+        i18n.translate('xpack.spaces.management.copyToSpace.copySuccess', {
+          defaultMessage: 'Copy successful',
+        })
+      );
+      onClose();
+    };
+
     if (needsConflictResolution) {
       setConflictResolutionInProgress(true);
       try {
-        const resolveCopySavedObjectsErrorsResult = await spacesManager.resolveCopySavedObjectsErrors(
+        await spacesManager.resolveCopySavedObjectsErrors(
           [props.savedObject],
           retries,
           copyOptions.includeRelated
         );
-        console.log({ resolveCopySavedObjectsErrorsResult });
+        closeWithSuccess();
       } catch (e) {
         setCopyInProgress(false);
         toastNotifications.addError(e, {
@@ -110,12 +120,7 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
         });
       }
     } else {
-      toastNotifications.addSuccess(
-        i18n.translate('xpack.spaces.management.copyToSpace.copySuccess', {
-          defaultMessage: 'Copy successful',
-        })
-      );
-      onClose();
+      closeWithSuccess();
     }
   }
 
