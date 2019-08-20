@@ -50,7 +50,6 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('saved query management component functionality', function () {
-      this.tags(['skipFirefox']);
       before(async function () {
         // set up a query with filters and a time filter
         log.debug('set up a query with filters to save');
