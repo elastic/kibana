@@ -23,6 +23,8 @@ import '../filters/trust_as_html';
 import tableHtml from './table.html';
 import { i18n } from '@kbn/i18n';
 
+const MIN_LINE_LENGTH = 350;
+
 addDocView({
   title: i18n.translate('kbnDocViews.table.tableTitle', {
     defaultMessage: 'Table',
@@ -35,6 +37,8 @@ addDocView({
       $scope.flattened = $scope.indexPattern.flattenHit($scope.hit);
       $scope.formatted = $scope.indexPattern.formatHit($scope.hit);
       $scope.fields = _.keys($scope.flattened).sort();
+      $scope.fieldRowOpen = {};
+      $scope.fields.forEach(field => ($scope.fieldRowOpen[field] = false));
 
       $scope.canToggleColumns = function canToggleColumn() {
         return _.isFunction($scope.onAddColumn) && _.isFunction($scope.onRemoveColumn);
@@ -52,9 +56,21 @@ addDocView({
         return $scope.columns.includes(columnName);
       };
 
-      $scope.showArrayInObjectsWarning = function showArrayInObjectsWarning(row, field) {
+      $scope.showArrayInObjectsWarning = function (row, field) {
         const value = $scope.flattened[field];
         return Array.isArray(value) && typeof value[0] === 'object';
+      };
+
+      $scope.enableDocValueCollapse = function (docValueField) {
+        const html =
+          typeof $scope.formatted[docValueField] === 'undefined'
+            ? $scope.hit[docValueField]
+            : $scope.formatted[docValueField];
+        return html.length > MIN_LINE_LENGTH;
+      };
+
+      $scope.toggleViewer = function (field) {
+        $scope.fieldRowOpen[field] = !$scope.fieldRowOpen[field];
       };
     },
   },
