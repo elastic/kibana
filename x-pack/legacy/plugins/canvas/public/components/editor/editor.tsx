@@ -14,8 +14,6 @@ import 'monaco-editor/esm/vs/base/worker/defaultWorkerFactory';
 
 import 'monaco-editor/esm/vs/editor/browser/controller/coreCommands.js';
 import 'monaco-editor/esm/vs/editor/browser/widget/codeEditorWidget.js';
-import 'monaco-editor/esm/vs/editor/contrib/bracketMatching/bracketMatching.js';
-import 'monaco-editor/esm/vs/editor/contrib/clipboard/clipboard.js';
 
 import 'monaco-editor/esm/vs/editor/contrib/suggest/suggestController.js'; // Needed for suggestions
 import 'monaco-editor/esm/vs/editor/contrib/hover/hover.js'; // Needed for hover
@@ -30,12 +28,12 @@ interface Props {
   width?: string | number;
 
   /**
-   * Height of editor. Defaults to 500.
+   * Height of editor. Defaults to 100%.
    */
   height?: string | number;
 
   languageId: string;
-  languageDef:
+  languageDef?:
     | monacoEditor.languages.IMonarchLanguage
     | PromiseLike<monacoEditor.languages.IMonarchLanguage>;
 
@@ -71,27 +69,30 @@ export class Editor extends React.Component<Props, {}> {
     // https://microsoft.github.io/monaco-editor/api/modules/monaco.languages.html#onlanguage
 
     monaco.languages.register({ id: this.props.languageId });
-    monaco.languages.setMonarchTokensProvider(this.props.languageId, this.props.languageDef);
 
-    monaco.languages.onLanguage(this.props.languageId, () => {
-      if (this.props.suggestionProvider) {
-        monaco.languages.registerCompletionItemProvider(
-          this.props.languageId,
-          this.props.suggestionProvider
-        );
-      }
+    if (this.props.languageDef) {
+      monaco.languages.setMonarchTokensProvider(this.props.languageId, this.props.languageDef);
 
-      if (this.props.signatureProvider) {
-        monaco.languages.registerSignatureHelpProvider(
-          this.props.languageId,
-          this.props.signatureProvider
-        );
-      }
+      monaco.languages.onLanguage(this.props.languageId, () => {
+        if (this.props.suggestionProvider) {
+          monaco.languages.registerCompletionItemProvider(
+            this.props.languageId,
+            this.props.suggestionProvider
+          );
+        }
 
-      if (this.props.hoverProvider) {
-        monaco.languages.registerHoverProvider(this.props.languageId, this.props.hoverProvider);
-      }
-    });
+        if (this.props.signatureProvider) {
+          monaco.languages.registerSignatureHelpProvider(
+            this.props.languageId,
+            this.props.signatureProvider
+          );
+        }
+
+        if (this.props.hoverProvider) {
+          monaco.languages.registerHoverProvider(this.props.languageId, this.props.hoverProvider);
+        }
+      });
+    }
 
     // Register the lovely theme
     monaco.editor.defineTheme('euiColors', theme);

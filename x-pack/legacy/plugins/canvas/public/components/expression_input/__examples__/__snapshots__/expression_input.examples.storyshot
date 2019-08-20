@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/ExpressionInput default 1`] = `
+<div
+  className="canvasExpressionInput"
+>
+  <div
+    className="euiFormRow euiFormRow--fullWidth canvasExpressionInput--inner"
+    id="generated-id-row"
+  >
+    <div
+      aria-describedby="generated-id-help"
+      className="canvasExpressionInput--editor"
+      id="generated-id"
+      onBlur={[Function]}
+      onFocus={[Function]}
+    >
+      <div
+        className="react-monaco-editor-container"
+        style={
+          Object {
+            "height": "100%",
+            "width": "100%",
+          }
+        }
+      />
+      <div />
+    </div>
+    <div
+      className="euiFormHelpText euiFormRow__text"
+      id="generated-id-help"
+    >
+      This is the coded expression that backs this element. You better know what you are doing here.
+    </div>
+  </div>
+</div>
+`;

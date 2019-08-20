@@ -166,30 +166,32 @@ function getFnArgAtPosition(
     for (let argIndex = 0; argIndex < argValues.length; argIndex++) {
       const value = argValues[argIndex];
 
-      let start = value.start;
-      let end = value.end;
+      let argStart = value.start;
+      let argEnd = value.end;
       if (argName !== '_') {
         // If an arg name is specified, expand our start position to include
-        // the arg name and the `=`
-        start = start - (argName.length + 1);
+        // the arg name plus the `=` character
+        argStart = argStart - (argName.length + 1);
 
         // If the arg value is an expression, expand our start and end position
         // to include the opening and closing braces
         if (value.node !== null && isExpression(value)) {
-          start--;
-          end++;
+          argStart--;
+          argEnd++;
         }
       }
 
-      if (start <= position && position <= end) {
+      if (argStart <= position && position <= argEnd) {
+        // If the current position is on an expression and NOT on the expression's
+        // argument name (`font=` for example), recurse within the expression
         if (
           value.node !== null &&
           isExpression(value) &&
-          !(start <= position && position <= start + argName.length + 1)
+          (argName === '_' || !(argStart <= position && position <= argStart + argName.length + 1))
         ) {
           return getFnArgAtPosition(value, position);
         }
-        return { ast, fnIndex, argName, argIndex, argStart: start, argEnd: end };
+        return { ast, fnIndex, argName, argIndex, argStart, argEnd };
       }
     }
   }

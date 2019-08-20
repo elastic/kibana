@@ -38,8 +38,8 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
       '^.+\\.html?$': 'jest-raw-loader',
     },
     transformIgnorePatterns: [
-      // ignore all node_modules except @elastic/eui which requires babel transforms to handle dynamic import()
-      '[/\\\\]node_modules(?![\\/\\\\]@elastic[\\/\\\\]eui)[/\\\\].+\\.js$',
+      // ignore all node_modules except @elastic/eui and monaco-editor which requires babel transforms to handle dynamic import()
+      '[/\\\\]node_modules(?![\\/\\\\]@elastic[\\/\\\\]eui)(?![\\/\\\\]monaco-editor)[/\\\\].+\\.js$',
     ],
     snapshotSerializers: [`${kibanaDirectory}/node_modules/enzyme-to-json/serializer`],
     reporters: [
