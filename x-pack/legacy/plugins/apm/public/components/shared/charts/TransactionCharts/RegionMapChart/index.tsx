@@ -4,25 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
 import { ChoroplethMap } from './ChoroplethMap';
 import { ColorProgressionBar } from './ColorProgressionBar';
+import { useAvgDurationByCountry } from '../../../../../hooks/useAvgDurationByCountry';
 
 function getProgressionColor(
   scale: number,
-  color = { hue: 204, saturation: 100, lightness: { min: 20, max: 90 } } // default to euiColorPrimary (#006BB4)
+  // default to euiColorPrimary (#006BB4)
+  color = { hue: 204, saturation: 100, lightness: { min: 20, max: 90 } }
 ) {
   const { min, max } = color.lightness;
   const lightness = Math.round(min + (max - min) * (1 - scale));
   return `hsl(${color.hue},${color.saturation}%,${lightness}%)`;
-}
-
-function getProgressionColor2(scale: number) {
-  return getProgressionColor(scale, {
-    hue: 350,
-    saturation: 100,
-    lightness: { min: 20, max: 90 }
-  });
 }
 
 const RegionMapChartToolTip: React.SFC<{
@@ -41,67 +35,42 @@ const RegionMapChartToolTip: React.SFC<{
   );
 };
 
-const testData = [
-  { key: 'USA', value: 1203, docCount: 837 },
-  { key: 'DNK', value: 237, docCount: 1783 },
-  { key: 'CAN', value: 976, docCount: 91 },
-  { key: 'ESP', value: 335, docCount: 58 },
-  { key: 'AUS', value: 693, docCount: 22 },
-  { key: 'AUT', value: 258, docCount: 68 },
-  { key: 'NLD', value: 189, docCount: 833 }
-];
-
-const testData2 = [
-  { key: 'USA', value: 189, docCount: 833 },
-  { key: 'DNK', value: 258, docCount: 68 },
-  { key: 'FRA', value: 693, docCount: 22 },
-  { key: 'ESP', value: 335, docCount: 58 },
-  { key: 'AUS', value: 976, docCount: 91 },
-  { key: 'AUT', value: 237, docCount: 1783 },
-  { key: 'NLD', value: 1203, docCount: 837 }
-];
-
 export const RegionMapChart: React.SFC = () => {
-  const [toggleData, setToggleData] = useState(true);
-  const [toggleStyle, setToggleStyle] = useState(true);
-  const [toggleColor, setToggleColor] = useState(true);
+  const { data } = useAvgDurationByCountry();
+  const choroplethData = useMemo(
+    () =>
+      data.map(
+        ({
+          country_iso2_code: key,
+          avg_duration_us: value,
+          count: docCount
+        }) => ({ key, value: value / 1000, docCount })
+      ),
+    [data]
+  );
+  const maxValue = useMemo(
+    () => Math.max(...choroplethData.map(({ value }) => value)),
+    [choroplethData]
+  );
   return (
     <div>
-      <button onClick={() => setToggleData(!toggleData)}>
-        toggleData: {JSON.stringify(toggleData)}
-      </button>
-      <button onClick={() => setToggleStyle(!toggleStyle)}>
-        toggleStyle: {JSON.stringify(toggleStyle)}
-      </button>
-      <button onClick={() => setToggleColor(!toggleColor)}>
-        toggleColor: {JSON.stringify(toggleColor)}
-      </button>
       <ChoroplethMap
-        getColorStyle={toggleColor ? getProgressionColor : getProgressionColor2}
-        // mapboxStyle="https://tiles.maps.elastic.co/styles/osm-bright-desaturated/style.json"
-        // mapboxStyle="https://tiles.maps.elastic.co/styles/dark-matter/style.json"
-        mapboxStyle={
-          toggleStyle
-            ? 'https://tiles.maps.elastic.co/styles/osm-bright-desaturated/style.json'
-            : 'https://tiles.maps.elastic.co/styles/dark-matter/style.json'
-        }
+        getColorStyle={getProgressionColor}
+        mapboxStyle="https://tiles.maps.elastic.co/styles/osm-bright-desaturated/style.json"
         initialMapboxOptions={{
-          zoom: 1,
+          zoom: 0.75,
           center: {
-            lng: -45,
-            lat: 45
+            lng: -25,
+            lat: 25
           }
         }}
         geojsonSource="https://vector.maps.elastic.co/files/world_countries_v1.geo.json?elastic_tile_service_tos=agree&my_app_name=ems-landing&my_app_version=7.2.0"
-        geojsonKeyProperty="iso3"
-        maxValue={1203}
-        data={toggleData ? testData : testData2}
+        geojsonKeyProperty="iso2"
+        maxValue={maxValue}
+        data={choroplethData}
         renderTooltip={RegionMapChartToolTip}
       />
-      <ColorProgressionBar
-        slices={10}
-        getColorStyle={toggleColor ? getProgressionColor : getProgressionColor2}
-      />
+      <ColorProgressionBar slices={10} getColorStyle={getProgressionColor} />
     </div>
   );
 };

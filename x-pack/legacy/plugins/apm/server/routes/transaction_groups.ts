@@ -12,6 +12,7 @@ import { getTransactionBreakdown } from '../lib/transactions/breakdown';
 import { getTransactionGroupList } from '../lib/transaction_groups';
 import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
+import { getTransactionAvgDurationByCountry } from '../lib/transactions/avg_duration_by_country';
 
 export const transactionGroupsRoute = createRoute(() => ({
   path: '/api/apm/services/{serviceName}/transaction_groups',
@@ -138,6 +139,25 @@ export const transactionGroupsBreakdownRoute = createRoute(() => ({
       serviceName,
       transactionName,
       transactionType,
+      setup
+    });
+  }
+}));
+
+export const transactionGroupsAvgDurationByCountry = createRoute(() => ({
+  path: `/api/apm/services/{serviceName}/transaction_groups/avg_duration_by_country`,
+  params: {
+    path: t.type({
+      serviceName: t.string
+    }),
+    query: t.intersection([uiFiltersRt, rangeRt])
+  },
+  handler: async (req, { path, query }) => {
+    const setup = await setupRequest(req);
+    const { serviceName } = path;
+
+    return getTransactionAvgDurationByCountry({
+      serviceName,
       setup
     });
   }
