@@ -36,10 +36,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Storage } from 'ui/storage';
 import { getDefaultQueryLanguage } from './lib/get_default_query_language';
-import { QueryBarInput } from 'plugins/data';
-const localStorage = new Storage(window.localStorage);
+import { QueryBarWrapper } from './query_bar_wrapper';
 
 export const SeriesConfig = props => {
   const defaults = { offset_time: '', value_template: '' };
@@ -63,7 +61,7 @@ export const SeriesConfig = props => {
         label={<FormattedMessage id="tsvb.seriesConfig.filterLabel" defaultMessage="Filter" />}
         fullWidth
       >
-        <QueryBarInput
+        <QueryBarWrapper
           query={{
             language:
               model.filter && model.filter.language
@@ -72,10 +70,7 @@ export const SeriesConfig = props => {
             query: model.filter && model.filter.query ? model.filter.query : '',
           }}
           onChange={filter => props.onChange({ filter })}
-          appName={'VisEditor'}
           indexPatterns={[seriesIndexPattern]}
-          store={localStorage}
-          showDatePicker={false}
         />
       </EuiFormRow>
 

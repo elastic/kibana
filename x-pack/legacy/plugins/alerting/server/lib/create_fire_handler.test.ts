@@ -7,50 +7,34 @@
 import { createFireHandler } from './create_fire_handler';
 
 const createFireHandlerParams = {
-  fireAction: jest.fn(),
+  executeAction: jest.fn(),
   spaceId: 'default',
+  apiKey: 'MTIzOmFiYw==',
   spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
   getBasePath: jest.fn().mockReturnValue(undefined),
-  alertSavedObject: {
-    id: '1',
-    type: 'alert',
-    attributes: {
-      alertTypeId: '123',
-      interval: '10s',
-      alertTypeParams: {
-        bar: true,
+  actions: [
+    {
+      id: '1',
+      group: 'default',
+      params: {
+        foo: true,
+        contextVal: 'My {{context.value}} goes here',
+        stateVal: 'My {{state.value}} goes here',
       },
-      actions: [
-        {
-          group: 'default',
-          actionRef: 'action_0',
-          params: {
-            foo: true,
-            contextVal: 'My {{context.value}} goes here',
-            stateVal: 'My {{state.value}} goes here',
-          },
-        },
-      ],
     },
-    references: [
-      {
-        name: 'action_0',
-        type: 'action',
-        id: '1',
-      },
-    ],
-  },
+  ],
 };
 
 beforeEach(() => jest.resetAllMocks());
 
-test('calls fireAction per selected action', async () => {
+test('calls executeAction per selected action', async () => {
   const fireHandler = createFireHandler(createFireHandlerParams);
   await fireHandler('default', {}, {});
-  expect(createFireHandlerParams.fireAction).toHaveBeenCalledTimes(1);
-  expect(createFireHandlerParams.fireAction.mock.calls[0]).toMatchInlineSnapshot(`
+  expect(createFireHandlerParams.executeAction).toHaveBeenCalledTimes(1);
+  expect(createFireHandlerParams.executeAction.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
       Object {
+        "apiKey": "MTIzOmFiYw==",
         "id": "1",
         "params": Object {
           "contextVal": "My  goes here",
@@ -63,19 +47,20 @@ test('calls fireAction per selected action', async () => {
   `);
 });
 
-test('limits fireAction per action group', async () => {
+test('limits executeAction per action group', async () => {
   const fireHandler = createFireHandler(createFireHandlerParams);
   await fireHandler('other-group', {}, {});
-  expect(createFireHandlerParams.fireAction).toMatchInlineSnapshot(`[MockFunction]`);
+  expect(createFireHandlerParams.executeAction).toMatchInlineSnapshot(`[MockFunction]`);
 });
 
 test('context attribute gets parameterized', async () => {
   const fireHandler = createFireHandler(createFireHandlerParams);
   await fireHandler('default', { value: 'context-val' }, {});
-  expect(createFireHandlerParams.fireAction).toHaveBeenCalledTimes(1);
-  expect(createFireHandlerParams.fireAction.mock.calls[0]).toMatchInlineSnapshot(`
+  expect(createFireHandlerParams.executeAction).toHaveBeenCalledTimes(1);
+  expect(createFireHandlerParams.executeAction.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
       Object {
+        "apiKey": "MTIzOmFiYw==",
         "id": "1",
         "params": Object {
           "contextVal": "My context-val goes here",
@@ -91,10 +76,11 @@ test('context attribute gets parameterized', async () => {
 test('state attribute gets parameterized', async () => {
   const fireHandler = createFireHandler(createFireHandlerParams);
   await fireHandler('default', {}, { value: 'state-val' });
-  expect(createFireHandlerParams.fireAction).toHaveBeenCalledTimes(1);
-  expect(createFireHandlerParams.fireAction.mock.calls[0]).toMatchInlineSnapshot(`
+  expect(createFireHandlerParams.executeAction).toHaveBeenCalledTimes(1);
+  expect(createFireHandlerParams.executeAction.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
       Object {
+        "apiKey": "MTIzOmFiYw==",
         "id": "1",
         "params": Object {
           "contextVal": "My  goes here",
@@ -105,40 +91,4 @@ test('state attribute gets parameterized', async () => {
       },
     ]
   `);
-});
-
-test('throws error if reference not found', async () => {
-  const params = {
-    spaceId: 'default',
-    fireAction: jest.fn(),
-    alertSavedObject: {
-      id: '1',
-      type: 'alert',
-      attributes: {
-        alertTypeId: '123',
-        interval: '10s',
-        alertTypeParams: {
-          bar: true,
-        },
-        actions: [
-          {
-            group: 'default',
-            actionRef: 'action_0',
-            params: {
-              foo: true,
-              contextVal: 'My {{context.value}} goes here',
-              stateVal: 'My {{state.value}} goes here',
-            },
-          },
-        ],
-      },
-      references: [],
-    },
-  };
-  const fireHandler = createFireHandler(params);
-  await expect(
-    fireHandler('default', {}, { value: 'state-val' })
-  ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Action reference \\"action_0\\" not found in alert id: 1"`
-  );
 });

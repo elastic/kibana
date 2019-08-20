@@ -34,9 +34,9 @@ import { Query, onlyDisabledFiltersChanged } from '../../../../data/public';
 import {
   APPLY_FILTER_TRIGGER,
   Embeddable,
-  executeTriggerActions,
   Container,
-} from '../../../../embeddable_api/public';
+  ExecuteTriggerActions,
+} from '../../../../embeddable_api/public/np_ready/public';
 import * as columnActions from '../doc_table/actions/columns';
 import { SavedSearch } from '../types';
 import searchTemplate from './search_template.html';
@@ -45,11 +45,11 @@ import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 interface SearchScope extends ng.IScope {
   columns?: string[];
   description?: string;
-  sort?: string[] | string[][];
+  sort?: string[][];
   searchSource?: SearchSource;
   sharedItemTitle?: string;
   inspectorAdapters?: Adapters;
-  setSortOrder?: (sortPair: [string, string]) => void;
+  setSortOrder?: (sortPair: [[string, string]]) => void;
   removeColumn?: (column: string) => void;
   addColumn?: (column: string) => void;
   moveColumn?: (column: string, index: number) => void;
@@ -112,6 +112,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       queryFilter,
     }: SearchEmbeddableConfig,
     initialInput: SearchInput,
+    private readonly executeTriggerActions: ExecuteTriggerActions,
     parent?: Container
   ) {
     super(
@@ -243,7 +244,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
         $state: { store: FilterStateStore.APP_STATE },
       }));
 
-      await executeTriggerActions(APPLY_FILTER_TRIGGER, {
+      await this.executeTriggerActions(APPLY_FILTER_TRIGGER, {
         embeddable: this,
         triggerContext: {
           filters,
@@ -263,9 +264,6 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     // been overridden in a dashboard.
     searchScope.columns = this.input.columns || this.savedSearch.columns;
     searchScope.sort = this.input.sort || this.savedSearch.sort;
-    if (searchScope.sort.length && !Array.isArray(searchScope.sort[0])) {
-      searchScope.sort = [searchScope.sort];
-    }
     searchScope.sharedItemTitle = this.panelTitle;
 
     if (

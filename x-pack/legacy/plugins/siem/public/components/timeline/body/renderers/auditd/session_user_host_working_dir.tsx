@@ -63,3 +63,5 @@ export const SessionUserHostWorkingDir = pure<Props>(
     </>
   )
 );
+
+SessionUserHostWorkingDir.displayName = 'SessionUserHostWorkingDir';
