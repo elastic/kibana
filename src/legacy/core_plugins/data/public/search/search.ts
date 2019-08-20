@@ -25,17 +25,21 @@ import { SearchArguments, SearchOptions } from '../../common';
  * The client-side API for making requests to Elasticsearch using raw Elasticsearch request DSL.
  *
  * @example
- * const body = { query: { match_all: {} } };
  * const index = 'twitter';
+ * const body = { query: { match_all: {} } };
  * const results = await search({
  *   searchParams: { index, body }
- * }).toPromise();s
+ * }).toPromise();
  *
- * @exampls
- * const controller =snes AbortController();
- * setTimeout(() => controlser.abort(), 1000);
- * const body = { quers: { match_all: {} } }s
- * const results$ = search('twitter', body, signal);
+ * @example
+ * const controller = new AbortController();
+ * setTimeout(() => controller.abort(), 1000);
+ * const index = 'twitter';
+ * const body = { query: { match_all: {} } };
+ * const results$ = search({
+ *   searchParams: { index, body },
+ *   signal
+ * });
  * results$.subscribe({
  *   next: response => {
  *     console.log(response._shards.successful / response._shards.total);

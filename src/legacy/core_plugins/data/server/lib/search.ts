@@ -25,14 +25,21 @@ import { getSearchStrategy } from './search_strategy';
  * The server-side API for making requests to Elasticsearch using raw Elasticsearch request DSL.
  *
  * @example
+ * const index = 'twitter';
  * const body = { query: { match_all: {} } };
- * const results = await search(request, 'twitter', body).toPromise();
+ * const results = await search(request, {
+ *   searchParams: { index, body }
+ * }).toPromise();
  *
  * @example
  * const controller = new AbortController();
  * setTimeout(() => controller.abort(), 1000);
+ * const index = 'twitter';
  * const body = { query: { match_all: {} } };
- * const results$ = search(request, 'twitter', body, signal);
+ * const results$ = search(request, {
+ *   searchParams: { index, body },
+ *   signal
+ * });
  * results$.subscribe({
  *   next: response => {
  *     console.log(response._shards.successful / response._shards.total);
