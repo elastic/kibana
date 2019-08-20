@@ -39,6 +39,7 @@ function ChartOptions({
   chart,
   index,
   changeValueAxis,
+  setValidity,
 }: ChartOptionsParams) {
   const setChart = <T extends keyof SeriesParam>(
     indx: number,
