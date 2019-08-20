@@ -417,12 +417,12 @@ export function resolveCopyToSpaceConflictsSuite(
     });
   };
 
-  const copyToSpaceTest = makeCopyToSpaceTest(describe);
+  const resolveCopyToSpaceConflictsTest = makeResolveCopyToSpaceConflictsTest(describe);
   // @ts-ignore
-  copyToSpaceTest.only = makeCopyToSpaceTest(describe.only);
+  resolveCopyToSpaceConflictsTest.only = makeCopyToSpaceTest(describe.only);
 
   return {
-    copyToSpaceTest,
+    resolveCopyToSpaceConflictsTest,
     expectNotFoundResponse,
     createExpectOverriddenResponseWithReferences,
     createExpectOverriddenResponseWithoutReferences,

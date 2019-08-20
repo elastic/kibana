@@ -14,7 +14,7 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Ftr
   const esArchiver = getService('esArchiver');
 
   const {
-    copyToSpaceTest,
+    resolveCopyToSpaceConflictsTest,
     createExpectNonOverriddenResponseWithReferences,
     createExpectNonOverriddenResponseWithoutReferences,
     createExpectOverriddenResponseWithReferences,
@@ -25,7 +25,7 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Ftr
 
   describe('resolve copy to spaces conflicts', () => {
     originSpaces.forEach(spaceId => {
-      copyToSpaceTest(`from the ${spaceId} space`, {
+      resolveCopyToSpaceConflictsTest(`from the ${spaceId} space`, {
         spaceId,
         tests: {
           withReferencesNotOverwriting: {
