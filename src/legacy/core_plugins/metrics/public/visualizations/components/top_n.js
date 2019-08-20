@@ -59,13 +59,17 @@ export class TopN extends Component {
     };
   }
 
-  renderRow(maxValue) {
+  renderRow({ min, max }) {
     return item => {
       const key = `${item.id || item.label}`;
       const lastValue = getLastValue(item.data);
       const formatter = item.tickFormatter || this.props.tickFormatter;
       const value = formatter(lastValue);
-      const width = `${100 * (lastValue / maxValue)}%`;
+
+      const intervalLength = max - min;
+      const inIntervalLength = lastValue - min;
+      const width = `${100 * (inIntervalLength / intervalLength)}%`;
+
       const backgroundColor = item.color;
       const styles = reactcss(
         {
@@ -104,12 +108,20 @@ export class TopN extends Component {
 
   render() {
     if (!this.props.series) return null;
-    const maxValue = this.props.series.reduce((max, series) => {
-      const lastValue = getLastValue(series.data);
-      return lastValue > max ? lastValue : max;
-    }, 0);
 
-    const rows = this.props.series.map(this.renderRow(maxValue));
+    const intervalSettings = this.props.series.reduce(
+      (acc, series, index) => {
+        const value = getLastValue(series.data);
+
+        return {
+          min: !index || value < acc.min ? value : acc.min,
+          max: !index || value > acc.max ? value : acc.max,
+        };
+      },
+      { min: undefined, max: undefined }
+    );
+
+    const rows = this.props.series.map(this.renderRow(intervalSettings));
     let className = 'tvbVisTopN';
     if (this.props.reversed) {
       className += ' tvbVisTopN--reversed';
