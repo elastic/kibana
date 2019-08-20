@@ -7,13 +7,9 @@
 import { IScope } from 'angular';
 import { NormalizedCacheObject } from 'apollo-cache-inmemory';
 import ApolloClient from 'apollo-client';
-import React from 'react';
-import { Observable } from 'rxjs';
 
 export interface AppFrontendLibs {
-  framework: AppFrameworkAdapter;
   apolloClient: AppApolloClient;
-  observableApi: AppObservableApi;
 }
 
 export type AppTimezoneProvider = () => string;
@@ -34,33 +30,6 @@ export interface AppFrameworkAdapter {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setUISettings(key: string, value: any): void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  render(component: React.ReactElement<any>): void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  renderBreadcrumbs(component: React.ReactElement<any>): void;
-}
-
-export interface AppObservableApiPostParams<RequestBody extends {} = {}> {
-  url: string;
-  body?: RequestBody;
-}
-
-export type AppObservableApiResponse<BodyType extends {} = {}> = Observable<{
-  status: number;
-  response: BodyType;
-}>;
-
-export interface AppObservableApi {
-  post<RequestBody extends {} = {}, ResponseBody extends {} = {}>(
-    params: AppObservableApiPostParams<RequestBody>
-  ): AppObservableApiResponse<ResponseBody>;
-}
-
-export interface AppUiKibanaAdapterScope extends IScope {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  breadcrumbs: any[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  topNavMenu: any[];
 }
 
 export interface AppKibanaUIConfig {
