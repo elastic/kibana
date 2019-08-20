@@ -5,6 +5,7 @@
  */
 import ReactDOM from 'react-dom';
 import euiLight from '@elastic/eui/dist/eui_theme_light.json';
+import euiDark from '@elastic/eui/dist/eui_theme_dark.json';
 import 'ui/autoload/all';
 import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
@@ -30,13 +31,15 @@ async function main(): Promise<void> {
   chrome.setRootTemplate(template);
 
   await waitFor(getRootEl);
+
+  const isDarkMode = npStart.core.uiSettings.get('theme:darkMode');
   const { root }: PluginStart = plugin.start({
     ...npStart.core,
     routes,
-    theme: { eui: euiLight },
+    theme: { eui: isDarkMode ? euiDark : euiLight },
   });
-  const container = getRootEl();
 
+  const container = getRootEl();
   ReactDOM.render(root, container);
 }
 

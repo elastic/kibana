@@ -47,7 +47,7 @@ export function DetailLayout(props: LayoutProps) {
   `;
 
   const FullWidthRemainingHeight = styled(EuiPage)`
-    background-color: white;
+    background-color: ${theme.eui.euiColorEmptyShade};
     height: calc(100vh - ${topBarsHeight()}px);
   `;
 
