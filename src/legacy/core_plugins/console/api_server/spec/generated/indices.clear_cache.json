@@ -22,6 +22,6 @@
       "_cache/clear",
       "{indices}/_cache/clear"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-clearcache.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-clearcache.html"
   }
 }
