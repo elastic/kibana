@@ -89,8 +89,13 @@ export function A11yProvider({ getService }: FtrProviderContext) {
 
     private async captureAxeReport(context: AxeContext): Promise<AxeReport> {
       const axeOptions = {
-        runOnly: ['wcag2a', 'wcag2aa'],
         reporter: 'v2',
+        runOnly: ['wcag2a', 'wcag2aa'],
+        rules: {
+          'color-contrast': {
+            enabled: false,
+          },
+        },
       };
 
       await (Wd.driver.manage() as any).setTimeouts({
