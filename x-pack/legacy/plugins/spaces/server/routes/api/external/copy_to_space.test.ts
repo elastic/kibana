@@ -61,6 +61,25 @@ describe('POST /api/spaces/_copy_saved_objects', () => {
     });
   });
 
+  test(`uses a Saved Objects Client instance without the spaces wrapper`, async () => {
+    const payload = {
+      spaces: ['a-space'],
+      objects: [],
+    };
+
+    const { mockSavedObjectsService } = await request('POST', '/api/spaces/_copy_saved_objects', {
+      expectSpacesClientCall: false,
+      payload,
+    });
+
+    expect(mockSavedObjectsService.getScopedSavedObjectsClient).toHaveBeenCalledWith(
+      expect.any(Object),
+      {
+        excludedWrappers: ['spaces'],
+      }
+    );
+  });
+
   test(`requires space IDs to be unique`, async () => {
     const payload = {
       spaces: ['a-space', 'a-space'],
@@ -232,6 +251,37 @@ describe('POST /api/spaces/_resolve_copy_saved_objects_errors', () => {
     expect(JSON.parse(responsePayload)).toMatchObject({
       message: 'test forbidden message',
     });
+  });
+
+  test(`uses a Saved Objects Client instance without the spaces wrapper`, async () => {
+    const payload = {
+      retries: {
+        ['a-space']: [
+          {
+            type: 'visualization',
+            id: 'bar',
+            overwrite: true,
+          },
+        ],
+      },
+      objects: [{ type: 'visualization', id: 'bar' }],
+    };
+
+    const { mockSavedObjectsService } = await request(
+      'POST',
+      '/api/spaces/_resolve_copy_saved_objects_errors',
+      {
+        expectSpacesClientCall: false,
+        payload,
+      }
+    );
+
+    expect(mockSavedObjectsService.getScopedSavedObjectsClient).toHaveBeenCalledWith(
+      expect.any(Object),
+      {
+        excludedWrappers: ['spaces'],
+      }
+    );
   });
 
   test(`requires objects to be unique`, async () => {

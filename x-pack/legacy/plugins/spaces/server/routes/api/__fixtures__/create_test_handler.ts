@@ -45,6 +45,7 @@ export interface RequestRunnerResult {
   server: any;
   mockSavedObjectsRepository: any;
   mockSavedObjectsService: {
+    getScopedSavedObjectsClient: jest.Mock<SavedObjectsService['getScopedSavedObjectsClient']>;
     importExport: {
       getSortedObjectsForExport: jest.Mock<
         SavedObjectsService['importExport']['getSortedObjectsForExport']
@@ -53,6 +54,7 @@ export interface RequestRunnerResult {
       resolveImportErrors: jest.Mock<SavedObjectsService['importExport']['resolveImportErrors']>;
     };
   };
+  headers: Record<string, unknown>;
   response: any;
 }
 
