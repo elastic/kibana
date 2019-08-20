@@ -20,18 +20,14 @@ import { KpiNetworkComponent, NetworkTopNFlowTable } from '../../components/page
 import { NetworkDnsTable } from '../../components/page/network/network_dns_table';
 import { UseUrlState } from '../../components/url_state';
 import { GlobalTime } from '../../containers/global_time';
-import { KpiNetworkQuery } from '../../containers/kpi_network';
-import { NetworkDnsQuery } from '../../containers/network_dns';
 import { NetworkTopNFlowQuery } from '../../containers/network_top_n_flow';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
-import { LastEventIndexKey } from '../../graphql/types';
+import { FlowTargetNew, LastEventIndexKey } from '../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../store';
 
 import { NetworkKql } from './kql';
 import { NetworkEmptyPage } from './network_empty_page';
 import * as i18n from './translations';
-import { AnomaliesNetworkTable } from '../../components/ml/tables/anomalies_network_table';
-import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 
@@ -94,10 +90,9 @@ const NetworkComponent = pure<NetworkComponentProps>(
                       {/*  )}*/}
                       {/* </KpiNetworkQuery>*/}
 
-                      <EuiSpacer />
-
                       <NetworkTopNFlowQuery
                         endDate={to}
+                        flowTarget={FlowTargetNew.source}
                         filterQuery={filterQuery}
                         skip={isInitializing}
                         sourceId="default"
@@ -105,18 +100,61 @@ const NetworkComponent = pure<NetworkComponentProps>(
                         type={networkModel.NetworkType.page}
                       >
                         {({
-                          totalCount,
-                          loading,
-                          networkTopNFlow,
-                          pageInfo,
-                          loadPage,
                           id,
                           inspect,
+                          loading,
+                          loadPage,
+                          networkTopNFlow,
+                          pageInfo,
                           refetch,
+                          totalCount,
                         }) => (
                           <NetworkTopNFlowTableManage
                             data={networkTopNFlow}
                             fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                            flowTargeted={FlowTargetNew.source}
+                            id={id}
+                            indexPattern={indexPattern}
+                            inspect={inspect}
+                            loading={loading}
+                            loadPage={loadPage}
+                            refetch={refetch}
+                            setQuery={setQuery}
+                            showMorePagesIndicator={getOr(
+                              false,
+                              'showMorePagesIndicator',
+                              pageInfo
+                            )}
+                            totalCount={totalCount}
+                            type={networkModel.NetworkType.page}
+                          />
+                        )}
+                      </NetworkTopNFlowQuery>
+                      <EuiSpacer />
+
+                      <NetworkTopNFlowQuery
+                        endDate={to}
+                        flowTarget={FlowTargetNew.destination}
+                        filterQuery={filterQuery}
+                        skip={isInitializing}
+                        sourceId="default"
+                        startDate={from}
+                        type={networkModel.NetworkType.page}
+                      >
+                        {({
+                          id,
+                          inspect,
+                          loading,
+                          loadPage,
+                          networkTopNFlow,
+                          pageInfo,
+                          refetch,
+                          totalCount,
+                        }) => (
+                          <NetworkTopNFlowTableManage
+                            data={networkTopNFlow}
+                            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                            flowTargeted={FlowTargetNew.destination}
                             id={id}
                             indexPattern={indexPattern}
                             inspect={inspect}

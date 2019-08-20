@@ -100,7 +100,6 @@ export const getNetworkTopNFlowColumns = (
     hideForMobile: false,
     render: ({ node }) => {
       const domainAttr = `${flowTarget}.domain`;
-      const domainKql = `${flowTarget}.domain`;
       const ipAttr = `${flowTarget}.ip`;
       const domains: string[] = get(domainAttr, node);
       const ip: string | null = get(ipAttr, node);
@@ -109,7 +108,7 @@ export const getNetworkTopNFlowColumns = (
         const id = escapeDataProviderId(`${tableId}-table-${ip}`);
         return getRowItemDraggables({
           rowItems: domains,
-          attrName: domainKql,
+          attrName: domainAttr,
           idPrefix: id,
           displayCount: 1,
         });

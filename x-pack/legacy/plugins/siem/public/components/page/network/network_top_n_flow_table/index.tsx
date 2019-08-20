@@ -29,6 +29,7 @@ const tableType = networkModel.NetworkTableType.topNFlow;
 interface OwnProps {
   data: NetworkTopNFlowEdges[];
   fakeTotalCount: number;
+  flowTargeted: FlowTargetNew;
   id: string;
   indexPattern: StaticIndexPattern;
   loading: boolean;
@@ -80,6 +81,7 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
     const {
       data,
       fakeTotalCount,
+      flowTargeted,
       id,
       indexPattern,
       limit,
@@ -99,12 +101,12 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
       <PaginatedTable
         columns={getNetworkTopNFlowColumns(
           indexPattern,
-          FlowTargetNew.source,
+          flowTargeted,
           type,
           NetworkTopNFlowTableId
         )}
         headerCount={totalCount}
-        headerTitle={i18n.SOURCE_IP}
+        headerTitle={flowTargeted === FlowTargetNew.source ? i18n.SOURCE_IP : i18n.DESTINATION_IP}
         headerUnit={i18n.UNIT(totalCount)}
         id={id}
         itemsPerRow={rowItems}

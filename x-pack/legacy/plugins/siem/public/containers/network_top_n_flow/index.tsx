@@ -39,6 +39,7 @@ export interface NetworkTopNFlowArgs {
 
 export interface OwnProps extends QueryTemplatePaginatedProps {
   children: (args: NetworkTopNFlowArgs) => React.ReactNode;
+  flowTarget: FlowTargetNew;
   type: networkModel.NetworkType;
 }
 
@@ -61,6 +62,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
       activePage,
       children,
       endDate,
+      flowTarget,
       filterQuery,
       id = ID,
       isInspected,
@@ -79,7 +81,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
         variables={{
           defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
           filterQuery: createFilter(filterQuery),
-          flowTarget: FlowTargetNew.source,
+          flowTarget,
           inspect: isInspected,
           pagination: generateTablePaginationOptions(activePage, limit),
           sort: topNFlowSort,

@@ -52,7 +52,6 @@ export const initialNetworkState: NetworkState = {
           field: NetworkTopNFlowFields.bytes_out,
           direction: Direction.desc,
         },
-        flowTarget: FlowTargetNew.source,
       },
       [NetworkTableType.dns]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,

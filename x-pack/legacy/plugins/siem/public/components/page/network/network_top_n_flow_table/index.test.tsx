@@ -11,11 +11,11 @@ import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { FlowDirection, FlowTarget } from '../../../../graphql/types';
+import { FlowDirection, FlowTarget, FlowTargetNew } from '../../../../graphql/types';
 import {
   apolloClientObservable,
-  mockIndexPattern,
   mockGlobalState,
+  mockIndexPattern,
   TestProviders,
 } from '../../../../mock';
 import { createStore, networkModel, State } from '../../../../store';
@@ -40,6 +40,7 @@ describe('NetworkTopNFlow Table Component', () => {
           <NetworkTopNFlowTable
             data={mockData.NetworkTopNFlow.edges}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopNFlow.pageInfo)}
+            flowTargeted={FlowTargetNew.source}
             id="topNFlow"
             indexPattern={mockIndexPattern}
             loading={false}
@@ -71,6 +72,7 @@ describe('NetworkTopNFlow Table Component', () => {
             <NetworkTopNFlowTable
               data={mockData.NetworkTopNFlow.edges}
               fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopNFlow.pageInfo)}
+              flowTargeted={FlowTargetNew.source}
               id="topNFlow"
               indexPattern={mockIndexPattern}
               loading={false}
@@ -112,6 +114,7 @@ describe('NetworkTopNFlow Table Component', () => {
             <NetworkTopNFlowTable
               data={mockData.NetworkTopNFlow.edges}
               fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopNFlow.pageInfo)}
+              flowTargeted={FlowTargetNew.source}
               id="topNFlow"
               indexPattern={mockIndexPattern}
               loading={false}
@@ -155,6 +158,7 @@ describe('NetworkTopNFlow Table Component', () => {
             <NetworkTopNFlowTable
               data={mockData.NetworkTopNFlow.edges}
               fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopNFlow.pageInfo)}
+              flowTargeted={FlowTargetNew.source}
               id="topNFlow"
               indexPattern={mockIndexPattern}
               loading={false}
