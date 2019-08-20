@@ -9,12 +9,14 @@ import {
   SavedObjectsClientContract,
   SavedObjectsImportResponse,
   SavedObjectsImportOptions,
+  SavedObjectsExportOptions,
 } from 'src/core/server';
 import { copySavedObjectsToSpacesFactory } from './copy_to_spaces';
 import { Readable } from 'stream';
 
 interface SetupOpts {
   objects: Array<{ type: string; id: string; attributes: Record<string, any> }>;
+  getSortedObjectsForExportImpl?: (opts: SavedObjectsExportOptions) => Promise<Readable>;
   importSavedObjectsImpl?: (opts: SavedObjectsImportOptions) => Promise<SavedObjectsImportResponse>;
 }
 
@@ -23,16 +25,18 @@ describe('copySavedObjectsToSpaces', () => {
     const savedObjectsService: SavedObjectsService = ({
       importExport: {
         objectLimit: 1000,
-        getSortedObjectsForExport: jest.fn().mockResolvedValue(
-          new Readable({
-            objectMode: true,
-            read() {
-              opts.objects.forEach(o => this.push(o));
+        getSortedObjectsForExport:
+          opts.getSortedObjectsForExportImpl ||
+          jest.fn().mockResolvedValue(
+            new Readable({
+              objectMode: true,
+              read() {
+                opts.objects.forEach(o => this.push(o));
 
-              this.push(null);
-            },
-          })
-        ),
+                this.push(null);
+              },
+            })
+          ),
         importSavedObjects:
           opts.importSavedObjectsImpl ||
           jest.fn().mockImplementation(() => {
@@ -96,145 +100,145 @@ describe('copySavedObjectsToSpaces', () => {
     });
 
     expect(result).toMatchInlineSnapshot(`
-                                                            Object {
-                                                              "destination1": Object {
-                                                                "errors": undefined,
-                                                                "success": true,
-                                                                "successCount": 3,
-                                                              },
-                                                              "destination2": Object {
-                                                                "errors": undefined,
-                                                                "success": true,
-                                                                "successCount": 3,
-                                                              },
-                                                            }
-                                        `);
+                                                                  Object {
+                                                                    "destination1": Object {
+                                                                      "errors": undefined,
+                                                                      "success": true,
+                                                                      "successCount": 3,
+                                                                    },
+                                                                    "destination2": Object {
+                                                                      "errors": undefined,
+                                                                      "success": true,
+                                                                      "successCount": 3,
+                                                                    },
+                                                                  }
+                                            `);
 
     expect((savedObjectsService.importExport.getSortedObjectsForExport as jest.Mock).mock.calls)
       .toMatchInlineSnapshot(`
-      Array [
-        Array [
-          Object {
-            "exportSizeLimit": 1000,
-            "includeReferencesDeep": true,
-            "namespace": "sourceSpace",
-            "objects": Array [
-              Object {
-                "id": "my-dashboard",
-                "type": "dashboard",
-              },
-            ],
-            "savedObjectsClient": null,
-            "types": Array [
-              "dashboard",
-              "visualization",
-            ],
-          },
-        ],
-      ]
-    `);
+            Array [
+              Array [
+                Object {
+                  "exportSizeLimit": 1000,
+                  "includeReferencesDeep": true,
+                  "namespace": "sourceSpace",
+                  "objects": Array [
+                    Object {
+                      "id": "my-dashboard",
+                      "type": "dashboard",
+                    },
+                  ],
+                  "savedObjectsClient": null,
+                  "types": Array [
+                    "dashboard",
+                    "visualization",
+                  ],
+                },
+              ],
+            ]
+        `);
 
     expect((savedObjectsService.importExport.importSavedObjects as jest.Mock).mock.calls)
       .toMatchInlineSnapshot(`
-      Array [
-        Array [
-          Object {
-            "namespace": "destination1",
-            "objectLimit": 1000,
-            "overwrite": true,
-            "readStream": Readable {
-              "_events": Object {},
-              "_eventsCount": 0,
-              "_maxListeners": undefined,
-              "_read": [Function],
-              "_readableState": ReadableState {
-                "awaitDrain": 0,
-                "buffer": BufferList {
-                  "head": null,
-                  "length": 0,
-                  "tail": null,
+            Array [
+              Array [
+                Object {
+                  "namespace": "destination1",
+                  "objectLimit": 1000,
+                  "overwrite": true,
+                  "readStream": Readable {
+                    "_events": Object {},
+                    "_eventsCount": 0,
+                    "_maxListeners": undefined,
+                    "_read": [Function],
+                    "_readableState": ReadableState {
+                      "awaitDrain": 0,
+                      "buffer": BufferList {
+                        "head": null,
+                        "length": 0,
+                        "tail": null,
+                      },
+                      "decoder": null,
+                      "defaultEncoding": "utf8",
+                      "destroyed": false,
+                      "emitClose": true,
+                      "emittedReadable": false,
+                      "encoding": null,
+                      "endEmitted": false,
+                      "ended": false,
+                      "flowing": null,
+                      "highWaterMark": 16,
+                      "length": 0,
+                      "needReadable": false,
+                      "objectMode": true,
+                      "paused": true,
+                      "pipes": null,
+                      "pipesCount": 0,
+                      "readableListening": false,
+                      "reading": false,
+                      "readingMore": false,
+                      "resumeScheduled": false,
+                      "sync": true,
+                    },
+                    "readable": true,
+                  },
+                  "savedObjectsClient": null,
+                  "supportedTypes": Array [
+                    "dashboard",
+                    "visualization",
+                  ],
                 },
-                "decoder": null,
-                "defaultEncoding": "utf8",
-                "destroyed": false,
-                "emitClose": true,
-                "emittedReadable": false,
-                "encoding": null,
-                "endEmitted": false,
-                "ended": false,
-                "flowing": null,
-                "highWaterMark": 16,
-                "length": 0,
-                "needReadable": false,
-                "objectMode": true,
-                "paused": true,
-                "pipes": null,
-                "pipesCount": 0,
-                "readableListening": false,
-                "reading": false,
-                "readingMore": false,
-                "resumeScheduled": false,
-                "sync": true,
-              },
-              "readable": true,
-            },
-            "savedObjectsClient": null,
-            "supportedTypes": Array [
-              "dashboard",
-              "visualization",
-            ],
-          },
-        ],
-        Array [
-          Object {
-            "namespace": "destination2",
-            "objectLimit": 1000,
-            "overwrite": true,
-            "readStream": Readable {
-              "_events": Object {},
-              "_eventsCount": 0,
-              "_maxListeners": undefined,
-              "_read": [Function],
-              "_readableState": ReadableState {
-                "awaitDrain": 0,
-                "buffer": BufferList {
-                  "head": null,
-                  "length": 0,
-                  "tail": null,
+              ],
+              Array [
+                Object {
+                  "namespace": "destination2",
+                  "objectLimit": 1000,
+                  "overwrite": true,
+                  "readStream": Readable {
+                    "_events": Object {},
+                    "_eventsCount": 0,
+                    "_maxListeners": undefined,
+                    "_read": [Function],
+                    "_readableState": ReadableState {
+                      "awaitDrain": 0,
+                      "buffer": BufferList {
+                        "head": null,
+                        "length": 0,
+                        "tail": null,
+                      },
+                      "decoder": null,
+                      "defaultEncoding": "utf8",
+                      "destroyed": false,
+                      "emitClose": true,
+                      "emittedReadable": false,
+                      "encoding": null,
+                      "endEmitted": false,
+                      "ended": false,
+                      "flowing": null,
+                      "highWaterMark": 16,
+                      "length": 0,
+                      "needReadable": false,
+                      "objectMode": true,
+                      "paused": true,
+                      "pipes": null,
+                      "pipesCount": 0,
+                      "readableListening": false,
+                      "reading": false,
+                      "readingMore": false,
+                      "resumeScheduled": false,
+                      "sync": true,
+                    },
+                    "readable": true,
+                  },
+                  "savedObjectsClient": null,
+                  "supportedTypes": Array [
+                    "dashboard",
+                    "visualization",
+                  ],
                 },
-                "decoder": null,
-                "defaultEncoding": "utf8",
-                "destroyed": false,
-                "emitClose": true,
-                "emittedReadable": false,
-                "encoding": null,
-                "endEmitted": false,
-                "ended": false,
-                "flowing": null,
-                "highWaterMark": 16,
-                "length": 0,
-                "needReadable": false,
-                "objectMode": true,
-                "paused": true,
-                "pipes": null,
-                "pipesCount": 0,
-                "readableListening": false,
-                "reading": false,
-                "readingMore": false,
-                "resumeScheduled": false,
-                "sync": true,
-              },
-              "readable": true,
-            },
-            "savedObjectsClient": null,
-            "supportedTypes": Array [
-              "dashboard",
-              "visualization",
-            ],
-          },
-        ],
-      ]
-    `);
+              ],
+            ]
+        `);
   });
 
   it(`doesn't stop copy if some spaces fail`, async () => {
@@ -288,25 +292,81 @@ describe('copySavedObjectsToSpaces', () => {
     );
 
     expect(result).toMatchInlineSnapshot(`
-            Object {
-              "failure-space": Object {
-                "errors": Array [
-                  [Error: Some error occurred!],
-                ],
-                "success": false,
-                "successCount": 0,
-              },
-              "marketing": Object {
-                "errors": undefined,
-                "success": true,
-                "successCount": 3,
-              },
-              "non-existent-space": Object {
-                "errors": undefined,
-                "success": true,
-                "successCount": 3,
-              },
-            }
-        `);
+                  Object {
+                    "failure-space": Object {
+                      "errors": Array [
+                        [Error: Some error occurred!],
+                      ],
+                      "success": false,
+                      "successCount": 0,
+                    },
+                    "marketing": Object {
+                      "errors": undefined,
+                      "success": true,
+                      "successCount": 3,
+                    },
+                    "non-existent-space": Object {
+                      "errors": undefined,
+                      "success": true,
+                      "successCount": 3,
+                    },
+                  }
+            `);
+  });
+
+  it(`handles stream read errors`, async () => {
+    const { savedObjectsClient, savedObjectsService } = setup({
+      objects: [
+        {
+          type: 'dashboard',
+          id: 'my-dashboard',
+          attributes: {},
+        },
+        {
+          type: 'visualization',
+          id: 'my-viz',
+          attributes: {},
+        },
+        {
+          type: 'index-pattern',
+          id: 'my-index-pattern',
+          attributes: {},
+        },
+      ],
+      getSortedObjectsForExportImpl: opts => {
+        return Promise.resolve(
+          new Readable({
+            objectMode: true,
+            read() {
+              this.emit('error', new Error('Something went wrong while reading this stream'));
+            },
+          })
+        );
+      },
+    });
+
+    const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
+      savedObjectsClient,
+      savedObjectsService
+    );
+
+    await expect(
+      copySavedObjectsToSpaces(
+        'sourceSpace',
+        ['failure-space', 'non-existent-space', 'marketing'],
+        {
+          includeReferences: true,
+          overwrite: true,
+          objects: [
+            {
+              type: 'dashboard',
+              id: 'my-dashboard',
+            },
+          ],
+        }
+      )
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Something went wrong while reading this stream"`
+    );
   });
 });

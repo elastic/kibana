@@ -9,12 +9,14 @@ import {
   SavedObjectsClientContract,
   SavedObjectsImportResponse,
   SavedObjectsResolveImportErrorsOptions,
+  SavedObjectsExportOptions,
 } from 'src/core/server';
 import { Readable } from 'stream';
 import { resolveCopySavedObjectsToSpacesConflictsFactory } from './resolve_copy_conflicts';
 
 interface SetupOpts {
   objects: Array<{ type: string; id: string; attributes: Record<string, any> }>;
+  getSortedObjectsForExportImpl?: (opts: SavedObjectsExportOptions) => Promise<Readable>;
   resolveImportErrorsImpl?: (
     opts: SavedObjectsResolveImportErrorsOptions
   ) => Promise<SavedObjectsImportResponse>;
@@ -25,16 +27,18 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
     const savedObjectsService: SavedObjectsService = ({
       importExport: {
         objectLimit: 1000,
-        getSortedObjectsForExport: jest.fn().mockResolvedValue(
-          new Readable({
-            objectMode: true,
-            read() {
-              opts.objects.forEach(o => this.push(o));
+        getSortedObjectsForExport:
+          opts.getSortedObjectsForExportImpl ||
+          jest.fn().mockResolvedValue(
+            new Readable({
+              objectMode: true,
+              read() {
+                opts.objects.forEach(o => this.push(o));
 
-              this.push(null);
-            },
-          })
-        ),
+                this.push(null);
+              },
+            })
+          ),
         resolveImportErrors:
           opts.resolveImportErrorsImpl ||
           jest.fn().mockImplementation(() => {
@@ -357,5 +361,36 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
               },
             }
         `);
+  });
+
+  it(`handles stream read errors`, async () => {
+    const { savedObjectsClient, savedObjectsService } = setup({
+      objects: [],
+      getSortedObjectsForExportImpl: opts => {
+        return Promise.resolve(
+          new Readable({
+            objectMode: true,
+            read() {
+              this.emit('error', new Error('Something went wrong while reading this stream'));
+            },
+          })
+        );
+      },
+    });
+
+    const resolveCopySavedObjectsToSpacesConflicts = resolveCopySavedObjectsToSpacesConflictsFactory(
+      savedObjectsClient,
+      savedObjectsService
+    );
+
+    await expect(
+      resolveCopySavedObjectsToSpacesConflicts('sourceSpace', {
+        includeReferences: true,
+        objects: [],
+        retries: {},
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Something went wrong while reading this stream"`
+    );
   });
 });
