@@ -167,12 +167,12 @@ export default function(kibana: any) {
       const alwaysFiringAlertType: AlertType = {
         id: 'test.always-firing',
         name: 'Test: Always Firing',
+        actionGroups: ['default'],
         async executor({ services, params, state }: AlertExecutorOptions) {
-          const actionGroupToFire = params.actionGroupToFire || 'default';
           services
             .alertInstanceFactory('1')
             .replaceState({ instanceStateValue: true })
-            .fire(actionGroupToFire, {
+            .fire('default', {
               instanceContextValue: true,
             });
           await services.callCluster('index', {
@@ -193,6 +193,7 @@ export default function(kibana: any) {
       const neverFiringAlertType: AlertType = {
         id: 'test.never-firing',
         name: 'Test: Never firing',
+        actionGroups: [],
         async executor({ services, params, state }: AlertExecutorOptions) {
           await services.callCluster('index', {
             index: params.index,
@@ -212,6 +213,7 @@ export default function(kibana: any) {
       const failingAlertType: AlertType = {
         id: 'test.failing',
         name: 'Test: Failing',
+        actionGroups: [],
         async executor({ services, params, state }: AlertExecutorOptions) {
           await services.callCluster('index', {
             index: params.index,
@@ -229,6 +231,7 @@ export default function(kibana: any) {
       const authorizationAlertType: AlertType = {
         id: 'test.authorization',
         name: 'Test: Authorization',
+        actionGroups: [],
         validate: {
           params: schema.object({
             callClusterAuthorizationIndex: schema.string(),
@@ -287,6 +290,7 @@ export default function(kibana: any) {
       const validationAlertType: AlertType = {
         id: 'test.validation',
         name: 'Test: Validation',
+        actionGroups: [],
         validate: {
           params: schema.object({
             param1: schema.string(),
@@ -297,6 +301,7 @@ export default function(kibana: any) {
       const noopAlertType: AlertType = {
         id: 'test.noop',
         name: 'Test: Noop',
+        actionGroups: [],
         async executor({ services, params, state }: AlertExecutorOptions) {},
       };
       server.plugins.alerting.registerType(alwaysFiringAlertType);

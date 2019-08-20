@@ -100,6 +100,7 @@ export function getCreateTaskRunnerFunction({
           apiKey,
           actions: actionsWithIds,
           spaceId,
+          alertType,
         });
         const alertInstances: Record<string, AlertInstance> = {};
         const alertInstancesData = taskInstance.state.alertInstances || {};

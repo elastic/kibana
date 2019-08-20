@@ -45,6 +45,7 @@ export interface AlertType {
   validate?: {
     params?: { validate: (object: any) => any };
   };
+  actionGroups: string[];
   executor: ({ services, params, state }: AlertExecutorOptions) => Promise<State | void>;
 }
 

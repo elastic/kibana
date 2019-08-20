@@ -68,6 +68,7 @@ describe('create()', () => {
     alertTypeRegistry.get.mockReturnValueOnce({
       id: '123',
       name: 'Test',
+      actionGroups: ['default'],
       async executor() {},
     });
     savedObjectsClient.create.mockResolvedValueOnce({
@@ -228,6 +229,7 @@ describe('create()', () => {
     alertTypeRegistry.get.mockReturnValueOnce({
       id: '123',
       name: 'Test',
+      actionGroups: ['default'],
       async executor() {},
     });
     savedObjectsClient.create.mockResolvedValueOnce({
@@ -289,6 +291,7 @@ describe('create()', () => {
     alertTypeRegistry.get.mockReturnValueOnce({
       id: '123',
       name: 'Test',
+      actionGroups: [],
       validate: {
         params: schema.object({
           param1: schema.string(),
@@ -308,6 +311,7 @@ describe('create()', () => {
     alertTypeRegistry.get.mockReturnValueOnce({
       id: '123',
       name: 'Test',
+      actionGroups: ['default'],
       async executor() {},
     });
     savedObjectsClient.create.mockRejectedValueOnce(new Error('Test failure'));
@@ -323,6 +327,7 @@ describe('create()', () => {
     alertTypeRegistry.get.mockReturnValueOnce({
       id: '123',
       name: 'Test',
+      actionGroups: ['default'],
       async executor() {},
     });
     savedObjectsClient.create.mockResolvedValueOnce({
@@ -372,6 +377,7 @@ describe('create()', () => {
     alertTypeRegistry.get.mockReturnValueOnce({
       id: '123',
       name: 'Test',
+      actionGroups: ['default'],
       async executor() {},
     });
     savedObjectsClient.create.mockResolvedValueOnce({
@@ -435,6 +441,7 @@ describe('create()', () => {
     alertTypeRegistry.get.mockReturnValueOnce({
       id: '123',
       name: 'Test',
+      actionGroups: ['default'],
       async executor() {},
     });
     alertsClientParams.createAPIKey.mockResolvedValueOnce({
@@ -933,6 +940,7 @@ describe('update()', () => {
     alertTypeRegistry.get.mockReturnValueOnce({
       id: '123',
       name: 'Test',
+      actionGroups: ['default'],
       async executor() {},
     });
     savedObjectsClient.get.mockResolvedValueOnce({
@@ -1056,6 +1064,7 @@ describe('update()', () => {
     alertTypeRegistry.get.mockReturnValueOnce({
       id: '123',
       name: 'Test',
+      actionGroups: ['default'],
       async executor() {},
     });
     savedObjectsClient.get.mockResolvedValueOnce({
@@ -1185,6 +1194,7 @@ describe('update()', () => {
     alertTypeRegistry.get.mockReturnValueOnce({
       id: '123',
       name: 'Test',
+      actionGroups: ['default'],
       validate: {
         params: schema.object({
           param1: schema.string(),

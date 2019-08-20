@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertAction, State, Context } from '../types';
+import { AlertAction, State, Context, AlertType } from '../types';
 import { ActionsPlugin } from '../../../actions';
 import { transformActionParams } from './transform_action_params';
 
@@ -13,6 +13,7 @@ interface CreateFireHandlerOptions {
   actions: AlertAction[];
   spaceId: string;
   apiKey?: string;
+  alertType: AlertType;
 }
 
 export function createFireHandler({
@@ -20,8 +21,12 @@ export function createFireHandler({
   actions: alertActions,
   spaceId,
   apiKey,
+  alertType,
 }: CreateFireHandlerOptions) {
   return async (actionGroup: string, context: Context, state: State) => {
+    if (!alertType.actionGroups.includes(actionGroup)) {
+      throw new Error(`Invalid action group "${actionGroup}" for alert "${alertType.id}".`);
+    }
     const actions = alertActions
       .filter(({ group }) => group === actionGroup)
       .map(action => {
