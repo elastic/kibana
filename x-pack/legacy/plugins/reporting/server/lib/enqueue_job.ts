@@ -5,17 +5,33 @@
  */
 
 import { get } from 'lodash';
+// @ts-ignore
 import { events as esqueueEvents } from './esqueue';
 import { oncePerServer } from './once_per_server';
+import { KbnServer, Logger, JobParams, ConditionalHeaders } from '../../types';
 
-function enqueueJobFn(server) {
+interface ConfirmedJob {
+  id: string;
+  index: string;
+  _seq_no: number;
+  _primary_term: number;
+}
+
+function enqueueJobFn(server: KbnServer) {
   const jobQueue = server.plugins.reporting.queue;
   const config = server.config();
   const queueConfig = config.get('xpack.reporting.queue');
   const browserType = config.get('xpack.reporting.capture.browser.type');
   const exportTypesRegistry = server.plugins.reporting.exportTypesRegistry;
 
-  return async function enqueueJob(parentLogger, exportTypeId, jobParams, user, headers, request) {
+  return async function enqueueJob(
+    parentLogger: Logger,
+    exportTypeId: string,
+    jobParams: JobParams,
+    user: string,
+    headers: ConditionalHeaders,
+    request: Request
+  ) {
     const logger = parentLogger.clone(['queue-job']);
     const exportType = exportTypesRegistry.getById(exportTypeId);
     const createJob = exportType.createJobFactory(server);
@@ -30,7 +46,7 @@ function enqueueJobFn(server) {
     return new Promise((resolve, reject) => {
       const job = jobQueue.addJob(exportType.jobType, payload, options);
 
-      job.on(esqueueEvents.EVENT_JOB_CREATED, (createdJob) => {
+      job.on(esqueueEvents.EVENT_JOB_CREATED, (createdJob: ConfirmedJob) => {
         if (createdJob.id === job.id) {
           logger.info(`Successfully queued job: ${createdJob.id}`);
           resolve(job);

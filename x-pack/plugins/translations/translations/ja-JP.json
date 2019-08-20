@@ -2457,7 +2457,6 @@
     "kbnDocViews.table.filterOutValueButtonAriaLabel": "値を除外",
     "kbnDocViews.table.filterOutValueButtonTooltip": "値を除外します",
     "kbnDocViews.table.noCachedMappingForThisFieldTooltip": "このフィールドのキャッシュされたマッピングがありません。管理 > インデックスパターンページからフィールドリストを更新してください",
-    "kbnDocViews.table.objectsInArraysAreNotWellSupportedTooltip": "配列のオブジェクトが正常にサポートされていません。",
     "kbnDocViews.table.tableTitle": "表",
     "kbnDocViews.table.toggleColumnInTableButtonAriaLabel": "表の列を切り替える",
     "kbnDocViews.table.toggleColumnInTableButtonTooltip": "表の列を切り替える",

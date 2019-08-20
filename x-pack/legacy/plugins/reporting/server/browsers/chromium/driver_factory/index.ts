@@ -8,6 +8,7 @@ import os from 'os';
 import path from 'path';
 // @ts-ignore
 import puppeteer from 'puppeteer-core';
+import { Browser, Page, LaunchOptions } from 'puppeteer';
 import rimraf from 'rimraf';
 import * as Rx from 'rxjs';
 import { map, share, mergeMap, filter, partition, ignoreElements, tap } from 'rxjs/operators';
@@ -71,7 +72,7 @@ export class HeadlessChromiumDriverFactory {
         env: {
           TZ: browserTimezone,
         },
-      })
+      } as LaunchOptions)
       .catch((error: Error) => {
         logger.warning(
           `The Reporting plugin encountered issues launching Chromium in a self-test. You may have trouble generating reports: [${error}]`
@@ -105,8 +106,8 @@ export class HeadlessChromiumDriverFactory {
         proxyConfig: this.browserConfig.proxy,
       });
 
-      let browser: puppeteer.Browser;
-      let page: puppeteer.Page;
+      let browser: Browser;
+      let page: Page;
       try {
         browser = await puppeteer.launch({
           pipe: true,
@@ -117,7 +118,7 @@ export class HeadlessChromiumDriverFactory {
           env: {
             TZ: browserTimezone,
           },
-        });
+        } as LaunchOptions);
 
         page = await browser.newPage();
 
