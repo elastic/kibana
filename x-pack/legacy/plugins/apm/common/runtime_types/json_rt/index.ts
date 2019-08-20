@@ -6,13 +6,16 @@
 import * as t from 'io-ts';
 import { either } from 'fp-ts/lib/Either';
 
-export const dateAsString = new t.Type<string, string, unknown>(
-  'DateAsString',
-  t.string.is,
+export const jsonRt = new t.Type<any, string, unknown>(
+  'JSON',
+  t.any.is,
   (u, c) =>
     either.chain(t.string.validate(u, c), s => {
-      const d = new Date(s);
-      return isNaN(d.getTime()) ? t.failure(u, c) : t.success(s);
+      try {
+        return t.success(JSON.parse(s));
+      } catch (e) {
+        return t.failure(u, c);
+      }
     }),
-  a => a
+  a => JSON.stringify(a)
 );

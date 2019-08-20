@@ -6,16 +6,16 @@
 import * as t from 'io-ts';
 import { either } from 'fp-ts/lib/Either';
 
-export const json = new t.Type<any, string, unknown>(
-  'JSON',
+// Checks whether a string is a valid ISO timestamp,
+// but doesn't convert it into a Date object when decoding
+
+export const dateAsStringRt = new t.Type<string, string, unknown>(
+  'DateAsString',
   t.string.is,
   (u, c) =>
     either.chain(t.string.validate(u, c), s => {
-      try {
-        return t.success(JSON.parse(s));
-      } catch (e) {
-        return t.failure(u, c);
-      }
+      const d = new Date(s);
+      return isNaN(d.getTime()) ? t.failure(u, c) : t.success(s);
     }),
-  a => a
+  t.identity
 );

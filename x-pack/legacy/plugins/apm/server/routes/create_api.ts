@@ -16,7 +16,6 @@ import {
   Route,
   Params
 } from './typings';
-import { debugRt } from './default_api_types';
 
 export function createApi() {
   const factoryFns: Array<RouteFactoryFn<any, any, any, any>> = [];
@@ -46,11 +45,6 @@ export function createApi() {
             },
             route,
             {
-              params: {
-                query: params.query
-                  ? t.intersection([params.query, debugRt])
-                  : debugRt
-              },
               handler: async (request: Request, h: ResponseToolkit) => {
                 const paramMap = {
                   path: request.params,

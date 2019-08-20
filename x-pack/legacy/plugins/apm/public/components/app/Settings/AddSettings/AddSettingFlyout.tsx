@@ -22,6 +22,7 @@ import React, { useState } from 'react';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { transactionSampleRateRt } from '../../../../../common/runtime_types/transaction_sample_rate_rt';
 import { AddSettingFlyoutBody } from './AddSettingFlyoutBody';
 import { Config } from '../SettingsList';
 import { useFetcher } from '../../../../hooks/useFetcher';
@@ -79,14 +80,15 @@ export function AddSettingsFlyout({
     [serviceName],
     { preservePreviousResponse: false }
   );
+
+  const isSampleRateValid = transactionSampleRateRt
+    .decode(sampleRate)
+    .isRight();
+
   const isSelectedEnvironmentValid = environments.some(
     env =>
       env.name === environment && (Boolean(selectedConfig) || env.available)
   );
-  const sampleRateFloat = parseFloat(sampleRate);
-  const hasCorrectDecimals = Number.isInteger(sampleRateFloat * 1000);
-  const isSampleRateValid =
-    sampleRateFloat >= 0 && sampleRateFloat <= 1 && hasCorrectDecimals;
 
   if (!isOpen) {
     return null;
@@ -190,7 +192,7 @@ export function AddSettingsFlyout({
                   await saveConfig({
                     environment,
                     serviceName,
-                    sampleRate: sampleRateFloat,
+                    sampleRate: parseFloat(sampleRate),
                     configurationId: selectedConfig
                       ? selectedConfig.id
                       : undefined

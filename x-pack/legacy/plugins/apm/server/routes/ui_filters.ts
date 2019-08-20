@@ -19,7 +19,7 @@ import { getErrorGroupsProjection } from '../../common/projections/errors';
 import { getTransactionsProjection } from '../../common/projections/transactions';
 import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
-import { json } from '../../common/runtime_types/json';
+import { jsonRt } from '../../common/runtime_types/json_rt';
 
 export const uiFiltersEnvironmentsRoute = createRoute(() => ({
   path: '/api/apm/ui_filters/environments',
@@ -39,7 +39,7 @@ export const uiFiltersEnvironmentsRoute = createRoute(() => ({
 }));
 
 const filterNamesRt = t.type({
-  filterNames: json.pipe(
+  filterNames: jsonRt.pipe(
     t.array(t.union(localUIFilterNames.map(name => t.literal(name))))
   )
 });

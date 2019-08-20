@@ -15,7 +15,7 @@ import { getEnvironments } from '../lib/settings/agent_configuration/get_environ
 import { deleteConfiguration } from '../lib/settings/agent_configuration/delete_configuration';
 import { createApmAgentConfigurationIndex } from '../lib/settings/agent_configuration/create_agent_config_index';
 import { createRoute } from './create_route';
-import { createRangeType } from '../../common/runtime_types/create_range_type';
+import { transactionSampleRateRt } from '../../common/runtime_types/transaction_sample_rate_rt';
 
 // get list of configurations
 export const agentConfigurationRoute = createRoute(core => ({
@@ -61,6 +61,20 @@ export const listAgentConfigurationServicesRoute = createRoute(() => ({
   }
 }));
 
+const agentPayloadRt = t.type({
+  settings: t.type({
+    transaction_sample_rate: transactionSampleRateRt
+  }),
+  service: t.intersection([
+    t.type({
+      name: t.string
+    }),
+    t.partial({
+      environments: t.array(t.string)
+    })
+  ])
+});
+
 // get environments for service
 export const listAgentConfigurationEnvironmentsRoute = createRoute(() => ({
   path:
@@ -79,17 +93,6 @@ export const listAgentConfigurationEnvironmentsRoute = createRoute(() => ({
     });
   }
 }));
-
-// create configuration
-const agentPayloadRt = t.type({
-  settings: t.type({
-    transaction_sample_rate: createRangeType(0, 1, 3)
-  }),
-  service: t.intersection([
-    t.type({ name: t.string }),
-    t.partial({ environment: t.string })
-  ])
-});
 
 export const createAgentConfigurationRoute = createRoute(() => ({
   method: 'POST',
