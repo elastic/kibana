@@ -88,7 +88,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
       description={
         <FormattedMessage
           id="xpack.snapshotRestore.policyForm.stepLogistics.nameDescription"
-          defaultMessage="A unique identifier for the policy."
+          defaultMessage="A unique identifier for this policy."
         />
       }
       idAria="nameDescription"
@@ -145,7 +145,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
       description={
         <FormattedMessage
           id="xpack.snapshotRestore.policyForm.stepLogistics.repositoryDescription"
-          defaultMessage="Repository to store snapshots taken by this policy."
+          defaultMessage="The repository where you want to store the snapshots."
         />
       }
       idAria="policyRepositoryDescription"
@@ -219,7 +219,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           error={{
             data: {
               error: i18n.translate('xpack.snapshotRestore.policyForm.noRepositoriesErrorMessage', {
-                defaultMessage: 'A repository is required to store snapshots.',
+                defaultMessage: 'You must register a repository to store your snapshots.',
               }),
             },
           }}
@@ -280,8 +280,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
       description={
         <FormattedMessage
           id="xpack.snapshotRestore.policyForm.stepLogistics.snapshotNameDescription"
-          defaultMessage="Name for the automatic snapshots taken by this policy.
-            A unique identifier will be appended to every snapshot name."
+          defaultMessage="The name for the snapshots. A unique identifier is automatically added to each name."
         />
       }
       idAria="policySnapshotNameDescription"
@@ -356,7 +355,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
       description={
         <FormattedMessage
           id="xpack.snapshotRestore.policyForm.stepLogistics.scheduleDescription"
-          defaultMessage="How often to run this policy."
+          defaultMessage="The frequency at which to take the snapshots."
         />
       }
       idAria="policyScheduleDescription"
@@ -476,7 +475,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
             <h3>
               <FormattedMessage
                 id="xpack.snapshotRestore.policyForm.stepLogisticsTitle"
-                defaultMessage="Logistics"
+                defaultMessage="Policy details"
               />
             </h3>
           </EuiTitle>
@@ -492,7 +491,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           >
             <FormattedMessage
               id="xpack.snapshotRestore.policyForm.stepLogistics.docsButtonLabel"
-              defaultMessage="Logistics docs"
+              defaultMessage="Snapshot Lifecycle Management docs"
             />
           </EuiButtonEmpty>
         </EuiFlexItem>

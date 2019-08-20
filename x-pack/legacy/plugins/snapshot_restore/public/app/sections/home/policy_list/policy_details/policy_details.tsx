@@ -237,7 +237,7 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
                                     name: i18n.translate(
                                       'xpack.snapshotRestore.policyDetails.executeButtonLabel',
                                       {
-                                        defaultMessage: 'Run immediately',
+                                        defaultMessage: 'Run now',
                                       }
                                     ),
                                     icon: 'play',
@@ -335,7 +335,7 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
                 >
                   <FormattedMessage
                     id="xpack.snapshotRestore.policyDetails.inProgressSnapshotLinkText"
-                    defaultMessage="'{snapshotName}' currently being taken…"
+                    defaultMessage="'{snapshotName}' in progress"
                     values={{ snapshotName: policyDetails.policy.inProgress.snapshotName }}
                   />
                 </EuiLink>

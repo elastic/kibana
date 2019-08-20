@@ -113,7 +113,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
             <p>
               <FormattedMessage
                 id="xpack.snapshotRestore.policyList.emptyPromptDescription"
-                defaultMessage="Use policies to schedule automatic backups of your cluster."
+                defaultMessage="Create a policy to automatically back up your cluster."
               />
             </p>
           </Fragment>
@@ -145,7 +145,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
               title={
                 <FormattedMessage
                   id="xpack.snapshotRestore.policyScheduleWarningTitle"
-                  defaultMessage="Duplicate schedules found"
+                  defaultMessage="Two or more policies have the same schedule"
                 />
               }
               color="warning"
@@ -153,8 +153,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
             >
               <FormattedMessage
                 id="xpack.snapshotRestore.policyScheduleWarningDescription"
-                defaultMessage="Some of your policies have the same schedule. Only one snapshot can be taken at
-                  a time. Edit or delete the policies with the duplicate schedule to avoid snapshot failures."
+                defaultMessage="Only one snapshot can be taken at a time. To avoid snapshot failures, edit or delete the policies."
               />
             </EuiCallOut>
             <EuiSpacer />

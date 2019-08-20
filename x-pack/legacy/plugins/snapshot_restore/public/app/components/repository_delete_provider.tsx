@@ -156,7 +156,7 @@ export const RepositoryDeleteProvider: React.FunctionComponent<Props> = ({ child
               <FormattedMessage
                 id="xpack.snapshotRestore.deleteRepository.confirmModal.deleteSingleDescription"
                 defaultMessage="The snapshots in this repository will still exist, but Elasticsearch won’t have access to them.
-                  Be sure to adjust any policies that use this repository, otherwise scheduled snapshots will fail."
+                  Adjust policies that use this repository to prevent scheduled snapshots from failing."
               />
             </p>
           ) : (
@@ -176,7 +176,7 @@ export const RepositoryDeleteProvider: React.FunctionComponent<Props> = ({ child
                 <FormattedMessage
                   id="xpack.snapshotRestore.deleteRepository.confirmModal.deleteMultipleDescription"
                   defaultMessage="The snapshots in these repositories will still exist, but Elasticsearch won't have access to them.
-                    Be sure to adjust any policies that use these repositories, otherwise scheduled snapshots will fail."
+                    Adjust policies that use these repositories to prevent scheduled snapshots from failing."
                 />
               </p>
             </Fragment>

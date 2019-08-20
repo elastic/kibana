@@ -182,12 +182,12 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
                 ) : isEditing ? (
                   <FormattedMessage
                     id="xpack.snapshotRestore.policyForm.saveButtonLabel"
-                    defaultMessage="Save"
+                    defaultMessage="Save policy"
                   />
                 ) : (
                   <FormattedMessage
                     id="xpack.snapshotRestore.policyForm.createButtonLabel"
-                    defaultMessage="Create"
+                    defaultMessage="Create policy"
                   />
                 )}
               </EuiButton>

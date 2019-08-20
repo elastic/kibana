@@ -187,7 +187,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
           <EuiDescriptionListTitle data-test-subj="title">
             <FormattedMessage
               id="xpack.snapshotRestore.policyDetails.nextExecutionLabel"
-              defaultMessage="Next execution"
+              defaultMessage="Next snapshot"
             />
           </EuiDescriptionListTitle>
 

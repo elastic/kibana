@@ -47,7 +47,7 @@ export const TabHistory: React.FunctionComponent<Props> = ({ policy }) => {
           <h3>
             <FormattedMessage
               id="xpack.snapshotRestore.policyDetails.lastSuccessTitle"
-              defaultMessage="Last successful run"
+              defaultMessage="Last successful snapshot"
             />
           </h3>
         </EuiTitle>
@@ -55,12 +55,11 @@ export const TabHistory: React.FunctionComponent<Props> = ({ policy }) => {
 
         <EuiDescriptionList textStyle="reverse">
           <EuiFlexGroup>
-            <EuiFlexItem data-test-subj="successTime">
+            <EuiFlexItem data-test-subj="successDate">
               <EuiDescriptionListTitle data-test-subj="title">
                 <FormattedMessage
-                  id="xpack.snapshotRestore.policyDetails.lastSuccess.timeLabel"
-                  defaultMessage="Ran on"
-                  description="Title for date time. Example: Ran on Jul 16, 2019 6:30 PM PDT"
+                  id="xpack.snapshotRestore.policyDetails.lastSuccess.dateLabel"
+                  defaultMessage="Date"
                 />
               </EuiDescriptionListTitle>
 
@@ -107,12 +106,11 @@ export const TabHistory: React.FunctionComponent<Props> = ({ policy }) => {
 
         <EuiDescriptionList textStyle="reverse">
           <EuiFlexGroup>
-            <EuiFlexItem data-test-subj="failureTime">
+            <EuiFlexItem data-test-subj="failureDate">
               <EuiDescriptionListTitle data-test-subj="title">
                 <FormattedMessage
-                  id="xpack.snapshotRestore.policyDetails.lastFailure.timeLabel"
-                  defaultMessage="Failed on"
-                  description="Title for date time. Example: Failed on Jul 16, 2019 6:30 PM PDT"
+                  id="xpack.snapshotRestore.policyDetails.lastFailure.dateLabel"
+                  defaultMessage="Date"
                 />
               </EuiDescriptionListTitle>
 
@@ -140,7 +138,7 @@ export const TabHistory: React.FunctionComponent<Props> = ({ policy }) => {
               <EuiDescriptionListTitle data-test-subj="title">
                 <FormattedMessage
                   id="xpack.snapshotRestore.policyDetails.lastFailure.detailsLabel"
-                  defaultMessage="Failure details"
+                  defaultMessage="Details"
                 />
               </EuiDescriptionListTitle>
               <EuiSpacer size="s" />
@@ -191,7 +189,7 @@ export const TabHistory: React.FunctionComponent<Props> = ({ policy }) => {
       <p>
         <FormattedMessage
           id="xpack.snapshotRestore.policyDetails.noHistoryMessage"
-          defaultMessage="This policy has not been executed yet. It will automatically run on {date} at {time}."
+          defaultMessage="This policy will run on {date} at {time}."
           values={{
             date: <FormattedDateTime epochMs={nextExecutionMillis} type="date" />,
             time: <FormattedDateTime epochMs={nextExecutionMillis} type="time" />,

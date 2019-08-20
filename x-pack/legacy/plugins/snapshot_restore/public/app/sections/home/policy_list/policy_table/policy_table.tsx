@@ -61,14 +61,14 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
         return (
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-            <EuiLink
-              onClick={() => trackUiMetric(UIM_POLICY_SHOW_DETAILS_CLICK)}
-              href={openPolicyDetailsUrl(name)}
-              data-test-subj="policyLink"
-            >
-              {name}
-            </EuiLink>
+              {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+              <EuiLink
+                onClick={() => trackUiMetric(UIM_POLICY_SHOW_DETAILS_CLICK)}
+                href={openPolicyDetailsUrl(name)}
+                data-test-subj="policyLink"
+              >
+                {name}
+              </EuiLink>
             </EuiFlexItem>
             {inProgress ? (
               <EuiFlexItem grow={false}>
@@ -76,7 +76,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
                   content={i18n.translate(
                     'xpack.snapshotRestore.policyList.table.inProgressTooltip',
                     {
-                      defaultMessage: 'Snapshot currently being taken',
+                      defaultMessage: 'Snapshot in progress',
                     }
                   )}
                 >
@@ -115,7 +115,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
     {
       field: 'nextExecutionMillis',
       name: i18n.translate('xpack.snapshotRestore.policyList.table.nextExecutionColumnTitle', {
-        defaultMessage: 'Next execution',
+        defaultMessage: 'Next snapshot',
       }),
       truncateText: true,
       sortable: true,
@@ -141,11 +141,11 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
                             Boolean(inProgress)
                               ? i18n.translate(
                                   'xpack.snapshotRestore.policyList.table.actionExecuteDisabledTooltip',
-                                  { defaultMessage: 'Policy is already running' }
+                                  { defaultMessage: 'Policy is running' }
                                 )
                               : i18n.translate(
                                   'xpack.snapshotRestore.policyList.table.actionExecuteTooltip',
-                                  { defaultMessage: 'Run immediately' }
+                                  { defaultMessage: 'Run now' }
                                 )
                           }
                         >

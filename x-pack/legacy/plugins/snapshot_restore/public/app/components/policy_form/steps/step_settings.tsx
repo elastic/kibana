@@ -297,8 +297,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
       description={
         <FormattedMessage
           id="xpack.snapshotRestore.policyForm.stepSettings.ignoreUnavailableDescription"
-          defaultMessage="Indices that do not exist or are unavailable will be ignored during snapshot creation.
-            Otherwise missing indices will cause snapshot creation to fail."
+          defaultMessage="Ignores indices that are unavailable when taking the snapshot. Otherwise, the entire snapshot will fail."
         />
       }
       idAria="policyIgnoreUnavailableDescription"
@@ -342,9 +341,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
       description={
         <FormattedMessage
           id="xpack.snapshotRestore.policyForm.stepSettings.partialDescription"
-          defaultMessage="Allows snapshot to be taken when one or more indices participating
-            in the snapshot don't have all primary shards available. Otherwise the entire
-            snapshot will fail."
+          defaultMessage="Allows snapshots of indices with primary shards that are unavailable. Otherwise, the entire snapshot will fail."
         />
       }
       idAria="policyPartialDescription"
@@ -384,7 +381,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
       description={
         <FormattedMessage
           id="xpack.snapshotRestore.policyForm.stepSettings.includeGlobalStateDescription"
-          defaultMessage="Stores the cluster global state as part of the snapshot."
+          defaultMessage="Stores the global state of the cluster as part of the snapshot."
         />
       }
       idAria="policyIncludeGlobalStateDescription"
@@ -437,7 +434,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
           >
             <FormattedMessage
               id="xpack.snapshotRestore.policyForm.stepSettings.docsButtonLabel"
-              defaultMessage="Settings docs"
+              defaultMessage="Snapshot settings docs"
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
