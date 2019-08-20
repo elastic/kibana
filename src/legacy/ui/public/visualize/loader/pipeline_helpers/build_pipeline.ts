@@ -33,7 +33,7 @@ interface SchemaConfigParams {
 
 export interface SchemaConfig {
   accessor: number;
-  format: SerializedFieldFormat | {};
+  format: SerializedFieldFormat;
   params: SchemaConfigParams;
   aggType: string;
 }

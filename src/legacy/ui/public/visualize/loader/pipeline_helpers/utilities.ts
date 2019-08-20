@@ -90,7 +90,7 @@ export const createFormat = (agg: AggConfig): SerializedFieldFormat => {
 
 export type FormatFactory = (mapping?: SerializedFieldFormat) => FieldFormat;
 
-export const getFormat: FormatFactory = (mapping: SerializedFieldFormat = {}): FieldFormat => {
+export const getFormat: FormatFactory = (mapping = {}) => {
   if (!mapping) {
     return getDefaultFieldFormat();
   }
