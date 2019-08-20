@@ -24,7 +24,7 @@ export const Description: FC<Props> = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.sparseData.description"
-          defaultMessage="Buckets without values will be ignored and buckets with a zero value will be analyzed."
+          defaultMessage="Buckets without values will be ignored and buckets with a zero value will be analyzed. Available for count and sum analysis."
         />
       }
     >
