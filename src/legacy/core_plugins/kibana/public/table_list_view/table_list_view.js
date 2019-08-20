@@ -116,7 +116,8 @@ class TableListViewUi extends React.Component {
       isDeletingItems: true
     });
     try {
-      await this.props.deleteItems(this.state.selectedIds);
+      const itemsById = _.indexBy(this.state.items, 'id');
+      await this.props.deleteItems(this.state.selectedIds.map(id => itemsById[id]));
     } catch (error) {
       toastNotifications.addDanger({
         title: (
