@@ -18,8 +18,6 @@
  */
 
 export interface VisualizationListItem {
-  canDelete?: boolean;
-  canEdit?: boolean;
   editUrl: string;
   icon: string;
   id: string;

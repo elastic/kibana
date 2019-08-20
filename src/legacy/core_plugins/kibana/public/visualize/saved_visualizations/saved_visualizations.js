@@ -23,7 +23,6 @@ import { uiModules } from 'ui/modules';
 import { SavedObjectLoader, SavedObjectsClientProvider } from 'ui/saved_objects';
 import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
 import { visualizations } from 'plugins/visualizations';
-import { capabilities } from 'ui/capabilities';
 import { createVisualizeEditUrl } from '../visualize_constants';
 import { findListItems } from './find_list_items';
 
@@ -63,8 +62,6 @@ app.service('savedVisualizations', function (SavedVis, Private, kbnUrl, chrome) 
     source.typeTitle = source.type.title;
     source.isExperimental = source.type.shouldMarkAsExperimentalInUI();
     source.editUrl = `#${createVisualizeEditUrl(id)}`;
-    source.canDelete = capabilities.get().visualize.delete;
-    source.canEdit = capabilities.get().visualize.save;
 
     return source;
   };
