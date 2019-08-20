@@ -21,16 +21,13 @@ import { SavedObjectAttributes } from 'src/core/server';
 import { SavedObjectsClientContract } from 'src/core/public';
 import { SavedQueryAttributes, SavedQuery } from '../index';
 
-interface SerializedSavedQueryAttributes extends SavedObjectAttributes {
-  title: string;
-  description: string;
-  query: {
-    query: string;
-    language: string;
+type SerializedSavedQueryAttributes = SavedObjectAttributes &
+  SavedQueryAttributes & {
+    query: {
+      query: string;
+      language: string;
+    };
   };
-  filters?: string;
-  timefilter?: string;
-}
 
 export interface SavedQueryService {
   saveQuery: (
@@ -62,11 +59,11 @@ export const createSavedQueryService = (
     };
 
     if (attributes.filters) {
-      queryObject.filters = JSON.stringify(attributes.filters);
+      queryObject.filters = attributes.filters;
     }
 
     if (attributes.timefilter) {
-      queryObject.timefilter = JSON.stringify(attributes.timefilter);
+      queryObject.timefilter = attributes.timefilter;
     }
 
     let rawQueryResponse;
@@ -141,10 +138,10 @@ export const createSavedQueryService = (
       },
     };
     if (savedQuery.attributes.filters) {
-      savedQueryItems.filters = JSON.parse(savedQuery.attributes.filters);
+      savedQueryItems.filters = savedQuery.attributes.filters;
     }
     if (savedQuery.attributes.timefilter) {
-      savedQueryItems.timefilter = JSON.parse(savedQuery.attributes.timefilter);
+      savedQueryItems.timefilter = savedQuery.attributes.timefilter;
     }
     return {
       id: savedQuery.id,

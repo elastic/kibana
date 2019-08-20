@@ -29,18 +29,21 @@ export const mappings = {
       query: {
         properties: {
           language: {
-            type: 'text',
+            type: 'keyword',
           },
           query: {
-            type: 'text',
+            type: 'keyword',
+            index: false,
           },
         },
       },
       filters: {
-        type: 'text',
+        type: 'object',
+        enabled: false,
       },
       timefilter: {
-        type: 'text',
+        type: 'object',
+        enabled: false,
       },
     },
   },
