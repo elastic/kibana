@@ -101,7 +101,7 @@ test('successfully executes the task', async () => {
     id: '1',
     type: 'alert',
     attributes: {
-      apiKey: 'MTIzOmFiYw==',
+      apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [],
   });
@@ -143,7 +143,7 @@ test('fireAction is called per alert instance that fired', async () => {
     id: '1',
     type: 'alert',
     attributes: {
-      apiKey: 'MTIzOmFiYw==',
+      apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [],
   });
@@ -176,7 +176,7 @@ test('persists alertInstances passed in from state, only if they fire', async ()
     id: '1',
     type: 'alert',
     attributes: {
-      apiKey: 'MTIzOmFiYw==',
+      apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [],
   });
@@ -224,7 +224,7 @@ test('validates params before executing the alert type', async () => {
     id: '1',
     type: 'alert',
     attributes: {
-      apiKey: 'MTIzOmFiYw==',
+      apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [],
   });
@@ -244,7 +244,7 @@ test('throws error if reference not found', async () => {
     id: '1',
     type: 'alert',
     attributes: {
-      apiKey: 'MTIzOmFiYw==',
+      apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [],
   });
@@ -261,7 +261,7 @@ test('uses API key when provided', async () => {
     id: '1',
     type: 'alert',
     attributes: {
-      apiKey: 'MTIzOmFiYw==',
+      apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [],
   });

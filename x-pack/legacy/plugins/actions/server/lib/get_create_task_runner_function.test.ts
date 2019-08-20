@@ -68,7 +68,7 @@ test('executes the task by calling the executor with proper parameters', async (
     attributes: {
       actionId: '2',
       params: { baz: true },
-      apiKey: 'MTIzOmFiYw==',
+      apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [],
   });
@@ -103,7 +103,7 @@ test('throws an error with suggested retry logic when return status is error', a
     attributes: {
       actionId: '2',
       params: { baz: true },
-      apiKey: 'MTIzOmFiYw==',
+      apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [],
   });
@@ -197,7 +197,7 @@ test(`doesn't use API key when provided and isSecurityEnabled is set to false`, 
     attributes: {
       actionId: '2',
       params: { baz: true },
-      apiKey: 'MTIzOmFiYw==',
+      apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [],
   });

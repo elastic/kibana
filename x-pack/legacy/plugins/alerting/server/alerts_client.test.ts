@@ -1025,7 +1025,7 @@ describe('update()', () => {
             },
           },
         ],
-        apiKey: 'MTIzOmFiYw==',
+        apiKey: Buffer.from('123:abc').toString('base64'),
         scheduledTaskId: 'task-123',
       },
       references: [

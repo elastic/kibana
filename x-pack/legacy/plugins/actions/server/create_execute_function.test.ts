@@ -62,7 +62,7 @@ describe('execute()', () => {
     expect(savedObjectsClient.create).toHaveBeenCalledWith('action_task_params', {
       actionId: '123',
       params: { baz: false },
-      apiKey: 'MTIzOmFiYw==',
+      apiKey: Buffer.from('123:abc').toString('base64'),
     });
   });
 
@@ -93,7 +93,7 @@ describe('execute()', () => {
       id: '123',
       params: { baz: false },
       spaceId: 'default',
-      apiKey: 'MTIzOmFiYw==',
+      apiKey: Buffer.from('123:abc').toString('base64'),
     });
     expect(getScopedSavedObjectsClient).toHaveBeenCalledWith({
       getBasePath: expect.anything(),
