@@ -12,10 +12,10 @@ import { either } from 'fp-ts/lib/Either';
 export const dateAsStringRt = new t.Type<string, string, unknown>(
   'DateAsString',
   t.string.is,
-  (u, c) =>
-    either.chain(t.string.validate(u, c), s => {
-      const d = new Date(s);
-      return isNaN(d.getTime()) ? t.failure(u, c) : t.success(s);
+  (input, context) =>
+    either.chain(t.string.validate(input, context), str => {
+      const date = new Date(str);
+      return isNaN(date.getTime()) ? t.failure(input, context) : t.success(str);
     }),
   t.identity
 );

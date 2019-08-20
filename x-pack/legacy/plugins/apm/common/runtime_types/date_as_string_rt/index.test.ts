@@ -8,7 +8,6 @@ import { dateAsStringRt } from './index';
 
 describe('dateAsStringRt', () => {
   it('validates whether a string is a valid date', () => {
-    // @ts-ignore
     expect(dateAsStringRt.decode(1566299881499).isLeft()).toBe(true);
 
     expect(dateAsStringRt.decode('2019-08-20T11:18:31.407Z').isRight()).toBe(
