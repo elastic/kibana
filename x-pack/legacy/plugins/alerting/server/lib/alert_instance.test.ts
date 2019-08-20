@@ -61,7 +61,7 @@ describe('getState()', () => {
 
 describe('getMeta()', () => {
   test('returns meta passed to constructor', () => {
-    const meta = { bar: true };
+    const meta = { groups: {} };
     const alertInstance = new AlertInstance({ meta });
     expect(alertInstance.getMeta()).toEqual(meta);
   });
@@ -72,7 +72,6 @@ describe('fire()', () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
       meta: {
-        bar: true,
         groups: {
           default: {
             lastFired: Date.now(),
@@ -88,7 +87,6 @@ describe('fire()', () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
       meta: {
-        bar: true,
         groups: {
           default: {
             lastFired: Date.now(),
@@ -104,7 +102,6 @@ describe('fire()', () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
       meta: {
-        bar: true,
         groups: {
           default: {
             lastFired: Date.now(),
@@ -118,7 +115,7 @@ describe('fire()', () => {
   });
 
   test('makes getFireOptions() return given options', () => {
-    const alertInstance = new AlertInstance({ state: { foo: true }, meta: { bar: true } });
+    const alertInstance = new AlertInstance({ state: { foo: true }, meta: { groups: {} } });
     alertInstance.replaceState({ otherField: true }).fire('default', { field: true });
     expect(alertInstance.getFireOptions()).toEqual({
       actionGroup: 'default',
@@ -148,11 +145,10 @@ describe('replaceState()', () => {
 
 describe('replaceMeta()', () => {
   test('replaces previous meta', () => {
-    const alertInstance = new AlertInstance({ meta: { foo: true } });
-    alertInstance.replaceMeta({ bar: true });
-    expect(alertInstance.getMeta()).toEqual({ bar: true });
-    alertInstance.replaceMeta({ baz: true });
-    expect(alertInstance.getMeta()).toEqual({ baz: true });
+    const alertInstance = new AlertInstance({ meta: { groups: {} } });
+    expect(alertInstance.getMeta()).toEqual({ groups: {} });
+    alertInstance.replaceMeta({ groups: { default: {} } });
+    expect(alertInstance.getMeta()).toEqual({ groups: { default: {} } });
   });
 });
 
@@ -160,9 +156,9 @@ describe('toJSON', () => {
   test('only serializes state and meta', () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
-      meta: { bar: true },
+      meta: { groups: {} },
     });
-    expect(JSON.stringify(alertInstance)).toEqual('{"state":{"foo":true},"meta":{"bar":true}}');
+    expect(JSON.stringify(alertInstance)).toEqual('{"state":{"foo":true},"meta":{"groups":{}}}');
   });
 });
 
@@ -170,7 +166,7 @@ describe('isObsolete', () => {
   test('returns true by default', () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
-      meta: { bar: true },
+      meta: { groups: {} },
     });
     expect(alertInstance.isObsolete()).toEqual(true);
   });
@@ -178,7 +174,7 @@ describe('isObsolete', () => {
   test('returns false when fired', () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
-      meta: { bar: true },
+      meta: { groups: {} },
     });
     alertInstance.fire('default');
     expect(alertInstance.isObsolete()).toEqual(false);
@@ -188,7 +184,6 @@ describe('isObsolete', () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
       meta: {
-        bar: true,
         groups: {
           default: {
             lastFired: Date.now(),
@@ -203,7 +198,6 @@ describe('isObsolete', () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
       meta: {
-        bar: true,
         groups: {
           default: {
             lastFired: Date.now(),

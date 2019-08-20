@@ -7,7 +7,13 @@
 import { State, Context } from '../types';
 import { parseDuration } from './parse_duration';
 
-type Meta = Record<string, any>;
+interface Meta {
+  groups?: {
+    [group: string]: {
+      lastFired?: number;
+    };
+  };
+}
 
 interface FireOptions {
   actionGroup: string;
@@ -41,7 +47,7 @@ export class AlertInstance {
       this.meta.groups &&
       this.meta.groups[this.fireOptions.actionGroup] &&
       this.meta.groups[this.fireOptions.actionGroup].lastFired !== undefined &&
-      this.meta.groups[this.fireOptions.actionGroup].lastFired + parseDuration(throttle) >
+      this.meta.groups[this.fireOptions.actionGroup].lastFired! + parseDuration(throttle) >
         Date.now()
     ) {
       return false;
@@ -53,11 +59,11 @@ export class AlertInstance {
     const isNotFiring = !this.shouldFire(throttle);
     let isAGroupStillThrottled = false;
 
-    if (throttle) {
-      for (const group of Object.keys(this.meta.groups || {})) {
+    if (throttle && this.meta.groups) {
+      for (const group of Object.keys(this.meta.groups)) {
         if (
           this.meta.groups[group].lastFired !== undefined &&
-          this.meta.groups[group].lastFired + parseDuration(throttle) > Date.now()
+          this.meta.groups[group].lastFired! + parseDuration(throttle) > Date.now()
         ) {
           // This group is still throttled and makes this instance not obsolete
           isAGroupStillThrottled = true;
