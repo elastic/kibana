@@ -25,7 +25,7 @@ export function compose(server: KibanaLegacyServer): ServerLibs {
   const soDatabase = new SODatabaseAdapter(server.savedObjects, server.plugins.elasticsearch);
 
   const configAdapter = new ConfigAdapter(soDatabase);
-  const configuration = new ConfigurationLib(configAdapter);
+  const configuration = new ConfigurationLib(configAdapter, { framework });
 
   const libs: ServerLibs = {
     configuration,

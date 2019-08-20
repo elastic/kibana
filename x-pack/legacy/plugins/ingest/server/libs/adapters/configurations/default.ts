@@ -28,7 +28,7 @@ export class ConfigAdapter {
   }
 
   public async get(id: string): Promise<ConfigurationFile> {
-    const config = await this.so.get<any>('configurations', id);
+    const config = await this.so.get<ConfigurationFile>('configurations', id);
 
     if (config.error) {
       throw new Error(config.error.message);
@@ -44,11 +44,13 @@ export class ConfigAdapter {
     }
   }
 
-  public async list(): Promise<ConfigurationFile[]> {
+  public async list(page: number = 1, perPage: number = 25): Promise<ConfigurationFile[]> {
     const configs = await this.so.find<any>({
       type: 'configurations',
       search: '*',
       searchFields: ['shared_id'],
+      page,
+      perPage,
     });
     const uniqConfigurationFile = configs.saved_objects
       .map<ConfigurationFile>(config => {
@@ -73,15 +75,22 @@ export class ConfigAdapter {
     return [...uniqConfigurationFile.values()];
   }
 
-  public async listVersions(sharedID: string, activeOnly = true): Promise<ConfigurationFile[]> {
+  public async listVersions(
+    sharedID: string,
+    activeOnly = true,
+    page: number = 1,
+    perPage: number = 25
+  ): Promise<ConfigurationFile[]> {
     const configs = (await this.so.find<any>({
       type: 'configurations',
       search: sharedID,
       searchFields: ['shared_id'],
+      page,
+      perPage,
     })).saved_objects;
 
     if (!activeOnly) {
-      const backupConfigs = await this.so.find<any>({
+      const backupConfigs = await this.so.find<BackupConfigurationFile>({
         type: 'backup_configurations',
         search: sharedID,
         searchFields: ['shared_id'],
@@ -99,56 +108,109 @@ export class ConfigAdapter {
   }
 
   public async update(
-    sharedID: string,
-    fromVersion: number,
+    id: string,
     configuration: ConfigurationFile
   ): Promise<{ id: string; version: number }> {
+    const config = await this.so.update<ConfigurationFile>('configurations', id, configuration);
+
     return {
-      id: 'fsdfsdf',
-      version: 0,
+      id: config.id,
+      version: config.attributes.version || 1,
     };
   }
 
-  public async delete(
-    sharedID: string,
-    version?: number
-  ): Promise<{ success: boolean; error?: string }> {
+  public async delete(id: string): Promise<{ success: boolean }> {
+    await this.so.delete('configurations', id);
     return {
       success: true,
     };
   }
 
   public async createBackup(
-    sharedID: string,
-    version?: number
+    configuration: BackupConfigurationFile
   ): Promise<{ success: boolean; id?: string; error?: string }> {
+    const newSo = await this.so.create<ConfigurationFile>(
+      'configurations',
+      (configuration as any) as ConfigurationFile
+    );
+
     return {
-      success: true,
-      id: 'k3jh5lk3j4h5kljh43',
+      success: newSo.error ? false : true,
+      id: newSo.id,
+      error: newSo.error ? newSo.error.message : undefined,
     };
   }
 
-  public async getBackup(sharedID: string, version?: number): Promise<BackupConfigurationFile> {
-    return {} as BackupConfigurationFile;
+  public async getBackup(id: string): Promise<BackupConfigurationFile> {
+    const config = await this.so.get<BackupConfigurationFile>('backup_configurations', id);
+
+    if (config.error) {
+      throw new Error(config.error.message);
+    }
+
+    if (!config.attributes) {
+      throw new Error(`No backup configuration found with ID of ${id}`);
+    }
+    if (RuntimeConfigurationFile.decode(config.attributes).isRight()) {
+      return config.attributes as BackupConfigurationFile;
+    } else {
+      throw new Error(`Invalid BackupConfigurationFile data. == ${config.attributes}`);
+    }
   }
 
   /**
    * Inputs sub-domain type
    */
-  public async getInputsById(ids: string[]): Promise<DatasourceInput[]> {
-    return [{} as DatasourceInput];
+  public async getInputsById(
+    ids: string[],
+    page: number = 1,
+    perPage: number = 25
+  ): Promise<DatasourceInput[]> {
+    const inputs = await this.so.find({
+      type: 'configurations',
+      search: ids.reduce((query, id, i) => {
+        if (i === ids.length - 1) {
+          return `${query} ${id}`;
+        }
+        return `${query} ${id} |`;
+      }, ''),
+      searchFields: ['id'],
+      perPage,
+      page,
+    });
+
+    return inputs.saved_objects.map(input => input.attributes);
   }
 
-  public async addInputs(
-    sharedID: string,
-    version: number,
-    dsUUID: string,
-    input: DatasourceInput
-  ): Promise<string> {
-    return 'htkjerhtkwerhtkjehr';
+  public async listInputsforConfiguration(
+    configurationId: string,
+    page: number = 1,
+    perPage: number = 25
+  ): Promise<DatasourceInput[]> {
+    const inputs = await this.so.find({
+      type: 'configurations',
+      search: configurationId,
+      searchFields: ['config_id'],
+      perPage,
+      page,
+    });
+
+    return inputs.saved_objects.map(input => input.attributes);
   }
 
-  public async deleteInputs(inputID: string[]): Promise<{ success: boolean; error?: string }> {
+  public async addInputs(inputs: DatasourceInput[]): Promise<string[]> {
+    const newInputs = [];
+    for (const input of inputs) {
+      newInputs.push(await this.so.create<DatasourceInput>('inputs', input));
+    }
+
+    return newInputs.map(input => input.attributes.id);
+  }
+
+  public async deleteInputs(inputIDs: string[]): Promise<{ success: boolean }> {
+    for (const id of inputIDs) {
+      await this.so.delete('inputs', id);
+    }
     return {
       success: true,
     };

@@ -5,6 +5,6 @@
  */
 
 export const PLUGIN = {
-  ID: 'ingest-data',
+  ID: 'ingest',
 };
 export const CONFIG_PREFIX = 'xpack.ingest-do-not-disable';

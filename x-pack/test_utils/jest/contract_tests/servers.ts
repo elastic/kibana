@@ -103,6 +103,7 @@ export async function createKibanaServer(xpackOption = {}) {
     // Allow kibana to start
     jest.setTimeout(120000);
   }
+
   const root = kbnTestServer.createRootWithCorePlugins(
     {
       elasticsearch: { ...getSharedESServer() },
