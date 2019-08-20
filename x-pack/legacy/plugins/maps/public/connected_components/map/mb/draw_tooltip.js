@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { EuiText } from '@elastic/eui';
@@ -71,10 +72,10 @@ export class DrawTooltip extends Component {
     }
   }
 
-  _updateTooltipLocation = ({ lngLat }) => {
+  _updateTooltipLocation = _.throttle(({ lngLat }) => {
     if (!this._mbPopup.isOpen()) {
       this._showTooltip();
     }
     this._mbPopup.setLngLat(lngLat);
-  }
+  }, 100)
 }
