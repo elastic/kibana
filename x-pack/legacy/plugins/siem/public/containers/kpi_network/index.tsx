@@ -70,6 +70,8 @@ const KpiNetworkComponentQuery = pure<KpiNetworkProps & KpiNetworkReducer>(
   )
 );
 
+KpiNetworkComponentQuery.displayName = 'KpiNetworkComponentQuery';
+
 const makeMapStateToProps = () => {
   const getQuery = inputsSelectors.globalQueryByIdSelector();
   const mapStateToProps = (state: State, { id = ID }: KpiNetworkProps) => {

@@ -16,9 +16,9 @@ import { Endpoint } from '../distributed/resource_locator';
 export function installRoute(router: CodeServerRouter, codeServices: CodeServices) {
   const lspService = codeServices.serviceFor(LspServiceDefinition);
   const kibanaVersion = router.server.config().get('pkg.version') as string;
-  const status = (endpoint: Endpoint, def: LanguageServerDefinition) => ({
+  const status = async (endpoint: Endpoint, def: LanguageServerDefinition) => ({
     name: def.name,
-    status: lspService.languageServerStatus(endpoint, { langName: def.name }),
+    status: await lspService.languageServerStatus(endpoint, { langName: def.name }),
     version: def.version,
     build: def.build,
     languages: def.languages,
@@ -32,7 +32,9 @@ export function installRoute(router: CodeServerRouter, codeServices: CodeService
     path: '/api/code/install',
     async handler(req: RequestFacade) {
       const endpoint = await codeServices.locate(req, '');
-      return enabledLanguageServers(router.server).map(def => status(endpoint, def));
+      return await Promise.all(
+        enabledLanguageServers(router.server).map(def => status(endpoint, def))
+      );
     },
     method: 'GET',
   });
@@ -44,7 +46,7 @@ export function installRoute(router: CodeServerRouter, codeServices: CodeService
       const def = enabledLanguageServers(router.server).find(d => d.name === name);
       const endpoint = await codeServices.locate(req, '');
       if (def) {
-        return status(endpoint, def);
+        return await status(endpoint, def);
       } else {
         return Boom.notFound(`language server ${name} not found.`);
       }

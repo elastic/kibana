@@ -9,6 +9,12 @@ import { DatabaseAdapter } from '../../database';
 import { ElasticsearchMonitorsAdapter } from '../elasticsearch_monitors_adapter';
 import { CountParams, CountResponse } from 'elasticsearch';
 
+const assertCloseTo = (actual: number, expected: number, precision: number) => {
+  if (Math.abs(expected - actual) > precision) {
+    throw new Error(`expected [${actual}] to be within ${precision} of ${actual}`);
+  }
+};
+
 // FIXME: there are many untested functions in this adapter. They should be tested.
 describe('ElasticsearchMonitorsAdapter', () => {
   let defaultCountResponse: CountResponse;
@@ -81,7 +87,7 @@ describe('ElasticsearchMonitorsAdapter', () => {
   });
 
   it('getMonitorChartsData will run expected parameters when no location is specified', async () => {
-    expect.assertions(4);
+    expect.assertions(3);
     const searchMock = jest.fn();
     const search = searchMock.bind({});
     const database = {
@@ -102,7 +108,12 @@ describe('ElasticsearchMonitorsAdapter', () => {
       10
     );
     expect(fixedInterval).not.toBeNaN();
-    expect(fixedInterval).toBeCloseTo(36000, 3);
+
+    /**
+     * The value based on the input should be ~36000
+     */
+    assertCloseTo(fixedInterval, 36000, 100);
+
     set(
       searchMock.mock.calls[0][1],
       'body.aggs.timeseries.date_histogram.fixed_interval',
@@ -112,7 +123,7 @@ describe('ElasticsearchMonitorsAdapter', () => {
   });
 
   it('getMonitorChartsData will provide expected filters when a location is specified', async () => {
-    expect.assertions(4);
+    expect.assertions(3);
     const searchMock = jest.fn();
     const search = searchMock.bind({});
     const database = {
@@ -133,7 +144,12 @@ describe('ElasticsearchMonitorsAdapter', () => {
       10
     );
     expect(fixedInterval).not.toBeNaN();
-    expect(fixedInterval).toBeCloseTo(36000, 3);
+
+    /**
+     * The value based on the input should be ~36000
+     */
+    assertCloseTo(fixedInterval, 36000, 100);
+
     set(
       searchMock.mock.calls[0][1],
       'body.aggs.timeseries.date_histogram.fixed_interval',

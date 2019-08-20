@@ -89,6 +89,8 @@ const NetworkFilterComponent = pure<NetworkFilterProps>(
   )
 );
 
+NetworkFilterComponent.displayName = 'NetworkFilterComponent';
+
 const makeMapStateToProps = () => {
   const getNetworkFilterQueryDraft = networkSelectors.networkFilterQueryDraft();
   const getIsNetworkFilterQueryDraftValid = networkSelectors.isNetworkFilterQueryDraftValid();

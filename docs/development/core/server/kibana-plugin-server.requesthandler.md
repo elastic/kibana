@@ -9,14 +9,14 @@ A function executed when route path matched requested resource path. Request han
 <b>Signature:</b>
 
 ```typescript
-export declare type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType> = (request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>, response: KibanaResponseFactory) => KibanaResponse<any> | Promise<KibanaResponse<any>>;
+export declare type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType> = (context: RequestHandlerContext, request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>, response: KibanaResponseFactory) => KibanaResponse<any> | Promise<KibanaResponse<any>>;
 ```
 
 ## Example
 
 
 ```ts
-const router = new Router('my-app');
+const router = httpSetup.createRouter();
 // creates a route handler for GET request on 'my-app/path/{id}' path
 router.get(
   {
@@ -29,8 +29,8 @@ router.get(
     },
   },
   // function to execute to create a responses
-  async (request, response) => {
-    const data = await findObject(request.params.id);
+  async (context, request, response) => {
+    const data = await context.findObject(request.params.id);
     // creates a command to respond with 'not found' error
     if (!data) return response.notFound();
     // creates a command to send found data to the client

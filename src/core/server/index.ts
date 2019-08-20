@@ -44,13 +44,21 @@ import {
   ClusterClient,
   ElasticsearchClientConfig,
   ElasticsearchServiceSetup,
+  ScopedClusterClient,
 } from './elasticsearch';
-import { HttpServiceSetup, HttpServiceStart } from './http';
+import {
+  HttpServiceSetup,
+  HttpServiceStart,
+  IRouter,
+  RequestHandlerContextContainer,
+  RequestHandlerContextProvider,
+} from './http';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { ContextSetup } from './context';
 
 export { bootstrap } from './bootstrap';
 export { ConfigPath, ConfigService } from './config';
+export { IContextContainer, IContextProvider, IContextHandler } from './context';
 export { CoreId } from './core_context';
 export {
   CallAPIOptions,
@@ -75,6 +83,7 @@ export {
   HttpResponseOptions,
   HttpResponsePayload,
   HttpServerSetup,
+  IKibanaSocket,
   IsAuthenticated,
   KibanaRequest,
   KibanaRequestRoute,
@@ -87,12 +96,16 @@ export {
   OnPostAuthToolkit,
   RedirectResponseOptions,
   RequestHandler,
+  RequestHandlerContextContainer,
+  RequestHandlerContextProvider,
+  RequestHandlerParams,
+  RequestHandlerReturn,
   ResponseError,
   ResponseErrorMeta,
   kibanaResponseFactory,
   KibanaResponseFactory,
   RouteConfig,
-  Router,
+  IRouter,
   RouteMethod,
   RouteConfigOptions,
   SessionStorage,
@@ -153,6 +166,21 @@ export {
   SavedObjectsMigrationVersion,
 } from './types';
 
+export { LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy';
+
+/**
+ * Plugin specific context passed to a route handler.
+ * @public
+ */
+export interface RequestHandlerContext {
+  core: {
+    elasticsearch: {
+      dataClient: ScopedClusterClient;
+      adminClient: ScopedClusterClient;
+    };
+  };
+}
+
 /**
  * Context passed to the plugins `setup` method.
  *
@@ -177,6 +205,11 @@ export interface CoreSetup {
     registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
     basePath: HttpServiceSetup['basePath'];
     isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
+    registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
+      name: T,
+      provider: RequestHandlerContextProvider<RequestHandlerContext>
+    ) => RequestHandlerContextContainer<RequestHandlerContext>;
+    createRouter: () => IRouter;
   };
 }
 
@@ -189,17 +222,15 @@ export interface CoreStart {} // eslint-disable-line @typescript-eslint/no-empty
 
 /** @internal */
 export interface InternalCoreSetup {
+  context: ContextSetup;
   http: HttpServiceSetup;
   elasticsearch: ElasticsearchServiceSetup;
-  plugins: PluginsServiceSetup;
 }
 
 /**
  * @public
  */
-export interface InternalCoreStart {
-  plugins: PluginsServiceStart;
-}
+export interface InternalCoreStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
 export {
   ContextSetup,
