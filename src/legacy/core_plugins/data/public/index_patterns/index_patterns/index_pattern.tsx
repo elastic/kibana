@@ -198,11 +198,11 @@ export class IndexPattern implements StaticIndexPattern {
     }
 
     if (this.isUnsupportedTimePattern()) {
-      const warningTitle = i18n.translate('common.ui.indexPattern.warningTitle', {
+      const warningTitle = i18n.translate('data.indexPatterns.warningTitle', {
         defaultMessage: 'Support for time interval index patterns removed',
       });
 
-      const warningText = i18n.translate('common.ui.indexPattern.warningText', {
+      const warningText = i18n.translate('data.indexPatterns.warningText', {
         defaultMessage:
           'Currently querying all indices matching {index}. {title} should be migrated to a wildcard-based index pattern.',
         values: {
@@ -226,7 +226,7 @@ export class IndexPattern implements StaticIndexPattern {
               <EuiFlexItem grow={false}>
                 <EuiButton size="s" href={kbnUrl.getRouteHref(this, 'edit')}>
                   <FormattedMessage
-                    id="common.ui.indexPattern.editIndexPattern"
+                    id="data.indexPatterns.editIndexPattern"
                     defaultMessage="Edit index pattern"
                   />
                 </EuiButton>
