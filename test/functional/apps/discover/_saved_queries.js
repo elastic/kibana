@@ -119,6 +119,7 @@ export default function ({ getService, getPageObjects }) {
       it('allows clearing the currently loaded saved query', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
+        expect(await queryBar.getQueryString()).to.eql('');
       });
     });
   });
