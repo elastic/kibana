@@ -44,70 +44,65 @@ function CategoryAxisPanel(props: VisOptionsProps<BasicVislibParams>) {
   );
 
   return (
-    <>
-      <EuiPanel paddingSize="s">
-        <EuiTitle size="xs">
-          <h2>
-            <FormattedMessage
-              id="kbnVislibVisTypes.controls.pointSeries.categoryAxis.xAxisTitle"
-              defaultMessage="X-axis"
-            />
-          </h2>
-        </EuiTitle>
-        <EuiSpacer size="s" />
+    <EuiPanel paddingSize="s">
+      <EuiTitle size="xs">
+        <h2>
+          <FormattedMessage
+            id="kbnVislibVisTypes.controls.pointSeries.categoryAxis.xAxisTitle"
+            defaultMessage="X-axis"
+          />
+        </h2>
+      </EuiTitle>
+      <EuiSpacer size="s" />
 
-        <SwitchOption
-          label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.categoryAxis.showLabel', {
-            defaultMessage: 'Show',
-          })}
-          paramName="show"
-          value={stateParams.categoryAxes[0].show}
-          setValue={setCategoryAxis}
-        />
+      <SwitchOption
+        label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.categoryAxis.showLabel', {
+          defaultMessage: 'Show',
+        })}
+        paramName="show"
+        value={stateParams.categoryAxes[0].show}
+        setValue={setCategoryAxis}
+      />
 
-        <SelectOption
-          id="categoryAxisPosition"
-          label={i18n.translate(
-            'kbnVislibVisTypes.controls.pointSeries.categoryAxis.positionLabel',
-            {
-              defaultMessage: 'Position',
-            }
-          )}
-          options={vis.type.editorConfig.collections.positions}
-          paramName="position"
-          value={stateParams.categoryAxes[0].position}
-          setValue={setCategoryAxis}
-        />
+      <SelectOption
+        id="categoryAxisPosition"
+        label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.categoryAxis.positionLabel', {
+          defaultMessage: 'Position',
+        })}
+        options={vis.type.editorConfig.collections.positions}
+        paramName="position"
+        value={stateParams.categoryAxes[0].position}
+        setValue={setCategoryAxis}
+      />
 
-        <EuiAccordion
-          id="visEditorCategoryAccordion"
-          className="visEditorSidebar__section visEditorSidebar__collapsible"
-          initialIsOpen={false}
-          buttonContent={i18n.translate(
-            'kbnVislibVisTypes.controls.pointSeries.categoryAxis.advancedOptionsLabel',
-            {
-              defaultMessage: 'Advanced options',
-            }
-          )}
-          aria-label={i18n.translate(
-            'kbnVislibVisTypes.controls.pointSeries.categoryAxis.toggleAdvancedOptionsAriaLabel',
-            {
-              defaultMessage: 'Toggle advanced options',
-            }
-          )}
-        >
-          <>
-            <EuiSpacer size="m" />
-            <LabelOptions
-              axis={stateParams.categoryAxes[0]}
-              axisName="categoryAxes"
-              index={0}
-              {...props}
-            />
-          </>
-        </EuiAccordion>
-      </EuiPanel>
-    </>
+      <EuiAccordion
+        id="visEditorCategoryAccordion"
+        className="visEditorSidebar__section visEditorSidebar__collapsible"
+        initialIsOpen={false}
+        buttonContent={i18n.translate(
+          'kbnVislibVisTypes.controls.pointSeries.categoryAxis.advancedOptionsLabel',
+          {
+            defaultMessage: 'Advanced options',
+          }
+        )}
+        aria-label={i18n.translate(
+          'kbnVislibVisTypes.controls.pointSeries.categoryAxis.toggleAdvancedOptionsAriaLabel',
+          {
+            defaultMessage: 'Toggle advanced options',
+          }
+        )}
+      >
+        <>
+          <EuiSpacer size="m" />
+          <LabelOptions
+            axis={stateParams.categoryAxes[0]}
+            axisName="categoryAxes"
+            index={0}
+            {...props}
+          />
+        </>
+      </EuiAccordion>
+    </EuiPanel>
   );
 }
 

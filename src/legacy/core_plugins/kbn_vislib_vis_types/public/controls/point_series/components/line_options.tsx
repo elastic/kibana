@@ -24,9 +24,10 @@ import { SeriesParam } from '../../../types';
 import { SwitchOption } from '../../switch';
 import { NumberInputOption } from '../../number_input';
 
+export type SetChart = <T extends keyof SeriesParam>(paramName: T, value: SeriesParam[T]) => void;
 interface LineOptionsParams {
   chart: SeriesParam;
-  setChart: <T extends keyof SeriesParam>(paramName: T, value: SeriesParam[T]) => void;
+  setChart: SetChart;
 }
 
 function LineOptions({ chart, setChart }: LineOptionsParams) {

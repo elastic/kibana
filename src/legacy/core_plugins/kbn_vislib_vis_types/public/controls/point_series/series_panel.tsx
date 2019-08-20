@@ -17,137 +17,88 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
-import { get } from 'lodash';
+import React, { useCallback } from 'react';
 import { EuiPanel, EuiTitle, EuiSpacer, EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { AggConfig } from 'ui/vis';
 import { VisOptionsProps } from 'ui/vis/editors/default';
 import { BasicVislibParams, ValueAxis } from '../../types';
-import { ChartOptions } from './components/chart_options';
+import { ChartOptions, SetChartValueByIndex } from './components/chart_options';
 
 interface SeriesPanelProps extends VisOptionsProps<BasicVislibParams> {
   addValueAxis: () => ValueAxis;
+  updateAxisTitle: () => void;
 }
 
 function SeriesPanel(props: SeriesPanelProps) {
-  const { stateParams, setValue, aggs, addValueAxis } = props;
+  const { stateParams, setValue, addValueAxis, updateAxisTitle } = props;
 
-  const [lastCustomLabels, setLastCustomLabels] = useState({} as { [key: string]: string });
-  // We track these so we can know when the agg is changed
-  const [lastMatchingSeriesAggType, setLastMatchingSeriesAggType] = useState('');
-  const [lastMatchingSeriesAggField, setLastMatchingSeriesAggField] = useState('');
+  const setChartValueByIndex: SetChartValueByIndex = useCallback(
+    (index, paramName, value) => {
+      const series = [...stateParams.seriesParams];
+      series[index] = {
+        ...series[index],
+        [paramName]: value,
+      };
+      setValue('seriesParams', series);
+    },
+    [setValue, stateParams.seriesParams]
+  );
 
-  const updateAxisTitle = () => {
-    stateParams.valueAxes.forEach((axis, axisNumber) => {
-      let newCustomLabel = '';
-      const isFirst = axisNumber === 0;
-      const matchingSeries: AggConfig[] = [];
-
-      stateParams.seriesParams.forEach((series, i) => {
-        const isMatchingSeries = (isFirst && !series.valueAxis) || series.valueAxis === axis.id;
-        if (isMatchingSeries) {
-          let seriesNumber = 0;
-          aggs.forEach((agg: AggConfig) => {
-            if (agg.schema.name === 'metric') {
-              if (seriesNumber === i) matchingSeries.push(agg);
-              seriesNumber++;
-            }
-          });
-        }
-      });
-
-      if (matchingSeries.length === 1) {
-        newCustomLabel = matchingSeries[0].makeLabel();
-      }
-
-      const matchingSeriesAggType = get(matchingSeries, '[0]type.name', '');
-      const matchingSeriesAggField = get(matchingSeries, '[0]params.field.name', '');
-
-      if (lastCustomLabels[axis.id] !== newCustomLabel && newCustomLabel !== '') {
-        const isFirstRender = Object.keys(lastCustomLabels).length === 0;
-        const aggTypeIsChanged = lastMatchingSeriesAggType !== matchingSeriesAggType;
-        const aggFieldIsChanged = lastMatchingSeriesAggField !== matchingSeriesAggField;
-        const aggIsChanged = aggTypeIsChanged || aggFieldIsChanged;
-        const axisTitleIsEmpty = axis.title.text === '';
-        const lastCustomLabelMatchesAxisTitle = lastCustomLabels[axis.id] === axis.title.text;
-
-        if (
-          !isFirstRender &&
-          (aggIsChanged || axisTitleIsEmpty || lastCustomLabelMatchesAxisTitle)
-        ) {
-          axis.title.text = newCustomLabel; // Override axis title with new custom label
-        }
-
-        setLastCustomLabels({ ...lastCustomLabels, [axis.id]: newCustomLabel });
-      }
-
-      setLastMatchingSeriesAggType(matchingSeriesAggType);
-      setLastMatchingSeriesAggField(matchingSeriesAggField);
-    });
-  };
-
-  const changeValueAxis = (index: number, selectedValueAxis: string) => {
+  const changeValueAxis = (index: number, paramName: 'valueAxis', selectedValueAxis: string) => {
     let newValueAxis = selectedValueAxis;
     if (selectedValueAxis === 'new') {
       const axis = addValueAxis();
       newValueAxis = axis.id;
     }
     // setChart
-    const series = [...stateParams.seriesParams];
-    series[index] = {
-      ...series[index],
-      valueAxis: newValueAxis,
-    };
-    setValue('seriesParams', series);
+    setChartValueByIndex(index, paramName, newValueAxis);
 
     updateAxisTitle();
   };
 
   return (
-    <>
-      <EuiPanel paddingSize="s">
-        <EuiTitle size="xs">
-          <h2>
-            <FormattedMessage
-              id="kbnVislibVisTypes.controls.pointSeries.series.metricsTitle"
-              defaultMessage="Metrics"
+    <EuiPanel paddingSize="s">
+      <EuiTitle size="xs">
+        <h2>
+          <FormattedMessage
+            id="kbnVislibVisTypes.controls.pointSeries.series.metricsTitle"
+            defaultMessage="Metrics"
+          />
+        </h2>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+
+      {stateParams.seriesParams.map((chart, index) => (
+        <EuiAccordion
+          id={`visEditorSeriesAccordion${chart.data.id}`}
+          key={index}
+          className="visEditorSidebar__section visEditorSidebar__collapsible"
+          initialIsOpen={index === 0}
+          buttonContent={chart.data.label}
+          aria-label={i18n.translate(
+            'kbnVislibVisTypes.controls.pointSeries.seriesAccordionAriaLabel',
+            {
+              defaultMessage: 'Toggle {agg} options',
+              values: { agg: chart.data.label },
+            }
+          )}
+        >
+          <>
+            <EuiSpacer size="m" />
+
+            <ChartOptions
+              index={index}
+              chart={chart}
+              changeValueAxis={changeValueAxis}
+              setChartValueByIndex={setChartValueByIndex}
+              {...props}
             />
-          </h2>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-
-        {stateParams.seriesParams.map((chart, index) => (
-          <EuiAccordion
-            id={`visEditorSeriesAccordion${chart.data.id}`}
-            key={index}
-            className="visEditorSidebar__section visEditorSidebar__collapsible"
-            initialIsOpen={index === 0}
-            buttonContent={chart.data.label}
-            aria-label={i18n.translate(
-              'kbnVislibVisTypes.controls.pointSeries.seriesAccordionAriaLabel',
-              {
-                defaultMessage: 'Toggle {agg} options',
-                values: { agg: chart.data.label },
-              }
-            )}
-          >
-            <>
-              <EuiSpacer size="m" />
-
-              <ChartOptions
-                index={index}
-                chart={chart}
-                {...props}
-                changeValueAxis={changeValueAxis}
-              />
-            </>
-          </EuiAccordion>
-        ))}
-      </EuiPanel>
-    </>
+          </>
+        </EuiAccordion>
+      ))}
+    </EuiPanel>
   );
 }
 

@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
-import { capitalize } from 'lodash';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiAccordion } from '@elastic/eui';
 
@@ -31,23 +30,37 @@ import { TextInputOption } from './../../text_input';
 import { LabelOptions } from './label_options';
 import { CustomExtentsOptions } from './custom_extents_options';
 
+export type SetValueAxisByIndex = <T extends keyof ValueAxis>(
+  index: number,
+  paramName: T,
+  value: ValueAxis[T]
+) => void;
+
 export interface ValueAxisOptionsParams extends VisOptionsProps<BasicVislibParams> {
   axis: ValueAxis;
   index: number;
+  isCategoryAxisHorizontal: boolean;
+  updateAxisName: (axis: ValueAxis, index: number) => void;
+  setValueAxisByIndex: SetValueAxisByIndex;
 }
 
 function ValueAxisOptions(props: ValueAxisOptionsParams) {
-  const { stateParams, setValue, vis, axis, index } = props;
+  const {
+    stateParams,
+    setValue,
+    vis,
+    axis,
+    index,
+    isCategoryAxisHorizontal,
+    updateAxisName,
+    setValueAxisByIndex,
+  } = props;
 
-  const setValueAxis = <T extends keyof ValueAxis>(paramName: T, value: ValueAxis[T]) => {
-    const valueAxes = [...stateParams.valueAxes];
-
-    valueAxes[index] = {
-      ...valueAxes[index],
-      [paramName]: value,
-    };
-    setValue('valueAxes', valueAxes);
-  };
+  const setValueAxis = useCallback(
+    <T extends keyof ValueAxis>(paramName: T, value: ValueAxis[T]) =>
+      setValueAxisByIndex(index, paramName, value),
+    [setValueAxisByIndex, index]
+  );
 
   const setValueAxisTitle = <T extends keyof ValueAxis['title']>(
     paramName: T,
@@ -84,21 +97,11 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
   const onPositionChanged = (paramName: 'position', value: ValueAxis['position']) => {
     setValueAxis(paramName, value);
 
-    let axisName = capitalize(axis.position) + 'Axis-';
-    axisName += stateParams.valueAxes.reduce((numberValue: number, axisItem: ValueAxis) => {
-      if (axisItem.name.substr(0, axisName.length) === axisName) {
-        const num = parseInt(axisItem.name.substr(axisName.length), 10);
-        if (num >= numberValue) {
-          numberValue = num + 1;
-        }
-      }
-      return numberValue;
-    }, 1);
-    setValueAxis('name', axisName);
+    updateAxisName(axis, index);
   };
 
   const isPositionDisabled = (position: LegendPositions) => {
-    if ('isCategoryAxisHorizontal') {
+    if (isCategoryAxisHorizontal) {
       return ['top', 'bottom'].includes(position);
     }
     return ['left', 'right'].includes(position);

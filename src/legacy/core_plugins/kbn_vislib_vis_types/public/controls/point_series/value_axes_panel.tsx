@@ -34,10 +34,13 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
 import { BasicVislibParams, ValueAxis } from '../../types';
-import { ValueAxisOptions } from './components/value_axis_options';
+import { ValueAxisOptions, SetValueAxisByIndex } from './components/value_axis_options';
 
 interface ValueAxesPanelProps extends VisOptionsProps<BasicVislibParams> {
+  isCategoryAxisHorizontal: boolean;
   addValueAxis: () => ValueAxis;
+  updateAxisName: (axis: ValueAxis, index: number) => void;
+  setValueAxisByIndex: SetValueAxisByIndex;
 }
 
 function ValueAxesPanel(props: ValueAxesPanelProps) {
@@ -96,71 +99,69 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
   );
 
   return (
-    <>
-      <EuiPanel paddingSize="s">
-        <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="baseline">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <h2>
-                <FormattedMessage
-                  id="kbnVislibVisTypes.controls.pointSeries.valueAxes.yAxisTitle"
-                  defaultMessage="Y-Axes"
-                />
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              position="bottom"
-              content={i18n.translate(
+    <EuiPanel paddingSize="s">
+      <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="baseline">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h2>
+              <FormattedMessage
+                id="kbnVislibVisTypes.controls.pointSeries.valueAxes.yAxisTitle"
+                defaultMessage="Y-Axes"
+              />
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            position="bottom"
+            content={i18n.translate(
+              'kbnVislibVisTypes.controls.pointSeries.valueAxes.addButtonAriaLabel',
+              {
+                defaultMessage: 'Add Y axis',
+              }
+            )}
+          >
+            <EuiButtonIcon
+              iconType="plusInCircleFilled"
+              onClick={addValueAxis}
+              aria-label={i18n.translate(
                 'kbnVislibVisTypes.controls.pointSeries.valueAxes.addButtonAriaLabel',
                 {
                   defaultMessage: 'Add Y axis',
                 }
               )}
-            >
-              <EuiButtonIcon
-                iconType="plusInCircleFilled"
-                onClick={addValueAxis}
-                aria-label={i18n.translate(
-                  'kbnVislibVisTypes.controls.pointSeries.valueAxes.addButtonAriaLabel',
-                  {
-                    defaultMessage: 'Add Y axis',
-                  }
-                )}
-                data-test-subj="visualizeAddYAxisButton"
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+              data-test-subj="visualizeAddYAxisButton"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-        <EuiSpacer size="s" />
+      <EuiSpacer size="s" />
 
-        {stateParams.valueAxes.map((axis, index) => (
-          <EuiAccordion
-            id="yAxisOptionsAccordion"
-            key={axis.id}
-            data-test-subj={`toggleYAxisOptions-${axis.id}`}
-            className="visEditorSidebar__section visEditorSidebar__collapsible"
-            initialIsOpen={false}
-            buttonContent={getButtonContent(axis)}
-            aria-label={i18n.translate(
-              'kbnVislibVisTypes.controls.pointSeries.valueAxes.toggleOptionsAriaLabel',
-              {
-                defaultMessage: 'Toggle {axisName} options',
-                values: { axisName: axis.name },
-              }
-            )}
-            extraAction={stateParams.valueAxes.length === 1 ? undefined : renderRemoveButton(axis)}
-          >
-            <>
-              <EuiSpacer size="m" />
-              <ValueAxisOptions axis={axis} index={index} {...props} />
-            </>
-          </EuiAccordion>
-        ))}
-      </EuiPanel>
-    </>
+      {stateParams.valueAxes.map((axis, index) => (
+        <EuiAccordion
+          id="yAxisOptionsAccordion"
+          key={axis.id}
+          data-test-subj={`toggleYAxisOptions-${axis.id}`}
+          className="visEditorSidebar__section visEditorSidebar__collapsible"
+          initialIsOpen={false}
+          buttonContent={getButtonContent(axis)}
+          aria-label={i18n.translate(
+            'kbnVislibVisTypes.controls.pointSeries.valueAxes.toggleOptionsAriaLabel',
+            {
+              defaultMessage: 'Toggle {axisName} options',
+              values: { axisName: axis.name },
+            }
+          )}
+          extraAction={stateParams.valueAxes.length === 1 ? undefined : renderRemoveButton(axis)}
+        >
+          <>
+            <EuiSpacer size="m" />
+            <ValueAxisOptions axis={axis} index={index} {...props} />
+          </>
+        </EuiAccordion>
+      ))}
+    </EuiPanel>
   );
 }
 

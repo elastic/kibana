@@ -35,6 +35,19 @@ function mapPositionOpposite(position: LegendPositions) {
   }
 }
 
+function mapPosition(position: LegendPositions) {
+  switch (position) {
+    case LegendPositions.BOTTOM:
+      return LegendPositions.LEFT;
+    case LegendPositions.TOP:
+      return LegendPositions.RIGHT;
+    case LegendPositions.LEFT:
+      return LegendPositions.BOTTOM;
+    case LegendPositions.RIGHT:
+      return LegendPositions.TOP;
+  }
+}
+
 const rotateOptions = [
   {
     text: i18n.translate('kbnVislibVisTypes.categoryAxis.rotate.horizontalText', {
@@ -56,4 +69,4 @@ const rotateOptions = [
   },
 ];
 
-export { mapPositionOpposite, rotateOptions };
+export { mapPositionOpposite, mapPosition, rotateOptions };

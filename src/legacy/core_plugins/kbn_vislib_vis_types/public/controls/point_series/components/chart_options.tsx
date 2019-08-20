@@ -17,42 +17,42 @@
  * under the License.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
 import { BasicVislibParams, SeriesParam, ValueAxis } from '../../../types';
 import { ChartTypes } from '../../../utils/collections';
 import { SelectOption } from '../../select';
-import { LineOptions } from './line_options';
+import { LineOptions, SetChart } from './line_options';
+
+export type SetChartValueByIndex = <T extends keyof SeriesParam>(
+  index: number,
+  paramName: T,
+  value: SeriesParam[T]
+) => void;
 
 interface ChartOptionsParams extends VisOptionsProps<BasicVislibParams> {
   index: number;
   chart: SeriesParam;
-  changeValueAxis: (index: number, selectedValueAxis: string) => void;
+  changeValueAxis: (index: number, paramName: 'valueAxis', selectedValueAxis: string) => void;
+  setChartValueByIndex: SetChartValueByIndex;
 }
 
 function ChartOptions({
   stateParams,
-  setValue,
   vis,
   chart,
   index,
   changeValueAxis,
-  setValidity,
+  setChartValueByIndex,
 }: ChartOptionsParams) {
-  const setChart = <T extends keyof SeriesParam>(
-    indx: number,
-    paramName: T,
-    value: SeriesParam[T]
-  ) => {
-    const series = [...stateParams.seriesParams];
-    series[indx] = {
-      ...series[indx],
-      [paramName]: value,
-    };
-    setValue('seriesParams', series);
-  };
+  const setChart: SetChart = useCallback(
+    (paramName, value) => {
+      setChartValueByIndex(index, paramName, value);
+    },
+    [setChartValueByIndex, index]
+  );
 
   const valueAxesOptions = useMemo(
     () => [
@@ -80,7 +80,7 @@ function ChartOptions({
         options={vis.type.editorConfig.collections.chartTypes}
         paramName="type"
         value={chart.type}
-        setValue={(...params) => setChart(index, ...params)}
+        setValue={setChart}
       />
 
       <SelectOption
@@ -91,7 +91,7 @@ function ChartOptions({
         options={vis.type.editorConfig.collections.chartModes}
         paramName="mode"
         value={chart.mode}
-        setValue={(...params) => setChart(index, ...params)}
+        setValue={setChart}
       />
 
       <SelectOption
@@ -102,7 +102,7 @@ function ChartOptions({
         options={valueAxesOptions}
         paramName="valueAxis"
         value={chart.valueAxis}
-        setValue={(paramName, value) => changeValueAxis(index, value)}
+        setValue={(...props) => changeValueAxis(index, ...props)}
       />
 
       {(chart.type === ChartTypes.LINE || chart.type === ChartTypes.AREA) && (
@@ -114,13 +114,11 @@ function ChartOptions({
           options={vis.type.editorConfig.collections.interpolationModes}
           paramName="interpolate"
           value={chart.interpolate}
-          setValue={(...params) => setChart(index, ...params)}
+          setValue={setChart}
         />
       )}
 
-      {chart.type === ChartTypes.LINE && (
-        <LineOptions chart={chart} setChart={(...params) => setChart(index, ...params)} />
-      )}
+      {chart.type === ChartTypes.LINE && <LineOptions chart={chart} setChart={setChart} />}
     </>
   );
 }
