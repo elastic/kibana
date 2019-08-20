@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 import { SavedObjectsImportRetry } from 'src/core/server';
 import { SavedObjectRecord } from 'ui/management/saved_objects_management';
-import { SummarizedCopyToSpaceResult } from '../../../../lib/copy_saved_objects';
+import { SummarizedCopyToSpaceResult } from '../../../../lib/copy_saved_objects_to_space';
 import { SpaceAvatar } from '../../../../components';
 import { Space } from '../../../../../common/model/space';
 import { CopyStatusSummaryIndicator } from './copy_status_summary_indicator';

@@ -9,7 +9,7 @@ import {
   SavedObjectRecord,
 } from 'ui/management/saved_objects_management';
 import { i18n } from '@kbn/i18n';
-import { CopyToSpaceFlyout } from '../../views/management/components/copy_to_space';
+import { CopySavedObjectsToSpaceFlyout } from '../../views/management/components/copy_saved_objects_to_space';
 
 export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagementAction {
   public id: string = 'copy_saved_objects_to_space';
@@ -32,7 +32,7 @@ export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagem
     if (!this.record) {
       throw new Error('No record available! `render()` was likely called before `start()`.');
     }
-    return <CopyToSpaceFlyout onClose={this.onClose} savedObject={this.record} />;
+    return <CopySavedObjectsToSpaceFlyout onClose={this.onClose} savedObject={this.record} />;
   };
 
   private onClose = () => {

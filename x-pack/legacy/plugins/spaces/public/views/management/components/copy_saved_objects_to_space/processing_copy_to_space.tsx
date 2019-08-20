@@ -15,7 +15,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { summarizeCopyResult } from '../../../../lib/copy_saved_objects';
+import { summarizeCopyResult } from '../../../../lib/copy_saved_objects_to_space';
 import { Space } from '../../../../../common/model/space';
 import { CopyOptions } from './types';
 import { SpaceResult } from './cts_space_result';

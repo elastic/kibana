@@ -17,7 +17,7 @@ jest.mock('../../../../lib/hooks', () => {
 });
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { CopyToSpaceFlyout } from './copy_to_space_flyout';
+import { CopySavedObjectsToSpaceFlyout } from './copy_to_space_flyout';
 import { CopyToSpaceForm } from './copy_to_space_form';
 import { EuiLoadingSpinner, EuiEmptyPrompt } from '@elastic/eui';
 import { Space } from '../../../../../common/model/space';
@@ -29,7 +29,7 @@ import { ProcessingCopyToSpace } from './processing_copy_to_space';
 const mountComponent = () => {
   const onClose = jest.fn();
   const wrapper = mountWithIntl(
-    <CopyToSpaceFlyout
+    <CopySavedObjectsToSpaceFlyout
       savedObject={{
         type: 'dashboard',
         id: 'my-dash',

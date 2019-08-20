@@ -39,7 +39,7 @@ interface Props {
   savedObject: SavedObjectRecord;
 }
 
-export const CopyToSpaceFlyout = ({ onClose, savedObject }: Props) => {
+export const CopySavedObjectsToSpaceFlyout = ({ onClose, savedObject }: Props) => {
   const [copyOptions, setCopyOptions] = useState<CopyOptions>({
     includeRelated: true,
     overwrite: true,
