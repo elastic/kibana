@@ -23,32 +23,47 @@ interface SetupOpts {
 }
 
 describe('resolveCopySavedObjectsToSpacesConflicts', () => {
-  const setup = (opts: SetupOpts) => {
+  const setup = (setupOpts: SetupOpts) => {
     const savedObjectsService: SavedObjectsService = ({
       importExport: {
         objectLimit: 1000,
         getSortedObjectsForExport:
-          opts.getSortedObjectsForExportImpl ||
+          setupOpts.getSortedObjectsForExportImpl ||
           jest.fn().mockResolvedValue(
             new Readable({
               objectMode: true,
               read() {
-                opts.objects.forEach(o => this.push(o));
+                setupOpts.objects.forEach(o => this.push(o));
 
                 this.push(null);
               },
             })
           ),
         resolveImportErrors:
-          opts.resolveImportErrorsImpl ||
-          jest.fn().mockImplementation(() => {
-            const response: SavedObjectsImportResponse = {
-              success: true,
-              successCount: opts.objects.length,
-            };
+          setupOpts.resolveImportErrorsImpl ||
+          jest
+            .fn()
+            .mockImplementation(async (resolveOpts: SavedObjectsResolveImportErrorsOptions) => {
+              const objectsToResolve: unknown[] = await new Promise((resolve, reject) => {
+                const objects: unknown[] = [];
+                resolveOpts.readStream.on('data', chunk => {
+                  objects.push(chunk);
+                });
+                resolveOpts.readStream.on('end', () => resolve(objects));
+                resolveOpts.readStream.on('error', err => reject(err));
+              });
 
-            return response;
-          }),
+              // Ensure the Readable stream passed to `resolveImportErrors` contains all of the expected objects.
+              // Verifies functionality for `readStreamToCompletion` and `createReadableStreamFromArray`
+              expect(objectsToResolve).toEqual(setupOpts.objects);
+
+              const response: SavedObjectsImportResponse = {
+                success: true,
+                successCount: setupOpts.objects.length,
+              };
+
+              return response;
+            }),
       },
       types: ['dashboard', 'visualization', 'globalType'],
       schema: new SavedObjectsSchema({
@@ -117,43 +132,43 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
     });
 
     expect(result).toMatchInlineSnapshot(`
-                                          Object {
-                                            "destination1": Object {
-                                              "errors": undefined,
-                                              "success": true,
-                                              "successCount": 3,
-                                            },
-                                            "destination2": Object {
-                                              "errors": undefined,
-                                              "success": true,
-                                              "successCount": 3,
-                                            },
-                                          }
-                            `);
+                                                Object {
+                                                  "destination1": Object {
+                                                    "errors": undefined,
+                                                    "success": true,
+                                                    "successCount": 3,
+                                                  },
+                                                  "destination2": Object {
+                                                    "errors": undefined,
+                                                    "success": true,
+                                                    "successCount": 3,
+                                                  },
+                                                }
+                                `);
 
     expect((savedObjectsService.importExport.getSortedObjectsForExport as jest.Mock).mock.calls)
       .toMatchInlineSnapshot(`
-      Array [
-        Array [
-          Object {
-            "exportSizeLimit": 1000,
-            "includeReferencesDeep": true,
-            "namespace": "sourceSpace",
-            "objects": Array [
-              Object {
-                "id": "my-dashboard",
-                "type": "dashboard",
-              },
-            ],
-            "savedObjectsClient": null,
-            "types": Array [
-              "dashboard",
-              "visualization",
-            ],
-          },
-        ],
-      ]
-    `);
+            Array [
+              Array [
+                Object {
+                  "exportSizeLimit": 1000,
+                  "includeReferencesDeep": true,
+                  "namespace": "sourceSpace",
+                  "objects": Array [
+                    Object {
+                      "id": "my-dashboard",
+                      "type": "dashboard",
+                    },
+                  ],
+                  "savedObjectsClient": null,
+                  "types": Array [
+                    "dashboard",
+                    "visualization",
+                  ],
+                },
+              ],
+            ]
+        `);
 
     expect((savedObjectsService.importExport.resolveImportErrors as jest.Mock).mock.calls)
       .toMatchInlineSnapshot(`
@@ -163,8 +178,12 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
             "namespace": "destination1",
             "objectLimit": 1000,
             "readStream": Readable {
-              "_events": Object {},
-              "_eventsCount": 0,
+              "_events": Object {
+                "data": [Function],
+                "end": [Function],
+                "error": [Function],
+              },
+              "_eventsCount": 3,
               "_maxListeners": undefined,
               "_read": [Function],
               "_readableState": ReadableState {
@@ -180,23 +199,23 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
                 "emitClose": true,
                 "emittedReadable": false,
                 "encoding": null,
-                "endEmitted": false,
-                "ended": false,
-                "flowing": null,
+                "endEmitted": true,
+                "ended": true,
+                "flowing": true,
                 "highWaterMark": 16,
                 "length": 0,
                 "needReadable": false,
                 "objectMode": true,
-                "paused": true,
+                "paused": false,
                 "pipes": null,
                 "pipesCount": 0,
                 "readableListening": false,
                 "reading": false,
                 "readingMore": false,
                 "resumeScheduled": false,
-                "sync": true,
+                "sync": false,
               },
-              "readable": true,
+              "readable": false,
             },
             "retries": Array [
               Object {
@@ -218,8 +237,12 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
             "namespace": "destination2",
             "objectLimit": 1000,
             "readStream": Readable {
-              "_events": Object {},
-              "_eventsCount": 0,
+              "_events": Object {
+                "data": [Function],
+                "end": [Function],
+                "error": [Function],
+              },
+              "_eventsCount": 3,
               "_maxListeners": undefined,
               "_read": [Function],
               "_readableState": ReadableState {
@@ -235,23 +258,23 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
                 "emitClose": true,
                 "emittedReadable": false,
                 "encoding": null,
-                "endEmitted": false,
-                "ended": false,
-                "flowing": null,
+                "endEmitted": true,
+                "ended": true,
+                "flowing": true,
                 "highWaterMark": 16,
                 "length": 0,
                 "needReadable": false,
                 "objectMode": true,
-                "paused": true,
+                "paused": false,
                 "pipes": null,
                 "pipesCount": 0,
                 "readableListening": false,
                 "reading": false,
                 "readingMore": false,
                 "resumeScheduled": false,
-                "sync": true,
+                "sync": false,
               },
-              "readable": true,
+              "readable": false,
             },
             "retries": Array [
               Object {
@@ -341,26 +364,26 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
     });
 
     expect(result).toMatchInlineSnapshot(`
-            Object {
-              "failure-space": Object {
-                "errors": Array [
-                  [Error: Some error occurred!],
-                ],
-                "success": false,
-                "successCount": 0,
-              },
-              "marketing": Object {
-                "errors": undefined,
-                "success": true,
-                "successCount": 3,
-              },
-              "non-existent-space": Object {
-                "errors": undefined,
-                "success": true,
-                "successCount": 3,
-              },
-            }
-        `);
+                  Object {
+                    "failure-space": Object {
+                      "errors": Array [
+                        [Error: Some error occurred!],
+                      ],
+                      "success": false,
+                      "successCount": 0,
+                    },
+                    "marketing": Object {
+                      "errors": undefined,
+                      "success": true,
+                      "successCount": 3,
+                    },
+                    "non-existent-space": Object {
+                      "errors": undefined,
+                      "success": true,
+                      "successCount": 3,
+                    },
+                  }
+            `);
   });
 
   it(`handles stream read errors`, async () => {
