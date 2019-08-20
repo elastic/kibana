@@ -8,7 +8,7 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DRAW_TYPE } from '../../../actions/map_actions';
+import { DRAW_TYPE } from '../../../../common/constants';
 import mapboxgl from 'mapbox-gl';
 import { I18nProvider } from '@kbn/i18n/react';
 

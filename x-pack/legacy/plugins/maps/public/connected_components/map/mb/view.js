@@ -19,13 +19,13 @@ import {
   DECIMAL_DEGREES_PRECISION,
   FEATURE_ID_PROPERTY_NAME,
   ZOOM_PRECISION,
-  LON_INDEX
+  LON_INDEX,
+  DRAW_TYPE
 } from '../../../../common/constants';
 import mapboxgl from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw-unminified';
 import DrawRectangle from 'mapbox-gl-draw-rectangle-mode';
 import { FeatureTooltip } from '../feature_tooltip';
-import { DRAW_TYPE } from '../../../actions/map_actions';
 import {
   createSpatialFilterWithBoundingBox,
   createSpatialFilterWithGeometry,

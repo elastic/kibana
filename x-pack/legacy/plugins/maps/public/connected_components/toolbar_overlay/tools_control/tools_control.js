@@ -17,7 +17,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DRAW_TYPE } from '../../../actions/map_actions';
+import { DRAW_TYPE } from '../../../../common/constants';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 const RESET_STATE = {
