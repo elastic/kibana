@@ -79,7 +79,7 @@ export class DocViewerTab extends React.Component<Props, State> {
 
     // doc view is provided by a react component
 
-    const Component = component;
+    const Component = component as any;
     return (
       <I18nProvider>
         <Component {...renderProps} />
