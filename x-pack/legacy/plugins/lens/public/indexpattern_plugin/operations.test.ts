@@ -163,6 +163,7 @@ describe('getOperationTypesForField', () => {
               label: 'Date Histogram of timestamp',
               dataType: 'date',
               isBucketed: true,
+              isMetric: false,
 
               // Private
               operationType: 'date_histogram',
@@ -234,6 +235,7 @@ describe('getOperationTypesForField', () => {
             "operationMetaData": Object {
               "dataType": "string",
               "isBucketed": true,
+              "isMetric": false,
               "scale": "ordinal",
             },
             "operations": Array [
@@ -248,6 +250,7 @@ describe('getOperationTypesForField', () => {
             "operationMetaData": Object {
               "dataType": "date",
               "isBucketed": true,
+              "isMetric": false,
               "scale": "interval",
             },
             "operations": Array [
@@ -262,6 +265,7 @@ describe('getOperationTypesForField', () => {
             "operationMetaData": Object {
               "dataType": "number",
               "isBucketed": false,
+              "isMetric": true,
               "scale": "ratio",
             },
             "operations": Array [

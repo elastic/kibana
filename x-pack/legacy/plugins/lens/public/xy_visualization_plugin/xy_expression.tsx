@@ -21,6 +21,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, IconType } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { FormatFactory } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
 import { LensMultiTable } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
@@ -40,7 +41,9 @@ export interface XYRender {
 export const xyChart: ExpressionFunction<'lens_xy_chart', LensMultiTable, XYArgs, XYRender> = ({
   name: 'lens_xy_chart',
   type: 'render',
-  help: 'An X/Y chart',
+  help: i18n.translate('xpack.lens.xyChart.help', {
+    defaultMessage: 'An X/Y chart',
+  }),
   args: {
     xTitle: {
       types: ['string'],
@@ -52,7 +55,9 @@ export const xyChart: ExpressionFunction<'lens_xy_chart', LensMultiTable, XYArgs
     },
     legend: {
       types: ['lens_xy_legendConfig'],
-      help: 'Configure the chart legend.',
+      help: i18n.translate('xpack.lens.xyChart.legend.help', {
+        defaultMessage: 'Configure the chart legend.',
+      }),
     },
     layers: {
       types: ['lens_xy_layer'],
@@ -91,7 +96,9 @@ export const getXyChartRenderer = (dependencies: {
 }): RenderFunction<XYChartProps> => ({
   name: 'lens_xy_chart_renderer',
   displayName: 'XY Chart',
-  help: 'X/Y Chart Renderer',
+  help: i18n.translate('xpack.lens.xyChart.renderer.help', {
+    defaultMessage: 'X/Y Chart Renderer',
+  }),
   validate: () => {},
   reuseDomNode: true,
   render: async (domNode: Element, config: XYChartProps, _handlers: unknown) => {

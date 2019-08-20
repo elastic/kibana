@@ -35,12 +35,16 @@ export const legendConfig: ExpressionFunction<
   args: {
     isVisible: {
       types: ['boolean'],
-      help: 'Specifies whether or not the legend is visible.',
+      help: i18n.translate('xpack.lens.xyChart.isVisible.help', {
+        defaultMessage: 'Specifies whether or not the legend is visible.',
+      }),
     },
     position: {
       types: ['string'],
       options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
-      help: 'Specifies the legend position.',
+      help: i18n.translate('xpack.lens.xyChart.position.help', {
+        defaultMessage: 'Specifies the legend position.',
+      }),
     },
   },
   fn: function fn(_context: unknown, args: LegendConfig) {
@@ -59,7 +63,9 @@ interface AxisConfig {
 const axisConfig: { [key in keyof AxisConfig]: ArgumentType<AxisConfig[key]> } = {
   title: {
     types: ['string'],
-    help: 'The axis title',
+    help: i18n.translate('xpack.lens.xyChart.title.help', {
+      defaultMessage: 'The axis title',
+    }),
   },
   hide: {
     types: ['boolean'],
