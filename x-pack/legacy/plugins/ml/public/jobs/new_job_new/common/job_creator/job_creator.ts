@@ -14,7 +14,7 @@ import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
 import { mlJobService } from '../../../../services/job_service';
 import { JobRunner, ProgressSubscriber } from '../job_runner';
 import { JOB_TYPE, CREATED_BY_LABEL } from './util/constants';
-import { determineSparseDataJob } from './util/general';
+import { isSparseDataJob } from './util/general';
 
 export class JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
@@ -245,34 +245,39 @@ export class JobCreator {
   }
 
   private _updateSparseDataDetectors() {
+    // loop through each detector, if the aggregation in the corresponding detector index is a count or sum
+    // change the detector to be a non-zer or non-null count or sum.
+    // note, the aggregations will always be a standard count or sum and not a non-null or non-zero version
     this._detectors.forEach((d, i) => {
-      if (this._aggs[i].id === ML_JOB_AGGREGATION.COUNT) {
-        d.function = this._sparseData
-          ? ML_JOB_AGGREGATION.NON_ZERO_COUNT
-          : ML_JOB_AGGREGATION.COUNT;
-      }
-      if (this._aggs[i].id === ML_JOB_AGGREGATION.HIGH_COUNT) {
-        d.function = this._sparseData
-          ? ML_JOB_AGGREGATION.HIGH_NON_ZERO_COUNT
-          : ML_JOB_AGGREGATION.HIGH_COUNT;
-      }
-      if (this._aggs[i].id === ML_JOB_AGGREGATION.LOW_COUNT) {
-        d.function = this._sparseData
-          ? ML_JOB_AGGREGATION.LOW_NON_ZERO_COUNT
-          : ML_JOB_AGGREGATION.LOW_COUNT;
-      }
-      if (this._aggs[i].id === ML_JOB_AGGREGATION.SUM) {
-        d.function = this._sparseData ? ML_JOB_AGGREGATION.NON_NULL_SUM : ML_JOB_AGGREGATION.SUM;
-      }
-      if (this._aggs[i].id === ML_JOB_AGGREGATION.HIGH_SUM) {
-        d.function = this._sparseData
-          ? ML_JOB_AGGREGATION.HIGH_NON_NULL_SUM
-          : ML_JOB_AGGREGATION.HIGH_SUM;
-      }
-      if (this._aggs[i].id === ML_JOB_AGGREGATION.LOW_SUM) {
-        d.function = this._sparseData
-          ? ML_JOB_AGGREGATION.LOW_NON_NULL_SUM
-          : ML_JOB_AGGREGATION.LOW_SUM;
+      switch (this._aggs[i].id) {
+        case ML_JOB_AGGREGATION.COUNT:
+          d.function = this._sparseData
+            ? ML_JOB_AGGREGATION.NON_ZERO_COUNT
+            : ML_JOB_AGGREGATION.COUNT;
+          break;
+        case ML_JOB_AGGREGATION.HIGH_COUNT:
+          d.function = this._sparseData
+            ? ML_JOB_AGGREGATION.HIGH_NON_ZERO_COUNT
+            : ML_JOB_AGGREGATION.HIGH_COUNT;
+          break;
+        case ML_JOB_AGGREGATION.LOW_COUNT:
+          d.function = this._sparseData
+            ? ML_JOB_AGGREGATION.LOW_NON_ZERO_COUNT
+            : ML_JOB_AGGREGATION.LOW_COUNT;
+          break;
+        case ML_JOB_AGGREGATION.SUM:
+          d.function = this._sparseData ? ML_JOB_AGGREGATION.NON_NULL_SUM : ML_JOB_AGGREGATION.SUM;
+          break;
+        case ML_JOB_AGGREGATION.HIGH_SUM:
+          d.function = this._sparseData
+            ? ML_JOB_AGGREGATION.HIGH_NON_NULL_SUM
+            : ML_JOB_AGGREGATION.HIGH_SUM;
+          break;
+        case ML_JOB_AGGREGATION.LOW_SUM:
+          d.function = this._sparseData
+            ? ML_JOB_AGGREGATION.LOW_NON_NULL_SUM
+            : ML_JOB_AGGREGATION.LOW_SUM;
+          break;
       }
     });
   }
@@ -426,6 +431,6 @@ export class JobCreator {
     if (this._job_config.analysis_config.influencers !== undefined) {
       this._job_config.analysis_config.influencers.forEach(i => this.addInfluencer(i));
     }
-    this._sparseData = determineSparseDataJob(job, datafeed);
+    this._sparseData = isSparseDataJob(job, datafeed);
   }
 }

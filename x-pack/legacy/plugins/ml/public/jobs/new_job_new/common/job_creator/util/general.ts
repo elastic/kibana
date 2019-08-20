@@ -34,7 +34,7 @@ export function getRichDetectors(job: Job, datafeed: Datafeed) {
 
 function getDetectors(job: Job, datafeed: Datafeed) {
   let detectors = job.analysis_config.detectors;
-  const sparseData = determineSparseDataJob(job, datafeed);
+  const sparseData = isSparseDataJob(job, datafeed);
 
   // if aggregations have been used in a single metric job and a distinct count detector
   // was used, we need to rebuild the detector.
@@ -60,37 +60,40 @@ function getDetectors(job: Job, datafeed: Datafeed) {
   } else {
     // all other detectors.
     detectors = detectors.map(d => {
-      // if a count function is used, add EVENT_RATE_FIELD_ID as its field
-      if (d.function === ML_JOB_AGGREGATION.COUNT) {
-        return { ...d, field_name: EVENT_RATE_FIELD_ID };
+      switch (d.function) {
+        // if a count function is used, add EVENT_RATE_FIELD_ID as its field
+        case ML_JOB_AGGREGATION.COUNT:
+          return { ...d, field_name: EVENT_RATE_FIELD_ID };
+
+        case ML_JOB_AGGREGATION.HIGH_COUNT:
+          return { ...d, field_name: EVENT_RATE_FIELD_ID };
+
+        case ML_JOB_AGGREGATION.LOW_COUNT:
+          return { ...d, field_name: EVENT_RATE_FIELD_ID };
+
+        // if sparse data functions were used, replace them with their non-sparse versions
+        // the sparse data flag has already been determined and set, so this information is not being lost.
+        case ML_JOB_AGGREGATION.NON_ZERO_COUNT:
+          return { ...d, field_name: EVENT_RATE_FIELD_ID, function: ML_JOB_AGGREGATION.COUNT };
+
+        case ML_JOB_AGGREGATION.HIGH_NON_ZERO_COUNT:
+          return { ...d, field_name: EVENT_RATE_FIELD_ID, function: ML_JOB_AGGREGATION.HIGH_COUNT };
+
+        case ML_JOB_AGGREGATION.LOW_NON_ZERO_COUNT:
+          return { ...d, field_name: EVENT_RATE_FIELD_ID, function: ML_JOB_AGGREGATION.LOW_COUNT };
+
+        case ML_JOB_AGGREGATION.NON_NULL_SUM:
+          return { ...d, function: ML_JOB_AGGREGATION.SUM };
+
+        case ML_JOB_AGGREGATION.HIGH_NON_NULL_SUM:
+          return { ...d, function: ML_JOB_AGGREGATION.HIGH_SUM };
+
+        case ML_JOB_AGGREGATION.LOW_NON_NULL_SUM:
+          return { ...d, function: ML_JOB_AGGREGATION.LOW_SUM };
+
+        default:
+          return d;
       }
-      if (d.function === ML_JOB_AGGREGATION.HIGH_COUNT) {
-        return { ...d, field_name: EVENT_RATE_FIELD_ID };
-      }
-      if (d.function === ML_JOB_AGGREGATION.LOW_COUNT) {
-        return { ...d, field_name: EVENT_RATE_FIELD_ID };
-      }
-      // if sparse data functions were used, replace them with their non-sparse versions
-      // the sparse data flag has already been determined and set, so this information is not being lost.
-      if (d.function === ML_JOB_AGGREGATION.NON_ZERO_COUNT) {
-        return { ...d, field_name: EVENT_RATE_FIELD_ID, function: ML_JOB_AGGREGATION.COUNT };
-      }
-      if (d.function === ML_JOB_AGGREGATION.HIGH_NON_ZERO_COUNT) {
-        return { ...d, field_name: EVENT_RATE_FIELD_ID, function: ML_JOB_AGGREGATION.HIGH_COUNT };
-      }
-      if (d.function === ML_JOB_AGGREGATION.LOW_NON_ZERO_COUNT) {
-        return { ...d, field_name: EVENT_RATE_FIELD_ID, function: ML_JOB_AGGREGATION.LOW_COUNT };
-      }
-      if (d.function === ML_JOB_AGGREGATION.NON_NULL_SUM) {
-        return { ...d, function: ML_JOB_AGGREGATION.SUM };
-      }
-      if (d.function === ML_JOB_AGGREGATION.HIGH_NON_NULL_SUM) {
-        return { ...d, function: ML_JOB_AGGREGATION.HIGH_SUM };
-      }
-      if (d.function === ML_JOB_AGGREGATION.LOW_NON_NULL_SUM) {
-        return { ...d, function: ML_JOB_AGGREGATION.LOW_SUM };
-      }
-      return d;
     });
   }
   return detectors;
@@ -100,7 +103,7 @@ function getDetectors(job: Job, datafeed: Datafeed) {
 // by looking to see whether the datafeed contains a dc_region field in an aggregation
 // if it does, it is a distinct count single metric job and no a sparse data job.
 // this check is needed because distinct count jobs also use NON_ZERO_COUNT
-export function determineSparseDataJob(job: Job, datafeed: Datafeed) {
+export function isSparseDataJob(job: Job, datafeed: Datafeed): boolean {
   const detectors = job.analysis_config.detectors;
 
   const distinctCountField = idx<Datafeed, string>(
