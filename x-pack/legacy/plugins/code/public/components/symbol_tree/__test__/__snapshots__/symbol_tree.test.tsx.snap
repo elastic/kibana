@@ -71,6 +71,7 @@ exports[`render symbol tree correctly 1`] = `
             >
               <a
                 className="code-symbol-link codeFileTree__node--link"
+                data-test-subj="codeStructureTreeNode-\\"stack-control\\""
                 href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L1:0?sideTab=structure"
                 onClick={[Function]}
               />
@@ -105,7 +106,6 @@ exports[`render symbol tree correctly 1`] = `
                   </div>
                   <div
                     className="euiText euiText--small"
-                    data-test-subj="codeStructureTreeNode-\\"stack-control\\""
                   >
                     "stack-control"
                   </div>
@@ -123,6 +123,7 @@ exports[`render symbol tree correctly 1`] = `
                 >
                   <a
                     className="code-symbol-link codeFileTree__node--link"
+                    data-test-subj="codeStructureTreeNode-EventEmitter"
                     href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L10:9?sideTab=structure"
                     onClick={[Function]}
                   />
@@ -147,7 +148,6 @@ exports[`render symbol tree correctly 1`] = `
                       </div>
                       <div
                         className="euiText euiText--small"
-                        data-test-subj="codeStructureTreeNode-EventEmitter"
                       >
                         EventEmitter
                       </div>
@@ -163,6 +163,7 @@ exports[`render symbol tree correctly 1`] = `
                 >
                   <a
                     className="code-symbol-link codeFileTree__node--link"
+                    data-test-subj="codeStructureTreeNode-ClrStackView"
                     href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L11:9?sideTab=structure"
                     onClick={[Function]}
                   />
@@ -187,7 +188,6 @@ exports[`render symbol tree correctly 1`] = `
                       </div>
                       <div
                         className="euiText euiText--small"
-                        data-test-subj="codeStructureTreeNode-ClrStackView"
                       >
                         ClrStackView
                       </div>
@@ -203,6 +203,7 @@ exports[`render symbol tree correctly 1`] = `
                 >
                   <a
                     className="code-symbol-link codeFileTree__node--link"
+                    data-test-subj="codeStructureTreeNode-StackControl"
                     href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L13:0?sideTab=structure"
                     onClick={[Function]}
                   />
@@ -237,7 +238,6 @@ exports[`render symbol tree correctly 1`] = `
                       </div>
                       <div
                         className="euiText euiText--small"
-                        data-test-subj="codeStructureTreeNode-StackControl"
                       >
                         StackControl
                       </div>
@@ -255,6 +255,7 @@ exports[`render symbol tree correctly 1`] = `
                     >
                       <a
                         className="code-symbol-link codeFileTree__node--link"
+                        data-test-subj="codeStructureTreeNode-model"
                         href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L14:2?sideTab=structure"
                         onClick={[Function]}
                       />
@@ -279,7 +280,6 @@ exports[`render symbol tree correctly 1`] = `
                           </div>
                           <div
                             className="euiText euiText--small"
-                            data-test-subj="codeStructureTreeNode-model"
                           >
                             model
                           </div>
@@ -295,6 +295,7 @@ exports[`render symbol tree correctly 1`] = `
                     >
                       <a
                         className="code-symbol-link codeFileTree__node--link"
+                        data-test-subj="codeStructureTreeNode-modelChange"
                         href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L15:2?sideTab=structure"
                         onClick={[Function]}
                       />
@@ -319,7 +320,6 @@ exports[`render symbol tree correctly 1`] = `
                           </div>
                           <div
                             className="euiText euiText--small"
-                            data-test-subj="codeStructureTreeNode-modelChange"
                           >
                             modelChange
                           </div>
@@ -335,6 +335,7 @@ exports[`render symbol tree correctly 1`] = `
                     >
                       <a
                         className="code-symbol-link codeFileTree__node--link"
+                        data-test-subj="codeStructureTreeNode-stackView"
                         href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L17:14?sideTab=structure"
                         onClick={[Function]}
                       />
@@ -359,7 +360,6 @@ exports[`render symbol tree correctly 1`] = `
                           </div>
                           <div
                             className="euiText euiText--small"
-                            data-test-subj="codeStructureTreeNode-stackView"
                           >
                             stackView
                           </div>
@@ -375,6 +375,7 @@ exports[`render symbol tree correctly 1`] = `
                     >
                       <a
                         className="code-symbol-link codeFileTree__node--link"
+                        data-test-subj="codeStructureTreeNode-HashMap<K, V>"
                         href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L137:13?sideTab=structure"
                         onClick={[Function]}
                       />
@@ -409,7 +410,6 @@ exports[`render symbol tree correctly 1`] = `
                           </div>
                           <div
                             className="euiText euiText--small"
-                            data-test-subj="codeStructureTreeNode-HashMap<K, V>"
                           >
                             HashMap&lt;K, V&gt;
                           </div>
@@ -427,6 +427,7 @@ exports[`render symbol tree correctly 1`] = `
                         >
                           <a
                             className="code-symbol-link codeFileTree__node--link"
+                            data-test-subj="codeStructureTreeNode-serialVersionUID"
                             href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L140:30?sideTab=structure"
                             onClick={[Function]}
                           />
@@ -451,7 +452,6 @@ exports[`render symbol tree correctly 1`] = `
                               </div>
                               <div
                                 className="euiText euiText--small"
-                                data-test-subj="codeStructureTreeNode-serialVersionUID"
                               >
                                 serialVersionUID
                               </div>
@@ -469,6 +469,7 @@ exports[`render symbol tree correctly 1`] = `
                     >
                       <a
                         className="code-symbol-link codeFileTree__node--link"
+                        data-test-subj="codeStructureTreeNode-Unit"
                         href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L21:0?sideTab=structure"
                         onClick={[Function]}
                       />
@@ -493,7 +494,6 @@ exports[`render symbol tree correctly 1`] = `
                           </div>
                           <div
                             className="euiText euiText--small"
-                            data-test-subj="codeStructureTreeNode-Unit"
                           >
                             Unit
                           </div>
@@ -509,6 +509,7 @@ exports[`render symbol tree correctly 1`] = `
                     >
                       <a
                         className="code-symbol-link codeFileTree__node--link"
+                        data-test-subj="codeStructureTreeNode-datemath"
                         href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L23:14?sideTab=structure"
                         onClick={[Function]}
                       />
@@ -533,7 +534,6 @@ exports[`render symbol tree correctly 1`] = `
                           </div>
                           <div
                             className="euiText euiText--small"
-                            data-test-subj="codeStructureTreeNode-datemath"
                           >
                             datemath
                           </div>

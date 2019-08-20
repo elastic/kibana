@@ -61,6 +61,7 @@ export class CodeSymbolTree extends React.PureComponent<Props, { activeSymbol?: 
       <div className="code-symbol-container">
         {bg}
         <Link
+          data-test-subj={`codeStructureTreeNode-${name}`}
           to={url.format({
             pathname: RepositoryUtils.locationToUrl({ uri: this.props.uri, range }),
             query: { sideTab: 'structure', ...queries },
@@ -89,9 +90,7 @@ export class CodeSymbolTree extends React.PureComponent<Props, { activeSymbol?: 
             ))}
           <EuiFlexGroup gutterSize="none" alignItems="center" className="code-structure-node">
             <EuiToken iconType={tokenType as IconType} />
-            <EuiText data-test-subj={`codeStructureTreeNode-${name}`} size="s">
-              {name}
-            </EuiText>
+            <EuiText size="s">{name}</EuiText>
           </EuiFlexGroup>
         </div>
       </div>

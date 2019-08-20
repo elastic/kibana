@@ -360,6 +360,11 @@ exports[`render correctly 1`] = `
                 </div>
                 <div
                   className="codeFileTree__node--fullWidth"
+                  data-test-subj="codeFileTreeNode-Directory-guava/src/com/google"
+                  onClick={[Function]}
+                  onKeyDown={[Function]}
+                  role="button"
+                  tabIndex={0}
                 />
               </div>
               <div
