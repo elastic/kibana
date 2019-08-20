@@ -110,6 +110,7 @@ export const code = (kibana: any) =>
         }).default(),
         maxWorkspace: Joi.number().default(5), // max workspace folder for each language server
         enableGlobalReference: Joi.boolean().default(false), // Global reference as optional feature for now
+        enableCommitIndexing: Joi.boolean().default(false),
         codeNodeUrl: Joi.string(),
       }).default();
     },

@@ -171,7 +171,7 @@ export function repositoryRoute(
 
         let indexStatus = null;
         try {
-          indexStatus = await repoObjectClient.getRepositoryLspIndexStatus(repoUri);
+          indexStatus = await repoObjectClient.getRepositoryIndexStatus(repoUri);
         } catch (error) {
           log.debug(`Get repository index status ${repoUri} error: ${error}`);
         }
