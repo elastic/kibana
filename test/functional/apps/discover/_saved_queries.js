@@ -87,13 +87,18 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('allows saving changes to a currently loaded query via the saved query management component', async () => {
+        await queryBar.setQuery('response:404');
         await savedQueryManagementComponent.updateCurrentlyLoadedQuery(
           'OkResponse',
-          '200 responses',
+          '404 responses',
           false,
           false
         );
         await savedQueryManagementComponent.savedQueryExistOrFail('OkResponse');
+        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
+        expect(await queryBar.getQueryString()).to.eql('');
+        await savedQueryManagementComponent.loadSavedQuery('OkResponse');
+        expect(await queryBar.getQueryString()).to.eql('response:404');
       });
 
       it('allows saving the currently loaded query as a new query', async () => {
