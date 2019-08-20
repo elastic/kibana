@@ -22,8 +22,7 @@ export default function manageRepositoriesFunctionalTests({
   const find = getService('find');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/37859
-  describe.skip('History', function() {
+  describe('History', function() {
     this.tags('smoke');
     const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
 
@@ -130,13 +129,14 @@ export default function manageRepositoriesFunctionalTests({
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/39163
-      it.skip('in search page, change language filters can go back and forward', async () => {
+      it('in search page, change language filters can go back and forward', async () => {
         log.debug('it select typescript language filter');
-        const url = `${PageObjects.common.getHostPort()}/app/code#/search?q=string&p=&langs=typescript`;
+        const url = `${PageObjects.common.getHostPort()}/app/code#/search?q=string&langs=typescript`;
         await browser.get(url);
 
-        await retry.try(async () => {
+        await PageObjects.header.awaitKibanaChrome();
+
+        await retry.tryForTime(300000, async () => {
           const language = await (await find.byCssSelector(
             '.euiFacetButton--isSelected'
           )).getVisibleText();
@@ -180,6 +180,8 @@ export default function manageRepositoriesFunctionalTests({
         log.debug('it goes back after line number changed');
         const url = `${PageObjects.common.getHostPort()}/app/code#/github.com/elastic/TypeScript-Node-Starter`;
         await browser.get(url);
+        await PageObjects.header.awaitKibanaChrome();
+
         const lineNumber = 20;
         await retry.try(async () => {
           const existence = await testSubjects.exists('codeFileTreeNode-File-tsconfig.json');
@@ -227,6 +229,9 @@ export default function manageRepositoriesFunctionalTests({
         await browser.get(url);
         // refresh so language server will be initialized.
         await browser.refresh();
+
+        await PageObjects.header.awaitKibanaChrome();
+
         // wait for tab is not disabled
         await PageObjects.common.sleep(5000);
         await testSubjects.click('codeStructureTreeTab');
