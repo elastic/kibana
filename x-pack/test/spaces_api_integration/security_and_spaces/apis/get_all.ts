@@ -245,6 +245,78 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
         }
       );
 
+      getAllTest(
+        `rbac user with saved objects management all at default space can access default from ${scenario.spaceId}`,
+        {
+          spaceId: scenario.spaceId,
+          user: scenario.users.allSavedObjectsAtDefaultSpace,
+          tests: {
+            exists: {
+              statusCode: 200,
+              response: createExpectResults('default'),
+            },
+            copySavedObjectsPurpose: {
+              statusCode: 200,
+              response: createExpectResults('default'),
+            },
+          },
+        }
+      );
+
+      getAllTest(
+        `rbac user with saved objects management read at default space can access default from ${scenario.spaceId}`,
+        {
+          spaceId: scenario.spaceId,
+          user: scenario.users.readSavedObjectsAtDefaultSpace,
+          tests: {
+            exists: {
+              statusCode: 200,
+              response: createExpectResults('default'),
+            },
+            copySavedObjectsPurpose: {
+              statusCode: 403,
+              response: expectRbacForbidden,
+            },
+          },
+        }
+      );
+
+      getAllTest(
+        `rbac user with saved objects management all at space_1 space can access space_1 from ${scenario.spaceId}`,
+        {
+          spaceId: scenario.spaceId,
+          user: scenario.users.allSavedObjectsAtSpace_1,
+          tests: {
+            exists: {
+              statusCode: 200,
+              response: createExpectResults('space_1'),
+            },
+            copySavedObjectsPurpose: {
+              statusCode: 200,
+              response: createExpectResults('space_1'),
+            },
+          },
+        }
+      );
+
+      getAllTest(
+        `rbac user with saved objects management read at space_1 space can access space_1 from ${scenario.spaceId}`,
+        {
+          spaceId: scenario.spaceId,
+          user: scenario.users.readSavedObjectsAtSpace_1,
+          tests: {
+            exists: {
+              statusCode: 200,
+              response: createExpectResults('space_1'),
+            },
+            copySavedObjectsPurpose: {
+              statusCode: 403,
+              response: expectRbacForbidden,
+            },
+          },
+        }
+      );
+
       getAllTest(`apm_user can't access any spaces from ${scenario.spaceId}`, {
         spaceId: scenario.spaceId,
         user: scenario.users.apmUser,
