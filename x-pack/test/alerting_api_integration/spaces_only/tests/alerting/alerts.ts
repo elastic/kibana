@@ -62,7 +62,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
     for (const scenario of SpaceScenarios) {
       describe(scenario.id, () => {
-        it('should schedule task, run alert and fire actions when appropriate', async () => {
+        it('should schedule task, run alert and fire actions', async () => {
           const reference = `create-test-1:${scenario.id}`;
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(scenario.id)}/api/action`)
@@ -136,7 +136,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
           });
         });
 
-        it('should handle custom retry logic when appropriate', async () => {
+        it('should handle custom retry logic', async () => {
           // We'll use this start time to query tasks created after this point
           const testStart = new Date();
           // We have to provide the test.rate-limit the next runAt, for testing purposes
@@ -221,7 +221,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
           expect(scheduledActionTask._source.task.runAt).to.eql(retryDate.toISOString());
         });
 
-        it('should have proper callCluster and savedObjectsClient authorization for alert type executor when appropriate', async () => {
+        it('should have proper callCluster and savedObjectsClient authorization for alert type executor', async () => {
           const reference = `create-test-3:${scenario.id}`;
           const response = await supertest
             .post(`${getUrlPrefix(scenario.id)}/api/alert`)
@@ -255,7 +255,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
           });
         });
 
-        it('should have proper callCluster and savedObjectsClient authorization for action type executor when appropriate', async () => {
+        it('should have proper callCluster and savedObjectsClient authorization for action type executor', async () => {
           const reference = `create-test-4:${scenario.id}`;
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(scenario.id)}/api/action`)
