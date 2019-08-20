@@ -22,6 +22,6 @@
       "_msearch",
       "{indices}/_msearch"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/search-multi-search.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-multi-search.html"
   }
 }

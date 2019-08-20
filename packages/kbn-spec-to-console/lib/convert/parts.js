@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 const replacePattern = require('../replace_pattern');
 
 module.exports = parts => {

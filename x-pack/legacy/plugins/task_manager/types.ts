@@ -7,3 +7,10 @@
 import { TaskManager as TaskManagerClass } from './task_manager';
 
 export type TaskManager = PublicMethodsOf<TaskManagerClass>;
+
+export interface Logger {
+  info(message: string): void;
+  debug(message: string): void;
+  warn(message: string): void;
+  error(message: string): void;
+}
