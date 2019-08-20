@@ -18,23 +18,23 @@
  */
 import React from 'react';
 import { FieldName } from 'ui/directives/field_name/field_name';
+import { FieldMapping, DocViewFilterFn } from 'ui/registry/doc_views_types';
 import classNames from 'classnames';
 import { DocViewTableRowBtnFilterAdd } from './table_row_btn_filter_add';
 import { DocViewTableRowBtnFilterRemove } from './table_row_btn_filter_remove';
 import { DocViewTableRowBtnToggleColumn } from './table_row_btn_toggle_column';
 import { DocViewTableRowBtnCollapse } from './table_row_btn_collapse';
 import { DocViewTableRowBtnFilterExists } from './table_row_btn_filter_exists';
-import { Mapping, FilterFn } from './table';
 
 export interface Props {
   field: string;
-  fieldMapping?: Mapping;
+  fieldMapping?: FieldMapping;
   isCollapsible: boolean;
   isColumnActive: boolean;
   isMetaField: boolean;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
-  onFilter?: FilterFn;
+  onFilter?: DocViewFilterFn;
   onToggleColumn: () => void;
   value: string;
   valueRaw: unknown;

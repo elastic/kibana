@@ -17,31 +17,9 @@
  * under the License.
  */
 import React, { useState } from 'react';
-import { IndexPattern } from 'ui/index_patterns';
+import { DocViewRenderProps } from 'ui/registry/doc_views';
 import { DocViewTableRow } from './table_row';
 
-export type FilterFn = (
-  mapping: Mapping | string | undefined,
-  value: unknown,
-  mode: '+' | '-'
-) => void;
-
-export interface Mapping {
-  filterable?: boolean;
-  scripted?: boolean;
-  rowCount?: number;
-  type: string;
-  name: string;
-}
-
-export interface Props {
-  columns: string[];
-  filter: FilterFn;
-  hit: Record<string, unknown>;
-  indexPattern: IndexPattern;
-  onAddColumn: (column: string) => void;
-  onRemoveColumn: (column: string) => void;
-}
 
 const COLLAPSE_LINE_LENGTH = 350;
 
@@ -52,7 +30,7 @@ export function DocViewTable({
   columns,
   onAddColumn,
   onRemoveColumn,
-}: Props) {
+}: DocViewRenderProps) {
   const mapping = indexPattern.fields.byName;
   const flattened = indexPattern.flattenHit(hit);
   const formatted = indexPattern.formatHit(hit, 'text');
