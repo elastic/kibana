@@ -22,33 +22,67 @@ import 'monaco-editor/esm/vs/editor/contrib/parameterHints/parameterHints.js'; /
 import { theme } from './editor_theme';
 
 interface Props {
-  /**
-   * Width of editor. Defaults to 100%.
-   */
+  /** Width of editor. Defaults to 100%. */
   width?: string | number;
 
-  /**
-   * Height of editor. Defaults to 100%.
-   */
+  /** Height of editor. Defaults to 100%. */
   height?: string | number;
 
+  /** ID of the editor language */
   languageId: string;
+
+  /** Language defintion if using a custom language in the editor */
   languageDef?:
     | monacoEditor.languages.IMonarchLanguage
     | PromiseLike<monacoEditor.languages.IMonarchLanguage>;
 
+  /** Value of the editor */
   value: string;
+
+  /** Function invoked when text in editor is changed */
   onChange: (value: string) => void;
 
+  /**
+   * Options for the Monaco Code Editor
+   * Documentation of options can be found here:
+   * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.editor.ieditorconstructionoptions.html
+   */
   options?: monacoEditor.editor.IEditorConstructionOptions;
 
+  /**
+   * Suggestion provider for autocompletion
+   * Documentation for the provider can be found here:
+   * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.completionitemprovider.html
+   */
   suggestionProvider?: monacoEditor.languages.CompletionItemProvider;
+
+  /**
+   * Signature provider for function parameter info
+   * Documentation for the provider can be found here:
+   * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.signaturehelpprovider.html
+   */
   signatureProvider?: monacoEditor.languages.SignatureHelpProvider;
+
+  /**
+   * Hover provider for hover documentation
+   * Documentation for the provider can be found here:
+   * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.hoverprovider.html
+   */
   hoverProvider?: monacoEditor.languages.HoverProvider;
 
+  /**
+   * Function called before the editor is mounted in the view
+   */
   editorWillMount?: EditorWillMount;
+  /**
+   * Function called before the editor is mounted in the view
+   * and completely replaces the setup behavior called by the component
+   */
   overrideEditorWillMount?: EditorWillMount;
 
+  /**
+   * Function called after the editor is mounted in the view
+   */
   editorDidMount?: EditorDidMount;
 }
 
@@ -65,14 +99,14 @@ export class Editor extends React.Component<Props, {}> {
       this.props.editorWillMount(monaco);
     }
 
-    // Setup on language handler here which registers all our code providers for the language
-    // https://microsoft.github.io/monaco-editor/api/modules/monaco.languages.html#onlanguage
-
     monaco.languages.register({ id: this.props.languageId });
 
     if (this.props.languageDef) {
       monaco.languages.setMonarchTokensProvider(this.props.languageId, this.props.languageDef);
 
+      // Setup onLanguage handler here which registers all our code providers for the language
+      // This ensures that the providers are only registered once
+      // https://microsoft.github.io/monaco-editor/api/modules/monaco.languages.html#onlanguage
       monaco.languages.onLanguage(this.props.languageId, () => {
         if (this.props.suggestionProvider) {
           monaco.languages.registerCompletionItemProvider(
@@ -94,7 +128,7 @@ export class Editor extends React.Component<Props, {}> {
       });
     }
 
-    // Register the lovely theme
+    // Register the theme
     monaco.editor.defineTheme('euiColors', theme);
   };
 

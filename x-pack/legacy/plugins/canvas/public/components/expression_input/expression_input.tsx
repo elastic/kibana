@@ -22,22 +22,32 @@ import { language } from './expression_language';
 import { getFunctionReferenceStr, getArgReferenceStr } from './reference';
 
 interface Props {
+  /** Font size of text within the editor */
   fontSize: number;
+  /** Boolean denoting whether the autocomplete widget is enabled */
   isAutocompleteEnabled: boolean;
 
-  error?: string;
-  value: string;
+  /** Canvas function defintions */
   functionDefinitions: CanvasFunction[];
+
+  /** Optional string for displaying error messages */
+  error?: string;
+  /** Value of expression */
+  value: string;
+  /** Function invoked when expression value is changed */
   onChange: (value?: string) => void;
 }
 
 export class ExpressionInput extends React.Component<Props> {
   static propTypes = {
-    functionDefinitions: PropTypes.array,
-    value: PropTypes.string,
-    onChange: PropTypes.func,
+    fontSize: PropTypes.number.isRequired,
+    isAutocompleteEnabled: PropTypes.bool.isRequired,
+
+    functionDefinitions: PropTypes.array.isRequired,
+
+    value: PropTypes.string.isRequired,
     error: PropTypes.string,
-    isAutocompleteEnabled: PropTypes.bool,
+    onChange: PropTypes.func.isRequired,
   };
 
   undoHistory: string[];
@@ -239,8 +249,6 @@ export class ExpressionInput extends React.Component<Props> {
   render() {
     const { value, error, fontSize, functionDefinitions, isAutocompleteEnabled } = this.props;
 
-    // TODO: I'm not sure we want to do this but waiting till we have function
-    // definitions means we can easily get nice syntax highlighting on functions
     if (functionDefinitions.length === 0) {
       return null;
     }
