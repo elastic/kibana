@@ -87,7 +87,7 @@ export const DataProviders = pure<Props>(
   }) => (
     <DropTargetDataProviders data-test-subj="dataProviders">
       <TimelineContext.Consumer>
-        {({ isLoading }) => (
+        {isLoading => (
           <DroppableWrapper isDropDisabled={!show || isLoading} droppableId={getDroppableId(id)}>
             {dataProviders != null && dataProviders.length ? (
               <Providers

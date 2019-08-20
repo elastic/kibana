@@ -41,7 +41,6 @@ interface Props {
   timelineId: string;
   toggleColumn: (column: ColumnHeader) => void;
   updateNote: UpdateNote;
-  width: number;
   maxDelay?: number;
 }
 
@@ -98,7 +97,6 @@ export class StatefulEvent extends React.Component<Props, State> {
       timelineId,
       toggleColumn,
       updateNote,
-      width,
     } = this.props;
 
     // If we are not ready to render yet, just return null
@@ -119,7 +117,6 @@ export class StatefulEvent extends React.Component<Props, State> {
             {getRowRenderer(event.ecs, rowRenderers).renderRow({
               browserFields,
               data: event.ecs,
-              width,
               children: (
                 <StatefulEventChild
                   id={event._id}
@@ -141,7 +138,6 @@ export class StatefulEvent extends React.Component<Props, State> {
                   showNotes={!!this.state.showNotes[event._id]}
                   onToggleShowNotes={this.onToggleShowNotes}
                   updateNote={updateNote}
-                  width={width}
                 />
               ),
             })}
@@ -155,7 +151,6 @@ export class StatefulEvent extends React.Component<Props, State> {
                 onUpdateColumns={onUpdateColumns}
                 timelineId={timelineId}
                 toggleColumn={toggleColumn}
-                width={width}
               />
             </EuiFlexItem>
           </div>

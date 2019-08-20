@@ -53,7 +53,6 @@ describe('Body', () => {
             sort={mockSort}
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
-            width={100}
           />
         </TestProviders>
       );
@@ -92,7 +91,6 @@ describe('Body', () => {
             sort={mockSort}
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
-            width={100}
           />
         </TestProviders>
       );
@@ -131,7 +129,6 @@ describe('Body', () => {
             sort={mockSort}
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
-            width={100}
           />
         </TestProviders>
       );
@@ -172,7 +169,6 @@ describe('Body', () => {
             sort={mockSort}
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
-            width={100}
           />
         </TestProviders>
       );

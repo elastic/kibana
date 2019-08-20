@@ -4,14 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import styled from 'styled-components';
-
+import React, { useContext } from 'react';
 import { BrowserFields } from '../../../../containers/source';
 import { Ecs } from '../../../../graphql/types';
+import { TimelineWidthContext } from '../../timeline_context';
 
-export const RowRendererContainer = styled.div<{ width: number }>`
-  width: ${({ width }) => `${width}px`};
-`;
+interface RowRendererContainerProps {
+  children: React.ReactNode;
+}
+
+export const RowRendererContainer = React.memo<RowRendererContainerProps>(({ children }) => {
+  const width = useContext(TimelineWidthContext);
+  return <div style={{ width: `${width}px` }}>{children}</div>;
+});
 
 RowRendererContainer.displayName = 'RowRendererContainer';
 
@@ -20,12 +25,10 @@ export interface RowRenderer {
   renderRow: ({
     browserFields,
     data,
-    width,
     children,
   }: {
     browserFields: BrowserFields;
     data: Ecs;
-    width: number;
     children: React.ReactNode;
   }) => React.ReactNode;
 }
