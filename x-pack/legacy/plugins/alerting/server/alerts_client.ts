@@ -54,7 +54,7 @@ interface FindResult {
 }
 
 interface CreateOptions {
-  data: Pick<Alert, Exclude<keyof Alert, 'createdBy' | 'apiKey'>>;
+  data: Pick<Alert, Exclude<keyof Alert, 'createdBy' | 'updatedBy' | 'apiKey'>>;
   options?: {
     migrationVersion?: Record<string, string>;
   };
@@ -102,9 +102,11 @@ export class AlertsClient {
     const alertType = this.alertTypeRegistry.get(data.alertTypeId);
     const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.alertTypeParams);
     const apiKey = await this.createAPIKey();
+    const username = await this.getUserName();
     const { alert: rawAlert, references } = this.getRawAlert({
       ...data,
-      createdBy: await this.getUserName(),
+      createdBy: username,
+      updatedBy: username,
       apiKey: apiKey.created
         ? Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64')
         : undefined,
@@ -199,7 +201,8 @@ export class AlertsClient {
         actions,
         apiKey: apiKey.created
           ? Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64')
-          : undefined,
+          : null,
+        updatedBy: await this.getUserName(),
       },
       {
         ...options,
@@ -223,10 +226,11 @@ export class AlertsClient {
         id,
         {
           enabled: true,
+          updatedBy: await this.getUserName(),
           scheduledTaskId: scheduledTask.id,
           apiKey: apiKey.created
             ? Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64')
-            : undefined,
+            : null,
         },
         { references: existingObject.references }
       );
@@ -243,6 +247,7 @@ export class AlertsClient {
           enabled: false,
           scheduledTaskId: null,
           apiKey: null,
+          updatedBy: await this.getUserName(),
         },
         { references: existingObject.references }
       );

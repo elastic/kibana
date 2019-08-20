@@ -70,6 +70,7 @@ export interface Alert {
   alertTypeParams: Record<string, any>;
   scheduledTaskId?: string;
   createdBy: string | null;
+  updatedBy: string | null;
   apiKey?: string;
 }
 
@@ -81,6 +82,7 @@ export interface RawAlert extends SavedObjectAttributes {
   alertTypeParams: SavedObjectAttributes;
   scheduledTaskId?: string;
   createdBy: string | null;
+  updatedBy: string | null;
   apiKey?: string;
 }
 

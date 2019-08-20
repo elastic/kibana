@@ -35,6 +35,9 @@
       "createdBy": {
         "type": "keyword"
       },
+      "updatedBy": {
+        "type": "keyword"
+      },
       "apiKey": {
         "type": "binary"
       }
