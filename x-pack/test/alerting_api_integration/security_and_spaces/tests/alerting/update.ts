@@ -37,6 +37,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             },
             interval: '12s',
             actions: [],
+            throttle: '2m',
           };
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)
@@ -207,7 +208,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it('sshould handle update alert request appropriately when interval is wrong syntax', async () => {
+        it('should handle update alert request appropriately when interval is wrong syntax', async () => {
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alert/1`)
             .set('kbn-xsrf', 'foo')
@@ -232,7 +233,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message:
-                  'child "interval" fails because ["interval" with value "10x" fails to match the seconds pattern, "interval" with value "10x" fails to match the minutes pattern, "interval" with value "10x" fails to match the hours pattern, "interval" with value "10x" fails to match the days pattern]. "alertTypeId" is not allowed',
+                  'child "interval" fails because ["interval" with value "10x" fails to match the seconds (5s) pattern, "interval" with value "10x" fails to match the minutes (5m) pattern, "interval" with value "10x" fails to match the hours (5h) pattern, "interval" with value "10x" fails to match the days (5d) pattern]. "alertTypeId" is not allowed',
                 validation: {
                   source: 'payload',
                   keys: ['interval', 'interval', 'interval', 'interval', 'alertTypeId'],
