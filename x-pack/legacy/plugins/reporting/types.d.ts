@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Request } from 'hapi';
+
 interface UiSettings {
   get: (value: string) => string;
 }
@@ -30,20 +32,6 @@ export interface KbnServer {
   }: {
     savedObjectsClient: SavedObjectClient;
   }) => UiSettings;
-}
-
-export interface ExportTypeDefinition {
-  id: string;
-  name: string;
-  jobType: string;
-  jobContentExtension: string;
-  createJobFactory: () => any;
-  executeJobFactory: () => any;
-  validLicenses: string[];
-}
-
-export interface ExportTypesRegistry {
-  register: (exportTypeDefinition: ExportTypeDefinition) => void;
 }
 
 export interface ConfigObject {
@@ -119,6 +107,8 @@ export interface JobParams {
   post?: JobParamPostPayload;
   panel?: any; // has to be resolved by the request handler
   visType?: string; // has to be resolved by the request handler
+
+  indexPatternId?: string; // for export_types/csv
 }
 
 export interface JobDocPayload {
@@ -133,6 +123,19 @@ export interface JobDocPayload {
   type?: string | null; // string if completed job; null if incomplete job;
   objects?: string | null; // string if completed job; null if incomplete job;
 }
+
+export type JobDocPayloadScreenshot = JobDocPayload & {
+  browserTimezone: string;
+  layout: any;
+};
+
+export type JobDocPayloadDiscoverCsv = JobDocPayload & {
+  searchRequest: any;
+  fields: any;
+  indexPatternSavedObject: any;
+  metaFields: any;
+  conflictedTypesFields: any;
+};
 
 export interface JobDocOutput {
   content: string; // encoded content
@@ -175,13 +178,17 @@ export interface ESQueueWorker {
   on: (event: string, handler: any) => void;
 }
 
-export type ESQueueWorkerExecuteFn = (job: JobDoc, cancellationToken: any) => void;
+export type ESQueueCreateJobFn = (
+  jobParams: JobParams,
+  headers: ConditionalHeaders,
+  request: Request
+) => Promise<JobParams>;
 
-export interface ExportType {
-  jobType: string;
-  createJobFactory: any;
-  executeJobFactory: (server: KbnServer) => ESQueueWorkerExecuteFn;
-}
+export type ESQueueWorkerExecuteFn = (job: JobDoc, cancellationToken: any) => void;
+export type ImmediateExecuteFn = (
+  jobDocPayload: JobDocPayload,
+  request: Request
+) => Promise<JobDocOutputExecuted>;
 
 export interface ESQueueWorkerOptions {
   kibanaName: string;
@@ -196,6 +203,30 @@ export interface ESQueueInstance {
     workerFn: any,
     workerOptions: ESQueueWorkerOptions
   ) => ESQueueWorker;
+}
+
+export type CreateJobFactory = (server: KbnServer) => ESQueueCreateJobFn;
+export type ExecuteJobFactory = (server: KbnServer) => ESQueueWorkerExecuteFn;
+export type ExecuteImmediateJobFactory = (server: KbnServer) => ImmediateExecuteFn;
+
+export interface ExportTypeDefinition {
+  id: string;
+  name: string;
+  jobType: string;
+  jobContentExtension: string;
+  createJobFactory: CreateJobFactory;
+  executeJobFactory: ExecuteJobFactory | ExecuteImmediateJobFactory;
+  validLicenses: string[];
+}
+
+export interface ExportType {
+  jobType: string;
+  createJobFactory: any;
+  executeJobFactory: (server: KbnServer) => ESQueueWorkerExecuteFn;
+}
+
+export interface ExportTypesRegistry {
+  register: (exportTypeDefinition: ExportTypeDefinition) => void;
 }
 
 export { LevelLogger as Logger } from './server/lib/level_logger';
