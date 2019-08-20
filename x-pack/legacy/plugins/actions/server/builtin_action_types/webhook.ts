@@ -13,6 +13,15 @@ import { assertValidInterval } from '../../../task_manager/lib/intervals';
 const PORT_MAX = 256 * 256 - 1;
 const PortSchema = schema.number({ min: 1, max: PORT_MAX });
 
+enum WebhookMethods {
+  POST = 'post',
+  PUT = 'put',
+}
+enum WebhookSchemes {
+  HTTP = 'http',
+  HTTPS = 'https',
+}
+
 // config definition
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 
@@ -26,12 +35,18 @@ const ConfigSchema = schema.object(
   {
     host: schema.string(),
     port: PortSchema,
-    scheme: schema.oneOf([schema.literal('http'), schema.literal('https')], {
-      defaultValue: 'http',
-    }),
-    method: schema.oneOf([schema.literal('post'), schema.literal('put')], {
-      defaultValue: 'post',
-    }),
+    scheme: schema.oneOf(
+      [schema.literal(WebhookSchemes.HTTP), schema.literal(WebhookSchemes.HTTPS)],
+      {
+        defaultValue: WebhookSchemes.HTTP,
+      }
+    ),
+    method: schema.oneOf(
+      [schema.literal(WebhookMethods.POST), schema.literal(WebhookMethods.PUT)],
+      {
+        defaultValue: WebhookMethods.POST,
+      }
+    ),
     path: nullableType(schema.string()),
     url: nullableType(schema.string()),
     headers: nullableType(HeadersSchema),
