@@ -15,27 +15,27 @@ describe('actionType', () => {
 });
 
 describe('secrets validation', () => {
-  test('secrets validation succeeds when secrets is valid', () => {
+  test('succeeds when secrets is valid', () => {
     const secrets: Record<string, any> = {
-      username: 'bob',
+      user: 'bob',
       password: 'supersecret',
     };
     expect(validateSecrets(actionType, secrets)).toEqual(secrets);
   });
 
-  test('secrets validation fails when secret password is omitted', () => {
+  test('fails when secret password is omitted', () => {
     expect(() => {
-      validateSecrets(actionType, { username: 'bob' });
+      validateSecrets(actionType, { user: 'bob' });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type secrets: [password]: expected value of type [string] but got [undefined]"`
     );
   });
 
-  test('secrets validation fails when secret username is omitted', () => {
+  test('fails when secret user is omitted', () => {
     expect(() => {
       validateSecrets(actionType, {});
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: [username]: expected value of type [string] but got [undefined]"`
+      `"error validating action type secrets: [user]: expected value of type [string] but got [undefined]"`
     );
   });
 });

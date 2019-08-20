@@ -65,7 +65,7 @@ function validateConfig(configObject: any): string | void {
 // secrets definition
 export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
 const SecretsSchema = schema.object({
-  username: schema.string(),
+  user: schema.string(),
   password: schema.string(),
 });
 
