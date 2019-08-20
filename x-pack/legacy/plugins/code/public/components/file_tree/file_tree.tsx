@@ -127,7 +127,17 @@ export class CodeFileTree extends React.Component<Props, { openPaths: string[] }
       />
     );
     if (this.props.match.params.path === node.path) {
-      bg = <div ref={el => this.scrollIntoView(el)} className="codeFileTree__node--fullWidth" />;
+      bg = (
+        <div
+          ref={el => this.scrollIntoView(el)}
+          className="codeFileTree__node--fullWidth"
+          tabIndex={0}
+          data-test-subj={`codeFileTreeNode-${nodeTypeMap[node.type]}-${node.path}`}
+          onClick={onClick}
+          onKeyDown={onClick}
+          role="button"
+        />
+      );
     }
     switch (node.type) {
       case FileTreeItemType.Directory: {
