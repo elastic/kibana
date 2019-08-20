@@ -105,8 +105,8 @@ describe('saved query service', () => {
     it('should optionally accept filters and timefilters in object format', async () => {
       const serializedSavedQueryAttributesWithFilters = {
         ...savedQueryAttributesWithFilters,
-        filters: JSON.stringify(savedQueryAttributesWithFilters.filters),
-        timefilter: JSON.stringify(savedQueryAttributesWithFilters.timefilter),
+        filters: savedQueryAttributesWithFilters.filters,
+        timefilter: savedQueryAttributesWithFilters.timefilter,
       };
 
       mockSavedObjectsClient.create.mockReturnValue({
@@ -167,8 +167,8 @@ describe('saved query service', () => {
     it('should find and return parsed filters and timefilters items', async () => {
       const serializedSavedQueryAttributesWithFilters = {
         ...savedQueryAttributesWithFilters,
-        filters: JSON.stringify(savedQueryAttributesWithFilters.filters),
-        timefilter: JSON.stringify(savedQueryAttributesWithFilters.timefilter),
+        filters: savedQueryAttributesWithFilters.filters,
+        timefilter: savedQueryAttributesWithFilters.timefilter,
       };
       mockSavedObjectsClient.find.mockReturnValue({
         savedObjects: [{ id: 'foo', attributes: serializedSavedQueryAttributesWithFilters }],
