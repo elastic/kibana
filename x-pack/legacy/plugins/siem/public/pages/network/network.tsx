@@ -16,11 +16,7 @@ import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
 import { manageQuery } from '../../components/page/manage_query';
-import {
-  KpiNetworkComponent,
-  // NetworkTopNFlowTable,
-  NetworkTopSourceFlowTable,
-} from '../../components/page/network';
+import { KpiNetworkComponent, NetworkTopNFlowTable } from '../../components/page/network';
 import { NetworkDnsTable } from '../../components/page/network/network_dns_table';
 import { UseUrlState } from '../../components/url_state';
 import { GlobalTime } from '../../containers/global_time';
@@ -39,8 +35,7 @@ import { scoreIntervalToDateTime } from '../../components/ml/score/score_interva
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 
-// const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
-const NetworkTopSourceFlowTableManage = manageQuery(NetworkTopSourceFlowTable);
+const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
 const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
 const KpiNetworkComponentManage = manageQuery(KpiNetworkComponent);
 interface NetworkComponentReduxProps {
@@ -73,13 +68,13 @@ const NetworkComponent = pure<NetworkComponentProps>(
                 <UseUrlState indexPattern={indexPattern}>
                   {({ isInitializing }) => (
                     <>
-                      {/*<KpiNetworkQuery*/}
+                      {/* <KpiNetworkQuery*/}
                       {/*  endDate={to}*/}
                       {/*  filterQuery={filterQuery}*/}
                       {/*  skip={isInitializing}*/}
                       {/*  sourceId="default"*/}
                       {/*  startDate={from}*/}
-                      {/*>*/}
+                      {/* >*/}
                       {/*  {({ kpiNetwork, loading, id, inspect, refetch }) => (*/}
                       {/*    <KpiNetworkComponentManage*/}
                       {/*      id={id}*/}
@@ -97,7 +92,7 @@ const NetworkComponent = pure<NetworkComponentProps>(
                       {/*      }}*/}
                       {/*    />*/}
                       {/*  )}*/}
-                      {/*</KpiNetworkQuery>*/}
+                      {/* </KpiNetworkQuery>*/}
 
                       <EuiSpacer />
 
@@ -119,7 +114,7 @@ const NetworkComponent = pure<NetworkComponentProps>(
                           inspect,
                           refetch,
                         }) => (
-                          <NetworkTopSourceFlowTableManage
+                          <NetworkTopNFlowTableManage
                             data={networkTopNFlow}
                             fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
                             id={id}
@@ -140,16 +135,16 @@ const NetworkComponent = pure<NetworkComponentProps>(
                         )}
                       </NetworkTopNFlowQuery>
 
-                      {/*<EuiSpacer />*/}
+                      {/* <EuiSpacer />*/}
 
-                      {/*<NetworkDnsQuery*/}
+                      {/* <NetworkDnsQuery*/}
                       {/*  endDate={to}*/}
                       {/*  filterQuery={filterQuery}*/}
                       {/*  skip={isInitializing}*/}
                       {/*  sourceId="default"*/}
                       {/*  startDate={from}*/}
                       {/*  type={networkModel.NetworkType.page}*/}
-                      {/*>*/}
+                      {/* >*/}
                       {/*  {({*/}
                       {/*    totalCount,*/}
                       {/*    loading,*/}
@@ -178,11 +173,11 @@ const NetworkComponent = pure<NetworkComponentProps>(
                       {/*      type={networkModel.NetworkType.page}*/}
                       {/*    />*/}
                       {/*  )}*/}
-                      {/*</NetworkDnsQuery>*/}
+                      {/* </NetworkDnsQuery>*/}
 
-                      {/*<EuiSpacer />*/}
+                      {/* <EuiSpacer />*/}
 
-                      {/*<AnomaliesNetworkTable*/}
+                      {/* <AnomaliesNetworkTable*/}
                       {/*  startDate={from}*/}
                       {/*  endDate={to}*/}
                       {/*  skip={isInitializing}*/}
@@ -195,7 +190,7 @@ const NetworkComponent = pure<NetworkComponentProps>(
                       {/*      to: fromTo.to,*/}
                       {/*    });*/}
                       {/*  }}*/}
-                      {/*/>*/}
+                      {/* />*/}
                     </>
                   )}
                 </UseUrlState>

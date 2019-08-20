@@ -6,4 +6,4 @@
 
 export { IpOverview } from './ip_overview';
 export { KpiNetworkComponent } from './kpi_network';
-export { NetworkTopSourceFlowTable } from './network_top_source_flow_table';
+export { NetworkTopNFlowTable } from './network_top_n_flow_table';

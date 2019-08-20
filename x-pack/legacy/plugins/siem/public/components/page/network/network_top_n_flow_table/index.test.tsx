@@ -20,7 +20,7 @@ import {
 } from '../../../../mock';
 import { createStore, networkModel, State } from '../../../../store';
 
-import { NetworkTopSourceFlowTable } from '.';
+import { NetworkTopNFlowTable } from '.';
 import { mockData } from './mock';
 
 describe('NetworkTopNFlow Table Component', () => {
@@ -37,7 +37,7 @@ describe('NetworkTopNFlow Table Component', () => {
     test('it renders the default NetworkTopNFlow table', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
-          <NetworkTopSourceFlowTable
+          <NetworkTopNFlowTable
             data={mockData.NetworkTopNFlow.edges}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopNFlow.pageInfo)}
             id="topNFlow"
@@ -68,7 +68,7 @@ describe('NetworkTopNFlow Table Component', () => {
       const wrapper = mount(
         <MockedProvider>
           <TestProviders store={store}>
-            <NetworkTopSourceFlowTable
+            <NetworkTopNFlowTable
               data={mockData.NetworkTopNFlow.edges}
               fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopNFlow.pageInfo)}
               id="topNFlow"
@@ -109,7 +109,7 @@ describe('NetworkTopNFlow Table Component', () => {
       const wrapper = mount(
         <MockedProvider>
           <TestProviders store={store}>
-            <NetworkTopSourceFlowTable
+            <NetworkTopNFlowTable
               data={mockData.NetworkTopNFlow.edges}
               fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopNFlow.pageInfo)}
               id="topNFlow"
@@ -152,7 +152,7 @@ describe('NetworkTopNFlow Table Component', () => {
       const wrapper = mount(
         <MockedProvider>
           <TestProviders store={store}>
-            <NetworkTopSourceFlowTable
+            <NetworkTopNFlowTable
               data={mockData.NetworkTopNFlow.edges}
               fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopNFlow.pageInfo)}
               id="topNFlow"

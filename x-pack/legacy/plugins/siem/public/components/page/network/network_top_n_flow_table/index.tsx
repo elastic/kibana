@@ -73,7 +73,7 @@ const rowItems: ItemsPerRow[] = [
   },
 ];
 
-export const NetworkTopSourceFlowTableId = 'networkTopSourceFlow-top-talkers';
+export const NetworkTopNFlowTableId = 'networkTopSourceFlow-top-talkers';
 
 class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowTableProps> {
   public render() {
@@ -101,7 +101,7 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
           indexPattern,
           FlowTargetNew.source,
           type,
-          NetworkTopSourceFlowTableId
+          NetworkTopNFlowTableId
         )}
         headerCount={totalCount}
         headerTitle={i18n.SOURCE_IP}
@@ -154,7 +154,7 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const NetworkTopSourceFlowTable = connect(
+export const NetworkTopNFlowTable = connect(
   makeMapStateToProps,
   {
     updateTopNFlowLimit: networkActions.updateTopNFlowLimit,
