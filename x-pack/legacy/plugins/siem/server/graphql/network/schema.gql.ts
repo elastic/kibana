@@ -102,7 +102,6 @@ export const networkSchema = gql`
     NetworkTopNFlow(
       id: String
       filterQuery: String
-      flowDirection: FlowDirection!
       flowTarget: FlowTarget!
       pagination: PaginationInputPaginated!
       sort: NetworkTopNFlowSortField!

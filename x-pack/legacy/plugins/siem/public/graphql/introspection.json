@@ -1686,16 +1686,6 @@
                 "defaultValue": null
               },
               {
-                "name": "flowDirection",
-                "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "ENUM", "name": "FlowDirection", "ofType": null }
-                },
-                "defaultValue": null
-              },
-              {
                 "name": "flowTarget",
                 "description": "",
                 "type": {

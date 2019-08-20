@@ -31,15 +31,12 @@ import {
   updateIsPtrIncluded,
   updateIpDetailsTableActivePage,
   updateNetworkPageTableActivePage,
-  updateTopNFlowDirection,
   updateTopNFlowLimit,
   updateTopNFlowSort,
-  updateTopNFlowTarget,
   updateTlsSort,
   updateUsersLimit,
   updateUsersSort,
 } from './actions';
-import { helperUpdateTopNFlowDirection } from './helper';
 import { IpDetailsTableType, NetworkModel, NetworkTableType, NetworkType } from './model';
 
 export type NetworkState = NetworkModel;
@@ -55,7 +52,6 @@ export const initialNetworkState: NetworkState = {
           direction: Direction.desc,
         },
         flowTarget: FlowTarget.source,
-        flowDirection: FlowDirection.uniDirectional,
       },
       [NetworkTableType.dns]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
@@ -183,22 +179,6 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       },
     },
   }))
-  .case(updateTopNFlowDirection, (state, { flowDirection, networkType }) => ({
-    ...state,
-    [networkType]: {
-      ...state[networkType],
-      queries: {
-        ...state[networkType].queries,
-        [NetworkTableType.topNFlow]: {
-          ...state[NetworkType.page].queries.topNFlow,
-          ...helperUpdateTopNFlowDirection(
-            state[NetworkType.page].queries.topNFlow.flowTarget,
-            flowDirection
-          ),
-        },
-      },
-    },
-  }))
   .case(updateTopNFlowSort, (state, { topNFlowSort, networkType }) => ({
     ...state,
     [networkType]: {
@@ -208,23 +188,6 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
         [NetworkTableType.topNFlow]: {
           ...state[NetworkType.page].queries.topNFlow,
           topNFlowSort,
-        },
-      },
-    },
-  }))
-  .case(updateTopNFlowTarget, (state, { flowTarget }) => ({
-    ...state,
-    [NetworkType.page]: {
-      ...state[NetworkType.page],
-      queries: {
-        ...state[NetworkType.page].queries,
-        [NetworkTableType.topNFlow]: {
-          ...state[NetworkType.page].queries.topNFlow,
-          flowTarget,
-          topNFlowSort: {
-            field: NetworkTopNFlowFields.bytes,
-            direction: Direction.desc,
-          },
         },
       },
     },

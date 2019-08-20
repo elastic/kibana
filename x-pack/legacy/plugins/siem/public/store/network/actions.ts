@@ -56,14 +56,14 @@ export const updateTopNFlowSort = actionCreator<{
   networkType: NetworkType;
 }>('UPDATE_TOP_N_FLOW_SORT');
 
-export const updateTopNFlowTarget = actionCreator<{
-  flowTarget: FlowTarget;
-}>('UPDATE_TOP_N_FLOW_TARGET');
-
-export const updateTopNFlowDirection = actionCreator<{
-  flowDirection: FlowDirection;
-  networkType: NetworkType;
-}>('UPDATE_TOP_N_FLOW_DIRECTION');
+// export const updateTopNFlowTarget = actionCreator<{
+//   flowTarget: FlowTarget;
+// }>('UPDATE_TOP_N_FLOW_TARGET');
+//
+// export const updateTopNFlowDirection = actionCreator<{
+//   flowDierection: FlowDirection;
+//   networkType: NetworkType;
+// }>('UPDATE_TOP_N_FLOW_DIRECTION');
 
 export const setNetworkFilterQueryDraft = actionCreator<{
   filterQueryDraft: KueryFilterQuery;

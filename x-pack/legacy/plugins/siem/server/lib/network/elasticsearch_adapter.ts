@@ -7,7 +7,6 @@
 import { get, getOr } from 'lodash/fp';
 
 import {
-  FlowDirection,
   FlowTarget,
   NetworkDnsData,
   NetworkDnsEdges,
@@ -102,21 +101,15 @@ const getTopNFlowEdges = (
   if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
     throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
   }
-  if (options.flowDirection === FlowDirection.uniDirectional) {
-    return formatTopNFlowEdges(
-      getOr([], 'aggregations.top_uni_flow.buckets', response),
-      options.flowTarget
-    );
-  }
   return formatTopNFlowEdges(
-    getOr([], 'aggregations.top_bi_flow.buckets', response),
+    getOr([], `aggregations.${options.flowTarget}.buckets`, response),
     options.flowTarget
   );
 };
 
 const formatTopNFlowEdges = (
   buckets: NetworkTopNFlowBuckets[],
-  flowTarget: FlowTarget
+  flowTarget: FlowTarget.source | FlowTarget.destination
 ): NetworkTopNFlowEdges[] =>
   buckets.map((bucket: NetworkTopNFlowBuckets) => ({
     node: {

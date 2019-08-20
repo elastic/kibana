@@ -67,7 +67,6 @@ export const mockGlobalState: State = {
           activePage: 0,
           limit: 10,
           flowTarget: FlowTarget.source,
-          flowDirection: FlowDirection.uniDirectional,
           topNFlowSort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
         },
         dns: {

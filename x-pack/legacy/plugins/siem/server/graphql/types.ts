@@ -1984,8 +1984,6 @@ export interface NetworkTopNFlowSourceArgs {
 
   filterQuery?: string | null;
 
-  flowDirection: FlowDirection;
-
   flowTarget: FlowTarget;
 
   pagination: PaginationInputPaginated;
@@ -2814,8 +2812,6 @@ export namespace SourceResolvers {
     id?: string | null;
 
     filterQuery?: string | null;
-
-    flowDirection: FlowDirection;
 
     flowTarget: FlowTarget;
 

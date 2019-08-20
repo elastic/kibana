@@ -1955,8 +1955,6 @@ export interface NetworkTopNFlowSourceArgs {
 
   filterQuery?: string | null;
 
-  flowDirection: FlowDirection;
-
   flowTarget: FlowTarget;
 
   pagination: PaginationInputPaginated;
@@ -3277,7 +3275,6 @@ export namespace GetNetworkDnsQuery {
 export namespace GetNetworkTopNFlowQuery {
   export type Variables = {
     sourceId: string;
-    flowDirection: FlowDirection;
     filterQuery?: string | null;
     pagination: PaginationInputPaginated;
     sort: NetworkTopNFlowSortField;
@@ -3328,10 +3325,6 @@ export namespace GetNetworkTopNFlowQuery {
 
     destination?: Destination | null;
 
-    client?: Client | null;
-
-    server?: Server | null;
-
     network?: Network | null;
   };
 
@@ -3346,26 +3339,6 @@ export namespace GetNetworkTopNFlowQuery {
   };
 
   export type Destination = {
-    __typename?: 'TopNFlowItem';
-
-    count?: number | null;
-
-    ip?: string | null;
-
-    domain?: string[] | null;
-  };
-
-  export type Client = {
-    __typename?: 'TopNFlowItem';
-
-    count?: number | null;
-
-    ip?: string | null;
-
-    domain?: string[] | null;
-  };
-
-  export type Server = {
     __typename?: 'TopNFlowItem';
 
     count?: number | null;

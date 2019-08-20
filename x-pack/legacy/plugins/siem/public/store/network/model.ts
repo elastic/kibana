@@ -40,7 +40,6 @@ export interface BasicQueryPaginated {
 export interface TopNFlowQuery extends BasicQueryPaginated {
   flowTarget: FlowTarget;
   topNFlowSort: NetworkTopNFlowSortField;
-  flowDirection: FlowDirection;
 }
 
 export interface DnsQuery extends BasicQueryPaginated {

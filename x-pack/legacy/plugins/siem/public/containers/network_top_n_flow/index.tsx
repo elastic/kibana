@@ -12,14 +12,13 @@ import { connect } from 'react-redux';
 import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
-  FlowDirection,
   FlowTarget,
   GetNetworkTopNFlowQuery,
   NetworkTopNFlowEdges,
   NetworkTopNFlowSortField,
   PageInfoPaginated,
 } from '../../graphql/types';
-import { inputsModel, networkModel, networkSelectors, State, inputsSelectors } from '../../store';
+import { inputsModel, inputsSelectors, networkModel, networkSelectors, State } from '../../store';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { createFilter } from '../helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
@@ -45,8 +44,6 @@ export interface OwnProps extends QueryTemplatePaginatedProps {
 
 export interface NetworkTopNFlowComponentReduxProps {
   activePage: number;
-  flowDirection: FlowDirection;
-  flowTarget: FlowTarget;
   isInspected: boolean;
   limit: number;
   topNFlowSort: NetworkTopNFlowSortField;
@@ -65,8 +62,6 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
       children,
       endDate,
       filterQuery,
-      flowDirection,
-      flowTarget,
       id = ID,
       isInspected,
       limit,
@@ -84,8 +79,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
         variables={{
           defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
           filterQuery: createFilter(filterQuery),
-          flowDirection,
-          flowTarget,
+          flowTarget: FlowTarget.source,
           inspect: isInspected,
           pagination: generateTablePaginationOptions(activePage, limit),
           sort: topNFlowSort,
