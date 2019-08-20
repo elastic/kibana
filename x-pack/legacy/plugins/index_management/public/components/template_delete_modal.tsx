@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiConfirmModal, EuiOverlayMask, EuiCallOut, EuiCheckbox } from '@elastic/eui';
+import { EuiConfirmModal, EuiOverlayMask, EuiCallOut, EuiCheckbox, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment, useState } from 'react';
@@ -32,13 +32,17 @@ export const TemplateDeleteModal = ({
       const hasDeletedTemplates = templatesDeleted && templatesDeleted.length;
 
       if (hasDeletedTemplates) {
-        const successMessage = i18n.translate(
-          'xpack.idxMgmt.deleteTemplatesModal.successNotificationMessageText',
-          {
-            defaultMessage: 'Deleted {numSuccesses, plural, one {# template} other {# templates}}',
-            values: { numSuccesses: templatesDeleted.length },
-          }
-        );
+        const successMessage =
+          templatesDeleted.length === 1
+            ? i18n.translate('xpack.idxMgmt.deleteTemplatesModal.successNotificationMessageText', {
+                defaultMessage: "Deleted template '{templateName}'",
+                values: { templateName: templatesToDelete[0] },
+              })
+            : i18n.translate('xpack.idxMgmt.deleteTemplatesModal.successNotificationMessageText', {
+                defaultMessage:
+                  'Deleted {numSuccesses, plural, one {# template} other {# templates}}',
+                values: { numSuccesses: templatesDeleted.length },
+              });
 
         callback({ hasDeletedTemplates });
         toastNotifications.addSuccess(successMessage);
@@ -116,10 +120,12 @@ export const TemplateDeleteModal = ({
                 {template.startsWith('.') ? (
                   <Fragment>
                     {' '}
-                    <FormattedMessage
-                      id="xpack.idxMgmt.deleteTemplatesModal.systemTemplateLabel"
-                      defaultMessage="(System template)"
-                    />
+                    <EuiBadge iconType="alert" color="hollow">
+                      <FormattedMessage
+                        id="xpack.idxMgmt.deleteTemplatesModal.systemTemplateLabel"
+                        defaultMessage="System template"
+                      />
+                    </EuiBadge>
                   </Fragment>
                 ) : null}
               </li>
@@ -141,7 +147,7 @@ export const TemplateDeleteModal = ({
                 <FormattedMessage
                   id="xpack.idxMgmt.deleteTemplatesModal.proceedWithCautionCallOutDescription"
                   defaultMessage="System templates are critical for internal operations.
-                Deleting a template cannot be undone."
+                  If you delete this template, you can’t recover it."
                 />
               </p>
               <EuiCheckbox

@@ -5,7 +5,7 @@
  */
 
 import { Template } from '../../../common/types';
-import { TemplateValidation } from '../../services/validation';
+import { TemplateValidation } from '../../services/template_validation';
 
 export interface StepProps {
   template: Template;

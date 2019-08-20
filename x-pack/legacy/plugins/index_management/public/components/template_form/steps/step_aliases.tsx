@@ -15,9 +15,10 @@ import {
   EuiFormRow,
   EuiText,
   EuiCodeEditor,
+  EuiCode,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { aliasesDocumentationLink } from '../../../lib/documentation_links';
+import { templatesDocumentationLink } from '../../../lib/documentation_links';
 import { StepProps } from '../types';
 
 export const StepAliases: React.FunctionComponent<StepProps> = ({
@@ -47,7 +48,7 @@ export const StepAliases: React.FunctionComponent<StepProps> = ({
             <p>
               <FormattedMessage
                 id="xpack.idxMgmt.templateForm.stepAliases.aliasesDescription"
-                defaultMessage="Use aliases to refer to the destination index by different names when making requests against Elasticsearch APIs."
+                defaultMessage="Set up aliases to associate with your indices."
               />
             </p>
           </EuiText>
@@ -57,13 +58,13 @@ export const StepAliases: React.FunctionComponent<StepProps> = ({
           <EuiButtonEmpty
             size="s"
             flush="right"
-            href={aliasesDocumentationLink}
+            href={templatesDocumentationLink}
             target="_blank"
             iconType="help"
           >
             <FormattedMessage
               id="xpack.idxMgmt.templateForm.stepAliases.docsButtonLabel"
-              defaultMessage="Index aliases docs"
+              defaultMessage="Index Templates docs"
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -79,6 +80,21 @@ export const StepAliases: React.FunctionComponent<StepProps> = ({
             defaultMessage="Aliases"
           />
         }
+        helpText={
+          <FormattedMessage
+            id="xpack.idxMgmt.templateForm.stepAliases.aliasesEditorHelpText"
+            defaultMessage="Use JSON format: {code}"
+            values={{
+              code: (
+                <EuiCode>
+                  {JSON.stringify({
+                    my_alias: {},
+                  })}
+                </EuiCode>
+              ),
+            }}
+          />
+        }
         isInvalid={Boolean(aliasesError)}
         error={aliasesError}
         fullWidth
@@ -87,10 +103,10 @@ export const StepAliases: React.FunctionComponent<StepProps> = ({
           mode="json"
           theme="textmate"
           width="100%"
+          height="300px"
           setOptions={{
             showLineNumbers: false,
             tabSize: 2,
-            maxLines: Infinity,
           }}
           editorProps={{
             $blockScrolling: Infinity,

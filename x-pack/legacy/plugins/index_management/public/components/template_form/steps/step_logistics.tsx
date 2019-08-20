@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   EuiComboBox,
   EuiComboBoxOptionProps,
@@ -15,18 +15,15 @@ import {
   EuiDescribedFormGroup,
   EuiFormRow,
   EuiFieldText,
-  EuiText,
   EuiFieldNumber,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { get } from 'lodash';
 import { Template } from '../../../../common/types';
-import { INVALID_CHARACTERS } from '../../../../common/constants';
+import { INVALID_INDEX_PATTERN_CHARS } from '../../../../common/constants';
 import { templatesDocumentationLink } from '../../../lib/documentation_links';
-import { loadIndexPatterns } from '../../../services/api';
 import { StepProps } from '../types';
 
-const indexPatternIllegalCharacters = INVALID_CHARACTERS.join(' ');
+const indexPatternInvalidCharacters = INVALID_INDEX_PATTERN_CHARS.join(' ');
 
 export const StepLogistics: React.FunctionComponent<StepProps> = ({
   template,
@@ -39,17 +36,9 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
 
   const [allIndexPatterns, setAllIndexPatterns] = useState<Template['indexPatterns']>([]);
 
-  const getIndexPatterns = async () => {
-    const indexPatternObjects = await loadIndexPatterns();
-    const titles = indexPatternObjects.map((indexPattern: any) =>
-      get(indexPattern, 'attributes.title')
-    );
-    setAllIndexPatterns(titles);
-  };
-
-  useEffect(() => {
-    getIndexPatterns();
-  }, []);
+  const indexPatternOptions = indexPatterns
+    ? indexPatterns.map(pattern => ({ label: pattern, value: pattern }))
+    : [];
 
   return (
     <div data-test-subj="stepLogistics">
@@ -63,17 +52,6 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
               />
             </h3>
           </EuiTitle>
-
-          <EuiSpacer size="s" />
-
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="xpack.idxMgmt.templateForm.stepLogistics.logisticsDescription"
-                defaultMessage="Define index patterns and other settings that will be applied to the template."
-              />
-            </p>
-          </EuiText>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
@@ -107,7 +85,7 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
         description={
           <FormattedMessage
             id="xpack.idxMgmt.templateForm.stepLogistics.nameDescription"
-            defaultMessage="This name will be used as a unique identifier for this template."
+            defaultMessage="A unique identifier for this template."
           />
         }
         idAria="stepLogisticsNameDescription"
@@ -117,7 +95,7 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
           label={
             <FormattedMessage
               id="xpack.idxMgmt.templateForm.stepLogistics.fieldNameLabel"
-              defaultMessage="Name (required)"
+              defaultMessage="Name"
             />
           }
           isInvalid={Boolean(nameError)}
@@ -150,7 +128,7 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
         description={
           <FormattedMessage
             id="xpack.idxMgmt.templateForm.stepLogistics.indexPatternsDescription"
-            defaultMessage="Define the index patterns that will be applied to the template."
+            defaultMessage="The index patterns to apply to the template."
           />
         }
         idAria="stepLogisticsIndexPatternsDescription"
@@ -160,15 +138,15 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
           label={
             <FormattedMessage
               id="xpack.idxMgmt.templateForm.stepLogistics.fieldIndexPatternsLabel"
-              defaultMessage="Index patterns (required)"
+              defaultMessage="Index patterns"
             />
           }
           helpText={
             <FormattedMessage
               id="xpack.idxMgmt.templateForm.stepLogistics.fieldIndexPatternsHelpText"
-              defaultMessage="Index patterns must match at least one index. Spaces and the characters {invalidCharactersList} are not allowed."
+              defaultMessage="Must match at least one index. Spaces and the characters {invalidCharactersList} are not allowed."
               values={{
-                invalidCharactersList: <strong>{indexPatternIllegalCharacters}</strong>,
+                invalidCharactersList: <strong>{indexPatternInvalidCharacters}</strong>,
               }}
             />
           }
@@ -177,19 +155,12 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
           fullWidth
         >
           <EuiComboBox
+            noSuggestions
             fullWidth
-            options={allIndexPatterns.map(indexPattern => ({
-              label: indexPattern,
-            }))}
             data-test-subj="indexPatternsComboBox"
-            selectedOptions={(indexPatterns || []).map((indexPattern: string) => {
-              return {
-                label: indexPattern,
-                value: indexPattern,
-              };
-            })}
+            selectedOptions={indexPatternOptions}
             onChange={(selectedPattern: EuiComboBoxOptionProps[]) => {
-              const newIndexPatterns = selectedPattern.map(({ label }) => label);
+              const newIndexPatterns = selectedPattern.map(({ value }) => value as string);
               updateTemplate({ indexPatterns: newIndexPatterns });
             }}
             onCreateOption={(selectedPattern: string) => {
@@ -212,7 +183,7 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
             <h3>
               <FormattedMessage
                 id="xpack.idxMgmt.templateForm.stepLogistics.orderTitle"
-                defaultMessage="Order"
+                defaultMessage="Merge order"
               />
             </h3>
           </EuiTitle>
@@ -220,29 +191,29 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
         description={
           <FormattedMessage
             id="xpack.idxMgmt.templateForm.stepLogistics.orderDescription"
-            defaultMessage="The order parameter controls the order of merging if multiple templates match an index."
+            defaultMessage="The merge order when multiple templates match an index."
           />
         }
         idAria="stepLogisticsOrderDescription"
         fullWidth
       >
         <EuiFormRow
+          fullWidth
           label={
             <FormattedMessage
               id="xpack.idxMgmt.templateForm.stepLogistics.fieldOrderLabel"
-              defaultMessage="Order"
+              defaultMessage="Order (optional)"
             />
           }
-          fullWidth
         >
           <EuiFieldNumber
+            fullWidth
             value={order}
             onChange={e => {
               const value = e.target.value;
               updateTemplate({ order: value === '' ? value : Number(value) });
             }}
             data-test-subj="orderInput"
-            fullWidth
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>{' '}
@@ -261,28 +232,28 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
         description={
           <FormattedMessage
             id="xpack.idxMgmt.templateForm.stepLogistics.versionDescription"
-            defaultMessage="A version number can be used to simplify template management by external systems."
+            defaultMessage="A number that identifies the template to external management systems."
           />
         }
         idAria="stepLogisticsVersionDescription"
         fullWidth
       >
         <EuiFormRow
+          fullWidth
           label={
             <FormattedMessage
               id="xpack.idxMgmt.templateForm.stepLogistics.fieldVersionLabel"
-              defaultMessage="Version"
+              defaultMessage="Version (optional)"
             />
           }
-          fullWidth
         >
           <EuiFieldNumber
+            fullWidth
             value={version}
             onChange={e => {
               const value = e.target.value;
               updateTemplate({ version: value === '' ? value : Number(value) });
             }}
-            fullWidth
             data-test-subj="versionInput"
           />
         </EuiFormRow>

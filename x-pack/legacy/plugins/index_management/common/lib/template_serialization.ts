@@ -18,7 +18,7 @@ const parseJson = (jsonString: string) => {
   return parsedJson;
 };
 
-const hasEntries = (data: object) => {
+const hasEntries = (data?: Partial<Template>) => {
   return data ? Object.entries(data).length > 0 : false;
 };
 
@@ -82,9 +82,9 @@ export function deserializeTemplate(templateEs: TemplateEs): Template {
     version: version || version === 0 ? version : '',
     order: order || order === 0 ? order : '',
     indexPatterns: indexPatterns.sort(),
-    settings: settings && hasEntries(settings) ? JSON.stringify(settings, null, 2) : undefined,
-    aliases: aliases && hasEntries(aliases) ? JSON.stringify(aliases, null, 2) : undefined,
-    mappings: mappings && hasEntries(mappings) ? JSON.stringify(mappings, null, 2) : undefined,
+    settings: hasEntries(settings) ? JSON.stringify(settings, null, 2) : undefined,
+    aliases: hasEntries(aliases) ? JSON.stringify(aliases, null, 2) : undefined,
+    mappings: hasEntries(mappings) ? JSON.stringify(mappings, null, 2) : undefined,
     ilmPolicy: settings && settings.index && settings.index.lifecycle,
   };
 

@@ -15,6 +15,7 @@ import {
   EuiFormRow,
   EuiText,
   EuiCodeEditor,
+  EuiCode,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { settingsDocumentationLink } from '../../../lib/documentation_links';
@@ -47,7 +48,7 @@ export const StepSettings: React.FunctionComponent<StepProps> = ({
             <p>
               <FormattedMessage
                 id="xpack.idxMgmt.templateForm.stepSettings.settingsDescription"
-                defaultMessage="Define how your indices behave."
+                defaultMessage="Define the behavior of your indices."
               />
             </p>
           </EuiText>
@@ -79,6 +80,15 @@ export const StepSettings: React.FunctionComponent<StepProps> = ({
             defaultMessage="Index settings"
           />
         }
+        helpText={
+          <FormattedMessage
+            id="xpack.idxMgmt.templateForm.stepSettings.settingsEditorHelpText"
+            defaultMessage="Use JSON format: {code}"
+            values={{
+              code: <EuiCode>{JSON.stringify({ number_of_replicas: 1 })}</EuiCode>,
+            }}
+          />
+        }
         isInvalid={Boolean(settingsError)}
         error={settingsError}
         fullWidth
@@ -87,10 +97,10 @@ export const StepSettings: React.FunctionComponent<StepProps> = ({
           mode="json"
           theme="textmate"
           width="100%"
+          height="300px"
           setOptions={{
             showLineNumbers: false,
             tabSize: 2,
-            maxLines: Infinity,
           }}
           editorProps={{
             $blockScrolling: Infinity,

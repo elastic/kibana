@@ -7,14 +7,7 @@
 import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiInMemoryTable,
-  EuiIcon,
-  EuiButton,
-  EuiLink,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiInMemoryTable, EuiIcon, EuiButton, EuiLink } from '@elastic/eui';
 import { TemplateListItem, Template } from '../../../../../common/types';
 import { BASE_PATH, UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../common/constants';
 import { TemplateDeleteModal } from '../../../../components';
@@ -91,7 +84,6 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       }),
       truncateText: true,
       sortable: true,
-      width: '100px',
       render: (hasMappings: boolean) => (hasMappings ? <EuiIcon type="check" /> : null),
     },
     {
@@ -101,7 +93,6 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       }),
       truncateText: true,
       sortable: true,
-      width: '100px',
       render: (hasSettings: boolean) => (hasSettings ? <EuiIcon type="check" /> : null),
     },
     {
@@ -111,14 +102,12 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       }),
       truncateText: true,
       sortable: true,
-      width: '100px',
       render: (hasAliases: boolean) => (hasAliases ? <EuiIcon type="check" /> : null),
     },
     {
       name: i18n.translate('xpack.idxMgmt.templateList.table.actionColumnTitle', {
         defaultMessage: 'Actions',
       }),
-      width: '75px',
       actions: [
         {
           name: i18n.translate('xpack.idxMgmt.templateList.table.actionEditText', {
@@ -209,36 +198,32 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
         />
       </EuiButton>
     ),
-    toolsRight: (
-      <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
-        <EuiFlexItem>
-          <EuiButton
-            color="secondary"
-            iconType="refresh"
-            onClick={reload}
-            data-test-subj="reloadButton"
-          >
-            <FormattedMessage
-              id="xpack.idxMgmt.templateList.table.reloadTemplatesButtonLabel"
-              defaultMessage="Reload"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButton
-            href={`#${BASE_PATH}create_template`}
-            fill
-            iconType="plusInCircle"
-            data-test-subj="createTemplateButton"
-          >
-            <FormattedMessage
-              id="xpack.idxMgmt.templateList.table.createTemplatesButtonLabel"
-              defaultMessage="Create a template"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
+    toolsRight: [
+      <EuiButton
+        color="secondary"
+        iconType="refresh"
+        onClick={reload}
+        data-test-subj="reloadButton"
+        key="reloadButton"
+      >
+        <FormattedMessage
+          id="xpack.idxMgmt.templateList.table.reloadTemplatesButtonLabel"
+          defaultMessage="Reload"
+        />
+      </EuiButton>,
+      <EuiButton
+        href={`#${BASE_PATH}create_template`}
+        fill
+        iconType="plusInCircle"
+        data-test-subj="createTemplateButton"
+        key="createTemplateButton"
+      >
+        <FormattedMessage
+          id="xpack.idxMgmt.templateList.table.createTemplatesButtonLabel"
+          defaultMessage="Create a template"
+        />
+      </EuiButton>,
+    ],
   };
 
   return (

@@ -10,7 +10,7 @@ import axios from 'axios';
 
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { TemplateFormTestBed } from './helpers/template_form.helpers';
-import { INVALID_CHARACTERS } from '../../common/constants';
+import { INVALID_INDEX_PATTERN_CHARS } from '../../common/constants';
 import {
   TEMPLATE_NAME,
   SETTINGS,
@@ -122,7 +122,7 @@ describe.skip('Create template', () => {
             }
           };
 
-          INVALID_CHARACTERS.forEach(expectErrorForChar);
+          INVALID_INDEX_PATTERN_CHARS.forEach(expectErrorForChar);
 
           actions.clickNextButton();
         });

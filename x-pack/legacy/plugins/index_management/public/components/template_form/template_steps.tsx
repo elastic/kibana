@@ -11,7 +11,8 @@ import { i18n } from '@kbn/i18n';
 interface Props {
   currentStep: number;
   maxCompletedStep: number;
-  updateCurrentStep: (step: number) => void;
+  updateCurrentStep: (step: number, shouldValidate?: boolean) => void;
+  isStepValid: boolean;
 }
 
 const stepNamesMap: { [key: number]: string } = {
@@ -19,7 +20,7 @@ const stepNamesMap: { [key: number]: string } = {
     defaultMessage: 'Logistics',
   }),
   2: i18n.translate('xpack.idxMgmt.templateForm.steps.settingsStepName', {
-    defaultMessage: 'Settings',
+    defaultMessage: 'Index settings',
   }),
   3: i18n.translate('xpack.idxMgmt.templateForm.steps.mappingsStepName', {
     defaultMessage: 'Mappings',
@@ -28,7 +29,7 @@ const stepNamesMap: { [key: number]: string } = {
     defaultMessage: 'Aliases',
   }),
   5: i18n.translate('xpack.idxMgmt.templateForm.steps.summaryStepName', {
-    defaultMessage: 'Review and save',
+    defaultMessage: 'Review template',
   }),
 };
 
@@ -36,14 +37,15 @@ export const TemplateSteps: React.FunctionComponent<Props> = ({
   currentStep,
   maxCompletedStep,
   updateCurrentStep,
+  isStepValid,
 }) => {
   const steps = [1, 2, 3, 4, 5].map(step => {
     return {
       title: stepNamesMap[step],
       isComplete: maxCompletedStep >= step,
       isSelected: currentStep === step,
-      disabled: step === 1 ? false : maxCompletedStep < step - 1,
-      onClick: () => updateCurrentStep(step),
+      disabled: isStepValid ? false : step > currentStep + 1,
+      onClick: () => updateCurrentStep(step, step !== 5), // should validate on all steps except step 5 (review)
     };
   });
 

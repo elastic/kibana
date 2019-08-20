@@ -36,73 +36,64 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
   const numIndexPatterns = indexPatterns.length;
 
   return (
-    <EuiFlexGroup data-test-subj="summaryTab">
-      <EuiFlexItem>
-        <EuiDescriptionList textStyle="reverse">
-          <EuiDescriptionListTitle>
-            <FormattedMessage
-              id="xpack.idxMgmt.templateDetails.summaryTab.indexPatternsDescriptionListTitle"
-              defaultMessage="Index {numIndexPatterns, plural, one {pattern} other {patterns}}"
-              values={{ numIndexPatterns }}
-            />
-          </EuiDescriptionListTitle>
-          <EuiDescriptionListDescription>
-            {numIndexPatterns > 1 ? (
-              <EuiText>
-                <ul>
-                  {indexPatterns.map((indexName: string, i: number) => {
-                    return (
-                      <li key={`${indexName}-${i}`}>
-                        <EuiTitle size="xs">
-                          <span>{indexName}</span>
-                        </EuiTitle>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </EuiText>
-            ) : (
-              indexPatterns.toString()
-            )}
-          </EuiDescriptionListDescription>
-        </EuiDescriptionList>
-      </EuiFlexItem>
-
-      <EuiFlexItem>
-        <EuiDescriptionList textStyle="reverse">
-          <EuiDescriptionListTitle>
-            <FormattedMessage
-              id="xpack.idxMgmt.templateDetails.summaryTab.ilmPolicyDescriptionListTitle"
-              defaultMessage="ILM policy"
-            />
-          </EuiDescriptionListTitle>
-          <EuiDescriptionListDescription>
-            {ilmPolicy && ilmPolicy.name ? (
-              <EuiLink href={getILMPolicyPath(ilmPolicy.name)}>{ilmPolicy.name}</EuiLink>
-            ) : (
-              <NoneDescriptionText />
-            )}
-          </EuiDescriptionListDescription>
-          <EuiDescriptionListTitle>
-            <FormattedMessage
-              id="xpack.idxMgmt.templateDetails.summaryTab.orderDescriptionListTitle"
-              defaultMessage="Order"
-            />
-          </EuiDescriptionListTitle>
-          <EuiDescriptionListDescription>
-            {order || order === 0 ? order : <NoneDescriptionText />}
-          </EuiDescriptionListDescription>
-          <EuiDescriptionListTitle>
-            <FormattedMessage
-              id="xpack.idxMgmt.templateDetails.summaryTab.versionDescriptionListTitle"
-              defaultMessage="Version"
-            />
-          </EuiDescriptionListTitle>
-          <EuiDescriptionListDescription>
-            {version || version === 0 ? version : <NoneDescriptionText />}
-          </EuiDescriptionListDescription>
-        </EuiDescriptionList>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiDescriptionList textStyle="reverse" data-test-subj="summaryTab">
+      <EuiDescriptionListTitle>
+        <FormattedMessage
+          id="xpack.idxMgmt.templateDetails.summaryTab.indexPatternsDescriptionListTitle"
+          defaultMessage="Index {numIndexPatterns, plural, one {pattern} other {patterns}}"
+          values={{ numIndexPatterns }}
+        />
+      </EuiDescriptionListTitle>
+      <EuiDescriptionListDescription>
+        {numIndexPatterns > 1 ? (
+          <EuiText>
+            <ul>
+              {indexPatterns.map((indexName: string, i: number) => {
+                return (
+                  <li key={`${indexName}-${i}`}>
+                    <EuiTitle size="xs">
+                      <span>{indexName}</span>
+                    </EuiTitle>
+                  </li>
+                );
+              })}
+            </ul>
+          </EuiText>
+        ) : (
+          indexPatterns.toString()
+        )}
+      </EuiDescriptionListDescription>
+      <EuiDescriptionListTitle>
+        <FormattedMessage
+          id="xpack.idxMgmt.templateDetails.summaryTab.ilmPolicyDescriptionListTitle"
+          defaultMessage="ILM policy"
+        />
+      </EuiDescriptionListTitle>
+      <EuiDescriptionListDescription>
+        {ilmPolicy && ilmPolicy.name ? (
+          <EuiLink href={getILMPolicyPath(ilmPolicy.name)}>{ilmPolicy.name}</EuiLink>
+        ) : (
+          <NoneDescriptionText />
+        )}
+      </EuiDescriptionListDescription>
+      <EuiDescriptionListTitle>
+        <FormattedMessage
+          id="xpack.idxMgmt.templateDetails.summaryTab.orderDescriptionListTitle"
+          defaultMessage="Order"
+        />
+      </EuiDescriptionListTitle>
+      <EuiDescriptionListDescription>
+        {order || order === 0 ? order : <NoneDescriptionText />}
+      </EuiDescriptionListDescription>
+      <EuiDescriptionListTitle>
+        <FormattedMessage
+          id="xpack.idxMgmt.templateDetails.summaryTab.versionDescriptionListTitle"
+          defaultMessage="Version"
+        />
+      </EuiDescriptionListTitle>
+      <EuiDescriptionListDescription>
+        {version || version === 0 ? version : <NoneDescriptionText />}
+      </EuiDescriptionListDescription>
+    </EuiDescriptionList>
   );
 };

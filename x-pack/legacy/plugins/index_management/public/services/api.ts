@@ -49,16 +49,6 @@ export const getHttpClient = () => {
   return httpClient;
 };
 
-let savedObjectsClient: any;
-
-export const setSavedObjectsClient = (aSavedObjectsClient: any) => {
-  savedObjectsClient = aSavedObjectsClient;
-};
-
-export const getSavedObjectsClient = () => {
-  return savedObjectsClient;
-};
-
 const apiPrefix = chrome.addBasePath('/api/index_management');
 
 export async function loadIndices() {
@@ -234,17 +224,7 @@ export function loadIndexTemplate(name: Template['name']) {
   });
 }
 
-export async function loadIndexPatterns() {
-  const { savedObjects } = await getSavedObjectsClient().find({
-    type: 'index-pattern',
-    fields: ['title'],
-    perPage: 10000,
-  });
-
-  return savedObjects;
-}
-
-export async function saveTemplate(template: Template, isClone: boolean) {
+export async function saveTemplate(template: Template, isClone?: boolean) {
   const result = sendRequest({
     path: `${apiPrefix}/templates`,
     method: 'put',

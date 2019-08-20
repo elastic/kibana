@@ -6,7 +6,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCodeEditor } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCodeEditor, EuiCallOut } from '@elastic/eui';
 import { Template } from '../../../../../../common/types';
 
 interface Props {
@@ -16,21 +17,36 @@ interface Props {
 export const TabSettings: React.FunctionComponent<Props> = ({ templateDetails }) => {
   const { settings } = templateDetails;
 
+  if (settings) {
+    return (
+      <div data-test-subj="settingsTab">
+        <EuiCodeEditor
+          mode="json"
+          theme="textmate"
+          width="100%"
+          isReadOnly
+          value={settings}
+          aria-label={i18n.translate(
+            'xpack.idxMgmt.templateDetails.settingsTab.settingsEditorAriaLabel',
+            {
+              defaultMessage: 'Settings code editor',
+            }
+          )}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div data-test-subj="settingsTab">
-      <EuiCodeEditor
-        mode="json"
-        theme="textmate"
-        width="100%"
-        isReadOnly
-        value={settings}
-        aria-label={i18n.translate(
-          'xpack.idxMgmt.templateDetails.settingsTab.settingsEditorAriaLabel',
-          {
-            defaultMessage: 'Settings code editor',
-          }
-        )}
-      />
-    </div>
+    <EuiCallOut
+      title={
+        <FormattedMessage
+          id="xpack.idxMgmt.templateDetails.settingsTab.noSettingsTitle"
+          defaultMessage="No settings defined."
+        />
+      }
+      iconType="pin"
+      data-test-subj="noSettingsCallout"
+    ></EuiCallOut>
   );
 };

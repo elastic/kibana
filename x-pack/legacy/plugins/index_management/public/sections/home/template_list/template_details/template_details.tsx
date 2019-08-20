@@ -51,39 +51,44 @@ const MAPPINGS_TAB_ID = 'mappings';
 const ALIASES_TAB_ID = 'aliases';
 const SETTINGS_TAB_ID = 'settings';
 
-const summaryTabData = {
-  id: SUMMARY_TAB_ID,
-  name: (
-    <FormattedMessage id="xpack.idxMgmt.templateDetails.summaryTabTitle" defaultMessage="Summary" />
-  ),
-};
-
-const settingsTabData = {
-  id: SETTINGS_TAB_ID,
-  name: (
-    <FormattedMessage
-      id="xpack.idxMgmt.templateDetails.settingsTabTitle"
-      defaultMessage="Settings"
-    />
-  ),
-};
-
-const mappingsTabData = {
-  id: MAPPINGS_TAB_ID,
-  name: (
-    <FormattedMessage
-      id="xpack.idxMgmt.templateDetails.mappingsTabTitle"
-      defaultMessage="Mappings"
-    />
-  ),
-};
-
-const aliasesTabData = {
-  id: ALIASES_TAB_ID,
-  name: (
-    <FormattedMessage id="xpack.idxMgmt.templateDetails.aliasesTabTitle" defaultMessage="Aliases" />
-  ),
-};
+const TABS = [
+  {
+    id: SUMMARY_TAB_ID,
+    name: (
+      <FormattedMessage
+        id="xpack.idxMgmt.templateDetails.summaryTabTitle"
+        defaultMessage="Summary"
+      />
+    ),
+  },
+  {
+    id: SETTINGS_TAB_ID,
+    name: (
+      <FormattedMessage
+        id="xpack.idxMgmt.templateDetails.settingsTabTitle"
+        defaultMessage="Settings"
+      />
+    ),
+  },
+  {
+    id: MAPPINGS_TAB_ID,
+    name: (
+      <FormattedMessage
+        id="xpack.idxMgmt.templateDetails.mappingsTabTitle"
+        defaultMessage="Mappings"
+      />
+    ),
+  },
+  {
+    id: ALIASES_TAB_ID,
+    name: (
+      <FormattedMessage
+        id="xpack.idxMgmt.templateDetails.aliasesTabTitle"
+        defaultMessage="Aliases"
+      />
+    ),
+  },
+];
 
 const tabToComponentMap: {
   [key: string]: React.FunctionComponent<{ templateDetails: Template }>;
@@ -120,7 +125,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
       label: (
         <FormattedMessage
           id="xpack.idxMgmt.templateDetails.editButtonLabel"
-          defaultMessage="Edit template"
+          defaultMessage="Edit"
         />
       ),
       icon: <EuiIcon type="pencil" />,
@@ -132,7 +137,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
       label: (
         <FormattedMessage
           id="xpack.idxMgmt.templateDetails.cloneButtonLabel"
-          defaultMessage="Clone template"
+          defaultMessage="Clone"
         />
       ),
       handleClick: () => cloneTemplate(templateName),
@@ -143,7 +148,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
       label: (
         <FormattedMessage
           id="xpack.idxMgmt.templateDetails.deleteButtonLabel"
-          defaultMessage="Delete template"
+          defaultMessage="Delete"
         />
       ),
       handleClick: () => setTemplateToDelete([templateName]),
@@ -157,7 +162,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
       <SectionLoading>
         <FormattedMessage
           id="xpack.idxMgmt.templateDetails.loadingIndexTemplateDescription"
-          defaultMessage="Loading index template…"
+          defaultMessage="Loading template…"
         />
       </SectionLoading>
     );
@@ -167,7 +172,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
         title={
           <FormattedMessage
             id="xpack.idxMgmt.templateDetails.loadingIndexTemplateErrorMessage"
-            defaultMessage="Error loading index template"
+            defaultMessage="Error loading template"
           />
         }
         error={error}
@@ -175,59 +180,31 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
       />
     );
   } else if (templateDetails) {
-    const { settings, mappings, aliases } = templateDetails;
+    const Content = tabToComponentMap[activeTab];
 
-    const settingsTab = settings ? [settingsTabData] : [];
-    const mappingsTab = mappings ? [mappingsTabData] : [];
-    const aliasesTab = aliases ? [aliasesTabData] : [];
+    content = (
+      <Fragment>
+        <EuiTabs>
+          {TABS.map(tab => (
+            <EuiTab
+              onClick={() => {
+                trackUiMetric(METRIC_TYPE.CLICK, tabToUiMetricMap[tab.id]);
+                setActiveTab(tab.id);
+              }}
+              isSelected={tab.id === activeTab}
+              key={tab.id}
+              data-test-subj="tab"
+            >
+              {tab.name}
+            </EuiTab>
+          ))}
+        </EuiTabs>
 
-    const optionalTabs = [...settingsTab, ...mappingsTab, ...aliasesTab];
-    const tabs = optionalTabs.length > 0 ? [summaryTabData, ...optionalTabs] : [];
+        <EuiSpacer size="l" />
 
-    if (tabs.length > 0) {
-      const Content = tabToComponentMap[activeTab];
-
-      content = (
-        <Fragment>
-          <EuiTabs>
-            {tabs.map(tab => (
-              <EuiTab
-                onClick={() => {
-                  trackUiMetric(METRIC_TYPE.CLICK, tabToUiMetricMap[tab.id]);
-                  setActiveTab(tab.id);
-                }}
-                isSelected={tab.id === activeTab}
-                key={tab.id}
-                data-test-subj="tab"
-              >
-                {tab.name}
-              </EuiTab>
-            ))}
-          </EuiTabs>
-
-          <EuiSpacer size="l" />
-
-          <Content templateDetails={templateDetails} />
-        </Fragment>
-      );
-    } else {
-      content = (
-        <Fragment>
-          <EuiTitle size="s">
-            <h3 data-test-subj="summaryTitle">
-              <FormattedMessage
-                id="xpack.idxMgmt.templateDetails.summaryHeadingText"
-                defaultMessage="Summary"
-              />
-            </h3>
-          </EuiTitle>
-
-          <EuiSpacer size="l" />
-
-          <TabSummary templateDetails={templateDetails} />
-        </Fragment>
-      );
-    }
+        <Content templateDetails={templateDetails} />
+      </Fragment>
+    );
   }
 
   return (
@@ -290,7 +267,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
                       data-test-subj="manageTemplateButton"
                       iconType="arrowDown"
                       iconSide="right"
-                      onClick={() => setIsPopOverOpen(!isPopoverOpen)}
+                      onClick={() => setIsPopOverOpen(prev => !prev)}
                     >
                       <FormattedMessage
                         id="xpack.idxMgmt.templateDetails.manageButtonLabel"

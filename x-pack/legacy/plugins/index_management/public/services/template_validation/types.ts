@@ -4,4 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const INVALID_INDEX_PATTERN_CHARS = ['\\', '/', '?', '"', '<', '>', '|'];
+export interface TemplateValidation {
+  isValid: boolean;
+  errors: { [key: string]: React.ReactNode[] };
+}

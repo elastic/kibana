@@ -59,7 +59,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
       <SectionLoading>
         <FormattedMessage
           id="xpack.idxMgmt.templateEdit.loadingIndexTemplateDescription"
-          defaultMessage="Loading index template…"
+          defaultMessage="Loading template…"
         />
       </SectionLoading>
     );
@@ -69,7 +69,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
         title={
           <FormattedMessage
             id="xpack.idxMgmt.templateEdit.loadingIndexTemplateErrorMessage"
-            defaultMessage="Error loading index template"
+            defaultMessage="Error loading template"
           />
         }
         error={error}
@@ -92,7 +92,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
   return (
     <EuiPageBody>
       <EuiPageContent>
-        <EuiTitle size="m">
+        <EuiTitle size="l">
           <h1 data-test-subj="pageTitle">
             <FormattedMessage
               id="xpack.idxMgmt.editTemplate.editTemplatePageTitle"

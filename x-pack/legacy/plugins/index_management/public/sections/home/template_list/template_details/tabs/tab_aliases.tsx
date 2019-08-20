@@ -6,7 +6,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCodeEditor } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCodeEditor, EuiCallOut } from '@elastic/eui';
 import { Template } from '../../../../../../common/types';
 
 interface Props {
@@ -16,21 +17,36 @@ interface Props {
 export const TabAliases: React.FunctionComponent<Props> = ({ templateDetails }) => {
   const { aliases } = templateDetails;
 
+  if (aliases) {
+    return (
+      <div data-test-subj="aliasesTab">
+        <EuiCodeEditor
+          mode="json"
+          theme="textmate"
+          width="100%"
+          isReadOnly
+          value={aliases}
+          aria-label={i18n.translate(
+            'xpack.idxMgmt.templateDetails.aliasesTab.aliasesEditorAriaLabel',
+            {
+              defaultMessage: 'Aliases code editor',
+            }
+          )}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div data-test-subj="aliasesTab">
-      <EuiCodeEditor
-        mode="json"
-        theme="textmate"
-        width="100%"
-        isReadOnly
-        value={aliases}
-        aria-label={i18n.translate(
-          'xpack.idxMgmt.templateDetails.aliasesTab.aliasesEditorAriaLabel',
-          {
-            defaultMessage: 'Aliases code editor',
-          }
-        )}
-      />
-    </div>
+    <EuiCallOut
+      title={
+        <FormattedMessage
+          id="xpack.idxMgmt.templateDetails.aliasesTab.noAliasesTitle"
+          defaultMessage="No aliases defined."
+        />
+      }
+      iconType="pin"
+      data-test-subj="noAliasesCallout"
+    ></EuiCallOut>
   );
 };

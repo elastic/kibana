@@ -16,6 +16,7 @@ import {
   EuiFormRow,
   EuiText,
   EuiCodeEditor,
+  EuiCode,
 } from '@elastic/eui';
 import { mappingDocumentationLink } from '../../../lib/documentation_links';
 import { StepProps } from '../types';
@@ -47,7 +48,7 @@ export const StepMappings: React.FunctionComponent<StepProps> = ({
             <p>
               <FormattedMessage
                 id="xpack.idxMgmt.templateForm.stepMappings.mappingsDescription"
-                defaultMessage="Define how documents and their fields are stored and indexed."
+                defaultMessage="Define how to store and index documents."
               />
             </p>
           </EuiText>
@@ -79,6 +80,23 @@ export const StepMappings: React.FunctionComponent<StepProps> = ({
             defaultMessage="Mappings"
           />
         }
+        helpText={
+          <FormattedMessage
+            id="xpack.idxMgmt.templateForm.stepMappings.mappingsEditorHelpText"
+            defaultMessage="Use JSON format: {code}"
+            values={{
+              code: (
+                <EuiCode>
+                  {JSON.stringify({
+                    properties: {
+                      name: { type: 'text' },
+                    },
+                  })}
+                </EuiCode>
+              ),
+            }}
+          />
+        }
         isInvalid={Boolean(mappingsError)}
         error={mappingsError}
         fullWidth
@@ -87,10 +105,10 @@ export const StepMappings: React.FunctionComponent<StepProps> = ({
           mode="json"
           theme="textmate"
           width="100%"
+          height="300px"
           setOptions={{
             showLineNumbers: false,
             tabSize: 2,
-            maxLines: Infinity,
           }}
           editorProps={{
             $blockScrolling: Infinity,

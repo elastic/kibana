@@ -56,7 +56,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
   };
 
   const cloneTemplate = (name: Template['name']) => {
-    history.push(`${BASE_PATH}create_template/${encodeURIComponent(name)}`);
+    history.push(`${BASE_PATH}clone_template/${encodeURIComponent(name)}`);
   };
 
   // Track component loaded
@@ -69,7 +69,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
       <SectionLoading>
         <FormattedMessage
           id="xpack.idxMgmt.indexTemplatesList.loadingIndexTemplatesDescription"
-          defaultMessage="Loading index templates…"
+          defaultMessage="Loading templates…"
         />
       </SectionLoading>
     );
@@ -79,7 +79,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
         title={
           <FormattedMessage
             id="xpack.idxMgmt.indexTemplatesList.loadingIndexTemplatesErrorMessage"
-            defaultMessage="Error loading index templates"
+            defaultMessage="Error loading templates"
           />
         }
         error={error}
@@ -93,7 +93,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
           <h1 data-test-subj="title">
             <FormattedMessage
               id="xpack.idxMgmt.indexTemplatesList.emptyPrompt.noIndexTemplatesTitle"
-              defaultMessage="You don't have any index templates yet"
+              defaultMessage="You don't have any templates yet"
             />
           </h1>
         }
@@ -109,7 +109,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
               <EuiText color="subdued">
                 <FormattedMessage
                   id="xpack.idxMgmt.home.indexTemplatesDescription"
-                  defaultMessage="Use index templates to automatically apply mappings and other properties to new indices."
+                  defaultMessage="Use templates to automatically apply settings, mappings, and aliases to indices."
                 />
               </EuiText>
             </EuiTitle>
@@ -123,7 +123,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
               label={
                 <FormattedMessage
                   id="xpack.idxMgmt.indexTemplatesTable.systemIndexTemplatesSwitchLabel"
-                  defaultMessage="Include system index templates"
+                  defaultMessage="Include system templates"
                 />
               }
             />

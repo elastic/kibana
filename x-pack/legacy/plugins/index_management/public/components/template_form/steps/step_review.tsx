@@ -121,7 +121,7 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
             <EuiDescriptionListTitle>
               <FormattedMessage
                 id="xpack.idxMgmt.templateForm.stepReview.summaryTab.settingsLabel"
-                defaultMessage="Has index settings"
+                defaultMessage="Index settings"
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
@@ -130,7 +130,7 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
             <EuiDescriptionListTitle>
               <FormattedMessage
                 id="xpack.idxMgmt.templateForm.stepReview.summaryTab.mappingLabel"
-                defaultMessage="Has mappings"
+                defaultMessage="Mappings"
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
@@ -139,7 +139,7 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
             <EuiDescriptionListTitle>
               <FormattedMessage
                 id="xpack.idxMgmt.templateForm.stepReview.summaryTab.aliasesLabel"
-                defaultMessage="Has aliases"
+                defaultMessage="Aliases"
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
@@ -164,7 +164,7 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
           <p>
             <FormattedMessage
               id="xpack.idxMgmt.templateForm.stepReview.requestTab.descriptionText"
-              defaultMessage="This Elasticsearch request will create this index template."
+              defaultMessage="This request will create the following index template."
             />
           </p>
         </EuiText>
@@ -198,7 +198,7 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
             title={
               <FormattedMessage
                 id="xpack.idxMgmt.templateForm.stepReview.summaryTab.indexPatternsWarningTitle"
-                defaultMessage="Proceed with caution"
+                defaultMessage="This template uses a wildcard (*) as an index pattern."
               />
             }
             color="warning"
@@ -208,13 +208,13 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
             <p data-test-subj="indexPatternsWarningDescription">
               <FormattedMessage
                 id="xpack.idxMgmt.templateForm.stepReview.summaryTab.indexPatternsWarningDescription"
-                defaultMessage="This template contains a wildcard (*) as an index pattern. This will create a catch-all template and apply to all indices."
+                defaultMessage="All new indices that you create will use this template."
               />{' '}
               {/* Edit link navigates back to step 1 (logistics) */}
               <EuiLink onClick={updateCurrentStep.bind(null, 1)}>
                 <FormattedMessage
                   id="xpack.idxMgmt.templateForm.stepReview.summaryTab.indexPatternsWarningLinkText"
-                  defaultMessage="Edit template."
+                  defaultMessage="Edit index patterns."
                 />
               </EuiLink>
             </p>

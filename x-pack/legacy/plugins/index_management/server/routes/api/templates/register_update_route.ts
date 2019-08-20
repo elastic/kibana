@@ -18,7 +18,7 @@ const handler: RouterRouteHandler = async (req, callWithRequest) => {
   // Verify the template exists (ES will throw 404 if not)
   await callWithRequest('indices.existsTemplate', { name });
 
-  // Otherwise update index template
+  // Next, update index template
   return await callWithRequest('indices.putTemplate', {
     name,
     order,

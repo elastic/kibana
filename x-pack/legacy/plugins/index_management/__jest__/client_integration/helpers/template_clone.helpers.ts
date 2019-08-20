@@ -12,8 +12,8 @@ import { TEMPLATE_NAME } from './constants';
 
 const testBedConfig: TestBedConfig = {
   memoryRouter: {
-    initialEntries: [`${BASE_PATH}create_template/${TEMPLATE_NAME}`],
-    componentRoutePath: `${BASE_PATH}create_template/:name?`,
+    initialEntries: [`${BASE_PATH}clone_template/${TEMPLATE_NAME}`],
+    componentRoutePath: `${BASE_PATH}clone_template/:name`,
   },
   doMountAsync: true,
 };
