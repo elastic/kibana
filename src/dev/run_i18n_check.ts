@@ -20,6 +20,7 @@
 import chalk from 'chalk';
 import Listr from 'listr';
 
+import { createFailError, run } from '@kbn/dev-utils';
 import { ErrorReporter, I18nConfig } from './i18n';
 import {
   extractDefaultMessages,
@@ -28,7 +29,6 @@ import {
   checkConfigs,
   mergeConfigs,
 } from './i18n/tasks';
-import { createFailError, run } from './run';
 
 const skipNoTranslations = ({ config }: { config: I18nConfig }) => !config.translations.length;
 

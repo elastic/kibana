@@ -61,13 +61,14 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
         return (
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiLink
-                onClick={() => trackUiMetric(UIM_POLICY_SHOW_DETAILS_CLICK)}
-                href={openPolicyDetailsUrl(name)}
-                data-test-subj="policyLink"
-              >
-                {name}
-              </EuiLink>
+            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+            <EuiLink
+              onClick={() => trackUiMetric(UIM_POLICY_SHOW_DETAILS_CLICK)}
+              href={openPolicyDetailsUrl(name)}
+              data-test-subj="policyLink"
+            >
+              {name}
+            </EuiLink>
             </EuiFlexItem>
             {inProgress ? (
               <EuiFlexItem grow={false}>

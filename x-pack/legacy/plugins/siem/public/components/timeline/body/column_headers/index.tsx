@@ -8,7 +8,6 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { Draggable } from 'react-beautiful-dnd';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../../../containers/source';
@@ -47,7 +46,6 @@ interface Props {
   actionsColumnWidth: number;
   browserFields: BrowserFields;
   columnHeaders: ColumnHeader[];
-  isLoading: boolean;
   onColumnRemoved: OnColumnRemoved;
   onColumnResized: OnColumnResized;
   onColumnSorted: OnColumnSorted;
@@ -56,6 +54,7 @@ interface Props {
   showEventsSelect: boolean;
   sort: Sort;
   timelineId: string;
+  toggleColumn: (column: ColumnHeader) => void;
   minWidth: number;
 }
 
@@ -87,12 +86,11 @@ const EventsSelectContainer = styled(EuiFlexItem)`
 EventsSelectContainer.displayName = 'EventsSelectContainer';
 
 /** Renders the timeline header columns */
-export const ColumnHeaders = pure<Props>(
+export const ColumnHeaders = React.memo<Props>(
   ({
     actionsColumnWidth,
     browserFields,
     columnHeaders,
-    isLoading,
     onColumnRemoved,
     onColumnResized,
     onColumnSorted,
@@ -101,10 +99,10 @@ export const ColumnHeaders = pure<Props>(
     showEventsSelect,
     sort,
     timelineId,
+    toggleColumn,
     minWidth,
   }) => {
     const { isResizing, setIsResizing } = isContainerResizing();
-
     return (
       <ColumnHeadersContainer data-test-subj="column-headers" minWidth={minWidth}>
         <ColumnHeadersFlexGroup
@@ -129,9 +127,9 @@ export const ColumnHeaders = pure<Props>(
                     columnHeaders={columnHeaders}
                     data-test-subj="field-browser"
                     height={FIELD_BROWSER_HEIGHT}
-                    isLoading={isLoading}
                     onUpdateColumns={onUpdateColumns}
                     timelineId={timelineId}
+                    toggleColumn={toggleColumn}
                     width={FIELD_BROWSER_WIDTH}
                   />
                 </EuiFlexItem>
@@ -170,7 +168,6 @@ export const ColumnHeaders = pure<Props>(
                             <Header
                               timelineId={timelineId}
                               header={header}
-                              isLoading={isLoading}
                               onColumnRemoved={onColumnRemoved}
                               onColumnResized={onColumnResized}
                               onColumnSorted={onColumnSorted}
