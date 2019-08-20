@@ -13,8 +13,10 @@ import {
   IndexPatternLayer,
   IndexPatternPrivateState,
   IndexPattern,
+  OperationType,
+  IndexPatternColumn,
 } from './indexpattern';
-import { buildColumn, getOperationTypesForField } from './operations';
+import { buildColumn, getOperationTypesForField, operationDefinitionMap } from './operations';
 import { hasField } from './utils';
 
 function buildSuggestion({
@@ -420,6 +422,7 @@ export function getDatasourceSuggestionsFromCurrentState(
 
 function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layerId: string) {
   const layer = state.layers[layerId];
+  const indexPattern = state.indexPatterns[layer.indexPatternId];
 
   const availableBucketedColumns = layer.columnOrder.filter(
     columnId => layer.columns[columnId].isBucketed
@@ -448,22 +451,77 @@ function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layer
   )
     .concat(
       availableMetricColumns.map(columnId => {
-        return buildLayerByColumnOrder(layer, [columnId]);
+        let column = layer.columns[columnId];
+        // if field based, suggest different metric
+        if (hasField(column)) {
+          const field = indexPattern.fields.find(
+            ({ name }) => hasField(column) && column.sourceField === name
+          )!;
+          const alternativeMetricOperations = getOperationTypesForField(field).filter(
+            operationType => operationType !== column.operationType
+          );
+          if (alternativeMetricOperations.length > 0) {
+            column = buildColumn({
+              op: alternativeMetricOperations[0],
+              columns: layer.columns,
+              indexPattern,
+              layerId,
+              field,
+              suggestedPriority: undefined,
+            });
+          }
+          return buildLayerByColumnOrder(
+            {
+              ...layer,
+              columns: {
+                [columnId]: column,
+              },
+            },
+            [columnId]
+          );
+        } else {
+          return buildLayerByColumnOrder(layer, [columnId]);
+        }
       })
     )
-    .map(updatedLayer =>
-      buildSuggestion({
+    .map(updatedLayer => {
+      return buildSuggestion({
         state,
         layerId,
         isMultiRow: updatedLayer.columnOrder.length > 1,
         updatedLayer,
         changeType:
           layer.columnOrder.length === updatedLayer.columnOrder.length ? 'unchanged' : 'reduced',
-      })
-    );
+        label:
+          updatedLayer.columnOrder.length === 1
+            ? getMetricSuggestionTitle(updatedLayer, availableMetricColumns.length === 1)
+            : getBucketSuggestionTitle(updatedLayer),
+      });
+    });
 }
 
-function buildLayerByColumnOrder(layer: IndexPatternLayer, columnOrder: string[]) {
+function getMetricSuggestionTitle(layer: IndexPatternLayer, onlyMetric: boolean) {
+  const { operationType, label } = Object.values(layer.columns)[0];
+  // TODO i18n
+  if (onlyMetric) {
+    return `${operationDefinitionMap[operationType].displayName} overall`;
+  } else {
+    return `${label} overall`;
+  }
+}
+
+function getBucketSuggestionTitle(layer: IndexPatternLayer) {
+  const { operationType } = layer.columns[
+    layer.columnOrder.find(columnId => layer.columns[columnId].isBucketed)!
+  ];
+  // TODO i18n
+  return `By ${operationDefinitionMap[operationType].displayName}`;
+}
+
+function buildLayerByColumnOrder(
+  layer: IndexPatternLayer,
+  columnOrder: string[]
+): IndexPatternLayer {
   return {
     ...layer,
     columns: _.pick(layer.columns, columnOrder),

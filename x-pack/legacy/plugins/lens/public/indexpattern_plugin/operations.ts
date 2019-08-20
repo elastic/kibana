@@ -117,6 +117,9 @@ export function getOperationTypesForField(field: IndexPatternField) {
     .filter(
       operationDefinition => operationDefinition.getPossibleOperationsForField(field).length > 0
     )
+    .sort(
+      (a, b) => (b.priority || Number.NEGATIVE_INFINITY) - (a.priority || Number.NEGATIVE_INFINITY)
+    )
     .map(({ type }) => type);
 }
 

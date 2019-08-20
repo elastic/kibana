@@ -139,9 +139,11 @@ export const datatableVisualization: Visualization<
         .map(table => {
           const title =
             table.changeType === 'unchanged'
-              ? i18n.translate('xpack.lens.datatable.suggestionLabel', { defaultMessage: 'Table' })
+              ? i18n.translate('xpack.lens.datatable.suggestionLabel', {
+                  defaultMessage: 'As table',
+                })
               : i18n.translate('xpack.lens.datatable.visualizationOf', {
-                  defaultMessage: 'Table: {operations}',
+                  defaultMessage: 'Table {operations}',
                   values: {
                     operations:
                       table.label ||

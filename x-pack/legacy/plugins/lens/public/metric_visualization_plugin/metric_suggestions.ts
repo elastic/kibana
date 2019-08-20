@@ -30,11 +30,11 @@ export function getSuggestions(
 
 function getSuggestion(table: TableSuggestion): VisualizationSuggestion<State> {
   const col = table.columns[0];
-  const title = col.operation.label;
+  const title = table.label || col.operation.label;
 
   return {
     title,
-    score: 1,
+    score: 0.5,
     datasourceSuggestionId: table.datasourceSuggestionId,
     previewIcon: 'visMetric',
     previewExpression: {

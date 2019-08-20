@@ -132,23 +132,22 @@ function getSuggestion(
   const xTitle = xValue.operation.label;
   const isDate = xValue.operation.dataType === 'date';
 
-  let title = isDate
-    ? i18n.translate('xpack.lens.xySuggestions.dateSuggestion', {
-        defaultMessage: '{yTitle} over {xTitle}',
-        description:
-          'Chart description for charts over time, like "Transfered bytes over log.timestamp"',
-        values: { xTitle, yTitle },
-      })
-    : i18n.translate('xpack.lens.xySuggestions.nonDateSuggestion', {
-        defaultMessage: '{yTitle} of {xTitle}',
-        description:
-          'Chart description for a value of some groups, like "Top URLs of top 5 countries"',
-        values: { xTitle, yTitle },
-      });
+  let title =
+    tableLabel ||
+    (isDate
+      ? i18n.translate('xpack.lens.xySuggestions.dateSuggestion', {
+          defaultMessage: '{yTitle} over {xTitle}',
+          description:
+            'Chart description for charts over time, like "Transfered bytes over log.timestamp"',
+          values: { xTitle, yTitle },
+        })
+      : i18n.translate('xpack.lens.xySuggestions.nonDateSuggestion', {
+          defaultMessage: '{yTitle} of {xTitle}',
+          description:
+            'Chart description for a value of some groups, like "Top URLs of top 5 countries"',
+          values: { xTitle, yTitle },
+        }));
 
-  if (currentState && changeType === 'extended' && tableLabel) {
-    title = tableLabel;
-  }
   const oldLayer = currentState && currentState.layers.find(layer => layer.layerId === layerId);
   const seriesType: SeriesType =
     (oldLayer && oldLayer.seriesType) ||

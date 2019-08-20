@@ -13,7 +13,7 @@ import { Action } from './state_management';
 import { Datasource, Visualization, FramePublicAPI } from '../../types';
 import { getSuggestions, Suggestion, switchToSuggestion } from './suggestion_helpers';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/data/public';
-import { prependDatasourceExpression } from './expression_helpers';
+import { prependDatasourceExpression, prependKibanaContext } from './expression_helpers';
 import { debouncedComponent } from '../../debounced_component';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
@@ -140,21 +140,12 @@ function InnerSuggestionPanel({
       </EuiTitle>
       <div className="lnsSuggestionsPanel__suggestions">
         {suggestions.map((suggestion: Suggestion) => {
-          const previewExpression = suggestion.previewExpression
-            ? prependDatasourceExpression(
-                suggestion.previewExpression,
-                datasourceMap,
-                suggestion.datasourceId
-                  ? {
-                      ...datasourceStates,
-                      [suggestion.datasourceId]: {
-                        isLoading: false,
-                        state: suggestion.datasourceState,
-                      },
-                    }
-                  : datasourceStates
-              )
-            : null;
+          const previewExpression = preparePreviewExpression(
+            suggestion,
+            datasourceMap,
+            datasourceStates,
+            frame
+          );
           return (
             <SuggestionPreview
               suggestion={suggestion}
@@ -169,4 +160,36 @@ function InnerSuggestionPanel({
       </div>
     </div>
   );
+}
+function preparePreviewExpression(
+  suggestion: Suggestion,
+  datasourceMap: Record<string, Datasource<unknown, unknown>>,
+  datasourceStates: Record<string, { isLoading: boolean; state: unknown }>,
+  framePublicAPI: FramePublicAPI
+) {
+  if (!suggestion.previewExpression) return null;
+
+  const expressionWithDatasource = prependDatasourceExpression(
+    suggestion.previewExpression,
+    datasourceMap,
+    suggestion.datasourceId
+      ? {
+          ...datasourceStates,
+          [suggestion.datasourceId]: {
+            isLoading: false,
+            state: suggestion.datasourceState,
+          },
+        }
+      : datasourceStates
+  );
+
+  const expressionContext = {
+    query: framePublicAPI.query,
+    timeRange: {
+      from: framePublicAPI.dateRange.fromDate,
+      to: framePublicAPI.dateRange.toDate,
+    },
+  };
+
+  return prependKibanaContext(expressionWithDatasource, expressionContext);
 }

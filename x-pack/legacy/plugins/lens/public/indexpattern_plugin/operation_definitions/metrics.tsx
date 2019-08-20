@@ -109,6 +109,7 @@ export const maxOperation = buildMetricOperation<MaxIndexPatternColumn>({
 
 export const averageOperation = buildMetricOperation<AvgIndexPatternColumn>({
   type: 'avg',
+  priority: 1,
   displayName: i18n.translate('xpack.lens.indexPattern.avg', {
     defaultMessage: 'Average',
   }),
@@ -121,7 +122,7 @@ export const averageOperation = buildMetricOperation<AvgIndexPatternColumn>({
 
 export const sumOperation = buildMetricOperation<SumIndexPatternColumn>({
   type: 'sum',
-  priority: 1,
+  priority: 2,
   displayName: i18n.translate('xpack.lens.indexPattern.sum', {
     defaultMessage: 'Sum',
   }),
