@@ -93,19 +93,18 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
         getIconForSavedObject: savedObject => {
           if (!visTypes) {
             return 'visualizeApp';
+          } else {
+            const visStateType = visTypes.get(JSON.parse(savedObject.attributes.visState).type);
+            return visStateType ? visStateType.icon : 'visualizeApp';
           }
-          return (
-            // @ts-ignore
-            visTypes.get(JSON.parse(savedObject.attributes.visState).type).icon || 'visualizeApp'
-          );
         },
         getTooltipForSavedObject: savedObject => {
           if (!visTypes) {
             return '';
           }
+          const visStateType = visTypes.get(JSON.parse(savedObject.attributes.visState).type);
           return `${savedObject.attributes.title} (
-            // @ts-ignore
-            ${visTypes.get(JSON.parse(savedObject.attributes.visState).type).title})`;
+            ${visStateType ? visStateType.title : ''})`;
         },
         showSavedObject: savedObject => {
           if (!visTypes) {
@@ -181,7 +180,6 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     // TODO: This is a bit of a hack to preserve the original functionality. Ideally we will clean this up
     // to allow for in place creation of visualizations without having to navigate away to a new URL.
     if (this.visTypes) {
-      // showNewVisModal(this.visTypes.values(), {
       showNewVisModal(this.visTypes, {
         editorParams: ['addToDashboard'],
       });
