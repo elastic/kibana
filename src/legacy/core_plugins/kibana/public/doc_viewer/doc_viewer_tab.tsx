@@ -23,7 +23,7 @@ import { DocViewRenderTab } from './doc_viewer_render_tab';
 import { DocViewerError } from './doc_viewer_render_error';
 
 interface Props {
-  component?: any;
+  component?: React.ComponentType<DocViewRenderProps>;
   id: number;
   render?: DocViewRenderFn;
   renderProps: DocViewRenderProps;
@@ -36,7 +36,7 @@ interface State {
 }
 /**
  * Renders the tab content of a doc view.
- * Displays an error message when it encounters exceptions, thank's to
+ * Displays an error message when it encounters exceptions, thanks to
  * Error Boundaries.
  */
 export class DocViewerTab extends React.Component<Props, State> {
@@ -50,10 +50,11 @@ export class DocViewerTab extends React.Component<Props, State> {
     return { hasError: true, error };
   }
 
-  shouldComponentUpdate(nextProps: Props) {
+  shouldComponentUpdate(nextProps: Props, nextState: State) {
     return (
       nextProps.renderProps.hit._id !== this.props.renderProps.hit._id ||
-      nextProps.id !== this.props.id
+      nextProps.id !== this.props.id ||
+      nextState.hasError
     );
   }
 

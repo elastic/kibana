@@ -7,26 +7,8 @@
 
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 
-jest.mock('ui/chrome', () => ({
-  addBasePath: () => 'api/cross_cluster_replication',
-  breadcrumbs: { set: () => {} },
-  getInjected: (key) => {
-    if (key === 'uiCapabilities') {
-      return {
-        navLinks: {},
-        management: {},
-        catalogue: {}
-      };
-    }
-    throw new Error(`Unexpected call to chrome.getInjected with key ${key}`);
-  }
-}));
-
-jest.mock('ui/index_patterns', () => {
-  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } =
-    require.requireActual('../../../../../../src/legacy/ui/public/index_patterns/constants');
-  return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE };
-});
+jest.mock('ui/new_platform');
+jest.mock('ui/index_patterns');
 
 const { setup } = pageHelpers.home;
 

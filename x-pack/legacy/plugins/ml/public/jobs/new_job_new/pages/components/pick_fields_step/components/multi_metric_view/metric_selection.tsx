@@ -43,6 +43,7 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     jobCreator.aggFieldPairs
   );
   const [lineChartsData, setLineChartsData] = useState<LineChartData>({});
+  const [loadingData, setLoadingData] = useState(false);
   const [modelData, setModelData] = useState<Record<number, ModelItem[]>>([]);
   const [anomalyData, setAnomalyData] = useState<Record<number, Anomaly[]>>([]);
   const [start, setStart] = useState(jobCreator.start);
@@ -152,6 +153,7 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     setChartSettings(cs);
 
     if (aggFieldPairList.length > 0) {
+      setLoadingData(true);
       const resp: LineChartData = await chartLoader.loadLineCharts(
         jobCreator.start,
         jobCreator.end,
@@ -162,24 +164,25 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
       );
 
       setLineChartsData(resp);
+      setLoadingData(false);
     }
   }
 
   return (
     <Fragment>
-      {lineChartsData && (
-        <ChartGrid
-          aggFieldPairList={aggFieldPairList}
-          chartSettings={chartSettings}
-          splitField={splitField}
-          fieldValues={fieldValues}
-          lineChartsData={lineChartsData}
-          modelData={modelData}
-          anomalyData={anomalyData}
-          deleteDetector={isActive ? deleteDetector : undefined}
-          jobType={jobCreator.type}
-        />
-      )}
+      <ChartGrid
+        aggFieldPairList={aggFieldPairList}
+        chartSettings={chartSettings}
+        splitField={splitField}
+        fieldValues={fieldValues}
+        lineChartsData={lineChartsData}
+        modelData={modelData}
+        anomalyData={anomalyData}
+        deleteDetector={isActive ? deleteDetector : undefined}
+        jobType={jobCreator.type}
+        loading={loadingData}
+      />
+
       {isActive && (
         <MetricSelector
           fields={fields}

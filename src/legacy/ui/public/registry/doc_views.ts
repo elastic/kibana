@@ -28,7 +28,7 @@ export const docViews: DocView[] = [];
  */
 export function addDocView(docView: DocViewInput) {
   if (docView.directive) {
-    // convert angular directive to render function for backwards compatibilty
+    // convert angular directive to render function for backwards compatibility
     docView.render = convertDirectiveToRenderFn(docView.directive);
   }
   if (typeof docView.shouldShow !== 'function') {
@@ -53,7 +53,7 @@ export function getDocViewsSorted(hit: ElasticSearchHit): DocView[] {
     .sort((a, b) => (Number(a.order) > Number(b.order) ? 1 : -1));
 }
 /**
- * Provider for compatiblity with 3rd Party plugins
+ * Provider for compatibility with 3rd Party plugins
  */
 export const DocViewsRegistryProvider = {
   register: (docViewRaw: DocViewInput | DocViewInputFn) => {

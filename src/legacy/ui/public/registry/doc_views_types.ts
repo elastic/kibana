@@ -17,7 +17,7 @@
  * under the License.
  */
 import { IndexPattern } from 'src/legacy/core_plugins/data/public';
-import { Component, FunctionComponent } from 'react';
+import { ComponentType } from 'react';
 import { IScope } from 'angular';
 
 export interface AngularDirective {
@@ -45,7 +45,7 @@ export type DocViewRenderFn = (
 ) => () => void;
 
 export interface DocViewInput {
-  component?: Component<any, any> | FunctionComponent<any>;
+  component?: ComponentType<DocViewRenderProps>;
   directive?: AngularDirective;
   order: number;
   render?: DocViewRenderFn;
