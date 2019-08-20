@@ -27,6 +27,7 @@ export function updateAlertRoute(server: Hapi.Server) {
     method: 'PUT',
     path: '/api/alert/{id}',
     options: {
+      tags: ['access:alerting-all'],
       validate: {
         options: {
           abortEarly: false,

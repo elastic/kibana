@@ -25,6 +25,7 @@ export function createAlertRoute(server: Hapi.Server) {
     method: 'POST',
     path: '/api/alert',
     options: {
+      tags: ['access:alerting-all'],
       validate: {
         options: {
           abortEarly: false,
