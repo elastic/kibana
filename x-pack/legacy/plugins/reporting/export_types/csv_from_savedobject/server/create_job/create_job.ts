@@ -8,7 +8,7 @@ import { notFound, notImplemented } from 'boom';
 import { Request } from 'hapi';
 import { get } from 'lodash';
 
-import { PLUGIN_ID } from '../../../../common/constants';
+import { PLUGIN_ID, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../../common/constants';
 import { cryptoFactory, LevelLogger, oncePerServer } from '../../../../server/lib';
 import { JobDocPayload, JobParams, KbnServer } from '../../../../types';
 import {
@@ -31,7 +31,11 @@ type CreateJobFn = (jobParams: JobParams, headers: any, req: Request) => Promise
 
 function createJobFn(server: KbnServer): CreateJobFn {
   const crypto = cryptoFactory(server);
-  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, 'savedobject-csv']);
+  const logger = LevelLogger.createForServer(server, [
+    PLUGIN_ID,
+    CSV_FROM_SAVEDOBJECT_JOB_TYPE,
+    'create-job',
+  ]);
 
   return async function createJob(
     jobParams: JobParams,

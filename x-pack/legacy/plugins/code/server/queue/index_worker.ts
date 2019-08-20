@@ -84,7 +84,7 @@ export class IndexWorker extends AbstractWorker {
 
     // Binding the index cancellation logic
     let cancelled = false;
-    this.cancellationService.cancelIndexJob(uri, CancellationReason.NEW_JOB_OVERRIDEN);
+    await this.cancellationService.cancelIndexJob(uri, CancellationReason.NEW_JOB_OVERRIDEN);
     const indexPromises: Array<Promise<IndexStats>> = this.indexerFactories.map(
       async (indexerFactory: IndexerFactory, index: number) => {
         const indexer = await indexerFactory.create(uri, revision, enforceReindex);

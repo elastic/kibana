@@ -63,7 +63,11 @@ function stringMatch(str: string | undefined, substr: string) {
   );
 }
 
-export const DataFrameAnalyticsList: FC = () => {
+interface Props {
+  isManagementTable?: boolean;
+}
+// isManagementTable - for use in Kibana managagement ML section
+export const DataFrameAnalyticsList: FC<Props> = ({ isManagementTable }) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [blockRefresh, setBlockRefresh] = useState(false);
@@ -225,7 +229,7 @@ export const DataFrameAnalyticsList: FC = () => {
     );
   }
 
-  const columns = getColumns(expandedRowItemIds, setExpandedRowItemIds);
+  const columns = getColumns(expandedRowItemIds, setExpandedRowItemIds, isManagementTable);
 
   const sorting = {
     sort: {

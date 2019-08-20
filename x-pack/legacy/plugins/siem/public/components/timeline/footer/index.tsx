@@ -72,8 +72,6 @@ ServerSideEventCount.displayName = 'ServerSideEventCount';
 /** The height of the footer, exported for use in height calculations */
 export const footerHeight = 40; // px
 
-export const isCompactFooter = (width: number): boolean => width < 600;
-
 interface FooterProps {
   itemsCount: number;
   isLive: boolean;
@@ -88,7 +86,7 @@ interface FooterProps {
   serverSideEventCount: number;
   tieBreaker: string;
   getUpdatedAt: () => number;
-  width: number;
+  compact: boolean;
 }
 
 interface FooterState {
@@ -134,7 +132,10 @@ export const EventsCount = pure<{
     </PopoverRowItems>
     <EuiToolTip content={`${serverSideEventCount} ${i18n.TOTAL_COUNT_OF_EVENTS}`}>
       <ServerSideEventCount>
-        <EuiBadge color="hollow">{serverSideEventCount}</EuiBadge> {i18n.EVENTS}
+        <EuiBadge color="hollow" data-test-subj="server-side-event-count">
+          {serverSideEventCount}
+        </EuiBadge>{' '}
+        {i18n.EVENTS}
       </ServerSideEventCount>
     </EuiToolTip>
   </h5>
@@ -202,7 +203,7 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
       serverSideEventCount,
       hasNextPage,
       getUpdatedAt,
-      width,
+      compact,
     } = this.props;
 
     if (isLoading && !this.state.paginationLoading) {
@@ -298,13 +299,10 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
             </EuiFlexItem>
 
             <EuiFlexItem data-test-subj="last-updated-container" grow={false}>
-              <FixedWidthLastUpdated
-                data-test-subj="fixed-width-last-updated"
-                compact={isCompactFooter(width)}
-              >
+              <FixedWidthLastUpdated data-test-subj="fixed-width-last-updated" compact={compact}>
                 <LastUpdatedAt
                   updatedAt={this.state.updatedAt || getUpdatedAt()}
-                  compact={isCompactFooter(width)}
+                  compact={compact}
                 />
               </FixedWidthLastUpdated>
             </EuiFlexItem>

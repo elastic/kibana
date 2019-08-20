@@ -7,7 +7,6 @@
 import * as Rx from 'rxjs';
 import { toArray, mergeMap } from 'rxjs/operators';
 import { KbnServer, ConditionalHeaders } from '../../../../types';
-// @ts-ignore
 import { oncePerServer } from '../../../../server/lib/once_per_server';
 import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
 import { PreserveLayout } from '../../../common/layouts/preserve_layout';
@@ -24,11 +23,9 @@ interface UrlScreenshot {
 function generatePngObservableFn(server: KbnServer) {
   const screenshotsObservable = screenshotsObservableFactory(server);
   const captureConcurrency = 1;
-  const createPngWithScreenshots = async ({
-    urlScreenshots,
-  }: {
-    urlScreenshots: UrlScreenshot[];
-  }) => {
+
+  // prettier-ignore
+  const createPngWithScreenshots = async ({ urlScreenshots }: { urlScreenshots: UrlScreenshot[] }) => {
     if (urlScreenshots.length !== 1) {
       throw new Error(
         `Expected there to be 1 URL screenshot, but there are ${urlScreenshots.length}`
