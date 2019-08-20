@@ -42,82 +42,110 @@ describe('secrets validation', () => {
 
 describe('config validation', () => {
   const defaultValues: Record<string, any> = {
-    scheme: 'http',
-    method: 'post',
-    path: null,
-    url: null,
     headers: null,
     proxy: null,
     connection_timeout: null,
     read_timeout: null,
+    method: 'post',
+  };
+
+  const defaultCompositeUrlValues: Record<string, any> = {
+    scheme: 'http',
+    path: null,
   };
 
   test('config validation passes when only required fields are provided', () => {
     const config: Record<string, any> = {
-      host: 'mylisteningserver',
-      port: 9200,
+      url: {
+        host: 'mylisteningserver',
+        port: 9200,
+      },
     };
     expect(validateConfig(actionType, config)).toEqual({
       ...defaultValues,
-      ...config,
+      url: {
+        ...defaultCompositeUrlValues,
+        ...config.url,
+      },
     });
   });
 
   test('config validation passes when valid schemes are provided', () => {
     const httpConfig: Record<string, any> = {
-      host: 'mylisteningserver',
-      port: 9200,
-      scheme: 'http',
+      url: {
+        host: 'mylisteningserver',
+        port: 9200,
+        scheme: 'http',
+      },
     };
     expect(validateConfig(actionType, httpConfig)).toEqual({
       ...defaultValues,
       ...httpConfig,
+      url: {
+        ...defaultCompositeUrlValues,
+        ...httpConfig.url,
+      },
     });
 
     const httpsConfig: Record<string, any> = {
-      host: 'mylisteningserver',
-      port: 9200,
-      scheme: 'https',
+      url: {
+        host: 'mylisteningserver',
+        port: 9200,
+        scheme: 'https',
+      },
     };
     expect(validateConfig(actionType, httpsConfig)).toEqual({
       ...defaultValues,
-      ...httpsConfig,
+      url: {
+        ...defaultCompositeUrlValues,
+        ...httpsConfig.url,
+      },
     });
   });
 
   test('should validate and throw error when scheme on config is invalid', () => {
     const config: Record<string, any> = {
-      host: 'mylisteningserver',
-      port: 9200,
-      scheme: 'ftp',
+      url: {
+        host: 'mylisteningserver',
+        port: 9200,
+        scheme: 'ftp',
+      },
     };
     expect(() => {
       validateConfig(actionType, config);
     }).toThrowErrorMatchingInlineSnapshot(`
-"error validating action type config: [scheme]: types that failed validation:
-- [scheme.0]: expected value to equal [http] but got [ftp]
-- [scheme.1]: expected value to equal [https] but got [ftp]"
+"error validating action type config: [url]: types that failed validation:
+- [url.0]: expected value of type [string] but got [Object]
+- [url.1.scheme]: types that failed validation:"
 `);
   });
 
   test('config validation passes when valid methods are provided', () => {
     ['post', 'put'].forEach(method => {
       const config: Record<string, any> = {
-        host: 'mylisteningserver',
-        port: 9200,
+        url: {
+          host: 'mylisteningserver',
+          port: 9200,
+        },
         method,
       };
       expect(validateConfig(actionType, config)).toEqual({
         ...defaultValues,
         ...config,
+        url: {
+          ...defaultCompositeUrlValues,
+          ...config.url,
+        },
       });
     });
   });
 
   test('should validate and throw error when method on config is invalid', () => {
     const config: Record<string, any> = {
-      host: 'mylisteningserver',
-      port: 9200,
+      url: {
+        host: 'mylisteningserver',
+        port: 9200,
+      },
       method: 'https',
     };
     expect(() => {
@@ -131,8 +159,6 @@ describe('config validation', () => {
 
   test('config validation passes when a url is specified', () => {
     const config: Record<string, any> = {
-      host: 'mylisteningserver',
-      port: 9200,
       url: 'http://mylisteningserver:9200/endpoint',
     };
     expect(validateConfig(actionType, config)).toEqual({
@@ -143,8 +169,7 @@ describe('config validation', () => {
 
   test('config validation passes when valid headers are provided', () => {
     const config: Record<string, any> = {
-      host: 'mylisteningserver',
-      port: 9200,
+      url: 'http://mylisteningserver:9200/endpoint',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -157,8 +182,7 @@ describe('config validation', () => {
 
   test('should validate and throw error when headers on config is invalid', () => {
     const config: Record<string, any> = {
-      host: 'mylisteningserver',
-      port: 9200,
+      url: 'http://mylisteningserver:9200/endpoint',
       headers: 'application/json',
     };
     expect(() => {
@@ -172,8 +196,7 @@ describe('config validation', () => {
 
   test('config validation passes when a valid proxy is provided', () => {
     const config: Record<string, any> = {
-      host: 'mylisteningserver',
-      port: 9200,
+      url: 'http://mylisteningserver:9200/endpoint',
       proxy: {
         host: 'localhost',
         port: 9200,
@@ -187,8 +210,7 @@ describe('config validation', () => {
 
   test('config validation passes when a proxy ommits a port', () => {
     const config: Record<string, any> = {
-      host: 'mylisteningserver',
-      port: 9200,
+      url: 'http://mylisteningserver:9200/endpoint',
       proxy: {
         host: 'localhost',
       },
@@ -205,8 +227,7 @@ describe('config validation', () => {
 
   test('should validate and throw error when a proxy is specified but has no host', () => {
     const config: Record<string, any> = {
-      host: 'mylisteningserver',
-      port: 9200,
+      url: 'http://mylisteningserver:9200/endpoint',
       proxy: {
         port: 8080,
       },
@@ -222,8 +243,7 @@ describe('config validation', () => {
 
   test('config validation passes when a valid connection_timeout is provided', () => {
     const config: Record<string, any> = {
-      host: 'mylisteningserver',
-      port: 9200,
+      url: 'http://mylisteningserver:9200/endpoint',
       connection_timeout: '10s',
     };
     expect(validateConfig(actionType, config)).toEqual({
@@ -234,8 +254,7 @@ describe('config validation', () => {
 
   test('ashould validate and throw error when an invalid connection_timeout is specified', () => {
     const config: Record<string, any> = {
-      host: 'mylisteningserver',
-      port: 9200,
+      url: 'http://mylisteningserver:9200/endpoint',
       connection_timeout: '10 seconds',
     };
     expect(() => {
@@ -247,8 +266,7 @@ describe('config validation', () => {
 
   test('config validation passes when a valid read_timeout is provided', () => {
     const config: Record<string, any> = {
-      host: 'mylisteningserver',
-      port: 9200,
+      url: 'http://mylisteningserver:9200/endpoint',
       read_timeout: '10s',
     };
     expect(validateConfig(actionType, config)).toEqual({
@@ -259,8 +277,7 @@ describe('config validation', () => {
 
   test('ashould validate and throw error when an invalid read_timeout is specified', () => {
     const config: Record<string, any> = {
-      host: 'mylisteningserver',
-      port: 9200,
+      url: 'http://mylisteningserver:9200/endpoint',
       read_timeout: '10 seconds',
     };
     expect(() => {

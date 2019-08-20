@@ -31,24 +31,27 @@ const ProxySchema = schema.object({
   port: nullableType(PortSchema),
 });
 
+const CompositeUrlSchema = schema.object({
+  host: schema.string(),
+  port: PortSchema,
+  path: nullableType(schema.string()),
+  scheme: schema.oneOf(
+    [schema.literal(WebhookSchemes.HTTP), schema.literal(WebhookSchemes.HTTPS)],
+    {
+      defaultValue: WebhookSchemes.HTTP,
+    }
+  ),
+});
+
 const ConfigSchema = schema.object(
   {
-    host: schema.string(),
-    port: PortSchema,
-    scheme: schema.oneOf(
-      [schema.literal(WebhookSchemes.HTTP), schema.literal(WebhookSchemes.HTTPS)],
-      {
-        defaultValue: WebhookSchemes.HTTP,
-      }
-    ),
+    url: schema.oneOf([schema.string(), CompositeUrlSchema]),
     method: schema.oneOf(
       [schema.literal(WebhookMethods.POST), schema.literal(WebhookMethods.PUT)],
       {
         defaultValue: WebhookMethods.POST,
       }
     ),
-    path: nullableType(schema.string()),
-    url: nullableType(schema.string()),
     headers: nullableType(HeadersSchema),
     proxy: nullableType(ProxySchema),
     connection_timeout: nullableType(schema.string()),
