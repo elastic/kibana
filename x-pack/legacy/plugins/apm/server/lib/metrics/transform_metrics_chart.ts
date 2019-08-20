@@ -5,6 +5,7 @@
  */
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { AggregationSearchResponse, AggregatedValue } from 'elasticsearch';
+import { idx } from '@kbn/elastic-idx';
 import { ChartBase } from './types';
 
 const colors = [
@@ -49,7 +50,7 @@ export function transformDataToMetricsChart<Params extends AggregatedParams>(
   chartBase: ChartBase
 ) {
   const { aggregations, hits } = result;
-  const { timeseriesData } = aggregations;
+  const timeseriesData = idx(aggregations, _ => _.timeseriesData);
 
   return {
     title: chartBase.title,
@@ -57,15 +58,15 @@ export function transformDataToMetricsChart<Params extends AggregatedParams>(
     yUnit: chartBase.yUnit,
     totalHits: hits.total,
     series: Object.keys(chartBase.series).map((seriesKey, i) => {
-      const agg = aggregations[seriesKey];
+      const overallValue = idx(aggregations, _ => _[seriesKey].value);
 
       return {
         title: chartBase.series[seriesKey].title,
         key: seriesKey,
         type: chartBase.type,
         color: chartBase.series[seriesKey].color || colors[i],
-        overallValue: agg.value,
-        data: timeseriesData.buckets.map(bucket => {
+        overallValue,
+        data: (idx(timeseriesData, _ => _.buckets) || []).map(bucket => {
           const { value } = bucket[seriesKey] as AggregatedValue;
           const y = value === null || isNaN(value) ? null : value;
           return {
