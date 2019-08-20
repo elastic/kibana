@@ -53,9 +53,11 @@ export class AddLayerPanel extends Component {
       this.props.removeTransientLayer();
       return;
     }
+
+    const style = (this.state.layer && this.state.layer.getCurrentStyle()) ?  this.state.layer.getCurrentStyle().getDescriptor() : null;
     const layerInitProps = {
       ...options,
-      ...(this.state.layer && { style: this.state.layer.getCurrentStyle().getDescriptor() })
+      style: style
     };
     const newLayer = source.createDefaultLayer(layerInitProps, this.props.mapColors);
     this.setState(
@@ -78,7 +80,7 @@ export class AddLayerPanel extends Component {
 
   _onSourceSelectionChange = ({ type, isIndexingSource }) => {
     this.setState({ sourceType: type, importView: isIndexingSource });
-  }
+  };
 
   _layerAddHandler = () => {
     const { isIndexingTriggered, setIndexingTriggered, selectLayerAndAdd,

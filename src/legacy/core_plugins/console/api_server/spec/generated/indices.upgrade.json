@@ -19,6 +19,6 @@
       "_upgrade",
       "{indices}/_upgrade"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-upgrade.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-upgrade.html"
   }
 }
