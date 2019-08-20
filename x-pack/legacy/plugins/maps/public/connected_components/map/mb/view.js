@@ -8,11 +8,13 @@ import _ from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { ResizeChecker } from 'ui/resize_checker';
+import { I18nProvider } from '@kbn/i18n/react';
 import {
   syncLayerOrderForSingleLayer,
   removeOrphanedSourcesAndLayers,
   addSpritesheetToMap
 } from './utils';
+import { getGlyphUrl, isRetina } from '../../../meta';
 import {
   DECIMAL_DEGREES_PRECISION,
   FEATURE_ID_PROPERTY_NAME,
@@ -36,7 +38,6 @@ import sprites1 from '@elastic/maki/dist/sprite@1.png';
 import sprites2 from '@elastic/maki/dist/sprite@2.png';
 import { i18n } from '@kbn/i18n';
 
-const isRetina = window.devicePixelRatio === 2;
 const mbDrawModes = MapboxDraw.modes;
 mbDrawModes.draw_rectangle = DrawRectangle;
 
@@ -44,6 +45,9 @@ const TOOLTIP_TYPE = {
   HOVER: 'HOVER',
   LOCKED: 'LOCKED'
 };
+
+// eslint-disable-next-line max-len,camelcase
+const TRANSPARENT_1x1_BASE64_URI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQYV2NgAAIAAAUAAarVyFEAAAAASUVORK5CYII=';
 
 export class MBMapContainer extends React.Component {
 
@@ -104,7 +108,7 @@ export class MBMapContainer extends React.Component {
     try {
       const options = {
         indexPatternId: this.props.drawState.indexPatternId,
-        geoFieldName: this.props.drawState.geoField,
+        geoFieldName: this.props.drawState.geoFieldName,
         geoFieldType: this.props.drawState.geoFieldType,
       };
       const filter = isBoundingBox
@@ -125,7 +129,7 @@ export class MBMapContainer extends React.Component {
       this.props.addFilters([filter]);
     } catch (error) {
       // TODO notify user why filter was not created
-      console.log(error);
+      console.error(error);
     } finally {
       this.props.disableDrawState();
     }
@@ -166,7 +170,8 @@ export class MBMapContainer extends React.Component {
       if (!match) {
         uniqueFeatures.push({
           id: featureId,
-          layerId: layerId
+          layerId: layerId,
+          geometry: mbFeature.geometry,
         });
       }
     }
@@ -364,14 +369,21 @@ export class MBMapContainer extends React.Component {
   async _createMbMapInstance() {
     const initialView = this.props.goto ? this.props.goto.center : null;
     return new Promise((resolve) => {
+
+      const mbStyle = {
+        version: 8,
+        sources: {},
+        layers: []
+      };
+      const glyphUrl = getGlyphUrl();
+      if (glyphUrl) {
+        mbStyle.glyphs = glyphUrl;
+      }
+
       const options = {
         attributionControl: false,
         container: this.refs.mapContainer,
-        style: {
-          version: 8,
-          sources: {},
-          layers: []
-        },
+        style: mbStyle,
         scrollZoom: this.props.scrollZoom,
         preserveDrawingBuffer: chrome.getInjected('preserveDrawingBuffer', false)
       };
@@ -388,8 +400,18 @@ export class MBMapContainer extends React.Component {
       mbMap.addControl(
         new mapboxgl.NavigationControl({ showCompass: false }), 'top-left'
       );
+
+      let emptyImage;
+      mbMap.on('styleimagemissing', (e) => {
+        if (emptyImage) {
+          mbMap.addImage(e.id, emptyImage);
+        }
+      });
       mbMap.on('load', () => {
-        resolve(mbMap);
+        mbMap.loadImage(TRANSPARENT_1x1_BASE64_URI, (error, data) => {
+          emptyImage = data;
+          resolve(mbMap);
+        });
       });
     });
   }
@@ -449,8 +471,8 @@ export class MBMapContainer extends React.Component {
   }
 
   _loadMakiSprites() {
-    const sprites = isRetina ? sprites2 : sprites1;
-    const json = isRetina ? spritesheet[2] : spritesheet[1];
+    const sprites = isRetina() ? sprites2 : sprites1;
+    const json = isRetina() ? spritesheet[2] : spritesheet[1];
     addSpritesheetToMap(json, sprites, this._mbMap);
   }
 
@@ -476,16 +498,20 @@ export class MBMapContainer extends React.Component {
     }
     const isLocked = this.props.tooltipState.type === TOOLTIP_TYPE.LOCKED;
     ReactDOM.render((
-      <FeatureTooltip
-        features={this.props.tooltipState.features}
-        loadFeatureProperties={this._loadFeatureProperties}
-        findLayerById={this._findLayerById}
-        closeTooltip={this._onTooltipClose}
-        showFilterButtons={!!this.props.addFilters && isLocked}
-        isLocked={isLocked}
-        addFilters={this.props.addFilters}
-        reevaluateTooltipPosition={this._reevaluateTooltipPosition}
-      />
+      <I18nProvider>
+        <FeatureTooltip
+          features={this.props.tooltipState.features}
+          anchorLocation={this.props.tooltipState.location}
+          loadFeatureProperties={this._loadFeatureProperties}
+          findLayerById={this._findLayerById}
+          closeTooltip={this._onTooltipClose}
+          showFilterButtons={!!this.props.addFilters && isLocked}
+          isLocked={isLocked}
+          addFilters={this.props.addFilters}
+          geoFields={this.props.geoFields}
+          reevaluateTooltipPosition={this._reevaluateTooltipPosition}
+        />
+      </I18nProvider>
     ), this._tooltipContainer);
 
     this._mbPopup.setLngLat(this.props.tooltipState.location)
@@ -562,12 +588,6 @@ export class MBMapContainer extends React.Component {
 
   };
 
-  _getLayerById(layerId) {
-    return this.props.layerList.find((layer) => {
-      return layer.getId() === layerId;
-    });
-  }
-
   _getLayerByMbLayerId(mbLayerId) {
     return this.props.layerList.find((layer) => {
       const mbLayerIds = layer.getMbLayerIds();
@@ -582,10 +602,7 @@ export class MBMapContainer extends React.Component {
     }
 
     removeOrphanedSourcesAndLayers(this._mbMap, this.props.layerList);
-    this.props.layerList.forEach(layer => {
-      layer.syncLayerWithMB(this._mbMap);
-    });
-
+    this.props.layerList.forEach(layer => layer.syncLayerWithMB(this._mbMap));
     syncLayerOrderForSingleLayer(this._mbMap, this.props.layerList);
   };
 

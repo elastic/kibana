@@ -5,6 +5,7 @@
  */
 
 import React, { FC, useEffect } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton } from '@elastic/eui';
 
 import { useEstimateBucketSpan, ESTIMATE_STATUS } from './estimate_bucket_span';
@@ -22,7 +23,10 @@ export const BucketSpanEstimator: FC<Props> = ({ setEstimating }) => {
 
   return (
     <EuiButton disabled={status === ESTIMATE_STATUS.RUNNING} onClick={estimateBucketSpan}>
-      Estimate bucket span
+      <FormattedMessage
+        id="xpack.ml.newJob.wizard.pickFieldsStep.bucketSpanEstimatorButton"
+        defaultMessage="Estimate bucket span"
+      />
     </EuiButton>
   );
 };

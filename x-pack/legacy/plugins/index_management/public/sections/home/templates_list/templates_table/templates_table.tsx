@@ -45,6 +45,7 @@ export const TemplatesTable: React.FunctionComponent<Props> = ({ templates, relo
       sortable: true,
       render: (name: Template['name']) => {
         return (
+          /* eslint-disable-next-line @elastic/eui/href-or-on-click */
           <EuiLink
             href={encodeURI(`#${BASE_PATH}templates/${name}`)}
             data-test-subj="templateDetailsLink"

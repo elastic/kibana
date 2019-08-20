@@ -57,6 +57,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       truncateText: true,
       sortable: true,
       render: (snapshotId: string, snapshot: SnapshotDetails) => (
+        /* eslint-disable-next-line @elastic/eui/href-or-on-click */
         <EuiLink
           onClick={() => trackUiMetric(UIM_SNAPSHOT_SHOW_DETAILS_CLICK)}
           href={openSnapshotDetailsUrl(snapshot.repository, snapshotId)}

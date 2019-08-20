@@ -53,7 +53,7 @@ This is the primary function for an action type. Whenever the action needs to ex
 |config|The decrypted configuration given to an action. This comes from the action saved object that is partially or fully encrypted within the data store. If you would like to validate the config before being passed to the executor, define `validate.config` within the action type.|
 |params|Parameters for the execution. These will be given at execution time by either an alert or manually provided when calling the plugin provided execute function.|
 |services.callCluster(path, opts)|Use this to do Elasticsearch queries on the cluster Kibana connects to. This function is the same as any other `callCluster` in Kibana.<br><br>**NOTE**: This currently authenticates as the Kibana internal user, but will change in a future PR.|
-|services.savedObjectsClient|This is an instance of the saved objects client. This provides the ability to do CRUD on any saved objects within the same space the alert lives in.<br><br>**NOTE**: This currently only works when security is disabled. A future PR will add support for enabling security using Elasticsearch API tokens.|
+|services.savedObjectsClient|This is an instance of the saved objects client. This provides the ability to do CRUD on any saved objects within the same space the alert lives in.<br><br>The scope of the saved objects client is tied to the user in context calling the execute API or the API key provided to the execute plugin function (only when security isenabled).|
 |services.log(tags, [data], [timestamp])|Use this to create server logs. (This is the same function as server.log)|
 
 ### Example
@@ -146,6 +146,7 @@ The following table describes the properties of the `options` object.
 |id|The id of the action you want to execute.|string|
 |params|The `params` value to give the action type executor.|object|
 |spaceId|The space id the action is within.|string|
+|apiKey|The Elasticsearch API key to use for context. (Note: only required and used when security is enabled).|string|
 
 ### Example
 
