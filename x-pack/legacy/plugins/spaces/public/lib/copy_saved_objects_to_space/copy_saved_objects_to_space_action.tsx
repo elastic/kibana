@@ -9,6 +9,7 @@ import {
   SavedObjectRecord,
 } from 'ui/management/saved_objects_management';
 import { i18n } from '@kbn/i18n';
+import { toastNotifications } from 'ui/notify';
 import { CopySavedObjectsToSpaceFlyout } from '../../views/management/components/copy_saved_objects_to_space';
 import { Space } from '../../../common/model/space';
 import { SpacesManager } from '../spaces_manager';
@@ -44,6 +45,7 @@ export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagem
         savedObject={this.record}
         spacesManager={this.spacesManager}
         activeSpace={this.activeSpace}
+        toastNotifications={toastNotifications}
       />
     );
   };

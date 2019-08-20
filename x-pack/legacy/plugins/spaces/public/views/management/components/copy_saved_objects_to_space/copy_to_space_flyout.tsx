@@ -27,7 +27,7 @@ import {
   ProcessedImportResponse,
 } from 'ui/management/saved_objects_management';
 import { SavedObjectsImportRetry } from 'src/core/server';
-import { toastNotifications } from 'ui/notify';
+import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
 import { Space } from '../../../../../common/model/space';
 import { SpacesManager } from '../../../../lib';
 import { useKibanaSpaces } from '../../../../lib/hooks';
@@ -41,10 +41,11 @@ interface Props {
   savedObject: SavedObjectRecord;
   spacesManager: SpacesManager;
   activeSpace: Space;
+  toastNotifications: ToastNotifications;
 }
 
 export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
-  const { onClose, savedObject, spacesManager } = props;
+  const { onClose, savedObject, spacesManager, toastNotifications } = props;
   const [copyOptions, setCopyOptions] = useState<CopyOptions>({
     includeRelated: true,
     overwrite: true,

@@ -16,6 +16,7 @@ jest.mock('../../../../lib/hooks', () => {
   };
 });
 import React from 'react';
+import Boom from 'boom';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { CopySavedObjectsToSpaceFlyout } from './copy_to_space_flyout';
 import { CopyToSpaceForm } from './copy_to_space_form';
@@ -25,9 +26,17 @@ import { findTestSubject } from 'test_utils/find_test_subject';
 import { SelectableSpacesControl } from './selectable_spaces_control';
 import { act } from 'react-testing-library';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';
+import { spacesManagerMock } from '../../../../lib/mocks';
+import { SpacesManager } from '../../../../lib';
+import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
 
-const mountComponent = () => {
+const setup = () => {
   const onClose = jest.fn();
+  const mockSpacesManager = spacesManagerMock.create();
+  const mockToastNotifications = {
+    addError: jest.fn(),
+    addSuccess: jest.fn(),
+  };
   const wrapper = mountWithIntl(
     <CopySavedObjectsToSpaceFlyout
       savedObject={{
@@ -36,11 +45,18 @@ const mountComponent = () => {
         references: [],
         meta: { icon: 'dashboard', title: 'foo' },
       }}
+      spacesManager={(mockSpacesManager as unknown) as SpacesManager}
+      activeSpace={{
+        id: 'my-active-space',
+        name: 'my active space',
+        disabledFeatures: [],
+      }}
+      toastNotifications={(mockToastNotifications as unknown) as ToastNotifications}
       onClose={onClose}
     />
   );
 
-  return { wrapper, onClose };
+  return { wrapper, onClose, mockSpacesManager, mockToastNotifications };
 };
 
 describe('CopyToSpaceFlyout', () => {
@@ -49,7 +65,7 @@ describe('CopyToSpaceFlyout', () => {
   });
 
   it('waits for spaces to load', () => {
-    let { wrapper } = mountComponent();
+    let { wrapper } = setup();
 
     expect(wrapper.find(CopyToSpaceForm)).toHaveLength(0);
     expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(0);
@@ -60,7 +76,7 @@ describe('CopyToSpaceFlyout', () => {
     mockIsLoading = false;
     mockSpaces = [{ id: 'foo', name: 'Foo Space', disabledFeatures: [] }];
 
-    wrapper = mountComponent().wrapper;
+    wrapper = setup().wrapper;
 
     expect(wrapper.find(CopyToSpaceForm)).toHaveLength(1);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
@@ -71,7 +87,7 @@ describe('CopyToSpaceFlyout', () => {
     mockIsLoading = false;
     mockSpaces = [];
 
-    const { wrapper, onClose } = mountComponent();
+    const { wrapper, onClose } = setup();
 
     expect(wrapper.find(CopyToSpaceForm)).toHaveLength(0);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
@@ -79,7 +95,59 @@ describe('CopyToSpaceFlyout', () => {
     expect(onClose).toHaveBeenCalledTimes(0);
   });
 
-  it('allows the form to be filled out', () => {
+  it('shows a message within an EuiEmptyPrompt when only the active space is available', () => {
+    mockIsLoading = false;
+    mockSpaces = [{ id: 'my-active-space', name: '', disabledFeatures: [] }];
+
+    const { wrapper, onClose } = setup();
+
+    expect(wrapper.find(CopyToSpaceForm)).toHaveLength(0);
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+    expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
+    expect(onClose).toHaveBeenCalledTimes(0);
+  });
+
+  it('handles errors thrown from copySavedObjects API call', async () => {
+    mockIsLoading = false;
+    mockSpaces = [
+      {
+        id: 'space-1',
+        name: 'Space 1',
+        disabledFeatures: [],
+      },
+    ];
+
+    const { wrapper, mockSpacesManager, mockToastNotifications } = setup();
+
+    mockSpacesManager.copySavedObjects.mockImplementation(() => {
+      return Promise.reject(Boom.serverUnavailable('Something bad happened'));
+    });
+
+    expect(wrapper.find(CopyToSpaceForm)).toHaveLength(1);
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+    expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(0);
+
+    // Using props callback instead of simulating clicks,
+    // because EuiSelectableuses a virtualized list, which isn't easily testable via test subjects
+    const spaceSelector = wrapper.find(SelectableSpacesControl);
+    act(() => {
+      spaceSelector.props().onChange(['space-1']);
+    });
+
+    const startButton = findTestSubject(wrapper, 'cts-initiate-button');
+    act(() => {
+      startButton.simulate('click');
+    });
+
+    await Promise.resolve();
+
+    wrapper.update();
+
+    expect(mockSpacesManager.copySavedObjects).toHaveBeenCalled();
+    expect(mockToastNotifications.addError).toHaveBeenCalled();
+  });
+
+  it('allows the form to be filled out', async () => {
     mockIsLoading = false;
     mockSpaces = [
       {
@@ -99,23 +167,28 @@ describe('CopyToSpaceFlyout', () => {
       },
     ];
 
-    const { wrapper, onClose } = mountComponent();
+    const { wrapper, onClose, mockSpacesManager, mockToastNotifications } = setup();
+
+    mockSpacesManager.copySavedObjects.mockResolvedValue({
+      'space-1': {
+        success: true,
+        successCount: 3,
+      },
+      'space-2': {
+        success: true,
+        successCount: 3,
+      },
+    });
 
     expect(wrapper.find(CopyToSpaceForm)).toHaveLength(1);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
     expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(0);
-
-    const includeRelatedSwitch = findTestSubject(wrapper, 'cts-form-include-related-objects');
-
-    const overwriteSwitch = findTestSubject(wrapper, 'cts-form-overwrite');
 
     // Using props callback instead of simulating clicks,
     // because EuiSelectableuses a virtualized list, which isn't easily testable via test subjects
     const spaceSelector = wrapper.find(SelectableSpacesControl);
 
     act(() => {
-      includeRelatedSwitch.simulate('click');
-      overwriteSwitch.simulate('click');
       spaceSelector.props().onChange(['space-1', 'space-2']);
     });
 
@@ -124,14 +197,26 @@ describe('CopyToSpaceFlyout', () => {
       startButton.simulate('click');
     });
 
+    await Promise.resolve();
+
     wrapper.update();
+
+    expect(mockSpacesManager.copySavedObjects).toHaveBeenCalledWith(
+      [
+        {
+          type: 'dashboard',
+          id: 'my-dash',
+          references: [],
+          meta: { icon: 'dashboard', title: 'foo' },
+        },
+      ],
+      ['space-1', 'space-2'],
+      true,
+      true
+    );
 
     expect(wrapper.find(CopyToSpaceForm)).toHaveLength(0);
     expect(wrapper.find(ProcessingCopyToSpace)).toHaveLength(1);
-
-    // temporary while mock calls are in place
-    act(() => jest.advanceTimersByTime(60000));
-    wrapper.update();
 
     const finishButton = findTestSubject(wrapper, 'cts-finish-button');
     act(() => {
@@ -139,5 +224,7 @@ describe('CopyToSpaceFlyout', () => {
     });
 
     expect(onClose).toHaveBeenCalledTimes(1);
+    expect(mockToastNotifications.addError).not.toHaveBeenCalled();
+    expect(mockToastNotifications.addSuccess).toHaveBeenCalled();
   });
 });
