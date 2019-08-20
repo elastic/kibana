@@ -429,6 +429,117 @@ export default function alertTests({ getService }: FtrProviderContext) {
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
         });
+
+        it('should throttle alerts when appropriate', async () => {
+          const reference = `create-test-5:${user.username}`;
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              description: 'My action',
+              actionTypeId: 'test.index-record',
+              config: {
+                unencrypted: `This value shouldn't get encrypted`,
+              },
+              secrets: {
+                encrypted: 'This value should be encrypted',
+              },
+            })
+            .expect(200);
+          objectRemover.add(space.id, createdAction.id, 'action');
+
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send(
+              getTestAlertData({
+                interval: '1s',
+                throttle: '1m',
+                alertTypeId: 'test.always-firing',
+                alertTypeParams: {
+                  index: esTestIndexName,
+                  reference,
+                },
+                actions: [
+                  {
+                    group: 'default',
+                    id: createdAction.id,
+                    params: {
+                      index: esTestIndexName,
+                      reference,
+                      message: '',
+                    },
+                  },
+                ],
+              })
+            );
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'space_1_all at space1':
+            case 'superuser at space1':
+              // Wait until alerts fired 3 times to ensure actions had a chance to fire twice
+              await retry.try(async () => {
+                const firedAlertsResult = await es.search({
+                  index: esTestIndexName,
+                  body: {
+                    query: {
+                      bool: {
+                        must: [
+                          {
+                            term: {
+                              source: 'alert:test.always-firing',
+                            },
+                          },
+                          {
+                            term: {
+                              reference,
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  },
+                });
+                expect(firedAlertsResult.hits.total.value).to.eql(3);
+              });
+              const firedActionsResult = await es.search({
+                index: esTestIndexName,
+                body: {
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            source: 'action:test.index-record',
+                          },
+                        },
+                        {
+                          term: {
+                            reference,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              });
+              expect(firedActionsResult.hits.total.value).to.eql(1);
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
       });
     }
   });
