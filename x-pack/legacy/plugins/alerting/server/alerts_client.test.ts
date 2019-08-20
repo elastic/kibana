@@ -596,6 +596,63 @@ describe('enable()', () => {
     expect(taskManager.schedule).toHaveBeenCalledTimes(0);
     expect(savedObjectsClient.update).toHaveBeenCalledTimes(0);
   });
+
+  test('calls the API key function', async () => {
+    const alertsClient = new AlertsClient(alertsClientParams);
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        interval: '10s',
+        alertTypeId: '2',
+        enabled: false,
+      },
+      references: [],
+    });
+    taskManager.schedule.mockResolvedValueOnce({
+      id: 'task-123',
+      scheduledAt: new Date(),
+      attempts: 0,
+      status: 'idle',
+      runAt: new Date(),
+      state: {},
+      params: {},
+      taskType: '',
+      startedAt: null,
+      retryAt: null,
+    });
+    alertsClientParams.createAPIKey.mockResolvedValueOnce({
+      created: true,
+      result: { id: '123', api_key: 'abc' },
+    });
+
+    await alertsClient.enable({ id: '1' });
+    expect(savedObjectsClient.update).toHaveBeenCalledWith(
+      'alert',
+      '1',
+      {
+        enabled: true,
+        scheduledTaskId: 'task-123',
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      {
+        references: [],
+      }
+    );
+    expect(taskManager.schedule).toHaveBeenCalledWith({
+      taskType: `alerting:2`,
+      params: {
+        alertId: '1',
+        spaceId: 'default',
+      },
+      state: {
+        alertInstances: {},
+        alertTypeState: {},
+        previousStartedAt: null,
+      },
+      scope: ['alerting'],
+    });
+  });
 });
 
 describe('disable()', () => {
@@ -618,6 +675,7 @@ describe('disable()', () => {
       'alert',
       '1',
       {
+        apiKey: null,
         enabled: false,
         scheduledTaskId: null,
       },

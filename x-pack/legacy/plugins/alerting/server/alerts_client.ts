@@ -212,6 +212,7 @@ export class AlertsClient {
   public async enable({ id }: { id: string }) {
     const existingObject = await this.savedObjectsClient.get('alert', id);
     if (existingObject.attributes.enabled === false) {
+      const apiKey = await this.createAPIKey();
       const scheduledTask = await this.scheduleAlert(
         id,
         existingObject.attributes.alertTypeId,
@@ -223,6 +224,9 @@ export class AlertsClient {
         {
           enabled: true,
           scheduledTaskId: scheduledTask.id,
+          apiKey: apiKey.created
+            ? Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64')
+            : undefined,
         },
         { references: existingObject.references }
       );
@@ -238,6 +242,7 @@ export class AlertsClient {
         {
           enabled: false,
           scheduledTaskId: null,
+          apiKey: null,
         },
         { references: existingObject.references }
       );
