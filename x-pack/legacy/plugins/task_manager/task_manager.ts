@@ -136,6 +136,7 @@ export class TaskManager {
    * Stops the task manager and cancels running tasks.
    */
   public stop() {
+    this.poller.stop();
     this.pool.cancelRunningTasks();
   }
 
