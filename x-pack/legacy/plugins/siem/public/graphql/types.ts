@@ -1166,33 +1166,57 @@ export interface NetworkTopNFlowEdges {
 export interface NetworkTopNFlowItem {
   _id?: string | null;
 
-  source?: TopNFlowItem | null;
+  source?: TopNFlowItemSource | null;
 
-  destination?: TopNFlowItem | null;
-
-  client?: TopNFlowItem | null;
-
-  server?: TopNFlowItem | null;
+  destination?: TopNFlowItemDestination | null;
 
   network?: TopNFlowNetworkEcsField | null;
 }
 
-export interface TopNFlowItem {
-  count?: number | null;
+export interface TopNFlowItemSource {
+  autonomous_system?: AutonomousSystemItem | null;
 
   domain?: string[] | null;
 
   ip?: string | null;
+
+  location?: GeoItem | null;
+
+  flows?: number | null;
+
+  destination_ips?: number | null;
+}
+
+export interface AutonomousSystemItem {
+  name?: string | null;
+
+  number?: number | null;
+}
+
+export interface GeoItem {
+  geo?: GeoEcsFields | null;
+
+  flowTarget?: FlowTarget | null;
+}
+
+export interface TopNFlowItemDestination {
+  autonomous_system?: AutonomousSystemItem | null;
+
+  domain?: string[] | null;
+
+  ip?: string | null;
+
+  location?: GeoItem | null;
+
+  flows?: number | null;
+
+  source_ips?: number | null;
 }
 
 export interface TopNFlowNetworkEcsField {
-  bytes?: number | null;
+  bytes_in?: number | null;
 
-  packets?: number | null;
-
-  transport?: string | null;
-
-  direction?: NetworkDirectionEcs[] | null;
+  bytes_out?: number | null;
 }
 
 export interface NetworkDnsData {
@@ -1955,7 +1979,7 @@ export interface NetworkTopNFlowSourceArgs {
 
   filterQuery?: string | null;
 
-  flowTarget: FlowTarget;
+  flowTarget: FlowTargetNew;
 
   pagination: PaginationInputPaginated;
 
@@ -2121,10 +2145,14 @@ export enum UsersFields {
   count = 'count',
 }
 
+export enum FlowTargetNew {
+  destination = 'destination',
+  source = 'source',
+}
+
 export enum NetworkTopNFlowFields {
-  bytes = 'bytes',
-  packets = 'packets',
-  ipCount = 'ipCount',
+  bytes_in = 'bytes_in',
+  bytes_out = 'bytes_out',
 }
 
 export enum NetworkDnsFields {
@@ -3278,7 +3306,7 @@ export namespace GetNetworkTopNFlowQuery {
     filterQuery?: string | null;
     pagination: PaginationInputPaginated;
     sort: NetworkTopNFlowSortField;
-    flowTarget: FlowTarget;
+    flowTarget: FlowTargetNew;
     timerange: TimerangeInput;
     defaultIndex: string[];
     inspect: boolean;
@@ -3329,33 +3357,107 @@ export namespace GetNetworkTopNFlowQuery {
   };
 
   export type _Source = {
-    __typename?: 'TopNFlowItem';
+    __typename?: 'TopNFlowItemSource';
 
-    count?: number | null;
+    autonomous_system?: AutonomousSystem | null;
+
+    domain?: string[] | null;
 
     ip?: string | null;
 
-    domain?: string[] | null;
+    location?: Location | null;
+
+    flows?: number | null;
+
+    destination_ips?: number | null;
+  };
+
+  export type AutonomousSystem = {
+    __typename?: 'AutonomousSystemItem';
+
+    name?: string | null;
+
+    number?: number | null;
+  };
+
+  export type Location = {
+    __typename?: 'GeoItem';
+
+    geo?: Geo | null;
+
+    flowTarget?: FlowTarget | null;
+  };
+
+  export type Geo = {
+    __typename?: 'GeoEcsFields';
+
+    continent_name?: ToStringArray | null;
+
+    country_name?: ToStringArray | null;
+
+    country_iso_code?: ToStringArray | null;
+
+    city_name?: ToStringArray | null;
+
+    region_iso_code?: ToStringArray | null;
+
+    region_name?: ToStringArray | null;
   };
 
   export type Destination = {
-    __typename?: 'TopNFlowItem';
+    __typename?: 'TopNFlowItemDestination';
 
-    count?: number | null;
+    autonomous_system?: _AutonomousSystem | null;
+
+    domain?: string[] | null;
 
     ip?: string | null;
 
-    domain?: string[] | null;
+    location?: _Location | null;
+
+    flows?: number | null;
+
+    source_ips?: number | null;
+  };
+
+  export type _AutonomousSystem = {
+    __typename?: 'AutonomousSystemItem';
+
+    name?: string | null;
+
+    number?: number | null;
+  };
+
+  export type _Location = {
+    __typename?: 'GeoItem';
+
+    geo?: _Geo | null;
+
+    flowTarget?: FlowTarget | null;
+  };
+
+  export type _Geo = {
+    __typename?: 'GeoEcsFields';
+
+    continent_name?: ToStringArray | null;
+
+    country_name?: ToStringArray | null;
+
+    country_iso_code?: ToStringArray | null;
+
+    city_name?: ToStringArray | null;
+
+    region_iso_code?: ToStringArray | null;
+
+    region_name?: ToStringArray | null;
   };
 
   export type Network = {
     __typename?: 'TopNFlowNetworkEcsField';
 
-    bytes?: number | null;
+    bytes_in?: number | null;
 
-    direction?: NetworkDirectionEcs[] | null;
-
-    packets?: number | null;
+    bytes_out?: number | null;
   };
 
   export type Cursor = {

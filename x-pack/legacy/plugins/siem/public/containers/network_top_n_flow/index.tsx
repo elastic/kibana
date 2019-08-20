@@ -12,7 +12,7 @@ import { connect } from 'react-redux';
 import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
-  FlowTarget,
+  FlowTargetNew,
   GetNetworkTopNFlowQuery,
   NetworkTopNFlowEdges,
   NetworkTopNFlowSortField,
@@ -79,7 +79,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
         variables={{
           defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
           filterQuery: createFilter(filterQuery),
-          flowTarget: FlowTarget.source,
+          flowTarget: FlowTargetNew.source,
           inspect: isInspected,
           pagination: generateTablePaginationOptions(activePage, limit),
           sort: topNFlowSort,

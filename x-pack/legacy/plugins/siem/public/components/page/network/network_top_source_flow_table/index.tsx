@@ -13,7 +13,7 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { networkActions } from '../../../../store/actions';
 import {
-  FlowTarget,
+  FlowTargetNew,
   NetworkTopNFlowEdges,
   NetworkTopNFlowFields,
   NetworkTopNFlowSortField,
@@ -73,7 +73,7 @@ const rowItems: ItemsPerRow[] = [
   },
 ];
 
-export const NetworkTopNFlowTableId = 'networkTopNFlow-top-talkers';
+export const NetworkTopSourceFlowTableId = 'networkTopSourceFlow-top-talkers';
 
 class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowTableProps> {
   public render() {
@@ -93,18 +93,15 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
       updateTableActivePage,
     } = this.props;
 
-    const field =
-      topNFlowSort.field === NetworkTopNFlowFields.ipCount
-        ? `node.${FlowTarget.source}.count`
-        : `node.network.${topNFlowSort.field}`;
+    const field = `node.network.${topNFlowSort.field}`;
 
     return (
       <PaginatedTable
         columns={getNetworkTopNFlowColumns(
           indexPattern,
-          FlowTarget.source,
+          FlowTargetNew.source,
           type,
-          NetworkTopNFlowTableId
+          NetworkTopSourceFlowTableId
         )}
         headerCount={totalCount}
         headerTitle={i18n.SOURCE_IP}
@@ -136,7 +133,7 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
   private onChange = (criteria: Criteria) => {
     if (criteria.sort != null) {
       const splitField = criteria.sort.field.split('.');
-      const field = last(splitField) === 'count' ? NetworkTopNFlowFields.ipCount : last(splitField);
+      const field = last(splitField);
       const newTopNFlowSort: NetworkTopNFlowSortField = {
         field: field as NetworkTopNFlowFields,
         direction: criteria.sort.direction,

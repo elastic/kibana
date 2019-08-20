@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Direction, FlowDirection, FlowTarget, NetworkTopNFlowFields } from '../../graphql/types';
+import { Direction, FlowTargetNew, NetworkTopNFlowFields } from '../../graphql/types';
 
 import { NetworkTopNFlowRequestOptions } from '.';
 
@@ -38,8 +38,8 @@ export const mockOptions: NetworkTopNFlowRequestOptions = {
     'destination.__typename',
     'event.duration',
     'event.__typename',
-    'network.bytes',
-    'network.packets',
+    'network.bytes_in',
+    'network.bytes_out',
     'network.__typename',
     '__typename',
     'edges.cursor.value',
@@ -53,9 +53,8 @@ export const mockOptions: NetworkTopNFlowRequestOptions = {
     'pageInfo.__typename',
     '__typename',
   ],
-  networkTopNFlowSort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
-  flowTarget: FlowTarget.source,
-  flowDirection: FlowDirection.uniDirectional,
+  networkTopNFlowSort: { field: NetworkTopNFlowFields.bytes_out, direction: Direction.desc },
+  flowTarget: FlowTargetNew.source,
 };
 
 export const mockRequest = {
@@ -64,8 +63,7 @@ export const mockRequest = {
     operationName: 'GetNetworkTopNFlowQuery',
     variables: {
       filterQuery: '',
-      flowDirection: FlowDirection.uniDirectional,
-      flowType: FlowTarget.source,
+      flowTarget: FlowTargetNew.source,
       pagination: {
         activePage: 0,
         cursorStart: 0,
@@ -75,32 +73,36 @@ export const mockRequest = {
       sourceId: 'default',
       timerange: { interval: '12h', from: 1549765830772, to: 1549852230772 },
     },
-    query: `query GetNetworkTopNFlowQuery($sourceId: ID!, $flowDirection: FlowDirection!, $sort: NetworkTopNFlowSortField!, $flowTarget: FlowTarget!, $timerange: TimerangeInput!, $pagination: PaginationInput!, $filterQuery: String) {
+    query: `query GetNetworkTopNFlowQuery($sourceId: ID!, $sort: NetworkTopNFlowSortField!, $flowTarget: FlowTargetNew!, $timerange: TimerangeInput!, $pagination: PaginationInput!, $filterQuery: String) {
         source(id: $sourceId) {
           id
-          NetworkTopNFlow(flowDirection: $flowDirection, sort: $sort, flowTarget: $flowTarget, timerange: $timerange, pagination: $pagination, filterQuery: $filterQuery) {
+          NetworkTopNFlow(sort: $sort, flowTarget: $flowTarget, timerange: $timerange, pagination: $pagination, filterQuery: $filterQuery) {
             totalCount
             edges {
               node {
-              source {
-                ip
-                domain
-                count
-                __typename
-              }
-              destination {
-                ip
-                domain
-                count
-                __typename
-              }
-              network {
-                bytes
-                packets
-                direction
-                __typename
-              }
-            __typename
+                source {
+                  autonomous_system
+                  domain
+                  ip
+                  location
+                  flows
+                  destination_ips
+                  __typename
+                }
+                destination {
+                  autonomous_system
+                  domain
+                  ip
+                  location
+                  source_ips
+                  __typename
+                }
+                network {
+                  bytes_in
+                  bytes_out
+                  __typename
+                }
+              __typename
             }
             cursor {
               value
@@ -141,25 +143,23 @@ export const mockResponse = {
     top_n_flow_count: {
       value: 545,
     },
-    top_uni_flow: {
+    [FlowTargetNew.source]: {
       buckets: [
         {
           key: '1.1.1.1',
-          bytes: {
+          flows: 1234567,
+          destination_ips: 345345,
+          bytes_in: {
             value: 11276023407,
           },
-          packets: {
+          bytes_out: {
             value: 1025631,
           },
-          direction: {
-            buckets: [
-              {
-                key: 'inbound',
-              },
-            ],
+          location: {
+            value: 'San Francisco, CA, USA',
           },
-          ip_count: {
-            value: 1,
+          autonomous_system: {
+            value: 'whatevenisthis',
           },
           domain: {
             buckets: [
@@ -171,24 +171,19 @@ export const mockResponse = {
         },
         {
           key: '2.2.2.2',
-          bytes: {
+          flows: 1234567,
+          destination_ips: 345345,
+          bytes_in: {
             value: 5469323342,
           },
-          packets: {
+          bytes_out: {
             value: 2811441,
           },
-          direction: {
-            buckets: [
-              {
-                key: 'outbound',
-              },
-              {
-                key: 'external',
-              },
-            ],
+          location: {
+            value: 'San Francisco, CA, USA',
           },
-          ip_count: {
-            value: 2,
+          autonomous_system: {
+            value: 'whatevenisthis',
           },
           domain: {
             buckets: [
@@ -200,21 +195,19 @@ export const mockResponse = {
         },
         {
           key: '3.3.3.3',
-          bytes: {
+          flows: 1234567,
+          destination_ips: 345345,
+          bytes_in: {
             value: 3807671322,
           },
-          packets: {
+          bytes_out: {
             value: 4494034,
           },
-          direction: {
-            buckets: [
-              {
-                key: 'outbound',
-              },
-            ],
+          location: {
+            value: 'San Francisco, CA, USA',
           },
-          ip_count: {
-            value: 5,
+          autonomous_system: {
+            value: 'whatevenisthis',
           },
           domain: {
             buckets: [
@@ -229,21 +222,19 @@ export const mockResponse = {
         },
         {
           key: '4.4.4.4',
-          bytes: {
+          flows: 1234567,
+          destination_ips: 345345,
+          bytes_in: {
             value: 166517626,
           },
-          packets: {
+          bytes_out: {
             value: 3194782,
           },
-          direction: {
-            buckets: [
-              {
-                key: 'inbound',
-              },
-            ],
+          location: {
+            value: 'San Francisco, CA, USA',
           },
-          ip_count: {
-            value: 1,
+          autonomous_system: {
+            value: 'whatevenisthis',
           },
           domain: {
             buckets: [
@@ -255,21 +246,19 @@ export const mockResponse = {
         },
         {
           key: '5.5.5.5',
-          bytes: {
+          flows: 1234567,
+          destination_ips: 345345,
+          bytes_in: {
             value: 104785026,
           },
-          packets: {
+          bytes_out: {
             value: 1838597,
           },
-          direction: {
-            buckets: [
-              {
-                key: 'external',
-              },
-            ],
+          location: {
+            value: 'San Francisco, CA, USA',
           },
-          ip_count: {
-            value: 3,
+          autonomous_system: {
+            value: 'whatevenisthis',
           },
           domain: {
             buckets: [
@@ -281,21 +270,19 @@ export const mockResponse = {
         },
         {
           key: '6.6.6.6',
-          bytes: {
+          flows: 1234567,
+          destination_ips: 345345,
+          bytes_in: {
             value: 28804250,
           },
-          packets: {
+          bytes_out: {
             value: 482982,
           },
-          direction: {
-            buckets: [
-              {
-                key: 'inbound',
-              },
-            ],
+          location: {
+            value: 'San Francisco, CA, USA',
           },
-          ip_count: {
-            value: 2,
+          autonomous_system: {
+            value: 'whatevenisthis',
           },
           domain: {
             doc_count_error_upper_bound: 0,
@@ -309,21 +296,19 @@ export const mockResponse = {
         },
         {
           key: '7.7.7.7',
-          bytes: {
+          flows: 1234567,
+          destination_ips: 345345,
+          bytes_in: {
             value: 23032363,
           },
-          packets: {
+          bytes_out: {
             value: 400623,
           },
-          direction: {
-            buckets: [
-              {
-                key: 'inbound',
-              },
-            ],
+          location: {
+            value: 'San Francisco, CA, USA',
           },
-          ip_count: {
-            value: 2,
+          autonomous_system: {
+            value: 'whatevenisthis',
           },
           domain: {
             doc_count_error_upper_bound: 0,
@@ -337,21 +322,19 @@ export const mockResponse = {
         },
         {
           key: '8.8.8.8',
-          bytes: {
+          flows: 1234567,
+          destination_ips: 345345,
+          bytes_in: {
             value: 21424889,
           },
-          packets: {
+          bytes_out: {
             value: 344357,
           },
-          direction: {
-            buckets: [
-              {
-                key: 'inbound',
-              },
-            ],
+          location: {
+            value: 'San Francisco, CA, USA',
           },
-          ip_count: {
-            value: 2,
+          autonomous_system: {
+            value: 'whatevenisthis',
           },
           domain: {
             buckets: [
@@ -363,21 +346,19 @@ export const mockResponse = {
         },
         {
           key: '9.9.9.9',
-          bytes: {
+          flows: 1234567,
+          destination_ips: 345345,
+          bytes_in: {
             value: 19205000,
           },
-          packets: {
+          bytes_out: {
             value: 355663,
           },
-          direction: {
-            buckets: [
-              {
-                key: 'inbound',
-              },
-            ],
+          location: {
+            value: 'San Francisco, CA, USA',
           },
-          ip_count: {
-            value: 2,
+          autonomous_system: {
+            value: 'whatevenisthis',
           },
           domain: {
             buckets: [
@@ -389,21 +370,19 @@ export const mockResponse = {
         },
         {
           key: '10.10.10.10',
-          bytes: {
+          flows: 1234567,
+          destination_ips: 345345,
+          bytes_in: {
             value: 11407633,
           },
-          packets: {
+          bytes_out: {
             value: 199360,
           },
-          direction: {
-            buckets: [
-              {
-                key: 'inbound',
-              },
-            ],
+          location: {
+            value: 'San Francisco, CA, USA',
           },
-          ip_count: {
-            value: 2,
+          autonomous_system: {
+            value: 'whatevenisthis',
           },
           domain: {
             buckets: [
@@ -415,21 +394,19 @@ export const mockResponse = {
         },
         {
           key: '11.11.11.11',
-          bytes: {
+          flows: 1234567,
+          destination_ips: 345345,
+          bytes_in: {
             value: 11393327,
           },
-          direction: {
-            buckets: [
-              {
-                key: 'inbound',
-              },
-            ],
-          },
-          ip_count: {
-            value: 2,
-          },
-          packets: {
+          bytes_out: {
             value: 195914,
+          },
+          location: {
+            value: 'San Francisco, CA, USA',
+          },
+          autonomous_system: {
+            value: 'whatevenisthis',
           },
           domain: {
             buckets: [
@@ -462,14 +439,15 @@ export const mockResult = {
       node: {
         _id: '1.1.1.1',
         network: {
-          bytes: 11276023407,
-          packets: 1025631,
-          direction: ['inbound'],
+          bytes_in: 11276023407,
+          bytes_out: 1025631,
         },
         source: {
           domain: ['test.1.net'],
           ip: '1.1.1.1',
           count: 1,
+          flows: 1234567,
+          destination_ips: 345345,
         },
       },
     },
@@ -481,14 +459,15 @@ export const mockResult = {
       node: {
         _id: '2.2.2.2',
         network: {
-          bytes: 5469323342,
-          packets: 2811441,
-          direction: ['outbound', 'external'],
+          bytes_in: 5469323342,
+          bytes_out: 2811441,
         },
         source: {
           domain: ['test.2.net'],
           ip: '2.2.2.2',
           count: 2,
+          flows: 1234567,
+          destination_ips: 345345,
         },
       },
     },
@@ -500,14 +479,15 @@ export const mockResult = {
       node: {
         _id: '3.3.3.3',
         network: {
-          bytes: 3807671322,
-          packets: 4494034,
-          direction: ['outbound'],
+          bytes_in: 3807671322,
+          bytes_out: 4494034,
         },
         source: {
           domain: ['test.3.com', 'test.3-duplicate.com'],
           ip: '3.3.3.3',
           count: 5,
+          flows: 1234567,
+          destination_ips: 345345,
         },
       },
     },
@@ -519,14 +499,15 @@ export const mockResult = {
       node: {
         _id: '4.4.4.4',
         network: {
-          bytes: 166517626,
-          packets: 3194782,
-          direction: ['inbound'],
+          bytes_in: 166517626,
+          bytes_out: 3194782,
         },
         source: {
           domain: ['test.4.com'],
           ip: '4.4.4.4',
           count: 1,
+          flows: 1234567,
+          destination_ips: 345345,
         },
       },
     },
@@ -538,14 +519,15 @@ export const mockResult = {
       node: {
         _id: '5.5.5.5',
         network: {
-          bytes: 104785026,
-          packets: 1838597,
-          direction: ['external'],
+          bytes_in: 104785026,
+          bytes_out: 1838597,
         },
         source: {
           domain: ['test.5.com'],
           ip: '5.5.5.5',
           count: 3,
+          flows: 1234567,
+          destination_ips: 345345,
         },
       },
     },
@@ -557,14 +539,15 @@ export const mockResult = {
       node: {
         _id: '6.6.6.6',
         network: {
-          bytes: 28804250,
-          packets: 482982,
-          direction: ['inbound'],
+          bytes_in: 28804250,
+          bytes_out: 482982,
         },
         source: {
           domain: ['test.6.com'],
           ip: '6.6.6.6',
           count: 2,
+          flows: 1234567,
+          destination_ips: 345345,
         },
       },
     },
@@ -576,14 +559,15 @@ export const mockResult = {
       node: {
         _id: '7.7.7.7',
         network: {
-          bytes: 23032363,
-          packets: 400623,
-          direction: ['inbound'],
+          bytes_in: 23032363,
+          bytes_out: 400623,
         },
         source: {
           domain: ['test.7.com'],
           ip: '7.7.7.7',
           count: 2,
+          flows: 1234567,
+          destination_ips: 345345,
         },
       },
     },
@@ -595,14 +579,15 @@ export const mockResult = {
       node: {
         _id: '8.8.8.8',
         network: {
-          bytes: 21424889,
-          packets: 344357,
-          direction: ['inbound'],
+          bytes_in: 21424889,
+          bytes_out: 344357,
         },
         source: {
           domain: ['test.8.com'],
           ip: '8.8.8.8',
           count: 2,
+          flows: 1234567,
+          destination_ips: 345345,
         },
       },
     },
@@ -614,14 +599,15 @@ export const mockResult = {
       node: {
         _id: '9.9.9.9',
         network: {
-          bytes: 19205000,
-          packets: 355663,
-          direction: ['inbound'],
+          bytes_in: 19205000,
+          bytes_out: 355663,
         },
         source: {
           domain: ['test.9.com'],
           ip: '9.9.9.9',
           count: 2,
+          flows: 1234567,
+          destination_ips: 345345,
         },
       },
     },
@@ -633,14 +619,15 @@ export const mockResult = {
       node: {
         _id: '10.10.10.10',
         network: {
-          bytes: 11407633,
-          packets: 199360,
-          direction: ['inbound'],
+          bytes_in: 11407633,
+          bytes_out: 199360,
         },
         source: {
           domain: ['test.10.com'],
           ip: '10.10.10.10',
           count: 2,
+          flows: 1234567,
+          destination_ips: 345345,
         },
       },
     },

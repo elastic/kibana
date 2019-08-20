@@ -8,6 +8,7 @@ import {
   DomainsSortField,
   FlowDirection,
   FlowTarget,
+  FlowTargetNew,
   NetworkDnsSortField,
   NetworkTopNFlowSortField,
   TlsSortField,
@@ -38,7 +39,7 @@ export interface BasicQueryPaginated {
 
 // Network Page Models
 export interface TopNFlowQuery extends BasicQueryPaginated {
-  flowTarget: FlowTarget;
+  flowTarget: FlowTargetNew;
   topNFlowSort: NetworkTopNFlowSortField;
 }
 

@@ -11,6 +11,7 @@ import {
   DomainsFields,
   FlowDirection,
   FlowTarget,
+  FlowTargetNew,
   NetworkDnsFields,
   NetworkTopNFlowFields,
   TlsFields,
@@ -48,10 +49,10 @@ export const initialNetworkState: NetworkState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         topNFlowSort: {
-          field: NetworkTopNFlowFields.bytes,
+          field: NetworkTopNFlowFields.bytes_out,
           direction: Direction.desc,
         },
-        flowTarget: FlowTarget.source,
+        flowTarget: FlowTargetNew.source,
       },
       [NetworkTableType.dns]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,

@@ -10,6 +10,7 @@ import {
   DomainsFields,
   FlowDirection,
   FlowTarget,
+  FlowTargetNew,
   HostsFields,
   NetworkDnsFields,
   NetworkTopNFlowFields,
@@ -66,8 +67,8 @@ export const mockGlobalState: State = {
         topNFlow: {
           activePage: 0,
           limit: 10,
-          flowTarget: FlowTarget.source,
-          topNFlowSort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
+          flowTarget: FlowTargetNew.source,
+          topNFlowSort: { field: NetworkTopNFlowFields.bytes_out, direction: Direction.desc },
         },
         dns: {
           activePage: 0,

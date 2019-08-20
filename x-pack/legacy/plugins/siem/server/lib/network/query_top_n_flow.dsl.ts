@@ -4,17 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Direction,
-  FlowTarget,
-  NetworkTopNFlowFields,
-  NetworkTopNFlowSortField,
-} from '../../graphql/types';
+import { Direction, FlowTargetNew, NetworkTopNFlowSortField } from '../../graphql/types';
 import { assertUnreachable, createQueryFilterClauses } from '../../utils/build_query';
 
 import { NetworkTopNFlowRequestOptions } from './index';
 
-const getCountAgg = (flowTarget: FlowTarget) => ({
+const getCountAgg = (flowTarget: FlowTargetNew) => ({
   top_n_flow_count: {
     cardinality: {
       field: `${flowTarget}.ip`,
@@ -61,7 +56,7 @@ export const buildTopNFlowQuery = ({
 
 const generateFlowTargetAggs = (
   networkTopNFlowSortField: NetworkTopNFlowSortField,
-  flowTarget: FlowTarget.source | FlowTarget.destination,
+  flowTarget: FlowTargetNew,
   querySize: number
 ) => ({
   [flowTarget]: {
@@ -128,42 +123,42 @@ const generateFlowTargetAggs = (
           },
         },
       },
+      flows: {
+        cardinality: {
+          field: 'network.community_id',
+        },
+      },
+      [`${getOppositeField(flowTarget)}_ips`]: {
+        cardinality: {
+          field: `${getOppositeField(flowTarget)}.ip`,
+        },
+      },
     },
   },
 });
 
 const getFlowTargetAggs = (
   networkTopNFlowSortField: NetworkTopNFlowSortField,
-  flowTarget: FlowTarget.source | FlowTarget.destination,
+  flowTarget: FlowTargetNew,
   querySize: number
 ) => {
   return generateFlowTargetAggs(networkTopNFlowSortField, flowTarget, querySize);
 };
 
-const getOppositeField = (flowTarget: FlowTarget): FlowTarget => {
+export const getOppositeField = (flowTarget: FlowTargetNew): FlowTargetNew => {
   switch (flowTarget) {
-    case FlowTarget.source:
-      return FlowTarget.destination;
-    case FlowTarget.destination:
-      return FlowTarget.source;
-    case FlowTarget.server:
-      return FlowTarget.client;
-    case FlowTarget.client:
-      return FlowTarget.server;
+    case FlowTargetNew.source:
+      return FlowTargetNew.destination;
+    case FlowTargetNew.destination:
+      return FlowTargetNew.source;
   }
   assertUnreachable(flowTarget);
 };
 
-type QueryOrder = { bytes: Direction } | { packets: Direction } | { ip_count: Direction };
+interface QueryOrder {
+  bytes_out: Direction;
+}
 
 const getQueryOrder = (networkTopNFlowSortField: NetworkTopNFlowSortField): QueryOrder => {
-  switch (networkTopNFlowSortField.field) {
-    case NetworkTopNFlowFields.bytes:
-      return { bytes: networkTopNFlowSortField.direction };
-    case NetworkTopNFlowFields.packets:
-      return { packets: networkTopNFlowSortField.direction };
-    case NetworkTopNFlowFields.ipCount:
-      return { ip_count: networkTopNFlowSortField.direction };
-  }
-  assertUnreachable(networkTopNFlowSortField.field);
+  return { bytes_out: networkTopNFlowSortField.direction };
 };
