@@ -18,4 +18,4 @@
  */
 
 export { CronEditor } from './cron_editor';
-export { DAY, WEEK } from './services';
+export { MINUTE, HOUR, DAY, WEEK, MONTH, YEAR } from './services';
