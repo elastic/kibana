@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   EuiFlyout,
   EuiIcon,
@@ -26,8 +26,10 @@ import {
   processImportResponse,
   ProcessedImportResponse,
 } from 'ui/management/saved_objects_management';
-import { SavedObjectsImportResponse, SavedObjectsImportRetry } from 'src/core/server';
+import { SavedObjectsImportRetry } from 'src/core/server';
 import { toastNotifications } from 'ui/notify';
+import { Space } from '../../../../../common/model/space';
+import { SpacesManager } from '../../../../lib';
 import { useKibanaSpaces } from '../../../../lib/hooks';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';
 import { CopyToSpaceFlyoutFooter } from './copy_to_space_flyout_footer';
@@ -37,16 +39,20 @@ import { CopyOptions } from './types';
 interface Props {
   onClose: () => void;
   savedObject: SavedObjectRecord;
+  spacesManager: SpacesManager;
+  activeSpace: Space;
 }
 
-export const CopySavedObjectsToSpaceFlyout = ({ onClose, savedObject }: Props) => {
+export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
+  const { onClose, savedObject, spacesManager } = props;
   const [copyOptions, setCopyOptions] = useState<CopyOptions>({
     includeRelated: true,
     overwrite: true,
     selectedSpaceIds: [],
   });
 
-  const { isLoading, spaces } = useKibanaSpaces();
+  const { isLoading, spaces } = useKibanaSpaces('copySavedObjects');
+  const eligibleSpaces = spaces.filter(space => space.id !== props.activeSpace.id);
 
   const [copyInProgress, setCopyInProgress] = useState(false);
   const [conflictResolutionInProgress, setConflictResolutionInProgress] = useState(false);
@@ -59,99 +65,49 @@ export const CopySavedObjectsToSpaceFlyout = ({ onClose, savedObject }: Props) =
     setRetries(updatedRetries);
   };
 
-  useEffect(() => {
-    if (copyInProgress) {
-      // simulating copy operation
-      setTimeout(() => {
-        const dummyResponse = copyOptions.selectedSpaceIds.reduce<
-          Record<string, SavedObjectsImportResponse>
-        >((acc, id) => {
-          const successCount = 17;
-          const hasErrors = id === 'sales';
-          return {
-            ...acc,
-            [id]: {
-              successCount,
-              success: true,
-              errors: hasErrors
-                ? [
-                    {
-                      type: 'index-pattern',
-                      id: 'logstash-*',
-                      error: {
-                        type: copyOptions.overwrite ? 'missing_references' : 'conflict',
-                        references: [],
-                      },
-                    },
-                  ]
-                : undefined,
-            } as SavedObjectsImportResponse,
-          };
-        }, {});
-
-        const processedResult = mapValues(dummyResponse, processImportResponse);
-        setCopyResult(processedResult);
-      }, 1000);
-    }
-  }, [copyInProgress]);
-
-  function startCopy() {
+  async function startCopy() {
     setCopyInProgress(true);
     setCopyResult({});
+    try {
+      const copySavedObjectsResult = await spacesManager.copySavedObjects(
+        [props.savedObject],
+        copyOptions.selectedSpaceIds,
+        copyOptions.includeRelated,
+        copyOptions.overwrite
+      );
+      const processedResult = mapValues(copySavedObjectsResult, processImportResponse);
+      setCopyResult(processedResult);
+    } catch (e) {
+      setCopyInProgress(false);
+      toastNotifications.addError(e, {
+        title: i18n.translate('xpack.spaces.management.copyToSpace.copyErrorTitle', {
+          defaultMessage: 'Error copying saved object',
+        }),
+      });
+    }
   }
 
-  function finishCopy() {
+  async function finishCopy() {
     const needsConflictResolution = Object.values(retries).some(spaceRetry =>
       spaceRetry.some(retry => retry.overwrite)
     );
     if (needsConflictResolution) {
       setConflictResolutionInProgress(true);
-      // simulating conflict resolution operation
-      setTimeout(() => {
-        setConflictResolutionInProgress(false);
-
-        const dummyResponse = copyOptions.selectedSpaceIds.reduce<
-          Record<string, SavedObjectsImportResponse>
-        >((acc, id) => {
-          const successCount = Math.floor(Math.random() * 10);
-          const hasErrors = false; // successCount % 2 === 0;
-          return {
-            ...acc,
-            [id]: {
-              successCount,
-              success: true,
-              errors: hasErrors
-                ? [
-                    {
-                      type: savedObject.type,
-                      id: savedObject.id,
-                      error: {
-                        type: copyOptions.overwrite ? 'missing_references' : 'conflict',
-                        references: [],
-                      },
-                    },
-                  ]
-                : undefined,
-            } as SavedObjectsImportResponse,
-          };
-        }, {});
-
-        if (dummyResponse.success) {
-          toastNotifications.addSuccess(
-            i18n.translate('xpack.spaces.management.copyToSpace.copyWithConflictSuccess', {
-              defaultMessage: 'Copy successful',
-            })
-          );
-        } else {
-          toastNotifications.addDanger(
-            i18n.translate('xpack.spaces.management.copyToSpace.copyWithConflictError', {
-              defaultMessage: 'Error resolving conflicts. Please try again.',
-            })
-          );
-        }
-
-        onClose();
-      }, 1000);
+      try {
+        const resolveCopySavedObjectsErrorsResult = await spacesManager.resolveCopySavedObjectsErrors(
+          [props.savedObject],
+          retries,
+          copyOptions.includeRelated
+        );
+        console.log({ resolveCopySavedObjectsErrorsResult });
+      } catch (e) {
+        setCopyInProgress(false);
+        toastNotifications.addError(e, {
+          title: i18n.translate('xpack.spaces.management.copyToSpace.resolveCopyErrorTitle', {
+            defaultMessage: 'Error resolving saved object conflicts',
+          }),
+        });
+      }
     } else {
       toastNotifications.addSuccess(
         i18n.translate('xpack.spaces.management.copyToSpace.copySuccess', {
@@ -169,7 +125,7 @@ export const CopySavedObjectsToSpaceFlyout = ({ onClose, savedObject }: Props) =
     }
 
     // Step 1a: assets loaded, but no spaces are available for copy.
-    if (spaces.length === 0) {
+    if (eligibleSpaces.length === 0) {
       return (
         <EuiEmptyPrompt
           body={
@@ -195,7 +151,11 @@ export const CopySavedObjectsToSpaceFlyout = ({ onClose, savedObject }: Props) =
     // Step 2: Copy has not been initiated yet; User must fill out form to continue.
     if (!copyInProgress) {
       return (
-        <CopyToSpaceForm spaces={spaces} copyOptions={copyOptions} onUpdate={setCopyOptions} />
+        <CopyToSpaceForm
+          spaces={eligibleSpaces}
+          copyOptions={copyOptions}
+          onUpdate={setCopyOptions}
+        />
       );
     }
 
@@ -206,7 +166,7 @@ export const CopySavedObjectsToSpaceFlyout = ({ onClose, savedObject }: Props) =
         copyInProgress={copyInProgress}
         conflictResolutionInProgress={conflictResolutionInProgress}
         copyResult={copyResult}
-        spaces={spaces}
+        spaces={eligibleSpaces}
         copyOptions={copyOptions}
         retries={retries}
         onRetriesChange={onRetriesChange}

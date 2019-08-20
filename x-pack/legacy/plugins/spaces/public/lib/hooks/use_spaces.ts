@@ -8,17 +8,17 @@ import { useEffect, useState } from 'react';
 import { kfetch } from 'ui/kfetch';
 import { Space } from '../../../common/model/space';
 
-export const useKibanaSpaces = () => {
+export const useKibanaSpaces = (purpose: 'any' | 'copySavedObjects' = 'any') => {
   const [spaces, setSpaces] = useState([] as Space[]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     setIsLoading(true);
-    kfetch({ pathname: '/api/spaces/space' }).then((response: Space[]) => {
+    kfetch({ pathname: '/api/spaces/space', query: { purpose } }).then((response: Space[]) => {
       setSpaces(response);
       setIsLoading(false);
     });
-  }, []);
+  }, [purpose]);
 
   return {
     isLoading,

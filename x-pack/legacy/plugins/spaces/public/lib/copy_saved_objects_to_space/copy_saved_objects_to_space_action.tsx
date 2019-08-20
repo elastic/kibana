@@ -10,6 +10,8 @@ import {
 } from 'ui/management/saved_objects_management';
 import { i18n } from '@kbn/i18n';
 import { CopySavedObjectsToSpaceFlyout } from '../../views/management/components/copy_saved_objects_to_space';
+import { Space } from '../../../common/model/space';
+import { SpacesManager } from '../spaces_manager';
 
 export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagementAction {
   public id: string = 'copy_saved_objects_to_space';
@@ -28,11 +30,22 @@ export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagem
     },
   };
 
+  constructor(private readonly spacesManager: SpacesManager, private readonly activeSpace: Space) {
+    super();
+  }
+
   public render = () => {
     if (!this.record) {
       throw new Error('No record available! `render()` was likely called before `start()`.');
     }
-    return <CopySavedObjectsToSpaceFlyout onClose={this.onClose} savedObject={this.record} />;
+    return (
+      <CopySavedObjectsToSpaceFlyout
+        onClose={this.onClose}
+        savedObject={this.record}
+        spacesManager={this.spacesManager}
+        activeSpace={this.activeSpace}
+      />
+    );
   };
 
   private onClose = () => {

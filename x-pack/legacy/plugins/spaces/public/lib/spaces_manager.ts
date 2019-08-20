@@ -17,8 +17,8 @@ export class SpacesManager extends EventEmitter {
     this.spaceSelectorURL = spaceSelectorURL;
   }
 
-  public async getSpaces(): Promise<Space[]> {
-    return await kfetch({ pathname: '/api/spaces/space' });
+  public async getSpaces(purpose: 'any' | 'copySavedObjects' = 'any'): Promise<Space[]> {
+    return await kfetch({ pathname: '/api/spaces/space', query: { purpose } });
   }
 
   public async getSpace(id: string): Promise<Space> {
@@ -48,6 +48,40 @@ export class SpacesManager extends EventEmitter {
     return await kfetch({
       pathname: `/api/spaces/space/${encodeURIComponent(space.id)}`,
       method: 'DELETE',
+    });
+  }
+
+  public async copySavedObjects(
+    objects: unknown,
+    spaces: string[],
+    includeReferences: boolean,
+    overwrite: boolean
+  ) {
+    return await kfetch({
+      pathname: `/api/spaces/_copy_saved_objects`,
+      method: 'POST',
+      body: JSON.stringify({
+        objects,
+        spaces,
+        includeReferences,
+        overwrite,
+      }),
+    });
+  }
+
+  public async resolveCopySavedObjectsErrors(
+    objects: unknown,
+    retries: unknown,
+    includeReferences: boolean
+  ) {
+    return await kfetch({
+      pathname: `/api/spaces/_resolve_copy_saved_objects_errors`,
+      method: 'POST',
+      body: JSON.stringify({
+        objects,
+        includeReferences,
+        retries,
+      }),
     });
   }
 
