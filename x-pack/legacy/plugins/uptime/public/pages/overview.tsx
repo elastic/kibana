@@ -86,7 +86,7 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
   };
 
   const updateQuery: UptimeSearchBarQueryChangeHandler = ({ queryText }) => {
-    updateUrl({ search: queryText || '', cursorKey: '', cursorDirection: '', sortOrder: '' });
+    updateUrl({ search: queryText || '', cursorKey: '' });
     refreshApp();
   };
 

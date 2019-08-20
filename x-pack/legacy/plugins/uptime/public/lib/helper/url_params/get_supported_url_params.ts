@@ -7,7 +7,6 @@
 import { parseIsPaused } from './parse_is_paused';
 import { parseUrlInt } from './parse_url_int';
 import { CLIENT_DEFAULTS } from '../../../../common/constants';
-import { CursorDirection, SortOrder } from '../../../../common/graphql/types';
 
 export interface UptimeUrlParams {
   autorefreshInterval: number;
@@ -17,9 +16,7 @@ export interface UptimeUrlParams {
   search: string;
   selectedPingStatus: string;
   cursorKey?: string;
-  cursorDirection?: CursorDirection;
   overviewPageIndex: number;
-  sortOrder?: SortOrder;
 }
 
 const {
@@ -88,9 +85,6 @@ export const getSupportedUrlParams = (params: {
     selectedPingStatus:
       selectedPingStatus === undefined ? SELECTED_PING_LIST_STATUS : selectedPingStatus,
     cursorKey,
-    cursorDirection:
-      cursorDirection === CursorDirection.BEFORE ? CursorDirection.BEFORE : CursorDirection.AFTER,
-    sortOrder: sortOrder === SortOrder.DESC ? SortOrder.DESC : SortOrder.ASC,
     overviewPageIndex: parseUrlInt(overviewPageIndex, OVERVIEW_PAGE_INDEX),
   };
 };
