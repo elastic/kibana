@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 jest.mock('ui/new_platform');
-import { savedMap } from './savedMap';
+import { savedVisualization } from './saved_visualization';
 import { buildEmbeddableFilters } from '../../../server/lib/build_embeddable_filters';
 
 const filterContext = {
@@ -20,8 +20,8 @@ const filterContext = {
   ],
 };
 
-describe('savedMap', () => {
-  const fn = savedMap().fn;
+describe('savedVisualization', () => {
+  const fn = savedVisualization().fn;
   const args = {
     id: 'some-id',
   };

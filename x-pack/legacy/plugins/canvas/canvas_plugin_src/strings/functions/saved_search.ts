@@ -5,15 +5,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { savedMap } from '../../functions/common/savedMap';
+import { savedSearch } from '../../functions/common/saved_search';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
 
-export const help: FunctionHelp<FunctionFactory<typeof savedMap>> = {
-  help: i18n.translate('xpack.canvas.functions.savedMapHelpText', {
-    defaultMessage: `Returns an embeddable for a saved map object`,
+export const help: FunctionHelp<FunctionFactory<typeof savedSearch>> = {
+  help: i18n.translate('xpack.canvas.functions.savedSearchHelpText', {
+    defaultMessage: `Returns an embeddable for a saved search object`,
   }),
   args: {
-    id: 'The id of the saved map object',
+    id: 'The id of the saved search object',
   },
 };

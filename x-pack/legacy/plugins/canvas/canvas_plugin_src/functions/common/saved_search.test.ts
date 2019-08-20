@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 jest.mock('ui/new_platform');
-import { savedSearch } from './savedSearch';
+import { savedSearch } from './saved_search';
 import { buildEmbeddableFilters } from '../../../server/lib/build_embeddable_filters';
 
 const filterContext = {

@@ -5,15 +5,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { savedSearch } from '../../functions/common/savedSearch';
+import { savedVisualization } from '../../functions/common/saved_visualization';
 import { FunctionHelp } from '.';
 import { FunctionFactory } from '../../../types';
 
-export const help: FunctionHelp<FunctionFactory<typeof savedSearch>> = {
-  help: i18n.translate('xpack.canvas.functions.savedSearchHelpText', {
-    defaultMessage: `Returns an embeddable for a saved search object`,
+export const help: FunctionHelp<FunctionFactory<typeof savedVisualization>> = {
+  help: i18n.translate('xpack.canvas.functions.savedVisualizationHelpText', {
+    defaultMessage: `Returns an embeddable for a saved visualization object`,
   }),
   args: {
-    id: 'The id of the saved search object',
+    id: 'The id of the saved visualization object',
   },
 };
