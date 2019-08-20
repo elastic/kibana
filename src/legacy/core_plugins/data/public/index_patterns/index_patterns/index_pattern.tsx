@@ -23,7 +23,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import chrome from 'ui/chrome';
-
 // @ts-ignore
 import { SavedObjectNotFound, DuplicateField } from 'ui/errors';
 // @ts-ignore
@@ -33,16 +32,15 @@ import { expandShorthand } from 'ui/utils/mapping_setup';
 import { toastNotifications } from 'ui/notify';
 import { findObjectByTitle } from 'ui/saved_objects';
 import { SavedObjectsClientContract } from 'src/core/public';
+
+import { IndexPatternMissingIndices } from '../errors';
+import { Field, FieldList, FieldType } from '../fields';
+import { createFieldsFetcher } from './_fields_fetcher';
+import { getRoutes } from '../utils';
+import { formatHitProvider } from './format_hit';
+// @ts-ignore
+import { flattenHitWrapper } from './flatten_hit';
 import { IndexPatternsApiClient } from './index_patterns_api_client';
-import { IndexPatternMissingIndices } from './errors';
-import { getRoutes } from './get_routes';
-import { FieldList } from './_field_list';
-import { createFieldsFetcher } from './fields_fetcher';
-import { Field, FieldType } from './_field';
-// @ts-ignore
-import { flattenHitWrapper } from './_flatten_hit';
-// @ts-ignore
-import { formatHitProvider } from './_format_hit';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
@@ -200,11 +198,11 @@ export class IndexPattern implements StaticIndexPattern {
     }
 
     if (this.isUnsupportedTimePattern()) {
-      const warningTitle = i18n.translate('common.ui.indexPattern.warningTitle', {
+      const warningTitle = i18n.translate('data.indexPatterns.warningTitle', {
         defaultMessage: 'Support for time interval index patterns removed',
       });
 
-      const warningText = i18n.translate('common.ui.indexPattern.warningText', {
+      const warningText = i18n.translate('data.indexPatterns.warningText', {
         defaultMessage:
           'Currently querying all indices matching {index}. {title} should be migrated to a wildcard-based index pattern.',
         values: {
@@ -228,7 +226,7 @@ export class IndexPattern implements StaticIndexPattern {
               <EuiFlexItem grow={false}>
                 <EuiButton size="s" href={kbnUrl.getRouteHref(this, 'edit')}>
                   <FormattedMessage
-                    id="common.ui.indexPattern.editIndexPattern"
+                    id="data.indexPatterns.editIndexPattern"
                     defaultMessage="Edit index pattern"
                   />
                 </EuiButton>
@@ -405,12 +403,12 @@ export class IndexPattern implements StaticIndexPattern {
       .join('');
   }
 
-  isTimeBased(): boolean {
-    return !!this.timeFieldName && (!this.fields || !!this.getTimeField());
-  }
-
   isUnsupportedTimePattern(): boolean {
     return !!this.intervalName;
+  }
+
+  isTimeBased(): boolean {
+    return !!this.timeFieldName && (!this.fields || !!this.getTimeField());
   }
 
   isTimeNanosBased(): boolean {
@@ -538,7 +536,7 @@ export class IndexPattern implements StaticIndexPattern {
 
             if (unresolvedCollision) {
               const message = i18n.translate(
-                'common.ui.indexPattern.unableWriteLabel',
+                'data.indexPatterns.unableWriteLabel',
                 {
                   defaultMessage:
                     'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.',
@@ -588,7 +586,7 @@ export class IndexPattern implements StaticIndexPattern {
         }
 
         toastNotifications.addError(err, {
-          title: i18n.translate('common.ui.indexPattern.fetchFieldErrorTitle', {
+          title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
             defaultMessage: 'Error fetching fields',
           }),
         });

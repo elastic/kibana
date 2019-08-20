@@ -19,8 +19,6 @@
 
 import _ from 'lodash';
 
-const flattenedCache = new WeakMap();
-
 // Takes a hit, merges it with any stored/scripted fields, and with the metaFields
 // returns a flattened version
 
@@ -84,15 +82,32 @@ function decorateFlattenedWrapper(hit, metaFields) {
   };
 }
 
-export function flattenHitWrapper(indexPattern, metaFields = {}) {
-
+/**
+ * This is wrapped by `createFlattenHitWrapper` in order to provide a single cache to be
+ * shared across all uses of this function. It is only exported here for use in mocks.
+ *
+ * @internal
+ */
+export function flattenHitWrapper(indexPattern, metaFields = {}, cache = new WeakMap()) {
   return function cachedFlatten(hit, deep = false) {
     const decorateFlattened = decorateFlattenedWrapper(hit, metaFields);
-    const cached = flattenedCache.get(hit);
+    const cached = cache.get(hit);
     const flattened = cached || flattenHit(indexPattern, hit, deep);
     if (!cached) {
-      flattenedCache.set(hit, { ...flattened });
+      cache.set(hit, { ...flattened });
     }
     return decorateFlattened(flattened);
   };
+}
+
+/**
+ * This wraps `flattenHitWrapper` so one single cache can be provided for all uses of that
+ * function. The returned value of this function is what is included in the index patterns
+ * setup contract.
+ *
+ * @public
+ */
+export function createFlattenHitWrapper() {
+  const cache = new WeakMap();
+  return _.partial(flattenHitWrapper, _, _, cache);
 }

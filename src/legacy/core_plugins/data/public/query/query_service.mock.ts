@@ -17,12 +17,35 @@
  * under the License.
  */
 
-export function getRoutes() {
-  return {
-    edit: '/management/kibana/index_patterns/{{id}}',
-    addField: '/management/kibana/index_patterns/{{id}}/create-field',
-    indexedFields: '/management/kibana/index_patterns/{{id}}?_a=(tab:indexedFields)',
-    scriptedFields: '/management/kibana/index_patterns/{{id}}?_a=(tab:scriptedFields)',
-    sourceFilters: '/management/kibana/index_patterns/{{id}}?_a=(tab:sourceFilters)',
+import { QueryService, QuerySetup } from '.';
+
+type QueryServiceClientContract = PublicMethodsOf<QueryService>;
+
+const createSetupContractMock = () => {
+  const setupContract: jest.Mocked<QuerySetup> = {
+    helpers: {
+      fromUser: jest.fn(),
+      toUser: jest.fn(),
+      getQueryLog: jest.fn(),
+    },
   };
-}
+
+  return setupContract;
+};
+
+const createMock = () => {
+  const mocked: jest.Mocked<QueryServiceClientContract> = {
+    setup: jest.fn(),
+    start: jest.fn(),
+    stop: jest.fn(),
+  };
+
+  mocked.setup.mockReturnValue(createSetupContractMock());
+  return mocked;
+};
+
+export const queryServiceMock = {
+  create: createMock,
+  createSetupContract: createSetupContractMock,
+  createStartContract: createSetupContractMock,
+};

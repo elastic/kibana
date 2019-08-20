@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { IndexPattern } from './_index_pattern';
+import { IndexPattern } from './index_pattern';
 
 const formattedCache = new WeakMap();
 const partialFormattedCache = new WeakMap();

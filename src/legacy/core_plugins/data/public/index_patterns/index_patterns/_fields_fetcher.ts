@@ -17,9 +17,10 @@
  * under the License.
  */
 
+import { IndexPattern } from './index_pattern';
 import { GetFieldsOptions, IndexPatternsApiClient } from './index_patterns_api_client';
-import { IndexPattern } from './_index_pattern';
 
+/** @internal */
 export const createFieldsFetcher = (
   indexPattern: IndexPattern,
   apiClient: IndexPatternsApiClient,

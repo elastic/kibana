@@ -17,35 +17,18 @@
  * under the License.
  */
 
-import { UiSettingsClientContract } from 'src/core/public';
-import { IndexPatterns } from '../index_patterns';
-import { FilterManager } from './filter_manager';
+import { IndexedArray } from 'ui/indexed_array';
+import { IndexPattern } from '../index_patterns';
+import { Field, FieldSpec } from './field';
 
-/**
- * Filter Service
- * @internal
- */
-
-export interface FilterServiceDependencies {
-  indexPatterns: IndexPatterns;
-  uiSettings: UiSettingsClientContract;
-}
-
-export class FilterService {
-  public setup({ indexPatterns, uiSettings }: FilterServiceDependencies) {
-    return {
-      filterManager: new FilterManager(indexPatterns, uiSettings),
-    };
-  }
-
-  public start() {
-    // nothing to do here yet
-  }
-
-  public stop() {
-    // nothing to do here yet
+export class FieldList extends IndexedArray<Field> {
+  constructor(indexPattern: IndexPattern, specs: FieldSpec[], shortDotsEnable = false) {
+    super({
+      index: ['name'],
+      group: ['type'],
+      initialSet: specs.map(function(field) {
+        return new Field(indexPattern, field, shortDotsEnable);
+      }),
+    });
   }
 }
-
-/** @public */
-export type FilterSetup = ReturnType<FilterService['setup']>;

@@ -17,28 +17,31 @@
  * under the License.
  */
 
-import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../constants';
+import { FilterService, FilterSetup } from '.';
 
-import {
-  ILLEGAL_CHARACTERS,
-  CONTAINS_SPACES,
-  validateIndexPattern,
-} from './validate_index_pattern';
+type FilterServiceClientContract = PublicMethodsOf<FilterService>;
 
-describe('Index Pattern Validation', () => {
-  it('should not allow space in the pattern', () => {
-    const errors = validateIndexPattern('my pattern');
-    expect(errors[CONTAINS_SPACES]).toBe(true);
-  });
+const createSetupContractMock = () => {
+  const setupContract: jest.Mocked<FilterSetup> = {
+    filterManager: jest.fn() as any,
+  };
 
-  it('should not allow illegal characters', () => {
-    INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.forEach(char => {
-      const errors = validateIndexPattern(`pattern${char}`);
-      expect(errors[ILLEGAL_CHARACTERS]).toEqual([char]);
-    });
-  });
+  return setupContract;
+};
 
-  it('should return empty object when there are no errors', () => {
-    expect(validateIndexPattern('my-pattern-*')).toEqual({});
-  });
-});
+const createMock = () => {
+  const mocked: jest.Mocked<FilterServiceClientContract> = {
+    setup: jest.fn(),
+    start: jest.fn(),
+    stop: jest.fn(),
+  };
+
+  mocked.setup.mockReturnValue(createSetupContractMock());
+  return mocked;
+};
+
+export const filterServiceMock = {
+  create: createMock,
+  createSetupContract: createSetupContractMock,
+  createStartContract: createSetupContractMock,
+};

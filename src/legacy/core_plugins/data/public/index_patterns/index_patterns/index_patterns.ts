@@ -24,11 +24,12 @@ import {
   UiSettingsClientContract,
 } from 'src/core/public';
 // @ts-ignore
-import { fieldFormats } from '../registry/field_formats';
+import { fieldFormats } from 'ui/registry/field_formats';
 
-import { IndexPattern } from './_index_pattern';
 import { createIndexPatternCache } from './_pattern_cache';
+import { IndexPattern } from './index_pattern';
 import { IndexPatternsApiClient } from './index_patterns_api_client';
+
 const indexPatternCache = createIndexPatternCache();
 const apiClient = new IndexPatternsApiClient();
 
@@ -124,7 +125,8 @@ export class IndexPatterns {
 
 // add angular service for backward compatibility
 // @ts-ignore
-import { uiModules } from '../modules';
+// eslint-disable-next-line
+import { uiModules } from 'ui/modules';
 
 const module = uiModules.get('kibana/index_patterns');
 let _service: any;

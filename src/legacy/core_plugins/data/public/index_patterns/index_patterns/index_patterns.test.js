@@ -17,26 +17,26 @@
  * under the License.
  */
 
-import { IndexPatterns } from '../index_patterns';
+import { IndexPatterns } from './index_patterns';
 
 jest.mock('../errors', () => ({
   IndexPatternMissingIndices: jest.fn(),
 }));
 
 
-jest.mock('../../registry/field_formats', () => ({
+jest.mock('ui/registry/field_formats', () => ({
   fieldFormats: {
     getDefaultInstance: jest.fn(),
   }
 }));
 
-jest.mock('../../notify', () => ({
+jest.mock('ui/notify', () => ({
   toastNotifications: {
     addDanger: jest.fn(),
   }
 }));
 
-jest.mock('../_index_pattern', () => {
+jest.mock('./index_pattern', () => {
   class IndexPattern {
     init = async () => {
       return this;
@@ -48,7 +48,7 @@ jest.mock('../_index_pattern', () => {
   };
 });
 
-jest.mock('../index_patterns_api_client', () => {
+jest.mock('./index_patterns_api_client', () => {
   class IndexPatternsApiClient {
     getFieldsForWildcard = async () => ({})
   }
