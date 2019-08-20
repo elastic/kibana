@@ -26,6 +26,6 @@
       "{indices}/_termvectors/{id}",
       "{indices}/_termvectors"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/docs-termvectors.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-termvectors.html"
   }
 }
