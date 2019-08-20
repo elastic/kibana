@@ -2418,6 +2418,18 @@
             "deprecationReason": null
           },
           {
+            "name": "hostDockerOverview",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "hostDockerInfo",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "podOverview",
             "description": "",
             "isDeprecated": false,

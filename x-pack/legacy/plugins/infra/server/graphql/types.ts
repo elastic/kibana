@@ -600,6 +600,8 @@ export enum InfraMetric {
   hostLoad = 'hostLoad',
   hostMemoryUsage = 'hostMemoryUsage',
   hostNetworkTraffic = 'hostNetworkTraffic',
+  hostDockerOverview = 'hostDockerOverview',
+  hostDockerInfo = 'hostDockerInfo',
   podOverview = 'podOverview',
   podCpuUsage = 'podCpuUsage',
   podMemoryUsage = 'podMemoryUsage',

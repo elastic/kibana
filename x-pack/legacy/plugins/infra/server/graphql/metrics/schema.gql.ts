@@ -19,6 +19,8 @@ export const metricsSchema: any = gql`
     hostLoad
     hostMemoryUsage
     hostNetworkTraffic
+    hostDockerOverview
+    hostDockerInfo
     podOverview
     podCpuUsage
     podMemoryUsage

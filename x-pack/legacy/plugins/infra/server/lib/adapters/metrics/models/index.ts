@@ -43,6 +43,8 @@ import { awsNetworkBytes } from './aws/aws_network_bytes';
 import { awsNetworkPackets } from './aws/aws_network_packets';
 import { awsDiskioBytes } from './aws/aws_diskio_bytes';
 import { awsDiskioOps } from './aws/aws_diskio_ops';
+import { hostDockerOverview } from './host/host_docker_overview';
+import { hostDockerInfo } from './host/host_docker_info';
 
 interface InfraMetricModels {
   [key: string]: InfraMetricModelCreator;
@@ -60,6 +62,8 @@ export const metricModels: InfraMetricModels = {
   [InfraMetric.hostLoad]: hostLoad,
   [InfraMetric.hostMemoryUsage]: hostMemoryUsage,
   [InfraMetric.hostNetworkTraffic]: hostNetworkTraffic,
+  [InfraMetric.hostDockerOverview]: hostDockerOverview,
+  [InfraMetric.hostDockerInfo]: hostDockerInfo,
 
   [InfraMetric.podOverview]: podOverview,
   [InfraMetric.podCpuUsage]: podCpuUsage,

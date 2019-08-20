@@ -364,6 +364,90 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
     ],
   },
+  {
+    id: 'dockerOverview',
+    label: 'Docker',
+    sections: [
+      {
+        id: InfraMetric.hostDockerOverview,
+        linkToId: 'dockerOverview',
+        label: i18n.translate(
+          'xpack.infra.metricDetailPage.dockerMetricsLayout.overviewSection.sectionLabel',
+          {
+            defaultMessage: 'Overview',
+          }
+        ),
+        requires: ['docker.info'],
+        type: InfraMetricLayoutSectionType.gauges,
+        visConfig: {
+          seriesOverrides: {
+            total: {
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.dockerMetricsLayout.overviewSection.totalLabel',
+                {
+                  defaultMessage: 'Total',
+                }
+              ),
+              color: 'secondary',
+            },
+            running: {
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.dockerMetricsLayout.overviewSection.runningLabel',
+                {
+                  defaultMessage: 'Running',
+                }
+              ),
+              color: 'secondary',
+            },
+            paused: {
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.dockerMetricsLayout.overviewSection.pausedLabel',
+                {
+                  defaultMessage: 'Paused',
+                }
+              ),
+              color: 'secondary',
+            },
+            stopped: {
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.dockerMetricsLayout.overviewSection.stoppedLabel',
+                {
+                  defaultMessage: 'Stopped',
+                }
+              ),
+              color: 'secondary',
+            },
+          },
+        },
+      },
+      {
+        id: InfraMetric.hostDockerInfo,
+        label: i18n.translate(
+          'xpack.infra.metricDetailPage.dockerMetricsLayout.containerStates.sectionLabel',
+          {
+            defaultMessage: 'Container States',
+          }
+        ),
+        requires: ['kubernetes.node'],
+        type: InfraMetricLayoutSectionType.chart,
+        visConfig: {
+          formatter: InfraFormatterType.abbreviatedNumber,
+          stacked: true,
+          seriesOverrides: {
+            running: {
+              color: theme.eui.euiColorVis2,
+              type: InfraMetricLayoutVisualizationType.bar,
+            },
+            stopped: {
+              color: theme.eui.euiColorVis1,
+              type: InfraMetricLayoutVisualizationType.bar,
+            },
+            paused: { color: theme.eui.euiColorVis7, type: InfraMetricLayoutVisualizationType.bar },
+          },
+        },
+      },
+    ],
+  },
   ...nginxLayoutCreator(theme),
   ...awsLayoutCreator(theme),
 ];
