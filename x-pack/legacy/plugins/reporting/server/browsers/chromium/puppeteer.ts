@@ -12,6 +12,9 @@ import puppeteerCore from 'puppeteer-core';
 // However, @types/puppeteer _is_ up-to-date, and this module merges them together.
 export type Browser = puppeteer.Browser;
 export type Page = puppeteer.Page;
+export type LaunchOptions = puppeteer.LaunchOptions;
+export type SerializableOrJSHandle = puppeteer.SerializableOrJSHandle;
+export type EvaluateFn = puppeteer.EvaluateFn;
 
 export const launch: (
   opts?: puppeteer.LaunchOptions
