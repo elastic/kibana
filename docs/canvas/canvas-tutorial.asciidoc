@@ -150,6 +150,8 @@ Here are some things to try:
 
 * Play with the {kibana-ref}/add-sample-data.html[sample Canvas workpads]. 
 
-* Learn more about {kibana-ref}/canvas-workpad.html[Workpads].
+* Learn more about <<create-canvas-workpad,Workpads>>.
+
+* Learn more about <<element-intro,Elements>>.
 
 * Deep dive into the {kibana-ref}/canvas-function-reference.html[expression language and functions] that drive Canvas.
