@@ -74,6 +74,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
   const [shouldIncludeTimefilter, setIncludeTimefilter] = useState(
     savedQuery ? !!savedQuery.timefilter : false
   );
+  const [formErrors, setFormErrors] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchQueries = async () => {
@@ -91,12 +92,6 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
     }
   );
 
-  const hasTitleConflict = !!savedQueries.find(
-    existingSavedQuery => !savedQuery && existingSavedQuery.attributes.title === title
-  );
-
-  const hasWhitespaceError = title.length > title.trim().length;
-
   const titleConflictErrorText = i18n.translate(
     'data.search.searchBar.savedQueryForm.titleConflictText',
     {
@@ -109,15 +104,27 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
       defaultMessage: 'Title cannot contain leading or trailing whitespace',
     }
   );
-  const hasErrors = hasWhitespaceError || hasTitleConflict;
 
-  const errors = () => {
-    if (hasWhitespaceError) return [whitespaceErrorText];
-    if (hasTitleConflict) return [titleConflictErrorText];
-    return [];
+  const validate = () => {
+    const errors = [];
+    if (title.length > title.trim().length) {
+      errors.push(whitespaceErrorText);
+    }
+    if (
+      !!savedQueries.find(
+        existingSavedQuery => !savedQuery && existingSavedQuery.attributes.title === title
+      )
+    ) {
+      errors.push(titleConflictErrorText);
+    }
+
+    setFormErrors(errors);
   };
+
+  const hasErrors = formErrors.length > 0;
+
   const saveQueryForm = (
-    <EuiForm isInvalid={hasErrors} error={errors()}>
+    <EuiForm isInvalid={hasErrors} error={formErrors}>
       <EuiFormRow>
         <EuiText color="subdued">{savedQueryDescriptionText}</EuiText>
       </EuiFormRow>
@@ -140,6 +147,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
           }}
           data-test-subj="saveQueryFormTitle"
           isInvalid={hasErrors}
+          onBlur={validate}
         />
       </EuiFormRow>
 
