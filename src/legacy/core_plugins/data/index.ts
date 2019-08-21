@@ -20,6 +20,7 @@
 import { resolve } from 'path';
 import { Legacy } from '../../../../kibana';
 import { mappings } from './mappings';
+import { SavedQuery } from './public';
 
 // eslint-disable-next-line import/no-default-export
 export default function DataPlugin(kibana: any) {
@@ -42,10 +43,10 @@ export default function DataPlugin(kibana: any) {
           icon: 'search',
           defaultSearchField: 'title',
           isImportableAndExportable: true,
-          getTitle(obj: any) {
+          getTitle(obj: SavedQuery) {
             return obj.attributes.title;
           },
-          getInAppUrl(obj: any) {
+          getInAppUrl(obj: SavedQuery) {
             return {
               path: `/app/kibana#/discover?_a=(savedQuery:'${encodeURIComponent(obj.id)}')`,
               uiCapabilitiesPath: 'discover.show',
