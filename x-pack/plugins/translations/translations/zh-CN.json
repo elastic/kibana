@@ -10122,6 +10122,7 @@
     "xpack.snapshotRestore.snapshotList.emptyPrompt.noRepositoriesAddButtonLabel": "注册存储库",
     "xpack.snapshotRestore.snapshotList.emptyPrompt.noRepositoriesDescription": "首先为您的快照注册存储库。",
     "xpack.snapshotRestore.snapshotList.emptyPrompt.noRepositoriesTitle": "您尚未有任何快照或存储库",
+    "xpack.snapshotRestore.snapshotList.emptyPrompt.noSnapshotsDescription": "使用 Elasticsearch API 创建快照",
     "xpack.snapshotRestore.snapshotList.emptyPrompt.noSnapshotsTitle": "您尚未有任何快照",
     "xpack.snapshotRestore.snapshotList.emptyPrompt.repositoryWarningDescription": "前往 {repositoryLink} 以修复错误。",
     "xpack.snapshotRestore.snapshotList.loadingSnapshotsDescription": "正在加载快照……",

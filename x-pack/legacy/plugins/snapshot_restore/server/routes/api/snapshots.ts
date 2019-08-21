@@ -33,10 +33,16 @@ export const getAllHandler: RouterRouteHandler = async (
   managedRepository?: string;
 }> => {
   const managedRepository = await getManagedRepositoryName(callWithInternalUser);
+  let policies: string[] = [];
 
-  // Get policies
-  const policiesByName = await callWithRequest('slm.policies');
-  const policies = Object.keys(policiesByName);
+  // Attempt to retrieve policies
+  // This could fail if user doesn't have access to read SLM policies
+  try {
+    const policiesByName = await callWithRequest('slm.policies');
+    policies = Object.keys(policiesByName);
+  } catch (e) {
+    // Silently swallow error as policy names aren't required in UI
+  }
 
   /*
    * TODO: For 8.0, replace the logic in this handler with one call to `GET /_snapshot/_all/_all`

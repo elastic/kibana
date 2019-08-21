@@ -9980,6 +9980,7 @@
     "xpack.snapshotRestore.snapshotList.emptyPrompt.noRepositoriesAddButtonLabel": "レポジトリを登録",
     "xpack.snapshotRestore.snapshotList.emptyPrompt.noRepositoriesDescription": "スナップショットのレポジトリを登録して始めます。",
     "xpack.snapshotRestore.snapshotList.emptyPrompt.noRepositoriesTitle": "まだスナップショットやレポジトリがありません",
+    "xpack.snapshotRestore.snapshotList.emptyPrompt.noSnapshotsDescription": "Elasticsearch API でスナップショットを作成します。",
     "xpack.snapshotRestore.snapshotList.emptyPrompt.noSnapshotsTitle": "まだスナップショットがありません",
     "xpack.snapshotRestore.snapshotList.emptyPrompt.repositoryWarningDescription": "{repositoryLink} に移動してエラーを解決してください。",
     "xpack.snapshotRestore.snapshotList.loadingSnapshotsDescription": "スナップショットを読み込み中…",
