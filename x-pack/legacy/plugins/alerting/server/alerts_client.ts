@@ -54,7 +54,10 @@ interface FindResult {
 }
 
 interface CreateOptions {
-  data: Pick<Alert, Exclude<keyof Alert, 'createdBy' | 'updatedBy' | 'apiKey'>>;
+  data: Pick<
+    Alert,
+    Exclude<keyof Alert, 'createdBy' | 'updatedBy' | 'apiKey' | 'mutedInstanceIds'>
+  >;
   options?: {
     migrationVersion?: Record<string, string>;
   };
@@ -111,6 +114,7 @@ export class AlertsClient {
         ? Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64')
         : undefined,
       alertTypeParams: validatedAlertTypeParams,
+      mutedInstanceIds: [],
     });
     const createdAlert = await this.savedObjectsClient.create('alert', rawAlert, {
       ...options,
@@ -252,6 +256,45 @@ export class AlertsClient {
         { references: existingObject.references }
       );
       await this.taskManager.remove(existingObject.attributes.scheduledTaskId);
+    }
+  }
+
+  public async mute({ alertId, alertInstanceId }: { alertId: string; alertInstanceId: string }) {
+    const existingObject = await this.savedObjectsClient.get('alert', alertId);
+    const mutedInstanceIds = existingObject.attributes.mutedInstanceIds || [];
+    if (!mutedInstanceIds.includes(alertInstanceId)) {
+      mutedInstanceIds.push(alertInstanceId);
+      await this.savedObjectsClient.update(
+        'alert',
+        alertId,
+        {
+          mutedInstanceIds,
+          updatedBy: await this.getUserName(),
+        },
+        {
+          version: existingObject.version,
+          references: existingObject.references,
+        }
+      );
+    }
+  }
+
+  public async unmute({ alertId, alertInstanceId }: { alertId: string; alertInstanceId: string }) {
+    const existingObject = await this.savedObjectsClient.get('alert', alertId);
+    const mutedInstanceIds = existingObject.attributes.mutedInstanceIds || [];
+    if (mutedInstanceIds.includes(alertInstanceId)) {
+      await this.savedObjectsClient.update(
+        'alert',
+        alertId,
+        {
+          updatedBy: await this.getUserName(),
+          mutedInstanceIds: mutedInstanceIds.filter((id: string) => id !== alertInstanceId),
+        },
+        {
+          version: existingObject.version,
+          references: existingObject.references,
+        }
+      );
     }
   }
 

@@ -27,6 +27,8 @@ import {
   updateAlertRoute,
   enableAlertRoute,
   disableAlertRoute,
+  muteAlertInstanceRoute,
+  unmuteAlertInstanceRoute,
 } from './routes';
 
 // Extend PluginProperties to indicate which plugins are guaranteed to exist
@@ -125,6 +127,8 @@ export function init(server: Server) {
   updateAlertRoute(server);
   enableAlertRoute(server);
   disableAlertRoute(server);
+  muteAlertInstanceRoute(server);
+  unmuteAlertInstanceRoute(server);
 
   // Expose functions
   server.decorate('request', 'getAlertsClient', function() {

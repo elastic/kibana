@@ -72,6 +72,7 @@ export interface Alert {
   createdBy: string | null;
   updatedBy: string | null;
   apiKey?: string;
+  mutedInstanceIds: string[];
 }
 
 export interface RawAlert extends SavedObjectAttributes {
@@ -84,6 +85,7 @@ export interface RawAlert extends SavedObjectAttributes {
   createdBy: string | null;
   updatedBy: string | null;
   apiKey?: string;
+  mutedInstanceIds: string[];
 }
 
 export interface AlertingPlugin {
