@@ -118,17 +118,17 @@ describe('xy_suggestions', () => {
 
     expect(rest).toHaveLength(0);
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
-                  Array [
-                    Object {
-                      "seriesType": "bar",
-                      "splitAccessor": "aaa",
-                      "x": "date",
-                      "y": Array [
-                        "bytes",
-                      ],
-                    },
-                  ]
-            `);
+      Array [
+        Object {
+          "seriesType": "area",
+          "splitAccessor": "aaa",
+          "x": "date",
+          "y": Array [
+            "bytes",
+          ],
+        },
+      ]
+    `);
   });
 
   test('does not suggest multiple splits', () => {
@@ -168,18 +168,18 @@ describe('xy_suggestions', () => {
 
     expect(rest).toHaveLength(0);
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
-                  Array [
-                    Object {
-                      "seriesType": "line",
-                      "splitAccessor": "product",
-                      "x": "date",
-                      "y": Array [
-                        "price",
-                        "quantity",
-                      ],
-                    },
-                  ]
-            `);
+      Array [
+        Object {
+          "seriesType": "area",
+          "splitAccessor": "product",
+          "x": "date",
+          "y": Array [
+            "price",
+            "quantity",
+          ],
+        },
+      ]
+    `);
   });
 
   test('uses datasource provided title if available', () => {
@@ -349,29 +349,29 @@ describe('xy_suggestions', () => {
 
     expect(rest).toHaveLength(0);
     expect([suggestionSubset(s1), suggestionSubset(s2)]).toMatchInlineSnapshot(`
-                  Array [
-                    Array [
-                      Object {
-                        "seriesType": "bar",
-                        "splitAccessor": "bbb",
-                        "x": "date",
-                        "y": Array [
-                          "price",
-                        ],
-                      },
-                    ],
-                    Array [
-                      Object {
-                        "seriesType": "bar",
-                        "splitAccessor": "ccc",
-                        "x": "country",
-                        "y": Array [
-                          "count",
-                        ],
-                      },
-                    ],
-                  ]
-            `);
+      Array [
+        Array [
+          Object {
+            "seriesType": "area",
+            "splitAccessor": "bbb",
+            "x": "date",
+            "y": Array [
+              "price",
+            ],
+          },
+        ],
+        Array [
+          Object {
+            "seriesType": "bar",
+            "splitAccessor": "ccc",
+            "x": "country",
+            "y": Array [
+              "count",
+            ],
+          },
+        ],
+      ]
+    `);
   });
 
   test('handles two numeric values', () => {
@@ -389,17 +389,17 @@ describe('xy_suggestions', () => {
     });
 
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
-                  Array [
-                    Object {
-                      "seriesType": "bar",
-                      "splitAccessor": "ddd",
-                      "x": "quantity",
-                      "y": Array [
-                        "price",
-                      ],
-                    },
-                  ]
-            `);
+                        Array [
+                          Object {
+                            "seriesType": "bar",
+                            "splitAccessor": "ddd",
+                            "x": "quantity",
+                            "y": Array [
+                              "price",
+                            ],
+                          },
+                        ]
+                `);
   });
 
   test('handles unbucketed suggestions', () => {
@@ -427,17 +427,17 @@ describe('xy_suggestions', () => {
     });
 
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
-                  Array [
-                    Object {
-                      "seriesType": "bar",
-                      "splitAccessor": "eee",
-                      "x": "mybool",
-                      "y": Array [
-                        "num votes",
-                      ],
-                    },
-                  ]
-            `);
+                        Array [
+                          Object {
+                            "seriesType": "bar",
+                            "splitAccessor": "eee",
+                            "x": "mybool",
+                            "y": Array [
+                              "num votes",
+                            ],
+                          },
+                        ]
+                `);
   });
 
   test('adds a preview expression with disabled axes and legend', () => {

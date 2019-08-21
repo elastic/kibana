@@ -177,7 +177,7 @@ function getSeriesType(
   return (
     (oldLayer && oldLayer.seriesType) ||
     (currentState && currentState.preferredSeriesType) ||
-    (splitBy && xValue.operation.dataType === 'date' ? 'line' : 'bar')
+    (xValue.operation.dataType === 'date' ? 'area' : 'bar')
   );
 }
 
