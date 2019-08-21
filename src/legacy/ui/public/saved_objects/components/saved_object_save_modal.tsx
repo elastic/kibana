@@ -35,6 +35,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
+import { EuiText } from '@elastic/eui';
 
 interface OnSaveProps {
   newTitle: string;
@@ -51,6 +52,7 @@ interface Props {
   objectType: string;
   confirmButtonLabel?: React.ReactNode;
   options?: React.ReactNode;
+  description?: string;
 }
 
 interface State {
@@ -95,6 +97,11 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
               {this.renderDuplicateTitleCallout()}
 
               <EuiForm>
+                {this.props.description && (
+                  <EuiFormRow>
+                    <EuiText color="subdued">{this.props.description}</EuiText>
+                  </EuiFormRow>
+                )}
                 {this.renderCopyOnSave()}
 
                 <EuiFormRow
