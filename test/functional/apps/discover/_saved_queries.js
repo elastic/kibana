@@ -112,9 +112,12 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('does not allow saving a query with a non-unique name', async () => {
-        await savedQueryManagementComponent.saveNewQueryWithDuplicateName('OkResponse');
+        await savedQueryManagementComponent.saveNewQueryWithNameError('OkResponse');
       });
 
+      it('does not allow saving a query with leading or trailing whitespace in the name', async () => {
+        await savedQueryManagementComponent.saveNewQueryWithNameError('OkResponse ');
+      });
       it('allows clearing the currently loaded saved query', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();

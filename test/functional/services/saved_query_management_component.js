@@ -32,7 +32,7 @@ export function SavedQueryManagementComponentProvider({ getService }) {
       await this.submitSaveQueryForm(name, description, includeFilters, includeTimeFilter);
     }
 
-    async saveNewQueryWithDuplicateName(name) {
+    async saveNewQueryWithNameError(name) {
       await this.openSavedQueryManagementComponent();
       await testSubjects.click('saved-query-management-save-button');
       if (name) {
