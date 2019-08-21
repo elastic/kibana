@@ -9,7 +9,7 @@ import fetchMock from 'fetch-mock/es5/client';
 import { AnonymousPaths } from '../anonymous_paths';
 import { SessionExpired } from './session_expired';
 import { setup } from '../../../../../src/test_utils/public/http_test_setup';
-import { UnauthorizedResponseInterceptor } from './unauthorized_response_interceptor';
+import { UnauthorizedResponseHttpInterceptor } from './unauthorized_response_http_interceptor';
 jest.mock('./session_expired');
 
 const drainPromiseQueue = () => {
@@ -37,7 +37,7 @@ it(`logs out 401 responses`, async () => {
   const logoutPromise = new Promise(resolve => {
     jest.spyOn(sessionExpired, 'logout').mockImplementation(() => resolve());
   });
-  const interceptor = new UnauthorizedResponseInterceptor(
+  const interceptor = new UnauthorizedResponseHttpInterceptor(
     sessionExpired,
     new AnonymousPaths(http.basePath, [])
   );
@@ -58,7 +58,7 @@ it(`ignores anonymous paths`, async () => {
   mockCurrentUrl('/foo/bar');
   const http = setupHttp('/foo');
   const sessionExpired = new SessionExpired(http.basePath);
-  const interceptor = new UnauthorizedResponseInterceptor(
+  const interceptor = new UnauthorizedResponseHttpInterceptor(
     sessionExpired,
     new AnonymousPaths(http.basePath, ['/bar'])
   );
@@ -72,7 +72,7 @@ it(`ignores anonymous paths`, async () => {
 it(`ignores errors which don't have a response, for example network connectivity issues`, async () => {
   const http = setupHttp('/foo');
   const sessionExpired = new SessionExpired(http.basePath);
-  const interceptor = new UnauthorizedResponseInterceptor(
+  const interceptor = new UnauthorizedResponseHttpInterceptor(
     sessionExpired,
     new AnonymousPaths(http.basePath, ['/bar'])
   );
@@ -86,7 +86,7 @@ it(`ignores errors which don't have a response, for example network connectivity
 it(`ignores requests which omit credentials`, async () => {
   const http = setupHttp('/foo');
   const sessionExpired = new SessionExpired(http.basePath);
-  const interceptor = new UnauthorizedResponseInterceptor(
+  const interceptor = new UnauthorizedResponseHttpInterceptor(
     sessionExpired,
     new AnonymousPaths(http.basePath, ['/bar'])
   );

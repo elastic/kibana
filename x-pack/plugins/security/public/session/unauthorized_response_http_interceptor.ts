@@ -9,7 +9,7 @@ import { HttpInterceptor, HttpErrorResponse, HttpInterceptController } from 'src
 import { AnonymousPaths } from '../anonymous_paths';
 import { SessionExpired } from './session_expired';
 
-export class UnauthorizedResponseInterceptor implements HttpInterceptor {
+export class UnauthorizedResponseHttpInterceptor implements HttpInterceptor {
   constructor(private sessionExpired: SessionExpired, private anonymousPaths: AnonymousPaths) {}
 
   responseError(httpErrorResponse: HttpErrorResponse, controller: HttpInterceptController) {

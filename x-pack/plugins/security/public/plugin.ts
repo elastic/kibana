@@ -9,8 +9,8 @@ import { AnonymousPaths } from './anonymous_paths';
 import {
   SessionExpired,
   SessionTimeout,
-  SessionTimeoutInterceptor,
-  UnauthorizedResponseInterceptor,
+  SessionTimeoutHttpInterceptor,
+  UnauthorizedResponseHttpInterceptor,
 } from './session';
 
 export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPluginStart> {
@@ -25,9 +25,9 @@ export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPlugi
     ]);
 
     const sessionExpired = new SessionExpired(basePath);
-    http.intercept(new UnauthorizedResponseInterceptor(sessionExpired, anonymousPaths));
+    http.intercept(new UnauthorizedResponseHttpInterceptor(sessionExpired, anonymousPaths));
     const sessionTimeout = new SessionTimeout(1.5 * 60 * 1000, notifications, sessionExpired, http);
-    http.intercept(new SessionTimeoutInterceptor(sessionTimeout, anonymousPaths));
+    http.intercept(new SessionTimeoutHttpInterceptor(sessionTimeout, anonymousPaths));
 
     return {
       anonymousPaths,

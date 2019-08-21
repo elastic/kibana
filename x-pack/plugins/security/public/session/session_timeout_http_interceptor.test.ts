@@ -6,7 +6,7 @@
 
 // @ts-ignore
 import fetchMock from 'fetch-mock/es5/client';
-import { SessionTimeoutInterceptor } from './session_timeout_interceptor';
+import { SessionTimeoutHttpInterceptor } from './session_timeout_http_interceptor';
 import { setup } from '../../../../../src/test_utils/public/http_test_setup';
 import { createSessionTimeoutMock } from './session_timeout.mock';
 import { AnonymousPaths } from '../anonymous_paths';
@@ -28,7 +28,7 @@ describe('response', () => {
   test('extends session timeouts', async () => {
     const http = setupHttp('/foo');
     const sessionTimeoutMock = createSessionTimeoutMock();
-    const interceptor = new SessionTimeoutInterceptor(
+    const interceptor = new SessionTimeoutHttpInterceptor(
       sessionTimeoutMock,
       new AnonymousPaths(http.basePath, [])
     );
@@ -44,7 +44,7 @@ describe('response', () => {
     mockCurrentUrl('/foo/bar');
     const http = setupHttp('/foo');
     const sessionTimeoutMock = createSessionTimeoutMock();
-    const interceptor = new SessionTimeoutInterceptor(
+    const interceptor = new SessionTimeoutHttpInterceptor(
       sessionTimeoutMock,
       new AnonymousPaths(http.basePath, ['/bar'])
     );
@@ -59,7 +59,7 @@ describe('response', () => {
   test(`doesn't extend session timeouts for system api requests`, async () => {
     const http = setupHttp('/foo');
     const sessionTimeoutMock = createSessionTimeoutMock();
-    const interceptor = new SessionTimeoutInterceptor(
+    const interceptor = new SessionTimeoutHttpInterceptor(
       sessionTimeoutMock,
       new AnonymousPaths(http.basePath, [])
     );
@@ -76,7 +76,7 @@ describe('responseError', () => {
   test('extends session timeouts', async () => {
     const http = setupHttp('/foo');
     const sessionTimeoutMock = createSessionTimeoutMock();
-    const interceptor = new SessionTimeoutInterceptor(
+    const interceptor = new SessionTimeoutHttpInterceptor(
       sessionTimeoutMock,
       new AnonymousPaths(http.basePath, [])
     );
@@ -92,7 +92,7 @@ describe('responseError', () => {
     mockCurrentUrl('/foo/bar');
     const http = setupHttp('/foo');
     const sessionTimeoutMock = createSessionTimeoutMock();
-    const interceptor = new SessionTimeoutInterceptor(
+    const interceptor = new SessionTimeoutHttpInterceptor(
       sessionTimeoutMock,
       new AnonymousPaths(http.basePath, ['/bar'])
     );
@@ -107,7 +107,7 @@ describe('responseError', () => {
   test(`doesn't extend session timeouts for system api requests`, async () => {
     const http = setupHttp('/foo');
     const sessionTimeoutMock = createSessionTimeoutMock();
-    const interceptor = new SessionTimeoutInterceptor(
+    const interceptor = new SessionTimeoutHttpInterceptor(
       sessionTimeoutMock,
       new AnonymousPaths(http.basePath, [])
     );

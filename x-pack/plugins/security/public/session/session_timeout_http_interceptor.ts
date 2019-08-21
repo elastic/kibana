@@ -13,7 +13,7 @@ const isSystemAPIRequest = (request: Request) => {
   return request.headers.has('kbn-system-api');
 };
 
-export class SessionTimeoutInterceptor implements HttpInterceptor {
+export class SessionTimeoutHttpInterceptor implements HttpInterceptor {
   constructor(private sessionTimeout: ISessionTimeout, private anonymousPaths: AnonymousPaths) {}
 
   response(httpResponse: HttpResponse) {
