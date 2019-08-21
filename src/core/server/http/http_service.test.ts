@@ -26,6 +26,7 @@ import { HttpConfigType, config } from './http_config';
 import { httpServerMock } from './http_server.mocks';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { loggingServiceMock } from '../logging/logging_service.mock';
+import { contextServiceMock } from '../context/context_service.mock';
 import { getEnvOptions } from '../config/__mocks__/env';
 
 const logger = loggingServiceMock.create();
@@ -44,6 +45,11 @@ const createConfigService = (value: Partial<HttpConfigType> = {}) => {
   );
   configService.setSchema(config.path, config.schema);
   return configService;
+};
+const contextSetup = contextServiceMock.createSetupContract();
+
+const setupDeps = {
+  context: contextSetup,
 };
 const fakeHapiServer = {
   start: noop,
@@ -75,7 +81,7 @@ test('creates and sets up http server', async () => {
 
   expect(httpServer.setup).not.toHaveBeenCalled();
 
-  await service.setup();
+  await service.setup(setupDeps);
   expect(httpServer.setup).toHaveBeenCalled();
   expect(httpServer.start).not.toHaveBeenCalled();
 
@@ -110,7 +116,7 @@ test('spins up notReady server until started if configured with `autoListen:true
     logger,
   });
 
-  await service.setup();
+  await service.setup(setupDeps);
 
   const mockResponse: any = {
     code: jest.fn().mockImplementation(() => mockResponse),
@@ -148,7 +154,7 @@ test('logs error if already set up', async () => {
 
   const service = new HttpService({ coreId, configService, env, logger });
 
-  await service.setup();
+  await service.setup(setupDeps);
 
   expect(loggingServiceMock.collect(logger).warn).toMatchSnapshot();
 });
@@ -166,7 +172,7 @@ test('stops http server', async () => {
 
   const service = new HttpService({ coreId, configService, env, logger });
 
-  await service.setup();
+  await service.setup(setupDeps);
   await service.start();
 
   expect(httpServer.stop).toHaveBeenCalledTimes(0);
@@ -193,7 +199,7 @@ test('stops not ready server if it is running', async () => {
 
   const service = new HttpService({ coreId, configService, env, logger });
 
-  await service.setup();
+  await service.setup(setupDeps);
 
   await service.stop();
 
@@ -216,7 +222,7 @@ test('register route handler', async () => {
 
   const service = new HttpService({ coreId, configService, env, logger });
 
-  const { createRouter } = await service.setup();
+  const { createRouter } = await service.setup(setupDeps);
   const router = createRouter('/foo');
 
   expect(registerRouterMock).toHaveBeenCalledTimes(1);
@@ -234,7 +240,7 @@ test('returns http server contract on setup', async () => {
   }));
 
   const service = new HttpService({ coreId, configService, env, logger });
-  const setupContract = await service.setup();
+  const setupContract = await service.setup(setupDeps);
   expect(setupContract).toMatchObject(httpServer);
   expect(setupContract).toMatchObject({
     createRouter: expect.any(Function),
@@ -258,7 +264,7 @@ test('does not start http server if process is dev cluster master', async () => 
     logger,
   });
 
-  await service.setup();
+  await service.setup(setupDeps);
   await service.start();
 
   expect(httpServer.start).not.toHaveBeenCalled();
@@ -283,7 +289,7 @@ test('does not start http server if configured with `autoListen:false`', async (
     logger,
   });
 
-  await service.setup();
+  await service.setup(setupDeps);
   await service.start();
 
   expect(httpServer.start).not.toHaveBeenCalled();

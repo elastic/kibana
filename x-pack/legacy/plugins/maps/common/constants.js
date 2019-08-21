@@ -19,7 +19,6 @@ export const EMS_TILES_VECTOR_STYLE_PATH = 'ems/tiles/vector/style';
 export const EMS_TILES_VECTOR_SOURCE_PATH = 'ems/tiles/vector/source';
 export const EMS_TILES_VECTOR_TILE_PATH = 'ems/tiles/vector/tile';
 
-
 export const MAP_SAVED_OBJECT_TYPE = 'map';
 export const APP_ID = 'maps';
 export const APP_ICON = 'gisApp';
@@ -77,4 +76,9 @@ export const LAT_INDEX = 1;
 export const EMPTY_FEATURE_COLLECTION = {
   type: 'FeatureCollection',
   features: []
+};
+
+export const DRAW_TYPE = {
+  BOUNDS: 'BOUNDS',
+  POLYGON: 'POLYGON'
 };
