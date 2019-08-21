@@ -14,9 +14,6 @@ import {
 
 const defaultValues: Record<string, any> = {
   headers: null,
-  proxy: null,
-  connection_timeout: null,
-  read_timeout: null,
   method: 'post',
 };
 

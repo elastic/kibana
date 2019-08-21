@@ -43,9 +43,6 @@ describe('secrets validation', () => {
 describe('config validation', () => {
   const defaultValues: Record<string, any> = {
     headers: null,
-    proxy: null,
-    connection_timeout: null,
-    read_timeout: null,
     method: 'post',
   };
 
@@ -192,99 +189,6 @@ describe('config validation', () => {
 - [headers.0]: expected value of type [object] but got [string]
 - [headers.1]: expected value to equal [null] but got [application/json]"
 `);
-  });
-
-  test('config validation passes when a valid proxy is provided', () => {
-    const config: Record<string, any> = {
-      url: 'http://mylisteningserver:9200/endpoint',
-      proxy: {
-        host: 'localhost',
-        port: 9200,
-      },
-    };
-    expect(validateConfig(actionType, config)).toEqual({
-      ...defaultValues,
-      ...config,
-    });
-  });
-
-  test('config validation passes when a proxy ommits a port', () => {
-    const config: Record<string, any> = {
-      url: 'http://mylisteningserver:9200/endpoint',
-      proxy: {
-        host: 'localhost',
-      },
-    };
-    expect(validateConfig(actionType, config)).toEqual({
-      ...defaultValues,
-      ...config,
-      proxy: {
-        host: 'localhost',
-        port: null,
-      },
-    });
-  });
-
-  test('should validate and throw error when a proxy is specified but has no host', () => {
-    const config: Record<string, any> = {
-      url: 'http://mylisteningserver:9200/endpoint',
-      proxy: {
-        port: 8080,
-      },
-    };
-    expect(() => {
-      validateConfig(actionType, config);
-    }).toThrowErrorMatchingInlineSnapshot(`
-"error validating action type config: [proxy]: types that failed validation:
-- [proxy.0.host]: expected value of type [string] but got [undefined]
-- [proxy.1]: expected value to equal [null] but got [[object Object]]"
-`);
-  });
-
-  test('config validation passes when a valid connection_timeout is provided', () => {
-    const config: Record<string, any> = {
-      url: 'http://mylisteningserver:9200/endpoint',
-      connection_timeout: '10s',
-    };
-    expect(validateConfig(actionType, config)).toEqual({
-      ...defaultValues,
-      ...config,
-    });
-  });
-
-  test('ashould validate and throw error when an invalid connection_timeout is specified', () => {
-    const config: Record<string, any> = {
-      url: 'http://mylisteningserver:9200/endpoint',
-      connection_timeout: '10 seconds',
-    };
-    expect(() => {
-      validateConfig(actionType, config);
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [connection_timeout]: Invalid interval \\"10 seconds\\". Intervals must be of the form {number}m. Example: 5m."`
-    );
-  });
-
-  test('config validation passes when a valid read_timeout is provided', () => {
-    const config: Record<string, any> = {
-      url: 'http://mylisteningserver:9200/endpoint',
-      read_timeout: '10s',
-    };
-    expect(validateConfig(actionType, config)).toEqual({
-      ...defaultValues,
-      ...config,
-    });
-  });
-
-  test('ashould validate and throw error when an invalid read_timeout is specified', () => {
-    const config: Record<string, any> = {
-      url: 'http://mylisteningserver:9200/endpoint',
-      read_timeout: '10 seconds',
-    };
-    expect(() => {
-      validateConfig(actionType, config);
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [read_timeout]: Invalid interval \\"10 seconds\\". Intervals must be of the form {number}m. Example: 5m."`
-    );
   });
 });
 

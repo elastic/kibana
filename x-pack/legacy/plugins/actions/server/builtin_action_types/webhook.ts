@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { nullableType } from './lib/nullable';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
-import { assertValidInterval } from '../../../task_manager/lib/intervals';
 
 // Generic Schemas
 const PORT_MAX = 256 * 256 - 1;
@@ -28,10 +27,6 @@ enum WebhookSchemes {
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 
 const HeadersSchema = schema.recordOf(schema.string(), schema.string());
-const ProxySchema = schema.object({
-  host: schema.string(),
-  port: nullableType(PortSchema),
-});
 
 export const CompositeUrlSchema = schema.object({
   host: schema.string(),
@@ -45,42 +40,13 @@ export const CompositeUrlSchema = schema.object({
   ),
 });
 
-const ConfigSchema = schema.object(
-  {
-    url: schema.oneOf([schema.string(), CompositeUrlSchema]),
-    method: schema.oneOf(
-      [schema.literal(WebhookMethods.POST), schema.literal(WebhookMethods.PUT)],
-      {
-        defaultValue: WebhookMethods.POST,
-      }
-    ),
-    headers: nullableType(HeadersSchema),
-    proxy: nullableType(ProxySchema),
-    connection_timeout: nullableType(schema.string()),
-    read_timeout: nullableType(schema.string()),
-  },
-  { validate: validateConfig }
-);
-
-function validateConfig(configObject: any): string | void {
-  const config: ActionTypeConfigType = configObject;
-
-  const { read_timeout: readTimeout, connection_timeout: connectionTimeout } = config;
-  try {
-    if (readTimeout != null) {
-      assertValidInterval(readTimeout);
-    }
-  } catch (e) {
-    return `[read_timeout]: ${e.message}`;
-  }
-  try {
-    if (connectionTimeout != null) {
-      assertValidInterval(connectionTimeout);
-    }
-  } catch (e) {
-    return `[connection_timeout]: ${e.message}`;
-  }
-}
+const ConfigSchema = schema.object({
+  url: schema.oneOf([schema.string(), CompositeUrlSchema]),
+  method: schema.oneOf([schema.literal(WebhookMethods.POST), schema.literal(WebhookMethods.PUT)], {
+    defaultValue: WebhookMethods.POST,
+  }),
+  headers: nullableType(HeadersSchema),
+});
 
 // secrets definition
 export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
