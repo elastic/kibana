@@ -23,7 +23,7 @@ const thresholdLineDefaults = {
   show: false,
   value: 10,
   width: 1,
-  style: 'full'
+  style: 'full',
 };
 
 export class PointSeries {
@@ -92,6 +92,7 @@ export class PointSeries {
   addThresholdLine(svgElem) {
     const chartData = this.chartData;
     const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
+    const valueAxisDomain = this.getValueAxis().axisScale.getDomain(chartData.values.length);
     const yScale = this.getValueAxis().getScale();
     const svgParentWidth = svgElem[0][0].attributes.width.value;
     const svgParentHeight = svgElem[0][0].attributes.height.value;
@@ -110,14 +111,18 @@ export class PointSeries {
     function y(y) {
       return yScale(y);
     }
-    svgElem
-      .append('line')
-      .attr('x1', isHorizontal ? 0 : y(thresholdValue))
-      .attr('y1', isHorizontal ? y(thresholdValue) : 0)
-      .attr('x2', isHorizontal ? svgParentWidth : y(thresholdValue))
-      .attr('y2', isHorizontal ? y(thresholdValue) : svgParentHeight)
-      .attr('stroke-width', thresholdLineWidth)
-      .attr('stroke-dasharray', thresholdLineStyle)
-      .attr('stroke', labelColor);
+
+    if (valueAxisDomain && valueAxisDomain[0] <= thresholdValue && valueAxisDomain[1] >= thresholdValue) {
+      svgElem
+        .append('line')
+        .attr('x1', isHorizontal ? 0 : y(thresholdValue))
+        .attr('y1', isHorizontal ? y(thresholdValue) : 0)
+        .attr('x2', isHorizontal ? svgParentWidth : y(thresholdValue))
+        .attr('y2', isHorizontal ? y(thresholdValue) : svgParentHeight)
+        .attr('stroke-width', thresholdLineWidth)
+        .attr('stroke-dasharray', thresholdLineStyle)
+        .attr('stroke', labelColor);
+    }
+
   }
 }

@@ -31,6 +31,11 @@ import { SelectOption } from '../controls/select';
 
 function PointSeriesOptions(props: VisOptionsProps<BasicVislibParams>) {
   const { stateParams, setValue, vis } = props;
+  const options = [
+    {value: 'full', text: 'Full'},
+    {value: 'dashed', text: 'Dashed'},
+    {value: 'dot-dashed', text: 'Dot-dashed'},
+  ];
 
   return (
     <>
@@ -79,6 +84,25 @@ function PointSeriesOptions(props: VisOptionsProps<BasicVislibParams>) {
             }
           />
         )}
+      </EuiPanel>
+
+      <EuiSpacer size="s"/>
+
+      <GridOptions {...props} />
+
+      <EuiSpacer size="s"/>
+
+      <EuiPanel paddingSize="s">
+        <EuiTitle size="xs">
+          <h2>
+            <FormattedMessage
+              id="kbnVislibVisTypes.editors.pointSeries.thresholdLineSettings"
+              defaultMessage="Threshold Line"
+            />
+          </h2>
+        </EuiTitle>
+        <EuiSpacer size="s"/>
+
 
         <SwitchOption
           label={i18n.translate('kbnVislibVisTypes.editors.pointSeries.thresholdLine.show', {
@@ -92,50 +116,52 @@ function PointSeriesOptions(props: VisOptionsProps<BasicVislibParams>) {
         />
 
         {stateParams.thresholdLine.show && (
-          <NumberInputOption
-            label={i18n.translate('kbnVislibVisTypes.editors.pointSeries.thresholdLine.valueLabel', {
-              defaultMessage: 'Threshold value',
-            })}
-            paramName="value"
-            value={stateParams.thresholdLine.value}
-            setValue={(paramName, value) =>
-              setValue('thresholdLine', { ...stateParams.thresholdLine, [paramName]: value })
-            }
-          />
-        ) && (
-          <NumberInputOption
-            label={i18n.translate('kbnVislibVisTypes.editors.pointSeries.thresholdLine.widthLabel', {
-              defaultMessage: 'Line width',
-            })}
-            paramName="width"
-            min="1"
-            value="1"
-            value={stateParams.thresholdLine.width}
-            setValue={(paramName, value) =>
-              setValue('thresholdLine', { ...stateParams.thresholdLine, [paramName]: value })
-            }
-          />
-        ) && (
-          <SelectOption
-            label={i18n.translate('kbnVislibVisTypes.editors.pointSeries.thresholdLine.style', {
-              defaultMessage: 'Line style',
-            })}
-            options={['full', 'dashed', 'dot-dashed']}
-            paramName="style"
-            value={stateParams.thresholdLine.style}
-            setValue={(paramName, value) =>
-              setValue('thresholdLine', { ...stateParams.thresholdLine, [paramName]: value })
-            }
-          />
-        )
 
+          <React.Fragment>
+
+          <NumberInputOption
+          label={i18n.translate('kbnVislibVisTypes.editors.pointSeries.thresholdLine.valueLabel', {
+          defaultMessage: 'Threshold value',
+        })}
+          paramName="value"
+          value={stateParams.thresholdLine.value}
+          step={0.1}
+          setValue={(paramName, value) =>
+          setValue('thresholdLine', { ...stateParams.thresholdLine, [paramName]: value })
+        }
+          />
+
+          <NumberInputOption
+          label={i18n.translate('kbnVislibVisTypes.editors.pointSeries.thresholdLine.widthLabel', {
+          defaultMessage: 'Line width',
+        })}
+          paramName="width"
+          min={1}
+          step={1}
+          value={stateParams.thresholdLine.width}
+          setValue={(paramName, value) =>
+          setValue('thresholdLine', { ...stateParams.thresholdLine, [paramName]: value })
+        }
+          />
+
+          <SelectOption
+          label={i18n.translate('kbnVislibVisTypes.editors.pointSeries.thresholdLine.style', {
+          defaultMessage: 'Line style',
+        })}
+          options={options}
+          paramName="style"
+          value={stateParams.thresholdLine.style}
+          setValue={(paramName, value) =>
+          setValue('thresholdLine', { ...stateParams.thresholdLine, [paramName]: value })
+        }
+          />
+
+          </React.Fragment>
+          )
         }
 
       </EuiPanel>
 
-      <EuiSpacer size="s"/>
-
-      <GridOptions {...props} />
     </>
   );
 }
