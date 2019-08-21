@@ -22,14 +22,30 @@ export const RedirectToHostsPage = ({
   },
   location: { search },
 }: HostComponentProps) => {
-  return (
-    <RedirectWrapper
-      to={hostName || tabName ? `/hosts/${hostName || tabName}${search}` : `/hosts/${search}`}
-      tabName={tabName}
-    />
-  );
+  if (!tabName) tabName = HostsTabName.hosts;
+
+  let to = hostName || tabName ? `/hosts/${tabName}${search}` : `/hosts/${search}`;
+  if (hostName && tabName) to = `/hosts/${tabName}${search}`;
+  return <RedirectWrapper to={to} />;
+};
+
+export const RedirectToHostDetailsPage = ({
+  match: {
+    params: { hostName, tabName },
+  },
+  location: { search },
+}: HostComponentProps) => {
+  if (!tabName) tabName = HostsTabName.authentications;
+  const to = `/hosts/${hostName}/${tabName}${search}`;
+  return <RedirectWrapper to={to} />;
 };
 
 export const getHostsUrl = () => '#/link-to/hosts';
 
 export const getTabsOnHostsUrl = (tabName: HostsTabName) => `#/link-to/hosts/${tabName}`;
+
+export const getHostDetailsUrl = (hostName: string) => `#/link-to/hosts/${hostName}`;
+
+export const getTabsOnHostDetailsUrl = (hostName: string, tabName: HostsTabName) => {
+  return `#/link-to/hosts/${hostName}/${tabName}`;
+};

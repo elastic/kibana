@@ -30,15 +30,18 @@ export class SiemNavigationComponent extends React.Component<
   }
 
   public componentWillMount(): void {
-    const { location } = this.props;
+    const {
+      location,
+      match: { params },
+    } = this.props;
     if (location.pathname) {
-      setBreadcrumbs(location.pathname);
+      setBreadcrumbs(location.pathname, params);
     }
   }
 
   public componentWillReceiveProps(nextProps: Readonly<RouteComponentProps>): void {
     if (this.props.location.pathname !== nextProps.location.pathname) {
-      setBreadcrumbs(nextProps.location.pathname);
+      setBreadcrumbs(nextProps.location.pathname, nextProps.match.params);
     }
   }
 

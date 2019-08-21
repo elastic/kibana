@@ -5,31 +5,21 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import { getOr, get } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 import { pure } from 'recompose';
 
 import { ActionCreator } from 'typescript-fsa';
-import { StaticIndexPattern } from 'ui/index_patterns';
 import { RouteComponentProps } from 'react-router-dom';
+import { get } from 'lodash/fp';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
-import {
-  EventsTable,
-  HostsTable,
-  KpiHostsComponent,
-  UncommonProcessTable,
-} from '../../components/page/hosts';
-import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
+import { KpiHostsComponent } from '../../components/page/hosts';
 import { manageQuery } from '../../components/page/manage_query';
 import { UseUrlState } from '../../components/url_state';
-import { AuthenticationsQuery } from '../../containers/authentications';
-import { EventsQuery } from '../../containers/events';
 import { GlobalTime } from '../../containers/global_time';
-import { HostsQuery } from '../../containers/hosts';
 import { KpiHostsQuery } from '../../containers/kpi_hosts';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { LastEventIndexKey } from '../../graphql/types';
@@ -37,21 +27,22 @@ import { hostsModel, hostsSelectors, State } from '../../store';
 
 import { HostsEmptyPage } from './hosts_empty_page';
 import { HostsKql } from './kql';
-import { AnomaliesHostTable } from '../../components/ml/tables/anomalies_host_table';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 import { SiemNavigation } from '../../components/navigation';
-import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
-import { InspectQuery, Refetch } from '../../store/inputs/model';
-import * as i18n from './translations';
-import { navTabs } from './hosts_navigations';
-import { NarrowDateRange } from '../../components/ml/types';
 
-const AuthenticationTableManage = manageQuery(AuthenticationTable);
-const HostsTableManage = manageQuery(HostsTable);
-const EventsTableManage = manageQuery(EventsTable);
-const UncommonProcessTableManage = manageQuery(UncommonProcessTable);
+import * as i18n from './translations';
+import {
+  UncommonProcessTabBody,
+  navTabs,
+  HostsTabName,
+  HostsQueryTabBody,
+  AuthenticationsQueryTabBody,
+  AnomaliesTabBody,
+  EventsTabBody,
+} from './hosts_navigations';
+
 const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
 
 interface HostsComponentReduxProps {
@@ -64,201 +55,9 @@ interface HostsComponentReduxProps {
 }
 
 type HostsComponentProps = RouteComponentProps & HostsComponentReduxProps;
-interface OwnProps {
-  type: hostsModel.HostsType;
-  startDate: number;
-  endDate: number;
-  filterQuery?: string;
-}
-type QueryTabBodyProps = OwnProps & {
-  indexPattern: StaticIndexPattern;
-  skip: boolean;
-  setQuery: ({
-    id,
-    inspect,
-    loading,
-    refetch,
-  }: {
-    id: string;
-    inspect: InspectQuery | null;
-    loading: boolean;
-    refetch: Refetch;
-  }) => void;
-  narrowDateRange?: NarrowDateRange;
-};
-
-type AnomaliesQueryTabBodyProps = OwnProps & {
-  skip: boolean;
-  narrowDateRange: NarrowDateRange;
-};
-
-const HostsQueryTabBody = ({
-  endDate,
-  filterQuery,
-  indexPattern,
-  skip,
-  setQuery,
-  startDate,
-  type,
-}: QueryTabBodyProps) => {
-  return (
-    <HostsQuery
-      endDate={endDate}
-      filterQuery={filterQuery}
-      skip={skip}
-      sourceId="default"
-      startDate={startDate}
-      type={type}
-    >
-      {({ hosts, totalCount, loading, pageInfo, loadPage, id, inspect, refetch }) => (
-        <HostsTableManage
-          data={hosts}
-          fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-          id={id}
-          indexPattern={indexPattern}
-          inspect={inspect}
-          loading={loading}
-          loadPage={loadPage}
-          refetch={refetch}
-          setQuery={setQuery}
-          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
-          totalCount={totalCount}
-          type={hostsModel.HostsType.page}
-        />
-      )}
-    </HostsQuery>
-  );
-};
-
-const AuthenticationsQueryTabBody = ({
-  endDate,
-  filterQuery,
-  skip,
-  setQuery,
-  startDate,
-  type,
-}: QueryTabBodyProps) => {
-  return (
-    <AuthenticationsQuery
-      endDate={endDate}
-      filterQuery={filterQuery}
-      skip={skip}
-      sourceId="default"
-      startDate={startDate}
-      type={type}
-    >
-      {({ authentications, totalCount, loading, pageInfo, loadPage, id, inspect, refetch }) => (
-        <AuthenticationTableManage
-          data={authentications}
-          fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-          id={id}
-          inspect={inspect}
-          loading={loading}
-          loadPage={loadPage}
-          refetch={refetch}
-          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
-          setQuery={setQuery}
-          totalCount={totalCount}
-          type={hostsModel.HostsType.page}
-        />
-      )}
-    </AuthenticationsQuery>
-  );
-};
-
-const UncommonProcessTabBody = ({
-  endDate,
-  filterQuery,
-  skip,
-  setQuery,
-  startDate,
-  type,
-}: QueryTabBodyProps) => {
-  return (
-    <UncommonProcessesQuery
-      endDate={endDate}
-      filterQuery={filterQuery}
-      skip={skip}
-      sourceId="default"
-      startDate={startDate}
-      type={type}
-    >
-      {({ uncommonProcesses, totalCount, loading, pageInfo, loadPage, id, inspect, refetch }) => (
-        <UncommonProcessTableManage
-          data={uncommonProcesses}
-          fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-          id={id}
-          inspect={inspect}
-          loading={loading}
-          loadPage={loadPage}
-          refetch={refetch}
-          setQuery={setQuery}
-          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
-          totalCount={totalCount}
-          type={hostsModel.HostsType.page}
-        />
-      )}
-    </UncommonProcessesQuery>
-  );
-};
-
-const AnomaliesTabBody = ({
-  endDate,
-  skip,
-  startDate,
-  type,
-  narrowDateRange,
-}: AnomaliesQueryTabBodyProps) => {
-  return (
-    <AnomaliesHostTable
-      startDate={startDate}
-      endDate={endDate}
-      skip={skip}
-      type={type}
-      narrowDateRange={narrowDateRange}
-    />
-  );
-};
-
-const EventsTabBody = ({
-  endDate,
-  filterQuery,
-  skip,
-  setQuery,
-  startDate,
-  type,
-}: QueryTabBodyProps) => {
-  return (
-    <EventsQuery
-      endDate={endDate}
-      filterQuery={filterQuery}
-      skip={skip}
-      sourceId="default"
-      startDate={startDate}
-      type={type}
-    >
-      {({ events, loading, id, inspect, refetch, totalCount, pageInfo, loadPage }) => (
-        <EventsTableManage
-          data={events}
-          fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-          id={id}
-          inspect={inspect}
-          loading={loading}
-          loadPage={loadPage}
-          refetch={refetch}
-          setQuery={setQuery}
-          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
-          totalCount={totalCount}
-          type={hostsModel.HostsType.page}
-        />
-      )}
-    </EventsQuery>
-  );
-};
 
 const HostsComponent = pure<HostsComponentProps>(
   ({ filterQuery, setAbsoluteRangeDatePicker, match }) => {
-    const tabName = get('params.tabName', match);
     return (
       <WithSource sourceId="default">
         {({ indicesExist, indexPattern }) =>
@@ -306,73 +105,6 @@ const HostsComponent = pure<HostsComponentProps>(
                         <EuiSpacer />
                         <SiemNavigation navTabs={navTabs} display="default" showBorder={true} />
                         <EuiSpacer />
-                        {tabName == null && (
-                          <HostsQueryTabBody
-                            endDate={to}
-                            filterQuery={filterQuery}
-                            skip={isInitializing}
-                            setQuery={setQuery}
-                            startDate={from}
-                            type={hostsModel.HostsType.page}
-                            indexPattern={indexPattern}
-                          />
-                        )}
-                        {tabName === 'authentications' && (
-                          <AuthenticationsQueryTabBody
-                            endDate={to}
-                            filterQuery={filterQuery}
-                            skip={isInitializing}
-                            startDate={from}
-                            type={hostsModel.HostsType.page}
-                            setQuery={setQuery}
-                            indexPattern={indexPattern}
-                          />
-                        )}
-                        {tabName === 'uncommon_processes' && (
-                          <UncommonProcessTabBody
-                            endDate={to}
-                            filterQuery={filterQuery}
-                            skip={isInitializing}
-                            startDate={from}
-                            type={hostsModel.HostsType.page}
-                            setQuery={setQuery}
-                            indexPattern={indexPattern}
-                          />
-                        )}
-                        {tabName === 'anomalies' && (
-                          <AnomaliesTabBody
-                            startDate={from}
-                            endDate={to}
-                            skip={isInitializing}
-                            type={hostsModel.HostsType.page}
-                            narrowDateRange={(score, interval) => {
-                              const fromTo = scoreIntervalToDateTime(score, interval);
-                              setAbsoluteRangeDatePicker({
-                                id: 'global',
-                                from: fromTo.from,
-                                to: fromTo.to,
-                              });
-                            }}
-                          />
-                        )}
-                        {tabName === 'events' && (
-                          <EventsTabBody
-                            startDate={from}
-                            endDate={to}
-                            skip={isInitializing}
-                            type={hostsModel.HostsType.page}
-                            narrowDateRange={(score, interval) => {
-                              const fromTo = scoreIntervalToDateTime(score, interval);
-                              setAbsoluteRangeDatePicker({
-                                id: 'global',
-                                from: fromTo.from,
-                                to: fromTo.to,
-                              });
-                            }}
-                            setQuery={setQuery}
-                            indexPattern={indexPattern}
-                          />
-                        )}
                       </>
                     )}
                   </UseUrlState>
@@ -393,6 +125,99 @@ const HostsComponent = pure<HostsComponentProps>(
 
 HostsComponent.displayName = 'HostsComponent';
 
+const HostsBodyComponent = pure<HostsComponentProps>(
+  ({ filterQuery, setAbsoluteRangeDatePicker, match }) => {
+    const tabName = get('params.tabName', match);
+    return (
+      <WithSource sourceId="default">
+        {({ indicesExist, indexPattern }) =>
+          indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
+            <GlobalTime>
+              {({ to, from, setQuery }) => (
+                <UseUrlState indexPattern={indexPattern}>
+                  {({ isInitializing }) => (
+                    <>
+                      {(tabName == null || tabName === HostsTabName.hosts) && (
+                        <HostsQueryTabBody
+                          endDate={to}
+                          filterQuery={filterQuery}
+                          skip={isInitializing}
+                          setQuery={setQuery}
+                          startDate={from}
+                          type={hostsModel.HostsType.page}
+                          indexPattern={indexPattern}
+                        />
+                      )}
+                      {tabName === HostsTabName.authentications && (
+                        <AuthenticationsQueryTabBody
+                          endDate={to}
+                          filterQuery={filterQuery}
+                          skip={isInitializing}
+                          startDate={from}
+                          type={hostsModel.HostsType.page}
+                          setQuery={setQuery}
+                          indexPattern={indexPattern}
+                        />
+                      )}
+                      {tabName === HostsTabName.uncommonProcesses && (
+                        <UncommonProcessTabBody
+                          endDate={to}
+                          filterQuery={filterQuery}
+                          skip={isInitializing}
+                          startDate={from}
+                          type={hostsModel.HostsType.page}
+                          setQuery={setQuery}
+                          indexPattern={indexPattern}
+                        />
+                      )}
+                      {tabName === HostsTabName.anomalies && (
+                        <AnomaliesTabBody
+                          startDate={from}
+                          endDate={to}
+                          skip={isInitializing}
+                          type={hostsModel.HostsType.page}
+                          narrowDateRange={(score, interval) => {
+                            const fromTo = scoreIntervalToDateTime(score, interval);
+                            setAbsoluteRangeDatePicker({
+                              id: 'global',
+                              from: fromTo.from,
+                              to: fromTo.to,
+                            });
+                          }}
+                        />
+                      )}
+                      {tabName === HostsTabName.events && (
+                        <EventsTabBody
+                          startDate={from}
+                          endDate={to}
+                          skip={isInitializing}
+                          type={hostsModel.HostsType.page}
+                          narrowDateRange={(score, interval) => {
+                            const fromTo = scoreIntervalToDateTime(score, interval);
+                            setAbsoluteRangeDatePicker({
+                              id: 'global',
+                              from: fromTo.from,
+                              to: fromTo.to,
+                            });
+                          }}
+                          setQuery={setQuery}
+                          indexPattern={indexPattern}
+                        />
+                      )}
+                    </>
+                  )}
+                </UseUrlState>
+              )}
+            </GlobalTime>
+          ) : null
+        }
+      </WithSource>
+    );
+  }
+);
+
+HostsBodyComponent.displayName = 'HostsBodyComponent';
+
 const makeMapStateToProps = () => {
   const getHostsFilterQueryAsJson = hostsSelectors.hostsFilterQueryAsJson();
   const mapStateToProps = (state: State) => ({
@@ -407,3 +232,10 @@ export const Hosts = connect(
     setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
   }
 )(HostsComponent);
+
+export const HostsBody = connect(
+  makeMapStateToProps,
+  {
+    setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
+  }
+)(HostsBodyComponent);
