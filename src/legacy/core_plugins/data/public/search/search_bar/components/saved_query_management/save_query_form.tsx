@@ -95,17 +95,29 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
     existingSavedQuery => !savedQuery && existingSavedQuery.attributes.title === title
   );
 
+  const hasWhitespaceError = title.length > title.trim().length;
+
   const titleConflictErrorText = i18n.translate(
     'data.search.searchBar.savedQueryForm.titleConflictText',
     {
       defaultMessage: 'Title conflicts with an existing saved query',
     }
   );
+  const whitespaceErrorText = i18n.translate(
+    'data.search.searchBar.savedQueryForm.whitespaceErrorText',
+    {
+      defaultMessage: 'Title cannot contain leading or trailing white space',
+    }
+  );
 
-  const errors = hasTitleConflict ? [titleConflictErrorText] : [];
+  const errors = hasWhitespaceError
+    ? [whitespaceErrorText]
+    : hasTitleConflict
+    ? [titleConflictErrorText]
+    : [];
 
   const saveQueryForm = (
-    <EuiForm isInvalid={hasTitleConflict} error={errors}>
+    <EuiForm isInvalid={hasWhitespaceError || hasTitleConflict} error={errors}>
       <EuiFormRow>
         <EuiText color="subdued">{savedQueryDescriptionText}</EuiText>
       </EuiFormRow>
@@ -116,7 +128,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
         helpText={i18n.translate('data.search.searchBar.savedQueryNameHelpText', {
           defaultMessage: 'Name must be unique.',
         })}
-        isInvalid={hasTitleConflict}
+        isInvalid={hasWhitespaceError || hasTitleConflict}
       >
         <EuiFieldText
           disabled={!!savedQuery}
@@ -126,7 +138,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
             setTitle(event.target.value);
           }}
           data-test-subj="saveQueryFormTitle"
-          isInvalid={hasTitleConflict}
+          isInvalid={hasWhitespaceError || hasTitleConflict}
         />
       </EuiFormRow>
 
@@ -209,7 +221,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
             }
             fill
             data-test-subj="savedQueryFormSaveButton"
-            disabled={hasTitleConflict}
+            disabled={hasWhitespaceError || hasTitleConflict}
           >
             {i18n.translate('data.search.searchBar.savedQueryFormSaveButtonText', {
               defaultMessage: 'Save',
