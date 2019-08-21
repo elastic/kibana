@@ -8,13 +8,13 @@ import { BehaviorSubject } from 'rxjs';
 import { TypeOf } from '@kbn/config-schema';
 import { schema } from './schema';
 import { LICENSE_TYPE } from './constants';
-import { LicensingServiceSetup } from './licensing_service_setup';
+import { LicensingPluginSetup } from './licensing_plugin_setup';
 
 /** @public */
-export type LicensingServiceSubject = BehaviorSubject<LicensingServiceSetup>;
+export type LicensingPluginSubject = BehaviorSubject<LicensingPluginSetup>;
 /** @public */
 export type LicensingConfigType = TypeOf<typeof schema>;
 /** @public */
 export type LicenseType = keyof typeof LICENSE_TYPE;
 /** @public */
-export type LicenseFeatureSerializer = (service: LicensingServiceSetup) => any;
+export type LicenseFeatureSerializer = (licensing: LicensingPluginSetup) => any;

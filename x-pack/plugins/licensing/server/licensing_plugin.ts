@@ -8,16 +8,16 @@ import { BehaviorSubject, Observable, Subscription, timer } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 import moment from 'moment';
 import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
-import { LicensingConfigType, LicensingServiceSubject } from './types';
+import { LicensingConfigType, LicensingPluginSubject } from './types';
 import { LicensingConfig } from './licensing_config';
-import { LicensingServiceSetup } from './licensing_service_setup';
+import { LicensingPluginSetup } from './licensing_plugin_setup';
 
-export class LicensingPlugin implements Plugin<LicensingServiceSubject, LicensingServiceSubject> {
+export class LicensingPlugin implements Plugin<LicensingPluginSubject, LicensingPluginSubject> {
   private readonly logger: Logger;
   private readonly config$: Observable<LicensingConfig>;
   private poller$!: Observable<number>;
   private pollerSubscription!: Subscription;
-  private service$!: LicensingServiceSubject;
+  private service$!: LicensingPluginSubject;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.logger = this.context.logger.get();
@@ -91,8 +91,8 @@ export class LicensingPlugin implements Plugin<LicensingServiceSubject, Licensin
       return this.service$;
     }
 
-    const service$ = new BehaviorSubject<LicensingServiceSetup>(
-      new LicensingServiceSetup(null, {}, null, clusterSource)
+    const service$ = new BehaviorSubject<LicensingPluginSetup>(
+      new LicensingPluginSetup(null, {}, null, clusterSource)
     );
 
     this.poller$ = timer(pollingFrequency);
@@ -104,7 +104,7 @@ export class LicensingPlugin implements Plugin<LicensingServiceSubject, Licensin
       );
 
       if (license !== false) {
-        service$.next(new LicensingServiceSetup(license, features, error, clusterSource));
+        service$.next(new LicensingPluginSetup(license, features, error, clusterSource));
       }
 
       return value;

@@ -22,7 +22,7 @@ function toLicenseType(minimumLicenseRequired: LICENSE_TYPE | string) {
   return LICENSE_TYPE[minimumLicenseRequired as LicenseType];
 }
 
-export class LicensingServiceSetup {
+export class LicensingPluginSetup {
   private readonly _license: any;
   private readonly license: any;
   private readonly features: any;
