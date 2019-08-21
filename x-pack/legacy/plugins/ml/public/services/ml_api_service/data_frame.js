@@ -43,7 +43,7 @@ export const dataFrame = {
   deleteDataFrameTransforms(transformsInfo) {
     return http({
       url: `${basePath}/_data_frame/transforms/delete_transforms`,
-      method: 'DELETE',
+      method: 'POST',
       data: {
         transformsInfo
       }

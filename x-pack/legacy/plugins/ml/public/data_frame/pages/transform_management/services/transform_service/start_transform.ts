@@ -21,7 +21,7 @@ export const startTransforms = async (dataFrames: DataFrameTransformListRow[]) =
     id: df.config.id,
     state: df.stats.state,
   }));
-  const { results } = await ml.dataFrame.startDataFrameTransforms(dataFramesInfo);
+  const results = await ml.dataFrame.startDataFrameTransforms(dataFramesInfo);
 
   results.forEach((result: DataFrameTransformEndpointResultData) => {
     if (result.success === true) {

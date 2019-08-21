@@ -19,7 +19,7 @@ export const deleteTransforms = async (dataFrames: DataFrameTransformListRow[]) 
     id: df.config.id,
     state: df.stats.state,
   }));
-  const { results } = await ml.dataFrame.deleteDataFrameTransforms(dataFramesInfo);
+  const results = await ml.dataFrame.deleteDataFrameTransforms(dataFramesInfo);
 
   results.forEach((result: DataFrameTransformEndpointResultData) => {
     if (result.success === true) {

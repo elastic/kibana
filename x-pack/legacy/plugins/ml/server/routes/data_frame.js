@@ -80,7 +80,7 @@ export function dataFrameRoutes({ commonRouteConfig, elasticsearchPlugin, route 
   });
 
   route({
-    method: 'DELETE',
+    method: 'POST',
     path: '/api/ml/_data_frame/transforms/delete_transforms',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
