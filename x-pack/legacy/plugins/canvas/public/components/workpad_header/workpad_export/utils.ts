@@ -8,11 +8,21 @@ import rison from 'rison-node';
 import chrome from 'ui/chrome';
 import { QueryString } from 'ui/utils/query_string';
 import { fetch } from '../../../../common/lib/fetch';
+import { CanvasWorkpad } from '../../../../types';
 
 // type of the desired pdf output (print or preserve_layout)
 const PDF_LAYOUT_TYPE = 'preserve_layout';
 
-export function getPdfUrl({ id, name: title, width, height }, { pageCount }) {
+interface PageCount {
+  pageCount: number;
+}
+
+type Arguments = [CanvasWorkpad, PageCount];
+
+export function getPdfUrl(
+  { id, name: title, width, height }: CanvasWorkpad,
+  { pageCount }: PageCount
+) {
   const reportingEntry = chrome.addBasePath('/api/reporting/generate');
   const canvasEntry = '/app/canvas#';
 
@@ -49,7 +59,7 @@ export function getPdfUrl({ id, name: title, width, height }, { pageCount }) {
   )}`;
 }
 
-export function createPdf(...args) {
+export function createPdf(...args: Arguments) {
   const createPdfUri = getPdfUrl(...args);
   return fetch.post(createPdfUri);
 }
