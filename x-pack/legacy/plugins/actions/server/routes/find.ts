@@ -30,6 +30,7 @@ export function findRoute(server: Hapi.Server) {
     method: 'GET',
     path: `/api/action/_find`,
     options: {
+      tags: ['access:actions-read'],
       validate: {
         query: Joi.object()
           .keys({

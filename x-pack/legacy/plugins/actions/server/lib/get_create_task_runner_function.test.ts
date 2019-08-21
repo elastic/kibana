@@ -23,35 +23,37 @@ const actionType = {
   name: '1',
   executor: jest.fn(),
 };
+const services = {
+  log: jest.fn(),
+  callCluster: jest.fn(),
+  savedObjectsClient: SavedObjectsClientMock.create(),
+};
 
 actionTypeRegistry.get.mockReturnValue(actionType);
 
 const getCreateTaskRunnerFunctionParams = {
-  getServices() {
-    return {
-      log: jest.fn(),
-      callCluster: jest.fn(),
-      savedObjectsClient: SavedObjectsClientMock.create(),
-    };
-  },
+  getServices: jest.fn().mockReturnValue(services),
   actionTypeRegistry,
   spaceIdToNamespace,
   encryptedSavedObjectsPlugin: mockedEncryptedSavedObjectsPlugin,
   getBasePath: jest.fn().mockReturnValue(undefined),
+  isSecurityEnabled: true,
 };
 
 const taskInstanceMock = {
   runAt: new Date(),
   state: {},
   params: {
-    id: '2',
-    params: { baz: true },
     spaceId: 'test',
+    actionTaskParamsId: '3',
   },
   taskType: 'actions:1',
 };
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => {
+  jest.resetAllMocks();
+  getCreateTaskRunnerFunctionParams.getServices.mockReturnValue(services);
+});
 
 test('executes the task by calling the executor with proper parameters', async () => {
   const { execute: mockExecute } = jest.requireMock('./execute');
@@ -60,11 +62,26 @@ test('executes the task by calling the executor with proper parameters', async (
 
   mockExecute.mockResolvedValueOnce({ status: 'ok' });
   spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+  mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+    references: [],
+  });
 
   const runnerResult = await runner.run();
 
   expect(runnerResult).toBeUndefined();
   expect(spaceIdToNamespace).toHaveBeenCalledWith('test');
+  expect(mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+    'action_task_params',
+    '3',
+    { namespace: 'namespace-test' }
+  );
   expect(mockExecute).toHaveBeenCalledWith({
     namespace: 'namespace-test',
     actionId: '2',
@@ -80,6 +97,16 @@ test('throws an error with suggested retry logic when return status is error', a
   const createTaskRunner = getCreateTaskRunnerFunction(getCreateTaskRunnerFunctionParams);
   const runner = createTaskRunner({ taskInstance: taskInstanceMock });
 
+  mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+    references: [],
+  });
   mockExecute.mockResolvedValueOnce({
     status: 'error',
     message: 'Error message',
@@ -95,4 +122,112 @@ test('throws an error with suggested retry logic when return status is error', a
     expect(e.data).toEqual({ foo: true });
     expect(e.retry).toEqual(false);
   }
+});
+
+test('uses API key when provided', async () => {
+  const { execute: mockExecute } = jest.requireMock('./execute');
+  const createTaskRunner = getCreateTaskRunnerFunction(getCreateTaskRunnerFunctionParams);
+  const runner = createTaskRunner({ taskInstance: taskInstanceMock });
+
+  mockExecute.mockResolvedValueOnce({ status: 'ok' });
+  spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+  mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+    references: [],
+  });
+
+  await runner.run();
+
+  expect(getCreateTaskRunnerFunctionParams.getServices).toHaveBeenCalledWith({
+    getBasePath: expect.anything(),
+    headers: {
+      // base64 encoded "123:abc"
+      authorization: 'ApiKey MTIzOmFiYw==',
+    },
+  });
+});
+
+test(`doesn't use API key when not provided`, async () => {
+  const { execute: mockExecute } = jest.requireMock('./execute');
+  const createTaskRunner = getCreateTaskRunnerFunction({
+    ...getCreateTaskRunnerFunctionParams,
+    isSecurityEnabled: false,
+  });
+  const runner = createTaskRunner({ taskInstance: taskInstanceMock });
+
+  mockExecute.mockResolvedValueOnce({ status: 'ok' });
+  spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+  mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+    },
+    references: [],
+  });
+
+  await runner.run();
+
+  expect(getCreateTaskRunnerFunctionParams.getServices).toHaveBeenCalledWith({
+    getBasePath: expect.anything(),
+    headers: {},
+  });
+});
+
+test(`doesn't use API key when provided and isSecurityEnabled is set to false`, async () => {
+  const { execute: mockExecute } = jest.requireMock('./execute');
+  const createTaskRunner = getCreateTaskRunnerFunction({
+    ...getCreateTaskRunnerFunctionParams,
+    isSecurityEnabled: false,
+  });
+  const runner = createTaskRunner({ taskInstance: taskInstanceMock });
+
+  mockExecute.mockResolvedValueOnce({ status: 'ok' });
+  spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+  mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+    references: [],
+  });
+
+  await runner.run();
+
+  expect(getCreateTaskRunnerFunctionParams.getServices).toHaveBeenCalledWith({
+    getBasePath: expect.anything(),
+    headers: {},
+  });
+});
+
+test(`throws an error when isSecurityEnabled is true but key isn't provided`, async () => {
+  const { execute: mockExecute } = jest.requireMock('./execute');
+  const createTaskRunner = getCreateTaskRunnerFunction(getCreateTaskRunnerFunctionParams);
+  const runner = createTaskRunner({ taskInstance: taskInstanceMock });
+
+  mockExecute.mockResolvedValueOnce({ status: 'ok' });
+  spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+  mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+    },
+    references: [],
+  });
+
+  await expect(runner.run()).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"API key is required. The attribute \\"apiKey\\" is missing."`
+  );
 });

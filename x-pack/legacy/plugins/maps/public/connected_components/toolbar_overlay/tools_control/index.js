@@ -6,12 +6,12 @@
 
 import { connect } from 'react-redux';
 import { ToolsControl } from './tools_control';
-import { getDrawState } from '../../../selectors/map_selectors';
+import { isDrawingFilter } from '../../../selectors/map_selectors';
 import { updateDrawState } from '../../../actions/map_actions';
 
 function mapStateToProps(state = {}) {
   return {
-    drawState: getDrawState(state),
+    isDrawingFilter: isDrawingFilter(state),
   };
 }
 
@@ -19,6 +19,9 @@ function mapDispatchToProps(dispatch) {
   return {
     initiateDraw: (options) => {
       dispatch(updateDrawState(options));
+    },
+    cancelDraw: () => {
+      dispatch(updateDrawState(null));
     }
   };
 }
