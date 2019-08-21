@@ -5,14 +5,14 @@
  */
 
 import { Request } from 'hapi';
-import { JobParamPostPayload, JobParams } from '../../../types';
+import { JobParamsPostPayloadPanelCsv, JobParamsPanelCsv } from '../../types';
 
 export function getJobParamsFromRequest(
   request: Request,
   opts: { isImmediate: boolean }
-): JobParams {
+): Partial<JobParamsPanelCsv> {
   const { savedObjectType, savedObjectId } = request.params;
-  const { timerange, state } = request.payload as JobParamPostPayload;
+  const { timerange, state } = request.payload as JobParamsPostPayloadPanelCsv;
   const post = timerange || state ? { timerange, state } : undefined;
 
   return {
