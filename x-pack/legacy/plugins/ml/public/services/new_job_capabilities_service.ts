@@ -16,7 +16,11 @@ import {
   EVENT_RATE_FIELD_ID,
 } from '../../common/types/fields';
 import { ES_FIELD_TYPES } from '../../common/constants/field_types';
-import { ML_JOB_AGGREGATION } from '../../common/constants/aggregation_types';
+import {
+  ML_JOB_AGGREGATION,
+  KIBANA_AGGREGATION,
+  ES_AGGREGATION,
+} from '../../common/constants/aggregation_types';
 import { ml } from './ml_api_service';
 
 // called in the angular routing resolve block to initialize the
@@ -195,8 +199,8 @@ function createCountFieldAndAggs() {
     {
       id: ML_JOB_AGGREGATION.COUNT,
       title: 'Count',
-      kibanaName: 'count',
-      dslName: 'count',
+      kibanaName: KIBANA_AGGREGATION.COUNT,
+      dslName: ES_AGGREGATION.COUNT,
       type: 'metrics',
       mlModelPlotAgg: {
         min: 'min',
@@ -207,8 +211,8 @@ function createCountFieldAndAggs() {
     {
       id: ML_JOB_AGGREGATION.HIGH_COUNT,
       title: 'High count',
-      kibanaName: 'count',
-      dslName: 'count',
+      kibanaName: KIBANA_AGGREGATION.COUNT,
+      dslName: ES_AGGREGATION.COUNT,
       type: 'metrics',
       mlModelPlotAgg: {
         min: 'min',
@@ -219,8 +223,8 @@ function createCountFieldAndAggs() {
     {
       id: ML_JOB_AGGREGATION.LOW_COUNT,
       title: 'Low count',
-      kibanaName: 'count',
-      dslName: 'count',
+      kibanaName: KIBANA_AGGREGATION.COUNT,
+      dslName: ES_AGGREGATION.COUNT,
       type: 'metrics',
       mlModelPlotAgg: {
         min: 'min',

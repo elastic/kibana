@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export * from './commit_indexer';
+export * from './commit_indexer_factory';
 export * from './lsp_incremental_indexer';
 export * from './lsp_indexer';
 export * from './lsp_indexer_factory';
