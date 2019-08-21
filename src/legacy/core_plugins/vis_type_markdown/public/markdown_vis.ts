@@ -22,7 +22,8 @@ import { i18n } from '@kbn/i18n';
 import { visFactory, DefaultEditorSize } from '../../visualizations/public';
 
 import { MarkdownVisWrapper } from './markdown_vis_controller';
-import markdownVisParamsTemplate from './markdown_vis_params.html';
+import { MarkdownOptions } from './markdown_options';
+import { SettingsOptions } from './settings_options';
 
 export const markdownVis = visFactory.createReactVisualization({
   name: 'markdown',
@@ -41,7 +42,22 @@ export const markdownVis = visFactory.createReactVisualization({
     },
   },
   editorConfig: {
-    optionsTemplate: markdownVisParamsTemplate,
+    optionTabs: [
+      {
+        name: 'advanced',
+        title: i18n.translate('visTypeMarkdown.tabs.dataText', {
+          defaultMessage: 'Data',
+        }),
+        editor: MarkdownOptions,
+      },
+      {
+        name: 'options',
+        title: i18n.translate('visTypeMarkdown.tabs.optionsText', {
+          defaultMessage: 'Options',
+        }),
+        editor: SettingsOptions,
+      },
+    ],
     enableAutoApply: true,
     defaultSize: DefaultEditorSize.LARGE,
   },

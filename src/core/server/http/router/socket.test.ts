@@ -56,4 +56,50 @@ describe('KibanaSocket', () => {
       expect(socket.getPeerCertificate()).toBe(null);
     });
   });
+
+  describe('authorized', () => {
+    it('returns `undefined` for net.Socket instance', () => {
+      const socket = new KibanaSocket(new Socket());
+
+      expect(socket.authorized).toBeUndefined();
+    });
+
+    it('mirrors the value of tls.Socket.authorized', () => {
+      const tlsSocket = new TLSSocket(new Socket());
+
+      tlsSocket.authorized = true;
+      let socket = new KibanaSocket(tlsSocket);
+      expect(tlsSocket.authorized).toBe(true);
+      expect(socket.authorized).toBe(true);
+
+      tlsSocket.authorized = false;
+      socket = new KibanaSocket(tlsSocket);
+      expect(tlsSocket.authorized).toBe(false);
+      expect(socket.authorized).toBe(false);
+    });
+  });
+
+  describe('authorizationError', () => {
+    it('returns `undefined` for net.Socket instance', () => {
+      const socket = new KibanaSocket(new Socket());
+
+      expect(socket.authorizationError).toBeUndefined();
+    });
+
+    it('mirrors the value of tls.Socket.authorizationError', () => {
+      const tlsSocket = new TLSSocket(new Socket());
+      tlsSocket.authorizationError = undefined as any;
+
+      let socket = new KibanaSocket(tlsSocket);
+      expect(tlsSocket.authorizationError).toBeUndefined();
+      expect(socket.authorizationError).toBeUndefined();
+
+      const authorizationError = new Error('some error');
+      tlsSocket.authorizationError = authorizationError;
+      socket = new KibanaSocket(tlsSocket);
+
+      expect(tlsSocket.authorizationError).toBe(authorizationError);
+      expect(socket.authorizationError).toBe(authorizationError);
+    });
+  });
 });

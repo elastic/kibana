@@ -36,9 +36,9 @@ interface OwnProps {
   browserFields: BrowserFields;
   data: TimelineItem[];
   id: string;
-  isLoading: boolean;
   height: number;
   sort: Sort;
+  toggleColumn: (column: ColumnHeader) => void;
   width: number;
 }
 
@@ -92,10 +92,10 @@ class StatefulBodyComponent extends React.PureComponent<StatefulBodyComponentPro
       getNotesByIds,
       height,
       id,
-      isLoading,
       pinnedEventIds,
       range,
       sort,
+      toggleColumn,
       width,
     } = this.props;
 
@@ -104,7 +104,6 @@ class StatefulBodyComponent extends React.PureComponent<StatefulBodyComponentPro
         addNoteToEvent={this.onAddNoteToEvent}
         browserFields={browserFields}
         id={id}
-        isLoading={isLoading}
         columnHeaders={columnHeaders || []}
         columnRenderers={columnRenderers}
         data={data}
@@ -122,6 +121,7 @@ class StatefulBodyComponent extends React.PureComponent<StatefulBodyComponentPro
         range={range!}
         rowRenderers={rowRenderers}
         sort={sort}
+        toggleColumn={toggleColumn}
         updateNote={this.onUpdateNote}
         width={width}
       />
