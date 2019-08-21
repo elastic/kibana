@@ -60,7 +60,7 @@ function getTitle(agg: Aggregation, field: Field, splitField: SplitField): strin
   if (splitField === null) {
     return title;
   } else {
-    return i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.populationField.placeholder', {
+    return i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.detectorTitle.placeholder', {
       defaultMessage: '{title} split by {field}',
       values: { title, field: splitField.name },
     });
