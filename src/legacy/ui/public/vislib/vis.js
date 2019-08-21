@@ -181,6 +181,12 @@ export function VislibVisProvider(Private) {
       if (last && removed && this.handler) this.handler.disable(event);
       return ret;
     }
+
+    removeAllListeners(event) {
+      const ret = EventEmitter.prototype.removeAllListeners.call(this, event);
+      this.handler.disable(event);
+      return ret;
+    }
   }
 
   return Vis;
