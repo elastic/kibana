@@ -31,7 +31,6 @@ describe('state_helpers', () => {
         label: 'Top values of source',
         dataType: 'string',
         isBucketed: true,
-        isMetric: false,
 
         // Private
         operationType: 'terms',
@@ -56,7 +55,6 @@ describe('state_helpers', () => {
                 label: 'Count',
                 dataType: 'number',
                 isBucketed: false,
-                isMetric: true,
 
                 // Private
                 operationType: 'count',
@@ -78,7 +76,6 @@ describe('state_helpers', () => {
         label: 'Top values of source',
         dataType: 'string',
         isBucketed: true,
-        isMetric: false,
 
         // Private
         operationType: 'terms',
@@ -103,7 +100,6 @@ describe('state_helpers', () => {
                 label: 'Count',
                 dataType: 'number',
                 isBucketed: false,
-                isMetric: true,
 
                 // Private
                 operationType: 'count',
@@ -131,7 +127,6 @@ describe('state_helpers', () => {
         label: 'Value of timestamp',
         dataType: 'date',
         isBucketed: true,
-        isMetric: false,
 
         // Private
         operationType: 'date_histogram',
@@ -178,7 +173,6 @@ describe('state_helpers', () => {
                 label: 'Average of bytes',
                 dataType: 'number',
                 isBucketed: false,
-                isMetric: true,
 
                 // Private
                 operationType: 'avg',
@@ -188,7 +182,6 @@ describe('state_helpers', () => {
                 label: 'Max of bytes',
                 dataType: 'number',
                 isBucketed: false,
-                isMetric: true,
 
                 // Private
                 operationType: 'max',
@@ -207,7 +200,6 @@ describe('state_helpers', () => {
             label: 'Date histogram of timestamp',
             dataType: 'date',
             isBucketed: true,
-            isMetric: false,
 
             // Private
             operationType: 'date_histogram',
@@ -240,7 +232,6 @@ describe('state_helpers', () => {
                 label: 'Date histogram of timestamp',
                 dataType: 'date',
                 isBucketed: true,
-                isMetric: false,
 
                 // Private
                 operationType: 'date_histogram',
@@ -262,7 +253,6 @@ describe('state_helpers', () => {
             label: 'Date histogram of order_date',
             dataType: 'date',
             isBucketed: true,
-            isMetric: false,
 
             // Private
             operationType: 'date_histogram',
@@ -284,7 +274,6 @@ describe('state_helpers', () => {
         label: 'Top values of source',
         dataType: 'string',
         isBucketed: true,
-        isMetric: false,
 
         // Private
         operationType: 'terms',
@@ -300,7 +289,6 @@ describe('state_helpers', () => {
         label: 'Average of bytes',
         dataType: 'number',
         isBucketed: false,
-        isMetric: true,
 
         // Private
         operationType: 'avg',
@@ -320,7 +308,6 @@ describe('state_helpers', () => {
                 label: 'Count',
                 dataType: 'number',
                 isBucketed: false,
-                isMetric: true,
 
                 // Private
                 operationType: 'count',
@@ -356,7 +343,6 @@ describe('state_helpers', () => {
             label: 'Value of timestamp',
             dataType: 'string',
             isBucketed: false,
-            isMetric: false,
 
             // Private
             operationType: 'date_histogram',
@@ -376,7 +362,6 @@ describe('state_helpers', () => {
             label: 'Top Values of category',
             dataType: 'string',
             isBucketed: true,
-            isMetric: false,
 
             // Private
             operationType: 'terms',
@@ -393,7 +378,6 @@ describe('state_helpers', () => {
             label: 'Average of bytes',
             dataType: 'number',
             isBucketed: false,
-            isMetric: true,
 
             // Private
             operationType: 'avg',
@@ -403,7 +387,6 @@ describe('state_helpers', () => {
             label: 'Date Histogram of timestamp',
             dataType: 'date',
             isBucketed: true,
-            isMetric: false,
 
             // Private
             operationType: 'date_histogram',
@@ -423,7 +406,6 @@ describe('state_helpers', () => {
             label: 'Top Values of category',
             dataType: 'string',
             isBucketed: true,
-            isMetric: false,
 
             // Private
             operationType: 'terms',
@@ -441,7 +423,6 @@ describe('state_helpers', () => {
             label: 'Average of bytes',
             dataType: 'number',
             isBucketed: false,
-            isMetric: true,
 
             // Private
             operationType: 'avg',
@@ -452,7 +433,6 @@ describe('state_helpers', () => {
             label: 'Date Histogram of timestamp',
             dataType: 'date',
             isBucketed: true,
-            isMetric: false,
 
             // Private
             operationType: 'date_histogram',
@@ -532,7 +512,6 @@ describe('state_helpers', () => {
           col1: {
             dataType: 'string',
             isBucketed: true,
-            isMetric: false,
             label: '',
             operationType: 'terms',
             sourceField: 'fieldA',
@@ -545,7 +524,6 @@ describe('state_helpers', () => {
           col2: {
             dataType: 'number',
             isBucketed: false,
-            isMetric: true,
             label: '',
             operationType: 'avg',
             sourceField: 'xxx',
@@ -567,7 +545,6 @@ describe('state_helpers', () => {
           col1: {
             dataType: 'string',
             isBucketed: true,
-            isMetric: false,
             label: '',
             operationType: 'date_histogram',
             sourceField: 'fieldC',
@@ -578,7 +555,6 @@ describe('state_helpers', () => {
           col2: {
             dataType: 'number',
             isBucketed: false,
-            isMetric: true,
             label: '',
             operationType: 'avg',
             sourceField: 'fieldB',
@@ -600,7 +576,6 @@ describe('state_helpers', () => {
           col1: {
             dataType: 'date',
             isBucketed: true,
-            isMetric: false,
             label: '',
             operationType: 'date_histogram',
             sourceField: 'fieldD',
@@ -631,7 +606,6 @@ describe('state_helpers', () => {
           col1: {
             dataType: 'string',
             isBucketed: true,
-            isMetric: false,
             label: '',
             operationType: 'terms',
             sourceField: 'fieldA',
@@ -644,7 +618,6 @@ describe('state_helpers', () => {
           col2: {
             dataType: 'number',
             isBucketed: false,
-            isMetric: true,
             label: '',
             operationType: 'avg',
             sourceField: 'fieldD',
@@ -666,7 +639,6 @@ describe('state_helpers', () => {
           col1: {
             dataType: 'string',
             isBucketed: true,
-            isMetric: false,
             label: '',
             operationType: 'terms',
             sourceField: 'fieldA',
@@ -679,7 +651,6 @@ describe('state_helpers', () => {
           col2: {
             dataType: 'number',
             isBucketed: false,
-            isMetric: true,
             label: '',
             operationType: 'min',
             sourceField: 'fieldC',

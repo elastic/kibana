@@ -31,7 +31,6 @@ describe('terms', () => {
               label: 'Top value of category',
               dataType: 'string',
               isBucketed: true,
-              isMetric: false,
 
               // Private
               operationType: 'terms',
@@ -46,7 +45,6 @@ describe('terms', () => {
               label: 'Count',
               dataType: 'number',
               isBucketed: false,
-              isMetric: true,
 
               // Private
               operationType: 'count',
@@ -93,7 +91,6 @@ describe('terms', () => {
         {
           dataType: 'string',
           isBucketed: true,
-          isMetric: false,
           scale: 'ordinal',
         },
       ]);
@@ -109,7 +106,6 @@ describe('terms', () => {
         {
           dataType: 'boolean',
           isBucketed: true,
-          isMetric: false,
           scale: 'ordinal',
         },
       ]);
@@ -162,7 +158,6 @@ describe('terms', () => {
             label: 'Count',
             dataType: 'number',
             isBucketed: false,
-            isMetric: true,
 
             // Private
             operationType: 'count',
@@ -189,7 +184,6 @@ describe('terms', () => {
         label: 'Top value of category',
         dataType: 'string',
         isBucketed: true,
-        isMetric: false,
 
         // Private
         operationType: 'terms',
@@ -205,7 +199,6 @@ describe('terms', () => {
           label: 'Count',
           dataType: 'number',
           isBucketed: false,
-          isMetric: true,
 
           // Private
           operationType: 'count',
@@ -220,7 +213,6 @@ describe('terms', () => {
           label: 'Top value of category',
           dataType: 'string',
           isBucketed: true,
-          isMetric: false,
 
           // Private
           operationType: 'terms',
@@ -246,7 +238,6 @@ describe('terms', () => {
           label: 'Top value of category',
           dataType: 'string',
           isBucketed: true,
-          isMetric: false,
 
           // Private
           operationType: 'terms',
@@ -262,7 +253,6 @@ describe('terms', () => {
             label: 'Value of timestamp',
             dataType: 'date',
             isBucketed: true,
-            isMetric: false,
 
             // Private
             operationType: 'date_histogram',
@@ -320,7 +310,6 @@ describe('terms', () => {
                     label: 'Count',
                     dataType: 'number',
                     isBucketed: false,
-                    isMetric: true,
 
                     // Private
                     operationType: 'filter_ratio',

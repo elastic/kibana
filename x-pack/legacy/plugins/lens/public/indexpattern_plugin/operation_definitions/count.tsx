@@ -20,7 +20,6 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
       {
         dataType: 'number',
         isBucketed: false,
-        isMetric: true,
         scale: 'ratio',
       },
     ];
@@ -34,7 +33,6 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
       operationType: 'count',
       suggestedPriority,
       isBucketed: false,
-      isMetric: true,
       scale: 'ratio',
     };
   },

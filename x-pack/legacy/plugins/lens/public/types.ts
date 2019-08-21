@@ -203,6 +203,9 @@ export interface OperationMetadata {
   isBucketed: boolean;
   scale?: 'ordinal' | 'interval' | 'ratio';
   // Extra meta-information like cardinality, color
+  // TODO currently it's not possible to differentiate between a field from a raw
+  // document and an aggregated metric which might be handy in some cases. Once we
+  // introduce a raw document datasource, this should be considered here.
 }
 
 export interface LensMultiTable {
