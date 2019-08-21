@@ -20,7 +20,7 @@ export { ArchiveEntry } from './extract';
 const REGISTRY = process.env.REGISTRY || 'http://integrations-registry.app.elstc.co';
 
 export async function fetchList(): Promise<RegistryList> {
-  return fetchUrl(`${REGISTRY}/list`).then(JSON.parse);
+  return fetchUrl(`${REGISTRY}/search`).then(JSON.parse);
 }
 
 export async function fetchInfo(key: string): Promise<RegistryPackage> {
