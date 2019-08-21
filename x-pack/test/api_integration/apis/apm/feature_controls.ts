@@ -31,32 +31,32 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
   const endpoints = [
     {
-      url: `/api/apm/services/foo/errors?start=${start}&end=${end}`,
+      url: `/api/apm/services/foo/errors?start=${start}&end=${end}&uiFilters=%7B%7D`,
       expectForbidden: expect404,
       expectResponse: expect200,
     },
     {
-      url: `/api/apm/services/foo/errors/bar?start=${start}&end=${end}`,
+      url: `/api/apm/services/foo/errors/bar?start=${start}&end=${end}&uiFilters=%7B%7D`,
       expectForbidden: expect404,
       expectResponse: expect200,
     },
     {
-      url: `/api/apm/services/foo/errors/distribution?start=${start}&end=${end}&groupId=bar`,
+      url: `/api/apm/services/foo/errors/distribution?start=${start}&end=${end}&groupId=bar&uiFilters=%7B%7D`,
       expectForbidden: expect404,
       expectResponse: expect200,
     },
     {
-      url: `/api/apm/services/foo/errors/distribution?start=${start}&end=${end}`,
+      url: `/api/apm/services/foo/errors/distribution?start=${start}&end=${end}&uiFilters=%7B%7D`,
       expectForbidden: expect404,
       expectResponse: expect200,
     },
     {
-      url: `/api/apm/services/foo/metrics/charts?start=${start}&end=${end}&agentName=cool-agent`,
+      url: `/api/apm/services/foo/metrics/charts?start=${start}&end=${end}&agentName=cool-agent&uiFilters=%7B%7D`,
       expectForbidden: expect404,
       expectResponse: expect200,
     },
     {
-      url: `/api/apm/services?start=${start}&end=${end}`,
+      url: `/api/apm/services?start=${start}&end=${end}&uiFilters=%7B%7D`,
       expectForbidden: expect404,
       expectResponse: expect200,
     },
@@ -71,7 +71,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       expectResponse: expect200,
     },
     {
-      url: `/api/apm/traces?start=${start}&end=${end}`,
+      url: `/api/apm/traces?start=${start}&end=${end}&uiFilters=%7B%7D`,
       expectForbidden: expect404,
       expectResponse: expect200,
     },
@@ -81,27 +81,27 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       expectResponse: expect200,
     },
     {
-      url: `/api/apm/services/foo/transaction_groups?start=${start}&end=${end}&transactionType=bar`,
+      url: `/api/apm/services/foo/transaction_groups?start=${start}&end=${end}&transactionType=bar&uiFilters=%7B%7D`,
       expectForbidden: expect404,
       expectResponse: expect200,
     },
     {
-      url: `/api/apm/services/foo/transaction_groups/charts?start=${start}&end=${end}&transactionType=bar`,
+      url: `/api/apm/services/foo/transaction_groups/charts?start=${start}&end=${end}&transactionType=bar&uiFilters=%7B%7D`,
       expectForbidden: expect404,
       expectResponse: expect200,
     },
     {
-      url: `/api/apm/services/foo/transaction_groups/charts?start=${start}&end=${end}`,
+      url: `/api/apm/services/foo/transaction_groups/charts?start=${start}&end=${end}&uiFilters=%7B%7D`,
       expectForbidden: expect404,
       expectResponse: expect200,
     },
     {
-      url: `/api/apm/services/foo/transaction_groups/charts?start=${start}&end=${end}&transactionType=bar&transactionName=baz`,
+      url: `/api/apm/services/foo/transaction_groups/charts?start=${start}&end=${end}&transactionType=bar&transactionName=baz&uiFilters=%7B%7D`,
       expectForbidden: expect404,
       expectResponse: expect200,
     },
     {
-      url: `/api/apm/services/foo/transaction_groups/distribution?start=${start}&end=${end}&transactionType=bar&transactionName=baz`,
+      url: `/api/apm/services/foo/transaction_groups/distribution?start=${start}&end=${end}&transactionType=bar&transactionName=baz&uiFilters=%7B%7D`,
       expectForbidden: expect404,
       expectResponse: expect200,
     },
