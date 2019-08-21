@@ -8,29 +8,24 @@ The external runtime is designed to render Canvas Workpads outside of Kibana in 
 
 This directory contains the code necessary to build and test this external runtime.
 
+## Building
+
+Run `node scripts/external_runtime`. The runtime will be built and stored in the Kibana `built_assets` directory.
+
 ## Development
-
-At present, this runtime is only configured to run in development mode.
-
-### Starting
 
 To start the `webpack-dev-server` and test a workpad, simply run:
 
-`/canvas: node scripts/external_runtime`
+`/canvas: node scripts/external_runtime --dev --run`
 
-A browser window should automatically open.
+A browser window should automatically open. If not, navigate to [`http://localhost:9001/`](http://localhost:9001).
 
 ### Customizing
 
-The `index.html` file contains a CDN-hosted EUI theme and a call to the `CanvasEmbed` runtime. Currently, you can embed by object or by url:
+The `index.html` file contains a call to the `CanvasEmbed` runtime. Currently, you can embed by object or by url:
 
 ```html
-<link
-  rel="stylesheet"
-  type="text/css"
-  href="https://cdn.jsdelivr.net/npm/@elastic/eui@13.1.1/dist/eui_theme_light.css"
-/>
-<script src="/canvas_external_runtime.js"></script>
+<script src=""></script>
 ...
 <div id="canvas"></div>
 <script>

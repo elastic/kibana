@@ -17,7 +17,7 @@ module.exports = {
     canvas_external_runtime: require.resolve('./index.ts'),
   },
   mode: isProd ? 'production' : 'development',
-  plugins: [new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 })],
+  plugins: isProd ? [new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 })] : [],
   output: {
     path: RUNTIME_OUTPUT,
     filename: '[name].js',
@@ -69,6 +69,14 @@ module.exports = {
           { loader: 'style-loader' },
           { loader: 'css-loader' },
           {
+            loader: 'postcss-loader',
+            options: {
+              config: {
+                path: require.resolve('./postcss.config.js'),
+              },
+            },
+          },
+          {
             loader: 'string-replace-loader',
             options: {
               search: '__REPLACE_WITH_PUBLIC_PATH__',
@@ -93,6 +101,12 @@ module.exports = {
             },
           },
           {
+            loader: 'postcss-loader',
+            options: {
+              path: path.resolve(KIBANA_ROOT, 'src/optimize/postcss.config.js'),
+            },
+          },
+          {
             loader: 'sass-loader',
             options: {
               sourceMap: !isProd,
@@ -110,22 +124,13 @@ module.exports = {
             loader: 'postcss-loader',
             options: {
               config: {
-                path: path.resolve(KIBANA_ROOT, 'src/optimize/postcss.config.js'),
+                path: require.resolve('./postcss.config.js'),
               },
             },
           },
           { loader: 'less-loader' },
         ],
         sideEffects: true,
-      },
-      {
-        test: require.resolve('jquery'),
-        loader: 'expose-loader?jQuery!expose-loader?$',
-      },
-      {
-        test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/,
-        loader: 'file-loader',
-        sideEffects: false,
       },
       {
         test: /\.scss$/,
@@ -137,13 +142,22 @@ module.exports = {
             loader: 'postcss-loader',
             options: {
               config: {
-                path: path.resolve(KIBANA_ROOT, 'src/optimize/postcss.config.js'),
+                path: require.resolve('./postcss.config.js'),
               },
             },
           },
           { loader: 'sass-loader' },
         ],
         sideEffects: true,
+      },
+      {
+        test: require.resolve('jquery'),
+        loader: 'expose-loader?jQuery!expose-loader?$',
+      },
+      {
+        test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/,
+        loader: 'file-loader',
+        sideEffects: false,
       },
       {
         test: /\.html$/,
