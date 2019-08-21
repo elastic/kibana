@@ -69,8 +69,6 @@ function tryNodeResolver(importRequest, file, config) {
 exports.resolve = function resolveKibanaPath(importRequest, file, config) {
   config = config || {};
 
-  if (/ui\/.+/.test(importRequest)) config.forceNode = false; //  Refer to https://github.com/elastic/kibana/issues/17061#issuecomment-522157366
-
   if (config.forceNode) {
     return tryNodeResolver(importRequest, file, config);
   }

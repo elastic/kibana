@@ -1,7 +1,5 @@
 ---
-extends: "@elastic/kibana"
-
-settings:
-  import/resolver:
-    '@elastic/eslint-import-resolver-kibana':
-      rootPackageName: '<%= snakeCase(name) %>'
+overrides:
+  - files: ['**/ui/**/*.js']
+    rules:
+      'import/no-unresolved': '0'
