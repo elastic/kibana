@@ -22,11 +22,22 @@ import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { AggGroupNames } from 'ui/vis/editors/default';
 import { SelectOption } from '../../controls/select';
 import { GaugeVisParams } from '../../gauge';
 import { GaugeOptionsInternalProps } from '.';
 
-function StylePanel({ setGaugeValue, stateParams, setValue, vis }: GaugeOptionsInternalProps) {
+function StylePanel({
+  aggs,
+  setGaugeValue,
+  stateParams,
+  setValue,
+  vis,
+}: GaugeOptionsInternalProps) {
+  const diasableAlignment =
+    aggs.bySchemaGroup[AggGroupNames.Metrics].length === 1 &&
+    !aggs.bySchemaGroup[AggGroupNames.Buckets];
+
   const setGaugeType = useCallback(
     (paramName: 'gaugeType', value: GaugeVisParams['gauge']['gaugeType']) => {
       const minAngle = value === 'Arc' ? undefined : 0;
@@ -65,6 +76,7 @@ function StylePanel({ setGaugeValue, stateParams, setValue, vis }: GaugeOptionsI
       />
 
       <SelectOption
+        disabled={diasableAlignment}
         label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.alignmentLabel', {
           defaultMessage: 'Alignment',
         })}

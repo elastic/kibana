@@ -31,6 +31,7 @@ uiModules
   .get('app/visualize')
   .directive('visOptionsReactWrapper', reactDirective => reactDirective(wrapInI18nContext(VisOptionsReactWrapper), [
     ['component', { wrapApply: false }],
+    ['aggs', { watchDepth: 'collection' }],
     ['stateParams', { watchDepth: 'collection' }],
     ['vis', { watchDepth: 'collection' }],
     ['uiState', { watchDepth: 'collection' }],
@@ -73,6 +74,7 @@ uiModules
           $scope.editor :
           `<vis-options-react-wrapper
             component="editor"
+            aggs="editorState.aggs"
             has-histogram-agg="hasHistogramAgg"
             state-params="editorState.params"
             vis="vis"

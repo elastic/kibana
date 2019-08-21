@@ -18,9 +18,11 @@
  */
 
 import { PersistedState } from 'ui/persisted_state';
+import { AggConfigs } from 'ui/vis/agg_configs';
 import { Vis } from './../..';
 
 export interface VisOptionsProps<VisParamType = unknown> {
+  aggs: AggConfigs;
   hasHistogramAgg: boolean;
   stateParams: VisParamType;
   vis: Vis;
