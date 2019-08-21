@@ -16,6 +16,7 @@ import { mocksSource } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { cloneDeep } from 'lodash/fp';
+import { SiemNavigation } from '../../components/navigation';
 
 jest.mock('../../lib/settings/use_kibana_ui_setting');
 
@@ -133,6 +134,6 @@ describe('Hosts - rendering', () => {
     );
     await new Promise(resolve => setTimeout(resolve));
     wrapper.update();
-    expect(wrapper.find('.navigation').exists()).toBe(true);
+    expect(wrapper.find(SiemNavigation).exists()).toBe(true);
   });
 });
