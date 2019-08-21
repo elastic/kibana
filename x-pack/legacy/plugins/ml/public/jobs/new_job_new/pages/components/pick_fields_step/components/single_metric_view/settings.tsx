@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { BucketSpan } from '../bucket_span';
+import { SparseDataSwitch } from '../sparse_data';
 
 import { CREATED_BY_LABEL } from '../../../../../common/job_creator/util/constants';
 import { mlJobService } from '../../../../../../../services/job_service';
@@ -39,8 +40,6 @@ export const SingleMetricSettings: FC<Props> = ({ isActive, setIsValid }) => {
       ...jobCreator.jobConfig,
       datafeed_config: jobCreator.datafeedConfig,
     };
-    delete mlJobService.tempJobCloningObjects.job.datafeed_config.aggregations;
-    delete mlJobService.tempJobCloningObjects.job.analysis_config.summary_count_field_name;
 
     mlJobService.tempJobCloningObjects.skipTimeRangeStep = true;
     window.location.href = window.location.href.replace('single_metric', 'multi_metric');
@@ -53,6 +52,9 @@ export const SingleMetricSettings: FC<Props> = ({ isActive, setIsValid }) => {
           <EuiFlexGroup gutterSize="xl">
             <EuiFlexItem>
               <BucketSpan setIsValid={setIsValid} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <SparseDataSwitch />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexGroup>
