@@ -12,8 +12,9 @@ import { PageRoute } from '../../components/page_route/pageroute';
 
 import { HostComponentProps } from '../../components/link_to/redirect_to_hosts';
 
-import { HostDetails } from './host_details';
-import { Hosts } from './hosts';
+import { HostDetails, HostDetailsBody } from './host_details';
+import { Hosts, HostsBody } from './hosts';
+import { HostsTabName } from './hosts_navigations';
 
 export const HostsContainer = pure<HostComponentProps>(({ match }) => (
   <>
@@ -23,37 +24,72 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
         exact
         path={match.url}
         render={props => (
-          <PageRoute
-            {...props}
-            component={Hosts}
-            title={i18n.translate('xpack.siem.pages.hosts.hostsTitle', {
-              defaultMessage: 'Hosts',
-            })}
-          />
+          <>
+            <PageRoute
+              {...props}
+              component={Hosts}
+              title={i18n.translate('xpack.siem.pages.hosts.hostsTitle', {
+                defaultMessage: 'Hosts',
+              })}
+            />
+            <HostsBody {...props} />
+          </>
         )}
       />
       <Route
         strict
         exact
-        path={`${match.url}/:tabName(hosts|authentications|uncommon_processes|anomalies|events)`}
+        path={`${match.url}/:tabName(|${HostsTabName.hosts}|${HostsTabName.authentications}|${HostsTabName.uncommonProcesses}|${HostsTabName.anomalies}|${HostsTabName.events})`}
         render={props => (
-          <PageRoute
-            {...props}
-            component={Hosts}
-            title={i18n.translate('xpack.siem.pages.hosts.hostsTitle', {
-              defaultMessage: 'Hosts',
-            })}
-          />
+          <>
+            <PageRoute
+              {...props}
+              component={Hosts}
+              title={i18n.translate('xpack.siem.pages.hosts.hostsTitle', {
+                defaultMessage: 'Hosts',
+              })}
+            />
+            <HostsBody {...props} />
+          </>
         )}
       />
       <Route
+        strict
+        exact
         path={`${match.url}/:hostName`}
         render={props => {
           return (
-            <PageRoute {...props} component={HostDetails} title={props.match.params.hostName} />
+            <>
+              <PageRoute
+                {...props}
+                component={HostDetails}
+                title={i18n.translate('xpack.siem.pages.hosts.hostsTitle', {
+                  defaultMessage: 'Hosts',
+                })}
+              />
+              <HostDetailsBody {...props} />
+            </>
           );
         }}
       />
+      <Route
+        strict
+        exact
+        path={`${match.url}/:hostName/:tabName(${HostsTabName.authentications}|${HostsTabName.uncommonProcesses}|${HostsTabName.anomalies}|${HostsTabName.events})`}
+        render={props => (
+          <>
+            <PageRoute
+              {...props}
+              component={HostDetails}
+              title={i18n.translate('xpack.siem.pages.hosts.hostsTitle', {
+                defaultMessage: 'Hosts',
+              })}
+            />
+            <HostDetailsBody {...props} />
+          </>
+        )}
+      />
+
       <Redirect from="/hosts/" to="/hosts" />
     </Switch>
   </>

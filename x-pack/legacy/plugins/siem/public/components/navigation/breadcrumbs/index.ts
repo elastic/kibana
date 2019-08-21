@@ -6,14 +6,22 @@
 
 import chrome, { Breadcrumb } from 'ui/chrome';
 
+import { get } from 'lodash/fp';
 import { APP_NAME } from '../../../../common/constants';
 import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../pages/hosts/host_details';
 import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../pages/network/ip_details';
-import { getHostsUrl, getNetworkUrl, getOverviewUrl, getTimelinesUrl } from '../../link_to';
+import { getNetworkUrl, getOverviewUrl, getTimelinesUrl } from '../../link_to';
 import * as i18n from '../translations';
+import { HostsTabName } from '../../../pages/hosts/hosts_navigations';
+import { getHostsUrl } from '../../link_to/redirect_to_hosts';
 
-export const setBreadcrumbs = (pathname: string) => {
-  const breadcrumbs = getBreadcrumbsForRoute(pathname);
+export interface NavigationParams {
+  hostName?: string;
+  tabName?: HostsTabName;
+}
+
+export const setBreadcrumbs = (pathname: string, params?: NavigationParams) => {
+  const breadcrumbs = getBreadcrumbsForRoute(pathname, params);
   if (breadcrumbs) {
     chrome.breadcrumbs.set(breadcrumbs);
   }
@@ -51,14 +59,21 @@ export const rootBreadcrumbs: { [name: string]: Breadcrumb[] } = {
   ],
 };
 
-export const getBreadcrumbsForRoute = (pathname: string): Breadcrumb[] | null => {
+export const getBreadcrumbsForRoute = (
+  pathname: string,
+  params?: NavigationParams
+): Breadcrumb[] | null => {
   const removeSlash = pathname.replace(/\/$/, '');
   const trailingPath = removeSlash.match(/([^\/]+$)/);
+  const hostName = get('hostName', params);
+  const tabName = get('tabName', params);
   if (trailingPath !== null) {
     if (Object.keys(rootBreadcrumbs).includes(trailingPath[0])) {
       return rootBreadcrumbs[trailingPath[0]];
     }
-    if (pathname.match(/hosts\/.*?/)) {
+    if (pathname.match(/hosts\/.*\/(authentications|uncommon_processes|anomalies|events)?/)) {
+      return [...siemRootBreadcrumb, ...getHostDetailsBreadcrumbs(hostName, tabName)];
+    } else if (pathname.match(/hosts\/.*?/)) {
       return [...siemRootBreadcrumb, ...getHostDetailsBreadcrumbs(trailingPath[0])];
     } else if (pathname.match(/network\/ip\/.*?/)) {
       return [...siemRootBreadcrumb, ...getIPDetailsBreadcrumbs(trailingPath[0])];
