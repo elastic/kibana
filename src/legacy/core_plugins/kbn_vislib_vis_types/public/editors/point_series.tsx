@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiPanel, EuiTitle, EuiSpacer, EuiColorPicker, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -158,6 +158,19 @@ function PointSeriesOptions(props: VisOptionsProps<BasicVislibParams>) {
                 setValue('thresholdLine', { ...stateParams.thresholdLine, [paramName]: value })
               }
             />
+
+            <EuiFormRow
+              label={i18n.translate('kbnVislibVisTypes.editors.pointSeries.thresholdLine.color', {
+                defaultMessage: 'Line color',
+              })}
+            >
+              <EuiColorPicker
+                color={stateParams.thresholdLine.color}
+                onChange={value => {
+                  setValue('thresholdLine', { ...stateParams.thresholdLine, color: value });
+                }}
+              />
+            </EuiFormRow>
           </React.Fragment>
         )}
       </EuiPanel>

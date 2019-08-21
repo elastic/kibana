@@ -24,6 +24,7 @@ const thresholdLineDefaults = {
   value: 10,
   width: 1,
   style: 'full',
+  color: '#00B3A4'
 };
 
 export class PointSeries {
@@ -106,7 +107,7 @@ export class PointSeries {
     }
     const thresholdValue = this.thresholdLineOptions.value;
 
-    const labelColor = this.handler.data.getColorFunc()(chartData.label);
+    const lineColor = this.thresholdLineOptions.color;
 
     function y(y) {
       return yScale(y);
@@ -121,7 +122,7 @@ export class PointSeries {
         .attr('y2', isHorizontal ? y(thresholdValue) : svgParentHeight)
         .attr('stroke-width', thresholdLineWidth)
         .attr('stroke-dasharray', thresholdLineStyle)
-        .attr('stroke', labelColor);
+        .attr('stroke', lineColor);
     }
 
   }

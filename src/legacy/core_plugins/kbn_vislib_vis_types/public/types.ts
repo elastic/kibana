@@ -35,6 +35,7 @@ interface ThresholdLine {
   value: number;
   width: number;
   style: 'full' | 'dashed' | 'dot-dashed';
+  color: string;
 }
 export interface ValueAxis {
   id: string;

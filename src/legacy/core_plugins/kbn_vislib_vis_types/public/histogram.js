@@ -106,7 +106,8 @@ export default function PointSeriesVisType(Private) {
           show: false,
           value: 10,
           width: 1,
-          style: 'full'
+          style: 'full',
+          color: '#00B3A4'
         }
       },
     },
