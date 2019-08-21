@@ -20,7 +20,7 @@
 import React from 'react';
 import _ from 'lodash';
 import { EuiFieldText, EuiForm, EuiFormRow, EuiSelect, EuiTextArea } from '@elastic/eui';
-import { QueryRule, QueryRuleSeverity } from '../services/query_rules';
+import { QueryRule, QueryRuleSeverity } from '@logrhythm/nm-web-shared/services/query_rules';
 
 const severityOptions = [
   {
