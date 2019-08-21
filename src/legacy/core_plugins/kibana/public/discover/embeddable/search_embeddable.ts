@@ -33,6 +33,7 @@ import { TimeRange } from 'ui/timefilter/time_history';
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
+import { timefilter } from 'ui/timefilter';
 import { Query, onlyDisabledFiltersChanged } from '../../../../data/public';
 import {
   APPLY_FILTER_TRIGGER,
@@ -136,6 +137,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       requests: new RequestAdapter(),
     };
     this.initializeSearchScope();
+    timefilter.on('autoRefreshFetch', this.fetch);
 
     this.subscription = Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
       this.panelTitle = this.output.title || '';
@@ -183,6 +185,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+    timefilter.off('autoRefreshFetch', this.fetch);
   }
 
   private initializeSearchScope() {
@@ -258,7 +261,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     this.fetch();
   }
 
-  private async fetch() {
+  private fetch = async () => {
     if (!this.searchScope) return;
 
     const { searchSource } = this.savedSearch;
@@ -302,7 +305,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
         }),
       });
     }
-  }
+  };
 
   private pushContainerStateParamsToScope(searchScope: SearchScope) {
     const isFetchRequired =

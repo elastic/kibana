@@ -104,9 +104,7 @@ export class DashboardAppController {
     indexPatterns,
     config,
     confirmModal,
-    courier,
   }: {
-    courier: { fetch: () => void };
     $scope: DashboardAppScope;
     $route: any;
     $routeParams: any;
@@ -431,14 +429,6 @@ export class DashboardAppController {
     $scope.$watch('model.query', (newQuery: Query) => {
       const query = migrateLegacyQuery(newQuery) as Query;
       $scope.updateQueryAndFetch({ query });
-    });
-
-    $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {
-      // The only reason this is here is so that search embeddables work on a dashboard with
-      // a refresh interval turned on. This kicks off the search poller. It should be
-      // refactored so no embeddables need to listen to the timefilter directly but instead
-      // the container tells it when to reload.
-      courier.fetch();
     });
 
     $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', () => {
