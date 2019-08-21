@@ -31,8 +31,7 @@ export class FormatSelect extends PureComponent<Props> {
         text: PropTypes.string,
       })
     ).isRequired,
-    handleSelectChange: PropTypes.func,
-    handleTextChange: PropTypes.func,
+    onValueChange: PropTypes.func,
   };
 
   state = {
