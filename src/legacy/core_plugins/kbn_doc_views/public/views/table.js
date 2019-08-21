@@ -18,72 +18,60 @@
  */
 
 import _ from 'lodash';
-import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
-
+import { addDocView } from 'ui/registry/doc_views';
 import '../filters/trust_as_html';
 import tableHtml from './table.html';
 import { i18n } from '@kbn/i18n';
 
-DocViewsRegistryProvider.register(function () {
-  const MIN_LINE_LENGTH = 350;
+const MIN_LINE_LENGTH = 350;
 
-  return {
-    title: i18n.translate('kbnDocViews.table.tableTitle', {
-      defaultMessage: 'Table'
-    }),
-    order: 10,
-    directive: {
-      template: tableHtml,
-      scope: {
-        hit: '=',
-        indexPattern: '=',
-        filter: '=',
-        columns: '=',
-        onAddColumn: '=',
-        onRemoveColumn: '=',
-      },
-      controller: function ($scope) {
-        $scope.mapping = $scope.indexPattern.fields.byName;
-        $scope.flattened = $scope.indexPattern.flattenHit($scope.hit);
-        $scope.formatted = $scope.indexPattern.formatHit($scope.hit);
-        $scope.fields = _.keys($scope.flattened).sort();
-        $scope.fieldRowOpen = {};
-        $scope.fields.forEach(field => $scope.fieldRowOpen[field] = false);
+addDocView({
+  title: i18n.translate('kbnDocViews.table.tableTitle', {
+    defaultMessage: 'Table',
+  }),
+  order: 10,
+  directive: {
+    template: tableHtml,
+    controller: $scope => {
+      $scope.mapping = $scope.indexPattern.fields.byName;
+      $scope.flattened = $scope.indexPattern.flattenHit($scope.hit);
+      $scope.formatted = $scope.indexPattern.formatHit($scope.hit);
+      $scope.fields = _.keys($scope.flattened).sort();
+      $scope.fieldRowOpen = {};
+      $scope.fields.forEach(field => ($scope.fieldRowOpen[field] = false));
 
-        $scope.canToggleColumns = function canToggleColumn() {
-          return (
-            _.isFunction($scope.onAddColumn)
-            && _.isFunction($scope.onRemoveColumn)
-          );
-        };
+      $scope.canToggleColumns = function canToggleColumn() {
+        return _.isFunction($scope.onAddColumn) && _.isFunction($scope.onRemoveColumn);
+      };
 
-        $scope.toggleColumn = function toggleColumn(columnName) {
-          if ($scope.columns.includes(columnName)) {
-            $scope.onRemoveColumn(columnName);
-          } else {
-            $scope.onAddColumn(columnName);
-          }
-        };
+      $scope.toggleColumn = function toggleColumn(columnName) {
+        if ($scope.columns.includes(columnName)) {
+          $scope.onRemoveColumn(columnName);
+        } else {
+          $scope.onAddColumn(columnName);
+        }
+      };
 
-        $scope.isColumnActive = function isColumnActive(columnName) {
-          return $scope.columns.includes(columnName);
-        };
+      $scope.isColumnActive = function isColumnActive(columnName) {
+        return $scope.columns.includes(columnName);
+      };
 
-        $scope.showArrayInObjectsWarning = function (row, field) {
-          const value = $scope.flattened[field];
-          return Array.isArray(value) && typeof value[0] === 'object';
-        };
+      $scope.showArrayInObjectsWarning = function (row, field) {
+        const value = $scope.flattened[field];
+        return Array.isArray(value) && typeof value[0] === 'object';
+      };
 
-        $scope.enableDocValueCollapse = function (docValueField) {
-          const html = (typeof $scope.formatted[docValueField] === 'undefined') ?
-            $scope.hit[docValueField] : $scope.formatted[docValueField];
-          return html.length > MIN_LINE_LENGTH;
-        };
+      $scope.enableDocValueCollapse = function (docValueField) {
+        const html =
+          typeof $scope.formatted[docValueField] === 'undefined'
+            ? $scope.hit[docValueField]
+            : $scope.formatted[docValueField];
+        return html.length > MIN_LINE_LENGTH;
+      };
 
-        $scope.toggleViewer = function (field) {
-          $scope.fieldRowOpen[field] = !$scope.fieldRowOpen[field];
-        };
-      }
-    }
-  };
+      $scope.toggleViewer = function (field) {
+        $scope.fieldRowOpen[field] = !$scope.fieldRowOpen[field];
+      };
+    },
+  },
 });

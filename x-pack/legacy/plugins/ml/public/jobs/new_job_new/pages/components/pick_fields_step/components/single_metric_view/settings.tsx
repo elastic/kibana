@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { BucketSpan } from '../bucket_span';
+import { SparseDataSwitch } from '../sparse_data';
 
 import { CREATED_BY_LABEL } from '../../../../../common/job_creator/util/constants';
 import { mlJobService } from '../../../../../../../services/job_service';
@@ -51,6 +52,9 @@ export const SingleMetricSettings: FC<Props> = ({ isActive, setIsValid }) => {
           <EuiFlexGroup gutterSize="xl">
             <EuiFlexItem>
               <BucketSpan setIsValid={setIsValid} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <SparseDataSwitch />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexGroup>
