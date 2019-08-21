@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SpaceScenarios } from '../../scenarios';
+import { Spaces } from '../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
@@ -18,36 +18,32 @@ export default function createActionTests({ getService }: FtrProviderContext) {
 
     after(() => objectRemover.removeAll());
 
-    for (const scenario of SpaceScenarios) {
-      describe(scenario.id, () => {
-        it('should handle create action request appropriately', async () => {
-          const response = await supertest
-            .post(`${getUrlPrefix(scenario.id)}/api/action`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              description: 'My action',
-              actionTypeId: 'test.index-record',
-              config: {
-                unencrypted: `This value shouldn't get encrypted`,
-              },
-              secrets: {
-                encrypted: 'This value should be encrypted',
-              },
-            });
-
-          expect(response.statusCode).to.eql(200);
-          expect(response.body).to.eql({
-            id: response.body.id,
-            description: 'My action',
-            actionTypeId: 'test.index-record',
-            config: {
-              unencrypted: `This value shouldn't get encrypted`,
-            },
-          });
-          expect(typeof response.body.id).to.be('string');
-          objectRemover.add(scenario.id, response.body.id, 'action');
+    it('should handle create action request appropriately', async () => {
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          description: 'My action',
+          actionTypeId: 'test.index-record',
+          config: {
+            unencrypted: `This value shouldn't get encrypted`,
+          },
+          secrets: {
+            encrypted: 'This value should be encrypted',
+          },
         });
+
+      expect(response.statusCode).to.eql(200);
+      expect(response.body).to.eql({
+        id: response.body.id,
+        description: 'My action',
+        actionTypeId: 'test.index-record',
+        config: {
+          unencrypted: `This value shouldn't get encrypted`,
+        },
       });
-    }
+      expect(typeof response.body.id).to.be('string');
+      objectRemover.add(Spaces.space1.id, response.body.id, 'action');
+    });
   });
 }

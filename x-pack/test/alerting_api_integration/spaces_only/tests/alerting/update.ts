@@ -5,7 +5,7 @@
  */
 
 import { getTestAlertData } from './utils';
-import { SpaceScenarios } from '../../scenarios';
+import { Spaces } from '../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
@@ -18,34 +18,30 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
     after(() => objectRemover.removeAll());
 
-    for (const scenario of SpaceScenarios) {
-      describe(scenario.id, () => {
-        it('should handle update alert request appropriately', async () => {
-          const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(scenario.id)}/api/alert`)
-            .set('kbn-xsrf', 'foo')
-            .send(getTestAlertData())
-            .expect(200);
-          objectRemover.add(scenario.id, createdAlert.id, 'alert');
+    it('should handle update alert request appropriately', async () => {
+      const { body: createdAlert } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData())
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
 
-          const updatedData = {
-            alertTypeParams: {
-              foo: true,
-            },
-            interval: '12s',
-            actions: [],
-          };
-          await supertest
-            .put(`${getUrlPrefix(scenario.id)}/api/alert/${createdAlert.id}`)
-            .set('kbn-xsrf', 'foo')
-            .send(updatedData)
-            .expect(200, {
-              ...updatedData,
-              id: createdAlert.id,
-              updatedBy: null,
-            });
+      const updatedData = {
+        alertTypeParams: {
+          foo: true,
+        },
+        interval: '12s',
+        actions: [],
+      };
+      await supertest
+        .put(`${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}`)
+        .set('kbn-xsrf', 'foo')
+        .send(updatedData)
+        .expect(200, {
+          ...updatedData,
+          id: createdAlert.id,
+          updatedBy: null,
         });
-      });
-    }
+    });
   });
 }

@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { getTestAlertData } from './utils';
-import { SpaceScenarios } from '../../scenarios';
+import { Spaces } from '../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
@@ -27,28 +27,24 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
       });
     }
 
-    for (const scenario of SpaceScenarios) {
-      describe(scenario.id, () => {
-        it('should handle delete alert request appropriately', async () => {
-          const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(scenario.id)}/api/alert`)
-            .set('kbn-xsrf', 'foo')
-            .send(getTestAlertData())
-            .expect(200);
+    it('should handle delete alert request appropriately', async () => {
+      const { body: createdAlert } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData())
+        .expect(200);
 
-          await supertest
-            .delete(`${getUrlPrefix(scenario.id)}/api/alert/${createdAlert.id}`)
-            .set('kbn-xsrf', 'foo')
-            .expect(204, '');
+      await supertest
+        .delete(`${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}`)
+        .set('kbn-xsrf', 'foo')
+        .expect(204, '');
 
-          try {
-            await getScheduledTask(createdAlert.scheduledTaskId);
-            throw new Error('Should have removed scheduled task');
-          } catch (e) {
-            expect(e.status).to.eql(404);
-          }
-        });
-      });
-    }
+      try {
+        await getScheduledTask(createdAlert.scheduledTaskId);
+        throw new Error('Should have removed scheduled task');
+      } catch (e) {
+        expect(e.status).to.eql(404);
+      }
+    });
   });
 }

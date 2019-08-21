@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SpaceScenarios } from '../../scenarios';
+import { Spaces } from '../../scenarios';
 import { getUrlPrefix } from '../../../common/lib/space_test_utils';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
@@ -14,21 +14,15 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('list_alert_types', () => {
-    for (const scenario of SpaceScenarios) {
-      describe(scenario.id, () => {
-        it('should return 200 with list of alert types', async () => {
-          const response = await supertest.get(`${getUrlPrefix(scenario.id)}/api/alert/types`);
+    it('should return 200 with list of alert types', async () => {
+      const response = await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/alert/types`);
 
-          expect(response.statusCode).to.eql(200);
-          const fixtureAlertType = response.body.find(
-            (alertType: any) => alertType.id === 'test.noop'
-          );
-          expect(fixtureAlertType).to.eql({
-            id: 'test.noop',
-            name: 'Test: Noop',
-          });
-        });
+      expect(response.statusCode).to.eql(200);
+      const fixtureAlertType = response.body.find((alertType: any) => alertType.id === 'test.noop');
+      expect(fixtureAlertType).to.eql({
+        id: 'test.noop',
+        name: 'Test: Noop',
       });
-    }
+    });
   });
 }

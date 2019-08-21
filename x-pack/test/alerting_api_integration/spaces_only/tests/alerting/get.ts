@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { getTestAlertData } from './utils';
-import { SpaceScenarios } from '../../scenarios';
+import { Spaces } from '../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
@@ -19,42 +19,38 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
     afterEach(() => objectRemover.removeAll());
 
-    for (const scenario of SpaceScenarios) {
-      describe(scenario.id, () => {
-        it('should handle get alert request appropriately', async () => {
-          const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(scenario.id)}/api/alert`)
-            .set('kbn-xsrf', 'foo')
-            .send(getTestAlertData())
-            .expect(200);
-          objectRemover.add(scenario.id, createdAlert.id, 'alert');
+    it('should handle get alert request appropriately', async () => {
+      const { body: createdAlert } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData())
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
 
-          const response = await supertest.get(
-            `${getUrlPrefix(scenario.id)}/api/alert/${createdAlert.id}`
-          );
+      const response = await supertest.get(
+        `${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}`
+      );
 
-          expect(response.statusCode).to.eql(200);
-          expect(response.body).to.eql({
-            id: createdAlert.id,
-            alertTypeId: 'test.noop',
-            interval: '10s',
-            enabled: true,
-            actions: [],
-            alertTypeParams: {},
-            createdBy: null,
-            scheduledTaskId: response.body.scheduledTaskId,
-            updatedBy: null,
-          });
-        });
-
-        it(`should handle get alert request appropriately when alert doesn't exist`, async () => {
-          await supertest.get(`${getUrlPrefix(scenario.id)}/api/alert/1`).expect(404, {
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Saved object [alert/1] not found',
-          });
-        });
+      expect(response.statusCode).to.eql(200);
+      expect(response.body).to.eql({
+        id: createdAlert.id,
+        alertTypeId: 'test.noop',
+        interval: '10s',
+        enabled: true,
+        actions: [],
+        alertTypeParams: {},
+        createdBy: null,
+        scheduledTaskId: response.body.scheduledTaskId,
+        updatedBy: null,
       });
-    }
+    });
+
+    it(`should handle get alert request appropriately when alert doesn't exist`, async () => {
+      await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/alert/1`).expect(404, {
+        statusCode: 404,
+        error: 'Not Found',
+        message: 'Saved object [alert/1] not found',
+      });
+    });
   });
 }

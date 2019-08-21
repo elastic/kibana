@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { getTestAlertData } from './utils';
-import { SpaceScenarios } from '../../scenarios';
+import { Spaces } from '../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
@@ -27,35 +27,31 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
       });
     }
 
-    for (const scenario of SpaceScenarios) {
-      describe(scenario.id, () => {
-        it('should handle enable alert request appropriately', async () => {
-          const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(scenario.id)}/api/alert`)
-            .set('kbn-xsrf', 'foo')
-            .send(getTestAlertData({ enabled: false }))
-            .expect(200);
-          objectRemover.add(scenario.id, createdAlert.id, 'alert');
+    it('should handle enable alert request appropriately', async () => {
+      const { body: createdAlert } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData({ enabled: false }))
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
 
-          await supertest
-            .post(`${getUrlPrefix(scenario.id)}/api/alert/${createdAlert.id}/_enable`)
-            .set('kbn-xsrf', 'foo')
-            .expect(204, '');
+      await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}/_enable`)
+        .set('kbn-xsrf', 'foo')
+        .expect(204, '');
 
-          const { body: updatedAlert } = await supertest
-            .get(`${getUrlPrefix(scenario.id)}/api/alert/${createdAlert.id}`)
-            .set('kbn-xsrf', 'foo')
-            .expect(200);
-          expect(typeof updatedAlert.scheduledTaskId).to.eql('string');
-          const { _source: taskRecord } = await getScheduledTask(updatedAlert.scheduledTaskId);
-          expect(taskRecord.type).to.eql('task');
-          expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
-          expect(JSON.parse(taskRecord.task.params)).to.eql({
-            alertId: createdAlert.id,
-            spaceId: scenario.id,
-          });
-        });
+      const { body: updatedAlert } = await supertest
+        .get(`${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}`)
+        .set('kbn-xsrf', 'foo')
+        .expect(200);
+      expect(typeof updatedAlert.scheduledTaskId).to.eql('string');
+      const { _source: taskRecord } = await getScheduledTask(updatedAlert.scheduledTaskId);
+      expect(taskRecord.type).to.eql('task');
+      expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
+      expect(JSON.parse(taskRecord.task.params)).to.eql({
+        alertId: createdAlert.id,
+        spaceId: Spaces.space1.id,
       });
-    }
+    });
   });
 }

@@ -6,7 +6,7 @@
 
 import { SpacesService } from '../../../common/services';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { SpaceScenarios } from '../scenarios';
+import { Spaces } from '../scenarios';
 
 // eslint-disable-next-line import/no-default-export
 export default function alertingApiIntegrationTests({
@@ -20,7 +20,7 @@ export default function alertingApiIntegrationTests({
     this.tags('ciGroup8');
 
     before(async () => {
-      for (const space of SpaceScenarios) {
+      for (const space of Object.values(Spaces)) {
         await spacesService.create(space);
       }
     });
