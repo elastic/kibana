@@ -100,7 +100,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.selectAggregation('Average', 'metrics');
       await PageObjects.visualize.selectField('bytes', 'metrics');
       await PageObjects.visualize.clickOptionsTab();
-      await testSubjects.setValue('gaugeColorRange2__right', '10000');
+      await testSubjects.setValue('gaugeColorRange2__to', '10000');
       await testSubjects.click('gaugePercentageMode');
       await PageObjects.visualize.waitForVisualizationRenderingStabilized();
       await PageObjects.visualize.clickGo();
