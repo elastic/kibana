@@ -58,6 +58,12 @@ describe('KibanaMigrator', () => {
   });
 
   describe('awaitMigration', () => {
+    it('resolves isMigrated if migrations were skipped', async () => {
+      const skipMigrations = true;
+      const result = await new KibanaMigrator(mockOptions()).awaitMigration(skipMigrations);
+      expect(result).toEqual([{ status: 'skipped' }, { status: 'skipped' }]);
+    });
+
     it('only handles and deletes index templates once', async () => {
       const options = mockOptions();
       const clusterStub = jest.fn<any, any>(() => ({ status: 404 }));

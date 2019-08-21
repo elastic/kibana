@@ -119,7 +119,21 @@ export class Server {
       plugins: mapToObject(pluginsStart.contracts),
     });
 
+    /**
+     * Note: ideally we'd like to wait for migrations to complete before
+     * loading the legacy service which in turn starts legacy plugins. But,
+     * our build process relies on the optimize phase being able to run
+     * without a running ES server. Optimize in turn depends on the legacy
+     * server being started. So until optimization has been moved to the
+     * NP we move migrations till after legacy.start() and only if we're not
+     * running optimize.
+     */
+    if (!this.env.cliArgs.optimize) {
+      await savedObjectsStart.migrator.awaitMigration();
+    }
+
     await this.http.start();
+
     return coreStart;
   }
 

@@ -146,7 +146,8 @@ export class SavedObjectsService
   }
 
   public async start(core: StartDeps): Promise<SavedObjectsServiceStart> {
-    await this.migrator!.awaitMigration();
+    // Start migrations, but don't wait for them to complete
+    this.migrator!.awaitMigration();
     return { migrator: this.migrator as KibanaMigrator };
   }
 
