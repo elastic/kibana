@@ -18,9 +18,15 @@ jest.mock('child_process', () => ({
     }),
   })),
 }));
+jest.mock('proper-lockfile', () => ({
+  check: jest.fn().mockReturnValue(false),
+  lock: jest.fn().mockImplementation(() => {
+    return () => {};
+  }),
+}));
 
 afterEach(() => {
-  jest.resetAllMocks();
+  jest.clearAllMocks();
 });
 
 it(`spawns process if repoConfig.init comes from own properties`, async () => {
