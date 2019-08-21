@@ -5,6 +5,7 @@
  */
 
 import React, { FC, memo, Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
 import { SplitField } from '../../../../../../../../common/types/fields';
@@ -85,7 +86,13 @@ export const SplitCards: FC<Props> = memo(
             <Fragment>
               {jobType === JOB_TYPE.MULTI_METRIC && (
                 <Fragment>
-                  <div style={{ fontSize: 'small' }}>Data split by {splitField.name}</div>
+                  <div style={{ fontSize: 'small' }}>
+                    <FormattedMessage
+                      id="xpack.ml.newJob.wizard.pickFieldsStep.splitCards.dataSplitBy"
+                      defaultMessage="Data split by {field}"
+                      values={{ field: splitField.name }}
+                    />
+                  </div>
                   <EuiSpacer size="m" />
                 </Fragment>
               )}
