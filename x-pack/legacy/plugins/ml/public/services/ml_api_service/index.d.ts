@@ -50,15 +50,8 @@ declare interface Ml {
     createDataFrameTransform(jobId: string, jobConfig: any): Promise<any>;
     deleteDataFrameTransforms(jobsData: DataFrameTransformEndpointData[]): Promise<any>;
     getDataFrameTransformsPreview(payload: any): Promise<any>;
-    startDataFrameTransforms(
-      jobsData: DataFrameTransformEndpointData[],
-      force?: boolean
-    ): Promise<any>;
-    stopDataFrameTransform(
-      jobId: string,
-      force?: boolean,
-      waitForCompletion?: boolean
-    ): Promise<any>;
+    startDataFrameTransforms(jobsData: DataFrameTransformEndpointData[]): Promise<any>;
+    stopDataFrameTransforms(jobsData: DataFrameTransformEndpointData[]): Promise<any>;
     getTransformAuditMessages(transformId: string): Promise<any>;
   };
 

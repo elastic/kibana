@@ -5,7 +5,10 @@
  */
 
 import { callWithRequestType } from '../../../common/types/kibana';
-import { DATA_FRAME_TRANSFORM_STATE } from '../../../public/data_frame/pages/transform_management/components/transform_list/common';
+import {
+  DATA_FRAME_TRANSFORM_STATE,
+  DataFrameTransformEndpointData,
+} from '../../../public/data_frame/pages/transform_management/components/transform_list/common';
 
 export function transformServiceProvider(callWithRequest: callWithRequestType) {
   async function deleteTransform(transformId: string) {
@@ -24,7 +27,7 @@ export function transformServiceProvider(callWithRequest: callWithRequestType) {
     return callWithRequest('ml.startDataFrameTransform', options);
   }
 
-  async function deleteTransforms(transformsInfo: Array<{ id: string; state: string }>) {
+  async function deleteTransforms(transformsInfo: DataFrameTransformEndpointData[]) {
     const results = [];
 
     for (const transformInfo of transformsInfo) {
@@ -46,7 +49,7 @@ export function transformServiceProvider(callWithRequest: callWithRequestType) {
     return results;
   }
 
-  async function startTransforms(transformsInfo: Array<{ id: string; state: string }>) {
+  async function startTransforms(transformsInfo: DataFrameTransformEndpointData[]) {
     const results = [];
     for (const transformInfo of transformsInfo) {
       try {
@@ -65,8 +68,29 @@ export function transformServiceProvider(callWithRequest: callWithRequestType) {
     return results;
   }
 
+  async function stopTransforms(transformsInfo: DataFrameTransformEndpointData[]) {
+    const results = [];
+    for (const transformInfo of transformsInfo) {
+      try {
+        await stopTransform({
+          transformId: transformInfo.id,
+          force:
+            transformInfo.state !== undefined
+              ? transformInfo.state === DATA_FRAME_TRANSFORM_STATE.FAILED
+              : false,
+          waitForCompletion: true,
+        });
+        results.push({ id: transformInfo.id, success: true });
+      } catch (e) {
+        results.push({ id: transformInfo.id, success: false, error: JSON.stringify(e) });
+      }
+    }
+    return results;
+  }
+
   return {
     deleteTransforms,
     startTransforms,
+    stopTransforms,
   };
 }

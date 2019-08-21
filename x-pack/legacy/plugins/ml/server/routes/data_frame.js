@@ -124,22 +124,12 @@ export function dataFrameRoutes({ commonRouteConfig, elasticsearchPlugin, route 
 
   route({
     method: 'POST',
-    path: '/api/ml/_data_frame/transforms/{transformId}/_stop',
+    path: '/api/ml/_data_frame/transforms/stop_transforms',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      const options = {
-        transformId: request.params.transformId
-      };
-
-      if (request.query.force !== undefined) {
-        options.force = request.query.force;
-      }
-
-      if (request.query.wait_for_completion !== undefined) {
-        options.waitForCompletion = request.query.wait_for_completion;
-      }
-
-      return callWithRequest('ml.stopDataFrameTransform', options)
+      const { stopTransforms } = transformServiceProvider(callWithRequest);
+      const { transformsInfo } = request.payload;
+      return stopTransforms(transformsInfo)
         .catch(resp => wrapError(resp));
     },
     config: {

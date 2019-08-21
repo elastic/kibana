@@ -65,10 +65,13 @@ export const dataFrame = {
       }
     });
   },
-  stopDataFrameTransform(transformId, force = false, waitForCompletion = false) {
+  stopDataFrameTransforms(transformsInfo) {
     return http({
-      url: `${basePath}/_data_frame/transforms/${transformId}/_stop?force=${force}&wait_for_completion=${waitForCompletion}`,
+      url: `${basePath}/_data_frame/transforms/stop_transforms`,
       method: 'POST',
+      data: {
+        transformsInfo,
+      }
     });
   },
   getTransformAuditMessages(transformId) {

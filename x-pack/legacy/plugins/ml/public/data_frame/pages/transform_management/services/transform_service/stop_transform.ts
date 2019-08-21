@@ -11,28 +11,19 @@ import { ml } from '../../../../../services/ml_api_service';
 import { refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../../../../common';
 
 import {
-  DATA_FRAME_TRANSFORM_STATE,
   DataFrameTransformListRow,
+  DataFrameTransformEndpointData,
+  DataFrameTransformEndpointResultData,
 } from '../../components/transform_list/common';
 
 export const stopTransforms = async (dataFrames: DataFrameTransformListRow[]) => {
-  const results = await Promise.all(
-    dataFrames.map(async df => {
-      const dfId = df.config.id;
-      try {
-        await ml.dataFrame.stopDataFrameTransform(
-          dfId,
-          df.stats.state === DATA_FRAME_TRANSFORM_STATE.FAILED,
-          true
-        );
-        return { id: dfId, success: true };
-      } catch (e) {
-        return { id: dfId, success: false, error: JSON.stringify(e) };
-      }
-    })
-  );
+  const dataFramesInfo: DataFrameTransformEndpointData[] = dataFrames.map(df => ({
+    id: df.config.id,
+    state: df.stats.state,
+  }));
+  const { results } = await ml.dataFrame.stopDataFrameTransforms(dataFramesInfo);
 
-  results.forEach(result => {
+  results.forEach((result: DataFrameTransformEndpointResultData) => {
     if (result.success === true) {
       toastNotifications.addSuccess(
         i18n.translate('xpack.ml.dataframe.transformList.stopTransformSuccessMessage', {
