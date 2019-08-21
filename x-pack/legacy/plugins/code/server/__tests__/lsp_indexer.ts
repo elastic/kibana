@@ -129,7 +129,7 @@ function setupLsServiceSendRequestSpy(): sinon.SinonSpy {
   );
 }
 
-describe('lsp_indexer unit tests', function(this: any) {
+describe('LSP indexer unit tests', function(this: any) {
   this.timeout(20000);
 
   // @ts-ignore
