@@ -34,19 +34,19 @@ export const Page: FC<{ jobId: string }> = ({ jobId }) => (
             <EuiTitle>
               <h1>
                 <FormattedMessage
-                  id="xpack.ml.dataframe.analyticsExploration.title"
+                  id="xpack.ml.dataframe.analytics.exploration.title"
                   defaultMessage="Analytics exploration"
                 />
                 <span>&nbsp;</span>
                 <EuiBetaBadge
                   label={i18n.translate(
-                    'xpack.ml.dataframe.analyticsExploration.experimentalBadgeLabel',
+                    'xpack.ml.dataframe.analytics.exploration.experimentalBadgeLabel',
                     {
                       defaultMessage: 'Experimental',
                     }
                   )}
                   tooltipContent={i18n.translate(
-                    'xpack.ml.dataframe.analyticsExploration.experimentalBadgeTooltipContent',
+                    'xpack.ml.dataframe.analytics.exploration.experimentalBadgeTooltipContent',
                     {
                       defaultMessage: `Data frame analytics are an experimental feature. We'd love to hear your feedback.`,
                     }
