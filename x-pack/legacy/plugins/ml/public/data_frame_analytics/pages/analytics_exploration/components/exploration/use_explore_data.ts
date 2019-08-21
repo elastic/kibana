@@ -16,6 +16,7 @@ import {
   getFlattenedFields,
   DataFrameAnalyticsOutlierConfig,
   EsDoc,
+  EsDocSource,
   EsFieldName,
 } from '../../../../common';
 
@@ -41,7 +42,7 @@ export const useExploreData = (
 ): UseExploreDataReturnType => {
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(INDEX_STATUS.UNUSED);
-  const [tableItems, setTableItems] = useState([] as EsDoc[]);
+  const [tableItems, setTableItems] = useState<EsDoc[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -70,7 +71,7 @@ export const useExploreData = (
           const docs = resp.hits.hits;
 
           if (docs.length === 0) {
-            setTableItems([] as EsDoc[]);
+            setTableItems([]);
             setStatus(INDEX_STATUS.LOADED);
             return;
           }
@@ -85,7 +86,7 @@ export const useExploreData = (
           // or is a nested fields when displaying it via EuiInMemoryTable.
           const flattenedFields = getFlattenedFields(docs[0]._source, resultsField);
           const transformedTableItems = docs.map(doc => {
-            const item = {} as Record<string, any>;
+            const item: EsDocSource = {};
             flattenedFields.forEach(ff => {
               item[ff] = getNestedProperty(doc._source, ff);
               if (item[ff] === undefined) {
@@ -108,11 +109,11 @@ export const useExploreData = (
             };
           });
 
-          setTableItems(transformedTableItems as EsDoc[]);
+          setTableItems(transformedTableItems);
           setStatus(INDEX_STATUS.LOADED);
         } catch (e) {
           setErrorMessage(JSON.stringify(e));
-          setTableItems([] as EsDoc[]);
+          setTableItems([]);
           setStatus(INDEX_STATUS.ERROR);
         }
       }
