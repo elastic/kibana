@@ -5,7 +5,7 @@
  */
 
 import { UMSavedObjectsAdapter } from './types';
-import uptimeIndexPattern from './heartbeat-index-pattern.json';
+import uptimeIndexPattern from './heartbeat_index_pattern.json';
 
 export class UMKibanaSavedObjectsAdapter implements UMSavedObjectsAdapter {
   private readonly savedObjectsClient: any;
