@@ -4,27 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useRefreshAnalyticsList } from '../../../../common';
 
-interface RefreshAnalyticsListButtonProps {
-  isLoading: boolean;
-  onClick(): void;
-}
-export const RefreshAnalyticsListButton: FC<RefreshAnalyticsListButtonProps> = ({
-  onClick,
-  isLoading,
-}) => (
-  <EuiButtonEmpty
-    data-test-subj="mlRefreshAnalyticsListButton"
-    onClick={onClick}
-    isLoading={isLoading}
-  >
-    <FormattedMessage
-      id="xpack.ml.dataframe.analyticsList.refreshButtonLabel"
-      defaultMessage="Refresh"
-    />
-  </EuiButtonEmpty>
-);
+export const RefreshAnalyticsListButton: FC = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const { refresh } = useRefreshAnalyticsList({ isLoading: setIsLoading });
+  return (
+    <EuiButtonEmpty
+      data-test-subj="mlRefreshAnalyticsListButton"
+      onClick={refresh}
+      isLoading={isLoading}
+    >
+      <FormattedMessage
+        id="xpack.ml.dataframe.analyticsList.refreshButtonLabel"
+        defaultMessage="Refresh"
+      />
+    </EuiButtonEmpty>
+  );
+};

@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Mounting and unmounting DocViewerRenderTab 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      <div />,
+      Object {
+        "hit": Object {},
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": [MockFunction],
+    },
+  ],
+}
+`;

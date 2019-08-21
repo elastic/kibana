@@ -53,6 +53,8 @@ export class ServerOptions {
 
   public readonly enableGlobalReference: boolean = this.options.enableGlobalReference;
 
+  public readonly enableCommitIndexing: boolean = this.options.enableCommitIndexing;
+
   public readonly lsp: LspOptions = this.options.lsp;
 
   public readonly security: SecurityOptions = this.options.security;
