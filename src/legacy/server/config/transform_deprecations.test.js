@@ -82,6 +82,21 @@ describe('server/config', function () {
           `);
         });
 
+        it('replaces a nonce', () => {
+          expect(
+            transformDeprecations(
+              { csp: { rules: [`script-src 'nonce-{nonce}'`] } },
+              jest.fn()
+            ).csp.rules
+          ).toEqual([`script-src 'self'`]);
+          expect(
+            transformDeprecations(
+              { csp: { rules: [`script-src 'unsafe-eval' 'nonce-{nonce}'`] } },
+              jest.fn()
+            ).csp.rules
+          ).toEqual([`script-src 'unsafe-eval' 'self'`]);
+        });
+
         it('removes a quoted nonce', () => {
           expect(
             transformDeprecations(
