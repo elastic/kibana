@@ -239,6 +239,10 @@ export class AggConfigs {
     return this.aggs.filter(agg => agg.type.type === type);
   }
 
+  byTypeName(type: string) {
+    return this.aggs.filter(agg => agg.type.name === type);
+  }
+
   bySchemaName(schema: string) {
     return this.aggs.filter(agg => agg.schema && agg.schema.name === schema);
   }
@@ -249,10 +253,12 @@ export class AggConfigs {
 
   getRequestAggs(): AggConfig[] {
     // collect all the aggregations
-    const aggregations = this.aggs.reduce((requestValuesAggs, agg: AggConfig) => {
-      const aggs = agg.getRequestAggs();
-      return aggs ? requestValuesAggs.concat(aggs) : requestValuesAggs;
-    }, []);
+    const aggregations = this.aggs
+      .filter(agg => agg.enabled && agg.type)
+      .reduce((requestValuesAggs, agg: AggConfig) => {
+        const aggs = agg.getRequestAggs();
+        return aggs ? requestValuesAggs.concat(aggs) : requestValuesAggs;
+      }, []);
     // move metrics to the end
     return _.sortBy(aggregations, (agg: AggConfig) =>
       agg.type.type === AggGroupNames.Metrics ? 1 : 0
