@@ -28,20 +28,19 @@ export const useUrlParams: UptimeUrlParamsHook = () => {
   };
 
   const updateUrlParams: UpdateUrlParams = updatedParams => {
-    if (refreshContext.history && refreshContext.location) {
-      const {
-        history,
-        location: { pathname, search },
-      } = refreshContext;
-      const currentParams: any = qs.parse(search[0] === '?' ? search.slice(1) : search);
-      history.push({
-        pathname,
-        search: qs.stringify({
-          ...currentParams,
-          ...updatedParams,
-        }),
-      });
-    }
+    if (!refreshContext.history || !refreshContext.location) return;
+    const {
+      history,
+      location: { pathname, search },
+    } = refreshContext;
+    const currentParams: any = qs.parse(search[0] === '?' ? search.slice(1) : search);
+    history.push({
+      pathname,
+      search: qs.stringify({
+        ...currentParams,
+        ...updatedParams,
+      }),
+    });
   };
 
   return [getUrlParams, updateUrlParams];
