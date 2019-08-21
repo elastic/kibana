@@ -15,6 +15,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiSwitch,
+  EuiSwitchEvent,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
@@ -49,8 +50,8 @@ export const LegendControls = injectI18n(
       />
     );
 
-    const handleAutoChange = (e: SyntheticEvent<HTMLInputElement>) => {
-      setDraftAuto(e.currentTarget.checked);
+    const handleAutoChange = (e: EuiSwitchEvent) => {
+      setDraftAuto(e.target.checked);
     };
 
     const createBoundsHandler = (name: string) => (e: SyntheticEvent<HTMLInputElement>) => {

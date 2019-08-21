@@ -31,9 +31,9 @@ describe('NetworkTopNFlow Select direction', () => {
       const wrapper = mount(<IsPtrIncluded isPtrIncluded={false} onChange={mockOnChange} />);
 
       wrapper
-        .find('input')
+        .find('button')
         .first()
-        .simulate('change', event);
+        .simulate('click', event);
 
       wrapper.update();
 

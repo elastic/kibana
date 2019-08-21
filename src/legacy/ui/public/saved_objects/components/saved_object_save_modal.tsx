@@ -31,6 +31,7 @@ import {
   EuiOverlayMask,
   EuiSpacer,
   EuiSwitch,
+  EuiSwitchEvent,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
@@ -186,7 +187,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
     });
   };
 
-  private onCopyOnSaveChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  private onCopyOnSaveChange = (event: EuiSwitchEvent) => {
     this.setState({
       copyOnSave: event.target.checked,
     });

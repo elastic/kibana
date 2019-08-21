@@ -29,6 +29,7 @@ export const DedicatedIndexSwitch: FC = () => {
         checked={useDedicatedIndex}
         onChange={toggleModelPlot}
         data-test-subj="mlJobWizardSwitchUseDedicatedIndex"
+        label=""
       />
     </Description>
   );

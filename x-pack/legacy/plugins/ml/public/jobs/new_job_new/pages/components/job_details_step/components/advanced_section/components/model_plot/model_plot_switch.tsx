@@ -29,6 +29,7 @@ export const ModelPlotSwitch: FC = () => {
         checked={modelPlotEnabled}
         onChange={toggleModelPlot}
         data-test-subj="mlJobWizardSwitchModelPlot"
+        label=""
       />
     </Description>
   );

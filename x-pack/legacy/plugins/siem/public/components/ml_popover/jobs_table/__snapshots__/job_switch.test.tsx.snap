@@ -11,6 +11,7 @@ exports[`JobSwitch renders correctly against snapshot 1`] = `
       checked={true}
       data-test-subj="job-switch"
       disabled={false}
+      label=""
       onChange={[Function]}
     />
   </EuiFlexItem>

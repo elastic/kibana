@@ -30,7 +30,7 @@ interface SwitchParamEditorProps extends AggParamEditorProps<boolean> {
 }
 
 function SwitchParamEditor({
-  value,
+  value = false,
   setValue,
   dataTestSubj,
   displayToolTip,

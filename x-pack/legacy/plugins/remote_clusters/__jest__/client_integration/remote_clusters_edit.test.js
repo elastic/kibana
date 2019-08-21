@@ -64,7 +64,7 @@ describe('Edit Remote cluster', () => {
   test('should populate the form fields with the values from the remote cluster loaded', () => {
     expect(find('remoteClusterFormNameInput').props().value).toBe(REMOTE_CLUSTER_EDIT_NAME);
     expect(find('remoteClusterFormSeedsInput').text()).toBe(REMOTE_CLUSTER_EDIT.seeds.join(''));
-    expect(find('remoteClusterFormSkipUnavailableFormToggle').props().checked).toBe(REMOTE_CLUSTER_EDIT.skipUnavailable);
+    expect(find('remoteClusterFormSkipUnavailableFormToggle').props()['aria-checked']).toBe(REMOTE_CLUSTER_EDIT.skipUnavailable);
   });
 
   test('should disable the form name input', () => {

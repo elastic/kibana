@@ -41,6 +41,7 @@ export const SparseDataSwitch: FC = () => {
         checked={sparseData}
         onChange={toggleSparseData}
         data-test-subj="mlJobWizardSwitchSparseData"
+        label=""
       />
     </Description>
   );

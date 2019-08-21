@@ -231,8 +231,8 @@ function toggleFeature(wrapper: ReactWrapper<any, any>) {
 
   wrapper
     .find(EuiSwitch)
-    .find('input')
-    .simulate('change', { target: { checked: false } });
+    .find('button')
+    .simulate('click');
 
   wrapper.update();
 }

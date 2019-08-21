@@ -105,6 +105,7 @@ export class FeatureTable extends Component<Props, {}> {
             aria-label={
               checked ? `${record.feature.name} visible` : `${record.feature.name} disabled`
             }
+            label=""
           />
         );
       },

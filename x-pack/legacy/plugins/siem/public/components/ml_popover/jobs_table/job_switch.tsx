@@ -59,6 +59,7 @@ export const JobSwitch = React.memo<JobSwitchProps>(
                 setIsLoading(true);
                 onJobStateChange(job.id, job.latestTimestampMs || 0, e.target.checked);
               }}
+              label=""
             />
           )}
         </EuiFlexItem>

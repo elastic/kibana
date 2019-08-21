@@ -14,10 +14,11 @@ import {
   EuiModalHeaderTitle,
   EuiOverlayMask,
   EuiSwitch,
+  EuiSwitchEvent,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { ChangeEvent } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { LanguageServer } from '../../../common/language_server';
@@ -60,7 +61,7 @@ class ProjectSettingsModal extends React.PureComponent<
     config: this.props.config,
   };
 
-  public onSwitchChange = (ls: string) => (e: ChangeEvent<HTMLInputElement>) => {
+  public onSwitchChange = (ls: string) => (e: EuiSwitchEvent) => {
     const { checked } = e.target;
     this.setState((prevState: State) => ({
       config: { ...prevState.config, [`disable${ls}`]: !checked },
