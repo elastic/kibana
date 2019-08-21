@@ -6,9 +6,9 @@
 
 import { PluginInitializerContext } from 'src/core/server';
 import { schema } from './schema';
-import { Plugin } from './plugin';
+import { LicensingPlugin } from './licensing_plugin';
 
 export * from './types';
 
 export const config = { schema };
-export const plugin = (context: PluginInitializerContext) => new Plugin(context);
+export const plugin = (context: PluginInitializerContext) => new LicensingPlugin(context);

@@ -9,12 +9,12 @@ import { take, skip } from 'rxjs/operators';
 import { merge } from 'lodash';
 import { ClusterClient } from 'src/core/server';
 import { coreMock } from '../../../../src/core/server/mocks';
-import { Plugin } from './plugin';
+import { LicensingPlugin } from './licensing_plugin';
 import { LicensingServiceSetup } from './licensing_service_setup';
 import { LICENSE_STATUS } from './constants';
 
 interface TestServices {
-  plugin: Plugin;
+  plugin: LicensingPlugin;
   service$: BehaviorSubject<LicensingServiceSetup>;
   licensing: LicensingServiceSetup;
   clusterClient: jest.Mocked<PublicMethodsOf<ClusterClient>>;
@@ -97,7 +97,7 @@ describe('licensing', () => {
       )
     );
 
-    const plugin = new Plugin(coreMock.createPluginInitializerContext({}));
+    const plugin = new LicensingPlugin(coreMock.createPluginInitializerContext({}));
     const service$ = await plugin.setup(coreSetup);
     const licensing = await service$
       .pipe(

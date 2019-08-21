@@ -7,12 +7,12 @@
 import { BehaviorSubject, Observable, Subscription, timer } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 import moment from 'moment';
-import { CoreSetup, Logger, PluginInitializerContext } from 'src/core/server';
+import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
 import { LicensingConfigType, LicensingServiceSubject } from './types';
 import { LicensingConfig } from './licensing_config';
 import { LicensingServiceSetup } from './licensing_service_setup';
 
-export class Plugin {
+export class LicensingPlugin implements Plugin<LicensingServiceSubject, LicensingServiceSubject> {
   private readonly logger: Logger;
   private readonly config$: Observable<LicensingConfig>;
   private poller$!: Observable<number>;
