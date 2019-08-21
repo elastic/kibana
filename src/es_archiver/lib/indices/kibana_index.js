@@ -77,39 +77,35 @@ export async function deleteKibanaIndices({ client, stats, log }) {
  */
 export async function migrateKibanaIndex({ client, log, kibanaPluginIds }) {
   const uiExports = await getUiExports(kibanaPluginIds);
-  const version = await loadElasticVersion();
+  const kibanaVersion = await loadKibanaVersion();
+
   const config = {
-    'kibana.index': '.kibana',
     'migrations.scrollDuration': '5m',
     'migrations.batchSize': 100,
     'migrations.pollInterval': 100,
     'xpack.task_manager.index': '.kibana_task_manager',
   };
-  const ready = async () => undefined;
-  const elasticsearch = {
-    getCluster: () => ({
-      callWithInternalUser: (path, ...args) => _.get(client, path).call(client, ...args),
-    }),
-    waitUntilReady: ready,
+
+  const migratorOptions = {
+    config: { get: path => config[path] },
+    kibanaConfig: {
+      index: '.kibana',
+    },
+    logger: {
+      debug: log.debug.bind(log),
+      info: log.info.bind(log),
+      warn: log.warning.bind(log),
+      error: log.error.bind(log),
+    },
+    version: kibanaVersion,
+    ...uiExports,
+    callCluster: (path, ...args) => _.get(client, path).call(client, ...args),
   };
 
-  const server = {
-    log: ([logType, messageType], ...args) => log[logType](`[${messageType}] ${args.join(' ')}`),
-    config: () => ({ get: path => config[path] }),
-    plugins: { elasticsearch },
-  };
-
-  const kbnServer = {
-    server,
-    version,
-    uiExports,
-    ready,
-  };
-
-  return await new KibanaMigrator({ kbnServer }).awaitMigration();
+  return await new KibanaMigrator(migratorOptions).awaitMigration();
 }
 
-async function loadElasticVersion() {
+async function loadKibanaVersion() {
   const readFile = promisify(fs.readFile);
   const packageJson = await readFile(path.join(__dirname, '../../../../package.json'));
   return JSON.parse(packageJson).version;
