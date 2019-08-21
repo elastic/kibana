@@ -116,7 +116,7 @@ export class LicensingServiceSetup {
     if (!this.isAvailable) {
       return {
         check: LICENSE_STATUS.Unavailable,
-        message: i18n.translate('xpack.server.checkLicense.errorUnavailableMessage', {
+        message: i18n.translate('xpack.licensing.check.errorUnavailableMessage', {
           defaultMessage:
             'You cannot use {pluginName} because license information is not available at this time.',
           values: { pluginName },
@@ -129,7 +129,7 @@ export class LicensingServiceSetup {
     if (!this.meetsMinimumOf(minimum)) {
       return {
         check: LICENSE_STATUS.Invalid,
-        message: i18n.translate('xpack.server.checkLicense.errorUnsupportedMessage', {
+        message: i18n.translate('xpack.licensing.check.errorUnsupportedMessage', {
           defaultMessage:
             'Your {licenseType} license does not support {pluginName}. Please upgrade your license.',
           values: { licenseType, pluginName },
@@ -140,7 +140,7 @@ export class LicensingServiceSetup {
     if (!this.isActive) {
       return {
         check: LICENSE_STATUS.Expired,
-        message: i18n.translate('xpack.server.checkLicense.errorExpiredMessage', {
+        message: i18n.translate('xpack.licensing.check.errorExpiredMessage', {
           defaultMessage:
             'You cannot use {pluginName} because your {licenseType} license has expired.',
           values: { licenseType, pluginName },
