@@ -17,7 +17,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   describe.only('hybrid', () => {
     before(async () => {
       log.debug('loading hybrid test data');
-      //await esArchiver.load('hybrid/kibana');
+      await esArchiver.load('hybrid/kibana');
       await esArchiver.load('hybrid/logstash');
       await esArchiver.load('hybrid/rollup');
     });
@@ -28,7 +28,9 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
     it('hybrid visualization', async () => {
       log.debug('navigateToApp visualize');
-      await PageObjects.navigateToApp('visualize');
+      await PageObjects.common.navigateToApp('visualize');
+      //await PageObjects.visualize.loadSavedVisualization(vizName1);
+
     });
   });
 }
