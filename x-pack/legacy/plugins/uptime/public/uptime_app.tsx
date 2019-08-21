@@ -35,6 +35,7 @@ import { MonitorPage, OverviewPage } from './pages';
 import { UptimeRefreshContext, UptimeSettingsContext } from './contexts';
 import { UptimeDatePicker } from './components/functional/uptime_date_picker';
 import { useUrlParams } from './hooks';
+import { getTitle } from './lib/helper/get_title';
 
 export interface UptimeAppColors {
   danger: string;
@@ -94,7 +95,6 @@ const Application = (props: UptimeAppProps) => {
       warning: euiLightVars.euiColorWarning,
     };
   }
-
   const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
   const [headingText, setHeadingText] = useState<string | undefined>(undefined);
 
@@ -113,6 +113,10 @@ const Application = (props: UptimeAppProps) => {
           }
         : undefined
     );
+  }, []);
+
+  useEffect(() => {
+    document.title = getTitle();
   }, []);
 
   const refreshApp = () => {
