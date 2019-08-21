@@ -5,10 +5,10 @@ Use to load map saved object and create MapEmbeddable instance.
 Renders map saved object. State comes from saved object.
 
 #### Customizable parameters
-- **hideFilterActions:** (Boolean) Set to true to hide all filter creation UIs like draw controls.
-- **isLayerTOCOpen:** (Boolean) Set to false to render map with collapse legended.
-- **openTOCDetails:** (Array of Strings) Array of layer ids. Add layer id to show layer details in legend on initial render
-- **mapCenter:** ({lat, lon, zoom }) Provide mapCenter to customize intial map center and zoom.
+- **hideFilterActions:** (Boolean) Set to true to hide all filtering controls.
+- **isLayerTOCOpen:** (Boolean) Set to false to render map with legend in collapsed state.
+- **openTOCDetails:** (Array of Strings) Array of layer ids. Add layer id to show layer details on initial render.
+- **mapCenter:** ({lat, lon, zoom }) Provide mapCenter to customize initial map location.
 
 
 Customize embeddable state by providing properties for `MapEmbeddableFactory.createFromSavedObject` `input` parameter.
