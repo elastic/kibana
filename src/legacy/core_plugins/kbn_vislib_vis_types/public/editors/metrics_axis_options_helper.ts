@@ -19,6 +19,7 @@
 
 import { ChartModes, ChartTypes, InterpolationModes } from '../utils/collections';
 import { ValueAxis, SeriesParam } from '../types';
+import { LegendPositions } from '../utils/collections';
 
 const makeSerie = (
   id: string,
@@ -43,4 +44,22 @@ const makeSerie = (
   };
 };
 
-export { makeSerie };
+const isAxisHorizontal = (position: LegendPositions) =>
+  [LegendPositions.TOP, LegendPositions.BOTTOM].includes(position);
+
+const RADIX = 10;
+
+function countNextAxisNumber(axisName: string) {
+  return (value: number, axis: ValueAxis) => {
+    const nameLength = axisName.length;
+    if (axis.id.substr(0, nameLength) === axisName) {
+      const num = parseInt(axis.id.substr(nameLength), RADIX);
+      if (num >= value) {
+        value = num + 1;
+      }
+    }
+    return value;
+  };
+}
+
+export { makeSerie, isAxisHorizontal, countNextAxisNumber };

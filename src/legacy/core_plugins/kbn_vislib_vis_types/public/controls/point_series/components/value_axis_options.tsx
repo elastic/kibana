@@ -29,6 +29,7 @@ import { SwitchOption } from './../../switch';
 import { TextInputOption } from './../../text_input';
 import { LabelOptions } from './label_options';
 import { CustomExtentsOptions } from './custom_extents_options';
+import { isAxisHorizontal } from '../../../editors/metrics_axis_options_helper';
 
 export type SetScale = <T extends keyof ValueAxis['scale']>(
   paramName: T,
@@ -45,7 +46,7 @@ export interface ValueAxisOptionsParams extends VisOptionsProps<BasicVislibParam
   axis: ValueAxis;
   index: number;
   isCategoryAxisHorizontal: boolean;
-  updateAxisName: (axis: ValueAxis, index: number) => void;
+  getUpdatedAxisName: (axisPosition: ValueAxis['position']) => string;
   setValueAxisByIndex: SetValueAxisByIndex;
 }
 
@@ -57,7 +58,7 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
     axis,
     index,
     isCategoryAxisHorizontal,
-    updateAxisName,
+    getUpdatedAxisName,
     setValueAxisByIndex,
   } = props;
 
@@ -98,15 +99,14 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
 
   const onPositionChanged = (paramName: 'position', value: ValueAxis['position']) => {
     setValueAxis(paramName, value);
-
-    updateAxisName(axis, index);
+    setValueAxis('name', getUpdatedAxisName(axis.position));
   };
 
   const isPositionDisabled = (position: LegendPositions) => {
     if (isCategoryAxisHorizontal) {
-      return ['top', 'bottom'].includes(position);
+      return isAxisHorizontal(position);
     }
-    return ['left', 'right'].includes(position);
+    return [LegendPositions.LEFT, LegendPositions.RIGHT].includes(position);
   };
 
   const positions = vis.type.editorConfig.collections.positions.map(

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiPanel,
   EuiTitle,
@@ -36,29 +36,34 @@ import { VisOptionsProps } from 'ui/vis/editors/default';
 import { BasicVislibParams, ValueAxis } from '../../types';
 import { ValueAxisOptions, SetValueAxisByIndex } from './components/value_axis_options';
 
+const MAX_STRING_LENGTH = 30;
+
 interface ValueAxesPanelProps extends VisOptionsProps<BasicVislibParams> {
   isCategoryAxisHorizontal: boolean;
   addValueAxis: () => ValueAxis;
   removeValueAxis: (axis: ValueAxis) => void;
-  updateAxisName: (axis: ValueAxis, index: number) => void;
+  getUpdatedAxisName: (axisPosition: ValueAxis['position']) => string;
   setValueAxisByIndex: SetValueAxisByIndex;
 }
 
 function ValueAxesPanel(props: ValueAxesPanelProps) {
   const { stateParams, addValueAxis, removeValueAxis } = props;
 
-  const getSeries = (axis: ValueAxis) => {
-    const isFirst = stateParams.valueAxes[0] === axis;
-    const series = stateParams.seriesParams.filter(
-      serie => serie.valueAxis === axis.id || (isFirst && !serie.valueAxis)
-    );
-    return series.map(serie => serie.data.label).join(', ');
-  };
+  const getSeries = useCallback(
+    (axis: ValueAxis) => {
+      const isFirst = stateParams.valueAxes[0] === axis;
+      const series = stateParams.seriesParams.filter(
+        serie => serie.valueAxis === axis.id || (isFirst && !serie.valueAxis)
+      );
+      return series.map(serie => serie.data.label).join(', ');
+    },
+    [stateParams.valueAxes[0], stateParams.seriesParams]
+  );
 
-  const getSeriesShort = (axis: ValueAxis) => {
-    const maxStringLength = 30;
-    return getSeries(axis).substring(0, maxStringLength);
-  };
+  const getSeriesShort = useCallback(
+    (axis: ValueAxis) => getSeries(axis).substring(0, MAX_STRING_LENGTH),
+    [getSeries]
+  );
 
   const renderRemoveButton = (axis: ValueAxis) => (
     <EuiToolTip

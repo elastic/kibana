@@ -56,6 +56,7 @@ module.directive('vislibValueAxes', function () {
         { name: 'angled', value: 75 },
       ];
 
+      // converted
       $scope.$watch('editorState.params.categoryAxes[0].position', position => {
         isCategoryAxisHorizontal = ['top', 'bottom'].includes(position);
         $scope.editorState.params.valueAxes.forEach(axis => {
@@ -67,6 +68,7 @@ module.directive('vislibValueAxes', function () {
         });
       });
 
+      // converted
       $scope.getSeries = function (axis) {
         const isFirst = $scope.editorState.params.valueAxes[0] === axis;
         const series = $scope.editorState.params.seriesParams.filter(series =>
@@ -74,19 +76,19 @@ module.directive('vislibValueAxes', function () {
         );
         return series.map(series => series.data.label).join(', ');
       };
-
+      // converted
       $scope.getSeriesShort = function (axis) {
         const maxStringLength = 30;
         return $scope.getSeries(axis).substring(0, maxStringLength);
       };
-
+      // converted
       $scope.isPositionDisabled = function (position) {
         if (isCategoryAxisHorizontal) {
           return ['top', 'bottom'].includes(position);
         }
         return ['left', 'right'].includes(position);
       };
-
+      // converted
       $scope.addValueAxis = function () {
         const firstAxis = $scope.editorState.params.valueAxes[0];
         const newAxis = _.cloneDeep(firstAxis);
@@ -111,7 +113,7 @@ module.directive('vislibValueAxes', function () {
         $scope.editorState.params.valueAxes.push(newAxis);
         return newAxis;
       };
-
+      // converted
       $scope.removeValueAxis = function (axis) {
         if ($scope.editorState.params.valueAxes.length > 1) {
           _.remove($scope.editorState.params.valueAxes, function (valAxis) {
@@ -119,20 +121,21 @@ module.directive('vislibValueAxes', function () {
           });
         }
       };
-
+      // converted
       $scope.updateExtents = function (axis) {
         if (!axis.scale.setYExtents) {
           delete axis.scale.min;
           delete axis.scale.max;
         }
       };
-
+      // converted
       $scope.updateBoundsMargin = function (axis) {
         if (!axis.scale.defaultYExtents) {
           delete axis.scale.boundsMargin;
         }
       };
 
+      // converted
       $scope.updateAxisName = function (axis) {
         const axisName = _.capitalize(axis.position) + 'Axis-';
         axis.name = axisName + $scope.editorState.params.valueAxes.reduce((value, axis) => {
