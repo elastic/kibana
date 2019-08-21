@@ -17,26 +17,34 @@
  * under the License.
  */
 
-import { SavedObjectsClientContract } from 'src/core/public';
-import { createSavedQueryService } from './search_bar/lib/saved_query_service';
-
-/**
- * Search Service
- * @internal
- */
-
-export class SearchService {
-  public setup(savedObjectsClient: SavedObjectsClientContract) {
-    return {
-      services: {
-        savedQueryService: createSavedQueryService(savedObjectsClient),
+export const mappings = {
+  query: {
+    properties: {
+      title: {
+        type: 'text',
       },
-    };
-  }
-
-  public stop() {}
-}
-
-/** @public */
-
-export type SearchSetup = ReturnType<SearchService['setup']>;
+      description: {
+        type: 'text',
+      },
+      query: {
+        properties: {
+          language: {
+            type: 'keyword',
+          },
+          query: {
+            type: 'keyword',
+            index: false,
+          },
+        },
+      },
+      filters: {
+        type: 'object',
+        enabled: false,
+      },
+      timefilter: {
+        type: 'object',
+        enabled: false,
+      },
+    },
+  },
+};
