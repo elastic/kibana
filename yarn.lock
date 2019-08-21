@@ -1611,10 +1611,10 @@
     ts-debounce "^1.0.0"
     uuid "^3.3.2"
 
-"@elastic/ctags-langserver@^0.1.5":
-  version "0.1.5"
-  resolved "https://registry.yarnpkg.com/@elastic/ctags-langserver/-/ctags-langserver-0.1.5.tgz#3d2691245ddb47c121178ebcdbf21a2adb74b3c2"
-  integrity sha512-Wx+1hv9u54ypEKGP1ZR/hp6z8nyjheGeOZRucO2LuMwaxNx8M8K/tDGQmAGRmXytW8f42QFAWo7PHFRht+fdSQ==
+"@elastic/ctags-langserver@^0.1.8":
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/@elastic/ctags-langserver/-/ctags-langserver-0.1.8.tgz#98d82d63a415080422bd8681bb4680cec754e9ca"
+  integrity sha512-PM24l8hCxahi+DndPAYHM0bIhb6/QCBH9WtZh1NUZCfrSYsy5CkB4yZMoyPAYIr2VKWvnIfr+YKT6i/2JaFv5w==
   dependencies:
     "@elastic/lsp-extension" "^0.1.1"
     "@elastic/node-ctags" "1.0.2"
