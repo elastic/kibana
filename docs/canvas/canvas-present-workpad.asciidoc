@@ -9,7 +9,7 @@ When you are ready to present your workpad, use and enable the presentation opti
 === View your workpad in fullscreen mode
 
 In the upper left corner, click the *Enter fullscreen mode* icon.
-+
+
 [role="screenshot"]
 image::images/canvas-fullscreen.png[Fullscreen mode]
 
