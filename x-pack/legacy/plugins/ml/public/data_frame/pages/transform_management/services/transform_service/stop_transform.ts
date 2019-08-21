@@ -12,14 +12,14 @@ import { refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../../../..
 
 import {
   DataFrameTransformListRow,
-  DataFrameTransformEndpointData,
+  DataFrameTransformEndpointRequest,
   DataFrameTransformEndpointResult,
 } from '../../components/transform_list/common';
 // @ts-ignore no declaration file
 import { mlMessageBarService } from '../../../../../../public/components/messagebar/messagebar_service';
 
 export const stopTransforms = async (dataFrames: DataFrameTransformListRow[]) => {
-  const dataFramesInfo: DataFrameTransformEndpointData[] = dataFrames.map(df => ({
+  const dataFramesInfo: DataFrameTransformEndpointRequest[] = dataFrames.map(df => ({
     id: df.config.id,
     state: df.stats.state,
   }));

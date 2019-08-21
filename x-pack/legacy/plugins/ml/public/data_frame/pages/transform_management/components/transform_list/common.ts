@@ -105,7 +105,7 @@ export interface DataFrameTransformListRow {
   stats: DataFrameTransformStats;
 }
 
-export interface DataFrameTransformEndpointData {
+export interface DataFrameTransformEndpointRequest {
   id: DataFrameTransformId;
   state?: DATA_FRAME_TRANSFORM_STATE;
 }

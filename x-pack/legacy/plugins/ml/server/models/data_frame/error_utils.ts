@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 // @ts-ignore no declaration file for module
 export { isRequestTimeout } from '../job_service/error_utils';
 import {
-  DataFrameTransformEndpointData,
+  DataFrameTransformEndpointRequest,
   DataFrameTransformEndpointResult,
 } from '../../../public/data_frame/pages/transform_management/components/transform_list/common';
 // @ts-ignore no declaration file
@@ -17,7 +17,7 @@ import { MLRequestFailure } from '../../../public/util/ml_error';
 interface Params {
   results: DataFrameTransformEndpointResult;
   id: string;
-  items: DataFrameTransformEndpointData[];
+  items: DataFrameTransformEndpointRequest[];
   action: string;
 }
 

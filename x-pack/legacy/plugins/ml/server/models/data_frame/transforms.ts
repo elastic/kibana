@@ -7,9 +7,10 @@
 import { callWithRequestType } from '../../../common/types/kibana';
 import {
   DATA_FRAME_TRANSFORM_STATE,
-  DataFrameTransformEndpointData,
+  DataFrameTransformEndpointRequest,
   DataFrameTransformEndpointResult,
 } from '../../../public/data_frame/pages/transform_management/components/transform_list/common';
+import { DataFrameTransformId } from '../../../public/data_frame/common/transform';
 import { isRequestTimeout, fillResultsWithTimeouts } from './error_utils';
 
 enum TRANSFORM_ACTIONS {
@@ -24,18 +25,18 @@ export function transformServiceProvider(callWithRequest: callWithRequestType) {
   }
 
   async function stopTransform(options: {
-    transformId: string;
+    transformId: DataFrameTransformId;
     force: boolean;
     waitForCompletion: boolean;
   }) {
     return callWithRequest('ml.stopDataFrameTransform', options);
   }
 
-  async function startTransform(options: { transformId: string; force: boolean }) {
+  async function startTransform(options: { transformId: DataFrameTransformId; force: boolean }) {
     return callWithRequest('ml.startDataFrameTransform', options);
   }
 
-  async function deleteTransforms(transformsInfo: DataFrameTransformEndpointData[]) {
+  async function deleteTransforms(transformsInfo: DataFrameTransformEndpointRequest[]) {
     const results: DataFrameTransformEndpointResult = {};
 
     for (const transformInfo of transformsInfo) {
@@ -77,7 +78,7 @@ export function transformServiceProvider(callWithRequest: callWithRequestType) {
     return results;
   }
 
-  async function startTransforms(transformsInfo: DataFrameTransformEndpointData[]) {
+  async function startTransforms(transformsInfo: DataFrameTransformEndpointRequest[]) {
     const results: DataFrameTransformEndpointResult = {};
 
     for (const transformInfo of transformsInfo) {
@@ -106,7 +107,7 @@ export function transformServiceProvider(callWithRequest: callWithRequestType) {
     return results;
   }
 
-  async function stopTransforms(transformsInfo: DataFrameTransformEndpointData[]) {
+  async function stopTransforms(transformsInfo: DataFrameTransformEndpointRequest[]) {
     const results: DataFrameTransformEndpointResult = {};
 
     for (const transformInfo of transformsInfo) {
