@@ -85,6 +85,7 @@ export interface RequiredSchemaField {
   example: string | number;
   name: string;
   type: string;
+  format: string;
   fields: Readonly<Record<string, Partial<RequiredSchemaField>>>;
 }
 
