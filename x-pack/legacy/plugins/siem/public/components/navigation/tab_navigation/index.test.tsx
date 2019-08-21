@@ -8,7 +8,7 @@ import { shallow } from 'enzyme';
 import * as React from 'react';
 
 import { TabNavigation } from './';
-import { navTabs } from '../../../pages/hosts/hosts';
+import { navTabs } from '../../../pages/home/home_navigations';
 
 describe('Tab Navigation', () => {
   test('it mounts with correct tab highlighted', () => {

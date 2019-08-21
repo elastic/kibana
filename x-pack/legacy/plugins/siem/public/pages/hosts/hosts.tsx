@@ -41,60 +41,18 @@ import { AnomaliesHostTable } from '../../components/ml/tables/anomalies_host_ta
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
-import { NavTab } from '../../components/navigation/tab_navigation';
-import { getTabsOnHostsUrl, getHostsUrl } from '../../components/link_to';
 import { SiemNavigation } from '../../components/navigation';
 import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
 import { InspectQuery, Refetch } from '../../store/inputs/model';
-import { NarrowDateRange } from '../../components/ml/types';
 import * as i18n from './translations';
+import { navTabs } from './hosts_navigations';
+import { NarrowDateRange } from '../../components/ml/types';
 
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
 const HostsTableManage = manageQuery(HostsTable);
 const EventsTableManage = manageQuery(EventsTable);
 const UncommonProcessTableManage = manageQuery(UncommonProcessTable);
 const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
-
-export enum HostsTabName {
-  hosts = 'hosts',
-  authentications = 'authentications',
-  uncommonProcesses = 'uncommon_processes',
-  anomalies = 'anomalies',
-  events = 'events',
-}
-
-export const navTabs: NavTab[] = [
-  {
-    id: HostsTabName.hosts,
-    name: i18n.NAVIGATION_HOSTS_TITLE,
-    href: getHostsUrl(),
-    disabled: false,
-  },
-  {
-    id: HostsTabName.authentications,
-    name: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
-    href: getTabsOnHostsUrl(HostsTabName.authentications),
-    disabled: false,
-  },
-  {
-    id: HostsTabName.uncommonProcesses,
-    name: i18n.NAVIGATION_UNCOMMON_PROCESSES_TITLE,
-    href: getTabsOnHostsUrl(HostsTabName.uncommonProcesses),
-    disabled: false,
-  },
-  {
-    id: HostsTabName.anomalies,
-    name: i18n.NAVIGATION_ANOMALIES_TITLE,
-    href: getTabsOnHostsUrl(HostsTabName.anomalies),
-    disabled: false,
-  },
-  {
-    id: HostsTabName.events,
-    name: i18n.NAVIGATION_EVENTS_TITLE,
-    href: getTabsOnHostsUrl(HostsTabName.events),
-    disabled: false,
-  },
-];
 
 interface HostsComponentReduxProps {
   filterQuery: string;

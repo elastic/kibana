@@ -7,7 +7,7 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { scrollToTop } from '../scroll_to_top';
-import { HostsTabName } from '../../pages/hosts/hosts';
+import { HostsTabName } from '../../pages/hosts/hosts_navigations';
 
 type TabName = HostsTabName;
 export interface RedirectWrapperProps {

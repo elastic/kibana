@@ -9,7 +9,7 @@ import * as React from 'react';
 
 import { SiemNavigationComponent } from './';
 import { setBreadcrumbs } from './breadcrumbs';
-import { navTabs } from '../../pages/hosts/hosts';
+import { navTabs } from '../../pages/home/home_navigations';
 
 jest.mock('./breadcrumbs', () => ({
   setBreadcrumbs: jest.fn(),
