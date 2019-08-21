@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SpacesClient, GetSpacePurpose } from './spaces_client';
+import { SavedObjectsService } from 'src/core/server';
+
+export function getEligibleTypes({ types, schema }: Pick<SavedObjectsService, 'schema' | 'types'>) {
+  return types.filter(type => !schema.isNamespaceAgnostic(type));
+}

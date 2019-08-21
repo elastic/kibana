@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SpacesClient, GetSpacePurpose } from './spaces_client';
+export { copySavedObjectsToSpacesFactory } from './copy_to_spaces';
+export { resolveCopySavedObjectsToSpacesConflictsFactory } from './resolve_copy_conflicts';
+export { CopyResponse } from './types';
