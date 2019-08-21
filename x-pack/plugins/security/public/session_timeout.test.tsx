@@ -16,7 +16,7 @@ const expectNoWarningToast = (notifications: NotificationsSetup) => {
   expect(notifications.toasts.add).not.toHaveBeenCalled();
 };
 
-const expectWarningToast = (notifications: NotificationsSetup) => {
+const expectWarningToast = (notifications: NotificationsSetup, toastLifeTimeMS: number = 60000) => {
   expect(notifications.toasts.add).toHaveBeenCalledTimes(1);
   expect(notifications.toasts.add.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
@@ -26,7 +26,7 @@ const expectWarningToast = (notifications: NotificationsSetup) => {
           onRefreshSession={[Function]}
         />,
         "title": "Warning",
-        "toastLifeTimeMs": 60000,
+        "toastLifeTimeMs": ${toastLifeTimeMS},
       },
     ]
   `);
@@ -99,6 +99,16 @@ describe('warning toast', () => {
     wrapper.find('EuiButton[data-test-subj="refreshSessionButton"]').simulate('click');
     expect(http.get).toHaveBeenCalled();
   });
+
+  test('when the session timeout is shorter than 65 seconds, display the warning immediately and for a shorter duration', () => {
+    const { notifications, http } = coreMock.createSetup();
+    const sessionExpired = createSessionExpiredMock();
+    const sessionTimeout = new SessionTimeout(64 * 1000, notifications, sessionExpired, http);
+
+    sessionTimeout.extend();
+    jest.advanceTimersByTime(0);
+    expectWarningToast(notifications, 59 * 1000);
+  });
 });
 
 describe('session expiration', () => {
@@ -128,6 +138,16 @@ describe('session expiration', () => {
     expect(sessionExpired.logout).not.toHaveBeenCalled();
 
     jest.advanceTimersByTime(1 * 1000);
+    expect(sessionExpired.logout).toHaveBeenCalled();
+  });
+
+  test(`if the session timeout is shorter than 5 seconds, expire session immediately`, () => {
+    const { notifications, http } = coreMock.createSetup();
+    const sessionExpired = createSessionExpiredMock();
+    const sessionTimeout = new SessionTimeout(4 * 1000, notifications, sessionExpired, http);
+
+    sessionTimeout.extend();
+    jest.advanceTimersByTime(0);
     expect(sessionExpired.logout).toHaveBeenCalled();
   });
 });
