@@ -37,7 +37,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AuthResultParams](./kibana-plugin-server.authresultparams.md) | Result of an incoming request authentication. |
 |  [AuthToolkit](./kibana-plugin-server.authtoolkit.md) | A tool set defining an outcome of Auth interceptor for incoming request. |
 |  [CallAPIOptions](./kibana-plugin-server.callapioptions.md) | The set of options that defines how API call should be made and result be processed. |
-|  [ContextSetup](./kibana-plugin-server.contextsetup.md) |  |
+|  [ContextSetup](./kibana-plugin-server.contextsetup.md) | An object that handles registration of context providers and configuring handlers with context. |
 |  [CoreSetup](./kibana-plugin-server.coresetup.md) | Context passed to the plugins <code>setup</code> method. |
 |  [CoreStart](./kibana-plugin-server.corestart.md) | Context passed to the plugins <code>start</code> method. |
 |  [CustomHttpResponseOptions](./kibana-plugin-server.customhttpresponseoptions.md) | HTTP response parameters for a response with adjustable status code. |
@@ -48,11 +48,14 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [HttpResponseOptions](./kibana-plugin-server.httpresponseoptions.md) | HTTP response parameters |
 |  [HttpServerSetup](./kibana-plugin-server.httpserversetup.md) | Kibana HTTP Service provides own abstraction for work with HTTP stack. Plugins don't have direct access to <code>hapi</code> server and its primitives anymore. Moreover, plugins shouldn't rely on the fact that HTTP Service uses one or another library under the hood. This gives the platform flexibility to upgrade or changing our internal HTTP stack without breaking plugins. If the HTTP Service lacks functionality you need, we are happy to discuss and support your needs. |
 |  [HttpServiceStart](./kibana-plugin-server.httpservicestart.md) |  |
+|  [IContextContainer](./kibana-plugin-server.icontextcontainer.md) | An object that handles registration of context providers and configuring handlers with context. |
 |  [IKibanaSocket](./kibana-plugin-server.ikibanasocket.md) | A tiny abstraction for TCP socket. |
 |  [InternalCoreStart](./kibana-plugin-server.internalcorestart.md) |  |
 |  [IRouter](./kibana-plugin-server.irouter.md) | Registers route handlers for specified resource path and method. |
 |  [KibanaRequestRoute](./kibana-plugin-server.kibanarequestroute.md) | Request specific route information exposed to a handler. |
 |  [LegacyRequest](./kibana-plugin-server.legacyrequest.md) |  |
+|  [LegacyServiceSetupDeps](./kibana-plugin-server.legacyservicesetupdeps.md) |  |
+|  [LegacyServiceStartDeps](./kibana-plugin-server.legacyservicestartdeps.md) |  |
 |  [Logger](./kibana-plugin-server.logger.md) | Logger exposes all the necessary methods to log any type of information and this is the interface used by the logging consumers including plugins. |
 |  [LoggerFactory](./kibana-plugin-server.loggerfactory.md) | The single purpose of <code>LoggerFactory</code> interface is to define a way to retrieve a context-based logger instance. |
 |  [LogMeta](./kibana-plugin-server.logmeta.md) | Contextual metadata |
@@ -63,6 +66,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [PluginManifest](./kibana-plugin-server.pluginmanifest.md) | Describes the set of required and optional properties plugin can define in its mandatory JSON manifest file. |
 |  [PluginsServiceSetup](./kibana-plugin-server.pluginsservicesetup.md) |  |
 |  [PluginsServiceStart](./kibana-plugin-server.pluginsservicestart.md) |  |
+|  [RequestHandlerContext](./kibana-plugin-server.requesthandlercontext.md) | Plugin specific context passed to a route handler. |
 |  [ResponseErrorMeta](./kibana-plugin-server.responseerrormeta.md) | Additional metadata to enhance error output or provide error details. |
 |  [RouteConfig](./kibana-plugin-server.routeconfig.md) | Route specific configuration. |
 |  [RouteConfigOptions](./kibana-plugin-server.routeconfigoptions.md) | Additional route options. |
@@ -118,6 +122,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [Headers](./kibana-plugin-server.headers.md) | Http request headers to read. |
 |  [HttpResponsePayload](./kibana-plugin-server.httpresponsepayload.md) | Data send to the client as a response payload. |
 |  [HttpServiceSetup](./kibana-plugin-server.httpservicesetup.md) |  |
+|  [IContextHandler](./kibana-plugin-server.icontexthandler.md) | A function registered by a plugin to perform some action. |
+|  [IContextProvider](./kibana-plugin-server.icontextprovider.md) | A function that returns a context value for a specific key of given context type. |
 |  [IsAuthenticated](./kibana-plugin-server.isauthenticated.md) | Return authentication status for a request. |
 |  [KibanaResponseFactory](./kibana-plugin-server.kibanaresponsefactory.md) | Creates an object containing request response payload, HTTP headers, error details, and other data transmitted to the client. |
 |  [KnownHeaders](./kibana-plugin-server.knownheaders.md) | Set of well-known HTTP headers. |
@@ -130,6 +136,10 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [RecursiveReadonly](./kibana-plugin-server.recursivereadonly.md) |  |
 |  [RedirectResponseOptions](./kibana-plugin-server.redirectresponseoptions.md) | HTTP response parameters for redirection response |
 |  [RequestHandler](./kibana-plugin-server.requesthandler.md) | A function executed when route path matched requested resource path. Request handler is expected to return a result of one of [KibanaResponseFactory](./kibana-plugin-server.kibanaresponsefactory.md) functions. |
+|  [RequestHandlerContextContainer](./kibana-plugin-server.requesthandlercontextcontainer.md) | An object that handles registration of http request context providers. |
+|  [RequestHandlerContextProvider](./kibana-plugin-server.requesthandlercontextprovider.md) | Context provider for request handler. Extends request context object with provided functionality or data. |
+|  [RequestHandlerParams](./kibana-plugin-server.requesthandlerparams.md) | Parameters passed to the request handler function. |
+|  [RequestHandlerReturn](./kibana-plugin-server.requesthandlerreturn.md) | Expected outcome the request handler function. |
 |  [ResponseError](./kibana-plugin-server.responseerror.md) | Error message and optional data send to the client in case of error. |
 |  [RouteMethod](./kibana-plugin-server.routemethod.md) | The set of common HTTP methods supported by Kibana routing. |
 |  [SavedObjectAttribute](./kibana-plugin-server.savedobjectattribute.md) |  |

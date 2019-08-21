@@ -49,7 +49,6 @@ exports[`render 1`] = `
   />
   <EuiSteps
     firstStepNumber={1}
-    headingElement="p"
     steps={
       Array [
         Object {
@@ -133,7 +132,6 @@ exports[`statusCheckState checking status 1`] = `
   />
   <EuiSteps
     firstStepNumber={1}
-    headingElement="p"
     steps={
       Array [
         Object {
@@ -252,7 +250,6 @@ exports[`statusCheckState failed status check - error 1`] = `
   />
   <EuiSteps
     firstStepNumber={1}
-    headingElement="p"
     steps={
       Array [
         Object {
@@ -376,7 +373,6 @@ exports[`statusCheckState failed status check - no data 1`] = `
   />
   <EuiSteps
     firstStepNumber={1}
-    headingElement="p"
     steps={
       Array [
         Object {
@@ -500,7 +496,6 @@ exports[`statusCheckState initial state - no check has been attempted 1`] = `
   />
   <EuiSteps
     firstStepNumber={1}
-    headingElement="p"
     steps={
       Array [
         Object {
@@ -619,7 +614,6 @@ exports[`statusCheckState successful status check 1`] = `
   />
   <EuiSteps
     firstStepNumber={1}
-    headingElement="p"
     steps={
       Array [
         Object {

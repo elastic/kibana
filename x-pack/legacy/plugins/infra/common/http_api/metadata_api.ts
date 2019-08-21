@@ -97,4 +97,6 @@ export type InfraMetadataMachine = rt.TypeOf<typeof InfraMetadataMachineRT>;
 
 export type InfraMetadataHost = rt.TypeOf<typeof InfraMetadataHostRT>;
 
-export type InfraMEtadataOS = rt.TypeOf<typeof InfraMetadataOSRT>;
+export type InfraMetadataOS = rt.TypeOf<typeof InfraMetadataOSRT>;
+
+export type InfraMetadataNodeType = rt.TypeOf<typeof InfraMetadataNodeTypeRT>;

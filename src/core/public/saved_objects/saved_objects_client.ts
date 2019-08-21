@@ -284,7 +284,7 @@ export class SavedObjectsClient {
    * @returns A find result with objects matching the specified search.
    */
   public find = <T extends SavedObjectAttributes>(
-    options: SavedObjectsFindOptions = {}
+    options: SavedObjectsFindOptions
   ): Promise<SavedObjectsFindResponsePublic<T>> => {
     const path = this.getPath(['_find']);
     const renameMap = {

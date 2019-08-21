@@ -16,6 +16,7 @@ export interface LspOptions {
 export interface SecurityOptions {
   enableMavenImport: boolean;
   enableGradleImport: boolean;
+  installGoDependency: boolean;
   installNodeDependency: boolean;
   gitHostWhitelist: string[];
   gitProtocolWhitelist: string[];
@@ -51,6 +52,8 @@ export class ServerOptions {
   public readonly maxWorkspace: number = this.options.maxWorkspace;
 
   public readonly enableGlobalReference: boolean = this.options.enableGlobalReference;
+
+  public readonly enableCommitIndexing: boolean = this.options.enableCommitIndexing;
 
   public readonly lsp: LspOptions = this.options.lsp;
 

@@ -48,7 +48,7 @@ export class IndexScheduler extends AbstractScheduler {
         return;
       }
 
-      const repoIndexStatus = await this.objectClient.getRepositoryLspIndexStatus(repo.uri);
+      const repoIndexStatus = await this.objectClient.getRepositoryIndexStatus(repo.uri);
 
       // Schedule index job only when the indexed revision is different from the current repository
       // revision.

@@ -27,6 +27,7 @@ import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import { Storage } from 'ui/storage';
 
+import { UiSettingsClientContract } from 'src/core/public';
 import { IndexPattern, Query, QueryBar, FilterBar } from '../../../../../data/public';
 
 interface DateRange {
@@ -41,6 +42,7 @@ interface DateRange {
 export interface SearchBarProps {
   appName: string;
   intl: InjectedIntl;
+  uiSettings: UiSettingsClientContract;
   indexPatterns?: IndexPattern[];
   // Query bar
   showQueryBar?: boolean;
@@ -183,10 +185,17 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   }
 
   public render() {
+    // This is needed, as kbn-top-nav might render before npSetup.core.uiSettings is set.
+    // This won't be needed when it's loaded exclusively with React.
+    if (!this.props.uiSettings) {
+      return null;
+    }
+
     let queryBar;
     if (this.shouldRenderQueryBar()) {
       queryBar = (
         <QueryBar
+          uiSettings={this.props.uiSettings}
           query={this.props.query}
           screenTitle={this.props.screenTitle}
           onSubmit={this.props.onQuerySubmit!}
@@ -226,6 +235,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           >
             <FilterBar
               className="globalFilterGroup__filterBar"
+              uiSettings={this.props.uiSettings}
               filters={this.props.filters!}
               onFiltersUpdated={this.getFilterUpdateFunction()}
               indexPatterns={this.props.indexPatterns!}
