@@ -106,6 +106,8 @@ export interface UpdateWorkerResult extends WorkerResult {
 }
 
 export enum IndexStatsKey {
+  Commit = 'commit-added-count',
+  CommitDeleted = 'commit-deleted-count',
   File = 'file-added-count',
   FileDeleted = 'file-deleted-count',
   Symbol = 'symbol-added-count',
@@ -161,5 +163,8 @@ export interface IndexProgress {
 }
 
 export interface IndexWorkerProgress extends WorkerProgress {
+  // Index progress for LSP indexing.
   indexProgress?: IndexProgress;
+  // Index progress for commit indexing.
+  commitIndexProgress?: IndexProgress;
 }
