@@ -30,8 +30,6 @@ export const fetchMonitorLocCheckGroups = async (
   let nextPagePagination = null;
   let prevPagePagination = null;
 
-  const ssAligned = searchSortAligned(queryContext.pagination);
-
   const fetcher = new LatestCheckGroupFetcher(queryContext);
   let lastItem: MonitorIdWithGroups | null = null;
   while (items.length < size) {
@@ -49,14 +47,20 @@ export const fetchMonitorLocCheckGroups = async (
     items.push(lastItem);
   }
 
-  const hasAfter = !!fetcher.next();
+  // We have to create these objects before checking if we can navigate backward
+  const paginationAfter: CursorPagination | null = fetcher.peek()
+    ? fetcher.paginationAfterCurrent()
+    : null;
+  const paginationBefore: CursorPagination | null = fetcher.reverse().peek()
+    ? fetcher.reverse().paginationAfterCurrent()
+    : null;
 
-  const lastMLCG = ssAligned;
+  const ssAligned = searchSortAligned(queryContext.pagination);
 
   return {
     items,
-    nextPagePagination,
-    prevPagePagination,
+    nextPagePagination: ssAligned ? paginationAfter : paginationBefore,
+    prevPagePagination: ssAligned ? paginationBefore : paginationAfter,
   };
 };
 
@@ -75,8 +79,40 @@ export class LatestCheckGroupFetcher {
     this.bufferPos = 0;
     this.endOfStream = false;
     this.searchAfter = queryContext.pagination.cursorKey;
+  }
 
-    console.log('INIT', this.searchAfter, 'BUF', this.buffer.length);
+  // Get a CursorPaginator object that will resume after the current() value.
+  paginationAfterCurrent(): CursorPagination | null {
+    const current = this.current();
+    const cursorKey = current
+      ? { monitor_id: current.monitorId, location: current.location }
+      : null;
+    return Object.assign({}, this.queryContext.pagination, { cursorKey });
+  }
+
+  // Returns a copy of this fetcher that goes backwards, not forwards from the cursorKey the fetcher
+  // was initialized with (not the current point).
+  reverse(): LatestCheckGroupFetcher {
+    const reverseContext = Object.assign({}, this.queryContext);
+    reverseContext.pagination = {
+      cursorKey: this.queryContext.pagination.cursorKey,
+      sortOrder: this.queryContext.pagination.sortOrder,
+      cursorDirection:
+        this.queryContext.pagination.cursorDirection === CursorDirection.AFTER
+          ? CursorDirection.BEFORE
+          : CursorDirection.AFTER,
+    };
+    return new LatestCheckGroupFetcher(reverseContext);
+  }
+
+  // Returns the last item fetched with next(). null if no items fetched with
+  // next or if next has not yet been invoked.
+  current(): MonitorLocCheckGroup | null {
+    if (this.endOfStream) {
+      return null;
+    }
+
+    return this.buffer[this.bufferPos] || null;
   }
 
   async next(): Promise<MonitorLocCheckGroup | null> {
@@ -93,6 +129,16 @@ export class LatestCheckGroupFetcher {
     console.log('RECURSECG', this.bufferPos);
     await this.queryAndBuffer();
     return await this.next();
+  }
+
+  async peek(): Promise<MonitorLocCheckGroup | null> {
+    const bufAhead = this.buffer[this.bufferPos + 1];
+    if (bufAhead) {
+      return bufAhead;
+    }
+
+    const results = await this.queryCheckGroupsPage(1);
+    return results.checkGroups[0];
   }
 
   async queryAndBuffer() {
