@@ -8,7 +8,7 @@ import { NotificationsSetup, Toast, HttpSetup } from 'src/core/public';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { SessionExpirationWarning } from './session_expiration_warning';
-import { SessionExpired } from './session_expired';
+import { ISessionExpired } from './session_expired';
 
 /**
  * Client session timeout is decreased by this number so that Kibana server
@@ -32,7 +32,7 @@ export class SessionTimeout {
   constructor(
     private sessionTimeout: number,
     private notifications: NotificationsSetup,
-    private sessionExpired: SessionExpired,
+    private sessionExpired: ISessionExpired,
     private http: HttpSetup
   ) {}
 

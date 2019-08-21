@@ -6,10 +6,14 @@
 
 import { HttpSetup } from 'src/core/public';
 
+export interface ISessionExpired {
+  logout(): void;
+}
+
 export class SessionExpired {
   constructor(private basePath: HttpSetup['basePath']) {}
 
-  public logout() {
+  logout() {
     const next = this.basePath.remove(
       `${window.location.pathname}${window.location.search}${window.location.hash}`
     );
