@@ -207,6 +207,7 @@ export interface InfraTSVBPanel {
 
 export interface InfraTSVBSeries {
   id: string;
+  label: string;
   data: InfraTSVBDataPoint[];
 }
 

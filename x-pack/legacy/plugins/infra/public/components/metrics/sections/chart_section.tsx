@@ -111,7 +111,7 @@ export const ChartSection = injectI18n(
         <EuiTitle size="xs">
           <h3 id={section.id}>{section.label}</h3>
         </EuiTitle>
-        <div style={{ height: 200 }}>
+        <div className="infMetricsExplorerChart" style={{ height: 200 }}>
           <Chart>
             <Axis
               id={getAxisId('timestamp')}
@@ -126,7 +126,7 @@ export const ChartSection = injectI18n(
                   key={`series-${section.id}-${series.id}`}
                   id={`series-${section.id}-${series.id}`}
                   series={series}
-                  name={getChartName(section, series.id)}
+                  name={getChartName(section, series.id, series.label)}
                   type={getChartType(section, series.id)}
                   color={getChartColor(section, series.id)}
                   stack={visConfig.stacked}

@@ -33,3 +33,9 @@
 .infMetricsExplorerChart .echTooltip {
   max-width: 90vw;
 }
+
+.infMetricsExplorerChart .echTooltip__label {
+  overflow-x: hidden;
+  white-space: no-wrap;
+  text-overflow: ellipsis;
+}

@@ -53,8 +53,12 @@ export const getMaxMinTimestamp = (metric: InfraMetricData): [number, number] =>
  * Returns the chart name from the visConfig based on the series id, otherwise it
  * just returns the seriesId
  */
-export const getChartName = (section: InfraMetricLayoutSection, seriesId: string) => {
-  return get(section, ['visConfig', 'seriesOverrides', seriesId, 'name'], seriesId);
+export const getChartName = (
+  section: InfraMetricLayoutSection,
+  seriesId: string,
+  label: string
+) => {
+  return get(section, ['visConfig', 'seriesOverrides', seriesId, 'name'], label);
 };
 
 /**
@@ -62,9 +66,11 @@ export const getChartName = (section: InfraMetricLayoutSection, seriesId: string
  * just returns a default color of #999
  */
 export const getChartColor = (section: InfraMetricLayoutSection, seriesId: string) => {
-  const color = new Color(
-    get(section, ['visConfig', 'seriesOverrides', seriesId, 'color'], '#999')
-  );
+  const rawColor: string | null = get(section, ['visConfig', 'seriesOverrides', seriesId, 'color']);
+  if (!rawColor) {
+    return null;
+  }
+  const color = new Color(rawColor);
   return color.hex().toString();
 };
 

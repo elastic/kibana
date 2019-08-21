@@ -22,7 +22,7 @@ import { InfraDataSeries } from '../../../graphql/types';
 interface Props {
   id: string;
   name: string;
-  color: string;
+  color: string | null;
   series: InfraDataSeries;
   type: InfraMetricLayoutVisualizationType;
   stack: boolean | undefined;
@@ -46,8 +46,8 @@ export const AreaChart = ({ id, color, series, name, type, stack }: Props) => {
       visible: true,
     },
     point: {
-      visible: false,
-      radius: 0.2,
+      visible: true,
+      radius: 1,
       strokeWidth: 2,
       opacity: 1,
     },
@@ -57,7 +57,7 @@ export const AreaChart = ({ id, color, series, name, type, stack }: Props) => {
     specId: getSpecId(id),
   };
   const customColors: CustomSeriesColorsMap = new Map();
-  customColors.set(colors, color);
+  customColors.set(colors, color || '#999');
   return (
     <AreaSeries
       id={getSpecId(id)}
@@ -68,7 +68,7 @@ export const AreaChart = ({ id, color, series, name, type, stack }: Props) => {
       yAccessors={['value']}
       data={series.data}
       areaSeriesStyle={style}
-      customSeriesColors={customColors}
+      customSeriesColors={color ? customColors : void 0}
       stackAccessors={stack ? ['timestamp'] : void 0}
     />
   );

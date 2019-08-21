@@ -21,6 +21,8 @@ export const metricsSchema: any = gql`
     hostNetworkTraffic
     hostDockerOverview
     hostDockerInfo
+    hostDockerTop5ByCpu
+    hostDockerTop5ByMemory
     podOverview
     podCpuUsage
     podMemoryUsage
@@ -53,6 +55,7 @@ export const metricsSchema: any = gql`
 
   type InfraDataSeries {
     id: ID!
+    label: String!
     data: [InfraDataPoint!]!
   }
 
