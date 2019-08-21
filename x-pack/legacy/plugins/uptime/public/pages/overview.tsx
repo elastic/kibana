@@ -21,6 +21,7 @@ import { UptimeSettingsContext } from '../contexts';
 import { useUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../infra/public';
+import { KueryBar } from '../components/functional/kuery_bar';
 
 interface OverviewPageProps {
   basePath: string;
@@ -110,6 +111,7 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
 
   return (
     <Fragment>
+      <KueryBar />
       <EmptyState basePath={basePath} implementsCustomErrorState={true} variables={{}}>
         <FilterBar
           currentQuery={filterQueryString}
