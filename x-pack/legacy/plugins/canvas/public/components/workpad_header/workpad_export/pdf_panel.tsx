@@ -9,11 +9,17 @@ import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { Clipboard } from '../../clipboard';
 
 interface Props {
+  /** The URL that will invoke PDF Report generation. */
   pdfURL: string;
+  /** Handler to invoke when the PDF is exported */
   onExport: () => void;
+  /** Handler to invoke when the URL is copied to the clipboard. */
   onCopy: () => void;
 }
 
+/**
+ * A panel displayed in the Export Menu with options in which to generate PDF Reports.
+ */
 export const PDFPanel = ({ pdfURL, onExport, onCopy }: Props) => (
   <div className="canvasWorkpadExport__panelContent">
     <EuiText size="s">
@@ -24,14 +30,12 @@ export const PDFPanel = ({ pdfURL, onExport, onCopy }: Props) => (
       Generate PDF
     </EuiButton>
     <EuiSpacer size="s" />
-
     <EuiText size="s">
       <p>
         Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher.
       </p>
     </EuiText>
     <EuiSpacer size="s" />
-
     <Clipboard content={pdfURL} onCopy={onCopy}>
       <EuiButton
         iconType="copy"

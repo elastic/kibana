@@ -13,9 +13,13 @@ const REPORTING_CONFIG = `xpack.reporting:
   capture.browser.type: chromium`;
 
 interface Props {
+  /** Handler to invoke when the Kibana configuration is copied. */
   onCopy: () => void;
 }
 
+/**
+ * A panel to display within the Export menu when reporting is disabled.
+ */
 export const DisabledPanel = ({ onCopy }: Props) => (
   <div className="canvasWorkpadExport__panelContent">
     <EuiText size="s">
