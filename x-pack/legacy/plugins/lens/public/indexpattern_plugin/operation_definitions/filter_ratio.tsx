@@ -18,6 +18,7 @@ import { updateColumnParam } from '../state_helpers';
 
 export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternColumn> = {
   type: 'filter_ratio',
+  priority: 1,
   displayName: i18n.translate('xpack.lens.indexPattern.filterRatio', {
     defaultMessage: 'Filter Ratio',
   }),

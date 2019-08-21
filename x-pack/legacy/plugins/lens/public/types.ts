@@ -47,15 +47,52 @@ export interface TableSuggestionColumn {
   operation: Operation;
 }
 
+/**
+ * A possible table a datasource can create. This object is passed to the visualization
+ * which tries to build a meaningful visualization given the shape of the table. If this
+ * is possible, the visualization returns a `VisualizationSuggestion` object
+ */
 export interface TableSuggestion {
+  /**
+   * The id of this table. This id has to be included in the `VisualizationSuggestion` to map
+   * the visualization to the right table as there can be multiple tables in a single `SuggestionRequest`.
+   */
   datasourceSuggestionId: number;
+  /**
+   * Flag indicating whether the table will include more than one column.
+   * This is not the case for example for a single metric aggregation
+   * */
   isMultiRow: boolean;
+  /**
+   * The columns of the table. Each column has to be mapped to a dimension in a chart. If a visualization
+   * can't use all columns of a suggestion, it should not return a `VisualizationSuggestion` based on it
+   * because there would be unreferenced columns
+   */
   columns: TableSuggestionColumn[];
+  /**
+   * The layer this table will replace. This is only relevant if the visualization this suggestion is passed
+   * is currently active and has multiple layers configured. If this suggestion is applied, the table of this
+   * layer will be replaced by the columns specified in this suggestion
+   */
   layerId: string;
+  /**
+   * A label describing the table. This can be used to provide a title for the `VisualizationSuggestion`,
+   * but the visualization can also decide to overwrite it.
+   */
   label?: string;
+  /**
+   * The change type indicates what was changed in this table compared to the currently active table of this layer.
+   */
   changeType: TableChangeType;
 }
 
+/**
+ * Indicates what was changed in this table compared to the currently active table of this layer.
+ * * `initial` means the layer associated with this table does not exist in the current configuration
+ * * `unchanged` means the table is the same in the currently active configuration
+ * * `reduced` means the table is a reduced version of the currently active table (some columns dropped, but not all of them)
+ * * `extended` means the table is an extended version of the currently active table (added one or multiple additional columns)
+ */
 export type TableChangeType = 'initial' | 'unchanged' | 'reduced' | 'extended';
 
 export interface DatasourceSuggestion<T = unknown> {
@@ -186,13 +223,47 @@ export interface SuggestionRequest<T = unknown> {
   state?: T; // State is only passed if the visualization is active
 }
 
+/**
+ * A possible configuration of a given visualization. It is based on a `TableSuggestion`.
+ * Suggestion might be shown in the UI to be chosen by the user directly, but they are
+ * also applied directly under some circumstances (dragging in the first field from the data
+ * panel or switching to another visualization in the chart switcher).
+ */
 export interface VisualizationSuggestion<T = unknown> {
+  /**
+   * The score of a suggestion should indicate how valuable the suggestion is. It is used
+   * to rank multiple suggestions of multiple visualizations. The number should be between 0 and 1
+   */
   score: number;
+  /**
+   * Flag indicating whether this suggestion should not be advertised to the user. It is still
+   * considered in scenarios where the available suggestion with the highest suggestion is applied
+   * directly.
+   */
   hide?: boolean;
+  /**
+   * Descriptive title of the suggestion. Should be as short as possible. This title is shown if
+   * the suggestion is advertised to the user and will also show either the `previewExpression` or
+   * the `previewIcon`
+   */
   title: string;
+  /**
+   * The new state of the visualization if this suggestion is applied.
+   */
   state: T;
+  /**
+   * The id of the `TableSuggestion` object this visualization suggestion is based on.
+   * This is used to switch the datasource configuration to the right table.
+   */
   datasourceSuggestionId: number;
+  /**
+   * The expression of the preview of the chart rendered if the suggestion is advertised to the user.
+   * If there is no expression provided, the preview icon is used.
+   */
   previewExpression?: Ast | string;
+  /**
+   * An EUI icon type shown instead of the preview expression.
+   */
   previewIcon: string;
 }
 

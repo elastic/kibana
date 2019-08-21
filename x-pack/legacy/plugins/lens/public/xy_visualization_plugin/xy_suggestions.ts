@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { partition, isEqual } from 'lodash';
+import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import {
@@ -16,7 +16,7 @@ import {
   OperationMetadata,
   TableChangeType,
 } from '../types';
-import { State, SeriesType, LayerConfig } from './types';
+import { State, SeriesType, XYState } from './types';
 import { generateId } from '../id_generator';
 import { buildExpression } from './to_expression';
 
@@ -120,6 +120,72 @@ function getSuggestion(
   currentState?: State,
   tableLabel?: string
 ): VisualizationSuggestion<State> {
+  const title = getSuggestionTitle(yValues, xValue, tableLabel);
+  const seriesType: SeriesType = getSeriesType(currentState, layerId, splitBy, xValue);
+  const isHorizontal = currentState ? currentState.isHorizontal : false;
+
+  const options = {
+    isHorizontal,
+    currentState,
+    seriesType,
+    layerId,
+    title,
+    yValues,
+    splitBy,
+    changeType,
+    datasourceSuggestionId,
+    xValue,
+  };
+
+  // if current state is using the same data, suggest same chart with different presentational configuration
+  if (currentState && changeType === 'unchanged') {
+    if (xValue.operation.scale && xValue.operation.scale !== 'ordinal') {
+      // change chart type for interval or ratio scales on x axis
+      const newSeriesType = seriesType === 'area' ? 'bar' : 'area';
+      return buildSuggestion({
+        ...options,
+        seriesType: newSeriesType,
+        title:
+          newSeriesType === 'area'
+            ? i18n.translate('xpack.lens.xySuggestions.areaChartTitle', {
+                defaultMessage: 'Area chart',
+              })
+            : i18n.translate('xpack.lens.xySuggestions.barChartTitle', {
+                defaultMessage: 'Bar chart',
+              }),
+      });
+    } else {
+      // flip between horizontal/vertical for ordinal scales
+      return buildSuggestion({
+        ...options,
+        title: i18n.translate('xpack.lens.xySuggestions.flipTitle', { defaultMessage: 'Flip' }),
+        isHorizontal: !options.isHorizontal,
+      });
+    }
+  } else {
+    return buildSuggestion(options);
+  }
+}
+
+function getSeriesType(
+  currentState: XYState | undefined,
+  layerId: string,
+  splitBy: TableSuggestionColumn | undefined,
+  xValue: TableSuggestionColumn
+): SeriesType {
+  const oldLayer = getExistingLayer(currentState, layerId);
+  return (
+    (oldLayer && oldLayer.seriesType) ||
+    (currentState && currentState.preferredSeriesType) ||
+    (splitBy && xValue.operation.dataType === 'date' ? 'line' : 'bar')
+  );
+}
+
+function getSuggestionTitle(
+  yValues: TableSuggestionColumn[],
+  xValue: TableSuggestionColumn,
+  tableLabel: string | undefined
+) {
   const yTitle = yValues
     .map(col => col.operation.label)
     .join(
@@ -130,11 +196,9 @@ function getSuggestion(
       })
     );
   const xTitle = xValue.operation.label;
-  const isDate = xValue.operation.dataType === 'date';
-
-  let title =
+  const title =
     tableLabel ||
-    (isDate
+    (xValue.operation.dataType === 'date'
       ? i18n.translate('xpack.lens.xySuggestions.dateSuggestion', {
           defaultMessage: '{yTitle} over {xTitle}',
           description:
@@ -147,36 +211,43 @@ function getSuggestion(
             'Chart description for a value of some groups, like "Top URLs of top 5 countries"',
           values: { xTitle, yTitle },
         }));
+  return title;
+}
 
-  const oldLayer = currentState && currentState.layers.find(layer => layer.layerId === layerId);
-  const seriesType: SeriesType =
-    (oldLayer && oldLayer.seriesType) ||
-    (currentState && currentState.preferredSeriesType) ||
-    (splitBy && isDate ? 'line' : 'bar');
-  let isHorizontal = currentState ? currentState.isHorizontal : false;
-  let newLayer = {
-    ...(oldLayer || {}),
+function buildSuggestion({
+  isHorizontal,
+  currentState,
+  seriesType,
+  layerId,
+  title,
+  yValues,
+  splitBy,
+  changeType,
+  datasourceSuggestionId,
+  xValue,
+}: {
+  currentState: XYState | undefined;
+  isHorizontal: boolean;
+  seriesType: SeriesType;
+  title: string;
+  yValues: TableSuggestionColumn[];
+  xValue: TableSuggestionColumn;
+  splitBy: TableSuggestionColumn | undefined;
+  layerId: string;
+  changeType: string;
+  datasourceSuggestionId: number;
+}) {
+  const newLayer = {
+    ...(getExistingLayer(currentState, layerId) || {}),
     layerId,
     seriesType,
     xAccessor: xValue.columnId,
     splitAccessor: splitBy ? splitBy.columnId : generateId(),
     accessors: yValues.map(col => col.columnId),
-    title: yTitle,
+    // TODO check whether we need this
+    title: '',
   };
-  // if current state is using the same data, suggest same chart with different series type
-  if (oldLayer && changeType === 'unchanged') {
-    if (xValue.operation.scale && xValue.operation.scale !== 'ordinal') {
-      const currentSeriesType = oldLayer.seriesType;
-      const newSeriesType = currentSeriesType === 'area' ? 'bar' : 'area';
-      // TODO i18n
-      title = `${newSeriesType} chart`;
-      newLayer = { ...newLayer, seriesType: newSeriesType };
-    } else {
-      // todo i18n
-      title = 'Flip';
-      isHorizontal = !isHorizontal;
-    }
-  }
+
   const state: State = {
     isHorizontal,
     legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
@@ -186,15 +257,8 @@ function getSuggestion(
       newLayer,
     ],
   };
-  const metadata: Record<string, OperationMetadata> = {};
 
-  [xValue, ...yValues, splitBy].forEach(col => {
-    if (col) {
-      metadata[col.columnId] = col.operation;
-    }
-  });
-
-  const suggestion = {
+  return {
     title,
     // chart with multiple y values and split series will have a score of 1, single y value and no split series reduce score
     score: ((yValues.length > 1 ? 2 : 1) + (splitBy ? 1 : 0)) / 3,
@@ -203,21 +267,48 @@ function getSuggestion(
     datasourceSuggestionId,
     state,
     previewIcon: getIconForSeries(seriesType),
-    previewExpression: buildExpression(
-      {
-        ...state,
-        layers: state.layers
-          .filter(layer => layer.layerId === layerId)
-          .map(layer => ({ ...layer, hide: true })),
-        legend: {
-          ...state.legend,
-          isVisible: false,
-        },
-      },
-      { xTitle, yTitle },
-      { [layerId]: metadata }
-    ),
+    previewExpression: buildPreviewExpression(state, layerId, xValue, yValues, splitBy),
   };
+}
 
-  return suggestion;
+function buildPreviewExpression(
+  state: XYState,
+  layerId: string,
+  xValue: TableSuggestionColumn,
+  yValues: TableSuggestionColumn[],
+  splitBy: TableSuggestionColumn | undefined
+) {
+  return buildExpression(
+    {
+      ...state,
+      // only show changed layer in preview and hide axes
+      layers: state.layers
+        .filter(layer => layer.layerId === layerId)
+        .map(layer => ({ ...layer, hide: true })),
+      // hide legend for preview
+      legend: {
+        ...state.legend,
+        isVisible: false,
+      },
+    },
+    { [layerId]: collectColumnMetaData(xValue, yValues, splitBy) }
+  );
+}
+
+function getExistingLayer(currentState: XYState | undefined, layerId: string) {
+  return currentState && currentState.layers.find(layer => layer.layerId === layerId);
+}
+
+function collectColumnMetaData(
+  xValue: TableSuggestionColumn,
+  yValues: TableSuggestionColumn[],
+  splitBy: TableSuggestionColumn | undefined
+) {
+  const metadata: Record<string, OperationMetadata> = {};
+  [xValue, ...yValues, splitBy].forEach(col => {
+    if (col) {
+      metadata[col.columnId] = col.operation;
+    }
+  });
+  return metadata;
 }

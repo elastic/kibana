@@ -6,7 +6,7 @@
 
 import { getSuggestions } from './xy_suggestions';
 import { TableSuggestionColumn, VisualizationSuggestion, DataType } from '../types';
-import { State } from './types';
+import { State, XYState } from './types';
 import { generateId } from '../id_generator';
 import { Ast } from '@kbn/interpreter/target/common';
 
@@ -20,6 +20,7 @@ describe('xy_suggestions', () => {
         dataType: 'number',
         label: `Avg ${columnId}`,
         isBucketed: false,
+        scale: 'ratio',
       },
     };
   }
@@ -31,6 +32,7 @@ describe('xy_suggestions', () => {
         dataType: 'string',
         label: `Top 5 ${columnId}`,
         isBucketed: true,
+        scale: 'ordinal',
       },
     };
   }
@@ -42,6 +44,7 @@ describe('xy_suggestions', () => {
         dataType: 'date',
         isBucketed: true,
         label: `${columnId} histogram`,
+        scale: 'interval',
       },
     };
   }
@@ -71,24 +74,28 @@ describe('xy_suggestions', () => {
             isMultiRow: true,
             columns: [dateCol('a')],
             layerId: 'first',
+            changeType: 'unchanged',
           },
           {
             datasourceSuggestionId: 1,
             isMultiRow: true,
             columns: [strCol('foo'), strCol('bar')],
             layerId: 'first',
+            changeType: 'unchanged',
           },
           {
             datasourceSuggestionId: 2,
             isMultiRow: false,
             columns: [strCol('foo'), numCol('bar')],
             layerId: 'first',
+            changeType: 'unchanged',
           },
           {
             datasourceSuggestionId: 3,
             isMultiRow: true,
             columns: [unknownCol(), numCol('bar')],
             layerId: 'first',
+            changeType: 'unchanged',
           },
         ],
       })
@@ -104,6 +111,7 @@ describe('xy_suggestions', () => {
           isMultiRow: true,
           columns: [numCol('bytes'), dateCol('date')],
           layerId: 'first',
+          changeType: 'unchanged',
         },
       ],
     });
@@ -137,6 +145,7 @@ describe('xy_suggestions', () => {
             strCol('city'),
           ],
           layerId: 'first',
+          changeType: 'unchanged',
         },
       ],
     });
@@ -152,6 +161,7 @@ describe('xy_suggestions', () => {
           isMultiRow: true,
           columns: [numCol('price'), numCol('quantity'), dateCol('date'), strCol('product')],
           layerId: 'first',
+          changeType: 'unchanged',
         },
       ],
     });
@@ -172,6 +182,150 @@ describe('xy_suggestions', () => {
             `);
   });
 
+  test('uses datasource provided title if available', () => {
+    const [suggestion, ...rest] = getSuggestions({
+      tables: [
+        {
+          datasourceSuggestionId: 1,
+          isMultiRow: true,
+          columns: [numCol('price'), numCol('quantity'), dateCol('date'), strCol('product')],
+          layerId: 'first',
+          changeType: 'unchanged',
+          label: 'Datasource title',
+        },
+      ],
+    });
+
+    expect(rest).toHaveLength(0);
+    expect(suggestion.title).toEqual('Datasource title');
+  });
+
+  test('hides reduced suggestions if there is a current state', () => {
+    const [suggestion, ...rest] = getSuggestions({
+      tables: [
+        {
+          datasourceSuggestionId: 1,
+          isMultiRow: true,
+          columns: [numCol('price'), numCol('quantity'), dateCol('date'), strCol('product')],
+          layerId: 'first',
+          changeType: 'reduced',
+        },
+      ],
+      state: {
+        isHorizontal: false,
+        legend: { isVisible: true, position: 'bottom' },
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            accessors: ['price', 'quantity'],
+            layerId: 'first',
+            seriesType: 'bar',
+            splitAccessor: 'product',
+            xAccessor: 'date',
+            title: '',
+          },
+        ],
+      },
+    });
+
+    expect(rest).toHaveLength(0);
+    expect(suggestion.hide).toBeTruthy();
+  });
+
+  test('does not hide reduced suggestions if xy visualization is not active', () => {
+    const [suggestion, ...rest] = getSuggestions({
+      tables: [
+        {
+          datasourceSuggestionId: 1,
+          isMultiRow: true,
+          columns: [numCol('price'), numCol('quantity'), dateCol('date'), strCol('product')],
+          layerId: 'first',
+          changeType: 'reduced',
+        },
+      ],
+    });
+
+    expect(rest).toHaveLength(0);
+    expect(suggestion.hide).toBeFalsy();
+  });
+
+  test('suggests an area chart for unchanged table and existing bar chart on non-ordinal x axis', () => {
+    const currentState: XYState = {
+      isHorizontal: false,
+      legend: { isVisible: true, position: 'bottom' },
+      preferredSeriesType: 'bar',
+      layers: [
+        {
+          accessors: ['price', 'quantity'],
+          layerId: 'first',
+          seriesType: 'bar',
+          splitAccessor: 'product',
+          xAccessor: 'date',
+          title: '',
+        },
+      ],
+    };
+    const [suggestion, ...rest] = getSuggestions({
+      tables: [
+        {
+          datasourceSuggestionId: 1,
+          isMultiRow: true,
+          columns: [numCol('price'), numCol('quantity'), dateCol('date'), strCol('product')],
+          layerId: 'first',
+          changeType: 'unchanged',
+        },
+      ],
+      state: currentState,
+    });
+
+    expect(rest).toHaveLength(0);
+    expect(suggestion.state).toEqual({
+      ...currentState,
+      preferredSeriesType: 'area',
+      layers: [{ ...currentState.layers[0], seriesType: 'area' }],
+    });
+    expect(suggestion.previewIcon).toEqual('visArea');
+    expect(suggestion.title).toEqual('Area chart');
+  });
+
+  test('suggests a flipped chart for unchanged table and existing bar chart on ordinal x axis', () => {
+    (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
+    const currentState: XYState = {
+      isHorizontal: false,
+      legend: { isVisible: true, position: 'bottom' },
+      preferredSeriesType: 'bar',
+      layers: [
+        {
+          accessors: ['price', 'quantity'],
+          layerId: 'first',
+          seriesType: 'bar',
+          splitAccessor: 'dummyCol',
+          xAccessor: 'product',
+          title: '',
+        },
+      ],
+    };
+    const [suggestion, ...rest] = getSuggestions({
+      tables: [
+        {
+          datasourceSuggestionId: 1,
+          isMultiRow: true,
+          columns: [numCol('price'), numCol('quantity'), strCol('product')],
+          layerId: 'first',
+          changeType: 'unchanged',
+        },
+      ],
+      state: currentState,
+    });
+
+    expect(rest).toHaveLength(0);
+    expect(suggestion.state).toEqual({
+      ...currentState,
+      isHorizontal: true,
+    });
+    expect(suggestion.title).toEqual('Flip');
+  });
+
   test('supports multiple suggestions', () => {
     (generateId as jest.Mock).mockReturnValueOnce('bbb').mockReturnValueOnce('ccc');
     const [s1, s2, ...rest] = getSuggestions({
@@ -181,12 +335,14 @@ describe('xy_suggestions', () => {
           isMultiRow: true,
           columns: [numCol('price'), dateCol('date')],
           layerId: 'first',
+          changeType: 'unchanged',
         },
         {
           datasourceSuggestionId: 1,
           isMultiRow: true,
           columns: [numCol('count'), strCol('country')],
           layerId: 'first',
+          changeType: 'unchanged',
         },
       ],
     });
@@ -227,6 +383,7 @@ describe('xy_suggestions', () => {
           isMultiRow: true,
           columns: [numCol('quantity'), numCol('price')],
           layerId: 'first',
+          changeType: 'unchanged',
         },
       ],
     });
@@ -264,6 +421,7 @@ describe('xy_suggestions', () => {
             },
           ],
           layerId: 'first',
+          changeType: 'unchanged',
         },
       ],
     });
@@ -290,6 +448,7 @@ describe('xy_suggestions', () => {
           isMultiRow: true,
           columns: [numCol('bytes'), dateCol('date')],
           layerId: 'first',
+          changeType: 'unchanged',
         },
       ],
     });

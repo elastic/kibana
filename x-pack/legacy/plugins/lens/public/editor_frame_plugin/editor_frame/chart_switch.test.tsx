@@ -94,6 +94,7 @@ describe('chart_switch', () => {
           datasourceSuggestionId: 0,
           isMultiRow: true,
           layerId: 'a',
+          changeType: 'unchanged',
         },
       },
     ]);
@@ -219,6 +220,7 @@ describe('chart_switch', () => {
           datasourceSuggestionId: 0,
           layerId: 'first',
           isMultiRow: true,
+          changeType: 'unchanged',
         },
       },
     ]);
@@ -447,6 +449,7 @@ describe('chart_switch', () => {
           datasourceSuggestionId: 0,
           layerId: 'a',
           isMultiRow: true,
+          changeType: 'unchanged',
         },
       },
     ]);

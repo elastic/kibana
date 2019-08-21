@@ -32,6 +32,7 @@ function generateSuggestion(datasourceSuggestionId = 1, state = {}): DatasourceS
       datasourceSuggestionId,
       isMultiRow: true,
       layerId: 'first',
+      changeType: 'unchanged',
     },
   };
 }
@@ -907,6 +908,7 @@ describe('editor_frame', () => {
             datasourceSuggestionId: 0,
             isMultiRow: true,
             layerId: 'first',
+            changeType: 'unchanged',
           },
         },
       ]);
@@ -1068,7 +1070,7 @@ describe('editor_frame', () => {
       expect(mockVisualization2.getSuggestions).toHaveBeenCalled();
     });
 
-    it('should display top 3 suggestions in descending order', async () => {
+    it('should display top 5 suggestions in descending order', async () => {
       const instance = mount(
         <EditorFrame
           {...getDefaultProps()}
@@ -1078,7 +1080,21 @@ describe('editor_frame', () => {
               getSuggestions: () => [
                 {
                   datasourceSuggestionId: 0,
+                  score: 0.1,
+                  state: {},
+                  title: 'Suggestion6',
+                  previewIcon: 'empty',
+                },
+                {
+                  datasourceSuggestionId: 0,
                   score: 0.5,
+                  state: {},
+                  title: 'Suggestion3',
+                  previewIcon: 'empty',
+                },
+                {
+                  datasourceSuggestionId: 0,
+                  score: 0.7,
                   state: {},
                   title: 'Suggestion2',
                   previewIcon: 'empty',
@@ -1099,14 +1115,14 @@ describe('editor_frame', () => {
                   datasourceSuggestionId: 0,
                   score: 0.4,
                   state: {},
-                  title: 'Suggestion4',
+                  title: 'Suggestion5',
                   previewIcon: 'empty',
                 },
                 {
                   datasourceSuggestionId: 0,
                   score: 0.45,
                   state: {},
-                  title: 'Suggestion3',
+                  title: 'Suggestion4',
                   previewIcon: 'empty',
                 },
               ],
@@ -1133,7 +1149,7 @@ describe('editor_frame', () => {
           .find('[data-test-subj="lnsSuggestion"]')
           .find(EuiPanel)
           .map(el => el.parents(EuiToolTip).prop('content'))
-      ).toEqual(['Suggestion1', 'Suggestion2', 'Suggestion3']);
+      ).toEqual(['Suggestion1', 'Suggestion2', 'Suggestion3', 'Suggestion4', 'Suggestion5']);
     });
 
     it('should switch to suggested visualization', async () => {

@@ -7,7 +7,7 @@
 import React from 'react';
 
 import { ExpressionRendererProps } from '../../../../../../../src/legacy/core_plugins/data/public';
-import { Visualization, FramePublicAPI } from '../../types';
+import { Visualization, FramePublicAPI, TableSuggestion } from '../../types';
 import {
   createMockVisualization,
   createMockDatasource,
@@ -548,11 +548,12 @@ describe('workspace_panel', () => {
     }
 
     it('should immediately transition if exactly one suggestion is returned', () => {
-      const expectedTable = {
+      const expectedTable: TableSuggestion = {
         datasourceSuggestionId: 0,
         isMultiRow: true,
         layerId: '1',
         columns: [],
+        changeType: 'unchanged',
       };
       mockDatasource.getDatasourceSuggestionsForField.mockReturnValueOnce([
         {
@@ -597,6 +598,7 @@ describe('workspace_panel', () => {
             isMultiRow: true,
             layerId: '1',
             columns: [],
+            changeType: 'unchanged',
           },
         },
       ]);
@@ -624,6 +626,7 @@ describe('workspace_panel', () => {
             isMultiRow: true,
             layerId: '1',
             columns: [],
+            changeType: 'unchanged',
           },
         },
       ]);
@@ -651,6 +654,7 @@ describe('workspace_panel', () => {
             isMultiRow: true,
             layerId: '1',
             columns: [],
+            changeType: 'unchanged',
           },
         },
       ]);
@@ -681,6 +685,7 @@ describe('workspace_panel', () => {
             isMultiRow: true,
             columns: [],
             layerId: '1',
+            changeType: 'unchanged',
           },
         },
         {
@@ -690,6 +695,7 @@ describe('workspace_panel', () => {
             isMultiRow: true,
             columns: [],
             layerId: '1',
+            changeType: 'unchanged',
           },
         },
       ]);

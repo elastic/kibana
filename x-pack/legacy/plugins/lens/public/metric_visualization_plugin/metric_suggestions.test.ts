@@ -51,25 +51,40 @@ describe('metric_suggestions', () => {
     expect(
       getSuggestions({
         tables: [
-          { columns: [dateCol('a')], datasourceSuggestionId: 0, isMultiRow: true, layerId: 'l1' },
+          {
+            columns: [dateCol('a')],
+            datasourceSuggestionId: 0,
+            isMultiRow: true,
+            layerId: 'l1',
+            changeType: 'unchanged',
+          },
           {
             columns: [strCol('foo'), strCol('bar')],
             datasourceSuggestionId: 1,
             isMultiRow: true,
             layerId: 'l1',
+            changeType: 'unchanged',
           },
-          { layerId: 'l1', datasourceSuggestionId: 2, isMultiRow: true, columns: [numCol('bar')] },
+          {
+            layerId: 'l1',
+            datasourceSuggestionId: 2,
+            isMultiRow: true,
+            columns: [numCol('bar')],
+            changeType: 'unchanged',
+          },
           {
             columns: [unknownCol(), numCol('bar')],
             datasourceSuggestionId: 3,
             isMultiRow: true,
             layerId: 'l1',
+            changeType: 'unchanged',
           },
           {
             columns: [numCol('bar'), numCol('baz')],
             datasourceSuggestionId: 4,
             isMultiRow: false,
             layerId: 'l1',
+            changeType: 'unchanged',
           },
         ],
       })
@@ -84,6 +99,7 @@ describe('metric_suggestions', () => {
           datasourceSuggestionId: 0,
           isMultiRow: false,
           layerId: 'l1',
+          changeType: 'unchanged',
         },
       ],
     });
@@ -110,7 +126,7 @@ describe('metric_suggestions', () => {
           "type": "expression",
         },
         "previewIcon": "visMetric",
-        "score": 1,
+        "score": 0.5,
         "state": Object {
           "accessor": "bytes",
           "layerId": "l1",

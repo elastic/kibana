@@ -210,7 +210,7 @@ describe('getOperationTypesForField', () => {
         suggestedPriority: 0,
         field,
       }) as MinIndexPatternColumn;
-      expect(column.operationType).toEqual('min');
+      expect(column.operationType).toEqual('avg');
       expect(column.sourceField).toEqual(field.name);
     });
 

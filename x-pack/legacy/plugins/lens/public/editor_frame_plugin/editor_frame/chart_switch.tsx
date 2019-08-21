@@ -112,6 +112,10 @@ export function ChartSwitch(props: Props) {
       visualizationMap: { [visualizationId]: newVisualization },
       activeVisualizationId: props.visualizationId,
       visualizationState: props.visualizationState,
+    }).filter(suggestion => {
+      // don't use extended versions of current data table on switching between visualizations
+      // to avoid confusing the user.
+      return suggestion.changeType !== 'extended';
     })[0];
 
     let dataLoss: VisualizationSelection['dataLoss'];

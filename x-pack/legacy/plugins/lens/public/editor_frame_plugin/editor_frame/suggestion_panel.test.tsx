@@ -157,6 +157,23 @@ describe('suggestion_panel', () => {
       Object {
         "chain": Array [
           Object {
+            "arguments": Object {},
+            "function": "kibana",
+            "type": "function",
+          },
+          Object {
+            "arguments": Object {
+              "query": Array [
+                "{\\"query\\":\\"\\",\\"language\\":\\"lucene\\"}",
+              ],
+              "timeRange": Array [
+                "{\\"from\\":\\"now-7d\\",\\"to\\":\\"now\\"}",
+              ],
+            },
+            "function": "kibana_context",
+            "type": "function",
+          },
+          Object {
             "arguments": Object {
               "layerIds": Array [
                 "first",

@@ -10,6 +10,7 @@ import { OperationDefinition } from '../operations';
 
 export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
   type: 'count',
+  priority: 2,
   displayName: i18n.translate('xpack.lens.indexPattern.count', {
     defaultMessage: 'Count',
   }),
