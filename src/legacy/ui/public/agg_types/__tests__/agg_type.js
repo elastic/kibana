@@ -99,7 +99,7 @@ describe('AggType Class', function () {
               }
             ]
           });
-          let aggConfig = vis.aggs.getByName('date_histogram')[0];
+          let aggConfig = vis.aggs.byName('date_histogram')[0];
 
           expect(aggType.getFormat(aggConfig)).to.be(fieldFormats.getDefaultInstance('date'));
 
@@ -111,7 +111,7 @@ describe('AggType Class', function () {
               }
             ]
           });
-          aggConfig = vis.aggs.getByName('count')[0];
+          aggConfig = vis.aggs.byName('count')[0];
 
           expect(aggType.getFormat(aggConfig)).to.be(fieldFormats.getDefaultInstance('string'));
         });

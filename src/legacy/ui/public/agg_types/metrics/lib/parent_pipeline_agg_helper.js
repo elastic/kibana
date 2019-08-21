@@ -77,7 +77,7 @@ const parentPipelineAggHelper = {
     if (agg.params.customMetric) {
       subAgg = agg.params.customMetric;
     } else {
-      subAgg = agg.aggConfigs.getById(agg.params.metricAgg);
+      subAgg = agg.aggConfigs.byId(agg.params.metricAgg);
     }
     return subAgg.type.getFormat(subAgg);
   }

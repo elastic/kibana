@@ -31,7 +31,7 @@ export type AggParam = BaseParamType;
 export interface AggParamOption {
   val: string;
   display: string;
-  enabled?(agg: AggConfig): void;
+  enabled?(agg: AggConfig): boolean;
 }
 
 const paramTypeMap = {

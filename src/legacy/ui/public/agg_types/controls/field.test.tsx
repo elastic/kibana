@@ -62,13 +62,13 @@ describe('FieldParamEditor component', () => {
     ];
 
     defaultProps = {
-      agg: {},
+      agg: {} as AggConfig,
       aggParam: {
         name: 'field',
         type: 'field',
         editorComponent: () => null,
         onChange,
-      },
+      } as any,
       value: undefined,
       editorConfig: {},
       indexedFields,

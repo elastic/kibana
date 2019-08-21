@@ -49,7 +49,7 @@ describe('AggConfig', function () {
         ]
       });
 
-      const aggConfig = vis.aggs.getByName('date_histogram')[0];
+      const aggConfig = vis.aggs.byName('date_histogram')[0];
       const stub = sinon.stub(aggConfig, 'write').returns({ params: {} });
 
       aggConfig.toDsl();
@@ -67,7 +67,7 @@ describe('AggConfig', function () {
         ]
       });
 
-      const aggConfig = vis.aggs.getByName('date_histogram')[0];
+      const aggConfig = vis.aggs.byName('date_histogram')[0];
       sinon.stub(aggConfig, 'write').returns({ params: {} });
 
       const dsl = aggConfig.toDsl();
@@ -85,7 +85,7 @@ describe('AggConfig', function () {
         ]
       });
 
-      const aggConfig = vis.aggs.getByName('date_histogram')[0];
+      const aggConfig = vis.aggs.byName('date_histogram')[0];
       const football = {};
 
       sinon.stub(aggConfig, 'write').returns({ params: football });
@@ -109,8 +109,8 @@ describe('AggConfig', function () {
         ]
       });
 
-      const histoConfig = vis.aggs.getByName('date_histogram')[0];
-      const avgConfig = vis.aggs.getByName('avg')[0];
+      const histoConfig = vis.aggs.byName('date_histogram')[0];
+      const avgConfig = vis.aggs.byName('avg')[0];
       const football = {};
 
       sinon.stub(histoConfig, 'write').returns({ params: {}, subAggs: [avgConfig] });
@@ -355,7 +355,7 @@ describe('AggConfig', function () {
         ]
       });
 
-      const aggConfig = vis.aggs.getByName('date_histogram')[0];
+      const aggConfig = vis.aggs.byName('date_histogram')[0];
       expect(aggConfig.id).to.be('1');
       expect(aggConfig.params).to.be.an('object');
       expect(aggConfig.type).to.be.an(AggType).and.have.property('name', 'date_histogram');

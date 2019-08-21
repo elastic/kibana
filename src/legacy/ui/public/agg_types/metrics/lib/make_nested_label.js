@@ -35,7 +35,7 @@ const makeNestedLabel = function (aggConfig, label) {
     }
     return metricLabel;
   }
-  const metric = aggConfig.aggConfigs.getById(aggConfig.params.metricAgg);
+  const metric = aggConfig.aggConfigs.byId(aggConfig.params.metricAgg);
   if (!metric) return '';
   return `${uppercaseLabel} of ${metric.makeLabel()}`;
 };

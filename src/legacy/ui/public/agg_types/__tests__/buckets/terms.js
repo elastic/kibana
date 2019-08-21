@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { aggTypes } from '../..';
 
-describe.skip('Terms Agg', function () {
+describe('Terms Agg', function () {
   describe('order agg editor UI', function () {
 
     let $rootScope;

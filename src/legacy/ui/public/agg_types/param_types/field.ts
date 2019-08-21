@@ -23,7 +23,6 @@ import { AggConfig } from '../../vis';
 // @ts-ignore
 import { SavedObjectNotFound } from '../../errors';
 import { FieldParamEditor } from '../controls/field';
-// @ts-ignore
 import { BaseParamType } from './base';
 import { toastNotifications } from '../../notify';
 import { propFilter } from '../filter';
@@ -78,7 +77,6 @@ export class FieldParamType extends BaseParamType {
     };
 
     this.deserialize = (fieldName: string, aggConfig: AggConfig) => {
-      // @ts-ignore
       const field = aggConfig.getIndexPattern().fields.byName[fieldName];
 
       if (!field) {

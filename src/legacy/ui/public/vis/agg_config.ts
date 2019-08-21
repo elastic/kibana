@@ -50,14 +50,14 @@ export class AggConfig {
    * @return {array} - the list that was passed in
    */
   static ensureIds(list: AggConfig[]) {
-    const have = [] as any;
-    const haveNot = [] as any;
+    const have: AggConfig[] = [];
+    const haveNot: AggConfig[] = [];
     list.forEach(function(obj) {
       (obj.id ? have : haveNot).push(obj);
     });
 
     let nextId = AggConfig.nextId(have);
-    haveNot.forEach(function(obj: any) {
+    haveNot.forEach(function(obj) {
       obj.id = String(nextId++);
     });
 

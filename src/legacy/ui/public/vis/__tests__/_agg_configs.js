@@ -277,8 +277,8 @@ describe('AggConfigs', function () {
       });
 
       const dsl = vis.aggs.toDsl();
-      const histo = vis.aggs.getByName('date_histogram')[0];
-      const count = vis.aggs.getByName('count')[0];
+      const histo = vis.aggs.byName('date_histogram')[0];
+      const count = vis.aggs.byName('count')[0];
 
       expect(dsl).to.have.property(histo.id);
       expect(dsl[histo.id]).to.be.an('object');
@@ -300,7 +300,7 @@ describe('AggConfigs', function () {
 
       const dsl = vis.aggs.toDsl();
 
-      const histo = vis.aggs.getByName('date_histogram')[0];
+      const histo = vis.aggs.byName('date_histogram')[0];
       const metrics = vis.aggs.bySchemaGroup('metrics');
 
       expect(dsl).to.have.property(histo.id);

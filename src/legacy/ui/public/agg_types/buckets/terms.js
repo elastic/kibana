@@ -168,7 +168,7 @@ export const termsBucketAgg = new BucketAggType({
 
         const orderAggId = orderAgg.id;
         if (orderAgg.parentId) {
-          orderAgg = aggs.getById(orderAgg.parentId);
+          orderAgg = aggs.byId(orderAgg.parentId);
         }
 
         output.subAggs = (output.subAggs || []).concat(orderAgg);

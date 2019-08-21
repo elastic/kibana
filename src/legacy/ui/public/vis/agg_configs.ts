@@ -223,15 +223,15 @@ export class AggConfigs {
     return [...this.aggs];
   }
 
-  getByIndex(index: number) {
+  byIndex(index: number) {
     return this.aggs[index];
   }
 
-  getById(id: string) {
+  byId(id: string) {
     return this.aggs.find(agg => agg.id === id);
   }
 
-  getByName(name: string) {
+  byName(name: string) {
     return this.aggs.filter(agg => agg.type.name === name);
   }
 
