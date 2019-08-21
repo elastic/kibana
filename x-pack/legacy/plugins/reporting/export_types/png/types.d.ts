@@ -6,8 +6,9 @@
 
 import { Request } from 'hapi';
 import { LayoutInstance } from '../common/layouts/layout';
-import { ConditionalHeaders, KbnServer } from '../../types';
+import { ConditionalHeaders, KbnServer, JobDocPayload } from '../../types';
 
+// NOTE: this does not extend the main Params
 export interface JobParamsPNG {
   objectType: string;
   title: string;
@@ -22,4 +23,7 @@ export type ESQueueCreateJobFnPNG = (
   request: Request
 ) => Promise<JobParamsPNG>;
 
-export type CreateJobFactoryPNG = (server: KbnServer) => ESQueueCreateJobFnPNG;
+export interface JobDocPayloadPNG extends JobDocPayload {
+  browserTimezone: string;
+  layout: any;
+}
