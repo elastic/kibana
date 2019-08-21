@@ -41,7 +41,7 @@ describe('NetworkTopNFlow Table Component', () => {
             data={mockData.NetworkTopNFlow.edges}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopNFlow.pageInfo)}
             flowTargeted={FlowTargetNew.source}
-            id="topNFlow"
+            id="topNFlowSource"
             indexPattern={mockIndexPattern}
             loading={false}
             loadPage={loadPage}
@@ -73,7 +73,7 @@ describe('NetworkTopNFlow Table Component', () => {
               data={mockData.NetworkTopNFlow.edges}
               fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopNFlow.pageInfo)}
               flowTargeted={FlowTargetNew.source}
-              id="topNFlow"
+              id="topNFlowSource"
               indexPattern={mockIndexPattern}
               loading={false}
               loadPage={loadPage}
@@ -115,7 +115,7 @@ describe('NetworkTopNFlow Table Component', () => {
               data={mockData.NetworkTopNFlow.edges}
               fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopNFlow.pageInfo)}
               flowTargeted={FlowTargetNew.source}
-              id="topNFlow"
+              id="topNFlowSource"
               indexPattern={mockIndexPattern}
               loading={false}
               loadPage={loadPage}
@@ -159,7 +159,7 @@ describe('NetworkTopNFlow Table Component', () => {
               data={mockData.NetworkTopNFlow.edges}
               fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopNFlow.pageInfo)}
               flowTargeted={FlowTargetNew.source}
-              id="topNFlow"
+              id="topNFlowSource"
               indexPattern={mockIndexPattern}
               loading={false}
               loadPage={loadPage}
@@ -174,7 +174,7 @@ describe('NetworkTopNFlow Table Component', () => {
           </TestProviders>
         </MockedProvider>
       );
-      expect(store.getState().network.page.queries!.topNFlow.topNFlowSort).toEqual({
+      expect(store.getState().network.page.queries!.topNFlowSource.topNFlowSort).toEqual({
         direction: 'desc',
         field: 'bytes_in',
       });
@@ -186,7 +186,7 @@ describe('NetworkTopNFlow Table Component', () => {
 
       wrapper.update();
 
-      expect(store.getState().network.page.queries!.topNFlow.topNFlowSort).toEqual({
+      expect(store.getState().network.page.queries!.topNFlowSource.topNFlowSort).toEqual({
         direction: 'asc',
         field: 'bytes_out',
       });

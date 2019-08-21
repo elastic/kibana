@@ -44,7 +44,15 @@ export type NetworkState = NetworkModel;
 export const initialNetworkState: NetworkState = {
   page: {
     queries: {
-      [NetworkTableType.topNFlow]: {
+      [NetworkTableType.topNFlowSource]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        topNFlowSort: {
+          field: NetworkTopNFlowFields.bytes_out,
+          direction: Direction.desc,
+        },
+      },
+      [NetworkTableType.topNFlowDestination]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         topNFlowSort: {
@@ -165,27 +173,27 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       },
     },
   }))
-  .case(updateTopNFlowLimit, (state, { limit, networkType }) => ({
+  .case(updateTopNFlowLimit, (state, { limit, networkType, tableType }) => ({
     ...state,
     [networkType]: {
       ...state[networkType],
       queries: {
         ...state[networkType].queries,
-        [NetworkTableType.topNFlow]: {
-          ...state[NetworkType.page].queries.topNFlow,
+        [tableType]: {
+          ...state[NetworkType.page].queries[tableType],
           limit,
         },
       },
     },
   }))
-  .case(updateTopNFlowSort, (state, { topNFlowSort, networkType }) => ({
+  .case(updateTopNFlowSort, (state, { topNFlowSort, networkType, tableType }) => ({
     ...state,
     [networkType]: {
       ...state[networkType],
       queries: {
         ...state[networkType].queries,
-        [NetworkTableType.topNFlow]: {
-          ...state[NetworkType.page].queries.topNFlow,
+        [tableType]: {
+          ...state[NetworkType.page].queries[tableType],
           topNFlowSort,
         },
       },

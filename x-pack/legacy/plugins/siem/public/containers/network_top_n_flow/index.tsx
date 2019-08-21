@@ -132,17 +132,14 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
   }
 }
 
-const makeMapStateToProps = () => {
-  const getNetworkTopNFlowSelector = networkSelectors.topNFlowSelector();
+const mapStateToProps = (state: State, { flowTarget, id = ID }: OwnProps) => {
+  const getNetworkTopNFlowSelector = networkSelectors.topNFlowSelector(flowTarget);
   const getQuery = inputsSelectors.globalQueryByIdSelector();
-  const mapStateToProps = (state: State, { id = ID }: OwnProps) => {
-    const { isInspected } = getQuery(state, id);
-    return {
-      ...getNetworkTopNFlowSelector(state),
-      isInspected,
-    };
+  const { isInspected } = getQuery(state, id);
+  return {
+    ...getNetworkTopNFlowSelector(state),
+    isInspected,
   };
-  return mapStateToProps;
 };
 
-export const NetworkTopNFlowQuery = connect(makeMapStateToProps)(NetworkTopNFlowComponentQuery);
+export const NetworkTopNFlowQuery = connect(mapStateToProps)(NetworkTopNFlowComponentQuery);

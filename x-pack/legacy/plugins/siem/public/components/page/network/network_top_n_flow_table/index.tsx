@@ -24,8 +24,6 @@ import { Criteria, ItemsPerRow, PaginatedTable } from '../../../paginated_table'
 import { getNetworkTopNFlowColumns } from './columns';
 import * as i18n from './translations';
 
-const tableType = networkModel.NetworkTableType.topNFlow;
-
 interface OwnProps {
   data: NetworkTopNFlowEdges[];
   fakeTotalCount: number;
@@ -52,10 +50,12 @@ interface NetworkTopNFlowTableDispatchProps {
   updateTopNFlowLimit: ActionCreator<{
     limit: number;
     networkType: networkModel.NetworkType;
+    tableType: networkModel.TopNTableType;
   }>;
   updateTopNFlowSort: ActionCreator<{
     topNFlowSort: NetworkTopNFlowSortField;
     networkType: networkModel.NetworkType;
+    tableType: networkModel.TopNTableType;
   }>;
 }
 
@@ -95,6 +95,17 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
       updateTableActivePage,
     } = this.props;
 
+    let tableType: networkModel.TopNTableType;
+    let headerTitle: string;
+
+    if (flowTargeted === FlowTargetNew.source) {
+      headerTitle = i18n.SOURCE_IP;
+      tableType = networkModel.NetworkTableType.topNFlowSource;
+    } else {
+      headerTitle = i18n.DESTINATION_IP;
+      tableType = networkModel.NetworkTableType.topNFlowDestination;
+    }
+
     const field =
       topNFlowSort.field === NetworkTopNFlowFields.bytes_out ||
       topNFlowSort.field === NetworkTopNFlowFields.bytes_in
@@ -110,14 +121,14 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
           NetworkTopNFlowTableId
         )}
         headerCount={totalCount}
-        headerTitle={flowTargeted === FlowTargetNew.source ? i18n.SOURCE_IP : i18n.DESTINATION_IP}
+        headerTitle={headerTitle}
         headerUnit={i18n.UNIT(totalCount)}
         id={id}
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}
         loadPage={newActivePage => loadPage(newActivePage)}
-        onChange={this.onChange}
+        onChange={criteria => this.onChange(criteria, tableType)}
         pageOfItems={data}
         showMorePagesIndicator={showMorePagesIndicator}
         sorting={{ field, direction: topNFlowSort.direction }}
@@ -129,14 +140,14 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
           })
         }
         updateLimitPagination={newLimit =>
-          updateTopNFlowLimit({ limit: newLimit, networkType: type })
+          updateTopNFlowLimit({ limit: newLimit, networkType: type, tableType })
         }
         updateProps={{ totalCount, topNFlowSort, field }}
       />
     );
   }
 
-  private onChange = (criteria: Criteria) => {
+  private onChange = (criteria: Criteria, tableType: networkModel.TopNTableType) => {
     if (criteria.sort != null) {
       const splitField = criteria.sort.field.split('.');
       const field = last(splitField);
@@ -148,20 +159,18 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
         this.props.updateTopNFlowSort({
           topNFlowSort: newTopNFlowSort,
           networkType: this.props.type,
+          tableType,
         });
       }
     }
   };
 }
 
-const makeMapStateToProps = () => {
-  const getNetworkTopNFlowSelector = networkSelectors.topNFlowSelector();
-  const mapStateToProps = (state: State) => getNetworkTopNFlowSelector(state);
-  return mapStateToProps;
-};
+const mapStateToProps = (state: State, ownProps: OwnProps) =>
+  networkSelectors.topNFlowSelector(ownProps.flowTargeted);
 
 export const NetworkTopNFlowTable = connect(
-  makeMapStateToProps,
+  mapStateToProps,
   {
     updateTopNFlowLimit: networkActions.updateTopNFlowLimit,
     updateTopNFlowSort: networkActions.updateTopNFlowSort,

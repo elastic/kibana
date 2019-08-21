@@ -15,7 +15,7 @@ import {
   TlsSortField,
   UsersSortField,
 } from '../../graphql/types';
-import { KueryFilterQuery, SerializedFilterQuery } from '../model';
+import { KueryFilterQuery, networkModel, SerializedFilterQuery } from '../model';
 
 import { IpDetailsTableType, NetworkTableType, NetworkType } from './model';
 
@@ -49,11 +49,13 @@ export const updateIsPtrIncluded = actionCreator<{
 export const updateTopNFlowLimit = actionCreator<{
   limit: number;
   networkType: NetworkType;
+  tableType: networkModel.TopNTableType;
 }>('UPDATE_TOP_N_FLOW_LIMIT');
 
 export const updateTopNFlowSort = actionCreator<{
   topNFlowSort: NetworkTopNFlowSortField;
   networkType: NetworkType;
+  tableType: networkModel.NetworkTableType;
 }>('UPDATE_TOP_N_FLOW_SORT');
 
 // export const updateTopNFlowTarget = actionCreator<{
