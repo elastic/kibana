@@ -56,10 +56,13 @@ export const dataFrame = {
       data: obj
     });
   },
-  startDataFrameTransform(transformId, force = false) {
+  startDataFrameTransforms(transformsInfo) {
     return http({
-      url: `${basePath}/_data_frame/transforms/${transformId}/_start?force=${force}`,
+      url: `${basePath}/_data_frame/transforms/start_transforms`,
       method: 'POST',
+      data: {
+        transformsInfo,
+      }
     });
   },
   stopDataFrameTransform(transformId, force = false, waitForCompletion = false) {

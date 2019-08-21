@@ -20,6 +20,10 @@ export function transformServiceProvider(callWithRequest: callWithRequestType) {
     return callWithRequest('ml.stopDataFrameTransform', options);
   }
 
+  async function startTransform(options: { transformId: string; force: boolean }) {
+    return callWithRequest('ml.startDataFrameTransform', options);
+  }
+
   async function deleteTransforms(transformsInfo: Array<{ id: string; state: string }>) {
     const results = [];
 
@@ -38,11 +42,31 @@ export function transformServiceProvider(callWithRequest: callWithRequestType) {
       } catch (e) {
         results.push({ id: transformInfo.id, success: false, error: JSON.stringify(e) });
       }
-      return results;
     }
+    return results;
+  }
+
+  async function startTransforms(transformsInfo: Array<{ id: string; state: string }>) {
+    const results = [];
+    for (const transformInfo of transformsInfo) {
+      try {
+        await startTransform({
+          transformId: transformInfo.id,
+          force:
+            transformInfo.state !== undefined
+              ? transformInfo.state === DATA_FRAME_TRANSFORM_STATE.FAILED
+              : false,
+        });
+        results.push({ id: transformInfo.id, success: true });
+      } catch (e) {
+        results.push({ id: transformInfo.id, success: false, error: JSON.stringify(e) });
+      }
+    }
+    return results;
   }
 
   return {
     deleteTransforms,
+    startTransforms,
   };
 }

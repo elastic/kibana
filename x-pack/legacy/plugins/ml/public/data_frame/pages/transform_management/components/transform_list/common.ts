@@ -107,7 +107,7 @@ export interface DataFrameTransformListRow {
 
 export interface DataFrameTransformEndpointData {
   id: DataFrameTransformId;
-  state: DATA_FRAME_TRANSFORM_STATE;
+  state?: DATA_FRAME_TRANSFORM_STATE;
 }
 
 export interface DataFrameTransformEndpointResultData {

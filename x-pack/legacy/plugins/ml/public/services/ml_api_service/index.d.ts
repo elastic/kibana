@@ -8,6 +8,7 @@ import { Annotation } from '../../../common/types/annotations';
 import { DslName, AggFieldNamePair } from '../../../common/types/fields';
 import { ExistingJobsAndGroups } from '../job_service';
 import { PrivilegesResponse } from '../../../common/types/privileges';
+import { DataFrameTransformEndpointData } from '../../data_frame/pages/transform_management/components/transform_list/common';
 
 // TODO This is not a complete representation of all methods of `ml.*`.
 // It just satisfies needs for other parts of the code area which use
@@ -47,9 +48,12 @@ declare interface Ml {
     getDataFrameTransforms(jobId?: string): Promise<any>;
     getDataFrameTransformsStats(jobId?: string): Promise<any>;
     createDataFrameTransform(jobId: string, jobConfig: any): Promise<any>;
-    deleteDataFrameTransforms(jobIds: string[]): Promise<any>;
+    deleteDataFrameTransforms(jobsData: DataFrameTransformEndpointData[]): Promise<any>;
     getDataFrameTransformsPreview(payload: any): Promise<any>;
-    startDataFrameTransform(jobId: string, force?: boolean): Promise<any>;
+    startDataFrameTransforms(
+      jobsData: DataFrameTransformEndpointData[],
+      force?: boolean
+    ): Promise<any>;
     stopDataFrameTransform(
       jobId: string,
       force?: boolean,

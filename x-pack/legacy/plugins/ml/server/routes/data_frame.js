@@ -109,18 +109,12 @@ export function dataFrameRoutes({ commonRouteConfig, elasticsearchPlugin, route 
 
   route({
     method: 'POST',
-    path: '/api/ml/_data_frame/transforms/{transformId}/_start',
+    path: '/api/ml/_data_frame/transforms/start_transforms',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      const options = {
-        transformId: request.params.transformId
-      };
-
-      if (request.query.force !== undefined) {
-        options.force = request.query.force;
-      }
-
-      return callWithRequest('ml.startDataFrameTransform', options)
+      const { startTransforms } = transformServiceProvider(callWithRequest);
+      const { transformsInfo } = request.payload;
+      return startTransforms(transformsInfo)
         .catch(resp => wrapError(resp));
     },
     config: {
