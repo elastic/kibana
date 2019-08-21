@@ -1,7 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`is rendered 1`] = `
-<div>
+<div
+  class="hideInPercy"
+>
   <p
     aria-live="polite"
     class="euiScreenReaderOnly"

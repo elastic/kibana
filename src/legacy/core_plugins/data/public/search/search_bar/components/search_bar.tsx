@@ -185,7 +185,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   }
 
   public render() {
-    // This is needed, as kbn-top-nav-v2 might render before npSetup.core.uiSettings is set.
+    // This is needed, as kbn-top-nav might render before npSetup.core.uiSettings is set.
     // This won't be needed when it's loaded exclusively with React.
     if (!this.props.uiSettings) {
       return null;
