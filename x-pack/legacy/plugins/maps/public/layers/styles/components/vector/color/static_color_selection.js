@@ -11,7 +11,7 @@ import {
 } from '@elastic/eui';
 import { staticColorShape } from '../style_option_shapes';
 
-export function StaticColorSelection({ onChange, styleOptions }) {
+export function StaticColorSelection({ onChange, styleOptions, swatches }) {
   const onColorChange = color => {
     onChange({ color });
   };
@@ -20,6 +20,7 @@ export function StaticColorSelection({ onChange, styleOptions }) {
     <EuiColorPicker
       onChange={onColorChange}
       color={styleOptions.color}
+      swatches={swatches}
     />
   );
 }

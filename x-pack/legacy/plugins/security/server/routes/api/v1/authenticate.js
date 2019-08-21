@@ -9,7 +9,7 @@ import Joi from 'joi';
 import { schema } from '@kbn/config-schema';
 import { canRedirectRequest, wrapError, OIDCAuthenticationFlow } from '../../../../../../../plugins/security/server';
 import { KibanaRequest } from '../../../../../../../../src/core/server';
-import { createCSPRuleString, generateCSPNonce } from '../../../../../../../../src/legacy/server/csp';
+import { createCSPRuleString } from '../../../../../../../../src/legacy/server/csp';
 
 export function initAuthenticateApi({ authc: { login, logout }, config }, server) {
 
@@ -96,12 +96,11 @@ export function initAuthenticateApi({ authc: { login, logout }, config }, server
       const legacyConfig = server.config();
       const basePath = legacyConfig.get('server.basePath');
 
-      const nonce = await generateCSPNonce();
-      const cspRulesHeader = createCSPRuleString(legacyConfig.get('csp.rules'), nonce);
+      const cspRulesHeader = createCSPRuleString(legacyConfig.get('csp.rules'));
       return h.response(`
         <!DOCTYPE html>
         <title>Kibana OpenID Connect Login</title>
-        <script nonce="${nonce}">
+        <script>
           window.location.replace(
             '${basePath}/api/security/v1/oidc?authenticationResponseURI=' + encodeURIComponent(window.location.href)
           );
