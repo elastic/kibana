@@ -61,12 +61,12 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       expectResponse: expect200,
     },
     {
-      url: `/api/apm/services/foo/agent_name?start=${start}&end=${end}&uiFilters=%7B%7D`,
+      url: `/api/apm/services/foo/agent_name?start=${start}&end=${end}`,
       expectForbidden: expect404,
       expectResponse: expect200,
     },
     {
-      url: `/api/apm/services/foo/transaction_types?start=${start}&end=${end}&uiFilters=%7B%7D`,
+      url: `/api/apm/services/foo/transaction_types?start=${start}&end=${end}`,
       expectForbidden: expect404,
       expectResponse: expect200,
     },
@@ -76,7 +76,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       expectResponse: expect200,
     },
     {
-      url: `/api/apm/traces/foo?start=${start}&end=${end}&uiFilters=%7B%7D`,
+      url: `/api/apm/traces/foo?start=${start}&end=${end}`,
       expectForbidden: expect404,
       expectResponse: expect200,
     },
