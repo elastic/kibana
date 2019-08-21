@@ -67,6 +67,8 @@ export interface DatasourceMetaData {
   filterableIndexPatterns: Array<{ id: string; title: string }>;
 }
 
+export type StateSetter<T> = (newState: T | ((prevState: T) => T)) => void;
+
 /**
  * Interface for the datasource registry
  */
@@ -92,7 +94,7 @@ export interface Datasource<T = unknown, P = unknown> {
   getDatasourceSuggestionsForField: (state: T, field: unknown) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsFromCurrentState: (state: T) => Array<DatasourceSuggestion<T>>;
 
-  getPublicAPI: (state: T, setState: (newState: T) => void, layerId: string) => DatasourcePublicAPI;
+  getPublicAPI: (state: T, setState: StateSetter<T>, layerId: string) => DatasourcePublicAPI;
 }
 
 /**
@@ -122,7 +124,7 @@ export type TableSpec = TableSpecColumn[];
 export interface DatasourceDataPanelProps<T = unknown> {
   state: T;
   dragDropContext: DragContextState;
-  setState: (newState: T) => void;
+  setState: StateSetter<T>;
 }
 
 // The only way a visualization has to restrict the query building
