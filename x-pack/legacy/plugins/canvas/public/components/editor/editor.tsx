@@ -87,9 +87,9 @@ interface Props {
 }
 
 export class Editor extends React.Component<Props, {}> {
-  editor: monacoEditor.editor.IStandaloneCodeEditor | null = null;
+  _editor: monacoEditor.editor.IStandaloneCodeEditor | null = null;
 
-  editorWillMount = (monaco: typeof monacoEditor) => {
+  _editorWillMount = (monaco: typeof monacoEditor) => {
     if (this.props.overrideEditorWillMount) {
       this.props.overrideEditorWillMount(monaco);
       return;
@@ -132,11 +132,11 @@ export class Editor extends React.Component<Props, {}> {
     monaco.editor.defineTheme('euiColors', theme);
   };
 
-  editorDidMount = (
+  _editorDidMount = (
     editor: monacoEditor.editor.IStandaloneCodeEditor,
     monaco: typeof monacoEditor
   ) => {
-    this.editor = editor;
+    this._editor = editor;
 
     if (this.props.editorDidMount) {
       this.props.editorDidMount(editor, monaco);
@@ -153,20 +153,20 @@ export class Editor extends React.Component<Props, {}> {
           language={languageId}
           value={value}
           onChange={onChange}
-          editorWillMount={this.editorWillMount}
-          editorDidMount={this.editorDidMount}
+          editorWillMount={this._editorWillMount}
+          editorDidMount={this._editorDidMount}
           width={width}
           height={height}
           options={options}
         />
-        <ReactResizeDetector handleWidth handleHeight onResize={this.updateDimensions} />
+        <ReactResizeDetector handleWidth handleHeight onResize={this._updateDimensions} />
       </React.Fragment>
     );
   }
 
-  updateDimensions = () => {
-    if (this.editor) {
-      this.editor.layout();
+  _updateDimensions = () => {
+    if (this._editor) {
+      this._editor.layout();
     }
   };
 }
