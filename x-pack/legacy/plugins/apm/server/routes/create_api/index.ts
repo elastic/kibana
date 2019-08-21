@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { merge } from 'lodash';
+import { merge, pick, omit } from 'lodash';
 import Boom from 'boom';
 import { InternalCoreSetup } from 'src/core/server';
 import { Request, ResponseToolkit } from 'hapi';
@@ -16,7 +16,6 @@ import {
   Route,
   Params
 } from '../typings';
-import { debugRt } from '../default_api_types';
 
 export function createApi() {
   const factoryFns: Array<RouteFactoryFn<any, any, any, any>> = [];
@@ -36,6 +35,17 @@ export function createApi() {
           any
         >;
 
+        const rts = {
+          // add _debug query parameter to all routes
+          query: params.query
+            ? t.exact(
+                t.intersection([params.query, t.partial({ _debug: t.boolean })])
+              )
+            : t.union([t.strict({}), t.strict({ _debug: t.boolean })]),
+          path: params.path || t.strict({}),
+          body: params.body || t.null
+        };
+
         server.route(
           merge(
             {
@@ -53,23 +63,16 @@ export function createApi() {
                   query: request.query
                 };
 
-                const parsedParams = (Object.keys(params) as Array<
-                  keyof typeof params
+                const parsedParams = (Object.keys(rts) as Array<
+                  keyof typeof rts
                 >).reduce(
                   (acc, key) => {
-                    let codec = params[key];
+                    let codec = rts[key];
                     const value = paramMap[key];
-
-                    if (!codec) return acc;
 
                     // Use exact props where possible (only possible for types with props)
                     if ('props' in codec) {
                       codec = t.exact(codec);
-                    }
-
-                    // add _debug query parameter to all routes
-                    if (key === 'query') {
-                      codec = t.intersection([codec, debugRt]);
                     }
 
                     const result = codec.decode(value);
@@ -78,15 +81,26 @@ export function createApi() {
                       throw Boom.badRequest(PathReporter.report(result)[0]);
                     }
 
+                    // hide _debug from route handlers
+                    const parsedValue =
+                      key === 'query'
+                        ? omit(result.value, '_debug')
+                        : result.value;
+
                     return {
                       ...acc,
-                      [key]: result.value
+                      [key]: parsedValue
                     };
                   },
                   {} as Record<keyof typeof params, any>
                 );
 
-                return route.handler(request, parsedParams, h);
+                return route.handler(
+                  request,
+                  // only return values for parameters that have runtime types
+                  pick(parsedParams, Object.keys(params)),
+                  h
+                );
               }
             }
           )

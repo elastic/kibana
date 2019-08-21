@@ -77,8 +77,73 @@ describe('createApi', () => {
 
       const route = core.http.server.route.mock.calls[0][0];
 
+      const routeHandler = route.handler;
+
+      route.handler = (requestMock: any) => {
+        return routeHandler({
+          // stub hapi's default values
+          params: {},
+          query: {},
+          payload: null,
+          ...requestMock
+        });
+      };
+
       return { route, handler };
     };
+
+    it('adds a _debug query parameter by default', () => {
+      const { handler, route } = initApi({});
+
+      expect(() =>
+        route.handler({
+          query: {
+            _debug: true
+          }
+        })
+      ).not.toThrow();
+
+      expect(handler).toHaveBeenCalledTimes(1);
+
+      const params = handler.mock.calls[0][1];
+
+      expect(params).toEqual({});
+
+      expect(() =>
+        route.handler({
+          query: {
+            _debug: 1
+          }
+        })
+      ).toThrow();
+    });
+
+    it('throws if any parameters are used but no types are defined', () => {
+      const { route } = initApi({});
+
+      expect(() =>
+        route.handler({
+          query: {
+            _debug: true,
+            extra: ''
+          }
+        })
+      ).toThrow();
+
+      expect(() =>
+        route.handler({
+          payload: { foo: 'bar' }
+        })
+      ).toThrow();
+
+      expect(() =>
+        route.handler({
+          params: {
+            foo: 'bar'
+          }
+        })
+      ).toThrow();
+    });
 
     it('validates path parameters', () => {
       const { handler, route } = initApi({ path: t.type({ foo: t.string }) });
@@ -129,7 +194,7 @@ describe('createApi', () => {
       ).toThrow();
     });
 
-    it('body parameters', () => {
+    it('validates body parameters', () => {
       const { handler, route } = initApi({ body: t.string });
 
       expect(() =>
@@ -155,13 +220,14 @@ describe('createApi', () => {
       ).toThrow();
     });
 
-    it('query parameters', () => {
+    it('validates query parameters', () => {
       const { handler, route } = initApi({ query: t.type({ bar: t.string }) });
 
       expect(() =>
         route.handler({
           query: {
-            bar: ''
+            bar: '',
+            _debug: true
           }
         })
       ).not.toThrow();
