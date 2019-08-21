@@ -14,51 +14,66 @@ monitoring-shard-allocation {
   cluster-view {
     display: block;
   }
+
   .parent {
     padding-top: 14px;
     border-left: 3px solid $euiColorSuccess !important;
+    
     &.red {
       border-left: 3px solid $euiColorDanger !important;
     }
+    
     &.yellow {
       border-left: 3px solid $euiColorWarning !important;
     }
   }
+  
   td.unassigned {
     vertical-align: middle;
     width: 150px;
   }
-
+  
   .child {
     float: left;
     align-self: center;
-
+    display: flex;
+    
     &.index {
+      
+      // border: 1px solid $euiColorSuccess;
       border-left: $euiSizeXS solid $euiColorSuccess;
+      border-radius: $euiSizeXS;
+
       &.red {
         border-left: $euiSizeXS solid $euiColorDanger;
       }
+
       &.yellow {
         border-left: $euiSizeXS solid $euiColorWarning;
       }
     }
-    background-color: $euiColorDarkShade;
-    margin: 5px;
+    background-color: $euiColorLightShade;
+    margin: $euiSizeXS;
+
     .title {
-      padding: 5px 7px;
-      display: inline-block;
+      padding: $euiSizeS 0 $euiSizeS $euiSizeS;
+      display: flex;
+      // display: inline-block;
       text-align: center;
-      font-size: 12px;
-      font: 10px sans-serif;
-      color: $euiColorGhost;
+      font-size: $euiSizeM;
+      // font: 10px sans-serif;
+      // color: $euiColorGhost;
+
       a {
-        color: $euiColorGhost;
+        // color: $euiColorGhost;
         text-decoration: none;
       }
-      i {
-        margin-left: 5px;
+
+      .euiIcon, i {
+        margin-left: $euiSizeXS;
       }
     }
+
     &.unassigned {
       .title {
         display: none;
@@ -76,26 +91,28 @@ monitoring-shard-allocation {
 
   .shard {
     align-self: center;
-    padding: 5px 7px;
+    padding: $euiSizeXS 7px;
     font: 10px sans-serif;
-    border-left: 1px solid $euiColorEmptyShade;
-    position: relative;
-    display: inline-block;
+    // border-left: 1px solid $euiColorEmptyShade;
+    // position: relative;
+    // display: inline-block;
   }
 
   .legend {
     font-size: 12px;
     background-color: $euiColorEmptyShade;
+
     .title {
-      margin-left: 5px;
+      margin-left: $euiSizeXS;
       font-weight: bold;
     }
     color: $euiColorDarkestShade;
-    padding: 5px;
+    padding: $euiSizeXS;
+
     span.shard {
       float: none;
       display: inline-block;
-      margin: 0 5px 0 10px;
+      margin: 0 $euiSizeXS 0 10px;
       padding: 0 4px;
     }
   }

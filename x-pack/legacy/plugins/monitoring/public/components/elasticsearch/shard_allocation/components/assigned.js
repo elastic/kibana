@@ -12,6 +12,7 @@ import { Shard } from './shard';
 import { calculateClass } from '../lib/calculate_class';
 import { generateQueryAndLink } from '../lib/generate_query_and_link';
 import {
+  EuiIcon,
   EuiKeyboardAccessible,
 } from '@elastic/eui';
 
@@ -52,7 +53,7 @@ export class Assigned extends React.Component {
         </a>
       </EuiKeyboardAccessible>
     );
-    const master = (data.node_type === 'master') ? <span className="fa fa-star" /> : null;
+    const master = (data.node_type === 'master') ? <EuiIcon type="starFilledSpace" color="primary" /> : null;
     const shards = sortBy(data.children, 'shard').map(this.createShard);
     return (
       <div

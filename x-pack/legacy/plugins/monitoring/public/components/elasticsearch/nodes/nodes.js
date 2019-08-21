@@ -11,6 +11,7 @@ import { ClusterStatus } from '../cluster_status';
 import { EuiMonitoringTable } from '../../table';
 import { MetricCell, OfflineCell } from './cells';
 import {
+  EuiIcon,
   EuiLink,
   EuiToolTip,
   EuiSpacer,
@@ -66,7 +67,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode) => {
                 position="bottom"
                 content={node.nodeTypeLabel}
               >
-                <span className={`fa ${node.nodeTypeClass}`} />
+                <EuiIcon type={node.nodeTypeClass} />
               </EuiToolTip>
               &nbsp;
               <span data-test-subj="name">
