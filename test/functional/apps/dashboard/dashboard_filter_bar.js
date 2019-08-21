@@ -124,5 +124,23 @@ export default function ({ getService, getPageObjects }) {
         await pieChart.expectPieSliceCount(1);
       });
     });
+
+    describe('saved search filtering', function () {
+      before(async () => {
+        await filterBar.ensureFieldEditorModalIsClosed();
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.clickNewDashboard();
+        await PageObjects.dashboard.setTimepickerInDataRange();
+      });
+
+      it('are added when pie chart legend item is clicked', async function () {
+        await dashboardAddPanel.addVisualization('Rendering Test: pie');
+        await PageObjects.dashboard.waitForRenderComplete();
+        await pieChart.filterByLegendItem('4,886');
+
+        const filterCount = await filterBar.getFilterCount();
+        expect(filterCount).to.equal(1);
+      });
+    });
   });
 }

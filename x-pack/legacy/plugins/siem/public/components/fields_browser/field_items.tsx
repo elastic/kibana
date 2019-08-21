@@ -61,7 +61,6 @@ export const getFieldItems = ({
   categoryId,
   columnHeaders,
   highlight = '',
-  isLoading,
   onUpdateColumns,
   timelineId,
   toggleColumn,
@@ -71,7 +70,6 @@ export const getFieldItems = ({
   categoryId: string;
   columnHeaders: ColumnHeader[];
   highlight?: string;
-  isLoading: boolean;
   timelineId: string;
   toggleColumn: (column: ColumnHeader) => void;
   onUpdateColumns: OnUpdateColumns;
@@ -148,7 +146,6 @@ export const getFieldItems = ({
                       })}
                       fieldId={field.name || ''}
                       highlight={highlight}
-                      isLoading={isLoading}
                       onUpdateColumns={onUpdateColumns}
                     />
                   </EuiFlexItem>

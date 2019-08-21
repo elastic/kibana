@@ -13,7 +13,7 @@ export const getNumberOfItems = async (
   layout: LayoutInstance,
   logger: Logger
 ): Promise<number> => {
-  logger.debug('determining how many items we have');
+  logger.debug('determining how many rendered items to wait for');
 
   // returns the value of the `itemsCountAttribute` if it's there, otherwise
   // we just count the number of `itemSelector`
