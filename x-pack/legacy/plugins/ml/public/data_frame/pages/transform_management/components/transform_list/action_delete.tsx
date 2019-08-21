@@ -25,9 +25,10 @@ import { DataFrameTransformListRow, DATA_FRAME_TRANSFORM_STATE } from './common'
 
 interface DeleteActionProps {
   items: DataFrameTransformListRow[];
+  forceDisable?: boolean;
 }
 
-export const DeleteAction: FC<DeleteActionProps> = ({ items }) => {
+export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => {
   const isBulkAction = items.length > 1;
 
   const disabled = items.some(
@@ -88,7 +89,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items }) => {
     <EuiButtonEmpty
       size="xs"
       color="text"
-      disabled={disabled || !canDeleteDataFrame}
+      disabled={forceDisable === true || disabled || !canDeleteDataFrame}
       iconType="trash"
       onClick={openModal}
       aria-label={buttonDeleteText}

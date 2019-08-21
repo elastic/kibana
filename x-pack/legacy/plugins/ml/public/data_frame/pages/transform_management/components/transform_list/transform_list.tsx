@@ -233,7 +233,7 @@ export const DataFrameTransformList: SFC = () => {
     );
   }
 
-  const columns = getColumns(expandedRowItemIds, setExpandedRowItemIds);
+  const columns = getColumns(expandedRowItemIds, setExpandedRowItemIds, transformSelection);
 
   const sorting = {
     sort: {

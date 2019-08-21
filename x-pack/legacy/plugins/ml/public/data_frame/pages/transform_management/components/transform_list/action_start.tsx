@@ -21,13 +21,18 @@ import {
   createPermissionFailureMessage,
 } from '../../../../../privilege/check_privilege';
 
-import { DataFrameTransformListRow, isCompletedBatchTransform } from './common';
+import {
+  DataFrameTransformListRow,
+  isCompletedBatchTransform,
+  DATA_FRAME_TRANSFORM_STATE,
+} from './common';
 
 interface StartActionProps {
   items: DataFrameTransformListRow[];
+  forceDisable?: boolean;
 }
 
-export const StartAction: FC<StartActionProps> = ({ items }) => {
+export const StartAction: FC<StartActionProps> = ({ items, forceDisable }) => {
   const isBulkAction = items.length > 1;
   const canStartStopDataFrameTransform: boolean = checkPermission('canStartStopDataFrame');
 
@@ -48,9 +53,21 @@ export const StartAction: FC<StartActionProps> = ({ items }) => {
   const completedBatchTransform = items.some((i: DataFrameTransformListRow) =>
     isCompletedBatchTransform(i)
   );
+  // Disable start action if one of the transforms is already started or trying to restart will throw error
+  const startedTransform = items.some(
+    (i: DataFrameTransformListRow) => i.stats.state === DATA_FRAME_TRANSFORM_STATE.STARTED
+  );
 
+  let startedTransformMessage;
   let completedBatchTransformMessage;
+
   if (isBulkAction === true) {
+    startedTransformMessage = i18n.translate(
+      'xpack.ml.dataframe.transformList.startedTransformBulkToolTip',
+      {
+        defaultMessage: 'One or more selected data frame transforms is already started.',
+      }
+    );
     completedBatchTransformMessage = i18n.translate(
       'xpack.ml.dataframe.transformList.completeBatchTransformBulkActionToolTip',
       {
@@ -59,6 +76,13 @@ export const StartAction: FC<StartActionProps> = ({ items }) => {
       }
     );
   } else {
+    startedTransformMessage = i18n.translate(
+      'xpack.ml.dataframe.transformList.startedTransformToolTip',
+      {
+        defaultMessage: '{transformId} is already started.',
+        values: { transformId: items[0] && items[0].config.id },
+      }
+    );
     completedBatchTransformMessage = i18n.translate(
       'xpack.ml.dataframe.transformList.completeBatchTransformToolTip',
       {
@@ -68,11 +92,14 @@ export const StartAction: FC<StartActionProps> = ({ items }) => {
     );
   }
 
+  const actionIsDisabled =
+    !canStartStopDataFrameTransform || completedBatchTransform || startedTransform;
+
   let startButton = (
     <EuiButtonEmpty
       size="xs"
       color="text"
-      disabled={!canStartStopDataFrameTransform || completedBatchTransform}
+      disabled={forceDisable === true || actionIsDisabled}
       iconType="play"
       onClick={openModal}
       aria-label={buttonStartText}
@@ -81,16 +108,18 @@ export const StartAction: FC<StartActionProps> = ({ items }) => {
     </EuiButtonEmpty>
   );
 
-  if (!canStartStopDataFrameTransform || completedBatchTransform) {
+  if (actionIsDisabled) {
+    let content;
+    if (!canStartStopDataFrameTransform) {
+      content = createPermissionFailureMessage('canStartStopDataFrame');
+    } else if (completedBatchTransform) {
+      content = completedBatchTransformMessage;
+    } else if (startedTransform) {
+      content = startedTransformMessage;
+    }
+
     startButton = (
-      <EuiToolTip
-        position="top"
-        content={
-          !canStartStopDataFrameTransform
-            ? createPermissionFailureMessage('canStartStopDataFrame')
-            : completedBatchTransformMessage
-        }
-      >
+      <EuiToolTip position="top" content={content}>
         {startButton}
       </EuiToolTip>
     );
