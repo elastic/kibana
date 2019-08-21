@@ -11,33 +11,41 @@ import { refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../../../..
 import {
   DataFrameTransformListRow,
   DataFrameTransformEndpointData,
-  DataFrameTransformEndpointResultData,
+  DataFrameTransformEndpointResult,
 } from '../../components/transform_list/common';
+// @ts-ignore no declaration file
+import { mlMessageBarService } from '../../../../../../public/components/messagebar/messagebar_service';
 
 export const deleteTransforms = async (dataFrames: DataFrameTransformListRow[]) => {
   const dataFramesInfo: DataFrameTransformEndpointData[] = dataFrames.map(df => ({
     id: df.config.id,
     state: df.stats.state,
   }));
-  const results = await ml.dataFrame.deleteDataFrameTransforms(dataFramesInfo);
+  const results: DataFrameTransformEndpointResult = await ml.dataFrame.deleteDataFrameTransforms(
+    dataFramesInfo
+  );
 
-  results.forEach((result: DataFrameTransformEndpointResultData) => {
-    if (result.success === true) {
-      toastNotifications.addSuccess(
-        i18n.translate('xpack.ml.dataframe.transformList.deleteTransformSuccessMessage', {
-          defaultMessage: 'Data frame transform {transformId} deleted successfully.',
-          values: { transformId: result.id },
-        })
-      );
-    } else {
-      toastNotifications.addDanger(
-        i18n.translate('xpack.ml.dataframe.transformList.deleteTransformErrorMessage', {
-          defaultMessage:
-            'An error occurred deleting the data frame transform {transformId}: {error}',
-          values: { transformId: result.id, error: result.error },
-        })
-      );
+  for (const transformId in results) {
+    // hasOwnProperty check to ensure only properties on object itself, and not its prototypes
+    if (results.hasOwnProperty(transformId)) {
+      if (results[transformId].success === true) {
+        toastNotifications.addSuccess(
+          i18n.translate('xpack.ml.dataframe.transformList.deleteTransformSuccessMessage', {
+            defaultMessage: 'Data frame transform {transformId} deleted successfully.',
+            values: { transformId },
+          })
+        );
+      } else {
+        toastNotifications.addDanger(
+          i18n.translate('xpack.ml.dataframe.transformList.deleteTransformErrorMessage', {
+            defaultMessage: 'An error occurred deleting the data frame transform {transformId}',
+            values: { transformId },
+          })
+        );
+        mlMessageBarService.notify.error(results[transformId].error);
+      }
     }
-  });
+  }
+
   refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.REFRESH);
 };

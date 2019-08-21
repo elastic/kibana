@@ -110,10 +110,13 @@ export interface DataFrameTransformEndpointData {
   state?: DATA_FRAME_TRANSFORM_STATE;
 }
 
-export interface DataFrameTransformEndpointResultData {
-  id: DataFrameTransformId;
+export interface ResultData {
   success: boolean;
-  error?: string;
+  error?: any;
+}
+
+export interface DataFrameTransformEndpointResult {
+  [key: string]: ResultData;
 }
 
 // Used to pass on attribute names to table columns

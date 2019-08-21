@@ -8,7 +8,15 @@ import { callWithRequestType } from '../../../common/types/kibana';
 import {
   DATA_FRAME_TRANSFORM_STATE,
   DataFrameTransformEndpointData,
+  DataFrameTransformEndpointResult,
 } from '../../../public/data_frame/pages/transform_management/components/transform_list/common';
+import { isRequestTimeout, fillResultsWithTimeouts } from './error_utils';
+
+enum TRANSFORM_ACTIONS {
+  STOP = 'stop',
+  START = 'start',
+  DELETE = 'delete',
+}
 
 export function transformServiceProvider(callWithRequest: callWithRequestType) {
   async function deleteTransform(transformId: string) {
@@ -28,61 +36,101 @@ export function transformServiceProvider(callWithRequest: callWithRequestType) {
   }
 
   async function deleteTransforms(transformsInfo: DataFrameTransformEndpointData[]) {
-    const results = [];
+    const results: DataFrameTransformEndpointResult = {};
 
     for (const transformInfo of transformsInfo) {
+      const transformId = transformInfo.id;
       try {
         if (transformInfo.state === DATA_FRAME_TRANSFORM_STATE.FAILED) {
-          await stopTransform({
-            transformId: transformInfo.id,
-            force: true,
-            waitForCompletion: true,
-          });
+          try {
+            await stopTransform({
+              transformId,
+              force: true,
+              waitForCompletion: true,
+            });
+          } catch (e) {
+            if (isRequestTimeout(e)) {
+              return fillResultsWithTimeouts({
+                results,
+                id: transformId,
+                items: transformsInfo,
+                action: TRANSFORM_ACTIONS.DELETE,
+              });
+            }
+          }
         }
 
-        await deleteTransform(transformInfo.id);
-        results.push({ id: transformInfo.id, success: true });
+        await deleteTransform(transformId);
+        results[transformId] = { success: true };
       } catch (e) {
-        results.push({ id: transformInfo.id, success: false, error: JSON.stringify(e) });
+        if (isRequestTimeout(e)) {
+          return fillResultsWithTimeouts({
+            results,
+            id: transformInfo.id,
+            items: transformsInfo,
+            action: TRANSFORM_ACTIONS.DELETE,
+          });
+        }
+        results[transformId] = { success: false, error: JSON.stringify(e) };
       }
     }
     return results;
   }
 
   async function startTransforms(transformsInfo: DataFrameTransformEndpointData[]) {
-    const results = [];
+    const results: DataFrameTransformEndpointResult = {};
+
     for (const transformInfo of transformsInfo) {
+      const transformId = transformInfo.id;
       try {
         await startTransform({
-          transformId: transformInfo.id,
+          transformId,
           force:
             transformInfo.state !== undefined
               ? transformInfo.state === DATA_FRAME_TRANSFORM_STATE.FAILED
               : false,
         });
-        results.push({ id: transformInfo.id, success: true });
+        results[transformId] = { success: true };
       } catch (e) {
-        results.push({ id: transformInfo.id, success: false, error: JSON.stringify(e) });
+        if (isRequestTimeout(e)) {
+          return fillResultsWithTimeouts({
+            results,
+            id: transformId,
+            items: transformsInfo,
+            action: TRANSFORM_ACTIONS.START,
+          });
+        }
+        results[transformId] = { success: false, error: JSON.stringify(e) };
       }
     }
     return results;
   }
 
   async function stopTransforms(transformsInfo: DataFrameTransformEndpointData[]) {
-    const results = [];
+    const results: DataFrameTransformEndpointResult = {};
+
     for (const transformInfo of transformsInfo) {
+      const transformId = transformInfo.id;
       try {
         await stopTransform({
-          transformId: transformInfo.id,
+          transformId,
           force:
             transformInfo.state !== undefined
               ? transformInfo.state === DATA_FRAME_TRANSFORM_STATE.FAILED
               : false,
           waitForCompletion: true,
         });
-        results.push({ id: transformInfo.id, success: true });
+        results[transformId] = { success: true };
       } catch (e) {
-        results.push({ id: transformInfo.id, success: false, error: JSON.stringify(e) });
+        if (isRequestTimeout(e)) {
+          return fillResultsWithTimeouts({
+            results,
+            id: transformId,
+            items: transformsInfo,
+            action: TRANSFORM_ACTIONS.STOP,
+          });
+        }
+        results[transformId] = { success: false, error: JSON.stringify(e) };
       }
     }
     return results;
