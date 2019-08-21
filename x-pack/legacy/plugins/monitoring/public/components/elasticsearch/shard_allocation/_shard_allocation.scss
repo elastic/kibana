@@ -32,11 +32,19 @@ monitoring-shard-allocation {
     vertical-align: middle;
     width: 150px;
   }
+
+  .children {
+    padding-top: $euiSizeL;
+  }
   
   .child {
-    float: left;
+    // float: left;
     align-self: center;
-    display: flex;
+    // display: flex;
+
+    >.euiFlexGroup {
+      padding: $euiSizeS;
+    }
     
     &.index {
       
@@ -52,15 +60,17 @@ monitoring-shard-allocation {
         border-left: $euiSizeXS solid $euiColorWarning;
       }
     }
-    background-color: $euiColorLightShade;
+    background-color: $euiColorLightestShade;
     margin: $euiSizeXS;
 
     .title {
-      padding: $euiSizeS 0 $euiSizeS $euiSizeS;
-      display: flex;
+      // padding: $euiSizeS 0 $euiSizeS $euiSizeS;
+      // display: flex;
       // display: inline-block;
       text-align: center;
       font-size: $euiSizeM;
+      display: flex;
+      flex-direction: row;
       // font: 10px sans-serif;
       // color: $euiColorGhost;
 
@@ -91,7 +101,7 @@ monitoring-shard-allocation {
 
   .shard {
     align-self: center;
-    padding: $euiSizeXS 7px;
+    // padding: $euiSizeXS 7px;
     font: 10px sans-serif;
     // border-left: 1px solid $euiColorEmptyShade;
     // position: relative;

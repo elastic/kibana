@@ -12,12 +12,12 @@
 import { i18n } from '@kbn/i18n';
 
 export const nodeTypeClass = {
-  invalid: 'fa-exclamation-triangle',
-  node: 'fa-server',
-  master: 'fa-star',
-  master_only: 'fa-star-o',
-  data: 'fa-database',
-  client: 'fa-binoculars'
+  invalid: 'alert',
+  node: 'storage',
+  master: 'starFilled',
+  master_only: 'starEmpty',
+  data: 'database',
+  client: 'glasses'
 };
 
 export const nodeTypeLabel = {

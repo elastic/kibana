@@ -12,6 +12,8 @@ import { Shard } from './shard';
 import { calculateClass } from '../lib/calculate_class';
 import { generateQueryAndLink } from '../lib/generate_query_and_link';
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiIcon,
   EuiKeyboardAccessible,
 } from '@elastic/eui';
@@ -56,15 +58,18 @@ export class Assigned extends React.Component {
     const master = (data.node_type === 'master') ? <EuiIcon type="starFilledSpace" color="primary" /> : null;
     const shards = sortBy(data.children, 'shard').map(this.createShard);
     return (
-      <div
+      <EuiFlexItem
+        grow={false}
         className={calculateClass(data, initialClasses.join(' '))}
         key={key}
         data-test-subj={`clusterView-Assigned-${key}`}
         data-status={shardStats && shardStats.status}
       >
-        <div className="title">{name}{master}</div>
-        {shards}
-      </div>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false} className="title eui-textNoWrap">{name}{master}</EuiFlexItem>
+          <EuiFlexItem>{shards}</EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
     );
   };
 
@@ -72,9 +77,9 @@ export class Assigned extends React.Component {
     const data = sortBy(this.props.data, sortByName).map(this.createChild);
     return (
       <td>
-        <div className="children">
+        <EuiFlexGroup wrap className="children">
           {data}
-        </div>
+        </EuiFlexGroup>
       </td>
     );
   }
