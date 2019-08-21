@@ -471,12 +471,12 @@
             "description": "",
             "args": [
               {
-                "name": "nodeId",
+                "name": "nodeIds",
                 "description": "",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "SCALAR", "name": "ID", "ofType": null }
+                  "ofType": { "kind": "INPUT_OBJECT", "name": "InfraNodeIdsInput", "ofType": null }
                 },
                 "defaultValue": null
               },
@@ -2317,6 +2317,33 @@
         "possibleTypes": null
       },
       {
+        "kind": "INPUT_OBJECT",
+        "name": "InfraNodeIdsInput",
+        "description": "",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "nodeId",
+            "description": "",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "ID", "ofType": null }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "cloudId",
+            "description": "",
+            "type": { "kind": "SCALAR", "name": "ID", "ofType": null },
+            "defaultValue": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "ENUM",
         "name": "InfraMetric",
         "description": "",
@@ -2482,6 +2509,42 @@
           },
           {
             "name": "nginxRequestsPerConnection",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "awsOverview",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "awsCpuUtilization",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "awsNetworkBytes",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "awsNetworkPackets",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "awsDiskioBytes",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "awsDiskioOps",
             "description": "",
             "isDeprecated": false,
             "deprecationReason": null

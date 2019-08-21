@@ -121,7 +121,9 @@ class ListControlUi extends Component {
     const partialResultsWarningMessage = i18n.translate(
       'inputControl.vis.listControl.partialResultsWarningMessage',
       {
-        defaultMessage: `Terms list is incomplete. Adjust the autocomplete settings in kibana.yml for more results.`,
+        defaultMessage:
+          'Terms list might be incomplete because the request is taking too long. ' +
+          'Adjust the autocomplete settings in kibana.yml for complete results.',
       }
     );
 

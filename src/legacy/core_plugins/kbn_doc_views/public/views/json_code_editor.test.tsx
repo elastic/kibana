@@ -19,8 +19,16 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { JsonCodeEditor } from './json_code_editor';
+import { IndexPattern } from 'ui/index_patterns';
 
 it('returns the `JsonCodeEditor` component', () => {
-  const hit = { _index: 'test', _source: { test: 123 } };
-  expect(shallow(<JsonCodeEditor hit={hit} />)).toMatchSnapshot();
+  const props = {
+    hit: { _index: 'test', _source: { test: 123 } },
+    columns: [],
+    indexPattern: {} as IndexPattern,
+    filter: jest.fn(),
+    onAddColumn: jest.fn(),
+    onRemoveColumn: jest.fn(),
+  };
+  expect(shallow(<JsonCodeEditor {...props} />)).toMatchSnapshot();
 });

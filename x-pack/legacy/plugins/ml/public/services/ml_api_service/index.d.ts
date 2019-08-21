@@ -5,7 +5,7 @@
  */
 
 import { Annotation } from '../../../common/types/annotations';
-import { DslName, AggFieldNamePair } from '../../../common/types/fields';
+import { AggFieldNamePair } from '../../../common/types/fields';
 import { ExistingJobsAndGroups } from '../job_service';
 import { PrivilegesResponse } from '../../../common/types/privileges';
 
@@ -121,6 +121,10 @@ declare interface Ml {
       end: number
     ): Promise<{ progress: number; isRunning: boolean }>;
   };
+
+  estimateBucketSpan(
+    data: object
+  ): Promise<{ name: string; ms: number; error?: boolean; message?: { msg: string } | string }>;
 }
 
 declare const ml: Ml;
