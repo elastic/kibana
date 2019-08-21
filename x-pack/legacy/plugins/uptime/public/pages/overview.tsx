@@ -23,7 +23,6 @@ import { UptimeSettingsContext } from '../contexts';
 import { useUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../infra/public';
-import { CursorPagination } from '../../common/graphql/types';
 import { CONTEXT_DEFAULTS } from '../../common/constants';
 
 interface OverviewPageProps {
@@ -50,7 +49,7 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
   );
   const [getUrlParams, updateUrl] = useUrlParams();
   const params = getUrlParams();
-  const { dateRangeStart, dateRangeEnd, search, cursorKey, cursorDirection, sortOrder } = params;
+  const { dateRangeStart, dateRangeEnd, search } = params;
 
   useEffect(() => {
     setBreadcrumbs(getOverviewPageBreadcrumbs());
@@ -92,12 +91,7 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
 
   const linkParameters = stringifyUrlParams(params);
 
-  const pagination: CursorPagination = {
-    // TODO: extract this encoding/decoding process to a module called from inside the hook
-    cursorKey: atob(cursorKey || ''),
-    cursorDirection: cursorDirection || CONTEXT_DEFAULTS.CURSOR_PAGINATION.cursorDirection,
-    sortOrder: sortOrder || CONTEXT_DEFAULTS.CURSOR_PAGINATION.sortOrder,
-  };
+  const pagination: any = undefined;
 
   return (
     <Fragment>
@@ -134,7 +128,7 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
           pagination={pagination}
           variables={{
             ...sharedProps,
-            pagination,
+            pagination: pagination ? btoa(JSON.stringify(pagination)) : undefined,
           }}
         />
       </EmptyState>

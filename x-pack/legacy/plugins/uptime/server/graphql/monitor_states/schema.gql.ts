@@ -139,9 +139,9 @@ export const monitorStatesSchema = gql`
   "The primary object returned for monitor states."
   type MonitorSummaryResult {
     "Used to go to the next page of results"
-    prevPagePagination: string
+    prevPagePagination: String
     "Used to go to the previous page of results"
-    nextPagePagination: string
+    nextPagePagination: String
     "The objects representing the state of a series of heartbeat monitors."
     summaries: [MonitorSummary!]
     "The number of summaries."

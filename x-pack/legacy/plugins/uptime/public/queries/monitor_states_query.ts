@@ -7,15 +7,15 @@
 import gql from 'graphql-tag';
 
 export const monitorStatesQueryString = `
-query MonitorStates($dateRangeStart: String!, $dateRangeEnd: String!, $pagination: CursorPagination, $filters: String) {
+query MonitorStates($dateRangeStart: String!, $dateRangeEnd: String!, $pagination: String, $filters: String) {
   monitorStates: getMonitorStates(
     dateRangeStart: $dateRangeStart
     dateRangeEnd: $dateRangeEnd
     pagination: $pagination
     filters: $filters
   ) {
-    searchAfter
-    searchBefore
+    prevPagePagination
+    nextPagePagination
     totalSummaryCount {
       count
     }
@@ -101,7 +101,6 @@ query MonitorStates($dateRangeStart: String!, $dateRangeEnd: String!, $paginatio
         timestamp
       }
     }
-    isFinalPage
   }
 }
 `;

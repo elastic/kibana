@@ -4,18 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  MonitorSummary,
-  StatesIndexStatus,
-  CursorPagination,
-} from '../../../../common/graphql/types';
+import { MonitorSummary, StatesIndexStatus } from '../../../../common/graphql/types';
 
 export interface UMMonitorStatesAdapter {
   getMonitorStates(
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    pagination?: CursorPagination,
+    pagination?: string,
     filters?: string | null
   ): Promise<GetMonitorStatesResult>;
   statesIndexExists(request: any): Promise<StatesIndexStatus>;

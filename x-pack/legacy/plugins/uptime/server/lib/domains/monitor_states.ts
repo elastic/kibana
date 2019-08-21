@@ -20,9 +20,19 @@ export class UMMonitorStatesDomain {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    pagination: CursorPagination,
+    pagination: string,
     filters?: string | null
   ): Promise<GetMonitorStatesResult> {
-    return this.adapter.getMonitorStates(request, dateRangeStart, dateRangeEnd, pagination, filters);
+    console.log('RAW PAGINATION', pagination, typeof pagination);
+    const decodedPagination = pagination
+      ? JSON.parse(Buffer.from(pagination, 'base64').toString())
+      : undefined;
+    return this.adapter.getMonitorStates(
+      request,
+      dateRangeStart,
+      dateRangeEnd,
+      decodedPagination,
+      filters
+    );
   }
 }

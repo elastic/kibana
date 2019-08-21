@@ -20,12 +20,17 @@ import {
   StatesIndexStatus,
   CursorDirection,
   SortOrder,
-  CursorPagination,
 } from '../../../../common/graphql/types';
 import { INDEX_NAMES, STATES, QUERY } from '../../../../common/constants';
 import { getHistogramInterval, getFilteredQueryAndStatusFilter } from '../../helper';
 import { fetchMonitorLocCheckGroups } from './latest_check_group_fetcher';
 import { queryEnriched } from './query_enriched';
+
+type CursorPagination = {
+  cursorKey?: any;
+  cursorDirection: CursorDirection;
+  sortOrder: SortOrder;
+};
 
 export type QueryContext = {
   database: any;
@@ -35,6 +40,7 @@ export type QueryContext = {
   pagination: CursorPagination;
   filterClause: any | null;
   size: number;
+  statusFilter?: string;
 };
 
 const checksSortBy = (check: Check) => [
@@ -65,13 +71,14 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
   ): Promise<GetMonitorStatesResult> {
     // TODO: make this configurable
     const size = 10;
-    console.log('FUN GET');
+    console.log('FUN GET', pagination);
 
     const { query: filterClause, statusFilter } = getFilteredQueryAndStatusFilter(
       dateRangeStart,
       dateRangeEnd,
       filters
     );
+
     const queryContext: QueryContext = {
       database: this.database,
       request: request,
@@ -80,6 +87,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       pagination: pagination,
       filterClause,
       size,
+      statusFilter,
     };
 
     const checkGroups = await queryEnriched(queryContext);

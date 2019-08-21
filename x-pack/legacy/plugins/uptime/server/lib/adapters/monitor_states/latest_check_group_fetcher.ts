@@ -27,9 +27,6 @@ export const fetchMonitorLocCheckGroups = async (
 ): Promise<FetchMonitorLocCheckGroupsResult> => {
   const items: MonitorIdWithGroups[] = [];
 
-  let nextPagePagination = null;
-  let prevPagePagination = null;
-
   const fetcher = new LatestCheckGroupFetcher(queryContext);
   let lastItem: MonitorIdWithGroups | null = null;
   while (items.length < size) {
@@ -87,6 +84,7 @@ export class LatestCheckGroupFetcher {
     const cursorKey = current
       ? { monitor_id: current.monitorId, location: current.location }
       : null;
+    console.log('COMBINE', this.queryContext.pagination, cursorKey);
     return Object.assign({}, this.queryContext.pagination, { cursorKey });
   }
 
@@ -102,6 +100,8 @@ export class LatestCheckGroupFetcher {
           ? CursorDirection.BEFORE
           : CursorDirection.AFTER,
     };
+    console.log('REG PAGINATION', this.queryContext.pagination);
+    console.log('REVERSE PAGINATION', reverseContext.pagination);
     return new LatestCheckGroupFetcher(reverseContext);
   }
 
@@ -126,7 +126,6 @@ export class LatestCheckGroupFetcher {
       return found;
     }
 
-    console.log('RECURSECG', this.bufferPos);
     await this.queryAndBuffer();
     return await this.next();
   }
@@ -147,7 +146,6 @@ export class LatestCheckGroupFetcher {
     this.buffer = results.checkGroups;
     this.searchAfter = results.searchAfter;
     if (this.buffer.length === 0) {
-      console.log('END OF STREAM');
       this.endOfStream = true;
     }
   }
@@ -160,8 +158,8 @@ export class LatestCheckGroupFetcher {
       checkGroups.push({
         monitorId: get<string>(bucket, 'key.monitor_id'),
         location: get<string>(bucket, 'key.location'),
-        checkGroup: get<string>(bucket, 'top.hits.hits[0]._source.monitor.check_group'),
-        timestamp: get<Date>(bucket, 'top.hits.hits[0]._source.@timestamp'),
+        checkGroup: get<string>(bucket, 'summaries.top.hits.hits[0]._source.monitor.check_group'),
+        timestamp: get<Date>(bucket, 'summaries.top.hits.hits[0]._source.@timestamp'),
       });
     });
 
@@ -188,10 +186,7 @@ export class LatestCheckGroupFetcher {
     // We check for summary.up to ensure that the check group
     // is complete. Summary fields are only present on
     // completed check groups.
-    const filters = [{ exists: { field: 'summary.up' } }];
-    if (this.queryContext.filterClause) {
-      filters.push(this.queryContext.filterClause);
-    }
+    const filters = [this.queryContext.filterClause] || [];
 
     const body = {
       query: {
@@ -235,17 +230,24 @@ export class LatestCheckGroupFetcher {
             ],
           },
           aggs: {
-            top: {
-              top_hits: {
-                sort: [
-                  {
-                    '@timestamp': 'desc',
+            summaries: {
+              filter: {
+                exists: { field: 'summary.up' },
+              },
+              aggs: {
+                top: {
+                  top_hits: {
+                    sort: [
+                      {
+                        '@timestamp': 'desc',
+                      },
+                    ],
+                    _source: {
+                      includes: ['monitor.check_group', '@timestamp'],
+                    },
+                    size: 1,
                   },
-                ],
-                _source: {
-                  includes: ['monitor.check_group', '@timestamp'],
                 },
-                size: 1,
               },
             },
           },

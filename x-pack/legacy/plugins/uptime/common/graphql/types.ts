@@ -504,16 +504,14 @@ export interface MonitorPageTitle {
 }
 /** The primary object returned for monitor states. */
 export interface MonitorSummaryResult {
-  /** Key used to go to the next page of results */
-  searchAfter?: string | null;
-  /** Key used to go to the previous page of results */
-  searchBefore?: string | null;
+  /** Used to go to the next page of results */
+  prevPagePagination?: string | null;
+  /** Used to go to the previous page of results */
+  nextPagePagination?: string | null;
   /** The objects representing the state of a series of heartbeat monitors. */
   summaries?: MonitorSummary[] | null;
   /** The number of summaries. */
   totalSummaryCount: DocCount;
-  /** Flag indicating if this is the final page in the index for the given parameters. */
-  isFinalPage: boolean;
 }
 /** Represents the current state and associated data for an Uptime monitor. */
 export interface MonitorSummary {
@@ -678,24 +676,6 @@ export interface MonitorSummaryUrl {
   username?: string | null;
 }
 
-export interface MonitorCursorKey {
-  monitor_id: string;
-
-  location?: string | null;
-}
-
-// ====================================================
-// InputTypes
-// ====================================================
-
-export interface CursorPagination {
-  cursorKey?: string | null;
-
-  cursorDirection: CursorDirection;
-
-  sortOrder: SortOrder;
-}
-
 // ====================================================
 // Arguments
 // ====================================================
@@ -778,7 +758,7 @@ export interface GetMonitorStatesQueryArgs {
 
   dateRangeEnd: string;
 
-  pagination?: CursorPagination | null;
+  pagination?: string | null;
 
   filters?: string | null;
 }
