@@ -41,9 +41,6 @@ interface Props {
   toggleColumn: (column: ColumnHeader) => void;
 }
 
-export const bufferOne: Record<string, JSX.Element> = {};
-export const bufferTwo: Record<string, JSX.Element> = {};
-
 export const ExpandableEvent = React.memo<Props>(
   ({
     browserFields,

@@ -8,6 +8,8 @@ import { EuiFlexItem } from '@elastic/eui';
 import * as React from 'react';
 import uuid from 'uuid';
 
+import VisibilitySensor from 'react-visibility-sensor';
+import styled from 'styled-components';
 import { BrowserFields } from '../../../../containers/source';
 import { TimelineDetailsComponentQuery } from '../../../../containers/timeline/details';
 import { TimelineItem, DetailItem } from '../../../../graphql/types';
@@ -54,12 +56,23 @@ export const getNewNoteId = (): string => uuid.v4();
 
 const emptyDetails: DetailItem[] = [];
 
+export const EmptyRow = styled.div`
+  background-color: ${props => props.theme.eui.euiColorLightestShade};
+  width: 100%;
+  border: ${props => `1px solid ${props.theme.eui.euiColorLightShade}`};
+  border-radius: 5px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+`;
+
 export class StatefulEvent extends React.Component<Props, State> {
   public readonly state: State = {
     expanded: {},
     showNotes: {},
     initialRender: false,
   };
+
+  public divElement: HTMLDivElement | null = null;
 
   /**
    * Incrementally loads the events when it mounts by trying to
@@ -103,59 +116,85 @@ export class StatefulEvent extends React.Component<Props, State> {
     // see componentDidMount() for when it schedules the first
     // time this stateful component should be rendered.
     if (!this.state.initialRender) {
-      return null;
+      return <EmptyRow style={{ height: '27px' }}></EmptyRow>;
     }
+
     return (
-      <TimelineDetailsComponentQuery
-        sourceId="default"
-        indexName={event._index!}
-        eventId={event._id}
-        executeQuery={!!this.state.expanded[event._id]}
+      <VisibilitySensor
+        partialVisibility={true}
+        scrollCheck={true}
+        offset={{ top: 50, bottom: -500 }}
       >
-        {({ detailsData, loading }) => (
-          <div data-test-subj="event">
-            {getRowRenderer(event.ecs, rowRenderers).renderRow({
-              browserFields,
-              data: event.ecs,
-              children: (
-                <StatefulEventChild
-                  id={event._id}
-                  actionsColumnWidth={actionsColumnWidth}
-                  associateNote={this.associateNote}
-                  addNoteToEvent={addNoteToEvent}
-                  onPinEvent={onPinEvent}
-                  columnHeaders={columnHeaders}
-                  columnRenderers={columnRenderers}
-                  expanded={!!this.state.expanded[event._id]}
-                  data={event.data}
-                  eventIdToNoteIds={eventIdToNoteIds}
-                  getNotesByIds={getNotesByIds}
-                  loading={loading}
-                  onColumnResized={onColumnResized}
-                  onToggleExpanded={this.onToggleExpanded}
-                  onUnPinEvent={onUnPinEvent}
-                  pinnedEventIds={pinnedEventIds}
-                  showNotes={!!this.state.showNotes[event._id]}
-                  onToggleShowNotes={this.onToggleShowNotes}
-                  updateNote={updateNote}
-                />
-              ),
-            })}
-            <EuiFlexItem data-test-subj="event-details" grow={true}>
-              <ExpandableEvent
-                browserFields={browserFields}
-                columnHeaders={columnHeaders}
-                id={event._id}
-                event={detailsData || emptyDetails}
-                forceExpand={!!this.state.expanded[event._id] && !loading}
-                onUpdateColumns={onUpdateColumns}
-                timelineId={timelineId}
-                toggleColumn={toggleColumn}
-              />
-            </EuiFlexItem>
-          </div>
-        )}
-      </TimelineDetailsComponentQuery>
+        {({ isVisible }) => {
+          if (isVisible) {
+            return (
+              <TimelineDetailsComponentQuery
+                sourceId="default"
+                indexName={event._index!}
+                eventId={event._id}
+                executeQuery={!!this.state.expanded[event._id]}
+              >
+                {({ detailsData, loading }) => (
+                  <div data-test-subj="event" ref={divElement => (this.divElement = divElement)}>
+                    {getRowRenderer(event.ecs, rowRenderers).renderRow({
+                      browserFields,
+                      data: event.ecs,
+                      children: (
+                        <StatefulEventChild
+                          id={event._id}
+                          actionsColumnWidth={actionsColumnWidth}
+                          associateNote={this.associateNote}
+                          addNoteToEvent={addNoteToEvent}
+                          onPinEvent={onPinEvent}
+                          columnHeaders={columnHeaders}
+                          columnRenderers={columnRenderers}
+                          expanded={!!this.state.expanded[event._id]}
+                          data={event.data}
+                          eventIdToNoteIds={eventIdToNoteIds}
+                          getNotesByIds={getNotesByIds}
+                          loading={loading}
+                          onColumnResized={onColumnResized}
+                          onToggleExpanded={this.onToggleExpanded}
+                          onUnPinEvent={onUnPinEvent}
+                          pinnedEventIds={pinnedEventIds}
+                          showNotes={!!this.state.showNotes[event._id]}
+                          onToggleShowNotes={this.onToggleShowNotes}
+                          updateNote={updateNote}
+                        />
+                      ),
+                    })}
+                    <EuiFlexItem data-test-subj="event-details" grow={true}>
+                      <ExpandableEvent
+                        browserFields={browserFields}
+                        columnHeaders={columnHeaders}
+                        id={event._id}
+                        event={detailsData || emptyDetails}
+                        forceExpand={!!this.state.expanded[event._id] && !loading}
+                        onUpdateColumns={onUpdateColumns}
+                        timelineId={timelineId}
+                        toggleColumn={toggleColumn}
+                      />
+                    </EuiFlexItem>
+                  </div>
+                )}
+              </TimelineDetailsComponentQuery>
+            );
+          } else {
+            // height place holder for visibility detection as well as re-rendering sections
+            if (this.divElement != null) {
+              return (
+                <EmptyRow
+                  style={{
+                    height: `${this.divElement.clientHeight - 10}px`, // subtract 10 since we use 5px margin
+                  }}
+                ></EmptyRow>
+              );
+            } else {
+              return <EmptyRow style={{ height: '27px' }}></EmptyRow>;
+            }
+          }
+        }}
+      </VisibilitySensor>
     );
   }
 

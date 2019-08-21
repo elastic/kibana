@@ -25,6 +25,12 @@ const mockSort: Sort = {
   sortDirection: Direction.desc,
 };
 
+jest.mock(
+  'react-visibility-sensor',
+  () => ({ children }: { children: (args: { isVisible: boolean }) => React.ReactNode }) =>
+    children({ isVisible: true })
+);
+
 describe('Body', () => {
   describe('rendering', () => {
     test('it renders the column headers', () => {
@@ -172,9 +178,10 @@ describe('Body', () => {
           />
         </TestProviders>
       );
+      wrapper.update();
       await wait();
       wrapper.update();
-      headersJustTimestamp.forEach(h => {
+      headersJustTimestamp.forEach(() => {
         expect(
           wrapper
             .find('[data-test-subj="data-driven-columns"]')
