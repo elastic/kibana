@@ -10,7 +10,7 @@ import { API_BASE_GENERATE_V1 } from '../../common/constants';
 import { createJobFactory, executeJobFactory } from '../../export_types/csv_from_savedobject';
 import { JobDocPayload, JobDocOutputExecuted, KbnServer, Logger } from '../../types';
 import { getRouteOptions } from './lib/route_config_factories';
-import { getJobParamsFromRequest } from './lib/get_job_params_from_request';
+import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
 
 interface KibanaResponse extends ResponseObject {
   isBoom: boolean;
