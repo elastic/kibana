@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+const { URL } = require('url');
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -21,10 +22,12 @@ const defaultValues: Record<string, any> = {
   method: 'post',
 };
 
-function extractCredentialsFromUrl(url: string): { url: string; user: string; password: string } {
-  return { url: url.replace('elastic:changeme@', ''), user: 'elastic', password: 'changeme' };
+function parsePort(url: Record<string, string>): Record<string, string | null | number> {
+  return {
+    ...url,
+    port: url.port ? parseInt(url.port) : url.port,
+  };
 }
-
 // eslint-disable-next-line import/no-default-export
 export default function webhookTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -32,9 +35,18 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
   async function createWebhookAction(
     urlWithCreds: string,
-    config: Record<string, string> = {}
+    config: Record<string, string | Record<string, string>> = {}
   ): Promise<string> {
-    const { url, user, password } = extractCredentialsFromUrl(urlWithCreds);
+    const { url: fullUrl, user, password } = extractCredentialsFromUrl(urlWithCreds);
+    const url = config.url && typeof config.url === 'object' ? parsePort(config.url) : fullUrl;
+    const composedConfig = {
+      headers: {
+        'Content-Type': 'text/plain',
+      },
+      ...config,
+      url,
+    };
+
     const { body: createdAction } = await supertest
       .post('/api/action')
       .set('kbn-xsrf', 'test')
@@ -45,13 +57,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           user,
           password,
         },
-        config: {
-          url,
-          headers: {
-            'Content-Type': 'text/plain',
-          },
-          ...config,
-        },
+        config: composedConfig,
       })
       .expect(200);
 
@@ -159,5 +165,38 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
       expect(result.status).to.eql('ok');
     });
+
+    it('should support composite webhook targets', async () => {
+      const webhookActionId = await createWebhookAction(webhookSimulatorURL, {
+        url: extractCompositesOfURL(webhookSimulatorURL),
+      });
+      const { body: result } = await supertest
+        .post(`/api/action/${webhookActionId}/_execute`)
+        .set('kbn-xsrf', 'test')
+        .send({
+          params: {
+            body: 'success',
+          },
+        })
+        .expect(200);
+
+      expect(result.status).to.eql('ok');
+    });
   });
+}
+
+function extractCredentialsFromUrl(url: string): { url: string; user: string; password: string } {
+  return { url: url.replace('elastic:changeme@', ''), user: 'elastic', password: 'changeme' };
+}
+
+function extractCompositesOfURL(
+  url: string
+): { host: string; port: string; path: string; scheme: string } {
+  const { protocol, port, pathname, search, hostname: host } = new URL(url);
+  return {
+    scheme: protocol ? protocol.replace(':', '') : protocol,
+    port,
+    path: `${pathname}${search}`,
+    host,
+  };
 }

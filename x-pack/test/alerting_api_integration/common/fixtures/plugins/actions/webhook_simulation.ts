@@ -43,6 +43,8 @@ function webhookHandler(request: WebhookRequest, h: any) {
   const body = request.payload;
 
   switch (body) {
+    case 'success':
+      return htmlResponse(h, 200, `OK`);
     case 'authenticate':
       return validateAuthentication(request, h);
     case 'success_post_method':

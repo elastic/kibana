@@ -112,7 +112,7 @@ function flatterUrl(url: string | TypeOf<typeof CompositeUrlSchema>): string {
   if (typeof url === 'string') {
     return url;
   }
-  return `${url.scheme}://${url.host}${url.path}`;
+  return `${url.scheme}://${url.host}${url.port ? `:${url.port}` : ''}${url.path || ''}`;
 }
 
 // action executor
