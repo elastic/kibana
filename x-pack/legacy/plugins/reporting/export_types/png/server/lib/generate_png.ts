@@ -7,7 +7,6 @@
 import * as Rx from 'rxjs';
 import { toArray, mergeMap } from 'rxjs/operators';
 import { KbnServer, ConditionalHeaders } from '../../../../types';
-// @ts-ignore
 import { oncePerServer } from '../../../../server/lib/once_per_server';
 import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
 import { PreserveLayout } from '../../../common/layouts/preserve_layout';

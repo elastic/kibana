@@ -101,10 +101,6 @@ export class PopulationJobCreator extends JobCreator {
   private _createDetector(agg: Aggregation, field: Field) {
     const dtr: Detector = createBasicDetector(agg, field);
 
-    if (field !== null) {
-      dtr.field_name = field.id;
-    }
-
     if (this._splitField !== null) {
       dtr.over_field_name = this._splitField.id;
     }
@@ -131,7 +127,7 @@ export class PopulationJobCreator extends JobCreator {
     this._overrideConfigs(job, datafeed);
     this.jobId = '';
     this.createdBy = CREATED_BY_LABEL.POPULATION;
-    const detectors = getRichDetectors(job.analysis_config.detectors);
+    const detectors = getRichDetectors(job, datafeed);
 
     this.removeAllDetectors();
 
