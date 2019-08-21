@@ -17,12 +17,18 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+export interface DataViewColumn {
+  name: string;
+  field: string;
+  sortable: Function;
+  render: DataViewColumnRender;
+}
 
-export default function (kibana) {
-  return new kibana.Plugin({
-    uiExports: {
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-    }
-  });
+type DataViewColumnRender = (value: string) => string;
+
+export interface DataViewRow {
+  [fields: string]: {
+    formatted: string;
+    raw: any;
+  };
 }

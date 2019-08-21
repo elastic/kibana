@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import React, { Component } from 'react';
-
+import PropTypes from 'prop-types';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -29,24 +29,34 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import {
-  DataTableFormat,
-} from './data_table';
+import { DataTableFormat } from './data_table';
+import { InspectorViewProps, Adapters } from '../../../types';
+import { TabularLoaderOptions, TabularData, TabularCallback } from '../../../adapters/data/types';
+import { UiSettingsClientContract } from '../../../../../../core/public';
 
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
+interface DataViewComponentState {
+  tabularData: TabularData | null;
+  tabularOptions: TabularLoaderOptions;
+  adapters: Adapters;
+  tabularPromise: TabularCallback | null;
+}
 
-class DataViewComponent extends Component {
+interface DataViewComponentProps extends InspectorViewProps {
+  uiSettings: UiSettingsClientContract;
+}
 
+export class DataViewComponent extends Component<DataViewComponentProps, DataViewComponentState> {
+  static propTypes = {
+    uiSettings: PropTypes.object.isRequired,
+    adapters: PropTypes.object.isRequired,
+    title: PropTypes.string.isRequired,
+  };
+
+  state = {} as DataViewComponentState;
   _isMounted = false;
-  state = {
-    tabularData: null,
-    tabularOptions: {},
-    tabularLoader: null,
-  }
 
-  static getDerivedStateFromProps(nextProps, state) {
-    if (nextProps.adapters === state.adapters) {
+  static getDerivedStateFromProps(nextProps: InspectorViewProps, state: DataViewComponentState) {
+    if (state && nextProps.adapters === state.adapters) {
       return null;
     }
 
@@ -58,7 +68,7 @@ class DataViewComponent extends Component {
     };
   }
 
-  onUpdateData = (type) => {
+  onUpdateData = (type: string) => {
     if (type === 'tabular') {
       this.setState({
         tabularData: null,
@@ -68,18 +78,19 @@ class DataViewComponent extends Component {
     }
   };
 
-  finishLoadingData() {
-    if (this.state.tabularPromise) {
-      this.state.tabularPromise.then(({ data, options }) => {
-        // Only update the data if the promise resolved before unmounting the component
-        if (this._isMounted) {
-          this.setState({
-            tabularData: data,
-            tabularOptions: options,
-            tabularPromise: null,
-          });
-        }
-      });
+  async finishLoadingData() {
+    const { tabularPromise } = this.state;
+
+    if (tabularPromise) {
+      const tabularData: TabularData = await tabularPromise;
+
+      if (this._isMounted) {
+        this.setState({
+          tabularData: tabularData.data,
+          tabularOptions: tabularData.options,
+          tabularPromise: null,
+        });
+      }
     }
   }
 
@@ -98,13 +109,13 @@ class DataViewComponent extends Component {
     this.finishLoadingData();
   }
 
-  renderNoData() {
+  static renderNoData() {
     return (
       <EuiEmptyPrompt
         title={
           <h2>
             <FormattedMessage
-              id="inspectorViews.data.noDataAvailableTitle"
+              id="inspector.data.noDataAvailableTitle"
               defaultMessage="No data available"
             />
           </h2>
@@ -113,7 +124,7 @@ class DataViewComponent extends Component {
           <React.Fragment>
             <p>
               <FormattedMessage
-                id="inspectorViews.data.noDataAvailableDescription"
+                id="inspector.data.noDataAvailableDescription"
                 defaultMessage="The element did not provide any data."
               />
             </p>
@@ -123,13 +134,9 @@ class DataViewComponent extends Component {
     );
   }
 
-  renderLoading() {
+  static renderLoading() {
     return (
-      <EuiFlexGroup
-        justifyContent="center"
-        alignItems="center"
-        style={{ height: '100%' }}
-      >
+      <EuiFlexGroup justifyContent="center" alignItems="center" style={{ height: '100%' }}>
         <EuiFlexItem grow={false}>
           <EuiPanel className="eui-textCenter">
             <EuiLoadingChart size="m" />
@@ -137,7 +144,7 @@ class DataViewComponent extends Component {
             <EuiText>
               <p>
                 <FormattedMessage
-                  id="inspectorViews.data.gatheringDataLabel"
+                  id="inspector.data.gatheringDataLabel"
                   defaultMessage="Gathering data"
                 />
               </p>
@@ -150,9 +157,9 @@ class DataViewComponent extends Component {
 
   render() {
     if (this.state.tabularPromise) {
-      return this.renderLoading();
+      return DataViewComponent.renderLoading();
     } else if (!this.state.tabularData) {
-      return this.renderNoData();
+      return DataViewComponent.renderNoData();
     }
 
     return (
@@ -160,23 +167,8 @@ class DataViewComponent extends Component {
         data={this.state.tabularData}
         isFormatted={this.state.tabularOptions.returnsFormattedValues}
         exportTitle={this.props.title}
+        uiSettings={this.props.uiSettings}
       />
     );
   }
 }
-
-const DataView = {
-  title: i18n.translate('inspectorViews.data.dataTitle', {
-    defaultMessage: 'Data'
-  }),
-  order: 10,
-  help: i18n.translate('inspectorViews.data.dataDescriptionTooltip', {
-    defaultMessage: 'View the data behind the visualization'
-  }),
-  shouldShow(adapters) {
-    return Boolean(adapters.data);
-  },
-  component: DataViewComponent
-};
-
-export { DataView };

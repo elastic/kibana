@@ -16,21 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { RequestsViewComponent } from './components/requests_view';
-import { Adapters, InspectorViewDescription } from '../../types';
+import { DataViewComponent } from './components/data_view';
+import { Adapters, InspectorViewDescription, InspectorViewProps } from '../../types';
+import { UiSettingsClientContract } from '../../../../../core/public';
 
-export const getRequestsViewDescription = (): InspectorViewDescription => ({
-  title: i18n.translate('inspector.requests.requestsTitle', {
-    defaultMessage: 'Requests',
+export const getDataViewDescription = (
+  uiSettings: UiSettingsClientContract
+): InspectorViewDescription => ({
+  title: i18n.translate('inspector.data.dataTitle', {
+    defaultMessage: 'Data',
   }),
-  order: 20,
-  help: i18n.translate('inspector.requests.requestsDescriptionTooltip', {
-    defaultMessage: 'View the requests that collected the data',
+  order: 10,
+  help: i18n.translate('inspector.data.dataDescriptionTooltip', {
+    defaultMessage: 'View the data behind the visualization',
   }),
   shouldShow(adapters: Adapters) {
-    return Boolean(adapters.requests);
+    return Boolean(adapters.data);
   },
-  component: RequestsViewComponent,
+  component: (props: InspectorViewProps) => (
+    <DataViewComponent {...props} uiSettings={uiSettings} />
+  ),
 });
