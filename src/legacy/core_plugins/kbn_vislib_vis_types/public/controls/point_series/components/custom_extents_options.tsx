@@ -27,12 +27,10 @@ import { SwitchOption } from '../../switch';
 import { NumberInputOption } from '../../number_input';
 import { ValueAxisOptionsParams } from './value_axis_options';
 import { YExtends } from './y_extends';
+import { SetScale } from './value_axis_options';
 
 interface CustomExtentsOptionsProps extends ValueAxisOptionsParams {
-  setValueAxisScale: <T extends keyof ValueAxis['scale']>(
-    paramName: T,
-    value: ValueAxis['scale'][T]
-  ) => void;
+  setValueAxisScale: SetScale;
   setValueAxis: <T extends keyof ValueAxis>(paramName: T, value: ValueAxis[T]) => void;
 }
 
@@ -131,7 +129,7 @@ function CustomExtentsOptions({
       />
 
       {axis.scale.setYExtents && (
-        <YExtends scale={axis.scale} setValue={setValueAxisScale} setValidity={setValidity} />
+        <YExtends scale={axis.scale} setScale={setValueAxisScale} setValidity={setValidity} />
       )}
     </>
   );

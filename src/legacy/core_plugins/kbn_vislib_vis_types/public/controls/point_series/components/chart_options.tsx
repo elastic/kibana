@@ -24,13 +24,10 @@ import { VisOptionsProps } from 'ui/vis/editors/default';
 import { BasicVislibParams, SeriesParam, ValueAxis } from '../../../types';
 import { ChartTypes } from '../../../utils/collections';
 import { SelectOption } from '../../select';
-import { LineOptions, SetChart } from './line_options';
+import { LineOptions } from './line_options';
+import { SetChartValueByIndex } from '../../../editors/metrics_axis_options';
 
-export type SetChartValueByIndex = <T extends keyof SeriesParam>(
-  index: number,
-  paramName: T,
-  value: SeriesParam[T]
-) => void;
+export type SetChart = <T extends keyof SeriesParam>(paramName: T, value: SeriesParam[T]) => void;
 
 interface ChartOptionsParams extends VisOptionsProps<BasicVislibParams> {
   index: number;

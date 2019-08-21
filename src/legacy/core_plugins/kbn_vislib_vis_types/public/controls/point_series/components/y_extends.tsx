@@ -21,8 +21,9 @@ import React, { useEffect } from 'react';
 import { EuiFormErrorText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { Scale, ValueAxis } from '../../../types';
+import { Scale } from '../../../types';
 import { NumberInputOption } from '../../number_input';
+import { SetScale } from './value_axis_options';
 
 const rangeError = i18n.translate(
   'kbnVislibVisTypes.controls.pointSeries.valueAxes.minErrorMessage',
@@ -45,14 +46,11 @@ function areExtendsValid(min: number | '' = '', max: number | '' = ''): boolean 
 
 interface YExtendsProps {
   scale: Scale;
-  setValue: <T extends keyof ValueAxis['scale']>(
-    paramName: T,
-    value: ValueAxis['scale'][T]
-  ) => void;
+  setScale: SetScale;
   setValidity: (isValid: boolean) => void;
 }
 
-function YExtends({ scale, setValue, setValidity }: YExtendsProps) {
+function YExtends({ scale, setScale, setValidity }: YExtendsProps) {
   const { min, max, type } = scale;
   const errors = [];
 
@@ -81,7 +79,7 @@ function YExtends({ scale, setValue, setValidity }: YExtendsProps) {
         step={0.1}
         paramName="max"
         value={max}
-        setValue={setValue}
+        setValue={setScale}
       />
       <NumberInputOption
         label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.minLabel', {
@@ -90,7 +88,7 @@ function YExtends({ scale, setValue, setValidity }: YExtendsProps) {
         step={0.1}
         paramName="min"
         value={min}
-        setValue={setValue}
+        setValue={setScale}
       />
       {errors.length > 0 && errors.map(error => <EuiFormErrorText>{error}</EuiFormErrorText>)}
     </>

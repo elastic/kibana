@@ -24,39 +24,32 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
 import { BasicVislibParams, ValueAxis } from '../../types';
-import { ChartOptions, SetChartValueByIndex } from './components/chart_options';
+import { ChartOptions } from './components/chart_options';
+import { SetChartValueByIndex } from '../../editors/metrics_axis_options';
 
 interface SeriesPanelProps extends VisOptionsProps<BasicVislibParams> {
   addValueAxis: () => ValueAxis;
   updateAxisTitle: () => void;
+  setChartValueByIndex: SetChartValueByIndex;
 }
 
 function SeriesPanel(props: SeriesPanelProps) {
-  const { stateParams, setValue, addValueAxis, updateAxisTitle } = props;
+  const { stateParams, setChartValueByIndex, addValueAxis, updateAxisTitle } = props;
 
-  const setChartValueByIndex: SetChartValueByIndex = useCallback(
-    (index, paramName, value) => {
-      const series = [...stateParams.seriesParams];
-      series[index] = {
-        ...series[index],
-        [paramName]: value,
-      };
-      setValue('seriesParams', series);
+  const changeValueAxis = useCallback(
+    (index: number, paramName: 'valueAxis', selectedValueAxis: string) => {
+      let newValueAxis = selectedValueAxis;
+      if (selectedValueAxis === 'new') {
+        const axis = addValueAxis();
+        newValueAxis = axis.id;
+      }
+      // setChart
+      setChartValueByIndex(index, paramName, newValueAxis);
+
+      updateAxisTitle();
     },
-    [setValue, stateParams.seriesParams]
+    [addValueAxis, setChartValueByIndex, updateAxisTitle]
   );
-
-  const changeValueAxis = (index: number, paramName: 'valueAxis', selectedValueAxis: string) => {
-    let newValueAxis = selectedValueAxis;
-    if (selectedValueAxis === 'new') {
-      const axis = addValueAxis();
-      newValueAxis = axis.id;
-    }
-    // setChart
-    setChartValueByIndex(index, paramName, newValueAxis);
-
-    updateAxisTitle();
-  };
 
   return (
     <EuiPanel paddingSize="s">

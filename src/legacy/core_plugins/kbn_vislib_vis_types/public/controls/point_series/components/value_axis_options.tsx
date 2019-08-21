@@ -30,6 +30,11 @@ import { TextInputOption } from './../../text_input';
 import { LabelOptions } from './label_options';
 import { CustomExtentsOptions } from './custom_extents_options';
 
+export type SetScale = <T extends keyof ValueAxis['scale']>(
+  paramName: T,
+  value: ValueAxis['scale'][T]
+) => void;
+
 export type SetValueAxisByIndex = <T extends keyof ValueAxis>(
   index: number,
   paramName: T,
@@ -78,10 +83,7 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
     setValue('valueAxes', valueAxes);
   };
 
-  const setValueAxisScale = <T extends keyof ValueAxis['scale']>(
-    paramName: T,
-    value: ValueAxis['scale'][T]
-  ) => {
+  const setValueAxisScale: SetScale = (paramName, value) => {
     const valueAxes = [...stateParams.valueAxes];
 
     valueAxes[index] = {

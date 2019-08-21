@@ -39,12 +39,13 @@ import { ValueAxisOptions, SetValueAxisByIndex } from './components/value_axis_o
 interface ValueAxesPanelProps extends VisOptionsProps<BasicVislibParams> {
   isCategoryAxisHorizontal: boolean;
   addValueAxis: () => ValueAxis;
+  removeValueAxis: (axis: ValueAxis) => void;
   updateAxisName: (axis: ValueAxis, index: number) => void;
   setValueAxisByIndex: SetValueAxisByIndex;
 }
 
 function ValueAxesPanel(props: ValueAxesPanelProps) {
-  const { stateParams, addValueAxis, setValue } = props;
+  const { stateParams, addValueAxis, removeValueAxis } = props;
 
   const getSeries = (axis: ValueAxis) => {
     const isFirst = stateParams.valueAxes[0] === axis;
@@ -57,12 +58,6 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
   const getSeriesShort = (axis: ValueAxis) => {
     const maxStringLength = 30;
     return getSeries(axis).substring(0, maxStringLength);
-  };
-
-  const removeValueAxis = (axis: ValueAxis) => {
-    if (stateParams.valueAxes.length > 1) {
-      setValue('valueAxes', stateParams.valueAxes.filter(valAxis => valAxis.id !== axis.id));
-    }
   };
 
   const renderRemoveButton = (axis: ValueAxis) => (

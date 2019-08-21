@@ -73,14 +73,14 @@ module.directive('vislibSeries', function () {
           }
         });
       });
-
+      // converted
       $scope.$watch(() => {
         return $scope.editorState.params.seriesParams.map(series => series.type).join();
       }, () => {
         const types = _.uniq(_.map($scope.editorState.params.seriesParams, 'type'));
         $scope.vis.type.type = types.length === 1 ? types[0] : 'histogram';
       });
-
+      // converted
       $scope.$watch('editorState.params.valueAxes.length', () => {
         $scope.editorState.params.seriesParams.forEach(series => {
           if (!$scope.editorState.params.valueAxes.find(axis => axis.id === series.valueAxis)) {
@@ -88,7 +88,7 @@ module.directive('vislibSeries', function () {
           }
         });
       });
-
+      // converted
       $scope.changeValueAxis = (index) => {
         const series = $scope.editorState.params.seriesParams[index];
         if (series.valueAxis === 'new') {

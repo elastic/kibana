@@ -36,6 +36,7 @@ uiModules
     ['vis', { watchDepth: 'collection' }],
     ['setValue', { watchDepth: 'reference' }],
     ['setValidity', { watchDepth: 'reference' }],
+    ['setVisType', { watchDepth: 'reference' }],
     ['setTouched', { watchDepth: 'reference' }],
     'hasHistogramAgg',
   ]))
@@ -69,6 +70,10 @@ uiModules
           }
         };
 
+        $scope.setVisType = (vis, type) => {
+          vis.type.type = type;
+        };
+
         const comp = typeof $scope.editor === 'string' ?
           $scope.editor :
           `<vis-options-react-wrapper
@@ -79,6 +84,7 @@ uiModules
             vis="vis"
             set-value="setValue"
             set-validity="setValidity"
+            set-vis-type="setVisType"
             set-touched="setTouched">
           </vis-options-react-wrapper>`;
         const $editor = $compile(comp)($scope);

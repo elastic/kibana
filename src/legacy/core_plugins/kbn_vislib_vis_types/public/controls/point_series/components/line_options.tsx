@@ -23,8 +23,8 @@ import { i18n } from '@kbn/i18n';
 import { SeriesParam } from '../../../types';
 import { SwitchOption } from '../../switch';
 import { NumberInputOption } from '../../number_input';
+import { SetChart } from './chart_options';
 
-export type SetChart = <T extends keyof SeriesParam>(paramName: T, value: SeriesParam[T]) => void;
 interface LineOptionsParams {
   chart: SeriesParam;
   setChart: SetChart;
