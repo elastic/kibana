@@ -121,7 +121,6 @@ export const getNetworkTopNFlowColumns = (
     name: i18n.AUTONOMOUS_SYSTEM,
     truncateText: false,
     hideForMobile: false,
-    sortable: true,
     render: ({ node, cursor: { value: ipAddress } }) => {
       const asAttr = `${flowTarget}.autonomous_system`;
       const as: AutonomousSystemItem | null = get(asAttr, node);
@@ -208,13 +207,12 @@ export const getNetworkTopNFlowColumns = (
     },
   },
   {
+    field: `node.${flowTarget}.${getOppositeField(flowTarget)}_ips`,
     name: flowTarget === FlowTargetNew.source ? i18n.DESTINATION_IPS : i18n.SOURCE_IPS,
     truncateText: false,
     hideForMobile: false,
     sortable: true,
-    render: ({ node }) => {
-      const ipsAttr = `${flowTarget}.${getOppositeField(flowTarget)}_ips`;
-      const ips: string | null = get(ipsAttr, node);
+    render: ips => {
       if (ips != null) {
         return numeral(ips).format('0,000');
       } else {
