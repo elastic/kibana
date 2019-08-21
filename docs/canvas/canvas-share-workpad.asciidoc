@@ -10,25 +10,39 @@ When you are ready to share your workpad, create a PDF, or export your workpad.
 
 To view your workpad outside of Kibana, generate a PDF. 
 
-. If you are using a basic license, enable reporting in your `config/kibana.yml` file.
+. If you are using a Gold or Platinum license, enable reporting in your `config/kibana.yml` file.
 
 . From your workpad, click the *Share workpad* icon in the upper left corner, then select *PDF reports*.
 
 . Click *Generate PDF*. 
 +
-image::images/canvas-generate-pdf.gif[]
+[role="screenshot"]
+image::images/canvas-generate-pdf.gif[Generate PDF]
 
 [float]
 [[export-workpad]]
 === Export your workpad
 
-To share your workpads with another author, export your workpads as JSON files.
+To share your workpad with another author, export it as a JSON file.
 
-. Go to the *Canvas workpads* page. 
+[float]
+[[export-single-workpad]]
+==== Export a single workpad
 
-. Choose one of the following options:
+. From your workpad, click the *Share workpad* icon in the upper left corner.
 
-* To export a single workpad, click the *Export* icon next to the workpad you want to export.
+. Select *Download as JSON*.
++
+[role="screenshot"]
+image::canvas-export-workpad.png[Export single workpad]
 
-* To export multiple workpads, select the workpads you want to export, then click *Export*.
+[float]
+[[export-multiple-workpads]]
+==== Export multiple workpads
+
+. Go to the *Canvas workpads* page.
+
+. Select the workpads you want to export
+
+. Click *Export*.
 
