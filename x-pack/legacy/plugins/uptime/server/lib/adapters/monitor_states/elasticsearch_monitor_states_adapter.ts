@@ -25,6 +25,7 @@ import {
 import { INDEX_NAMES, STATES, QUERY } from '../../../../common/constants';
 import { getHistogramInterval, getFilteredQueryAndStatusFilter } from '../../helper';
 import { fetchMonitorLocCheckGroups } from './latest_check_group_fetcher';
+import { queryEnriched } from './query_enriched';
 
 export type QueryContext = {
   database: any;
@@ -33,9 +34,9 @@ export type QueryContext = {
   dateRangeEnd: string;
   pagination: CursorPagination;
   filterClause: any | null;
+  size: number;
 };
 
-type SortChecks = (check: Check) => string[];
 const checksSortBy = (check: Check) => [
   get<string>(check, 'observer.geo.name'),
   get<string>(check, 'monitor.ip'),
@@ -62,6 +63,8 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     pagination: CursorPagination = DefaultCursorPagination,
     filters?: string | null
   ): Promise<GetMonitorStatesResult> {
+    // TODO: make this configurable
+    const size = 10;
     console.log('FUN GET');
 
     const { query: filterClause, statusFilter } = getFilteredQueryAndStatusFilter(
@@ -76,11 +79,12 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       dateRangeEnd: dateRangeEnd,
       pagination: pagination,
       filterClause,
+      size,
     };
 
-    const checkGroups = await fetchMonitorLocCheckGroups(queryContext, 10);
+    const checkGroups = await queryEnriched(queryContext);
 
-    console.log('AWAIT IT', checkGroups);
+    console.log('AWAIT IT', JSON.stringify(checkGroups, null, 2));
 
     return {
       summaries: [],
