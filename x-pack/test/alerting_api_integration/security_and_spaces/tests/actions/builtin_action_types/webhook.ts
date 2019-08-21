@@ -5,10 +5,8 @@
  */
 
 import expect from '@kbn/expect';
-const { URL } = require('url');
-
+import { URL } from 'url';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-
 import {
   getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
@@ -25,7 +23,7 @@ const defaultValues: Record<string, any> = {
 function parsePort(url: Record<string, string>): Record<string, string | null | number> {
   return {
     ...url,
-    port: url.port ? parseInt(url.port) : url.port,
+    port: url.port ? parseInt(url.port, 10) : url.port,
   };
 }
 // eslint-disable-next-line import/no-default-export
@@ -181,6 +179,38 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(result.status).to.eql('ok');
+    });
+
+    it('should handle unreachable webhook targets', async () => {
+      const webhookActionId = await createWebhookAction('http://some.non.existent.com/endpoint');
+      const { body: result } = await supertest
+        .post(`/api/action/${webhookActionId}/_execute`)
+        .set('kbn-xsrf', 'test')
+        .send({
+          params: {
+            body: 'failure',
+          },
+        })
+        .expect(200);
+
+      expect(result.status).to.eql('error');
+      expect(result.message).to.match(/due to unreachable remote webhook/);
+    });
+
+    it('should handle failing webhook targets', async () => {
+      const webhookActionId = await createWebhookAction(webhookSimulatorURL);
+      const { body: result } = await supertest
+        .post(`/api/action/${webhookActionId}/_execute`)
+        .set('kbn-xsrf', 'test')
+        .send({
+          params: {
+            body: 'failure',
+          },
+        })
+        .expect(200);
+
+      expect(result.status).to.eql('error');
+      expect(result.message).to.match(/due to remote webhook failure/);
     });
   });
 }

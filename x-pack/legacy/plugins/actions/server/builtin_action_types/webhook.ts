@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { nullableType } from './lib/nullable';
@@ -115,6 +115,18 @@ function flatterUrl(url: string | TypeOf<typeof CompositeUrlSchema>): string {
   return `${url.scheme}://${url.host}${url.port ? `:${url.port}` : ''}${url.path || ''}`;
 }
 
+function webhookErrorSource(error: AxiosError): string {
+  if (error.response) {
+    // The request was made and the server responded with a status code
+    // that falls out of the range of 2xx
+    return `remote webhook failure`;
+  } else if (error.request) {
+    // The request was made but no response was received
+    return `unreachable remote webhook`;
+  }
+  return `unknown webhook event`;
+}
+
 // action executor
 async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionTypeExecutorResult> {
   const log = (msg: string) => execOptions.services.log(['warn', 'actions', 'webhook'], msg);
@@ -124,9 +136,8 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
   const { user: username, password } = execOptions.secrets as ActionTypeSecretsType;
   const { body: data } = execOptions.params as ActionParamsType;
 
-  let response;
   try {
-    response = await axios.request({
+    const response = await axios.request({
       method,
       url: flatterUrl(url),
       auth: {
@@ -136,31 +147,34 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
       headers,
       data,
     });
-  } catch (err) {
+
+    log(`response from ${id} webhook event: ${response.status}`);
+
+    if (response.status >= 200 && response.status < 300) {
+      return {
+        status: 'ok',
+        data: response.data,
+      };
+    } else {
+      return {
+        status: 'error',
+        message: `an http error ${response.status} occurred in action "${id}", due to an unknown webhook event`,
+        data: response.data,
+      };
+    }
+  } catch (error) {
     const message = i18n.translate('xpack.actions.builtin.webhook.postingErrorMessage', {
-      defaultMessage: `error in action "{id}" webhook event: {errorMessage}`,
+      defaultMessage: `error in action "{id}", due to {eventSource}: {errorMessage}`,
       values: {
         id,
-        errorMessage: err.message,
+        eventSource: webhookErrorSource(error),
+        errorMessage: error.message,
       },
     });
-    log(`error on ${id} webhook event: ${err.message}`);
+    log(`error on ${id} webhook event: ${error.message}`);
     return {
       status: 'error',
       message,
     };
   }
-
-  log(`response from ${id} webhook event: ${response.status}`);
-
-  if (response.status === 200) {
-    return {
-      status: 'ok',
-      data: response.data,
-    };
-  }
-
-  return {
-    status: 'error',
-  };
 }
