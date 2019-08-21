@@ -1,3 +1,4 @@
+[role="xpack"]
 [[canvas-present-workpad]]
 == Present your workpad
 
@@ -8,12 +9,9 @@ When you are ready to present your workpad, use and enable the presentation opti
 === View your workpad in fullscreen mode
 
 In the upper left corner, click the *Enter fullscreen mode* icon.
-
-[float]
-[[zoom-in-out]]
-=== Use the zoom options
-
-In the upper left corner, click the *Zoom controls* icon, then select one of the options.
++
+[role="screenshot"]
+image::images/canvas-fullscreen.png[Fullscreen mode]
 
 [float]
 [[enable-autoplay]]
