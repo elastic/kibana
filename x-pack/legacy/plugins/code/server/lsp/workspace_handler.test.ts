@@ -102,7 +102,8 @@ test('should support spaces in workspace dir', async () => {
   expect(converted).toBe(`git://${repo}/blob/${revision}/${file}`);
 });
 
-test('should support case-insensitive workspace dir', async () => {
+// FLAKY: https://github.com/elastic/kibana/issues/43655
+test.skip('should support case-insensitive workspace dir', async () => {
   const workspaceCaseInsensitive = path.join(baseDir, 'WorkSpace');
   // test only if it's case-insensitive
   const workspaceHandler = new WorkspaceHandler(
