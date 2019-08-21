@@ -42,7 +42,7 @@ const INITIAL_DATA = {
       p99: []
     },
     tpmBuckets: [],
-    overallAvgDuration: undefined
+    overallAvgDuration: null
   },
   anomalyTimeseries: undefined
 };

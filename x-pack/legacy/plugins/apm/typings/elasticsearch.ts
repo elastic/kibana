@@ -25,7 +25,10 @@ declare module 'elasticsearch' {
     | 'min'
     | 'percentiles'
     | 'sum'
-    | 'extended_stats';
+    | 'extended_stats'
+    | 'filter'
+    | 'filters'
+    | 'cardinality';
 
   type AggOptions = AggregationOptionMap & {
     [key: string]: any;
@@ -40,6 +43,10 @@ declare module 'elasticsearch' {
     };
   };
 
+  type SubAggregation<T> = T extends { aggs: any }
+    ? AggregationResultMap<T['aggs']>
+    : {};
+
   // eslint-disable-next-line @typescript-eslint/prefer-interface
   type BucketAggregation<SubAggregationMap, KeyType = string> = {
     buckets: Array<
@@ -47,9 +54,20 @@ declare module 'elasticsearch' {
         key: KeyType;
         key_as_string: string;
         doc_count: number;
-      } & (SubAggregationMap extends { aggs: any }
-        ? AggregationResultMap<SubAggregationMap['aggs']>
-        : {})
+      } & (SubAggregation<SubAggregationMap>)
+    >;
+  };
+
+  type FilterAggregation<SubAggregationMap> = {
+    doc_count: number;
+  } & SubAggregation<SubAggregationMap>;
+
+  // eslint-disable-next-line @typescript-eslint/prefer-interface
+  type FiltersAggregation<SubAggregationMap> = {
+    buckets: Array<
+      {
+        doc_count: number;
+      } & SubAggregation<SubAggregationMap>
     >;
   };
 
@@ -105,6 +123,11 @@ declare module 'elasticsearch' {
             lower: number | null;
           };
         };
+        filter: FilterAggregation<AggregationOption[AggregationName]>;
+        filters: FiltersAggregation<AggregationOption[AggregationName]>;
+        cardinality: {
+          value: number;
+        };
       }[AggregationType & keyof AggregationOption[AggregationName]];
     }
   >;
@@ -115,7 +138,7 @@ declare module 'elasticsearch' {
   > &
     (SearchParams extends { body: Required<AggregationOptionMap> }
       ? {
-          aggregations: AggregationResultMap<SearchParams['body']['aggs']>;
+          aggregations?: AggregationResultMap<SearchParams['body']['aggs']>;
         }
       : {});
 

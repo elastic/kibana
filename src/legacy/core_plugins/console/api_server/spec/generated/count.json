@@ -32,6 +32,6 @@
       "_count",
       "{indices}/_count"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/search-count.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-count.html"
   }
 }

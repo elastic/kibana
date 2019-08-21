@@ -5,10 +5,10 @@
  */
 
 import { useMemo } from 'react';
-import { loadTransactionCharts } from '../services/rest/apm/transaction_groups';
 import { getTransactionCharts } from '../selectors/chartSelectors';
 import { useFetcher } from './useFetcher';
 import { useUrlParams } from './useUrlParams';
+import { callApmApi } from '../services/rest/callApmApi';
 
 export function useTransactionCharts() {
   const {
@@ -18,13 +18,18 @@ export function useTransactionCharts() {
 
   const { data, error, status } = useFetcher(() => {
     if (serviceName && start && end) {
-      return loadTransactionCharts({
-        serviceName,
-        start,
-        end,
-        transactionName,
-        transactionType,
-        uiFilters
+      return callApmApi({
+        pathname: '/api/apm/services/{serviceName}/transaction_groups/charts',
+        params: {
+          path: { serviceName },
+          query: {
+            start,
+            end,
+            transactionType,
+            transactionName,
+            uiFilters: JSON.stringify(uiFilters)
+          }
+        }
       });
     }
   }, [serviceName, start, end, transactionName, transactionType, uiFilters]);

@@ -28,7 +28,6 @@ const regionMapPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyP
     require: ['kibana', 'elasticsearch', 'visualizations', 'interpreter', 'data'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: [resolve(__dirname, 'public/legacy')],
       injectDefaultVars(server) {
         const { regionmap } = server.config().get('map');

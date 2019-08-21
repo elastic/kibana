@@ -18,6 +18,6 @@
     "patterns": [
       "{indices}"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-delete-index.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-delete-index.html"
   }
 }

@@ -121,6 +121,7 @@ export interface CoreSetup {
         registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
         basePath: HttpServiceSetup['basePath'];
         isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
+        registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(name: T, provider: RequestHandlerContextProvider<RequestHandlerContext>) => RequestHandlerContextContainer<RequestHandlerContext>;
         createRouter: () => IRouter;
     };
 }
@@ -239,7 +240,8 @@ export interface HttpServerSetup {
 
 // @public (undocumented)
 export type HttpServiceSetup = Omit<HttpServerSetup, 'registerRouter'> & {
-    createRouter: (path: string) => IRouter;
+    createRouter: (path: string, plugin?: PluginOpaqueId) => IRouter;
+    registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(pluginOpaqueId: PluginOpaqueId, contextName: T, provider: RequestHandlerContextProvider<RequestHandlerContext>) => RequestHandlerContextContainer<RequestHandlerContext>;
 };
 
 // @public (undocumented)
@@ -261,6 +263,8 @@ export type IContextProvider<TContext extends Record<string, any>, TContextName 
 
 // @public
 export interface IKibanaSocket {
+    readonly authorizationError?: Error;
+    readonly authorized?: boolean;
     // (undocumented)
     getPeerCertificate(detailed: true): DetailedPeerCertificate | null;
     // (undocumented)
@@ -271,17 +275,15 @@ export interface IKibanaSocket {
 // @internal (undocumented)
 export interface InternalCoreSetup {
     // (undocumented)
+    context: ContextSetup;
+    // (undocumented)
     elasticsearch: ElasticsearchServiceSetup;
     // (undocumented)
     http: HttpServiceSetup;
-    // (undocumented)
-    plugins: PluginsServiceSetup;
 }
 
 // @public (undocumented)
 export interface InternalCoreStart {
-    // (undocumented)
-    plugins: PluginsServiceStart;
 }
 
 // @public
@@ -364,6 +366,28 @@ export type KnownHeaders = KnownKeys<IncomingHttpHeaders>;
 
 // @public @deprecated (undocumented)
 export interface LegacyRequest extends Request {
+}
+
+// @public @deprecated (undocumented)
+export interface LegacyServiceSetupDeps {
+    // Warning: (ae-incompatible-release-tags) The symbol "core" is marked as @public, but its signature references "InternalCoreSetup" which is marked as @internal
+    // 
+    // (undocumented)
+    core: InternalCoreSetup & {
+        plugins: PluginsServiceSetup;
+    };
+    // (undocumented)
+    plugins: Record<string, unknown>;
+}
+
+// @public @deprecated (undocumented)
+export interface LegacyServiceStartDeps {
+    // (undocumented)
+    core: InternalCoreStart & {
+        plugins: PluginsServiceStart;
+    };
+    // (undocumented)
+    plugins: Record<string, unknown>;
 }
 
 // Warning: (ae-forgotten-export) The symbol "lifecycleResponseFactory" needs to be exported by the entry point index.d.ts
@@ -541,7 +565,30 @@ export type RedirectResponseOptions = HttpResponseOptions & {
 };
 
 // @public
-export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType> = (context: {}, request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>, response: KibanaResponseFactory) => KibanaResponse<any> | Promise<KibanaResponse<any>>;
+export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType> = (context: RequestHandlerContext, request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>>, response: KibanaResponseFactory) => KibanaResponse<any> | Promise<KibanaResponse<any>>;
+
+// @public
+export interface RequestHandlerContext {
+    // (undocumented)
+    core: {
+        elasticsearch: {
+            dataClient: ScopedClusterClient;
+            adminClient: ScopedClusterClient;
+        };
+    };
+}
+
+// @public
+export type RequestHandlerContextContainer<TContext> = IContextContainer<TContext, RequestHandlerReturn | Promise<RequestHandlerReturn>, RequestHandlerParams>;
+
+// @public
+export type RequestHandlerContextProvider<TContext> = IContextProvider<TContext, keyof TContext, RequestHandlerParams>;
+
+// @public
+export type RequestHandlerParams = [KibanaRequest, KibanaResponseFactory];
+
+// @public
+export type RequestHandlerReturn = KibanaResponse;
 
 // @public
 export type ResponseError = string | Error | {

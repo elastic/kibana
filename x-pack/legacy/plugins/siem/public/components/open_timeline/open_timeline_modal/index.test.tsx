@@ -18,6 +18,8 @@ import * as i18n from '../translations';
 
 import { OpenTimelineModalButton } from '.';
 
+jest.mock('../../../lib/settings/use_kibana_ui_setting');
+
 const getStateChildComponent = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   wrapper: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>
