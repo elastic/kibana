@@ -55,6 +55,18 @@ import {
 
 import { INDEX_STATUS, useExploreData } from './use_explore_data';
 
+const customColorScaleFactory = (n: number) => (t: number) => {
+  if (t < 1 / n) {
+    return 0;
+  }
+  if (t < 3 / n) {
+    return (n / 4) * (t - 1 / n);
+  }
+  return 0.5 + (t - 3 / n);
+};
+
+const FEATURE_INFLUENCE = 'feature_influence';
+
 interface GetDataFrameAnalyticsResponse {
   count: number;
   data_frame_analytics: DataFrameAnalyticsOutlierConfig[];
@@ -116,13 +128,6 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
     .get('theme:darkMode')
     ? euiThemeDark
     : euiThemeLight;
-
-  const cellBgColor = d3.scale
-    .linear()
-    .domain([0, 1])
-    // typings for .range() incorrectly don't allow passing in a color extent.
-    // @ts-ignore
-    .range([d3.rgb(euiTheme.euiColorEmptyShade), d3.rgb(euiTheme.euiColorVis1)]);
 
   const [clearTable, setClearTable] = useState(false);
 
@@ -216,6 +221,22 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
   const columns = [];
 
   if (selectedFields.length > 0 && tableItems.length > 0) {
+    // table cell color coding takes into account:
+    // - whether the theme is dark/light
+    // - the number of analysis features
+    // based on that
+    const cellBgColorScale = d3.scale
+      .linear()
+      .domain([0, 1])
+      // typings for .range() incorrectly don't allow passing in a color extent.
+      // @ts-ignore
+      .range([d3.rgb(euiTheme.euiColorEmptyShade), d3.rgb(euiTheme.euiColorVis1)]);
+    const featureCount = Object.keys(tableItems[0]._source).filter(key =>
+      key.includes(`${jobConfig.dest.results_field}.${FEATURE_INFLUENCE}.`)
+    ).length;
+    const customScale = customColorScaleFactory(featureCount);
+    const cellBgColor = (n: number) => cellBgColorScale(customScale(n));
+
     columns.push(
       ...selectedFields
         .sort(sortColumns(tableItems[0]._source, jobConfig.dest.results_field))
@@ -285,13 +306,13 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
             const color = undefined;
             const resultsField = jobConfig.dest.results_field;
 
-            if (fullItem._source[`${resultsField}.feature_influence.${k}`] !== undefined) {
+            if (fullItem._source[`${resultsField}.${FEATURE_INFLUENCE}.${k}`] !== undefined) {
               backgroundColor = cellBgColor(
-                fullItem._source[`${resultsField}.feature_influence.${k}`]
+                fullItem._source[`${resultsField}.${FEATURE_INFLUENCE}.${k}`]
               );
             }
 
-            if (split[0] === resultsField) {
+            if (split.length > 2 && split[0] === resultsField && split[1] === FEATURE_INFLUENCE) {
               backgroundColor = cellBgColor(d);
             }
 
