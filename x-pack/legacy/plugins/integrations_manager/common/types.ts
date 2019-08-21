@@ -20,8 +20,8 @@ export type AssetType =
   | 'visualization';
 
 // Registry's response types
-// from /list
-// https://github.com/elastic/integrations-registry/blob/master/docs/api/list.json
+// from /search
+// https://github.com/elastic/integrations-registry/blob/master/docs/api/search.json
 export type RegistryList = RegistryListItem[];
 export interface RegistryListItem {
   description: string;
