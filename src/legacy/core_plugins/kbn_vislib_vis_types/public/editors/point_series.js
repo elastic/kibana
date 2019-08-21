@@ -18,7 +18,7 @@
  */
 
 import { uiModules } from 'ui/modules';
-import vislibValuePointSeriesTemplate from './point_series.html';
+import vislibValuePointSeriesTemplate from './point_series.tsx';
 const module = uiModules.get('kibana');
 
 module.directive('vislibValueAxes', function () {

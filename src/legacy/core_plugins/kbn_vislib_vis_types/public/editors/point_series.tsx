@@ -26,6 +26,8 @@ import { SwitchOption } from '../controls/switch';
 import { GridOptions } from '../controls/point_series/grid_options';
 import { BasicOptions } from '../controls/basic_options';
 import { BasicVislibParams } from '../types';
+import { NumberInputOption } from '../controls/number_input';
+import { SelectOption } from '../controls/select';
 
 function PointSeriesOptions(props: VisOptionsProps<BasicVislibParams>) {
   const { stateParams, setValue, vis } = props;
@@ -41,7 +43,7 @@ function PointSeriesOptions(props: VisOptionsProps<BasicVislibParams>) {
             />
           </h2>
         </EuiTitle>
-        <EuiSpacer size="s" />
+        <EuiSpacer size="s"/>
 
         <BasicOptions {...props} />
 
@@ -77,9 +79,61 @@ function PointSeriesOptions(props: VisOptionsProps<BasicVislibParams>) {
             }
           />
         )}
+
+        <SwitchOption
+          label={i18n.translate('kbnVislibVisTypes.editors.pointSeries.thresholdLine.show', {
+            defaultMessage: 'Show threshold line',
+          })}
+          paramName="show"
+          value={stateParams.thresholdLine.show}
+          setValue={(paramName, value) =>
+            setValue('thresholdLine', { ...stateParams.thresholdLine, [paramName]: value })
+          }
+        />
+
+        {stateParams.thresholdLine.show && (
+          <NumberInputOption
+            label={i18n.translate('kbnVislibVisTypes.editors.pointSeries.thresholdLine.valueLabel', {
+              defaultMessage: 'Threshold value',
+            })}
+            paramName="value"
+            value={stateParams.thresholdLine.value}
+            setValue={(paramName, value) =>
+              setValue('thresholdLine', { ...stateParams.thresholdLine, [paramName]: value })
+            }
+          />
+        ) && (
+          <NumberInputOption
+            label={i18n.translate('kbnVislibVisTypes.editors.pointSeries.thresholdLine.widthLabel', {
+              defaultMessage: 'Line width',
+            })}
+            paramName="width"
+            min="1"
+            value="1"
+            value={stateParams.thresholdLine.width}
+            setValue={(paramName, value) =>
+              setValue('thresholdLine', { ...stateParams.thresholdLine, [paramName]: value })
+            }
+          />
+        ) && (
+          <SelectOption
+            label={i18n.translate('kbnVislibVisTypes.editors.pointSeries.thresholdLine.style', {
+              defaultMessage: 'Line style',
+            })}
+            options={['full', 'dashed', 'dot-dashed']}
+            paramName="style"
+            value={stateParams.thresholdLine.style}
+            setValue={(paramName, value) =>
+              setValue('thresholdLine', { ...stateParams.thresholdLine, [paramName]: value })
+            }
+          />
+        )
+
+        }
+
       </EuiPanel>
 
-      <EuiSpacer size="s" />
+      <EuiSpacer size="s"/>
 
       <GridOptions {...props} />
     </>
