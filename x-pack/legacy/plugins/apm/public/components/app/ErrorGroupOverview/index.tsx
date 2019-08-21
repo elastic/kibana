@@ -14,16 +14,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { useFetcher } from '../../../hooks/useFetcher';
-import {
-  loadErrorDistribution,
-  loadErrorGroupList
-} from '../../../services/rest/apm/error_groups';
 import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
 import { ErrorGroupList } from './List';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useTrackPageview } from '../../../../../infra/public';
 import { PROJECTION } from '../../../../common/projections/typings';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
+import { callApmApi } from '../../../services/rest/callApmApi';
 
 const ErrorGroupOverview: React.SFC = () => {
   const { urlParams, uiFilters } = useUrlParams();
@@ -32,24 +29,38 @@ const ErrorGroupOverview: React.SFC = () => {
 
   const { data: errorDistributionData } = useFetcher(() => {
     if (serviceName && start && end) {
-      return loadErrorDistribution({
-        serviceName,
-        start,
-        end,
-        uiFilters
+      return callApmApi({
+        pathname: '/api/apm/services/{serviceName}/errors/distribution',
+        params: {
+          path: {
+            serviceName
+          },
+          query: {
+            start,
+            end,
+            uiFilters: JSON.stringify(uiFilters)
+          }
+        }
       });
     }
   }, [serviceName, start, end, uiFilters]);
 
   const { data: errorGroupListData } = useFetcher(() => {
     if (serviceName && start && end) {
-      return loadErrorGroupList({
-        serviceName,
-        start,
-        end,
-        sortField,
-        sortDirection,
-        uiFilters
+      return callApmApi({
+        pathname: '/api/apm/services/{serviceName}/errors',
+        params: {
+          path: {
+            serviceName
+          },
+          query: {
+            start,
+            end,
+            sortField,
+            sortDirection,
+            uiFilters: JSON.stringify(uiFilters)
+          }
+        }
       });
     }
   }, [serviceName, start, end, sortField, sortDirection, uiFilters]);
