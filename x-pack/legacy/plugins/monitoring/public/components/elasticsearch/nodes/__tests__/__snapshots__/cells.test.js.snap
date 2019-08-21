@@ -28,12 +28,12 @@ exports[`Node Listing Metric Cell should format a non-percentage metric 1`] = `
     <div
       class="euiText euiText--extraSmall"
     >
-      206.5 GB max
+      206.5 GB  max
     </div>
     <div
       class="euiText euiText--extraSmall"
     >
-      206.3 GB min
+      206.3 GB  min
     </div>
   </div>
 </div>
