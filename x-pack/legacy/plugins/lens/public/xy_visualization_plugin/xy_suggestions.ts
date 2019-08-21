@@ -121,7 +121,7 @@ function getSuggestion(
   tableLabel?: string
 ): VisualizationSuggestion<State> {
   const title = getSuggestionTitle(yValues, xValue, tableLabel);
-  const seriesType: SeriesType = getSeriesType(currentState, layerId, splitBy, xValue);
+  const seriesType: SeriesType = getSeriesType(currentState, layerId, xValue, changeType);
   const isHorizontal = currentState ? currentState.isHorizontal : false;
 
   const options = {
@@ -141,18 +141,17 @@ function getSuggestion(
   if (currentState && changeType === 'unchanged') {
     if (xValue.operation.scale && xValue.operation.scale !== 'ordinal') {
       // change chart type for interval or ratio scales on x axis
-      const newSeriesType = seriesType === 'area' ? 'bar' : 'area';
+      const newSeriesType = flipSeriesType(seriesType);
       return buildSuggestion({
         ...options,
         seriesType: newSeriesType,
-        title:
-          newSeriesType === 'area'
-            ? i18n.translate('xpack.lens.xySuggestions.areaChartTitle', {
-                defaultMessage: 'Area chart',
-              })
-            : i18n.translate('xpack.lens.xySuggestions.barChartTitle', {
-                defaultMessage: 'Bar chart',
-              }),
+        title: newSeriesType.startsWith('area')
+          ? i18n.translate('xpack.lens.xySuggestions.areaChartTitle', {
+              defaultMessage: 'Area chart',
+            })
+          : i18n.translate('xpack.lens.xySuggestions.barChartTitle', {
+              defaultMessage: 'Bar chart',
+            }),
       });
     } else {
       // flip between horizontal/vertical for ordinal scales
@@ -167,18 +166,38 @@ function getSuggestion(
   }
 }
 
+function flipSeriesType(oldSeriesType: SeriesType) {
+  switch (oldSeriesType) {
+    case 'area':
+      return 'bar';
+    case 'area_stacked':
+      return 'bar_stacked';
+    case 'bar':
+      return 'area';
+    case 'bar_stacked':
+      return 'area_stacked';
+    default:
+      return 'bar';
+  }
+}
+
 function getSeriesType(
   currentState: XYState | undefined,
   layerId: string,
-  splitBy: TableSuggestionColumn | undefined,
-  xValue: TableSuggestionColumn
+  xValue: TableSuggestionColumn,
+  changeType: TableChangeType
 ): SeriesType {
-  const oldLayer = getExistingLayer(currentState, layerId);
-  return (
-    (oldLayer && oldLayer.seriesType) ||
-    (currentState && currentState.preferredSeriesType) ||
-    (xValue.operation.dataType === 'date' ? 'area' : 'bar')
-  );
+  const defaultType = xValue.operation.dataType === 'date' ? 'area' : 'bar';
+  if (changeType === 'initial') {
+    return defaultType;
+  } else {
+    const oldLayer = getExistingLayer(currentState, layerId);
+    return (
+      (oldLayer && oldLayer.seriesType) ||
+      (currentState && currentState.preferredSeriesType) ||
+      defaultType
+    );
+  }
 }
 
 function getSuggestionTitle(
