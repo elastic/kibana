@@ -6,9 +6,7 @@
 
 import { Plugin, CoreSetup } from 'src/core/public';
 import { AnonymousPaths } from './anonymous_paths';
-import { SessionExpired } from './session_expired';
-import { SessionTimeout } from './session_timeout';
-import { SessionTimeoutInterceptor } from './session_timeout_interceptor';
+import { SessionExpired, SessionTimeout, SessionTimeoutInterceptor } from './session';
 import { UnauthorizedResponseInterceptor } from './unauthorized_response_interceptor';
 
 export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPluginStart> {

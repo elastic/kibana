@@ -6,7 +6,7 @@
 
 import { HttpInterceptor, HttpErrorResponse, HttpResponse } from 'src/core/public';
 
-import { AnonymousPaths } from './anonymous_paths';
+import { AnonymousPaths } from '../anonymous_paths';
 import { ISessionTimeout } from './session_timeout';
 
 const isSystemAPIRequest = (request: Request) => {

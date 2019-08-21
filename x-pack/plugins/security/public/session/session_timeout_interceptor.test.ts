@@ -7,9 +7,9 @@
 // @ts-ignore
 import fetchMock from 'fetch-mock/es5/client';
 import { SessionTimeoutInterceptor } from './session_timeout_interceptor';
-import { setup } from '../../../../src/test_utils/public/http_test_setup';
+import { setup } from '../../../../../src/test_utils/public/http_test_setup';
 import { createSessionTimeoutMock } from './session_timeout.mock';
-import { AnonymousPaths } from './anonymous_paths';
+import { AnonymousPaths } from '../anonymous_paths';
 
 const mockCurrentUrl = (url: string) => window.history.pushState({}, '', url);
 
