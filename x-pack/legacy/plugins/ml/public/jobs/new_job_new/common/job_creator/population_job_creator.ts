@@ -101,10 +101,6 @@ export class PopulationJobCreator extends JobCreator {
   private _createDetector(agg: Aggregation, field: Field) {
     const dtr: Detector = createBasicDetector(agg, field);
 
-    if (field !== null) {
-      dtr.field_name = field.id;
-    }
-
     if (this._splitField !== null) {
       dtr.over_field_name = this._splitField.id;
     }

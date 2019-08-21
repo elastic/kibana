@@ -1596,10 +1596,10 @@
     ts-debounce "^1.0.0"
     uuid "^3.3.2"
 
-"@elastic/ctags-langserver@^0.1.5":
-  version "0.1.5"
-  resolved "https://registry.yarnpkg.com/@elastic/ctags-langserver/-/ctags-langserver-0.1.5.tgz#3d2691245ddb47c121178ebcdbf21a2adb74b3c2"
-  integrity sha512-Wx+1hv9u54ypEKGP1ZR/hp6z8nyjheGeOZRucO2LuMwaxNx8M8K/tDGQmAGRmXytW8f42QFAWo7PHFRht+fdSQ==
+"@elastic/ctags-langserver@^0.1.8":
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/@elastic/ctags-langserver/-/ctags-langserver-0.1.8.tgz#98d82d63a415080422bd8681bb4680cec754e9ca"
+  integrity sha512-PM24l8hCxahi+DndPAYHM0bIhb6/QCBH9WtZh1NUZCfrSYsy5CkB4yZMoyPAYIr2VKWvnIfr+YKT6i/2JaFv5w==
   dependencies:
     "@elastic/lsp-extension" "^0.1.1"
     "@elastic/node-ctags" "1.0.2"
@@ -1649,10 +1649,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@13.1.1":
-  version "13.1.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-13.1.1.tgz#35ff2bdb4f38b12a2a82108d9b10ba5949eef3a9"
-  integrity sha512-yPqxQYWSIEO4nhgWDHY48Ty9eUD1xLYogKUPXzla3OESOj8vqYLD/fCYX4M3s32NZgLzjvy8AaFiCNsZ3SF6yw==
+"@elastic/eui@13.3.0":
+  version "13.3.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-13.3.0.tgz#05c78ffcb2041ebafd807e23dd3d32553e8c1812"
+  integrity sha512-Z/1KGaqKY2PCJXdJ3XTSTcnZZxjFysafvIWNRs+O0C+IQsyy0cz5Sj8BaM9pUgYVjL2SaO04Hs9Yb09MDJwFGQ==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
