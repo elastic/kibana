@@ -7,7 +7,6 @@
 import { EuiFlexGroup } from '@elastic/eui';
 import { getOr, isEmpty } from 'lodash/fp';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
@@ -53,6 +52,8 @@ const TimelineContainer = styled(EuiFlexGroup)`
 
 TimelineContainer.displayName = 'TimelineContainer';
 
+export const isCompactFooter = (width: number): boolean => width < 600;
+
 interface Props {
   browserFields: BrowserFields;
   columns: ColumnHeader[];
@@ -82,7 +83,7 @@ interface Props {
 }
 
 /** The parent Timeline component */
-export const Timeline = pure<Props>(
+export const Timeline = React.memo<Props>(
   ({
     browserFields,
     columns,
@@ -170,38 +171,38 @@ export const Timeline = pure<Props>(
                   refetch,
                 }) => (
                   <TimelineRefetch loading={loading} id={id} inspect={inspect} refetch={refetch}>
-                    <TimelineContext.Provider value={{ isLoading: loading }} />
-                    <StatefulBody
-                      browserFields={browserFields}
-                      data={events}
-                      id={id}
-                      isLoading={loading}
-                      height={calculateBodyHeight({
-                        flyoutHeight,
-                        flyoutHeaderHeight,
-                        timelineHeaderHeight,
-                        timelineFooterHeight: footerHeight,
-                      })}
-                      sort={sort}
-                      toggleColumn={toggleColumn}
-                      width={width}
-                    />
-                    <Footer
-                      serverSideEventCount={totalCount}
-                      hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                      height={footerHeight}
-                      isLive={isLive}
-                      isLoading={loading}
-                      itemsCount={events.length}
-                      itemsPerPage={itemsPerPage}
-                      itemsPerPageOptions={itemsPerPageOptions}
-                      onChangeItemsPerPage={onChangeItemsPerPage}
-                      onLoadMore={loadMore}
-                      nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                      tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
-                      getUpdatedAt={getUpdatedAt}
-                      width={width}
-                    />
+                    <TimelineContext.Provider value={{ isLoading: loading }}>
+                      <StatefulBody
+                        browserFields={browserFields}
+                        data={events}
+                        id={id}
+                        height={calculateBodyHeight({
+                          flyoutHeight,
+                          flyoutHeaderHeight,
+                          timelineHeaderHeight,
+                          timelineFooterHeight: footerHeight,
+                        })}
+                        sort={sort}
+                        toggleColumn={toggleColumn}
+                        width={width}
+                      />
+                      <Footer
+                        serverSideEventCount={totalCount}
+                        hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                        height={footerHeight}
+                        isLive={isLive}
+                        isLoading={loading}
+                        itemsCount={events.length}
+                        itemsPerPage={itemsPerPage}
+                        itemsPerPageOptions={itemsPerPageOptions}
+                        onChangeItemsPerPage={onChangeItemsPerPage}
+                        onLoadMore={loadMore}
+                        nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                        tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
+                        getUpdatedAt={getUpdatedAt}
+                        compact={isCompactFooter(width)}
+                      />
+                    </TimelineContext.Provider>
                   </TimelineRefetch>
                 )}
               </TimelineQuery>

@@ -14,7 +14,7 @@
     "test:browser:dev": "gulp testbrowser-dev",
     "test:browser": "gulp testbrowser",
     "test:jest": "node scripts/jest",
-    "test:mocha": "grunt test:mocha",
+    "test:mocha": "node scripts/mocha",
     "test:server": "gulp testserver"
   },
   "kibana": {
@@ -34,7 +34,7 @@
     "@kbn/pm": "1.0.0",
     "@kbn/test": "1.0.0",
     "@kbn/utility-types": "1.0.0",
-    "@mattapperson/slapshot": "1.2.3",
+    "@mattapperson/slapshot": "1.4.0",
     "@storybook/addon-actions": "^5.0.5",
     "@storybook/addon-console": "^1.1.0",
     "@storybook/addon-info": "^5.0.5",
@@ -119,6 +119,7 @@
     "cheerio": "0.22.0",
     "commander": "3.0.0",
     "copy-webpack-plugin": "^5.0.0",
+    "cypress": "^3.4.1",
     "del": "^4.0.0",
     "dotenv": "2.0.0",
     "enzyme": "^3.10.0",
@@ -142,6 +143,11 @@
     "jsdom": "^12.0.0",
     "madge": "3.4.4",
     "mocha": "3.5.3",
+    "mocha-junit-reporter": "^1.23.1",
+    "mocha-multi-reporters": "^1.1.7",
+    "mochawesome": "^4.0.1",
+    "mochawesome-merge": "^2.0.1",
+    "mochawesome-report-generator": "^4.0.1",
     "mustache": "^2.3.0",
     "mutation-observer": "^1.0.3",
     "node-fetch": "^2.1.2",
@@ -165,6 +171,7 @@
     "supertest-as-promised": "^4.0.2",
     "tmp": "0.1.0",
     "tree-kill": "^1.1.0",
+    "ts-loader": "^6.0.4",
     "typescript": "3.5.3",
     "vinyl-fs": "^3.0.2",
     "xml-crypto": "^0.10.1",
@@ -175,9 +182,9 @@
     "@babel/polyfill": "7.4.4",
     "@babel/register": "7.4.4",
     "@babel/runtime": "7.4.5",
-    "@elastic/ctags-langserver": "^0.1.4",
+    "@elastic/ctags-langserver": "^0.1.5",
     "@elastic/datemath": "5.0.2",
-    "@elastic/eui": "13.1.1",
+    "@elastic/eui": "13.3.0",
     "@elastic/javascript-typescript-langserver": "^0.2.2",
     "@elastic/lsp-extension": "^0.1.2",
     "@elastic/maki": "6.1.0",
@@ -360,5 +367,13 @@
   },
   "engines": {
     "yarn": "^1.10.1"
+  },
+  "workspaces": {
+    "nohoist": [
+      "**/mochawesome",
+      "**/mochawesome/**",
+      "**/mocha-multi-reporters",
+      "**/mocha-multi-reporters/**"
+    ]
   }
 }

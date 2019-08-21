@@ -30,7 +30,7 @@ import { AggParam, FieldParamType } from '..';
 
 const label = i18n.translate('common.ui.aggTypes.field.fieldLabel', { defaultMessage: 'Field' });
 
-interface FieldParamEditorProps extends AggParamEditorProps<Field> {
+export interface FieldParamEditorProps extends AggParamEditorProps<Field> {
   customError?: string;
   customLabel?: string;
 }

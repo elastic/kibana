@@ -23,14 +23,13 @@ import { i18n } from '@kbn/i18n';
 import { CourierRequestHandlerProvider } from 'ui/vis/request_handlers/courier';
 import { AggConfigs } from 'ui/vis/agg_configs';
 
+import chrome from 'ui/chrome';
+
 // need to get rid of angular from these
-// @ts-ignore
-import { IndexPatternsProvider } from 'ui/index_patterns';
 // @ts-ignore
 import { SearchSourceProvider } from 'ui/courier/search_source';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
-
-import chrome from 'ui/chrome';
+import { IndexPatternsProvider } from '../../../data/public';
 
 const courierRequestHandlerProvider = CourierRequestHandlerProvider;
 const courierRequestHandler = courierRequestHandlerProvider().handler;

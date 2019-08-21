@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import {
   FeatureCatalogueRegistryProvider,
   FeatureCatalogueCategory,
@@ -13,7 +14,9 @@ FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'canvas',
     title: 'Canvas',
-    description: 'Showcase your data in a pixel-perfect way.',
+    description: i18n.translate('xpack.canvas.appDescription', {
+      defaultMessage: 'Showcase your data in a pixel-perfect way.',
+    }),
     icon: 'canvasApp',
     path: '/app/canvas',
     showOnHomePage: true,
