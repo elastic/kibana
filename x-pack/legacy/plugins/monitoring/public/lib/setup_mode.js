@@ -5,7 +5,11 @@
  */
 
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';
-import { get } from 'lodash';
+import { get, contains } from 'lodash';
+
+function isOnPage(hash) {
+  return contains(window.location.hash, hash);
+}
 
 const angularState = {
   injector: null,
@@ -135,6 +139,10 @@ export const toggleSetupMode = inSetupMode => {
 
 const setSetupModeMenuItem = () => {
   checkAngularState();
+
+  if (isOnPage('no-data')) {
+    return;
+  }
 
   const globalState = angularState.injector.get('globalState');
   const navItems = globalState.inSetupMode
