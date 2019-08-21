@@ -55,7 +55,7 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
         <h3>
           <FormattedMessage
             id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.sectionLogisticsTitle"
-            defaultMessage="Policy details"
+            defaultMessage="Logistics"
           />{' '}
           <EuiToolTip
             content={

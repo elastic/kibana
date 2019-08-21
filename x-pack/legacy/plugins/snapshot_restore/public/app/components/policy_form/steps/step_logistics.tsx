@@ -475,7 +475,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
             <h3>
               <FormattedMessage
                 id="xpack.snapshotRestore.policyForm.stepLogisticsTitle"
-                defaultMessage="Policy details"
+                defaultMessage="Logistics"
               />
             </h3>
           </EuiTitle>
@@ -491,7 +491,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           >
             <FormattedMessage
               id="xpack.snapshotRestore.policyForm.stepLogistics.docsButtonLabel"
-              defaultMessage="Snapshot Lifecycle Management docs"
+              defaultMessage="Logistics docs"
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
