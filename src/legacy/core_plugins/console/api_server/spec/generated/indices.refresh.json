@@ -18,6 +18,6 @@
       "_refresh",
       "{indices}/_refresh"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-refresh.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-refresh.html"
   }
 }
