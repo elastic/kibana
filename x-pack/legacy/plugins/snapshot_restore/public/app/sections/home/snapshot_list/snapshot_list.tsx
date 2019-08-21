@@ -140,37 +140,22 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
           </h1>
         }
         body={
-          <Fragment>
-            <p>
-              <FormattedMessage
-                id="xpack.snapshotRestore.snapshotList.emptyPrompt.repositoryWarningDescription"
-                defaultMessage="Go to {repositoryLink} to fix the errors."
-                values={{
-                  repositoryLink: (
-                    <EuiLink href={linkToRepositories()}>
-                      <FormattedMessage
-                        id="xpack.snapshotRestore.repositoryWarningLinkText"
-                        defaultMessage="Repositories"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </p>
-            <p>
-              <EuiLink
-                href={documentationLinksService.getSnapshotDocUrl()}
-                target="_blank"
-                data-test-subj="srSnapshotsEmptyPromptDocLink"
-              >
-                <FormattedMessage
-                  id="xpack.snapshotRestore.emptyPrompt.noSnapshotsDocLinkText"
-                  defaultMessage="Learn how to create a snapshot"
-                />{' '}
-                <EuiIcon type="link" />
-              </EuiLink>
-            </p>
-          </Fragment>
+          <p>
+            <FormattedMessage
+              id="xpack.snapshotRestore.snapshotList.emptyPrompt.repositoryWarningDescription"
+              defaultMessage="Go to {repositoryLink} to fix the errors."
+              values={{
+                repositoryLink: (
+                  <EuiLink href={linkToRepositories()}>
+                    <FormattedMessage
+                      id="xpack.snapshotRestore.repositoryWarningLinkText"
+                      defaultMessage="Repositories"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
         }
       />
     );
