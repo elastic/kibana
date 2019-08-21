@@ -17,7 +17,15 @@
  * under the License.
  */
 
-import { DataView } from './data/data_view';
-import { viewRegistry } from 'ui/inspector';
+// TODO: add a more specific TabularData type.
+export type TabularData = any;
+export type TabularCallback = () => TabularData | Promise<TabularData>;
 
-viewRegistry.register(DataView);
+export interface TabularHolder {
+  data: TabularData | null;
+  options: TabularLoaderOptions;
+}
+
+export interface TabularLoaderOptions {
+  returnsFormattedValues?: boolean;
+}
