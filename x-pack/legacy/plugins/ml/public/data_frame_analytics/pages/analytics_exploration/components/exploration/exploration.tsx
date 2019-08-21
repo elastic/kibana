@@ -356,14 +356,14 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
         <EuiFlexItem grow={false}>
           <ExplorationTitle jobId={jobConfig.id} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem>
           <EuiFlexGroup alignItems="center" gutterSize="xs">
-            <EuiFlexItem>
+            <EuiFlexItem style={{ textAlign: 'right' }}>
               {docFieldsCount > MAX_COLUMNS && (
                 <EuiText size="s">
                   {i18n.translate('xpack.ml.dataframe.analytics.exploration.fieldSelection', {
                     defaultMessage:
-                      'showing {selectedFieldsLength, number} of {docFieldsCount, number} {docFieldsCount, plural, one {field} other {fields}}',
+                      '{selectedFieldsLength, number} of {docFieldsCount, number} {docFieldsCount, plural, one {field} other {fields}} selected',
                     values: { selectedFieldsLength: selectedFields.length, docFieldsCount },
                   })}
                 </EuiText>
