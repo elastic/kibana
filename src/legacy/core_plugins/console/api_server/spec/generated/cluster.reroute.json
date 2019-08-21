@@ -14,6 +14,6 @@
     "patterns": [
       "_cluster/reroute"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-reroute.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-reroute.html"
   }
 }

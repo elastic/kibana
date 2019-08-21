@@ -1,6 +1,12 @@
 {
   "cluster.health": {
     "url_params": {
+      "expand_wildcards": [
+        "open",
+        "closed",
+        "none",
+        "all"
+      ],
       "level": [
         "cluster",
         "indices",
@@ -34,6 +40,6 @@
       "_cluster/health",
       "_cluster/health/{indices}"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-health.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-health.html"
   }
 }
