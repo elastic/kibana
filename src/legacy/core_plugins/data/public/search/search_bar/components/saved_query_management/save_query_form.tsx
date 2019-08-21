@@ -64,7 +64,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
 }) => {
   const [title, setTitle] = useState(savedQuery ? savedQuery.title : '');
   const [description, setDescription] = useState(savedQuery ? savedQuery.description : '');
-  const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
+  const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
   const [shouldIncludeFilters, setShouldIncludeFilters] = useState(
     savedQuery ? !!savedQuery.filters : true
   );
