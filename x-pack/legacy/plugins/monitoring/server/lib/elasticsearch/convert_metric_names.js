@@ -9,7 +9,7 @@ import { LISTING_METRICS_NAMES } from './nodes/get_nodes/nodes_listing_metrics';
 
 // We should use some explicit prefix for the converted aggregation name
 // so we can easily strip them out later (see `convertMetricNames` and `uncovertMetricNames`)
-export const CONVERTED_TOKEN = `odh_`;
+const CONVERTED_TOKEN = `odh_`;
 
 /**
  * This work stemmed from this issue: https://github.com/elastic/kibana/issues/43477
