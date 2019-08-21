@@ -14,19 +14,21 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
-  describe('hybrid', () => {
+  describe.only('hybrid', () => {
     before(async () => {
       log.debug('loading hybrid test data');
-      await esArchiver.load('hybrid');
+      //await esArchiver.load('hybrid/kibana');
+      await esArchiver.load('hybrid/logstash');
+      await esArchiver.load('hybrid/rollup');
     });
 
     after(async () => {
-      await esArchiver.unload('hybrid');
+      //await esArchiver.unload('hybrid');
     });
 
     it('hybrid visualization', async () => {
       log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.navigateToApp('visualize');
     });
   });
 }
