@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import axios from 'axios';
+import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { nullableType } from './lib/nullable';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
@@ -31,7 +33,7 @@ const ProxySchema = schema.object({
   port: nullableType(PortSchema),
 });
 
-const CompositeUrlSchema = schema.object({
+export const CompositeUrlSchema = schema.object({
   host: schema.string(),
   port: PortSchema,
   path: nullableType(schema.string()),
@@ -106,8 +108,58 @@ export const actionType: ActionType = {
   executor,
 };
 
+function flatterUrl(url: string | TypeOf<typeof CompositeUrlSchema>): string {
+  if (typeof url === 'string') {
+    return url;
+  }
+  return `${url.scheme}://${url.host}${url.path}`;
+}
+
 // action executor
 async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionTypeExecutorResult> {
+  const log = (msg: string) => execOptions.services.log(['warn', 'actions', 'webhook'], msg);
+
+  const id = execOptions.id;
+  const { method, url, headers = {} } = execOptions.config as ActionTypeConfigType;
+  const { user: username, password } = execOptions.secrets as ActionTypeSecretsType;
+  const { body: data } = execOptions.params as ActionParamsType;
+
+  let response;
+  try {
+    response = await axios.request({
+      method,
+      url: flatterUrl(url),
+      auth: {
+        username,
+        password,
+      },
+      headers,
+      data,
+    });
+  } catch (err) {
+    const message = i18n.translate('xpack.actions.builtin.webhook.postingErrorMessage', {
+      defaultMessage: `error in action "{id}" webhook event: {errorMessage}`,
+      values: {
+        id,
+        errorMessage: err.message,
+      },
+    });
+    log(`error on ${id} webhook event: ${err.message}`);
+    return {
+      status: 'error',
+      message,
+    };
+  }
+
+  log(`response from ${id} webhook event: ${response.status}`);
+
+  if (response.status === 200) {
+    return {
+      status: 'ok',
+      data: response.data,
+    };
+  }
+
   return {
     status: 'error',
   };

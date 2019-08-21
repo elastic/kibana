@@ -21,10 +21,38 @@ const defaultValues: Record<string, any> = {
   method: 'post',
 };
 
+function extractCredentialsFromUrl(url: string): { url: string; user: string; password: string } {
+  return { url: url.replace('elastic:changeme@', ''), user: 'elastic', password: 'changeme' };
+}
+
 // eslint-disable-next-line import/no-default-export
 export default function webhookTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+
+  async function createWebhookAction(urlWithCreds: string): Promise<string> {
+    const { url, user, password } = extractCredentialsFromUrl(urlWithCreds);
+    const { body: createdAction } = await supertest
+      .post('/api/action')
+      .set('kbn-xsrf', 'test')
+      .send({
+        description: 'A generic Webhook action',
+        actionTypeId: '.webhook',
+        secrets: {
+          user,
+          password,
+        },
+        config: {
+          url,
+          headers: {
+            'Content-Type': 'text/plain',
+          },
+        },
+      })
+      .expect(200);
+
+    return createdAction.id;
+  }
 
   describe('webhook action', () => {
     let webhookSimulatorURL: string = '<could not determine kibana url>';
@@ -81,6 +109,21 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           url: webhookSimulatorURL,
         },
       });
+    });
+
+    it('should send authentication to the webhook target', async () => {
+      const webhookActionId = await createWebhookAction(webhookSimulatorURL);
+      const { body: result } = await supertest
+        .post(`/api/action/${webhookActionId}/_execute`)
+        .set('kbn-xsrf', 'test')
+        .send({
+          params: {
+            body: 'validateAuthentication',
+          },
+        })
+        .expect(200);
+
+      expect(result.status).to.eql('ok');
     });
   });
 }
