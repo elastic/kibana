@@ -20,6 +20,8 @@ import { KpiNetworkComponent, NetworkTopNFlowTable } from '../../components/page
 import { NetworkDnsTable } from '../../components/page/network/network_dns_table';
 import { UseUrlState } from '../../components/url_state';
 import { GlobalTime } from '../../containers/global_time';
+import { KpiNetworkQuery } from '../../containers/kpi_network';
+import { NetworkDnsQuery } from '../../containers/network_dns';
 import { NetworkTopNFlowQuery } from '../../containers/network_top_n_flow';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { FlowTargetNew, LastEventIndexKey } from '../../graphql/types';
@@ -28,9 +30,10 @@ import { networkModel, networkSelectors, State } from '../../store';
 import { NetworkKql } from './kql';
 import { NetworkEmptyPage } from './network_empty_page';
 import * as i18n from './translations';
+import { AnomaliesNetworkTable } from '../../components/ml/tables/anomalies_network_table';
+import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
-import { IPDetailsLink } from '../../components/links';
 
 const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
 const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
@@ -65,33 +68,33 @@ const NetworkComponent = pure<NetworkComponentProps>(
                 <UseUrlState indexPattern={indexPattern}>
                   {({ isInitializing }) => (
                     <>
-                      {/* <KpiNetworkQuery*/}
-                      {/*  endDate={to}*/}
-                      {/*  filterQuery={filterQuery}*/}
-                      {/*  skip={isInitializing}*/}
-                      {/*  sourceId="default"*/}
-                      {/*  startDate={from}*/}
-                      {/* >*/}
-                      {/*  {({ kpiNetwork, loading, id, inspect, refetch }) => (*/}
-                      {/*    <KpiNetworkComponentManage*/}
-                      {/*      id={id}*/}
-                      {/*      inspect={inspect}*/}
-                      {/*      setQuery={setQuery}*/}
-                      {/*      refetch={refetch}*/}
-                      {/*      data={kpiNetwork}*/}
-                      {/*      loading={loading}*/}
-                      {/*      from={from}*/}
-                      {/*      to={to}*/}
-                      {/*      narrowDateRange={(min: number, max: number) => {*/}
-                      {/*        setTimeout(() => {*/}
-                      {/*          setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });*/}
-                      {/*        }, 500);*/}
-                      {/*      }}*/}
-                      {/*    />*/}
-                      {/*  )}*/}
-                      {/* </KpiNetworkQuery>*/}
+                      <KpiNetworkQuery
+                        endDate={to}
+                        filterQuery={filterQuery}
+                        skip={isInitializing}
+                        sourceId="default"
+                        startDate={from}
+                      >
+                        {({ kpiNetwork, loading, id, inspect, refetch }) => (
+                          <KpiNetworkComponentManage
+                            id={id}
+                            inspect={inspect}
+                            setQuery={setQuery}
+                            refetch={refetch}
+                            data={kpiNetwork}
+                            loading={loading}
+                            from={from}
+                            to={to}
+                            narrowDateRange={(min: number, max: number) => {
+                              setTimeout(() => {
+                                setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+                              }, 500);
+                            }}
+                          />
+                        )}
+                      </KpiNetworkQuery>
 
-                      {/* <EuiSpacer />*/}
+                      <EuiSpacer />
                       <EuiFlexGroup>
                         <EuiFlexItem grow={false}>
                           <NetworkTopNFlowQuery
@@ -179,62 +182,62 @@ const NetworkComponent = pure<NetworkComponentProps>(
                         </EuiFlexItem>
                       </EuiFlexGroup>
 
-                      {/* <EuiSpacer />*/}
+                      <EuiSpacer />
 
-                      {/* <NetworkDnsQuery*/}
-                      {/*  endDate={to}*/}
-                      {/*  filterQuery={filterQuery}*/}
-                      {/*  skip={isInitializing}*/}
-                      {/*  sourceId="default"*/}
-                      {/*  startDate={from}*/}
-                      {/*  type={networkModel.NetworkType.page}*/}
-                      {/* >*/}
-                      {/*  {({*/}
-                      {/*    totalCount,*/}
-                      {/*    loading,*/}
-                      {/*    networkDns,*/}
-                      {/*    pageInfo,*/}
-                      {/*    loadPage,*/}
-                      {/*    id,*/}
-                      {/*    inspect,*/}
-                      {/*    refetch,*/}
-                      {/*  }) => (*/}
-                      {/*    <NetworkDnsTableManage*/}
-                      {/*      data={networkDns}*/}
-                      {/*      fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}*/}
-                      {/*      id={id}*/}
-                      {/*      inspect={inspect}*/}
-                      {/*      loading={loading}*/}
-                      {/*      loadPage={loadPage}*/}
-                      {/*      refetch={refetch}*/}
-                      {/*      setQuery={setQuery}*/}
-                      {/*      showMorePagesIndicator={getOr(*/}
-                      {/*        false,*/}
-                      {/*        'showMorePagesIndicator',*/}
-                      {/*        pageInfo*/}
-                      {/*      )}*/}
-                      {/*      totalCount={totalCount}*/}
-                      {/*      type={networkModel.NetworkType.page}*/}
-                      {/*    />*/}
-                      {/*  )}*/}
-                      {/* </NetworkDnsQuery>*/}
+                      <NetworkDnsQuery
+                        endDate={to}
+                        filterQuery={filterQuery}
+                        skip={isInitializing}
+                        sourceId="default"
+                        startDate={from}
+                        type={networkModel.NetworkType.page}
+                      >
+                        {({
+                          totalCount,
+                          loading,
+                          networkDns,
+                          pageInfo,
+                          loadPage,
+                          id,
+                          inspect,
+                          refetch,
+                        }) => (
+                          <NetworkDnsTableManage
+                            data={networkDns}
+                            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                            id={id}
+                            inspect={inspect}
+                            loading={loading}
+                            loadPage={loadPage}
+                            refetch={refetch}
+                            setQuery={setQuery}
+                            showMorePagesIndicator={getOr(
+                              false,
+                              'showMorePagesIndicator',
+                              pageInfo
+                            )}
+                            totalCount={totalCount}
+                            type={networkModel.NetworkType.page}
+                          />
+                        )}
+                      </NetworkDnsQuery>
 
-                      {/* <EuiSpacer />*/}
+                      <EuiSpacer />
 
-                      {/* <AnomaliesNetworkTable*/}
-                      {/*  startDate={from}*/}
-                      {/*  endDate={to}*/}
-                      {/*  skip={isInitializing}*/}
-                      {/*  type={networkModel.NetworkType.page}*/}
-                      {/*  narrowDateRange={(score, interval) => {*/}
-                      {/*    const fromTo = scoreIntervalToDateTime(score, interval);*/}
-                      {/*    setAbsoluteRangeDatePicker({*/}
-                      {/*      id: 'global',*/}
-                      {/*      from: fromTo.from,*/}
-                      {/*      to: fromTo.to,*/}
-                      {/*    });*/}
-                      {/*  }}*/}
-                      {/* />*/}
+                      <AnomaliesNetworkTable
+                        startDate={from}
+                        endDate={to}
+                        skip={isInitializing}
+                        type={networkModel.NetworkType.page}
+                        narrowDateRange={(score, interval) => {
+                          const fromTo = scoreIntervalToDateTime(score, interval);
+                          setAbsoluteRangeDatePicker({
+                            id: 'global',
+                            from: fromTo.from,
+                            to: fromTo.to,
+                          });
+                        }}
+                      />
                     </>
                   )}
                 </UseUrlState>
