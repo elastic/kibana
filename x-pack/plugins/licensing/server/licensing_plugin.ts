@@ -12,7 +12,7 @@ import { LicensingConfigType, LicensingPluginSubject } from './types';
 import { LicensingConfig } from './licensing_config';
 import { LicensingPluginSetup } from './licensing_plugin_setup';
 
-export class LicensingPlugin implements Plugin<LicensingPluginSubject, LicensingPluginSubject> {
+export class LicensingPlugin implements Plugin<LicensingPluginSubject> {
   private readonly logger: Logger;
   private readonly config$: Observable<LicensingConfig>;
   private poller$!: Observable<number>;
@@ -86,14 +86,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSubject, Licensing
     }
   }
 
-  private create(
-    { clusterSource, pollingFrequency }: LicensingConfig,
-    core: CoreSetup | CoreStart
-  ) {
-    if (this.service$) {
-      return this.service$;
-    }
-
+  private create({ clusterSource, pollingFrequency }: LicensingConfig, core: CoreSetup) {
     const service$ = new BehaviorSubject<LicensingPluginSetup>(
       new LicensingPluginSetup(null, {}, null, clusterSource)
     );
@@ -125,12 +118,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSubject, Licensing
     return service$;
   }
 
-  public async start(core: CoreStart) {
-    const config = await this.config$.pipe(first()).toPromise();
-    const service$ = this.create(config, core);
-
-    return service$;
-  }
+  public async start(core: CoreStart) {}
 
   public stop() {
     if (this.pollerSubscription) {
