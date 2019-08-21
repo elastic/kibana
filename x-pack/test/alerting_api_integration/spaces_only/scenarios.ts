@@ -19,13 +19,4 @@ const Space1: Space1 = {
   disabledFeatures: [],
 };
 
-interface Space2 extends Space {
-  id: 'space2';
-}
-const Space2: Space2 = {
-  id: 'space2',
-  name: 'Space 2',
-  disabledFeatures: [],
-};
-
-export const SpaceScenarios: [Space1, Space2] = [Space1, Space2];
+export const SpaceScenarios: [Space1] = [Space1];
