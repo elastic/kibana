@@ -7,3 +7,4 @@
 export { SessionExpired } from './session_expired';
 export { SessionTimeout } from './session_timeout';
 export { SessionTimeoutInterceptor } from './session_timeout_interceptor';
+export { UnauthorizedResponseInterceptor } from './unauthorized_response_interceptor';

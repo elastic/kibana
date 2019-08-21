@@ -22,7 +22,7 @@ const expectWarningToast = (notifications: NotificationsSetup, toastLifeTimeMS: 
     Array [
       Object {
         "color": "warning",
-        "text": <SessionExpirationWarning
+        "text": <SessionTimeoutWarning
           onRefreshSession={[Function]}
         />,
         "title": "Warning",

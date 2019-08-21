@@ -6,21 +6,26 @@
 
 import { Plugin, CoreSetup } from 'src/core/public';
 import { AnonymousPaths } from './anonymous_paths';
-import { SessionExpired, SessionTimeout, SessionTimeoutInterceptor } from './session';
-import { UnauthorizedResponseInterceptor } from './unauthorized_response_interceptor';
+import {
+  SessionExpired,
+  SessionTimeout,
+  SessionTimeoutInterceptor,
+  UnauthorizedResponseInterceptor,
+} from './session';
 
 export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPluginStart> {
   public setup(core: CoreSetup, deps: {}) {
     const { http, notifications } = core;
-    const sessionExpired = new SessionExpired(http.basePath);
-    const anonymousPaths = new AnonymousPaths(http.basePath, [
+    const { basePath } = http;
+    const anonymousPaths = new AnonymousPaths(basePath, [
       '/login',
       '/logout',
       '/logged_out',
       '/status',
     ]);
-    http.intercept(new UnauthorizedResponseInterceptor(sessionExpired, anonymousPaths));
 
+    const sessionExpired = new SessionExpired(basePath);
+    http.intercept(new UnauthorizedResponseInterceptor(sessionExpired, anonymousPaths));
     const sessionTimeout = new SessionTimeout(1.5 * 60 * 1000, notifications, sessionExpired, http);
     http.intercept(new SessionTimeoutInterceptor(sessionTimeout, anonymousPaths));
 

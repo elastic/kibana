@@ -12,7 +12,7 @@ interface Props {
   onRefreshSession: () => void;
 }
 
-export const SessionExpirationWarning = (props: Props) => {
+export const SessionTimeoutWarning = (props: Props) => {
   return (
     <>
       <p>

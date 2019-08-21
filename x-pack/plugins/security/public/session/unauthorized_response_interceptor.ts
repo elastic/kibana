@@ -6,7 +6,7 @@
 
 import { HttpInterceptor, HttpErrorResponse, HttpInterceptController } from 'src/core/public';
 
-import { AnonymousPaths } from './anonymous_paths';
+import { AnonymousPaths } from '../anonymous_paths';
 import { SessionExpired } from './session_expired';
 
 export class UnauthorizedResponseInterceptor implements HttpInterceptor {

@@ -7,27 +7,29 @@
 import { NotificationsSetup, Toast, HttpSetup } from 'src/core/public';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { SessionExpirationWarning } from './session_expiration_warning';
+import { SessionTimeoutWarning } from './session_timeout_warning';
 import { ISessionExpired } from './session_expired';
 
 /**
  * Client session timeout is decreased by this number so that Kibana server
  * can still access session content during logout request to properly clean
  * user session up (invalidate access tokens, redirect to logout portal etc.).
- * @type {number}
  */
-const SESSION_TIMEOUT_GRACE_PERIOD_MS = 5 * 1000;
+const GRACE_PERIOD_MS = 5 * 1000;
 
-const EXPIRATION_WARNING_MS = 60 * 1000;
+/**
+ * Duration we'll normally display the warning toast
+ */
+const WARNING_MS = 60 * 1000;
 
 export interface ISessionTimeout {
   extend(): void;
 }
 
 export class SessionTimeout {
-  private sessionExpirationWarningTimeout?: number;
-  private sessionExpirationTimeout?: number;
-  private activeNotification?: Toast;
+  private warningTimeout?: number;
+  private expirationTimeout?: number;
+  private warningToast?: Toast;
 
   constructor(
     private sessionTimeout: number,
@@ -37,36 +39,33 @@ export class SessionTimeout {
   ) {}
 
   extend(): void {
-    if (this.sessionExpirationWarningTimeout) {
-      window.clearTimeout(this.sessionExpirationWarningTimeout);
+    if (this.warningTimeout) {
+      window.clearTimeout(this.warningTimeout);
     }
-    if (this.sessionExpirationTimeout) {
-      window.clearTimeout(this.sessionExpirationTimeout);
+    if (this.expirationTimeout) {
+      window.clearTimeout(this.expirationTimeout);
     }
-    if (this.activeNotification) {
-      this.notifications.toasts.remove(this.activeNotification);
+    if (this.warningToast) {
+      this.notifications.toasts.remove(this.warningToast);
     }
-    this.sessionExpirationWarningTimeout = window.setTimeout(
-      () => this.showSessionExpirationWarning(),
-      Math.max(this.sessionTimeout - EXPIRATION_WARNING_MS - SESSION_TIMEOUT_GRACE_PERIOD_MS, 0)
+    this.warningTimeout = window.setTimeout(
+      () => this.showWarning(),
+      Math.max(this.sessionTimeout - WARNING_MS - GRACE_PERIOD_MS, 0)
     );
-    this.sessionExpirationTimeout = window.setTimeout(
+    this.expirationTimeout = window.setTimeout(
       () => this.sessionExpired.logout(),
-      Math.max(this.sessionTimeout - SESSION_TIMEOUT_GRACE_PERIOD_MS, 0)
+      Math.max(this.sessionTimeout - GRACE_PERIOD_MS, 0)
     );
   }
 
-  private showSessionExpirationWarning = () => {
-    this.activeNotification = this.notifications.toasts.add({
+  private showWarning = () => {
+    this.warningToast = this.notifications.toasts.add({
       color: 'warning',
-      text: <SessionExpirationWarning onRefreshSession={this.refreshSession} />,
+      text: <SessionTimeoutWarning onRefreshSession={this.refreshSession} />,
       title: i18n.translate('xpack.security.hacks.warningTitle', {
         defaultMessage: 'Warning',
       }),
-      toastLifeTimeMs: Math.min(
-        this.sessionTimeout - SESSION_TIMEOUT_GRACE_PERIOD_MS,
-        EXPIRATION_WARNING_MS
-      ),
+      toastLifeTimeMs: Math.min(this.sessionTimeout - GRACE_PERIOD_MS, WARNING_MS),
     });
   };
 

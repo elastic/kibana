@@ -6,9 +6,9 @@
 
 // @ts-ignore
 import fetchMock from 'fetch-mock/es5/client';
-import { AnonymousPaths } from './anonymous_paths';
+import { AnonymousPaths } from '../anonymous_paths';
 import { SessionExpired } from './session_expired';
-import { setup } from '../../../../src/test_utils/public/http_test_setup';
+import { setup } from '../../../../../src/test_utils/public/http_test_setup';
 import { UnauthorizedResponseInterceptor } from './unauthorized_response_interceptor';
 jest.mock('./session_expired');
 
