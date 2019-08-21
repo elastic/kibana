@@ -75,7 +75,7 @@ function MarkdownOptions({ stateParams, setValue }: VisOptionsProps<MarkdownVisP
             onChange={({ target: { value } }) => onMarkdownUpdate(value)}
             fullWidth={true}
             data-test-subj="markdownTextarea"
-            // resize="none"
+            resize="none"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
