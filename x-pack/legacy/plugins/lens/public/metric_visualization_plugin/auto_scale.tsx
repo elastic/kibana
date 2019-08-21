@@ -40,14 +40,14 @@ export class AutoScale extends React.Component<Props, State> {
   }
 
   setParent = (el: Element | null) => {
-    if (this.parent !== el) {
+    if (el && this.parent !== el) {
       this.parent = el;
       setTimeout(() => this.scale());
     }
   };
 
   setChild = (el: Element | null) => {
-    if (this.child !== el) {
+    if (el && this.child !== el) {
       this.child = el;
       setTimeout(() => this.scale());
     }
@@ -64,10 +64,8 @@ export class AutoScale extends React.Component<Props, State> {
           <div
             {...this.props}
             ref={el => {
-              if (el !== null) {
-                this.setParent(el);
-                resizeRef(el);
-              }
+              this.setParent(el);
+              resizeRef(el);
             }}
             style={{
               ...style,

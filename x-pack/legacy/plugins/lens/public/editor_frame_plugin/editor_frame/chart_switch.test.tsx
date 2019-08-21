@@ -206,6 +206,7 @@ describe('chart_switch', () => {
                 label: '',
                 dataType: 'string',
                 isBucketed: true,
+                isMetric: false,
               },
             },
             {
@@ -214,6 +215,7 @@ describe('chart_switch', () => {
                 label: '',
                 dataType: 'number',
                 isBucketed: false,
+                isMetric: true,
               },
             },
           ],
@@ -435,6 +437,7 @@ describe('chart_switch', () => {
                 label: '',
                 dataType: 'string',
                 isBucketed: true,
+                isMetric: false,
               },
             },
             {
@@ -443,6 +446,7 @@ describe('chart_switch', () => {
                 label: '',
                 dataType: 'number',
                 isBucketed: false,
+                isMetric: true,
               },
             },
           ],

@@ -40,6 +40,7 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>({
           {
             dataType: 'number',
             isBucketed: false,
+            isMetric: true,
             scale: 'ratio',
           },
         ];
@@ -67,6 +68,7 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>({
         suggestedPriority,
         sourceField: field ? field.name : '',
         isBucketed: false,
+        isMetric: true,
         scale: 'ratio',
       } as T;
     },

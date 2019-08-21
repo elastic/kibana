@@ -36,7 +36,8 @@ function buildSuggestion({
   label?: string;
 }): DatasourceSuggestion<IndexPatternPrivateState> {
   const columnOrder = (updatedLayer || state.layers[layerId]).columnOrder;
-  const columns = (updatedLayer || state.layers[layerId]).columns;
+  const columnMap = (updatedLayer || state.layers[layerId]).columns;
+
   return {
     state: updatedLayer
       ? {
@@ -51,7 +52,7 @@ function buildSuggestion({
     table: {
       columns: columnOrder.map(columnId => ({
         columnId,
-        operation: columnToOperation(columns[columnId]),
+        operation: columnToOperation(columnMap[columnId]),
       })),
       isMultiRow: typeof isMultiRow === 'undefined' || isMultiRow,
       datasourceSuggestionId: datasourceSuggestionId || 0,
@@ -110,6 +111,7 @@ function getExistingLayerSuggestionsForField(
   } else if (!usableAsBucketOperation && operations.length > 0) {
     updatedLayer = addFieldAsMetricOperation(layer, layerId, indexPattern, field);
   }
+
   return updatedLayer
     ? [
         buildSuggestion({

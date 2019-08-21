@@ -53,6 +53,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
         {
           dataType: type,
           isBucketed: true,
+          isMetric: false,
           scale: 'ordinal',
         },
       ];
@@ -85,6 +86,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       suggestedPriority,
       sourceField: field.name,
       isBucketed: true,
+      isMetric: false,
       params: {
         size: DEFAULT_SIZE,
         orderBy: existingMetricColumn

@@ -148,6 +148,7 @@ describe('XYConfigPanel', () => {
     const exampleOperation: Operation = {
       dataType: 'number',
       isBucketed: false,
+      isMetric: true,
       label: 'bar',
     };
     const bucketedOps: Operation[] = [
@@ -186,6 +187,7 @@ describe('XYConfigPanel', () => {
     const exampleOperation: Operation = {
       dataType: 'number',
       isBucketed: false,
+      isMetric: true,
       label: 'bar',
     };
     const ops: Operation[] = [
