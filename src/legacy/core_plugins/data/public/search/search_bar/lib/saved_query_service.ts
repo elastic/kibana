@@ -53,7 +53,7 @@ export const createSavedQueryService = (
     };
 
     const queryObject: SerializedSavedQueryAttributes = {
-      title: attributes.title,
+      title: attributes.title.trim(), // trim whitespace before save as an extra precaution against circumventing the front end
       description: attributes.description,
       query,
     };

@@ -109,15 +109,15 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
       defaultMessage: 'Title cannot contain leading or trailing white space',
     }
   );
+  const hasErrors = hasWhitespaceError || hasTitleConflict;
 
-  const errors = hasWhitespaceError
-    ? [whitespaceErrorText]
-    : hasTitleConflict
-    ? [titleConflictErrorText]
-    : [];
-
+  const errors = () => {
+    if (hasWhitespaceError) return [whitespaceErrorText];
+    if (hasTitleConflict) return [titleConflictErrorText];
+    return [];
+  };
   const saveQueryForm = (
-    <EuiForm isInvalid={hasWhitespaceError || hasTitleConflict} error={errors}>
+    <EuiForm isInvalid={hasErrors} error={errors()}>
       <EuiFormRow>
         <EuiText color="subdued">{savedQueryDescriptionText}</EuiText>
       </EuiFormRow>
@@ -129,7 +129,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
           defaultMessage:
             'Name cannot contain leading or trailing whitespace. Name must be unique.',
         })}
-        isInvalid={hasWhitespaceError || hasTitleConflict}
+        isInvalid={hasErrors}
       >
         <EuiFieldText
           disabled={!!savedQuery}
@@ -139,7 +139,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
             setTitle(event.target.value);
           }}
           data-test-subj="saveQueryFormTitle"
-          isInvalid={hasWhitespaceError || hasTitleConflict}
+          isInvalid={hasErrors}
         />
       </EuiFormRow>
 
@@ -222,7 +222,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
             }
             fill
             data-test-subj="savedQueryFormSaveButton"
-            disabled={hasWhitespaceError || hasTitleConflict}
+            disabled={hasErrors}
           >
             {i18n.translate('data.search.searchBar.savedQueryFormSaveButtonText', {
               defaultMessage: 'Save',
