@@ -1,5 +1,0 @@
----
-overrides:
-  - files: ['**/ui/**/*.js']
-    rules:
-      'import/no-unresolved': '0'

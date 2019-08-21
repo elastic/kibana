@@ -20,12 +20,15 @@
 /* eslint-disable no-restricted-syntax */
 import { spawn } from 'child_process';
 import { resolve } from 'path';
-import { promises as fsP } from 'fs';
+import util from 'util';
+import { stat } from 'fs';
 import { snakeCase } from 'lodash';
 import del from 'del';
-import es from '@kbn/es';
-import { withProcRunner } from '@kbn/dev-utils';
+import { withProcRunner, ToolingLog } from '@kbn/dev-utils';
+import { createEsTestCluster } from '@kbn/test';
+import execa from 'execa';
 
+const statP = util.promisify(stat);
 const ROOT_DIR = resolve(__dirname, '../../../');
 const oneMinute = 60000;
 
@@ -35,13 +38,10 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
   const generatedPath = resolve(ROOT_DIR, `plugins/${snakeCased}`);
   const collect = xs => data => xs.push(data + ''); // Coerce from Buffer to String
 
-  // eslint-disable-next-line no-undef
   beforeAll(() => {
-    // eslint-disable-next-line no-undef
-    jest.setTimeout(oneMinute * 6);
+    jest.setTimeout(oneMinute * 10);
   });
 
-  // eslint-disable-next-line no-undef
   beforeAll(done => {
     const create = spawn(process.execPath, ['scripts/generate_plugin.js', pluginName], {
       cwd: ROOT_DIR,
@@ -52,37 +52,36 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
     create.on('close', done);
   });
 
-  // eslint-disable-next-line no-undef
   afterAll(() => {
     del.sync(generatedPath, { force: true });
   });
 
   it(`should succeed on creating a plugin in a directory named 'plugins/${snakeCased}`, async () => {
-    const stats = await fsP.stat(generatedPath);
-    // eslint-disable-next-line no-undef
+    const stats = await statP(generatedPath);
     expect(stats.isDirectory()).toBe(true);
   });
 
   describe(`and then running 'yarn start' in the plugin's root dir`, () => {
+    const log = new ToolingLog({ level: 'info', writeTo: process.stdout });
     it(`should result in the spec plugin being initialized on kibana's stdout`, async () => {
-      // run kibana
-      const ran = await es.run({
-        license: 'basic',
-        version: 7.0,
+      const es = createEsTestCluster({ license: 'basic', log });
+      await es.start();
+      await withProcRunner(log, async proc => {
+        await proc.run('kibana', {
+          cwd: generatedPath,
+          args: ['start', '--optimize.enabled=false', '--logging.json=false'],
+          cmd: 'yarn',
+          wait: /ispec_plugin.+Status changed from uninitialized to green - Ready/,
+        });
+        await proc.stop('kibana');
       });
-
-      console.log(`\n### ran: \n\t${ran}`);
-      // kill both (somehow)
-      expect(true).toBe(true);
-      // expect(/ispec_plugin.+Status changed from uninitialized to green - Ready/.test(startStdOuts.join('\n')))
-      //   .toBeTruthy();
+      await es.stop();
     });
   });
 
   describe(`and then running 'yarn build' in the plugin's root dir`, () => {
     const stdErrs = [];
 
-    // eslint-disable-next-line no-undef
     beforeAll(done => {
       const build = spawn('yarn', ['build'], { cwd: generatedPath });
       build.stderr.on('data', collect(stdErrs));
@@ -90,7 +89,6 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
     });
 
     it(`should result in only having 'warning package.json: No license field' on stderr`, () => {
-      // eslint-disable-next-line no-undef
       expect(stdErrs.join('\n')).toEqual('warning package.json: No license field\n');
     });
   });
@@ -99,7 +97,6 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
     const stdOuts = [];
     const stdErrs = [];
 
-    // eslint-disable-next-line no-undef
     beforeAll(done => {
       const preinstall = spawn('yarn', ['preinstall'], { cwd: generatedPath });
       preinstall.stderr.on('data', collect(stdErrs));
@@ -108,35 +105,13 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
     });
 
     it(`should result in only having 'warning package.json: No license field' on stderr`, () => {
-      // eslint-disable-next-line no-undef
       expect(stdErrs.join('\n')).toEqual('warning package.json: No license field\n');
     });
   });
 
   describe(`and then running 'yarn lint' in the plugin's root dir`, () => {
-    const stdErrs = [];
-    const stdOuts = [];
-    let joined;
-
-    // eslint-disable-next-line no-undef
-    beforeAll(done => {
-      const yarnLint = spawn('yarn', ['lint'], { cwd: generatedPath });
-      yarnLint.stderr.on('data', collect(stdErrs));
-      yarnLint.stdout.on('data', collect(stdOuts));
-      yarnLint.on('close', () => {
-        joined = stdErrs.join('\n');
-        done();
-      });
-    }, oneMinute * 3);
-
-    it(`should not show the '"@kbn/eslint/no-restricted-paths" is invalid' msg on stderr`, () => {
-      // eslint-disable-next-line no-undef
-      expect(joined).not.toContain('"@kbn/eslint/no-restricted-paths" is invalid');
-    });
-
-    it(`should not show the 'import/no-unresolved' msg on stdout`, () => {
-      // eslint-disable-next-line no-undef
-      expect(joined).not.toContain('import/no-unresolved');
+    it(`should lint w/o errors`, async () => {
+      await execa('yarn', ['lint'], { cwd: generatedPath });
     });
   });
 
@@ -166,7 +141,6 @@ Global options:
       const kbnHelp = spawn('yarn', ['kbn', '--help'], { cwd: generatedPath });
       kbnHelp.stdout.on('data', collect(outData));
       kbnHelp.on('close', () => {
-        // eslint-disable-next-line no-undef
         expect(outData.join('\n')).toContain(helpMsg);
         done();
       });
@@ -195,7 +169,6 @@ Global options:
       const kbnHelp = spawn('yarn', ['es', '--help'], { cwd: generatedPath });
       kbnHelp.stdout.on('data', collect(outData));
       kbnHelp.on('close', () => {
-        // eslint-disable-next-line no-undef
         expect(outData.join('\n')).toContain(helpMsg);
         done();
       });
