@@ -8,7 +8,7 @@ import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { RedirectWrapper } from './redirect_wrapper';
-import { HostsTabName } from '../../pages/hosts/hosts';
+import { HostsTabName } from '../../pages/hosts/hosts_navigations';
 
 export type HostComponentProps = RouteComponentProps<{
   hostName: string;

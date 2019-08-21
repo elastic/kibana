@@ -17,13 +17,7 @@ import { AutoSizer } from '../../components/auto_sizer';
 import { DragDropContextWrapper } from '../../components/drag_and_drop/drag_drop_context_wrapper';
 import { Flyout, flyoutHeaderHeight } from '../../components/flyout';
 import { HelpMenu } from '../../components/help_menu';
-import {
-  LinkToPage,
-  getOverviewUrl,
-  getHostsUrl,
-  getNetworkUrl,
-  getTimelinesUrl,
-} from '../../components/link_to';
+import { LinkToPage } from '../../components/link_to';
 import { SiemNavigation } from '../../components/navigation';
 import { StatefulTimeline } from '../../components/timeline';
 import { AutoSaveWarningMsg } from '../../components/timeline/auto_save_warning';
@@ -37,8 +31,7 @@ import { WithSource } from '../../containers/source';
 import { MlPopover } from '../../components/ml_popover/ml_popover';
 import { MlHostConditionalContainer } from '../../components/ml/conditional_links/ml_host_conditional_container';
 import { MlNetworkConditionalContainer } from '../../components/ml/conditional_links/ml_network_conditional_container';
-import { NavTab } from '../../components/navigation/tab_navigation';
-
+import { navTabs } from './home_navigations';
 const WrappedByAutoSizer = styled.div`
   height: 100%;
 `;
@@ -80,41 +73,6 @@ const calculateFlyoutHeight = ({
   globalHeaderSize: number;
   windowHeight: number;
 }): number => Math.max(0, windowHeight - globalHeaderSize);
-
-const navTabs: NavTab[] = [
-  {
-    id: 'overview',
-    name: i18n.translate('xpack.siem.navigation.overview', {
-      defaultMessage: 'Overview',
-    }),
-    href: getOverviewUrl(),
-    disabled: false,
-  },
-  {
-    id: 'hosts',
-    name: i18n.translate('xpack.siem.navigation.hosts', {
-      defaultMessage: 'Hosts',
-    }),
-    href: getHostsUrl(),
-    disabled: false,
-  },
-  {
-    id: 'network',
-    name: i18n.translate('xpack.siem.navigation.network', {
-      defaultMessage: 'Network',
-    }),
-    href: getNetworkUrl(),
-    disabled: false,
-  },
-  {
-    id: 'timelines',
-    name: i18n.translate('xpack.siem.navigation.timelines', {
-      defaultMessage: 'Timelines',
-    }),
-    href: getTimelinesUrl(),
-    disabled: false,
-  },
-];
 
 export const HomePage = pure(() => (
   <AutoSizer detectAnyWindowResize={true} content>

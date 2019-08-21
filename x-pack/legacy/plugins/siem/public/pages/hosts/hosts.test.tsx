@@ -120,7 +120,7 @@ describe('Hosts - rendering', () => {
     expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(false);
   });
 
-  test('it should render the hosts tab by default', async () => {
+  test('it should render tab navigation', async () => {
     localSource[0].result.data.source.status.indicesExist = true;
     const wrapper = mount(
       <TestProviders>
@@ -133,6 +133,6 @@ describe('Hosts - rendering', () => {
     );
     await new Promise(resolve => setTimeout(resolve));
     wrapper.update();
-    expect(wrapper.find('HostsQueryTabBody').exists()).toBe(true);
+    expect(wrapper.find('.navigation').exists()).toBe(true);
   });
 });

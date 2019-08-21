@@ -17,7 +17,8 @@ const offsetChrome = 49;
 const gutterTimeline = '70px'; // Temporary until timeline is moved - MichaelMarcialis
 
 const disableSticky = 'screen and (max-width: ' + euiLightVars.euiBreakpoints.s + ')';
-const disableStickyMq = window.matchMedia(disableSticky);
+const disableStickyMq =
+  typeof window.matchMedia === 'function' ? window.matchMedia(disableSticky) : { matches: false };
 
 const Aside = styled.aside<{ isSticky?: boolean }>`
   ${props => css`
