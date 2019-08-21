@@ -22,6 +22,24 @@ interface SetupOpts {
   ) => Promise<SavedObjectsImportResponse>;
 }
 
+const expectStreamToContainObjects = async (
+  stream: Readable,
+  expectedObjects: SetupOpts['objects']
+) => {
+  const objectsToResolve: unknown[] = await new Promise((resolve, reject) => {
+    const objects: SetupOpts['objects'] = [];
+    stream.on('data', chunk => {
+      objects.push(chunk);
+    });
+    stream.on('end', () => resolve(objects));
+    stream.on('error', err => reject(err));
+  });
+
+  // Ensure the Readable stream passed to `resolveImportErrors` contains all of the expected objects.
+  // Verifies functionality for `readStreamToCompletion` and `createReadableStreamFromArray`
+  expect(objectsToResolve).toEqual(expectedObjects);
+};
+
 describe('resolveCopySavedObjectsToSpacesConflicts', () => {
   const setup = (setupOpts: SetupOpts) => {
     const savedObjectsService: SavedObjectsService = ({
@@ -44,18 +62,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
           jest
             .fn()
             .mockImplementation(async (resolveOpts: SavedObjectsResolveImportErrorsOptions) => {
-              const objectsToResolve: unknown[] = await new Promise((resolve, reject) => {
-                const objects: unknown[] = [];
-                resolveOpts.readStream.on('data', chunk => {
-                  objects.push(chunk);
-                });
-                resolveOpts.readStream.on('end', () => resolve(objects));
-                resolveOpts.readStream.on('error', err => reject(err));
-              });
-
-              // Ensure the Readable stream passed to `resolveImportErrors` contains all of the expected objects.
-              // Verifies functionality for `readStreamToCompletion` and `createReadableStreamFromArray`
-              expect(objectsToResolve).toEqual(setupOpts.objects);
+              await expectStreamToContainObjects(resolveOpts.readStream, setupOpts.objects);
 
               const response: SavedObjectsImportResponse = {
                 success: true,
@@ -296,28 +303,31 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
   });
 
   it(`doesn't stop resolution if some spaces fail`, async () => {
+    const objects = [
+      {
+        type: 'dashboard',
+        id: 'my-dashboard',
+        attributes: {},
+      },
+      {
+        type: 'visualization',
+        id: 'my-viz',
+        attributes: {},
+      },
+      {
+        type: 'index-pattern',
+        id: 'my-index-pattern',
+        attributes: {},
+      },
+    ];
+
     const { savedObjectsClient, savedObjectsService } = setup({
-      objects: [
-        {
-          type: 'dashboard',
-          id: 'my-dashboard',
-          attributes: {},
-        },
-        {
-          type: 'visualization',
-          id: 'my-viz',
-          attributes: {},
-        },
-        {
-          type: 'index-pattern',
-          id: 'my-index-pattern',
-          attributes: {},
-        },
-      ],
-      resolveImportErrorsImpl: opts => {
+      objects,
+      resolveImportErrorsImpl: async opts => {
         if (opts.namespace === 'failure-space') {
           throw new Error(`Some error occurred!`);
         }
+        await expectStreamToContainObjects(opts.readStream, objects);
         return Promise.resolve({
           success: true,
           successCount: 3,

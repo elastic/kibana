@@ -14,7 +14,9 @@ import { SpacesAuditLogger } from '../audit_logger';
 import { SpacesConfigType } from '../../new_platform/config';
 
 type SpacesClientRequestFacade = Legacy.Request | KibanaRequest;
+
 export type GetSpacePurpose = 'any' | 'copySavedObjectsIntoSpace';
+const SUPPORTED_GET_SPACE_PURPOSES: GetSpacePurpose[] = ['any', 'copySavedObjectsIntoSpace'];
 
 const PURPOSE_PRIVILEGE_MAP: Record<
   GetSpacePurpose,
@@ -52,11 +54,12 @@ export class SpacesClient {
   }
 
   public async getAll(purpose: GetSpacePurpose = 'any'): Promise<Space[]> {
+    if (!SUPPORTED_GET_SPACE_PURPOSES.includes(purpose)) {
+      throw Boom.badRequest(`unsupported space purpose: ${purpose}`);
+    }
+
     if (this.useRbac()) {
       const privilegeFactory = PURPOSE_PRIVILEGE_MAP[purpose];
-      if (!privilegeFactory) {
-        throw Boom.badRequest(`unsupported space purpose: ${purpose}`);
-      }
 
       const { saved_objects } = await this.internalSavedObjectRepository.find({
         type: 'space',

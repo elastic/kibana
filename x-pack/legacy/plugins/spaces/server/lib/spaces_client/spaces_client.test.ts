@@ -187,43 +187,26 @@ describe('#getAll', () => {
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
     });
 
-    test(`ignores the provided purpose`, async () => {
-      const mockAuditLogger = createMockAuditLogger();
-      const mockDebugLogger = createMockDebugLogger();
+    test(`throws Boom.badRequest when an invalid purpose is provided'`, async () => {
       const { mockAuthorization } = createMockAuthorization();
       mockAuthorization.mode.useRbacForRequest.mockReturnValue(false);
-      const mockCallWithRequestRepository = {
-        find: jest.fn().mockReturnValue({
-          saved_objects: savedObjects,
-        }),
-      };
-      const maxSpaces = 1234;
-      const mockConfig = createMockConfig({
-        maxSpaces: 1234,
-      });
+
       const request = Symbol() as any;
 
       const client = new SpacesClient(
-        mockAuditLogger as any,
-        mockDebugLogger,
+        null as any,
+        null as any,
         mockAuthorization,
-        mockCallWithRequestRepository,
-        mockConfig,
+        null as any,
+        null as any,
         null,
         request
       );
-      const actualSpaces = await client.getAll('some-invalid-purpose' as GetSpacePurpose);
+      await expect(
+        client.getAll('invalid_purpose' as GetSpacePurpose)
+      ).rejects.toThrowErrorMatchingSnapshot();
 
-      expect(actualSpaces).toEqual(expectedSpaces);
-      expect(mockCallWithRequestRepository.find).toHaveBeenCalledWith({
-        type: 'space',
-        page: 1,
-        perPage: maxSpaces,
-        sortField: 'name.keyword',
-      });
-      expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
-      expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
-      expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
+      expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -255,7 +238,7 @@ describe('#getAll', () => {
       ).rejects.toThrowErrorMatchingSnapshot();
 
       expect(mockInternalRepository.find).not.toHaveBeenCalled();
-      expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(mockAuthorization.mode.useRbacForRequest).not.toHaveBeenCalled();
       expect(mockAuthorization.checkPrivilegesWithRequest).not.toHaveBeenCalled();
       expect(mockCheckPrivilegesAtSpaces).not.toHaveBeenCalled();
       expect(mockAuditLogger.spacesAuthorizationFailure).not.toHaveBeenCalled();
