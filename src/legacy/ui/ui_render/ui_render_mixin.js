@@ -92,28 +92,22 @@ export function uiRenderMixin(kbnServer, server, config) {
   kbnServer.afterPluginsInit(() => {
     const authEnabled = !!server.auth.settings.default;
 
+    const basePath = config.get('server.basePath');
+    const regularBundlePath = `${basePath}/bundles`;
+    const dllBundlePath = `${basePath}/built_assets/dlls`;
+
     server.route({
-      path: '/bundles/app/{id}/bootstrap.js',
+      path: '/bundles/global.style.css',
       method: 'GET',
       config: {
-        tags: ['api'],
-        auth: authEnabled ? { mode: 'try' } : false,
+        auth: false,
       },
       async handler(request, h) {
-        const { id } = request.params;
-        const app = server.getUiAppById(id) || server.getHiddenUiAppById(id);
-        if (!app) {
-          throw Boom.notFound(`Unknown app: ${id}`);
-        }
-
         const uiSettings = request.getUiSettingsService();
         const darkMode = !authEnabled || request.auth.isAuthenticated
           ? await uiSettings.get('theme:darkMode')
           : false;
 
-        const basePath = config.get('server.basePath');
-        const regularBundlePath = `${basePath}/bundles`;
-        const dllBundlePath = `${basePath}/built_assets/dlls`;
         const styleSheetPaths = [
           `${dllBundlePath}/vendors.style.dll.css`,
           ...(
@@ -130,7 +124,6 @@ export function uiRenderMixin(kbnServer, server, config) {
           ),
           `${regularBundlePath}/${darkMode ? 'dark' : 'light'}_theme.style.css`,
           `${regularBundlePath}/commons.style.css`,
-          `${regularBundlePath}/${app.getId()}.style.css`,
           ...kbnServer.uiExports.styleSheetPaths
             .filter(path => (
               path.theme === '*' || path.theme === (darkMode ? 'dark' : 'light')
@@ -143,12 +136,49 @@ export function uiRenderMixin(kbnServer, server, config) {
             .reverse()
         ];
 
+        const styleSheetsContents = await Promise.all(
+          styleSheetPaths.map(async path => [path, await server.inject({ url: path })])
+        );
+
+        // Concatenate all stylesheets into a single string
+        const concatStyleSheet = styleSheetsContents
+          .map(([path, resp]) => `/** ${path} */\n\n${resp.payload}`)
+          .join('\n\n');
+
+        // Generate a hash for the etag
+        const hash = createHash('sha1');
+        hash.update(concatStyleSheet);
+        const etag = hash.digest('hex');
+
+        return h.response(concatStyleSheet)
+          .header('content-type', 'text/css; charset=utf-8')
+          .etag(etag);
+      }
+    });
+
+    server.route({
+      path: '/bundles/app/{id}/bootstrap.js',
+      method: 'GET',
+      config: {
+        tags: ['api'],
+        auth: authEnabled ? { mode: 'try' } : false,
+      },
+      async handler(request, h) {
+        const { id } = request.params;
+        const app = server.getUiAppById(id) || server.getHiddenUiAppById(id);
+        if (!app) {
+          throw Boom.notFound(`Unknown app: ${id}`);
+        }
+
         const bootstrap = new AppBootstrap({
           templateData: {
             appId: app.getId(),
             regularBundlePath,
             dllBundlePath,
-            styleSheetPaths,
+            styleSheetPaths: [
+              `${regularBundlePath}/global.style.css`,
+              `${regularBundlePath}/${app.getId()}.style.css`,
+            ]
           }
         });
 
