@@ -36,7 +36,7 @@
   },
   masterIssue: true,
   masterIssueApproval: true,
-  rangeStrategy: 'replace',
+  rangeStrategy: 'bump',
   npm: {
     lockFileMaintenance: {
       enabled: false,
@@ -159,6 +159,7 @@
         packagePatterns: [
           '(\\b|_)vega(\\b|_)',
         ],
+        enabled: false,
       },
       {
         groupSlug: 'language server',
@@ -880,7 +881,7 @@
       },
     ],
   },
-  prConcurrentLimit: 6,
+  prConcurrentLimit: 0,
   vulnerabilityAlerts: {
     enabled: false,
   },
