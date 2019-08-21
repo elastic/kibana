@@ -123,7 +123,7 @@ describe('licensing', () => {
   test('returns instance of licensing setup', async () => {
     const { licensing } = await setup();
 
-    expect(licensing).toBeInstanceOf(LicensingServiceSetup);
+    expect(licensing).toBeInstanceOf(LicensingPluginSetup);
   });
 
   test('uid returns a UID field', async () => {
