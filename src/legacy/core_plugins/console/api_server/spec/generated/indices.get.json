@@ -21,6 +21,6 @@
     "patterns": [
       "{indices}"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-get-index.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-get-index.html"
   }
 }

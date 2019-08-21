@@ -76,9 +76,10 @@ describe('defaultValidationErrorHandler', () => {
 describe('timeouts', () => {
   const logger = loggingServiceMock.create();
   const server = new HttpServer(logger, 'foo');
+  const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
   test('closes sockets on timeout', async () => {
-    const router = new Router('', logger.get());
+    const router = new Router('', logger.get(), enhanceWithContext);
     router.get({ path: '/a', validate: false }, async (context, req, res) => {
       await new Promise(resolve => setTimeout(resolve, 2000));
       return res.ok({});
