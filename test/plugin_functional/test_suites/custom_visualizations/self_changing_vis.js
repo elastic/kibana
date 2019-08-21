@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }) {
     return await testSubjects.getAttribute('counterEditor', 'value');
   }
 
-  describe('self changing vis', function describeIndexTests() {
+  describe.skip('self changing vis', function describeIndexTests() {
 
     before(async () => {
       await PageObjects.visualize.navigateToNewVisualization();

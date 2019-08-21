@@ -26,6 +26,7 @@ export { Authenticator, ProviderLoginAttempt } from './authenticator';
 export { AuthenticationResult } from './authentication_result';
 export { DeauthenticationResult } from './deauthentication_result';
 export { OIDCAuthenticationFlow } from './providers';
+export { CreateAPIKeyResult } from './api_keys';
 
 interface SetupAuthenticationParams {
   core: CoreSetup;
