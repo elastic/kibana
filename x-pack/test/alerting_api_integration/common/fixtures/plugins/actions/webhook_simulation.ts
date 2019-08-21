@@ -5,7 +5,7 @@
  */
 import expect from '@kbn/expect';
 import Joi from 'joi';
-import Hapi from 'hapi';
+import Hapi, { Util } from 'hapi';
 import HapiBasic from '@hapi/basic';
 
 interface WebhookRequest extends Hapi.Request {
@@ -26,7 +26,7 @@ export async function initPlugin(server: Hapi.Server, path: string) {
   server.auth.strategy('simple', 'basic', { validate });
 
   server.route({
-    method: 'POST',
+    method: ['POST', 'PUT'],
     path,
     options: {
       auth: 'simple',
@@ -43,9 +43,12 @@ function webhookHandler(request: WebhookRequest, h: any) {
   const body = request.payload;
 
   switch (body) {
-    case 'validateAuthentication':
+    case 'authenticate':
       return validateAuthentication(request, h);
-      break;
+    case 'success_post_method':
+      return validateRequestUsesMethod(request, h, 'post');
+    case 'success_put_method':
+      return validateRequestUsesMethod(request, h, 'put');
   }
 
   return htmlResponse(
@@ -64,6 +67,19 @@ function validateAuthentication(request: WebhookRequest, h: any) {
       username: 'elastic',
       password: 'changeme',
     });
+    return htmlResponse(h, 200, `OK`);
+  } catch (ex) {
+    return htmlResponse(h, 403, `the validateAuthentication operation failed. ${ex.message}`);
+  }
+}
+
+function validateRequestUsesMethod(
+  request: WebhookRequest,
+  h: any,
+  method: Util.HTTP_METHODS_PARTIAL
+) {
+  try {
+    expect(request.method).to.eql(method);
     return htmlResponse(h, 200, `OK`);
   } catch (ex) {
     return htmlResponse(h, 403, `the validateAuthentication operation failed. ${ex.message}`);

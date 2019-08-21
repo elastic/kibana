@@ -30,7 +30,10 @@ export default function webhookTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  async function createWebhookAction(urlWithCreds: string): Promise<string> {
+  async function createWebhookAction(
+    urlWithCreds: string,
+    config: Record<string, string> = {}
+  ): Promise<string> {
     const { url, user, password } = extractCredentialsFromUrl(urlWithCreds);
     const { body: createdAction } = await supertest
       .post('/api/action')
@@ -47,6 +50,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           headers: {
             'Content-Type': 'text/plain',
           },
+          ...config,
         },
       })
       .expect(200);
@@ -118,7 +122,37 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'test')
         .send({
           params: {
-            body: 'validateAuthentication',
+            body: 'authenticate',
+          },
+        })
+        .expect(200);
+
+      expect(result.status).to.eql('ok');
+    });
+
+    it('should support the POST method against webhook target', async () => {
+      const webhookActionId = await createWebhookAction(webhookSimulatorURL, { method: 'post' });
+      const { body: result } = await supertest
+        .post(`/api/action/${webhookActionId}/_execute`)
+        .set('kbn-xsrf', 'test')
+        .send({
+          params: {
+            body: 'success_post_method',
+          },
+        })
+        .expect(200);
+
+      expect(result.status).to.eql('ok');
+    });
+
+    it('should support the PUT method against webhook target', async () => {
+      const webhookActionId = await createWebhookAction(webhookSimulatorURL, { method: 'put' });
+      const { body: result } = await supertest
+        .post(`/api/action/${webhookActionId}/_execute`)
+        .set('kbn-xsrf', 'test')
+        .send({
+          params: {
+            body: 'success_put_method',
           },
         })
         .expect(200);
