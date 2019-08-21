@@ -7,6 +7,7 @@
 import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { wrapError } from '../client/errors';
 import { transformAuditMessagesProvider } from '../models/data_frame/transform_audit_messages';
+import { transformServiceProvider } from '../models/data_frame';
 
 export function dataFrameRoutes({ commonRouteConfig, elasticsearchPlugin, route }) {
 
@@ -80,11 +81,12 @@ export function dataFrameRoutes({ commonRouteConfig, elasticsearchPlugin, route 
 
   route({
     method: 'DELETE',
-    path: '/api/ml/_data_frame/transforms/{transformId}',
+    path: '/api/ml/_data_frame/transforms/delete_transforms',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      const { transformId } = request.params;
-      return callWithRequest('ml.deleteDataFrameTransform', { transformId })
+      const { deleteTransforms } = transformServiceProvider(callWithRequest);
+      const { transformsInfo } = request.payload;
+      return deleteTransforms(transformsInfo)
         .catch(resp => wrapError(resp));
     },
     config: {

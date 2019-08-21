@@ -105,6 +105,17 @@ export interface DataFrameTransformListRow {
   stats: DataFrameTransformStats;
 }
 
+export interface DataFrameTransformEndpointData {
+  id: DataFrameTransformId;
+  state: DATA_FRAME_TRANSFORM_STATE;
+}
+
+export interface DataFrameTransformEndpointResultData {
+  id: DataFrameTransformId;
+  success: boolean;
+  error?: string;
+}
+
 // Used to pass on attribute names to table columns
 export enum DataFrameTransformListColumn {
   configDestIndex = 'config.dest.index',
