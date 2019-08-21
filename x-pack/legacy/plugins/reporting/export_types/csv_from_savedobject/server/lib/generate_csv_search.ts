@@ -13,7 +13,7 @@ import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
 
 import { CancellationToken } from '../../../../common/cancellation_token';
 
-import { KbnServer, Logger, JobParams } from '../../../../types';
+import { KbnServer, Logger } from '../../../../types';
 import {
   IndexPatternSavedObject,
   SavedSearchObjectAttributes,
@@ -21,7 +21,7 @@ import {
   SearchRequest,
   SearchSource,
   SearchSourceQuery,
-} from '../../';
+} from '../../types';
 import {
   CsvResultFromSearch,
   ESQueryConfig,
@@ -29,9 +29,10 @@ import {
   Filter,
   IndexPatternField,
   QueryFilter,
-} from './';
+} from '../../types';
 import { getDataSource } from './get_data_source';
 import { getFilters } from './get_filters';
+import { JobParamsDiscoverCsv } from '../../../csv/types';
 
 const getEsQueryConfig = async (config: any) => {
   const configs = await Promise.all([
@@ -54,7 +55,7 @@ export async function generateCsvSearch(
   server: KbnServer,
   logger: Logger,
   searchPanel: SearchPanel,
-  jobParams: JobParams
+  jobParams: JobParamsDiscoverCsv
 ): Promise<CsvResultFromSearch> {
   const { savedObjects, uiSettingsServiceFactory } = server;
   const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(req);

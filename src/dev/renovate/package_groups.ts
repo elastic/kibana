@@ -125,6 +125,7 @@ export const RENOVATE_PACKAGE_GROUPS: PackageGroup[] = [
   {
     name: 'vega',
     packageWords: ['vega'],
+    enabled: false,
   },
 
   {
