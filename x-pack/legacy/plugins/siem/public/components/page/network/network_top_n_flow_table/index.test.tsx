@@ -11,7 +11,7 @@ import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { FlowDirection, FlowTarget, FlowTargetNew } from '../../../../graphql/types';
+import { FlowTargetNew } from '../../../../graphql/types';
 import {
   apolloClientObservable,
   mockGlobalState,
@@ -23,6 +23,24 @@ import { createStore, networkModel, State } from '../../../../store';
 import { NetworkTopNFlowTable } from '.';
 import { mockData } from './mock';
 
+jest.mock('ui/new_platform', () => ({
+  npStart: {
+    core: {
+      injectedMetadata: {
+        getKibanaVersion: () => '8.0.0',
+      },
+    },
+  },
+  npSetup: {
+    core: {
+      uiSettings: {
+        get$: () => ({
+          subscribe: jest.fn(),
+        }),
+      },
+    },
+  },
+}));
 describe('NetworkTopNFlow Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
@@ -60,96 +78,6 @@ describe('NetworkTopNFlow Table Component', () => {
     });
   });
 
-  describe('Direction', () => {
-    test('when you click on the bi-directional button, it get selected', () => {
-      const event = {
-        target: { name: 'direction', value: FlowDirection.biDirectional },
-      };
-
-      const wrapper = mount(
-        <MockedProvider>
-          <TestProviders store={store}>
-            <NetworkTopNFlowTable
-              data={mockData.NetworkTopNFlow.edges}
-              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopNFlow.pageInfo)}
-              flowTargeted={FlowTargetNew.source}
-              id="topNFlowSource"
-              indexPattern={mockIndexPattern}
-              loading={false}
-              loadPage={loadPage}
-              showMorePagesIndicator={getOr(
-                false,
-                'showMorePagesIndicator',
-                mockData.NetworkTopNFlow.pageInfo
-              )}
-              totalCount={mockData.NetworkTopNFlow.totalCount}
-              type={networkModel.NetworkType.page}
-            />
-          </TestProviders>
-        </MockedProvider>
-      );
-
-      wrapper
-        .find(`[data-test-subj="${FlowDirection.biDirectional}"]`)
-        .first()
-        .simulate('click', event);
-
-      wrapper.update();
-
-      expect(
-        wrapper
-          .find(`[data-test-subj="${FlowDirection.biDirectional}"]`)
-          .first()
-          .render()
-          .hasClass('euiFilterButton-hasActiveFilters')
-      ).toEqual(true);
-    });
-  });
-
-  describe('Sorting by type', () => {
-    test('when you click on the sorting dropdown, and picked destination', () => {
-      const wrapper = mount(
-        <MockedProvider>
-          <TestProviders store={store}>
-            <NetworkTopNFlowTable
-              data={mockData.NetworkTopNFlow.edges}
-              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopNFlow.pageInfo)}
-              flowTargeted={FlowTargetNew.source}
-              id="topNFlowSource"
-              indexPattern={mockIndexPattern}
-              loading={false}
-              loadPage={loadPage}
-              showMorePagesIndicator={getOr(
-                false,
-                'showMorePagesIndicator',
-                mockData.NetworkTopNFlow.pageInfo
-              )}
-              totalCount={mockData.NetworkTopNFlow.totalCount}
-              type={networkModel.NetworkType.page}
-            />
-          </TestProviders>
-        </MockedProvider>
-      );
-
-      expect(
-        wrapper
-          .find(`[data-test-subj="flow-target-filter-button-${FlowTarget.destination}"]`)
-          .first()
-          .prop('hasActiveFilters')
-      ).toBeFalsy();
-      wrapper
-        .find(`[data-test-subj="flow-target-filter-button-${FlowTarget.destination}"]`)
-        .first()
-        .simulate('click');
-      expect(
-        wrapper
-          .find(`[data-test-subj="flow-target-filter-button-${FlowTarget.destination}"]`)
-          .first()
-          .prop('hasActiveFilters')
-      ).toBeTruthy();
-    });
-  });
-
   describe('Sorting on Table', () => {
     test('when you click on the column header, you should show the sorting icon', () => {
       const wrapper = mount(
@@ -176,7 +104,7 @@ describe('NetworkTopNFlow Table Component', () => {
       );
       expect(store.getState().network.page.queries!.topNFlowSource.topNFlowSort).toEqual({
         direction: 'desc',
-        field: 'bytes_in',
+        field: 'bytes_out',
       });
 
       wrapper

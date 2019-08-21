@@ -147,8 +147,8 @@ export const mockResponse = {
       buckets: [
         {
           key: '1.1.1.1',
-          flows: 1234567,
-          destination_ips: 345345,
+          flows: { value: 1234567 },
+          destination_ips: { value: 345345 },
           bytes_in: {
             value: 11276023407,
           },
@@ -156,10 +156,69 @@ export const mockResponse = {
             value: 1025631,
           },
           location: {
-            value: 'San Francisco, CA, USA',
+            doc_count: 14,
+            top_geo: {
+              hits: {
+                total: {
+                  value: 14,
+                  relation: 'eq',
+                },
+                max_score: 1,
+                hits: [
+                  {
+                    _index: 'filebeat-8.0.0-2019.06.19-000005',
+                    _type: '_doc',
+                    _id: 'dd4fa2d4bd-692279846149410',
+                    _score: 1,
+                    _source: {
+                      source: {
+                        geo: {
+                          continent_name: 'North America',
+                          region_iso_code: 'US-PA',
+                          city_name: 'Philadelphia',
+                          country_iso_code: 'US',
+                          region_name: 'Pennsylvania',
+                          location: {
+                            lon: -75.1534,
+                            lat: 39.9359,
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
           },
           autonomous_system: {
-            value: 'whatevenisthis',
+            doc_count: 14,
+            top_as: {
+              hits: {
+                total: {
+                  value: 14,
+                  relation: 'eq',
+                },
+                max_score: 1,
+                hits: [
+                  {
+                    _index: 'filebeat-8.0.0-2019.06.19-000005',
+                    _type: '_doc',
+                    _id: 'dd4fa2d4bd-692279846149410',
+                    _score: 1,
+                    _source: {
+                      source: {
+                        as: {
+                          number: 3356,
+                          organization: {
+                            name: 'Level 3 Parent, LLC',
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
           },
           domain: {
             buckets: [
@@ -171,8 +230,8 @@ export const mockResponse = {
         },
         {
           key: '2.2.2.2',
-          flows: 1234567,
-          destination_ips: 345345,
+          flows: { value: 1234567 },
+          destination_ips: { value: 345345 },
           bytes_in: {
             value: 5469323342,
           },
@@ -180,10 +239,69 @@ export const mockResponse = {
             value: 2811441,
           },
           location: {
-            value: 'San Francisco, CA, USA',
+            doc_count: 14,
+            top_geo: {
+              hits: {
+                total: {
+                  value: 14,
+                  relation: 'eq',
+                },
+                max_score: 1,
+                hits: [
+                  {
+                    _index: 'filebeat-8.0.0-2019.06.19-000005',
+                    _type: '_doc',
+                    _id: 'dd4fa2d4bd-692279846149410',
+                    _score: 1,
+                    _source: {
+                      source: {
+                        geo: {
+                          continent_name: 'North America',
+                          region_iso_code: 'US-PA',
+                          city_name: 'Philadelphia',
+                          country_iso_code: 'US',
+                          region_name: 'Pennsylvania',
+                          location: {
+                            lon: -75.1534,
+                            lat: 39.9359,
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
           },
           autonomous_system: {
-            value: 'whatevenisthis',
+            doc_count: 14,
+            top_as: {
+              hits: {
+                total: {
+                  value: 14,
+                  relation: 'eq',
+                },
+                max_score: 1,
+                hits: [
+                  {
+                    _index: 'filebeat-8.0.0-2019.06.19-000005',
+                    _type: '_doc',
+                    _id: 'dd4fa2d4bd-692279846149410',
+                    _score: 1,
+                    _source: {
+                      source: {
+                        as: {
+                          number: 3356,
+                          organization: {
+                            name: 'Level 3 Parent, LLC',
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
           },
           domain: {
             buckets: [
@@ -195,8 +313,8 @@ export const mockResponse = {
         },
         {
           key: '3.3.3.3',
-          flows: 1234567,
-          destination_ips: 345345,
+          flows: { value: 1234567 },
+          destination_ips: { value: 345345 },
           bytes_in: {
             value: 3807671322,
           },
@@ -204,10 +322,69 @@ export const mockResponse = {
             value: 4494034,
           },
           location: {
-            value: 'San Francisco, CA, USA',
+            doc_count: 14,
+            top_geo: {
+              hits: {
+                total: {
+                  value: 14,
+                  relation: 'eq',
+                },
+                max_score: 1,
+                hits: [
+                  {
+                    _index: 'filebeat-8.0.0-2019.06.19-000005',
+                    _type: '_doc',
+                    _id: 'dd4fa2d4bd-692279846149410',
+                    _score: 1,
+                    _source: {
+                      source: {
+                        geo: {
+                          continent_name: 'North America',
+                          region_iso_code: 'US-PA',
+                          city_name: 'Philadelphia',
+                          country_iso_code: 'US',
+                          region_name: 'Pennsylvania',
+                          location: {
+                            lon: -75.1534,
+                            lat: 39.9359,
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
           },
           autonomous_system: {
-            value: 'whatevenisthis',
+            doc_count: 14,
+            top_as: {
+              hits: {
+                total: {
+                  value: 14,
+                  relation: 'eq',
+                },
+                max_score: 1,
+                hits: [
+                  {
+                    _index: 'filebeat-8.0.0-2019.06.19-000005',
+                    _type: '_doc',
+                    _id: 'dd4fa2d4bd-692279846149410',
+                    _score: 1,
+                    _source: {
+                      source: {
+                        as: {
+                          number: 3356,
+                          organization: {
+                            name: 'Level 3 Parent, LLC',
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
           },
           domain: {
             buckets: [
@@ -222,8 +399,8 @@ export const mockResponse = {
         },
         {
           key: '4.4.4.4',
-          flows: 1234567,
-          destination_ips: 345345,
+          flows: { value: 1234567 },
+          destination_ips: { value: 345345 },
           bytes_in: {
             value: 166517626,
           },
@@ -231,10 +408,69 @@ export const mockResponse = {
             value: 3194782,
           },
           location: {
-            value: 'San Francisco, CA, USA',
+            doc_count: 14,
+            top_geo: {
+              hits: {
+                total: {
+                  value: 14,
+                  relation: 'eq',
+                },
+                max_score: 1,
+                hits: [
+                  {
+                    _index: 'filebeat-8.0.0-2019.06.19-000005',
+                    _type: '_doc',
+                    _id: 'dd4fa2d4bd-692279846149410',
+                    _score: 1,
+                    _source: {
+                      source: {
+                        geo: {
+                          continent_name: 'North America',
+                          region_iso_code: 'US-PA',
+                          city_name: 'Philadelphia',
+                          country_iso_code: 'US',
+                          region_name: 'Pennsylvania',
+                          location: {
+                            lon: -75.1534,
+                            lat: 39.9359,
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
           },
           autonomous_system: {
-            value: 'whatevenisthis',
+            doc_count: 14,
+            top_as: {
+              hits: {
+                total: {
+                  value: 14,
+                  relation: 'eq',
+                },
+                max_score: 1,
+                hits: [
+                  {
+                    _index: 'filebeat-8.0.0-2019.06.19-000005',
+                    _type: '_doc',
+                    _id: 'dd4fa2d4bd-692279846149410',
+                    _score: 1,
+                    _source: {
+                      source: {
+                        as: {
+                          number: 3356,
+                          organization: {
+                            name: 'Level 3 Parent, LLC',
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
           },
           domain: {
             buckets: [
@@ -246,8 +482,8 @@ export const mockResponse = {
         },
         {
           key: '5.5.5.5',
-          flows: 1234567,
-          destination_ips: 345345,
+          flows: { value: 1234567 },
+          destination_ips: { value: 345345 },
           bytes_in: {
             value: 104785026,
           },
@@ -255,10 +491,69 @@ export const mockResponse = {
             value: 1838597,
           },
           location: {
-            value: 'San Francisco, CA, USA',
+            doc_count: 14,
+            top_geo: {
+              hits: {
+                total: {
+                  value: 14,
+                  relation: 'eq',
+                },
+                max_score: 1,
+                hits: [
+                  {
+                    _index: 'filebeat-8.0.0-2019.06.19-000005',
+                    _type: '_doc',
+                    _id: 'dd4fa2d4bd-692279846149410',
+                    _score: 1,
+                    _source: {
+                      source: {
+                        geo: {
+                          continent_name: 'North America',
+                          region_iso_code: 'US-PA',
+                          city_name: 'Philadelphia',
+                          country_iso_code: 'US',
+                          region_name: 'Pennsylvania',
+                          location: {
+                            lon: -75.1534,
+                            lat: 39.9359,
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
           },
           autonomous_system: {
-            value: 'whatevenisthis',
+            doc_count: 14,
+            top_as: {
+              hits: {
+                total: {
+                  value: 14,
+                  relation: 'eq',
+                },
+                max_score: 1,
+                hits: [
+                  {
+                    _index: 'filebeat-8.0.0-2019.06.19-000005',
+                    _type: '_doc',
+                    _id: 'dd4fa2d4bd-692279846149410',
+                    _score: 1,
+                    _source: {
+                      source: {
+                        as: {
+                          number: 3356,
+                          organization: {
+                            name: 'Level 3 Parent, LLC',
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
           },
           domain: {
             buckets: [
@@ -270,8 +565,8 @@ export const mockResponse = {
         },
         {
           key: '6.6.6.6',
-          flows: 1234567,
-          destination_ips: 345345,
+          flows: { value: 1234567 },
+          destination_ips: { value: 345345 },
           bytes_in: {
             value: 28804250,
           },
@@ -279,10 +574,69 @@ export const mockResponse = {
             value: 482982,
           },
           location: {
-            value: 'San Francisco, CA, USA',
+            doc_count: 14,
+            top_geo: {
+              hits: {
+                total: {
+                  value: 14,
+                  relation: 'eq',
+                },
+                max_score: 1,
+                hits: [
+                  {
+                    _index: 'filebeat-8.0.0-2019.06.19-000005',
+                    _type: '_doc',
+                    _id: 'dd4fa2d4bd-692279846149410',
+                    _score: 1,
+                    _source: {
+                      source: {
+                        geo: {
+                          continent_name: 'North America',
+                          region_iso_code: 'US-PA',
+                          city_name: 'Philadelphia',
+                          country_iso_code: 'US',
+                          region_name: 'Pennsylvania',
+                          location: {
+                            lon: -75.1534,
+                            lat: 39.9359,
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
           },
           autonomous_system: {
-            value: 'whatevenisthis',
+            doc_count: 14,
+            top_as: {
+              hits: {
+                total: {
+                  value: 14,
+                  relation: 'eq',
+                },
+                max_score: 1,
+                hits: [
+                  {
+                    _index: 'filebeat-8.0.0-2019.06.19-000005',
+                    _type: '_doc',
+                    _id: 'dd4fa2d4bd-692279846149410',
+                    _score: 1,
+                    _source: {
+                      source: {
+                        as: {
+                          number: 3356,
+                          organization: {
+                            name: 'Level 3 Parent, LLC',
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
           },
           domain: {
             doc_count_error_upper_bound: 0,
@@ -296,8 +650,8 @@ export const mockResponse = {
         },
         {
           key: '7.7.7.7',
-          flows: 1234567,
-          destination_ips: 345345,
+          flows: { value: 1234567 },
+          destination_ips: { value: 345345 },
           bytes_in: {
             value: 23032363,
           },
@@ -305,10 +659,69 @@ export const mockResponse = {
             value: 400623,
           },
           location: {
-            value: 'San Francisco, CA, USA',
+            doc_count: 14,
+            top_geo: {
+              hits: {
+                total: {
+                  value: 14,
+                  relation: 'eq',
+                },
+                max_score: 1,
+                hits: [
+                  {
+                    _index: 'filebeat-8.0.0-2019.06.19-000005',
+                    _type: '_doc',
+                    _id: 'dd4fa2d4bd-692279846149410',
+                    _score: 1,
+                    _source: {
+                      source: {
+                        geo: {
+                          continent_name: 'North America',
+                          region_iso_code: 'US-PA',
+                          city_name: 'Philadelphia',
+                          country_iso_code: 'US',
+                          region_name: 'Pennsylvania',
+                          location: {
+                            lon: -75.1534,
+                            lat: 39.9359,
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
           },
           autonomous_system: {
-            value: 'whatevenisthis',
+            doc_count: 14,
+            top_as: {
+              hits: {
+                total: {
+                  value: 14,
+                  relation: 'eq',
+                },
+                max_score: 1,
+                hits: [
+                  {
+                    _index: 'filebeat-8.0.0-2019.06.19-000005',
+                    _type: '_doc',
+                    _id: 'dd4fa2d4bd-692279846149410',
+                    _score: 1,
+                    _source: {
+                      source: {
+                        as: {
+                          number: 3356,
+                          organization: {
+                            name: 'Level 3 Parent, LLC',
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
           },
           domain: {
             doc_count_error_upper_bound: 0,
@@ -322,8 +735,8 @@ export const mockResponse = {
         },
         {
           key: '8.8.8.8',
-          flows: 1234567,
-          destination_ips: 345345,
+          flows: { value: 1234567 },
+          destination_ips: { value: 345345 },
           bytes_in: {
             value: 21424889,
           },
@@ -331,10 +744,69 @@ export const mockResponse = {
             value: 344357,
           },
           location: {
-            value: 'San Francisco, CA, USA',
+            doc_count: 14,
+            top_geo: {
+              hits: {
+                total: {
+                  value: 14,
+                  relation: 'eq',
+                },
+                max_score: 1,
+                hits: [
+                  {
+                    _index: 'filebeat-8.0.0-2019.06.19-000005',
+                    _type: '_doc',
+                    _id: 'dd4fa2d4bd-692279846149410',
+                    _score: 1,
+                    _source: {
+                      source: {
+                        geo: {
+                          continent_name: 'North America',
+                          region_iso_code: 'US-PA',
+                          city_name: 'Philadelphia',
+                          country_iso_code: 'US',
+                          region_name: 'Pennsylvania',
+                          location: {
+                            lon: -75.1534,
+                            lat: 39.9359,
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
           },
           autonomous_system: {
-            value: 'whatevenisthis',
+            doc_count: 14,
+            top_as: {
+              hits: {
+                total: {
+                  value: 14,
+                  relation: 'eq',
+                },
+                max_score: 1,
+                hits: [
+                  {
+                    _index: 'filebeat-8.0.0-2019.06.19-000005',
+                    _type: '_doc',
+                    _id: 'dd4fa2d4bd-692279846149410',
+                    _score: 1,
+                    _source: {
+                      source: {
+                        as: {
+                          number: 3356,
+                          organization: {
+                            name: 'Level 3 Parent, LLC',
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
           },
           domain: {
             buckets: [
@@ -346,8 +818,8 @@ export const mockResponse = {
         },
         {
           key: '9.9.9.9',
-          flows: 1234567,
-          destination_ips: 345345,
+          flows: { value: 1234567 },
+          destination_ips: { value: 345345 },
           bytes_in: {
             value: 19205000,
           },
@@ -355,10 +827,69 @@ export const mockResponse = {
             value: 355663,
           },
           location: {
-            value: 'San Francisco, CA, USA',
+            doc_count: 14,
+            top_geo: {
+              hits: {
+                total: {
+                  value: 14,
+                  relation: 'eq',
+                },
+                max_score: 1,
+                hits: [
+                  {
+                    _index: 'filebeat-8.0.0-2019.06.19-000005',
+                    _type: '_doc',
+                    _id: 'dd4fa2d4bd-692279846149410',
+                    _score: 1,
+                    _source: {
+                      source: {
+                        geo: {
+                          continent_name: 'North America',
+                          region_iso_code: 'US-PA',
+                          city_name: 'Philadelphia',
+                          country_iso_code: 'US',
+                          region_name: 'Pennsylvania',
+                          location: {
+                            lon: -75.1534,
+                            lat: 39.9359,
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
           },
           autonomous_system: {
-            value: 'whatevenisthis',
+            doc_count: 14,
+            top_as: {
+              hits: {
+                total: {
+                  value: 14,
+                  relation: 'eq',
+                },
+                max_score: 1,
+                hits: [
+                  {
+                    _index: 'filebeat-8.0.0-2019.06.19-000005',
+                    _type: '_doc',
+                    _id: 'dd4fa2d4bd-692279846149410',
+                    _score: 1,
+                    _source: {
+                      source: {
+                        as: {
+                          number: 3356,
+                          organization: {
+                            name: 'Level 3 Parent, LLC',
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
           },
           domain: {
             buckets: [
@@ -370,8 +901,8 @@ export const mockResponse = {
         },
         {
           key: '10.10.10.10',
-          flows: 1234567,
-          destination_ips: 345345,
+          flows: { value: 1234567 },
+          destination_ips: { value: 345345 },
           bytes_in: {
             value: 11407633,
           },
@@ -379,10 +910,69 @@ export const mockResponse = {
             value: 199360,
           },
           location: {
-            value: 'San Francisco, CA, USA',
+            doc_count: 14,
+            top_geo: {
+              hits: {
+                total: {
+                  value: 14,
+                  relation: 'eq',
+                },
+                max_score: 1,
+                hits: [
+                  {
+                    _index: 'filebeat-8.0.0-2019.06.19-000005',
+                    _type: '_doc',
+                    _id: 'dd4fa2d4bd-692279846149410',
+                    _score: 1,
+                    _source: {
+                      source: {
+                        geo: {
+                          continent_name: 'North America',
+                          region_iso_code: 'US-PA',
+                          city_name: 'Philadelphia',
+                          country_iso_code: 'US',
+                          region_name: 'Pennsylvania',
+                          location: {
+                            lon: -75.1534,
+                            lat: 39.9359,
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
           },
           autonomous_system: {
-            value: 'whatevenisthis',
+            doc_count: 14,
+            top_as: {
+              hits: {
+                total: {
+                  value: 14,
+                  relation: 'eq',
+                },
+                max_score: 1,
+                hits: [
+                  {
+                    _index: 'filebeat-8.0.0-2019.06.19-000005',
+                    _type: '_doc',
+                    _id: 'dd4fa2d4bd-692279846149410',
+                    _score: 1,
+                    _source: {
+                      source: {
+                        as: {
+                          number: 3356,
+                          organization: {
+                            name: 'Level 3 Parent, LLC',
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
           },
           domain: {
             buckets: [
@@ -394,8 +984,8 @@ export const mockResponse = {
         },
         {
           key: '11.11.11.11',
-          flows: 1234567,
-          destination_ips: 345345,
+          flows: { value: 1234567 },
+          destination_ips: { value: 345345 },
           bytes_in: {
             value: 11393327,
           },
@@ -403,10 +993,69 @@ export const mockResponse = {
             value: 195914,
           },
           location: {
-            value: 'San Francisco, CA, USA',
+            doc_count: 14,
+            top_geo: {
+              hits: {
+                total: {
+                  value: 14,
+                  relation: 'eq',
+                },
+                max_score: 1,
+                hits: [
+                  {
+                    _index: 'filebeat-8.0.0-2019.06.19-000005',
+                    _type: '_doc',
+                    _id: 'dd4fa2d4bd-692279846149410',
+                    _score: 1,
+                    _source: {
+                      source: {
+                        geo: {
+                          continent_name: 'North America',
+                          region_iso_code: 'US-PA',
+                          city_name: 'Philadelphia',
+                          country_iso_code: 'US',
+                          region_name: 'Pennsylvania',
+                          location: {
+                            lon: -75.1534,
+                            lat: 39.9359,
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
           },
           autonomous_system: {
-            value: 'whatevenisthis',
+            doc_count: 14,
+            top_as: {
+              hits: {
+                total: {
+                  value: 14,
+                  relation: 'eq',
+                },
+                max_score: 1,
+                hits: [
+                  {
+                    _index: 'filebeat-8.0.0-2019.06.19-000005',
+                    _type: '_doc',
+                    _id: 'dd4fa2d4bd-692279846149410',
+                    _score: 1,
+                    _source: {
+                      source: {
+                        as: {
+                          number: 3356,
+                          organization: {
+                            name: 'Level 3 Parent, LLC',
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
           },
           domain: {
             buckets: [
@@ -445,7 +1094,24 @@ export const mockResult = {
         source: {
           domain: ['test.1.net'],
           ip: '1.1.1.1',
-          count: 1,
+          autonomous_system: {
+            name: 'Level 3 Parent, LLC',
+            number: 3356,
+          },
+          location: {
+            flowTarget: 'source',
+            geo: {
+              city_name: 'Philadelphia',
+              continent_name: 'North America',
+              country_iso_code: 'US',
+              location: {
+                lat: 39.9359,
+                lon: -75.1534,
+              },
+              region_iso_code: 'US-PA',
+              region_name: 'Pennsylvania',
+            },
+          },
           flows: 1234567,
           destination_ips: 345345,
         },
@@ -465,7 +1131,24 @@ export const mockResult = {
         source: {
           domain: ['test.2.net'],
           ip: '2.2.2.2',
-          count: 2,
+          location: {
+            flowTarget: 'source',
+            geo: {
+              city_name: 'Philadelphia',
+              continent_name: 'North America',
+              country_iso_code: 'US',
+              location: {
+                lat: 39.9359,
+                lon: -75.1534,
+              },
+              region_iso_code: 'US-PA',
+              region_name: 'Pennsylvania',
+            },
+          },
+          autonomous_system: {
+            name: 'Level 3 Parent, LLC',
+            number: 3356,
+          },
           flows: 1234567,
           destination_ips: 345345,
         },
@@ -485,7 +1168,24 @@ export const mockResult = {
         source: {
           domain: ['test.3.com', 'test.3-duplicate.com'],
           ip: '3.3.3.3',
-          count: 5,
+          location: {
+            flowTarget: 'source',
+            geo: {
+              city_name: 'Philadelphia',
+              continent_name: 'North America',
+              country_iso_code: 'US',
+              location: {
+                lat: 39.9359,
+                lon: -75.1534,
+              },
+              region_iso_code: 'US-PA',
+              region_name: 'Pennsylvania',
+            },
+          },
+          autonomous_system: {
+            name: 'Level 3 Parent, LLC',
+            number: 3356,
+          },
           flows: 1234567,
           destination_ips: 345345,
         },
@@ -505,7 +1205,24 @@ export const mockResult = {
         source: {
           domain: ['test.4.com'],
           ip: '4.4.4.4',
-          count: 1,
+          location: {
+            flowTarget: 'source',
+            geo: {
+              city_name: 'Philadelphia',
+              continent_name: 'North America',
+              country_iso_code: 'US',
+              location: {
+                lat: 39.9359,
+                lon: -75.1534,
+              },
+              region_iso_code: 'US-PA',
+              region_name: 'Pennsylvania',
+            },
+          },
+          autonomous_system: {
+            name: 'Level 3 Parent, LLC',
+            number: 3356,
+          },
           flows: 1234567,
           destination_ips: 345345,
         },
@@ -525,7 +1242,24 @@ export const mockResult = {
         source: {
           domain: ['test.5.com'],
           ip: '5.5.5.5',
-          count: 3,
+          location: {
+            flowTarget: 'source',
+            geo: {
+              city_name: 'Philadelphia',
+              continent_name: 'North America',
+              country_iso_code: 'US',
+              location: {
+                lat: 39.9359,
+                lon: -75.1534,
+              },
+              region_iso_code: 'US-PA',
+              region_name: 'Pennsylvania',
+            },
+          },
+          autonomous_system: {
+            name: 'Level 3 Parent, LLC',
+            number: 3356,
+          },
           flows: 1234567,
           destination_ips: 345345,
         },
@@ -545,7 +1279,24 @@ export const mockResult = {
         source: {
           domain: ['test.6.com'],
           ip: '6.6.6.6',
-          count: 2,
+          location: {
+            flowTarget: 'source',
+            geo: {
+              city_name: 'Philadelphia',
+              continent_name: 'North America',
+              country_iso_code: 'US',
+              location: {
+                lat: 39.9359,
+                lon: -75.1534,
+              },
+              region_iso_code: 'US-PA',
+              region_name: 'Pennsylvania',
+            },
+          },
+          autonomous_system: {
+            name: 'Level 3 Parent, LLC',
+            number: 3356,
+          },
           flows: 1234567,
           destination_ips: 345345,
         },
@@ -565,7 +1316,24 @@ export const mockResult = {
         source: {
           domain: ['test.7.com'],
           ip: '7.7.7.7',
-          count: 2,
+          location: {
+            flowTarget: 'source',
+            geo: {
+              city_name: 'Philadelphia',
+              continent_name: 'North America',
+              country_iso_code: 'US',
+              location: {
+                lat: 39.9359,
+                lon: -75.1534,
+              },
+              region_iso_code: 'US-PA',
+              region_name: 'Pennsylvania',
+            },
+          },
+          autonomous_system: {
+            name: 'Level 3 Parent, LLC',
+            number: 3356,
+          },
           flows: 1234567,
           destination_ips: 345345,
         },
@@ -585,7 +1353,24 @@ export const mockResult = {
         source: {
           domain: ['test.8.com'],
           ip: '8.8.8.8',
-          count: 2,
+          location: {
+            flowTarget: 'source',
+            geo: {
+              city_name: 'Philadelphia',
+              continent_name: 'North America',
+              country_iso_code: 'US',
+              location: {
+                lat: 39.9359,
+                lon: -75.1534,
+              },
+              region_iso_code: 'US-PA',
+              region_name: 'Pennsylvania',
+            },
+          },
+          autonomous_system: {
+            name: 'Level 3 Parent, LLC',
+            number: 3356,
+          },
           flows: 1234567,
           destination_ips: 345345,
         },
@@ -605,7 +1390,24 @@ export const mockResult = {
         source: {
           domain: ['test.9.com'],
           ip: '9.9.9.9',
-          count: 2,
+          location: {
+            flowTarget: 'source',
+            geo: {
+              city_name: 'Philadelphia',
+              continent_name: 'North America',
+              country_iso_code: 'US',
+              location: {
+                lat: 39.9359,
+                lon: -75.1534,
+              },
+              region_iso_code: 'US-PA',
+              region_name: 'Pennsylvania',
+            },
+          },
+          autonomous_system: {
+            name: 'Level 3 Parent, LLC',
+            number: 3356,
+          },
           flows: 1234567,
           destination_ips: 345345,
         },
@@ -625,7 +1427,24 @@ export const mockResult = {
         source: {
           domain: ['test.10.com'],
           ip: '10.10.10.10',
-          count: 2,
+          location: {
+            flowTarget: 'source',
+            geo: {
+              city_name: 'Philadelphia',
+              continent_name: 'North America',
+              country_iso_code: 'US',
+              location: {
+                lat: 39.9359,
+                lon: -75.1534,
+              },
+              region_iso_code: 'US-PA',
+              region_name: 'Pennsylvania',
+            },
+          },
+          autonomous_system: {
+            name: 'Level 3 Parent, LLC',
+            number: 3356,
+          },
           flows: 1234567,
           destination_ips: 345345,
         },

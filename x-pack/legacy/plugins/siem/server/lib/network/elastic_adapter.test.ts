@@ -11,14 +11,18 @@ import { FrameworkAdapter, FrameworkRequest } from '../framework';
 
 import { ElasticsearchNetworkAdapter } from './elasticsearch_adapter';
 import { mockOptions, mockRequest, mockResponse, mockResult, mockTopNFlowQueryDsl } from './mock';
+import { getOppositeField } from './query_top_n_flow.dsl';
 
 jest.mock('./query_top_n_flow.dsl', () => {
+  const r = jest.requireActual('./query_top_n_flow.dsl');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return {
+    ...r,
     buildTopNFlowQuery: jest.fn(() => mockTopNFlowQueryDsl),
   };
 });
 
-describe('Network Top N flow elasticsearch_adapter with FlowTarget=source and FlowDirection=uniDirectional', () => {
+describe('Network Top N flow elasticsearch_adapter with FlowTarget=source', () => {
   describe('Happy Path - get Data', () => {
     const mockCallWithRequest = jest.fn();
     mockCallWithRequest.mockResolvedValue(mockResponse);

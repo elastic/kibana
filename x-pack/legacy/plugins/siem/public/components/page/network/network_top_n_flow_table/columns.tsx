@@ -128,19 +128,28 @@ export const getNetworkTopNFlowColumns = (
         const id = escapeDataProviderId(`${tableId}-table-${flowTarget}-ip-${ipAddress}`);
         if (as.name && as.number) {
           return (
-            <>
-              {getRowItemDraggables({
-                rowItems: [as.name],
-                attrName: `${flowTarget}.as.organization.name`,
-                idPrefix: `${id}-name`,
-              })}
-              <span style={{ width: '5px' }} />
-              {getRowItemDraggables({
-                rowItems: [`(${as.number})`],
-                attrName: `${flowTarget}.as.number`,
-                idPrefix: `${id}-number`,
-              })}
-            </>
+            <EuiFlexGroup direction="column" gutterSize="none">
+              <EuiFlexItem>
+                {getRowItemDraggables({
+                  rowItems: [as.name],
+                  attrName: `${flowTarget}.as.organization.name`,
+                  idPrefix: `${id}-name`,
+                })}
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <div style={{ display: 'flex' }}>
+                  <div>{`(AS`}</div>
+                  <div>
+                    {getRowItemDraggables({
+                      rowItems: [`${as.number}`],
+                      attrName: `${flowTarget}.as.number`,
+                      idPrefix: `${id}-number`,
+                    })}
+                  </div>
+                  <div>{`)`}</div>
+                </div>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           );
         }
         return (
@@ -151,12 +160,18 @@ export const getNetworkTopNFlowColumns = (
                 attrName: `${flowTarget}.as.organization.name`,
                 idPrefix: `${id}-name`,
               })}
-            {as.number &&
-              getRowItemDraggables({
-                rowItems: [`${as.number}`],
-                attrName: `${flowTarget}.as.number`,
-                idPrefix: `${id}-number`,
-              })}
+            {as.number && (
+              <div style={{ display: 'flex' }}>
+                <div>{`AS`}</div>
+                <div>
+                  {getRowItemDraggables({
+                    rowItems: [`${as.number}`],
+                    attrName: `${flowTarget}.as.number`,
+                    idPrefix: `${id}-number`,
+                  })}
+                </div>
+              </div>
+            )}
           </>
         );
       } else {
