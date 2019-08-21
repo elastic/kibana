@@ -1,3 +1,4 @@
+[role="xpack"]
 [[element-intro]]
 == Showcase your data with elements
 
@@ -66,7 +67,7 @@ For for more information about the Lucene query string sytax, refer to <<lucene-
 
 . Click *Elasticsearch raw documents*.
 
-. From the *Index* dropdown, select the index data that you want to display. 
+. In the *Index* field, enter the index pattern that you want to display. 
 
 . From the *Fields* dropdown, select the associated fields you want to display.
 
@@ -101,16 +102,14 @@ For for more information about the Lucene query string syntax, refer to <<lucene
 Choose how you want the elements to appear on your workpad.
 
 [float]
-[[process-and-display]]
-==== Specify how to process and display the data
+[[data-display]]
+==== Specify how to display the data
 
-When you connect your element to a data source, the element often appears as a warning. To remove the error, specify the process and display options.
+When you connect your element to a data source, the element often appears as a warning. To remove the error, specify the display options.
 
 . Click *Display*
 
-. Change the data points to display in your element. 
-
-. In the *Label* field, enter a name for the data.
+. Change the display options for the element. 
 
 [float]
 [[element-display-container]]
@@ -136,7 +135,7 @@ To make your element look exactly the way you want, apply CSS overrides.
 +
 [source,js]
 --------------------------------------------------
-.canvasRenderE1 h1 {
+.canvasRenderEl h1 {
 text.align: center;
 }
 --------------------------------------------------
@@ -172,7 +171,9 @@ Move the element to a preferred location on your workpad. As you move the elemen
 
 * Click and drag the element to your preferred location.
 
-* To move the element by 1 pixel, select the element, then use your arrow keys.
+* To move the element by 1 pixel, select the element, press and hold Shift, then use your arrow keys.
+
+* To move the element by 10 pixels, select the element, then use your arrow keys.
 
 [float]
 [[resize-canvas-elements]]
@@ -182,7 +183,7 @@ Make your elements bigger or smaller than the default size.
 
 . Select the element.
 
-. Click and drag the resizing icon to the size you want.
+. Click and drag the resize handles to the size you want.
 
 [float]
 [[align-canvas-elements]]
@@ -190,7 +191,7 @@ Make your elements bigger or smaller than the default size.
 
 Align two or more elements on your workpad.
 
-. Press Shift, then select the elements you want to align.
+. Press and hold Shift, then select the elements you want to align.
 
 . Click the *Element options* icon in the top right corner, then select *Align elements*.
 
@@ -203,9 +204,9 @@ image::images/canvas-align-elements.gif[Align elements]
 [[distribute-canvas-elements]]
 ==== Distribute elements
 
-Distribute two or more elements on your workpad.
+Distribute three or more elements on your workpad.
 
-. Press Shift, then select the elements you want to distribute.
+. Press and hold Shift, then select the elements you want to distribute.
 
 . Click the *Element options* icon in the top right corner, then select *Distribute elements*.
 
@@ -227,6 +228,15 @@ Change the order of how the elements are displayed on your workpad.
 . Select *Order*, then select the order that you want the element to appear.
 
 [float]
+[[zoom-in-out]]
+=== Use the zoom options
+
+In the upper left corner, click the *Zoom controls* icon, then select one of the options.
++
+[role="screenshot"]
+image::canvas/canvas-zoom-controls.png[Zoom controls]
+
+[float]
 [[element-save]]
 === Save elements
 
@@ -234,7 +244,7 @@ After you have made changes to elements, save them so that you can reuse them ac
 
 . Select the element that you want to save.
 +
-To save a group of elements, press Shift, then select the elements you want to save.
+To save a group of elements, press and hold Shift, then select the elements you want to save.
 
 . Click the *Save as new element* icon.
 
