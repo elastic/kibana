@@ -106,7 +106,7 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
   const whitespaceErrorText = i18n.translate(
     'data.search.searchBar.savedQueryForm.whitespaceErrorText',
     {
-      defaultMessage: 'Title cannot contain leading or trailing white space',
+      defaultMessage: 'Title cannot contain leading or trailing whitespace',
     }
   );
   const hasErrors = hasWhitespaceError || hasTitleConflict;
