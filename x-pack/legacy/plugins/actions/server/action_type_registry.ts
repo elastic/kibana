@@ -6,18 +6,23 @@
 
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
-import { ActionType, GetServicesFunction } from './types';
 import { TaskManager, TaskRunCreatorFunction } from '../../task_manager';
 import { getCreateTaskRunnerFunction, ExecutorError } from './lib';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
-import { SpacesPlugin } from '../../spaces';
+import {
+  ActionType,
+  GetBasePathFunction,
+  GetServicesFunction,
+  SpaceIdToNamespaceFunction,
+} from './types';
 
 interface ConstructorOptions {
+  isSecurityEnabled: boolean;
   taskManager: TaskManager;
   getServices: GetServicesFunction;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
-  spaceIdToNamespace: SpacesPlugin['spaceIdToNamespace'];
-  getBasePath: SpacesPlugin['getBasePath'];
+  spaceIdToNamespace: SpaceIdToNamespaceFunction;
+  getBasePath: GetBasePathFunction;
 }
 
 export class ActionTypeRegistry {
@@ -31,9 +36,11 @@ export class ActionTypeRegistry {
     encryptedSavedObjectsPlugin,
     spaceIdToNamespace,
     getBasePath,
+    isSecurityEnabled,
   }: ConstructorOptions) {
     this.taskManager = taskManager;
     this.taskRunCreatorFunction = getCreateTaskRunnerFunction({
+      isSecurityEnabled,
       getServices,
       actionTypeRegistry: this,
       encryptedSavedObjectsPlugin,
@@ -55,12 +62,15 @@ export class ActionTypeRegistry {
   public register(actionType: ActionType) {
     if (this.has(actionType.id)) {
       throw new Error(
-        i18n.translate('xpack.actions.actionTypeRegistry.register.duplicateActionTypeError', {
-          defaultMessage: 'Action type "{id}" is already registered.',
-          values: {
-            id: actionType.id,
-          },
-        })
+        i18n.translate(
+          'xpack.actions.actionTypeRegistry.register.duplicateActionTypeErrorMessage',
+          {
+            defaultMessage: 'Action type "{id}" is already registered.',
+            values: {
+              id: actionType.id,
+            },
+          }
+        )
       );
     }
     this.actionTypes.set(actionType.id, actionType);
@@ -87,7 +97,7 @@ export class ActionTypeRegistry {
   public get(id: string): ActionType {
     if (!this.has(id)) {
       throw Boom.badRequest(
-        i18n.translate('xpack.actions.actionTypeRegistry.get.missingActionTypeError', {
+        i18n.translate('xpack.actions.actionTypeRegistry.get.missingActionTypeErrorMessage', {
           defaultMessage: 'Action type "{id}" is not registered.',
           values: {
             id,

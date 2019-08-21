@@ -11,6 +11,8 @@ import { UpdateBreadcrumbs } from '../UpdateBreadcrumbs';
 import * as hooks from '../../../../hooks/useCore';
 
 jest.mock('ui/kfetch');
+jest.mock('ui/index_patterns');
+jest.mock('ui/new_platform');
 
 const coreMock = {
   chrome: {
