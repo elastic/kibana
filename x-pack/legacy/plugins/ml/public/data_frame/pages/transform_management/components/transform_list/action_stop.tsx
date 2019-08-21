@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC } from 'react';
+import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
@@ -19,7 +19,7 @@ interface StopActionProps {
   items: DataFrameTransformListRow[];
 }
 
-export const StopAction: SFC<StopActionProps> = ({ items }) => {
+export const StopAction: FC<StopActionProps> = ({ items }) => {
   const canStartStopDataFrame: boolean = checkPermission('canStartStopDataFrame');
   const buttonStopText = i18n.translate('xpack.ml.dataframe.transformList.stopActionName', {
     defaultMessage: 'Stop',

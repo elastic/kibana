@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, SFC, useState } from 'react';
+import React, { Fragment, FC, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
@@ -27,7 +27,7 @@ interface DeleteActionProps {
   items: DataFrameTransformListRow[];
 }
 
-export const DeleteAction: SFC<DeleteActionProps> = ({ items }) => {
+export const DeleteAction: FC<DeleteActionProps> = ({ items }) => {
   const isBulkAction = items.length > 1;
 
   const disabled = items.some(
