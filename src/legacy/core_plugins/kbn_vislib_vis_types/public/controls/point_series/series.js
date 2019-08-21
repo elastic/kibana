@@ -30,6 +30,7 @@ module.directive('vislibSeries', function () {
     template: vislibSeriesTemplate,
     replace: true,
     link: function ($scope) {
+      // converted
       function makeSerie(id, label) {
         const last = $scope.series[$scope.series.length - 1];
         return {
@@ -49,6 +50,7 @@ module.directive('vislibSeries', function () {
       }
 
       $scope.series = $scope.editorState.params.seriesParams;
+      // converted
       $scope.$watch(() => {
         return $scope.editorState.aggs.map(agg => {
           return safeMakeLabel(agg);

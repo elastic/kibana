@@ -31,6 +31,7 @@ import { CategoryAxisPanel } from '../controls/point_series/category_axis_panel'
 import { ValueAxesPanel } from '../controls/point_series/value_axes_panel';
 import { SetValueAxisByIndex } from '../controls/point_series/components/value_axis_options';
 import { mapPositionOpposite, mapPosition } from '../controls/point_series/utils';
+import { makeSerie } from './metrics_axis_options_helper';
 
 export type SetChartValueByIndex = <T extends keyof SeriesParam>(
   index: number,
@@ -59,10 +60,10 @@ function MetricsAxisOptions(props: VisOptionsProps<BasicVislibParams>) {
   const { stateParams, setValue, aggs, setVisType, vis } = props;
 
   const [lastCustomLabels, setLastCustomLabels] = useState({} as { [key: string]: string });
+  const [isCategoryAxisHorizontal, setIsCategoryAxisHorizontal] = useState(true);
   // We track these so we can know when the agg is changed
   const [lastMatchingSeriesAggType, setLastMatchingSeriesAggType] = useState('');
   const [lastMatchingSeriesAggField, setLastMatchingSeriesAggField] = useState('');
-  const [isCategoryAxisHorizontal, setIsCategoryAxisHorizontal] = useState(true);
 
   const updateAxisTitle = () => {
     stateParams.valueAxes.forEach((axis, axisNumber) => {
@@ -70,13 +71,12 @@ function MetricsAxisOptions(props: VisOptionsProps<BasicVislibParams>) {
       const isFirst = axisNumber === 0;
       const matchingSeries: AggConfig[] = [];
 
-      stateParams.seriesParams.forEach((series, i) => {
-        const isMatchingSeries = (isFirst && !series.valueAxis) || series.valueAxis === axis.id;
-        if (isMatchingSeries) {
+      stateParams.seriesParams.forEach((series, seriesIndex) => {
+        if ((isFirst && !series.valueAxis) || series.valueAxis === axis.id) {
           let seriesNumber = 0;
           aggs.forEach((agg: AggConfig) => {
             if (agg.schema.name === 'metric') {
-              if (seriesNumber === i) {
+              if (seriesNumber === seriesIndex) {
                 matchingSeries.push(agg);
               }
               seriesNumber++;
@@ -93,18 +93,18 @@ function MetricsAxisOptions(props: VisOptionsProps<BasicVislibParams>) {
       const matchingSeriesAggField = get(matchingSeries, '[0]params.field.name', '');
 
       if (lastCustomLabels[axis.id] !== newCustomLabel && newCustomLabel !== '') {
-        const isFirstRender = Object.keys(lastCustomLabels).length === 0;
         const aggTypeIsChanged = lastMatchingSeriesAggType !== matchingSeriesAggType;
         const aggFieldIsChanged = lastMatchingSeriesAggField !== matchingSeriesAggField;
         const aggIsChanged = aggTypeIsChanged || aggFieldIsChanged;
-        const axisTitleIsEmpty = axis.title.text === '';
         const lastCustomLabelMatchesAxisTitle = lastCustomLabels[axis.id] === axis.title.text;
+        const isFirstRender = Object.keys(lastCustomLabels).length === 0;
 
         if (
           !isFirstRender &&
-          (aggIsChanged || axisTitleIsEmpty || lastCustomLabelMatchesAxisTitle)
+          (aggIsChanged || axis.title.text === '' || lastCustomLabelMatchesAxisTitle)
         ) {
-          axis.title.text = newCustomLabel; // Override axis title with new custom label
+          // Override axis title with new custom label
+          setValueAxis(axisNumber, 'title', { ...axis, text: newCustomLabel });
         }
 
         setLastCustomLabels({ ...lastCustomLabels, [axis.id]: newCustomLabel });
@@ -196,7 +196,40 @@ function MetricsAxisOptions(props: VisOptionsProps<BasicVislibParams>) {
     })
     .join();
 
-  useEffect(updateAxisTitle, [aggsLabel]);
+  useEffect(() => {
+    updateAxisTitle();
+
+    const schemaTitle = vis.type.schemas.metrics[0].title;
+
+    const metrics = aggs.filter(agg => {
+      const isMetric = agg.type && agg.type.type === 'metrics';
+      return isMetric && agg.schema.title === schemaTitle;
+    });
+
+    // update labels for existing params or create new one
+    const updatedSeries = metrics.map(agg => {
+      const params = stateParams.seriesParams.find(param => param.data.id === agg.id);
+      if (params) {
+        return {
+          ...params,
+          data: {
+            ...params.data,
+            label: agg.makeLabel(),
+          },
+        };
+      } else {
+        const series = makeSerie(
+          agg.id,
+          agg.makeLabel(),
+          stateParams.seriesParams,
+          stateParams.valueAxes[0].id
+        );
+        return series;
+      }
+    });
+
+    setValue('seriesParams', updatedSeries);
+  }, [aggsLabel]);
 
   useEffect(() => {
     const position = stateParams.categoryAxes[0].position;

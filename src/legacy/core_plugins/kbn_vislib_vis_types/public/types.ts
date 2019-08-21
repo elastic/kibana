@@ -17,7 +17,13 @@
  * under the License.
  */
 
-import { LegendPositions, ChartModes, ChartTypes, AxisModes } from './utils/collections';
+import {
+  LegendPositions,
+  ChartModes,
+  ChartTypes,
+  AxisModes,
+  InterpolationModes,
+} from './utils/collections';
 
 export interface CommonVislibParams {
   addTooltip: boolean;
@@ -58,7 +64,7 @@ export interface ValueAxis extends Axis {
 export interface SeriesParam {
   data: { label: string; id: string };
   drawLinesBetweenPoints: boolean;
-  interpolate: string;
+  interpolate: InterpolationModes;
   lineWidth: number | '';
   mode: ChartModes;
   show: boolean;

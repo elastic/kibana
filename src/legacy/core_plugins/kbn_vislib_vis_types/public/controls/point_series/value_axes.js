@@ -148,6 +148,7 @@ module.directive('vislibValueAxes', function () {
       // We track these so we can know when the agg is changed
       let lastMatchingSeriesAggType = '';
       let lastMatchingSeriesAggField = '';
+      // convered
       $scope.updateAxisTitle = function () {
         $scope.editorState.params.valueAxes.forEach((axis, axisNumber) => {
           let newCustomLabel = '';
