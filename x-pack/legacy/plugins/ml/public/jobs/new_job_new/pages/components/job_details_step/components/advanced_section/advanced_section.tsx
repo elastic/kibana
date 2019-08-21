@@ -4,13 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment } from 'react';
+import React, { FC } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { ModelPlotSwitch } from './components/model_plot';
 import { DedicatedIndexSwitch } from './components/dedicated_index';
 import { ModelMemoryLimitInput } from './components/model_memory_limit';
 
-const ButtonContent = <Fragment>Advanced</Fragment>;
+const ButtonContent = i18n.translate(
+  'xpack.ml.newJob.wizard.jobDetailsStep.advancedSectionButton',
+  {
+    defaultMessage: 'Advanced',
+  }
+);
 
 interface Props {
   advancedExpanded: boolean;

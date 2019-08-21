@@ -16,9 +16,10 @@ import { Anomalies } from '../types';
 const endDate: number = new Date('3000-01-01T00:00:00.000Z').valueOf();
 const narrowDateRange = jest.fn();
 
+jest.mock('../../../lib/settings/use_kibana_ui_setting');
+
 describe('anomaly_scores', () => {
   let anomalies: Anomalies = cloneDeep(mockAnomalies);
-
   beforeEach(() => {
     anomalies = cloneDeep(mockAnomalies);
   });

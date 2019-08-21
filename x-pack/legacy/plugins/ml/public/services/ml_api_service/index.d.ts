@@ -5,7 +5,7 @@
  */
 
 import { Annotation } from '../../../common/types/annotations';
-import { DslName, AggFieldNamePair } from '../../../common/types/fields';
+import { AggFieldNamePair } from '../../../common/types/fields';
 import { ExistingJobsAndGroups } from '../job_service';
 import { PrivilegesResponse } from '../../../common/types/privileges';
 import { DataFrameTransformEndpointData } from '../../data_frame/pages/transform_management/components/transform_list/common';

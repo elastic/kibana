@@ -31,6 +31,7 @@ export const NetworkKql = pure<NetworkKqlProps>(({ indexPattern, type }) => (
           setFilterQueryDraftFromKueryExpression,
         }) => (
           <AutocompleteField
+            data-test-subj="kqlInput"
             isLoadingSuggestions={isLoadingSuggestions}
             isValid={isFilterQueryDraftValid}
             loadSuggestions={loadSuggestions}
