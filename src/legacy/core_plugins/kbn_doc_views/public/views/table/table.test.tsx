@@ -45,6 +45,12 @@ const indexPattern = {
         scripted: false,
         filterable: true,
       },
+      scripted: {
+        name: 'extension',
+        type: 'number',
+        scripted: true,
+        filterable: true,
+      },
     },
   },
   metaFields: ['_index', '_score'],
@@ -73,6 +79,8 @@ const hit = {
     relatedContent: {
       test: 1,
     },
+    scripted: 123,
+    _underscore: 123,
   },
 };
 

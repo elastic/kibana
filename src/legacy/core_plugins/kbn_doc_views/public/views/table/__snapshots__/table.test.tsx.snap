@@ -6,6 +6,99 @@ exports[`renders the \`DocViewTable\` component 1`] = `
 >
   <tbody>
     <tr
+      data-test-subj="tableDocViewRow-_underscore"
+    >
+      <td
+        class="kbnDocViewer__buttons"
+      >
+        <span
+          class="euiToolTipAnchor"
+        >
+          <span
+            class="kbnDocViewer__actionButton"
+          >
+            <i
+              class="fa fa-search-plus text-muted"
+            />
+          </span>
+        </span>
+        <span
+          class="euiToolTipAnchor"
+        >
+          <span
+            class="kbnDocViewer__actionButton"
+          >
+            <i
+              class="fa fa-search-minus text-muted"
+            />
+          </span>
+        </span>
+        <span
+          class="euiToolTipAnchor"
+        >
+          <button
+            aria-label="Toggle column in table"
+            aria-pressed="false"
+            class="kbnDocViewer__actionButton"
+          >
+            <i
+              class="fa fa-columns"
+            />
+          </button>
+        </span>
+        <span
+          class="euiToolTipAnchor"
+        >
+          <span
+            class="kbnDocViewer__actionButton"
+          >
+            <i
+              class="fa fa-asterisk text-muted"
+            />
+          </span>
+        </span>
+      </td>
+      <td
+        class="kbnDocViewer__field"
+      >
+        <span
+          class=""
+          title="_underscore"
+        >
+          <span
+            aria-label="Unknown field"
+            class="dscField__icon"
+          >
+            <strong
+              aria-hidden="true"
+            >
+              ?
+            </strong>
+          </span>
+          <span
+            class="dscFieldName"
+          >
+            _underscore
+          </span>
+        </span>
+      </td>
+      <td>
+        <span
+          class="euiToolTipAnchor"
+        >
+          <i
+            class="fa fa-warning text-color-warning kbnDocViewer__underscore"
+          />
+        </span>
+        <div
+          class="kbnDocViewer__value"
+          data-test-subj="tableDocViewRow-_underscore-value"
+        >
+          123
+        </div>
+      </td>
+    </tr>
+    <tr
       data-test-subj="tableDocViewRow-bytes"
     >
       <td
@@ -459,6 +552,96 @@ exports[`renders the \`DocViewTable\` component 1`] = `
           data-test-subj="tableDocViewRow-relatedContent.test-value"
         >
           1
+        </div>
+      </td>
+    </tr>
+    <tr
+      data-test-subj="tableDocViewRow-scripted"
+    >
+      <td
+        class="kbnDocViewer__buttons"
+      >
+        <span
+          class="euiToolTipAnchor"
+        >
+          <button
+            aria-label="Filter for value"
+            class="kbnDocViewer__actionButton"
+            data-test-subj="addInclusiveFilterButton"
+          >
+            <i
+              class="fa fa-search-plus"
+            />
+          </button>
+        </span>
+        <span
+          class="euiToolTipAnchor"
+        >
+          <button
+            aria-label="Filter out value"
+            class="kbnDocViewer__actionButton"
+            data-test-subj="removeInclusiveFilterButton"
+          >
+            <i
+              class="fa fa-search-minus"
+            />
+          </button>
+        </span>
+        <span
+          class="euiToolTipAnchor"
+        >
+          <button
+            aria-label="Toggle column in table"
+            aria-pressed="false"
+            class="kbnDocViewer__actionButton"
+          >
+            <i
+              class="fa fa-columns"
+            />
+          </button>
+        </span>
+        <span
+          class="euiToolTipAnchor"
+        >
+          <span
+            class="kbnDocViewer__actionButton"
+          >
+            <i
+              class="fa fa-asterisk text-muted"
+            />
+          </span>
+        </span>
+      </td>
+      <td
+        class="kbnDocViewer__field"
+      >
+        <span
+          class="scripted"
+          title="extension"
+        >
+          <span
+            aria-label="Number field"
+            class="dscField__icon"
+          >
+            <strong
+              aria-hidden="true"
+            >
+              #
+            </strong>
+          </span>
+          <span
+            class="dscFieldName"
+          >
+            extension
+          </span>
+        </span>
+      </td>
+      <td>
+        <div
+          class="kbnDocViewer__value"
+          data-test-subj="tableDocViewRow-scripted-value"
+        >
+          123
         </div>
       </td>
     </tr>
