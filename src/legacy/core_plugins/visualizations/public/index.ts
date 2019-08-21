@@ -17,45 +17,17 @@
  * under the License.
  */
 
-import { FiltersService, FiltersSetup } from './filters';
-import { TypesService, TypesSetup } from './types';
+import { VisualizationsPlugin as Plugin, VisualizationsSetup } from './plugin';
 
-class VisualizationsPlugin {
-  private readonly filters: FiltersService;
-  private readonly types: TypesService;
-
-  constructor() {
-    this.filters = new FiltersService();
-    this.types = new TypesService();
-  }
-
-  public setup() {
-    return {
-      filters: this.filters.setup(),
-      types: this.types.setup(),
-    };
-  }
-
-  public stop() {
-    this.filters.stop();
-    this.types.stop();
-  }
+export function plugin() {
+  return new Plugin();
 }
 
-/**
- * We export visualizations here so that users importing from 'plugins/visualizations'
- * will automatically receive the response value of the `setup` contract, mimicking
- * the data that will eventually be injected by the new platform.
- */
-export const visualizations = new VisualizationsPlugin().setup();
-
-/** @public */
-export interface VisualizationsSetup {
-  filters: FiltersSetup;
-  types: TypesSetup;
-}
+// Temporarily included here for BWC during the shimming process
+export { setup as visualizations } from './legacy';
 
 /** @public types */
+export type VisualizationsSetup = VisualizationsSetup;
 export {
   Vis,
   visFactory,
@@ -69,3 +41,6 @@ export {
   VisTypesRegistry,
   Status,
 } from './types';
+
+/** @public static code */
+// TBD
