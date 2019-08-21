@@ -99,7 +99,9 @@ export const useExploreData = (
                 const parts = ff.split('.');
                 if (parts[0] === resultsField && parts.length >= 2) {
                   parts.shift();
-                  item[ff] = doc._source[resultsField][parts.join('.')];
+                  if (doc._source[resultsField] !== undefined) {
+                    item[ff] = doc._source[resultsField][parts.join('.')];
+                  }
                 }
               }
             });
@@ -112,7 +114,11 @@ export const useExploreData = (
           setTableItems(transformedTableItems);
           setStatus(INDEX_STATUS.LOADED);
         } catch (e) {
-          setErrorMessage(JSON.stringify(e));
+          if (e.message !== undefined) {
+            setErrorMessage(e.message);
+          } else {
+            setErrorMessage(JSON.stringify(e));
+          }
           setTableItems([]);
           setStatus(INDEX_STATUS.ERROR);
         }
