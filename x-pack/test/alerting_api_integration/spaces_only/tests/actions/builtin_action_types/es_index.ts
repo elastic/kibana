@@ -96,40 +96,23 @@ export default function indexTest({ getService }: FtrProviderContext) {
       });
     });
 
-    it('should execute unsuccessfully when expected', async () => {
-      let response;
-      let result;
-
-      response = await supertest
+    it('should execute successly when expected for a single body', async () => {
+      const { body: result } = await supertest
         .post(`/api/action/${createdActionID}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            indeX: ES_TEST_INDEX_NAME,
+            index: ES_TEST_INDEX_NAME,
             documents: [{ testing: [1, 2, 3] }],
+            refresh: true,
           },
         })
         .expect(200);
-      result = response.body;
-      expect(result.status).to.equal('error');
-      expect(result.message).to.eql(
-        'error validating action params: [indeX]: definition for this key is missing'
-      );
+      expect(result.status).to.eql('ok');
 
-      response = await supertest
-        .post(`/api/action/${createdActionID}/_execute`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          params: {
-            documents: [{ testing: [1, 2, 3] }],
-          },
-        })
-        .expect(200);
-      result = response.body;
-      expect(result.status).to.equal('error');
-      expect(result.message).to.eql(
-        `index param needs to be set because not set in config for action ${createdActionID}`
-      );
+      const items = await getTestIndexItems(es);
+      expect(items.length).to.eql(1);
+      expect(items[0]._source).to.eql({ testing: [1, 2, 3] });
     });
   });
 }
