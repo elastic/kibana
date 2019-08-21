@@ -112,6 +112,7 @@ export interface DashboardAppStateParameters {
   query: Query | string;
   filters: Filter[];
   viewMode: ViewMode;
+  savedQuery?: string;
 }
 
 // This could probably be improved if we flesh out AppState more... though AppState will be going away

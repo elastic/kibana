@@ -20,8 +20,9 @@
 import { UiSettingsClientContract } from 'src/core/public';
 import { IndexPatterns } from '../index_patterns';
 import { FilterManager } from './filter_manager';
+
 /**
- * FilterSearch Service
+ * Filter Service
  * @internal
  */
 
@@ -35,6 +36,10 @@ export class FilterService {
     return {
       filterManager: new FilterManager(indexPatterns, uiSettings),
     };
+  }
+
+  public start() {
+    // nothing to do here yet
   }
 
   public stop() {
