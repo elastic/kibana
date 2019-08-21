@@ -47,58 +47,6 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           expect(typeof response.body.id).to.be('string');
           objectRemover.add(scenario.id, response.body.id, 'action');
         });
-
-        it(`should handle create action request appropriately when action type isn't registered`, async () => {
-          await supertest
-            .post(`${getUrlPrefix(scenario.id)}/api/action`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              description: 'My action',
-              actionTypeId: 'test.unregistered-action-type',
-              config: {},
-            })
-            .expect(400, {
-              statusCode: 400,
-              error: 'Bad Request',
-              message: 'Action type "test.unregistered-action-type" is not registered.',
-            });
-        });
-
-        it('should handle create action request appropriately when payload is empty and invalid', async () => {
-          await supertest
-            .post(`${getUrlPrefix(scenario.id)}/api/action`)
-            .set('kbn-xsrf', 'foo')
-            .send({})
-            .expect(400, {
-              statusCode: 400,
-              error: 'Bad Request',
-              message:
-                'child "description" fails because ["description" is required]. child "actionTypeId" fails because ["actionTypeId" is required]',
-              validation: {
-                source: 'payload',
-                keys: ['description', 'actionTypeId'],
-              },
-            });
-        });
-
-        it(`should handle create action request appropriately when config isn't valid`, async () => {
-          await supertest
-            .post(`${getUrlPrefix(scenario.id)}/api/action`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              description: 'my description',
-              actionTypeId: 'test.index-record',
-              config: {
-                unencrypted: 'my unencrypted text',
-              },
-            })
-            .expect(400, {
-              statusCode: 400,
-              error: 'Bad Request',
-              message:
-                'error validating action type secrets: [encrypted]: expected value of type [string] but got [undefined]',
-            });
-        });
       });
     }
   });
