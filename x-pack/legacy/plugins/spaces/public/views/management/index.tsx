@@ -48,12 +48,15 @@ routes.defaults(/\/management/, {
         }
 
         // Customize Saved Objects Management
-        SavedObjectsManagementActionRegistry.register(
-          new CopyToSpaceSavedObjectsManagementAction(
-            new SpacesManager(spaceSelectorURL),
-            activeSpace.space
-          )
+        const action = new CopyToSpaceSavedObjectsManagementAction(
+          new SpacesManager(spaceSelectorURL),
+          activeSpace.space
         );
+        // This route resolve function executes any time the management screen is loaded, and we want to ensure
+        // that this action is only registered once.
+        if (!SavedObjectsManagementActionRegistry.has(action.id)) {
+          SavedObjectsManagementActionRegistry.register(action);
+        }
 
         // Customize Advanced Settings
         const PageTitle = () => <AdvancedSettingsTitle space={activeSpace.space} />;
