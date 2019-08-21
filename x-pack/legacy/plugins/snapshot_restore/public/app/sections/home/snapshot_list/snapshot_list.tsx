@@ -8,7 +8,7 @@ import React, { Fragment, useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { parse } from 'querystring';
 
-import { EuiButton, EuiCallOut, EuiIcon, EuiLink, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiLink, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 
 import { SectionError, SectionLoading } from '../../../components';
 import { BASE_PATH, UIM_SNAPSHOT_LIST_LOAD } from '../../../constants';
