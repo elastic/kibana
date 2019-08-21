@@ -20,6 +20,10 @@ const SESSION_TIMEOUT_GRACE_PERIOD_MS = 5 * 1000;
 
 const EXPIRATION_WARNING_MS = 60 * 1000;
 
+export interface ISessionTimeout {
+  extend(): void;
+}
+
 export class SessionTimeout {
   private sessionExpirationWarningTimeout?: number;
   private sessionExpirationTimeout?: number;
