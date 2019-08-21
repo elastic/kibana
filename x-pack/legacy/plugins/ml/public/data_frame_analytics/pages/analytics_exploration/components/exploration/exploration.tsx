@@ -29,6 +29,9 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
+import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
+import euiThemeDark from '@elastic/eui/dist/eui_theme_dark.json';
+
 // TODO EUI's types for EuiInMemoryTable is missing these props
 interface ExpandableTableProps extends EuiInMemoryTableProps {
   compressed: boolean;
@@ -108,19 +111,18 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
     })();
   }, []);
 
-  const IS_DARK_THEME = useUiChromeContext()
+  const euiTheme = useUiChromeContext()
     .getUiSettingsClient()
-    .get('theme:darkMode');
+    .get('theme:darkMode')
+    ? euiThemeDark
+    : euiThemeLight;
 
-  const range = IS_DARK_THEME
-    ? [d3.rgb('#1d1e22'), d3.rgb('#4a8baf')]
-    : [d3.rgb('#ffffff'), d3.rgb('#58b6ea')];
   const cellBgColor = d3.scale
     .linear()
     .domain([0, 1])
     // typings for .range() incorrectly don't allow passing in a color extent.
     // @ts-ignore
-    .range(range);
+    .range([d3.rgb(euiTheme.euiColorEmptyShade), d3.rgb(euiTheme.euiColorVis1)]);
 
   const [clearTable, setClearTable] = useState(false);
 
