@@ -119,7 +119,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
   describe('feature controls', () => {
     const codeAdminUsername = 'code_admin_user';
-    const codeAdminRoleName = 'code_admin';
+    const codeAdminRoleName = 'code_admin_role';
     const codeAdminUserPassword = `${codeAdminUsername}-password`;
 
     before(async () => {
@@ -158,6 +158,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         .set('kbn-xsrf', 'foo')
         .expect(200);
 
+      await security.role.delete(codeAdminRoleName);
       await security.user.delete(codeAdminUsername);
     });
 
@@ -196,8 +197,8 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     });
 
     it(`Admin Code user can execute clone/delete with all permission`, async () => {
-      const username = 'code_admin_user';
-      const roleName = 'code_admin';
+      const username = 'another_code_admin_user';
+      const roleName = 'another_code_admin_role';
       const password = `${username}-password`;
       try {
         await security.role.create(roleName, {
