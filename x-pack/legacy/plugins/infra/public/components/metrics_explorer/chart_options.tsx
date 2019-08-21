@@ -78,6 +78,13 @@ export const MetricsExplorerChartOptions = injectI18n(({ chartOptions, onChange,
         defaultMessage: 'Area',
       }),
     },
+    {
+      id: MetricsExplorerChartType.bar,
+      label: intl.formatMessage({
+        id: 'xpack.infra.metricsExplorer.chartOptions.barLabel',
+        defaultMessage: 'Bar',
+      }),
+    },
   ];
 
   const handleYAxisChange = useCallback(
