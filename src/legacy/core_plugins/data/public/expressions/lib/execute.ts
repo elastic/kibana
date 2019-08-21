@@ -18,8 +18,8 @@
  */
 
 import { fromExpression } from '@kbn/interpreter/target/common';
-import { DataAdapter, RequestAdapter } from 'ui/inspector/adapters';
-import { Adapters } from 'ui/inspector';
+import { DataAdapter, RequestAdapter } from '../../../../../ui/public/inspector/adapters';
+import { Adapters } from '../../../../../ui/public/inspector';
 import { getInterpreter } from '../services';
 import { Ast, IExpressionLoaderParams, IInterpreterResult } from './_types';
 
@@ -110,7 +110,7 @@ export class ExpressionDataHandler {
 
 export function execute(
   expression: string | Ast,
-  params: IExpressionLoaderParams
+  params: IExpressionLoaderParams = {}
 ): ExpressionDataHandler {
   return new ExpressionDataHandler(expression, params);
 }

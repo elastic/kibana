@@ -19,7 +19,7 @@
 
 import { Observable } from 'rxjs';
 import * as Rx from 'rxjs';
-import { share } from 'rxjs/operators';
+import { share, first } from 'rxjs/operators';
 import { renderersRegistry } from '../../../../interpreter/public/registries';
 import { event, RenderId, Data, IInterpreterRenderHandlers } from './_types';
 
@@ -74,9 +74,11 @@ export class ExpressionRenderHandler {
       throw new Error(`invalid renderer id '${data.as}'`);
     }
 
+    const promise = this.render$.pipe(first()).toPromise();
+
     renderersRegistry.get(data.as).render(this.element, data.value, this.handlers);
 
-    return this.render$.toPromise();
+    return promise;
   };
 
   destroy = () => {

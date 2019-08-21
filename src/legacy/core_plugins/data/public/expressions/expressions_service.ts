@@ -18,39 +18,46 @@
  */
 
 import { npSetup } from 'ui/new_platform';
-import { fromExpression, toExpression } from '@kbn/interpreter/common';
 // @ts-ignore
 import { getInterpreter } from '../../../interpreter/public/interpreter';
-import { setInterpreter } from './services';
+import { setInspector, setInterpreter } from './services';
 import { execute } from './lib/execute';
 import { loader } from './lib/loader';
 import { render } from './lib/render';
 import { createRenderer } from './expression_renderer';
 
+import { Start as IInspector } from '../../../../../plugins/inspector/public';
+
+export interface ExpressionsServiceStartDependencies {
+  inspector: IInspector;
+}
 /**
  * Expressions Service
  * @internal
  */
 export class ExpressionsService {
-  public async setup({}) {
-    const interpreter = await getInterpreter();
-    setInterpreter(interpreter);
-
-    const ExpressionRenderer = createRenderer(loader);
+  public setup() {
+    getInterpreter()
+      .then(setInterpreter)
+      .catch((e: Error) => {
+        throw new Error('interpreter is not initialized');
+      });
 
     return {
-      interpreter,
-
-      execute,
-      render,
-      loader,
-
-      fromExpression,
-      toExpression,
-
       registerType: npSetup.plugins.data.expressions.registerType,
       registerFunction: npSetup.plugins.data.expressions.registerFunction,
       registerRenderer: npSetup.plugins.data.expressions.registerRenderer,
+    };
+  }
+
+  public start({ inspector }: ExpressionsServiceStartDependencies) {
+    const ExpressionRenderer = createRenderer(loader);
+    setInspector(inspector);
+
+    return {
+      execute,
+      render,
+      loader,
 
       ExpressionRenderer,
     };
@@ -63,3 +70,4 @@ export class ExpressionsService {
 
 /** @public */
 export type ExpressionsSetup = ReturnType<ExpressionsService['setup']>;
+export type ExpressionsStart = ReturnType<ExpressionsService['start']>;

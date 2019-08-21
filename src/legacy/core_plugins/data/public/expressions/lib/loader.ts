@@ -17,15 +17,14 @@
  * under the License.
  */
 
-import { Inspector, InspectorSession } from 'ui/inspector/inspector';
-import { Ast } from '@kbn/interpreter/target/common';
-import { Observable } from 'rxjs';
-import * as Rx from 'rxjs';
-import { share } from 'rxjs/operators';
-import { Adapters } from 'ui/inspector';
+import { Ast } from '@kbn/interpreter/common';
+import { Observable, Subject } from 'rxjs';
+import { first, share } from 'rxjs/operators';
+import { Adapters, InspectorSession } from '../../../../../../plugins/inspector/public';
 import { execute, ExpressionDataHandler } from './execute';
 import { ExpressionRenderHandler } from './render';
 import { RenderId, Data, IExpressionLoaderParams } from './_types';
+import { getInspector } from '../services';
 
 export class ExpressionLoader {
   data$: Observable<Data>;
@@ -35,11 +34,11 @@ export class ExpressionLoader {
 
   private dataHandler: ExpressionDataHandler;
   private renderHandler: ExpressionRenderHandler;
-  private dataSubject: Rx.Subject<Data>;
+  private dataSubject: Subject<Data>;
   private data: Data;
 
   constructor(element: HTMLElement, expression: string | Ast, params: IExpressionLoaderParams) {
-    this.dataSubject = new Rx.Subject();
+    this.dataSubject = new Subject();
     this.data$ = this.dataSubject.asObservable().pipe(share());
 
     this.renderHandler = new ExpressionRenderHandler(element);
@@ -49,6 +48,10 @@ export class ExpressionLoader {
 
     this.update$.subscribe(({ newExpression, newParams }) => {
       this.update(newExpression, newParams);
+    });
+
+    this.data$.subscribe(data => {
+      this.render(data);
     });
 
     this.execute(expression, params);
@@ -75,7 +78,7 @@ export class ExpressionLoader {
   }
 
   openInspector(title: string): InspectorSession {
-    return Inspector.open(this.inspect(), {
+    return getInspector().open(this.inspect(), {
       title,
     });
   }
@@ -84,12 +87,15 @@ export class ExpressionLoader {
     return this.dataHandler.inspect();
   }
 
-  async update(expression: string | Ast, params: IExpressionLoaderParams): Promise<RenderId> {
+  update(expression: string | Ast, params: IExpressionLoaderParams): Promise<RenderId> {
+    const promise = this.render$.pipe(first()).toPromise();
+
     if (expression !== null) {
-      this.data = await this.execute(expression, params);
+      this.execute(expression, params);
+    } else {
+      this.render(this.data);
     }
-    const renderId = this.render(this.data);
-    return renderId;
+    return promise;
   }
 
   private execute = async (
