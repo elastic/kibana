@@ -681,19 +681,26 @@ export class DataRecognizer {
       : [this.indexPatternName];
 
     moduleConfig.datafeeds.forEach((df) => {
-      const indexes = [];
-      df.config.indexes.forEach(index => {
+      const newIndices = [];
+      // the datafeed can contain indexes and indices
+      const currentIndices = df.config.indexes !== undefined ? df.config.indexes : df.config.indices;
+
+      currentIndices.forEach(index => {
         if (index === INDEX_PATTERN_NAME) {
           // the datafeed index is INDEX_PATTERN_NAME, so replace it with index pattern(s)
           // supplied by the user or the default one from the manifest
-          indexes.push(...indexPatternNames);
+          newIndices.push(...indexPatternNames);
         } else {
           // otherwise keep using the index from the datafeed json
-          indexes.push(index);
+          newIndices.push(index);
         }
       });
-      df.config.indexes = indexes;
+
+      // just in case indexes was used, delete it in favour of indices
+      delete df.config.indexes;
+      df.config.indices = newIndices;
     });
+    moduleConfig.datafeeds;
   }
 
   // loop through the custom urls in each job and replace the INDEX_PATTERN_ID
