@@ -7474,6 +7474,19 @@
             "description": "",
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          { "name": "flows", "description": "", "isDeprecated": false, "deprecationReason": null },
+          {
+            "name": "destination_ips",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "source_ips",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "possibleTypes": null

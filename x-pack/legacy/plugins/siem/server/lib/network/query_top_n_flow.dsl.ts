@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Direction, FlowTargetNew, NetworkTopNFlowSortField } from '../../graphql/types';
+import {
+  Direction,
+  FlowTargetNew,
+  NetworkTopNFlowSortField,
+  NetworkTopNFlowFields,
+} from '../../graphql/types';
 import { assertUnreachable, createQueryFilterClauses } from '../../utils/build_query';
 
 import { NetworkTopNFlowRequestOptions } from './index';
@@ -54,7 +59,7 @@ export const buildTopNFlowQuery = ({
   return dslQuery;
 };
 
-const generateFlowTargetAggs = (
+const getFlowTargetAggs = (
   networkTopNFlowSortField: NetworkTopNFlowSortField,
   flowTarget: FlowTargetNew,
   querySize: number
@@ -137,14 +142,6 @@ const generateFlowTargetAggs = (
   },
 });
 
-const getFlowTargetAggs = (
-  networkTopNFlowSortField: NetworkTopNFlowSortField,
-  flowTarget: FlowTargetNew,
-  querySize: number
-) => {
-  return generateFlowTargetAggs(networkTopNFlowSortField, flowTarget, querySize);
-};
-
 export const getOppositeField = (flowTarget: FlowTargetNew): FlowTargetNew => {
   switch (flowTarget) {
     case FlowTargetNew.source:
@@ -155,10 +152,25 @@ export const getOppositeField = (flowTarget: FlowTargetNew): FlowTargetNew => {
   assertUnreachable(flowTarget);
 };
 
-interface QueryOrder {
-  bytes_out: Direction;
-}
+type QueryOrder =
+  | { bytes_in: Direction }
+  | { bytes_out: Direction }
+  | { flows: Direction }
+  | { destination_ips: Direction }
+  | { source_ips: Direction };
 
 const getQueryOrder = (networkTopNFlowSortField: NetworkTopNFlowSortField): QueryOrder => {
-  return { bytes_out: networkTopNFlowSortField.direction };
+  switch (networkTopNFlowSortField.field) {
+    case NetworkTopNFlowFields.bytes_in:
+      return { bytes_in: networkTopNFlowSortField.direction };
+    case NetworkTopNFlowFields.bytes_out:
+      return { bytes_out: networkTopNFlowSortField.direction };
+    case NetworkTopNFlowFields.flows:
+      return { flows: networkTopNFlowSortField.direction };
+    case NetworkTopNFlowFields.destination_ips:
+      return { destination_ips: networkTopNFlowSortField.direction };
+    case NetworkTopNFlowFields.source_ips:
+      return { source_ips: networkTopNFlowSortField.direction };
+  }
+  assertUnreachable(networkTopNFlowSortField.field);
 };

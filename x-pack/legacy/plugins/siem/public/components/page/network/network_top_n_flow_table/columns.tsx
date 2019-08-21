@@ -194,13 +194,12 @@ export const getNetworkTopNFlowColumns = (
     },
   },
   {
+    field: `node.${flowTarget}.flows`,
     name: i18n.FLOWS,
     truncateText: false,
     hideForMobile: false,
     sortable: true,
-    render: ({ node }) => {
-      const flowsAttr = `${flowTarget}.flows`;
-      const flows: string | null = get(flowsAttr, node);
+    render: flows => {
       if (flows != null) {
         return numeral(flows).format('0,000');
       } else {

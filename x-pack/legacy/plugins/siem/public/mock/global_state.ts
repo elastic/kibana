@@ -10,7 +10,6 @@ import {
   DomainsFields,
   FlowDirection,
   FlowTarget,
-  FlowTargetNew,
   HostsFields,
   NetworkDnsFields,
   NetworkTopNFlowFields,

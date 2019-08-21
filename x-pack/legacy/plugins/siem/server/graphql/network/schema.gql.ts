@@ -54,6 +54,9 @@ export const networkSchema = gql`
   enum NetworkTopNFlowFields {
     bytes_in
     bytes_out
+    flows
+    destination_ips
+    source_ips
   }
 
   input NetworkTopNFlowSortField {

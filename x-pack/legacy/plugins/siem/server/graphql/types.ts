@@ -2182,6 +2182,9 @@ export enum FlowTargetNew {
 export enum NetworkTopNFlowFields {
   bytes_in = 'bytes_in',
   bytes_out = 'bytes_out',
+  flows = 'flows',
+  destination_ips = 'destination_ips',
+  source_ips = 'source_ips',
 }
 
 export enum NetworkDnsFields {
