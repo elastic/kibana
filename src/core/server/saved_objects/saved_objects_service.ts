@@ -88,7 +88,7 @@ export class SavedObjectsService
             errors.pipe(
               concatMap((error, i) =>
                 iif(
-                  () => i < 10 && error instanceof elasticsearch.errors.NoConnections,
+                  () => error instanceof elasticsearch.errors.NoConnections,
                   timer(1000),
                   throwError(error)
                 )
