@@ -48,8 +48,7 @@ function LabelOptions({ stateParams, setValue, axis, axisName, index }: LabelOpt
       };
       setValue(axisName, axes);
     },
-    // setValue is changed when stateParams[axisName] is updated, so it's no need to watch stateParams[axisName] here.
-    [setValue]
+    [setValue, stateParams[axisName]]
   );
 
   return (

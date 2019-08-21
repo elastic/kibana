@@ -28,7 +28,6 @@ import { BasicVislibParams, ValueAxis, SeriesParam } from '../types';
 import { SeriesPanel } from '../controls/point_series/series_panel';
 import { CategoryAxisPanel } from '../controls/point_series/category_axis_panel';
 import { ValueAxesPanel } from '../controls/point_series/value_axes_panel';
-import { SetValueAxisByIndex } from '../controls/point_series/components/value_axis_options';
 import { mapPositionOpposite, mapPosition } from '../controls/point_series/utils';
 import { makeSerie, isAxisHorizontal, countNextAxisNumber } from './metrics_axis_options_helper';
 
@@ -36,6 +35,12 @@ export type SetChartValueByIndex = <T extends keyof SeriesParam>(
   index: number,
   paramName: T,
   value: SeriesParam[T]
+) => void;
+
+export type SetValueAxisByIndex = <T extends keyof ValueAxis>(
+  index: number,
+  paramName: T,
+  value: ValueAxis[T]
 ) => void;
 
 const RADIX = 10;
@@ -50,6 +55,31 @@ function MetricsAxisOptions(props: VisOptionsProps<BasicVislibParams>) {
   // We track these so we can know when the agg is changed
   const [lastMatchingSeriesAggType, setLastMatchingSeriesAggType] = useState('');
   const [lastMatchingSeriesAggField, setLastMatchingSeriesAggField] = useState('');
+
+  const setValueAxisByIndex: SetValueAxisByIndex = useCallback(
+    (index, paramName, value) => {
+      const valueAxes = [...stateParams.valueAxes];
+
+      valueAxes[index] = {
+        ...valueAxes[index],
+        [paramName]: value,
+      };
+      setValue('valueAxes', valueAxes);
+    },
+    [stateParams.valueAxes]
+  );
+
+  const setChartByIndex: SetChartValueByIndex = useCallback(
+    (index, paramName, value) => {
+      const series = [...stateParams.seriesParams];
+      series[index] = {
+        ...series[index],
+        [paramName]: value,
+      };
+      setValue('seriesParams', series);
+    },
+    [setValue, stateParams.seriesParams]
+  );
 
   const updateAxisTitle = () => {
     stateParams.valueAxes.forEach((axis, axisNumber) => {
@@ -90,7 +120,7 @@ function MetricsAxisOptions(props: VisOptionsProps<BasicVislibParams>) {
           (aggIsChanged || axis.title.text === '' || lastCustomLabelMatchesAxisTitle)
         ) {
           // Override axis title with new custom label
-          setValueAxis(axisNumber, 'title', { ...axis, text: newCustomLabel });
+          setValueAxisByIndex(axisNumber, 'title', { ...axis, text: newCustomLabel });
         }
 
         setLastCustomLabels({ ...lastCustomLabels, [axis.id]: newCustomLabel });
@@ -100,31 +130,6 @@ function MetricsAxisOptions(props: VisOptionsProps<BasicVislibParams>) {
       setLastMatchingSeriesAggField(matchingSeriesAggField);
     });
   };
-
-  const setValueAxis: SetValueAxisByIndex = useCallback(
-    (index, paramName, value) => {
-      const valueAxes = [...stateParams.valueAxes];
-
-      valueAxes[index] = {
-        ...valueAxes[index],
-        [paramName]: value,
-      };
-      setValue('valueAxes', valueAxes);
-    },
-    [stateParams.valueAxes]
-  );
-
-  const setChart: SetChartValueByIndex = useCallback(
-    (index, paramName, value) => {
-      const series = [...stateParams.seriesParams];
-      series[index] = {
-        ...series[index],
-        [paramName]: value,
-      };
-      setValue('seriesParams', series);
-    },
-    [setValue, stateParams.seriesParams]
-  );
 
   const getUpdatedAxisName = useCallback(
     (axisPosition: ValueAxis['position']) => {
@@ -140,7 +145,7 @@ function MetricsAxisOptions(props: VisOptionsProps<BasicVislibParams>) {
       }, 1);
       return axisName;
     },
-    [setValueAxis, stateParams.valueAxes]
+    [setValueAxisByIndex, stateParams.valueAxes]
   );
 
   const addValueAxis = useCallback(() => {
@@ -169,10 +174,10 @@ function MetricsAxisOptions(props: VisOptionsProps<BasicVislibParams>) {
       });
 
       if (chartIndex !== undefined) {
-        setChart(chartIndex, 'valueAxis', axis.id);
+        setChartByIndex(chartIndex, 'valueAxis', axis.id);
       }
     },
-    [stateParams.valueAxes, setChart, setValue]
+    [stateParams.valueAxes, setChartByIndex, setValue]
   );
 
   const aggsLabel = aggs
@@ -225,8 +230,8 @@ function MetricsAxisOptions(props: VisOptionsProps<BasicVislibParams>) {
 
       if (axisIsHorizontal === isCategoryAxisHorizontal) {
         const position = mapPosition(axis.position);
-        setValueAxis(index, 'position', position);
-        setValueAxis(index, 'name', getUpdatedAxisName(position));
+        setValueAxisByIndex(index, 'position', position);
+        setValueAxisByIndex(index, 'name', getUpdatedAxisName(position));
       }
     });
   }, [stateParams.categoryAxes[0].position, stateParams.valueAxes]);
@@ -243,7 +248,7 @@ function MetricsAxisOptions(props: VisOptionsProps<BasicVislibParams>) {
       <SeriesPanel
         addValueAxis={addValueAxis}
         updateAxisTitle={updateAxisTitle}
-        setChartValueByIndex={setChart}
+        setChartByIndex={setChartByIndex}
         {...props}
       />
       <EuiSpacer size="s" />
@@ -252,7 +257,7 @@ function MetricsAxisOptions(props: VisOptionsProps<BasicVislibParams>) {
         isCategoryAxisHorizontal={isCategoryAxisHorizontal}
         removeValueAxis={removeValueAxis}
         getUpdatedAxisName={getUpdatedAxisName}
-        setValueAxisByIndex={setValueAxis}
+        setValueAxisByIndex={setValueAxisByIndex}
         {...props}
       />
       <EuiSpacer size="s" />

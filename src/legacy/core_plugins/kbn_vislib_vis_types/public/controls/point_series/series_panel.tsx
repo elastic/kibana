@@ -30,11 +30,11 @@ import { SetChartValueByIndex } from '../../editors/metrics_axis_options';
 interface SeriesPanelProps extends VisOptionsProps<BasicVislibParams> {
   addValueAxis: () => ValueAxis;
   updateAxisTitle: () => void;
-  setChartValueByIndex: SetChartValueByIndex;
+  setChartByIndex: SetChartValueByIndex;
 }
 
 function SeriesPanel(props: SeriesPanelProps) {
-  const { stateParams, setChartValueByIndex, addValueAxis, updateAxisTitle } = props;
+  const { stateParams, setChartByIndex, addValueAxis, updateAxisTitle } = props;
 
   const changeValueAxis = useCallback(
     (index: number, paramName: 'valueAxis', selectedValueAxis: string) => {
@@ -44,11 +44,11 @@ function SeriesPanel(props: SeriesPanelProps) {
         newValueAxis = axis.id;
       }
       // setChart
-      setChartValueByIndex(index, paramName, newValueAxis);
+      setChartByIndex(index, paramName, newValueAxis);
 
       updateAxisTitle();
     },
-    [addValueAxis, setChartValueByIndex, updateAxisTitle]
+    [addValueAxis, setChartByIndex, updateAxisTitle]
   );
 
   return (
@@ -85,7 +85,7 @@ function SeriesPanel(props: SeriesPanelProps) {
               index={index}
               chart={chart}
               changeValueAxis={changeValueAxis}
-              setChartValueByIndex={setChartValueByIndex}
+              setChartByIndex={setChartByIndex}
               {...props}
             />
           </>

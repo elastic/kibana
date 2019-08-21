@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { EuiTitle, EuiFormErrorText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -25,11 +25,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { ValueAxis } from '../../../types';
 import { SwitchOption } from '../../switch';
 import { NumberInputOption } from '../../number_input';
-import { ValueAxisOptionsParams } from './value_axis_options';
 import { YExtends } from './y_extends';
 import { SetScale } from './value_axis_options';
 
-interface CustomExtentsOptionsProps extends ValueAxisOptionsParams {
+interface CustomExtentsOptionsProps {
+  axis: ValueAxis;
   setValueAxisScale: SetScale;
   setValueAxis: <T extends keyof ValueAxis>(paramName: T, value: ValueAxis[T]) => void;
 }
@@ -42,30 +42,39 @@ function CustomExtentsOptions({
   const [isBoundsMarginValid, setIsBoundsMarginValid] = useState(true);
   const setValidity = (isValid: boolean) => {};
 
-  const setBoundsMargin = (paramName: 'boundsMargin', value: number | '') => {
-    const isValid = value === '' ? true : value >= 0;
-    setIsBoundsMarginValid(isValid);
-    setValidity(isValid);
+  const setBoundsMargin = useCallback(
+    (paramName: 'boundsMargin', value: number | '') => {
+      const isValid = value === '' ? true : value >= 0;
+      setIsBoundsMarginValid(isValid);
+      setValidity(isValid);
 
-    setValueAxisScale(paramName, value);
-  };
+      setValueAxisScale(paramName, value);
+    },
+    [setIsBoundsMarginValid, setValidity, setValueAxisScale]
+  );
 
-  const onDefaultYExtentsChange = (paramName: 'defaultYExtents', value: boolean) => {
-    const scale = { ...axis.scale, [paramName]: value };
-    if (!scale.defaultYExtents) {
-      delete scale.boundsMargin;
-    }
-    setValueAxis('scale', scale);
-  };
+  const onDefaultYExtentsChange = useCallback(
+    (paramName: 'defaultYExtents', value: boolean) => {
+      const scale = { ...axis.scale, [paramName]: value };
+      if (!scale.defaultYExtents) {
+        delete scale.boundsMargin;
+      }
+      setValueAxis('scale', scale);
+    },
+    [setValueAxis]
+  );
 
-  const onSetYExtentsChange = (paramName: 'setYExtents', value: boolean) => {
-    const scale = { ...axis.scale, [paramName]: value };
-    if (!scale.setYExtents) {
-      delete scale.min;
-      delete scale.max;
-    }
-    setValueAxis('scale', scale);
-  };
+  const onSetYExtentsChange = useCallback(
+    (paramName: 'setYExtents', value: boolean) => {
+      const scale = { ...axis.scale, [paramName]: value };
+      if (!scale.setYExtents) {
+        delete scale.min;
+        delete scale.max;
+      }
+      setValueAxis('scale', scale);
+    },
+    [setValueAxis]
+  );
 
   return (
     <>

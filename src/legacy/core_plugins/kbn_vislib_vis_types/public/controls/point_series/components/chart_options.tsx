@@ -33,7 +33,7 @@ interface ChartOptionsParams extends VisOptionsProps<BasicVislibParams> {
   index: number;
   chart: SeriesParam;
   changeValueAxis: (index: number, paramName: 'valueAxis', selectedValueAxis: string) => void;
-  setChartValueByIndex: SetChartValueByIndex;
+  setChartByIndex: SetChartValueByIndex;
 }
 
 function ChartOptions({
@@ -42,13 +42,13 @@ function ChartOptions({
   chart,
   index,
   changeValueAxis,
-  setChartValueByIndex,
+  setChartByIndex,
 }: ChartOptionsParams) {
   const setChart: SetChart = useCallback(
     (paramName, value) => {
-      setChartValueByIndex(index, paramName, value);
+      setChartByIndex(index, paramName, value);
     },
-    [setChartValueByIndex, index]
+    [setChartByIndex, index]
   );
 
   const valueAxesOptions = useMemo(

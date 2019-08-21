@@ -30,16 +30,11 @@ import { TextInputOption } from './../../text_input';
 import { LabelOptions } from './label_options';
 import { CustomExtentsOptions } from './custom_extents_options';
 import { isAxisHorizontal } from '../../../editors/metrics_axis_options_helper';
+import { SetValueAxisByIndex } from '../../../editors/metrics_axis_options';
 
 export type SetScale = <T extends keyof ValueAxis['scale']>(
   paramName: T,
   value: ValueAxis['scale'][T]
-) => void;
-
-export type SetValueAxisByIndex = <T extends keyof ValueAxis>(
-  index: number,
-  paramName: T,
-  value: ValueAxis[T]
 ) => void;
 
 export interface ValueAxisOptionsParams extends VisOptionsProps<BasicVislibParams> {

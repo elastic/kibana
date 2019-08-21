@@ -34,7 +34,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
 import { BasicVislibParams, ValueAxis } from '../../types';
-import { ValueAxisOptions, SetValueAxisByIndex } from './components/value_axis_options';
+import { ValueAxisOptions } from './components/value_axis_options';
+import { SetValueAxisByIndex } from '../../editors/metrics_axis_options';
 
 const MAX_STRING_LENGTH = 30;
 
@@ -65,39 +66,44 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
     [getSeries]
   );
 
-  const renderRemoveButton = (axis: ValueAxis) => (
-    <EuiToolTip
-      position="bottom"
-      content={i18n.translate(
-        'kbnVislibVisTypes.controls.pointSeries.valueAxes.removeButtonAriaLabel',
-        {
-          defaultMessage: 'Remove Y axis',
-        }
-      )}
-    >
-      <EuiButtonIcon
-        color="danger"
-        iconType="cross"
-        onClick={() => removeValueAxis(axis)}
-        aria-label={i18n.translate(
+  const renderRemoveButton = useCallback(
+    (axis: ValueAxis) => (
+      <EuiToolTip
+        position="bottom"
+        content={i18n.translate(
           'kbnVislibVisTypes.controls.pointSeries.valueAxes.removeButtonAriaLabel',
           {
             defaultMessage: 'Remove Y axis',
           }
         )}
-      />
-    </EuiToolTip>
-  );
-
-  const getButtonContent = (axis: ValueAxis) => (
-    <>
-      {axis.name}{' '}
-      <EuiToolTip content={getSeries(axis)}>
-        <EuiText size="xs">{getSeriesShort(axis)}</EuiText>
+      >
+        <EuiButtonIcon
+          color="danger"
+          iconType="cross"
+          onClick={() => removeValueAxis(axis)}
+          aria-label={i18n.translate(
+            'kbnVislibVisTypes.controls.pointSeries.valueAxes.removeButtonAriaLabel',
+            {
+              defaultMessage: 'Remove Y axis',
+            }
+          )}
+        />
       </EuiToolTip>
-    </>
+    ),
+    [removeValueAxis]
   );
 
+  const getButtonContent = useCallback(
+    (axis: ValueAxis) => (
+      <>
+        {axis.name}{' '}
+        <EuiToolTip content={getSeries(axis)}>
+          <EuiText size="xs">{getSeriesShort(axis)}</EuiText>
+        </EuiToolTip>
+      </>
+    ),
+    [getSeries, getSeriesShort]
+  );
   return (
     <EuiPanel paddingSize="s">
       <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="baseline">
