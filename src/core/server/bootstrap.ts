@@ -70,6 +70,22 @@ export async function bootstrap({
 
   const root = new Root(rawConfigService.getConfig$(), env, onRootShutdown);
 
+  process.on('SIGHUP', () => {
+    const cliLogger = root.logger.get('cli');
+    cliLogger.info('Reloading logging configuration due to SIGHUP.', { tags: ['config'] });
+
+    try {
+      rawConfigService.reloadConfig();
+    } catch (err) {
+      return shutdown(err);
+    }
+
+    cliLogger.info('Reloaded logging configuration due to SIGHUP.', { tags: ['config'] });
+  });
+
+  process.on('SIGINT', () => shutdown());
+  process.on('SIGTERM', () => shutdown());
+
   function shutdown(reason?: Error) {
     rawConfigService.stop();
     return root.shutdown(reason);
@@ -87,22 +103,6 @@ export async function bootstrap({
     cliLogger.info('Optimization done.');
     await shutdown();
   }
-
-  process.on('SIGHUP', () => {
-    const cliLogger = root.logger.get('cli');
-    cliLogger.info('Reloading logging configuration due to SIGHUP.', { tags: ['config'] });
-
-    try {
-      rawConfigService.reloadConfig();
-    } catch (err) {
-      return shutdown(err);
-    }
-
-    cliLogger.info('Reloaded logging configuration due to SIGHUP.', { tags: ['config'] });
-  });
-
-  process.on('SIGINT', () => shutdown());
-  process.on('SIGTERM', () => shutdown());
 }
 
 function onRootShutdown(reason?: any) {

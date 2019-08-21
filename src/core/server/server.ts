@@ -106,6 +106,7 @@ export class Server {
   }
 
   public async start() {
+    this.log.debug('starting server');
     const pluginsStart = await this.plugins.start({});
     const savedObjectsStart = await this.savedObjects.start({});
 
