@@ -20,15 +20,15 @@ const buildKibanaFeatures = (savedObjectTypes: string[]) => {
       privileges: {
         all: {
           savedObject: {
-            all: ['search', 'url'],
+            all: ['search', 'url', 'query'],
             read: ['index-pattern'],
           },
-          ui: ['show', 'createShortUrl', 'save'],
+          ui: ['show', 'createShortUrl', 'save', 'saveQuery'],
         },
         read: {
           savedObject: {
             all: [],
-            read: ['index-pattern', 'search'],
+            read: ['index-pattern', 'search', 'query'],
           },
           ui: ['show'],
         },
@@ -46,15 +46,15 @@ const buildKibanaFeatures = (savedObjectTypes: string[]) => {
       privileges: {
         all: {
           savedObject: {
-            all: ['visualization', 'url'],
+            all: ['visualization', 'url', 'query'],
             read: ['index-pattern', 'search'],
           },
-          ui: ['show', 'createShortUrl', 'delete', 'save'],
+          ui: ['show', 'createShortUrl', 'delete', 'save', 'saveQuery'],
         },
         read: {
           savedObject: {
             all: [],
-            read: ['index-pattern', 'search', 'visualization'],
+            read: ['index-pattern', 'search', 'visualization', 'query'],
           },
           ui: ['show'],
         },
@@ -72,7 +72,7 @@ const buildKibanaFeatures = (savedObjectTypes: string[]) => {
       privileges: {
         all: {
           savedObject: {
-            all: ['dashboard', 'url'],
+            all: ['dashboard', 'url', 'query'],
             read: [
               'index-pattern',
               'search',
@@ -82,7 +82,7 @@ const buildKibanaFeatures = (savedObjectTypes: string[]) => {
               'map',
             ],
           },
-          ui: ['createNew', 'show', 'showWriteControls'],
+          ui: ['createNew', 'show', 'showWriteControls', 'saveQuery'],
         },
         read: {
           savedObject: {
@@ -95,6 +95,7 @@ const buildKibanaFeatures = (savedObjectTypes: string[]) => {
               'canvas-workpad',
               'map',
               'dashboard',
+              'query',
             ],
           },
           ui: ['show'],
