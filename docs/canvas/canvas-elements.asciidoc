@@ -232,9 +232,9 @@ Change the order of how the elements are displayed on your workpad.
 === Use the zoom options
 
 In the upper left corner, click the *Zoom controls* icon, then select one of the options.
-+
+
 [role="screenshot"]
-image::canvas/canvas-zoom-controls.png[Zoom controls]
+image::images/canvas-zoom-controls.png[Zoom controls]
 
 [float]
 [[element-save]]
