@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Storyshots arguments/NumberFormat with custom format 1`] = `
+exports[`Storyshots arguments/DateFormat with custom format 1`] = `
 Array [
   <div
     className="euiFormControlLayout euiFormControlLayout--compressed"
@@ -10,35 +10,25 @@ Array [
     >
       <select
         className="euiSelect euiSelect--compressed"
-        id="NumberFormatExample3"
+        id="DateFormatExample3"
         onChange={[Function]}
         onMouseUp={[Function]}
         value="custom"
       >
         <option
-          value="0.0[000]"
+          value="l"
         >
-          Number
+          Shorthand
         </option>
         <option
-          value="0.0%"
+          value="x"
         >
-          Percent
+          Unix
         </option>
         <option
-          value="$0.00"
+          value="LLL"
         >
-          Currency
-        </option>
-        <option
-          value="00:00:00"
-        >
-          Duration
-        </option>
-        <option
-          value="0.0b"
-        >
-          Bytes
+          Longhand
         </option>
         <option
           value="custom"
@@ -78,16 +68,16 @@ Array [
       <input
         className="euiFieldText euiFieldText--compressed"
         onChange={[Function]}
-        placeholder="0.0a"
+        placeholder="M/D/YY h:ma"
         type="text"
-        value="0.0[000]a"
+        value="MM/DD/YYYY"
       />
     </div>
   </div>,
 ]
 `;
 
-exports[`Storyshots arguments/NumberFormat with no format 1`] = `
+exports[`Storyshots arguments/DateFormat with no format 1`] = `
 Array [
   <div
     className="euiFormControlLayout euiFormControlLayout--compressed"
@@ -97,35 +87,25 @@ Array [
     >
       <select
         className="euiSelect euiSelect--compressed"
-        id="NumberFormatExample1"
+        id="DateFormatExample1"
         onChange={[Function]}
         onMouseUp={[Function]}
         value="custom"
       >
         <option
-          value="0.0[000]"
+          value="l"
         >
-          Number
+          Shorthand
         </option>
         <option
-          value="0.0%"
+          value="x"
         >
-          Percent
+          Unix
         </option>
         <option
-          value="$0.00"
+          value="LLL"
         >
-          Currency
-        </option>
-        <option
-          value="00:00:00"
-        >
-          Duration
-        </option>
-        <option
-          value="0.0b"
-        >
-          Bytes
+          Longhand
         </option>
         <option
           value="custom"
@@ -165,7 +145,7 @@ Array [
       <input
         className="euiFieldText euiFieldText--compressed"
         onChange={[Function]}
-        placeholder="0.0a"
+        placeholder="M/D/YY h:ma"
         type="text"
         value=""
       />
@@ -174,7 +154,7 @@ Array [
 ]
 `;
 
-exports[`Storyshots arguments/NumberFormat with preset format 1`] = `
+exports[`Storyshots arguments/DateFormat with preset format 1`] = `
 <div
   className="euiFormControlLayout euiFormControlLayout--compressed"
 >
@@ -183,35 +163,25 @@ exports[`Storyshots arguments/NumberFormat with preset format 1`] = `
   >
     <select
       className="euiSelect euiSelect--compressed"
-      id="NumberFormatExample2"
+      id="DateFormatExample2"
       onChange={[Function]}
       onMouseUp={[Function]}
-      value="$0.00"
+      value="LLL"
     >
       <option
-        value="0.0[000]"
+        value="l"
       >
-        Number
+        Shorthand
       </option>
       <option
-        value="0.0%"
+        value="x"
       >
-        Percent
+        Unix
       </option>
       <option
-        value="$0.00"
+        value="LLL"
       >
-        Currency
-      </option>
-      <option
-        value="00:00:00"
-      >
-        Duration
-      </option>
-      <option
-        value="0.0b"
-      >
-        Bytes
+        Longhand
       </option>
       <option
         value="custom"
