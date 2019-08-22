@@ -47,8 +47,6 @@ export const getNetworkTopNFlowColumns = (
 ): NetworkTopNFlowColumns => [
   {
     name: i18n.IP_TITLE,
-    truncateText: false,
-    hideForMobile: false,
     render: ({ node }) => {
       const ipAttr = `${flowTarget}.ip`;
       const ip: string | null = get(ipAttr, node);
@@ -96,8 +94,6 @@ export const getNetworkTopNFlowColumns = (
   },
   {
     name: i18n.DOMAIN,
-    truncateText: false,
-    hideForMobile: false,
     render: ({ node }) => {
       const domainAttr = `${flowTarget}.domain`;
       const ipAttr = `${flowTarget}.ip`;
@@ -119,8 +115,6 @@ export const getNetworkTopNFlowColumns = (
   },
   {
     name: i18n.AUTONOMOUS_SYSTEM,
-    truncateText: false,
-    hideForMobile: false,
     render: ({ node, cursor: { value: ipAddress } }) => {
       const asAttr = `${flowTarget}.autonomous_system`;
       const as: AutonomousSystemItem | null = get(asAttr, node);
@@ -182,8 +176,6 @@ export const getNetworkTopNFlowColumns = (
   {
     field: 'node.network.bytes_in',
     name: i18n.BYTES_IN,
-    truncateText: false,
-    hideForMobile: false,
     sortable: true,
     render: bytes => {
       if (bytes != null) {
@@ -196,8 +188,6 @@ export const getNetworkTopNFlowColumns = (
   {
     field: 'node.network.bytes_out',
     name: i18n.BYTES_OUT,
-    truncateText: false,
-    hideForMobile: false,
     sortable: true,
     render: bytes => {
       if (bytes != null) {
@@ -210,8 +200,6 @@ export const getNetworkTopNFlowColumns = (
   {
     field: `node.${flowTarget}.flows`,
     name: i18n.FLOWS,
-    truncateText: false,
-    hideForMobile: false,
     sortable: true,
     render: flows => {
       if (flows != null) {
@@ -224,8 +212,6 @@ export const getNetworkTopNFlowColumns = (
   {
     field: `node.${flowTarget}.${getOppositeField(flowTarget)}_ips`,
     name: flowTarget === FlowTargetNew.source ? i18n.DESTINATION_IPS : i18n.SOURCE_IPS,
-    truncateText: false,
-    hideForMobile: false,
     sortable: true,
     render: ips => {
       if (ips != null) {
