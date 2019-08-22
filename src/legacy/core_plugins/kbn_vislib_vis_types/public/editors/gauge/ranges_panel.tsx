@@ -43,7 +43,7 @@ function RangesPanel({
     uiState.on('colorChanged', () => {
       setIsCustomColors(true);
     });
-  }, []);
+  }, [uiState]);
 
   const addRangeValues = useCallback(() => {
     const previousRange = last(stateParams.gauge.colorsRange);

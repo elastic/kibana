@@ -42,7 +42,7 @@ function GaugeOptions(props: VisOptionsProps<GaugeVisParams>) {
         ...stateParams.gauge,
         [paramName]: value,
       }),
-    [stateParams.gauge]
+    [setValue, stateParams.gauge]
   );
 
   return (

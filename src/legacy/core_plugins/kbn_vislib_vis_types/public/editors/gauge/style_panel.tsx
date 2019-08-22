@@ -50,7 +50,7 @@ function StylePanel({
         maxAngle,
       });
     },
-    [stateParams.gauge]
+    [setValue, stateParams.gauge]
   );
 
   return (
