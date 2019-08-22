@@ -24,7 +24,7 @@ import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import chrome from 'ui/chrome';
 import { UiSettingsClientContract } from 'src/core/public';
 import { RefreshInterval, TimeRange } from 'src/plugins/data/public';
-import { IndexPattern } from 'src/legacy/core_plugins/data/public/index_patterns/index_patterns';
+import { IndexPattern } from 'src/legacy/core_plugins/data/public';
 import { IScope } from 'angular';
 import { timeHistory } from './time_history';
 import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
