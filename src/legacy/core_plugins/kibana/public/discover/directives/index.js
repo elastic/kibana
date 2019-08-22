@@ -24,7 +24,6 @@ import { DiscoverNoResults } from './no_results';
 import { DiscoverUninitialized } from './uninitialized';
 import { DiscoverUnsupportedIndexPattern } from './unsupported_index_pattern';
 import { DiscoverHistogram } from './histogram';
-import './timechart';
 
 const app = uiModules.get('apps/discover', ['react']);
 
