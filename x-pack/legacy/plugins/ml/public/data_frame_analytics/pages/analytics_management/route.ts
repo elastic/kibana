@@ -14,7 +14,6 @@ import { checkGetJobsPrivilege } from '../../../privilege/check_privilege';
 import { loadCurrentIndexPattern, loadCurrentSavedSearch } from '../../../util/index_utils';
 // @ts-ignore
 import { loadIndexPatterns } from '../../../util/index_utils';
-// @ts-ignore
 import { getDataFrameAnalyticsBreadcrumbs } from '../../breadcrumbs';
 
 const template = `<ml-data-frame-analytics-management />`;
