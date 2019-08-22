@@ -8,6 +8,7 @@ import {
   SummaryHistogram,
   Check,
   CursorDirection,
+  SortOrder,
 } from '../../../../common/graphql/types';
 import { CursorPagination } from './adapter_types';
 
@@ -263,9 +264,13 @@ export const queryEnriched = async (queryContext: QueryContext): Promise<Enriche
     histogram: histogramMap[summary.monitor_id],
   }));
 
-  console.log('MLCPAG', mlcgsResult.nextPagePagination);
+  const sortedResItems = sortBy(resItems, 'monitor_id');
+  if (queryContext.pagination.sortOrder === SortOrder.DESC) {
+    sortedResItems.reverse();
+  }
+
   return {
-    items: resItems,
+    items: sortedResItems,
     nextPagePagination: mlcgsResult.nextPagePagination,
     prevPagePagination: mlcgsResult.prevPagePagination,
   };

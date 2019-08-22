@@ -43,7 +43,10 @@ export const fetchMonitorLocCheckGroups = async (
     // On our first item set the previous pagination to be items before this if they exist
     if (!paginationBefore) {
       const reverseFetcher = fetcher.reverse();
-      reverseFetcher && reverseFetcher.peek() ? reverseFetcher.paginationAfterCurrent() : null;
+      paginationBefore =
+        reverseFetcher && (await reverseFetcher.peek())
+          ? reverseFetcher.paginationAfterCurrent()
+          : null;
     }
 
     if (currentMonitor && currentMonitor.id === mlcg.monitorId) {
@@ -70,7 +73,12 @@ export const fetchMonitorLocCheckGroups = async (
 
   const ssAligned = searchSortAligned(queryContext.pagination);
 
-  console.log('ITEMS', items);
+  console.log('SSALIGN', ssAligned, queryContext.pagination);
+  if (!ssAligned) {
+    items.reverse();
+  }
+  console.log('ALIT', items);
+
   return {
     items,
     nextPagePagination: ssAligned ? paginationAfter : paginationBefore,
@@ -149,30 +157,39 @@ export class LatestCheckGroupFetcher {
     return await this.next();
   }
 
-  async peek(): Promise<MonitorLocCheckGroup | null> {
+  async peek(recurse: boolean = true): Promise<MonitorLocCheckGroup | null> {
+    if (this.endOfStream) {
+      return null;
+    }
+
     const bufAhead = this.buffer[this.bufferPos + 1];
     if (bufAhead) {
       return bufAhead;
     }
 
-    this.queryNextAndBuffer(false);
+    await this.queryNextAndBuffer();
 
-    return this.buffer[this.bufferPos + 1];
+    if (recurse) {
+      return await this.peek(false);
+    } else {
+      return null;
+    }
   }
 
-  async queryNextAndBuffer(discardBuffer: boolean = true) {
+  async queryNextAndBuffer() {
+    // Trim the buffer to just the current element since we'll be fetching more
+    const current = this.current();
+    if (current) {
+      this.buffer = [current];
+      this.bufferPos = 0;
+    }
+
     const results = await this.queryCheckGroupsPage();
     if (results.checkGroups.length === 0) {
       this.endOfStream = true;
+      return;
     }
-    if (discardBuffer) {
-      // We can't discard the current element of course!
-      const current = this.current!;
-      if (current) {
-        this.buffer = [this.current()!];
-        this.bufferPos = 0;
-      }
-    }
+
     results.checkGroups.forEach(cg => this.buffer.push(cg));
     this.searchAfter = results.searchAfter;
   }
