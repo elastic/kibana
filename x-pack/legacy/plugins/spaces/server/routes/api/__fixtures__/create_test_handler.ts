@@ -215,10 +215,23 @@ export function createTestHandler(
       fatal: jest.fn(),
     };
 
+    const uiSettingsService = {
+      get: jest.fn().mockImplementation((key: string) => {
+        if (key === 'defaultRoute') {
+          return '/app/spaceDefaultRoute';
+        }
+        throw new Error(`unexpected UI Settings Service call using key ${key}`);
+      }),
+    };
+
+    const uiSettingsServiceFactory = jest.fn().mockReturnValue(uiSettingsService);
+
     const service = new SpacesService(log, server.config().get('server.basePath'));
     const spacesService = await service.setup({
       http: httpServiceMock.createSetupContract(),
       elasticsearch: elasticsearchServiceMock.createSetupContract(),
+      uiSettingsServiceFactory,
+      fallbackDefaultRoute: '/app/fallbackRoute',
       savedObjects: server.savedObjects,
       security: createOptionalPlugin({ get: () => null }, 'xpack.security', {}, 'security'),
       spacesAuditLogger: {} as SpacesAuditLogger,
