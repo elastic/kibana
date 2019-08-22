@@ -74,6 +74,34 @@ describe('terms', () => {
     });
   });
 
+  describe('onFieldChange', () => {
+    it('should change correctly without auto interval', () => {
+      const oldColumn: TermsIndexPatternColumn = {
+        operationType: 'terms',
+        sourceField: 'source',
+        label: 'Top values of source',
+        isBucketed: true,
+        dataType: 'string',
+        params: {
+          size: 5,
+          orderBy: {
+            type: 'alphabetical',
+          },
+          orderDirection: 'asc',
+        },
+      };
+      const indexPattern = createMockedIndexPattern();
+      const newDateField = indexPattern.fields.find(i => i.name === 'dest')!;
+
+      const column = termsOperation.onFieldChange(oldColumn, indexPattern, newDateField);
+      expect(column).toHaveProperty('sourceField', 'dest');
+      expect(column).toHaveProperty('params.size', 5);
+      expect(column).toHaveProperty('params.orderBy.type', 'alphabetical');
+      expect(column).toHaveProperty('params.orderDirection', 'asc');
+      expect(column.label).toContain('dest');
+    });
+  });
+
   describe('getPossibleOperationsForField', () => {
     it('should return operation with the right type', () => {
       expect(

@@ -8,7 +8,7 @@ import React from 'react';
 import { dateHistogramOperation } from './date_histogram';
 import { shallow } from 'enzyme';
 import { DateHistogramIndexPatternColumn, IndexPatternPrivateState } from '../indexpattern';
-import { EuiRange } from '@elastic/eui';
+import { EuiRange, EuiSwitch } from '@elastic/eui';
 import { UiSettingsClientContract } from 'src/core/public';
 import { Storage } from 'ui/storage';
 import { createMockedIndexPattern } from '../mocks';
@@ -26,6 +26,7 @@ describe('date_histogram', () => {
         1: {
           id: '1',
           title: 'Mock Indexpattern',
+          timeFieldName: 'timestamp',
           fields: [
             {
               name: 'timestamp',
@@ -84,6 +85,24 @@ describe('date_histogram', () => {
                 interval: 'd',
               },
               sourceField: 'other_timestamp',
+            },
+          },
+        },
+        third: {
+          indexPatternId: '1',
+          columnOrder: ['col1'],
+          columns: {
+            col1: {
+              label: 'Value of timestamp',
+              dataType: 'date',
+              isBucketed: true,
+
+              // Private
+              operationType: 'date_histogram',
+              params: {
+                interval: 'auto',
+              },
+              sourceField: 'timestamp',
             },
           },
         },
@@ -166,6 +185,48 @@ describe('date_histogram', () => {
           }),
         })
       );
+    });
+  });
+
+  describe('onFieldChange', () => {
+    it('should change correctly without auto interval', () => {
+      const oldColumn: DateHistogramIndexPatternColumn = {
+        operationType: 'date_histogram',
+        sourceField: 'timestamp',
+        label: 'Date over timestamp',
+        isBucketed: true,
+        dataType: 'date',
+        params: {
+          interval: 'd',
+        },
+      };
+      const indexPattern = createMockedIndexPattern();
+      const newDateField = indexPattern.fields.find(i => i.name === 'start_date')!;
+
+      const column = dateHistogramOperation.onFieldChange(oldColumn, indexPattern, newDateField);
+      expect(column).toHaveProperty('sourceField', 'start_date');
+      expect(column).toHaveProperty('params.interval', 'd');
+      expect(column.label).toContain('start_date');
+    });
+
+    it('should change interval from auto when switching to a non primary time field', () => {
+      const oldColumn: DateHistogramIndexPatternColumn = {
+        operationType: 'date_histogram',
+        sourceField: 'timestamp',
+        label: 'Date over timestamp',
+        isBucketed: true,
+        dataType: 'date',
+        params: {
+          interval: 'auto',
+        },
+      };
+      const indexPattern = createMockedIndexPattern();
+      const newDateField = indexPattern.fields.find(i => i.name === 'start_date')!;
+
+      const column = dateHistogramOperation.onFieldChange(oldColumn, indexPattern, newDateField);
+      expect(column).toHaveProperty('sourceField', 'start_date');
+      expect(column).toHaveProperty('params.interval', 'd');
+      expect(column.label).toContain('start_date');
     });
   });
 
@@ -279,6 +340,41 @@ describe('date_histogram', () => {
       );
 
       expect(instance.find(EuiRange).prop('value')).toEqual(2);
+    });
+
+    it('should render disabled switch and no level of detail control for auto interval', () => {
+      const instance = shallow(
+        <InlineOptions
+          state={state}
+          setState={jest.fn()}
+          columnId="col1"
+          layerId="third"
+          storage={{} as Storage}
+          uiSettings={{} as UiSettingsClientContract}
+        />
+      );
+      expect(instance.find(EuiRange).exists()).toBe(false);
+      expect(instance.find(EuiSwitch).prop('checked')).toBe(false);
+    });
+
+    it('should allow switching to manual interval', () => {
+      const setStateSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          layerId="third"
+          storage={{} as Storage}
+          uiSettings={{} as UiSettingsClientContract}
+        />
+      );
+      instance.find(EuiSwitch).prop('onChange')!({
+        target: { checked: true },
+      } as React.ChangeEvent<HTMLInputElement>);
+      expect(setStateSpy).toHaveBeenCalled();
+      const newState = setStateSpy.mock.calls[0][0];
+      expect(newState).toHaveProperty('layers.third.columns.col1.params.interval', 'd');
     });
 
     it('should update state with the interval value', () => {
