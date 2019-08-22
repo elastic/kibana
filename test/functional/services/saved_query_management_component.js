@@ -39,8 +39,13 @@ export function SavedQueryManagementComponentProvider({ getService }) {
         await testSubjects.setValue('saveQueryFormTitle', name);
       }
       const saveQueryFormSaveButtonStatus = await testSubjects.isEnabled('savedQueryFormSaveButton');
-      expect(saveQueryFormSaveButtonStatus).to.not.eql(true);
-      await testSubjects.click('savedQueryFormCancelButton');
+
+      try {
+        expect(saveQueryFormSaveButtonStatus).to.not.eql(true);
+      }
+      finally {
+        await testSubjects.click('savedQueryFormCancelButton');
+      }
     }
 
     async saveCurrentlyLoadedAsNewQuery(name, description, includeFilters, includeTimeFilter) {
