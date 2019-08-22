@@ -9,16 +9,16 @@ import { SavedObjectRecord } from 'ui/management/saved_objects_management';
 import { SummarizedCopyToSpaceResult } from 'plugins/spaces/lib/copy_saved_objects_to_space';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { SavedObjectsImportRetry } from 'src/core/server';
 import { Space } from '../../../../../common/model/space';
 import { CopyStatusIndicator } from './copy_status_indicator';
+import { CTSImportRetry } from './types';
 
 interface Props {
   savedObject: SavedObjectRecord;
   summarizedCopyResult: SummarizedCopyToSpaceResult;
   space: Space;
-  retries: SavedObjectsImportRetry[];
-  onRetriesChange: (retries: SavedObjectsImportRetry[]) => void;
+  retries: CTSImportRetry[];
+  onRetriesChange: (retries: CTSImportRetry[]) => void;
   conflictResolutionInProgress: boolean;
 }
 
@@ -27,12 +27,11 @@ export const SpaceCopyResultDetails = (props: Props) => {
     const retry = props.retries.find(r => r.type === object.type && r.id === object.id);
 
     props.onRetriesChange([
-      ...props.retries.filter(r => r.type !== object.type && r.id !== object.id),
+      ...props.retries.filter(r => r !== retry),
       {
         type: object.type,
         id: object.id,
         overwrite: retry ? !retry.overwrite : true,
-        replaceReferences: [],
       },
     ]);
   };

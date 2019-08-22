@@ -6,7 +6,6 @@
 
 import React, { Fragment } from 'react';
 import { ProcessedImportResponse, SavedObjectRecord } from 'ui/management/saved_objects_management';
-import { SavedObjectsImportRetry } from 'src/core/server';
 import {
   EuiSpacer,
   EuiText,
@@ -15,9 +14,12 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { summarizeCopyResult } from '../../../../lib/copy_saved_objects_to_space';
+import {
+  summarizeCopyResult,
+  SummarizedCopyToSpaceResult,
+} from '../../../../lib/copy_saved_objects_to_space';
 import { Space } from '../../../../../common/model/space';
-import { CopyOptions } from './types';
+import { CopyOptions, CTSImportRetry } from './types';
 import { SpaceResult } from './cts_space_result';
 
 interface Props {
@@ -25,14 +27,14 @@ interface Props {
   copyInProgress: boolean;
   conflictResolutionInProgress: boolean;
   copyResult: Record<string, ProcessedImportResponse>;
-  retries: Record<string, SavedObjectsImportRetry[]>;
-  onRetriesChange: (retries: Record<string, SavedObjectsImportRetry[]>) => void;
+  retries: Record<string, CTSImportRetry[]>;
+  onRetriesChange: (retries: Record<string, CTSImportRetry[]>) => void;
   spaces: Space[];
   copyOptions: CopyOptions;
 }
 
 export const ProcessingCopyToSpace = (props: Props) => {
-  function updateRetries(spaceId: string, updatedRetries: SavedObjectsImportRetry[]) {
+  function updateRetries(spaceId: string, updatedRetries: CTSImportRetry[]) {
     props.onRetriesChange({
       ...props.retries,
       [spaceId]: updatedRetries,
@@ -92,7 +94,7 @@ export const ProcessingCopyToSpace = (props: Props) => {
           props.savedObject,
           spaceCopyResult,
           props.copyOptions.includeRelated
-        );
+        ) as SummarizedCopyToSpaceResult;
 
         return (
           <Fragment key={id}>

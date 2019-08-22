@@ -6,17 +6,17 @@
 
 import React, { Fragment } from 'react';
 import { ProcessedImportResponse } from 'ui/management/saved_objects_management';
-import { SavedObjectsImportRetry } from 'src/core/server';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiStat, EuiHorizontalRule } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { CTSImportRetry } from './types';
 
 interface Props {
   copyInProgress: boolean;
   conflictResolutionInProgress: boolean;
   initialCopyFinished: boolean;
   copyResult: Record<string, ProcessedImportResponse>;
-  retries: Record<string, SavedObjectsImportRetry[]>;
+  retries: Record<string, CTSImportRetry[]>;
   numberOfSelectedSpaces: number;
   onCopyStart: () => void;
   onCopyFinish: () => void;

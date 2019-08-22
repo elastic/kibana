@@ -7,6 +7,7 @@
 import React from 'react';
 import { EuiLoadingSpinner, EuiText, EuiIconTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { SavedObjectsImportMissingReferencesError } from 'src/core/server';
 import {
   SummarizedCopyToSpaceResult,
   SummarizedSavedObjectResult,
@@ -35,6 +36,7 @@ export const CopyStatusIndicator = (props: Props) => {
   const successColor = props.overwritePending ? 'warning' : 'success';
   const hasConflicts = objectResult.conflicts.length > 0;
   const hasUnresolvableErrors = objectResult.hasUnresolvableErrors;
+  const hasMissingRefs = objectResult.missingReferences.length > 0;
 
   if (successful) {
     const message = props.overwritePending ? (
@@ -50,6 +52,25 @@ export const CopyStatusIndicator = (props: Props) => {
     );
     return <EuiIconTip type={'check'} color={successColor} content={message} />;
   }
+  if (hasMissingRefs) {
+    const { references } = objectResult.missingReferences[0]
+      .error as SavedObjectsImportMissingReferencesError;
+
+    return (
+      <EuiIconTip
+        type={'cross'}
+        color={'danger'}
+        data-test-subj={`cts-object-result-missing-refs-${objectResult.id}`}
+        content={
+          <FormattedMessage
+            id="xpack.spaces.management.copyToSpace.copyStatus.missingRefsErrorMessage"
+            defaultMessage="This saved object requires a saved object which doesn't exist in this space: {type}:{id}."
+            values={{ type: references[0].type, id: references[0].id }}
+          />
+        }
+      />
+    );
+  }
   if (hasUnresolvableErrors) {
     return (
       <EuiIconTip
@@ -57,7 +78,7 @@ export const CopyStatusIndicator = (props: Props) => {
         color={'danger'}
         content={
           <FormattedMessage
-            id="xpack.spaces.management.copyToSpace.copyStatus.errorMessage"
+            id="xpack.spaces.management.copyToSpace.copyStatus.unresolvableErrorMessage"
             defaultMessage="There was an error copying this saved object."
           />
         }

@@ -30,10 +30,16 @@ const createCopyResult = (
 ) => {
   const failedImports: ProcessedImportResponse['failedImports'] = [];
   if (opts.withConflicts) {
-    failedImports.push({
-      obj: { type: 'visualization', id: 'foo-viz' },
-      error: { type: 'conflict' },
-    });
+    failedImports.push(
+      {
+        obj: { type: 'visualization', id: 'foo-viz' },
+        error: { type: 'conflict' },
+      },
+      {
+        obj: { type: 'index-pattern', id: 'transient-index-pattern-conflict' },
+        error: { type: 'conflict' },
+      }
+    );
   }
   if (opts.withUnresolvableError) {
     failedImports.push({
@@ -58,67 +64,21 @@ describe('summarizeCopyResult', () => {
     const summarizedResult = summarizeCopyResult(savedObjectRecord, copyResult, includeRelated);
 
     expect(summarizedResult).toMatchInlineSnapshot(`
-                  Object {
-                    "objects": Array [
-                      Object {
-                        "conflicts": Array [],
-                        "hasUnresolvableErrors": false,
-                        "id": "foo",
-                        "name": "my-dashboard",
-                        "type": "dashboard",
-                      },
-                      Object {
-                        "conflicts": Array [],
-                        "hasUnresolvableErrors": false,
-                        "id": "foo-viz",
-                        "name": "Foo Viz",
-                        "type": "visualization",
-                      },
-                      Object {
-                        "conflicts": Array [],
-                        "hasUnresolvableErrors": false,
-                        "id": "bar-viz",
-                        "name": "Bar Viz",
-                        "type": "visualization",
-                      },
-                    ],
-                    "processing": true,
-                  }
-            `);
-  });
-
-  it('processes failedImports to extract conflicts', () => {
-    const savedObjectRecord = createSavedObjectRecord();
-    const copyResult = createCopyResult({ withConflicts: true });
-    const includeRelated = true;
-
-    const summarizedResult = summarizeCopyResult(savedObjectRecord, copyResult, includeRelated);
-    expect(summarizedResult).toMatchInlineSnapshot(`
             Object {
-              "hasConflicts": true,
-              "hasUnresolvableErrors": false,
               "objects": Array [
                 Object {
                   "conflicts": Array [],
                   "hasUnresolvableErrors": false,
                   "id": "foo",
+                  "missingReferences": Array [],
                   "name": "my-dashboard",
                   "type": "dashboard",
                 },
                 Object {
-                  "conflicts": Array [
-                    Object {
-                      "error": Object {
-                        "type": "conflict",
-                      },
-                      "obj": Object {
-                        "id": "foo-viz",
-                        "type": "visualization",
-                      },
-                    },
-                  ],
+                  "conflicts": Array [],
                   "hasUnresolvableErrors": false,
                   "id": "foo-viz",
+                  "missingReferences": Array [],
                   "name": "Foo Viz",
                   "type": "visualization",
                 },
@@ -126,14 +86,84 @@ describe('summarizeCopyResult', () => {
                   "conflicts": Array [],
                   "hasUnresolvableErrors": false,
                   "id": "bar-viz",
+                  "missingReferences": Array [],
                   "name": "Bar Viz",
                   "type": "visualization",
                 },
               ],
-              "processing": false,
-              "successful": false,
+              "processing": true,
             }
         `);
+  });
+
+  it('processes failedImports to extract conflicts, including transient conflicts', () => {
+    const savedObjectRecord = createSavedObjectRecord();
+    const copyResult = createCopyResult({ withConflicts: true });
+    const includeRelated = true;
+
+    const summarizedResult = summarizeCopyResult(savedObjectRecord, copyResult, includeRelated);
+    expect(summarizedResult).toMatchInlineSnapshot(`
+      Object {
+        "hasConflicts": true,
+        "hasUnresolvableErrors": false,
+        "objects": Array [
+          Object {
+            "conflicts": Array [],
+            "hasUnresolvableErrors": false,
+            "id": "foo",
+            "missingReferences": Array [],
+            "name": "my-dashboard",
+            "type": "dashboard",
+          },
+          Object {
+            "conflicts": Array [
+              Object {
+                "error": Object {
+                  "type": "conflict",
+                },
+                "obj": Object {
+                  "id": "foo-viz",
+                  "type": "visualization",
+                },
+              },
+            ],
+            "hasUnresolvableErrors": false,
+            "id": "foo-viz",
+            "missingReferences": Array [],
+            "name": "Foo Viz",
+            "type": "visualization",
+          },
+          Object {
+            "conflicts": Array [],
+            "hasUnresolvableErrors": false,
+            "id": "bar-viz",
+            "missingReferences": Array [],
+            "name": "Bar Viz",
+            "type": "visualization",
+          },
+          Object {
+            "conflicts": Array [
+              Object {
+                "error": Object {
+                  "type": "conflict",
+                },
+                "obj": Object {
+                  "id": "transient-index-pattern-conflict",
+                  "type": "index-pattern",
+                },
+              },
+            ],
+            "hasUnresolvableErrors": false,
+            "id": "transient-index-pattern-conflict",
+            "missingReferences": Array [],
+            "name": "transient-index-pattern-conflict",
+            "type": "index-pattern",
+          },
+        ],
+        "processing": false,
+        "successful": false,
+      }
+    `);
   });
 
   it('processes failedImports to extract unresolvable errors', () => {
@@ -151,6 +181,19 @@ describe('summarizeCopyResult', () => {
                   "conflicts": Array [],
                   "hasUnresolvableErrors": false,
                   "id": "foo",
+                  "missingReferences": Array [
+                    Object {
+                      "error": Object {
+                        "blocking": Array [],
+                        "references": Array [],
+                        "type": "missing_references",
+                      },
+                      "obj": Object {
+                        "id": "bar-viz",
+                        "type": "visualization",
+                      },
+                    },
+                  ],
                   "name": "my-dashboard",
                   "type": "dashboard",
                 },
@@ -158,6 +201,7 @@ describe('summarizeCopyResult', () => {
                   "conflicts": Array [],
                   "hasUnresolvableErrors": false,
                   "id": "foo-viz",
+                  "missingReferences": Array [],
                   "name": "Foo Viz",
                   "type": "visualization",
                 },
@@ -165,6 +209,19 @@ describe('summarizeCopyResult', () => {
                   "conflicts": Array [],
                   "hasUnresolvableErrors": true,
                   "id": "bar-viz",
+                  "missingReferences": Array [
+                    Object {
+                      "error": Object {
+                        "blocking": Array [],
+                        "references": Array [],
+                        "type": "missing_references",
+                      },
+                      "obj": Object {
+                        "id": "bar-viz",
+                        "type": "visualization",
+                      },
+                    },
+                  ],
                   "name": "Bar Viz",
                   "type": "visualization",
                 },
@@ -182,36 +239,39 @@ describe('summarizeCopyResult', () => {
 
     const summarizedResult = summarizeCopyResult(savedObjectRecord, copyResult, includeRelated);
     expect(summarizedResult).toMatchInlineSnapshot(`
-      Object {
-        "hasConflicts": false,
-        "hasUnresolvableErrors": false,
-        "objects": Array [
-          Object {
-            "conflicts": Array [],
-            "hasUnresolvableErrors": false,
-            "id": "foo",
-            "name": "my-dashboard",
-            "type": "dashboard",
-          },
-          Object {
-            "conflicts": Array [],
-            "hasUnresolvableErrors": false,
-            "id": "foo-viz",
-            "name": "Foo Viz",
-            "type": "visualization",
-          },
-          Object {
-            "conflicts": Array [],
-            "hasUnresolvableErrors": false,
-            "id": "bar-viz",
-            "name": "Bar Viz",
-            "type": "visualization",
-          },
-        ],
-        "processing": false,
-        "successful": true,
-      }
-    `);
+            Object {
+              "hasConflicts": false,
+              "hasUnresolvableErrors": false,
+              "objects": Array [
+                Object {
+                  "conflicts": Array [],
+                  "hasUnresolvableErrors": false,
+                  "id": "foo",
+                  "missingReferences": Array [],
+                  "name": "my-dashboard",
+                  "type": "dashboard",
+                },
+                Object {
+                  "conflicts": Array [],
+                  "hasUnresolvableErrors": false,
+                  "id": "foo-viz",
+                  "missingReferences": Array [],
+                  "name": "Foo Viz",
+                  "type": "visualization",
+                },
+                Object {
+                  "conflicts": Array [],
+                  "hasUnresolvableErrors": false,
+                  "id": "bar-viz",
+                  "missingReferences": Array [],
+                  "name": "Bar Viz",
+                  "type": "visualization",
+                },
+              ],
+              "processing": false,
+              "successful": true,
+            }
+        `);
   });
 
   it('does not include references unless requested', () => {
@@ -221,21 +281,22 @@ describe('summarizeCopyResult', () => {
 
     const summarizedResult = summarizeCopyResult(savedObjectRecord, copyResult, includeRelated);
     expect(summarizedResult).toMatchInlineSnapshot(`
-      Object {
-        "hasConflicts": false,
-        "hasUnresolvableErrors": false,
-        "objects": Array [
-          Object {
-            "conflicts": Array [],
-            "hasUnresolvableErrors": false,
-            "id": "foo",
-            "name": "my-dashboard",
-            "type": "dashboard",
-          },
-        ],
-        "processing": false,
-        "successful": true,
-      }
-    `);
+            Object {
+              "hasConflicts": false,
+              "hasUnresolvableErrors": false,
+              "objects": Array [
+                Object {
+                  "conflicts": Array [],
+                  "hasUnresolvableErrors": false,
+                  "id": "foo",
+                  "missingReferences": Array [],
+                  "name": "my-dashboard",
+                  "type": "dashboard",
+                },
+              ],
+              "processing": false,
+              "successful": true,
+            }
+        `);
   });
 });

@@ -43,13 +43,8 @@ const setup = () => {
     references: [
       {
         type: 'visualization',
-        id: 'conflicting-viz',
+        id: 'my-viz',
         name: 'My Viz',
-      },
-      {
-        type: 'index-pattern',
-        id: 'conflicting-ip',
-        name: 'My IP',
       },
     ],
     meta: { icon: 'dashboard', title: 'foo' },
@@ -158,7 +153,7 @@ describe('CopyToSpaceFlyout', () => {
     expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(0);
 
     // Using props callback instead of simulating clicks,
-    // because EuiSelectableuses a virtualized list, which isn't easily testable via test subjects
+    // because EuiSelectable uses a virtualized list, which isn't easily testable via test subjects
     const spaceSelector = wrapper.find(SelectableSpacesControl);
     act(() => {
       spaceSelector.props().onChange(['space-1']);
@@ -196,7 +191,7 @@ describe('CopyToSpaceFlyout', () => {
           },
           {
             type: 'visualization',
-            id: 'conflicting-viz',
+            id: 'my-viz',
             error: { type: 'conflict' },
           },
         ],
@@ -212,7 +207,7 @@ describe('CopyToSpaceFlyout', () => {
     expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(0);
 
     // Using props callback instead of simulating clicks,
-    // because EuiSelectableuses a virtualized list, which isn't easily testable via test subjects
+    // because EuiSelectable uses a virtualized list, which isn't easily testable via test subjects
     const spaceSelector = wrapper.find(SelectableSpacesControl);
     act(() => {
       spaceSelector.props().onChange(['space-2']);
@@ -231,8 +226,6 @@ describe('CopyToSpaceFlyout', () => {
 
     const spaceResult = findTestSubject(wrapper, `cts-space-result-space-2`);
     spaceResult.simulate('click');
-
-    wrapper.update();
 
     const overwriteButton = findTestSubject(wrapper, `cts-overwrite-conflict-conflicting-ip`);
     overwriteButton.simulate('click');
@@ -274,7 +267,7 @@ describe('CopyToSpaceFlyout', () => {
     expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(0);
 
     // Using props callback instead of simulating clicks,
-    // because EuiSelectableuses a virtualized list, which isn't easily testable via test subjects
+    // because EuiSelectable uses a virtualized list, which isn't easily testable via test subjects
     const spaceSelector = wrapper.find(SelectableSpacesControl);
 
     act(() => {
@@ -291,7 +284,7 @@ describe('CopyToSpaceFlyout', () => {
     wrapper.update();
 
     expect(mockSpacesManager.copySavedObjects).toHaveBeenCalledWith(
-      [savedObjectToCopy],
+      [{ type: savedObjectToCopy.type, id: savedObjectToCopy.id }],
       ['space-1', 'space-2'],
       true,
       true
@@ -307,7 +300,6 @@ describe('CopyToSpaceFlyout', () => {
 
     expect(onClose).toHaveBeenCalledTimes(1);
     expect(mockToastNotifications.addError).not.toHaveBeenCalled();
-    expect(mockToastNotifications.addSuccess).toHaveBeenCalled();
   });
 
   it('allows conflicts to be resolved', async () => {
@@ -335,7 +327,7 @@ describe('CopyToSpaceFlyout', () => {
           },
           {
             type: 'visualization',
-            id: 'conflicting-viz',
+            id: 'my-viz',
             error: { type: 'conflict' },
           },
         ],
@@ -350,7 +342,7 @@ describe('CopyToSpaceFlyout', () => {
     });
 
     // Using props callback instead of simulating clicks,
-    // because EuiSelectableuses a virtualized list, which isn't easily testable via test subjects
+    // because EuiSelectable uses a virtualized list, which isn't easily testable via test subjects
     const spaceSelector = wrapper.find(SelectableSpacesControl);
 
     act(() => {
@@ -372,8 +364,6 @@ describe('CopyToSpaceFlyout', () => {
     const spaceResult = findTestSubject(wrapper, `cts-space-result-space-2`);
     spaceResult.simulate('click');
 
-    wrapper.update();
-
     const overwriteButton = findTestSubject(wrapper, `cts-overwrite-conflict-conflicting-ip`);
     overwriteButton.simulate('click');
 
@@ -386,17 +376,94 @@ describe('CopyToSpaceFlyout', () => {
     wrapper.update();
 
     expect(mockSpacesManager.resolveCopySavedObjectsErrors).toHaveBeenCalledWith(
-      [savedObjectToCopy],
+      [{ type: savedObjectToCopy.type, id: savedObjectToCopy.id }],
       {
-        'space-2': [
-          { type: 'index-pattern', id: 'conflicting-ip', overwrite: true, replaceReferences: [] },
-        ],
+        'space-2': [{ type: 'index-pattern', id: 'conflicting-ip', overwrite: true }],
       },
       true
     );
 
     expect(onClose).toHaveBeenCalledTimes(1);
     expect(mockToastNotifications.addError).not.toHaveBeenCalled();
-    expect(mockToastNotifications.addSuccess).toHaveBeenCalled();
+  });
+
+  it('displays an error when missing references are encountered', async () => {
+    const { wrapper, onClose, mockSpacesManager, mockToastNotifications } = setup();
+
+    mockSpacesManager.copySavedObjects.mockResolvedValue({
+      'space-1': {
+        success: true,
+        successCount: 3,
+      },
+      'space-2': {
+        success: false,
+        successCount: 1,
+        errors: [
+          {
+            type: 'visualization',
+            id: 'my-viz',
+            error: {
+              type: 'missing_references',
+              references: [{ type: 'index-pattern', id: 'missing-index-pattern' }],
+            },
+          },
+        ],
+      },
+    });
+
+    // Using props callback instead of simulating clicks,
+    // because EuiSelectable uses a virtualized list, which isn't easily testable via test subjects
+    const spaceSelector = wrapper.find(SelectableSpacesControl);
+
+    act(() => {
+      spaceSelector.props().onChange(['space-1', 'space-2']);
+    });
+
+    const startButton = findTestSubject(wrapper, 'cts-initiate-button');
+    act(() => {
+      startButton.simulate('click');
+    });
+
+    await Promise.resolve();
+
+    wrapper.update();
+
+    expect(wrapper.find(CopyToSpaceForm)).toHaveLength(0);
+    expect(wrapper.find(ProcessingCopyToSpace)).toHaveLength(1);
+
+    const spaceResult = findTestSubject(wrapper, `cts-space-result-space-2`);
+    spaceResult.simulate('click');
+
+    const missingRefIconTip = spaceResult.find(
+      'EuiIconTip[data-test-subj="cts-object-result-missing-refs-my-viz"]'
+    );
+
+    expect(missingRefIconTip.props()).toMatchInlineSnapshot(`
+      Object {
+        "color": "danger",
+        "content": <FormattedMessage
+          defaultMessage="This saved object requires a saved object which doesn't exist in this space: {type}:{id}."
+          id="xpack.spaces.management.copyToSpace.copyStatus.missingRefsErrorMessage"
+          values={
+            Object {
+              "id": "missing-index-pattern",
+              "type": "index-pattern",
+            }
+          }
+        />,
+        "data-test-subj": "cts-object-result-missing-refs-my-viz",
+        "type": "cross",
+      }
+    `);
+
+    const finishButton = findTestSubject(wrapper, 'cts-finish-button');
+    act(() => {
+      finishButton.simulate('click');
+    });
+
+    expect(mockSpacesManager.resolveCopySavedObjectsErrors).not.toHaveBeenCalled();
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(mockToastNotifications.addError).not.toHaveBeenCalled();
   });
 });

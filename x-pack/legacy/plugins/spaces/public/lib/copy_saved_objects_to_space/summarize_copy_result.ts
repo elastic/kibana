@@ -11,6 +11,7 @@ export interface SummarizedSavedObjectResult {
   id: string;
   name: string;
   conflicts: ProcessedImportResponse['failedImports'];
+  missingReferences: ProcessedImportResponse['failedImports'];
   hasUnresolvableErrors: boolean;
 }
 
@@ -41,17 +42,6 @@ export type SummarizedCopyToSpaceResult =
 
 export function summarizeCopyResult(
   savedObject: SavedObjectRecord,
-  copyResult: undefined,
-  includeRelated: boolean
-): null;
-export function summarizeCopyResult(
-  savedObject: SavedObjectRecord,
-  copyResult: ProcessedImportResponse | undefined,
-  includeRelated: boolean
-): SummarizedCopyToSpaceResult;
-
-export function summarizeCopyResult(
-  savedObject: SavedObjectRecord,
   copyResult: ProcessedImportResponse | undefined,
   includeRelated: boolean
 ): SummarizedCopyToSpaceResult | null {
@@ -59,6 +49,10 @@ export function summarizeCopyResult(
 
   const conflicts = copyResult
     ? copyResult.failedImports.filter(failed => failed.error.type === 'conflict')
+    : [];
+
+  const missingReferences = copyResult
+    ? copyResult.failedImports.filter(failed => failed.error.type === 'missing_references')
     : [];
 
   const unresolvableErrors = copyResult
@@ -71,29 +65,51 @@ export function summarizeCopyResult(
     copyResult && copyResult.failedImports.some(failed => failed.error.type !== 'conflict')
   );
 
-  const objects: SummarizedSavedObjectResult[] = [
-    {
-      type: savedObject.type,
-      id: savedObject.id,
-      name: savedObject.meta.title,
-      conflicts: conflicts.filter(
-        c => c.obj.type === savedObject.type && c.obj.id === savedObject.id
-      ),
-      hasUnresolvableErrors: unresolvableErrors.some(
-        e => e.obj.type === savedObject.type && e.obj.id === savedObject.id
-      ),
-    },
-  ];
+  const objectMap = new Map();
+  objectMap.set(`${savedObject.type}:${savedObject.id}`, {
+    type: savedObject.type,
+    id: savedObject.id,
+    name: savedObject.meta.title,
+    conflicts: conflicts.filter(
+      c => c.obj.type === savedObject.type && c.obj.id === savedObject.id
+    ),
+    missingReferences,
+    hasUnresolvableErrors: unresolvableErrors.some(
+      e => e.obj.type === savedObject.type && e.obj.id === savedObject.id
+    ),
+  });
 
   if (includeRelated) {
     savedObject.references.forEach(ref => {
-      objects.push({
+      objectMap.set(`${ref.type}:${ref.id}`, {
         type: ref.type,
         id: ref.id,
         name: ref.name,
         conflicts: conflicts.filter(c => c.obj.type === ref.type && c.obj.id === ref.id),
+        missingReferences: missingReferences.filter(
+          m => m.obj.type === ref.type && m.obj.id === ref.id
+        ),
         hasUnresolvableErrors: unresolvableErrors.some(
           e => e.obj.type === ref.type && e.obj.id === ref.id
+        ),
+      });
+    });
+
+    // The `savedObject.references` array only includes the direct references. It does not include any references of references.
+    // Therefore, if there are conflicts detected in these transient references, we need to include them here so that they are visible
+    // in the UI as resolvable conflicts.
+    const transientConflicts = conflicts.filter(c => !objectMap.has(`${c.obj.type}:${c.obj.id}`));
+    transientConflicts.forEach(conflict => {
+      objectMap.set(`${conflict.obj.type}:${conflict.obj.id}`, {
+        type: conflict.obj.type,
+        id: conflict.obj.id,
+        name: conflict.obj.title || conflict.obj.id,
+        conflicts: conflicts.filter(c => c.obj.type === conflict.obj.type && conflict.obj.id),
+        missingReferences: missingReferences.filter(
+          m => m.obj.type === conflict.obj.type && m.obj.id === conflict.obj.id
+        ),
+        hasUnresolvableErrors: unresolvableErrors.some(
+          e => e.obj.type === conflict.obj.type && e.obj.id === conflict.obj.id
         ),
       });
     });
@@ -102,7 +118,7 @@ export function summarizeCopyResult(
   if (typeof copyResult === 'undefined') {
     return {
       processing: true,
-      objects,
+      objects: Array.from(objectMap.values()),
     };
   }
 
@@ -110,7 +126,7 @@ export function summarizeCopyResult(
     return {
       successful,
       hasConflicts: false,
-      objects,
+      objects: Array.from(objectMap.values()),
       hasUnresolvableErrors: false,
       processing: false,
     };
@@ -119,7 +135,7 @@ export function summarizeCopyResult(
   return {
     successful,
     hasConflicts,
-    objects,
+    objects: Array.from(objectMap.values()),
     hasUnresolvableErrors,
     processing: false,
   };

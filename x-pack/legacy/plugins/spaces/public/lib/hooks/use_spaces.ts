@@ -7,8 +7,9 @@
 import { useEffect, useState } from 'react';
 import { kfetch } from 'ui/kfetch';
 import { Space } from '../../../common/model/space';
+import { GetSpacePurpose } from '../../../common/model/types';
 
-export const useKibanaSpaces = (purpose: 'any' | 'copySavedObjects' = 'any') => {
+export const useKibanaSpaces = (purpose?: GetSpacePurpose) => {
   const [spaces, setSpaces] = useState([] as Space[]);
   const [isLoading, setIsLoading] = useState(true);
 

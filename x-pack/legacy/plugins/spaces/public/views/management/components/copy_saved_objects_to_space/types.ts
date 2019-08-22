@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SavedObjectsImportRetry } from 'src/core/server';
+
 export interface CopyOptions {
   includeRelated: boolean;
   overwrite: boolean;
   selectedSpaceIds: string[];
 }
+
+export type CTSImportRetry = Omit<SavedObjectsImportRetry, 'replaceReferences'>;

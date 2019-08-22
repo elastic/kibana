@@ -26,7 +26,6 @@ import {
   processImportResponse,
   ProcessedImportResponse,
 } from 'ui/management/saved_objects_management';
-import { SavedObjectsImportRetry } from 'src/core/server';
 import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
 import { Space } from '../../../../../common/model/space';
 import { SpacesManager } from '../../../../lib';
@@ -34,7 +33,7 @@ import { useKibanaSpaces } from '../../../../lib/hooks';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';
 import { CopyToSpaceFlyoutFooter } from './copy_to_space_flyout_footer';
 import { CopyToSpaceForm } from './copy_to_space_form';
-import { CopyOptions } from './types';
+import { CopyOptions, CTSImportRetry } from './types';
 
 interface Props {
   onClose: () => void;
@@ -52,17 +51,17 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
     selectedSpaceIds: [],
   });
 
-  const { isLoading, spaces } = useKibanaSpaces('copySavedObjects');
+  const { isLoading, spaces } = useKibanaSpaces('copySavedObjectsIntoSpace');
   const eligibleSpaces = spaces.filter(space => space.id !== props.activeSpace.id);
 
   const [copyInProgress, setCopyInProgress] = useState(false);
   const [conflictResolutionInProgress, setConflictResolutionInProgress] = useState(false);
   const [copyResult, setCopyResult] = useState<Record<string, ProcessedImportResponse>>({});
-  const [retries, setRetries] = useState<Record<string, SavedObjectsImportRetry[]>>({});
+  const [retries, setRetries] = useState<Record<string, CTSImportRetry[]>>({});
 
   const initialCopyFinished = Object.values(copyResult).length > 0;
 
-  const onRetriesChange = (updatedRetries: Record<string, SavedObjectsImportRetry[]>) => {
+  const onRetriesChange = (updatedRetries: Record<string, CTSImportRetry[]>) => {
     setRetries(updatedRetries);
   };
 
@@ -71,7 +70,12 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
     setCopyResult({});
     try {
       const copySavedObjectsResult = await spacesManager.copySavedObjects(
-        [props.savedObject],
+        [
+          {
+            type: savedObject.type,
+            id: savedObject.id,
+          },
+        ],
         copyOptions.selectedSpaceIds,
         copyOptions.includeRelated,
         copyOptions.overwrite
@@ -93,24 +97,20 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
       spaceRetry.some(retry => retry.overwrite)
     );
 
-    const closeWithSuccess = () => {
-      toastNotifications.addSuccess(
-        i18n.translate('xpack.spaces.management.copyToSpace.copySuccess', {
-          defaultMessage: 'Copy successful',
-        })
-      );
-      onClose();
-    };
-
     if (needsConflictResolution) {
       setConflictResolutionInProgress(true);
       try {
         await spacesManager.resolveCopySavedObjectsErrors(
-          [props.savedObject],
+          [
+            {
+              type: savedObject.type,
+              id: savedObject.id,
+            },
+          ],
           retries,
           copyOptions.includeRelated
         );
-        closeWithSuccess();
+        onClose();
       } catch (e) {
         setCopyInProgress(false);
         toastNotifications.addError(e, {
@@ -120,7 +120,7 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
         });
       }
     } else {
-      closeWithSuccess();
+      onClose();
     }
   }
 

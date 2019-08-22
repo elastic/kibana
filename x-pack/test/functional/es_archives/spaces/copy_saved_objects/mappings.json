@@ -304,6 +304,20 @@
                 "type": "text"
               }
             }
+          },
+          "references": {
+            "type": "nested",
+            "properties": {
+              "name": {
+                "type": "keyword"
+              },
+              "type": {
+                "type": "keyword"
+              },
+              "id": {
+                "type": "keyword"
+              }
+            }
           }
         }
       }
