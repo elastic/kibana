@@ -13,7 +13,7 @@ import { Repository } from '../../../model';
 import sinon from 'sinon';
 import { ResourceSchedulerService } from './resource_scheduler_service';
 import { ClusterState } from './cluster_state';
-import { ClusterMeta } from './cluster_meta';
+import { ClusterMetadata } from './cluster_meta';
 import { RoutingTable } from './routing_table';
 import { CodeNodes } from './code_nodes';
 
@@ -35,7 +35,7 @@ test('test poll cluster state', async () => {
   const clusterService = new ClusterService(esClient, log, repoClient);
   clusterService.setClusterState(
     new ClusterState(
-      new ClusterMeta(),
+      new ClusterMetadata(),
       new RoutingTable(),
       new CodeNodes([{ id: 'test', address: 'localhost' }])
     )

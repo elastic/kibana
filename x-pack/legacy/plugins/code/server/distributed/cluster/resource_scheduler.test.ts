@@ -11,7 +11,7 @@ import { ResourceScheduler } from './resource_scheduler';
 import { Logger } from '../../log';
 import { ConsoleLoggerFactory } from '../../utils/console_logger_factory';
 import { ClusterState } from './cluster_state';
-import { ClusterMeta } from './cluster_meta';
+import { ClusterMetadata } from './cluster_meta';
 
 const log: Logger = new ConsoleLoggerFactory().getLogger(['test']);
 
@@ -74,13 +74,13 @@ test('hash based resource allocation', () => {
   expect(assignments.length).toBe(0);
 
   let nodes = new CodeNodes([{ id: 'na', address: 'http://a' }]);
-  state = new ClusterState(new ClusterMeta(), rt, nodes);
+  state = new ClusterState(new ClusterMetadata(), rt, nodes);
   assignments = scheduler.allocate(resources, state);
 
   expect(assignments.length).toBe(resources.length);
 
   nodes = new CodeNodes([{ id: 'na', address: 'http://a' }, { id: 'nb', address: 'http://b' }]);
-  state = new ClusterState(new ClusterMeta(), rt, nodes);
+  state = new ClusterState(new ClusterMetadata(), rt, nodes);
   for (let i = 0; i < 10; i++) {
     resources.push(randStr());
     assignments = scheduler.allocate(resources, state);

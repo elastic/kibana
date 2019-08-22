@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ClusterMeta } from './cluster_meta';
+import { ClusterMetadata } from './cluster_meta';
 import { EsClient } from '../../lib/esqueue';
 import { RepositoryObjectClient } from '../../search';
 import { Poller } from '../../poller';
@@ -62,7 +62,7 @@ export class ClusterService {
     }
     this.setClusterState(
       new ClusterState(
-        new ClusterMeta(repos),
+        new ClusterMetadata(repos),
         this.currentState.routingTable.withoutRepositories(removed),
         this.currentState.nodes
       )

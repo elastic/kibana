@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ClusterMeta } from './cluster_meta';
+import { ClusterMetadata } from './cluster_meta';
 import { Repository } from '../../../model';
 import { RoutingTable } from './routing_table';
 import { ClusterState } from './cluster_state';
@@ -45,7 +45,7 @@ test('cluster state functions', () => {
     { uri: 'github/c/c', url: 'http://github/c/c' },
   ];
   const state = new ClusterState(
-    new ClusterMeta(repositories),
+    new ClusterMetadata(repositories),
     new RoutingTable([
       { nodeId: 'n1', resource: 'github/a/a' },
       { nodeId: 'n1', resource: 'github/b/b' },

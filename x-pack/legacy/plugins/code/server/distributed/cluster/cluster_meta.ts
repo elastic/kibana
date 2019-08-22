@@ -10,7 +10,7 @@ import { Repository } from '../../../model';
  * A snapshot of the cluster meta data, which includes:
  * - repository objects
  */
-export class ClusterMeta {
+export class ClusterMetadata {
   private readonly uri2Repo: Map<string, Repository>;
 
   constructor(public readonly repositories: Repository[] = []) {

@@ -6,7 +6,7 @@
 
 import { RoutingTable } from './routing_table';
 import { Repository } from '../../../model';
-import { ClusterMeta } from './cluster_meta';
+import { ClusterMetadata } from './cluster_meta';
 import { CodeNodes } from './code_nodes';
 
 /**
@@ -14,13 +14,13 @@ import { CodeNodes } from './code_nodes';
  */
 export class ClusterState {
   constructor(
-    public readonly clusterMeta: ClusterMeta,
+    public readonly clusterMeta: ClusterMetadata,
     public readonly routingTable: RoutingTable,
     public readonly nodes: CodeNodes
   ) {}
 
   static empty(): ClusterState {
-    return new ClusterState(new ClusterMeta([]), new RoutingTable([]), new CodeNodes([]));
+    return new ClusterState(new ClusterMetadata([]), new RoutingTable([]), new CodeNodes([]));
   }
 
   /**
