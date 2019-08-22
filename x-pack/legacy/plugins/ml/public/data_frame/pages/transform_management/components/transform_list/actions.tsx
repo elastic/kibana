@@ -10,22 +10,20 @@ import { StartAction } from './action_start';
 import { StopAction } from './action_stop';
 import { DeleteAction } from './action_delete';
 
-export const getActions = (transformSelection: DataFrameTransformListRow[]) => {
-  let disable = false;
+export const getActions = ({ forceDisable }: { forceDisable: boolean }) => {
   return [
     {
       isPrimary: true,
       render: (item: DataFrameTransformListRow) => {
-        disable = transformSelection.some(transform => transform.id === item.id);
         if (item.stats.state === DATA_FRAME_TRANSFORM_STATE.STOPPED) {
-          return <StartAction items={[item]} forceDisable={disable} />;
+          return <StartAction items={[item]} forceDisable={forceDisable} />;
         }
-        return <StopAction items={[item]} forceDisable={disable} />;
+        return <StopAction items={[item]} forceDisable={forceDisable} />;
       },
     },
     {
       render: (item: DataFrameTransformListRow) => {
-        return <DeleteAction items={[item]} forceDisable={disable} />;
+        return <DeleteAction items={[item]} forceDisable={forceDisable} />;
       },
     },
   ];

@@ -64,7 +64,7 @@ export const getColumns = (
   setExpandedRowItemIds: React.Dispatch<React.SetStateAction<DataFrameTransformId[]>>,
   transformSelection: DataFrameTransformListRow[]
 ) => {
-  const actions = getActions(transformSelection);
+  const actions = getActions({ forceDisable: transformSelection.length > 0 });
 
   function toggleDetails(item: DataFrameTransformListRow) {
     const index = expandedRowItemIds.indexOf(item.config.id);

@@ -11,8 +11,6 @@ import {
   DataFrameTransformEndpointRequest,
   DataFrameTransformEndpointResult,
 } from '../../../public/data_frame/pages/transform_management/components/transform_list/common';
-// @ts-ignore no declaration file
-import { MLRequestFailure } from '../../../public/util/ml_error';
 
 interface Params {
   results: DataFrameTransformEndpointResult;

@@ -19,20 +19,22 @@ enum TRANSFORM_ACTIONS {
   DELETE = 'delete',
 }
 
+interface StartStopOptions {
+  transformId: DataFrameTransformId;
+  force: boolean;
+  waitForCompletion?: boolean;
+}
+
 export function transformServiceProvider(callWithRequest: callWithRequestType) {
-  async function deleteTransform(transformId: string) {
+  async function deleteTransform(transformId: DataFrameTransformId) {
     return callWithRequest('ml.deleteDataFrameTransform', { transformId });
   }
 
-  async function stopTransform(options: {
-    transformId: DataFrameTransformId;
-    force: boolean;
-    waitForCompletion: boolean;
-  }) {
+  async function stopTransform(options: StartStopOptions) {
     return callWithRequest('ml.stopDataFrameTransform', options);
   }
 
-  async function startTransform(options: { transformId: DataFrameTransformId; force: boolean }) {
+  async function startTransform(options: StartStopOptions) {
     return callWithRequest('ml.startDataFrameTransform', options);
   }
 
