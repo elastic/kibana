@@ -25,7 +25,7 @@ test('it renders without crashing', () => {
     <ClusterPrivileges
       role={role}
       onChange={jest.fn()}
-      availableClusterPrivileges={['all', 'manage', 'monitor']}
+      builtinClusterPrivileges={['all', 'manage', 'monitor']}
     />
   );
   expect(wrapper).toMatchSnapshot();
@@ -47,7 +47,7 @@ test('it allows for custom cluster privileges', () => {
     <ClusterPrivileges
       role={role}
       onChange={onChange}
-      availableClusterPrivileges={['all', 'manage', 'monitor']}
+      builtinClusterPrivileges={['all', 'manage', 'monitor']}
     />
   );
 

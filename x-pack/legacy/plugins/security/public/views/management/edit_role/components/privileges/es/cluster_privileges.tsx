@@ -12,19 +12,19 @@ import { isReadOnlyRole } from '../../../../../../lib/role_utils';
 
 interface Props {
   role: Role;
-  availableClusterPrivileges: string[];
+  builtinClusterPrivileges: string[];
   onChange: (privs: string[]) => void;
 }
 
 interface State {
-  allClusterPrivileges: string[];
+  availableClusterPrivileges: string[];
 }
 
 export class ClusterPrivileges extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      allClusterPrivileges: this.getAllClusterPrivileges(props),
+      availableClusterPrivileges: this.getAvailableClusterPrivileges(props),
     };
   }
 
@@ -33,12 +33,12 @@ export class ClusterPrivileges extends Component<Props, State> {
       return;
     }
     this.setState({
-      allClusterPrivileges: this.getAllClusterPrivileges(nextProps),
+      availableClusterPrivileges: this.getAvailableClusterPrivileges(nextProps),
     });
   }
 
   public render() {
-    return <EuiFlexGroup>{this.buildComboBox(this.state.allClusterPrivileges)}</EuiFlexGroup>;
+    return <EuiFlexGroup>{this.buildComboBox(this.state.availableClusterPrivileges)}</EuiFlexGroup>;
   }
 
   public buildComboBox = (items: string[]) => {
@@ -72,12 +72,12 @@ export class ClusterPrivileges extends Component<Props, State> {
     this.props.onChange([...this.props.role.elasticsearch.cluster, customPrivilege]);
   };
 
-  private getAllClusterPrivileges = (props: Props) => {
-    const allClusterPrivileges = [
-      ...props.availableClusterPrivileges,
+  private getAvailableClusterPrivileges = (props: Props) => {
+    const availableClusterPrivileges = [
+      ...props.builtinClusterPrivileges,
       ...props.role.elasticsearch.cluster,
     ];
 
-    return _.uniq(allClusterPrivileges);
+    return _.uniq(availableClusterPrivileges);
   };
 }
