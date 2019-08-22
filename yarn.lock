@@ -30138,13 +30138,13 @@ xhr@^2.0.1:
     parse-headers "^2.0.0"
     xtend "^4.0.0"
 
-xml-crypto@^0.10.1:
-  version "0.10.1"
-  resolved "https://registry.yarnpkg.com/xml-crypto/-/xml-crypto-0.10.1.tgz#f832f74ccf56f24afcae1163a1fcab44d96774a8"
-  integrity sha1-+DL3TM9W8kr8rhFjofyrRNlndKg=
+xml-crypto@^1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/xml-crypto/-/xml-crypto-1.4.0.tgz#de1cec8cd31cbd689cd90d3d6e8a27d4ae807de7"
+  integrity sha512-K8FRdRxICVulK4WhiTUcJrRyAIJFPVOqxfurA3x/JlmXBTxy+SkEENF6GeRt7p/rB6WSOUS9g0gXNQw5n+407g==
   dependencies:
-    xmldom "=0.1.19"
-    xpath.js ">=0.0.3"
+    xmldom "0.1.27"
+    xpath "0.0.27"
 
 xml-name-validator@^2.0.1:
   version "2.0.1"
@@ -30189,10 +30189,10 @@ xmlbuilder@~9.0.1:
   resolved "https://registry.yarnpkg.com/xmlbuilder/-/xmlbuilder-9.0.4.tgz#519cb4ca686d005a8420d3496f3f0caeecca580f"
   integrity sha1-UZy0ymhtAFqEINNJbz8MruzKWA8=
 
-xmldom@=0.1.19:
-  version "0.1.19"
-  resolved "https://registry.yarnpkg.com/xmldom/-/xmldom-0.1.19.tgz#631fc07776efd84118bf25171b37ed4d075a0abc"
-  integrity sha1-Yx/Ad3bv2EEYvyUXGzftTQdaCrw=
+xmldom@0.1.27:
+  version "0.1.27"
+  resolved "https://registry.yarnpkg.com/xmldom/-/xmldom-0.1.27.tgz#d501f97b3bdb403af8ef9ecc20573187aadac0e9"
+  integrity sha1-1QH5ezvbQDr4757MIFcxh6rawOk=
 
 xmlhttprequest-ssl@~1.5.4:
   version "1.5.5"
@@ -30204,10 +30204,10 @@ xorshift@^0.2.0:
   resolved "https://registry.yarnpkg.com/xorshift/-/xorshift-0.2.1.tgz#fcd82267e9351c13f0fb9c73307f25331d29c63a"
   integrity sha1-/NgiZ+k1HBPw+5xzMH8lMx0pxjo=
 
-xpath.js@>=0.0.3:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/xpath.js/-/xpath.js-1.1.0.tgz#3816a44ed4bb352091083d002a383dd5104a5ff1"
-  integrity sha512-jg+qkfS4K8E7965sqaUl8mRngXiKb3WZGfONgE18pr03FUQiuSV6G+Ej4tS55B+rIQSFEIw3phdVAQ4pPqNWfQ==
+xpath@0.0.27:
+  version "0.0.27"
+  resolved "https://registry.yarnpkg.com/xpath/-/xpath-0.0.27.tgz#dd3421fbdcc5646ac32c48531b4d7e9d0c2cfa92"
+  integrity sha512-fg03WRxtkCV6ohClePNAECYsmpKKTv5L8y/X3Dn1hQrec3POx2jHZ/0P2qQ6HvsrU1BmeqXcof3NGGueG6LxwQ==
 
 xregexp@3.2.0:
   version "3.2.0"
