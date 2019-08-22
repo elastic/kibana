@@ -13,6 +13,7 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { networkActions } from '../../../../store/actions';
 import {
+  Direction,
   FlowTargetNew,
   NetworkTopNFlowEdges,
   NetworkTopNFlowFields,
@@ -151,9 +152,11 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
     if (criteria.sort != null) {
       const splitField = criteria.sort.field.split('.');
       const field = last(splitField);
+      const newSortDirection =
+        field !== this.props.topNFlowSort.field ? Direction.desc : criteria.sort.direction; // sort by desc on init click
       const newTopNFlowSort: NetworkTopNFlowSortField = {
         field: field as NetworkTopNFlowFields,
-        direction: criteria.sort.direction,
+        direction: newSortDirection,
       };
       if (!isEqual(newTopNFlowSort, this.props.topNFlowSort)) {
         this.props.updateTopNFlowSort({

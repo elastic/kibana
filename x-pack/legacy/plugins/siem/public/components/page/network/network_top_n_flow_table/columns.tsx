@@ -78,7 +78,7 @@ export const getNetworkTopNFlowColumns = (
                 <EuiFlexGroup alignItems="center" gutterSize="none">
                   {geo ? (
                     <EuiFlexItem grow={false}>
-                      <CountryFlag countryCode={geo} />
+                      <CountryFlag countryCode={geo} displayCountryNameOnHover={true} />
                     </EuiFlexItem>
                   ) : null}
                   <EuiFlexItem grow={false}>
