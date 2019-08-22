@@ -16,13 +16,8 @@ const layerList = [
       'isAutoSelect': true
     },
     'visible': true,
-    'style': {
-      'type': 'TILE',
-      'properties': {
-
-      }
-    },
-    'type': 'TILE',
+    'style': {},
+    'type': 'VECTOR_TILE',
     'minZoom': 0,
     'maxZoom': 24
   },
