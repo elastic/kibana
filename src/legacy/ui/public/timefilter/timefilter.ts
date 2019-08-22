@@ -19,10 +19,10 @@
 
 import _ from 'lodash';
 import { Subject, BehaviorSubject } from 'rxjs';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import chrome from 'ui/chrome';
-import { UiSettingsClientContract } from 'kibana/public';
+import { UiSettingsClientContract } from 'src/core/public';
 import { RefreshInterval, TimeRange } from 'src/plugins/data/public';
 import { IndexPattern } from 'src/legacy/core_plugins/data/public/index_patterns/index_patterns';
 import { IScope } from 'angular';
@@ -32,7 +32,7 @@ import uiRoutes from '../routes';
 import { parseQueryString } from './lib/parse_querystring';
 import { calculateBounds, getTime } from './get_time';
 
-class Timefilter {
+export class Timefilter {
   // Fired when isTimeRangeSelectorEnabled \ isAutoRefreshSelectorEnabled are toggled
   private enabledUpdated$ = new BehaviorSubject(false);
   // Fired when a user changes the timerange
@@ -90,7 +90,14 @@ class Timefilter {
    * @property {string|moment} time.from
    * @property {string|moment} time.to
    */
-  setTime = (time: TimeRange) => {
+  setTime = (
+    time:
+      | TimeRange
+      | {
+          from: Moment;
+          to: Moment;
+        }
+  ) => {
     // Object.assign used for partially composed updates
     const newTime = Object.assign(this.getTime(), time);
     if (areTimeRangesDifferent(this.getTime(), newTime)) {
@@ -114,7 +121,7 @@ class Timefilter {
    * @property {number} time.value Refresh interval in milliseconds. Positive integer
    * @property {boolean} time.pause
    */
-  setRefreshInterval = (refreshInterval: RefreshInterval) => {
+  setRefreshInterval = (refreshInterval: Partial<RefreshInterval>) => {
     const prevRefreshInterval = this.getRefreshInterval();
     const newRefreshInterval = { ...prevRefreshInterval, ...refreshInterval };
     // If the refresh interval is <= 0 handle that as a paused refresh
@@ -155,7 +162,7 @@ class Timefilter {
   };
 
   getForceNow = () => {
-    const forceNow = parseQueryString().forceNow;
+    const forceNow = parseQueryString().forceNow as string;
     if (!forceNow) {
       return;
     }
@@ -219,9 +226,9 @@ export const timefilter = new Timefilter(chrome.getUiSettingsClient());
 // TODO
 // remove everything underneath once globalState is no longer an angular service
 // and listener can be registered without angular.
-function convertISO8601(stringTime: string) {
+function convertISO8601(stringTime: string): string {
   const obj = moment(stringTime, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);
-  return obj.isValid() ? obj : stringTime;
+  return obj.isValid() ? obj.toString() : stringTime;
 }
 
 // Currently some parts of Kibana (index patterns, timefilter) rely on addSetupWork in the uiRouter

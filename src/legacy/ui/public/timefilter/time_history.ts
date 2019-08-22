@@ -18,21 +18,24 @@
  */
 
 import moment from 'moment';
+import { TimeRange } from 'src/plugins/data/public';
 import { PersistedLog } from '../persisted_log';
 
-class TimeHistory {
+export class TimeHistory {
+  private history: PersistedLog;
+
   constructor() {
     const historyOptions = {
       maxLength: 10,
       filterDuplicates: true,
-      isDuplicate: (oldItem, newItem) => {
+      isDuplicate: (oldItem: TimeRange, newItem: TimeRange) => {
         return oldItem.from === newItem.from && oldItem.to === newItem.to;
-      }
+      },
     };
     this.history = new PersistedLog('kibana.timepicker.timeHistory', historyOptions);
   }
 
-  add(time) {
+  add(time: TimeRange) {
     if (!time) {
       return;
     }
@@ -40,7 +43,7 @@ class TimeHistory {
     // time from/to can be strings or moment objects - convert to strings so always dealing with same types
     const justStringsTime = {
       from: moment.isMoment(time.from) ? time.from.toISOString() : time.from,
-      to: moment.isMoment(time.to) ? time.to.toISOString() : time.to
+      to: moment.isMoment(time.to) ? time.to.toISOString() : time.to,
     };
     this.history.add(justStringsTime);
   }
