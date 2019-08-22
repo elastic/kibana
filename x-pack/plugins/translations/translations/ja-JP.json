@@ -3747,8 +3747,6 @@
     "xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.jobExistsDescription": "現在 {serviceName} ({transactionType}) の実行中のジョブがあります。",
     "xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.jobExistsDescription.viewJobLinkText": "既存のジョブを表示",
     "xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.jobExistsTitle": "ジョブが既に存在します",
-    "xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.noPatternTitle": "利用可能な APM インデックスパターンがありません。ジョブを作成するには、{setupInstructionLink} で APM インデックスパターンをインポートしてください",
-    "xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.noPatternTitle.setupInstructionLinkText": "セットアップの手順",
     "xpack.apm.serviceDetails.enableAnomalyDetectionPanel.createMLJobDescription": "ここでは、{serviceName} 数列内の APM トランザクションの期間の異常スコアを計算する機械学習ジョブを作成できます。有効にすると、{transactionDurationGraphText} が予測バウンドを表示し、異常スコアが >=75 の場合グラフに注釈が追加されます。",
     "xpack.apm.serviceDetails.enableAnomalyDetectionPanel.createMLJobDescription.transactionDurationGraphText": "トランザクション時間のグラフ",
     "xpack.apm.serviceDetails.enableAnomalyDetectionPanel.createNewJobButtonLabel": "新規ジョブを作成",
