@@ -8,20 +8,20 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import { DataFrameTransformListRow } from './common';
-import { StartAction } from './action_start';
+import { StopAction } from './action_stop';
 
 import dataFrameTransformListRow from './__mocks__/data_frame_transform_list_row.json';
 
-describe('Data Frame: Transform List Actions <StartAction />', () => {
+describe('Data Frame: Transform List Actions <StopAction />', () => {
   test('Minimal initialization', () => {
     const item: DataFrameTransformListRow = dataFrameTransformListRow;
     const props = {
       disabled: false,
       items: [item],
-      startTransform(d: DataFrameTransformListRow) {},
+      stopTransform(d: DataFrameTransformListRow) {},
     };
 
-    const wrapper = shallow(<StartAction {...props} />);
+    const wrapper = shallow(<StopAction {...props} />);
 
     expect(wrapper).toMatchSnapshot();
   });
