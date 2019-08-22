@@ -13,8 +13,16 @@ import { PageRoute } from '../../components/page_route/pageroute';
 import { HostComponentProps } from '../../components/link_to/redirect_to_hosts';
 
 import { HostDetails, HostDetailsBody } from './host_details';
-import { Hosts, HostsBody } from './hosts';
-import { HostsTabName } from './hosts_navigations';
+import { Hosts } from './hosts';
+import {
+  HostsTabName,
+  HostsQueryTabBody,
+  AuthenticationsQueryTabBody,
+  UncommonProcessTabBody,
+  AnomaliesTabBody,
+  EventsTabBody,
+} from './hosts_navigations';
+import { HostsBody } from './hosts_body';
 
 export const HostsContainer = pure<HostComponentProps>(({ match }) => (
   <>
@@ -32,14 +40,17 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
                 defaultMessage: 'Hosts',
               })}
             />
-            <HostsBody {...props} />
+            <Route
+              path={match.url}
+              render={() => <HostsBody {...props} children={HostsQueryTabBody} />}
+            />
           </>
         )}
       />
       <Route
         strict
         exact
-        path={`${match.url}/:tabName(|${HostsTabName.hosts}|${HostsTabName.authentications}|${HostsTabName.uncommonProcesses}|${HostsTabName.anomalies}|${HostsTabName.events})`}
+        path={`${match.url}/:tabName(${HostsTabName.hosts}|${HostsTabName.authentications}|${HostsTabName.uncommonProcesses}|${HostsTabName.anomalies}|${HostsTabName.events})`}
         render={props => (
           <>
             <PageRoute
@@ -49,7 +60,26 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
                 defaultMessage: 'Hosts',
               })}
             />
-            <HostsBody {...props} />
+            <Route
+              path={`${match.url}/:tabName(${HostsTabName.hosts})`}
+              render={() => <HostsBody {...props} children={HostsQueryTabBody} />}
+            />
+            <Route
+              path={`${match.url}/:tabName(${HostsTabName.authentications})`}
+              render={() => <HostsBody {...props} children={AuthenticationsQueryTabBody} />}
+            />
+            <Route
+              path={`${match.url}/:tabName(${HostsTabName.uncommonProcesses})`}
+              render={() => <HostsBody {...props} children={UncommonProcessTabBody} />}
+            />
+            <Route
+              path={`${match.url}/:tabName(${HostsTabName.anomalies})`}
+              render={() => <HostsBody {...props} children={AnomaliesTabBody} />}
+            />
+            <Route
+              path={`${match.url}/:tabName(${HostsTabName.events})`}
+              render={() => <HostsBody {...props} children={EventsTabBody} />}
+            />
           </>
         )}
       />
@@ -67,7 +97,10 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
                   defaultMessage: 'Hosts',
                 })}
               />
-              <HostDetailsBody {...props} />
+              <Route
+                path={match.url}
+                render={() => <HostDetailsBody {...props} children={HostsQueryTabBody} />}
+              />
             </>
           );
         }}
@@ -85,7 +118,26 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
                 defaultMessage: 'Hosts',
               })}
             />
-            <HostDetailsBody {...props} />
+            <Route
+              path={`${match.url}/:hostName/:tabName(${HostsTabName.hosts})`}
+              render={() => <HostDetailsBody {...props} children={HostsQueryTabBody} />}
+            />
+            <Route
+              path={`${match.url}/:hostName/:tabName(${HostsTabName.authentications})`}
+              render={() => <HostDetailsBody {...props} children={AuthenticationsQueryTabBody} />}
+            />
+            <Route
+              path={`${match.url}/:hostName/:tabName(${HostsTabName.uncommonProcesses})`}
+              render={() => <HostDetailsBody {...props} children={UncommonProcessTabBody} />}
+            />
+            <Route
+              path={`${match.url}/:hostName/:tabName(${HostsTabName.anomalies})`}
+              render={() => <HostDetailsBody {...props} children={AnomaliesTabBody} />}
+            />
+            <Route
+              path={`${match.url}/:hostName/:tabName(${HostsTabName.events})`}
+              render={() => <HostDetailsBody {...props} children={EventsTabBody} />}
+            />
           </>
         )}
       />
