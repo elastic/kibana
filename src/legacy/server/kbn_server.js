@@ -161,8 +161,6 @@ export default class KbnServer {
 
     const { server, config } = this;
 
-    await server.kibanaMigrator.awaitMigration();
-
     if (isWorker) {
       // help parent process know when we are ready
       process.send(['WORKER_LISTENING']);

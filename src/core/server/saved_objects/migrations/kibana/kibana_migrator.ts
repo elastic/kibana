@@ -104,7 +104,14 @@ export class KibanaMigrator {
    * @returns
    * @memberof KibanaMigrator
    */
-  public awaitMigration = once(async () => {
+  public awaitMigration = once(async (skipMigrations: boolean = false) => {
+    if (skipMigrations) {
+      this.log.warn(
+        'Skipping Saved Object migrations on startup. Note: Individual documents will still be migrated when reading or writing documents.'
+      );
+      return Object.keys(this.mappingProperties).map(() => ({ status: 'skipped' }));
+    }
+
     const kibanaIndexName = this.kibanaConfig.index;
     const indexMap = createIndexMap({
       config: this.config,

@@ -64,6 +64,7 @@ export interface SetupDeps {
 export class SavedObjectsService
   implements CoreService<SavedObjectsServiceSetup, SavedObjectsServiceStart> {
   private migrator: KibanaMigrator | undefined;
+
   constructor(private readonly coreContext: CoreContext) {}
 
   public async setup(coreSetup: SetupDeps) {
@@ -146,8 +147,18 @@ export class SavedObjectsService
   }
 
   public async start(core: StartDeps): Promise<SavedObjectsServiceStart> {
-    // Start migrations, but don't wait for them to complete
-    this.migrator!.awaitMigration();
+    /**
+     * Note: We want to ensure that migrations have completed before
+     * continuing with further Core startup steps such as running the legacy
+     * server, legacy plugins and allowing HTTP requests.
+     *
+     * However, our build system optimize step and some tests depend on the
+     * HTTP server running without an Elasticsearch server being available.
+     */
+    const cliArgs = this.coreContext.env.cliArgs;
+    const skipMigrations = cliArgs.optimize || cliArgs.skipMigrations;
+    await this.migrator!.awaitMigration(skipMigrations);
+
     return { migrator: this.migrator as KibanaMigrator };
   }
 
