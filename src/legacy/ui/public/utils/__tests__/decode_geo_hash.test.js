@@ -17,14 +17,27 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import { geohashColumns } from '../decode_geo_hash';
+import { geohashColumns, decodeGeoHash } from '../decode_geo_hash';
 
-describe('decode_geo_hash', function () {
-  it('geohashColumns', function () {
-    expect(geohashColumns(1)).to.equal(8);
-    expect(geohashColumns(2)).to.equal(8 * 4);
-    expect(geohashColumns(3)).to.equal(8 * 4 * 8);
-    expect(geohashColumns(4)).to.equal(8 * 4 * 8 * 4);
+test('geohashColumns', function () {
+  expect(geohashColumns(1)).toBe(8);
+  expect(geohashColumns(2)).toBe(8 * 4);
+  expect(geohashColumns(3)).toBe(8 * 4 * 8);
+  expect(geohashColumns(4)).toBe(8 * 4 * 8 * 4);
+});
+
+test('decodeGeoHash', function () {
+  expect(decodeGeoHash('drm3btev3e86')).toEqual({
+    latitude: [
+      41.119999922811985,
+      41.12000009045005,
+      41.12000000663102,
+    ],
+    longitude: [
+      -71.34000029414892,
+      -71.3399999588728,
+      -71.34000012651086,
+    ],
   });
 });
+
