@@ -93,13 +93,11 @@ used for the saved search will also be automatically selected.
 Saving queries enables you to reload them into <<discover, Discover>>, <<visualize, visualizations>> and <<dashboard, dashboards>>.
 Saving a query saves the query string, the filters and the time filter but, unlike searches, the index pattern is not saved, making saved queries portable.
 
-[role="xpack"]
-[[discover-read-only-access]]
 ==== Read only access
 When you have insufficient privileges to save queries, the following indicator in Kibana will be displayed and the *Save* button won't be visible in the saved query management pop-over.
 
 [role="screenshot"]
-image::discover/images/saved-query-management-component-readonly.png[Example of the saved query management popover with read only access to Discover]
+image::discover/images/saved-query-management-component-readonly.png["Example of the saved query management popover with read only access to Discover",width="80%"]
 
 ==== Saving a Query
 To save the current query string, filters and time filter:
@@ -109,10 +107,10 @@ To save the current query string, filters and time filter:
 . Enter a name, a description and select the filter options you would like to include (filters are automatically included but the time filter is not) and click *Save*.
 
 [role="screenshot"]
-image::discover/images/saved-query-management-component.png[Example of the saved query management popover with a list of saved queries with write access]
+image::discover/images/saved-query-management-component.png["Example of the saved query management popover with a list of saved queries with write access",width="80%"]
 
 [role="screenshot"]
-image::discover/images/saved-query-save-form.png[Example of the saved query management save form with the filters option included and the time filter option excluded]
+image::discover/images/saved-query-save-form.png["Example of the saved query management save form with the filters option included and the time filter option excluded",width="80%"]
 
 ==== Loading a Query
 To load a saved query into Discover:
@@ -148,7 +146,7 @@ To delete a query from the saved query management popover:
 . Click the trash can icon to delete the query.
 
 [role="screenshot"]
-image::discover/images/saved-query-management-component-save-as-new.png[Example of the saved query management popover when a query is loaded and we are about to delete a query]
+image::discover/images/saved-query-management-component-save-as-new.png["Example of the saved query management popover when a query is loaded and we are about to delete a query",width="80%"]
 
 You can import, export and delete saved queries from *Management/Kibana/Saved Objects*.
 
