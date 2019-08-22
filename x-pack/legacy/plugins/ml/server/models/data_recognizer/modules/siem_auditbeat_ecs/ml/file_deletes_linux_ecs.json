@@ -1,0 +1,28 @@
+{
+    "job_type": "anomaly_detector",
+    "groups": [
+      "siem"
+    ],
+    "description": "SIEM Auditbeat: Detect unusual increases in file deletes on Linux",
+    "analysis_config": {
+      "bucket_span": "15m",
+      "detectors": [
+        {
+          "detector_description": "high_non_zero_count by \"file.path\"",
+          "function": "high_non_zero_count",
+          "by_field_name": "file.path"
+        }
+      ],
+      "influencers": [
+        "host.name",
+        "file.path"
+      ]
+    },
+    "analysis_limits": {
+      "model_memory_limit": "256mb"
+    },
+    "data_description": {
+      "time_field": "@timestamp",
+      "time_format": "epoch_ms"
+    }
+  }

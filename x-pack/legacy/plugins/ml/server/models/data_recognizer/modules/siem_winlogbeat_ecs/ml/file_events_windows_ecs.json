@@ -1,6 +1,6 @@
 {
   "job_type": "anomaly_detector",
-  "description": "SIEM Auditbeat: Detect unusually rare processes on Linux across your entire fleet",
+  "description": "SIEM Winlogbeat: Detect unusual increases in file changes on Windows",
   "groups": [
     "siem"
   ],
@@ -8,15 +8,15 @@
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "rare by \"process.name\"",
-        "function": "rare",
-        "by_field_name": "process.name"
+        "detector_description": "high_count",
+        "function": "high_count"
       }
     ],
     "influencers": [
       "host.name",
+      "file.path",
       "process.name",
-      "user.id"
+      "user.name"
     ]
   },
   "analysis_limits": {

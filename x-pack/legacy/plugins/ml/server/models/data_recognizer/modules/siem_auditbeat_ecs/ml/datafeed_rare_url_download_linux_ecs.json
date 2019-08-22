@@ -1,0 +1,30 @@
+{
+    "job_id": "JOB_ID",
+    "indices": [
+      "INDEX_PATTERN_NAME"
+    ],
+    "query": {
+        "bool":{
+          "must":[
+            {"bool":{
+                "should":[
+                  {"match":{"process.name": "curl"}},
+                  {"match":{"process.name": "wget"}}
+                  ]
+              }
+            }
+            ],
+          "must_not":[
+            {"bool":{
+              "should":[
+                {"match":{"destination.ip": "::1"}},
+                {"match":{"destination.ip": "127.0.0.1"
+                }},
+                {"match":{"destination.ip":"169.254.169.254"}},
+                {"wildcard":{"process.title":{"value":"*localhost*"}}}
+                ]
+            }}
+            ]
+        }
+      }
+    }

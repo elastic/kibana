@@ -1,0 +1,11 @@
+{
+    "job_id": "JOB_ID",
+    "indices": [
+      "INDEX_PATTERN_NAME"
+    ],
+    "query": {
+        "query_string": {
+          "query": "event.code: 7045"
+        }
+      }
+  }

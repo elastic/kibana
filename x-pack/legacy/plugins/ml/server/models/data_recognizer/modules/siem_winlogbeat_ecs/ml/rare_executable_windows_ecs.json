@@ -1,0 +1,29 @@
+{
+    "job_type": "anomaly_detector",
+    "description": "SIEM Winlogbeat: Detect unusual executables on Windows",
+    "groups": [
+      "siem"
+    ],
+    "analysis_config": {
+      "bucket_span": "15m",
+      "detectors": [
+        {
+          "detector_description": "rare by \"process.executable\"",
+          "function": "rare",
+          "by_field_name": "process.executable"
+        }
+      ],
+      "influencers": [
+        "host.name",
+        "process.name",
+        "user.name"
+      ]
+    },
+    "analysis_limits": {
+      "model_memory_limit": "256mb"
+    },
+    "data_description": {
+      "time_field": "@timestamp",
+      "time_format": "epoch_ms"
+    }
+  }

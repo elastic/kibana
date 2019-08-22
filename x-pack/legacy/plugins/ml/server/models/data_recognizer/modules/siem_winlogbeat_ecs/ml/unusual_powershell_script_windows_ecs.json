@@ -1,6 +1,6 @@
 {
   "job_type": "anomaly_detector",
-  "description": "SIEM Auditbeat: Detect unusually rare processes on Linux across your entire fleet",
+  "description": "SIEM Winlogbeat: Detect high entropy in the script block field on Windows",
   "groups": [
     "siem"
   ],
@@ -8,15 +8,15 @@
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "rare by \"process.name\"",
-        "function": "rare",
-        "by_field_name": "process.name"
+        "detector_description": "high_info_content(\"winlog.event_data.ScriptBlockText\")",
+        "function": "high_info_content",
+        "field_name": "winlog.event_data.ScriptBlockText"
       }
     ],
     "influencers": [
       "host.name",
-      "process.name",
-      "user.id"
+      "user.name",
+      "winlog.event_data.Path"
     ]
   },
   "analysis_limits": {

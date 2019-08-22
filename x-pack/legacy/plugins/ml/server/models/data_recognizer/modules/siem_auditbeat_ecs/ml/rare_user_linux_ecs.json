@@ -1,0 +1,29 @@
+{
+    "job_type": "anomaly_detector",
+    "groups": [
+      "siem"
+    ],
+    "description": "SIEM Auditbeat: Detect unusual users on Linux",
+    "analysis_config": {
+      "bucket_span": "15m",
+      "detectors": [
+        {
+          "detector_description": "rare by \"user.name.keyword\"",
+          "function": "rare",
+          "by_field_name": "user.name.keyword"
+        }
+      ],
+      "influencers": [
+        "host.name",
+        "process.name",
+        "user.name"
+      ]
+    },
+    "analysis_limits": {
+      "model_memory_limit": "256mb"
+    },
+    "data_description": {
+      "time_field": "@timestamp",
+      "time_format": "epoch_ms"
+    }
+  }

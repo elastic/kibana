@@ -1,6 +1,6 @@
 {
   "job_type": "anomaly_detector",
-  "description": "SIEM Auditbeat: Detect unusually rare processes on Linux across your entire fleet",
+  "description": "SIEM Auditbeat: Detect unusually rare destination ports on Linux",
   "groups": [
     "siem"
   ],
@@ -8,15 +8,16 @@
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "rare by \"process.name\"",
+        "detector_description": "rare by \"destination.port\"",
         "function": "rare",
-        "by_field_name": "process.name"
+        "by_field_name": "destination.port"
       }
     ],
     "influencers": [
       "host.name",
       "process.name",
-      "user.id"
+      "user.name",
+      "destination.ip"
     ]
   },
   "analysis_limits": {

@@ -23,24 +23,96 @@
   },
   "jobs": [
     {
-      "id": "rare_process_linux_ecs",
-      "file": "rare_process_linux_ecs.json"
+      "id": "rare_process_by_host_linux_ecs",
+      "file": "rare_process_by_host_linux_ecs.json"
     },
     {
       "id": "suspicious_login_activity_ecs",
       "file": "suspicious_login_activity_ecs.json"
+    },
+    {
+      "id": "file_deletes_linux_ecs",
+      "file": "file_deletes_linux_ecs.json"
+    },
+    {
+      "id": "file_events_linux_ecs",
+      "file": "file_events_linux_ecs.json"
+    },
+    {
+      "id": "rare_destination_port_linux_ecs",
+      "file": "rare_destination_port_linux_ecs.json"
+    },
+    {
+      "id": "rare_listening_port_linux_ecs",
+      "file": "rare_listening_port_linux_ecs.json"
+    },
+    {
+      "id": "rare_path_activity_linux_ecs",
+      "file": "rare_path_activity_linux_ecs.json"
+    },
+    {
+      "id": "rare_process_linux_ecs",
+      "file": "rare_process_linux_ecs.json"
+    },
+    {
+      "id": "rare_url_download_linux_ecs",
+      "file": "rare_url_download_linux_ecs.json"
+    },
+    {
+      "id": "rare_user_linux_ecs",
+      "file": "rare_user_linux_ecs.json"
     }
   ],
   "datafeeds": [
     {
-      "id": "datafeed-rare_process_linux_ecs",
+      "id": "datafeed_rare_process_by_host_linux_ecs",
+      "file": "datafeed_rare_process_by_host_linux_ecs.json",
+      "job_id": "rare_process_by_host_linux_ecs"
+    },
+    {
+      "id": "datafeed_suspicious_login_activity_ecs",
+      "file": "datafeed_suspicious_login_activity_ecs.json",
+      "job_id": "suspicious_login_activity_ecs"
+    },
+    {
+      "id": "datafeed_file_deletes_linux_ecs",
+      "file": "datafeed_file_deletes_linux_ecs.json",
+      "job_id": "file_deletes_linux_ecs"
+    },
+    {
+      "id": "datafeed_file_events_linux_ecs",
+      "file": "datafeed_file_events_linux_ecs.json",
+      "job_id": "file_events_linux_ecs"
+    },
+    {
+      "id": "datafeed_rare_destination_port_linux_ecs",
+      "file": "datafeed_rare_destination_port_linux_ecs.json",
+      "job_id": "rare_destination_port_linux_ecs"
+    },
+    {
+      "id": "datafeed_rare_listening_port_linux_ecs",
+      "file": "datafeed_rare_listening_port_linux_ecs.json",
+      "job_id": "rare_listening_port_linux_ecs"
+    },
+    {
+      "id": "datafeed_rare_path_activity_linux_ecs",
+      "file": "datafeed_rare_path_activity_linux_ecs.json",
+      "job_id": "rare_path_activity_linux_ecs"
+    },
+    {
+      "id": "datafeed_rare_process_linux_ecs",
       "file": "datafeed_rare_process_linux_ecs.json",
       "job_id": "rare_process_linux_ecs"
     },
     {
-      "id": "datafeed-suspicious_login_activity_ecs",
-      "file": "datafeed_suspicious_login_activity_ecs.json",
-      "job_id": "suspicious_login_activity_ecs"
+      "id": "datafeed_rare_url_download_linux_ecs",
+      "file": "datafeed_rare_url_download_linux_ecs.json",
+      "job_id": "rare_url_download_linux_ecs"
+    },
+    {
+      "id": "datafeed_rare_user_linux_ecs",
+      "file": "datafeed_rare_user_linux_ecs.json",
+      "job_id": "rare_user_linux_ecs"
     }
   ]
 }

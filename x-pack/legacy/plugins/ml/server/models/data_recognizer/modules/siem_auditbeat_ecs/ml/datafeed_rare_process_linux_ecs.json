@@ -1,13 +1,27 @@
 {
     "job_id": "JOB_ID",
-    "indexes": [
+    "indices": [
       "INDEX_PATTERN_NAME"
     ],
     "query": {
-      "bool": {
-        "filter": [
-          { "terms": { "event.action": [ "process_started", "executed" ] } }
-        ]
-      }
+        "bool": {
+          "filter": [
+            {
+              "match": {"event.action": "executed"}
+            }
+          ],
+          "must_not": [
+            {
+              "bool": {
+                "should": [
+                  {"match": {"user.name": "jenkins-worker"}},
+                  {"match": {"user.name": "jenkins-user"}},
+                  {"match": {"user.name": "jenkins"}},
+                  {"wildcard": {"process.name": {"wildcard": "jenkins*"}}}
+                ]
+              }
+            }
+          ]
+        }
     }
-  }
+}

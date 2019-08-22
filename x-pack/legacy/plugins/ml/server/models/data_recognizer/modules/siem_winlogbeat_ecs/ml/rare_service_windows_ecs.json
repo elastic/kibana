@@ -1,22 +1,21 @@
 {
   "job_type": "anomaly_detector",
-  "description": "SIEM Auditbeat: Detect unusually rare processes on Linux across your entire fleet",
   "groups": [
-    "siem"
+      "siem"
   ],
+  "description": "SIEM Winlogbeat: Detects rare and unusual services on Windows.",
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "rare by \"process.name\"",
+        "detector_description": "rare by \"winlog.event_data.ServiceName\"",
         "function": "rare",
-        "by_field_name": "process.name"
+        "by_field_name": "winlog.event_data.ServiceName"
       }
     ],
     "influencers": [
       "host.name",
-      "process.name",
-      "user.id"
+      "winlog.event_data.ServiceName"
     ]
   },
   "analysis_limits": {
