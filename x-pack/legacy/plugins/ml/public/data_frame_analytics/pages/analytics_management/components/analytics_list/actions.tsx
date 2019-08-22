@@ -13,7 +13,7 @@ import {
   createPermissionFailureMessage,
 } from '../../../../../privilege/check_privilege';
 
-import { DataFrameAnalyticsListRow, DATA_FRAME_TASK_STATE } from './common';
+import { getResultsUrl, DataFrameAnalyticsListRow, DATA_FRAME_TASK_STATE } from './common';
 import { stopAnalytics } from '../../services/analytics_service';
 
 import { StartAction } from './action_start';
@@ -25,6 +25,21 @@ export const getActions = () => {
   return [
     {
       isPrimary: true,
+      render: (item: DataFrameAnalyticsListRow) => {
+        return (
+          <EuiButtonEmpty
+            href={getResultsUrl(item.id)}
+            size="xs"
+            color="text"
+            iconType="visTable"
+            aria-label={'View'}
+          >
+            {'View'}
+          </EuiButtonEmpty>
+        );
+      },
+    },
+    {
       render: (item: DataFrameAnalyticsListRow) => {
         if (
           item.stats.state !== DATA_FRAME_TASK_STATE.STARTED &&

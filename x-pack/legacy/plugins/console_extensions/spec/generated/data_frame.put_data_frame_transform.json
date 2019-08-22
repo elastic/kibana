@@ -1,5 +1,8 @@
 {
   "data_frame.put_data_frame_transform": {
+    "url_params": {
+      "defer_validation": "__flag__"
+    },
     "methods": [
       "PUT"
     ],
