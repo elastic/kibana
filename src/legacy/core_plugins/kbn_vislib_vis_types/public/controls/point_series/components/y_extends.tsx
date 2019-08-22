@@ -22,6 +22,7 @@ import { EuiFormErrorText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { Scale } from '../../../types';
+import { ScaleTypes } from '../../../utils/collections';
 import { NumberInputOption } from '../../number_input';
 import { SetScale } from './value_axis_options';
 
@@ -58,7 +59,7 @@ function YExtends({ scale, setScale, setValidity }: YExtendsProps) {
     errors.push(rangeError);
   }
 
-  if (type === 'log' && (min === undefined || min <= 0)) {
+  if (type === ScaleTypes.LOG && (min === undefined || min <= 0)) {
     errors.push(minError);
   }
 
@@ -68,7 +69,7 @@ function YExtends({ scale, setScale, setValidity }: YExtendsProps) {
     setValidity(isValid);
 
     return () => setValidity(true);
-  }, [isValid]);
+  }, [isValid, setValidity]);
 
   return (
     <>

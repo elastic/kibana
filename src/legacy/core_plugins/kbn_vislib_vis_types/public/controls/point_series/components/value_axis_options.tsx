@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiAccordion } from '@elastic/eui';
 
@@ -47,13 +47,13 @@ export interface ValueAxisOptionsParams extends VisOptionsProps<BasicVislibParam
 
 function ValueAxisOptions(props: ValueAxisOptionsParams) {
   const {
-    stateParams,
-    setValue,
-    vis,
     axis,
     index,
     isCategoryAxisHorizontal,
+    stateParams,
+    vis,
     getUpdatedAxisName,
+    setValue,
     setValueAxisByIndex,
   } = props;
 
@@ -63,52 +63,65 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
     [setValueAxisByIndex, index]
   );
 
-  const setValueAxisTitle = <T extends keyof ValueAxis['title']>(
-    paramName: T,
-    value: ValueAxis['title'][T]
-  ) => {
-    const valueAxes = [...stateParams.valueAxes];
+  const setValueAxisTitle = useCallback(
+    <T extends keyof ValueAxis['title']>(paramName: T, value: ValueAxis['title'][T]) => {
+      const valueAxes = [...stateParams.valueAxes];
 
-    valueAxes[index] = {
-      ...valueAxes[index],
-      title: {
-        ...valueAxes[index].title,
-        [paramName]: value,
-      },
-    };
-    setValue('valueAxes', valueAxes);
-  };
+      valueAxes[index] = {
+        ...valueAxes[index],
+        title: {
+          ...valueAxes[index].title,
+          [paramName]: value,
+        },
+      };
+      setValue('valueAxes', valueAxes);
+    },
+    [setValue, index, stateParams.valueAxes]
+  );
 
-  const setValueAxisScale: SetScale = (paramName, value) => {
-    const valueAxes = [...stateParams.valueAxes];
+  const setValueAxisScale: SetScale = useCallback(
+    (paramName, value) => {
+      const valueAxes = [...stateParams.valueAxes];
 
-    valueAxes[index] = {
-      ...valueAxes[index],
-      scale: {
-        ...valueAxes[index].scale,
-        [paramName]: value,
-      },
-    };
-    setValue('valueAxes', valueAxes);
-  };
+      valueAxes[index] = {
+        ...valueAxes[index],
+        scale: {
+          ...valueAxes[index].scale,
+          [paramName]: value,
+        },
+      };
+      setValue('valueAxes', valueAxes);
+    },
+    [setValue, index, stateParams.valueAxes]
+  );
 
-  const onPositionChanged = (paramName: 'position', value: ValueAxis['position']) => {
-    setValueAxis(paramName, value);
-    setValueAxis('name', getUpdatedAxisName(axis.position));
-  };
+  const onPositionChanged = useCallback(
+    (paramName: 'position', value: ValueAxis['position']) => {
+      setValueAxis(paramName, value);
+      setValueAxis('name', getUpdatedAxisName(axis.position));
+    },
+    [setValueAxis, getUpdatedAxisName, axis.position]
+  );
 
-  const isPositionDisabled = (position: LegendPositions) => {
-    if (isCategoryAxisHorizontal) {
-      return isAxisHorizontal(position);
-    }
-    return [LegendPositions.LEFT, LegendPositions.RIGHT].includes(position);
-  };
+  const isPositionDisabled = useCallback(
+    (position: LegendPositions) => {
+      if (isCategoryAxisHorizontal) {
+        return isAxisHorizontal(position);
+      }
+      return [LegendPositions.LEFT, LegendPositions.RIGHT].includes(position);
+    },
+    [isAxisHorizontal, isCategoryAxisHorizontal]
+  );
 
-  const positions = vis.type.editorConfig.collections.positions.map(
-    (position: { text: string; value: LegendPositions }) => ({
-      ...position,
-      disabled: isPositionDisabled(position.value),
-    })
+  const positions = useMemo(
+    () =>
+      vis.type.editorConfig.collections.positions.map(
+        (position: { text: string; value: LegendPositions }) => ({
+          ...position,
+          disabled: isPositionDisabled(position.value),
+        })
+      ),
+    [vis.type.editorConfig.collections.positions, isPositionDisabled]
   );
 
   return (
@@ -187,9 +200,9 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
           <LabelOptions axis={axis} axisName="valueAxes" index={index} {...props} />
           <CustomExtentsOptions
             axis={axis}
-            {...props}
             setValueAxisScale={setValueAxisScale}
             setValueAxis={setValueAxis}
+            {...props}
           />
         </>
       </EuiAccordion>

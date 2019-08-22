@@ -41,9 +41,9 @@ const MAX_STRING_LENGTH = 30;
 
 interface ValueAxesPanelProps extends VisOptionsProps<BasicVislibParams> {
   isCategoryAxisHorizontal: boolean;
+  getUpdatedAxisName: (axisPosition: ValueAxis['position']) => string;
   addValueAxis: () => ValueAxis;
   removeValueAxis: (axis: ValueAxis) => void;
-  getUpdatedAxisName: (axisPosition: ValueAxis['position']) => string;
   setValueAxisByIndex: SetValueAxisByIndex;
 }
 

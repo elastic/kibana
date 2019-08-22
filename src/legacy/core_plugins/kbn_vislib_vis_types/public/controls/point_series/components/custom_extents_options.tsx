@@ -30,17 +30,18 @@ import { SetScale } from './value_axis_options';
 
 interface CustomExtentsOptionsProps {
   axis: ValueAxis;
+  setValidity(isValid: boolean): void;
+  setValueAxis<T extends keyof ValueAxis>(paramName: T, value: ValueAxis[T]): void;
   setValueAxisScale: SetScale;
-  setValueAxis: <T extends keyof ValueAxis>(paramName: T, value: ValueAxis[T]) => void;
 }
 
 function CustomExtentsOptions({
-  setValueAxisScale,
-  setValueAxis,
   axis,
+  setValidity,
+  setValueAxis,
+  setValueAxisScale,
 }: CustomExtentsOptionsProps) {
   const [isBoundsMarginValid, setIsBoundsMarginValid] = useState(true);
-  const setValidity = (isValid: boolean) => {};
 
   const setBoundsMargin = useCallback(
     (paramName: 'boundsMargin', value: number | '') => {
@@ -61,7 +62,7 @@ function CustomExtentsOptions({
       }
       setValueAxis('scale', scale);
     },
-    [setValueAxis]
+    [setValueAxis, axis.scale]
   );
 
   const onSetYExtentsChange = useCallback(
@@ -73,7 +74,7 @@ function CustomExtentsOptions({
       }
       setValueAxis('scale', scale);
     },
-    [setValueAxis]
+    [setValueAxis, axis.scale]
   );
 
   return (

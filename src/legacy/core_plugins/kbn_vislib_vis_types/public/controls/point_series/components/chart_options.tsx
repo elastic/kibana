@@ -30,17 +30,17 @@ import { SetChartValueByIndex } from '../../../editors/metrics_axis_options';
 export type SetChart = <T extends keyof SeriesParam>(paramName: T, value: SeriesParam[T]) => void;
 
 interface ChartOptionsParams extends VisOptionsProps<BasicVislibParams> {
-  index: number;
   chart: SeriesParam;
+  index: number;
   changeValueAxis: (index: number, paramName: 'valueAxis', selectedValueAxis: string) => void;
   setChartByIndex: SetChartValueByIndex;
 }
 
 function ChartOptions({
-  stateParams,
-  vis,
   chart,
   index,
+  stateParams,
+  vis,
   changeValueAxis,
   setChartByIndex,
 }: ChartOptionsParams) {
