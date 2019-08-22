@@ -136,7 +136,7 @@ element by 10 pixels.  To nudge an element by 1 pixel, use Shift + an arrow key.
 ==== Documentation
 
 Check out the 
-updated {kibana-ref}/canvas-getting-started.html[Getting started guide], the new introduction to {kibana-ref}/canvas-workpad.html[Canvas workpads], 
+updated {kibana-ref}/canvas-tutorial.html[Getting started guide], the new introduction to {kibana-ref}/create-canvas-workpad.html[Canvas workpads], 
 and the improved {kibana-ref}/canvas-function-reference.html[Canvas function reference]. 
 
 // end::notable-highlights[]
