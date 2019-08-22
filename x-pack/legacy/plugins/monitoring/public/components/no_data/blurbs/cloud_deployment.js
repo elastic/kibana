@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiTitle, EuiText, EuiTextColor, EuiLink } from '@elastic/eui';
+import { EuiTitle, EuiText, EuiTextColor, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const CloudDeployment = () => {
@@ -20,6 +20,7 @@ export const CloudDeployment = () => {
         </h2>
       </EuiTitle>
       <EuiTextColor color="subdued">
+        <EuiSpacer />
         <EuiText>
           <p>
             <FormattedMessage
