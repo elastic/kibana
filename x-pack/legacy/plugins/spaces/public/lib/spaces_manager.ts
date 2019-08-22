@@ -7,7 +7,9 @@ import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 import { EventEmitter } from 'events';
 import { kfetch } from 'ui/kfetch';
+import { SavedObjectRecord } from 'ui/management/saved_objects_management';
 import { Space } from '../../common/model/space';
+import { GetSpacePurpose } from '../../server/lib/spaces_client';
 
 export class SpacesManager extends EventEmitter {
   private spaceSelectorURL: string;
@@ -17,7 +19,7 @@ export class SpacesManager extends EventEmitter {
     this.spaceSelectorURL = spaceSelectorURL;
   }
 
-  public async getSpaces(purpose: 'any' | 'copySavedObjects' = 'any'): Promise<Space[]> {
+  public async getSpaces(purpose: GetSpacePurpose): Promise<Space[]> {
     return await kfetch({ pathname: '/api/spaces/space', query: { purpose } });
   }
 
@@ -52,7 +54,7 @@ export class SpacesManager extends EventEmitter {
   }
 
   public async copySavedObjects(
-    objects: unknown,
+    objects: SavedObjectRecord[],
     spaces: string[],
     includeReferences: boolean,
     overwrite: boolean
@@ -70,7 +72,7 @@ export class SpacesManager extends EventEmitter {
   }
 
   public async resolveCopySavedObjectsErrors(
-    objects: unknown,
+    objects: SavedObjectRecord[],
     retries: unknown,
     includeReferences: boolean
   ) {
