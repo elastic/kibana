@@ -12,6 +12,21 @@ import { throwErrors, createPlainError } from '../../../../../common/runtime_typ
 
 const MODULE_ID = 'logs_ui_analysis';
 
+// This is needed due to: https://github.com/elastic/kibana/issues/43671
+const removeSampleDataIndex = (indexPattern: string) => {
+  const SAMPLE_DATA_INDEX = 'kibana_sample_data_logs*';
+  const indices = indexPattern.split(',');
+  const sampleDataIndex = indices.findIndex((index: string) => {
+    return index === SAMPLE_DATA_INDEX;
+  });
+  if (sampleDataIndex > -1) {
+    indices.splice(sampleDataIndex, 1);
+    return indices.join(',');
+  } else {
+    return indexPattern;
+  }
+};
+
 export const callSetupMlModuleAPI = async (
   start: number | undefined,
   end: number | undefined,
@@ -28,7 +43,7 @@ export const callSetupMlModuleAPI = async (
       setupMlModuleRequestPayloadRT.encode({
         start,
         end,
-        indexPatternName: indexPattern,
+        indexPatternName: removeSampleDataIndex(indexPattern),
         prefix: getJobIdPrefix(spaceId, sourceId),
         startDatafeed: true,
         jobOverrides: [
