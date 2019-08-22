@@ -95,8 +95,9 @@ const NetworkComponent = pure<NetworkComponentProps>(
                       </KpiNetworkQuery>
 
                       <EuiSpacer />
+
                       <EuiFlexGroup>
-                        <EuiFlexItem grow={false}>
+                        <EuiFlexItem>
                           <NetworkTopNFlowQuery
                             endDate={to}
                             flowTarget={FlowTargetNew.source}
@@ -138,7 +139,8 @@ const NetworkComponent = pure<NetworkComponentProps>(
                             )}
                           </NetworkTopNFlowQuery>
                         </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
+
+                        <EuiFlexItem>
                           <NetworkTopNFlowQuery
                             endDate={to}
                             flowTarget={FlowTargetNew.destination}
