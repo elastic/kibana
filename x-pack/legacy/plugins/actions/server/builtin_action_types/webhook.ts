@@ -4,16 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import axios, { AxiosError } from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { nullableType } from './lib/nullable';
+import { portSchema } from './lib/schemas';
+import { isOk, promiseResult, Result } from './lib/result_type';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 
-// Generic Schemas
-const PORT_MAX = 256 * 256 - 1;
-const PortSchema = schema.number({ min: 1, max: PORT_MAX });
-
+// config definition
 enum WebhookMethods {
   POST = 'post',
   PUT = 'put',
@@ -23,14 +22,13 @@ enum WebhookSchemes {
   HTTPS = 'https',
 }
 
-// config definition
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 
 const HeadersSchema = schema.recordOf(schema.string(), schema.string());
 
 export const CompositeUrlSchema = schema.object({
   host: schema.string(),
-  port: PortSchema,
+  port: portSchema(),
   path: nullableType(schema.string()),
   scheme: schema.oneOf(
     [schema.literal(WebhookSchemes.HTTP), schema.literal(WebhookSchemes.HTTPS)],
@@ -56,7 +54,6 @@ const SecretsSchema = schema.object({
 });
 
 // params definition
-
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 const ParamsSchema = schema.object({
   body: schema.maybe(schema.string()),
@@ -74,14 +71,14 @@ export const actionType: ActionType = {
   executor,
 };
 
-function flatterUrl(url: string | TypeOf<typeof CompositeUrlSchema>): string {
+function asComposedUrl(url: string | TypeOf<typeof CompositeUrlSchema>): string {
   if (typeof url === 'string') {
     return url;
   }
   return `${url.scheme}://${url.host}${url.port ? `:${url.port}` : ''}${url.path || ''}`;
 }
 
-function webhookErrorSource(error: AxiosError): string {
+function describeWebhookErrorSource(error: AxiosError): string {
   if (error.response) {
     // The request was made and the server responded with a status code
     // that falls out of the range of 2xx
@@ -102,18 +99,21 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
   const { user: username, password } = execOptions.secrets as ActionTypeSecretsType;
   const { body: data } = execOptions.params as ActionParamsType;
 
-  try {
-    const response = await axios.request({
+  const result: Result<AxiosResponse, AxiosError> = await promiseResult(
+    axios.request({
       method,
-      url: flatterUrl(url),
+      url: asComposedUrl(url),
       auth: {
         username,
         password,
       },
       headers,
       data,
-    });
+    })
+  );
 
+  if (isOk(result)) {
+    const { value: response } = result;
     log(`response from ${id} webhook event: ${response.status}`);
 
     if (response.status >= 200 && response.status < 300) {
@@ -128,12 +128,13 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
         data: response.data,
       };
     }
-  } catch (error) {
+  } else {
+    const { error } = result;
     const message = i18n.translate('xpack.actions.builtin.webhook.postingErrorMessage', {
       defaultMessage: `error in action "{id}", due to {eventSource}: {errorMessage}`,
       values: {
         id,
-        eventSource: webhookErrorSource(error),
+        eventSource: describeWebhookErrorSource(error),
         errorMessage: error.message,
       },
     });

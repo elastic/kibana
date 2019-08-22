@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { URL } from 'url';
+import { URL, format as formatUrl } from 'url';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getExternalServiceSimulatorPath,
@@ -23,6 +23,7 @@ function parsePort(url: Record<string, string>): Record<string, string | null | 
     port: url.port ? parseInt(url.port, 10) : url.port,
   };
 }
+
 // eslint-disable-next-line import/no-default-export
 export default function webhookTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -213,7 +214,9 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 }
 
 function extractCredentialsFromUrl(url: string): { url: string; user: string; password: string } {
-  return { url: url.replace('elastic:changeme@', ''), user: 'elastic', password: 'changeme' };
+  const parsedUrl = new URL(url);
+  const { password, username: user } = parsedUrl;
+  return { url: formatUrl(parsedUrl, { auth: false }), user, password };
 }
 
 function extractCompositesOfURL(
