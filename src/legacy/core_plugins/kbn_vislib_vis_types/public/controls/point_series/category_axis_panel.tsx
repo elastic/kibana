@@ -79,6 +79,7 @@ function CategoryAxisPanel(props: VisOptionsProps<BasicVislibParams>) {
         id="visEditorCategoryAccordion"
         className="visEditorSidebar__section visEditorSidebar__collapsible"
         initialIsOpen={false}
+        buttonContentClassName="euiText euiText--small"
         buttonContent={i18n.translate(
           'kbnVislibVisTypes.controls.pointSeries.categoryAxis.advancedOptionsLabel',
           {

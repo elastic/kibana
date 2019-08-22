@@ -70,6 +70,7 @@ function SeriesPanel(props: SeriesPanelProps) {
           className="visEditorSidebar__section visEditorSidebar__collapsible"
           initialIsOpen={index === 0}
           buttonContent={chart.data.label}
+          buttonContentClassName="visEditorSidebar__aggGroupAccordionButtonContent"
           aria-label={i18n.translate(
             'kbnVislibVisTypes.controls.pointSeries.seriesAccordionAriaLabel',
             {

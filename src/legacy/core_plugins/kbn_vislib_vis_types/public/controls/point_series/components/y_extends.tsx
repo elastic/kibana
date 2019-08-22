@@ -18,7 +18,6 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiFormErrorText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { Scale } from '../../../types';
@@ -83,6 +82,7 @@ function YExtends({ scale, setScale, setValidity }: YExtendsProps) {
         setValue={setScale}
       />
       <NumberInputOption
+        errors={errors}
         label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.minLabel', {
           defaultMessage: 'Min',
         })}
@@ -91,7 +91,6 @@ function YExtends({ scale, setScale, setValidity }: YExtendsProps) {
         value={min}
         setValue={setScale}
       />
-      {errors.length > 0 && errors.map(error => <EuiFormErrorText>{error}</EuiFormErrorText>)}
     </>
   );
 }

@@ -27,7 +27,6 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   EuiToolTip,
-  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -36,8 +35,6 @@ import { VisOptionsProps } from 'ui/vis/editors/default';
 import { BasicVislibParams, ValueAxis } from '../../types';
 import { ValueAxisOptions } from './components/value_axis_options';
 import { SetValueAxisByIndex } from '../../editors/metrics_axis_options';
-
-const MAX_STRING_LENGTH = 30;
 
 interface ValueAxesPanelProps extends VisOptionsProps<BasicVislibParams> {
   isCategoryAxisHorizontal: boolean;
@@ -59,11 +56,6 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
       return series.map(serie => serie.data.label).join(', ');
     },
     [stateParams.valueAxes[0], stateParams.seriesParams]
-  );
-
-  const getSeriesShort = useCallback(
-    (axis: ValueAxis) => getSeries(axis).substring(0, MAX_STRING_LENGTH),
-    [getSeries]
   );
 
   const renderRemoveButton = useCallback(
@@ -94,15 +86,19 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
   );
 
   const getButtonContent = useCallback(
-    (axis: ValueAxis) => (
-      <>
-        {axis.name}{' '}
-        <EuiToolTip content={getSeries(axis)}>
-          <EuiText size="xs">{getSeriesShort(axis)}</EuiText>
-        </EuiToolTip>
-      </>
-    ),
-    [getSeries, getSeriesShort]
+    (axis: ValueAxis) => {
+      const description = getSeries(axis);
+
+      return (
+        <>
+          {axis.name}{' '}
+          <EuiToolTip content={description}>
+            <>{description}</>
+          </EuiToolTip>
+        </>
+      );
+    },
+    [getSeries]
   );
   return (
     <EuiPanel paddingSize="s">
@@ -152,6 +148,8 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
           className="visEditorSidebar__section visEditorSidebar__collapsible"
           initialIsOpen={false}
           buttonContent={getButtonContent(axis)}
+          buttonClassName="eui-textTruncate"
+          buttonContentClassName="visEditorSidebar__aggGroupAccordionButtonContent eui-textTruncate"
           aria-label={i18n.translate(
             'kbnVislibVisTypes.controls.pointSeries.valueAxes.toggleOptionsAriaLabel',
             {

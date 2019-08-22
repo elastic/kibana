@@ -143,19 +143,19 @@ const getScaleTypes = () => [
     text: i18n.translate('kbnVislibVisTypes.scaleTypes.linearText', {
       defaultMessage: 'Linear',
     }),
-    value: InterpolationModes.LINEAR,
+    value: ScaleTypes.LINEAR,
   },
   {
     text: i18n.translate('kbnVislibVisTypes.scaleTypes.logText', {
       defaultMessage: 'Log',
     }),
-    value: InterpolationModes.CARDINAL,
+    value: ScaleTypes.LOG,
   },
   {
     text: i18n.translate('kbnVislibVisTypes.scaleTypes.squareRootText', {
       defaultMessage: 'Square root',
     }),
-    value: InterpolationModes.STEP_AFTER,
+    value: ScaleTypes.SQUARE_ROOT,
   },
 ];
 
@@ -171,25 +171,25 @@ const getAxisModes = () => [
     text: i18n.translate('kbnVislibVisTypes.axisModes.normalText', {
       defaultMessage: 'Normal',
     }),
-    value: InterpolationModes.LINEAR,
+    value: AxisModes.NORMAL,
   },
   {
     text: i18n.translate('kbnVislibVisTypes.axisModes.percentageText', {
       defaultMessage: 'Percentage',
     }),
-    value: InterpolationModes.CARDINAL,
+    value: AxisModes.PERCENTAGE,
   },
   {
     text: i18n.translate('kbnVislibVisTypes.axisModes.wiggleText', {
       defaultMessage: 'Wiggle',
     }),
-    value: InterpolationModes.STEP_AFTER,
+    value: AxisModes.WIGGLE,
   },
   {
     text: i18n.translate('kbnVislibVisTypes.axisModes.silhouetteText', {
       defaultMessage: 'Silhouette',
     }),
-    value: InterpolationModes.STEP_AFTER,
+    value: AxisModes.SILHOUETTE,
   },
 ];
 
