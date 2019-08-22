@@ -46,8 +46,8 @@ export const AreaChart = ({ id, color, series, name, type, stack }: Props) => {
       visible: true,
     },
     point: {
-      visible: true,
-      radius: 1,
+      visible: false,
+      radius: 0.2,
       strokeWidth: 2,
       opacity: 1,
     },
