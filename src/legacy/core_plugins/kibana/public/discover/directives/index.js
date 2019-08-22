@@ -20,13 +20,10 @@
 import 'ngreact';
 import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
-
 import { DiscoverNoResults } from './no_results';
-
 import { DiscoverUninitialized } from './uninitialized';
-
 import { DiscoverUnsupportedIndexPattern } from './unsupported_index_pattern';
-
+import { DiscoverHistogram } from './histogram';
 import './timechart';
 
 const app = uiModules.get('apps/discover', ['react']);
@@ -42,3 +39,5 @@ app.directive('discoverUninitialized', reactDirective =>
 app.directive('discoverUnsupportedIndexPattern', reactDirective =>
   reactDirective(wrapInI18nContext(DiscoverUnsupportedIndexPattern), ['unsupportedType'])
 );
+
+app.directive('discoverHistogram', reactDirective => reactDirective(DiscoverHistogram));
