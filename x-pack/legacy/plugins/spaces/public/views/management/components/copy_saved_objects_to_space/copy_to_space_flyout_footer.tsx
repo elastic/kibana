@@ -141,7 +141,7 @@ export const CopyToSpaceFlyoutFooter = (props: Props) => {
               textAlign="center"
               description={
                 <FormattedMessage
-                  id="xpack.spaces.management.copyToSpaceFlyoutFooter.conflictCount"
+                  id="xpack.spaces.management.copyToSpaceFlyoutFooter.pendingCount"
                   defaultMessage="Pending"
                 />
               }
