@@ -32,6 +32,9 @@ interface NoteCardsCompProps {
 const NoteCardsComp = React.memo<NoteCardsCompProps>(({ children }) => {
   const width = useContext(TimelineWidthContext);
 
+  // Passing the styles directly to the component because the width is
+  // being calculated and is recommended by Styled Components for performance
+  // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
   return (
     <EuiPanel
       data-test-subj="note-cards"

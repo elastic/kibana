@@ -53,6 +53,9 @@ export const ExpandableEvent = React.memo<Props>(
     onUpdateColumns,
   }) => {
     const width = useContext(TimelineWidthContext);
+    // Passing the styles directly to the component of LazyAccordion because the width is
+    // being calculated and is recommended by Styled Components for performance
+    // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
     return (
       <ExpandableDetails hideExpandButton={true}>
         <LazyAccordion
