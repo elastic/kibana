@@ -17,7 +17,7 @@
  * under the License.
  */
 
-module.exports = () => {
+module.exports = (_, options = {}) => {
   return {
     presets: [
       [
@@ -38,6 +38,8 @@ module.exports = () => {
           useBuiltIns: 'entry',
           modules: 'cjs',
           corejs: 3,
+
+          ...(options['@babel/preset-env'] || {})
         },
       ],
       require('./common_preset'),

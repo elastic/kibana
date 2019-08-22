@@ -21,7 +21,12 @@ const babelJest = require('babel-jest');
 
 module.exports = babelJest.createTransformer({
   presets: [
-    require.resolve('@kbn/babel-preset/node_preset')
+    [require.resolve('@kbn/babel-preset/node_preset'), {
+      '@babel/preset-env': {
+        // required by EUI
+        include: ['@babel/plugin-transform-regenerator']
+      }
+    }]
   ],
   plugins: [
     // enables jest to parse and execute dynamic import() calls
