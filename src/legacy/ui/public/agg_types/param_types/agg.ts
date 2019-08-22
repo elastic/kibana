@@ -21,9 +21,6 @@ import { AggConfig } from '../../vis/agg_config';
 import { BaseParamType } from './base';
 
 export class AggParamType extends BaseParamType {
-  // to work around circular dependency
-  editorComponent = require('../controls/sub_agg');
-
   makeAgg: (agg: AggConfig, state?: unknown) => AggConfig;
 
   constructor(config: Record<string, any>) {
@@ -37,8 +34,8 @@ export class AggParamType extends BaseParamType {
       };
     }
     if (!config.serialize) {
-      this.serialize = (customMetric: AggConfig) => {
-        return customMetric.toJSON();
+      this.serialize = (agg: AggConfig) => {
+        return agg.toJSON();
       };
     }
     if (!config.deserialize) {
@@ -48,6 +45,9 @@ export class AggParamType extends BaseParamType {
         }
         return this.makeAgg(agg, state);
       };
+    }
+    if (!config.editorComponent) {
+      this.editorComponent = require('../controls/sub_agg');
     }
     this.makeAgg = config.makeAgg;
     this.valueType = AggConfig;
