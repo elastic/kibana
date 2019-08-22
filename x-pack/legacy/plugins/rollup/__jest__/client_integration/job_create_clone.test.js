@@ -7,18 +7,8 @@
 import { setupEnvironment, pageHelpers } from './helpers';
 import { JOB_TO_CLONE, JOB_CLONE_INDEX_PATTERN_CHECK } from './helpers/constants';
 
-jest.mock('ui/index_patterns', () => {
-  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual(
-    '../../../../../../src/legacy/ui/public/index_patterns/constants'
-  );
-  return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE };
-});
-
-jest.mock('ui/chrome', () => ({
-  addBasePath: () => '/api/rollup',
-  breadcrumbs: { set: () => {} },
-  getInjected: () => ({}),
-}));
+jest.mock('ui/new_platform');
+jest.mock('ui/index_patterns');
 
 jest.mock('lodash/function/debounce', () => fn => fn);
 

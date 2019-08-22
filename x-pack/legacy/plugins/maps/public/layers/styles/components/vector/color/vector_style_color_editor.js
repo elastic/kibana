@@ -19,6 +19,7 @@ export function VectorStyleColorEditor(props) {
       label={getVectorStyleLabel(props.styleProperty)}
       styleDescriptor={props.styleDescriptor}
       handlePropertyChange={props.handlePropertyChange}
+      swatches={props.swatches}
       DynamicSelector={DynamicColorSelection}
       StaticSelector={StaticColorSelection}
       defaultDynamicStyleOptions={props.defaultDynamicStyleOptions}

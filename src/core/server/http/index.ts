@@ -24,6 +24,7 @@ export { GetAuthHeaders } from './auth_headers_storage';
 export { AuthStatus, GetAuthState, IsAuthenticated } from './auth_state_storage';
 export {
   CustomHttpResponseOptions,
+  IKibanaSocket,
   isRealRequest,
   HttpResponseOptions,
   HttpResponsePayload,
@@ -39,7 +40,7 @@ export {
   kibanaResponseFactory,
   KibanaResponseFactory,
   RouteConfig,
-  Router,
+  IRouter,
   RouteMethod,
   RouteConfigOptions,
 } from './router';
@@ -54,3 +55,4 @@ export {
 export { OnPostAuthHandler, OnPostAuthToolkit } from './lifecycle/on_post_auth';
 export { SessionStorageFactory, SessionStorage } from './session_storage';
 export { SessionStorageCookieOptions } from './cookie_session_storage';
+export * from './types';

@@ -44,6 +44,8 @@ export const HeaderContainer = styled.div`
   width: ${EDIT_DATA_PROVIDER_WIDTH};
 `;
 
+HeaderContainer.displayName = 'HeaderContainer';
+
 // SIDE EFFECT: the following `injectGlobal` overrides the default styling
 // of euiComboBoxOptionsList because it's implemented as a popover, so it's
 // not selectable as a child of the styled component
@@ -131,6 +133,7 @@ export class StatefulEditDataProvider extends React.PureComponent<Props, State> 
                     }
                   >
                     <EuiComboBox
+                      data-test-subj="field"
                       isClearable={false}
                       onChange={this.onFieldSelected}
                       options={getCategorizedFieldNames(browserFields)}
@@ -146,6 +149,7 @@ export class StatefulEditDataProvider extends React.PureComponent<Props, State> 
               <EuiFlexItem grow={false}>
                 <EuiFormRow label={i18n.OPERATOR}>
                   <EuiComboBox
+                    data-test-subj="operator"
                     isClearable={false}
                     onChange={this.onOperatorSelected}
                     options={operatorLabels}
@@ -170,6 +174,7 @@ export class StatefulEditDataProvider extends React.PureComponent<Props, State> 
               <EuiFormRow label={i18n.VALUE_LABEL}>
                 <EuiFieldText
                   className={VALUE_INPUT_CLASS_NAME}
+                  data-test-subj="value"
                   placeholder={i18n.VALUE}
                   onChange={this.onValueChange}
                   value={sanatizeValue(this.state.updatedValue)}

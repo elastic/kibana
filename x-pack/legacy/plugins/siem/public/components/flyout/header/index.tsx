@@ -6,7 +6,6 @@
 
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { pure } from 'recompose';
 import { Dispatch } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
 
@@ -71,7 +70,7 @@ interface DispatchProps {
 
 type Props = OwnProps & StateReduxProps & DispatchProps;
 
-const statefulFlyoutHeader = pure<Props>(
+const statefulFlyoutHeader = React.memo<Props>(
   ({
     associateNote,
     createTimeline,
@@ -113,7 +112,11 @@ const statefulFlyoutHeader = pure<Props>(
   )
 );
 
+statefulFlyoutHeader.displayName = 'statefulFlyoutHeader';
+
 const emptyHistory: History[] = []; // stable reference
+
+const emptyNotesId: string[] = []; //stable reference
 
 const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
@@ -128,7 +131,7 @@ const makeMapStateToProps = () => {
       isFavorite = false,
       kqlQuery,
       title = '',
-      noteIds = [],
+      noteIds = emptyNotesId,
       width = DEFAULT_TIMELINE_WIDTH,
     } = timeline;
 

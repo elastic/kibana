@@ -9,27 +9,8 @@ import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { FollowerIndexForm } from '../../public/app/components/follower_index_form/follower_index_form';
 import { FOLLOWER_INDEX_EDIT } from './helpers/constants';
 
-jest.mock('ui/chrome', () => ({
-  addBasePath: (path) => path || 'api/cross_cluster_replication',
-  breadcrumbs: { set: () => {} },
-  getInjected: (key) => {
-    if (key === 'uiCapabilities') {
-      return {
-        navLinks: {},
-        management: {},
-        catalogue: {}
-      };
-    }
-  }
-}));
-
-jest.mock('ui/index_patterns', () => {
-  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } =
-    jest.requireActual('../../../../../../src/legacy/ui/public/index_patterns/constants');
-  const { validateIndexPattern, ILLEGAL_CHARACTERS, CONTAINS_SPACES } =
-    jest.requireActual('../../../../../../src/legacy/ui/public/index_patterns/validate/validate_index_pattern');
-  return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE, validateIndexPattern, ILLEGAL_CHARACTERS, CONTAINS_SPACES };
-});
+jest.mock('ui/new_platform');
+jest.mock('ui/index_patterns');
 
 const { setup } = pageHelpers.followerIndexEdit;
 const { setup: setupFollowerIndexAdd } = pageHelpers.followerIndexAdd;

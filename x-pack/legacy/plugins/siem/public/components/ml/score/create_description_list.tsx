@@ -20,6 +20,8 @@ const LargeScore = styled(EuiText)`
   font-weight: lighter;
 `;
 
+LargeScore.displayName = 'LargeScore';
+
 export const createDescriptionList = (
   score: Anomaly,
   startDate: number,

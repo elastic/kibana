@@ -14,9 +14,9 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import { useContext } from 'react';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { OnUpdateColumns } from '../timeline/events';
@@ -24,6 +24,7 @@ import { WithHoverActions } from '../with_hover_actions';
 
 import { LoadingSpinner } from './helpers';
 import * as i18n from './translations';
+import { TimelineContext } from '../timeline/timeline_context';
 
 /**
  * The name of a (draggable) field
@@ -37,6 +38,8 @@ export const FieldNameContainer = styled.span`
   }
 `;
 
+FieldNameContainer.displayName = 'FieldNameContainer';
+
 const HoverActionsContainer = styled(EuiPanel)`
   cursor: default;
   height: 25px;
@@ -45,25 +48,59 @@ const HoverActionsContainer = styled(EuiPanel)`
   top: 3px;
 `;
 
+HoverActionsContainer.displayName = 'HoverActionsContainer';
+
 const HoverActionsFlexGroup = styled(EuiFlexGroup)`
   cursor: pointer;
   position: relative;
   top: -8px;
 `;
 
+HoverActionsFlexGroup.displayName = 'HoverActionsFlexGroup';
+
 const ViewCategoryIcon = styled(EuiIcon)`
   margin-left: 5px;
 `;
 
+ViewCategoryIcon.displayName = 'ViewCategoryIcon';
+
+interface ToolTipProps {
+  categoryId: string;
+  onUpdateColumns: OnUpdateColumns;
+  categoryColumns: ColumnHeader[];
+}
+
+const ToolTip = React.memo<ToolTipProps>(({ categoryId, onUpdateColumns, categoryColumns }) => {
+  const { isLoading } = useContext(TimelineContext);
+  return (
+    <EuiToolTip content={i18n.VIEW_CATEGORY(categoryId)}>
+      {!isLoading ? (
+        <ViewCategoryIcon
+          aria-label={i18n.VIEW_CATEGORY(categoryId)}
+          color="text"
+          data-test-subj="view-category"
+          onClick={() => {
+            onUpdateColumns(categoryColumns);
+          }}
+          type="visTable"
+        />
+      ) : (
+        <LoadingSpinner size="m" />
+      )}
+    </EuiToolTip>
+  );
+});
+
+ToolTip.displayName = 'ToolTip';
+
 /** Renders a field name in it's non-dragging state */
-export const FieldName = pure<{
+export const FieldName = React.memo<{
   categoryId: string;
   categoryColumns: ColumnHeader[];
   fieldId: string;
   highlight?: string;
-  isLoading: boolean;
   onUpdateColumns: OnUpdateColumns;
-}>(({ categoryId, categoryColumns, fieldId, highlight = '', isLoading, onUpdateColumns }) => (
+}>(({ categoryId, categoryColumns, fieldId, highlight = '', onUpdateColumns }) => (
   <WithHoverActions
     hoverContent={
       <HoverActionsContainer data-test-subj="hover-actions-container" paddingSize="s">
@@ -75,26 +112,21 @@ export const FieldName = pure<{
         >
           <EuiFlexItem grow={false}>
             <EuiToolTip content={i18n.COPY_TO_CLIPBOARD}>
-              <WithCopyToClipboard text={fieldId} titleSummary={i18n.FIELD} />
+              <WithCopyToClipboard
+                data-test-subj="copy-to-clipboard"
+                text={fieldId}
+                titleSummary={i18n.FIELD}
+              />
             </EuiToolTip>
           </EuiFlexItem>
 
           {categoryColumns.length > 0 && (
             <EuiFlexItem grow={false}>
-              <EuiToolTip content={i18n.VIEW_CATEGORY(categoryId)}>
-                {!isLoading ? (
-                  <ViewCategoryIcon
-                    aria-label={i18n.VIEW_CATEGORY(categoryId)}
-                    color="text"
-                    onClick={() => {
-                      onUpdateColumns(categoryColumns);
-                    }}
-                    type="visTable"
-                  />
-                ) : (
-                  <LoadingSpinner size="m" />
-                )}
-              </EuiToolTip>
+              <ToolTip
+                categoryId={categoryId}
+                categoryColumns={categoryColumns}
+                onUpdateColumns={onUpdateColumns}
+              />
             </EuiFlexItem>
           )}
         </HoverActionsFlexGroup>
@@ -102,8 +134,12 @@ export const FieldName = pure<{
     }
     render={() => (
       <FieldNameContainer>
-        <EuiHighlight search={highlight}>{fieldId}</EuiHighlight>
+        <EuiHighlight data-test-subj={`field-name-${fieldId}`} search={highlight}>
+          {fieldId}
+        </EuiHighlight>
       </FieldNameContainer>
     )}
   />
 ));
+
+FieldName.displayName = 'FieldName';

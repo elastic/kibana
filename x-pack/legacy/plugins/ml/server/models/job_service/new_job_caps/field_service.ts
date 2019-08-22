@@ -6,12 +6,17 @@
 
 import { cloneDeep } from 'lodash';
 import { Request } from 'src/legacy/server/kbn_server';
-import { Field, Aggregation, FieldId, NewJobCaps } from '../../../../common/types/fields';
+import {
+  Field,
+  Aggregation,
+  FieldId,
+  NewJobCaps,
+  METRIC_AGG_TYPE,
+} from '../../../../common/types/fields';
 import { ES_FIELD_TYPES } from '../../../../common/constants/field_types';
+import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { rollupServiceProvider, RollupJob, RollupFields } from './rollup';
 import { aggregations } from './aggregations';
-
-const METRIC_AGG_TYPE: string = 'metrics';
 
 const supportedTypes: string[] = [
   ES_FIELD_TYPES.DATE,
@@ -79,7 +84,7 @@ class FieldsService {
         }
       });
     }
-    return fields;
+    return fields.sort((a, b) => a.id.localeCompare(b.id));
   }
 
   // public function to load fields from _field_caps and create a list
@@ -133,8 +138,8 @@ async function combineFieldsAndAggs(
 
   aggs.forEach(a => {
     if (a.type === METRIC_AGG_TYPE) {
-      switch (a.kibanaName) {
-        case 'cardinality':
+      switch (a.dslName) {
+        case ES_AGGREGATION.CARDINALITY:
           textAndKeywordFields.forEach(f => {
             mix(f, a);
           });
@@ -142,7 +147,7 @@ async function combineFieldsAndAggs(
             mix(f, a);
           });
           break;
-        case 'count':
+        case ES_AGGREGATION.COUNT:
           break;
         default:
           numericalFields.forEach(f => {
@@ -177,7 +182,7 @@ function mixFactory(rollupFields: RollupFields) {
   return function mix(field: Field, agg: Aggregation): void {
     if (
       isRollup === false ||
-      (rollupFields[field.id] && rollupFields[field.id].find(f => f.agg === agg.kibanaName))
+      (rollupFields[field.id] && rollupFields[field.id].find(f => f.agg === agg.dslName))
     ) {
       if (field.aggs !== undefined) {
         field.aggs.push(agg);

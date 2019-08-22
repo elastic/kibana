@@ -315,6 +315,8 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
   )
 );
 
+HostDetailsComponent.displayName = 'HostDetailsComponent';
+
 const makeMapStateToProps = () => {
   const getHostsFilterQuery = hostsSelectors.hostsFilterQueryExpression();
   return (state: State) => ({

@@ -4,29 +4,56 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel } from '@elastic/eui';
-import React from 'react';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useMemo } from 'react';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
-import { loadTraceList } from '../../../services/rest/apm/traces';
 import { TraceList } from './TraceList';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useTrackPageview } from '../../../../../infra/public';
+import { LocalUIFilters } from '../../shared/LocalUIFilters';
+import { PROJECTION } from '../../../../common/projections/typings';
+import { callApmApi } from '../../../services/rest/callApmApi';
 
 export function TraceOverview() {
   const { urlParams, uiFilters } = useUrlParams();
   const { start, end } = urlParams;
   const { status, data = [] } = useFetcher(() => {
     if (start && end) {
-      return loadTraceList({ start, end, uiFilters });
+      return callApmApi({
+        pathname: '/api/apm/traces',
+        params: {
+          query: {
+            start,
+            end,
+            uiFilters: JSON.stringify(uiFilters)
+          }
+        }
+      });
     }
   }, [start, end, uiFilters]);
 
   useTrackPageview({ app: 'apm', path: 'traces_overview' });
   useTrackPageview({ app: 'apm', path: 'traces_overview', delay: 15000 });
 
+  const localUIFiltersConfig = useMemo(() => {
+    const config: React.ComponentProps<typeof LocalUIFilters> = {
+      filterNames: ['transactionResult', 'host', 'containerId', 'podName'],
+      projection: PROJECTION.TRACES
+    };
+
+    return config;
+  }, []);
+
   return (
-    <EuiPanel>
-      <TraceList items={data} isLoading={status === FETCH_STATUS.LOADING} />
-    </EuiPanel>
+    <EuiFlexGroup>
+      <EuiFlexItem grow={1}>
+        <LocalUIFilters {...localUIFiltersConfig}></LocalUIFilters>
+      </EuiFlexItem>
+      <EuiFlexItem grow={7}>
+        <EuiPanel>
+          <TraceList items={data} isLoading={status === FETCH_STATUS.LOADING} />
+        </EuiPanel>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

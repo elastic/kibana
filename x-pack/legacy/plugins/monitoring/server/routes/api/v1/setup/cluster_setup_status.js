@@ -16,11 +16,11 @@ export function clusterSetupStatusRoute(server) {
    */
   server.route({
     method: 'POST',
-    path: '/api/monitoring/v1/setup/collection/cluster/{clusterUuid}',
+    path: '/api/monitoring/v1/setup/collection/cluster/{clusterUuid?}',
     config: {
       validate: {
         params: Joi.object({
-          clusterUuid: Joi.string().required(),
+          clusterUuid: Joi.string().optional(),
         }),
         query: Joi.object({
           // This flag is not intended to be used in production. It was introduced
