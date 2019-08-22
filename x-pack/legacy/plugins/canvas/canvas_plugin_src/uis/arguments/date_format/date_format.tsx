@@ -9,8 +9,8 @@ import PropTypes from 'prop-types';
 import { FormatSelect } from '../../../../public/components/format_select/format_select';
 import { ArgumentProps } from '../../../../types/arguments';
 
-interface NumberFormatOption {
-  /** A NumeralJS format string */
+interface DateFormatOption {
+  /** A MomentJS format string */
   value: string;
   /** The name to display for the format */
   text: string;
@@ -18,7 +18,7 @@ interface NumberFormatOption {
 
 export interface Props extends ArgumentProps {
   /** An array of number formats options */
-  numberFormats: NumberFormatOption[];
+  dateFormats: DateFormatOption[];
   /** The handler to invoke when value changes */
   onValueChange: (value: string) => void;
   /** The value of the argument */
@@ -27,8 +27,8 @@ export interface Props extends ArgumentProps {
   argId: string;
 }
 
-export const NumberFormatArgInput: FunctionComponent<Props> = ({
-  numberFormats,
+export const DateFormatArgInput: FunctionComponent<Props> = ({
+  dateFormats,
   onValueChange,
   argValue,
   argId,
@@ -36,14 +36,14 @@ export const NumberFormatArgInput: FunctionComponent<Props> = ({
   <FormatSelect
     argId={argId}
     argValue={argValue}
-    formatOptions={numberFormats}
+    formatOptions={dateFormats}
     onValueChange={onValueChange}
-    defaultCustomFormat="0.0a"
+    defaultCustomFormat="M/D/YY h:ma"
   />
 );
 
-NumberFormatArgInput.propTypes = {
-  numberFormats: PropTypes.arrayOf(
+DateFormatArgInput.propTypes = {
+  dateFormats: PropTypes.arrayOf(
     PropTypes.shape({ value: PropTypes.string, text: PropTypes.string })
   ).isRequired,
   onValueChange: PropTypes.func.isRequired,

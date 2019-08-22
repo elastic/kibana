@@ -6,41 +6,39 @@
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { action } from '@storybook/addon-actions';
-import { NumberFormatArgInput } from '../number_format';
+import { DateFormatArgInput } from '../date_format';
 
-const numberFormats = [
-  { value: '0.0[000]', text: 'Number' },
-  { value: '0.0%', text: 'Percent' },
-  { value: '$0.00', text: 'Currency' },
-  { value: '00:00:00', text: 'Duration' },
-  { value: '0.0b', text: 'Bytes' },
+const dateFormats = [
+  { value: 'l', text: 'Shorthand' },
+  { value: 'x', text: 'Unix' },
+  { value: 'LLL', text: 'Longhand' },
 ];
 
-storiesOf('arguments/NumberFormat', module)
+storiesOf('arguments/DateFormat', module)
   .add('with no format', () => (
-    <NumberFormatArgInput
-      numberFormats={numberFormats}
+    <DateFormatArgInput
+      dateFormats={dateFormats}
       onValueChange={action('onValueChange')}
       argValue=""
-      argId="NumberFormatExample1"
+      argId="DateFormatExample1"
       renderError={action('renderError')}
     />
   ))
   .add('with preset format', () => (
-    <NumberFormatArgInput
-      numberFormats={numberFormats}
+    <DateFormatArgInput
+      dateFormats={dateFormats}
       onValueChange={action('onValueChange')}
-      argValue="$0.00"
-      argId="NumberFormatExample2"
+      argValue="LLL"
+      argId="DateFormatExample2"
       renderError={action('renderError')}
     />
   ))
   .add('with custom format', () => (
-    <NumberFormatArgInput
-      numberFormats={numberFormats}
+    <DateFormatArgInput
+      dateFormats={dateFormats}
       onValueChange={action('onValueChange')}
-      argValue="0.0[000]a"
-      argId="NumberFormatExample3"
+      argValue="MM/DD/YYYY"
+      argId="DateFormatExample3"
       renderError={action('renderError')}
     />
   ));
