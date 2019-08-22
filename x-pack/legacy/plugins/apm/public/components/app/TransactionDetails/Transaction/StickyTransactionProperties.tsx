@@ -128,6 +128,7 @@ export function StickyTransactionProperties({
           errorCount={errorCount}
           transaction={transaction}
           verbose
+          link={false}
         />
       ) : (
         noErrorsText

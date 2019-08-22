@@ -13,7 +13,7 @@ import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { fontSize } from '../../../../style/variables';
 import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
 
-const LinkLabel = styled.span`
+const Title = styled.span`
   font-size: ${fontSize};
 `;
 
@@ -21,12 +21,14 @@ interface Props {
   errorCount: number;
   transaction: Transaction;
   verbose?: boolean;
+  link?: boolean;
 }
 
 export const ErrorCountBadge: React.SFC<Props> = ({
   errorCount = 0,
   transaction,
-  verbose
+  verbose,
+  link = true
 }) => {
   const toolTipContent = i18n.translate(
     'xpack.apm.transactionDetails.errorsOverviewLinkTooltip',
@@ -37,20 +39,39 @@ export const ErrorCountBadge: React.SFC<Props> = ({
     }
   );
 
+  const linkProps = link
+    ? {
+        onClick: (event: any) => {
+          (event as MouseEvent).stopPropagation();
+        },
+        onClickAriaLabel: toolTipContent
+      }
+    : {};
+
   const errorCountBadge = (
-    <EuiBadge
-      color={euiThemeLight.euiColorDanger}
-      onClick={(event: any) => {
-        (event as MouseEvent).stopPropagation();
-      }}
-      onClickAriaLabel={toolTipContent}
-    >
+    <EuiBadge color={euiThemeLight.euiColorDanger} {...linkProps}>
       {errorCount}
     </EuiBadge>
   );
   const serviceName = transaction.service.name;
 
-  return (
+  const content = verbose ? (
+    <Fragment>
+      {errorCountBadge}
+      <Title>
+        &nbsp;
+        {i18n.translate('xpack.apm.transactionDetails.errorsOverviewLink', {
+          values: { errorCount },
+          defaultMessage:
+            '{errorCount, plural, one {Related error} other {Related errors}}'
+        })}
+      </Title>
+    </Fragment>
+  ) : (
+    <EuiToolTip content={toolTipContent}>{errorCountBadge}</EuiToolTip>
+  );
+
+  return link ? (
     <ErrorOverviewLink
       serviceName={serviceName}
       query={{
@@ -61,21 +82,9 @@ export const ErrorCountBadge: React.SFC<Props> = ({
       color="danger"
       style={{ textDecoration: 'none' }}
     >
-      {verbose ? (
-        <Fragment>
-          {errorCountBadge}
-          <LinkLabel>
-            &nbsp;
-            {i18n.translate('xpack.apm.transactionDetails.errorsOverviewLink', {
-              values: { errorCount },
-              defaultMessage:
-                '{errorCount, plural, one {Related error} other {Related errors}}'
-            })}
-          </LinkLabel>
-        </Fragment>
-      ) : (
-        <EuiToolTip content={toolTipContent}>{errorCountBadge}</EuiToolTip>
-      )}
+      {content}
     </ErrorOverviewLink>
+  ) : (
+    content
   );
 };
