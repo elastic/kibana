@@ -38,14 +38,6 @@ export interface ConfigObject {
   get: (path?: string) => any;
 }
 
-export type EvalArgs = any[];
-export type EvalFn<T> = (...evalArgs: EvalArgs) => T;
-
-export interface EvaluateOptions {
-  fn: EvalFn<any>;
-  args: EvalArgs; // Arguments to be passed into the function defined by fn.
-}
-
 export interface ElementPosition {
   boundingClientRect: {
     // modern browsers support x/y, but older ones don't
@@ -58,10 +50,6 @@ export interface ElementPosition {
     x: number;
     y: number;
   };
-}
-
-export interface HeadlessElementInfo {
-  position: ElementPosition;
 }
 
 export interface ConditionalHeaders {
@@ -86,16 +74,8 @@ export interface TimeRangeParams {
   max: Date | string | number;
 }
 
-type PostPayloadState = Partial<{
-  state: {
-    query: any;
-    sort: any[];
-    columns: string[]; // TODO
-  };
-}>;
-
 // retain POST payload data, needed for async
-export interface JobParamPostPayload extends PostPayloadState {
+export interface JobParamPostPayload {
   timerange: TimeRangeParams;
 }
 
@@ -104,11 +84,6 @@ export interface JobParams {
   savedObjectType: string;
   savedObjectId: string;
   isImmediate: boolean;
-  post?: JobParamPostPayload;
-  panel?: any; // has to be resolved by the request handler
-  visType?: string; // has to be resolved by the request handler
-
-  indexPatternId?: string; // for export_types/csv
 }
 
 export interface JobDocPayload {
@@ -119,23 +94,9 @@ export interface JobDocPayload {
   relativeUrl?: string;
   timeRange?: any;
   title: string;
+  type: string | null;
   urls?: string[];
-  type?: string | null; // string if completed job; null if incomplete job;
-  objects?: string | null; // string if completed job; null if incomplete job;
 }
-
-export type JobDocPayloadScreenshot = JobDocPayload & {
-  browserTimezone: string;
-  layout: any;
-};
-
-export type JobDocPayloadDiscoverCsv = JobDocPayload & {
-  searchRequest: any;
-  fields: any;
-  indexPatternSavedObject: any;
-  metaFields: any;
-  conflictedTypesFields: any;
-};
 
 export interface JobDocOutput {
   content: string; // encoded content
@@ -171,7 +132,6 @@ export interface JobDocOutputExecuted {
   content: string | null; // defaultOutput is null
   max_size_reached: boolean;
   size: number;
-  csv_contains_formulas?: string[];
 }
 
 export interface ESQueueWorker {

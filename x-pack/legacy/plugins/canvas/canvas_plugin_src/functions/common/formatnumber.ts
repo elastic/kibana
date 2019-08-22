@@ -8,7 +8,7 @@ import numeral from '@elastic/numeral';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { getFunctionHelp } from '../../strings';
 
-interface Arguments {
+export interface Arguments {
   format: string;
 }
 

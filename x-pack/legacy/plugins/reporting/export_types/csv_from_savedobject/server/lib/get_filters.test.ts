@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedSearchObjectAttributes, TimeRangeParams } from '../../';
-import { QueryFilter, SearchSourceFilter } from './';
+import {
+  QueryFilter,
+  SavedSearchObjectAttributes,
+  SearchSourceFilter,
+  TimeRangeParams,
+} from '../../types';
 import { getFilters } from './get_filters';
 
 interface Args {
