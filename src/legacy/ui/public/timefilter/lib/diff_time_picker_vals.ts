@@ -18,7 +18,9 @@
  */
 
 import _ from 'lodash';
-import { RefreshInterval, TimeRange } from 'src/plugins/data/public';
+
+import { RefreshInterval } from 'src/plugins/data/public';
+import { InputTimeRange } from '../timefilter';
 
 const valueOf = function(o: any) {
   if (o) return o.valueOf();
@@ -39,10 +41,7 @@ export function areRefreshIntervalsDifferent(rangeA: RefreshInterval, rangeB: Re
   return false;
 }
 
-export function areTimeRangesDifferent(
-  rangeA: TimeRange | undefined,
-  rangeB: TimeRange | undefined
-) {
+export function areTimeRangesDifferent(rangeA: InputTimeRange, rangeB: InputTimeRange) {
   if (rangeA && rangeB && _.isObject(rangeA) && _.isObject(rangeB)) {
     if (
       valueOf(rangeA.to) !== valueOf(rangeB.to) ||

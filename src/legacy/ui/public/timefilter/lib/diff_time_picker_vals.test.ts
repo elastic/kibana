@@ -22,11 +22,6 @@ import expect from '@kbn/expect';
 import { areTimeRangesDifferent } from './diff_time_picker_vals';
 
 describe('Diff Time Picker Values', () => {
-  test('accepts two undefined values', () => {
-    const diff = areTimeRangesDifferent(undefined, undefined);
-    expect(diff).to.be(false);
-  });
-
   describe('dateMath ranges', () => {
     test('knows a match', () => {
       const diff = areTimeRangesDifferent(

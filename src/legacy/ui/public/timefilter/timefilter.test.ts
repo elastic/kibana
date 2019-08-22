@@ -96,7 +96,10 @@ describe('setTime', () => {
 
   test('should update time', () => {
     timefilter.setTime({ from: '5', to: '10' });
-    expect(timefilter.getTime()).to.eql({ from: 5, to: 10 });
+    expect(timefilter.getTime()).to.eql({
+      from: '5',
+      to: '10',
+    });
   });
 
   test('should not add unexpected object keys to time state', () => {
@@ -111,7 +114,7 @@ describe('setTime', () => {
 
   test('should allow partial updates to time', () => {
     timefilter.setTime({ from: '5', to: '10' });
-    expect(timefilter.getTime()).to.eql({ from: 5, to: 10 });
+    expect(timefilter.getTime()).to.eql({ from: '5', to: '10' });
   });
 
   test('not emit anything if the time has not changed', () => {
