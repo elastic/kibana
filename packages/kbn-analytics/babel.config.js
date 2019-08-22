@@ -20,22 +20,12 @@
 // We can't use common Kibana presets here because of babel versions incompatibility
 module.exports = {
   plugins: ['@babel/plugin-proposal-class-properties'],
-  presets: ['@kbn/babel-preset/webpack_preset'],
   env: {
     web: {
-      presets: ['@babel/preset-env'],
+      presets: ['@kbn/babel-preset/webpack_preset']
     },
     node: {
-      presets: [
-        [
-          '@babel/preset-env',
-          {
-            targets: {
-              node: 'current',
-            },
-          },
-        ],
-      ],
+      presets: ['@kbn/babel-preset/node_preset'],
     },
   },
   ignore: ['**/*.test.ts', '**/*.test.tsx'],
