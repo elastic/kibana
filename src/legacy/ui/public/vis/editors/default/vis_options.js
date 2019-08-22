@@ -39,6 +39,7 @@ uiModules
     ['setVisType', { watchDepth: 'reference' }],
     ['setTouched', { watchDepth: 'reference' }],
     'hasHistogramAgg',
+    'currentTab',
   ]))
   .directive('visEditorVisOptions', function ($compile) {
     return {
@@ -80,6 +81,7 @@ uiModules
             component="editor"
             has-histogram-agg="hasHistogramAgg"
             aggs="editorState.aggs"
+            current-tab="$parent.$parent.sidebar.section"
             state-params="editorState.params"
             vis="vis"
             set-value="setValue"

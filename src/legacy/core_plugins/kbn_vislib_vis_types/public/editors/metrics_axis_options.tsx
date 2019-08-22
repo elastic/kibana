@@ -81,7 +81,7 @@ function MetricsAxisOptions(props: VisOptionsProps<BasicVislibParams>) {
     [stateParams.seriesParams, setValue]
   );
 
-  const updateAxisTitle = useCallback(() => {
+  const updateAxisTitle = () => {
     stateParams.valueAxes.forEach((axis, axisNumber) => {
       let newCustomLabel = '';
       const isFirst = axisNumber === 0;
@@ -129,15 +129,7 @@ function MetricsAxisOptions(props: VisOptionsProps<BasicVislibParams>) {
       setLastMatchingSeriesAggType(matchingSeriesAggType);
       setLastMatchingSeriesAggField(matchingSeriesAggField);
     });
-  }, [
-    aggs,
-    lastCustomLabels,
-    lastMatchingSeriesAggField,
-    lastMatchingSeriesAggType,
-    stateParams.seriesParams,
-    stateParams.valueAxes,
-    setValueAxisByIndex,
-  ]);
+  };
 
   const getUpdatedAxisName = useCallback(
     (axisPosition: ValueAxis['position']) => {
@@ -227,15 +219,7 @@ function MetricsAxisOptions(props: VisOptionsProps<BasicVislibParams>) {
     });
 
     setValue('seriesParams', updatedSeries);
-  }, [
-    aggs,
-    aggsLabel,
-    stateParams.seriesParams,
-    stateParams.valueAxes,
-    vis.type.schemas.metrics,
-    setValue,
-    updateAxisTitle,
-  ]);
+  }, [aggsLabel, stateParams.valueAxes]);
 
   useEffect(() => {
     const chartPosition = stateParams.categoryAxes[0].position;
