@@ -69,7 +69,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       statusFilter,
     };
 
-    console.log('PAGINATION GET', pagination);
+    console.log('getMonitorStates()', pagination);
 
     const enriched = await queryEnriched(queryContext);
 

@@ -1,12 +1,13 @@
 import { CursorDirection, SortOrder } from '../../../../common/graphql/types';
 import { QueryContext } from './elasticsearch_monitor_states_adapter';
-import { INDEX_NAMES, QUERY } from '../../../../common/constants';
+import { INDEX_NAMES } from '../../../../common/constants';
 import { get, set } from 'lodash';
 import { CursorPagination } from './adapter_types';
 
 export type MonitorLocCheckGroup = {
   monitorId: string;
   location: string | null;
+  filterMatchesLatest: boolean;
   checkGroup: string;
   timestamp: Date;
   up: number;
@@ -29,47 +30,35 @@ export const fetchMonitorLocCheckGroups = async (
   size: number
 ): Promise<FetchMonitorLocCheckGroupsResult> => {
   const items: MonitorIdWithGroups[] = [];
-
-  const fetcher = new LatestCheckGroupFetcher(queryContext);
-  let currentMonitor: MonitorIdWithGroups | null = null;
+  const fetcher = new FilteredFetcher(queryContext);
 
   let paginationBefore: CursorPagination | null = null;
-
+  console.log('Start fetching');
+  const start = new Date();
   while (items.length < size) {
-    const mlcg = await fetcher.next();
-    if (!mlcg) {
+    const monitor = await fetcher.next();
+    if (!monitor) {
       break; // No more items to fetch
     }
     // On our first item set the previous pagination to be items before this if they exist
     if (items.length === 0) {
-      const reverseFetcher = fetcher.reverse();
-      paginationBefore =
-        reverseFetcher && (await reverseFetcher.peek())
-          ? reverseFetcher.paginationAfterCurrent()
-          : null;
+      console.log('DO REVERSE');
+      const reverseFetcher = (await fetcher.reverse())!;
+      const revPagination =
+        reverseFetcher && (await reverseFetcher.peek()) && reverseFetcher.paginationAfterCurrent()!;
+      paginationBefore = revPagination && revPagination.cursorKey ? revPagination : null;
     }
 
-    if (currentMonitor && currentMonitor.id === mlcg.monitorId) {
-      currentMonitor.groups.push(mlcg);
-    } else {
-      currentMonitor = { id: mlcg.monitorId, groups: [mlcg] };
-    }
-
-    // Handle the case where we are at the end of the results or
-    // have processed all the mlcgs for this monitor
-    const peek = await fetcher.peek();
-    if (!peek || (peek && peek.monitorId != mlcg.monitorId)) {
-      const status = currentMonitor.groups.some(g => g.down > 0) ? 'down' : 'up';
-      if (!queryContext.statusFilter || queryContext.statusFilter === status) {
-        items.push(currentMonitor);
-      }
-    }
+    items.push(monitor);
   }
+  console.log('Fetching done', new Date().getTime() - start.getTime(), items.length, size);
 
+  console.log('CHECK NEXT');
   // We have to create these objects before checking if we can navigate backward
   const paginationAfter: CursorPagination | null = (await fetcher.peek())
     ? fetcher.paginationAfterCurrent()
     : null;
+  console.log('E CHECK NEXT', paginationAfter);
 
   const ssAligned = searchSortAligned(queryContext.pagination);
 
@@ -84,7 +73,103 @@ export const fetchMonitorLocCheckGroups = async (
   };
 };
 
-export class LatestCheckGroupFetcher {
+export class FilteredFetcher {
+  queryContext: QueryContext;
+  currentMonitor: MonitorIdWithGroups | null;
+  unfilteredFetcher: UnfilteredFetcher;
+
+  constructor(
+    queryContext: QueryContext,
+    initCurrentMonitor: MonitorIdWithGroups | null = null,
+    initUnfilteredFetcher: UnfilteredFetcher | null = null
+  ) {
+    this.queryContext = queryContext;
+    this.currentMonitor = initCurrentMonitor;
+    this.unfilteredFetcher = initUnfilteredFetcher || new UnfilteredFetcher(queryContext);
+  }
+
+  current(): MonitorIdWithGroups | null {
+    return this.currentMonitor;
+  }
+
+  async reverse(): Promise<FilteredFetcher | null> {
+    if (!this.currentMonitor) {
+      return null;
+    }
+    const revUnfiltered = this.unfilteredFetcher.reverse();
+    if (!revUnfiltered) {
+      return null;
+    }
+    const newFetcher = new FilteredFetcher(
+      revUnfiltered.queryContext,
+      this.currentMonitor,
+      revUnfiltered
+    );
+    const peeked = await newFetcher.peek();
+    // The secondary attributes may not have been reversed, we may re-traverse the current item partially
+    console.log('BIRDI', peeked);
+    console.log('CUR', this.currentMonitor);
+    while (peeked && peeked.id === this.currentMonitor.id) {
+      console.log('SKIP AHEAD');
+      this.next();
+    }
+    return newFetcher;
+  }
+
+  paginationAfterCurrent(): CursorPagination | null {
+    return this.unfilteredFetcher.paginationAfterCurrent();
+  }
+
+  clone(): FilteredFetcher {
+    return new FilteredFetcher(this.queryContext, this.current(), this.unfilteredFetcher.clone());
+  }
+
+  // Note this is doesn't cache the peek'd data
+  // In the future this may be relevant perf wise, but not today.
+  async peek(): Promise<MonitorIdWithGroups | null> {
+    const clone = this.clone();
+    return await clone.next();
+  }
+
+  async next(): Promise<MonitorIdWithGroups | null> {
+    let monitor: MonitorIdWithGroups | null = null;
+
+    // Keep going forward until we find a monitor that matches the filter
+    while (true) {
+      const mlcg = await this.unfilteredFetcher.next();
+      if (!mlcg) {
+        this.currentMonitor = mlcg;
+        break; // No more items to fetch
+      }
+
+      if (monitor && monitor.id === mlcg.monitorId) {
+        monitor.groups.push(mlcg);
+      } else {
+        monitor = { id: mlcg.monitorId, groups: [mlcg] };
+      }
+
+      const peek = await this.unfilteredFetcher.peek();
+      if (peek && peek.monitorId != monitor.id) {
+        if (this.filter(monitor)) {
+          break;
+        }
+      }
+    }
+
+    this.currentMonitor = monitor;
+    return monitor;
+  }
+
+  filter(monitor: MonitorIdWithGroups): boolean {
+    const status = monitor.groups.some(g => g.down > 0) ? 'down' : 'up';
+    return (
+      (!this.queryContext.statusFilter || this.queryContext.statusFilter === status) &&
+      monitor.groups.some(g => g.filterMatchesLatest)
+    );
+  }
+}
+
+class UnfilteredFetcher {
   queryContext: QueryContext;
   // Cache representing pre-fetched query results.
   // The first item is the CheckGroup this represents.
@@ -105,18 +190,23 @@ export class LatestCheckGroupFetcher {
     this.searchAfter = queryContext.pagination.cursorKey;
   }
 
+  clone() {
+    return new UnfilteredFetcher(this.queryContext, this.buffer.slice(0), this.bufferPos);
+  }
+
   // Get a CursorPaginator object that will resume after the current() value.
   paginationAfterCurrent(): CursorPagination | null {
     const current = this.current();
-    const cursorKey = current
-      ? { monitor_id: current.monitorId, location: current.location }
-      : null;
+    if (!current) {
+      return null;
+    }
+    const cursorKey = { monitor_id: current.monitorId, location: current.location };
 
     return Object.assign({}, this.queryContext.pagination, { cursorKey });
   }
 
   // Returns a copy of this fetcher that goes backwards, not forwards from the current positon
-  reverse(): LatestCheckGroupFetcher | null {
+  reverse(): UnfilteredFetcher | null {
     const reverseContext = Object.assign({}, this.queryContext);
     const current = this.current();
 
@@ -129,7 +219,7 @@ export class LatestCheckGroupFetcher {
           : CursorDirection.AFTER,
     };
 
-    return current ? new LatestCheckGroupFetcher(reverseContext, [current], 0) : null;
+    return current ? new UnfilteredFetcher(reverseContext, [current], 0) : null;
   }
 
   // Returns the last item fetched with next(). null if no items fetched with
@@ -156,7 +246,7 @@ export class LatestCheckGroupFetcher {
     return await this.next();
   }
 
-  async peek(recurse: boolean = true): Promise<MonitorLocCheckGroup | null> {
+  async peek(): Promise<MonitorLocCheckGroup | null> {
     if (this.endOfStream) {
       return null;
     }
@@ -168,14 +258,10 @@ export class LatestCheckGroupFetcher {
 
     await this.queryNextAndBuffer();
 
-    if (recurse) {
-      return await this.peek(false);
-    } else {
-      return null;
-    }
+    return await this.peek();
   }
 
-  async queryNextAndBuffer() {
+  async queryNextAndBuffer(size: number = 500) {
     // Trim the buffer to just the current element since we'll be fetching more
     const current = this.current();
     if (current) {
@@ -183,34 +269,81 @@ export class LatestCheckGroupFetcher {
       this.bufferPos = 0;
     }
 
-    const results = await this.queryCheckGroupsPage();
+    const results = await this.queryCheckGroupsPage(size);
     if (results.checkGroups.length === 0) {
       this.endOfStream = true;
       return;
     }
 
-    results.checkGroups.forEach(cg => this.buffer.push(cg));
+    results.checkGroups.forEach(mlcg => this.buffer.push(mlcg));
     this.searchAfter = results.searchAfter;
   }
 
-  private async queryCheckGroupsPage(size: number = 1000): Promise<CheckGroupsPageResult> {
+  private async queryCheckGroupsPage(size: number): Promise<CheckGroupsPageResult> {
+    const start = new Date();
     const result = await this.execCheckGroupsQuery(this.queryContext.request, size);
-    const checkGroups: MonitorLocCheckGroup[] = [];
+
+    const monitorIds = get<any>(result, 'aggregations.monitors.buckets', []).map(
+      (b: any) => b.key.monitor_id
+    );
+
+    const checkGroups = get<any>(result, 'aggregations.monitors.buckets', []).map(
+      (b: any) => b.summaries.top.hits.hits[0]._source.monitor.check_group
+    );
+
+    const latestMatchingCheckGroups = new Map<string, boolean>();
+
+    // Get the latest check groups for each found monitor ID to ensure our query matched the
+    // latest version of the data.
+    if (monitorIds.length > 0) {
+      const latestChecksRes = await this.queryContext.database.search(this.queryContext.request, {
+        index: INDEX_NAMES.HEARTBEAT,
+        body: {
+          size: 10000,
+          _source: 'monitor.id',
+          query: {
+            bool: {
+              filter: [
+                { terms: { 'monitor.id': monitorIds } },
+                { terms: { 'monitor.check_group': checkGroups } },
+                { exists: { field: 'summary.up' } },
+              ],
+            },
+          },
+        },
+      });
+      latestChecksRes.hits.hits.forEach((h: any) => {
+        const monitorId: string = h._source.monitor.id;
+        latestMatchingCheckGroups.set(monitorId, true);
+      });
+    }
+
+    const elapsed = new Date().getTime() - start.getTime();
+    console.log(
+      'Exec Query',
+      elapsed,
+      result.aggregations.monitors.buckets.length,
+      this.endOfStream
+    );
+
+    const monitors: MonitorLocCheckGroup[] = [];
 
     get<any>(result, 'aggregations.monitors.buckets', []).forEach((bucket: any) => {
-      const hitSource = bucket.summaries.top.hits.hits[0]._source;
-      checkGroups.push({
+      const latestSummaryHitSource = bucket.summaries.top.hits.hits[0]._source;
+      const latestSummaryCheckGroup = latestSummaryHitSource.monitor.check_group;
+      monitors.push({
         monitorId: bucket.key.monitor_id,
         location: bucket.key.location,
-        checkGroup: hitSource.monitor.check_group,
-        timestamp: hitSource['@timestamp'],
-        up: hitSource.summary.up,
-        down: hitSource.summary.down,
+        filterMatchesLatest: latestMatchingCheckGroups.has(bucket.key.monitor_id),
+        checkGroup: latestSummaryCheckGroup,
+        timestamp: latestSummaryHitSource['@timestamp'],
+        up: latestSummaryHitSource.summary.up,
+        down: latestSummaryHitSource.summary.down,
       });
     });
 
     return {
-      checkGroups,
+      checkGroups: monitors,
       searchAfter: result.aggregations.monitors.after_key,
     };
   }
@@ -229,32 +362,19 @@ export class LatestCheckGroupFetcher {
   private queryBody(size: number, searchAfter: any) {
     const compositeOrder = cursorDirectionToOrder(this.queryContext.pagination.cursorDirection);
 
-    // We check for summary.up to ensure that the check group
-    // is complete. Summary fields are only present on
-    // completed check groups.
-    const filters = [this.queryContext.filterClause] || [];
+    const filter = this.queryContext.filterClause || { match_all: {} };
 
     const body = {
       query: {
         bool: {
-          filter: filters,
+          filter,
         },
       },
       size: 0,
       aggs: {
         monitors: {
           composite: {
-            /**
-             * The goal here is to fetch more than enough check groups to reach the target
-             * amount in one query.
-             *
-             * For larger cardinalities, we can only count on being able to fetch max bucket
-             * size, so we will have to run this query multiple times.
-             *
-             * Multiplying `size` by 2 assumes that there will be less than three locations
-             * for the deployment, if needed the query will be run subsequently.
-             */
-            size: Math.min(size * 2, QUERY.DEFAULT_AGGS_CAP),
+            size: size,
             sources: [
               {
                 monitor_id: {
@@ -283,11 +403,7 @@ export class LatestCheckGroupFetcher {
               aggs: {
                 top: {
                   top_hits: {
-                    sort: [
-                      {
-                        '@timestamp': 'desc',
-                      },
-                    ],
+                    sort: [{ '@timestamp': 'desc' }],
                     _source: {
                       includes: ['monitor.check_group', '@timestamp', 'summary.up', 'summary.down'],
                     },
