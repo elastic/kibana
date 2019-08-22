@@ -69,6 +69,8 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       statusFilter,
     };
 
+    console.log('PAGINATION GET', pagination);
+
     const enriched = await queryEnriched(queryContext);
 
     const encodeJSONB64 = (p: any): string | null => {
@@ -79,7 +81,6 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       return Buffer.from(JSON.stringify(p)).toString('base64');
     };
 
-    console.log('ITEMS ARE ', enriched.items);
     return {
       summaries: enriched.items,
       nextPagePagination: encodeJSONB64(enriched.nextPagePagination),

@@ -42,19 +42,23 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
         { dateRangeStart, dateRangeEnd, filters, pagination },
         { req }
       ): Promise<MonitorSummaryResult> {
-        const [totalSummaryCount, { summaries, isFinalPage }] = await Promise.all([
+        const [
+          totalSummaryCount,
+          { summaries, nextPagePagination, prevPagePagination },
+        ] = await Promise.all([
           libs.pings.getDocCount(req),
           libs.monitorStates.getMonitorStates(
             req,
             dateRangeStart,
             dateRangeEnd,
-            pagination || undefined,
+            pagination ? JSON.parse(Buffer.from(pagination, 'base64').toString()) : pagination,
             filters
           ),
         ]);
         return {
-          isFinalPage,
           summaries,
+          nextPagePagination,
+          prevPagePagination,
           totalSummaryCount,
         };
       },

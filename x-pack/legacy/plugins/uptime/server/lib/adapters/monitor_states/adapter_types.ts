@@ -10,7 +10,6 @@ import {
   CursorDirection,
   SortOrder,
 } from '../../../../common/graphql/types';
-import { CONTEXT_DEFAULTS } from 'x-pack/legacy/plugins/uptime/common/constants';
 
 export interface UMMonitorStatesAdapter {
   getMonitorStates(
@@ -47,8 +46,7 @@ export interface MonitorStatesCheckGroupsResult {
 }
 
 export interface EnrichMonitorStatesResult {
-  // TODO: describe this return type better
   monitors: any[];
-  // flag indicating if the result is the end of the index
-  isFinalPage: boolean;
+  nextPagePagination: any | null;
+  prevPagePagination: any | null;
 }

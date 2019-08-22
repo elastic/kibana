@@ -13,9 +13,9 @@ export interface UptimeUrlParams {
   autorefreshIsPaused: boolean;
   dateRangeStart: string;
   dateRangeEnd: string;
+  pagination?: string;
   search: string;
   selectedPingStatus: string;
-  cursorKey?: string;
   overviewPageIndex: number;
 }
 
@@ -65,9 +65,7 @@ export const getSupportedUrlParams = (params: {
     dateRangeEnd,
     search,
     selectedPingStatus,
-    cursorKey,
-    cursorDirection,
-    sortOrder,
+    pagination,
     overviewPageIndex,
   } = filteredParams;
 
@@ -84,7 +82,7 @@ export const getSupportedUrlParams = (params: {
     search: search || SEARCH,
     selectedPingStatus:
       selectedPingStatus === undefined ? SELECTED_PING_LIST_STATUS : selectedPingStatus,
-    cursorKey,
+    pagination,
     overviewPageIndex: parseUrlInt(overviewPageIndex, OVERVIEW_PAGE_INDEX),
   };
 };

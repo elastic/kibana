@@ -24,9 +24,6 @@ import {
   MonitorSummary,
   MonitorSummaryResult,
   SummaryHistogramPoint,
-  CursorPagination,
-  CursorDirection,
-  SortOrder,
 } from '../../../../common/graphql/types';
 import { MonitorListStatusColumn } from './monitor_list_status_column';
 import { formatUptimeGraphQLErrorList } from '../../../lib/helper/format_error_list';
@@ -37,7 +34,6 @@ import { MonitorBarSeries } from '../charts';
 import { MonitorPageLink } from '../monitor_page_link';
 import { MonitorListActionsPopover } from './monitor_list_actions_popover';
 import { OverviewPageLink } from '../overview_page_link';
-import { useUrlParams } from '../../../hooks';
 
 interface MonitorListQueryResult {
   monitorStates?: MonitorSummaryResult;
@@ -49,7 +45,6 @@ interface MonitorListProps {
   dangerColor: string;
   successColor: string;
   linkParameters?: string;
-  pagination: CursorPagination;
 }
 
 type Props = UptimeGraphQLQueryProps<MonitorListQueryResult> & MonitorListProps;
@@ -67,37 +62,16 @@ export const MonitorListComponent = (props: Props) => {
   } = props;
   const [drawerIds, updateDrawerIds] = useState<string[]>([]);
   const items = get<MonitorSummary[]>(data, 'monitorStates.summaries', []);
-  const isFinalPage = get<boolean>(data, 'monitorStates.isFinalPage', true);
-  const [getUrlParams] = useUrlParams();
-  const { overviewPageIndex } = getUrlParams();
 
-  const paginationLinkForSummary = (summary: MonitorSummary, cursorDirection: CursorDirection) => {
-    const location = get(summary.state, 'observer.geo.name', [])
-      .concat()
-      .sort()[0];
+  const nextPagePagination = get<string>(data, 'monitorStates.nextPagePagination');
+  const prevPagePagination = get<string>(data, 'monitorStates.prevPagePagination');
 
-    const { monitor_id } = summary;
-    const cursorKeyProp = {
-      monitor_id,
-      location,
-    };
-    const pagination = {
-      cursorKey: JSON.stringify(cursorKeyProp),
-      cursorDirection,
-      sortOrder: SortOrder.ASC,
-    };
-
-    if (CursorDirection.BEFORE === cursorDirection) {
-      return (
-        <OverviewPageLink pagination={pagination}>
-          <EuiIcon type={'arrowLeft'} />
-        </OverviewPageLink>
-      );
-    }
+  const paginationLinkForSummary = (pagination: string, direction: string = 'next') => {
+    const icon = direction === 'prev' ? 'arrowLeft' : 'arrowRight';
 
     return (
       <OverviewPageLink pagination={pagination}>
-        <EuiIcon type={'arrowRight'} />
+        <EuiIcon type={icon} />
       </OverviewPageLink>
     );
   };
@@ -261,12 +235,8 @@ export const MonitorListComponent = (props: Props) => {
           <EuiFlexGroup>
             <EuiFlexItem>
               <span>
-                {items.length > 0 &&
-                  overviewPageIndex !== 0 &&
-                  paginationLinkForSummary(items[0], CursorDirection.BEFORE)}
-                {items.length > 1 &&
-                  !isFinalPage &&
-                  paginationLinkForSummary(last(items), CursorDirection.AFTER)}
+                {prevPagePagination && paginationLinkForSummary(prevPagePagination, 'prev')}
+                {nextPagePagination && paginationLinkForSummary(nextPagePagination, 'next')}
               </span>
             </EuiFlexItem>
           </EuiFlexGroup>

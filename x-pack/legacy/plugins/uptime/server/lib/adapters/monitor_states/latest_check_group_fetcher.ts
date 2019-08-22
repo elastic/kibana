@@ -31,8 +31,11 @@ export const fetchMonitorLocCheckGroups = async (
 
   const fetcher = new LatestCheckGroupFetcher(queryContext);
   let currentMonitor: MonitorIdWithGroups | null = null;
+  let i = 0;
   while (items.length < size) {
+    i++;
     const mlcg = await fetcher.next();
+    console.log('Next invoked', i, mlcg, await fetcher.current());
     if (!mlcg) {
       break; // No more items to fetch
     }
@@ -82,7 +85,7 @@ export class LatestCheckGroupFetcher {
   constructor(queryContext: QueryContext) {
     this.queryContext = queryContext;
     this.buffer = [];
-    this.bufferPos = 0;
+    this.bufferPos = -1; // We start before the stream. User must call next to get any data
     this.endOfStream = false;
     this.searchAfter = queryContext.pagination.cursorKey;
   }
@@ -93,7 +96,8 @@ export class LatestCheckGroupFetcher {
     const cursorKey = current
       ? { monitor_id: current.monitorId, location: current.location }
       : null;
-    console.log('COMBINE', this.queryContext.pagination, cursorKey);
+
+    console.log('current is', current);
     return Object.assign({}, this.queryContext.pagination, { cursorKey });
   }
 
@@ -123,11 +127,10 @@ export class LatestCheckGroupFetcher {
   }
 
   async next(): Promise<MonitorLocCheckGroup | null> {
-    console.log('BUFFER STAT CG', this.buffer.length, this.bufferPos);
     if (this.endOfStream) {
       return null;
     }
-    const found = this.buffer[this.bufferPos];
+    const found = this.buffer[this.bufferPos + 1];
     if (found) {
       this.bufferPos++;
       return found;
@@ -154,15 +157,18 @@ export class LatestCheckGroupFetcher {
       this.endOfStream = true;
     }
     if (discardBuffer) {
-      this.bufferPos = 0;
-      this.buffer = results.checkGroups;
-    } else {
-      results.checkGroups.forEach(cg => this.buffer.push(cg));
+      // We can't discard the current element of course!
+      const current = this.current!;
+      if (current) {
+        this.buffer = [this.current()!];
+        this.bufferPos = 0;
+      }
     }
+    results.checkGroups.forEach(cg => this.buffer.push(cg));
     this.searchAfter = results.searchAfter;
   }
 
-  private async queryCheckGroupsPage(size: number = 50): Promise<CheckGroupsPageResult> {
+  private async queryCheckGroupsPage(size: number = 1000): Promise<CheckGroupsPageResult> {
     const result = await this.execCheckGroupsQuery(this.queryContext.request, size);
     const checkGroups: MonitorLocCheckGroup[] = [];
 

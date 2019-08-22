@@ -7,9 +7,7 @@ import {
   MonitorSummary,
   SummaryHistogram,
   Check,
-  StatesIndexStatus,
   CursorDirection,
-  SortOrder,
 } from '../../../../common/graphql/types';
 import { CursorPagination } from './adapter_types';
 
@@ -265,6 +263,7 @@ export const queryEnriched = async (queryContext: QueryContext): Promise<Enriche
     histogram: histogramMap[summary.monitor_id],
   }));
 
+  console.log('MLCPAG', mlcgsResult.nextPagePagination);
   return {
     items: resItems,
     nextPagePagination: mlcgsResult.nextPagePagination,

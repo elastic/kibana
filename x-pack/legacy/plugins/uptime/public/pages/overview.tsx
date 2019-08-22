@@ -49,7 +49,7 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
   );
   const [getUrlParams, updateUrl] = useUrlParams();
   const params = getUrlParams();
-  const { dateRangeStart, dateRangeEnd, search } = params;
+  const { dateRangeStart, dateRangeEnd, search, pagination } = params;
 
   useEffect(() => {
     setBreadcrumbs(getOverviewPageBreadcrumbs());
@@ -91,8 +91,6 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
 
   const linkParameters = stringifyUrlParams(params);
 
-  const pagination: any = undefined;
-
   return (
     <Fragment>
       <EmptyState basePath={basePath} implementsCustomErrorState={true} variables={{}}>
@@ -125,7 +123,6 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
           implementsCustomErrorState={true}
           linkParameters={linkParameters}
           successColor={colors.success}
-          pagination={pagination}
           variables={{
             ...sharedProps,
             pagination: pagination ? btoa(JSON.stringify(pagination)) : undefined,
