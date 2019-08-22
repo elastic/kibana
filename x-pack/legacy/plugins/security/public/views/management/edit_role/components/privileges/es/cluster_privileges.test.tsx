@@ -8,6 +8,7 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import { Role } from '../../../../../../../common/model';
 import { ClusterPrivileges } from './cluster_privileges';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 test('it renders without crashing', () => {
   const role: Role = {
@@ -28,4 +29,33 @@ test('it renders without crashing', () => {
     />
   );
   expect(wrapper).toMatchSnapshot();
+});
+
+test('it allows for custom cluster privileges', () => {
+  const role: Role = {
+    name: '',
+    elasticsearch: {
+      cluster: ['existing-custom', 'monitor'],
+      indices: [],
+      run_as: [],
+    },
+    kibana: [],
+  };
+
+  const onChange = jest.fn();
+  const wrapper = mountWithIntl(
+    <ClusterPrivileges
+      role={role}
+      onChange={onChange}
+      availableClusterPrivileges={['all', 'manage', 'monitor']}
+    />
+  );
+
+  const clusterPrivsSelect = wrapper.find(
+    'EuiComboBox[data-test-subj="cluster-privileges-combobox"]'
+  );
+
+  (clusterPrivsSelect.props() as any).onCreateOption('custom-cluster-privilege');
+
+  expect(onChange).toHaveBeenCalledWith(['existing-custom', 'monitor', 'custom-cluster-privilege']);
 });
