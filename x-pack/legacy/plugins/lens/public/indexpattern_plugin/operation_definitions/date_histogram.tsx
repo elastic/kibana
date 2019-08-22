@@ -138,6 +138,8 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       sourceField: field.name,
       params: {
         ...oldColumn.params,
+        // If we have an "auto" interval but the field we're switching to doesn't support auto intervals
+        // we use the default custom interval instead
         interval:
           oldColumn.params.interval === 'auto' && !supportsAutoInterval(field.name, indexPattern)
             ? defaultCustomInterval

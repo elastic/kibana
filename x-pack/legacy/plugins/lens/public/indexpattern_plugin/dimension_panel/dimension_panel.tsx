@@ -117,6 +117,9 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
           const operationsForNewField =
             operationFieldSupportMatrix.operationByField[droppedItem.field.name];
 
+          // We need to check if dragging in a new field, was just a field change on the same
+          // index pattern and on the same operations (therefore checking if the new field supports
+          // our previous operation)
           const hasFieldChanged =
             selectedColumn &&
             hasField(selectedColumn) &&
@@ -124,6 +127,8 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
             operationsForNewField &&
             operationsForNewField.includes(selectedColumn.operationType);
 
+          // If only the field has changed use the onFieldChange method on the operation to get the
+          // new column, otherwise use the regular buildColumn to get a new column.
           const newColumn = hasFieldChanged
             ? (operationDefinitionMap[selectedColumn.operationType] as OperationDefinition<
                 IndexPatternColumn
@@ -142,6 +147,8 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
               layerId,
               columnId: props.columnId,
               newColumn,
+              // If the field has changed, the onFieldChange method needs to take care of everything including moving
+              // over params. If we create a new column above we want changeColumn to move over params.
               keepParams: !hasFieldChanged,
             })
           );

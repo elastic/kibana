@@ -89,12 +89,15 @@ export interface OperationDefinition<C extends BaseIndexPatternColumn> {
   transfer?: (column: C, newIndexPattern: IndexPattern) => C;
   /**
    * This method will be called if the user changes the field of an operation.
-   * If this isn't implemented the new column will just be the old column with the new field name,
-   * and everything else will stay the same. You can implement this method to modify the logic
-   * by which the new column will be built. This will only be called for switching the field,
-   * not for initially selecting a field.
+   * You must implement it and return the new column after the field change.
+   * The most simple implementation will just change the field on the column, and keep
+   * the rest the same. Some implementations might want to change labels, or their parameters
+   * when changing the field.
    *
-   * See {@link #transfer} for controlling column building when switching an index pattern not just a field.
+   * This will only be called for switching the field, not for initially selecting a field.
+   *
+   * See {@link OperationDefinition#transfer} for controlling column building when switching an
+   * index pattern not just a field.
    *
    * @param oldColumn The column before the user changed the field.
    * @param indexPattern The index pattern that field is on.
