@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiButton, EuiPopover, EuiPopoverTitle, EuiSpacer } from '@elastic/eui';
 import React, { useContext, useEffect, useReducer, useState } from 'react';
-
 import styled from 'styled-components';
 import moment from 'moment';
-import { EuiButton, EuiPopover, EuiPopoverTitle, EuiSpacer } from '@elastic/eui';
+
 import { useJobSummaryData } from './hooks/use_job_summary_data';
 import * as i18n from './translations';
-import { KibanaConfigContext } from '../../lib/adapters/framework/kibana_framework_adapter';
 import { Job } from './types';
 import { hasMlAdminPermissions } from '../ml/permissions/has_ml_admin_permissions';
 import { MlCapabilitiesContext } from '../ml/permissions/ml_capabilities_provider';
@@ -26,6 +25,8 @@ import { getConfigTemplatesToInstall, getJobsToDisplay, getJobsToInstall } from 
 import { configTemplates, siemJobPrefix } from './config_templates';
 import { useStateToaster } from '../toasters';
 import { errorToToaster } from '../ml/api/error_to_toaster';
+import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
+import { DEFAULT_KBN_VERSION } from '../../../common/constants';
 
 const PopoverContentsDiv = styled.div`
   max-width: 550px;
@@ -94,11 +95,10 @@ export const MlPopover = React.memo(() => {
   const [isCreatingJobs, setIsCreatingJobs] = useState(false);
   const [filterQuery, setFilterQuery] = useState('');
   const [, dispatchToaster] = useStateToaster();
-
   const [, configuredIndexPatterns] = useIndexPatterns(refreshToggle);
-  const config = useContext(KibanaConfigContext);
   const capabilities = useContext(MlCapabilitiesContext);
-  const headers = { 'kbn-version': config.kbnVersion };
+  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+  const headers = { 'kbn-version': kbnVersion };
 
   // Enable/Disable Job & Datafeed -- passed to JobsTable for use as callback on JobSwitch
   const enableDatafeed = async (jobName: string, latestTimestampMs: number, enable: boolean) => {

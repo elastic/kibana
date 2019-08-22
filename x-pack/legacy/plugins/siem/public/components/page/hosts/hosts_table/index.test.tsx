@@ -13,7 +13,6 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import {
   apolloClientObservable,
-  mockFrameworks,
   mockIndexPattern,
   mockGlobalState,
   TestProviders,
@@ -22,7 +21,6 @@ import { createStore, hostsModel, State } from '../../../../store';
 
 import { HostsTable } from './index';
 import { mockData } from './mock';
-import { KibanaConfigContext } from '../../../../lib/adapters/framework/kibana_framework_adapter';
 
 describe('Hosts Table', () => {
   const loadPage = jest.fn();
@@ -38,23 +36,17 @@ describe('Hosts Table', () => {
     test('it renders the default Hosts table', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
-          <KibanaConfigContext.Provider value={mockFrameworks.default_UTC}>
-            <HostsTable
-              data={mockData.Hosts.edges}
-              id="hostsQuery"
-              indexPattern={mockIndexPattern}
-              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Hosts.pageInfo)}
-              loading={false}
-              loadPage={loadPage}
-              showMorePagesIndicator={getOr(
-                false,
-                'showMorePagesIndicator',
-                mockData.Hosts.pageInfo
-              )}
-              totalCount={mockData.Hosts.totalCount}
-              type={hostsModel.HostsType.page}
-            />
-          </KibanaConfigContext.Provider>
+          <HostsTable
+            data={mockData.Hosts.edges}
+            id="hostsQuery"
+            indexPattern={mockIndexPattern}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Hosts.pageInfo)}
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.Hosts.pageInfo)}
+            totalCount={mockData.Hosts.totalCount}
+            type={hostsModel.HostsType.page}
+          />
         </ReduxStoreProvider>
       );
 

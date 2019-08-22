@@ -88,7 +88,9 @@ export function documentSearchRoute(router: CodeServerRouter, log: Logger) {
 
       let scope: string[] = [];
       if (typeof repoScope === 'string') {
-        scope = repoScope.split(',');
+        scope = [repoScope];
+      } else if (Array.isArray(repoScope)) {
+        scope = repoScope;
       }
 
       const searchReq: DocumentSearchRequest = {
