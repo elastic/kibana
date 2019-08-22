@@ -7,10 +7,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiForm, EuiFormRow, EuiRange, EuiSelect } from '@elastic/eui';
-import { TermsIndexPatternColumn, IndexPatternColumn } from '../indexpattern';
-import { OperationDefinition } from '../operations';
-import { updateColumnParam } from '../state_helpers';
-import { DataType } from '../../types';
+import { TermsIndexPatternColumn, IndexPatternColumn } from '../../indexpattern';
+import { updateColumnParam } from '../../state_helpers';
+import { DataType } from '../../../types';
+import { OperationDefinition } from '.';
 
 type PropType<C> = C extends React.ComponentType<infer P> ? P : unknown;
 
@@ -42,23 +42,14 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
   displayName: i18n.translate('xpack.lens.indexPattern.terms', {
     defaultMessage: 'Top Values',
   }),
-  getPossibleOperationsForDocument: () => [],
-  getPossibleOperationsForField: ({ aggregationRestrictions, aggregatable, type }) => {
+  getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       (type === 'string' || type === 'boolean') &&
       aggregatable &&
       (!aggregationRestrictions || aggregationRestrictions.terms)
     ) {
-      return [
-        {
-          dataType: type,
-          isBucketed: true,
-          isMetric: false,
-          scale: 'ordinal',
-        },
-      ];
+      return { dataType: type, isBucketed: true, isMetric: false, scale: 'ordinal' };
     }
-    return [];
   },
   isTransferable: (column, newIndexPattern) => {
     const newField = newIndexPattern.fields.find(field => field.name === column.sourceField);

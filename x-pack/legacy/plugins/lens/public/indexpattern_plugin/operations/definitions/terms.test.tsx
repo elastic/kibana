@@ -7,7 +7,7 @@
 import React from 'react';
 import { termsOperation } from './terms';
 import { shallow } from 'enzyme';
-import { IndexPatternPrivateState, TermsIndexPatternColumn } from '../indexpattern';
+import { IndexPatternPrivateState, TermsIndexPatternColumn } from '../../indexpattern';
 import { EuiRange, EuiSelect } from '@elastic/eui';
 import { UiSettingsClientContract } from 'src/core/public';
 import { Storage } from 'ui/storage';
@@ -75,10 +75,10 @@ describe('terms', () => {
     });
   });
 
-  describe('getPossibleOperationsForField', () => {
+  describe('getPossibleOperationForField', () => {
     it('should return operation with the right type', () => {
       expect(
-        termsOperation.getPossibleOperationsForField({
+        termsOperation.getPossibleOperationForField({
           aggregatable: true,
           searchable: true,
           name: 'test',
@@ -89,51 +89,47 @@ describe('terms', () => {
             },
           },
         })
-      ).toEqual([
-        {
-          dataType: 'string',
-          isBucketed: true,
-          isMetric: false,
-          scale: 'ordinal',
-        },
-      ]);
+      ).toEqual({
+        dataType: 'string',
+        isBucketed: true,
+        isMetric: false,
+        scale: 'ordinal',
+      });
 
       expect(
-        termsOperation.getPossibleOperationsForField({
+        termsOperation.getPossibleOperationForField({
           aggregatable: true,
           searchable: true,
           name: 'test',
           type: 'boolean',
         })
-      ).toEqual([
-        {
-          dataType: 'boolean',
-          isBucketed: true,
-          isMetric: false,
-          scale: 'ordinal',
-        },
-      ]);
+      ).toEqual({
+        dataType: 'boolean',
+        isBucketed: true,
+        isMetric: false,
+        scale: 'ordinal',
+      });
     });
 
     it('should not return an operation if restrictions prevent terms', () => {
       expect(
-        termsOperation.getPossibleOperationsForField({
+        termsOperation.getPossibleOperationForField({
           aggregatable: false,
           searchable: true,
           name: 'test',
           type: 'string',
         })
-      ).toEqual([]);
+      ).toEqual(undefined);
 
       expect(
-        termsOperation.getPossibleOperationsForField({
+        termsOperation.getPossibleOperationForField({
           aggregatable: true,
           aggregationRestrictions: {},
           searchable: true,
           name: 'test',
           type: 'string',
         })
-      ).toEqual([]);
+      ).toEqual(undefined);
     });
   });
 

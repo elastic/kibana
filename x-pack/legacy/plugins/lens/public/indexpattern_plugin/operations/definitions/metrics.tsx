@@ -11,34 +11,30 @@ import {
   SumIndexPatternColumn,
   AvgIndexPatternColumn,
   MaxIndexPatternColumn,
-} from '../indexpattern';
-import { OperationDefinition } from '../operations';
+} from '../../indexpattern';
+import { OperationDefinition } from '.';
 
 function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
   type: T['operationType'],
   displayName: string,
   ofName: (name: string) => string
 ) {
-  const operationDefinition: OperationDefinition<T> = {
+  return {
     type,
     displayName,
-    getPossibleOperationsForDocument: () => [],
-    getPossibleOperationsForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
+    getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
       if (
         fieldType === 'number' &&
         aggregatable &&
         (!aggregationRestrictions || aggregationRestrictions[type])
       ) {
-        return [
-          {
-            dataType: 'number',
-            isBucketed: false,
-            isMetric: true,
-            scale: 'ratio',
-          },
-        ];
+        return {
+          dataType: 'number',
+          isBucketed: false,
+          isMetric: true,
+          scale: 'ratio',
+        };
       }
-      return [];
     },
     isTransferable: (column, newIndexPattern) => {
       const newField = newIndexPattern.fields.find(field => field.name === column.sourceField);
@@ -50,7 +46,16 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
           (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
       );
     },
-    buildColumn({ suggestedPriority, field }): T {
+    toEsAggsConfig: (column, columnId) => ({
+      id: columnId,
+      enabled: true,
+      type: column.operationType,
+      schema: 'metric',
+      params: {
+        field: column.sourceField,
+      },
+    }),
+    buildColumn: ({ suggestedPriority, field }) => {
       if (!field) {
         throw new Error(`Invariant: A ${type} operation can only be built with a field`);
       }
@@ -63,19 +68,9 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
         isBucketed: false,
         isMetric: true,
         scale: 'ratio',
-      } as T;
+      };
     },
-    toEsAggsConfig: (column, columnId) => ({
-      id: columnId,
-      enabled: true,
-      type: column.operationType,
-      schema: 'metric',
-      params: {
-        field: column.sourceField,
-      },
-    }),
-  };
-  return operationDefinition;
+  } as OperationDefinition<T>;
 }
 
 export const minOperation = buildMetricOperation<MinIndexPatternColumn>(

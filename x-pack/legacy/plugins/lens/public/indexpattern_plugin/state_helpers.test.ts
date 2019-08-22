@@ -22,7 +22,7 @@ import {
 import { operationDefinitionMap } from './operations';
 
 jest.mock('ui/new_platform');
-jest.mock('./operations');
+jest.mock('./operations/operations');
 
 describe('state_helpers', () => {
   describe('deleteColumn', () => {

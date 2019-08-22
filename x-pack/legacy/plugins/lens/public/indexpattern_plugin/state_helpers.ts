@@ -12,7 +12,8 @@ import {
   IndexPatternLayer,
   IndexPattern,
 } from './indexpattern';
-import { operationDefinitionMap, OperationDefinition, isColumnTransferable } from './operations';
+import { isColumnTransferable } from './operations/operations';
+import { operationDefinitionMap } from './operations';
 
 export function updateColumnParam<
   C extends BaseIndexPatternColumn & { params: object },
@@ -61,9 +62,7 @@ function adjustColumnReferencesForChangedColumn(
   Object.keys(newColumns).forEach(currentColumnId => {
     if (currentColumnId !== columnId) {
       const currentColumn = newColumns[currentColumnId] as BaseIndexPatternColumn;
-      const operationDefinition = operationDefinitionMap[
-        currentColumn.operationType
-      ] as OperationDefinition<BaseIndexPatternColumn>;
+      const operationDefinition = operationDefinitionMap[currentColumn.operationType];
       newColumns[currentColumnId] = (operationDefinition.onOtherColumnChanged
         ? operationDefinition.onOtherColumnChanged(currentColumn, newColumns)
         : currentColumn) as IndexPatternColumn;
@@ -175,11 +174,9 @@ export function updateLayerIndexPattern(
     isColumnTransferable(column, newIndexPattern)
   );
   const newColumns: IndexPatternLayer['columns'] = _.mapValues(keptColumns, column => {
-    const operationDefinition = operationDefinitionMap[column.operationType] as OperationDefinition<
-      IndexPatternColumn
-    >;
+    const operationDefinition = operationDefinitionMap[column.operationType];
     return operationDefinition.transfer
-      ? operationDefinition.transfer(column, newIndexPattern)
+      ? (operationDefinition.transfer(column, newIndexPattern) as IndexPatternColumn)
       : column;
   });
   const newColumnOrder = layer.columnOrder.filter(columnId => newColumns[columnId]);

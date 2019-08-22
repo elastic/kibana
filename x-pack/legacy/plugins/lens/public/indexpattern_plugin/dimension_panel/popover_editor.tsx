@@ -28,11 +28,12 @@ import {
   IndexPatternField,
 } from '../indexpattern';
 import { IndexPatternDimensionPanelProps, OperationFieldSupportMatrix } from './dimension_panel';
-import { operationDefinitionMap, getOperationDisplay, buildColumn } from '../operations';
+import { getOperationDisplay, buildColumn } from '../operations/operations';
 import { deleteColumn, changeColumn } from '../state_helpers';
 import { FieldSelect } from './field_select';
 import { hasField } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
+import { operationDefinitionMap } from '../operations';
 
 const operationPanels = getOperationDisplay();
 

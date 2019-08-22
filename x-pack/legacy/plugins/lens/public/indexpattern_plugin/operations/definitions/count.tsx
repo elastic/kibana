@@ -5,24 +5,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CountIndexPatternColumn } from '../indexpattern';
-import { OperationDefinition } from '../operations';
+import { CountIndexPatternColumn } from '../../indexpattern';
+import { OperationDefinition } from '.';
 
 export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
   type: 'count',
   displayName: i18n.translate('xpack.lens.indexPattern.count', {
     defaultMessage: 'Count',
   }),
-  getPossibleOperationsForField: () => [],
-  getPossibleOperationsForDocument: () => {
-    return [
-      {
-        dataType: 'number',
-        isBucketed: false,
-        isMetric: true,
-        scale: 'ratio',
-      },
-    ];
+  getPossibleOperationForDocument: () => {
+    return {
+      dataType: 'number',
+      isBucketed: false,
+      isMetric: true,
+      scale: 'ratio',
+    };
   },
   buildColumn({ suggestedPriority }) {
     return {

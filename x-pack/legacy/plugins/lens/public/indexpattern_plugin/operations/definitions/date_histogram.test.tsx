@@ -7,7 +7,7 @@
 import React from 'react';
 import { dateHistogramOperation } from './date_histogram';
 import { shallow } from 'enzyme';
-import { DateHistogramIndexPatternColumn, IndexPatternPrivateState } from '../indexpattern';
+import { DateHistogramIndexPatternColumn, IndexPatternPrivateState } from '../../indexpattern';
 import { EuiRange } from '@elastic/eui';
 import { UiSettingsClientContract } from 'src/core/public';
 import { Storage } from 'ui/storage';

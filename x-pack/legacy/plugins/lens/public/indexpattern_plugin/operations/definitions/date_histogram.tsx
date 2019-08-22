@@ -8,10 +8,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiForm, EuiFormRow, EuiRange } from '@elastic/eui';
-import { IndexPatternField, DateHistogramIndexPatternColumn } from '../indexpattern';
-import { DimensionPriority } from '../../types';
-import { OperationDefinition } from '../operations';
-import { updateColumnParam } from '../state_helpers';
+import { IndexPatternField, DateHistogramIndexPatternColumn } from '../../indexpattern';
+import { DimensionPriority } from '../../../types';
+import { updateColumnParam } from '../../state_helpers';
+import { OperationDefinition } from '.';
 
 type PropType<C> = C extends React.ComponentType<infer P> ? P : unknown;
 
@@ -39,23 +39,19 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
   displayName: i18n.translate('xpack.lens.indexPattern.dateHistogram', {
     defaultMessage: 'Date Histogram',
   }),
-  getPossibleOperationsForDocument: () => [],
-  getPossibleOperationsForField: ({ aggregationRestrictions, aggregatable, type }) => {
+  getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       type === 'date' &&
       aggregatable &&
       (!aggregationRestrictions || aggregationRestrictions.date_histogram)
     ) {
-      return [
-        {
-          dataType: 'date',
-          isBucketed: true,
-          isMetric: false,
-          scale: 'interval',
-        },
-      ];
+      return {
+        dataType: 'date',
+        isBucketed: true,
+        isMetric: false,
+        scale: 'interval',
+      };
     }
-    return [];
   },
   buildColumn({
     suggestedPriority,

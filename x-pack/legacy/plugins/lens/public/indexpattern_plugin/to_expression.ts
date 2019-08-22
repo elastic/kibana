@@ -7,7 +7,8 @@
 import _ from 'lodash';
 
 import { IndexPatternPrivateState, IndexPatternColumn, IndexPattern } from './indexpattern';
-import { operationDefinitionMap, OperationDefinition, buildColumn } from './operations';
+import { buildColumn } from './operations/operations';
+import { operationDefinitionMap } from './operations';
 
 function getExpressionForLayer(
   indexPattern: IndexPattern,
@@ -20,12 +21,7 @@ function getExpressionForLayer(
   }
 
   function getEsAggsConfig<C extends IndexPatternColumn>(column: C, columnId: string) {
-    // Typescript is not smart enough to infer that definitionMap[C['operationType']] is always OperationDefinition<C>,
-    // but this is made sure by the typing of the operation map
-    const operationDefinition = (operationDefinitionMap[
-      column.operationType
-    ] as unknown) as OperationDefinition<C>;
-    return operationDefinition.toEsAggsConfig(column, columnId);
+    return operationDefinitionMap[column.operationType].toEsAggsConfig(column, columnId);
   }
 
   const columnEntries = columnOrder.map(

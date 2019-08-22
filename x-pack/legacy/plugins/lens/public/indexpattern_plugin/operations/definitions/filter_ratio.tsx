@@ -11,26 +11,23 @@ import { EuiButton, EuiFormRow } from '@elastic/eui';
 import {
   Query,
   QueryBarInput,
-} from '../../../../../../../src/legacy/core_plugins/data/public/query';
-import { FilterRatioIndexPatternColumn } from '../indexpattern';
-import { OperationDefinition } from '../operations';
-import { updateColumnParam } from '../state_helpers';
+} from '../../../../../../../../src/legacy/core_plugins/data/public/query';
+import { FilterRatioIndexPatternColumn } from '../../indexpattern';
+import { updateColumnParam } from '../../state_helpers';
+import { OperationDefinition } from '.';
 
 export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternColumn> = {
   type: 'filter_ratio',
   displayName: i18n.translate('xpack.lens.indexPattern.filterRatio', {
     defaultMessage: 'Filter Ratio',
   }),
-  getPossibleOperationsForField: () => [],
-  getPossibleOperationsForDocument: () => {
-    return [
-      {
-        dataType: 'number',
-        isBucketed: false,
-        isMetric: true,
-        scale: 'ratio',
-      },
-    ];
+  getPossibleOperationForDocument: () => {
+    return {
+      dataType: 'number',
+      isBucketed: false,
+      isMetric: true,
+      scale: 'ratio',
+    };
   },
   buildColumn({ suggestedPriority }) {
     return {

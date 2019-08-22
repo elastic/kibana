@@ -14,7 +14,7 @@ import {
   IndexPatternPrivateState,
   IndexPattern,
 } from './indexpattern';
-import { buildColumn, getOperationTypesForField } from './operations';
+import { buildColumn, getOperationTypesForField } from './operations/operations';
 import { hasField } from './utils';
 
 function buildSuggestion({
