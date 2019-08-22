@@ -33,11 +33,7 @@ export function initInternalSpacesApi(deps: InternalRouteDeps) {
           return Boom.notFound();
         }
 
-        // TODO: Need to get the UI Settings service for the space we are switching to, not the space we are switching from.
-        // TODO: consolidate the defaultRoute logic. It's duplicated in the on_post_auth_interceptoor too.
-        const defaultRoute =
-          (await request.getUiSettingsService().get('defaultRoute')) ||
-          config.get('server.defaultRoute');
+        const defaultRoute = await spacesService.getDefaultRoute(request, id);
 
         return {
           location: addSpaceIdToPath(config.get('server.basePath'), existingSpace.id, defaultRoute),

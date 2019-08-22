@@ -31,6 +31,8 @@ export interface SpacesServiceSetup {
 
   getBasePath(spaceId: string): string;
 
+  getDefaultRoute(request: RequestFacade, spaceId?: string): Promise<string>;
+
   isInDefaultSpace(request: RequestFacade): boolean;
 
   spaceIdToNamespace(spaceId: string): string | undefined;
@@ -42,6 +44,8 @@ interface SpacesServiceDeps {
   http: HttpServiceSetup;
   elasticsearch: ElasticsearchServiceSetup;
   savedObjects: SavedObjectsService;
+  uiSettingsServiceFactory: any;
+  fallbackDefaultRoute: string;
   security: OptionalPlugin<SecurityPlugin>;
   config$: Observable<SpacesConfigType>;
   spacesAuditLogger: any;
@@ -56,6 +60,8 @@ export class SpacesService {
     http,
     elasticsearch,
     savedObjects,
+    uiSettingsServiceFactory,
+    fallbackDefaultRoute,
     security,
     config$,
     spacesAuditLogger,
@@ -88,6 +94,16 @@ export class SpacesService {
       },
       spaceIdToNamespace,
       namespaceToSpaceId,
+      getDefaultRoute: async (request: RequestFacade, spaceId: string = getSpaceId(request)) => {
+        const uiSettingsService = uiSettingsServiceFactory({
+          savedObjectsClient: savedObjects.getScopedSavedObjectsClient(request, {
+            excludedWrappers: ['spaces'],
+          }),
+          namespace: spaceIdToNamespace(spaceId),
+        });
+
+        return (await uiSettingsService.get('defaultRoute')) || fallbackDefaultRoute;
+      },
       scopedClient: async (request: RequestFacade) => {
         return combineLatest(elasticsearch.adminClient$, config$)
           .pipe(
