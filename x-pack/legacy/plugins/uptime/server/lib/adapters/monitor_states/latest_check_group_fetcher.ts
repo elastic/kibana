@@ -44,10 +44,8 @@ export const fetchMonitorLocCheckGroups = async (
     // On our first item set the previous pagination to be items before this if they exist
     if (items.length === 0) {
       const reverseFetcher = await fetcher.reverse();
-      const peeked = await reverseFetcher.peek();
-      console.log('DO REVERSE', peeked);
-      const revPagination = reverseFetcher && peeked && reverseFetcher.paginationAfterCurrent()!;
-      paginationBefore = revPagination && revPagination.cursorKey ? revPagination : null;
+      paginationBefore = reverseFetcher && (await reverseFetcher.paginationAfterCurrent());
+      console.log('END REVERSE', paginationBefore);
     }
 
     items.push(monitor);
@@ -58,7 +56,7 @@ export const fetchMonitorLocCheckGroups = async (
   // We have to create these objects before checking if we can navigate backward
   console.log('PEEKNEXT', await fetcher.peek());
   const paginationAfter: CursorPagination | null = (await fetcher.peek())
-    ? fetcher.paginationAfterCurrent()
+    ? await fetcher.paginationAfterCurrent()
     : null;
   console.log('E CHECK NEXT', paginationAfter);
 
@@ -99,11 +97,19 @@ class Fetcher {
   }
 
   // Get a CursorPaginator object that will resume after the current() value.
-  paginationAfterCurrent(): CursorPagination | null {
+  async paginationAfterCurrent(): Promise<CursorPagination | null> {
+    const peek = await this.peek();
+    console.log('CURP', this.current());
+    if (!peek) {
+      console.log('PEEKED', peek);
+      return null;
+    }
+
     const current = this.current();
     if (!current) {
       return null;
     }
+    console.log('PAGINATION AFTER', current.id);
     const cursorKey = { monitor_id: current.id };
 
     return Object.assign({}, this.queryContext.pagination, { cursorKey });
@@ -215,8 +221,6 @@ class Fetcher {
       filteredCheckGroups.set(checkGroup, true);
     });
 
-    console.log("MIDS", monitorIds);
-
     let mostRecentGroupsForMonitorIds = new Map<string, MonitorLocCheckGroup[]>();
     if (monitorIdsMatchingStatusFilter.length > 0) {
       const mostRecentQueryResult = await this.mostRecentCheckGroups(
@@ -254,12 +258,9 @@ class Fetcher {
       });
     });
     miwgs = sortBy(miwgs, miwg => miwg.id);
-    if (this.queryContext.pagination.sortOrder === SortOrder.DESC) {
+    if (this.queryContext.pagination.cursorDirection === CursorDirection.BEFORE) {
       miwgs.reverse();
     }
-
-    console.log('ITALL', miwgs);
-    console.log('ITFMG', mostRecentGroupsForMonitorIds);
 
     const elapsed = new Date().getTime() - start.getTime();
     console.log('Exec Query in', elapsed, 'Len', miwgs.length);
