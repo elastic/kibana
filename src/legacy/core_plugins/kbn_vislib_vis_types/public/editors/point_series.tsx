@@ -32,9 +32,24 @@ import { SelectOption } from '../controls/select';
 function PointSeriesOptions(props: VisOptionsProps<BasicVislibParams>) {
   const { stateParams, setValue, vis } = props;
   const options = [
-    { value: 'full', text: 'Full' },
-    { value: 'dashed', text: 'Dashed' },
-    { value: 'dot-dashed', text: 'Dot-dashed' },
+    {
+      value: 'full',
+      text: i18n.translate('kbnVislibVisTypes.editors.pointSeries.thresholdLine.style.full', {
+        defaultMessage: 'Full',
+      }),
+    },
+    {
+      value: 'dashed',
+      text: i18n.translate('kbnVislibVisTypes.editors.pointSeries.thresholdLine.style.dashed', {
+        defaultMessage: 'Dashed',
+      }),
+    },
+    {
+      value: 'dot-dashed',
+      text: i18n.translate('kbnVislibVisTypes.editors.pointSeries.thresholdLine.style.dotdashed', {
+        defaultMessage: 'Dot-dashed',
+      }),
+    },
   ];
 
   return (

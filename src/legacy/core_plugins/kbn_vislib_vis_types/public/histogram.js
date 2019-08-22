@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { PointSeriesOptions } from './editors/point_series';
 import { getLegendPositions, LegendPositions } from './utils/legend_positions';
+import { palettes } from '@elastic/eui/lib/services';
 
 export default function PointSeriesVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
@@ -107,7 +108,7 @@ export default function PointSeriesVisType(Private) {
           value: 10,
           width: 1,
           style: 'full',
-          color: '#00B3A4'
+          color: palettes.euiPaletteColorBlind.colors[0]
         }
       },
     },
