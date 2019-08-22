@@ -3310,7 +3310,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/fetch-mock@7.3.1":
+"@types/fetch-mock@^7.3.1":
   version "7.3.1"
   resolved "https://registry.yarnpkg.com/@types/fetch-mock/-/fetch-mock-7.3.1.tgz#df7421e8bcb351b430bfbfa5c52bb353826ac94f"
   integrity sha512-2U4vZWHNbsbK7TRmizgr/pbKe0FKopcxu+hNDtIBDiM1wvrKRItybaYj7VQ6w/hZJStU/JxRiNi5ww4YDEvKbA==
@@ -8573,7 +8573,7 @@ core-js@^1.0.0:
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-1.2.7.tgz#652294c14651db28fa93bd2d5ff2983a4f08c636"
   integrity sha1-ZSKUwUZR2yj6k70tX/KYOk8IxjY=
 
-core-js@^2.2.0, core-js@^2.4.0, core-js@^2.5.0, core-js@^2.5.1, core-js@^2.5.3, core-js@^2.5.7, core-js@^2.6.5:
+core-js@^2.2.0, core-js@^2.4.0, core-js@^2.5.0, core-js@^2.5.1, core-js@^2.5.3, core-js@^2.5.7, core-js@^2.6.5, core-js@^2.6.9:
   version "2.6.9"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.6.9.tgz#6b4b214620c834152e179323727fc19741b084f2"
   integrity sha512-HOpZf6eXmnl7la+cUdMnLvUxKNqLUzJvgIziQ0DiF3JwSImNphIqdGqzj6hIKyX04MmV0poclQ7+wjWvxQyR2A==
@@ -12011,12 +12011,13 @@ fecha@^2.3.3:
   resolved "https://registry.yarnpkg.com/fecha/-/fecha-2.3.3.tgz#948e74157df1a32fd1b12c3a3c3cdcb6ec9d96cd"
   integrity sha512-lUGBnIamTAwk4znq5BcqsDaxSmZ9nDVJaij6NvRt/Tg4R69gERA+otPKbS86ROw9nxVMw2/mp1fnaiWqbs6Sdg==
 
-fetch-mock@7.3.3:
-  version "7.3.3"
-  resolved "https://registry.yarnpkg.com/fetch-mock/-/fetch-mock-7.3.3.tgz#d1abdf309cdef8adb4b0fc0596d3f97fcfbd4528"
-  integrity sha512-MHKcwZ4n9TmnfnVfelUBrrfxtC9tztafIR+F8l/Yu9N+y48fU1BAwj3iSxhYFYELVw73rCZh2DPWtWCekY/t+w==
+fetch-mock@^7.3.9:
+  version "7.3.9"
+  resolved "https://registry.yarnpkg.com/fetch-mock/-/fetch-mock-7.3.9.tgz#a80fd2a1728f72e0634ef7a9734bc61200096487"
+  integrity sha512-PgsTbiQBNapFz2P2UwDl3gowK3nZqfV4HdyDZ1dI4eTGGH9MLAeBglIPbyDbbNQoGYBOfla6/9uaiq7az2z4Aw==
   dependencies:
     babel-polyfill "^6.26.0"
+    core-js "^2.6.9"
     glob-to-regexp "^0.4.0"
     path-to-regexp "^2.2.1"
     whatwg-url "^6.5.0"
