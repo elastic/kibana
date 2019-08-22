@@ -6,9 +6,11 @@
 
 import { timefilter } from 'ui/timefilter';
 import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
+import { Subscription } from 'rxjs';
 export function executorProvider(Promise, $timeout) {
 
   const queue = [];
+  const subscriptions = new Subscription();
   let executionTimer;
   let ignorePaused = false;
 
@@ -47,6 +49,7 @@ export function executorProvider(Promise, $timeout) {
      * @returns {void}
      */
   function destroy() {
+    subscriptions.unsubscribe();
     cancel();
     ignorePaused = false;
     queue.splice(0, queue.length);
@@ -93,12 +96,12 @@ export function executorProvider(Promise, $timeout) {
   return {
     register,
     start($scope) {
-      subscribeWithScope($scope, timefilter.getFetch$(), {
+      subscriptions.add(subscribeWithScope($scope, timefilter.getFetch$(), {
         next: reFetch
-      });
-      subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
+      }));
+      subscriptions.add(subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
         next: killIfPaused
-      });
+      }));
       start();
     },
     run,
