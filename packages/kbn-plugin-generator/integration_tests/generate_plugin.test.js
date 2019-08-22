@@ -61,62 +61,37 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
     expect(stats.isDirectory()).toBe(true);
   });
 
-  describe(`and then running 'yarn start' in the plugin's root dir`, () => {
-    const log = new ToolingLog({ level: 'info', writeTo: process.stdout });
-    it(`should result in the spec plugin being initialized on kibana's stdout`, async () => {
+  describe(`then running`, () => {
+    it(`'yarn build' should exit 0`, async () => {
+      await execa('yarn', ['build'], { cwd: generatedPath });
+    });
+
+    it(`'yarn start' should result in the spec plugin being initialized on kibana's stdout`, async () => {
+      const log = new ToolingLog({ level: 'info', writeTo: process.stdout });
       const es = createEsTestCluster({ license: 'basic', log });
       await es.start();
       await withProcRunner(log, async proc => {
         await proc.run('kibana', {
-          cwd: generatedPath,
-          args: ['start', '--optimize.enabled=false', '--logging.json=false'],
           cmd: 'yarn',
+          args: ['start', '--optimize.enabled=false', '--logging.json=false'],
+          cwd: generatedPath,
           wait: /ispec_plugin.+Status changed from uninitialized to green - Ready/,
         });
         await proc.stop('kibana');
       });
       await es.stop();
     });
-  });
 
-  describe(`and then running 'yarn build' in the plugin's root dir`, () => {
-    const stdErrs = [];
-
-    beforeAll(done => {
-      const build = spawn('yarn', ['build'], { cwd: generatedPath });
-      build.stderr.on('data', collect(stdErrs));
-      build.on('close', () => done());
+    it(`'yarn preinstall' should exit 0`, async () => {
+      await execa('yarn', ['preinstall'], { cwd: generatedPath });
     });
 
-    it(`should result in only having 'warning package.json: No license field' on stderr`, () => {
-      expect(stdErrs.join('\n')).toEqual('warning package.json: No license field\n');
-    });
-  });
-
-  describe(`and then running 'yarn preinstall' in the plugin's root dir`, () => {
-    const stdOuts = [];
-    const stdErrs = [];
-
-    beforeAll(done => {
-      const preinstall = spawn('yarn', ['preinstall'], { cwd: generatedPath });
-      preinstall.stderr.on('data', collect(stdErrs));
-      preinstall.stdout.on('data', collect(stdOuts));
-      preinstall.on('close', () => done());
-    });
-
-    it(`should result in only having 'warning package.json: No license field' on stderr`, () => {
-      expect(stdErrs.join('\n')).toEqual('warning package.json: No license field\n');
-    });
-  });
-
-  describe(`and then running 'yarn lint' in the plugin's root dir`, () => {
-    it(`should lint w/o errors`, async () => {
+    it(`'yarn lint' should exit 0`, async () => {
       await execa('yarn', ['lint'], { cwd: generatedPath });
     });
-  });
 
-  describe(`and then running 'yarn kbn --help'`, () => {
-    const helpMsg = `
+    it(`'yarn kbn --help' should print out the kbn help msg`, done => {
+      const helpMsg = `
 usage: kbn <command> [<args>]
 
 By default commands are run for Kibana itself, all packages in the 'packages/'
@@ -136,7 +111,6 @@ Global options:
    --oss                  Do not include the x-pack when running command.
    --skip-kibana-plugins  Filter all plugins in ./plugins and ../kibana-extra when running command.
 `;
-    it(`should print out the kbn help msg`, done => {
       const outData = [];
       const kbnHelp = spawn('yarn', ['kbn', '--help'], { cwd: generatedPath });
       kbnHelp.stdout.on('data', collect(outData));
@@ -145,10 +119,9 @@ Global options:
         done();
       });
     });
-  });
 
-  describe(`and then running 'yarn es --help'`, () => {
-    const helpMsg = `
+    it(`'yarn es --help' should print out the es help msg`, done => {
+      const helpMsg = `
 usage: es <command> [<args>]
 
 Assists with running Elasticsearch for Kibana development
@@ -164,7 +137,6 @@ Global options:
 
   --help
 `;
-    it(`should print out the es help msg`, done => {
       const outData = [];
       const kbnHelp = spawn('yarn', ['es', '--help'], { cwd: generatedPath });
       kbnHelp.stdout.on('data', collect(outData));
