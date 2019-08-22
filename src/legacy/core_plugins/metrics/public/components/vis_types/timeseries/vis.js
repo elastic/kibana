@@ -176,7 +176,7 @@ export class TimeseriesVisualization extends Component {
 
     const interval = this.getInterval();
 
-    let axisCount = 1;
+    let axisCount = 2;
     if (seriesModel.some(hasSeparateAxis)) {
       seriesModel.forEach(row => {
         if (row.separate_axis) {
