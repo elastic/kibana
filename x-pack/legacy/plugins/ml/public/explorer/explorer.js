@@ -267,6 +267,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           stateUpdate.indexPattern = indexPattern;
 
           this.updateExplorer(stateUpdate, true);
+          return;
         }
 
         // Listen for changes to job selection.
@@ -313,17 +314,20 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           }
 
           this.updateExplorer(stateUpdate, true);
+          return;
         }
 
         // RELOAD reloads full Anomaly Explorer and clears the selection.
         if (action === EXPLORER_ACTION.RELOAD) {
           this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
           this.updateExplorer({ ...payload, ...getClearedSelectedAnomaliesState() }, true);
+          return;
         }
 
         // REDRAW reloads Anomaly Explorer and tries to retain the selection.
         if (action === EXPLORER_ACTION.REDRAW) {
           this.updateExplorer({}, false);
+          return;
         }
       } else if (this.previousSwimlaneLimit !== this.props.swimlaneLimit) {
         this.previousSwimlaneLimit = this.props.swimlaneLimit;
