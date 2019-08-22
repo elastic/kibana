@@ -6,6 +6,7 @@
 
 import {
   Document,
+  IntegrationsSearchResult,
   ResolveSnippetsIntegrationRequest,
   SearchResultItem,
   SourceHit,
@@ -20,7 +21,9 @@ export class IntegrationsSearchClient extends DocumentSearchClient {
     super(client, log);
   }
 
-  public async resolveSnippets(req: ResolveSnippetsIntegrationRequest) {
+  public async resolveSnippets(
+    req: ResolveSnippetsIntegrationRequest
+  ): Promise<IntegrationsSearchResult> {
     const { repoUri, filePath, lineNumStart, lineNumEnd } = req;
     const index = DocumentSearchIndexWithScope([repoUri]);
 

@@ -187,6 +187,10 @@ export interface CommitSearchResult extends DocumentSearchResult {
   commits: CommitSearchResultItem[];
 }
 
+export interface IntegrationsSearchResult extends SearchResult {
+  results?: SearchResultItem[];
+}
+
 export interface SourceLocation {
   line: number;
   column: number;
