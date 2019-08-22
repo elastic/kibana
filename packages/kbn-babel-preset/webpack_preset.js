@@ -29,6 +29,9 @@ module.exports = () => {
         },
       ],
       require('./common_preset'),
+    ],
+    plugins: [
+      '@babel/plugin-syntax-dynamic-import'
     ]
   };
 };
