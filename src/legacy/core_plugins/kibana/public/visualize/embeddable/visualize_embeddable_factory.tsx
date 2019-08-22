@@ -78,19 +78,18 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   VisualizationAttributes
 > {
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
-  private readonly visTypes: VisTypesRegistry;
 
   static async createVisualizeEmbeddableFactory(): Promise<VisualizeEmbeddableFactory> {
-    const visTypes = VisTypesRegistryProvider;
-    return new VisualizeEmbeddableFactory(visTypes.getAll());
+    return new VisualizeEmbeddableFactory(() => VisTypesRegistryProvider.getAll());
   }
 
-  constructor(visTypes: VisTypesRegistry) {
+  constructor(private readonly getVisTypesRegistry: () => VisTypesRegistry) {
     super({
       savedObjectMetaData: {
         name: i18n.translate('kbn.visualize.savedObjectName', { defaultMessage: 'Visualization' }),
         type: 'visualization',
         getIconForSavedObject: savedObject => {
+          const visTypes = getVisTypesRegistry();
           if (!visTypes) {
             return 'visualizeApp';
           } else {
@@ -99,6 +98,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
           }
         },
         getTooltipForSavedObject: savedObject => {
+          const visTypes = getVisTypesRegistry();
           if (!visTypes) {
             return '';
           }
@@ -107,6 +107,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
             ${visStateType ? visStateType.title : ''})`;
         },
         showSavedObject: savedObject => {
+          const visTypes = getVisTypesRegistry();
           if (!visTypes) {
             return false;
           }
@@ -122,8 +123,6 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
         },
       },
     });
-
-    this.visTypes = visTypes;
   }
 
   public isEditable() {
@@ -177,10 +176,13 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   }
 
   public async create() {
+    const visTypes = getVisTypesRegistry();
     // TODO: This is a bit of a hack to preserve the original functionality. Ideally we will clean this up
     // to allow for in place creation of visualizations without having to navigate away to a new URL.
-    if (this.visTypes) {
-      showNewVisModal(this.visTypes, {
+
+    // TODO: This now seems redundant as `visTypes` will always be truthy.
+    if (visTypes) {
+      showNewVisModal(visTypes, {
         editorParams: ['addToDashboard'],
       });
     }
