@@ -12,6 +12,7 @@ import {
   LegacyMonitorStatesQueryResult,
   GetMonitorStatesResult,
   EnrichMonitorStatesResult,
+  CursorPagination,
 } from './adapter_types';
 import {
   MonitorSummary,
@@ -21,16 +22,10 @@ import {
   CursorDirection,
   SortOrder,
 } from '../../../../common/graphql/types';
-import { INDEX_NAMES, STATES, QUERY } from '../../../../common/constants';
+import { INDEX_NAMES, STATES, QUERY, CONTEXT_DEFAULTS } from '../../../../common/constants';
 import { getHistogramInterval, getFilteredQueryAndStatusFilter } from '../../helper';
 import { fetchMonitorLocCheckGroups } from './latest_check_group_fetcher';
 import { queryEnriched } from './query_enriched';
-
-type CursorPagination = {
-  cursorKey?: any;
-  cursorDirection: CursorDirection;
-  sortOrder: SortOrder;
-};
 
 export type QueryContext = {
   database: any;
@@ -43,20 +38,6 @@ export type QueryContext = {
   statusFilter?: string;
 };
 
-const checksSortBy = (check: Check) => [
-  get<string>(check, 'observer.geo.name'),
-  get<string>(check, 'monitor.ip'),
-];
-
-const DefaultCursorPagination: CursorPagination = {
-  cursorDirection: CursorDirection.AFTER,
-  sortOrder: SortOrder.DESC,
-};
-
-const cursorDirectionToOrder = (cd: CursorDirection): 'asc' | 'desc' => {
-  return CursorDirection[cd] === CursorDirection.AFTER ? 'asc' : 'desc';
-};
-
 export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter {
   constructor(private readonly database: DatabaseAdapter) {
     this.database = database;
@@ -66,12 +47,10 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    pagination: CursorPagination = DefaultCursorPagination,
+    pagination: CursorPagination = CONTEXT_DEFAULTS.CURSOR_PAGINATION,
     filters?: string | null
   ): Promise<GetMonitorStatesResult> {
-    // TODO: make this configurable
     const size = 10;
-    console.log('FUN GET', pagination);
 
     const { query: filterClause, statusFilter } = getFilteredQueryAndStatusFilter(
       dateRangeStart,
@@ -90,13 +69,21 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       statusFilter,
     };
 
-    const checkGroups = await queryEnriched(queryContext);
+    const enriched = await queryEnriched(queryContext);
 
-    console.log('AWAIT IT', JSON.stringify(checkGroups, null, 2));
+    const encodeJSONB64 = (p: any): string | null => {
+      if (!p) {
+        return null;
+      }
 
+      return Buffer.from(JSON.stringify(p)).toString('base64');
+    };
+
+    console.log('ITEMS ARE ', enriched.items);
     return {
-      summaries: [],
-      isFinalPage: true,
+      summaries: enriched.items,
+      nextPagePagination: encodeJSONB64(enriched.nextPagePagination),
+      prevPagePagination: encodeJSONB64(enriched.prevPagePagination),
     };
   }
 

@@ -8,10 +8,12 @@ export type MonitorLocCheckGroup = {
   location: string | null;
   checkGroup: string;
   timestamp: Date;
+  up: number;
+  down: number;
 };
 
 export type MonitorIdWithGroups = {
-  monitorId: string;
+  id: string;
   groups: MonitorLocCheckGroup[];
 };
 
@@ -28,20 +30,27 @@ export const fetchMonitorLocCheckGroups = async (
   const items: MonitorIdWithGroups[] = [];
 
   const fetcher = new LatestCheckGroupFetcher(queryContext);
-  let lastItem: MonitorIdWithGroups | null = null;
+  let currentMonitor: MonitorIdWithGroups | null = null;
   while (items.length < size) {
     const mlcg = await fetcher.next();
     if (!mlcg) {
       break; // No more items to fetch
     }
 
-    if (lastItem && lastItem.monitorId === mlcg.monitorId) {
-      lastItem.groups.push(mlcg);
-      continue;
+    if (currentMonitor && currentMonitor.id === mlcg.monitorId) {
+      currentMonitor.groups.push(mlcg);
+    } else {
+      currentMonitor = { id: mlcg.monitorId, groups: [mlcg] };
     }
 
-    lastItem = { monitorId: mlcg.monitorId, groups: [] };
-    items.push(lastItem);
+    // Handle the case where we have processed all the mlcgs for this monitor
+    const peek = await fetcher.peek();
+    if (peek && peek.monitorId != mlcg.monitorId) {
+      const status = currentMonitor.groups.some(g => g.down > 0) ? 'down' : 'up';
+      if (!queryContext.statusFilter || queryContext.statusFilter === status) {
+        items.push(currentMonitor);
+      }
+    }
   }
 
   // We have to create these objects before checking if we can navigate backward
@@ -100,8 +109,6 @@ export class LatestCheckGroupFetcher {
           ? CursorDirection.BEFORE
           : CursorDirection.AFTER,
     };
-    console.log('REG PAGINATION', this.queryContext.pagination);
-    console.log('REVERSE PAGINATION', reverseContext.pagination);
     return new LatestCheckGroupFetcher(reverseContext);
   }
 
@@ -126,7 +133,7 @@ export class LatestCheckGroupFetcher {
       return found;
     }
 
-    await this.queryAndBuffer();
+    await this.queryNextAndBuffer();
     return await this.next();
   }
 
@@ -136,18 +143,23 @@ export class LatestCheckGroupFetcher {
       return bufAhead;
     }
 
-    const results = await this.queryCheckGroupsPage(1);
-    return results.checkGroups[0];
+    this.queryNextAndBuffer(false);
+
+    return this.buffer[this.bufferPos + 1];
   }
 
-  async queryAndBuffer() {
+  async queryNextAndBuffer(discardBuffer: boolean = true) {
     const results = await this.queryCheckGroupsPage();
-    this.bufferPos = 0;
-    this.buffer = results.checkGroups;
-    this.searchAfter = results.searchAfter;
-    if (this.buffer.length === 0) {
+    if (results.checkGroups.length === 0) {
       this.endOfStream = true;
     }
+    if (discardBuffer) {
+      this.bufferPos = 0;
+      this.buffer = results.checkGroups;
+    } else {
+      results.checkGroups.forEach(cg => this.buffer.push(cg));
+    }
+    this.searchAfter = results.searchAfter;
   }
 
   private async queryCheckGroupsPage(size: number = 50): Promise<CheckGroupsPageResult> {
@@ -155,11 +167,14 @@ export class LatestCheckGroupFetcher {
     const checkGroups: MonitorLocCheckGroup[] = [];
 
     get<any>(result, 'aggregations.monitors.buckets', []).forEach((bucket: any) => {
+      const hitSource = bucket.summaries.top.hits.hits[0]._source;
       checkGroups.push({
-        monitorId: get<string>(bucket, 'key.monitor_id'),
-        location: get<string>(bucket, 'key.location'),
-        checkGroup: get<string>(bucket, 'summaries.top.hits.hits[0]._source.monitor.check_group'),
-        timestamp: get<Date>(bucket, 'summaries.top.hits.hits[0]._source.@timestamp'),
+        monitorId: bucket.key.monitor_id,
+        location: bucket.key.location,
+        checkGroup: hitSource.monitor.check_group,
+        timestamp: hitSource['@timestamp'],
+        up: hitSource.summary.up,
+        down: hitSource.summary.down,
       });
     });
 
@@ -243,7 +258,7 @@ export class LatestCheckGroupFetcher {
                       },
                     ],
                     _source: {
-                      includes: ['monitor.check_group', '@timestamp'],
+                      includes: ['monitor.check_group', '@timestamp', 'summary.up', 'summary.down'],
                     },
                     size: 1,
                   },

@@ -23,7 +23,6 @@ export class UMMonitorStatesDomain {
     pagination: string,
     filters?: string | null
   ): Promise<GetMonitorStatesResult> {
-    console.log('RAW PAGINATION', pagination, typeof pagination);
     const decodedPagination = pagination
       ? JSON.parse(Buffer.from(pagination, 'base64').toString())
       : undefined;

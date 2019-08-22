@@ -1,8 +1,8 @@
 import { QueryContext } from './elasticsearch_monitor_states_adapter';
-import { LegacyMonitorStatesQueryResult } from './adapter_types';
-import { QUERY, INDEX_NAMES } from '../../../../common/constants';
+import { getHistogramInterval } from '../../helper';
+import { QUERY, INDEX_NAMES, STATES } from '../../../../common/constants';
 import { fetchMonitorLocCheckGroups } from './latest_check_group_fetcher';
-import { get, flatten } from 'lodash';
+import { get, flatten, sortBy } from 'lodash';
 import {
   MonitorSummary,
   SummaryHistogram,
@@ -10,8 +10,8 @@ import {
   StatesIndexStatus,
   CursorDirection,
   SortOrder,
-  CursorPagination,
 } from '../../../../common/graphql/types';
+import { CursorPagination } from './adapter_types';
 
 export type EnrichedQueryResult = {
   items: any[];
@@ -233,13 +233,139 @@ export const queryEnriched = async (queryContext: QueryContext): Promise<Enriche
   const items = await queryContext.database.search(queryContext.request, params);
   const monitorBuckets = get(items, 'aggregations.monitors.buckets', []);
 
+  const monitorIds: string[] = [];
+  const summaries: MonitorSummary[] = monitorBuckets.map((monitor: any) => {
+    const monitorId = get<string>(monitor, 'key.monitor_id');
+    monitorIds.push(monitorId);
+    let state = get<any>(monitor, 'state.value');
+    state = {
+      ...state,
+      timestamp: state['@timestamp'],
+    };
+    const { checks } = state;
+    if (checks) {
+      state.checks = sortBy<SortChecks, Check>(checks, checksSortBy);
+      state.checks = state.checks.map((check: any) => ({
+        ...check,
+        timestamp: check['@timestamp'],
+      }));
+    } else {
+      state.checks = [];
+    }
+    return {
+      monitor_id: monitorId,
+      state,
+    };
+  });
+
+  const histogramMap = await getHistogramForMonitors(queryContext, monitorIds);
+
+  const resItems = summaries.map(summary => ({
+    ...summary,
+    histogram: histogramMap[summary.monitor_id],
+  }));
+
   return {
-    items,
+    items: resItems,
     nextPagePagination: mlcgsResult.nextPagePagination,
     prevPagePagination: mlcgsResult.prevPagePagination,
   };
 };
 
+const getHistogramForMonitors = async (
+  queryContext: QueryContext,
+  monitorIds: string[]
+): Promise<{ [key: string]: SummaryHistogram }> => {
+  const params = {
+    index: INDEX_NAMES.HEARTBEAT,
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            {
+              terms: {
+                'monitor.id': monitorIds,
+              },
+            },
+            {
+              range: {
+                '@timestamp': {
+                  gte: queryContext.dateRangeStart,
+                  lte: queryContext.dateRangeEnd,
+                },
+              },
+            },
+          ],
+        },
+      },
+      aggs: {
+        by_id: {
+          terms: {
+            field: 'monitor.id',
+            size: STATES.LEGACY_STATES_QUERY_SIZE,
+          },
+          aggs: {
+            histogram: {
+              date_histogram: {
+                field: '@timestamp',
+                fixed_interval: getHistogramInterval(
+                  queryContext.dateRangeStart,
+                  queryContext.dateRangeEnd
+                ),
+                missing: 0,
+              },
+              aggs: {
+                status: {
+                  terms: {
+                    field: 'monitor.status',
+                    size: 2,
+                    shard_size: 2,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+  const result = await queryContext.database.search(queryContext.request, params);
+
+  const buckets: any[] = get(result, 'aggregations.by_id.buckets', []);
+  return buckets.reduce((map: { [key: string]: any }, item: any) => {
+    const points = get(item, 'histogram.buckets', []).map((histogram: any) => {
+      const status = get(histogram, 'status.buckets', []).reduce(
+        (statuses: { up: number; down: number }, bucket: any) => {
+          if (bucket.key === 'up') {
+            statuses.up = bucket.doc_count;
+          } else if (bucket.key === 'down') {
+            statuses.down = bucket.doc_count;
+          }
+          return statuses;
+        },
+        { up: 0, down: 0 }
+      );
+      return {
+        timestamp: histogram.key,
+        ...status,
+      };
+    });
+
+    map[item.key] = {
+      count: item.doc_count,
+      points,
+    };
+    return map;
+  }, {});
+};
+
 const cursorDirectionToOrder = (cd: CursorDirection): 'asc' | 'desc' => {
   return CursorDirection[cd] === CursorDirection.AFTER ? 'asc' : 'desc';
 };
+
+type SortChecks = (check: Check) => string[];
+const checksSortBy = (check: Check) => [
+  get<string>(check, 'observer.geo.name'),
+  get<string>(check, 'monitor.ip'),
+];

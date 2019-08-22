@@ -4,22 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MonitorSummary, StatesIndexStatus } from '../../../../common/graphql/types';
+import {
+  MonitorSummary,
+  StatesIndexStatus,
+  CursorDirection,
+  SortOrder,
+} from '../../../../common/graphql/types';
+import { CONTEXT_DEFAULTS } from 'x-pack/legacy/plugins/uptime/common/constants';
 
 export interface UMMonitorStatesAdapter {
   getMonitorStates(
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    pagination?: string,
+    pagination?: CursorPagination,
     filters?: string | null
   ): Promise<GetMonitorStatesResult>;
   statesIndexExists(request: any): Promise<StatesIndexStatus>;
 }
 
+export interface CursorPagination {
+  cursorKey?: any;
+  cursorDirection: CursorDirection;
+  sortOrder: SortOrder;
+}
+
 export interface GetMonitorStatesResult {
   summaries: MonitorSummary[];
-  isFinalPage: boolean;
+  nextPagePagination: string | null;
+  prevPagePagination: string | null;
 }
 
 export interface LegacyMonitorStatesQueryResult {
