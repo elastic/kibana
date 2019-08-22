@@ -5,6 +5,11 @@
  */
 import { CanvasFunction, CanvasArgValue } from '../../../types';
 
+/**
+ * Given a function definition, this function returns a markdown string
+ * that includes the context the function accepts, what the function returns
+ * as well as the general help/documentation text associated with the function
+ */
 export function getFunctionReferenceStr(fnDef: CanvasFunction) {
   const { help, context, type } = fnDef;
   const doc = `**Accepts**: ${
@@ -15,6 +20,12 @@ export function getFunctionReferenceStr(fnDef: CanvasFunction) {
   return doc;
 }
 
+/**
+ * Given an argument defintion, this function returns a markdown string
+ * that includes the aliases of the argument, types accepted for the argument,
+ * the default value of the argument, whether or not its required, and
+ * the general help/documentation text associated with the argument
+ */
 export function getArgReferenceStr(argDef: CanvasArgValue) {
   const { aliases, types, default: def, required, help } = argDef;
 

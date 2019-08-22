@@ -29,9 +29,13 @@ interface FunctionSuggestion extends BaseSuggestion {
   fnDef: CanvasFunction;
 }
 
+type ArgSuggestionValue = CanvasArgValue & {
+  name: string;
+};
+
 interface ArgSuggestion extends BaseSuggestion {
   type: 'argument';
-  argDef: CanvasArgValue;
+  argDef: ArgSuggestionValue;
 }
 
 interface ValueSuggestion extends BaseSuggestion {
@@ -40,19 +44,15 @@ interface ValueSuggestion extends BaseSuggestion {
 
 export type AutocompleteSuggestion = FunctionSuggestion | ArgSuggestion | ValueSuggestion;
 
-interface FunctionAtPosition {
+interface FnArgAtPosition {
   ast: ExpressionASTWithMeta;
   fnIndex: number;
-}
 
-interface ArgAtPosition extends FunctionAtPosition {
-  argName: string;
-  argIndex: number;
-  argStart: number;
-  argEnd: number;
+  argName?: string;
+  argIndex?: number;
+  argStart?: number;
+  argEnd?: number;
 }
-
-type FnArgAtPosition = FunctionAtPosition | ArgAtPosition;
 
 // If you parse an expression with the "addMeta" option it completely
 // changes the type of returned object.  The following types
