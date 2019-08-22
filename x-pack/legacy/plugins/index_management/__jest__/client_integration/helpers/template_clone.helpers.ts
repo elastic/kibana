@@ -6,7 +6,7 @@
 
 import { registerTestBed, TestBedConfig } from '../../../../../../test_utils';
 import { BASE_PATH } from '../../../common/constants';
-import { TemplateCreate } from '../../../public/sections/template_create';
+import { TemplateClone } from '../../../public/sections/template_clone';
 import { formSetup } from './template_form.helpers';
 import { TEMPLATE_NAME } from './constants';
 
@@ -18,6 +18,6 @@ const testBedConfig: TestBedConfig = {
   doMountAsync: true,
 };
 
-const initTestBed = registerTestBed(TemplateCreate, testBedConfig);
+const initTestBed = registerTestBed(TemplateClone, testBedConfig);
 
 export const setup = formSetup.bind(null, initTestBed);

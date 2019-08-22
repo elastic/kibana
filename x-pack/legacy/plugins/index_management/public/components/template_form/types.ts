@@ -10,7 +10,7 @@ import { TemplateValidation } from '../../services/template_validation';
 export interface StepProps {
   template: Template;
   updateTemplate: (updatedTemplate: Partial<Template>) => void;
-  updateCurrentStep: (step: number) => void;
+  updateCurrentStep: (step: number, maxCompletedStep: number) => void;
   errors: TemplateValidation['errors'];
   isEditing?: boolean;
 }

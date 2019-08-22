@@ -12,20 +12,20 @@ import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { TemplateFormTestBed } from './helpers/template_form.helpers';
 import * as fixtures from '../../test/fixtures';
 import { TEMPLATE_NAME, INDEX_PATTERNS as DEFAULT_INDEX_PATTERNS } from './helpers/constants';
-import { Template } from '../../common/types';
 
 const { setup } = pageHelpers.templateClone;
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 
-interface TemplateFormProps {
-  onSave: (template: Template) => void;
-  clearSaveError: () => void;
-  isSaving: boolean;
-  saveError: any;
-  template: Template;
-  isEditing?: boolean;
-}
+jest.mock('ui/index_patterns', () => ({
+  ILLEGAL_CHARACTERS: 'ILLEGAL_CHARACTERS',
+  CONTAINS_SPACES: 'CONTAINS_SPACES',
+  validateIndexPattern: () => {
+    return {
+      errors: {},
+    };
+  },
+}));
 
 jest.mock('ui/chrome', () => ({
   breadcrumbs: { set: () => {} },
@@ -34,14 +34,6 @@ jest.mock('ui/chrome', () => ({
 
 jest.mock('../../public/services/api', () => ({
   ...jest.requireActual('../../public/services/api'),
-  loadIndexPatterns: async () => {
-    const INDEX_PATTERNS = [
-      { attributes: { title: 'index1' } },
-      { attributes: { title: 'index2' } },
-      { attributes: { title: 'index3' } },
-    ];
-    return await INDEX_PATTERNS;
-  },
   getHttpClient: () => mockHttpClient,
 }));
 
@@ -61,7 +53,7 @@ jest.mock('@elastic/eui', () => ({
   EuiCodeEditor: (props: any) => (
     <input
       data-test-subj="mockCodeEditor"
-      onChange={async (syntheticEvent: any) => {
+      onChange={(syntheticEvent: any) => {
         props.onChange(syntheticEvent.jsonString);
       }}
     />
@@ -70,7 +62,7 @@ jest.mock('@elastic/eui', () => ({
 
 // We need to skip the tests until react 16.9.0 is released
 // which supports asynchronous code inside act()
-describe.skip('Clone template', () => {
+describe.skip('<TemplateClone />', () => {
   let testBed: TemplateFormTestBed;
 
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -101,18 +93,6 @@ describe.skip('Clone template', () => {
 
     expect(exists('pageTitle')).toBe(true);
     expect(find('pageTitle').text()).toEqual(`Clone template '${templateToClone.name}'`);
-  });
-
-  test('should have the correct props', async () => {
-    const { component } = testBed;
-    const templateForm = component.find('TemplateForm').props() as TemplateFormProps;
-
-    expect(templateForm.template).toEqual({
-      ...templateToClone,
-      name: `${templateToClone.name}-copy`,
-      indexPatterns: [],
-      aliases: undefined,
-    });
   });
 
   describe('form payload', () => {
@@ -151,7 +131,6 @@ describe.skip('Clone template', () => {
           ...templateToClone,
           name: `${templateToClone.name}-copy`,
           indexPatterns: DEFAULT_INDEX_PATTERNS,
-          aliases: undefined,
         })
       );
     });

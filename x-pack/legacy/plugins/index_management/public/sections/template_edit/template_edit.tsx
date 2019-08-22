@@ -78,7 +78,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
     );
   } else if (template) {
     const { name: templateName } = template;
-    const isSystemTemplate = templateName.startsWith('.');
+    const isSystemTemplate = templateName && templateName.startsWith('.');
 
     content = (
       <Fragment>
@@ -93,6 +93,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
               }
               color="danger"
               iconType="alert"
+              data-test-subj="systemTemplateEditCallout"
             >
               <FormattedMessage
                 id="xpack.idxMgmt.templateEdit.systemTemplateWarningDescription"

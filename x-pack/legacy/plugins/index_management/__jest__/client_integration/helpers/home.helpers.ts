@@ -35,7 +35,7 @@ export interface IdxMgmtHomeTestBed extends TestBed<IdxMgmtTestSubjects> {
     selectHomeTab: (tab: 'indicesTab' | 'templatesTab') => void;
     selectDetailsTab: (tab: 'summary' | 'settings' | 'mappings' | 'aliases') => void;
     clickReloadButton: () => void;
-    clickTemplateActionAt: (name: Template['name'], action: 'edit' | 'clone' | 'delete') => void;
+    clickTemplateAction: (name: Template['name'], action: 'edit' | 'clone' | 'delete') => void;
     clickTemplateAt: (index: number) => void;
     clickCloseDetailsButton: () => void;
     clickActionMenu: (name: Template['name']) => void;
@@ -85,7 +85,7 @@ export const setup = async (): Promise<IdxMgmtHomeTestBed> => {
     component.find(`div[id="${templateName}-actions"] button`).simulate('click');
   };
 
-  const clickTemplateActionAt = (
+  const clickTemplateAction = (
     templateName: Template['name'],
     action: 'edit' | 'clone' | 'delete'
   ) => {
@@ -127,7 +127,7 @@ export const setup = async (): Promise<IdxMgmtHomeTestBed> => {
       selectHomeTab,
       selectDetailsTab,
       clickReloadButton,
-      clickTemplateActionAt,
+      clickTemplateAction,
       clickTemplateAt,
       clickCloseDetailsButton,
       clickActionMenu,
@@ -150,6 +150,9 @@ export type TestSubjects =
   | 'emptyPrompt'
   | 'manageTemplateButton'
   | 'mappingsTab'
+  | 'noAliasesCallout'
+  | 'noMappingsCallout'
+  | 'noSettingsCallout'
   | 'indicesList'
   | 'indicesTab'
   | 'reloadButton'

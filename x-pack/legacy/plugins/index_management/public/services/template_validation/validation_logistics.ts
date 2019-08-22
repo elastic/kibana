@@ -122,7 +122,6 @@ export const validateLogistics = (template: Template): TemplateValidation => {
   } else if (Array.isArray(indexPatterns) && indexPatterns.length) {
     indexPatterns.forEach(pattern => {
       const errorMsg = validateIndexPattern(pattern);
-
       if (errorMsg) {
         validation.errors.indexPatterns.push(errorMsg);
       }

@@ -24,7 +24,6 @@ import {
   TemplateValidation,
 } from '../../services/template_validation';
 import { StepProps } from './types';
-import { BASE_PATH } from '../../../common/constants';
 import { SectionError } from '..';
 
 interface Props {

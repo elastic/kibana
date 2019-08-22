@@ -10,7 +10,6 @@ import axios from 'axios';
 
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { TemplateFormTestBed } from './helpers/template_form.helpers';
-import { INVALID_INDEX_PATTERN_CHARS } from '../../common/constants';
 import {
   TEMPLATE_NAME,
   SETTINGS,
@@ -23,6 +22,16 @@ const { setup } = pageHelpers.templateCreate;
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 
+jest.mock('ui/index_patterns', () => ({
+  ILLEGAL_CHARACTERS: 'ILLEGAL_CHARACTERS',
+  CONTAINS_SPACES: 'CONTAINS_SPACES',
+  validateIndexPattern: () => {
+    return {
+      errors: {},
+    };
+  },
+}));
+
 jest.mock('ui/chrome', () => ({
   breadcrumbs: { set: () => {} },
   addBasePath: (path: string) => path || '/api/index_management',
@@ -30,14 +39,6 @@ jest.mock('ui/chrome', () => ({
 
 jest.mock('../../public/services/api', () => ({
   ...jest.requireActual('../../public/services/api'),
-  loadIndexPatterns: async () => {
-    const INDEX_PATTERNS = [
-      { attributes: { title: 'index1' } },
-      { attributes: { title: 'index2' } },
-      { attributes: { title: 'index3' } },
-    ];
-    return await INDEX_PATTERNS;
-  },
   getHttpClient: () => mockHttpClient,
 }));
 
@@ -48,7 +49,7 @@ jest.mock('@elastic/eui', () => ({
   EuiComboBox: (props: any) => (
     <input
       data-test-subj="mockComboBox"
-      onChange={async (syntheticEvent: any) => {
+      onChange={(syntheticEvent: any) => {
         props.onChange([syntheticEvent['0']]);
       }}
     />
@@ -66,7 +67,7 @@ jest.mock('@elastic/eui', () => ({
 
 // We need to skip the tests until react 16.9.0 is released
 // which supports asynchronous code inside act()
-describe.skip('Create template', () => {
+describe.skip('<TemplateCreate />', () => {
   let testBed: TemplateFormTestBed;
 
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -93,39 +94,14 @@ describe.skip('Create template', () => {
       actions.clickNextButton();
 
       expect(form.getErrorsMessages()).toEqual([
-        'Template name is required.',
-        'You must define at least one index pattern.',
+        'A template name is required.',
+        'At least one index pattern is required.',
       ]);
     });
 
     describe('form validation', () => {
       beforeEach(async () => {
         testBed = await setup();
-      });
-
-      describe('index patterns (step 1)', () => {
-        it('should not allow invalid characters', () => {
-          const { form, actions, find } = testBed;
-
-          const expectErrorForChar = (char: string) => {
-            find('mockComboBox').simulate('change', [
-              { label: `with${char}`, value: `with${char}` },
-            ]); // Using mocked EuiComboBox
-            actions.clickNextButton();
-
-            try {
-              expect(form.getErrorsMessages()).toContain(
-                `'with${char}' index pattern contains illegal characters.`
-              );
-            } catch {
-              throw new Error(`Invalid character ${char} did not display an error.`);
-            }
-          };
-
-          INVALID_INDEX_PATTERN_CHARS.forEach(expectErrorForChar);
-
-          actions.clickNextButton();
-        });
       });
 
       describe('index settings (step 2)', () => {
@@ -137,9 +113,11 @@ describe.skip('Create template', () => {
         });
 
         it('should not allow invalid json', async () => {
-          const { form, actions } = testBed;
+          const { form, actions, exists, find } = testBed;
 
           // Complete step 2 (index settings) with invalid json
+          expect(exists('stepSettings')).toBe(true);
+          expect(find('stepTitle').text()).toEqual('Index settings (optional)');
           actions.completeStepTwo({
             settings: '{ invalidJsonString ',
           });
@@ -162,8 +140,11 @@ describe.skip('Create template', () => {
         });
 
         it('should not allow invalid json', async () => {
-          const { actions, form } = testBed;
+          const { actions, form, exists, find } = testBed;
+
           // Complete step 3 (mappings) with invalid json
+          expect(exists('stepMappings')).toBe(true);
+          expect(find('stepTitle').text()).toEqual('Mappings (optional)');
           actions.completeStepThree({
             mappings: '{ invalidJsonString ',
           });
@@ -191,8 +172,11 @@ describe.skip('Create template', () => {
         });
 
         it('should not allow invalid json', async () => {
-          const { actions, form } = testBed;
+          const { actions, form, exists, find } = testBed;
+
           // Complete step 4 (aliases) with invalid json
+          expect(exists('stepAliases')).toBe(true);
+          expect(find('stepTitle').text()).toEqual('Aliases (optional)');
           actions.completeStepFour({
             aliases: '{ invalidJsonString ',
           });
@@ -289,7 +273,7 @@ describe.skip('Create template', () => {
 
         expect(exists('indexPatternsWarning')).toBe(true);
         expect(find('indexPatternsWarningDescription').text()).toEqual(
-          'This template contains a wildcard (*) as an index pattern. This will create a catch-all template and apply to all indices. Edit template.'
+          'All new indices that you create will use this template. Edit index patterns.'
         );
       });
     });

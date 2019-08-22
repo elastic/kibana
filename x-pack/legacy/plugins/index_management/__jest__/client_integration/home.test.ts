@@ -21,6 +21,12 @@ const removeWhiteSpaceOnArrayValues = (array: any[]) =>
     return value.trim();
   });
 
+jest.mock('ui/index_patterns', () => ({
+  ILLEGAL_CHARACTERS: '',
+  CONTAINS_SPACES: '',
+  validateIndexPattern: () => {},
+}));
+
 jest.mock('ui/chrome', () => ({
   breadcrumbs: { set: () => {} },
   addBasePath: (path: string) => path || '/api/index_management',
@@ -237,7 +243,7 @@ describe.skip('<IndexManagementHome />', () => {
           expect(find('templateDetails.title').text()).toBe(template1.name);
         });
 
-        test('template actions column should have an option to delete', async () => {
+        test('template actions column should have an option to delete', () => {
           const { actions, findAction } = testBed;
           const { name: templateName } = template1;
 
@@ -248,7 +254,7 @@ describe.skip('<IndexManagementHome />', () => {
           expect(deleteAction.text()).toEqual('Delete');
         });
 
-        test('template actions column should have an option to clone', async () => {
+        test('template actions column should have an option to clone', () => {
           const { actions, findAction } = testBed;
           const { name: templateName } = template1;
 
@@ -259,7 +265,7 @@ describe.skip('<IndexManagementHome />', () => {
           expect(cloneAction.text()).toEqual('Clone');
         });
 
-        test('template actions column should have an option to edit', async () => {
+        test('template actions column should have an option to edit', () => {
           const { actions, findAction } = testBed;
           const { name: templateName } = template1;
 
@@ -275,7 +281,7 @@ describe.skip('<IndexManagementHome />', () => {
             const { actions } = testBed;
             const { name: templateName } = template1;
 
-            await actions.clickTemplateActionAt(templateName, 'delete');
+            await actions.clickTemplateAction(templateName, 'delete');
 
             // We need to read the document "body" as the modal is added there and not inside
             // the component DOM tree.
@@ -300,7 +306,7 @@ describe.skip('<IndexManagementHome />', () => {
             });
 
             const { name: systemTemplateName } = template3;
-            await actions.clickTemplateActionAt(systemTemplateName, 'delete');
+            await actions.clickTemplateAction(systemTemplateName, 'delete');
 
             expect(
               document.body.querySelector('[data-test-subj="deleteSystemTemplateCallOut"]')
@@ -314,7 +320,7 @@ describe.skip('<IndexManagementHome />', () => {
             const templateId = rows[0].columns[2].value;
 
             const { name: templateName } = template1;
-            await actions.clickTemplateActionAt(templateName, 'delete');
+            await actions.clickTemplateAction(templateName, 'delete');
 
             const modal = document.body.querySelector(
               '[data-test-subj="deleteTemplatesConfirmation"]'
@@ -405,7 +411,7 @@ describe.skip('<IndexManagementHome />', () => {
           });
 
           describe('tabs', () => {
-            test('should have 4 tabs if template has mappings, settings and aliases data', async () => {
+            test('should have 4 tabs', async () => {
               const template = fixtures.getTemplate({
                 name: `a${getRandomString()}`,
                 indexPatterns: ['template1Pattern1*', 'template1Pattern2'],
@@ -430,7 +436,7 @@ describe.skip('<IndexManagementHome />', () => {
                 }),
               });
 
-              const { find, actions, exists, component } = testBed;
+              const { find, actions, exists } = testBed;
 
               httpRequestsMockHelpers.setLoadTemplateResponse(template);
 
@@ -449,51 +455,30 @@ describe.skip('<IndexManagementHome />', () => {
 
               // Navigate and verify all tabs
               actions.selectDetailsTab('settings');
-
-              // @ts-ignore (remove when react 16.9.0 is released)
-              await act(async () => {
-                await nextTick();
-                component.update();
-              });
-
               expect(exists('summaryTab')).toBe(false);
               expect(exists('settingsTab')).toBe(true);
 
               actions.selectDetailsTab('aliases');
-
-              // @ts-ignore (remove when react 16.9.0 is released)
-              await act(async () => {
-                await nextTick();
-                component.update();
-              });
-
               expect(exists('summaryTab')).toBe(false);
               expect(exists('settingsTab')).toBe(false);
               expect(exists('aliasesTab')).toBe(true);
 
               actions.selectDetailsTab('mappings');
-
-              // @ts-ignore (remove when react 16.9.0 is released)
-              await act(async () => {
-                await nextTick();
-                component.update();
-              });
-
               expect(exists('summaryTab')).toBe(false);
               expect(exists('settingsTab')).toBe(false);
               expect(exists('aliasesTab')).toBe(false);
               expect(exists('mappingsTab')).toBe(true);
             });
 
-            it('should not show tabs if mappings, settings and aliases data is not present', async () => {
-              const templateWithNoTabs = fixtures.getTemplate({
+            test('should show an info callout if data is not present', async () => {
+              const templateWithNoOptionalFields = fixtures.getTemplate({
                 name: `a${getRandomString()}`,
                 indexPatterns: ['template1Pattern1*', 'template1Pattern2'],
               });
 
               const { actions, find, exists, component } = testBed;
 
-              httpRequestsMockHelpers.setLoadTemplateResponse(templateWithNoTabs);
+              httpRequestsMockHelpers.setLoadTemplateResponse(templateWithNoOptionalFields);
 
               await actions.clickTemplateAt(0);
 
@@ -503,41 +488,18 @@ describe.skip('<IndexManagementHome />', () => {
                 component.update();
               });
 
-              expect(find('templateDetails.tab').length).toBe(0);
+              expect(find('templateDetails.tab').length).toBe(4);
               expect(exists('summaryTab')).toBe(true);
-              expect(exists('summaryTitle')).toBe(true);
-            });
 
-            it('should not show all tabs if mappings, settings or aliases data is not present', async () => {
-              const templateWithSomeTabs = fixtures.getTemplate({
-                name: `a${getRandomString()}`,
-                indexPatterns: ['template1Pattern1*', 'template1Pattern2'],
-                settings: JSON.stringify({
-                  index: {
-                    number_of_shards: '1',
-                  },
-                }),
-              });
+              // Navigate and verify callout message per tab
+              actions.selectDetailsTab('settings');
+              expect(exists('noSettingsCallout')).toBe(true);
 
-              const { actions, find, exists, component } = testBed;
+              actions.selectDetailsTab('mappings');
+              expect(exists('noMappingsCallout')).toBe(true);
 
-              httpRequestsMockHelpers.setLoadTemplateResponse(templateWithSomeTabs);
-
-              await actions.clickTemplateAt(0);
-
-              // @ts-ignore (remove when react 16.9.0 is released)
-              await act(async () => {
-                await nextTick();
-                component.update();
-              });
-
-              expect(find('templateDetails.tab').length).toBe(2);
-              expect(exists('summaryTab')).toBe(true);
-              // Template does not contain aliases or mappings, so tabs will not render
-              expect(find('templateDetails.tab').map(t => t.text())).toEqual([
-                'Summary',
-                'Settings',
-              ]);
+              actions.selectDetailsTab('aliases');
+              expect(exists('noAliasesCallout')).toBe(true);
             });
           });
 

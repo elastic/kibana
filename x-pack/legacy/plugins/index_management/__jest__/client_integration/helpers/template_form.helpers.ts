@@ -64,10 +64,7 @@ export const formSetup = async (initTestBed: any): Promise<TemplateFormTestBed> 
   };
 
   const completeStepTwo = ({ settings }: Partial<Template>) => {
-    const { find, exists } = testBed;
-
-    expect(exists('stepSettings')).toBe(true);
-    expect(find('stepTitle').text()).toEqual('Index settings (optional)');
+    const { find } = testBed;
 
     if (settings) {
       find('mockCodeEditor').simulate('change', {
@@ -79,10 +76,7 @@ export const formSetup = async (initTestBed: any): Promise<TemplateFormTestBed> 
   };
 
   const completeStepThree = ({ mappings }: Partial<Template>) => {
-    const { find, exists } = testBed;
-
-    expect(exists('stepMappings')).toBe(true);
-    expect(find('stepTitle').text()).toEqual('Mappings (optional)');
+    const { find } = testBed;
 
     if (mappings) {
       find('mockCodeEditor').simulate('change', {
@@ -94,10 +88,7 @@ export const formSetup = async (initTestBed: any): Promise<TemplateFormTestBed> 
   };
 
   const completeStepFour = ({ aliases }: Partial<Template>) => {
-    const { find, exists } = testBed;
-
-    expect(exists('stepAliases')).toBe(true);
-    expect(find('stepTitle').text()).toEqual('Aliases (optional)');
+    const { find } = testBed;
 
     if (aliases) {
       find('mockCodeEditor').simulate('change', {
@@ -150,6 +141,7 @@ type TestSubjects =
   | 'requestTab'
   | 'saveTemplateError'
   | 'settingsEditor'
+  | 'systemTemplateEditCallout'
   | 'stepAliases'
   | 'stepMappings'
   | 'stepSettings'
