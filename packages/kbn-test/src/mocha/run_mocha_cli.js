@@ -73,7 +73,12 @@ export function runMochaCli() {
           cwd: REPO_ROOT,
           onlyFiles: true,
           absolute: true,
-          ignore: ['**/__tests__/fixtures/**', 'src/**/public/**', '**/_*.js'],
+          ignore: [
+            '**/__tests__/fixtures/**',
+            'src/**/public/**',
+            '**/_*.js',
+            'packages/**/target/**',
+          ],
         }
       )
       .forEach(file => {
