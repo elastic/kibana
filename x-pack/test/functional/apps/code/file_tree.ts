@@ -42,9 +42,9 @@ export default function exploreRepositoryFunctionalTests({
         );
       });
 
-      // Wait for the index to start.
+      // Wait for the index to end.
       await retry.try(async () => {
-        expect(await testSubjects.exists('repositoryIndexOngoing')).to.be(true);
+        expect(await testSubjects.exists('repositoryIndexDone')).to.be(true);
       });
     });
 
