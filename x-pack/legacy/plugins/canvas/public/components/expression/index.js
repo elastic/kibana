@@ -94,7 +94,7 @@ export const Expression = compose(
   }),
   withState('fontSize', 'setFontSize', () => {
     const fontSize = storage.get(LOCALSTORAGE_EXPRESSION_EDITOR_FONT_SIZE);
-    return fontSize === null ? 16 : fontSize;
+    return fontSize === null ? 16 : parseInt(fontSize, 10);
   }),
   withState('isCompact', 'setCompact', true),
   withHandlers({

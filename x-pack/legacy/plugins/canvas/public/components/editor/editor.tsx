@@ -31,11 +31,6 @@ interface Props {
   /** ID of the editor language */
   languageId: string;
 
-  /** Language defintion if using a custom language in the editor */
-  languageDef?:
-    | monacoEditor.languages.IMonarchLanguage
-    | PromiseLike<monacoEditor.languages.IMonarchLanguage>;
-
   /** Value of the editor */
   value: string;
 
@@ -99,34 +94,25 @@ export class Editor extends React.Component<Props, {}> {
       this.props.editorWillMount(monaco);
     }
 
-    monaco.languages.register({ id: this.props.languageId });
+    monaco.languages.onLanguage(this.props.languageId, () => {
+      if (this.props.suggestionProvider) {
+        monaco.languages.registerCompletionItemProvider(
+          this.props.languageId,
+          this.props.suggestionProvider
+        );
+      }
 
-    if (this.props.languageDef) {
-      monaco.languages.setMonarchTokensProvider(this.props.languageId, this.props.languageDef);
+      if (this.props.signatureProvider) {
+        monaco.languages.registerSignatureHelpProvider(
+          this.props.languageId,
+          this.props.signatureProvider
+        );
+      }
 
-      // Setup onLanguage handler here which registers all our code providers for the language
-      // This ensures that the providers are only registered once
-      // https://microsoft.github.io/monaco-editor/api/modules/monaco.languages.html#onlanguage
-      monaco.languages.onLanguage(this.props.languageId, () => {
-        if (this.props.suggestionProvider) {
-          monaco.languages.registerCompletionItemProvider(
-            this.props.languageId,
-            this.props.suggestionProvider
-          );
-        }
-
-        if (this.props.signatureProvider) {
-          monaco.languages.registerSignatureHelpProvider(
-            this.props.languageId,
-            this.props.signatureProvider
-          );
-        }
-
-        if (this.props.hoverProvider) {
-          monaco.languages.registerHoverProvider(this.props.languageId, this.props.hoverProvider);
-        }
-      });
-    }
+      if (this.props.hoverProvider) {
+        monaco.languages.registerHoverProvider(this.props.languageId, this.props.hoverProvider);
+      }
+    });
 
     // Register the theme
     monaco.editor.defineTheme('euiColors', theme);

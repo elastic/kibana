@@ -14,11 +14,13 @@ import { Editor } from '../editor';
 
 import { CanvasFunction } from '../../../types';
 import {
+  AutocompleteSuggestion,
   getAutocompleteSuggestions,
   getFnArgDefAtPosition,
 } from '../../../common/lib/autocomplete';
 
-import { language } from './expression_language';
+import { LANGUAGE_ID } from '../../lib/monaco_language_def';
+
 import { getFunctionReferenceStr, getArgReferenceStr } from './reference';
 
 interface Props {
@@ -139,7 +141,7 @@ export class ExpressionInput extends React.Component<Props> {
       text.length - lengthAfterPosition
     );
 
-    const suggestions = aSuggestions.map((s: any) => {
+    const suggestions = aSuggestions.map((s: AutocompleteSuggestion) => {
       if (s.type === 'argument') {
         return {
           label: s.argDef.name,
@@ -242,16 +244,8 @@ export class ExpressionInput extends React.Component<Props> {
     };
   };
 
-  editorWillMount = () => {
-    language.keywords = this.props.functionDefinitions.map(fn => fn.name);
-  };
-
   render() {
-    const { value, error, fontSize, functionDefinitions, isAutocompleteEnabled } = this.props;
-
-    if (functionDefinitions.length === 0) {
-      return null;
-    }
+    const { value, error, fontSize, isAutocompleteEnabled } = this.props;
 
     const helpText = error
       ? null
@@ -267,11 +261,9 @@ export class ExpressionInput extends React.Component<Props> {
         >
           <div className="canvasExpressionInput--editor">
             <Editor
-              languageId="expression"
-              languageDef={language}
+              languageId={LANGUAGE_ID}
               value={value}
               onChange={this.onChange}
-              editorWillMount={this.editorWillMount}
               suggestionProvider={{
                 triggerCharacters: [' '],
                 provideCompletionItems: this.provideSuggestions,

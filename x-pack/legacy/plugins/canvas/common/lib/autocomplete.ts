@@ -18,6 +18,28 @@ import {
 
 const MARKER = 'CANVAS_SUGGESTION_MARKER';
 
+interface BaseSuggestion {
+  text: string;
+  start: number;
+  end: number;
+}
+
+interface FunctionSuggestion extends BaseSuggestion {
+  type: 'function';
+  fnDef: CanvasFunction;
+}
+
+interface ArgSuggestion extends BaseSuggestion {
+  type: 'argument';
+  argDef: CanvasArgValue;
+}
+
+interface ValueSuggestion extends BaseSuggestion {
+  type: 'value';
+}
+
+export type AutocompleteSuggestion = FunctionSuggestion | ArgSuggestion | ValueSuggestion;
+
 // If you parse an expression with the "addMeta" option it completely
 // changes the type of returned object.  The following types
 // enhance the existing AST types with the appropriate meta information
@@ -115,7 +137,7 @@ export function getAutocompleteSuggestions(
   specs: CanvasFunction[],
   expression: string,
   position: number
-) {
+): AutocompleteSuggestion[] {
   const text = expression.substr(0, position) + MARKER + expression.substr(position);
   try {
     const ast = parse(text, { addMeta: true }) as ExpressionASTWithMeta;
@@ -202,7 +224,7 @@ function getFnNameSuggestions(
   specs: CanvasFunction[],
   ast: ExpressionASTWithMeta,
   fnIndex: number
-) {
+): FunctionSuggestion[] {
   // Filter the list of functions by the text at the marker
   const { start, end, node: fn } = ast.node.chain[fnIndex];
   const query = fn.function.replace(MARKER, '');
@@ -232,7 +254,7 @@ function getArgNameSuggestions(
   fnIndex: number,
   argName: string,
   argIndex: number
-) {
+): ArgSuggestion[] {
   // Get the list of args from the function definition
   const fn = ast.node.chain[fnIndex].node;
   const fnDef = getByAlias(specs, fn.function);
@@ -294,7 +316,7 @@ function getArgValueSuggestions(
   fnIndex: number,
   argName: string,
   argIndex: number
-) {
+): ValueSuggestion[] {
   // Get the list of values from the argument definition
   const fn = ast.node.chain[fnIndex].node;
   const fnDef = getByAlias(specs, fn.function);
