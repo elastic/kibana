@@ -28,6 +28,7 @@ const mapStateToProps = (state: any) => ({
 
 const getAbsoluteUrl = (path: string) => {
   const { location } = getWindow();
+
   if (!location) {
     return path;
   } // fallback for mocked window object
@@ -67,7 +68,7 @@ export const WorkpadExport = compose<ComponentProps, Props>(
         switch (type) {
           case 'pdf':
             return createPdf(workpad, { pageCount })
-              .then(({ data }) => {
+              .then(({ data }: { data: { job: { id: string } } }) => {
                 notify.info('Exporting PDF. You can track the progress in Management.', {
                   title: `PDF export of workpad '${workpad.name}'`,
                 });
@@ -75,7 +76,7 @@ export const WorkpadExport = compose<ComponentProps, Props>(
                 // register the job so a completion notification shows up when it's ready
                 jobCompletionNotifications.add(data.job.id);
               })
-              .catch(err => {
+              .catch((err: Error) => {
                 notify.error(err, { title: `Failed to create PDF for '${workpad.name}'` });
               });
           case 'json':
