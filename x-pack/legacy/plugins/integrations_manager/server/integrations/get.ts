@@ -10,12 +10,14 @@ import { InstallationAttributes } from '../../common/types';
 import * as Registry from '../registry';
 import { createInstallableFrom } from './index';
 
+function nameAsTitle(name: string) {
+  return name.charAt(0).toUpperCase() + name.substr(1).toLowerCase();
+}
+
 export async function getIntegrations(options: { savedObjectsClient: SavedObjectsClientContract }) {
   const { savedObjectsClient } = options;
   const registryItems = await Registry.fetchList().then(items =>
-    items.map(item =>
-      Object.assign({}, item, { title: item.title || item.description.split(' ')[0] })
-    )
+    items.map(item => Object.assign({}, item, { title: item.title || nameAsTitle(item.name) }))
   );
   const searchObjects = registryItems.map(({ name, version }) => ({
     type: SAVED_OBJECT_TYPE,
@@ -47,7 +49,7 @@ export async function getIntegrationInfo(options: {
 
   // add properties that aren't (or aren't yet) on Registry response
   const updated = Object.assign({}, item, {
-    title: item.title || item.description.split(' ')[0],
+    title: item.title || nameAsTitle(item.name),
     assets: Registry.groupPathsByService(paths),
   });
 
