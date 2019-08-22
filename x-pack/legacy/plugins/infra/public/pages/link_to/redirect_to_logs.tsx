@@ -32,5 +32,5 @@ export const RedirectToLogs = injectI18n(({ location, match }: RedirectToLogsPro
     replaceLogPositionInQueryString(getTimeFromLocation(location)),
     replaceSourceIdInQueryString(sourceId)
   )('');
-  return <Redirect to={`/logs?${searchString}`} />;
+  return <Redirect to={`/logs/stream?${searchString}`} />;
 });
