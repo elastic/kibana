@@ -24,7 +24,11 @@ export function canvas(kibana) {
         euiIconType: 'canvasApp',
         main: 'plugins/canvas/app',
       },
-      interpreter: ['plugins/canvas/browser_functions', 'plugins/canvas/renderers'],
+      interpreter: [
+        'plugins/canvas/browser_functions',
+        'plugins/canvas/renderers',
+        'plugins/canvas/interpreter_expression_types',
+      ],
       styleSheetPaths: resolve(__dirname, 'public/style/index.scss'),
       hacks: [
         // window.onerror override
