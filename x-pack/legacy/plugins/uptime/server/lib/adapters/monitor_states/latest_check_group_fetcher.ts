@@ -31,7 +31,7 @@ export const fetchMonitorLocCheckGroups = async (
   size: number
 ): Promise<FetchMonitorLocCheckGroupsResult> => {
   const items: MonitorIdWithGroups[] = [];
-  const fetcher = new UnfilteredFetcher(queryContext);
+  const fetcher = new Fetcher(queryContext);
 
   let paginationBefore: CursorPagination | null = null;
   console.log('Start fetching');
@@ -74,96 +74,7 @@ export const fetchMonitorLocCheckGroups = async (
   };
 };
 
-/* export class FilteredFetcher {
-  queryContext: QueryContext;
-  currentMonitor: MonitorIdWithGroups | null;
-  unfilteredFetcher: UnfilteredFetcher;
-
-  constructor(
-    queryContext: QueryContext,
-    initCurrentMonitor: MonitorIdWithGroups | null = null,
-    initUnfilteredFetcher: UnfilteredFetcher | null = null
-  ) {
-    this.queryContext = queryContext;
-    this.currentMonitor = initCurrentMonitor;
-    this.unfilteredFetcher = initUnfilteredFetcher || new UnfilteredFetcher(queryContext);
-  }
-
-  current(): MonitorIdWithGroups | null {
-    return this.currentMonitor;
-  }
-
-  async reverse(): Promise<FilteredFetcher | null> {
-    if (!this.currentMonitor) {
-      return null;
-    }
-    const revUnfiltered = this.unfilteredFetcher.reverse();
-    if (!revUnfiltered) {
-      return null;
-    }
-    const newFetcher = new FilteredFetcher(
-      revUnfiltered.queryContext,
-      this.currentMonitor,
-      revUnfiltered
-    );
-    const peeked = await newFetcher.peek();
-    // The secondary attributes may not have been reversed, we may re-traverse the current item partially
-    console.log('BIRDI', peeked);
-    console.log('CUR', this.currentMonitor);
-    while (peeked && peeked.id === this.currentMonitor.id) {
-      console.log('SKIP AHEAD');
-      this.next();
-    }
-    return newFetcher;
-  }
-
-  paginationAfterCurrent(): CursorPagination | null {
-    return this.unfilteredFetcher.paginationAfterCurrent();
-  }
-
-  clone(): FilteredFetcher {
-    return new FilteredFetcher(this.queryContext, this.current(), this.unfilteredFetcher.clone());
-  }
-
-  // Note this is doesn't cache the peek'd data
-  // In the future this may be relevant perf wise, but not today.
-  async peek(): Promise<MonitorIdWithGroups | null> {
-    const clone = this.clone();
-    return await clone.next();
-  }
-
-  async next(): Promise<MonitorIdWithGroups | null> {
-    // Keep going forward until we find a monitor that matches the filter
-    while (true) {
-      const mlcg = await this.unfilteredFetcher.next();
-      if (!mlcg) {
-        this.currentMonitor = mlcg;
-        break; // No more items to fetch
-      }
-
-      const peek = await this.unfilteredFetcher.peek();
-      if (peek && peek.id != monitor.id) {
-        if (this.filter(monitor)) {
-          break;
-        }
-      }
-    }
-
-    this.currentMonitor = monitor;
-    return monitor;
-  }
-
-  filter(monitor: MonitorIdWithGroups): boolean {
-    const status = monitor.groups.some(g => g.down > 0) ? 'down' : 'up';
-    return (
-      (!this.queryContext.statusFilter || this.queryContext.statusFilter === status) &&
-      monitor.groups.some(g => g.filterMatchesLatest)
-    );
-  }
-}
-
- */
-class UnfilteredFetcher {
+class Fetcher {
   queryContext: QueryContext;
   // Cache representing pre-fetched query results.
   // The first item is the CheckGroup this represents.
@@ -185,7 +96,7 @@ class UnfilteredFetcher {
   }
 
   clone() {
-    return new UnfilteredFetcher(this.queryContext, this.buffer.slice(0), this.bufferPos);
+    return new Fetcher(this.queryContext, this.buffer.slice(0), this.bufferPos);
   }
 
   // Get a CursorPaginator object that will resume after the current() value.
@@ -200,7 +111,7 @@ class UnfilteredFetcher {
   }
 
   // Returns a copy of this fetcher that goes backwards, not forwards from the current positon
-  reverse(): UnfilteredFetcher | null {
+  reverse(): Fetcher | null {
     const reverseContext = Object.assign({}, this.queryContext);
     const current = this.current();
 
@@ -213,7 +124,7 @@ class UnfilteredFetcher {
           : CursorDirection.AFTER,
     };
 
-    return current ? new UnfilteredFetcher(reverseContext, [current], 0) : null;
+    return current ? new Fetcher(reverseContext, [current], 0) : null;
   }
 
   // Returns the last item fetched with next(). null if no items fetched with
