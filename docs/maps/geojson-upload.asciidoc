@@ -1,0 +1,57 @@
+[role="xpack"]
+[[indexing-and-styling-geojson-data]]
+== GeoJSON Upload
+
+GeoJSON Upload allows you to upload properly formatted GeoJSON
+files from Kibana Maps to be indexed in {es} as
+{ref}/geo-point.html[geo_point] or {ref}/geo-shape.html[geo_shape] indexed documents.
+
+[float]
+=== The Utility of GeoJSON Upload
+
+One of the initial challenges a user will likely face when using Kibana Maps
+for the first time, is how to get their data into {es} for visualization
+in the Maps app. There are a number of different ways to get data into
+{es}, but GeoJSON Upload provides a simple drag & drop interface to
+streamline data indexing for use in Kibana Maps and the broader Kibana ecosystem.
+
+[float]
+=== Why GeoJSON
+
+GeoJSON is a commonly used, open standard file format for storing geospatial
+vector data. There are many formats of vector data used in the GIS community, 
+however GeoJSON is a widely-used, open and flexible option. For other types of 
+geospatial vector data, there are usually paths to convert these files to GeoJSON.
+
+[float]
+=== Overview of how to use the GeoJSON upload feature
+
+In the Maps application, you can find GeoJSON Upload by clicking *Add Layer*.
+From the panel that opens you'll see *Upload GeoJSON Vector File*.
+
+[role="screenshot"]
+image::maps/images/fu_gs_select_source_file_upload.png[]
+
+. Click *Upload GeoJSON Vector File*
+. Use the *File Picker* to select a valid GeoJSON file. The file will then load
+a preview of the data on the map.
+. The *Index Type* will default to {ref}/geo-point.html[geo_point] for point data, 
+but you can override this and select {ref}/geo-shape.html[geo_shape]
+since that is also valid. All other shapes will default to a type of `geo_shape`.
+. For *GeoJSON Upload*, the *Index name* & *Index pattern* defaults to the name of the uploaded
+file minus its extension (".json", ".geojson", etc.), however you may want to change 
+it to something different. You may actually have to change the index name if it's 
+invalid as an *Index name* or *Index pattern*.
+. To import the file, click *Import file*
+. Upon completing the indexing process and creating the associated index pattern,
+the Elasticsearch responses will be shown on the *Layer Add Panel* and the indexed data
+will be shown on the map. If all goes well, the geospatial data shown on the map
+will look identical to the previewed data, the difference is the source. Before
+it was just a local preview, now it's indexed data from Elasticsearch!
+. If you want to continue adding the data to the map, click *Add layer* in the lower
+right-hand corner.
+. You should now see the *Layer Settings* section, adjust any settings or <<maps-vector-style-properties, properties>> as needed.
+. Click *Save & close*
+
+For an example of how to use GeoJSON Upload with sample files, consider trying
+the <<geojson-upload-integrated-example, integrated example>> 

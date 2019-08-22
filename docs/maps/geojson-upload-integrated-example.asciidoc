@@ -1,0 +1,135 @@
+[role="xpack"]
+[[indexing-geojson-data-example]]
+== Indexing GeoJSON Data Example
+
+The *Maps* Application makes it easy to import GeoJSON documents into an
+Elasticsearch index using the *Upload GeoJSON vector file* feature.
+
+[role="screenshot"]
+image::maps/images/fu_gs_select_source_file_upload.png[]
+
+[float]
+=== Prerequisites
+Before you begin, we've provided the following GeoJSON sample data files
+for you to download:
+
+* https://raw.githubusercontent.com/elastic/examples/master/Maps/Getting%20Started%20Examples/geojson_upload_and_styling/logan_international_airport.geojson[Logan International Airport]
+* https://raw.githubusercontent.com/elastic/examples/master/Maps/Getting%20Started%20Examples/geojson_upload_and_styling/bangor_international_airport.geojson[Bangor International Airport]
+* https://raw.githubusercontent.com/elastic/examples/master/Maps/Getting%20Started%20Examples/geojson_upload_and_styling/lightning_detected.geojson[Lightning detected]
+* https://raw.githubusercontent.com/elastic/examples/master/Maps/Getting%20Started%20Examples/geojson_upload_and_styling/original_flight_path.geojson[Original flight path]
+* https://raw.githubusercontent.com/elastic/examples/master/Maps/Getting%20Started%20Examples/geojson_upload_and_styling/modified_flight_path.geojson[Modified flight path]
+
+This data represents two real airports, fictitious lightning detected, and two
+fictitious airplane routes. These files are good examples of some of the types
+of vector data that can be easily uploaded to Kibana and indexed in
+Elasticsearch for display in the Maps application. You do not need to use all of
+these files, feel free to work with as many as you'd like or use valid GeoJSON
+files of your own.
+
+[float]
+=== Take-away skills
+In this tutorial, you'll learn to:
+
+* Upload GeoJSON Files to Kibana, index them in {es}, and display
+them as layers in a map
+* Add an additional heatmap layer using the newly indexed {es} data
+
+[role="xpack"]
+=== Creating and setting up map
+
+The first thing to do is to <<maps-create, create a new map>>.
+
+Zoom in on the New England area in the northeast United States.
+Since you're adding flight paths to this area, this should
+set the map up well for a good view of the data being added.
+
+[role="screenshot"]
+image::maps/images/fu_gs_new_england_map.png[]
+
+[float]
+[[upload-and-index-geojson-file]]
+==== Steps to upload and index GeoJSON File(s)
+For each of the downloaded GeoJSON files, complete the following steps:
+
+. Below the map legend, click *Add layer*.
+. From the list of layer types, click *Upload GeoJSON vector file*.
+. Upload the file indicated according to the section instructions. This should
+auto-populate the fields *Index type* and *Index name* with the values
+{ref}/geo-point.html[geo_point] and `<file name>` respectively. These defaults will
+work well for this example.
+. The *Import file* button on the lower right should now be active.
+Go ahead and click it.
+. You'll see some activity as the GeoJSON Upload utility creates a new index
+and index pattern for the dataset. When the process is complete, you should
+receive messages indicating both the creation of the new index and index pattern
+were successful. The *Add layer* button in the bottom right should now be
+active. Go ahead and click it.
+. You should now see the *Layer Settings* section, adjust any settings or <<maps-vector-style-properties, properties>> as needed.
+. Click *Save & close*
+
+If you've added all of the sample files, your map should now look something
+like this:
+
+[role="screenshot"]
+image::maps/images/fu_gs_flight_paths.png[]
+
+
+[float]
+==== Save map
+Now that your map is complete, you'll want to <<maps-save, save it>> so others can use it.
+
+[float]
+=== Organizing layers and leveraging aggregations on indexed data
+Looking over the map, it's actually fairly complete and could be considered
+done, but there are a few more additions and tweaks that can be made to tell a
+better story with our newly indexed data.
+
+Looking at the `Lightning detected` layer, it's pretty clear where lightning has
+struck. What's a little less clear, is if there have been more lightning 
+strikes in some areas vs. others, or in other words, where the real lightning 
+hot spots are. One advantage of now having indexed
+{ref}/geo-point.html[geo_point] data for the 
+lightning strikes is that we can perform aggregations on the data. 
+
+[float]
+==== Add heatmap aggregation layer for lightning strikes
+. Below the map legend, click *Add layer*.
+. From the list of layer types, click *Grid aggregation*.
+. Since you've indexed `lightning_detected.geojson` using the index name & 
+pattern `lightning_detected`, that data is available to us as a {ref}/geo-point.html[geo_point]
+aggregation. Go ahead and select the *Index pattern* `lightning_detected`
+. Next click *Show as* and select `heat map`.
+. Click *Add layer* to add the Heat map layer.
+"Lightning intensity"
+. The remaining default settings are pretty good, but there are a couple other
+settings you might like to change. Under *Source Settings* > *Grid resolution*
+you can select from different heat map resolutions. The default "Coarse" looks
+pretty good, but feel free to select a different resolution.
+. Another setting that's worth playing around with is *Layer Style* >
+*Color range*. Again the default looks pretty good, but feel free to choose a
+different color range.
+. When you're finished modifying settings, click *Save & close*
+
+With your new lightning heat map layer added, your map should now look
+something like this:
+
+[role="screenshot"]
+image::maps/images/fu_gs_lightning_intensity.png[]
+
+
+[float]
+==== Final map & tweaks
+It might make sense to make a few final tweaks including:
+
+. Adjusting the layer order
+. Deciding which layers to show at different zoom levels 
+
+When you've finished, again make sure and <<maps-save, save your work >>.
+
+Your final map should look something like this:
+
+[role="screenshot"]
+image::maps/images/fu_gs_final_map.png[]
+
+Hopefully this quick example has demonstrated how easy it is to quickly
+index geospatial data and save customized maps!
