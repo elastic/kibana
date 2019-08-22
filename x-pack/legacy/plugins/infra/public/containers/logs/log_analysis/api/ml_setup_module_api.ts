@@ -15,16 +15,10 @@ const MODULE_ID = 'logs_ui_analysis';
 // This is needed due to: https://github.com/elastic/kibana/issues/43671
 const removeSampleDataIndex = (indexPattern: string) => {
   const SAMPLE_DATA_INDEX = 'kibana_sample_data_logs*';
-  const indices = indexPattern.split(',');
-  const sampleDataIndex = indices.findIndex((index: string) => {
-    return index === SAMPLE_DATA_INDEX;
-  });
-  if (sampleDataIndex > -1) {
-    indices.splice(sampleDataIndex, 1);
-    return indices.join(',');
-  } else {
-    return indexPattern;
-  }
+  return indexPattern
+    .split(',')
+    .filter(index => index !== SAMPLE_DATA_INDEX)
+    .join(',');
 };
 
 export const callSetupMlModuleAPI = async (
