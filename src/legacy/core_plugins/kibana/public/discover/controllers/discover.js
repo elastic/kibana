@@ -574,7 +574,7 @@ function discoverController(
           next: $scope.updateTime
         }));
         subscriptions.add(subscribeWithScope($scope, timefilter.getFetch$(), {
-          next: $scope.fetc
+          next: $scope.fetch
         }));
 
         $scope.$watchCollection('state.sort', function (sort) {
