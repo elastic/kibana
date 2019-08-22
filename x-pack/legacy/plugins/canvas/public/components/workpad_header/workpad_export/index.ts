@@ -59,10 +59,13 @@ export const WorkpadExport = compose<ComponentProps, Props>(
         switch (type) {
           case 'pdf':
             notify.info('The PDF generation URL was copied to your clipboard.');
+            break;
           case 'reportingConfig':
             notify.info(`Copied reporting configuration to clipboard`);
+            break;
+          default:
+            throw new Error(`Unknown export type: ${type}`);
         }
-        throw new Error(`Unknown export type: ${type}`);
       },
       onExport: type => {
         switch (type) {
@@ -81,8 +84,7 @@ export const WorkpadExport = compose<ComponentProps, Props>(
               });
           case 'json':
             downloadWorkpad(workpad.id);
-          case 'embed':
-            return;
+            break;
           default:
             throw new Error(`Unknown export type: ${type}`);
         }

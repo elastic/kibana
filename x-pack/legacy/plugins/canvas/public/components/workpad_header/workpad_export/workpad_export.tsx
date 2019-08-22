@@ -14,8 +14,8 @@ import { PDFPanel } from './pdf_panel';
 
 type ClosePopoverFn = () => void;
 
-type CopyTypes = 'pdf' | 'reportingConfig' | 'embed';
-type ExportTypes = 'pdf' | 'json' | 'embed';
+type CopyTypes = 'pdf' | 'reportingConfig';
+type ExportTypes = 'pdf' | 'json';
 type ExportUrlTypes = 'pdf';
 
 export type OnCopyFn = (type: CopyTypes) => void;
@@ -99,7 +99,7 @@ export const WorkpadExport: FunctionComponent<Props> = ({
           ) : (
             <DisabledPanel
               onCopy={() => {
-                onCopy('pdf');
+                onCopy('reportingConfig');
                 closePopover();
               }}
             />
