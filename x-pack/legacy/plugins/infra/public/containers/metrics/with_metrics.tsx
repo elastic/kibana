@@ -49,16 +49,21 @@ export const WithMetrics = ({
 }: WithMetricsProps) => {
   const metrics = layouts.reduce(
     (acc, item) => {
-      // Need to filter out the apmMetrics id since that is being handled
-      // by the useApmMetrics hook. This could have been added to the GraphQL
-      // endpoint but would have required signifigant overhead with managing
-      // the types due to the shape of the APM metric data
-      return acc.concat(item.sections.map(s => s.id).filter(s => s !== 'apmMetrics'));
+      return acc.concat(item.sections.map(s => s.id));
     },
     [] as InfraMetric[]
   );
 
-  const apmMetrics = useApmMetrics(sourceId, nodeId, nodeType, timerange);
+  // only make this request if apmMetrics is included in the list
+  // of metrics from the filtered layout.
+  const apmMetrics = metrics.includes(InfraMetric.apmMetrics)
+    ? useApmMetrics(sourceId, nodeId, nodeType, timerange)
+    : {
+        metrics: null,
+        loading: false,
+        error: undefined,
+        makeRequest: () => void 0,
+      };
 
   return (
     <Query<MetricsQuery.Query, MetricsQuery.Variables>
@@ -67,7 +72,11 @@ export const WithMetrics = ({
       notifyOnNetworkStatusChange
       variables={{
         sourceId,
-        metrics,
+        // Need to filter out the apmMetrics id since that is being handled
+        // by the useApmMetrics hook. This could have been added to the GraphQL
+        // endpoint but would have required signifigant overhead with managing
+        // the types due to the shape of the APM metric data
+        metrics: metrics.filter(m => m !== InfraMetric.apmMetrics),
         nodeType,
         nodeId,
         cloudId,

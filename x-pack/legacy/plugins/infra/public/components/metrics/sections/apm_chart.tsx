@@ -132,6 +132,8 @@ export const ApmChart = ({
         tooltip={tooltipProps}
         theme={getChartTheme()}
         onBrushEnd={handleTimeChange}
+        showLegend={true}
+        legendPosition="right"
       />
     </Chart>
   );

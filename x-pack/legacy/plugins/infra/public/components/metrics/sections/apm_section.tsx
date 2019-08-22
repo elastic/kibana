@@ -16,6 +16,7 @@ import { MetricSummary, MetricSummaryItem } from './metric_summary';
 import { ApmChart } from './apm_chart';
 import { SourceConfiguration } from '../../../utils/source_configuration';
 import { createAPMServiceLink } from './helpers/create_apm_service_link';
+import { euiStyled } from '../../../../../../common/eui_styled_components';
 
 interface Props {
   section: InfraMetricLayoutSection;
@@ -119,7 +120,7 @@ export const ApmSection = ({
                       )}
                     </h3>
                   </EuiTitle>
-                  <div style={{ height: 200 }}>
+                  <ChartContainer>
                     <ApmChart
                       section={section}
                       dataSet={responseTimes}
@@ -129,7 +130,7 @@ export const ApmSection = ({
                       stopLiveStreaming={stopLiveStreaming}
                       onChangeRangeTime={onChangeRangeTime}
                     />
-                  </div>
+                  </ChartContainer>
                   <EuiTitle size="xs">
                     <h3>
                       {i18n.translate(
@@ -138,7 +139,7 @@ export const ApmSection = ({
                       )}
                     </h3>
                   </EuiTitle>
-                  <div style={{ height: 200 }}>
+                  <ChartContainer>
                     <ApmChart
                       section={section}
                       dataSet={transPerMinute}
@@ -147,7 +148,7 @@ export const ApmSection = ({
                       stopLiveStreaming={stopLiveStreaming}
                       onChangeRangeTime={onChangeRangeTime}
                     />
-                  </div>
+                  </ChartContainer>
                 </React.Fragment>
               );
             }
@@ -158,3 +159,8 @@ export const ApmSection = ({
     </EuiPageContentBody>
   );
 };
+
+const ChartContainer = euiStyled.div`
+height: 250px;
+margin-bottom: ${params => params.theme.eui.euiSizeM};
+`;
