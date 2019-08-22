@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import { ClusterMeta } from './cluster_meta';
 import { EsClient } from '../../lib/esqueue';
 import { RepositoryObjectClient } from '../../search';
 import { Poller } from '../../poller';
 import { Logger } from '../../log';
-import { Repository } from '../../../model';
 import { ClusterState } from './cluster_state';
 import { ClusterStateEvent } from './cluster_state_event';
 
@@ -51,20 +49,21 @@ export class ClusterService {
    * Sync the cluster meta-data with the remote storage.
    */
   async pollClusterState(): Promise<void> {
-    const cmpFunc = (a: Repository, b: Repository): number => {
-      return a.url.localeCompare(b.url);
-    };
-    const repos = (await this.repositoryObjectClient.getAllRepositories()).sort(cmpFunc);
-    const currentRepos = this.currentState.clusterMeta.repositories.sort(cmpFunc);
-    // sort both arrays to make them comparable.
-    if (_.isEqual(currentRepos, repos)) {
+    const repos = await this.repositoryObjectClient.getAllRepositories();
+    const repoUris = new Set(repos.map(repo => repo.uri));
+    const currentRepoUris = new Set(
+      this.currentState.clusterMeta.repositories.map(repo => repo.uri)
+    );
+    const added = new Set(Array.from(repoUris).filter(uri => !currentRepoUris.has(uri)));
+    const removed = new Set(Array.from(currentRepoUris).filter(uri => !repoUris.has(uri)));
+    if (added.size === 0 && removed.size === 0) {
       // the cluster state and the routing table is only needed to be updated when repository objects have changed.
       return;
     }
     this.setClusterState(
       new ClusterState(
         new ClusterMeta(repos),
-        this.currentState.routingTable,
+        this.currentState.routingTable.withoutRepositories(removed),
         this.currentState.nodes
       )
     );

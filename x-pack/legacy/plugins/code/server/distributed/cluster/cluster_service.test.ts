@@ -61,4 +61,11 @@ test('test poll cluster state', async () => {
   expect(repo).toBeDefined();
   expect(repo!.url).toBe('http://github/a/a');
   expect(state.routingTable.getRepositoryURIsByNodeId('test')).toEqual(['github/a/a']);
+
+  repoClient.getAllRepositories = sinon.fake.returns([]);
+  await clusterService.pollClusterState();
+  state = clusterService.state();
+  expect(state).toBeDefined();
+  expect(state.clusterMeta.repositories.length).toBe(0);
+  expect(state.routingTable.repositoryURIs().length).toBe(0);
 });

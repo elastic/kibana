@@ -30,6 +30,15 @@ export class RoutingTable {
     return new RoutingTable(this.assignments.concat(assignments));
   }
 
+  /**
+   * return a new routing table without given repositories
+   */
+  public withoutRepositories(repoUris: Set<string>): RoutingTable {
+    return new RoutingTable(
+      this.assignments.filter(assignment => !repoUris.has(assignment.resource))
+    );
+  }
+
   public nodeIds(): string[] {
     return Array.from(this.node2Repos.keys());
   }
