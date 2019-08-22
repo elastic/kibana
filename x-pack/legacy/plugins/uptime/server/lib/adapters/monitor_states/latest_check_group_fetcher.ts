@@ -1,7 +1,8 @@
-import { CursorDirection, SortOrder, CursorPagination } from '../../../../common/graphql/types';
+import { CursorDirection, SortOrder } from '../../../../common/graphql/types';
 import { QueryContext } from './elasticsearch_monitor_states_adapter';
-import { INDEX_NAMES, STATES, QUERY } from '../../../../common/constants';
+import { INDEX_NAMES, QUERY } from '../../../../common/constants';
 import { get, set } from 'lodash';
+import { CursorPagination } from './adapter_types';
 
 export type MonitorLocCheckGroup = {
   monitorId: string;
@@ -31,13 +32,18 @@ export const fetchMonitorLocCheckGroups = async (
 
   const fetcher = new LatestCheckGroupFetcher(queryContext);
   let currentMonitor: MonitorIdWithGroups | null = null;
-  let i = 0;
+
+  let paginationBefore: CursorPagination | null = null;
+
   while (items.length < size) {
-    i++;
     const mlcg = await fetcher.next();
-    console.log('Next invoked', i, mlcg, await fetcher.current());
     if (!mlcg) {
       break; // No more items to fetch
+    }
+    // On our first item set the previous pagination to be items before this if they exist
+    if (!paginationBefore) {
+      const reverseFetcher = fetcher.reverse();
+      reverseFetcher && reverseFetcher.peek() ? reverseFetcher.paginationAfterCurrent() : null;
     }
 
     if (currentMonitor && currentMonitor.id === mlcg.monitorId) {
@@ -46,9 +52,10 @@ export const fetchMonitorLocCheckGroups = async (
       currentMonitor = { id: mlcg.monitorId, groups: [mlcg] };
     }
 
-    // Handle the case where we have processed all the mlcgs for this monitor
+    // Handle the case where we are at the end of the results or
+    // have processed all the mlcgs for this monitor
     const peek = await fetcher.peek();
-    if (peek && peek.monitorId != mlcg.monitorId) {
+    if (!peek || (peek && peek.monitorId != mlcg.monitorId)) {
       const status = currentMonitor.groups.some(g => g.down > 0) ? 'down' : 'up';
       if (!queryContext.statusFilter || queryContext.statusFilter === status) {
         items.push(currentMonitor);
@@ -57,15 +64,13 @@ export const fetchMonitorLocCheckGroups = async (
   }
 
   // We have to create these objects before checking if we can navigate backward
-  const paginationAfter: CursorPagination | null = fetcher.peek()
+  const paginationAfter: CursorPagination | null = (await fetcher.peek())
     ? fetcher.paginationAfterCurrent()
-    : null;
-  const paginationBefore: CursorPagination | null = fetcher.reverse().peek()
-    ? fetcher.reverse().paginationAfterCurrent()
     : null;
 
   const ssAligned = searchSortAligned(queryContext.pagination);
 
+  console.log('ITEMS', items);
   return {
     items,
     nextPagePagination: ssAligned ? paginationAfter : paginationBefore,
@@ -82,10 +87,14 @@ export class LatestCheckGroupFetcher {
   endOfStream: boolean;
   searchAfter: any;
 
-  constructor(queryContext: QueryContext) {
+  constructor(
+    queryContext: QueryContext,
+    initialBuffer: MonitorLocCheckGroup[] = [],
+    initialBufferPos: number = -1
+  ) {
     this.queryContext = queryContext;
-    this.buffer = [];
-    this.bufferPos = -1; // We start before the stream. User must call next to get any data
+    this.buffer = initialBuffer;
+    this.bufferPos = initialBufferPos;
     this.endOfStream = false;
     this.searchAfter = queryContext.pagination.cursorKey;
   }
@@ -97,13 +106,11 @@ export class LatestCheckGroupFetcher {
       ? { monitor_id: current.monitorId, location: current.location }
       : null;
 
-    console.log('current is', current);
     return Object.assign({}, this.queryContext.pagination, { cursorKey });
   }
 
-  // Returns a copy of this fetcher that goes backwards, not forwards from the cursorKey the fetcher
-  // was initialized with (not the current point).
-  reverse(): LatestCheckGroupFetcher {
+  // Returns a copy of this fetcher that goes backwards, not forwards from the current positon
+  reverse(): LatestCheckGroupFetcher | null {
     const reverseContext = Object.assign({}, this.queryContext);
     reverseContext.pagination = {
       cursorKey: this.queryContext.pagination.cursorKey,
@@ -113,7 +120,9 @@ export class LatestCheckGroupFetcher {
           ? CursorDirection.BEFORE
           : CursorDirection.AFTER,
     };
-    return new LatestCheckGroupFetcher(reverseContext);
+
+    const current = this.current();
+    return current ? new LatestCheckGroupFetcher(reverseContext, [current], 0) : null;
   }
 
   // Returns the last item fetched with next(). null if no items fetched with
