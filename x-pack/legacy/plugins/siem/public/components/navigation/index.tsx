@@ -46,8 +46,10 @@ export class SiemNavigationComponent extends React.Component<
   }
 
   public render() {
-    const { location, ...rest } = this.props;
-    return <TabNavigation location={location.pathname} search={location.search} {...rest} />;
+    const { location, navTabs } = this.props;
+    return (
+      <TabNavigation location={location.pathname} search={location.search} navTabs={navTabs} />
+    );
   }
 }
 

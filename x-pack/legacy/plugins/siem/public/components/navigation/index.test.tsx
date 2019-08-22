@@ -48,11 +48,11 @@ describe('SIEM Navigation', () => {
   };
   const wrapper = shallow(<SiemNavigationComponent {...mockProps} navTabs={navTabs} />);
   test('it calls setBreadcrumbs with correct path on mount', () => {
-    expect(setBreadcrumbs).toHaveBeenNthCalledWith(1, '/hosts');
+    expect(setBreadcrumbs).toHaveBeenNthCalledWith(1, '/hosts', {});
   });
   test('it calls setBreadcrumbs with correct path on update', () => {
     wrapper.setProps({ location: { pathname: '/network' } });
     wrapper.update();
-    expect(setBreadcrumbs).toHaveBeenNthCalledWith(2, '/network');
+    expect(setBreadcrumbs).toHaveBeenNthCalledWith(2, '/network', {});
   });
 });
