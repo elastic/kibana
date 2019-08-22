@@ -50,7 +50,7 @@ interface Props {
   appName: string;
   disableAutoFocus?: boolean;
   screenTitle?: string;
-  prepend?: any;
+  prepend?: React.ReactNode;
   persistedLog?: PersistedLog;
   bubbleSubmitEvent?: boolean;
   languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
@@ -202,10 +202,8 @@ export class QueryBarInputUI extends Component<Props, State> {
   };
 
   private onQueryStringChange = (value: string) => {
-    const hasValue = Boolean(value.trim());
-
     this.setState({
-      isSuggestionsVisible: hasValue,
+      isSuggestionsVisible: true,
       index: null,
       suggestionLimit: 50,
     });

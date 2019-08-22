@@ -29,6 +29,7 @@ export function executeRoute({ server, actionTypeRegistry, getServices }: Execut
     method: 'POST',
     path: '/api/action/{id}/_execute',
     options: {
+      tags: ['access:actions-read'],
       response: {
         emptyStatusCode: 204,
       },
@@ -52,15 +53,12 @@ export function executeRoute({ server, actionTypeRegistry, getServices }: Execut
       const { id } = request.params;
       const { params } = request.payload;
       const namespace = server.plugins.spaces && server.plugins.spaces.getSpaceId(request);
-      const savedObjectsClient = request.getSavedObjectsClient();
-      // Ensure user can read the action and has access to it
-      await savedObjectsClient.get('action', id);
       const result = await execute({
         params,
         actionTypeRegistry,
         actionId: id,
         namespace: namespace === 'default' ? undefined : namespace,
-        services: getServices(request.getBasePath(), { savedObjectsClient }),
+        services: getServices(request),
         encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects!,
       });
       return result;
