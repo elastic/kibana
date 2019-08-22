@@ -40,6 +40,20 @@ interface ValueSuggestion extends BaseSuggestion {
 
 export type AutocompleteSuggestion = FunctionSuggestion | ArgSuggestion | ValueSuggestion;
 
+interface FunctionAtPosition {
+  ast: ExpressionASTWithMeta;
+  fnIndex: number;
+}
+
+interface ArgAtPosition extends FunctionAtPosition {
+  argName: string;
+  argIndex: number;
+  argStart: number;
+  argEnd: number;
+}
+
+type FnArgAtPosition = FunctionAtPosition | ArgAtPosition;
+
 // If you parse an expression with the "addMeta" option it completely
 // changes the type of returned object.  The following types
 // enhance the existing AST types with the appropriate meta information
@@ -171,17 +185,7 @@ export function getAutocompleteSuggestions(
     It returns which function the cursor is in, as well as which argument for that function the cursor is in
     if any.
 */
-function getFnArgAtPosition(
-  ast: ExpressionASTWithMeta,
-  position: number
-): {
-  ast: ExpressionASTWithMeta;
-  fnIndex: number;
-  argName?: string;
-  argIndex?: number;
-  argStart?: number;
-  argEnd?: number;
-} {
+function getFnArgAtPosition(ast: ExpressionASTWithMeta, position: number): FnArgAtPosition {
   const fnIndex = ast.node.chain.findIndex(fn => fn.start <= position && position <= fn.end);
   const fn = ast.node.chain[fnIndex];
   for (const [argName, argValues] of Object.entries(fn.node.arguments)) {

@@ -10,6 +10,9 @@ import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 
 import chrome from 'ui/chrome';
 
+// NOTE: For talk around where this theme information will ultimately live,
+// please see this discuss issue: https://github.com/elastic/kibana/issues/43814
+
 const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
 
 const themeName = IS_DARK_THEME ? darkTheme : lightTheme;
