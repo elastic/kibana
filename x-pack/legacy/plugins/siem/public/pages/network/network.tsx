@@ -35,12 +35,14 @@ import { scoreIntervalToDateTime } from '../../components/ml/score/score_interva
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 import { SavedMap } from '../../components/embeddables/saved_map';
+import { NetworkFilter } from '../../containers/network';
 
 const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
 const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
 const KpiNetworkComponentManage = manageQuery(KpiNetworkComponent);
 interface NetworkComponentReduxProps {
   filterQuery: string;
+  queryExpression: string;
   setAbsoluteRangeDatePicker: ActionCreator<{
     id: InputsModelId;
     from: number;
@@ -69,7 +71,22 @@ const NetworkComponent = pure<NetworkComponentProps>(
                 <UseUrlState indexPattern={indexPattern}>
                   {({ isInitializing }) => (
                     <>
-                      <SavedMap filterQuery={queryExpression} startDate={from} endDate={to} />
+                      <NetworkFilter
+                        indexPattern={indexPattern}
+                        type={networkModel.NetworkType.page}
+                      >
+                        {({ applyFilterQueryFromKueryExpression, filterQueryDraft }) => (
+                          <SavedMap
+                            applyFilterQueryFromKueryExpression={
+                              applyFilterQueryFromKueryExpression
+                            }
+                            filterQuery={queryExpression}
+                            startDate={from}
+                            endDate={to}
+                          />
+                        )}
+                      </NetworkFilter>
+
                       <KpiNetworkQuery
                         endDate={to}
                         filterQuery={filterQuery}

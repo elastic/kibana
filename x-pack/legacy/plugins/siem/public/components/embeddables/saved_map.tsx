@@ -4,28 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter } from '@kbn/es-query';
-import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import * as React from 'react';
+import { useEffect, useState } from 'react';
 import { npStart } from 'ui/new_platform';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 
 import styled from 'styled-components';
 import { TimeRange } from 'ui/timefilter';
-import { useEffect } from 'react';
-import { useState } from 'react';
+import chrome from 'ui/chrome';
 import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import {
   APPLY_FILTER_TRIGGER,
+  CONTEXT_MENU_TRIGGER,
   EmbeddableInput,
   EmbeddablePanel,
+  PANEL_BADGE_TRIGGER,
   ViewMode,
 } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+
+import * as i18n from './translations';
 
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../maps/common/constants';
 import { Loader } from '../loader';
 import { ESQuery } from '../../../common/typed_json';
-import { UpdateGlobalFilterAction } from './update_global_filter_action';
+import {
+  UPDATE_GLOBAL_FILTER_ACTION_ID,
+  UpdateGlobalFilterAction,
+} from './update_global_filter_action';
+import { importSavedObject, savedObjectExists } from './api';
+import { useIndexPatterns } from '../ml_popover/hooks/use_index_patterns';
+import { MAP_SAVED_OBJECT } from './saved_objects/saved_objects';
 
 interface SavedMapInput extends EmbeddableInput {
   id: string;
@@ -44,25 +53,25 @@ const EmbeddableWrapper = styled(EuiFlexGroup)`
 `;
 
 export interface SavedMapProps {
+  applyFilterQueryFromKueryExpression: (expression: string) => void;
   filterQuery?: ESQuery | string;
   startDate?: number;
   endDate?: number;
 }
 
-export const SavedMap = React.memo<SavedMapProps>(({ filterQuery, startDate, endDate }) => {
-  const [embeddable, setEmbeddable] = React.useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+const REQUIRED_INDEX_PATTERNS = ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'];
 
-  console.log('render:filterQuery', filterQuery);
-  console.log('render:startDate', startDate);
-  console.log('render:endDate', endDate);
+export const SavedMap = React.memo<SavedMapProps>(
+  ({ applyFilterQueryFromKueryExpression, filterQuery, startDate, endDate }) => {
+    const [embeddable, setEmbeddable] = React.useState(null);
+    const [, configuredIndexPatterns] = useIndexPatterns();
+    const [isLoading, setIsLoading] = useState(true);
+    const [isError, setIsError] = useState(false);
 
-  const loadSavedObject = async (id: string) => {
-    try {
-      const factory = start.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
-      const embeddableObject = await factory.createFromSavedObject(
-        'bdc5a6e0-c04e-11e9-a93a-29c67776e569',
-        {
+    const loadSavedObject = async (id: string) => {
+      try {
+        const factory = start.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
+        const embeddableObject = await factory.createFromSavedObject(id, {
           filters: [],
           hidePanelTitles: true,
           id,
@@ -75,69 +84,142 @@ export const SavedMap = React.memo<SavedMapProps>(({ filterQuery, startDate, end
           viewMode: ViewMode.VIEW,
           isLayerTOCOpen: false,
           openTOCDetails: [],
+          hideFilterActions: true,
+        });
+
+        setEmbeddable(embeddableObject);
+        setIsLoading(false);
+      } catch (e) {
+        console.log('Error loading embeddable from saved object: ', e);
+        setIsLoading(false);
+      }
+    };
+
+    const setupEmbeddablesAPI = () => {
+      let actionLoaded = false;
+      try {
+        const actions = start.getTriggerActions(APPLY_FILTER_TRIGGER);
+        actionLoaded =
+          actions.length > 0 && actions.some(a => a.id === UPDATE_GLOBAL_FILTER_ACTION_ID);
+      } catch (e) {
+        actionLoaded = false;
+      }
+
+      if (!actionLoaded) {
+        const updateGlobalFiltersAction = new UpdateGlobalFilterAction({
+          applyFilterQueryFromKueryExpression,
+        });
+        start.registerAction(updateGlobalFiltersAction);
+        start.attachAction(APPLY_FILTER_TRIGGER, updateGlobalFiltersAction.id);
+        start.detachAction(CONTEXT_MENU_TRIGGER, 'CUSTOM_TIME_RANGE');
+        start.detachAction(PANEL_BADGE_TRIGGER, 'CUSTOM_TIME_RANGE_BADGE');
+      }
+    };
+
+    // Initial Load useEffect
+    useEffect(() => {
+      setIsLoading(true);
+
+      const importIfNotExists = async () => {
+        if (!(await savedObjectExists(MAP_SAVED_OBJECT_TYPE, MAP_SAVED_OBJECT.id))) {
+          // Check if required index patterns even exist before trying to import
+          if (REQUIRED_INDEX_PATTERNS.every(ip => configuredIndexPatterns.includes(ip))) {
+            console.log('Map Saved Object does not exist. Importing...');
+            const importResponse = await importSavedObject();
+            console.log('importResponse:', importResponse);
+          } else {
+            // Show missing index patterns error
+            setIsError(true);
+            return;
+          }
         }
-      );
 
-      setEmbeddable(embeddableObject);
-      setIsLoading(false);
-    } catch (e) {
-      console.log('Error loading embeddable from saved object: ', e);
-      setIsLoading(false);
-    }
-  };
+        setupEmbeddablesAPI();
+        loadSavedObject(MAP_SAVED_OBJECT.id);
+      };
 
-  useEffect(() => {
-    setIsLoading(true);
-    const updateGlobalFiltersAction = new UpdateGlobalFilterAction();
-    start.registerAction(updateGlobalFiltersAction);
-    start.attachAction(APPLY_FILTER_TRIGGER, updateGlobalFiltersAction.id);
-    loadSavedObject('822cd0f0-ce7c-419d-aeaa-1171cf452745');
-  }, []);
+      if (configuredIndexPatterns.length > 0) {
+        importIfNotExists();
+      }
+    }, [configuredIndexPatterns]);
 
-  useEffect(() => {
-    console.log('useEffect:filterQuery');
-    if (embeddable != null && filterQuery != null) {
-      if (embeddable._dispatchSetQuery != null) {
+    // FilterQuery updated useEffect
+    useEffect(() => {
+      console.log('useEffect:filterQuery');
+      if (embeddable != null && filterQuery != null) {
         const query = { query: filterQuery, language: 'kuery' };
+        console.log('updating input with query: ', query);
         embeddable.updateInput({ query });
       }
-    }
-  }, [filterQuery]);
+    }, [filterQuery]);
 
-  useEffect(() => {
-    console.log('useEffect:startDate', startDate);
-    console.log('useEffect:endDate', endDate);
-    if (embeddable != null && startDate != null && endDate != null) {
-      if (embeddable._dispatchSetQuery != null) {
+    // DateRange updated useEffect
+    useEffect(() => {
+      console.log('useEffect:startDate', startDate);
+      console.log('useEffect:endDate', endDate);
+      if (embeddable != null && startDate != null && endDate != null) {
         const timeRange = {
           from: new Date(startDate).toISOString(),
           to: new Date(endDate).toISOString(),
         };
+        console.log('updating input with timeRange: ', timeRange);
         embeddable.updateInput({ timeRange });
       }
-    }
-  }, [startDate, endDate]);
-  return (
-    <>
-      <EmbeddableWrapper>
-        {embeddable != null ? (
-          <EmbeddablePanel
-            embeddable={embeddable}
-            getActions={start.getTriggerCompatibleActions}
-            getEmbeddableFactory={start.getEmbeddableFactory}
-            getAllEmbeddableFactories={start.getEmbeddableFactories}
-            notifications={npStart.core.notifications}
-            overlays={npStart.core.overlays}
-            inspector={npStart.plugins.inspector}
-            SavedObjectFinder={SavedObjectFinder}
-          />
-        ) : (
-          <Loader data-test-subj="pewpew-loading-panel" overlay size="xl" />
-        )}
-      </EmbeddableWrapper>
-      <EuiSpacer />
-    </>
-  );
-});
+    }, [startDate, endDate]);
+    return (
+      <>
+        <EmbeddableWrapper>
+          {embeddable != null ? (
+            <EmbeddablePanel
+              embeddable={embeddable}
+              getActions={start.getTriggerCompatibleActions}
+              getEmbeddableFactory={start.getEmbeddableFactory}
+              getAllEmbeddableFactories={start.getEmbeddableFactories}
+              notifications={npStart.core.notifications}
+              overlays={npStart.core.overlays}
+              inspector={npStart.plugins.inspector}
+              SavedObjectFinder={SavedObjectFinder}
+            />
+          ) : isError ? (
+            <IndexPatternsMissingPrompt
+              indexPatterns={configuredIndexPatterns}
+              onChange={() => {}}
+            />
+          ) : (
+            <Loader data-test-subj="pewpew-loading-panel" overlay size="xl" />
+          )}
+        </EmbeddableWrapper>
+        <EuiSpacer />
+      </>
+    );
+  }
+);
 
 SavedMap.displayName = 'SavedMap';
+
+const IndexPatternsMissingPrompt = React.memo<>(() => {
+  return (
+    <EuiEmptyPrompt
+      iconType="gisApp"
+      title={<h2>{i18n.ERROR_TITLE}</h2>}
+      titleSize="xs"
+      body={
+        <>
+          <p>{i18n.ERROR_DESCRIPTION}</p>
+          <p>{i18n.ERROR_INDEX_PATTERNS}</p>
+        </>
+      }
+      actions={
+        <EuiButton
+          href={`${chrome.getBasePath()}/app/kibana#/management/kibana/index_patterns`}
+          color="primary"
+          target="_blank"
+          isDisabled={selectedOptions.length === 0}
+          fill
+        >
+          {i18n.ERROR_BUTTON}
+        </EuiButton>
+      }
+    />
+  );
+});
