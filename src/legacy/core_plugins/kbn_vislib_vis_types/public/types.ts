@@ -23,6 +23,7 @@ import {
   ChartTypes,
   AxisModes,
   InterpolationModes,
+  Rotates,
 } from './utils/collections';
 
 export interface CommonVislibParams {
@@ -32,7 +33,7 @@ export interface CommonVislibParams {
 
 interface Labels {
   filter: boolean;
-  rotate?: number;
+  rotate?: Rotates;
   show: boolean;
   truncate: number | null;
 }

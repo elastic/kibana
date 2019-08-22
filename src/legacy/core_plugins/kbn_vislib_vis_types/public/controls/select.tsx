@@ -45,7 +45,7 @@ function SelectOption<ParamName extends string, ValidParamValues extends string 
     <EuiFormRow id={id} label={label} fullWidth={true} compressed labelAppend={labelAppend}>
       <EuiSelect
         options={[emptyValue, ...options]}
-        value={value || emptyValue.value}
+        value={value === undefined ? emptyValue.value : value}
         onChange={ev => setValue(paramName, ev.target.value as ValidParamValues)}
         fullWidth={true}
       />

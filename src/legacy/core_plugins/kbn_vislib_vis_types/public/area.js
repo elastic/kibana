@@ -34,7 +34,7 @@ import {
   AxisTypes,
   ScaleTypes,
   AxisModes,
-  ROTATES,
+  Rotates,
   getAxisModes,
   getScaleTypes
 } from './utils/collections';
@@ -46,8 +46,9 @@ export default function PointSeriesVisType(Private) {
     name: 'area',
     title: i18n.translate('kbnVislibVisTypes.area.areaTitle', { defaultMessage: 'Area' }),
     icon: 'visArea',
-    description: i18n.translate(
-      'kbnVislibVisTypes.area.areaDescription', { defaultMessage: 'Emphasize the quantity beneath a line chart' }),
+    description: i18n.translate('kbnVislibVisTypes.area.areaDescription', {
+      defaultMessage: 'Emphasize the quantity beneath a line chart',
+    }),
     visConfig: {
       defaults: {
         type: 'area',
@@ -62,15 +63,15 @@ export default function PointSeriesVisType(Private) {
             show: true,
             style: {},
             scale: {
-              type: ScaleTypes.LINEAR
+              type: ScaleTypes.LINEAR,
             },
             labels: {
               show: true,
               filter: true,
-              truncate: 100
+              truncate: 100,
             },
-            title: {}
-          }
+            title: {},
+          },
         ],
         valueAxes: [
           {
@@ -82,32 +83,34 @@ export default function PointSeriesVisType(Private) {
             style: {},
             scale: {
               type: ScaleTypes.LINEAR,
-              mode: AxisModes.NORMAL
+              mode: AxisModes.NORMAL,
             },
             labels: {
               show: true,
-              rotate: ROTATES.HORIZONTAL,
+              rotate: Rotates.HORIZONTAL,
               filter: false,
-              truncate: 100
+              truncate: 100,
             },
             title: {
-              text: 'Count'
-            }
-          }
-        ],
-        seriesParams: [{
-          show: 'true',
-          type: ChartTypes.AREA,
-          mode: ChartModes.STACKED,
-          data: {
-            label: 'Count',
-            id: '1'
+              text: 'Count',
+            },
           },
-          drawLinesBetweenPoints: true,
-          showCircles: true,
-          interpolate: InterpolationModes.LINEAR,
-          valueAxis: 'ValueAxis-1'
-        }],
+        ],
+        seriesParams: [
+          {
+            show: true,
+            type: ChartTypes.AREA,
+            mode: ChartModes.STACKED,
+            data: {
+              label: 'Count',
+              id: '1',
+            },
+            drawLinesBetweenPoints: true,
+            showCircles: true,
+            interpolate: InterpolationModes.LINEAR,
+            valueAxis: 'ValueAxis-1',
+          },
+        ],
         addTooltip: true,
         addLegend: true,
         legendPosition: LegendPositions.RIGHT,
@@ -129,55 +132,71 @@ export default function PointSeriesVisType(Private) {
       optionTabs: [
         {
           name: 'advanced',
-          title: 'Metrics & Axes',
-          editor: MetricsAxisOptions
+          title: i18n.translate('kbnVislibVisTypes.area.tabs.metricsAxesTitle', {
+            defaultMessage: 'Metrics & Axes',
+          }),
+          editor: MetricsAxisOptions,
         },
-        { name: 'options', title: 'Panel Settings', editor: PointSeriesOptions },
+        {
+          name: 'options',
+          title: i18n.translate('kbnVislibVisTypes.area.tabs.panelSettingsTitle', {
+            defaultMessage: 'Panel Settings',
+          }),
+          editor: PointSeriesOptions,
+        },
       ],
       schemas: new Schemas([
         {
           group: 'metrics',
           name: 'metric',
-          title: i18n.translate('kbnVislibVisTypes.area.metricsTitle', { defaultMessage: 'Y-axis' }),
+          title: i18n.translate('kbnVislibVisTypes.area.metricsTitle', {
+            defaultMessage: 'Y-axis',
+          }),
           aggFilter: ['!geo_centroid', '!geo_bounds'],
           min: 1,
-          defaults: [
-            { schema: 'metric', type: 'count' }
-          ]
+          defaults: [{ schema: 'metric', type: 'count' }],
         },
         {
           group: 'metrics',
           name: 'radius',
-          title: i18n.translate('kbnVislibVisTypes.area.radiusTitle', { defaultMessage: 'Dot size' }),
+          title: i18n.translate('kbnVislibVisTypes.area.radiusTitle', {
+            defaultMessage: 'Dot size',
+          }),
           min: 0,
           max: 1,
-          aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality']
+          aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality'],
         },
         {
           group: 'buckets',
           name: 'segment',
-          title: i18n.translate('kbnVislibVisTypes.area.segmentTitle', { defaultMessage: 'X-axis' }),
+          title: i18n.translate('kbnVislibVisTypes.area.segmentTitle', {
+            defaultMessage: 'X-axis',
+          }),
           min: 0,
           max: 1,
-          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
+          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
         },
         {
           group: 'buckets',
           name: 'group',
-          title: i18n.translate('kbnVislibVisTypes.area.groupTitle', { defaultMessage: 'Split series' }),
+          title: i18n.translate('kbnVislibVisTypes.area.groupTitle', {
+            defaultMessage: 'Split series',
+          }),
           min: 0,
           max: 3,
-          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
+          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
         },
         {
           group: 'buckets',
           name: 'split',
-          title: i18n.translate('kbnVislibVisTypes.area.splitTitle', { defaultMessage: 'Split chart' }),
+          title: i18n.translate('kbnVislibVisTypes.area.splitTitle', {
+            defaultMessage: 'Split chart',
+          }),
           min: 0,
           max: 1,
-          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
-        }
-      ])
-    }
+          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        },
+      ]),
+    },
   });
 }

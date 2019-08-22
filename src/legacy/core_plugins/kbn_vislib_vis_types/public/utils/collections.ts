@@ -193,7 +193,7 @@ const getAxisModes = () => [
   },
 ];
 
-export enum ROTATES {
+export enum Rotates {
   HORIZONTAL = 0,
   VERTICAL = 90,
   ANGLED = 75,

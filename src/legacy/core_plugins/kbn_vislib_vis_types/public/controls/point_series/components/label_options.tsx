@@ -94,7 +94,7 @@ function LabelOptions({ stateParams, setValue, axis, axisName, index }: LabelOpt
         options={rotateOptions}
         paramName="rotate"
         value={axis.labels.rotate}
-        setValue={setAxisLabel}
+        setValue={(paramName, value) => setAxisLabel(paramName, Number(value))}
       />
 
       <TruncateLabelsOption value={axis.labels.truncate} setValue={setAxisLabel} />
