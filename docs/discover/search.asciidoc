@@ -88,9 +88,10 @@ used for the saved search will also be automatically selected.
 
 [[save-load-delete-query]]
 === Saving and Loading Queries
-Saving queries allows you to reuse them in <<discover, Discover>>, <<visualize, visualizations>> and <<dashboard, dashboards>>.
+Saving queries allows you to reuse them in <<discover, Discover>>, <<visualize, Visualize>> and <<dashboard, Dashboard>>.
 Saved queries always include the KQL or Lucene query text, but the filter bar and time picker can optionally be included as well. Unlike saved searches, queries do not include Discover specific information like the columns selected in the document table, the sort order, or the index pattern. Saved searches can be thought of as a way to persist a particular Discover view. Saved queries on the other hand are a portable set of filters that can be reused in other applications.
 
+[role="xpack"]
 ==== Read only access
 When you have insufficient privileges to save queries the *Save* button won't be visible in the saved query management popover.
 
