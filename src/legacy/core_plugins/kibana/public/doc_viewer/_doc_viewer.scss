@@ -1,3 +1,7 @@
+.kbnDocViewerTable{
+  margin-top: $euiSizeS;
+}
+
 .kbnDocViewer {
   pre,
   .kbnDocViewer__value {
@@ -34,7 +38,7 @@
   white-space: nowrap;
 }
 .kbnDocViewer__buttons{
-  width: 80px;
+  width: 60px;
 }
 
 .kbnDocViewer__buttons > * + * {

@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 
 export interface Props {
   active: boolean;
-  disabled: boolean;
+  disabled?: boolean;
   onClick: () => void;
 }
 

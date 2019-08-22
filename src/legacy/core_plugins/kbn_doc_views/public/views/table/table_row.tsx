@@ -37,7 +37,7 @@ export interface Props {
   isCollapsed: boolean;
   onToggleCollapse: () => void;
   onFilter?: DocViewFilterFn;
-  onToggleColumn: () => void;
+  onToggleColumn?: () => void;
   value: string;
   valueRaw: unknown;
 }
@@ -76,11 +76,10 @@ export function DocViewTableRow({
             disabled={!fieldMapping || !fieldMapping.filterable}
             onClick={() => onFilter(fieldMapping, valueRaw, '-')}
           />
-          <DocViewTableRowBtnToggleColumn
-            active={isColumnActive}
-            disabled={typeof onToggleColumn !== 'function'}
-            onClick={onToggleColumn}
-          />
+          {typeof onToggleColumn === 'function' && (
+            <DocViewTableRowBtnToggleColumn active={isColumnActive} onClick={onToggleColumn} />
+          )}
+
           <DocViewTableRowBtnFilterExists
             disabled={!fieldMapping || isMetaField || fieldMapping.scripted}
             onClick={() => onFilter('_exists_', field, '+')}

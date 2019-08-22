@@ -40,13 +40,6 @@ export function DocViewTable({
     setFieldRowOpen({ ...fieldRowOpen });
   }
 
-  const toggleColumn = (columnName: string) => {
-    if (columns.includes(columnName)) {
-      onRemoveColumn(columnName);
-    } else {
-      onAddColumn(columnName);
-    }
-  };
   // the formatting of array of objects with formatHit is optimzed for angular
   // and since it's still in use in other places, we do some local formatting here
   const formatValue = (field: string) => {
@@ -63,7 +56,7 @@ export function DocViewTable({
   };
 
   return (
-    <table className="table table-condensed">
+    <table className="table table-condensed kbnDocViewerTable">
       <tbody>
         {Object.keys(flattened)
           .sort()
@@ -71,6 +64,16 @@ export function DocViewTable({
             const value = formatValue(field);
             const isCollapsible = value.length > COLLAPSE_LINE_LENGTH;
             const isCollapsed = isCollapsible && !fieldRowOpen[field];
+            const toggleColumn =
+              onRemoveColumn && onAddColumn
+                ? () => {
+                    if (columns.includes(field)) {
+                      onRemoveColumn(field);
+                    } else {
+                      onAddColumn(field);
+                    }
+                  }
+                : undefined;
 
             return (
               <DocViewTableRow
@@ -83,7 +86,7 @@ export function DocViewTable({
                 isMetaField={indexPattern.metaFields.includes(field)}
                 onFilter={filter}
                 onToggleCollapse={() => toggleValueCollapse(field)}
-                onToggleColumn={() => toggleColumn(field)}
+                onToggleColumn={toggleColumn}
                 value={value}
                 valueRaw={flattened[field]}
               />
