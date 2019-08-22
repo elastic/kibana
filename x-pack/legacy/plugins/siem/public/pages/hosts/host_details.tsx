@@ -44,15 +44,9 @@ import { InputsModelId } from '../../store/inputs/constants';
 import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 import { KpiHostDetailsQuery } from '../../containers/kpi_host_details';
 import { hostToCriteria } from '../../components/ml/criteria/host_to_criteria';
-import {
-  AuthenticationsQueryTabBody,
-  HostsTabName,
-  AnomaliesTabBody,
-  EventsTabBody,
-  UncommonProcessTabBody,
-  navTabsHostDatails,
-} from './hosts_navigations';
+import { navTabsHostDatails, HostsTabName } from './hosts_navigations';
 import { SiemNavigation } from '../../components/navigation';
+import { Anomaly } from '../../components/ml/types';
 
 const type = hostsModel.HostsType.details;
 
@@ -206,6 +200,7 @@ const HostDetailsBodyComponent = pure<HostDetailsComponentProps>(
     },
     filterQueryExpression,
     setAbsoluteRangeDatePicker,
+    children,
   }) => {
     return (
       <WithSource sourceId="default">
@@ -216,7 +211,29 @@ const HostDetailsBodyComponent = pure<HostDetailsComponentProps>(
                 <UseUrlState indexPattern={indexPattern}>
                   {({ isInitializing }) => (
                     <>
-                      {(tabName == null || tabName === HostsTabName.authentications) && (
+                      {typeof children === 'function' &&
+                        children({
+                          endDate: to,
+                          filterQuery: getFilterQuery(
+                            hostName,
+                            filterQueryExpression,
+                            indexPattern
+                          ),
+                          skip: isInitializing,
+                          setQuery,
+                          startDate: from,
+                          type,
+                          indexPattern,
+                          narrowDateRange: (score: Anomaly, interval: string) => {
+                            const fromTo = scoreIntervalToDateTime(score, interval);
+                            setAbsoluteRangeDatePicker({
+                              id: 'global',
+                              from: fromTo.from,
+                              to: fromTo.to,
+                            });
+                          },
+                        })}
+                      {/* {(tabName == null || tabName === HostsTabName.authentications) && (
                         <AuthenticationsQueryTabBody
                           endDate={to}
                           filterQuery={getFilterQuery(
@@ -280,7 +297,7 @@ const HostDetailsBodyComponent = pure<HostDetailsComponentProps>(
                           )}
                           indexPattern={indexPattern}
                         />
-                      )}
+                      )} */}
                     </>
                   )}
                 </UseUrlState>
