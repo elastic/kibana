@@ -13,13 +13,13 @@ export const UNIT = (totalCount: number) =>
   });
 
 export const SOURCE_IP = i18n.translate('xpack.siem.networkTopNFlowTable.column.sourceIpTitle', {
-  defaultMessage: 'Source IP',
+  defaultMessage: 'Source IPs',
 });
 
 export const DESTINATION_IP = i18n.translate(
   'xpack.siem.networkTopNFlowTable.column.destinationIpTitle',
   {
-    defaultMessage: 'Destination IP',
+    defaultMessage: 'Destination IPs',
   }
 );
 
