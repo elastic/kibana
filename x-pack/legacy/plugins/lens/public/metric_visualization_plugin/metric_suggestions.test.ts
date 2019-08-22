@@ -115,6 +115,9 @@ describe('metric_suggestions', () => {
                 "accessor": Array [
                   "bytes",
                 ],
+                "mode": Array [
+                  "reduced",
+                ],
                 "title": Array [
                   "",
                 ],
