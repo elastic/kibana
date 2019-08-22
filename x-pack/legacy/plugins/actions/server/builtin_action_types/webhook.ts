@@ -122,15 +122,22 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
         data: response.data,
       };
     } else {
+      const message = i18n.translate('xpack.actions.builtin.webhook.invalidResponseErrorMessage', {
+        defaultMessage: `an http error {code} occurred in action "{id}", due to an unknown webhook event: {data}`,
+        values: {
+          id,
+          code: response.status,
+          data: response.data,
+        },
+      });
       return {
         status: 'error',
-        message: `an http error ${response.status} occurred in action "${id}", due to an unknown webhook event`,
-        data: response.data,
+        message,
       };
     }
   } else {
     const { error } = result;
-    const message = i18n.translate('xpack.actions.builtin.webhook.postingErrorMessage', {
+    const message = i18n.translate('xpack.actions.builtin.webhook.unreachableErrorMessage', {
       defaultMessage: `error in action "{id}", due to {eventSource}: {errorMessage}`,
       values: {
         id,
