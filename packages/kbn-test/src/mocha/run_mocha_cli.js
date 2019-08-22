@@ -63,12 +63,7 @@ export function runMochaCli() {
   if (!opts._.length) {
     globby
       .sync(
-        [
-          'src/**/__tests__/**/*.js',
-          'packages/elastic-datemath/test/**/*.js',
-          'packages/**/__tests__/**/*.js',
-          'tasks/**/__tests__/**/*.js',
-        ],
+        ['src/**/__tests__/**/*.js', 'packages/**/__tests__/**/*.js', 'tasks/**/__tests__/**/*.js'],
         {
           cwd: REPO_ROOT,
           onlyFiles: true,
