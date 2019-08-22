@@ -16,6 +16,7 @@ export interface LspOptions {
 export interface SecurityOptions {
   enableMavenImport: boolean;
   enableGradleImport: boolean;
+  installGoDependency: boolean;
   installNodeDependency: boolean;
   gitHostWhitelist: string[];
   gitProtocolWhitelist: string[];
@@ -24,7 +25,7 @@ export interface SecurityOptions {
 
 export interface DiskOptions {
   thresholdEnabled: boolean;
-  watermarkLowMb: number;
+  watermarkLow: string;
 }
 
 export class ServerOptions {
@@ -38,6 +39,8 @@ export class ServerOptions {
 
   public readonly jdtConfigPath = resolve(this.config.get('path.data'), 'code/jdt_config');
 
+  public readonly goPath = resolve(this.config.get('path.data'), 'code/gopath');
+
   public readonly updateFrequencyMs: number = this.options.updateFrequencyMs;
 
   public readonly indexFrequencyMs: number = this.options.indexFrequencyMs;
@@ -49,6 +52,8 @@ export class ServerOptions {
   public readonly maxWorkspace: number = this.options.maxWorkspace;
 
   public readonly enableGlobalReference: boolean = this.options.enableGlobalReference;
+
+  public readonly enableCommitIndexing: boolean = this.options.enableCommitIndexing;
 
   public readonly lsp: LspOptions = this.options.lsp;
 

@@ -7,12 +7,14 @@
 import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
 import { IndexPattern } from 'ui/index_patterns';
 import { IndexPatternTitle } from '../../../../../common/types/kibana';
+import { ML_JOB_AGGREGATION } from '../../../../../common/constants/aggregation_types';
 import { Job, Datafeed, Detector, JobId, DatafeedId, BucketSpan } from './configs';
 import { Aggregation, Field } from '../../../../../common/types/fields';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
 import { mlJobService } from '../../../../services/job_service';
 import { JobRunner, ProgressSubscriber } from '../job_runner';
-import { JOB_TYPE } from './util/constants';
+import { JOB_TYPE, CREATED_BY_LABEL } from './util/constants';
+import { isSparseDataJob } from './util/general';
 
 export class JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
@@ -29,6 +31,7 @@ export class JobCreator {
   protected _subscribers: ProgressSubscriber[];
   protected _aggs: Aggregation[] = [];
   protected _fields: Field[] = [];
+  protected _sparseData: boolean = false;
   private _stopAllRefreshPolls: {
     stop: boolean;
   };
@@ -60,6 +63,7 @@ export class JobCreator {
     this._detectors.push(detector);
     this._aggs.push(agg);
     this._fields.push(field);
+    this._updateSparseDataDetectors();
   }
 
   protected _editDetector(detector: Detector, agg: Aggregation, field: Field, index: number) {
@@ -67,6 +71,7 @@ export class JobCreator {
       this._detectors[index] = detector;
       this._aggs[index] = agg;
       this._fields[index] = field;
+      this._updateSparseDataDetectors();
     }
   }
 
@@ -95,9 +100,17 @@ export class JobCreator {
     return agg !== undefined ? agg : null;
   }
 
+  public get aggregations(): Aggregation[] {
+    return this._aggs;
+  }
+
   public getField(index: number): Field | null {
     const field = this._fields[index];
     return field !== undefined ? field : null;
+  }
+
+  public get fields(): Field[] {
+    return this._fields;
   }
 
   public set bucketSpan(bucketSpan: BucketSpan) {
@@ -222,6 +235,53 @@ export class JobCreator {
     }
   }
 
+  public get sparseData(): boolean {
+    return this._sparseData;
+  }
+
+  public set sparseData(sparseData: boolean) {
+    this._sparseData = sparseData;
+    this._updateSparseDataDetectors();
+  }
+
+  private _updateSparseDataDetectors() {
+    // loop through each detector, if the aggregation in the corresponding detector index is a count or sum
+    // change the detector to be a non-zer or non-null count or sum.
+    // note, the aggregations will always be a standard count or sum and not a non-null or non-zero version
+    this._detectors.forEach((d, i) => {
+      switch (this._aggs[i].id) {
+        case ML_JOB_AGGREGATION.COUNT:
+          d.function = this._sparseData
+            ? ML_JOB_AGGREGATION.NON_ZERO_COUNT
+            : ML_JOB_AGGREGATION.COUNT;
+          break;
+        case ML_JOB_AGGREGATION.HIGH_COUNT:
+          d.function = this._sparseData
+            ? ML_JOB_AGGREGATION.HIGH_NON_ZERO_COUNT
+            : ML_JOB_AGGREGATION.HIGH_COUNT;
+          break;
+        case ML_JOB_AGGREGATION.LOW_COUNT:
+          d.function = this._sparseData
+            ? ML_JOB_AGGREGATION.LOW_NON_ZERO_COUNT
+            : ML_JOB_AGGREGATION.LOW_COUNT;
+          break;
+        case ML_JOB_AGGREGATION.SUM:
+          d.function = this._sparseData ? ML_JOB_AGGREGATION.NON_NULL_SUM : ML_JOB_AGGREGATION.SUM;
+          break;
+        case ML_JOB_AGGREGATION.HIGH_SUM:
+          d.function = this._sparseData
+            ? ML_JOB_AGGREGATION.HIGH_NON_NULL_SUM
+            : ML_JOB_AGGREGATION.HIGH_SUM;
+          break;
+        case ML_JOB_AGGREGATION.LOW_SUM:
+          d.function = this._sparseData
+            ? ML_JOB_AGGREGATION.LOW_NON_NULL_SUM
+            : ML_JOB_AGGREGATION.LOW_SUM;
+          break;
+      }
+    });
+  }
+
   public setTimeRange(start: number, end: number) {
     this._start = start;
     this._end = end;
@@ -247,11 +307,12 @@ export class JobCreator {
     return this._subscribers;
   }
 
-  public async createAndStartJob() {
+  public async createAndStartJob(): Promise<JobRunner> {
     try {
       await this.createJob();
       await this.createDatafeed();
-      await this.startDatafeed();
+      const jobRunner = await this.startDatafeed();
+      return jobRunner;
     } catch (error) {
       throw error;
     }
@@ -341,12 +402,12 @@ export class JobCreator {
     return null;
   }
 
-  public set createdBy(createdBy: string | null) {
+  public set createdBy(createdBy: CREATED_BY_LABEL | null) {
     this._setCustomSetting('created_by', createdBy);
   }
 
-  public get createdBy(): string | null {
-    return this._getCustomSetting('created_by') as string | null;
+  public get createdBy(): CREATED_BY_LABEL | null {
+    return this._getCustomSetting('created_by') as CREATED_BY_LABEL | null;
   }
 
   public get formattedJobJson() {
@@ -355,5 +416,21 @@ export class JobCreator {
 
   public get formattedDatafeedJson() {
     return JSON.stringify(this._datafeed_config, null, 2);
+  }
+
+  protected _overrideConfigs(job: Job, datafeed: Datafeed) {
+    this._job_config = job;
+    this._datafeed_config = datafeed;
+
+    this._detectors = this._job_config.analysis_config.detectors;
+    this._influencers = this._job_config.analysis_config.influencers;
+    if (this._job_config.groups === undefined) {
+      this._job_config.groups = [];
+    }
+
+    if (this._job_config.analysis_config.influencers !== undefined) {
+      this._job_config.analysis_config.influencers.forEach(i => this.addInfluencer(i));
+    }
+    this._sparseData = isSparseDataJob(job, datafeed);
   }
 }

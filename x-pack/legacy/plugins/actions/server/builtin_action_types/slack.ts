@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
 
@@ -14,13 +15,11 @@ import {
   ExecutorType,
 } from '../types';
 
-// config definition
+// secrets definition
 
-const unencryptedConfigProperties: string[] = [];
+export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
 
-export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
-
-const ConfigSchema = schema.object({
+const SecretsSchema = schema.object({
   webhookUrl: schema.string(),
 });
 
@@ -41,9 +40,8 @@ export function getActionType({ executor }: { executor?: ExecutorType } = {}): A
   return {
     id: '.slack',
     name: 'slack',
-    unencryptedAttributes: unencryptedConfigProperties,
     validate: {
-      config: ConfigSchema,
+      secrets: SecretsSchema,
       params: ParamsSchema,
     },
     executor,
@@ -59,11 +57,11 @@ async function slackExecutor(
   execOptions: ActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult> {
   const id = execOptions.id;
-  const config = execOptions.config as ActionTypeConfigType;
+  const secrets = execOptions.secrets as ActionTypeSecretsType;
   const params = execOptions.params as ActionParamsType;
 
   let result: IncomingWebhookResult;
-  const { webhookUrl } = config;
+  const { webhookUrl } = secrets;
   const { message } = params;
 
   try {
@@ -96,11 +94,23 @@ async function slackExecutor(
   }
 
   if (result == null) {
-    return errorResult(id, `unexpected null response from slack`);
+    const errMessage = i18n.translate(
+      'xpack.actions.builtin.slack.unexpectedNullResponseErrorMessage',
+      {
+        defaultMessage: 'unexpected null response from slack',
+      }
+    );
+    return errorResult(id, errMessage);
   }
 
   if (result.text !== 'ok') {
-    return errorResult(id, `unexpected text response from slack (expecting 'ok')`);
+    const errMessage = i18n.translate(
+      'xpack.actions.builtin.slack.unexpectedTextResponseErrorMessage',
+      {
+        defaultMessage: 'unexpected text response from slack',
+      }
+    );
+    return errorResult(id, errMessage);
   }
 
   return successResult(result);
@@ -111,16 +121,32 @@ function successResult(data: any): ActionTypeExecutorResult {
 }
 
 function errorResult(id: string, message: string): ActionTypeExecutorResult {
+  const errMessage = i18n.translate('xpack.actions.builtin.slack.errorPostingErrorMessage', {
+    defaultMessage: 'an error occurred in action "{id}" posting a slack message: {message}',
+    values: {
+      id,
+      message,
+    },
+  });
   return {
     status: 'error',
-    message: `an error occurred in action ${id} posting a slack message: ${message}`,
+    message: errMessage,
   };
 }
 
 function retryResult(id: string, message: string): ActionTypeExecutorResult {
+  const errMessage = i18n.translate(
+    'xpack.actions.builtin.slack.errorPostingRetryLaterErrorMessage',
+    {
+      defaultMessage: 'an error occurred in action "{id}" posting a slack message, retry later',
+      values: {
+        id,
+      },
+    }
+  );
   return {
     status: 'error',
-    message: `an error occurred in action ${id} posting a slack message, retrying later`,
+    message: errMessage,
     retry: true,
   };
 }
@@ -133,9 +159,21 @@ function retryResultSeconds(
   const retryEpoch = Date.now() + retryAfter * 1000;
   const retry = new Date(retryEpoch);
   const retryString = retry.toISOString();
+  const errMessage = i18n.translate(
+    'xpack.actions.builtin.slack.errorPostingRetryDateErrorMessage',
+    {
+      defaultMessage:
+        'an error occurred in action "{id}" posting a slack message, retry at {retryString}: {message}',
+      values: {
+        id,
+        retryString,
+        message,
+      },
+    }
+  );
   return {
     status: 'error',
-    message: `an error occurred in action ${id} posting a slack message, retry at ${retryString}: ${message}`,
+    message: errMessage,
     retry,
   };
 }

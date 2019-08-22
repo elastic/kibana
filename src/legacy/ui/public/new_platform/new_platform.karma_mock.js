@@ -20,7 +20,9 @@
 import sinon from 'sinon';
 
 export const npSetup = {
-  core: {},
+  core: {
+    chrome: {}
+  },
   plugins: {
     data: {
       expressions: {
@@ -29,13 +31,30 @@ export const npSetup = {
         registerType: sinon.fake(),
       },
     },
+    inspector: {
+      registerView: () => undefined,
+      __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: {
+        views: {
+          register: () => undefined,
+        },
+      },
+    },
   },
 };
 
 export const npStart = {
-  core: {},
+  core: {
+    chrome: {}
+  },
   plugins: {
     data: {},
+    inspector: {
+      isAvailable: () => false,
+      open: () => ({
+        onClose: Promise.resolve(undefined),
+        close: () => Promise.resolve(undefined),
+      }),
+    },
   },
 };
 

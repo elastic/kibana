@@ -6,7 +6,7 @@
 
 import React, { useContext, useEffect, useState, useMemo } from 'react';
 import { toastNotifications } from 'ui/notify';
-import { idx } from '@kbn/elastic-idx/target';
+import { idx } from '@kbn/elastic-idx';
 import { i18n } from '@kbn/i18n';
 import { LoadingIndicatorContext } from '../context/LoadingIndicatorContext';
 import { useComponentId } from './useComponentId';
@@ -18,8 +18,16 @@ export enum FETCH_STATUS {
   FAILURE = 'failure'
 }
 
-export function useFetcher<Response>(
-  fn: () => Promise<Response> | undefined,
+type Fetcher = (...args: any[]) => any;
+type GetReturn<TFetcher extends Fetcher> = Exclude<
+  ReturnType<TFetcher>,
+  undefined
+> extends Promise<infer TReturn>
+  ? TReturn
+  : ReturnType<TFetcher>;
+
+export function useFetcher<TFetcher extends Fetcher>(
+  fn: TFetcher,
   fnDeps: any[],
   options: { preservePreviousResponse?: boolean } = {}
 ) {
@@ -27,7 +35,7 @@ export function useFetcher<Response>(
   const id = useComponentId();
   const { dispatchStatus } = useContext(LoadingIndicatorContext);
   const [result, setResult] = useState<{
-    data?: Response;
+    data?: GetReturn<TFetcher>;
     status?: FETCH_STATUS;
     error?: Error;
   }>({});

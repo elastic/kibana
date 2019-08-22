@@ -86,35 +86,35 @@ export default function ({ getService, getPageObjects }) {
       });
 
       // TODO: update this test when elastic-charts can support integration tests
-      // it('should show the correct bar chart', async function () {
-      //   const expectedBarChartData = [
-      //     35,
-      //     189,
-      //     694,
-      //     1347,
-      //     1285,
-      //     704,
-      //     176,
-      //     29,
-      //     39,
-      //     189,
-      //     640,
-      //     1276,
-      //     1327,
-      //     663,
-      //     166,
-      //     25,
-      //     30,
-      //     164,
-      //     663,
-      //     1320,
-      //     1270,
-      //     681,
-      //     188,
-      //     27,
-      //   ];
-      //   await verifyChartData(expectedBarChartData);
-      // });
+      it.skip('should show the correct bar chart', async function () {
+        const expectedBarChartData = [
+          35,
+          189,
+          694,
+          1347,
+          1285,
+          704,
+          176,
+          29,
+          39,
+          189,
+          640,
+          1276,
+          1327,
+          663,
+          166,
+          25,
+          30,
+          164,
+          663,
+          1320,
+          1270,
+          681,
+          188,
+          27,
+        ];
+        await verifyChartData(expectedBarChartData);
+      });
 
       it('should show correct time range string in chart', async function () {
         const actualTimeString = await PageObjects.discover.getChartTimespan();
@@ -123,46 +123,48 @@ export default function ({ getService, getPageObjects }) {
       });
 
       // TODO: update these tests when elastic-charts can support integration tests
-      // it('should show bars in the correct time zone', async function () {
-      //   const maxTicks = [
-      //     '2015-09-20 00:00',
-      //     '2015-09-20 12:00',
-      //     '2015-09-21 00:00',
-      //     '2015-09-21 12:00',
-      //     '2015-09-22 00:00',
-      //     '2015-09-22 12:00',
-      //     '2015-09-23 00:00',
-      //     '2015-09-23 12:00'
-      //   ];
+      it.skip('should show bars in the correct time zone', async function () {
+        const maxTicks = [
+          '2015-09-20 00:00',
+          '2015-09-20 12:00',
+          '2015-09-21 00:00',
+          '2015-09-21 12:00',
+          '2015-09-22 00:00',
+          '2015-09-22 12:00',
+          '2015-09-23 00:00',
+          '2015-09-23 12:00'
+        ];
 
-      //   for (const tick of await PageObjects.discover.getBarChartXTicks()) {
-      //     if (!maxTicks.includes(tick)) {
-      //       throw new Error(`unexpected x-axis tick "${tick}"`);
-      //     }
-      //   }
-      // });
+        for (const tick of await PageObjects.discover.getBarChartXTicks()) {
+          if (!maxTicks.includes(tick)) {
+            throw new Error(`unexpected x-axis tick "${tick}"`);
+          }
+        }
+      });
 
-      // it('should modify the time range when a bar is clicked', async function () {
-      //   await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      //   await PageObjects.visualize.waitForVisualization();
-      //   await PageObjects.discover.clickHistogramBar(0);
-      //   await PageObjects.visualize.waitForVisualization();
-      //   const time = await PageObjects.timePicker.getTimeConfig();
-      //   expect(time.start).to.be('Sep 20, 2015 @ 00:00:00.000');
-      //   expect(time.end).to.be('Sep 20, 2015 @ 03:00:00.000');
-      // });
+      it.skip('should modify the time range when a bar is clicked', async function () {
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.visualize.waitForVisualization();
+        await PageObjects.discover.clickHistogramBar(0);
+        await PageObjects.visualize.waitForVisualization();
+        const time = await PageObjects.timePicker.getTimeConfig();
+        expect(time.start).to.be('Sep 20, 2015 @ 00:00:00.000');
+        expect(time.end).to.be('Sep 20, 2015 @ 03:00:00.000');
+        const rowData = await PageObjects.discover.getDocTableIndex(1);
+        expect(rowData).to.have.string('Sep 20, 2015 @ 02:57:03.761');
+      });
 
-      // it('should modify the time range when the histogram is brushed', async function () {
-      //   await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      //   await PageObjects.visualize.waitForVisualization();
-      //   await PageObjects.discover.brushHistogram(0, 1);
-      //   await PageObjects.visualize.waitForVisualization();
+      it.skip('should modify the time range when the histogram is brushed', async function () {
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.visualize.waitForVisualization();
+        await PageObjects.discover.brushHistogram(0, 1);
+        await PageObjects.visualize.waitForVisualization();
 
-      //   const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
-      //   if (newDurationHours < 1 || newDurationHours >= 5) {
-      //     throw new Error(`expected new duration of ${newDurationHours} hours to be between 1 and 5 hours`);
-      //   }
-      // });
+        const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
+        expect(Math.round(newDurationHours)).to.be(3);
+        const rowData = await PageObjects.discover.getDocTableIndex(1);
+        expect(rowData).to.have.string('Sep 20, 2015 @ 02:56:02.323');
+      });
 
       it('should show correct initial chart interval of Auto', async function () {
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
@@ -174,166 +176,166 @@ export default function ({ getService, getPageObjects }) {
       });
 
       // TODO: update these test when elastic-charts can support integration tests
-      // it('should show correct data for chart interval Hourly', async function () {
-      //   await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
-      //   await PageObjects.discover.setChartInterval('Hourly');
+      it.skip('should show correct data for chart interval Hourly', async function () {
+        await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+        await PageObjects.discover.setChartInterval('Hourly');
 
-      //   const expectedBarChartData = [
-      //     4,
-      //     7,
-      //     16,
-      //     23,
-      //     38,
-      //     87,
-      //     132,
-      //     159,
-      //     248,
-      //     320,
-      //     349,
-      //     376,
-      //     380,
-      //     324,
-      //     293,
-      //     233,
-      //     188,
-      //     125,
-      //     69,
-      //     40,
-      //     28,
-      //     17,
-      //     2,
-      //     3,
-      //     8,
-      //     10,
-      //     12,
-      //     28,
-      //     36,
-      //     84,
-      //     111,
-      //     157,
-      //     229,
-      //     292,
-      //     324,
-      //     373,
-      //     378,
-      //     345,
-      //     306,
-      //     223,
-      //     167,
-      //     124,
-      //     72,
-      //     35,
-      //     22,
-      //     11,
-      //     7,
-      //     1,
-      //     6,
-      //     5,
-      //     12,
-      //     25,
-      //     27,
-      //     76,
-      //     111,
-      //     175,
-      //     228,
-      //     294,
-      //     358,
-      //     372,
-      //     366,
-      //     344,
-      //     276,
-      //     213,
-      //     201,
-      //     113,
-      //     72,
-      //     39,
-      //     36,
-      //     12,
-      //     7,
-      //     3,
-      //   ];
-      //   await verifyChartData(expectedBarChartData);
-      // });
+        const expectedBarChartData = [
+          4,
+          7,
+          16,
+          23,
+          38,
+          87,
+          132,
+          159,
+          248,
+          320,
+          349,
+          376,
+          380,
+          324,
+          293,
+          233,
+          188,
+          125,
+          69,
+          40,
+          28,
+          17,
+          2,
+          3,
+          8,
+          10,
+          12,
+          28,
+          36,
+          84,
+          111,
+          157,
+          229,
+          292,
+          324,
+          373,
+          378,
+          345,
+          306,
+          223,
+          167,
+          124,
+          72,
+          35,
+          22,
+          11,
+          7,
+          1,
+          6,
+          5,
+          12,
+          25,
+          27,
+          76,
+          111,
+          175,
+          228,
+          294,
+          358,
+          372,
+          366,
+          344,
+          276,
+          213,
+          201,
+          113,
+          72,
+          39,
+          36,
+          12,
+          7,
+          3,
+        ];
+        await verifyChartData(expectedBarChartData);
+      });
 
-      // it('should show correct data for chart interval Daily', async function () {
-      //   const chartInterval = 'Daily';
-      //   const expectedBarChartData = [4757, 4614, 4633];
-      //   await PageObjects.discover.setChartInterval(chartInterval);
-      //   await retry.try(async () => {
-      //     await verifyChartData(expectedBarChartData);
-      //   });
-      // });
+      it.skip('should show correct data for chart interval Daily', async function () {
+        const chartInterval = 'Daily';
+        const expectedBarChartData = [4757, 4614, 4633];
+        await PageObjects.discover.setChartInterval(chartInterval);
+        await retry.try(async () => {
+          await verifyChartData(expectedBarChartData);
+        });
+      });
 
-      // it('should show correct data for chart interval Weekly', async function () {
-      //   const chartInterval = 'Weekly';
-      //   const expectedBarChartData = [4757, 9247];
+      it.skip('should show correct data for chart interval Weekly', async function () {
+        const chartInterval = 'Weekly';
+        const expectedBarChartData = [4757, 9247];
 
-      //   await PageObjects.discover.setChartInterval(chartInterval);
-      //   await retry.try(async () => {
-      //     await verifyChartData(expectedBarChartData);
-      //   });
-      // });
+        await PageObjects.discover.setChartInterval(chartInterval);
+        await retry.try(async () => {
+          await verifyChartData(expectedBarChartData);
+        });
+      });
 
-      // it('browser back button should show previous interval Daily', async function () {
-      //   const expectedChartInterval = 'Daily';
-      //   const expectedBarChartData = [4757, 4614, 4633];
+      it.skip('browser back button should show previous interval Daily', async function () {
+        const expectedChartInterval = 'Daily';
+        const expectedBarChartData = [4757, 4614, 4633];
 
-      //   await browser.goBack();
-      //   await retry.try(async function tryingForTime() {
-      //     const actualInterval = await PageObjects.discover.getChartInterval();
-      //     expect(actualInterval).to.be(expectedChartInterval);
-      //   });
-      //   await verifyChartData(expectedBarChartData);
-      // });
+        await browser.goBack();
+        await retry.try(async function tryingForTime() {
+          const actualInterval = await PageObjects.discover.getChartInterval();
+          expect(actualInterval).to.be(expectedChartInterval);
+        });
+        await verifyChartData(expectedBarChartData);
+      });
 
-      // it('should show correct data for chart interval Monthly', async function () {
-      //   const chartInterval = 'Monthly';
-      //   const expectedBarChartData = [13129];
+      it.skip('should show correct data for chart interval Monthly', async function () {
+        const chartInterval = 'Monthly';
+        const expectedBarChartData = [13129];
 
-      //   await PageObjects.discover.setChartInterval(chartInterval);
-      //   await verifyChartData(expectedBarChartData);
-      // });
+        await PageObjects.discover.setChartInterval(chartInterval);
+        await verifyChartData(expectedBarChartData);
+      });
 
-      // it('should show correct data for chart interval Yearly', async function () {
-      //   const chartInterval = 'Yearly';
-      //   const expectedBarChartData = [13129];
+      it.skip('should show correct data for chart interval Yearly', async function () {
+        const chartInterval = 'Yearly';
+        const expectedBarChartData = [13129];
 
-      //   await PageObjects.discover.setChartInterval(chartInterval);
-      //   await verifyChartData(expectedBarChartData);
-      // });
+        await PageObjects.discover.setChartInterval(chartInterval);
+        await verifyChartData(expectedBarChartData);
+      });
 
-      // it('should show correct data for chart interval Auto', async function () {
-      //   const chartInterval = 'Auto';
-      //   const expectedBarChartData = [
-      //     35,
-      //     189,
-      //     694,
-      //     1347,
-      //     1285,
-      //     704,
-      //     176,
-      //     29,
-      //     39,
-      //     189,
-      //     640,
-      //     1276,
-      //     1327,
-      //     663,
-      //     166,
-      //     25,
-      //     30,
-      //     164,
-      //     663,
-      //     1320,
-      //     1270,
-      //     681,
-      //     188,
-      //     27,
-      //   ];
+      it.skip('should show correct data for chart interval Auto', async function () {
+        const chartInterval = 'Auto';
+        const expectedBarChartData = [
+          35,
+          189,
+          694,
+          1347,
+          1285,
+          704,
+          176,
+          29,
+          39,
+          189,
+          640,
+          1276,
+          1327,
+          663,
+          166,
+          25,
+          30,
+          164,
+          663,
+          1320,
+          1270,
+          681,
+          188,
+          27,
+        ];
 
-      //   await PageObjects.discover.setChartInterval(chartInterval);
-      //   await verifyChartData(expectedBarChartData);
-      // });
+        await PageObjects.discover.setChartInterval(chartInterval);
+        await verifyChartData(expectedBarChartData);
+      });
 
       it('should show Auto chart interval', async function () {
         const expectedChartInterval = 'Auto';
@@ -348,41 +350,41 @@ export default function ({ getService, getPageObjects }) {
       });
 
       // TODO: update this function when elastic-charts can support integration tests
-      // async function verifyChartData(expectedBarChartData) {
-      //   await retry.try(async function tryingForTime() {
-      //     const paths = await PageObjects.discover.getBarChartData();
-      //     // the largest bars are over 100 pixels high so this is less than 1% tolerance
-      //     const barHeightTolerance = 1;
-      //     let stringResults = '';
-      //     let hasFailure = false;
-      //     for (let y = 0; y < expectedBarChartData.length; y++) {
-      //       stringResults +=
-      //         y +
-      //         ': expected = ' +
-      //         expectedBarChartData[y] +
-      //         ', actual = ' +
-      //         paths[y] +
-      //         ', Pass = ' +
-      //         (Math.abs(expectedBarChartData[y] - paths[y]) <
-      //           barHeightTolerance) +
-      //         '\n';
-      //       if (
-      //         Math.abs(expectedBarChartData[y] - paths[y]) > barHeightTolerance
-      //       ) {
-      //         hasFailure = true;
-      //       }
-      //     }
-      //     if (hasFailure) {
-      //       log.debug(stringResults);
-      //       log.debug(paths);
-      //     }
-      //     for (let x = 0; x < expectedBarChartData.length; x++) {
-      //       expect(
-      //         Math.abs(expectedBarChartData[x] - paths[x]) < barHeightTolerance
-      //       ).to.be.ok();
-      //     }
-      //   });
-      // }
+      async function verifyChartData(expectedBarChartData) {
+        await retry.try(async function tryingForTime() {
+          const paths = await PageObjects.discover.getBarChartData();
+          // the largest bars are over 100 pixels high so this is less than 1% tolerance
+          const barHeightTolerance = 1;
+          let stringResults = '';
+          let hasFailure = false;
+          for (let y = 0; y < expectedBarChartData.length; y++) {
+            stringResults +=
+              y +
+              ': expected = ' +
+              expectedBarChartData[y] +
+              ', actual = ' +
+              paths[y] +
+              ', Pass = ' +
+              (Math.abs(expectedBarChartData[y] - paths[y]) <
+                barHeightTolerance) +
+              '\n';
+            if (
+              Math.abs(expectedBarChartData[y] - paths[y]) > barHeightTolerance
+            ) {
+              hasFailure = true;
+            }
+          }
+          if (hasFailure) {
+            log.debug(stringResults);
+            log.debug(paths);
+          }
+          for (let x = 0; x < expectedBarChartData.length; x++) {
+            expect(
+              Math.abs(expectedBarChartData[x] - paths[x]) < barHeightTolerance
+            ).to.be.ok();
+          }
+        });
+      }
     });
 
     describe('query #2, which has an empty time range', () => {

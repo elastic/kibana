@@ -5,13 +5,12 @@
  */
 
 import expect from '@kbn/expect';
-import { TestInvoker } from './lib/types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function exploreRepositoryFunctionalTests({
   getService,
   getPageObjects,
-}: TestInvoker) {
+}: FtrProviderContext) {
   // const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
@@ -23,7 +22,8 @@ export default function exploreRepositoryFunctionalTests({
 
   const FIND_TIME = config.get('timeouts.find');
 
-  describe('Explore Repository', function() {
+  // FLAKY: https://github.com/elastic/kibana/issues/43557
+  describe.skip('Explore Repository', function() {
     this.tags('smoke');
     describe('Explore a repository', () => {
       const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';

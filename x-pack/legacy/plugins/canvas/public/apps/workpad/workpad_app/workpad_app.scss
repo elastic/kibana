@@ -22,7 +22,7 @@ $canvasLayoutFontSize: $euiFontSizeS;
 
 .canvasLayout__stage {
   flex-grow: 1;
-  flex-basis: 0%;
+  flex-basis: auto;
   display: flex;
   flex-direction: column;
 }
@@ -30,7 +30,7 @@ $canvasLayoutFontSize: $euiFontSizeS;
 .canvasLayout__stageHeader {
   flex-grow: 0;
   flex-basis: auto;
-  padding: ($euiSizeXS +1px) $euiSize $euiSizeXS $euiSize;
+  padding: ($euiSizeXS + 1px) $euiSize $euiSizeXS;
   font-size: $canvasLayoutFontSize;
   border-bottom: $euiBorderThin;
   background: $euiColorLightestShade;
@@ -43,7 +43,7 @@ $canvasLayoutFontSize: $euiFontSizeS;
 
 .canvasLayout__stageContent {
   flex-grow: 1;
-  flex-basis: 0%;
+  flex-basis: auto;
   position: relative;
 }
 
