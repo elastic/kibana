@@ -135,7 +135,14 @@ export class StatefulEvent extends React.Component<Props, State> {
                 executeQuery={!!this.state.expanded[event._id]}
               >
                 {({ detailsData, loading }) => (
-                  <div data-test-subj="event" ref={divElement => (this.divElement = divElement)}>
+                  <div
+                    data-test-subj="event"
+                    ref={divElement => {
+                      if (divElement != null) {
+                        this.divElement = divElement;
+                      }
+                    }}
+                  >
                     {getRowRenderer(event.ecs, rowRenderers).renderRow({
                       browserFields,
                       data: event.ecs,
@@ -181,17 +188,9 @@ export class StatefulEvent extends React.Component<Props, State> {
             );
           } else {
             // height place holder for visibility detection as well as re-rendering sections
-            if (this.divElement != null) {
-              return (
-                <EmptyRow
-                  style={{
-                    height: `${this.divElement.clientHeight - 10}px`, // subtract 10 since we use 5px margin
-                  }}
-                ></EmptyRow>
-              );
-            } else {
-              return <EmptyRow style={{ height: '27px' }}></EmptyRow>;
-            }
+            const height =
+              this.divElement != null ? `${this.divElement.clientHeight - 10}px` : '27px';
+            return <EmptyRow style={{ height }}></EmptyRow>;
           }
         }}
       </VisibilitySensor>
