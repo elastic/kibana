@@ -36,6 +36,7 @@ const XY_MARGIN = {
 
 const X_TICK_TOTAL = 8;
 
+// position absolutely to make sure that window resizing/zooming works
 const ChartsWrapper = styled.div`
   user-select: none;
   position: absolute;
@@ -133,7 +134,6 @@ export class HistogramInner extends PureComponent {
       <div style={{ position: 'relative', height: XY_HEIGHT }}>
         <ChartsWrapper>
           <XYPlot
-            // make sure that window resizing/zooming works
             xType={this.props.xType}
             width={XY_WIDTH}
             height={XY_HEIGHT}
