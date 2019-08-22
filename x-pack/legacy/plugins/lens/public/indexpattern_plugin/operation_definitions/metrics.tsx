@@ -63,6 +63,13 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
         scale: 'ratio',
       } as T;
     },
+    onFieldChange: (oldColumn, indexPattern, field) => {
+      return {
+        ...oldColumn,
+        label: ofName(field.name),
+        sourceField: field.name,
+      };
+    },
     toEsAggsConfig: (column, columnId) => ({
       id: columnId,
       enabled: true,

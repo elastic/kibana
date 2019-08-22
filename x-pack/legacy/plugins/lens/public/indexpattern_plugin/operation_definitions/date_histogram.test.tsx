@@ -11,6 +11,7 @@ import { DateHistogramIndexPatternColumn, IndexPatternPrivateState } from '../in
 import { EuiRange } from '@elastic/eui';
 import { UiSettingsClientContract } from 'src/core/public';
 import { Storage } from 'ui/storage';
+import { createMockedIndexPattern } from '../mocks';
 
 jest.mock('ui/new_platform');
 
@@ -91,13 +92,31 @@ describe('date_histogram', () => {
   });
 
   describe('buildColumn', () => {
-    it('should create column object with default params', () => {
+    it('should create column object with auto interval for primary time field', () => {
       const column = dateHistogramOperation.buildColumn({
         columns: {},
         suggestedPriority: 0,
         layerId: 'first',
+        indexPattern: createMockedIndexPattern(),
         field: {
           name: 'timestamp',
+          type: 'date',
+          esTypes: ['date'],
+          aggregatable: true,
+          searchable: true,
+        },
+      });
+      expect(column.params.interval).toEqual('auto');
+    });
+
+    it('should create column object with manual interval for non-primary time fields', () => {
+      const column = dateHistogramOperation.buildColumn({
+        columns: {},
+        suggestedPriority: 0,
+        layerId: 'first',
+        indexPattern: createMockedIndexPattern(),
+        field: {
+          name: 'start_date',
           type: 'date',
           esTypes: ['date'],
           aggregatable: true,
@@ -112,6 +131,7 @@ describe('date_histogram', () => {
         columns: {},
         suggestedPriority: 0,
         layerId: 'first',
+        indexPattern: createMockedIndexPattern(),
         field: {
           name: 'timestamp',
           type: 'date',

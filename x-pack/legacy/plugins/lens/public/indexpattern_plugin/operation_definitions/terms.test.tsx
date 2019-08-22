@@ -11,6 +11,7 @@ import { IndexPatternPrivateState, TermsIndexPatternColumn } from '../indexpatte
 import { EuiRange, EuiSelect } from '@elastic/eui';
 import { UiSettingsClientContract } from 'src/core/public';
 import { Storage } from 'ui/storage';
+import { createMockedIndexPattern } from '../mocks';
 
 jest.mock('ui/new_platform');
 
@@ -138,6 +139,7 @@ describe('terms', () => {
       const termsColumn = termsOperation.buildColumn({
         layerId: 'first',
         suggestedPriority: undefined,
+        indexPattern: createMockedIndexPattern(),
         field: {
           aggregatable: true,
           searchable: true,
@@ -153,6 +155,7 @@ describe('terms', () => {
       const termsColumn = termsOperation.buildColumn({
         layerId: 'first',
         suggestedPriority: undefined,
+        indexPattern: createMockedIndexPattern(),
         columns: {
           col1: {
             label: 'Count',

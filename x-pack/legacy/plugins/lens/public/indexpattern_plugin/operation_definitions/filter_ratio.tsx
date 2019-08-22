@@ -16,6 +16,10 @@ import { FilterRatioIndexPatternColumn } from '../indexpattern';
 import { OperationDefinition } from '../operations';
 import { updateColumnParam } from '../state_helpers';
 
+const filterRatioLabel = i18n.translate('xpack.lens.indexPattern.filterRatio', {
+  defaultMessage: 'Filter Ratio',
+});
+
 export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternColumn> = {
   type: 'filter_ratio',
   displayName: i18n.translate('xpack.lens.indexPattern.filterRatio', {
@@ -33,9 +37,7 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
   },
   buildColumn({ suggestedPriority }) {
     return {
-      label: i18n.translate('xpack.lens.indexPattern.filterRatio', {
-        defaultMessage: 'Filter Ratio',
-      }),
+      label: filterRatioLabel,
       dataType: 'number',
       operationType: 'filter_ratio',
       suggestedPriority,
@@ -47,6 +49,8 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
       },
     };
   },
+  // Since this operation doesn't support fields, this method can actually not be called.
+  onFieldChange: oldColumn => ({ ...oldColumn }),
   toEsAggsConfig: (column, columnId) => ({
     id: columnId,
     enabled: true,

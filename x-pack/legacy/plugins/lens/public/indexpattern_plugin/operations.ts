@@ -77,6 +77,7 @@ export interface OperationDefinition<C extends BaseIndexPatternColumn> {
     layerId: string;
     columns: Partial<Record<string, IndexPatternColumn>>;
     field?: IndexPatternField;
+    indexPattern: IndexPattern;
   }) => C;
   onOtherColumnChanged?: (
     currentColumn: C,
@@ -86,6 +87,20 @@ export interface OperationDefinition<C extends BaseIndexPatternColumn> {
   toEsAggsConfig: (column: C, columnId: string) => unknown;
   isTransferable: (column: C, newIndexPattern: IndexPattern) => boolean;
   transfer?: (column: C, newIndexPattern: IndexPattern) => C;
+  /**
+   * This method will be called if the user changes the field of an operation.
+   * If this isn't implemented the new column will just be the old column with the new field name,
+   * and everything else will stay the same. You can implement this method to modify the logic
+   * by which the new column will be built. This will only be called for switching the field,
+   * not for initially selecting a field.
+   *
+   * See {@link #transfer} for controlling column building when switching an index pattern not just a field.
+   *
+   * @param oldColumn The column before the user changed the field.
+   * @param indexPattern The index pattern that field is on.
+   * @param field The field that the user changed to.
+   */
+  onFieldChange: (oldColumn: C, indexPattern: IndexPattern, field: IndexPatternField) => C;
 }
 
 export function isColumnTransferable(column: IndexPatternColumn, newIndexPattern: IndexPattern) {
@@ -196,5 +211,6 @@ export function buildColumn({
     suggestedPriority,
     field,
     layerId,
+    indexPattern,
   });
 }

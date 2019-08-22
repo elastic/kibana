@@ -18,11 +18,16 @@ import {
   OperationType,
 } from '../indexpattern';
 
-import { getAvailableOperationsByMetadata, buildColumn } from '../operations';
+import {
+  getAvailableOperationsByMetadata,
+  buildColumn,
+  operationDefinitionMap,
+  OperationDefinition,
+} from '../operations';
 import { PopoverEditor } from './popover_editor';
 import { DragContextState, ChildDragDropProvider, DragDrop } from '../../drag_drop';
 import { changeColumn, deleteColumn } from '../state_helpers';
-import { isDraggedField } from '../utils';
+import { isDraggedField, hasField } from '../utils';
 
 export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   state: IndexPatternPrivateState;
@@ -109,18 +114,35 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
             return;
           }
 
-          props.setState(
-            changeColumn({
-              state: props.state,
-              layerId,
-              columnId: props.columnId,
-              newColumn: buildColumn({
+          const operationsForNewField =
+            operationFieldSupportMatrix.operationByField[droppedItem.field.name];
+
+          const hasFieldChanged =
+            selectedColumn &&
+            hasField(selectedColumn) &&
+            selectedColumn.sourceField !== droppedItem.field.name &&
+            operationsForNewField &&
+            operationsForNewField.includes(selectedColumn.operationType);
+
+          const newColumn = hasFieldChanged
+            ? (operationDefinitionMap[selectedColumn.operationType] as OperationDefinition<
+                IndexPatternColumn
+              >).onFieldChange(selectedColumn, currentIndexPattern, droppedItem.field)
+            : buildColumn({
                 columns: props.state.layers[props.layerId].columns,
                 indexPattern: currentIndexPattern,
                 layerId,
                 suggestedPriority: props.suggestedPriority,
                 field: droppedItem.field,
-              }),
+              });
+
+          props.setState(
+            changeColumn({
+              state: props.state,
+              layerId,
+              columnId: props.columnId,
+              newColumn,
+              keepParams: !hasFieldChanged,
             })
           );
         }}

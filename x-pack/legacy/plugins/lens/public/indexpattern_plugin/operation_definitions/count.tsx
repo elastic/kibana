@@ -8,6 +8,10 @@ import { i18n } from '@kbn/i18n';
 import { CountIndexPatternColumn } from '../indexpattern';
 import { OperationDefinition } from '../operations';
 
+const countLabel = i18n.translate('xpack.lens.indexPattern.countOf', {
+  defaultMessage: 'Count of documents',
+});
+
 export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
   type: 'count',
   displayName: i18n.translate('xpack.lens.indexPattern.count', {
@@ -25,9 +29,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
   },
   buildColumn({ suggestedPriority }) {
     return {
-      label: i18n.translate('xpack.lens.indexPattern.countOf', {
-        defaultMessage: 'Count of documents',
-      }),
+      label: countLabel,
       dataType: 'number',
       operationType: 'count',
       suggestedPriority,
@@ -35,6 +37,8 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
       scale: 'ratio',
     };
   },
+  // This cannot be called practically, since this is a fieldless operation
+  onFieldChange: oldColumn => ({ ...oldColumn }),
   toEsAggsConfig: (column, columnId) => ({
     id: columnId,
     enabled: true,
