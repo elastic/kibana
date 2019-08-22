@@ -55,7 +55,7 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
       );
       return series.map(serie => serie.data.label).join(', ');
     },
-    [stateParams.valueAxes[0], stateParams.seriesParams]
+    [stateParams.valueAxes, stateParams.seriesParams]
   );
 
   const renderRemoveButton = useCallback(

@@ -48,7 +48,7 @@ function LabelOptions({ stateParams, setValue, axis, axisName, index }: LabelOpt
       };
       setValue(axisName, axes);
     },
-    [setValue, stateParams[axisName]]
+    [axisName, index, setValue, stateParams]
   );
 
   return (

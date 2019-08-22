@@ -64,7 +64,7 @@ function ChartOptions({
         value: 'new',
       },
     ],
-    [stateParams.valueAxes.map(({ id }: ValueAxis) => id)]
+    [stateParams.valueAxes]
   );
 
   return (

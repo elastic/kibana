@@ -110,7 +110,7 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
       }
       return [LegendPositions.LEFT, LegendPositions.RIGHT].includes(position);
     },
-    [isAxisHorizontal, isCategoryAxisHorizontal]
+    [isCategoryAxisHorizontal]
   );
 
   const positions = useMemo(

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useCallback } from 'react';
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -27,10 +27,13 @@ import { SelectOption } from '../select';
 import { BasicVislibParams, ValueAxis } from '../../types';
 
 function GridPanel({ stateParams, setValue, hasHistogramAgg }: VisOptionsProps<BasicVislibParams>) {
-  const setGrid = <T extends keyof BasicVislibParams['grid']>(
-    paramName: T,
-    value: BasicVislibParams['grid'][T]
-  ) => setValue('grid', { ...stateParams.grid, [paramName]: value });
+  const setGrid = useCallback(
+    <T extends keyof BasicVislibParams['grid']>(
+      paramName: T,
+      value: BasicVislibParams['grid'][T]
+    ) => setValue('grid', { ...stateParams.grid, [paramName]: value }),
+    [stateParams.grid, setValue]
+  );
 
   const options = useMemo(
     () => [
@@ -45,14 +48,14 @@ function GridPanel({ stateParams, setValue, hasHistogramAgg }: VisOptionsProps<B
         value: '',
       },
     ],
-    [stateParams.valueAxes.map(({ id }: ValueAxis) => id)]
+    [stateParams.valueAxes]
   );
 
   useEffect(() => {
     if (hasHistogramAgg) {
       setGrid('categoryLines', false);
     }
-  }, [hasHistogramAgg]);
+  }, [hasHistogramAgg, setGrid]);
 
   return (
     <EuiPanel paddingSize="s">

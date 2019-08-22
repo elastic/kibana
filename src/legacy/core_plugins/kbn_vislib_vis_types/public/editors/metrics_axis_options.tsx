@@ -66,7 +66,7 @@ function MetricsAxisOptions(props: VisOptionsProps<BasicVislibParams>) {
       };
       setValue('valueAxes', valueAxes);
     },
-    [stateParams.valueAxes]
+    [stateParams.valueAxes, setValue]
   );
 
   const setChartByIndex: SetChartValueByIndex = useCallback(
@@ -78,10 +78,10 @@ function MetricsAxisOptions(props: VisOptionsProps<BasicVislibParams>) {
       };
       setValue('seriesParams', series);
     },
-    [setValue, stateParams.seriesParams]
+    [stateParams.seriesParams, setValue]
   );
 
-  const updateAxisTitle = () => {
+  const updateAxisTitle = useCallback(() => {
     stateParams.valueAxes.forEach((axis, axisNumber) => {
       let newCustomLabel = '';
       const isFirst = axisNumber === 0;
@@ -129,7 +129,15 @@ function MetricsAxisOptions(props: VisOptionsProps<BasicVislibParams>) {
       setLastMatchingSeriesAggType(matchingSeriesAggType);
       setLastMatchingSeriesAggField(matchingSeriesAggField);
     });
-  };
+  }, [
+    aggs,
+    lastCustomLabels,
+    lastMatchingSeriesAggField,
+    lastMatchingSeriesAggType,
+    stateParams.seriesParams,
+    stateParams.valueAxes,
+    setValueAxisByIndex,
+  ]);
 
   const getUpdatedAxisName = useCallback(
     (axisPosition: ValueAxis['position']) => {
@@ -145,7 +153,7 @@ function MetricsAxisOptions(props: VisOptionsProps<BasicVislibParams>) {
       }, 1);
       return axisName;
     },
-    [setValueAxisByIndex, stateParams.valueAxes]
+    [stateParams.valueAxes]
   );
 
   const addValueAxis = useCallback(() => {
@@ -177,7 +185,7 @@ function MetricsAxisOptions(props: VisOptionsProps<BasicVislibParams>) {
         setChartByIndex(chartIndex, 'valueAxis', axis.id);
       }
     },
-    [stateParams.valueAxes, setChartByIndex, setValue]
+    [stateParams.seriesParams, stateParams.valueAxes, setChartByIndex, setValue]
   );
 
   const aggsLabel = aggs
@@ -219,7 +227,15 @@ function MetricsAxisOptions(props: VisOptionsProps<BasicVislibParams>) {
     });
 
     setValue('seriesParams', updatedSeries);
-  }, [aggsLabel]);
+  }, [
+    aggs,
+    aggsLabel,
+    stateParams.seriesParams,
+    stateParams.valueAxes,
+    vis.type.schemas.metrics,
+    setValue,
+    updateAxisTitle,
+  ]);
 
   useEffect(() => {
     const chartPosition = stateParams.categoryAxes[0].position;
@@ -234,14 +250,21 @@ function MetricsAxisOptions(props: VisOptionsProps<BasicVislibParams>) {
         setValueAxisByIndex(index, 'name', getUpdatedAxisName(position));
       }
     });
-  }, [stateParams.categoryAxes[0].position, stateParams.valueAxes]);
+  }, [
+    isCategoryAxisHorizontal,
+    stateParams.categoryAxes,
+    stateParams.valueAxes,
+    getUpdatedAxisName,
+    setValueAxisByIndex,
+  ]);
 
   const seriesParamsTypes = stateParams.seriesParams.map(({ type }) => type);
+  const seriesParamsTypesString = seriesParamsTypes.join();
 
   useEffect(() => {
     const types = uniq(seriesParamsTypes);
     setVisType(vis, types.length === 1 ? types[0] : 'histogram');
-  }, [seriesParamsTypes.join()]);
+  }, [seriesParamsTypes, seriesParamsTypesString, vis, setVisType]);
 
   return (
     <>
