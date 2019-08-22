@@ -63,7 +63,7 @@ const TimelionDatasource = ({ args, updateArgs }) => {
 
       <EuiFormRow label="Query" helpText="Lucene Query String syntax">
         <EuiTextArea
-          className="canvasTextArea--code"
+          className="canvasTextArea__code"
           value={getQuery()}
           onChange={e => setArg(argName, e.target.value)}
         />

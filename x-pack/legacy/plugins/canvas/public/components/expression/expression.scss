@@ -2,30 +2,21 @@
   max-height: 480px;
 }
 
-.canvasExpression--controls {
-  position: absolute;
-  right: $euiSizeXL;
-  top: $euiSizeL;
-}
-
-.canvasExpressionInput--editor {
-  height: 250px;
+.canvasExpressionInput__editor {
+  height: $euiSize * 16;
+  padding-top: $euiSize;
   flex-grow: 1;
-  flex-basis: auto;
-  border: $euiBorderThin;
-  display: flex;
-  flex-direction: row;
-
-  .react-monaco-editor-container {
-    flex-grow: 1;
-    flex-basis: 0%;
-  }
 }
 
 .canvasExpression--fullSize {
-  height: calc(100vh - 200px); // space for global nav and autocomplete popup
   display: flex;
   flex-direction: column;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: $euiZMask - 1;
 
   .canvasExpressionInput {
     flex-grow: 1;
@@ -33,15 +24,12 @@
     flex-direction: column;
   }
 
-  .canvasExpressionInput--inner {
+  .canvasExpressionInput__inner {
     flex-grow: 1;
+    display: flex;
   }
 
-  .canvasExpression--settings {
-    flex-grow: 0;
-  }
-
-  .canvasTextArea--code {
+  .canvasTextArea__code {
     flex-grow: 1;
     padding-right: $euiSizeXXL;
   }
@@ -51,7 +39,7 @@
     display: flex;
     flex-direction: column;
 
-    .canvasAutocomplete--inner {
+    .canvasAutocomplete__inner {
       flex-grow: 1;
       display: flex;
       flex-direction: column;
@@ -67,4 +55,8 @@
   .autocompleteReference {
     height: 98px;
   }
+}
+
+.canvasExpression__settings {
+  padding: $euiSize;
 }

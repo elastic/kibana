@@ -25,9 +25,6 @@ import { getFunctionReferenceStr, getArgReferenceStr } from './reference';
 
 interface Props {
   /** Font size of text within the editor */
-  fontSize: number;
-  /** Boolean denoting whether the autocomplete widget is enabled */
-  isAutocompleteEnabled: boolean;
 
   /** Canvas function defintions */
   functionDefinitions: CanvasFunction[];
@@ -38,13 +35,12 @@ interface Props {
   value: string;
   /** Function invoked when expression value is changed */
   onChange: (value?: string) => void;
+  /** In full screen mode or not */
+  isCompact: boolean;
 }
 
 export class ExpressionInput extends React.Component<Props> {
   static propTypes = {
-    fontSize: PropTypes.number.isRequired,
-    isAutocompleteEnabled: PropTypes.bool.isRequired,
-
     functionDefinitions: PropTypes.array.isRequired,
 
     value: PropTypes.string.isRequired,
@@ -88,7 +84,6 @@ export class ExpressionInput extends React.Component<Props> {
     500,
     { leading: true, trailing: false }
   );
-
   onKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
     if (e.ctrlKey || e.metaKey) {
       if (e.key === 'z') {
@@ -245,21 +240,17 @@ export class ExpressionInput extends React.Component<Props> {
   };
 
   render() {
-    const { value, error, fontSize, isAutocompleteEnabled } = this.props;
+    const { value, error, isCompact } = this.props;
 
-    const helpText = error
-      ? null
-      : 'This is the coded expression that backs this element. You better know what you are doing here.';
     return (
       <div className="canvasExpressionInput">
         <EuiFormRow
-          className="canvasExpressionInput--inner"
+          className="canvasExpressionInput__inner"
           fullWidth
           isInvalid={Boolean(error)}
           error={error}
-          helpText={helpText}
         >
-          <div className="canvasExpressionInput--editor">
+          <div className="canvasExpressionInput__editor">
             <Editor
               languageId={LANGUAGE_ID}
               value={value}
@@ -272,9 +263,9 @@ export class ExpressionInput extends React.Component<Props> {
                 provideHover: this.providerHover,
               }}
               options={{
-                fontSize,
+                fontSize: isCompact ? 12 : 16,
                 scrollBeyondLastLine: false,
-                quickSuggestions: isAutocompleteEnabled,
+                quickSuggestions: true,
                 minimap: {
                   enabled: false,
                 },

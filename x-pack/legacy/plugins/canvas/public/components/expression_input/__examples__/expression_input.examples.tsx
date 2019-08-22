@@ -52,7 +52,6 @@ const sampleFunctionDef = {
 storiesOf('components/ExpressionInput', module).add('default', () => (
   <ExpressionInput
     fontSize={16}
-    isAutocompleteEnabled={true}
     value="markdown"
     onChange={action('onChange')}
     functionDefinitions={[sampleFunctionDef as any]}
