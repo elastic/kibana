@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import { RefreshInterval, TimeRange } from 'src/plugins/data/public';
 
-const valueOf = function(o) {
+const valueOf = function(o: any) {
   if (o) return o.valueOf();
 };
 
