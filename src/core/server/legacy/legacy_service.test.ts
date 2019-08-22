@@ -338,9 +338,9 @@ describe('once LegacyService is set up in `devClusterMaster` mode', () => {
     await devClusterLegacyService.setup(setupDeps);
     await devClusterLegacyService.start(startDeps);
 
-    expect(MockClusterManager.create.mock.calls).toMatchSnapshot(
-      'cluster manager without base path proxy'
-    );
+    const [[cliArgs, config, basePathProxy]] = MockClusterManager.create.mock.calls;
+    expect(cliArgs.basePath).toBe(false);
+    expect(basePathProxy).not.toBeDefined();
   });
 
   test('creates ClusterManager with base path proxy.', async () => {
@@ -362,8 +362,7 @@ describe('once LegacyService is set up in `devClusterMaster` mode', () => {
     expect(MockClusterManager.create).toBeCalledTimes(1);
 
     const [[cliArgs, config, basePathProxy]] = MockClusterManager.create.mock.calls;
-    expect(cliArgs).toMatchSnapshot('cli args. cluster manager with base path proxy');
-    expect(config).toMatchSnapshot('config. cluster manager with base path proxy');
+    expect(cliArgs.basePath).toEqual(true);
     expect(basePathProxy).toBeInstanceOf(BasePathProxyServer);
   });
 });
