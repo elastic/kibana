@@ -197,12 +197,25 @@ export function buildColumn({
     throw new Error('No suitable operation found for given parameters');
   }
 
-  return operationDefinition.buildColumn({
+  const baseOptions = {
     columns,
     suggestedPriority,
-    field,
     layerId,
-  });
+  };
+
+  // check for the operation for field getter to determine whether
+  // this is a field based operation type
+  if ('getPossibleOperationForField' in operationDefinition) {
+    if (!field) {
+      throw new Error(`Invariant error: ${operationDefinition.type} operation requires field`);
+    }
+    return operationDefinition.buildColumn({
+      ...baseOptions,
+      field,
+    });
+  } else {
+    return operationDefinition.buildColumn(baseOptions);
+  }
 }
 
 export { operationDefinitionMap } from './definitions';

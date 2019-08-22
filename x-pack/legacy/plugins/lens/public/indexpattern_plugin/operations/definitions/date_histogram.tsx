@@ -8,8 +8,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiForm, EuiFormRow, EuiRange } from '@elastic/eui';
-import { IndexPatternField, DateHistogramIndexPatternColumn } from '../../indexpattern';
-import { DimensionPriority } from '../../../types';
+import { DateHistogramIndexPatternColumn } from '../../indexpattern';
 import { updateColumnParam } from '../../state_helpers';
 import { OperationDefinition } from '.';
 
@@ -53,16 +52,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       };
     }
   },
-  buildColumn({
-    suggestedPriority,
-    field,
-  }: {
-    suggestedPriority: DimensionPriority | undefined;
-    field?: IndexPatternField;
-  }): DateHistogramIndexPatternColumn {
-    if (!field) {
-      throw new Error('Invariant error: date histogram operation requires field');
-    }
+  buildColumn({ suggestedPriority, field }) {
     let interval = 'd';
     let timeZone: string | undefined;
     if (field.aggregationRestrictions && field.aggregationRestrictions.date_histogram) {

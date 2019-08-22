@@ -62,9 +62,6 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
     );
   },
   buildColumn({ suggestedPriority, columns, field }) {
-    if (!field) {
-      throw new Error('Invariant error: terms operation requires field');
-    }
     const existingMetricColumn = Object.entries(columns)
       .filter(([_columnId, column]) => column && isSortableByColumn(column))
       .map(([id]) => id)[0];

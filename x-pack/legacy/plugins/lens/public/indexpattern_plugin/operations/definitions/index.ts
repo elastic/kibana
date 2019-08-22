@@ -42,12 +42,6 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    */
   displayName: string;
   // TODO move into field specific part
-  buildColumn: (arg: {
-    suggestedPriority: DimensionPriority | undefined;
-    layerId: string;
-    columns: Partial<Record<string, IndexPatternColumn>>;
-    field?: IndexPatternField;
-  }) => C;
   /**
    * This function is called if another column in the same layer changed or got removed.
    * Can be used to update references to other columns (e.g. for sorting).
@@ -81,6 +75,38 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
   transfer?: (column: C, newIndexPattern: IndexPattern) => C;
 }
 
+interface BaseBuildColumnArgs {
+  suggestedPriority: DimensionPriority | undefined;
+  layerId: string;
+  columns: Partial<Record<string, IndexPatternColumn>>;
+}
+
+type FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> = BaseOperationDefinitionProps<
+  C
+> & {
+  /**
+   * Returns the meta data of the operation if applied to the given field. Undefined
+   * if the field is not applicable to the operation.
+   */
+  getPossibleOperationForField: (field: IndexPatternField) => OperationMetadata | undefined;
+  buildColumn: (
+    arg: BaseBuildColumnArgs & {
+      field: IndexPatternField;
+    }
+  ) => C;
+};
+
+type DocumentBasedOperationDefinition<
+  C extends BaseIndexPatternColumn
+> = BaseOperationDefinitionProps<C> & {
+  /**
+   * Returns the meta data of the operation if applied to documents of the given index pattern.
+   * Undefined if the operation is not applicable to the index pattern.
+   */
+  getPossibleOperationForDocument: (indexPattern: IndexPattern) => OperationMetadata | undefined;
+  buildColumn: (arg: BaseBuildColumnArgs) => C;
+};
+
 /**
  * Shape of an operation definition. If the type parameter of the definition
  * indicates a field based column, `getPossibleOperationForField` has to be
@@ -89,22 +115,8 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
 export type OperationDefinition<
   C extends BaseIndexPatternColumn
 > = C extends FieldBasedIndexPatternColumn
-  ? BaseOperationDefinitionProps<C> & {
-      /**
-       * Returns the meta data of the operation if applied to the given field. Undefined
-       * if the field is not applicable to the operation.
-       */
-      getPossibleOperationForField: (field: IndexPatternField) => OperationMetadata | undefined;
-    }
-  : BaseOperationDefinitionProps<C> & {
-      /**
-       * Returns the meta data of the operation if applied to documents of the given index pattern.
-       * Undefined if the operation is not applicable to the index pattern.
-       */
-      getPossibleOperationForDocument: (
-        indexPattern: IndexPattern
-      ) => OperationMetadata | undefined;
-    };
+  ? FieldBasedOperationDefinition<C>
+  : DocumentBasedOperationDefinition<C>;
 
 // This type is like mapping over a union of types
 // Each possible column type out of the `IndexPatternColumn` union type

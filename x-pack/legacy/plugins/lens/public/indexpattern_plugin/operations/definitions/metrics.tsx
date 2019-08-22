@@ -55,21 +55,16 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
         field: column.sourceField,
       },
     }),
-    buildColumn: ({ suggestedPriority, field }) => {
-      if (!field) {
-        throw new Error(`Invariant: A ${type} operation can only be built with a field`);
-      }
-      return {
-        label: ofName(field ? field.name : ''),
-        dataType: 'number',
-        operationType: type,
-        suggestedPriority,
-        sourceField: field ? field.name : '',
-        isBucketed: false,
-        isMetric: true,
-        scale: 'ratio',
-      };
-    },
+    buildColumn: ({ suggestedPriority, field }) => ({
+      label: ofName(field ? field.name : ''),
+      dataType: 'number',
+      operationType: type,
+      suggestedPriority,
+      sourceField: field ? field.name : '',
+      isBucketed: false,
+      isMetric: true,
+      scale: 'ratio',
+    }),
   } as OperationDefinition<T>;
 }
 
