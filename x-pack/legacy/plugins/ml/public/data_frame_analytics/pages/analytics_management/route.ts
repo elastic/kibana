@@ -8,7 +8,6 @@ import uiRoutes from 'ui/routes';
 
 // @ts-ignore
 import { checkFullLicense } from '../../../license/check_license';
-// @ts-ignore
 import { checkGetJobsPrivilege } from '../../../privilege/check_privilege';
 import {
   loadCurrentIndexPattern,
