@@ -108,7 +108,7 @@ export default function PointSeriesVisType(Private) {
           value: 10,
           width: 1,
           style: 'full',
-          color: palettes.euiPaletteColorBlind.colors[0]
+          color: palettes.euiPaletteColorBlind.colors[9]
         }
       },
     },

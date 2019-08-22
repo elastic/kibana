@@ -27,7 +27,7 @@ const defaults = {
   showTooltip: true,
   color: undefined,
   fillColor: undefined,
-  showLabel: true
+  showLabel: true,
 };
 
 /**

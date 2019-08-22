@@ -18,13 +18,14 @@
  */
 
 import _ from 'lodash';
+import { palettes } from '@elastic/eui/lib/services';
 
 const thresholdLineDefaults = {
   show: false,
   value: 10,
   width: 1,
   style: 'full',
-  color: '#00B3A4'
+  color: palettes.euiPaletteColorBlind.colors[9],
 };
 
 export class PointSeries {
