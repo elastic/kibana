@@ -50,7 +50,7 @@ import chrome from 'ui/chrome';
 import { getVisualizeLoader } from 'ui/visualize/loader';
 
 import { Legacy } from 'kibana';
-import { VisTypesRegistry, VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { VisTypesPluginContract, VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
 import { SavedObjectAttributes } from 'kibana/server';
 import {
@@ -80,10 +80,10 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
 
   static async createVisualizeEmbeddableFactory(): Promise<VisualizeEmbeddableFactory> {
-    return new VisualizeEmbeddableFactory(() => VisTypesRegistryProvider.getAll());
+    return new VisualizeEmbeddableFactory(() => VisTypesRegistryProvider);
   }
 
-  constructor(private readonly getVisTypesRegistry: () => VisTypesRegistry) {
+  constructor(private readonly getVisTypesRegistry: () => VisTypesPluginContract) {
     super({
       savedObjectMetaData: {
         name: i18n.translate('kbn.visualize.savedObjectName', { defaultMessage: 'Visualization' }),
@@ -176,13 +176,13 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   }
 
   public async create() {
-    const visTypes = getVisTypesRegistry();
+    const visTypes = this.getVisTypesRegistry();
     // TODO: This is a bit of a hack to preserve the original functionality. Ideally we will clean this up
     // to allow for in place creation of visualizations without having to navigate away to a new URL.
 
     // TODO: This now seems redundant as `visTypes` will always be truthy.
     if (visTypes) {
-      showNewVisModal(visTypes, {
+      showNewVisModal(visTypes.getAll(), {
         editorParams: ['addToDashboard'],
       });
     }

@@ -73,6 +73,6 @@ export {
   // VisualizationController,
   // VisType,
   VisTypeAlias,
-  VisTypesRegistry,
+  VisTypesPluginContract,
   Status,
 } from './types';

@@ -52,7 +52,7 @@ interface VisTypeAliasListEntry extends VisTypeAlias {
 
 interface TypeSelectionProps {
   onVisTypeSelected: (visType: VisType) => void;
-  visTypesRegistry: Map<string, VisType>;
+  visTypesRegistry: VisType[];
   visTypeAliases?: VisTypeAlias[];
   showExperimental: boolean;
 }
@@ -167,11 +167,11 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
   }
 
   private filteredVisTypes(
-    visTypes: Map<string, VisType>,
+    visTypes: VisType[],
     visTypeAliases: any[] = [],
     query: string
   ): Array<VisTypeListEntry | VisTypeAliasListEntry> {
-    const types = [...visTypes.values()].filter(type => {
+    const types = visTypes.filter(type => {
       // Filter out all lab visualizations if lab mode is not enabled
       if (!this.props.showExperimental && type.stage === 'experimental') {
         return false;

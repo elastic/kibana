@@ -52,10 +52,7 @@ describe('NewVisModal', () => {
     ...defaultVisTypeParams,
   };
 
-  const visTypes: Map<string, VisType> = new Map()
-    .set('vis', vis)
-    .set('visExpression', visExpression)
-    .set('visWithSearch', visWithSearch);
+  const visTypes = [vis, visExpression, visWithSearch] as VisType[];
 
   it('should render as expected', () => {
     const wrapper = mountWithIntl(

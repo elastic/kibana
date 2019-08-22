@@ -33,7 +33,7 @@ import { TypeSelection } from './type_selection';
 interface TypeSelectionProps {
   isOpen: boolean;
   onClose: () => void;
-  visTypesRegistry: Map<string, VisType>;
+  visTypesRegistry: VisType[];
   visTypeAliases?: VisTypeAlias[];
   editorParams?: string[];
 }

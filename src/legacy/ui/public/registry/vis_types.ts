@@ -19,12 +19,19 @@
 
 import { VisType } from '../vis';
 
-export type VisTypesRegistry = Map<string, VisType>;
+export interface VisTypesPluginContract {
+  register: (visType: VisType) => VisTypesPluginContract;
+  get: (name: string) => VisType | undefined;
+  getAll: () => VisType[];
+}
 
 const visTypes: Map<string, VisType> = new Map();
 
 export const VisTypesRegistryProvider = {
-  register: (obj: VisType) => visTypes.set(obj.name, obj),
+  register: (obj: VisType) => {
+    visTypes.set(obj.name, obj);
+    return VisTypesRegistryProvider;
+  },
   get: (key: string) => visTypes.get(key),
-  getAll: () => new Map(visTypes),
+  getAll: () => visTypes.values(),
 };

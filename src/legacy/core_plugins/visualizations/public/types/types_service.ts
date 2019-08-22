@@ -63,5 +63,5 @@ export type VisParams = types.VisParams;
 export type VisProvider = types.VisProvider;
 export type VisState = types.VisState;
 // todo: this breaks it // export { VisualizationController, VisType } from 'ui/vis/vis_types/vis_type';
-export { VisTypesRegistry } from 'ui/registry/vis_types';
+export { VisTypesPluginContract } from 'ui/registry/vis_types';
 export { Status } from 'ui/vis/update_status';

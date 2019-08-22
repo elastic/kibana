@@ -29,7 +29,7 @@ interface ShowNewVisModalParams {
 }
 
 export function showNewVisModal(
-  visTypeRegistry: Map<string, VisType>,
+  visTypeRegistry: VisType[],
   { editorParams = [] }: ShowNewVisModalParams = {}
 ) {
   const container = document.createElement('div');
