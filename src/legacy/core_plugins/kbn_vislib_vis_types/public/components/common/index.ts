@@ -17,15 +17,10 @@
  * under the License.
  */
 
-import 'ui/directives/inequality';
-import { uiModules } from 'ui/modules';
-import pointSeriesOptionsTemplate from './point_series_options.html';
-const module = uiModules.get('kibana');
-
-module.directive('pointSeriesOptions', function () {
-  return {
-    restrict: 'E',
-    template: pointSeriesOptionsTemplate,
-    replace: true
-  };
-});
+export { BasicOptions } from './basic_options';
+export { NumberInputOption } from './number_input';
+export { RangeOption } from './range';
+export { SelectOption } from './select';
+export { SwitchOption } from './switch';
+export { TextInputOption } from './text_input';
+export { TruncateLabelsOption } from './truncate_labels';
