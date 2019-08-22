@@ -6,6 +6,7 @@
 
 
 import { JOB_STATE, DATAFEED_STATE } from 'plugins/ml/../common/constants/states';
+import { Stat } from '../../../../components/stat';
 
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -98,17 +99,6 @@ function createJobStats(jobsSummaryList) {
 
   return jobStats;
 }
-
-function Stat({ stat }) {
-  return (
-    <span className="stat">
-      <span className="stat-label">{stat.label}</span>: <span className="stat-value">{stat.value}</span>
-    </span>
-  );
-}
-Stat.propTypes = {
-  stat: PropTypes.object.isRequired,
-};
 
 export const JobStatsBar = ({ jobsSummaryList }) => {
   const jobStats = createJobStats(jobsSummaryList);

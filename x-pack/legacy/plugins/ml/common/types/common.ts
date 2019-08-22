@@ -8,6 +8,12 @@ export interface Dictionary<TValue> {
   [id: string]: TValue;
 }
 
+export interface StatsBarStat {
+  label: string;
+  value: string | number;
+  show?: boolean;
+}
+
 // converts a dictionary to an array. note this loses the dictionary `key` information.
 // however it's able to retain the type information of the dictionary elements.
 export function dictionaryToArray<TValue>(dict: Dictionary<TValue>): TValue[] {
