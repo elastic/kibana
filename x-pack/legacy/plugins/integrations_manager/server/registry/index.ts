@@ -11,7 +11,7 @@ import {
   RegistryPackage,
 } from '../../common/types';
 import { cacheGet, cacheSet } from './cache';
-import { ArchiveEntry, untarBuffer, unzipBuffer } from './extract';
+import { ArchiveEntry, untarBuffer } from './extract';
 import { fetchUrl, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
 
@@ -61,10 +61,9 @@ async function extract(
   filter = (entry: ArchiveEntry): boolean => true,
   onEntry: (entry: ArchiveEntry) => void
 ) {
-  const libExtract = key.endsWith('.zip') ? unzipBuffer : untarBuffer;
   const archiveBuffer = await getOrFetchArchiveBuffer(key);
 
-  return libExtract(archiveBuffer, filter, onEntry);
+  return untarBuffer(archiveBuffer, filter, onEntry);
 }
 
 async function getOrFetchArchiveBuffer(key: string): Promise<Buffer> {
