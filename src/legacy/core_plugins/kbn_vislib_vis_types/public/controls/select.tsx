@@ -24,7 +24,7 @@ interface SelectOptionProps<ParamName extends string, ValidParamValues extends s
   id?: string;
   label: string;
   labelAppend?: React.ReactNode;
-  options: Array<{ value: ValidParamValues; text: string }>;
+  options: ReadonlyArray<{ readonly value: ValidParamValues; readonly text: string }>;
   paramName: ParamName;
   value?: ValidParamValues;
   setValue: (paramName: ParamName, value: ValidParamValues) => void;
