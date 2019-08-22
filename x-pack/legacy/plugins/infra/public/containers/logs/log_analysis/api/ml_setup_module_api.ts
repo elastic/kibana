@@ -111,12 +111,14 @@ const setupMlModuleResponsePayloadRT = rt.type({
       id: rt.string,
       started: rt.boolean,
       success: rt.boolean,
+      error: rt.any,
     })
   ),
   jobs: rt.array(
     rt.type({
       id: rt.string,
       success: rt.boolean,
+      error: rt.any,
     })
   ),
 });

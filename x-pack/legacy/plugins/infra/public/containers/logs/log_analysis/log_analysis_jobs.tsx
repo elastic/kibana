@@ -19,7 +19,8 @@ type JobStatus =
   | 'created'
   | 'started'
   | 'opening'
-  | 'opened';
+  | 'opened'
+  | 'failed';
 
 export const useLogAnalysisJobs = ({
   indexPattern,
@@ -57,14 +58,18 @@ export const useLogAnalysisJobs = ({
         const hasSuccessfullyStartedDatafeeds = datafeeds.every(
           datafeed => datafeed.success && datafeed.started
         );
+        const hasAnyErrors =
+          jobs.some(job => !!job.error) || datafeeds.some(datafeed => !!datafeed.error);
 
         setJobStatus(currentJobStatus => ({
           ...currentJobStatus,
-          logEntryRate: hasSuccessfullyCreatedJobs
+          logEntryRate: hasAnyErrors
+            ? 'failed'
+            : hasSuccessfullyCreatedJobs
             ? hasSuccessfullyStartedDatafeeds
               ? 'started'
-              : 'created'
-            : 'inconsistent',
+              : 'failed'
+            : 'failed',
         }));
       },
     },
@@ -116,7 +121,7 @@ export const useLogAnalysisJobs = ({
 
   const didSetupFail = useMemo(
     () => !isSettingUpMlModule && setupMlModuleRequest.state !== 'uninitialized' && isSetupRequired,
-    [setupMlModuleRequest.state, jobStatus]
+    [isSettingUpMlModule, setupMlModuleRequest.state, isSetupRequired]
   );
 
   return {
