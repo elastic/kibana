@@ -6,8 +6,8 @@
 
 import _ from 'lodash';
 import { Ast } from '@kbn/interpreter/common';
-import { Visualization, Datasource, FramePublicAPI } from '../../types';
-import { Action } from './state_management';
+import { Visualization, Datasource, FramePublicAPI, SetState } from '../../types';
+import { switchVisualization } from '../../state_management';
 
 export interface Suggestion {
   visualizationId: string;
@@ -108,20 +108,19 @@ export function getSuggestions({
 
 export function switchToSuggestion(
   frame: FramePublicAPI,
-  dispatch: (action: Action) => void,
+  setState: SetState,
   suggestion: Pick<
     Suggestion,
     'visualizationId' | 'visualizationState' | 'datasourceState' | 'datasourceId' | 'keptLayerIds'
   >
 ) {
-  const action: Action = {
-    type: 'SWITCH_VISUALIZATION',
-    newVisualizationId: suggestion.visualizationId,
-    initialState: suggestion.visualizationState,
-    datasourceState: suggestion.datasourceState,
+  switchVisualization(setState, {
+    visualizationId: suggestion.visualizationId,
+    visualizationState: suggestion.visualizationState,
     datasourceId: suggestion.datasourceId,
-  };
-  dispatch(action);
+    datasourceState: suggestion.datasourceState,
+  });
+
   const layerIds = Object.keys(frame.datasourceLayers).filter(id => {
     return !suggestion.keptLayerIds.includes(id);
   });

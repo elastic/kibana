@@ -5,39 +5,33 @@
  */
 
 import _ from 'lodash';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Storage } from 'ui/storage';
 import { toastNotifications } from 'ui/notify';
 import { Chrome } from 'ui/chrome';
-import { Query, QueryBar } from '../../../../../../src/legacy/core_plugins/data/public/query';
-import { Document, SavedObjectStore } from '../persistence';
-import { EditorFrameInstance } from '../types';
-import { NativeRenderer } from '../native_renderer';
-
-interface State {
-  isLoading: boolean;
-  isDirty: boolean;
-  dateRange: {
-    fromDate: string;
-    toDate: string;
-  };
-  query: Query;
-  indexPatternTitles: string[];
-  persistedDoc?: Document;
-}
+import { QueryBar } from '../../../../../../src/legacy/core_plugins/data/public/query';
+import { SavedObjectStore } from '../persistence';
+import { Datasource, Visualization } from '../types';
+import { ExpressionRenderer } from '../../../../../../src/legacy/core_plugins/data/public';
+import { EditorFrame } from '../editor_frame_plugin/editor_frame';
+import { initialState, initialize, getFramePublicAPI, toSavedObject } from '../state_management';
 
 export function App({
-  editorFrame,
+  datasourceMap,
+  visualizationMap,
+  expressionRenderer,
   store,
   chrome,
   docId,
   docStorage,
   redirectTo,
 }: {
-  editorFrame: EditorFrameInstance;
+  datasourceMap: Record<string, Datasource>;
+  visualizationMap: Record<string, Visualization>;
+  expressionRenderer: ExpressionRenderer;
   chrome: Chrome;
   store: Storage;
   docId?: string;
@@ -46,55 +40,71 @@ export function App({
 }) {
   const uiSettings = chrome.getUiSettingsClient();
   const timeDefaults = uiSettings.get('timepicker:timeDefaults');
-  const language = store.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage');
 
-  const [state, setState] = useState<State>({
-    isLoading: !!docId,
-    isDirty: false,
-    query: { query: '', language },
-    dateRange: {
-      fromDate: timeDefaults.from,
-      toDate: timeDefaults.to,
-    },
-    indexPatternTitles: [],
+  const [state, setState] = useState(
+    initialState({
+      datasourceMap,
+      visualizationMap,
+      dateRange: {
+        fromDate: timeDefaults.from,
+        toDate: timeDefaults.to,
+      },
+      language: store.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage'),
+    })
+  );
+
+  const framePublicAPI = getFramePublicAPI({
+    datasourceMap,
+    state,
+    setState,
   });
 
-  const lastKnownDocRef = useRef<Document | undefined>(undefined);
+  const saveableDoc = toSavedObject({
+    datasourceMap,
+    visualizationMap,
+    state,
+    framePublicAPI,
+  });
 
+  const isSaveable = !_.isEqual(state.doc, saveableDoc);
+
+  const indexPatternTitles = Object.keys(state.datasourceStates).reduce(
+    (arr, datasourceId) => {
+      const datasourceState = state.datasourceStates[datasourceId].state;
+      const datasource = datasourceMap[datasourceId];
+      const layers = datasource.getLayers(datasourceState);
+      if (layers.length) {
+        arr.push(
+          ...datasource
+            .getMetaData(datasourceState)
+            .filterableIndexPatterns.map(pattern => pattern.title)
+        );
+      }
+      return arr;
+    },
+    [] as string[]
+  );
+
+  // When the route changes, we treat it as an initialization event.
   useEffect(() => {
-    if (docId && (!state.persistedDoc || state.persistedDoc.id !== docId)) {
-      setState({ ...state, isLoading: true });
-      docStorage
-        .load(docId)
-        .then(doc => {
-          setState({
-            ...state,
-            isLoading: false,
-            persistedDoc: doc,
-            query: doc.state.query,
-            indexPatternTitles: doc.state.datasourceMetaData.filterableIndexPatterns.map(
-              ({ title }) => title
-            ),
-          });
+    initialize({
+      setState,
+      datasourceMap,
+      dateRange: state.dateRange,
+      language: state.language,
+      docId,
+      docStorage,
+      visualizationMap,
+    }).catch((e: unknown) => {
+      toastNotifications.addDanger(
+        i18n.translate('xpack.lens.editorFrame.docLoadingError', {
+          defaultMessage: 'Error loading saved document',
         })
-        .catch(() => {
-          setState({ ...state, isLoading: false });
+      );
 
-          toastNotifications.addDanger(
-            i18n.translate('xpack.lens.editorFrame.docLoadingError', {
-              defaultMessage: 'Error loading saved document',
-            })
-          );
-
-          redirectTo();
-        });
-    }
+      redirectTo();
+    });
   }, [docId]);
-
-  // Can save if the frame has told us what it has, and there is either:
-  // a) No saved doc
-  // b) A saved doc that differs from the frame state
-  const isSaveable = state.isDirty;
 
   const onError = useCallback(
     (e: { message: string }) =>
@@ -114,30 +124,29 @@ export function App({
                 <EuiLink
                   data-test-subj="lnsApp_saveButton"
                   onClick={() => {
-                    if (isSaveable && lastKnownDocRef.current) {
-                      docStorage
-                        .save(lastKnownDocRef.current)
-                        .then(({ id }) => {
-                          // Prevents unnecessary network request and disables save button
-                          const newDoc = { ...lastKnownDocRef.current!, id };
-                          setState({
-                            ...state,
-                            isDirty: false,
-                            persistedDoc: newDoc,
-                          });
-                          if (docId !== id) {
-                            redirectTo(id);
-                          }
-                        })
-                        .catch(reason => {
-                          toastNotifications.addDanger(
-                            i18n.translate('xpack.lens.editorFrame.docSavingError', {
-                              defaultMessage: 'Error saving document {reason}',
-                              values: { reason },
-                            })
-                          );
-                        });
+                    if (!saveableDoc) {
+                      return;
                     }
+
+                    docStorage
+                      .save(saveableDoc)
+                      .then(({ id }) => {
+                        setState({
+                          ...state,
+                          doc: { ...saveableDoc, id },
+                        });
+                        if (docId !== id) {
+                          redirectTo(id);
+                        }
+                      })
+                      .catch(reason => {
+                        toastNotifications.addDanger(
+                          i18n.translate('xpack.lens.editorFrame.docSavingError', {
+                            defaultMessage: 'Error saving document {reason}',
+                            values: { reason },
+                          })
+                        );
+                      });
                   }}
                   color={isSaveable ? 'primary' : 'subdued'}
                   disabled={!isSaveable}
@@ -163,7 +172,7 @@ export function App({
               });
             }}
             appName={'lens'}
-            indexPatterns={state.indexPatternTitles}
+            indexPatterns={indexPatternTitles}
             store={store}
             showDatePicker={true}
             showQueryInput={true}
@@ -174,30 +183,20 @@ export function App({
           />
         </div>
 
-        {(!state.isLoading || state.persistedDoc) && (
-          <NativeRenderer
-            className="lnsAppFrame"
-            render={editorFrame.mount}
-            nativeProps={{
-              dateRange: state.dateRange,
-              query: state.query,
-              doc: state.persistedDoc,
-              onError,
-              onChange: ({ indexPatternTitles, doc }) => {
-                const indexPatternChange = !_.isEqual(state.indexPatternTitles, indexPatternTitles);
-                const docChange = !_.isEqual(state.persistedDoc, doc);
-                if (indexPatternChange || docChange) {
-                  setState({
-                    ...state,
-                    indexPatternTitles,
-                    isDirty: docChange,
-                  });
-                }
-                lastKnownDocRef.current = doc;
-              },
-            }}
-          />
-        )}
+        <div className="lnsAppFrame">
+          {!state.isLoading && (
+            <EditorFrame
+              data-test-subj="lnsEditorFrame"
+              framePublicAPI={framePublicAPI}
+              onError={onError}
+              datasourceMap={datasourceMap}
+              visualizationMap={visualizationMap}
+              ExpressionRenderer={expressionRenderer}
+              state={state}
+              setState={setState}
+            />
+          )}
+        </div>
       </div>
     </I18nProvider>
   );

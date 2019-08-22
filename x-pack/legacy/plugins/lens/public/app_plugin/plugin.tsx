@@ -9,7 +9,6 @@ import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { HashRouter, Switch, Route, RouteComponentProps } from 'react-router-dom';
 import chrome from 'ui/chrome';
 import { Storage } from 'ui/storage';
-import { editorFrameSetup, editorFrameStop } from '../editor_frame_plugin';
 import { indexPatternDatasourceSetup, indexPatternDatasourceStop } from '../indexpattern_plugin';
 import { SavedObjectIndexStore } from '../persistence';
 import { xyVisualizationSetup, xyVisualizationStop } from '../xy_visualization_plugin';
@@ -19,34 +18,36 @@ import {
   datatableVisualizationStop,
 } from '../datatable_visualization_plugin';
 import { App } from './app';
-import { EditorFrameInstance } from '../types';
+import { createRegistries } from '../state_management';
+import { editorFrameSetup, editorFrameStop } from '../editor_frame_plugin';
+import { Datasource, Visualization } from '../types';
 
 export class AppPlugin {
-  private instance: EditorFrameInstance | null = null;
-
   constructor() {}
 
   setup() {
+    const plugins = editorFrameSetup();
+
     // TODO: These plugins should not be called from the top level, but since this is the
     // entry point to the app we have no choice until the new platform is ready
     const indexPattern = indexPatternDatasourceSetup();
     const datatableVisualization = datatableVisualizationSetup();
     const xyVisualization = xyVisualizationSetup();
     const metricVisualization = metricVisualizationSetup();
-    const editorFrame = editorFrameSetup();
+    const registries = createRegistries();
     const store = new SavedObjectIndexStore(chrome!.getSavedObjectsClient());
 
-    editorFrame.registerDatasource('indexpattern', indexPattern);
-    editorFrame.registerVisualization(xyVisualization);
-    editorFrame.registerVisualization(datatableVisualization);
-    editorFrame.registerVisualization(metricVisualization);
-
-    this.instance = editorFrame.createInstance({});
+    registries.registerDatasource('indexpattern', indexPattern as Datasource<unknown, unknown>);
+    registries.registerVisualization(xyVisualization as Visualization<unknown, unknown>);
+    registries.registerVisualization(datatableVisualization as Visualization<unknown, unknown>);
+    registries.registerVisualization(metricVisualization as Visualization<unknown, unknown>);
 
     const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
       return (
         <App
-          editorFrame={this.instance!}
+          datasourceMap={registries.datasources}
+          visualizationMap={registries.visualizations}
+          expressionRenderer={plugins.data.expressions.ExpressionRenderer}
           chrome={chrome}
           store={new Storage(localStorage)}
           docId={routeProps.match.params.id}
@@ -80,10 +81,6 @@ export class AppPlugin {
   }
 
   stop() {
-    if (this.instance) {
-      this.instance.unmount();
-    }
-
     // TODO this will be handled by the plugin platform itself
     indexPatternDatasourceStop();
     xyVisualizationStop();

@@ -12,7 +12,6 @@ import { getSuggestions } from './metric_suggestions';
 import { MetricConfigPanel } from './metric_config_panel';
 import { Visualization } from '../types';
 import { State, PersistableState } from './types';
-import { generateId } from '../id_generator';
 
 export const metricVisualization: Visualization<State, PersistableState> = {
   id: 'lnsMetric',
@@ -38,11 +37,11 @@ export const metricVisualization: Visualization<State, PersistableState> = {
 
   getSuggestions,
 
-  initialize(frame, state) {
+  initialize(generator, state) {
     return (
       state || {
-        layerId: frame.addNewLayer(),
-        accessor: generateId(),
+        layerId: generator.generateLayerId(),
+        accessor: generator.generateColumnId(),
       }
     );
   },

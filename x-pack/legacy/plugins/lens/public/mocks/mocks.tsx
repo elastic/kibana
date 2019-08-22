@@ -7,10 +7,43 @@
 import React from 'react';
 import { ExpressionRendererProps } from 'src/legacy/core_plugins/data/public';
 import { setup as data } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
-import { DatasourcePublicAPI, FramePublicAPI, Visualization, Datasource } from '../types';
-import { EditorFrameSetupPlugins } from './plugin';
+import { DatasourcePublicAPI, FramePublicAPI, Visualization, Datasource, AppState } from '../types';
+import { EditorFrameSetupPlugins } from '../editor_frame_plugin';
 
 type DataSetup = typeof data;
+
+export function createSetStateMock() {
+  const setState = jest.fn();
+
+  return {
+    setState,
+    setStateResult: () => setState.mock.calls[0][0](createMockState()),
+  };
+}
+
+export function createMockState(): AppState {
+  return {
+    title: 'aaa',
+    datasourceStates: {
+      indexpattern: {
+        state: 'hello',
+        isLoading: false,
+      },
+    },
+    activeDatasourceId: 'indexpattern',
+    visualization: { activeId: '2', state: {} },
+    dateRange: {
+      fromDate: '',
+      toDate: '',
+    },
+    isLoading: false,
+    language: 'en',
+    query: {
+      query: '',
+      language: 'en',
+    },
+  };
+}
 
 export function createMockVisualization(): jest.Mocked<Visualization> {
   return {
@@ -67,6 +100,17 @@ export function createMockDatasource(): DatasourceMock {
 }
 
 export type FrameMock = jest.Mocked<FramePublicAPI>;
+
+export function createMockGenerator() {
+  return {
+    generateLayerId: () => 'l42',
+    generateColumnId: jest
+      .fn()
+      .mockReturnValueOnce('test-id1')
+      .mockReturnValueOnce('test-id2')
+      .mockReturnValue('test-id3'),
+  };
+}
 
 export function createMockFramePublicAPI(): FrameMock {
   return {

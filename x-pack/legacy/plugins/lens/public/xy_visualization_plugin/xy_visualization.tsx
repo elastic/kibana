@@ -15,7 +15,6 @@ import { XYConfigPanel } from './xy_config_panel';
 import { Visualization } from '../types';
 import { State, PersistableState, SeriesType, visualizationTypes } from './types';
 import { toExpression } from './to_expression';
-import { generateId } from '../id_generator';
 
 const defaultIcon = 'visBarVertical';
 const defaultSeriesType = 'bar';
@@ -71,7 +70,7 @@ export const xyVisualization: Visualization<State, PersistableState> = {
 
   getSuggestions,
 
-  initialize(frame, state) {
+  initialize(generator, state) {
     return (
       state || {
         title: 'Empty XY Chart',
@@ -80,14 +79,14 @@ export const xyVisualization: Visualization<State, PersistableState> = {
         preferredSeriesType: defaultSeriesType,
         layers: [
           {
-            layerId: frame.addNewLayer(),
-            accessors: [generateId()],
+            layerId: generator.generateLayerId(),
+            accessors: [generator.generateColumnId()],
             position: Position.Top,
             seriesType: defaultSeriesType,
             showGridlines: false,
-            splitAccessor: generateId(),
+            splitAccessor: generator.generateColumnId(),
             title: '',
-            xAccessor: generateId(),
+            xAccessor: generator.generateColumnId(),
           },
         ],
       }

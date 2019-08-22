@@ -9,28 +9,26 @@ import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import { DatasourceDataPanelProps, Datasource } from '../../../public';
 import { NativeRenderer } from '../../native_renderer';
-import { Action } from './state_management';
 import { DragContext } from '../../drag_drop';
-import { StateSetter } from '../../types';
+import { StateSetter, SetState } from '../../types';
+import { updateDatasourceState, switchDatasource } from '../../state_management';
 
 interface DataPanelWrapperProps {
   datasourceState: unknown;
   datasourceMap: Record<string, Datasource>;
   activeDatasource: string | null;
   datasourceIsLoading: boolean;
-  dispatch: (action: Action) => void;
+  setState: SetState;
 }
 
 export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
   const setDatasourceState: StateSetter<unknown> = useMemo(
     () => updater => {
-      props.dispatch({
-        type: 'UPDATE_DATASOURCE_STATE',
-        updater,
-        datasourceId: props.activeDatasource!,
-      });
+      if (props.activeDatasource !== null) {
+        updateDatasourceState(props.setState, updater, props.activeDatasource);
+      }
     },
-    [props.dispatch, props.activeDatasource]
+    [props.setState, props.activeDatasource]
   );
 
   const datasourceProps: DatasourceDataPanelProps = {
@@ -76,10 +74,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
                 icon={props.activeDatasource === datasourceId ? 'check' : 'empty'}
                 onClick={() => {
                   setDatasourceSwitcher(false);
-                  props.dispatch({
-                    type: 'SWITCH_DATASOURCE',
-                    newDatasourceId: datasourceId,
-                  });
+                  switchDatasource(props.setState, datasourceId);
                 }}
               >
                 {datasourceId}

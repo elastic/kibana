@@ -9,12 +9,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiIcon, EuiTitle, EuiPanel, EuiIconTip, EuiToolTip } from '@elastic/eui';
 import { toExpression } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
-import { Action } from './state_management';
-import { Datasource, Visualization, FramePublicAPI } from '../../types';
+import { Datasource, Visualization, FramePublicAPI, SetState } from '../../types';
 import { getSuggestions, Suggestion, switchToSuggestion } from './suggestion_helpers';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/data/public';
-import { prependDatasourceExpression } from './expression_helpers';
 import { debouncedComponent } from '../../debounced_component';
+import { prependDatasourceExpression } from '../../state_management';
 
 const MAX_SUGGESTIONS_DISPLAYED = 3;
 
@@ -31,20 +30,20 @@ export interface SuggestionPanelProps {
   activeVisualizationId: string | null;
   visualizationMap: Record<string, Visualization>;
   visualizationState: unknown;
-  dispatch: (action: Action) => void;
+  setState: SetState;
   ExpressionRenderer: ExpressionRenderer;
   frame: FramePublicAPI;
 }
 
 const SuggestionPreview = ({
   suggestion,
-  dispatch,
+  setState,
   frame,
   previewExpression,
   ExpressionRenderer: ExpressionRendererComponent,
 }: {
   suggestion: Suggestion;
-  dispatch: (action: Action) => void;
+  setState: SetState;
   frame: FramePublicAPI;
   ExpressionRenderer: ExpressionRenderer;
   previewExpression?: string;
@@ -61,9 +60,7 @@ const SuggestionPreview = ({
         className="lnsSuggestionPanel__button"
         paddingSize="none"
         data-test-subj="lnsSuggestion"
-        onClick={() => {
-          switchToSuggestion(frame, dispatch, suggestion);
-        }}
+        onClick={() => switchToSuggestion(frame, setState, suggestion)}
       >
         {expressionError ? (
           <div className="lnsSidebar__suggestionIcon">
@@ -108,7 +105,7 @@ function InnerSuggestionPanel({
   activeVisualizationId,
   visualizationMap,
   visualizationState,
-  dispatch,
+  setState,
   frame,
   ExpressionRenderer: ExpressionRendererComponent,
 }: SuggestionPanelProps) {
@@ -150,7 +147,7 @@ function InnerSuggestionPanel({
           return (
             <SuggestionPreview
               suggestion={suggestion}
-              dispatch={dispatch}
+              setState={setState}
               frame={frame}
               ExpressionRenderer={ExpressionRendererComponent}
               previewExpression={previewExpression ? toExpression(previewExpression) : undefined}

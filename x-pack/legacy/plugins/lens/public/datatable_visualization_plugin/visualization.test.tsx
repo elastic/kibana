@@ -5,36 +5,26 @@
  */
 
 import React from 'react';
-import { createMockDatasource } from '../editor_frame_plugin/mocks';
 import {
   DatatableVisualizationState,
   datatableVisualization,
   DataTableLayer,
 } from './visualization';
 import { mount } from 'enzyme';
-import { Operation, DataType, FramePublicAPI } from '../types';
+import { Operation, DataType } from '../types';
 import { generateId } from '../id_generator';
+import { createMockGenerator, createMockDatasource, createMockFramePublicAPI } from '../mocks';
 
 jest.mock('../id_generator');
-
-function mockFrame(): FramePublicAPI {
-  return {
-    addNewLayer: () => 'aaa',
-    removeLayers: () => {},
-    datasourceLayers: {},
-    query: { query: '', language: 'lucene' },
-    dateRange: {
-      fromDate: 'now-7d',
-      toDate: 'now',
-    },
-  };
-}
 
 describe('Datatable Visualization', () => {
   describe('#initialize', () => {
     it('should initialize from the empty state', () => {
-      (generateId as jest.Mock).mockReturnValueOnce('id');
-      expect(datatableVisualization.initialize(mockFrame(), undefined)).toEqual({
+      const generator = {
+        generateLayerId: () => 'aaa',
+        generateColumnId: () => 'id',
+      };
+      expect(datatableVisualization.initialize(generator)).toEqual({
         layers: [
           {
             layerId: 'aaa',
@@ -53,7 +43,9 @@ describe('Datatable Visualization', () => {
           },
         ],
       };
-      expect(datatableVisualization.initialize(mockFrame(), expectedState)).toEqual(expectedState);
+      expect(datatableVisualization.initialize(createMockGenerator(), expectedState)).toEqual(
+        expectedState
+      );
     });
   });
 
@@ -76,7 +68,7 @@ describe('Datatable Visualization', () => {
       const setState = jest.fn();
       const datasource = createMockDatasource();
       const layer = { layerId: 'a', columns: ['b', 'c'] };
-      const frame = mockFrame();
+      const frame = createMockFramePublicAPI();
       frame.datasourceLayers = { a: datasource.publicAPIMock };
 
       mount(
@@ -114,7 +106,7 @@ describe('Datatable Visualization', () => {
       const setState = jest.fn();
       const datasource = createMockDatasource();
       const layer = { layerId: 'a', columns: ['b', 'c'] };
-      const frame = mockFrame();
+      const frame = createMockFramePublicAPI();
       frame.datasourceLayers = { a: datasource.publicAPIMock };
       const component = mount(
         <DataTableLayer
@@ -148,7 +140,7 @@ describe('Datatable Visualization', () => {
       const setState = jest.fn();
       const datasource = createMockDatasource();
       const layer = { layerId: 'a', columns: ['b', 'c'] };
-      const frame = mockFrame();
+      const frame = createMockFramePublicAPI();
       frame.datasourceLayers = { a: datasource.publicAPIMock };
       const component = mount(
         <DataTableLayer

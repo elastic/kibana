@@ -6,16 +6,16 @@
 
 import React, { useMemo, useContext, memo } from 'react';
 import { NativeRenderer } from '../../native_renderer';
-import { Action } from './state_management';
-import { Visualization, FramePublicAPI, Datasource } from '../../types';
+import { Visualization, FramePublicAPI, Datasource, SetState } from '../../types';
 import { DragContext } from '../../drag_drop';
 import { ChartSwitch } from './chart_switch';
+import { updateVisualizationState } from '../../state_management';
 
 interface ConfigPanelWrapperProps {
   visualizationState: unknown;
   visualizationMap: Record<string, Visualization>;
   activeVisualizationId: string | null;
-  dispatch: (action: Action) => void;
+  setState: SetState;
   framePublicAPI: FramePublicAPI;
   datasourceMap: Record<string, Datasource>;
   datasourceStates: Record<
@@ -30,13 +30,8 @@ interface ConfigPanelWrapperProps {
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
   const context = useContext(DragContext);
   const setVisualizationState = useMemo(
-    () => (newState: unknown) => {
-      props.dispatch({
-        type: 'UPDATE_VISUALIZATION_STATE',
-        newState,
-      });
-    },
-    [props.dispatch]
+    () => (newState: unknown) => updateVisualizationState(props.setState, newState),
+    [props.setState]
   );
 
   return (
@@ -48,7 +43,7 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
         visualizationState={props.visualizationState}
         datasourceMap={props.datasourceMap}
         datasourceStates={props.datasourceStates}
-        dispatch={props.dispatch}
+        setState={props.setState}
         framePublicAPI={props.framePublicAPI}
       />
       {props.activeVisualizationId && props.visualizationState !== null && (

@@ -7,15 +7,16 @@
 import React from 'react';
 import { EuiPageContent, EuiPageContentHeader, EuiPageContentBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Action } from './state_management';
+import { setTitle } from '../../state_management';
+import { SetState } from '../../types';
 
 interface Props {
   title: string;
-  dispatch: React.Dispatch<Action>;
+  setState: SetState;
   children: React.ReactNode | React.ReactNode[];
 }
 
-export function WorkspacePanelWrapper({ children, title, dispatch }: Props) {
+export function WorkspacePanelWrapper({ children, title, setState }: Props) {
   return (
     <EuiPageContent className="lnsPageContent">
       <EuiPageContentHeader className="lnsPageContentHeader">
@@ -27,7 +28,7 @@ export function WorkspacePanelWrapper({ children, title, dispatch }: Props) {
           })}
           data-test-subj="lns_ChartTitle"
           value={title}
-          onChange={e => dispatch({ type: 'UPDATE_TITLE', title: e.target.value })}
+          onChange={e => setTitle(setState, e.target.value)}
           aria-label={i18n.translate('xpack.lens.chartTitleAriaLabel', {
             defaultMessage: 'Title',
           })}

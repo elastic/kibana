@@ -8,7 +8,7 @@ import { TimeRange } from 'ui/timefilter/time_history';
 import { Query } from 'src/legacy/core_plugins/data/public';
 import { Filter } from '@kbn/es-query';
 import { Ast, fromExpression, ExpressionFunctionAST } from '@kbn/interpreter/common';
-import { Visualization, Datasource, FramePublicAPI } from '../../types';
+import { Visualization, Datasource, FramePublicAPI } from '../types';
 
 export function prependDatasourceExpression(
   visualizationExpression: Ast | string | null,
@@ -25,7 +25,7 @@ export function prependDatasourceExpression(
 
   Object.entries(datasourceMap).forEach(([datasourceId, datasource]) => {
     const state = datasourceStates[datasourceId].state;
-    const layers = datasource.getLayers(datasourceStates[datasourceId].state);
+    const layers = datasource.getLayers(state);
 
     layers.forEach(layerId => {
       const result = datasource.toExpression(state, layerId);

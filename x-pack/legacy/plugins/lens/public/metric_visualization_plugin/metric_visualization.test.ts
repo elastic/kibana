@@ -6,11 +6,8 @@
 
 import { metricVisualization } from './metric_visualization';
 import { State } from './types';
-import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_plugin/mocks';
-import { generateId } from '../id_generator';
-import { DatasourcePublicAPI, FramePublicAPI } from '../types';
-
-jest.mock('../id_generator');
+import { createMockDatasource, createMockFramePublicAPI, createMockGenerator } from '../mocks';
+import { DatasourcePublicAPI } from '../types';
 
 function exampleState(): State {
   return {
@@ -19,22 +16,10 @@ function exampleState(): State {
   };
 }
 
-function mockFrame(): FramePublicAPI {
-  return {
-    ...createMockFramePublicAPI(),
-    addNewLayer: () => 'l42',
-    datasourceLayers: {
-      l1: createMockDatasource().publicAPIMock,
-      l42: createMockDatasource().publicAPIMock,
-    },
-  };
-}
-
 describe('metric_visualization', () => {
   describe('#initialize', () => {
     it('loads default state', () => {
-      (generateId as jest.Mock).mockReturnValueOnce('test-id1');
-      const initialState = metricVisualization.initialize(mockFrame());
+      const initialState = metricVisualization.initialize(createMockGenerator());
 
       expect(initialState.accessor).toBeDefined();
       expect(initialState).toMatchInlineSnapshot(`
@@ -46,7 +31,9 @@ describe('metric_visualization', () => {
     });
 
     it('loads from persisted state', () => {
-      expect(metricVisualization.initialize(mockFrame(), exampleState())).toEqual(exampleState());
+      expect(metricVisualization.initialize(createMockGenerator(), exampleState())).toEqual(
+        exampleState()
+      );
     });
   });
 
@@ -72,7 +59,7 @@ describe('metric_visualization', () => {
       };
 
       const frame = {
-        ...mockFrame(),
+        ...createMockFramePublicAPI(),
         datasourceLayers: { l1: datasource },
       };
 

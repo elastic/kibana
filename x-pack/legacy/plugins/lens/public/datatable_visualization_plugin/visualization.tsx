@@ -29,13 +29,6 @@ export interface DatatableVisualizationState {
   layers: LayerState[];
 }
 
-function newLayerState(layerId: string): LayerState {
-  return {
-    layerId,
-    columns: [generateId()],
-  };
-}
-
 function updateColumns(
   state: DatatableVisualizationState,
   layer: LayerState,
@@ -114,11 +107,15 @@ export const datatableVisualization: Visualization<
 
   switchVisualizationType: (_, state) => state,
 
-  initialize(frame, state) {
-    const layerId = Object.keys(frame.datasourceLayers)[0] || frame.addNewLayer();
+  initialize(generator, state) {
     return (
       state || {
-        layers: [newLayerState(layerId)],
+        layers: [
+          {
+            layerId: generator.generateLayerId(),
+            columns: [generator.generateColumnId()],
+          },
+        ],
       }
     );
   },

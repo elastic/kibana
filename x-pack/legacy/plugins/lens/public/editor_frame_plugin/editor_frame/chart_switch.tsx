@@ -16,9 +16,9 @@ import {
 } from '@elastic/eui';
 import { flatten } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Visualization, FramePublicAPI, Datasource } from '../../types';
-import { Action } from './state_management';
+import { Visualization, FramePublicAPI, Datasource, SetState } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
+import { generateId } from '../../id_generator';
 
 interface VisualizationSelection {
   visualizationId: string;
@@ -31,7 +31,7 @@ interface VisualizationSelection {
 }
 
 interface Props {
-  dispatch: (action: Action) => void;
+  setState: SetState;
   visualizationMap: Record<string, Visualization>;
   visualizationId: string | null;
   visualizationState: unknown;
@@ -77,7 +77,7 @@ export function ChartSwitch(props: Props) {
   const commitSelection = (selection: VisualizationSelection) => {
     setFlyoutOpen(false);
 
-    switchToSuggestion(props.framePublicAPI, props.dispatch, {
+    switchToSuggestion(props.framePublicAPI, props.setState, {
       ...selection,
       visualizationState: selection.getVisualizationState(),
     });
@@ -128,6 +128,11 @@ export function ChartSwitch(props: Props) {
       dataLoss = 'nothing';
     }
 
+    const generator = {
+      generateLayerId: props.framePublicAPI.addNewLayer,
+      generateColumnId: generateId,
+    };
+
     return {
       visualizationId,
       subVisualizationId,
@@ -136,13 +141,10 @@ export function ChartSwitch(props: Props) {
         ? () =>
             switchVisType(
               subVisualizationId,
-              newVisualization.initialize(props.framePublicAPI, topSuggestion.visualizationState)
+              newVisualization.initialize(generator, topSuggestion.visualizationState)
             )
         : () => {
-            return switchVisType(
-              subVisualizationId,
-              newVisualization.initialize(props.framePublicAPI)
-            );
+            return switchVisType(subVisualizationId, newVisualization.initialize(generator));
           },
       keptLayerIds: topSuggestion ? topSuggestion.keptLayerIds : [],
       datasourceState: topSuggestion ? topSuggestion.datasourceState : undefined,

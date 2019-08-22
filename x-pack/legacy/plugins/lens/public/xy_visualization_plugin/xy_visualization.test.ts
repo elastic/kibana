@@ -8,11 +8,8 @@ import { xyVisualization } from './xy_visualization';
 import { Position } from '@elastic/charts';
 import { Operation } from '../types';
 import { State } from './types';
-import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_plugin/mocks';
-import { generateId } from '../id_generator';
+import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { Ast } from '@kbn/interpreter/target/common';
-
-jest.mock('../id_generator');
 
 function exampleState(): State {
   return {
@@ -32,15 +29,21 @@ function exampleState(): State {
   };
 }
 
+function mockGenerator() {
+  return {
+    generateLayerId: () => 'layerA',
+    generateColumnId: jest
+      .fn()
+      .mockReturnValueOnce('test-id1')
+      .mockReturnValueOnce('test-id2')
+      .mockReturnValue('test-id3'),
+  };
+}
+
 describe('xy_visualization', () => {
   describe('#initialize', () => {
     it('loads default state', () => {
-      (generateId as jest.Mock)
-        .mockReturnValueOnce('test-id1')
-        .mockReturnValueOnce('test-id2')
-        .mockReturnValue('test-id3');
-      const mockFrame = createMockFramePublicAPI();
-      const initialState = xyVisualization.initialize(mockFrame);
+      const initialState = xyVisualization.initialize(mockGenerator());
 
       expect(initialState.layers).toHaveLength(1);
       expect(initialState.layers[0].xAccessor).toBeDefined();
@@ -55,7 +58,7 @@ describe('xy_visualization', () => {
               "accessors": Array [
                 "test-id1",
               ],
-              "layerId": "",
+              "layerId": "layerA",
               "position": "top",
               "seriesType": "bar",
               "showGridlines": false,
@@ -75,9 +78,7 @@ describe('xy_visualization', () => {
     });
 
     it('loads from persisted state', () => {
-      expect(xyVisualization.initialize(createMockFramePublicAPI(), exampleState())).toEqual(
-        exampleState()
-      );
+      expect(xyVisualization.initialize(mockGenerator(), exampleState())).toEqual(exampleState());
     });
   });
 

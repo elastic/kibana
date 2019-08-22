@@ -4,19 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getSavedObjectFormat, Props } from './save';
-import { createMockDatasource, createMockVisualization } from '../mocks';
+import { toSavedObject } from './actions';
+import { createMockVisualization, createMockDatasource } from '../mocks';
 
 describe('save editor frame state', () => {
   const mockVisualization = createMockVisualization();
   mockVisualization.getPersistableState.mockImplementation(x => x);
   const mockDatasource = createMockDatasource();
   mockDatasource.getPersistableState.mockImplementation(x => x);
-  const saveArgs: Props = {
-    activeDatasources: {
+  const saveArgs = {
+    datasourceMap: {
       indexpattern: mockDatasource,
     },
-    visualization: mockVisualization,
+    visualizationMap: {
+      2: mockVisualization,
+    },
     state: {
       title: 'aaa',
       datasourceStates: {
@@ -50,9 +52,9 @@ describe('save editor frame state', () => {
       things: `${state}_vis_persisted`,
     }));
 
-    const doc = await getSavedObjectFormat({
+    const doc = await toSavedObject({
       ...saveArgs,
-      activeDatasources: {
+      datasourceMap: {
         indexpattern: datasource,
       },
       state: {
@@ -63,10 +65,11 @@ describe('save editor frame state', () => {
             isLoading: false,
           },
         },
-        activeDatasourceId: 'indexpattern',
         visualization: { activeId: '3', state: '4' },
       },
-      visualization,
+      visualizationMap: {
+        3: visualization,
+      },
     });
 
     expect(doc).toEqual({

@@ -13,7 +13,8 @@ import {
   createExpressionRendererMock,
   DatasourceMock,
   createMockFramePublicAPI,
-} from '../mocks';
+  createMockState,
+} from '../../mocks';
 import { ExpressionRenderer } from 'src/legacy/core_plugins/data/public';
 import { SuggestionPanel, SuggestionPanelProps } from './suggestion_panel';
 import { getSuggestions, Suggestion } from './suggestion_helpers';
@@ -27,7 +28,7 @@ describe('suggestion_panel', () => {
   let mockDatasource: DatasourceMock;
 
   let expressionRendererMock: ExpressionRenderer;
-  let dispatchMock: jest.Mock;
+  let setStateMock: jest.Mock;
 
   const suggestion1State = { suggestion1: true };
   const suggestion2State = { suggestion2: true };
@@ -38,7 +39,7 @@ describe('suggestion_panel', () => {
     mockVisualization = createMockVisualization();
     mockDatasource = createMockDatasource();
     expressionRendererMock = createExpressionRendererMock();
-    dispatchMock = jest.fn();
+    setStateMock = jest.fn();
 
     (getSuggestions as jest.Mock).mockReturnValue([
       {
@@ -77,7 +78,7 @@ describe('suggestion_panel', () => {
         vis: mockVisualization,
       },
       visualizationState: {},
-      dispatch: dispatchMock,
+      setState: setStateMock,
       ExpressionRenderer: expressionRendererMock,
       frame: createMockFramePublicAPI(),
     };
@@ -94,7 +95,7 @@ describe('suggestion_panel', () => {
     ).toEqual(['Suggestion1', 'Suggestion2']);
   });
 
-  it('should dispatch visualization switch action if suggestion is clicked', () => {
+  it('should switch visualizations if suggestion is clicked', () => {
     const wrapper = mount(<SuggestionPanel {...defaultProps} />);
 
     wrapper
@@ -102,12 +103,11 @@ describe('suggestion_panel', () => {
       .first()
       .simulate('click');
 
-    expect(dispatchMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: 'SWITCH_VISUALIZATION',
-        initialState: suggestion1State,
-      })
-    );
+    const stateSetter = setStateMock.mock.calls[0][0];
+
+    expect(stateSetter(createMockState())).toMatchObject({
+      visualization: { state: suggestion1State },
+    });
   });
 
   it('should remove unused layers if suggestion is clicked', () => {

@@ -7,14 +7,15 @@
 import React from 'react';
 
 import { ExpressionRendererProps } from '../../../../../../../src/legacy/core_plugins/data/public';
-import { Visualization, FramePublicAPI } from '../../types';
+import { Visualization, FramePublicAPI, SetState } from '../../types';
 import {
   createMockVisualization,
   createMockDatasource,
   createExpressionRendererMock,
   DatasourceMock,
   createMockFramePublicAPI,
-} from '../mocks';
+  createSetStateMock,
+} from '../../mocks';
 import { InnerWorkspacePanel, WorkspacePanelProps } from './workspace_panel';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
@@ -57,7 +58,7 @@ describe('workspace_panel', () => {
           vis: mockVisualization,
         }}
         visualizationState={{}}
-        dispatch={() => {}}
+        setState={() => {}}
         ExpressionRenderer={expressionRendererMock}
       />
     );
@@ -78,7 +79,7 @@ describe('workspace_panel', () => {
           vis: { ...mockVisualization, toExpression: () => null },
         }}
         visualizationState={{}}
-        dispatch={() => {}}
+        setState={() => {}}
         ExpressionRenderer={expressionRendererMock}
       />
     );
@@ -99,7 +100,7 @@ describe('workspace_panel', () => {
           vis: { ...mockVisualization, toExpression: () => 'vis' },
         }}
         visualizationState={{}}
-        dispatch={() => {}}
+        setState={() => {}}
         ExpressionRenderer={expressionRendererMock}
       />
     );
@@ -134,7 +135,7 @@ describe('workspace_panel', () => {
           vis: { ...mockVisualization, toExpression: () => 'vis' },
         }}
         visualizationState={{}}
-        dispatch={() => {}}
+        setState={() => {}}
         ExpressionRenderer={expressionRendererMock}
       />
     );
@@ -228,7 +229,7 @@ describe('workspace_panel', () => {
           vis: { ...mockVisualization, toExpression: () => 'vis' },
         }}
         visualizationState={{}}
-        dispatch={() => {}}
+        setState={() => {}}
         ExpressionRenderer={expressionRendererMock}
       />
     );
@@ -305,7 +306,7 @@ describe('workspace_panel', () => {
           vis: { ...mockVisualization, toExpression: () => 'vis' },
         }}
         visualizationState={{}}
-        dispatch={() => {}}
+        setState={() => {}}
         ExpressionRenderer={expressionRendererMock}
       />
     );
@@ -353,7 +354,7 @@ describe('workspace_panel', () => {
             vis: { ...mockVisualization, toExpression: () => 'vis' },
           }}
           visualizationState={{}}
-          dispatch={() => {}}
+          setState={() => {}}
           ExpressionRenderer={expressionRendererMock}
         />
       );
@@ -392,7 +393,7 @@ describe('workspace_panel', () => {
             vis: { ...mockVisualization, toExpression: () => 'vis' },
           }}
           visualizationState={{}}
-          dispatch={() => {}}
+          setState={() => {}}
           ExpressionRenderer={expressionRendererMock}
         />
       );
@@ -436,7 +437,7 @@ describe('workspace_panel', () => {
             vis: { ...mockVisualization, toExpression: () => 'vis' },
           }}
           visualizationState={{}}
-          dispatch={() => {}}
+          setState={() => {}}
           ExpressionRenderer={expressionRendererMock}
         />
       );
@@ -483,7 +484,7 @@ describe('workspace_panel', () => {
             vis: { ...mockVisualization, toExpression: () => 'vis' },
           }}
           visualizationState={{}}
-          dispatch={() => {}}
+          setState={() => {}}
           ExpressionRenderer={expressionRendererMock}
         />
       );
@@ -509,17 +510,15 @@ describe('workspace_panel', () => {
   });
 
   describe('suggestions from dropping in workspace panel', () => {
-    let mockDispatch: jest.Mock;
     let frame: jest.Mocked<FramePublicAPI>;
 
     const draggedField: unknown = {};
 
     beforeEach(() => {
       frame = createMockFramePublicAPI();
-      mockDispatch = jest.fn();
     });
 
-    function initComponent(draggingContext: unknown = draggedField) {
+    function initComponent(mockSetState: SetState, draggingContext: unknown = draggedField) {
       instance = mount(
         <ChildDragDropProvider dragging={draggingContext} setDragging={() => {}}>
           <InnerWorkspacePanel
@@ -540,7 +539,7 @@ describe('workspace_panel', () => {
               vis2: mockVisualization2,
             }}
             visualizationState={{}}
-            dispatch={mockDispatch}
+            setState={mockSetState}
             ExpressionRenderer={expressionRendererMock}
           />
         </ChildDragDropProvider>
@@ -548,6 +547,7 @@ describe('workspace_panel', () => {
     }
 
     it('should immediately transition if exactly one suggestion is returned', () => {
+      const { setState, setStateResult } = createSetStateMock();
       const expectedTable = {
         datasourceSuggestionId: 0,
         isMultiRow: true,
@@ -569,7 +569,7 @@ describe('workspace_panel', () => {
           previewIcon: 'empty',
         },
       ]);
-      initComponent();
+      initComponent(setState);
 
       instance.find(DragDrop).prop('onDrop')!(draggedField);
 
@@ -579,12 +579,15 @@ describe('workspace_panel', () => {
           tables: [expectedTable],
         })
       );
-      expect(mockDispatch).toHaveBeenCalledWith({
-        type: 'SWITCH_VISUALIZATION',
-        newVisualizationId: 'vis',
-        initialState: {},
-        datasourceState: {},
-        datasourceId: 'mock',
+      expect(setStateResult()).toMatchObject({
+        visualization: {
+          activeId: 'vis',
+          state: {},
+        },
+        activeDatasourceId: 'mock',
+        datasourceStates: {
+          mock: { state: {} },
+        },
       });
     });
 
@@ -609,7 +612,7 @@ describe('workspace_panel', () => {
           previewIcon: 'empty',
         },
       ]);
-      initComponent();
+      initComponent(jest.fn());
       expect(instance.find(DragDrop).prop('droppable')).toBeTruthy();
     });
 
@@ -636,7 +639,7 @@ describe('workspace_panel', () => {
           previewIcon: 'empty',
         },
       ]);
-      initComponent();
+      initComponent(jest.fn());
       expect(instance.find(DragDrop).prop('droppable')).toBeFalsy();
     });
 
@@ -663,16 +666,17 @@ describe('workspace_panel', () => {
           previewIcon: 'empty',
         },
       ]);
-      initComponent();
+      initComponent(jest.fn());
       expect(instance.find(DragDrop).prop('droppable')).toBeTruthy();
     });
 
     it('should refuse to drop if there are no suggestions', () => {
-      initComponent();
+      initComponent(jest.fn());
       expect(instance.find(DragDrop).prop('droppable')).toBeFalsy();
     });
 
     it('should immediately transition to the first suggestion if there are multiple', () => {
+      const { setState, setStateResult } = createSetStateMock();
       mockDatasource.getDatasourceSuggestionsForField.mockReturnValueOnce([
         {
           state: {},
@@ -712,17 +716,20 @@ describe('workspace_panel', () => {
         },
       ]);
 
-      initComponent();
+      initComponent(setState);
       instance.find(DragDrop).prop('onDrop')!(draggedField);
 
-      expect(mockDispatch).toHaveBeenCalledWith({
-        type: 'SWITCH_VISUALIZATION',
-        newVisualizationId: 'vis',
-        initialState: {
-          isFirst: true,
+      expect(setStateResult()).toMatchObject({
+        visualization: {
+          activeId: 'vis',
+          state: {
+            isFirst: true,
+          },
         },
-        datasourceState: {},
-        datasourceId: 'mock',
+        activeDatasourceId: 'mock',
+        datasourceStates: {
+          mock: { state: {} },
+        },
       });
     });
   });

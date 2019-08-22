@@ -7,33 +7,57 @@
 import { Ast } from '@kbn/interpreter/common';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { Query, KibanaDatatable } from 'src/plugins/data/common';
+import { ExpressionRenderer } from 'src/legacy/core_plugins/data/public';
 import { DragContextState } from './drag_drop';
 import { Document } from './persistence';
+
+export interface AppState {
+  persistedId?: string;
+  title: string;
+  visualization: {
+    activeId: string;
+    state: unknown;
+  };
+  datasourceStates: Record<string, { state: unknown; isLoading: boolean }>;
+  activeDatasourceId: string | null;
+  isLoading: boolean;
+  dateRange: {
+    fromDate: string;
+    toDate: string;
+  };
+  language: string;
+  query: Query;
+  doc?: Document;
+}
+
+export interface Generator {
+  generateColumnId: () => string;
+  generateLayerId: () => string;
+}
 
 // eslint-disable-next-line
 export interface EditorFrameOptions {}
 
 export type ErrorCallback = (e: { message: string }) => void;
 
-export interface EditorFrameProps {
-  onError: ErrorCallback;
-  doc?: Document;
-  dateRange: {
-    fromDate: string;
-    toDate: string;
-  };
-  query: Query;
+export type SetState = React.Dispatch<React.SetStateAction<AppState>>;
 
-  // Frame loader (app or embeddable) is expected to call this when it loads and updates
-  onChange: (newState: { indexPatternTitles: string[]; doc: Document }) => void;
+export interface EditorFrameProps {
+  state: AppState;
+  setState: SetState;
+  framePublicAPI: FramePublicAPI;
+  datasourceMap: Record<string, Datasource>;
+  visualizationMap: Record<string, Visualization>;
+  ExpressionRenderer: ExpressionRenderer;
+  onError: (e: { message: string }) => void;
 }
+
 export interface EditorFrameInstance {
   mount: (element: Element, props: EditorFrameProps) => void;
   unmount: () => void;
 }
 
 export interface EditorFrameSetup {
-  createInstance: (options: EditorFrameOptions) => EditorFrameInstance;
   // generic type on the API functions to pull the "unknown vs. specific type" error into the implementation
   registerDatasource: <T, P>(name: string, datasource: Datasource<T, P>) => void;
   registerVisualization: <T, P>(visualization: Visualization<T, P>) => void;
@@ -226,7 +250,7 @@ export interface Visualization<T = unknown, P = unknown> {
   switchVisualizationType?: (visualizationTypeId: string, state: T) => T;
 
   // For initializing from saved object
-  initialize: (frame: FramePublicAPI, state?: P) => T;
+  initialize: (generator: Generator, state?: P) => T;
 
   getPersistableState: (state: T) => P;
 

@@ -9,12 +9,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { toExpression } from '@kbn/interpreter/common';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/data/public';
-import { Action } from './state_management';
-import { Datasource, Visualization, FramePublicAPI } from '../../types';
+import { Datasource, Visualization, FramePublicAPI, SetState } from '../../types';
 import { DragDrop, DragContext } from '../../drag_drop';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
-import { buildExpression } from './expression_helpers';
 import { debouncedComponent } from '../../debounced_component';
+import { buildExpression } from '../../state_management';
 
 export interface WorkspacePanelProps {
   activeVisualizationId: string | null;
@@ -30,7 +29,7 @@ export interface WorkspacePanelProps {
     }
   >;
   framePublicAPI: FramePublicAPI;
-  dispatch: (action: Action) => void;
+  setState: SetState;
   ExpressionRenderer: ExpressionRenderer;
 }
 
@@ -45,7 +44,7 @@ export function InnerWorkspacePanel({
   datasourceMap,
   datasourceStates,
   framePublicAPI,
-  dispatch,
+  setState,
   ExpressionRenderer: ExpressionRendererComponent,
 }: WorkspacePanelProps) {
   const dragDropContext = useContext(DragContext);
@@ -76,7 +75,7 @@ export function InnerWorkspacePanel({
 
   function onDrop() {
     if (suggestionForDraggedField) {
-      switchToSuggestion(framePublicAPI, dispatch, suggestionForDraggedField);
+      switchToSuggestion(framePublicAPI, setState, suggestionForDraggedField);
     }
   }
 
