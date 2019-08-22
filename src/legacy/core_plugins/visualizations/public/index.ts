@@ -30,17 +30,15 @@ export { setup as visualizations } from './legacy';
 export type VisualizationsSetup = VisualizationsSetup;
 export {
   Vis,
-  visFactory,
-  DefaultEditorSize,
   VisParams,
   VisProvider,
   VisState,
-  // VisualizationController,
-  // VisType,
+  VisType,
   VisTypeAlias,
   VisTypesRegistry,
+  VisualizationController,
   Status,
 } from './types';
 
 /** @public static code */
-// TBD
+export { DefaultEditorSize, defaultFeedbackMessage, visFactory } from './types';

@@ -17,19 +17,4 @@
  * under the License.
  */
 
-export {
-  TypesService,
-  visFactory,
-  DefaultEditorSize,
-  // types
-  TypesSetup,
-  Vis,
-  VisParams,
-  VisProvider,
-  VisState,
-  // VisualizationController,
-  // VisType,
-  VisTypeAlias,
-  VisTypesRegistry,
-  Status,
-} from './types_service';
+export * from './types_service';

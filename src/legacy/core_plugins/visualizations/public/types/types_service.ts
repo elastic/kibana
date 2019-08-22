@@ -18,14 +18,11 @@
  */
 
 // @ts-ignore
-import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
+import { VisProvider } from 'ui/vis/index.js';
 // @ts-ignore
-import { VisProvider as Vis } from 'ui/vis/index.js';
-// @ts-ignore
-import { VisFactoryProvider, visFactory } from 'ui/vis/vis_factory';
-// @ts-ignore
-import { DefaultEditorSize } from 'ui/vis/editor_size';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+// @ts-ignore
+import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import * as types from 'ui/vis/vis';
 
 import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
@@ -38,11 +35,12 @@ import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
 export class TypesService {
   public setup() {
     return {
-      Vis,
-      VisFactoryProvider,
+      VisProvider,
       VisTypesRegistryProvider,
-      defaultFeedbackMessage, // make default in base vis type, or move?
       visTypeAliasRegistry,
+      __LEGACY: {
+        VisFactoryProvider,
+      },
     };
   }
 
@@ -51,17 +49,21 @@ export class TypesService {
   }
 }
 
-/** @public */
-export type TypesSetup = ReturnType<TypesService['setup']>;
-
-export { visFactory, DefaultEditorSize };
-
 /** @public types */
+export type TypesSetup = ReturnType<TypesService['setup']>;
 export type VisTypeAlias = VisTypeAlias;
 export type Vis = types.Vis;
 export type VisParams = types.VisParams;
 export type VisProvider = types.VisProvider;
 export type VisState = types.VisState;
-// todo: this breaks it // export { VisualizationController, VisType } from 'ui/vis/vis_types/vis_type';
+export { VisualizationController, VisType } from 'ui/vis/vis_types/vis_type';
 export { VisTypesRegistry } from 'ui/registry/vis_types';
 export { Status } from 'ui/vis/update_status';
+
+/** @public static code */
+// @ts-ignore
+export { DefaultEditorSize } from 'ui/vis/editor_size';
+// @ts-ignore Used only by tsvb, vega, input control vis
+export { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
+// @ts-ignore
+export { visFactory } from 'ui/vis/vis_factory';
