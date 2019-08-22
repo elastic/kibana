@@ -109,6 +109,17 @@ export interface SymbolSearchRequest extends SearchRequest {
   repoScope?: RepositoryUri[];
 }
 
+export interface CodeIntegrationRequest {
+  repoUri: RepositoryUri;
+  revision?: string;
+}
+
+export interface ResolveSnippetsIntegrationRequest extends CodeIntegrationRequest {
+  filePath: string;
+  lineNumStart: number;
+  lineNumEnd?: number;
+}
+
 // The base interface of any kind of search result.
 export interface SearchResult {
   total: number;
