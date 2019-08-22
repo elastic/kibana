@@ -32,12 +32,12 @@ module.exports = () => {
             node: 'current',
           },
 
-          // replaces `import "@babel/polyfill"` with a list of require statements
+          // replaces `import "core-js/stable"` with a list of require statements
           // for just the polyfills that the target versions don't already supply
           // on their own
           useBuiltIns: 'entry',
           modules: 'cjs',
-          corejs: 2,
+          corejs: 3,
         },
       ],
       require('./common_preset'),
