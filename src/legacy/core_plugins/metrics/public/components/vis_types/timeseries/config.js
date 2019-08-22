@@ -65,22 +65,22 @@ export const TimeseriesConfig = injectI18n(function(props) {
   const stackedOptions = [
     {
       label: intl.formatMessage({ id: 'tsvb.timeSeries.noneLabel', defaultMessage: 'None' }),
-      value: 'none',
+      value: STACKED_OPTIONS.NONE,
     },
     {
       label: intl.formatMessage({ id: 'tsvb.timeSeries.stackedLabel', defaultMessage: 'Stacked' }),
-      value: 'stacked',
+      value: STACKED_OPTIONS.STACKED,
     },
     {
       label: intl.formatMessage({
         id: 'tsvb.timeSeries.stackedWithinSeriesLabel',
         defaultMessage: 'Stacked within series',
       }),
-      value: 'stacked_within_series',
+      value: STACKED_OPTIONS.STACKED_WITHIN_SERIES,
     },
     {
       label: intl.formatMessage({ id: 'tsvb.timeSeries.percentLabel', defaultMessage: 'Percent' }),
-      value: 'percent',
+      value: STACKED_OPTIONS.PERCENT,
       disabled: isPercentDisabled(props.seriesQuantity[model.id]),
     },
   ];

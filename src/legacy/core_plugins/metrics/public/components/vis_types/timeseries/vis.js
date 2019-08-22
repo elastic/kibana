@@ -19,12 +19,12 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { startsWith, get, cloneDeep, map } from 'lodash';
 import { toastNotifications } from 'ui/notify';
 import { htmlIdGenerator } from '@elastic/eui';
 import { ScaleType } from '@elastic/charts';
 
 import { createTickFormatter } from '../../lib/tick_formatter';
-import { startsWith, get, cloneDeep, map } from 'lodash';
 import { TimeSeries } from '../../../visualizations/views/timeseries';
 import { MarkdownSimple } from '../../../../../kibana_react/public';
 import { replaceVars } from '../../lib/replace_vars';
@@ -65,6 +65,32 @@ export class TimeseriesVisualization extends Component {
 
     return vars;
   };
+
+  static calculateDomainForSeries = series =>
+    TimeseriesVisualization.getYAxisDomain(
+      series.reduce(
+        (acc, s) => {
+          (s.data || []).forEach(([, data]) => {
+            if (!acc.axis_min || data < acc.axis_min) {
+              acc.axis_min = data;
+            }
+            if (!acc.axis_max || data > acc.axis_max) {
+              acc.axis_max = data;
+            }
+          });
+          return acc;
+        },
+        {
+          axis_min: undefined,
+          axis_max: undefined,
+        }
+      )
+    );
+
+  static getYAxisDomain = model => ({
+    min: get(model, 'axis_min'),
+    max: get(model, 'axis_max'),
+  });
 
   componentDidUpdate() {
     if (
@@ -121,23 +147,53 @@ export class TimeseriesVisualization extends Component {
     );
 
     const yAxisIdGenerator = htmlIdGenerator('yaxis');
-    const mainAxisId = yAxisIdGenerator('main');
     const mainAxisGroupId = yAxisIdGenerator('main_group');
+    let domain = TimeseriesVisualization.getYAxisDomain(model);
+
     const mainAxis = {
-      id: mainAxisId,
+      id: yAxisIdGenerator('main'),
       groupId: mainAxisGroupId,
       position: model.axis_position,
       tickFormatter,
     };
+
     const mainAxisScaleType = model.axis_scale === 'log' ? ScaleType.Log : ScaleType.Linear;
 
-    if (model.axis_min) mainAxis.min = Number(model.axis_min);
-    if (model.axis_max) mainAxis.max = Number(model.axis_max);
-
     const yAxis = [mainAxis];
+    const stackedWithinSeries = seriesModel.find(
+      item => item.stacked === STACKED_OPTIONS.STACKED_WITHIN_SERIES
+    );
+
+    let stackedWithinGroupId;
+
+    if (Boolean(stackedWithinSeries)) {
+      stackedWithinGroupId = yAxisIdGenerator('stacked_within_series_GroupId');
+      domain = TimeseriesVisualization.calculateDomainForSeries(series);
+
+      mainAxis.domain = domain;
+
+      yAxis.push({
+        id: yAxisIdGenerator('stacked_within_series_YAxis'),
+        groupId: stackedWithinGroupId,
+        position: model.axis_position,
+        tickFormatter,
+        hide: true,
+        domain,
+      });
+    }
+
+    yAxis.push(mainAxis);
 
     seriesModel.forEach(seriesGroup => {
-      const seriesGroupId = seriesGroup.id;
+      let seriesGroupId = seriesGroup.id;
+
+      if (
+        Boolean(stackedWithinSeries) &&
+        STACKED_OPTIONS.STACKED_WITHIN_SERIES === seriesModel.stacked
+      ) {
+        seriesGroupId = stackedWithinGroupId;
+      }
+
       const seriesData = series.filter(r => startsWith(r.id, seriesGroup.id));
       const seriesGroupTickFormatter = createTickFormatter(
         seriesGroup.formatter,
@@ -161,20 +217,18 @@ export class TimeseriesVisualization extends Component {
       });
 
       if (seriesGroup.separate_axis) {
-        const yaxis = {
+        yAxis.push({
           id: yAxisIdGenerator(seriesGroup.id),
           groupId: seriesGroupId,
           position: seriesGroup.axis_position,
+          domain: Boolean(stackedWithinSeries)
+            ? domain
+            : TimeseriesVisualization.getYAxisDomain(seriesGroup),
           tickFormatter:
             seriesGroup.stacked === STACKED_OPTIONS.PERCENT
               ? this.yAxisStackedByPercentFormatter
               : seriesGroupTickFormatter,
-        };
-
-        if (seriesGroup.axis_min != null) yaxis.min = Number(seriesGroup.axis_min);
-        if (seriesGroup.axis_max != null) yaxis.max = Number(seriesGroup.axis_max);
-
-        yAxis.push(yaxis);
+        });
       }
     });
 

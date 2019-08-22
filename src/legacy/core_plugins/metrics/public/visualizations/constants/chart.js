@@ -30,11 +30,12 @@ export const GRID_LINE_CONFIG = {
 };
 
 export const X_ACCESSOR_INDEX = 0;
+export const STACK_ACCESSORS = [0];
 export const Y_ACCESSOR_INDEXES = [1];
 
 export const STACKED_OPTIONS = {
+  NONE: 'none',
+  PERCENT: 'percent',
   STACKED: 'stacked',
   STACKED_WITHIN_SERIES: 'stacked_within_series',
-  PERCENT: 'percent',
-  NONE: 'none',
 };

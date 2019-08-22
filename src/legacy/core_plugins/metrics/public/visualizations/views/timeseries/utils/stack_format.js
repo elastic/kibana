@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { X_ACCESSOR_INDEX, STACKED_OPTIONS } from '../../../constants';
+import { STACK_ACCESSORS, STACKED_OPTIONS } from '../../../constants';
 
 export const getStackAccessors = stack => {
   switch (stack) {
     case STACKED_OPTIONS.STACKED:
     case STACKED_OPTIONS.STACKED_WITHIN_SERIES:
     case STACKED_OPTIONS.PERCENT:
-      return [X_ACCESSOR_INDEX];
+      return STACK_ACCESSORS;
     default:
       return undefined;
   }

@@ -103,7 +103,6 @@ export const TimeSeries = ({
         tooltip={{
           type: TooltipType.VerticalCursor,
           headerFormatter: tooltipFormatter,
-          type: 'vertical',
         }}
       />
 
@@ -189,13 +188,14 @@ export const TimeSeries = ({
         }
       )}
 
-      {yAxis.map(({ id, groupId, position, tickFormatter, min, max }) => (
+      {yAxis.map(({ id, groupId, position, tickFormatter, domain, hide = false }) => (
         <Axis
           key={groupId}
           groupId={getGroupId(groupId)}
           id={getAxisId(id)}
           position={position}
-          domain={{ min, max }}
+          domain={domain}
+          hide={hide}
           showGridLines={showGrid}
           gridLineStyle={GRID_LINE_CONFIG}
           tickFormat={tickFormatter}
