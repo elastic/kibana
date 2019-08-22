@@ -136,6 +136,7 @@ class ControlsTabUi extends Component {
                 id="selectControlType"
               >
                 <EuiSelect
+                  data-test-subj="selectControlType"
                   options={[
                     { value: 'range', text: intl.formatMessage({
                       id: 'inputControl.editor.controlsTab.select.rangeDropDownOptionLabel',
