@@ -33,5 +33,5 @@ export const VisTypesRegistryProvider = {
     return VisTypesRegistryProvider;
   },
   get: (key: string) => visTypes.get(key),
-  getAll: () => visTypes.values(),
+  getAll: () => [...visTypes.values()],
 };
