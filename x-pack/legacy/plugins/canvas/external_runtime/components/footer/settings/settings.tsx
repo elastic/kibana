@@ -19,7 +19,7 @@ import css from './settings.module';
  * The Settings Popover for External Workpads.
  */
 export const Settings = () => {
-  const [{ workpad }] = useExternalEmbedState();
+  const [{ workpad, refs }] = useExternalEmbedState();
 
   if (!workpad) {
     return null;
@@ -78,6 +78,8 @@ export const Settings = () => {
   return (
     <EuiFlexGroup alignItems="flexEnd" justifyContent="center" direction="column" gutterSize="none">
       <EuiFlexItem grow={false}>
+        {/* 
+         //@ts-ignore EuiPopover missing insert property */}
         <EuiPopover
           closePopover={() => setPopoverOpen(false)}
           id="settings"
@@ -86,6 +88,7 @@ export const Settings = () => {
           panelPaddingSize="none"
           withTitle
           anchorPosition="upRight"
+          insert={{ sibling: refs.stage.current, position: 'after' }}
         >
           <EuiContextMenu initialPanelId={0} panels={panels} />
         </EuiPopover>

@@ -1,16 +1,15 @@
 <html>
 
 <head>
-  <script src="canvas_external_runtime.js"></script>
+  <script src="kbnCanvas.js"></script>
 </head>
 
 <body>
-  <div class="kbnCanvas" id="canvas"></div>
-  <script>
-    new ElasticCanvas.EmbedFromURL(document.getElementById('canvas'), '/test/austin.json', {
-      height: 400,
-    });
-  </script>
+  <div kbn-embed="canvas" kbn-height="400" kbn-url="/test/austin.json"></div>
+  <div kbn-embed="canvas" kbn-height="400" kbn-url="/test/test.json"></div>
 </body>
+<script type="text/javascript">
+  KbnCanvas.embed();
+</script>
 
 </html>

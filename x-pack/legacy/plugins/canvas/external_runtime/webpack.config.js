@@ -7,21 +7,21 @@
 const path = require('path');
 const webpack = require('webpack');
 
-const { KIBANA_ROOT, RUNTIME_OUTPUT } = require('./constants');
+const { KIBANA_ROOT, RUNTIME_OUTPUT, LIBRARY_NAME, RUNTIME_NAME } = require('./constants');
 
 const isProd = process.env.NODE_ENV === 'production';
 
 module.exports = {
   context: KIBANA_ROOT,
   entry: {
-    canvas_external_runtime: require.resolve('./index.ts'),
+    [RUNTIME_NAME]: require.resolve('./index.ts'),
   },
   mode: isProd ? 'production' : 'development',
   plugins: isProd ? [new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 })] : [],
   output: {
     path: RUNTIME_OUTPUT,
     filename: '[name].js',
-    library: 'ElasticCanvas',
+    library: LIBRARY_NAME,
   },
   // Include a require alias for legacy UI code and styles
   resolve: {
@@ -169,8 +169,12 @@ module.exports = {
         test: [
           require.resolve('@elastic/eui/es/components/code_editor'),
           require.resolve('@elastic/eui/es/components/drag_and_drop'),
-          require.resolve('highlight.js'),
           require.resolve('@elastic/eui/packages/react-datepicker'),
+          require.resolve('highlight.js'),
+          /canvas_plugin_src\/renderers\/advanced_filter/,
+          /canvas_plugin_src\/renderers\/dropdown_filter/,
+          /canvas_plugin_src\/renderers\/embeddable.tsx/,
+          /canvas_plugin_src\/renderers\/time_filter/,
         ],
         use: 'null-loader',
       },

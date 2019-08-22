@@ -1,5 +1,5 @@
-.root,
-.render {
+:global .kbnCanvas :local .root,
+:global .kbnCanvas :local .render {
   height: 100%;
   width: 100%;
 }

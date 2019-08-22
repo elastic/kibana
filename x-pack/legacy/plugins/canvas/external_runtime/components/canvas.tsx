@@ -20,7 +20,7 @@ let timeout: number = 0;
  */
 export const Canvas = () => {
   const [
-    { workpad, height: containerHeight, width: containerWidth, page, settings },
+    { workpad, height: containerHeight, width: containerWidth, page, settings, refs },
     dispatch,
   ] = useExternalEmbedState();
 
@@ -73,6 +73,7 @@ export const Canvas = () => {
       style={{ height: rootHeight, width: containerWidth }}
       onMouseEnter={() => hideToolbar(false)}
       onMouseLeave={() => hideToolbar(true)}
+      ref={refs.stage}
     >
       <div className={css.container} style={{ height: containerHeight, width: containerWidth }}>
         <div className={css.page} style={pageStyle}>

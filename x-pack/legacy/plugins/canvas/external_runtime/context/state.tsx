@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { createContext, useContext, Dispatch, useReducer, ReactChild } from 'react';
+import React, {
+  createContext,
+  useContext,
+  Dispatch,
+  useReducer,
+  ReactChild,
+  RefObject,
+} from 'react';
 import { CanvasRenderedWorkpad } from '../types';
 import { reducer } from './reducer';
 import { ExternalEmbedAction } from './actions';
@@ -31,6 +38,9 @@ export interface ExternalEmbedState {
       autohide: boolean;
     };
   };
+  refs: {
+    stage: RefObject<HTMLDivElement>;
+  };
 }
 
 type StateType = [ExternalEmbedState, Dispatch<ExternalEmbedAction>];
@@ -53,6 +63,9 @@ export const initialExternalEmbedState: ExternalEmbedState = {
     toolbar: {
       autohide: false,
     },
+  },
+  refs: {
+    stage: React.createRef(),
   },
 };
 

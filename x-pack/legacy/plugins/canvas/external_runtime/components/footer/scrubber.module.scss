@@ -2,7 +2,7 @@
 @import '@elastic/eui/src/global_styling/variables/_colors.scss';
 @import '@elastic/eui/src/global_styling/mixins/_helpers.scss';
 
-.root {
+:global .kbnCanvas :local .root {
   background: #fff;
   position: absolute;
   bottom: -172px;
@@ -13,11 +13,11 @@
   height: 172px;
 }
 
-.visible {
+:global .kbnCanvas :local .visible {
   bottom: 0;
 }
 
-.slideContainer {
+:global .kbnCanvas :local .slideContainer {
   @include euiScrollBar;
   display: flex;
   overflow-x: auto;

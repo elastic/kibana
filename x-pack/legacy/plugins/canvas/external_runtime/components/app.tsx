@@ -32,8 +32,12 @@ export const App = (props: Props) => {
 
   // Register all of the rendering experessions with a bespoke registry.
   const renderersRegistry = new RenderFunctionsRegistry();
-  // TODO: don't register the time control; add a mock for it.
-  renderFunctions.forEach((fn: Function) => renderersRegistry.register(fn));
+
+  renderFunctions.forEach((fn: Function | undefined) => {
+    if (fn) {
+      renderersRegistry.register(fn);
+    }
+  });
 
   const initialState: ExternalEmbedState = {
     ...initialExternalEmbedState,

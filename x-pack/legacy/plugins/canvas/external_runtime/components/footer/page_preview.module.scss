@@ -1,13 +1,13 @@
-.root {
+:global .kbnCanvas :local .root {
   margin: 0 8px;
   cursor: pointer;
 }
 
-.root :global .canvasPage {
+:global .kbnCanvas :local .root :global .canvasPage {
   position: relative;
 }
 
-.preview {
+:global .kbnCanvas :local .preview {
   pointer-events: none;
   transform-origin: top left;
 }

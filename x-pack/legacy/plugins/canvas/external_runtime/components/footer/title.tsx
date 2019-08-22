@@ -25,7 +25,9 @@ export const Title = () => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText color="ghost" size="s">
-          {workpad.name}
+          <div className="eui-textTruncate" style={{ maxWidth: '50px' }}>
+            {workpad.name}
+          </div>
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>

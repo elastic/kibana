@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import 'whatwg-fetch';
 import 'babel-polyfill';
-export * from './url_embed';
-export * from './obj_embed';
+
+export * from './embed';

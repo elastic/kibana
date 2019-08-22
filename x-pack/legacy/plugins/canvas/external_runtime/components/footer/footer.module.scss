@@ -1,9 +1,12 @@
-:global .kbnCanvas :local(.root .bar) {
+:global .kbnCanvas :local .root .bar {
   position: absolute;
 }
 
 .bar {
   composes: euiBottomBar from global;
   composes: euiBottomBar--paddingSmall from global;
+}
+
+:global .kbnCanvas :local .bar {
   transition: bottom 0.25s;
 }

@@ -6,6 +6,7 @@
 
 export const BUILT_ASSETS: string;
 export const KIBANA_ROOT: string;
+export const LIBRARY_NAME: string;
 export const RUNTIME_FILE: string;
 export const RUNTIME_NAME: string;
 export const RUNTIME_OUTPUT: string;
