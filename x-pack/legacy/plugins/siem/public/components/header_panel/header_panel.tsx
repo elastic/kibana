@@ -54,7 +54,7 @@ export const HeaderPanel = pure<HeaderPanelProps>(
                 </h2>
               </EuiTitle>
 
-              <EuiText color="subdued" size="s">
+              <EuiText color="subdued" size="xs">
                 {subtitle}
               </EuiText>
             </EuiFlexItem>
