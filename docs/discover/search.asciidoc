@@ -88,6 +88,67 @@ If the saved search is associated with a different index pattern than is current
 selected, opening the saved search changes the selected index pattern. The query language
 used for the saved search will also be automatically selected.
 
+[[save-load-delete-query]]
+=== Saving and Loading Queries
+Saving queries enables you to reload them into <<discover, Discover>>, <<visualize, visualizations>> and <<dashboard, dashboards>>.
+Saving a query saves the query string, the filters and the time filter but, unlike searches, the index pattern is not saved, making saved queries portable.
+
+==== Read only access
+When you have insufficient privileges to save queries, the following indicator in Kibana will be displayed and the *Save* button won't be visible in the saved query management pop-over.
+
+[role="screenshot"]
+image::discover/images/saved-query-management-component-readonly.png["Example of the saved query management popover with read only access to Discover",width="80%"]
+
+==== Saving a Query
+To save the current query string, filters and time filter:
+
+. Click *#* in the search bar, next to the query string input.
+. Click the *Save* button in the popover.
+. Enter a name, a description and select the filter options you would like to include (filters are automatically included but the time filter is not) and click *Save*.
+
+[role="screenshot"]
+image::discover/images/saved-query-management-component.png["Example of the saved query management popover with a list of saved queries with write access",width="80%"]
+
+[role="screenshot"]
+image::discover/images/saved-query-save-form.png["Example of the saved query management save form with the filters option included and the time filter option excluded",width="80%"]
+
+==== Loading a Query
+To load a saved query into Discover:
+
+. Click *#* in the search bar, next to the query string input.
+. Select the query you want to load (you might need to scroll down to find the query you are looking for).
+
+==== Saving Changes Made to a Query
+When you have loaded a query and made changes to the query string, the filters or the time filter, you can save the changes as a new saved query or save the changes to the existing saved query. To save the changes as a new saved query:
+
+. Click *#* in the search bar, next to the query string input.
+. Click the *Save as new* button in the popover.
+. Enter a name, a description and select the filter options you would like to include (filters are automatically included but the time filter is not) and click *Save*.
+
+To save the changes to the current query:
+
+. Click *#* in the search bar, next to the query string input.
+. Click the *Save changes* button in the popover.
+. Enter a description and select the filter options you would like to include (filters are automatically included but the time filter is not) and click *Save*.
+
+==== Clearing a Query
+To clear a query that is currently loaded:
+
+. Click *#* in the search bar, next to the query string input.
+. Click the *Clear* button in the popover.
+
+This will unload the query but will not delete it.
+
+==== Deleting a Query
+To delete a query from the saved query management popover:
+
+. Click *#* in the search bar, next to the query string input.
+. Click the trash can icon to delete the query.
+
+[role="screenshot"]
+image::discover/images/saved-query-management-component-save-as-new.png["Example of the saved query management popover when a query is loaded and we are about to delete a query",width="80%"]
+
+You can import, export and delete saved queries from *Management/Kibana/Saved Objects*.
 
 [[select-pattern]]
 === Changing Which Indices You're Searching
