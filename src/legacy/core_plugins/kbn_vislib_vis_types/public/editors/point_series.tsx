@@ -50,7 +50,7 @@ function PointSeriesOptions(props: VisOptionsProps<BasicVislibParams>) {
         defaultMessage: 'Dot-dashed',
       }),
     },
-  ];
+  ] as const;
 
   return (
     <>
@@ -130,7 +130,7 @@ function PointSeriesOptions(props: VisOptionsProps<BasicVislibParams>) {
         />
 
         {stateParams.thresholdLine.show && (
-          <React.Fragment>
+          <>
             <NumberInputOption
               label={i18n.translate(
                 'kbnVislibVisTypes.editors.pointSeries.thresholdLine.valueLabel',
@@ -140,9 +140,8 @@ function PointSeriesOptions(props: VisOptionsProps<BasicVislibParams>) {
               )}
               paramName="value"
               value={stateParams.thresholdLine.value}
-              step={0.1}
               setValue={(paramName, value) =>
-                setValue('thresholdLine', { ...stateParams.thresholdLine, [paramName]: value })
+                setValue('thresholdLine', { ...stateParams.thresholdLine, [paramName]: value || 0 })
               }
             />
 
@@ -158,7 +157,7 @@ function PointSeriesOptions(props: VisOptionsProps<BasicVislibParams>) {
               step={1}
               value={stateParams.thresholdLine.width}
               setValue={(paramName, value) =>
-                setValue('thresholdLine', { ...stateParams.thresholdLine, [paramName]: value })
+                setValue('thresholdLine', { ...stateParams.thresholdLine, [paramName]: value || 1 })
               }
             />
 
@@ -186,7 +185,7 @@ function PointSeriesOptions(props: VisOptionsProps<BasicVislibParams>) {
                 }}
               />
             </EuiFormRow>
-          </React.Fragment>
+          </>
         )}
       </EuiPanel>
     </>
