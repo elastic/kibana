@@ -49,7 +49,7 @@ import { timezoneProvider } from 'ui/vis/lib/timezone';
 
 export interface DiscoverHistogramProps {
   chartData: any;
-  timefilterUpdateHandler: (ranges: { xaxis: { from: number; to: number } }) => void;
+  timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
 }
 
 export class DiscoverHistogram extends Component<DiscoverHistogramProps> {
@@ -60,10 +60,8 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps> {
 
   public onBrushEnd = (min: number, max: number) => {
     const range = {
-      xaxis: {
-        from: min,
-        to: max,
-      },
+      from: min,
+      to: max,
     };
 
     this.props.timefilterUpdateHandler(range);
@@ -73,10 +71,8 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps> {
     const startRange = elementData[0].x;
 
     const range = {
-      xaxis: {
-        from: startRange,
-        to: startRange + xInterval,
-      },
+      from: startRange,
+      to: startRange + xInterval,
     };
 
     this.props.timefilterUpdateHandler(range);
@@ -221,7 +217,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps> {
     };
 
     return (
-      <Chart>
+      <Chart size="100%">
         <Settings
           xDomain={xDomain}
           onBrushEnd={this.onBrushEnd}

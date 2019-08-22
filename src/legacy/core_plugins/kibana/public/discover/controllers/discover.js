@@ -56,7 +56,6 @@ import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { getDocLink } from 'ui/documentation_links';
 import '../components/fetch_error';
-import '../components/histogram';
 import { getPainlessError } from './get_painless_error';
 import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
@@ -70,7 +69,6 @@ import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_s
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 import 'ui/capabilities/route_setup';
-import { brushHandler } from '../../../../metrics/public/lib/create_brush_handler';
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
 
 import { setup as data } from '../../../../../core_plugins/data/public/legacy';
@@ -213,7 +211,13 @@ function discoverController(
 
   timefilter.disableTimeRangeSelector();
   timefilter.disableAutoRefreshSelector();
-  $scope.timefilterUpdateHandler = brushHandler(timefilter);
+  $scope.timefilterUpdateHandler = (ranges) => {
+    timefilter.setTime({
+      from: moment(ranges.from).toISOString(),
+      to: moment(ranges.to).toISOString(),
+      mode: 'absolute',
+    });
+  };
 
   $scope.getDocLink = getDocLink;
   $scope.intervalOptions = intervalOptions;
