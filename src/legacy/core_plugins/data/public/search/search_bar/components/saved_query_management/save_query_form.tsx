@@ -34,7 +34,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { sortBy } from 'lodash';
+import { sortBy, isEqual } from 'lodash';
 import { SavedQuery, SavedQueryAttributes } from '../../index';
 import { SavedQueryService } from '../../lib/saved_query_service';
 
@@ -118,10 +118,16 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
       errors.push(titleConflictErrorText);
     }
 
-    setFormErrors(errors);
+    if (!isEqual(errors, formErrors)) {
+      setFormErrors(errors);
+    }
   };
 
   const hasErrors = formErrors.length > 0;
+
+  if (hasErrors) {
+    validate();
+  }
 
   const saveQueryForm = (
     <EuiForm isInvalid={hasErrors} error={formErrors}>
