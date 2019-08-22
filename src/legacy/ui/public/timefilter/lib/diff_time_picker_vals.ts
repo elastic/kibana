@@ -18,18 +18,35 @@
  */
 
 import _ from 'lodash';
+import { RefreshInterval, TimeRange } from 'src/plugins/data/public';
 
-const valueOf = function (o) {
+const valueOf = function(o) {
   if (o) return o.valueOf();
 };
 
-export function areTimePickerValsDifferent(rangeA, rangeB) {
+export function areRefreshIntervalsDifferent(rangeA: RefreshInterval, rangeB: RefreshInterval) {
   if (_.isObject(rangeA) && _.isObject(rangeB)) {
     if (
-      valueOf(rangeA.to) !== valueOf(rangeB.to)
-      || valueOf(rangeA.from) !== valueOf(rangeB.from)
-      || valueOf(rangeA.value) !== valueOf(rangeB.value)
-      || valueOf(rangeA.pause) !== valueOf(rangeB.pause)
+      valueOf(rangeA.value) !== valueOf(rangeB.value) ||
+      valueOf(rangeA.pause) !== valueOf(rangeB.pause)
+    ) {
+      return true;
+    }
+  } else {
+    return !_.isEqual(rangeA, rangeB);
+  }
+
+  return false;
+}
+
+export function areTimeRangesDifferent(
+  rangeA: TimeRange | undefined,
+  rangeB: TimeRange | undefined
+) {
+  if (rangeA && rangeB && _.isObject(rangeA) && _.isObject(rangeB)) {
+    if (
+      valueOf(rangeA.to) !== valueOf(rangeB.to) ||
+      valueOf(rangeA.from) !== valueOf(rangeB.from)
     ) {
       return true;
     }

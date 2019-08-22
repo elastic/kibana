@@ -17,42 +17,40 @@
  * under the License.
  */
 
-
 import moment from 'moment';
 import expect from '@kbn/expect';
-import { areTimePickerValsDifferent } from './diff_time_picker_vals';
+import { areTimeRangesDifferent } from './diff_time_picker_vals';
 
 describe('Diff Time Picker Values', () => {
-
   test('accepts two undefined values', () => {
-    const diff = areTimePickerValsDifferent(undefined, undefined);
+    const diff = areTimeRangesDifferent(undefined, undefined);
     expect(diff).to.be(false);
   });
 
   describe('dateMath ranges', () => {
     test('knows a match', () => {
-      const diff = areTimePickerValsDifferent(
+      const diff = areTimeRangesDifferent(
         {
           to: 'now',
-          from: 'now-7d'
+          from: 'now-7d',
         },
         {
           to: 'now',
-          from: 'now-7d'
+          from: 'now-7d',
         }
       );
 
       expect(diff).to.be(false);
     });
     test('knows a difference', () => {
-      const diff = areTimePickerValsDifferent(
+      const diff = areTimeRangesDifferent(
         {
           to: 'now',
-          from: 'now-7d'
+          from: 'now-7d',
         },
         {
           to: 'now',
-          from: 'now-1h'
+          from: 'now-1h',
         }
       );
 
@@ -62,14 +60,14 @@ describe('Diff Time Picker Values', () => {
 
   describe('a dateMath range, and a moment range', () => {
     test('is always different', () => {
-      const diff = areTimePickerValsDifferent(
+      const diff = areTimeRangesDifferent(
         {
           to: moment(),
-          from: moment()
+          from: moment(),
         },
         {
           to: 'now',
-          from: 'now-1h'
+          from: 'now-1h',
         }
       );
 
@@ -82,14 +80,14 @@ describe('Diff Time Picker Values', () => {
       const to = moment();
       const from = moment().add(1, 'day');
 
-      const diff = areTimePickerValsDifferent(
+      const diff = areTimeRangesDifferent(
         {
           to: to.clone(),
-          from: from.clone()
+          from: from.clone(),
         },
         {
           to: to.clone(),
-          from: from.clone()
+          from: from.clone(),
         }
       );
 
@@ -101,23 +99,18 @@ describe('Diff Time Picker Values', () => {
       const from = moment().add(1, 'day');
       const from2 = moment().add(2, 'day');
 
-      const diff = areTimePickerValsDifferent(
+      const diff = areTimeRangesDifferent(
         {
           to: to.clone(),
-          from: from.clone()
+          from: from.clone(),
         },
         {
           to: to.clone(),
-          from: from2.clone()
+          from: from2.clone(),
         }
       );
 
       expect(diff).to.be(true);
     });
-  });
-
-  test('does not fall apart with unusual values', () => {
-    const diff = areTimePickerValsDifferent({}, {});
-    expect(diff).to.be(false);
   });
 });
