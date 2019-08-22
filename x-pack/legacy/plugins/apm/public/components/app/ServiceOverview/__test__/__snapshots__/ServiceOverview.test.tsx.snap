@@ -278,7 +278,6 @@ NodeList [
       >
         <span
           class="euiBadge euiBadge--iconLeft euiBadge--hollow"
-          title="test"
         >
           <span
             class="euiBadge__content"
@@ -292,7 +291,6 @@ NodeList [
         </span>
         <span
           class="euiBadge euiBadge--iconLeft euiBadge--hollow"
-          title="dev"
         >
           <span
             class="euiBadge__content"
