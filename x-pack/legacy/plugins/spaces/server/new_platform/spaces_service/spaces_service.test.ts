@@ -22,7 +22,7 @@ const mockLogger = {
   log: jest.fn(),
 };
 
-const createService = async (serverBasePath: string = '') => {
+const setup = async (serverBasePath: string = '', spaceDefaultRoute?: string) => {
   const spacesService = new SpacesService(mockLogger, serverBasePath);
 
   const httpSetup = httpServiceMock.createSetupContract();
@@ -35,24 +35,44 @@ const createService = async (serverBasePath: string = '') => {
     return '/';
   });
 
+  const uiSettingsService = {
+    get: jest.fn().mockImplementation((key: string) => {
+      if (key === 'defaultRoute') {
+        return spaceDefaultRoute;
+      }
+      throw new Error(`unexpected UI Settings Service call using key ${key}`);
+    }),
+  };
+
+  const uiSettingsServiceFactory = jest.fn().mockReturnValue(uiSettingsService);
+
+  const savedObjectsService = ({
+    getScopedSavedObjectsClient: jest.fn().mockReturnValue(null),
+    getSavedObjectsRepository: jest.fn().mockReturnValue(null),
+  } as unknown) as SavedObjectsService;
+
   const spacesServiceSetup = await spacesService.setup({
     http: httpSetup,
     elasticsearch: elasticsearchServiceMock.createSetupContract(),
     config$: Rx.of({ maxSpaces: 10 }),
+    uiSettingsServiceFactory,
+    fallbackDefaultRoute: '/app/mockFallbackRoute',
     security: createOptionalPlugin({ get: () => null }, 'xpack.security', {}, 'security'),
-    savedObjects: ({
-      getSavedObjectsRepository: jest.fn().mockReturnValue(null),
-    } as unknown) as SavedObjectsService,
+    savedObjects: savedObjectsService,
     spacesAuditLogger: new SpacesAuditLogger({}),
   });
 
-  return spacesServiceSetup;
+  return {
+    spacesServiceSetup,
+    uiSettingsServiceFactory,
+    savedObjectsService,
+  };
 };
 
 describe('SpacesService', () => {
   describe('#getSpaceId', () => {
     it('returns the default space id when no identifier is present', async () => {
-      const spacesServiceSetup = await createService();
+      const { spacesServiceSetup } = await setup();
 
       const request: KibanaRequest = {
         url: { path: '/app/kibana' },
@@ -62,7 +82,7 @@ describe('SpacesService', () => {
     });
 
     it('returns the space id when identifier is present', async () => {
-      const spacesServiceSetup = await createService();
+      const { spacesServiceSetup } = await setup();
 
       const request: KibanaRequest = {
         url: { path: '/s/foo/app/kibana' },
@@ -74,7 +94,7 @@ describe('SpacesService', () => {
 
   describe('#getBasePath', () => {
     it(`throws when a space id is not provided`, async () => {
-      const spacesServiceSetup = await createService();
+      const { spacesServiceSetup } = await setup();
 
       // @ts-ignore TS knows this isn't right
       expect(() => spacesServiceSetup.getBasePath()).toThrowErrorMatchingInlineSnapshot(
@@ -87,29 +107,29 @@ describe('SpacesService', () => {
     });
 
     it('returns "" for the default space and no server base path', async () => {
-      const spacesServiceSetup = await createService();
+      const { spacesServiceSetup } = await setup();
       expect(spacesServiceSetup.getBasePath(DEFAULT_SPACE_ID)).toEqual('');
     });
 
     it('returns /sbp for the default space and the "/sbp" server base path', async () => {
-      const spacesServiceSetup = await createService('/sbp');
+      const { spacesServiceSetup } = await setup('/sbp');
       expect(spacesServiceSetup.getBasePath(DEFAULT_SPACE_ID)).toEqual('/sbp');
     });
 
     it('returns /s/foo for the foo space and no server base path', async () => {
-      const spacesServiceSetup = await createService();
+      const { spacesServiceSetup } = await setup();
       expect(spacesServiceSetup.getBasePath('foo')).toEqual('/s/foo');
     });
 
     it('returns /sbp/s/foo for the foo space and the "/sbp" server base path', async () => {
-      const spacesServiceSetup = await createService('/sbp');
+      const { spacesServiceSetup } = await setup('/sbp');
       expect(spacesServiceSetup.getBasePath('foo')).toEqual('/sbp/s/foo');
     });
   });
 
   describe('#isInDefaultSpace', () => {
     it('returns true when in the default space', async () => {
-      const spacesServiceSetup = await createService();
+      const { spacesServiceSetup } = await setup();
 
       const request: KibanaRequest = {
         url: { path: '/app/kibana' },
@@ -119,7 +139,7 @@ describe('SpacesService', () => {
     });
 
     it('returns false when not in the default space', async () => {
-      const spacesServiceSetup = await createService();
+      const { spacesServiceSetup } = await setup();
 
       const request: KibanaRequest = {
         url: { path: '/s/foo/app/kibana' },
@@ -129,16 +149,138 @@ describe('SpacesService', () => {
     });
   });
 
+  describe('#getDefaultRoute', () => {
+    it('constructs a saved objects client without the spaces wrapper', async () => {
+      const { spacesServiceSetup, savedObjectsService } = await setup(
+        '/serverBasePath',
+        '/app/myDefaultRoute'
+      );
+
+      const request: KibanaRequest = {
+        url: { path: '/s/foo/app/kibana' },
+      } as KibanaRequest;
+
+      await spacesServiceSetup.getDefaultRoute(request);
+
+      expect(savedObjectsService.getScopedSavedObjectsClient).toHaveBeenCalledWith(request, {
+        excludedWrappers: ['spaces'],
+      });
+    });
+
+    describe('with no space id supplied', () => {
+      it('returns the route from the advanced setting for the space indicated by the request', async () => {
+        const { spacesServiceSetup, uiSettingsServiceFactory } = await setup(
+          '/serverBasePath',
+          '/app/myDefaultRoute'
+        );
+
+        const request: KibanaRequest = {
+          url: { path: '/s/foo/app/kibana' },
+        } as KibanaRequest;
+
+        await expect(spacesServiceSetup.getDefaultRoute(request)).resolves.toEqual(
+          '/app/myDefaultRoute'
+        );
+
+        expect(uiSettingsServiceFactory).toHaveBeenCalledWith(
+          expect.objectContaining({
+            namespace: 'foo',
+          })
+        );
+      });
+
+      it('returns the fallback route when setting is missing for the space indicated by the request', async () => {
+        const { spacesServiceSetup, uiSettingsServiceFactory } = await setup('/serverBasePath');
+
+        const request: KibanaRequest = {
+          url: { path: '/s/foo/app/kibana' },
+        } as KibanaRequest;
+
+        await expect(spacesServiceSetup.getDefaultRoute(request)).resolves.toEqual(
+          '/app/mockFallbackRoute'
+        );
+
+        expect(uiSettingsServiceFactory).toHaveBeenCalledWith(
+          expect.objectContaining({
+            namespace: 'foo',
+          })
+        );
+      });
+
+      it('returns the route from the advanced setting for the default space indicated by the request', async () => {
+        const { spacesServiceSetup, uiSettingsServiceFactory } = await setup(
+          '/serverBasePath',
+          '/app/myDefaultRoute'
+        );
+
+        const request: KibanaRequest = {
+          url: { path: '/app/kibana' },
+        } as KibanaRequest;
+
+        await expect(spacesServiceSetup.getDefaultRoute(request)).resolves.toEqual(
+          '/app/myDefaultRoute'
+        );
+
+        expect(uiSettingsServiceFactory).toHaveBeenCalledWith(
+          expect.objectContaining({
+            namespace: undefined,
+          })
+        );
+      });
+    });
+
+    describe('with space id supplied', () => {
+      it('returns the route from the advanced setting for the supplied space', async () => {
+        const { spacesServiceSetup, uiSettingsServiceFactory } = await setup(
+          '/serverBasePath',
+          '/app/myDefaultRoute'
+        );
+
+        const request: KibanaRequest = {
+          url: { path: '/s/foo/app/kibana' },
+        } as KibanaRequest;
+
+        await expect(spacesServiceSetup.getDefaultRoute(request, 'bar-space')).resolves.toEqual(
+          '/app/myDefaultRoute'
+        );
+
+        expect(uiSettingsServiceFactory).toHaveBeenCalledWith(
+          expect.objectContaining({
+            namespace: 'bar-space',
+          })
+        );
+      });
+
+      it('returns the fallback route for the supplied space', async () => {
+        const { spacesServiceSetup, uiSettingsServiceFactory } = await setup('/serverBasePath');
+
+        const request: KibanaRequest = {
+          url: { path: '/s/foo/app/kibana' },
+        } as KibanaRequest;
+
+        await expect(spacesServiceSetup.getDefaultRoute(request, 'bar-space')).resolves.toEqual(
+          '/app/mockFallbackRoute'
+        );
+
+        expect(uiSettingsServiceFactory).toHaveBeenCalledWith(
+          expect.objectContaining({
+            namespace: 'bar-space',
+          })
+        );
+      });
+    });
+  });
+
   describe('#spaceIdToNamespace', () => {
     it('returns the namespace for the given space', async () => {
-      const spacesServiceSetup = await createService();
+      const { spacesServiceSetup } = await setup();
       expect(spacesServiceSetup.spaceIdToNamespace('foo')).toEqual('foo');
     });
   });
 
   describe('#namespaceToSpaceId', () => {
     it('returns the space id for the given namespace', async () => {
-      const spacesServiceSetup = await createService();
+      const { spacesServiceSetup } = await setup();
       expect(spacesServiceSetup.namespaceToSpaceId('foo')).toEqual('foo');
     });
   });

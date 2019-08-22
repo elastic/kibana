@@ -95,7 +95,6 @@ describe('onPostAuthRequestInterceptor', () => {
       }
       const config: Config = {
         'server.basePath': serverBasePath,
-        'server.defaultRoute': defaultRoute,
       };
 
       const configFn = jest.fn(() => {
@@ -112,6 +111,7 @@ describe('onPostAuthRequestInterceptor', () => {
             isNotFoundError: (e: Error) => e.message === 'space not found',
           },
         },
+        getScopedSavedObjectsClient: jest.fn(),
         getSavedObjectsRepository: jest.fn().mockImplementation(() => {
           return {
             get: (type: string, id: string) => {
@@ -202,10 +202,23 @@ describe('onPostAuthRequestInterceptor', () => {
         );
       });
 
+      const uiSettingsService = {
+        get: jest.fn().mockImplementation((key: string) => {
+          if (key === 'defaultRoute') {
+            return defaultRoute;
+          }
+          throw new Error(`unexpected UI Settings Service call using key ${key}`);
+        }),
+      };
+
+      const uiSettingsServiceFactory = jest.fn().mockReturnValue(uiSettingsService);
+
       const service = new SpacesService(log, configFn().get('server.basePath'));
       spacesService = await service.setup({
         http: httpMock,
         elasticsearch: elasticsearchServiceMock.createSetupContract(),
+        uiSettingsServiceFactory,
+        fallbackDefaultRoute: '/app/fallbackRoute',
         savedObjects: (savedObjectsService as unknown) as SavedObjectsService,
         security: {} as OptionalPlugin<SecurityPlugin>,
         spacesAuditLogger: {} as SpacesAuditLogger,
