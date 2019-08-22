@@ -12,9 +12,12 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
   loadingMessage.style.display = 'flex';
 
   window.onload = function () {
-    var files = [
+    var asyncFiles = [
       '{{dllBundlePath}}/vendors.bundle.dll.js',
       '{{regularBundlePath}}/commons.bundle.js',
+    ];
+
+    var syncFiles = [
       '{{regularBundlePath}}/{{appId}}.bundle.js'
     ];
 
@@ -43,13 +46,13 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
       document.head.appendChild(dom);
     }
 
-    function createJavascriptElement(path) {
+    function createJavascriptElement(file, onload) {
       var dom = document.createElement('script');
 
       dom.setAttribute('async', '');
       dom.addEventListener('error', failure);
       dom.setAttribute('src', file);
-      dom.addEventListener('load', next);
+      dom.addEventListener('load', onload);
       document.head.appendChild(dom);
     }
 
@@ -57,17 +60,29 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
       loadStyleSheet('{{this}}');
     {{/each}}
 
-    (function next() {
-      var file = files.shift();
+    var asyncFilesLoaded = 0;
+
+    function asyncFileComplete() {
+      asyncFilesLoaded++;
+      if (asyncFiles.length === asyncFilesLoaded) {
+        loadNextSyncFile();
+      }
+    }
+
+    function loadAsyncFiles() {
+      for (var i = 0; i < asyncFiles.length; i++) {
+        createJavascriptElement(asyncFiles[i], asyncFileComplete);
+      }
+    };
+
+    function loadNextSyncFile() {
+      var file = syncFiles.shift();
       if (!file) return;
 
-      var dom = document.createElement('script');
+      createJavascriptElement(file, loadNextSyncFile);
+    }
 
-      dom.setAttribute('async', '');
-      dom.addEventListener('error', failure);
-      dom.setAttribute('src', file);
-      dom.addEventListener('load', next);
-      document.head.appendChild(dom);
-    }());
+    // Start by loading all async files
+    loadAsyncFiles();
   };
 }
