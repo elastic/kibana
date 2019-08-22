@@ -209,8 +209,8 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
         ) : (
           <>
             <BasicTable
-              items={pageOfItems}
               columns={columns}
+              items={pageOfItems}
               onChange={onChange}
               sorting={
                 sorting
@@ -305,7 +305,9 @@ const Panel = styled(EuiPanel)<{ loading: { loading?: boolean } }>`
 
 Panel.displayName = 'Panel';
 
-const BasicTable = styled(EuiBasicTable)`
+const BasicTable = styled(EuiBasicTable).attrs({
+  compressed: true,
+})`
   tbody {
     th,
     td {
