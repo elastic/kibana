@@ -674,9 +674,33 @@ export class DataRecognizer {
   // if an override index pattern has been specified,
   // update all of the datafeeds.
   updateDatafeedIndices(moduleConfig) {
+    // if the supplied index pattern contains a comma, split into multiple indices and
+    // add each one to the datafeed
+    const indexPatternNames = this.indexPatternName.includes(',')
+      ? this.indexPatternName.split(',').map(i => i.trim())
+      : [this.indexPatternName];
+
     moduleConfig.datafeeds.forEach((df) => {
-      df.config.indexes = df.config.indexes.map(index => (index === INDEX_PATTERN_NAME ? this.indexPatternName : index));
+      const newIndices = [];
+      // the datafeed can contain indexes and indices
+      const currentIndices = df.config.indexes !== undefined ? df.config.indexes : df.config.indices;
+
+      currentIndices.forEach(index => {
+        if (index === INDEX_PATTERN_NAME) {
+          // the datafeed index is INDEX_PATTERN_NAME, so replace it with index pattern(s)
+          // supplied by the user or the default one from the manifest
+          newIndices.push(...indexPatternNames);
+        } else {
+          // otherwise keep using the index from the datafeed json
+          newIndices.push(index);
+        }
+      });
+
+      // just in case indexes was used, delete it in favour of indices
+      delete df.config.indexes;
+      df.config.indices = newIndices;
     });
+    moduleConfig.datafeeds;
   }
 
   // loop through the custom urls in each job and replace the INDEX_PATTERN_ID
