@@ -74,12 +74,12 @@ export default function AggParamWriterHelper(Private) {
     write(paramValues, modifyAggConfig = null) {
       paramValues = _.clone(paramValues);
 
-      if (this.aggType.params.find(param => param.name === 'field') && !paramValues.field) {
+      if (this.aggType.paramByName('field') && !paramValues.field) {
         // pick a field rather than force a field to be specified everywhere
         if (this.aggType.type === AggGroupNames.Metrics) {
           paramValues.field = _.sample(this.indexPattern.fields.byType.number);
         } else {
-          const type = this.aggType.params.find(param => param.name === 'field').filterFieldTypes || 'string';
+          const type = this.aggType.paramByName('field').filterFieldTypes || 'string';
           let field;
           do {
             field = _.sample(this.indexPattern.fields.byType[type]);

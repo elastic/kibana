@@ -17,12 +17,14 @@
  * under the License.
  */
 
-import { AggConfig } from 'ui/vis';
+import { AggConfig } from '../../vis';
 import { BaseParamType } from './base';
 
 export interface OptionedValueProp {
   value: string;
   text: string;
+  disabled?: boolean;
+  isCompatible: (agg: AggConfig) => boolean;
 }
 
 export interface OptionedParamEditorProps<T = OptionedValueProp> {
@@ -42,26 +44,16 @@ export class OptionedParamType extends BaseParamType {
         output.params[this.name] = aggConfig.params[this.name].value;
       };
     }
+    if (!config.serialize) {
+      this.serialize = (selected: OptionedValueProp) => {
+        return selected.value;
+      };
+    }
+    if (!config.deserialize) {
+      this.deserialize = (value: any) => {
+        return this.options.find((option: OptionedValueProp) => option.value === value);
+      };
+    }
     this.options = config.options || [];
   }
-
-  /**
-   * Serialize a selection to be stored in the database
-   * @param  {object} selected - the option that was selected
-   * @return {any}
-   */
-  serialize = (selected: OptionedValueProp) => {
-    return selected.value;
-  };
-
-  /**
-   * Take a value that was serialized to the database and
-   * return the option that is represents
-   *
-   * @param  {any} value - the value that was saved
-   * @return {object}
-   */
-  deserialize = (value: any) => {
-    return this.options.find((option: OptionedValueProp) => option.value === value);
-  };
 }

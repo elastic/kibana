@@ -30,4 +30,7 @@ export interface Schema {
   params: AggParam[];
   title: string;
   defaults: unknown;
+  hideCustomLabel?: boolean;
+  mustBeFirst?: boolean;
+  editorComponent?: any;
 }

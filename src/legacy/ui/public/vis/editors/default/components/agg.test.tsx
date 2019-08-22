@@ -25,6 +25,8 @@ import { DefaultEditorAgg, DefaultEditorAggProps } from './agg';
 import { act } from 'react-dom/test-utils';
 import { DefaultEditorAggParams } from './agg_params';
 import { IndexPattern } from 'ui/index_patterns';
+import { AggType } from 'ui/agg_types';
+import { Schema } from 'ui/vis/editors/default/schemas';
 
 jest.mock('./agg_params', () => ({
   DefaultEditorAggParams: () => null,
@@ -107,7 +109,7 @@ describe('DefaultEditorAgg component', () => {
     (defaultProps.agg as any).brandNew = false;
     defaultProps.agg.type = {
       makeLabel: () => 'Agg description',
-    };
+    } as AggType;
     const comp = mount(<DefaultEditorAgg {...defaultProps} />);
 
     act(() => {
@@ -155,7 +157,7 @@ describe('DefaultEditorAgg component', () => {
   it('should add schema component', () => {
     defaultProps.agg.schema = {
       editorComponent: () => <div className="schemaComponent"></div>,
-    };
+    } as Schema;
     const comp = mount(<DefaultEditorAgg {...defaultProps} />);
 
     expect(comp.find('.schemaComponent').exists()).toBeTruthy();
@@ -224,11 +226,11 @@ describe('DefaultEditorAgg component', () => {
     it('should disable min_doc_count when agg is histogram or date_histogram', () => {
       defaultProps.agg.type = {
         name: 'histogram',
-      };
+      } as AggType;
       const compHistogram = shallow(<DefaultEditorAgg {...defaultProps} />);
       defaultProps.agg.type = {
         name: 'date_histogram',
-      };
+      } as AggType;
       const compDateHistogram = shallow(<DefaultEditorAgg {...defaultProps} />);
 
       expect(compHistogram.find(DefaultEditorAggParams).props()).toHaveProperty('disabledParams', [
@@ -243,7 +245,7 @@ describe('DefaultEditorAgg component', () => {
     it('should set error when agg is not histogram or date_histogram', () => {
       defaultProps.agg.type = {
         name: 'aggType',
-      };
+      } as AggType;
       const comp = shallow(<DefaultEditorAgg {...defaultProps} />);
 
       expect(comp.find(DefaultEditorAggParams).prop('aggError')).toBeDefined();
@@ -252,7 +254,7 @@ describe('DefaultEditorAgg component', () => {
     it('should set min_doc_count to true when agg type was changed to histogram', () => {
       defaultProps.agg.type = {
         name: 'aggType',
-      };
+      } as AggType;
       const comp = mount(<DefaultEditorAgg {...defaultProps} />);
       comp.setProps({ agg: { ...defaultProps.agg, type: { name: 'histogram' } } });
 
@@ -266,7 +268,7 @@ describe('DefaultEditorAgg component', () => {
     it('should set min_doc_count to 0 when agg type was changed to date_histogram', () => {
       defaultProps.agg.type = {
         name: 'aggType',
-      };
+      } as AggType;
       const comp = mount(<DefaultEditorAgg {...defaultProps} />);
       comp.setProps({ agg: { ...defaultProps.agg, type: { name: 'date_histogram' } } });
 

@@ -473,7 +473,7 @@ export const buildVislibDimensions = async (
       dimensions.x.params.format = xAgg.buckets.getScaledDateFormat();
       dimensions.x.params.bounds = xAgg.buckets.getBounds();
     } else if (xAgg.type.name === 'histogram') {
-      const intervalParam = xAgg.type.params.find((agg: any) => agg.name === 'interval');
+      const intervalParam = xAgg.type.paramByName('interval');
       const output = { params: {} as any };
       await intervalParam.modifyAggConfigOnSearchRequestStart(xAgg, params.searchSource);
       intervalParam.write(xAgg, output);

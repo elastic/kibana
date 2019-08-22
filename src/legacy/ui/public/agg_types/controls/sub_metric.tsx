@@ -20,6 +20,7 @@
 import React, { useEffect, useState } from 'react';
 import { EuiFormLabel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AggParamType } from '../param_types/agg';
 import {
   AggParamEditorProps,
   DefaultEditorAggParams,
@@ -49,7 +50,14 @@ function SubMetricParamEditor({
   const aggGroup = type === 'customMetric' ? AggGroupNames.Metrics : AggGroupNames.Buckets;
 
   useEffect(() => {
-    setValue(agg.params[type] || agg.type.params.find((a: any) => a.name === type).makeAgg(agg));
+    if (agg.params[type]) {
+      setValue(agg.params[type]);
+    } else {
+      const param = agg.type.paramByName(type);
+      if (param) {
+        setValue((param as AggParamType).makeAgg(agg));
+      }
+    }
   }, []);
 
   const [innerState, setInnerState] = useState(true);

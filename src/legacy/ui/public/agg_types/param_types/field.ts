@@ -76,7 +76,10 @@ export class FieldParamType extends BaseParamType {
       return field.name;
     };
 
-    this.deserialize = (fieldName: string, aggConfig: AggConfig) => {
+    this.deserialize = (fieldName: string, aggConfig?: AggConfig) => {
+      if (!aggConfig) {
+        throw new Error('aggConfig was not provided to FieldParamType deserialize function');
+      }
       const field = aggConfig.getIndexPattern().fields.byName[fieldName];
 
       if (!field) {

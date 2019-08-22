@@ -21,10 +21,14 @@ import React, { useEffect, useRef } from 'react';
 import { EuiFormRow, EuiIconTip, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AggParamEditorProps } from 'ui/vis/editors/default';
-import { AggConfig } from 'ui/vis';
+import { AggParamEditorProps } from '../../vis/editors/default';
+import { AggConfig } from '../../vis';
 import { AggParam } from '../agg_params';
-import { OptionedValueProp, OptionedParamEditorProps } from '../param_types/optioned';
+import {
+  OptionedValueProp,
+  OptionedParamEditorProps,
+  OptionedParamType,
+} from '../param_types/optioned';
 
 export interface AggregateValueProp extends OptionedValueProp {
   isCompatible(aggConfig: AggConfig): boolean;
@@ -34,7 +38,9 @@ export type TopAggregateParamEditorProps = AggParamEditorProps<AggregateValuePro
   OptionedParamEditorProps<AggregateValueProp>;
 
 export function getCompatibleAggs(agg: AggConfig): AggregateValueProp[] {
-  const { options = [] } = agg.getAggParams().find(({ name }: AggParam) => name === 'aggregate');
+  const { options = [] } = agg
+    .getAggParams()
+    .find(({ name }: AggParam) => name === 'aggregate') as OptionedParamType;
   return options.filter((option: AggregateValueProp) => option.isCompatible(agg));
 }
 

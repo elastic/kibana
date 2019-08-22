@@ -30,12 +30,13 @@ import { Adapters } from '../inspector';
 
 export interface AggTypeConfig {
   name: string;
+  type?: string;
   title: string;
   dslName?: string;
   makeLabel?: () => string;
   ordered?: any;
   hasNoDsl?: boolean;
-  createFilter: (aggConfig: AggConfig, key: any) => any;
+  createFilter: (aggConfig: AggConfig, key: any, params?: any) => any;
   params?: AggParam[];
   getRequestAggs?: () => AggConfig[];
   getResponseAggs?: () => AggConfig[];
@@ -49,12 +50,16 @@ export interface AggTypeConfig {
     inspectorAdapters: Adapters
   ) => Promise<any>;
   getFormat?: (agg: AggConfig) => FieldFormat;
+  getValue?: (agg: AggConfig, bucket: any) => any;
+  getKey?: (bucket: any, key: any, agg: AggConfig) => any;
 }
 
 const getFormat = (agg: AggConfig) => {
   const field = agg.getField();
   return field ? field.format : fieldFormats.getDefaultInstance('string');
 };
+
+const defaultGetValue = (agg: AggConfig, bucket: any) => {};
 
 export class AggType {
   /**
@@ -64,6 +69,8 @@ export class AggType {
    * @type {string}
    */
   name: string;
+
+  type: string;
   /**
    * the name of the elasticsearch aggregation that this aggType represents. Usually just this.name
    *
@@ -86,7 +93,7 @@ export class AggType {
    * @param {AggConfig} aggConfig - an agg config of this type
    * @returns {string} - label that can be used in the ui to describe the aggConfig
    */
-  makeLabel: () => string;
+  makeLabel: (aggConfig?: AggConfig) => string;
   /**
    * Describes if this aggType creates data that is ordered, and if that ordered data
    * is some sort of time series.
@@ -116,7 +123,7 @@ export class AggType {
    * @param {mixed} key The key for the bucket
    * @returns {object} The filter
    */
-  createFilter: (aggConfig: AggConfig, key: any) => any;
+  createFilter: (aggConfig: AggConfig, key: any, params?: any) => any;
   /**
    * An instance of {{#crossLink "AggParams"}}{{/crossLink}}.
    *
@@ -133,7 +140,7 @@ export class AggType {
    *                                         that should replace this one,
    *                                         or undefined
    */
-  getRequestAggs: (() => AggConfig[]) | (() => void);
+  getRequestAggs: ((aggConfig?: AggConfig) => AggConfig[]) | (() => void);
   /**
    * Designed for multi-value metric aggs, this method can return a
    * set of AggConfigs that should replace this aggConfig in result sets
@@ -144,7 +151,7 @@ export class AggType {
    *                                         that should replace this one,
    *                                         or undefined
    */
-  getResponseAggs: (() => AggConfig[]) | (() => void);
+  getResponseAggs: ((aggConfig?: AggConfig) => AggConfig[]) | (() => void);
   /**
    * A function that will be called each time an aggConfig of this type
    * is created, giving the agg type a chance to modify the agg config
@@ -177,6 +184,12 @@ export class AggType {
    */
   getFormat: (agg: AggConfig) => FieldFormat;
 
+  getValue: (agg: AggConfig, bucket: any) => any;
+
+  paramByName = (name: string) => {
+    return this.params.find(p => p.name === name);
+  };
+
   /**
    * Generic AggType Constructor
    *
@@ -188,6 +201,7 @@ export class AggType {
    */
   constructor(config: AggTypeConfig) {
     this.name = config.name;
+    this.type = config.type || 'metrics';
     this.dslName = config.dslName || config.name;
     this.title = config.title;
     this.makeLabel = config.makeLabel || _.constant(this.name);
@@ -221,10 +235,11 @@ export class AggType {
       this.params = initParams(params as any);
     }
 
-    this.getRequestAggs = config.getRequestAggs || _.noop;
-    this.getResponseAggs = config.getResponseAggs || _.noop;
+    this.getRequestAggs = config.getRequestAggs || (() => {});
+    this.getResponseAggs = config.getResponseAggs || (() => {});
     this.decorateAggConfig = config.decorateAggConfig || (() => ({}));
     this.postFlightRequest = config.postFlightRequest || _.identity;
     this.getFormat = config.getFormat || getFormat;
+    this.getValue = config.getValue || defaultGetValue;
   }
 }

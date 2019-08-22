@@ -30,7 +30,7 @@ describe('Terms Agg', function () {
       ngMock.module('kibana');
       ngMock.inject(function ($controller, _$rootScope_) {
         const terms = aggTypes.buckets.find(agg => agg.name === 'terms');
-        const orderAggController = terms.params.find(param => param.name === 'orderAgg').controller;
+        const orderAggController = terms.paramByName('orderAgg').controller;
 
         $rootScope = _$rootScope_;
         $rootScope.agg = {

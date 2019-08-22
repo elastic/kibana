@@ -18,6 +18,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { AggParamType } from '../param_types/agg';
 import { AggParamEditorProps, DefaultEditorAggParams } from '../../vis/editors/default';
 import { AggConfig } from '../../vis';
 
@@ -36,7 +37,10 @@ function SubAggParamEditor({
     if (agg.params.metricAgg !== 'custom') {
       setValue(undefined);
     } else if (!agg.params.customMetric) {
-      setValue(agg.type.params.find((a: any) => a.name === 'customMetric').makeAgg(agg));
+      const customMetric = agg.type.paramByName('customMetric');
+      if (customMetric) {
+        setValue((customMetric as AggParamType).makeAgg(agg));
+      }
     }
   }, [value, metricAggs]);
 

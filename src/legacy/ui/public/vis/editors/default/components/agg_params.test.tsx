@@ -94,12 +94,12 @@ describe('DefaultEditorAggParams component', () => {
     intervalDeserialize = jest.fn(() => 'deserialized');
 
     defaultProps = {
-      agg: {
+      agg: ({
         type: {
           params: [{ name: 'interval', deserialize: intervalDeserialize }],
         },
         params: {},
-      } as AggConfig,
+      } as any) as AggConfig,
       groupName: 'metrics',
       formIsTouched: false,
       indexPattern: {} as IndexPattern,

@@ -44,8 +44,8 @@ describe('Significant Terms Agg', function () {
       }
 
       function testSerializeAndWrite(aggConfig) {
-        const includeArg = $rootScope.agg.type.params.find(param => param.name === 'include');
-        const excludeArg = $rootScope.agg.type.params.find(param => param.name === 'exclude');
+        const includeArg = $rootScope.agg.type.paramByName('include');
+        const excludeArg = $rootScope.agg.type.paramByName('exclude');
 
         expect(includeArg.serialize(aggConfig.params.include, aggConfig)).to.equal('404');
         expect(excludeArg.serialize(aggConfig.params.exclude, aggConfig)).to.equal('400');

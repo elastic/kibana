@@ -27,13 +27,12 @@
  */
 
 import _ from 'lodash';
-import { Schemas } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
-import { TimeRange } from 'ui/timefilter/time_history';
-import { Schema } from 'ui/vis/editors/default/schemas';
+import { Schemas } from '../visualize/loader/pipeline_helpers/build_pipeline';
+import { TimeRange } from '../timefilter';
+import { Schema } from '../vis/editors/default/schemas';
 import { AggConfig, AggConfigOptions } from './agg_config';
-// @ts-ignore
 import { AggGroupNames } from './editors/default/agg_groups';
-import { IndexPattern } from '../index_patterns';
+import { IndexPattern } from '../../../core_plugins/data/public';
 
 function removeParentAggs(obj: any) {
   for (const prop in obj) {
@@ -159,11 +158,11 @@ export class AggConfigs {
   toDsl(hierarchical: boolean = false) {
     const dslTopLvl = {};
     let dslLvlCursor: Record<string, any>;
-    let nestedMetrics: unknown[];
+    let nestedMetrics: Array<{ config: AggConfig; dsl: any }> | [];
 
     if (hierarchical) {
       // collect all metrics, and filter out the ones that we won't be copying
-      nestedMetrics = _(this.aggs)
+      nestedMetrics = this.aggs
         .filter(function(agg) {
           return agg.type.type === 'metrics' && agg.type.name !== 'count';
         })
@@ -172,8 +171,7 @@ export class AggConfigs {
             config: agg,
             dsl: agg.toDsl(this),
           };
-        })
-        .value();
+        });
     }
     this.getRequestAggs()
       .filter((config: AggConfig) => !config.type.hasNoDsl)
@@ -255,10 +253,13 @@ export class AggConfigs {
     // collect all the aggregations
     const aggregations = this.aggs
       .filter(agg => agg.enabled && agg.type)
-      .reduce((requestValuesAggs, agg: AggConfig) => {
-        const aggs = agg.getRequestAggs();
-        return aggs ? requestValuesAggs.concat(aggs) : requestValuesAggs;
-      }, []);
+      .reduce(
+        (requestValuesAggs, agg: AggConfig) => {
+          const aggs = agg.getRequestAggs();
+          return aggs ? requestValuesAggs.concat(aggs) : requestValuesAggs;
+        },
+        [] as AggConfig[]
+      );
     // move metrics to the end
     return _.sortBy(aggregations, (agg: AggConfig) =>
       agg.type.type === AggGroupNames.Metrics ? 1 : 0
@@ -281,10 +282,13 @@ export class AggConfigs {
    * @return {array[AggConfig]}
    */
   getResponseAggs(): AggConfig[] {
-    return this.getRequestAggs().reduce(function(responseValuesAggs, agg: AggConfig) {
-      const aggs = agg.getResponseAggs();
-      return aggs ? responseValuesAggs.concat(aggs) : responseValuesAggs;
-    }, []);
+    return this.getRequestAggs().reduce(
+      function(responseValuesAggs, agg: AggConfig) {
+        const aggs = agg.getResponseAggs();
+        return aggs ? responseValuesAggs.concat(aggs) : responseValuesAggs;
+      },
+      [] as AggConfig[]
+    );
   }
 
   /**

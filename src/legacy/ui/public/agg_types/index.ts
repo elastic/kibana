@@ -121,8 +121,8 @@ export const aggTypes = {
   ],
 };
 
-aggTypes.metrics.forEach(agg => (agg.type = 'metrics'));
-aggTypes.buckets.forEach(agg => (agg.type = 'buckets'));
+aggTypes.metrics.forEach(aggType => (aggType.type = 'metrics'));
+aggTypes.buckets.forEach(aggType => (aggType.type = 'buckets'));
 
 export { AggParam } from './agg_params';
 export { AggType } from './agg_type';

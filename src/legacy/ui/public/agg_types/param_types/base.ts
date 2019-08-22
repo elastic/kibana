@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { AggParam } from 'ui/agg_types';
-import { AggConfigs } from 'ui/vis/agg_configs';
+import { AggParam } from '../';
+import { AggConfigs } from '../../vis/agg_configs';
 import { AggConfig } from '../../vis';
 import { SearchSource } from '../../courier';
 
@@ -36,14 +36,13 @@ export class BaseParamType implements AggParam {
     aggConfigs?: AggConfigs,
     locals?: Record<string, any>
   ) => void;
-  serialize: (value: any) => any;
-  deserialize: (value: any, aggConfig: AggConfig) => any;
+  serialize: (value: any, aggConfig?: AggConfig) => any;
+  deserialize: (value: any, aggConfig?: AggConfig) => any;
   options: any[];
   valueType?: any;
 
   onChange?(agg: AggConfig): void;
   shouldShow?(agg: AggConfig): boolean;
-  makeOrderAgg?(agg: AggConfig, state: unknown): AggConfig;
 
   /**
    *  A function that will be called before an aggConfig is serialized and sent to ES.
@@ -84,7 +83,6 @@ export class BaseParamType implements AggParam {
     this.options = config.options;
     this.modifyAggConfigOnSearchRequestStart =
       config.modifyAggConfigOnSearchRequestStart || function() {};
-    this.makeOrderAgg = config.makeOrderAgg;
     this.valueType = config.valueType || config.type;
   }
 }

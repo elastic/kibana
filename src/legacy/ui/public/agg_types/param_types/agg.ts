@@ -24,7 +24,7 @@ export class AggParamType extends BaseParamType {
   // to work around circular dependency
   editorComponent = require('../controls/sub_agg');
 
-  makeAgg: (agg: AggConfig, state: unknown) => AggConfig;
+  makeAgg: (agg: AggConfig, state?: unknown) => AggConfig;
 
   constructor(config: Record<string, any>) {
     super(config);
@@ -42,7 +42,10 @@ export class AggParamType extends BaseParamType {
       };
     }
     if (!config.deserialize) {
-      this.deserialize = (state: unknown, agg: AggConfig): AggConfig => {
+      this.deserialize = (state: unknown, agg?: AggConfig): AggConfig => {
+        if (!agg) {
+          throw new Error('aggConfig was not provided to AggParamType deserialize function');
+        }
         return this.makeAgg(agg, state);
       };
     }

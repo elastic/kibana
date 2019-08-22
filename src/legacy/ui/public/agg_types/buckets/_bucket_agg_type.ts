@@ -17,21 +17,19 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { AggType } from '../agg_type';
-import { createLegacyClass } from '../../utils/legacy_class';
+import { AggType, AggTypeConfig } from '../agg_type';
+import { AggConfig } from '../../vis';
 
-createLegacyClass(BucketAggType).inherits(AggType);
-function BucketAggType(config) {
-  BucketAggType.Super.call(this, config);
+export class BucketAggType extends AggType {
+  getKey: (bucket: any, key: any, agg: AggConfig) => any;
 
-  if (_.isFunction(config.getKey)) {
-    this.getKey = config.getKey;
+  constructor(config: AggTypeConfig) {
+    super(config);
+
+    this.getKey =
+      config.getKey ||
+      ((bucket, key) => {
+        return key || bucket.key;
+      });
   }
 }
-
-BucketAggType.prototype.getKey = function (bucket, key) {
-  return key || bucket.key;
-};
-
-export { BucketAggType };

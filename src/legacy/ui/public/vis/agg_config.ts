@@ -25,13 +25,15 @@
  */
 
 import _ from 'lodash';
-// @ts-ignore
 import { i18n } from '@kbn/i18n';
-import { AggType } from '../agg_types';
+import { BucketAggType } from 'ui/agg_types/buckets/_bucket_agg_type';
+import { AggGroupNames } from './editors/default/agg_groups';
+import { AggType, FieldParamType } from '../agg_types';
 // @ts-ignore
 import { fieldFormats } from '../registry/field_formats';
 import { writeParams } from '../agg_types/agg_params';
 import { AggConfigs } from './agg_configs';
+import { Schema } from './editors/default/schemas';
 
 export interface AggConfigOptions {
   id: string;
@@ -40,6 +42,43 @@ export interface AggConfigOptions {
   schema: string;
   params: any;
 }
+
+const unknownSchema: Schema = {
+  name: 'unknown',
+  title: 'Unknown',
+  hideCustomLabel: true,
+  aggFilter: [],
+  min: 1,
+  max: 1,
+  params: [],
+  defaults: {},
+  editor: false,
+  group: AggGroupNames.Metrics,
+};
+
+const getTypeFromRegistry = (type: string): AggType => {
+  // We need to inline require here, since we're having a cyclic dependency
+  // from somewhere inside agg_types back to AggConfig.
+  const aggTypes = require('../agg_types').aggTypes;
+  const registeredType =
+    aggTypes.metrics.find((agg: AggType) => agg.name === type) ||
+    aggTypes.buckets.find((agg: AggType) => agg.name === type);
+
+  if (!registeredType) {
+    throw new Error('unknown type');
+  }
+
+  return registeredType;
+};
+
+const getSchemaFromRegistry = (schemas: any, schema: string): Schema => {
+  const registeredSchema = schemas.byName[schema];
+  if (!registeredSchema) {
+    throw new Error('unknown schema');
+  }
+
+  return registeredSchema;
+};
 
 export class AggConfig {
   /**
@@ -84,10 +123,10 @@ export class AggConfig {
   public params: any;
   public parent?: AggConfigs;
 
-  private __schema: any;
-  private __type: any;
+  private __schema: Schema;
+  private __type: AggType;
   private __typeDecorations: any;
-  private subAggs: any;
+  private subAggs: AggConfig[] = [];
 
   constructor(aggConfigs: AggConfigs, opts: AggConfigOptions) {
     this.aggConfigs = aggConfigs;
@@ -99,11 +138,16 @@ export class AggConfig {
     this.params = {};
 
     // setters
-    this.type = opts.type;
-    this.schema = opts.schema;
+    this.setType(opts.type);
+    this.setSchema(opts.schema);
 
     // set the params to the values from opts, or just to the defaults
     this.setParams(opts.params || {});
+
+    // @ts-ignore
+    this.__type = this.__type;
+    // @ts-ignore
+    this.__schema = this.__schema;
   }
 
   /**
@@ -211,7 +255,7 @@ export class AggConfig {
     configDsl[this.type.dslName || this.type.name] = output.params;
 
     // if the config requires subAggs, write them to the dsl as well
-    if (this.subAggs && !output.subAggs) output.subAggs = this.subAggs;
+    if (this.subAggs.length && !output.subAggs) output.subAggs = this.subAggs;
     if (output.subAggs) {
       const subDslLvl = configDsl.aggs || (configDsl.aggs = {});
       output.subAggs.forEach(function nestAdhocSubAggs(subAggConfig: any) {
@@ -252,7 +296,7 @@ export class AggConfig {
       id: this.id,
       enabled: this.enabled,
       type: this.type && this.type.name,
-      schema: this.schema && this.schema.name,
+      schema: _.get(this, 'schema.name', this.schema),
       params: outParams,
     };
   }
@@ -260,7 +304,7 @@ export class AggConfig {
   getAggParams() {
     return [
       ...(_.has(this, 'type.params') ? this.type.params : []),
-      ...(_.has(this, 'schema.params') ? this.schema.params : []),
+      ...(_.has(this, 'schema.params') ? (this.schema as Schema).params : []),
     ];
   }
 
@@ -277,7 +321,11 @@ export class AggConfig {
   }
 
   getKey(bucket: any, key: string) {
-    return this.type.getKey(bucket, key, this);
+    if (this.type instanceof BucketAggType) {
+      return (this.type as BucketAggType).getKey(bucket, key, this);
+    } else {
+      return '';
+    }
   }
 
   getFieldDisplayName() {
@@ -354,15 +402,6 @@ export class AggConfig {
       );
     }
 
-    if (_.isString(type)) {
-      // We need to inline require here, since we're having a cyclic dependency
-      // from somewhere inside agg_types back to AggConfig.
-      const aggTypes = require('../agg_types').aggTypes;
-      type =
-        aggTypes.metrics.find((agg: AggType) => agg.name === type) ||
-        aggTypes.buckets.find((agg: AggType) => agg.name === type);
-    }
-
     if (type && _.isFunction(type.decorateAggConfig)) {
       this.__typeDecorations = type.decorateAggConfig();
       Object.defineProperties(this, this.__typeDecorations);
@@ -370,7 +409,8 @@ export class AggConfig {
 
     this.__type = type;
 
-    const fieldParam = this.type && this.type.params.find((p: any) => p.type === 'field');
+    const fieldParam =
+      this.type && (this.type.params.find((p: any) => p.type === 'field') as FieldParamType);
     // @ts-ignore
     const availableFields = fieldParam
       ? fieldParam.getAvailableFields(this.getIndexPattern().fields)
@@ -385,15 +425,26 @@ export class AggConfig {
     });
   }
 
+  public setType(type: string | AggType) {
+    this.type = typeof type === 'string' ? getTypeFromRegistry(type) : type;
+  }
+
   public get schema() {
     return this.__schema;
   }
 
   public set schema(schema) {
-    if (_.isString(schema) && this.aggConfigs.schemas) {
-      schema = this.aggConfigs.schemas.byName[schema];
-    }
-
     this.__schema = schema;
+  }
+
+  public setSchema(schema: string | Schema) {
+    if (this.aggConfigs.schemas) {
+      this.schema =
+        typeof schema === 'string'
+          ? getSchemaFromRegistry(this.aggConfigs.schemas, schema)
+          : schema;
+    } else {
+      this.schema = unknownSchema;
+    }
   }
 }
