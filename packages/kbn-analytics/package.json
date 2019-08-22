@@ -3,21 +3,21 @@
   "private": true,
   "version": "1.0.0",
   "description": "Kibana Analytics tool",
-  "main": "target/index.js",
-  "types": "target/index.d.ts",
+  "main": "target/node/index.js",
+  "browser": "target/web/browser.js",
+  "types": "target/types/index.d.ts",
   "author": "Ahmad Bamieh <ahmadbamieh@gmail.com>",
   "license": "Apache-2.0",
   "scripts": {
-    "build:types": "tsc --emitDeclarationOnly",
-    "build:js": "babel src --out-dir target --delete-dir-on-start --extensions .ts,.js,.tsx",
-    "build": "yarn run build:types & yarn run build:js",
-    "kbn:bootstrap": "yarn build",
-    "kbn:watch": "yarn build:js --watch"
+    "build": "node scripts/build",
+    "kbn:bootstrap": "node scripts/build --source-maps",
+    "kbn:watch": "node scripts/build --source-maps --watch"
   },
   "devDependencies": {
-    "typescript": "3.5.1",
+    "@babel/cli": "7.4.4",
+    "@kbn/dev-utils": "1.0.0",
     "@kbn/babel-preset": "1.0.0",
-    "@babel/cli": "7.4.4"
+    "typescript": "3.5.1"
   },
   "dependencies": {
     "@kbn/dev-utils": "1.0.0"
