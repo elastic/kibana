@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { get, last } from 'lodash';
+import { get } from 'lodash';
 import React, { useState, Fragment } from 'react';
 import { withUptimeGraphQL, UptimeGraphQLQueryProps } from '../../higher_order';
 import { monitorStatesQuery } from '../../../queries/monitor_states_query';
@@ -66,8 +66,12 @@ export const MonitorListComponent = (props: Props) => {
   const nextPagePagination = get<string>(data, 'monitorStates.nextPagePagination');
   const prevPagePagination = get<string>(data, 'monitorStates.prevPagePagination');
 
-  const paginationLinkForSummary = (pagination: string, direction: string = 'next') => {
+  const paginationLinkForSummary = (pagination: string | null, direction: string = 'next') => {
     const icon = direction === 'prev' ? 'arrowLeft' : 'arrowRight';
+
+    if (!pagination) {
+      return <EuiIcon type={icon} color={'ghost'} />;
+    }
 
     return (
       <OverviewPageLink pagination={pagination}>
@@ -235,8 +239,8 @@ export const MonitorListComponent = (props: Props) => {
           <EuiFlexGroup>
             <EuiFlexItem>
               <span>
-                {prevPagePagination && paginationLinkForSummary(prevPagePagination, 'prev')}
-                {nextPagePagination && paginationLinkForSummary(nextPagePagination, 'next')}
+                {paginationLinkForSummary(prevPagePagination, 'prev')}
+                {paginationLinkForSummary(nextPagePagination, 'next')}
               </span>
             </EuiFlexItem>
           </EuiFlexGroup>

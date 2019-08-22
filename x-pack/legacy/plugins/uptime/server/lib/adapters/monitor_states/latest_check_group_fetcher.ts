@@ -41,7 +41,7 @@ export const fetchMonitorLocCheckGroups = async (
       break; // No more items to fetch
     }
     // On our first item set the previous pagination to be items before this if they exist
-    if (!paginationBefore) {
+    if (items.length === 0) {
       const reverseFetcher = fetcher.reverse();
       paginationBefore =
         reverseFetcher && (await reverseFetcher.peek())
@@ -73,11 +73,9 @@ export const fetchMonitorLocCheckGroups = async (
 
   const ssAligned = searchSortAligned(queryContext.pagination);
 
-  console.log('SSALIGN', ssAligned, queryContext.pagination);
   if (!ssAligned) {
     items.reverse();
   }
-  console.log('ALIT', items);
 
   return {
     items,
@@ -120,8 +118,10 @@ export class LatestCheckGroupFetcher {
   // Returns a copy of this fetcher that goes backwards, not forwards from the current positon
   reverse(): LatestCheckGroupFetcher | null {
     const reverseContext = Object.assign({}, this.queryContext);
+    const current = this.current();
+
     reverseContext.pagination = {
-      cursorKey: this.queryContext.pagination.cursorKey,
+      cursorKey: current ? { monitor_id: current.monitorId, location: current.location } : null,
       sortOrder: this.queryContext.pagination.sortOrder,
       cursorDirection:
         this.queryContext.pagination.cursorDirection === CursorDirection.AFTER
@@ -129,7 +129,6 @@ export class LatestCheckGroupFetcher {
           : CursorDirection.AFTER,
     };
 
-    const current = this.current();
     return current ? new LatestCheckGroupFetcher(reverseContext, [current], 0) : null;
   }
 
@@ -328,13 +327,4 @@ const searchSortAligned = (pagination: CursorPagination): boolean => {
   } else {
     return pagination.sortOrder === SortOrder.DESC;
   }
-};
-
-const reorderResults = <T>(results: T[], pagination: CursorPagination): T[] => {
-  if (searchSortAligned(pagination)) {
-    return results;
-  }
-
-  results.reverse();
-  return results;
 };
