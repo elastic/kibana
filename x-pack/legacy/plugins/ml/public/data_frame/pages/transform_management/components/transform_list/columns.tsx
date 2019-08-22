@@ -61,9 +61,10 @@ export const getTaskStateBadge = (
 
 export const getColumns = (
   expandedRowItemIds: DataFrameTransformId[],
-  setExpandedRowItemIds: React.Dispatch<React.SetStateAction<DataFrameTransformId[]>>
+  setExpandedRowItemIds: React.Dispatch<React.SetStateAction<DataFrameTransformId[]>>,
+  transformSelection: DataFrameTransformListRow[]
 ) => {
-  const actions = getActions();
+  const actions = getActions({ forceDisable: transformSelection.length > 0 });
 
   function toggleDetails(item: DataFrameTransformListRow) {
     const index = expandedRowItemIds.indexOf(item.config.id);

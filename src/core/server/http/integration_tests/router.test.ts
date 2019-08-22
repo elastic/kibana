@@ -29,6 +29,7 @@ import { CoreContext } from '../../core_context';
 import { Env } from '../../config';
 import { getEnvOptions } from '../../config/__mocks__/env';
 import { configServiceMock } from '../../config/config_service.mock';
+import { contextServiceMock } from '../../context/context_service.mock';
 import { loggingServiceMock } from '../../logging/logging_service.mock';
 
 let server: HttpService;
@@ -37,7 +38,11 @@ let logger: ReturnType<typeof loggingServiceMock.create>;
 let env: Env;
 let coreContext: CoreContext;
 const configService = configServiceMock.create();
+const contextSetup = contextServiceMock.createSetupContract();
 
+const setupDeps = {
+  context: contextSetup,
+};
 configService.atPath.mockReturnValue(
   new BehaviorSubject({
     hosts: ['localhost'],
@@ -63,7 +68,7 @@ afterEach(async () => {
 
 describe('Handler', () => {
   it("Doesn't expose error details if handler throws", async () => {
-    const { server: innerServer, createRouter } = await server.setup();
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -86,7 +91,7 @@ describe('Handler', () => {
   });
 
   it('returns 500 Server error if handler throws Boom error', async () => {
-    const { server: innerServer, createRouter } = await server.setup();
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -109,7 +114,7 @@ describe('Handler', () => {
   });
 
   it('returns 500 Server error if handler returns unexpected result', async () => {
-    const { server: innerServer, createRouter } = await server.setup();
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
 
     const router = createRouter('/');
     router.get({ path: '/', validate: false }, (context, req, res) => 'ok' as any);
@@ -130,7 +135,7 @@ describe('Handler', () => {
   });
 
   it('returns 400 Bad request if request validation failed', async () => {
-    const { server: innerServer, createRouter } = await server.setup();
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
     router.get(
@@ -162,7 +167,7 @@ describe('Handler', () => {
 describe('Response factory', () => {
   describe('Success', () => {
     it('supports answering with json object', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -180,7 +185,7 @@ describe('Response factory', () => {
     });
 
     it('supports answering with string', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -198,7 +203,7 @@ describe('Response factory', () => {
     });
 
     it('supports answering with undefined', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -213,7 +218,7 @@ describe('Response factory', () => {
     });
 
     it('supports answering with Stream', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -240,7 +245,7 @@ describe('Response factory', () => {
     });
 
     it('supports answering with chunked Stream', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -266,7 +271,7 @@ describe('Response factory', () => {
     });
 
     it('supports answering with Buffer', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -293,7 +298,7 @@ describe('Response factory', () => {
     });
 
     it('supports answering with Buffer text', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -320,7 +325,7 @@ describe('Response factory', () => {
     });
 
     it('supports configuring standard headers', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -343,7 +348,7 @@ describe('Response factory', () => {
     });
 
     it('supports configuring non-standard headers', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -368,7 +373,7 @@ describe('Response factory', () => {
     });
 
     it('accepted headers are case-insensitive.', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -390,7 +395,7 @@ describe('Response factory', () => {
     });
 
     it('accept array of headers', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -412,7 +417,7 @@ describe('Response factory', () => {
     });
 
     it('throws if given invalid json object as response payload', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -432,7 +437,7 @@ describe('Response factory', () => {
     });
 
     it('200 OK with body', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -450,7 +455,7 @@ describe('Response factory', () => {
     });
 
     it('202 Accepted with body', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -468,7 +473,7 @@ describe('Response factory', () => {
     });
 
     it('204 No content', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -487,7 +492,7 @@ describe('Response factory', () => {
 
   describe('Redirection', () => {
     it('302 supports redirection to configured URL', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -512,7 +517,7 @@ describe('Response factory', () => {
     });
 
     it('throws if redirection url not provided', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -542,7 +547,7 @@ describe('Response factory', () => {
 
   describe('Error', () => {
     it('400 Bad request', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -564,7 +569,7 @@ describe('Response factory', () => {
     });
 
     it('400 Bad request with default message', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -585,7 +590,7 @@ describe('Response factory', () => {
     });
 
     it('400 Bad request with additional data', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -611,7 +616,7 @@ describe('Response factory', () => {
     });
 
     it('401 Unauthorized', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -635,7 +640,7 @@ describe('Response factory', () => {
     });
 
     it('401 Unauthorized with default message', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -652,7 +657,7 @@ describe('Response factory', () => {
     });
 
     it('403 Forbidden', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -670,7 +675,7 @@ describe('Response factory', () => {
     });
 
     it('403 Forbidden with default message', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -687,7 +692,7 @@ describe('Response factory', () => {
     });
 
     it('404 Not Found', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -705,7 +710,7 @@ describe('Response factory', () => {
     });
 
     it('404 Not Found with default message', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -722,7 +727,7 @@ describe('Response factory', () => {
     });
 
     it('409 Conflict', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -740,7 +745,7 @@ describe('Response factory', () => {
     });
 
     it('409 Conflict with default message', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -757,7 +762,7 @@ describe('Response factory', () => {
     });
 
     it('Custom error response', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
 
       const router = createRouter('/');
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -782,7 +787,7 @@ describe('Response factory', () => {
     });
 
     it('Custom error response for server error', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -808,7 +813,7 @@ describe('Response factory', () => {
     });
 
     it('Custom error response for Boom server error', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -834,7 +839,7 @@ describe('Response factory', () => {
     });
 
     it('Custom error response requires error status code', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -868,7 +873,7 @@ describe('Response factory', () => {
 
   describe('Custom', () => {
     it('creates success response', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -891,7 +896,7 @@ describe('Response factory', () => {
     });
 
     it('creates redirect response', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -914,7 +919,7 @@ describe('Response factory', () => {
     });
 
     it('throws if redirects without location header to be set', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -941,7 +946,7 @@ describe('Response factory', () => {
     });
 
     it('creates error response', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -962,7 +967,7 @@ describe('Response factory', () => {
     });
 
     it('creates error response with additional data', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -990,7 +995,7 @@ describe('Response factory', () => {
     });
 
     it('creates error response with additional data and error object', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -1018,7 +1023,7 @@ describe('Response factory', () => {
     });
 
     it('creates error response with Boom error', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -1039,7 +1044,7 @@ describe('Response factory', () => {
     });
 
     it("Doesn't log details of created 500 Server error response", async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -1060,7 +1065,7 @@ describe('Response factory', () => {
     });
 
     it('throws an error if not valid error is provided', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -1087,7 +1092,7 @@ describe('Response factory', () => {
     });
 
     it('throws if an error not provided', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -1113,7 +1118,7 @@ describe('Response factory', () => {
     });
 
     it('throws an error if statusCode is not specified', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -1138,7 +1143,7 @@ describe('Response factory', () => {
     });
 
     it('throws an error if statusCode is not valid', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {

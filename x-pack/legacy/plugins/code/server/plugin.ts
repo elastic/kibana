@@ -90,6 +90,7 @@ export class CodePlugin {
       catalogue: [], // TODO add catalogue here
       privileges: {
         all: {
+          excludeFromBasePrivileges: true,
           api: ['code_user', 'code_admin'],
           savedObject: {
             all: [],

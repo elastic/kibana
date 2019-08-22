@@ -43,12 +43,16 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
 
   async function loadChart() {
     setLoadingData(true);
-    const resp = await chartLoader.loadEventRateChart(
-      jobCreator.start,
-      jobCreator.end,
-      chartInterval.getInterval().asMilliseconds()
-    );
-    setEventRateChartData(resp);
+    try {
+      const resp = await chartLoader.loadEventRateChart(
+        jobCreator.start,
+        jobCreator.end,
+        chartInterval.getInterval().asMilliseconds()
+      );
+      setEventRateChartData(resp);
+    } catch (error) {
+      setEventRateChartData([]);
+    }
     setLoadingData(false);
   }
 
