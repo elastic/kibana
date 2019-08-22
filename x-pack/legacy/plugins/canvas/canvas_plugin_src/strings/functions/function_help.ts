@@ -59,6 +59,9 @@ import { help as replace } from './replace';
 import { help as revealImage } from './revealImage';
 import { help as rounddate } from './rounddate';
 import { help as rowCount } from './rowCount';
+import { help as savedMap } from './saved_map';
+import { help as savedSearch } from './saved_search';
+import { help as savedVisualization } from './saved_visualization';
 import { help as seriesStyle } from './seriesStyle';
 import { help as shape } from './shape';
 import { help as sort } from './sort';
@@ -204,6 +207,9 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   revealImage,
   rounddate,
   rowCount,
+  savedMap,
+  savedSearch,
+  savedVisualization,
   seriesStyle,
   shape,
   sort,

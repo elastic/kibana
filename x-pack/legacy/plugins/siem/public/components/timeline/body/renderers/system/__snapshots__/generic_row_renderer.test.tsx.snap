@@ -6,9 +6,7 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
     <span>
       some children
     </span>
-    <RowRendererContainer
-      width={100}
-    >
+    <RowRendererContainer>
       <SystemGenericFileDetails
         browserFields={Object {}}
         contextId="user_login"
@@ -109,9 +107,7 @@ exports[`GenericRowRenderer #createGenericSystemRowRenderer renders correctly ag
     <span>
       some children
     </span>
-    <RowRendererContainer
-      width={100}
-    >
+    <RowRendererContainer>
       <SystemGenericDetails
         browserFields={Object {}}
         contextId="process_started"
