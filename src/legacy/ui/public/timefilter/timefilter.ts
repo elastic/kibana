@@ -32,6 +32,14 @@ import uiRoutes from '../routes';
 import { parseQueryString } from './lib/parse_querystring';
 import { calculateBounds, getTime } from './get_time';
 
+// Timefilter accepts moment input but always returns string output
+export type InputTimeRange =
+  | TimeRange
+  | {
+      from: Moment;
+      to: Moment;
+    };
+
 export class Timefilter {
   // Fired when isTimeRangeSelectorEnabled \ isAutoRefreshSelectorEnabled are toggled
   private enabledUpdated$ = new BehaviorSubject(false);
@@ -74,7 +82,7 @@ export class Timefilter {
     return this.fetch$.asObservable();
   };
 
-  getTime = () => {
+  getTime = (): TimeRange => {
     const { from, to } = this._time;
     return {
       ...this._time,
@@ -90,14 +98,7 @@ export class Timefilter {
    * @property {string|moment} time.from
    * @property {string|moment} time.to
    */
-  setTime = (
-    time:
-      | TimeRange
-      | {
-          from: Moment;
-          to: Moment;
-        }
-  ) => {
+  setTime = (time: InputTimeRange) => {
     // Object.assign used for partially composed updates
     const newTime = Object.assign(this.getTime(), time);
     if (areTimeRangesDifferent(this.getTime(), newTime)) {
