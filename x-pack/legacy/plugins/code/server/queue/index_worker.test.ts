@@ -6,12 +6,11 @@
 
 import sinon from 'sinon';
 
-import { WorkerReservedProgress } from '../../model';
+import { IndexerType, WorkerReservedProgress } from '../../model';
 import { GitOperations } from '../git_operations';
-import { IndexerFactory } from '../indexer';
 import {
   RepositoryGitStatusReservedField,
-  RepositoryLspIndexStatusReservedField,
+  RepositoryIndexStatusReservedField,
 } from '../indexer/schema';
 import { CancellationToken, EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
@@ -43,7 +42,7 @@ test('Execute index job.', async () => {
   const getSpy = sinon.fake.returns(
     Promise.resolve({
       _source: {
-        [RepositoryLspIndexStatusReservedField]: {
+        [RepositoryIndexStatusReservedField]: {
           uri: 'github.com/elastic/kibana',
           progress: WorkerReservedProgress.COMPLETED,
           timestamp: new Date(),
@@ -74,11 +73,13 @@ test('Execute index job.', async () => {
 
   const cToken = new CancellationToken();
 
+  const indexerFactoryMap = new Map();
+  indexerFactoryMap.set(IndexerType.COMMIT, indexerFactory);
   const indexWorker = new IndexWorker(
     esQueue as Esqueue,
     log,
     esClient as EsClient,
-    [(indexerFactory as any) as IndexerFactory],
+    indexerFactoryMap,
     {} as GitOperations,
     (cancellationService as any) as CancellationSerivce
   );
@@ -114,7 +115,7 @@ test('Execute index job and then cancel.', async () => {
   const getSpy = sinon.fake.returns(
     Promise.resolve({
       _source: {
-        [RepositoryLspIndexStatusReservedField]: {
+        [RepositoryIndexStatusReservedField]: {
           uri: 'github.com/elastic/kibana',
           progress: WorkerReservedProgress.COMPLETED,
           timestamp: new Date(),
@@ -145,11 +146,13 @@ test('Execute index job and then cancel.', async () => {
 
   const cToken = new CancellationToken();
 
+  const indexerFactoryMap = new Map();
+  indexerFactoryMap.set(IndexerType.COMMIT, indexerFactory);
   const indexWorker = new IndexWorker(
     esQueue as Esqueue,
     log,
     esClient as EsClient,
-    [(indexerFactory as any) as IndexerFactory],
+    indexerFactoryMap,
     {} as GitOperations,
     (cancellationService as any) as CancellationSerivce
   );
@@ -189,7 +192,7 @@ test('Index job skipped/deduplicated if revision matches', async () => {
   const getSpy = sinon.fake.returns(
     Promise.resolve({
       _source: {
-        [RepositoryLspIndexStatusReservedField]: {
+        [RepositoryIndexStatusReservedField]: {
           uri: 'github.com/elastic/kibana',
           progress: 50,
           timestamp: new Date(),
@@ -221,11 +224,13 @@ test('Index job skipped/deduplicated if revision matches', async () => {
 
   const cToken = new CancellationToken();
 
+  const indexerFactoryMap = new Map();
+  indexerFactoryMap.set(IndexerType.COMMIT, indexerFactory);
   const indexWorker = new IndexWorker(
     esQueue as Esqueue,
     log,
     esClient as EsClient,
-    [(indexerFactory as any) as IndexerFactory],
+    indexerFactoryMap,
     {} as GitOperations,
     (cancellationService as any) as CancellationSerivce
   );
@@ -262,7 +267,7 @@ test('Index job continue if revision matches and checkpoint found', async () => 
   const getSpy = sinon.fake.returns(
     Promise.resolve({
       _source: {
-        [RepositoryLspIndexStatusReservedField]: {
+        [RepositoryIndexStatusReservedField]: {
           uri: 'github.com/elastic/kibana',
           progress: 50,
           timestamp: new Date(),
@@ -300,11 +305,13 @@ test('Index job continue if revision matches and checkpoint found', async () => 
 
   const cToken = new CancellationToken();
 
+  const indexerFactoryMap = new Map();
+  indexerFactoryMap.set(IndexerType.COMMIT, indexerFactory);
   const indexWorker = new IndexWorker(
     esQueue as Esqueue,
     log,
     esClient as EsClient,
-    [(indexerFactory as any) as IndexerFactory],
+    indexerFactoryMap,
     {} as GitOperations,
     (cancellationService as any) as CancellationSerivce
   );
@@ -340,7 +347,7 @@ test('On index job enqueued.', async () => {
     esQueue as Esqueue,
     log,
     esClient as EsClient,
-    [],
+    new Map(),
     {} as GitOperations,
     {} as CancellationSerivce
   );
@@ -382,7 +389,7 @@ test('On index job completed.', async () => {
     esQueue as Esqueue,
     log,
     esClient as EsClient,
-    [],
+    new Map(),
     {} as GitOperations,
     {} as CancellationSerivce
   );
@@ -432,7 +439,7 @@ test('On index job completed because of cancellation.', async () => {
     esQueue as Esqueue,
     log,
     esClient as EsClient,
-    [],
+    new Map(),
     {} as GitOperations,
     {} as CancellationSerivce
   );
@@ -486,7 +493,7 @@ test('On index job completed with a different revision in git status.', async ()
     {} as Esqueue,
     log,
     esClient as EsClient,
-    [],
+    new Map(),
     {} as GitOperations,
     {} as CancellationSerivce
   );
