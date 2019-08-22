@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "_ml/data_frame/analytics/{id}"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current/delete-dfanalytics.html"
   }
 }

@@ -15,15 +15,6 @@ export abstract class EmbedProgram implements ControlledProgram {
   private _killed: boolean = false;
   protected constructor(readonly log: Logger) {
     this.pid = globalPid++;
-    this.start().then(
-      () => {
-        this.log.debug('started embed program: ' + this.pid);
-      },
-      err => {
-        this.log.error('embed program launch failed.');
-        this.log.debug(err);
-      }
-    );
   }
 
   readonly pid: number;
