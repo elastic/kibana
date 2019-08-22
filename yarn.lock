@@ -14275,6 +14275,14 @@ growly@^1.3.0:
   resolved "https://registry.yarnpkg.com/growly/-/growly-1.3.0.tgz#f10748cbe76af964b7c96c93c6bcc28af120c081"
   integrity sha1-8QdIy+dq+WS3yWyTxrzCivEgwIE=
 
+grunt-available-tasks@^0.6.3:
+  version "0.6.3"
+  resolved "https://registry.yarnpkg.com/grunt-available-tasks/-/grunt-available-tasks-0.6.3.tgz#5be7f6fdda776b80a7b272a21f68bd3050f82260"
+  integrity sha1-W+f2/dp3a4CnsnKiH2i9MFD4ImA=
+  dependencies:
+    chalk "^1.1.1"
+    lodash "^4.10.0"
+
 grunt-babel@^8.0.0:
   version "8.0.0"
   resolved "https://registry.yarnpkg.com/grunt-babel/-/grunt-babel-8.0.0.tgz#92ef63aafadf938c488dc2f926ac9846e0c93d1b"
@@ -18701,7 +18709,7 @@ lodash@^3.10.1, lodash@^3.3.1, lodash@~3.10.1:
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-3.10.1.tgz#5bf45e8e49ba4189e17d482789dfd15bd140b7b6"
   integrity sha1-W/Rejkm6QYnhfUgnid/RW9FAt7Y=
 
-lodash@^4.16.4:
+lodash@^4.10.0, lodash@^4.16.4:
   version "4.17.15"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
   integrity sha512-8xOcRHvCjnocdS5cpwXQXVzmmh5e5+saE2QGoeQmbKmRS6J3VQppPOIt0MnmE+4xlZoumy0GPG0D0MVIQbNA1A==

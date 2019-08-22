@@ -25,7 +25,17 @@ module.exports = function (grunt) {
   // grunt.config.get() within the config files
   const config = {
     root: __dirname,
+    availabletasks: {
+      tasks: {
+        options: {
+          filter: 'exclude',
+          tasks: ['availabletasks', 'tasks']
+        }
+      }
+    },
   };
+
+  grunt.registerTask('tasks', ['availabletasks']);
 
   grunt.config.merge(config);
 
