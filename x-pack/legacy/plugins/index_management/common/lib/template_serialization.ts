@@ -10,6 +10,11 @@ const parseJson = (jsonString: string) => {
 
   try {
     parsedJson = JSON.parse(jsonString);
+
+    // Do not send empty object
+    if (!hasEntries(parsedJson)) {
+      parsedJson = undefined;
+    }
   } catch (e) {
     // Silently swallow parsing errors since parsing validation is done on client
     // so we should never reach this point
@@ -18,7 +23,7 @@ const parseJson = (jsonString: string) => {
   return parsedJson;
 };
 
-const hasEntries = (data?: Partial<Template>) => {
+const hasEntries = (data?: object) => {
   return data ? Object.entries(data).length > 0 : false;
 };
 

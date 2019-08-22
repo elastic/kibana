@@ -11,8 +11,6 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiLink,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';

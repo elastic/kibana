@@ -11,8 +11,7 @@ import { i18n } from '@kbn/i18n';
 interface Props {
   currentStep: number;
   maxCompletedStep: number;
-  updateCurrentStep: (step: number, shouldValidate?: boolean) => void;
-  isStepValid: boolean;
+  updateCurrentStep: (step: number, maxCompletedStep: number) => void;
 }
 
 const stepNamesMap: { [key: number]: string } = {
@@ -37,15 +36,13 @@ export const TemplateSteps: React.FunctionComponent<Props> = ({
   currentStep,
   maxCompletedStep,
   updateCurrentStep,
-  isStepValid,
 }) => {
   const steps = [1, 2, 3, 4, 5].map(step => {
     return {
       title: stepNamesMap[step],
       isComplete: maxCompletedStep >= step,
       isSelected: currentStep === step,
-      disabled: isStepValid ? false : step > currentStep + 1,
-      onClick: () => updateCurrentStep(step, step !== 5), // should validate on all steps except step 5 (review)
+      onClick: () => updateCurrentStep(step, step - 1),
     };
   });
 

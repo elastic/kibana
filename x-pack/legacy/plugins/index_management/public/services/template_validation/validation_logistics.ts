@@ -40,6 +40,23 @@ const validateIndexPattern = (indexPattern: string) => {
   }
 };
 
+export const INVALID_NAME_CHARS = ['"', '*', '\\', '<', '|', ',', '>', '/', '?'];
+
+const doesStringIncludeChar = (string: string, chars: string[]) => {
+  let containsChar = false;
+  let invalidChar: string | null = null;
+
+  for (let i = 0; i < chars.length; i++) {
+    if (string.includes(chars[i])) {
+      containsChar = true;
+      invalidChar = chars[i];
+      break;
+    }
+  }
+
+  return { containsChar, invalidChar };
+};
+
 export const validateLogistics = (template: Template): TemplateValidation => {
   const { name, indexPatterns } = template;
 
@@ -59,22 +76,6 @@ export const validateLogistics = (template: Template): TemplateValidation => {
       })
     );
   } else {
-    if (name.endsWith('*')) {
-      validation.errors.name.push(
-        i18n.translate('xpack.idxMgmt.templateValidation.templateNameWildcardError', {
-          defaultMessage: "A template name must not end with '*'.",
-        })
-      );
-    }
-
-    if (name.includes(',')) {
-      validation.errors.name.push(
-        i18n.translate('xpack.idxMgmt.templateValidation.templateNameCommaError', {
-          defaultMessage: 'Commas are not allowed in a template name.',
-        })
-      );
-    }
-
     if (name.includes(' ')) {
       validation.errors.name.push(
         i18n.translate('xpack.idxMgmt.templateValidation.templateNameSpacesError', {
@@ -89,6 +90,25 @@ export const validateLogistics = (template: Template): TemplateValidation => {
           defaultMessage: 'A template name must not start with an underscore.',
         })
       );
+    }
+
+    if (name.startsWith('.')) {
+      validation.errors.name.push(
+        i18n.translate('xpack.idxMgmt.templateValidation.templateNamePeriodError', {
+          defaultMessage: 'A template name must not start with a period.',
+        })
+      );
+    }
+
+    const { containsChar, invalidChar } = doesStringIncludeChar(name, INVALID_NAME_CHARS);
+
+    if (containsChar) {
+      validation.errors.name = [
+        i18n.translate('xpack.idxMgmt.templateValidation.templateNameInvalidaCharacterError', {
+          defaultMessage: 'A template name must not contain the character "{invalidChar}"',
+          values: { invalidChar },
+        }),
+      ];
     }
   }
 

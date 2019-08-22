@@ -3,10 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Fragment } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiPageBody, EuiPageContent, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiPageBody, EuiPageContent, EuiTitle, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { BASE_PATH } from '../../../common/constants';
 import { setBreadcrumbs } from '../../services/set_breadcrumbs';
 import { loadIndexTemplate, updateTemplate } from '../../services/api';
@@ -45,7 +45,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
       return;
     }
 
-    history.push(`${BASE_PATH}templates/${name}`);
+    history.push(`${BASE_PATH}templates/${encodeURIComponent(name)}`);
   };
 
   const clearSaveError = () => {
@@ -77,15 +77,40 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
       />
     );
   } else if (template) {
+    const { name: templateName } = template;
+    const isSystemTemplate = templateName.startsWith('.');
+
     content = (
-      <TemplateForm
-        template={template}
-        onSave={onSave}
-        isSaving={isSaving}
-        saveError={saveError}
-        clearSaveError={clearSaveError}
-        isEditing={true}
-      />
+      <Fragment>
+        {isSystemTemplate && (
+          <Fragment>
+            <EuiCallOut
+              title={
+                <FormattedMessage
+                  id="xpack.idxMgmt.templateEdit.systemTemplateWarningTitle"
+                  defaultMessage="Editing a system template can break Kibana"
+                />
+              }
+              color="danger"
+              iconType="alert"
+            >
+              <FormattedMessage
+                id="xpack.idxMgmt.templateEdit.systemTemplateWarningDescription"
+                defaultMessage="System templates are critical for internal operations."
+              />
+            </EuiCallOut>
+            <EuiSpacer size="l" />
+          </Fragment>
+        )}
+        <TemplateForm
+          template={template}
+          onSave={onSave}
+          isSaving={isSaving}
+          saveError={saveError}
+          clearSaveError={clearSaveError}
+          isEditing={true}
+        />
+      </Fragment>
     );
   }
 

@@ -144,7 +144,7 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
           helpText={
             <FormattedMessage
               id="xpack.idxMgmt.templateForm.stepLogistics.fieldIndexPatternsHelpText"
-              defaultMessage="Must match at least one index. Spaces and the characters {invalidCharactersList} are not allowed."
+              defaultMessage="Spaces and the characters {invalidCharactersList} are not allowed."
               values={{
                 invalidCharactersList: <strong>{indexPatternInvalidCharacters}</strong>,
               }}

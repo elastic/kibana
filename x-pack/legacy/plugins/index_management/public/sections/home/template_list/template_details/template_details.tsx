@@ -25,6 +25,7 @@ import {
   EuiContextMenuItem,
   EuiText,
   EuiIcon,
+  EuiContextMenu,
 } from '@elastic/eui';
 import {
   UIM_TEMPLATE_DETAIL_PANEL_MAPPINGS_TAB,
@@ -54,39 +55,27 @@ const SETTINGS_TAB_ID = 'settings';
 const TABS = [
   {
     id: SUMMARY_TAB_ID,
-    name: (
-      <FormattedMessage
-        id="xpack.idxMgmt.templateDetails.summaryTabTitle"
-        defaultMessage="Summary"
-      />
-    ),
+    name: i18n.translate('xpack.idxMgmt.templateDetails.summaryTabTitle', {
+      defaultMessage: 'Summary',
+    }),
   },
   {
     id: SETTINGS_TAB_ID,
-    name: (
-      <FormattedMessage
-        id="xpack.idxMgmt.templateDetails.settingsTabTitle"
-        defaultMessage="Settings"
-      />
-    ),
+    name: i18n.translate('xpack.idxMgmt.templateDetails.settingsTabTitle', {
+      defaultMessage: 'Settings',
+    }),
   },
   {
     id: MAPPINGS_TAB_ID,
-    name: (
-      <FormattedMessage
-        id="xpack.idxMgmt.templateDetails.mappingsTabTitle"
-        defaultMessage="Mappings"
-      />
-    ),
+    name: i18n.translate('xpack.idxMgmt.templateDetails.mappingsTabTitle', {
+      defaultMessage: 'Mappings',
+    }),
   },
   {
     id: ALIASES_TAB_ID,
-    name: (
-      <FormattedMessage
-        id="xpack.idxMgmt.templateDetails.aliasesTabTitle"
-        defaultMessage="Aliases"
-      />
-    ),
+    name: i18n.translate('xpack.idxMgmt.templateDetails.aliasesTabTitle', {
+      defaultMessage: 'Aliases',
+    }),
   },
 ];
 
@@ -121,37 +110,25 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
 
   const contextMenuItems = [
     {
-      type: 'edit',
-      label: (
-        <FormattedMessage
-          id="xpack.idxMgmt.templateDetails.editButtonLabel"
-          defaultMessage="Edit"
-        />
-      ),
-      icon: <EuiIcon type="pencil" />,
-      handleClick: () => editTemplate(templateName),
+      name: i18n.translate('xpack.idxMgmt.templateDetails.editButtonLabel', {
+        defaultMessage: 'Edit',
+      }),
+      icon: 'pencil',
+      onClick: () => editTemplate(templateName),
     },
     {
-      type: 'clone',
-      icon: <EuiIcon type="copy" />,
-      label: (
-        <FormattedMessage
-          id="xpack.idxMgmt.templateDetails.cloneButtonLabel"
-          defaultMessage="Clone"
-        />
-      ),
-      handleClick: () => cloneTemplate(templateName),
+      name: i18n.translate('xpack.idxMgmt.templateDetails.cloneButtonLabel', {
+        defaultMessage: 'Clone',
+      }),
+      icon: 'copy',
+      onClick: () => cloneTemplate(templateName),
     },
     {
-      type: 'delete',
-      icon: <EuiIcon type="trash" />,
-      label: (
-        <FormattedMessage
-          id="xpack.idxMgmt.templateDetails.deleteButtonLabel"
-          defaultMessage="Delete"
-        />
-      ),
-      handleClick: () => setTemplateToDelete([templateName]),
+      name: i18n.translate('xpack.idxMgmt.templateDetails.deleteButtonLabel', {
+        defaultMessage: 'Delete',
+      }),
+      icon: 'trash',
+      onClick: () => setTemplateToDelete([templateName]),
     },
   ];
 
@@ -278,36 +255,24 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
                   isOpen={isPopoverOpen}
                   closePopover={() => setIsPopOverOpen(false)}
                   panelPaddingSize="none"
-                  anchorPosition="downCenter"
+                  withTitle
+                  anchorPosition="rightUp"
+                  repositionOnScroll
                 >
-                  <EuiContextMenuPanel
-                    title={i18n.translate(
-                      'xpack.idxMgmt.templateDetails.manageContextMenuPanelTitle',
+                  <EuiContextMenu
+                    initialPanelId={0}
+                    panels={[
                       {
-                        defaultMessage: 'Template options',
-                      }
-                    )}
-                    items={contextMenuItems.map(({ type, handleClick, label, icon }) => {
-                      return (
-                        <EuiContextMenuItem
-                          key={type}
-                          data-test-subj={`${type}TemplateLink`}
-                          onClick={() => {
-                            setIsPopOverOpen(false);
-                            handleClick();
-                          }}
-                        >
-                          <EuiFlexGroup alignItems="center">
-                            <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
-                            <EuiFlexItem grow={false}>
-                              <EuiText size="m">
-                                <span>{label}</span>
-                              </EuiText>
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        </EuiContextMenuItem>
-                      );
-                    })}
+                        id: 0,
+                        title: i18n.translate(
+                          'xpack.idxMgmt.templateDetails.manageContextMenuPanelTitle',
+                          {
+                            defaultMessage: 'Template options',
+                          }
+                        ),
+                        items: contextMenuItems,
+                      },
+                    ]}
                   />
                 </EuiPopover>
               </EuiFlexItem>

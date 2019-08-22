@@ -95,14 +95,11 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
     setTemplate(newTemplate);
   };
 
-  const handleStepChange = (newCurrentStep: number, newMaxCompletedStep: number) => {
-    setCurrentStep(newCurrentStep);
-    setMaxCompletedStep(newMaxCompletedStep);
-    clearSaveError();
-  };
+  const updateCurrentStep = (nextStep: number, nextMaxCompletedStep: number) => {
+    // All steps needs validation, except for the last step
+    const shouldValidate = currentStep !== lastStep;
 
-  const updateCurrentStep = (step: number, shouldValidate?: boolean) => {
-    if (shouldValidate && currentStep < 5) {
+    if (shouldValidate) {
       const stepValidation = validateStep(template);
 
       const { isValid: isCurrentStepValid } = stepValidation;
@@ -116,40 +113,25 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
 
       setValidation(newValidation);
 
-      // If step is invalid and the selected step is > current step, do not let user to proceed
-      if (!isCurrentStepValid && step > currentStep) {
+      // If step is invalid do not let user proceed
+      if (!isCurrentStepValid) {
         return;
       }
     }
 
-    handleStepChange(step, step - 1);
+    setCurrentStep(nextStep);
+    setMaxCompletedStep(nextMaxCompletedStep);
+    clearSaveError();
   };
 
   const onBack = () => {
     const prevStep = currentStep - 1;
-
-    handleStepChange(prevStep, prevStep - 1);
+    updateCurrentStep(prevStep, prevStep - 1);
   };
 
   const onNext = () => {
     const nextStep = currentStep + 1;
-    const stepValidation = validateStep(template);
-
-    const { isValid: isCurrentStepValid } = stepValidation;
-
-    const newValidation = {
-      ...validation,
-      ...{
-        [currentStep]: stepValidation,
-      },
-    };
-
-    setValidation(newValidation);
-
-    if (isCurrentStepValid) {
-      setMaxCompletedStep(Math.max(currentStep, maxCompletedStep));
-      setCurrentStep(nextStep);
-    }
+    updateCurrentStep(nextStep, Math.max(currentStep, maxCompletedStep));
   };
 
   const saveButtonLabel = isEditing ? (
@@ -170,7 +152,6 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
         currentStep={currentStep}
         maxCompletedStep={maxCompletedStep}
         updateCurrentStep={updateCurrentStep}
-        isStepValid={isStepValid}
       />
 
       <EuiSpacer size="l" />
@@ -254,15 +235,6 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
                 </EuiFlexItem>
               ) : null}
             </EuiFlexGroup>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty href={`#${BASE_PATH}templates`} data-test-subj="cancelButton">
-              <FormattedMessage
-                id="xpack.idxMgmt.templateForm.cancelButtonLabel"
-                defaultMessage="Cancel"
-              />
-            </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiForm>

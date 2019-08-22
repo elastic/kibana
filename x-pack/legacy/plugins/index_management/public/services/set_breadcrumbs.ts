@@ -20,6 +20,13 @@ const homeBreadcrumb: Breadcrumb = {
   href: `#${BASE_PATH}`,
 };
 
+const templatesBreadcrumb: Breadcrumb = {
+  text: i18n.translate('xpack.idxMgmt.breadcrumb.templatesLabel', {
+    defaultMessage: 'Templates',
+  }),
+  href: `#${BASE_PATH}templates`,
+};
+
 const breadcrumbsMap: {
   [key: string]: Breadcrumb;
 } = {
@@ -42,7 +49,7 @@ const breadcrumbsMap: {
 
 export const setBreadcrumbs = (type?: 'templateCreate' | 'templateEdit' | 'templateClone') => {
   const breadcrumbs = type
-    ? [MANAGEMENT_BREADCRUMB, homeBreadcrumb, breadcrumbsMap[type]]
+    ? [MANAGEMENT_BREADCRUMB, homeBreadcrumb, templatesBreadcrumb, breadcrumbsMap[type]]
     : [MANAGEMENT_BREADCRUMB, homeBreadcrumb];
   chrome.breadcrumbs.set(breadcrumbs);
 };

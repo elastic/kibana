@@ -67,7 +67,18 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       truncateText: true,
       sortable: true,
       render: (ilmPolicy: { name: string }) =>
-        ilmPolicy && ilmPolicy.name ? ilmPolicy.name : null,
+        ilmPolicy && ilmPolicy.name ? (
+          <span
+            title={i18n.translate('xpack.idxMgmt.templateList.table.ilmPolicyColumnDescription', {
+              defaultMessage: "'{policyName}' index lifecycle policy",
+              values: {
+                policyName: ilmPolicy.name,
+              },
+            })}
+          >
+            {ilmPolicy.name}
+          </span>
+        ) : null,
     },
     {
       field: 'order',
@@ -174,15 +185,6 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
     box: {
       incremental: true,
     },
-    filters: [
-      {
-        type: 'is',
-        field: 'ilmPolicy.name',
-        name: i18n.translate('xpack.idxMgmt.templateList.table.ilmPolicyFilterLabel', {
-          defaultMessage: 'ILM policy',
-        }),
-      },
-    ],
     toolsLeft: selection.length && (
       <EuiButton
         data-test-subj="deleteTemplatesButton"
