@@ -35,7 +35,7 @@ export function statusRoute(router: CodeServerRouter, codeServices: CodeServices
     const head = await gitService.headRevision(endpoint, { uri: repoUri });
     if (head === commit.id) {
       try {
-        const indexStatus = await repoObjectClient.getRepositoryLspIndexStatus(repoUri);
+        const indexStatus = await repoObjectClient.getRepositoryIndexStatus(repoUri);
         if (indexStatus.progress < 100) {
           report.repoStatus = RepoFileStatus.INDEXING;
         }

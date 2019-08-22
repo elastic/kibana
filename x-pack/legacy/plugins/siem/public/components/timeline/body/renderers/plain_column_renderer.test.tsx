@@ -95,7 +95,7 @@ describe('plain_column_renderer', () => {
           <span>{column}</span>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('120.563KB');
+      expect(wrapper.text()).toEqual('120.6KB');
     });
 
     test('should return the value of event.action if event has a valid value', () => {
