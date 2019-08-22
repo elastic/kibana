@@ -903,15 +903,21 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       });
     };
 
+    isSwimlaneSelectActive = false;
     onSwimlaneEnterHandler = () => this.setSwimlaneSelectActive(true);
     onSwimlaneLeaveHandler = () => this.setSwimlaneSelectActive(false);
     setSwimlaneSelectActive = (active) => {
-      if (!active && this.disableDragSelectOnMouseLeave) {
-        this.dragSelect.clearSelection();
+      if (this.isSwimlaneSelectActive && !active && this.disableDragSelectOnMouseLeave) {
         this.dragSelect.stop();
+        this.isSwimlaneSelectActive = active;
         return;
       }
-      this.dragSelect.start();
+      if (!this.isSwimlaneSelectActive && active) {
+        this.dragSelect.start();
+        this.dragSelect.clearSelection();
+        this.dragSelect.setSelectables(document.getElementsByClassName('sl-cell'));
+        this.isSwimlaneSelectActive = active;
+      }
     };
 
     // This queue tracks click events while the swimlanes are loading.
