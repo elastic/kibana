@@ -26,7 +26,7 @@ export enum LegendPositions {
   BOTTOM = 'bottom',
 }
 
-const getLegendPositions = () => [
+const getPositions = () => [
   {
     text: i18n.translate('kbnVislibVisTypes.legendPositions.topText', {
       defaultMessage: 'Top',
@@ -73,8 +73,8 @@ const getChartTypes = () => [
     value: ChartTypes.AREA,
   },
   {
-    text: i18n.translate('kbnVislibVisTypes.chartTypes.histogramText', {
-      defaultMessage: 'Histogram',
+    text: i18n.translate('kbnVislibVisTypes.chartTypes.barText', {
+      defaultMessage: 'Bar',
     }),
     value: ChartTypes.HISTOGRAM,
   },
@@ -200,7 +200,7 @@ export enum Rotates {
 }
 
 export {
-  getLegendPositions,
+  getPositions,
   getChartTypes,
   getChartModes,
   getInterpolationModes,

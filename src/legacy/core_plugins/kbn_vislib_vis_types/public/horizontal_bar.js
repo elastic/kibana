@@ -21,7 +21,22 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { PointSeriesOptions } from './editors/point_series_options';
-import { getLegendPositions, LegendPositions } from './utils/collections';
+import { MetricsAxisOptions } from './editors/metrics_axis_options';
+import {
+  getPositions,
+  LegendPositions,
+  getChartTypes,
+  ChartTypes,
+  getChartModes,
+  ChartModes,
+  getInterpolationModes,
+  AxisTypes,
+  ScaleTypes,
+  AxisModes,
+  Rotates,
+  getAxisModes,
+  getScaleTypes
+} from './utils/collections';
 
 export default function PointSeriesVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
@@ -42,17 +57,17 @@ export default function PointSeriesVisType(Private) {
         categoryAxes: [
           {
             id: 'CategoryAxis-1',
-            type: 'category',
-            position: 'left',
+            type: AxisTypes.CATEGORY,
+            position: LegendPositions.LEFT,
             show: true,
             style: {
             },
             scale: {
-              type: 'linear'
+              type: ScaleTypes.LINEAR
             },
             labels: {
               show: true,
-              rotate: 0,
+              rotate: Rotates.HORIZONTAL,
               filter: false,
               truncate: 200
             },
@@ -63,18 +78,18 @@ export default function PointSeriesVisType(Private) {
           {
             id: 'ValueAxis-1',
             name: 'LeftAxis-1',
-            type: 'value',
-            position: 'bottom',
+            type: AxisTypes.VALUE,
+            position: LegendPositions.BOTTOM,
             show: true,
             style: {
             },
             scale: {
-              type: 'linear',
-              mode: 'normal'
+              type: ScaleTypes.LINEAR,
+              mode: AxisModes.NORMAL
             },
             labels: {
               show: true,
-              rotate: 75,
+              rotate: Rotates.ANGLED,
               filter: true,
               truncate: 100
             },
@@ -85,8 +100,8 @@ export default function PointSeriesVisType(Private) {
         ],
         seriesParams: [{
           show: true,
-          type: 'histogram',
-          mode: 'normal',
+          type: ChartTypes.HISTOGRAM,
+          mode: ChartModes.NORMAL,
           data: {
             label: 'Count',
             id: '1'
@@ -105,40 +120,29 @@ export default function PointSeriesVisType(Private) {
     },
     editorConfig: {
       collections: {
-        legendPositions: getLegendPositions(),
-        positions: ['top', 'left', 'right', 'bottom'],
-        chartTypes: [{
-          value: 'line',
-          text: 'line'
-        }, {
-          value: 'area',
-          text: 'area'
-        }, {
-          value: 'histogram',
-          text: 'bar'
-        }],
-        axisModes: ['normal', 'percentage', 'wiggle', 'silhouette'],
-        scaleTypes: ['linear', 'log', 'square root'],
-        chartModes: ['normal', 'stacked'],
-        interpolationModes: [{
-          value: 'linear',
-          text: 'straight',
-        }, {
-          value: 'cardinal',
-          text: 'smoothed',
-        }, {
-          value: 'step-after',
-          text: 'stepped',
-        }],
+        legendPositions: getPositions(),
+        positions: getPositions(),
+        chartTypes: getChartTypes(),
+        axisModes: getAxisModes(),
+        scaleTypes: getScaleTypes(),
+        chartModes: getChartModes(),
+        interpolationModes: getInterpolationModes(),
       },
       optionTabs: [
         {
           name: 'advanced',
-          title: 'Metrics & Axes',
-          editor: '<div><vislib-series></vislib-series><vislib-value-axes>' +
-          '</vislib-value-axes><vislib-category-axis></vislib-category-axis></div>'
+          title: i18n.translate('kbnVislibVisTypes.horizontalBar.tabs.metricsAxesTitle', {
+            defaultMessage: 'Metrics & axes',
+          }),
+          editor: MetricsAxisOptions,
         },
-        { name: 'options', title: 'Panel Settings', editor: PointSeriesOptions },
+        {
+          name: 'options',
+          title: i18n.translate('kbnVislibVisTypes.horizontalBar.tabs.panelSettingsTitle', {
+            defaultMessage: 'Panel settings',
+          }),
+          editor: PointSeriesOptions,
+        },
       ],
       schemas: new Schemas([
         {

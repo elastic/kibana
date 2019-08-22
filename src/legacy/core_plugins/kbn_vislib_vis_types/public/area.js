@@ -23,7 +23,7 @@ import { Schemas } from 'ui/vis/editors/default/schemas';
 import { PointSeriesOptions } from './editors/point_series_options';
 import { MetricsAxisOptions } from './editors/metrics_axis_options';
 import {
-  getLegendPositions,
+  getPositions,
   LegendPositions,
   getChartTypes,
   ChartTypes,
@@ -121,8 +121,8 @@ export default function PointSeriesVisType(Private) {
     },
     editorConfig: {
       collections: {
-        legendPositions: getLegendPositions(),
-        positions: getLegendPositions(),
+        legendPositions: getPositions(),
+        positions: getPositions(),
         chartTypes: getChartTypes(),
         axisModes: getAxisModes(),
         scaleTypes: getScaleTypes(),
@@ -133,14 +133,14 @@ export default function PointSeriesVisType(Private) {
         {
           name: 'advanced',
           title: i18n.translate('kbnVislibVisTypes.area.tabs.metricsAxesTitle', {
-            defaultMessage: 'Metrics & Axes',
+            defaultMessage: 'Metrics & axes',
           }),
           editor: MetricsAxisOptions,
         },
         {
           name: 'options',
           title: i18n.translate('kbnVislibVisTypes.area.tabs.panelSettingsTitle', {
-            defaultMessage: 'Panel Settings',
+            defaultMessage: 'Panel settings',
           }),
           editor: PointSeriesOptions,
         },
