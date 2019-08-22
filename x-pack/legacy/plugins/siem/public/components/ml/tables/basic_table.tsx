@@ -15,6 +15,10 @@ export const BasicTable = styled(EuiInMemoryTable).attrs({
     td {
       vertical-align: top;
     }
+
+    .euiTableCellContent {
+      display: block;
+    }
   }
 `;
 

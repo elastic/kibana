@@ -313,6 +313,10 @@ const BasicTable = styled(EuiBasicTable).attrs({
     td {
       vertical-align: top;
     }
+
+    .euiTableCellContent {
+      display: block;
+    }
   }
 `;
 
