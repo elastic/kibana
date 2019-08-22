@@ -47,7 +47,7 @@ export const AnalysisPage = () => {
             setupMlModule={setupMlModule}
           />
         ) : (
-          <AnalysisResultsContent />
+          <AnalysisResultsContent sourceId={sourceId} />
         )}
       </ColumnarPage>
     </AnalysisPageProviders>
