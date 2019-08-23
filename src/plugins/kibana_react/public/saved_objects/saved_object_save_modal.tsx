@@ -85,7 +85,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
             <EuiModalHeader>
               <EuiModalHeaderTitle>
                 <FormattedMessage
-                  id="common.ui.savedObjects.saveModal.saveTitle"
+                  id="kibana-react.savedObjects.saveModal.saveTitle"
                   defaultMessage="Save {objectType}"
                   values={{ objectType: this.props.objectType }}
                 />
@@ -107,7 +107,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
                   fullWidth
                   label={
                     <FormattedMessage
-                      id="common.ui.savedObjects.saveModal.titleLabel"
+                      id="kibana-react.savedObjects.saveModal.titleLabel"
                       defaultMessage="Title"
                     />
                   }
@@ -131,7 +131,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
             <EuiModalFooter>
               <EuiButtonEmpty data-test-subj="saveCancelButton" onClick={this.props.onClose}>
                 <FormattedMessage
-                  id="common.ui.savedObjects.saveModal.cancelButtonLabel"
+                  id="kibana-react.savedObjects.saveModal.cancelButtonLabel"
                   defaultMessage="Cancel"
                 />
               </EuiButtonEmpty>
@@ -147,7 +147,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
                   this.props.confirmButtonLabel
                 ) : (
                   <FormattedMessage
-                    id="common.ui.savedObjects.saveModal.confirmSaveButtonLabel"
+                    id="kibana-react.savedObjects.saveModal.confirmSaveButtonLabel"
                     defaultMessage="Confirm Save"
                   />
                 )}
@@ -214,7 +214,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
         <EuiCallOut
           title={
             <FormattedMessage
-              id="common.ui.savedObjects.saveModal.duplicateTitleLabel"
+              id="kibana-react.savedObjects.saveModal.duplicateTitleLabel"
               defaultMessage="A {objectType} with the title '{title}' already exists."
               values={{ objectType: this.props.objectType, title: this.state.title }}
             />
@@ -224,14 +224,14 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
         >
           <p>
             <FormattedMessage
-              id="common.ui.savedObjects.saveModal.duplicateTitleDescription"
+              id="kibana-react.savedObjects.saveModal.duplicateTitleDescription"
               defaultMessage="Click {confirmSaveLabel} to save the {objectType} with the duplicate title."
               values={{
                 objectType: this.props.objectType,
                 confirmSaveLabel: (
                   <strong>
                     <FormattedMessage
-                      id="common.ui.savedObjects.saveModal.duplicateTitleDescription.confirmSaveText"
+                      id="kibana-react.savedObjects.saveModal.duplicateTitleDescription.confirmSaveText"
                       defaultMessage="Confirm Save"
                     />
                   </strong>
@@ -258,7 +258,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
           onChange={this.onCopyOnSaveChange}
           label={
             <FormattedMessage
-              id="common.ui.savedObjects.saveModal.saveAsNewLabel"
+              id="kibana-react.savedObjects.saveModal.saveAsNewLabel"
               defaultMessage="Save as a new {objectType}"
               values={{ objectType: this.props.objectType }}
             />
