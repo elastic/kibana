@@ -22,6 +22,16 @@ type JobStatus =
   | 'opened'
   | 'failed';
 
+interface AllJobStatuses {
+  [key: string]: JobStatus;
+}
+
+const getInitialJobStatuses = (): AllJobStatuses => {
+  return {
+    logEntryRate: 'unknown',
+  };
+};
+
 export const useLogAnalysisJobs = ({
   indexPattern,
   sourceId,
@@ -33,16 +43,13 @@ export const useLogAnalysisJobs = ({
   spaceId: string;
   timeField: string;
 }) => {
-  const [jobStatus, setJobStatus] = useState<{
-    logEntryRate: JobStatus;
-  }>({
-    logEntryRate: 'unknown',
-  });
+  const [jobStatus, setJobStatus] = useState<AllJobStatuses>(getInitialJobStatuses());
 
   const [setupMlModuleRequest, setupMlModule] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
       createPromise: async (start, end) => {
+        setJobStatus(getInitialJobStatuses());
         return await callSetupMlModuleAPI(
           start,
           end,
