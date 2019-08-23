@@ -16,19 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
-import { shallow } from 'enzyme';
-import { JsonCodeEditor } from './json_code_editor';
-import { IndexPattern } from 'ui/index_patterns';
 
-it('returns the `JsonCodeEditor` component', () => {
-  const props = {
-    hit: { _index: 'test', _source: { test: 123 } },
-    columns: [],
-    indexPattern: {} as IndexPattern,
-    filter: jest.fn(),
-    onAddColumn: jest.fn(),
-    onRemoveColumn: jest.fn(),
-  };
-  expect(shallow(<JsonCodeEditor {...props} />)).toMatchSnapshot();
-});
+export {
+  context,
+  createKibanaReactContext,
+  KibanaContextProvider,
+  useKibana,
+  withKibana,
+  UseKibana,
+} from './context';
+export { KibanaReactContext, KibanaReactContextValue } from './types';

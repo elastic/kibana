@@ -17,34 +17,16 @@
  * under the License.
  */
 
-import { Core } from './types';
+import * as React from 'react';
+import { CoreStart } from '../context/types';
 
-const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<any> = {
-    getAll: jest.fn(),
-    get: jest.fn(),
-    get$: jest.fn(),
-    set: jest.fn(),
-    remove: jest.fn(),
-    isDeclared: jest.fn(),
-    isDefault: jest.fn(),
-    isCustom: jest.fn(),
-    isOverridden: jest.fn(),
-    overrideLocalDefault: jest.fn(),
-    getUpdate$: jest.fn(),
-    getSaved$: jest.fn(),
-    getUpdateErrors$: jest.fn(),
-    stop: jest.fn(),
-  };
-  return setupContract as any;
-};
-
-export const createMock = (): Core => {
-  const uiSettings = createSetupContractMock();
-
-  const core: Partial<Core> = {
-    uiSettings,
-  };
-
-  return core as Core;
-};
+export interface KibanaReactOverlays {
+  openFlyout: (
+    node: React.ReactNode,
+    options?: Parameters<CoreStart['overlays']['openFlyout']>['1']
+  ) => ReturnType<CoreStart['overlays']['openFlyout']>;
+  openModal: (
+    node: React.ReactNode,
+    options?: Parameters<CoreStart['overlays']['openFlyout']>['1']
+  ) => ReturnType<CoreStart['overlays']['openModal']>;
+}
