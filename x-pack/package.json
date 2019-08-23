@@ -325,6 +325,7 @@
     "react-sticky": "^6.0.3",
     "react-syntax-highlighter": "^5.7.0",
     "react-vis": "^1.8.1",
+    "react-visibility-sensor": "^5.1.1",
     "recompose": "^0.26.0",
     "reduce-reducers": "^0.4.3",
     "redux": "4.0.0",
