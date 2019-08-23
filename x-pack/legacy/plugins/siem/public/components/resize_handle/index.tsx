@@ -7,7 +7,7 @@
 import * as React from 'react';
 import { fromEvent, Observable, Subscription } from 'rxjs';
 import { concatMap, takeUntil } from 'rxjs/operators';
-import styled, { injectGlobal } from 'styled-components';
+import styled from 'styled-components';
 
 export type OnResize = ({ delta, id }: { delta: number; id: string }) => void;
 
@@ -17,20 +17,6 @@ export const globalResizeCursorClassName = 'global-resize-cursor';
 /** This polyfill is for Safari only. `movementX` is more accurate and "feels" better, so only use this function on Safari */
 export const calculateDeltaX = ({ prevX, screenX }: { prevX: number; screenX: number }) =>
   prevX !== 0 ? screenX - prevX : 0;
-
-const isSafari = /^((?!chrome|android|crios|fxios|Firefox).)*safari/i.test(navigator.userAgent);
-
-// eslint-disable-next-line no-unused-expressions
-injectGlobal`
-.${globalResizeCursorClassName} {
-  * {
-      cursor: ${resizeCursorStyle};
-      &: hover {
-        cursor: ${resizeCursorStyle};
-      }
-  }
-}
-`;
 
 interface Props {
   /** the `onResize` callback will be invoked with this id */
@@ -66,6 +52,7 @@ export const removeGlobalResizeCursorStyleFromBody = () => {
 
 export class Resizeable extends React.PureComponent<Props, State> {
   private drag$: Observable<MouseEvent> | null;
+  private dragEventTargets: Array<{ htmlElement: HTMLElement; prevCursor: string }>;
   private dragSubscription: Subscription | null;
   private prevX: number = 0;
   private ref: React.RefObject<HTMLElement>;
@@ -79,6 +66,7 @@ export class Resizeable extends React.PureComponent<Props, State> {
     this.drag$ = null;
     this.dragSubscription = null;
     this.upSubscription = null;
+    this.dragEventTargets = [];
 
     this.state = {
       isResizing: false,
@@ -93,22 +81,30 @@ export class Resizeable extends React.PureComponent<Props, State> {
     const up$ = fromEvent<MouseEvent>(document, 'mouseup');
 
     this.drag$ = down$.pipe(concatMap(() => move$.pipe(takeUntil(up$))));
-    this.dragSubscription = this.drag$.subscribe(e => {
-      const delta = isSafari ? this.calculateDelta(e) : e.movementX;
-
+    this.dragSubscription = this.drag$.subscribe(event => {
+      // We do a feature detection of event.movementX here and if it is missing
+      // we calculate the delta manually. Browsers IE-11 and Safari will call calculateDelta
+      const delta = event.movementX == null ? this.calculateDelta(event) : event.movementX;
       if (!this.state.isResizing) {
         this.setState({ isResizing: true });
       }
-
       onResize({ id, delta });
-
-      addGlobalResizeCursorStyleToBody();
+      if (event.target != null && event.target instanceof HTMLElement) {
+        const htmlElement: HTMLElement = event.target;
+        this.dragEventTargets = [
+          ...this.dragEventTargets,
+          { htmlElement, prevCursor: htmlElement.style.cursor },
+        ];
+        htmlElement.style.cursor = resizeCursorStyle;
+      }
     });
 
     this.upSubscription = up$.subscribe(() => {
       if (this.state.isResizing) {
-        removeGlobalResizeCursorStyleFromBody();
-
+        this.dragEventTargets.reverse().forEach(eventTarget => {
+          eventTarget.htmlElement.style.cursor = eventTarget.prevCursor;
+        });
+        this.dragEventTargets = [];
         this.setState({ isResizing: false });
       }
     });
