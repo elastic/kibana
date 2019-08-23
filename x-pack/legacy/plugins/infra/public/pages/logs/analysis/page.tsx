@@ -18,10 +18,17 @@ import { Source } from '../../../containers/source';
 export const AnalysisPage = () => {
   const { sourceId, source } = useContext(Source.Context);
   const spaceId = chrome.getInjected('activeSpace').space.id;
-  const { isSetupRequired, isLoadingSetupStatus } = useLogAnalysisJobs({
+  const {
+    isSetupRequired,
+    isLoadingSetupStatus,
+    setupMlModule,
+    isSettingUpMlModule,
+    didSetupFail,
+  } = useLogAnalysisJobs({
     indexPattern: source ? source.configuration.logAlias : '',
     sourceId,
     spaceId,
+    timeField: source ? source.configuration.fields.timestamp : '',
   });
 
   return (
@@ -34,9 +41,13 @@ export const AnalysisPage = () => {
             })}
           />
         ) : isSetupRequired ? (
-          <AnalysisSetupContent />
+          <AnalysisSetupContent
+            didSetupFail={didSetupFail}
+            isSettingUp={isSettingUpMlModule}
+            setupMlModule={setupMlModule}
+          />
         ) : (
-          <AnalysisResultsContent />
+          <AnalysisResultsContent sourceId={sourceId} />
         )}
       </ColumnarPage>
     </AnalysisPageProviders>

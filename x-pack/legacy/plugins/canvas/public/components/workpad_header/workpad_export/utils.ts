@@ -7,6 +7,7 @@
 import rison from 'rison-node';
 import chrome from 'ui/chrome';
 import { QueryString } from 'ui/utils/query_string';
+// @ts-ignore Untyped local.
 import { fetch } from '../../../../common/lib/fetch';
 import { CanvasWorkpad } from '../../../../types';
 

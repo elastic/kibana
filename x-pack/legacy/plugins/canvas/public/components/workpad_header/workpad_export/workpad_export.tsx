@@ -100,7 +100,7 @@ export const WorkpadExport: FunctionComponent<Props> = ({
           ) : (
             <DisabledPanel
               onCopy={() => {
-                onCopy('pdf');
+                onCopy('reportingConfig');
                 closePopover();
               }}
             />
