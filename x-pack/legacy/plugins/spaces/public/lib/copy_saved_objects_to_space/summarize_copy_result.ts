@@ -99,10 +99,10 @@ export function summarizeCopyResult(
     });
 
     // The `savedObject.references` array only includes the direct references. It does not include any references of references.
-    // Therefore, if there are conflicts detected in these transient references, we need to include them here so that they are visible
+    // Therefore, if there are conflicts detected in these transitive references, we need to include them here so that they are visible
     // in the UI as resolvable conflicts.
-    const transientConflicts = conflicts.filter(c => !objectMap.has(`${c.obj.type}:${c.obj.id}`));
-    transientConflicts.forEach(conflict => {
+    const transitiveConflicts = conflicts.filter(c => !objectMap.has(`${c.obj.type}:${c.obj.id}`));
+    transitiveConflicts.forEach(conflict => {
       objectMap.set(`${conflict.obj.type}:${conflict.obj.id}`, {
         type: conflict.obj.type,
         id: conflict.obj.id,
