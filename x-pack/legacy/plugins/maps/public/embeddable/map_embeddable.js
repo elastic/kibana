@@ -10,12 +10,10 @@ import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
-import {
-  APPLY_FILTER_TRIGGER,
-  Embeddable,
-  executeTriggerActions
-} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/index';
+import { Embeddable, APPLY_FILTER_TRIGGER } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { start } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { onlyDisabledFiltersChanged } from '../../../../../../src/legacy/core_plugins/data/public';
+
 import { I18nContext } from 'ui/i18n';
 
 import { GisMap } from '../connected_components/gis_map';
@@ -139,7 +137,7 @@ export class MapEmbeddable extends Embeddable {
     render(
       <Provider store={this._store}>
         <I18nContext>
-          <GisMap addFilters={this.addFilters}/>
+          <GisMap addFilters={this.input.hideFilterActions ? null : this.addFilters}/>
         </I18nContext>
       </Provider>,
       domNode
@@ -151,7 +149,7 @@ export class MapEmbeddable extends Embeddable {
   }
 
   addFilters = filters => {
-    executeTriggerActions(APPLY_FILTER_TRIGGER, {
+    start.executeTriggerActions(APPLY_FILTER_TRIGGER, {
       embeddable: this,
       triggerContext: {
         filters,

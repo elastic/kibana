@@ -324,14 +324,18 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       return await find.byCssSelector('div.vgaVis__controls');
     }
 
-    async addInputControl() {
+    async addInputControl(type) {
+      if (type) {
+        const selectInput = await testSubjects.find('selectControlType');
+        await selectInput.type(type);
+      }
       await testSubjects.click('inputControlEditorAddBtn');
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async inputControlSubmit() {
-      await testSubjects.click('inputControlSubmitBtn');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.clickWhenNotDisabled('inputControlSubmitBtn');
+      await this.waitForVisualizationRenderingStabilized();
     }
 
     async inputControlClear() {
@@ -361,13 +365,12 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async setSelectByOptionText(selectId, optionText) {
+      const selectField = await find.byCssSelector(`#${selectId}`);
       const options = await find.allByCssSelector(`#${selectId} > option`);
-      const optionsTextPromises = options.map(async (optionElement) => {
-        return await optionElement.getVisibleText();
-      });
-      const optionsText = await Promise.all(optionsTextPromises);
-
+      const $ = await selectField.parseDomContent();
+      const optionsText = $('option').toArray().map(option => $(option).text());
       const optionIndex = optionsText.indexOf(optionText);
+
       if (optionIndex === -1) {
         throw new Error(`Unable to find option '${optionText}' in select ${selectId}. Available options: ${optionsText.join(',')}`);
       }
@@ -563,10 +566,6 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       const sortSelect = await testSubjects.find(`visDefaultEditorAggregateWith`);
       const sortMetric = await sortSelect.findByCssSelector(`option[value="${fieldValue}"]`);
       await sortMetric.click();
-    }
-
-    async selectFieldById(fieldValue, id) {
-      await find.clickByCssSelector(`#${id} > option[label="${fieldValue}"]`);
     }
 
     async getInterval() {
@@ -1275,6 +1274,19 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async removeDimension(agg) {
       await testSubjects.click(`visEditorAggAccordion${agg} removeDimensionBtn`);
+    }
+
+    async setFilterParams({ aggNth = 0, indexPattern, field }) {
+      await comboBox.set(`indexPatternSelect-${aggNth}`, indexPattern);
+      await comboBox.set(`fieldSelect-${aggNth}`, field);
+    }
+
+    async setFilterRange({ aggNth = 0, min, max }) {
+      const control = await testSubjects.find(`inputControl${aggNth}`);
+      const inputMin = await control.findByCssSelector('[name$="minValue"]');
+      await inputMin.type(min);
+      const inputMax = await control.findByCssSelector('[name$="maxValue"]');
+      await inputMax.type(max);
     }
   }
 

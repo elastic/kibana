@@ -5,7 +5,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
   <EuiFlexItem
     grow={false}
   >
-    <Memo()
+    <DraggableScore
       id="anomaly-scores-job-key-1"
       index={0}
       score={
@@ -82,7 +82,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
     <EuiPopover
       anchorPosition="downCenter"
       button={
-        <Styled(EuiIcon)
+        <Icon
           type="iInCircle"
         />
       }
@@ -105,9 +105,9 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
                 <EuiSpacer
                   size="m"
                 />
-                <Styled(EuiText)>
+                <LargeScore>
                   17
-                </Styled(EuiText)>
+                </LargeScore>
               </React.Fragment>,
               "title": "Max Anomaly Score",
             },
@@ -151,7 +151,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
                 <EuiFlexItem
                   grow={false}
                 >
-                  <pure(Component)
+                  <PreferenceFormattedDate
                     value={2019-06-16T06:00:00.000Z}
                   />
                 </EuiFlexItem>

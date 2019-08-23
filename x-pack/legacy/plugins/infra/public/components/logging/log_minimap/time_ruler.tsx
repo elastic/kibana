@@ -25,16 +25,35 @@ export const TimeRuler: React.SFC<TimeRulerProps> = ({ end, height, start, tickC
   const ticks = yScale.ticks(tickCount);
   const formatTick = yScale.tickFormat();
 
+  const dateModLabel = (() => {
+    for (let i = 0; i < ticks.length; i++) {
+      const tickLabel = formatTick(ticks[i]);
+      if (!tickLabel[0].match(/[0-9]/)) {
+        return i % 12;
+      }
+    }
+  })();
+
   return (
     <g>
       {ticks.map((tick, tickIndex) => {
         const y = yScale(tick);
+        const isLabeledTick = tickIndex % 12 === dateModLabel;
+        const tickStartX = isLabeledTick ? 0 : width / 3 - 4;
         return (
           <g key={`tick${tickIndex}`}>
-            <TimeRulerTickLabel x={2} y={y - 4}>
-              {formatTick(tick)}
-            </TimeRulerTickLabel>
-            <TimeRulerGridLine x1={0} y1={y} x2={width} y2={y} />
+            {isLabeledTick && (
+              <TimeRulerTickLabel x={0} y={y - 4}>
+                {formatTick(tick)}
+              </TimeRulerTickLabel>
+            )}
+            <TimeRulerGridLine
+              isDark={isLabeledTick}
+              x1={tickStartX}
+              y1={y}
+              x2={width / 3}
+              y2={y}
+            />
           </g>
         );
       })}
@@ -45,15 +64,22 @@ export const TimeRuler: React.SFC<TimeRulerProps> = ({ end, height, start, tickC
 TimeRuler.displayName = 'TimeRuler';
 
 const TimeRulerTickLabel = euiStyled.text`
-  font-size: ${props => props.theme.eui.euiFontSizeXS};
+  font-size: 9px;
   line-height: ${props => props.theme.eui.euiLineHeight};
   fill: ${props => props.theme.eui.textColors.subdued};
+  user-select: none;
+  pointer-events: none;
 `;
 
-const TimeRulerGridLine = euiStyled.line`
+const TimeRulerGridLine = euiStyled.line<{ isDark: boolean }>`
   stroke: ${props =>
-    props.theme.darkMode ? props.theme.eui.euiColorDarkShade : props.theme.eui.euiColorMediumShade};
-  stroke-dasharray: 2, 2;
+    props.isDark
+      ? props.theme.darkMode
+        ? props.theme.eui.euiColorDarkestShade
+        : props.theme.eui.euiColorDarkShade
+      : props.theme.darkMode
+      ? props.theme.eui.euiColorDarkShade
+      : props.theme.eui.euiColorMediumShade};
   stroke-opacity: 0.5;
   stroke-width: 1px;
 `;

@@ -20,6 +20,8 @@
 import { EditorConfigProviderRegistry } from './editor_config_providers';
 import { EditorParamConfig, FixedParam, NumericIntervalParam, TimeIntervalParam } from './types';
 
+jest.mock('ui/new_platform');
+
 describe('EditorConfigProvider', () => {
   let registry: EditorConfigProviderRegistry;
   const indexPattern = {
