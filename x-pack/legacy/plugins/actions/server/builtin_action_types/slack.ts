@@ -9,7 +9,6 @@ import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
 import {
   successResult,
   errorResult,
-  errorResultWithStaticMessage,
   retryResult,
   retryResultSeconds,
   getRetryAfterIntervalFromHeaders,
@@ -123,17 +122,19 @@ async function slackExecutor(
   }
 
   if (result == null) {
-    return errorResultWithStaticMessage(
+    return errorResult(
       id,
       'unexpected null response from slack',
+      ACTION_DESCRIPTION,
       ACTION_I18N_IDENTIFIERS.UNEXPECTED_NULL_ERROR
     );
   }
 
   if (result.text !== 'ok') {
-    return errorResultWithStaticMessage(
+    return errorResult(
       id,
       'unexpected text response from slack',
+      ACTION_DESCRIPTION,
       ACTION_I18N_IDENTIFIERS.UNEXPECTED_TEXT_ERROR
     );
   }

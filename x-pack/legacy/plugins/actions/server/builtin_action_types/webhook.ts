@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { i18n } from '@kbn/i18n';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { nullableType } from './lib/nullable';
@@ -84,18 +84,6 @@ function asComposedUrl(url: string | TypeOf<typeof CompositeUrlSchema>): string 
   return `${url.scheme}://${url.host}${url.port ? `:${url.port}` : ''}${url.path || ''}`;
 }
 
-function describeWebhookErrorSource(error: AxiosError): string {
-  if (error.response) {
-    // The request was made and the server responded with a status code
-    // that falls out of the range of 2xx
-    return `remote webhook failure`;
-  } else if (error.request) {
-    // The request was made but no response was received
-    return `unreachable remote webhook`;
-  }
-  return `unknown webhook event`;
-}
-
 // action executor
 const ACTION_DESCRIPTION = 'calling a remote webhook';
 enum ACTION_I18N_IDENTIFIERS {
@@ -106,7 +94,8 @@ enum ACTION_I18N_IDENTIFIERS {
 }
 
 async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionTypeExecutorResult> {
-  const log = (msg: string) => execOptions.services.log(['warn', 'actions', 'webhook'], msg);
+  const log = (level: string, msg: string) =>
+    execOptions.services.log([level, 'actions', 'webhook'], msg);
 
   const id = execOptions.id;
   const { method, url, headers = {} } = execOptions.config as ActionTypeConfigType;
@@ -128,18 +117,25 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
 
   if (isOk(result)) {
     const {
-      value: { status, statusText, headers: responseHeaders },
+      value: { status, statusText },
     } = result;
-    log(`response from ${id} webhook event: [HTTP ${status}] ${statusText}`);
+    log('debug', `response from ${id} webhook event: [HTTP ${status}] ${statusText}`);
 
-    if (status >= 200 && status < 300) {
-      return successResult(data);
-    } else {
+    return successResult(data);
+  } else {
+    const { error } = result;
+
+    if (error.response) {
+      const { status, statusText, headers: responseHeaders } = error.response;
+      const message = `[${status}] ${statusText}`;
+      log(`warn`, `error on ${id} webhook event: ${message}`);
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
       // special handling for 5xx
       if (status >= 500) {
         return retryResult(
           id,
-          statusText,
+          message,
           ACTION_DESCRIPTION,
           ACTION_I18N_IDENTIFIERS.INVALID_RESPONSE_RETRY_LATER_ERROR
         );
@@ -149,28 +145,24 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
       if (status === 429) {
         return retryResultSeconds(
           id,
-          statusText,
+          message,
           ACTION_DESCRIPTION,
           ACTION_I18N_IDENTIFIERS.INVALID_RESPONSE_RETRY_LATER_DATE_ERROR,
           getRetryAfterIntervalFromHeaders(responseHeaders)
         );
       }
-
       return errorResult(
         id,
-        statusText,
+        message,
         ACTION_DESCRIPTION,
         ACTION_I18N_IDENTIFIERS.INVALID_RESPONSE_ERROR
       );
     }
-  } else {
-    const { error } = result;
-    log(`error on ${id} webhook event: ${error.message}`);
-    return errorResult(
-      id,
-      error.message,
-      describeWebhookErrorSource(error),
-      ACTION_I18N_IDENTIFIERS.UNREACHABLE_ERROR
-    );
+
+    const message = i18n.translate(`xpack.actions.builtin.webhook.unreachableRemoteWebhook`, {
+      defaultMessage: 'Unreachable Remote Webhook, are you sure the address is correct?',
+    });
+    log(`warn`, `error on ${id} webhook event: ${message}`);
+    return errorResult(id, message, ACTION_DESCRIPTION, ACTION_I18N_IDENTIFIERS.UNREACHABLE_ERROR);
   }
 }
