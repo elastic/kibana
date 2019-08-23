@@ -75,7 +75,7 @@ describe('terms', () => {
   });
 
   describe('onFieldChange', () => {
-    it('should change correctly without auto interval', () => {
+    it('should change correctly to new field', () => {
       const oldColumn: TermsIndexPatternColumn = {
         operationType: 'terms',
         sourceField: 'source',
