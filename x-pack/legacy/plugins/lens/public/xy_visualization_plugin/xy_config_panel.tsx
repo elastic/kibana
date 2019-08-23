@@ -228,7 +228,14 @@ export function XYConfigPanel(props: VisualizationProps<State>) {
                     state,
                     {
                       ...layer,
-                      accessors: [...layer.accessors, generateId()],
+                      accessors: [
+                        ...layer.accessors,
+                        generateId([
+                          ...layer.accessors,
+                          layer.xAccessor,
+                          layer.splitAccessor || '',
+                        ]),
+                      ],
                     },
                     index
                   )

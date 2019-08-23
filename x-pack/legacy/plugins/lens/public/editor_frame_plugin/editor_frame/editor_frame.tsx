@@ -100,7 +100,7 @@ export function EditorFrame(props: EditorFrameProps) {
     query: props.query,
 
     addNewLayer() {
-      const newLayerId = generateId();
+      const newLayerId = generateId(Object.keys(datasourceLayers));
 
       dispatch({
         type: 'UPDATE_LAYER',

@@ -17,7 +17,7 @@ import {
   TableChangeType,
 } from '../types';
 import { State, SeriesType, XYState } from './types';
-import { generateId } from '../id_generator';
+import { generateId, resetIdGenerator } from '../id_generator';
 import { buildExpression } from './to_expression';
 
 const columnSortOrder = {
@@ -50,6 +50,7 @@ function getIconForSeries(type: SeriesType): EuiIconType {
 export function getSuggestions(
   opts: SuggestionRequest<State>
 ): Array<VisualizationSuggestion<State>> {
+  resetIdGenerator();
   return opts.tables
     .filter(
       ({ isMultiRow, columns }) =>
@@ -256,13 +257,14 @@ function buildSuggestion({
   changeType: string;
   datasourceSuggestionId: number;
 }) {
+  const accessors = yValues.map(col => col.columnId);
   const newLayer = {
     ...(getExistingLayer(currentState, layerId) || {}),
     layerId,
     seriesType,
     xAccessor: xValue.columnId,
-    splitAccessor: splitBy ? splitBy.columnId : generateId(),
-    accessors: yValues.map(col => col.columnId),
+    splitAccessor: splitBy ? splitBy.columnId : generateId([xValue.columnId, ...accessors]),
+    accessors,
   };
 
   const state: State = {

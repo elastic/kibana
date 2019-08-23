@@ -75,7 +75,11 @@ export function DataTableLayer({
           dragDropContext={dragDropContext}
           filterOperations={allOperations}
           layerId={layer.layerId}
-          onAdd={() => setState(updateColumns(state, layer, columns => [...columns, generateId()]))}
+          onAdd={() =>
+            setState(
+              updateColumns(state, layer, columns => [...columns, generateId(layer.columns)])
+            )
+          }
           onRemove={column =>
             setState(updateColumns(state, layer, columns => columns.filter(c => c !== column)))
           }

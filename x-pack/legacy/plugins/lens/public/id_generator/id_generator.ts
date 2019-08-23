@@ -4,8 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid/v4';
+let idState = 0;
 
-export function generateId() {
-  return uuid();
+export function generateId(existingIds: string[] = []) {
+  do {
+    idState++;
+  } while (existingIds.includes(String(idState)));
+  return String(idState);
+}
+
+export function resetIdGenerator() {
+  idState = 0;
 }

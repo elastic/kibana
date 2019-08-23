@@ -16,11 +16,7 @@ import {
 } from './indexpattern';
 import { buildColumn, getOperationTypesForField, operationDefinitionMap } from './operations';
 import { hasField } from './utils';
-
-let idState = 0;
-function generateId() {
-  return '' + idState++;
-}
+import { generateId, resetIdGenerator } from '../id_generator';
 
 function buildSuggestion({
   state,
@@ -72,7 +68,7 @@ export function getDatasourceSuggestionsForField(
   indexPatternId: string,
   field: IndexPatternField
 ): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
-  idState = 0;
+  resetIdGenerator();
   const layers = Object.keys(state.layers);
   const layerIds = layers.filter(id => state.layers[id].indexPatternId === indexPatternId);
 
@@ -155,7 +151,7 @@ function addFieldAsMetricOperation(
     suggestedPriority: undefined,
     field,
   });
-  const newColumnId = generateId();
+  const newColumnId = generateId(layer.columnOrder);
   const updatedColumns = {
     ...layer.columns,
     [newColumnId]: newColumn,
@@ -184,7 +180,7 @@ function addFieldAsBucketOperation(
     suggestedPriority: undefined,
     field,
   });
-  const newColumnId = generateId();
+  const newColumnId = generateId(layer.columnOrder);
   const updatedColumns = {
     ...layer.columns,
     [newColumnId]: newColumn,
@@ -323,7 +319,7 @@ function createNewLayerWithMetricAggregation(
 export function getDatasourceSuggestionsFromCurrentState(
   state: IndexPatternPrivateState
 ): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
-  idState = 0;
+  resetIdGenerator();
   return _.flatten(
     Object.entries(state.layers || {})
       .filter(([_id, layer]) => layer.columnOrder.length)
@@ -389,7 +385,7 @@ function createSuggestionWithDefaultDateHistogram(
 ) {
   const layer = state.layers[layerId];
   const indexPattern = state.indexPatterns[layer.indexPatternId];
-  const newId = generateId();
+  const newId = generateId(layer.columnOrder);
   const [buckets, metrics] = separateBucketColumns(layer);
   const timeColumn = buildColumn({
     layerId,
