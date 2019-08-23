@@ -6,17 +6,11 @@
 import { i18n } from '@kbn/i18n';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { schema, TypeOf } from '@kbn/config-schema';
+import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
 import { nullableType } from './lib/nullable';
 import { portSchema } from './lib/schemas';
 import { isOk, promiseResult, Result } from './lib/result_type';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
-import {
-  successResult,
-  errorResult,
-  retryResult,
-  retryResultSeconds,
-  getRetryAfterIntervalFromHeaders,
-} from './lib/action_executor_result';
 
 // config definition
 enum WebhookMethods {
@@ -85,14 +79,6 @@ function asComposedUrl(url: string | TypeOf<typeof CompositeUrlSchema>): string 
 }
 
 // action executor
-const ACTION_DESCRIPTION = 'calling a remote webhook';
-enum ACTION_I18N_IDENTIFIERS {
-  INVALID_RESPONSE_ERROR = 'webhook.invalidResponseErrorMessage',
-  INVALID_RESPONSE_RETRY_LATER_ERROR = 'webhook.invalidResponseRetryLaterErrorMessage',
-  INVALID_RESPONSE_RETRY_LATER_DATE_ERROR = 'webhook.invalidResponseRetryDateErrorMessage',
-  UNREACHABLE_ERROR = 'webhook.unreachableErrorMessage',
-}
-
 async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionTypeExecutorResult> {
   const log = (level: string, msg: string) =>
     execOptions.services.log([level, 'actions', 'webhook'], msg);
@@ -133,36 +119,98 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
       // that falls out of the range of 2xx
       // special handling for 5xx
       if (status >= 500) {
-        return retryResult(
-          id,
-          message,
-          ACTION_DESCRIPTION,
-          ACTION_I18N_IDENTIFIERS.INVALID_RESPONSE_RETRY_LATER_ERROR
-        );
+        return retryResult(id, message);
       }
 
       // special handling for rate limiting
       if (status === 429) {
-        return retryResultSeconds(
-          id,
-          message,
-          ACTION_DESCRIPTION,
-          ACTION_I18N_IDENTIFIERS.INVALID_RESPONSE_RETRY_LATER_DATE_ERROR,
-          getRetryAfterIntervalFromHeaders(responseHeaders)
-        );
+        return retryResultSeconds(id, message, getRetryAfterIntervalFromHeaders(responseHeaders));
       }
-      return errorResult(
-        id,
-        message,
-        ACTION_DESCRIPTION,
-        ACTION_I18N_IDENTIFIERS.INVALID_RESPONSE_ERROR
-      );
+      return errorResultInvalid(id, message);
     }
 
-    const message = i18n.translate(`xpack.actions.builtin.webhook.unreachableRemoteWebhook`, {
+    const message = i18n.translate('xpack.actions.builtin.webhook.unreachableRemoteWebhook', {
       defaultMessage: 'Unreachable Remote Webhook, are you sure the address is correct?',
     });
     log(`warn`, `error on ${id} webhook event: ${message}`);
-    return errorResult(id, message, ACTION_DESCRIPTION, ACTION_I18N_IDENTIFIERS.UNREACHABLE_ERROR);
+    return errorResultUnreachable(id, message);
   }
+}
+
+// Action Executor Result w/ internationalisation
+function successResult(data: any): ActionTypeExecutorResult {
+  return { status: 'ok', data };
+}
+
+function errorResultInvalid(id: string, message: string): ActionTypeExecutorResult {
+  const errMessage = i18n.translate('xpack.actions.builtin.webhook.invalidResponseErrorMessage', {
+    defaultMessage: 'an error occurred in action "{id}" calling a remote webhook: {message}',
+    values: {
+      id,
+      message,
+    },
+  });
+  return {
+    status: 'error',
+    message: errMessage,
+  };
+}
+
+function errorResultUnreachable(id: string, message: string): ActionTypeExecutorResult {
+  const errMessage = i18n.translate('xpack.actions.builtin.webhook.unreachableErrorMessage', {
+    defaultMessage: 'an error occurred in action "{id}" calling a remote webhook: {message}',
+    values: {
+      id,
+      message,
+    },
+  });
+  return {
+    status: 'error',
+    message: errMessage,
+  };
+}
+
+function retryResult(id: string, message: string): ActionTypeExecutorResult {
+  const errMessage = i18n.translate(
+    'xpack.actions.builtin.webhook.invalidResponseRetryLaterErrorMessage',
+    {
+      defaultMessage: 'an error occurred in action "{id}" calling a remote webhook, retry later',
+      values: {
+        id,
+      },
+    }
+  );
+  return {
+    status: 'error',
+    message: errMessage,
+    retry: true,
+  };
+}
+
+function retryResultSeconds(
+  id: string,
+  message: string,
+
+  retryAfter: number
+): ActionTypeExecutorResult {
+  const retryEpoch = Date.now() + retryAfter * 1000;
+  const retry = new Date(retryEpoch);
+  const retryString = retry.toISOString();
+  const errMessage = i18n.translate(
+    'xpack.actions.builtin.webhook.invalidResponseRetryDateErrorMessage',
+    {
+      defaultMessage:
+        'an error occurred in action "{id}" calling a remote webhook, retry at {retryString}: {message}',
+      values: {
+        id,
+        retryString,
+        message,
+      },
+    }
+  );
+  return {
+    status: 'error',
+    message: errMessage,
+    retry,
+  };
 }
