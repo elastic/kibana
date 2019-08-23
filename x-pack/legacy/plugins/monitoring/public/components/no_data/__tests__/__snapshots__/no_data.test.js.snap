@@ -9,7 +9,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
     style="max-width:600px"
   >
     <div
-      class="euiPanel euiPanel--paddingLarge euiPageContent eui-textCenter euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+      class="euiPanel euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter eui-textCenter"
     >
       <svg
         class="euiIcon euiIcon--xxLarge euiIcon--app euiIcon-isLoading"
@@ -73,7 +73,7 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
     style="max-width:600px"
   >
     <div
-      class="euiPanel euiPanel--paddingLarge euiPageContent eui-textCenter euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+      class="euiPanel euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter eui-textCenter"
     >
       <svg
         class="euiIcon euiIcon--xxLarge euiIcon--app euiIcon-isLoading"
