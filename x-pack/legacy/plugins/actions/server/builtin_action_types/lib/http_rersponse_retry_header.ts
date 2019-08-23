@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fromNullable } from 'fp-ts/lib/Option';
+import { fromNullable, Option } from 'fp-ts/lib/Option';
 
-const DEFAULT_RETRY_AFTER: number = 60;
-export function getRetryAfterIntervalFromHeaders(headers: Record<string, string>): number {
+export function getRetryAfterIntervalFromHeaders(headers: Record<string, string>): Option<number> {
   return fromNullable(headers['retry-after'])
     .map(retryAfter => parseInt(retryAfter, 10))
-    .filter(retryAfter => !isNaN(retryAfter))
-    .getOrElse(DEFAULT_RETRY_AFTER);
+    .filter(retryAfter => !isNaN(retryAfter));
 }

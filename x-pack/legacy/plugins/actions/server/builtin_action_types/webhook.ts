@@ -124,7 +124,9 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
 
       // special handling for rate limiting
       if (status === 429) {
-        return retryResultSeconds(id, message, getRetryAfterIntervalFromHeaders(responseHeaders));
+        return getRetryAfterIntervalFromHeaders(responseHeaders)
+          .map(retry => retryResultSeconds(id, message, retry))
+          .getOrElse(retryResult(id, message));
       }
       return errorResultInvalid(id, message);
     }

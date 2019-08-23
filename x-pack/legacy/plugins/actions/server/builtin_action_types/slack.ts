@@ -82,7 +82,9 @@ async function slackExecutor(
 
     // special handling for rate limiting
     if (status === 429) {
-      return retryResultSeconds(id, err.message, getRetryAfterIntervalFromHeaders(headers));
+      return getRetryAfterIntervalFromHeaders(headers)
+        .map(retry => retryResultSeconds(id, err.message, retry))
+        .getOrElse(retryResult(id, err.message));
     }
 
     return errorResult(id, `${err.message} - ${statusText}`);
