@@ -33,8 +33,6 @@ const logs = `
 [Sun Mar 7 21:16:17 2004] [error] [client xx.xx.xx.xx] File does not exist: /home/httpd/twiki/view/Main/WebHome
 `;
 
-
-
 const html = `<section>
   <span>Hello World!</span>
 </section>`;

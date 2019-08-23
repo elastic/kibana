@@ -9,7 +9,6 @@ exports[`Storyshots components/ExpressionInput default 1`] = `
     id="generated-id-row"
   >
     <div
-      aria-describedby="generated-id-help"
       className="canvasExpressionInput__editor"
       id="generated-id"
       onBlur={[Function]}
@@ -25,12 +24,6 @@ exports[`Storyshots components/ExpressionInput default 1`] = `
         }
       />
       <div />
-    </div>
-    <div
-      className="euiFormHelpText euiFormRow__text"
-      id="generated-id-help"
-    >
-      This is the coded expression that backs this element. You better know what you are doing here.
     </div>
   </div>
 </div>

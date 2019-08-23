@@ -43,6 +43,8 @@ jest.mock('@elastic/eui/packages/react-datepicker', () => {
   };
 });
 
+jest.mock('plugins/interpreter/registries', () => ({}));
+
 addSerializer(styleSheetSerializer);
 
 // Initialize Storyshots and build the Jest Snapshots

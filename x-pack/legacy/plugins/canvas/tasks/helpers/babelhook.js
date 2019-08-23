@@ -40,10 +40,6 @@ const options = {
           location: resolve(__dirname, '..', 'mocks', 'noop'),
         },
         {
-          pattern: 'plugins/interpreter/registries',
-          location: resolve(__dirname, '..', 'mocks', 'noop'),
-        },
-        {
           pattern: '/state/store',
           location: resolve(__dirname, '..', 'mocks', 'stateStore'),
         },
