@@ -30,8 +30,8 @@ export interface IPackageScripts {
   [key: string]: string;
 }
 
-export function readPackageJson(dir: string) {
-  return readPkg(dir, { normalize: false });
+export function readPackageJson(cwd: string) {
+  return readPkg({ cwd, normalize: false });
 }
 
 export function writePackageJson(path: string, json: IPackageJson) {
