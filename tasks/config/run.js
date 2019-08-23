@@ -166,7 +166,7 @@ module.exports = function (grunt) {
       args: [
         'nyc',
         '--reporter=html',
-        '--report-dir=./target/mocha-coverage',
+        '--report-dir=./target/kibana-coverage/mocha',
         NODE,
         'scripts/mocha'
       ]
