@@ -239,6 +239,7 @@ export class AbstractESSource extends AbstractVectorSource {
     }
 
     try {
+      // indexPatternService.clearCache(this._descriptor.indexPatternId);
       this.indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
       return this.indexPattern;
     } catch (error) {

@@ -29,6 +29,7 @@ import { ContactCardEmbeddableExample } from './hello_world_embeddable_example';
 import { HelloWorldContainerExample } from './hello_world_container_example';
 import { DashboardContainerExample } from './dashboard_container_example';
 import { Start as InspectorStartContract } from '../../../../../../src/plugins/inspector/public';
+import { MapEmbeddableExample } from './map_embeddable_example';
 
 export interface AppProps {
   getActions: GetActionsCompatibleWithTrigger;
@@ -46,6 +47,10 @@ export class App extends Component<AppProps, { selectedTabId: string }> {
     super(props);
     this.tabs = [
       {
+        id: 'mapEmbeddable',
+        name: 'Map Embeddable',
+      },
+      {
         id: 'helloWorldContainer',
         name: 'Hello World Container',
       },
@@ -60,7 +65,7 @@ export class App extends Component<AppProps, { selectedTabId: string }> {
     ];
 
     this.state = {
-      selectedTabId: 'helloWorldContainer',
+      selectedTabId: 'mapEmbeddable',
     };
   }
 
@@ -96,6 +101,20 @@ export class App extends Component<AppProps, { selectedTabId: string }> {
 
   private getContentsForTab() {
     switch (this.state.selectedTabId) {
+      case 'mapEmbeddable': {
+        return (
+          <MapEmbeddableExample
+            getActions={this.props.getActions}
+            getEmbeddableFactory={this.props.getEmbeddableFactory}
+            getAllEmbeddableFactories={this.props.getAllEmbeddableFactories}
+            overlays={this.props.overlays}
+            notifications={this.props.notifications}
+            inspector={this.props.inspector}
+            SavedObjectFinder={this.props.SavedObjectFinder}
+          />
+        );
+        // return <>MapEmbeddableExample</>;
+      }
       case 'helloWorldContainer': {
         return (
           <HelloWorldContainerExample

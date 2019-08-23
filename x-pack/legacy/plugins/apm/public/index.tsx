@@ -13,6 +13,8 @@ import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
+import 'uiExports/fieldFormats';
+import 'uiExports/search';
 import 'uiExports/autocompleteProviders';
 import { GlobalHelpExtension } from './components/app/GlobalHelpExtension';
 import { plugin } from './new-platform';
@@ -21,7 +23,7 @@ import './style/global_overrides.css';
 import template from './templates/index.html';
 import { CoreProvider } from './context/CoreContext';
 
-const { core } = npStart;
+const { core, plugins } = npStart;
 
 // render APM feedback link in global help menu
 core.chrome.setHelpExtension(domElement => {
@@ -50,5 +52,5 @@ const checkForRoot = () => {
   });
 };
 checkForRoot().then(() => {
-  plugin().start(core);
+  plugin().start({ core, plugins });
 });

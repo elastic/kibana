@@ -11,6 +11,7 @@ import styled from 'styled-components';
 import { InternalCoreStart } from 'src/core/public';
 import { history } from '../utils/history';
 import { CoreProvider } from '../context/CoreContext';
+import { EmbeddableProvider } from '../context/EmbeddableContext';
 import { LocationProvider } from '../context/LocationContext';
 import { UrlParamsProvider } from '../context/UrlParamsContext';
 import { px, unit, units } from '../style/variables';
@@ -21,6 +22,7 @@ import { routes } from '../components/app/Main/route_config';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
 import { useUpdateBadgeEffect } from '../components/app/Main/useUpdateBadgeEffect';
 import { MatchedRouteProvider } from '../context/MatchedRouteContext';
+import { PluginsStart } from 'ui/new_platform/new_platform';
 
 export const REACT_APP_ROOT_ID = 'react-apm-root';
 
@@ -54,15 +56,23 @@ const App = () => {
 };
 
 export class Plugin {
-  public start(core: InternalCoreStart) {
+  public start({
+    core,
+    plugins
+  }: {
+    core: InternalCoreStart;
+    plugins: PluginsStart;
+  }) {
     const { i18n } = core;
     ReactDOM.render(
       <CoreProvider core={core}>
         <i18n.Context>
           <Router history={history}>
-            <LocationProvider>
-              <App />
-            </LocationProvider>
+            <EmbeddableProvider core={core} plugins={plugins}>
+              <LocationProvider>
+                <App />
+              </LocationProvider>
+            </EmbeddableProvider>
           </Router>
         </i18n.Context>
       </CoreProvider>,

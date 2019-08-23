@@ -5,19 +5,9 @@
  */
 
 import React, { useMemo } from 'react';
-import { ChoroplethMap } from './ChoroplethMap';
+import { ChoroplethMap, getDefaultProgressionColor } from './ChoroplethMap';
 import { ColorProgressionBar } from './ColorProgressionBar';
 import { useAvgDurationByCountry } from '../../../../../hooks/useAvgDurationByCountry';
-
-function getProgressionColor(
-  scale: number,
-  // default to euiColorPrimary (#006BB4)
-  color = { hue: 204, saturation: 100, lightness: { min: 20, max: 90 } }
-) {
-  const { min, max } = color.lightness;
-  const lightness = Math.round(min + (max - min) * (1 - scale));
-  return `hsl(${color.hue},${color.saturation}%,${lightness}%)`;
-}
 
 const RegionMapChartToolTip: React.SFC<{
   geojsonProperties: { [name: string]: any };
@@ -48,29 +38,27 @@ export const RegionMapChart: React.SFC = () => {
       ),
     [data]
   );
-  const maxValue = useMemo(
-    () => Math.max(...choroplethData.map(({ value }) => value)),
-    [choroplethData]
-  );
+
   return (
     <div>
       <ChoroplethMap
-        getColorStyle={getProgressionColor}
         mapboxStyle="https://tiles.maps.elastic.co/styles/osm-bright-desaturated/style.json"
         initialMapboxOptions={{
-          zoom: 0.75,
+          zoom: 1.41,
           center: {
-            lng: -25,
-            lat: 25
+            lng: 0,
+            lat: 45
           }
         }}
         geojsonSource="https://vector.maps.elastic.co/files/world_countries_v1.geo.json?elastic_tile_service_tos=agree&my_app_name=ems-landing&my_app_version=7.2.0"
         geojsonKeyProperty="iso2"
-        maxValue={maxValue}
         data={choroplethData}
         renderTooltip={RegionMapChartToolTip}
       />
-      <ColorProgressionBar slices={10} getColorStyle={getProgressionColor} />
+      <ColorProgressionBar
+        slices={10}
+        getColorStyle={getDefaultProgressionColor}
+      />
     </div>
   );
 };

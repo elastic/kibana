@@ -4,26 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import { useRef } from 'react';
 import { useFetcher } from './useFetcher';
 import { useUrlParams } from './useUrlParams';
 import { callApmApi } from '../services/rest/callApmApi';
 
 export function useAvgDurationByCountry() {
   const {
-    urlParams: {
-      serviceName,
-      start,
-      end /* transactionName, transactionType*/
-    },
+    urlParams: { serviceName, start, end },
     uiFilters
   } = useUrlParams();
 
-  const {
-    data = [],
-    error,
-    status
-  } = useFetcher(() => {
+  const { data = [], error, status } = useFetcher(() => {
     if (serviceName && start && end) {
       return callApmApi({
         pathname:

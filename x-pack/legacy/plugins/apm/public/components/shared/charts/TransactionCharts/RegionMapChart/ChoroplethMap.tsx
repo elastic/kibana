@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback
+} from 'react';
 import { isEqual } from 'lodash';
 import {
   Map,
@@ -17,27 +23,61 @@ import {
 
 interface Props {
   style?: React.CSSProperties;
-  getColorStyle: (scale: number) => string;
   mapboxStyle: MapboxOptions['style'];
   geojsonSource: NonNullable<GeoJSONSourceOptions['data']>;
   geojsonKeyProperty: string;
   data: Array<{ key: string; value: number; [property: string]: any }>;
-  maxValue: number;
   renderTooltip: (props: {
     geojsonProperties: NonNullable<mapboxgl.MapboxGeoJSONFeature['properties']>;
     data?: Props['data'][0];
   }) => React.ReactElement | null;
   initialMapboxOptions?: Partial<MapboxOptions>;
+  mapValueToColor?: (value: number) => string;
+  getProgressionColor?: typeof getDefaultProgressionColor;
 }
+
+const linearScale = (x: number, range = { min: 0, max: 1 }) =>
+  (range.max - range.min) * x + range.min;
+const quadradicScale = (x: number, range = { min: 0, max: 1 }) =>
+  4 * (range.max - range.min) * (x ** 2 - x) + range.max;
+
+export function getDefaultProgressionColor(scale: number) {
+  const hue = quadradicScale(scale, { min: 200, max: 218 });
+  const saturation = 55;
+  const lightness = Math.round(linearScale(1 - scale, { min: 35, max: 98 }));
+  return `hsl(${hue},${saturation}%,${lightness}%)`;
+}
+
+function getDefaultMapValueToColor(
+  getProgressionColor = getDefaultProgressionColor,
+  data: Props['data']
+) {
+  return (value: number) => {
+    const firstValue = data[0] ? data[0].value : 0;
+    const { min, max } = data.reduce(
+      ({ min, max }, { value }) => ({
+        min: Math.min(min, value),
+        max: Math.max(max, value)
+      }),
+      { min: firstValue, max: firstValue }
+    );
+    const scale = (value - min) / (max - min);
+    return getProgressionColor(scale);
+  };
+}
+
 export const ChoroplethMap: React.SFC<Props> = props => {
   const {
     style,
-    getColorStyle,
+    mapValueToColor = useMemo(
+      () => getDefaultMapValueToColor(props.getProgressionColor, props.data),
+      [props.getProgressionColor, props.data]
+    ),
+    getProgressionColor,
     mapboxStyle = 'https://tiles.maps.elastic.co/styles/osm-bright/style.json',
     geojsonSource,
     geojsonKeyProperty,
     data,
-    maxValue,
     renderTooltip: ToolTip
   } = props;
 
@@ -56,6 +96,7 @@ export const ChoroplethMap: React.SFC<Props> = props => {
   const mapboxMap = useRef<Map | null>(null);
   const mapboxPopup = useRef<Popup | null>(null);
   const mapboxStyleRef = useRef(mapboxStyle);
+  const mapValueToColorRef = useRef(mapValueToColor);
   const choroplethIncrementingId = useRef(0);
   const choroplethLayerId = useRef('choropleth_regions_0');
   const propsRef = useRef(props);
@@ -90,9 +131,7 @@ export const ChoroplethMap: React.SFC<Props> = props => {
               property: propsRef.current.geojsonKeyProperty,
               stops: propsRef.current.data.map(({ key, value }) => [
                 key,
-                propsRef.current.getColorStyle(
-                  value / propsRef.current.maxValue
-                )
+                mapValueToColorRef.current(value)
               ]),
               type: 'categorical',
               default: 'transparent'
@@ -104,7 +143,7 @@ export const ChoroplethMap: React.SFC<Props> = props => {
     }
   });
 
-  const onMouseMove = useRef(
+  const onMouseMove = useCallback(
     (event: mapboxgl.MapMouseEvent & mapboxgl.EventData) => {
       if (mapboxMap.current && isMapReady.current && mapboxPopup.current) {
         mapboxPopup.current.setLngLat(event.lngLat);
@@ -137,8 +176,15 @@ export const ChoroplethMap: React.SFC<Props> = props => {
           }
         }
       }
-    }
+    },
+    []
   );
+
+  const onMouseOut = useCallback(() => {
+    hoveredFeaturePropertiesRef.current = null;
+    setHoveredFeatureProperties(null);
+    setHoveredData(undefined);
+  }, []);
 
   useEffect(() => {
     if (containerRef.current !== null) {
@@ -158,7 +204,8 @@ export const ChoroplethMap: React.SFC<Props> = props => {
         closeOnClick: false
       };
       mapboxPopup.current = new Popup(popupOptions);
-      map.on('mousemove', onMouseMove.current);
+      map.on('mousemove', onMouseMove);
+      map.on('mouseout', onMouseOut);
       map.on('load', () => {
         isMapReady.current = true;
         updateChoroplethLayer.current();
@@ -183,6 +230,7 @@ export const ChoroplethMap: React.SFC<Props> = props => {
 
   useEffect(() => {
     const map = mapboxMap.current;
+    mapValueToColorRef.current = mapValueToColor;
     if (map && isMapReady.current) {
       if (isEqual(mapboxStyleRef.current, mapboxStyle)) {
         updateChoroplethLayer.current();
@@ -198,11 +246,11 @@ export const ChoroplethMap: React.SFC<Props> = props => {
     }
   }, [
     mapboxStyle,
-    getColorStyle,
     geojsonSource,
     geojsonKeyProperty,
     data,
-    maxValue
+    mapValueToColor,
+    getProgressionColor
   ]);
 
   return (
