@@ -23,7 +23,7 @@ import { PageRouter } from '../routes';
 import { createStore } from '../store';
 import { ApolloClientContext } from '../utils/apollo_context';
 import { HistoryContext } from '../utils/history_context';
-import { createContext, useUiSetting } from '../../../../../../src/plugins/kibana_react/public';
+import { createContext, useUiSetting$ } from '../../../../../../src/plugins/kibana_react/public';
 
 const { Provider: KibanaProvider } = createContext(npStart.core);
 
@@ -37,7 +37,7 @@ export async function startApp(libs: InfraFrontendLibs) {
   });
 
   const InfraPluginRoot: React.FunctionComponent = () => {
-    const [darkMode] = useUiSetting<boolean>('theme:darkMode');
+    const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
     return (
       <I18nContext>

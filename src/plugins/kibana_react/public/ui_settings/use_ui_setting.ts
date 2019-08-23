@@ -33,14 +33,14 @@ type Setter<T> = (newValue: T) => Promise<boolean>;
  * Usage:
  *
  * ```js
- * const [darkMode, setDarkMode] = useUiSetting('theme:darkMode');
+ * const [darkMode, setDarkMode] = useUiSetting$('theme:darkMode');
  * ```
  *
  * @todo As of this writing `uiSettings` service exists only on *setup* `core`
  *       object, but I assume it will be available on *start* `core` object, too,
  *       thus postfix assertion is used `core.uiSetting!`.
  */
-export const useUiSetting = <T>(key: string, defaultValue?: T): [T, Setter<T>] => {
+export const useUiSetting$ = <T>(key: string, defaultValue?: T): [T, Setter<T>] => {
   const { services } = useKibana();
 
   if (typeof services.uiSettings !== 'object') {

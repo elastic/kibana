@@ -95,16 +95,16 @@ export default withKibana(Demo);
 Wrappers around Core's `uiSettings` service.
 
 
-### `useUiSetting` hook
+### `useUiSetting$` hook
 
-`useUiSetting` synchronously returns the latest setting from `CoreStart['uiSettings']` service and
+`useUiSetting$` synchronously returns the latest setting from `CoreStart['uiSettings']` service and
 subscribes to changes, re-rendering your component with latest values.
 
 ```tsx
-import { useUiSetting } from 'kibana-react';
+import { useUiSetting$ } from 'kibana-react';
 
 const Demo = () => {
-  const [darkMode] = useUiSetting<boolean>('theme:darkMode');
+  const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
   return (
     <div>
       {darkMode ? 'dark' : 'light'}

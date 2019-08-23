@@ -20,7 +20,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { act, Simulate } from 'react-dom/test-utils';
-import { useUiSetting } from './use_ui_setting';
+import { useUiSetting$ } from './use_ui_setting';
 import { createContext } from '../context';
 import { KibanaServices } from '../context/types';
 import { Subject } from 'rxjs';
@@ -60,7 +60,7 @@ const TestConsumer: React.FC<{
   setting: string;
   newValue?: string;
 }> = ({ setting, newValue = '' }) => {
-  const [value, set] = useUiSetting(setting, 'DEFAULT');
+  const [value, set] = useUiSetting$(setting, 'DEFAULT');
 
   return (
     <div>
