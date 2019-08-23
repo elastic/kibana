@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { injectI18n } from '@kbn/i18n/react';
 import compose from 'lodash/fp/compose';
 import React from 'react';
 import { match as RouteMatch, Redirect, RouteComponentProps } from 'react-router-dom';
@@ -30,8 +31,8 @@ export function buildSearchString(location: RouteComponentProps['location'], sou
   )('');
 }
 
-export const RedirectToLogs = ({ location, match }: RedirectToLogsProps) => {
+export const RedirectToLogs = injectI18n(({ location, match }: RedirectToLogsProps) => {
   const searchString = buildSearchString(location, match.params.sourceId);
 
   return <Redirect to={`/logs/stream?${searchString}`} />;
-};
+});
