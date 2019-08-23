@@ -139,14 +139,14 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
   />
   <inject-AxisSpec-with-chartStore
     id="x"
-    position="bottom"
+    position="left"
     showGridLines={false}
     tickFormat={[Function]}
     title=""
   />
   <inject-AxisSpec-with-chartStore
     id="y"
-    position="left"
+    position="bottom"
     showGridLines={false}
     tickFormat={[Function]}
     title=""
@@ -399,14 +399,14 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
   />
   <inject-AxisSpec-with-chartStore
     id="x"
-    position="bottom"
+    position="left"
     showGridLines={false}
     tickFormat={[Function]}
     title=""
   />
   <inject-AxisSpec-with-chartStore
     id="y"
-    position="left"
+    position="bottom"
     showGridLines={false}
     tickFormat={[Function]}
     title=""
