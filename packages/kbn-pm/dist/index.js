@@ -22078,7 +22078,7 @@ __webpack_require__.r(__webpack_exports__);
 
 const glob = Object(util__WEBPACK_IMPORTED_MODULE_2__["promisify"])(glob__WEBPACK_IMPORTED_MODULE_0___default.a);
 async function workspacePackagePaths(rootPath) {
-  const rootPkgJson = await Object(_package_json__WEBPACK_IMPORTED_MODULE_5__["readPackageJson"])(path__WEBPACK_IMPORTED_MODULE_1___default.a.join(rootPath, 'package.json'));
+  const rootPkgJson = await Object(_package_json__WEBPACK_IMPORTED_MODULE_5__["readPackageJson"])(rootPath);
 
   if (!rootPkgJson.workspaces) {
     return [];

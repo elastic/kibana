@@ -30,7 +30,7 @@ export interface IPackageScripts {
   [key: string]: string;
 }
 
-export function readPackageJson(cwd: string) {
+export function readPackageJson(cwd: string): IPackageJson {
   return readPkg({ cwd, normalize: false });
 }
 
