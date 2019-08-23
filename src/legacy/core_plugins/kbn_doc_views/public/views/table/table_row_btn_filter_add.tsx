@@ -37,9 +37,9 @@ export function DocViewTableRowBtnFilterAdd({ onClick, disabled = false }: Props
           />
         }
       >
-        <span className="kbnDocViewer__actionButton">
+        <button className="kbnDocViewer__actionButton" disabled>
           <i className="fa fa-search-plus text-muted" />
-        </span>
+        </button>
       </EuiToolTip>
     );
   }

@@ -29,7 +29,11 @@ export interface Props {
 
 export function DocViewTableRowBtnToggleColumn({ onClick, active, disabled = false }: Props) {
   if (disabled) {
-    return <i className="fa fa-columns text-muted" />;
+    return (
+      <button disabled>
+        <i className="fa fa-columns text-muted" />
+      </button>
+    );
   }
   return (
     <EuiToolTip

@@ -37,9 +37,9 @@ export function DocViewTableRowBtnFilterRemove({ onClick, disabled = false }: Pr
           />
         }
       >
-        <span className="kbnDocViewer__actionButton">
+        <button className="kbnDocViewer__actionButton" disabled>
           <i className="fa fa-search-minus text-muted" />
-        </span>
+        </button>
       </EuiToolTip>
     );
   }

@@ -49,9 +49,9 @@ export function DocViewTableRowBtnFilterExists({
           )
         }
       >
-        <span className="kbnDocViewer__actionButton">
+        <button className="kbnDocViewer__actionButton" disabled>
           <i className="fa fa-asterisk text-muted" />
-        </span>
+        </button>
       </EuiToolTip>
     );
   }
