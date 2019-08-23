@@ -25,11 +25,10 @@ export const TimePickerPopover: FunctionComponent<Props> = ({ from, to, onSelect
   const button = (handleClick: (event: MouseEvent<HTMLButtonElement>) => void) => (
     <button
       className="canvasTimePickerPopover__button"
-      aria-label={
-        'Displaying data ' +
-        formatDuration(from, to) +
-        '. Click to open a calendar tool to select a new time range.'
-      }
+      aria-label={`Displaying data ${formatDuration(
+        from,
+        to
+      )}. Click to open a calendar tool to select a new time range.`}
       onClick={handleClick}
     >
       <PrettyDuration from={from} to={to} />
