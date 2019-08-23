@@ -17,24 +17,6 @@
  * under the License.
  */
 
-import { spawnSync } from 'child_process';
-import { resolve } from 'path';
+import { dirname } from 'path';
 
-import expect from '@kbn/expect';
-import { REPO_ROOT } from '@kbn/dev-utils';
-
-const SCRIPT = resolve(REPO_ROOT, 'scripts/functional_test_runner.js');
-const BASIC_CONFIG = require.resolve('../fixtures/simple_project/config.js');
-
-describe('basic config file with a single app and test', function() {
-  this.timeout(60 * 1000);
-
-  it('runs and prints expected output', () => {
-    const proc = spawnSync(process.execPath, [SCRIPT, '--config', BASIC_CONFIG]);
-    const stdout = proc.stdout.toString('utf8');
-    expect(stdout).to.contain('$BEFORE$');
-    expect(stdout).to.contain('$TESTNAME$');
-    expect(stdout).to.contain('$INTEST$');
-    expect(stdout).to.contain('$AFTER$');
-  });
-});
+export const REPO_ROOT = dirname(require.resolve('../../../package.json'));
