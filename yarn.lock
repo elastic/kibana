@@ -948,15 +948,7 @@
     pirates "^4.0.0"
     source-map-support "^0.5.9"
 
-"@babel/runtime-corejs2@^7.2.0":
-  version "7.5.5"
-  resolved "https://registry.yarnpkg.com/@babel/runtime-corejs2/-/runtime-corejs2-7.5.5.tgz#c3214c08ef20341af4187f1c9fbdc357fbec96b2"
-  integrity sha512-FYATQVR00NSNi7mUfpPDp7E8RYMXDuO8gaix7u/w3GekfUinKgX1AcTxs7SoiEmoEW9mbpjrwqWSW6zCmw5h8A==
-  dependencies:
-    core-js "^2.6.5"
-    regenerator-runtime "^0.13.2"
-
-"@babel/runtime-corejs2@^7.4.2":
+"@babel/runtime-corejs2@^7.2.0", "@babel/runtime-corejs2@^7.4.2":
   version "7.5.5"
   resolved "https://registry.yarnpkg.com/@babel/runtime-corejs2/-/runtime-corejs2-7.5.5.tgz#c3214c08ef20341af4187f1c9fbdc357fbec96b2"
   integrity sha512-FYATQVR00NSNi7mUfpPDp7E8RYMXDuO8gaix7u/w3GekfUinKgX1AcTxs7SoiEmoEW9mbpjrwqWSW6zCmw5h8A==
@@ -1137,10 +1129,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@13.3.0":
-  version "13.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-13.3.0.tgz#05c78ffcb2041ebafd807e23dd3d32553e8c1812"
-  integrity sha512-Z/1KGaqKY2PCJXdJ3XTSTcnZZxjFysafvIWNRs+O0C+IQsyy0cz5Sj8BaM9pUgYVjL2SaO04Hs9Yb09MDJwFGQ==
+"@elastic/eui@13.6.0":
+  version "13.6.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-13.6.0.tgz#a01b66f84bfc7eec2303df1c8d9a7d7443b59049"
+  integrity sha512-a7hD9jLIvA2yJZi+btDIRGRHRSjCwb/0/en3U29MtNB2cOEnNYQ1MGcI5/eIz6eKi93eb0ASG9qq6xVqVaAezQ==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
