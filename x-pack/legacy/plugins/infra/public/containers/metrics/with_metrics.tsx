@@ -10,8 +10,8 @@ import {
   InfraMetric,
   InfraMetricData,
   InfraNodeType,
-  InfraTimerangeInput,
   MetricsQuery,
+  InfraTimerangeInput,
 } from '../../graphql/types';
 import { InfraMetricLayout } from '../../pages/metrics/layouts/types';
 import { metricsQuery } from './metrics.gql_query';
