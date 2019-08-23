@@ -1,6 +1,6 @@
 {
   "job_type": "anomaly_detector",
-  "description": "SIEM Winlogbeat: Detect unusual users on Windows",
+  "description": "SIEM Winlogbeat: Detect  users that are not normally active may indicate unauthorized changes or activity by an unauthorized user.",
   "groups": [
     "siem"
   ],

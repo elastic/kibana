@@ -3,7 +3,7 @@
     "groups": [
         "siem"
       ],
-    "description": "SIEM Auditbeat: Detect activity on unusual file paths",
+    "description": "SIEM Auditbeat: Detect activity in unusual paths that may indicate malware or persistence mechanisms.",
     "analysis_config": {
         "bucket_span": "15m",
         "detectors": [

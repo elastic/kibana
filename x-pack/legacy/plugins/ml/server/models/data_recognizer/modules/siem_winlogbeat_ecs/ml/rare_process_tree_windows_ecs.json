@@ -3,7 +3,7 @@
   "groups": [
     "siem"
   ],
-  "description": "SIEM Winlogbeat: Detects unusual Windows parent / child process activity",
+  "description": "SIEM Winlogbeat: Detect unusual Windows parent-child process activity",
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [

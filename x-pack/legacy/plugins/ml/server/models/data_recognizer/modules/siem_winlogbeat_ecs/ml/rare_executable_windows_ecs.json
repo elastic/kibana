@@ -1,6 +1,6 @@
 {
     "job_type": "anomaly_detector",
-    "description": "SIEM Winlogbeat: Detect unusual executables on Windows",
+    "description": "SIEM Winlogbeat: Detect unusual Windows processes which may indicate unauthorized services, malware or persistence mechanisms.",
     "groups": [
       "siem"
     ],

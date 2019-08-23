@@ -3,7 +3,7 @@
     "groups": [
       "siem"
     ],
-    "description": "SIEM Auditbeat: Detect unusually rare downloads via curl and wget on Linux",
+    "description": "SIEM Auditbeat: Detect unusual URL request from a Linux instance. Curl and wget activity is very common but unusual URLs can sometimes be malware delivery.",
     "analysis_config": {
       "bucket_span": "15m",
       "detectors": [

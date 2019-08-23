@@ -1,6 +1,6 @@
 {
   "job_type": "anomaly_detector",
-  "description": "SIEM Auditbeat: Detect unusually rare processes on Linux across your entire fleet",
+  "description": "SIEM Auditbeat: Detect unusual Linux processes which may indicate unauthorized services, malware or persistence mechanisms.",
   "groups": [
     "siem"
   ],

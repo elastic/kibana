@@ -3,7 +3,7 @@
     "groups": [
       "siem"
     ],
-    "description": "SIEM Auditbeat: Detect unusual increases in file deletes on Linux",
+    "description": "SIEM Auditbeat: Detect surges in file delete events that could be wiper or data destruction activity.",
     "analysis_config": {
       "bucket_span": "15m",
       "detectors": [

@@ -3,7 +3,7 @@
     "groups": [
       "siem"
     ],
-    "description": "SIEM Auditbeat: Detect unusual increases in file changes on Linux",
+    "description": "SIEM Auditbeat: Detect surges in file events that could indicate data copying or attempted exfiltration.",
     "analysis_config": {
       "bucket_span": "15m",
       "detectors": [

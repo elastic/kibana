@@ -1,6 +1,6 @@
 {
   "job_type": "anomaly_detector",
-  "description": "SIEM Winlogbeat: Detect unusual increases in file changes on Windows",
+  "description": "SIEM Winlogbeat: Detect surges in file events that could indicate data copying or attempted exfiltration.",
   "groups": [
     "siem"
   ],

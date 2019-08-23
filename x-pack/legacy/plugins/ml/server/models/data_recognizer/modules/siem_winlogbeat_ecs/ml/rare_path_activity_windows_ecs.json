@@ -3,7 +3,7 @@
   "groups": [
       "siem"
   ],
-  "description": "SIEM Winlogbeat: Detect activity in rare paths on Windows",
+  "description": "SIEM Winlogbeat: Detect activity in unusual paths that may indicate malware or persistence mechanisms.",
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [

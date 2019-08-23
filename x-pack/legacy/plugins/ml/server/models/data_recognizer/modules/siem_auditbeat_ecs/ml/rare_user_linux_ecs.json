@@ -3,7 +3,7 @@
     "groups": [
       "siem"
     ],
-    "description": "SIEM Auditbeat: Detect unusual users on Linux",
+    "description": "SIEM Auditbeat: Detect users that are not normally active may indicate unauthorized changes or activity by an unauthorized user.",
     "analysis_config": {
       "bucket_span": "15m",
       "detectors": [
