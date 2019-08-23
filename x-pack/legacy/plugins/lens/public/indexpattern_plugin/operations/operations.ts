@@ -160,11 +160,17 @@ function getPossibleOperationForField(
  * @param indexPattern The index pattern associated to the layer of the column
  * @param newField The new field the column should be switched to
  */
-export function changeField(column: IndexPatternColumn, indexPattern: IndexPattern, newField: IndexPatternField) {
+export function changeField(
+  column: IndexPatternColumn,
+  indexPattern: IndexPattern,
+  newField: IndexPatternField
+) {
   const operationDefinition = operationDefinitionMap[column.operationType];
 
-  if(!('onFieldChange' in operationDefinition)) {
-    throw new Error('Invariant error: Cannot change field if operation isn\'t a field based operaiton');
+  if (!('onFieldChange' in operationDefinition)) {
+    throw new Error(
+      "Invariant error: Cannot change field if operation isn't a field based operaiton"
+    );
   }
 
   // This has to be casted back to an index pattern column, because the `operationDefinitionMap` only

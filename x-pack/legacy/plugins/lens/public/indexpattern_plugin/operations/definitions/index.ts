@@ -199,5 +199,6 @@ export const operationDefinitions: PossibleOperationDefinition[] = Object.values
  */
 export const operationDefinitionMap = (internalOperationDefinitionMap as unknown) as Record<
   OperationType,
-  FieldBasedOperationDefinition<BaseIndexPatternColumn> | DocumentBasedOperationDefinition<BaseIndexPatternColumn>
+  | FieldBasedOperationDefinition<BaseIndexPatternColumn>
+  | DocumentBasedOperationDefinition<BaseIndexPatternColumn>
 >;

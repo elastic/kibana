@@ -18,11 +18,7 @@ import {
   OperationType,
 } from '../indexpattern';
 
-import {
-  getAvailableOperationsByMetadata,
-  buildColumn,
-  changeField,
-} from '../operations';
+import { getAvailableOperationsByMetadata, buildColumn, changeField } from '../operations';
 import { PopoverEditor } from './popover_editor';
 import { DragContextState, ChildDragDropProvider, DragDrop } from '../../drag_drop';
 import { changeColumn, deleteColumn } from '../state_helpers';
