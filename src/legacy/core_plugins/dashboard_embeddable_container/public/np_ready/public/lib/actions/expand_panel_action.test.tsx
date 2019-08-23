@@ -31,7 +31,6 @@ import {
   ContactCardEmbeddableOutput,
 } from '../../../../../../embeddable_api/public/np_ready/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable';
 import { DashboardOptions } from '../embeddable/dashboard_container_factory';
-import { createKibanaReactContext } from '../../../../../../../../plugins/kibana_react/public';
 
 const embeddableFactories = new Map<string, EmbeddableFactory>();
 embeddableFactories.set(
@@ -55,7 +54,6 @@ beforeEach(async () => {
     overlays: {} as any,
     savedObjectMetaData: {} as any,
   };
-  const context = createKibanaReactContext<DashboardOptions>(options);
   const input = getSampleDashboardInput({
     panels: {
       '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
