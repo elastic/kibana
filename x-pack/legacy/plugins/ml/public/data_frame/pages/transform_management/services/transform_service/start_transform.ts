@@ -15,7 +15,7 @@ import {
   DataFrameTransformEndpointRequest,
   DataFrameTransformEndpointResult,
 } from '../../components/transform_list/common';
-// @ts-ignore no declaration file
+
 import { mlMessageBarService } from '../../../../../../public/components/messagebar/messagebar_service';
 
 export const startTransforms = async (dataFrames: DataFrameTransformListRow[]) => {
