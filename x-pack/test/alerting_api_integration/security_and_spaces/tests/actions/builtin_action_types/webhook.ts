@@ -201,15 +201,3 @@ function extractCredentialsFromUrl(url: string): { url: string; user: string; pa
   const { password, username: user } = parsedUrl;
   return { url: formatUrl(parsedUrl, { auth: false }), user, password };
 }
-
-function extractCompositesOfURL(
-  url: string
-): { host: string; port: string; path: string; scheme: string } {
-  const { protocol, port, pathname, search, hostname: host } = new URL(url);
-  return {
-    scheme: protocol ? protocol.replace(':', '') : protocol,
-    port,
-    path: `${pathname}${search}`,
-    host,
-  };
-}
