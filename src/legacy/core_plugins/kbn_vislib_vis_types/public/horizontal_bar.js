@@ -35,7 +35,8 @@ import {
   AxisModes,
   Rotates,
   getAxisModes,
-  getScaleTypes
+  getScaleTypes,
+  getThresholdLineStyles,
 } from './utils/collections';
 
 export default function PointSeriesVisType(Private) {
@@ -127,6 +128,7 @@ export default function PointSeriesVisType(Private) {
         scaleTypes: getScaleTypes(),
         chartModes: getChartModes(),
         interpolationModes: getInterpolationModes(),
+        thresholdLineStyles: getThresholdLineStyles(),
       },
       optionTabs: [
         {

@@ -24,6 +24,7 @@ import {
   AxisModes,
   InterpolationModes,
   Rotates,
+  ThresholdLineStyles,
 } from './utils/collections';
 
 export interface CommonVislibParams {
@@ -52,7 +53,7 @@ interface ThresholdLine {
   show: boolean;
   value: number;
   width: number;
-  style: 'full' | 'dashed' | 'dot-dashed';
+  style: ThresholdLineStyles;
   color: string;
 }
 

@@ -25,7 +25,6 @@ interface NumberInputOptionProps<ParamName extends string> {
   label?: React.ReactNode;
   max?: number;
   min?: number;
-  step?: string | number;
   paramName: ParamName;
   step?: number;
   value?: number | '';
@@ -49,7 +48,6 @@ function NumberInputOption<ParamName extends string>({
         step={step}
         max={max}
         min={min}
-        step={step}
         value={value}
         onChange={ev =>
           setValue(paramName, isNaN(ev.target.valueAsNumber) ? '' : ev.target.valueAsNumber)

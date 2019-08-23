@@ -35,7 +35,9 @@ import {
   AxisModes,
   Rotates,
   getAxisModes,
-  getScaleTypes
+  getScaleTypes,
+  getThresholdLineStyles,
+  ThresholdLineStyles,
 } from './utils/collections';
 import { palettes } from '@elastic/eui/lib/services';
 
@@ -118,7 +120,7 @@ export default function PointSeriesVisType(Private) {
           show: false,
           value: 10,
           width: 1,
-          style: 'full',
+          style: ThresholdLineStyles.FULL,
           color: palettes.euiPaletteColorBlind.colors[9]
         }
       },
@@ -132,6 +134,7 @@ export default function PointSeriesVisType(Private) {
         scaleTypes: getScaleTypes(),
         chartModes: getChartModes(),
         interpolationModes: getInterpolationModes(),
+        thresholdLineStyles: getThresholdLineStyles(),
       },
       optionTabs: [
         {

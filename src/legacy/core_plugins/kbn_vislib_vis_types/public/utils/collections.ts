@@ -199,6 +199,33 @@ export enum Rotates {
   ANGLED = 75,
 }
 
+export enum ThresholdLineStyles {
+  FULL = 'full',
+  DASHED = 'dashed',
+  DOT_DASHED = 'dot-dashed',
+}
+
+const getThresholdLineStyles = () => [
+  {
+    value: ThresholdLineStyles.FULL,
+    text: i18n.translate('kbnVislibVisTypes.thresholdLine.style.fullText', {
+      defaultMessage: 'Full',
+    }),
+  },
+  {
+    value: ThresholdLineStyles.DASHED,
+    text: i18n.translate('kbnVislibVisTypes.thresholdLine.style.dashedText', {
+      defaultMessage: 'Dashed',
+    }),
+  },
+  {
+    value: ThresholdLineStyles.DOT_DASHED,
+    text: i18n.translate('kbnVislibVisTypes.thresholdLine.style.dotdashedText', {
+      defaultMessage: 'Dot-dashed',
+    }),
+  },
+];
+
 export {
   getPositions,
   getChartTypes,
@@ -206,4 +233,5 @@ export {
   getInterpolationModes,
   getScaleTypes,
   getAxisModes,
+  getThresholdLineStyles,
 };
