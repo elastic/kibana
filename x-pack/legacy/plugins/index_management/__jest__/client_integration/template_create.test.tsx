@@ -88,15 +88,14 @@ describe.skip('<TemplateCreate />', () => {
       expect(find('pageTitle').text()).toEqual('Create template');
     });
 
-    test('should not let the user go to the next step if some fields are missing', () => {
-      const { form, actions } = testBed;
+    test('should not let the user go to the next step with invalid fields', () => {
+      const { find, form } = testBed;
 
-      actions.clickNextButton();
+      form.setInputValue('nameInput', '');
+      find('mockComboBox').simulate('change', [{ value: '' }]);
 
-      expect(form.getErrorsMessages()).toEqual([
-        'A template name is required.',
-        'At least one index pattern is required.',
-      ]);
+      const nextButton = find('nextButton');
+      expect(nextButton.props().disabled).toEqual(true);
     });
 
     describe('form validation', () => {

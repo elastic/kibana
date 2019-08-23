@@ -25,6 +25,12 @@ jest.mock('ui/chrome', () => ({
   addBasePath: path => path || '/api/index_management',
 }));
 
+jest.mock('ui/index_patterns', () => ({
+  ILLEGAL_CHARACTERS: '',
+  CONTAINS_SPACES: '',
+  validateIndexPattern: () => { },
+}));
+
 setHttpClient(axios.create({ adapter: axiosXhrAdapter }));
 let server = null;
 

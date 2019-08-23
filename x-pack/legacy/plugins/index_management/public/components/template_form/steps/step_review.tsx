@@ -50,6 +50,8 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
   const { name, indexPatterns, version, order } = template;
 
   const serializedTemplate = serializeTemplate(template);
+  // Name not included in ES request body
+  delete serializedTemplate.name;
   const {
     mappings: serializedMappings,
     settings: serializedSettings,

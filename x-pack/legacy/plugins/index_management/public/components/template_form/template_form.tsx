@@ -139,7 +139,9 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
   );
 
   useEffect(() => {
-    updateValidation(template);
+    if (!isEditing) {
+      updateValidation(template);
+    }
   }, []);
 
   return (

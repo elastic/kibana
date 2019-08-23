@@ -26,7 +26,7 @@ import {
   getTemplateListLink,
   getTemplateCloneLink,
 } from '../../../services/routing';
-import { UIM_TEMPLATE_LIST_LOAD, BASE_PATH } from '../../../../common/constants';
+import { UIM_TEMPLATE_LIST_LOAD } from '../../../../common/constants';
 import { TemplateDetails } from './template_details';
 
 interface MatchParams {
