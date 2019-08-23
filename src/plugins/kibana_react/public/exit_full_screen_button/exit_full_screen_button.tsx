@@ -45,7 +45,7 @@ class ExitFullScreenButtonUi extends PureComponent<Props> {
 
   public render() {
     return (
-      <div>
+      <div className="hideInPercy">
         <EuiScreenReaderOnly>
           <p aria-live="polite">
             {i18n.translate('common.ui.exitFullScreenButton.fullScreenModeDescription', {

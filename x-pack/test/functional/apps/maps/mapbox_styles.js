@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 export const MAPBOX_STYLES = {
   POINT_LAYER: {
     'id': 'n1t6f_circle',
@@ -74,7 +73,7 @@ export const MAPBOX_STYLES = {
         '#072f6b'
       ],
       'circle-opacity': 0.75,
-      'circle-stroke-color': '#FFFFFF',
+      /* 'circle-stroke-color': '' */ // Obtained dynamically
       'circle-stroke-opacity': 0.75,
       'circle-stroke-width': 1,
       'circle-radius': 10
@@ -200,7 +199,7 @@ export const MAPBOX_STYLES = {
       'visibility': 'visible'
     },
     'paint': {
-      'line-color': '#FFFFFF',
+      /* 'line-color': '' */ // Obtained dynamically
       'line-opacity': 0.75,
       'line-width': 1
     }

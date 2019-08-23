@@ -31,7 +31,6 @@
       "{indices}/_stats/{metrics}"
     ],
     "url_components": {
-      "indices": null,
       "metrics": [
         "_all",
         "completion",
@@ -49,8 +48,9 @@
         "store",
         "suggest",
         "warmer"
-      ]
+      ],
+      "indices": null
     },
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/indices-stats.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-stats.html"
   }
 }
