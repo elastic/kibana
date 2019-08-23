@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
 import { toastNotifications } from 'ui/notify';
 import { startMLJob } from '../../../../../services/rest/ml';
-import { getAPMIndexPattern } from '../../../../../services/rest/savedObjects';
 import { IUrlParams } from '../../../../../context/UrlParamsContext/types';
 import { MLJobLink } from '../../../../shared/Links/MachineLearningLinks/MLJobLink';
 import { MachineLearningFlyoutView } from './view';
@@ -21,35 +20,12 @@ interface Props {
 
 interface State {
   isCreatingJob: boolean;
-  hasIndexPattern: boolean;
 }
 
 export class MachineLearningFlyout extends Component<Props, State> {
   public state: State = {
-    isCreatingJob: false,
-    hasIndexPattern: false
+    isCreatingJob: false
   };
-  public mounted = false;
-
-  public componentWillUnmount() {
-    this.mounted = false;
-  }
-
-  public async componentDidMount() {
-    this.mounted = true;
-    const indexPattern = await getAPMIndexPattern();
-
-    // setTimeout:0 hack forces the state update to wait for next tick
-    // in case the component is mid-unmount :/
-    setTimeout(() => {
-      if (!this.mounted) {
-        return;
-      }
-      this.setState({
-        hasIndexPattern: !!indexPattern
-      });
-    }, 0);
-  }
 
   public onClickCreate = async ({
     transactionType
@@ -156,7 +132,7 @@ export class MachineLearningFlyout extends Component<Props, State> {
   public render() {
     const { isOpen, onClose, urlParams } = this.props;
     const { serviceName } = urlParams;
-    const { isCreatingJob, hasIndexPattern } = this.state;
+    const { isCreatingJob } = this.state;
 
     if (!isOpen || !serviceName) {
       return null;
@@ -164,7 +140,6 @@ export class MachineLearningFlyout extends Component<Props, State> {
 
     return (
       <MachineLearningFlyoutView
-        hasIndexPattern={hasIndexPattern}
         isCreatingJob={isCreatingJob}
         onClickCreate={this.onClickCreate}
         onClose={onClose}

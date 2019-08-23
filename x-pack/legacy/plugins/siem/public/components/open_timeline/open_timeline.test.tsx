@@ -17,6 +17,8 @@ import { mockTimelineResults } from '../../mock/timeline_results';
 import { OpenTimeline } from './open_timeline';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from './constants';
 
+jest.mock('../../lib/settings/use_kibana_ui_setting');
+
 describe('OpenTimeline', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
   const title = 'All Timelines / Open Timelines';

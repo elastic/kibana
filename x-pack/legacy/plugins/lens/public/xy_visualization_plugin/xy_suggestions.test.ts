@@ -222,7 +222,6 @@ describe('xy_suggestions', () => {
             seriesType: 'bar',
             splitAccessor: 'product',
             xAccessor: 'date',
-            title: '',
           },
         ],
       },
@@ -261,7 +260,6 @@ describe('xy_suggestions', () => {
           seriesType: 'bar',
           splitAccessor: 'product',
           xAccessor: 'date',
-          title: '',
         },
       ],
     };
@@ -301,7 +299,6 @@ describe('xy_suggestions', () => {
           seriesType: 'bar',
           splitAccessor: 'dummyCol',
           xAccessor: 'product',
-          title: '',
         },
       ],
     };

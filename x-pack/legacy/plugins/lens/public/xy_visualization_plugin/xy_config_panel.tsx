@@ -49,7 +49,6 @@ function newLayerState(seriesType: SeriesType, layerId: string): LayerConfig {
     seriesType,
     xAccessor: generateId(),
     accessors: [generateId()],
-    title: '',
     splitAccessor: generateId(),
   };
 }

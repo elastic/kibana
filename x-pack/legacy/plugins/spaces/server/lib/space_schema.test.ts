@@ -62,3 +62,77 @@ describe('#id', () => {
     }
   );
 });
+
+describe('#color', () => {
+  test('is optional', () => {
+    const result = spaceSchema.validate({
+      ...defaultProperties,
+      color: undefined,
+    });
+    expect(result.error).toBeNull();
+  });
+
+  test(`doesn't allow an empty string`, () => {
+    const result = spaceSchema.validate({
+      ...defaultProperties,
+      color: '',
+    });
+    expect(result.error).toMatchInlineSnapshot(
+      `[ValidationError: child "color" fails because ["color" is not allowed to be empty]]`
+    );
+  });
+
+  test(`allows lower case hex color code`, () => {
+    const result = spaceSchema.validate({
+      ...defaultProperties,
+      color: '#aabbcc',
+    });
+    expect(result.error).toBeNull();
+  });
+
+  test(`allows upper case hex color code`, () => {
+    const result = spaceSchema.validate({
+      ...defaultProperties,
+      color: '#AABBCC',
+    });
+    expect(result.error).toBeNull();
+  });
+
+  test(`allows numeric hex color code`, () => {
+    const result = spaceSchema.validate({
+      ...defaultProperties,
+      color: '#123456',
+    });
+    expect(result.error).toBeNull();
+  });
+
+  test(`must start with a hash`, () => {
+    const result = spaceSchema.validate({
+      ...defaultProperties,
+      color: '123456',
+    });
+    expect(result.error).toMatchInlineSnapshot(
+      `[ValidationError: child "color" fails because ["color" with value "123456" fails to match the 6 digit hex color, starting with a # pattern]]`
+    );
+  });
+
+  test(`cannot exceed 6 digits following the hash`, () => {
+    const result = spaceSchema.validate({
+      ...defaultProperties,
+      color: '1234567',
+    });
+    expect(result.error).toMatchInlineSnapshot(
+      `[ValidationError: child "color" fails because ["color" with value "1234567" fails to match the 6 digit hex color, starting with a # pattern]]`
+    );
+  });
+
+  test(`cannot be fewer than 6 digits following the hash`, () => {
+    const result = spaceSchema.validate({
+      ...defaultProperties,
+      color: '12345',
+    });
+    expect(result.error).toMatchInlineSnapshot(
+      `[ValidationError: child "color" fails because ["color" with value "12345" fails to match the 6 digit hex color, starting with a # pattern]]`
+    );
+  });
+});
