@@ -948,15 +948,7 @@
     pirates "^4.0.0"
     source-map-support "^0.5.9"
 
-"@babel/runtime-corejs2@^7.2.0":
-  version "7.5.5"
-  resolved "https://registry.yarnpkg.com/@babel/runtime-corejs2/-/runtime-corejs2-7.5.5.tgz#c3214c08ef20341af4187f1c9fbdc357fbec96b2"
-  integrity sha512-FYATQVR00NSNi7mUfpPDp7E8RYMXDuO8gaix7u/w3GekfUinKgX1AcTxs7SoiEmoEW9mbpjrwqWSW6zCmw5h8A==
-  dependencies:
-    core-js "^2.6.5"
-    regenerator-runtime "^0.13.2"
-
-"@babel/runtime-corejs2@^7.4.2":
+"@babel/runtime-corejs2@^7.2.0", "@babel/runtime-corejs2@^7.4.2":
   version "7.5.5"
   resolved "https://registry.yarnpkg.com/@babel/runtime-corejs2/-/runtime-corejs2-7.5.5.tgz#c3214c08ef20341af4187f1c9fbdc357fbec96b2"
   integrity sha512-FYATQVR00NSNi7mUfpPDp7E8RYMXDuO8gaix7u/w3GekfUinKgX1AcTxs7SoiEmoEW9mbpjrwqWSW6zCmw5h8A==
@@ -1208,10 +1200,10 @@
     vscode-languageserver "^5.2.1"
     vscode-languageserver-types "^3.14.0"
 
-"@elastic/makelogs@^4.4.0":
-  version "4.4.0"
-  resolved "https://registry.yarnpkg.com/@elastic/makelogs/-/makelogs-4.4.0.tgz#bfe9d774afdaa923583e436e3c8459ded5545247"
-  integrity sha512-m+nVI5wv212li2f4eShl/ZxjhkYz2lFQzqxDM5xWnhF/vL90tIbTAlLj+RkwXTT1cnmcEzXWNxFsZAfyyiux0A==
+"@elastic/makelogs@^4.5.0":
+  version "4.5.0"
+  resolved "https://registry.yarnpkg.com/@elastic/makelogs/-/makelogs-4.5.0.tgz#d9256eb89fbfe7df9ff442cb31c598c5594370d7"
+  integrity sha512-xf8pG6vYoztTJUIjJDxHVRpwzMfsruZ33GjwbkzvKr4C/ZN1fjk5/iZYAnoGkknZgWVB1YEwTdFdUBR9h7ejcg==
   dependencies:
     async "^1.4.2"
     bluebird "^2.10.0"
