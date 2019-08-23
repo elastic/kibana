@@ -48,6 +48,8 @@ const FieldsBrowserButtonContainer = styled.div`
   }
 `;
 
+FieldsBrowserButtonContainer.displayName = 'FieldsBrowserButtonContainer';
+
 interface DispatchProps {
   removeColumn?: ActionCreator<{
     id: string;
@@ -95,9 +97,9 @@ export class StatefulFieldsBrowserComponent extends React.PureComponent<
       columnHeaders,
       browserFields,
       height,
-      isLoading,
       onFieldSelected,
       timelineId,
+      toggleColumn,
       width,
     } = this.props;
     const {
@@ -141,7 +143,6 @@ export class StatefulFieldsBrowserComponent extends React.PureComponent<
             }
             searchInput={filterInput}
             height={height}
-            isLoading={isLoading}
             isSearching={isSearching}
             onCategorySelected={this.updateSelectedCategoryId}
             onFieldSelected={onFieldSelected}
@@ -151,7 +152,7 @@ export class StatefulFieldsBrowserComponent extends React.PureComponent<
             onSearchInputChange={this.updateFilter}
             selectedCategoryId={selectedCategoryId}
             timelineId={timelineId}
-            toggleColumn={this.toggleColumn}
+            toggleColumn={toggleColumn}
             width={width}
           />
         )}
@@ -164,26 +165,6 @@ export class StatefulFieldsBrowserComponent extends React.PureComponent<
     this.setState(({ show }) => ({
       show: !show,
     }));
-  };
-
-  private toggleColumn = (column: ColumnHeader) => {
-    const { columnHeaders, removeColumn, timelineId, upsertColumn } = this.props;
-    const exists = columnHeaders.findIndex(c => c.id === column.id) !== -1;
-
-    if (!exists && upsertColumn != null) {
-      upsertColumn({
-        column,
-        id: timelineId,
-        index: 1,
-      });
-    }
-
-    if (exists && removeColumn != null) {
-      removeColumn({
-        columnId: column.id,
-        id: timelineId,
-      });
-    }
   };
 
   /** Invoked when the user types in the filter input */

@@ -92,6 +92,9 @@ function createRawRequestMock(customization: DeepPartial<Request> = {}) {
       headers: {},
       path: '/',
       route: { settings: {} },
+      url: {
+        href: '/',
+      },
       raw: {
         req: {
           url: '/',

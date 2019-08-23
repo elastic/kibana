@@ -23,16 +23,15 @@ export interface HttpServerSetup
 |  [registerAuth](./kibana-plugin-server.httpserversetup.registerauth.md) | <code>(handler: AuthenticationHandler) =&gt; void</code> | To define custom authentication and/or authorization mechanism for incoming requests. A handler should return a state to associate with the incoming request. The state can be retrieved later via http.auth.get(..) Only one AuthenticationHandler can be registered. |
 |  [registerOnPostAuth](./kibana-plugin-server.httpserversetup.registeronpostauth.md) | <code>(handler: OnPostAuthHandler) =&gt; void</code> | To define custom logic to perform for incoming requests. Runs the handler after Auth interceptor did make sure a user has access to the requested resource. The auth state is available at stage via http.auth.get(..) Can register any number of registerOnPreAuth, which are called in sequence (from the first registered to the last). |
 |  [registerOnPreAuth](./kibana-plugin-server.httpserversetup.registeronpreauth.md) | <code>(handler: OnPreAuthHandler) =&gt; void</code> | To define custom logic to perform for incoming requests. Runs the handler before Auth interceptor performs a check that user has access to requested resources, so it's the only place when you can forward a request to another URL right on the server. Can register any number of registerOnPostAuth, which are called in sequence (from the first registered to the last). |
-|  [registerRouter](./kibana-plugin-server.httpserversetup.registerrouter.md) | <code>(router: Router) =&gt; void</code> | Add all the routes registered with <code>router</code> to HTTP server request listeners. |
+|  [registerRouter](./kibana-plugin-server.httpserversetup.registerrouter.md) | <code>(router: IRouter) =&gt; void</code> | Add all the routes registered with <code>router</code> to HTTP server request listeners. |
 |  [server](./kibana-plugin-server.httpserversetup.server.md) | <code>Server</code> |  |
 
 ## Example
 
-To handle an incoming request in your plugin you should: - Create a `Router` instance. Use `plugin-id` as a prefix path segment for your routes.
+To handle an incoming request in your plugin you should: - Create a `Router` instance. Router is already configured to use `plugin-id` to prefix path segment for your routes.
 
 ```ts
-import { Router } from 'src/core/server';
-const router = new Router('my-app');
+const router = httpSetup.createRouter();
 
 ```
 - Use `@kbn/config-schema` package to create a schema to validate the request `params`<!-- -->, `query`<!-- -->, and `body`<!-- -->. Every incoming request will be validated against the created schema. If validation failed, the request is rejected with `400` status and `Bad request` error without calling the route's handler. To opt out of validating the request, specify `false`<!-- -->.
@@ -49,12 +48,13 @@ const validate = {
 - Declare a function to respond to incoming request. The function will receive `request` object containing request details: url, headers, matched route, as well as validated `params`<!-- -->, `query`<!-- -->, `body`<!-- -->. And `response` object instructing HTTP server to create HTTP response with information sent back to the client as the response body, headers, and HTTP status. Unlike, `hapi` route handler in the Legacy platform, any exception raised during the handler call will generate `500 Server error` response and log error details for further investigation. See below for returning custom error responses.
 
 ```ts
-const handler = async (request: KibanaRequest, response: ResponseFactory) => {
+const handler = async (context: RequestHandlerContext, request: KibanaRequest, response: ResponseFactory) => {
   const data = await findObject(request.params.id);
   // creates a command to respond with 'not found' error
   if (!data) return response.notFound();
   // creates a command to send found data to the client and set response headers
-  return response.ok(data, {
+  return response.ok({
+    body: data,
     headers: {
       'content-type': 'application/json'
     }
@@ -66,8 +66,7 @@ const handler = async (request: KibanaRequest, response: ResponseFactory) => {
 
 ```ts
 import { schema, TypeOf } from '@kbn/config-schema';
-import { Router } from 'src/core/server';
-const router = new Router('my-app');
+const router = httpSetup.createRouter();
 
 const validate = {
   params: schema.object({
@@ -79,10 +78,11 @@ router.get({
   path: 'path/{id}',
   validate
 },
-async (request, response) => {
+async (context, request, response) => {
   const data = await findObject(request.params.id);
   if (!data) return response.notFound();
-  return response.ok(data, {
+  return response.ok({
+    body: data,
     headers: {
       'content-type': 'application/json'
     }

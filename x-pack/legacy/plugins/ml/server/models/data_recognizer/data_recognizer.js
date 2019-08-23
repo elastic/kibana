@@ -8,6 +8,7 @@
 
 import fs from 'fs';
 import Boom from 'boom';
+import { merge } from 'lodash';
 import { getLatestDataOrBucketTimestamp, prefixDatafeedId } from '../../../common/util/job_utils';
 import { mlLog } from '../../client/log';
 import { jobServiceProvider } from '../job_service';
@@ -261,6 +262,8 @@ export class DataRecognizer {
     startDatafeed,
     start,
     end,
+    jobOverrides,
+    datafeedOverrides,
     request
   ) {
 
@@ -300,6 +303,9 @@ export class DataRecognizer {
       datafeeds: [],
       savedObjects: []
     };
+
+    this.applyJobConfigOverrides(moduleConfig, jobOverrides, jobPrefix);
+    this.applyDatafeedConfigOverrides(moduleConfig, datafeedOverrides, jobPrefix);
     this.updateDatafeedIndices(moduleConfig);
     this.updateJobUrlIndexPatterns(moduleConfig);
 
@@ -668,9 +674,33 @@ export class DataRecognizer {
   // if an override index pattern has been specified,
   // update all of the datafeeds.
   updateDatafeedIndices(moduleConfig) {
+    // if the supplied index pattern contains a comma, split into multiple indices and
+    // add each one to the datafeed
+    const indexPatternNames = this.indexPatternName.includes(',')
+      ? this.indexPatternName.split(',').map(i => i.trim())
+      : [this.indexPatternName];
+
     moduleConfig.datafeeds.forEach((df) => {
-      df.config.indexes = df.config.indexes.map(index => (index === INDEX_PATTERN_NAME ? this.indexPatternName : index));
+      const newIndices = [];
+      // the datafeed can contain indexes and indices
+      const currentIndices = df.config.indexes !== undefined ? df.config.indexes : df.config.indices;
+
+      currentIndices.forEach(index => {
+        if (index === INDEX_PATTERN_NAME) {
+          // the datafeed index is INDEX_PATTERN_NAME, so replace it with index pattern(s)
+          // supplied by the user or the default one from the manifest
+          newIndices.push(...indexPatternNames);
+        } else {
+          // otherwise keep using the index from the datafeed json
+          newIndices.push(index);
+        }
+      });
+
+      // just in case indexes was used, delete it in favour of indices
+      delete df.config.indexes;
+      df.config.indices = newIndices;
     });
+    moduleConfig.datafeeds;
   }
 
   // loop through the custom urls in each job and replace the INDEX_PATTERN_ID
@@ -752,6 +782,96 @@ export class DataRecognizer {
       }
     }
     return false;
+  }
+
+  applyJobConfigOverrides(moduleConfig, jobOverrides, jobPrefix = '') {
+    if(jobOverrides !== undefined && jobOverrides !== null) {
+      if (typeof jobOverrides !== 'object') {
+        throw Boom.badRequest(
+          `Incompatible jobOverrides type (${typeof jobOverrides}). It needs to be an object or array of objects.`
+        );
+      }
+
+      // jobOverrides could be a single object or an array of objects.
+      // if single, convert to an array
+      const overrides = Array.isArray(jobOverrides) ? jobOverrides : [jobOverrides];
+      const { jobs } = moduleConfig;
+
+      // separate all the overrides.
+      // the overrides which don't contain a job id will be applied to all jobs in the module
+      const generalOverrides = [];
+      const jobSpecificOverrides = [];
+      overrides.forEach(o => {
+        if (o.job_id === undefined) {
+          generalOverrides.push(o);
+        } else {
+          jobSpecificOverrides.push(o);
+        }
+      });
+
+      generalOverrides.forEach(o => {
+        jobs.forEach(({ config }) => merge(config, o));
+      });
+
+      jobSpecificOverrides.forEach(o => {
+        // for each override, find the relevant job.
+        // note, the job id already has the prefix prepended to it
+        const job = jobs.find(j => j.id === `${jobPrefix}${o.job_id}`);
+        if (job !== undefined) {
+          // delete the job_id in the override as this shouldn't be overridden
+          delete o.job_id;
+          merge(job.config, o);
+        }
+      });
+    }
+  }
+
+  applyDatafeedConfigOverrides(moduleConfig, datafeedOverrides, jobPrefix = '') {
+    if(datafeedOverrides !== undefined && datafeedOverrides !== null) {
+      if (typeof datafeedOverrides !== 'object') {
+        throw Boom.badRequest(
+          `Incompatible datafeedOverrides type (${typeof datafeedOverrides}). It needs to be an object or array of objects.`
+        );
+      }
+
+      // jobOverrides could be a single object or an array of objects.
+      // if single, convert to an array
+      const overrides = Array.isArray(datafeedOverrides) ? datafeedOverrides : [datafeedOverrides];
+      const { datafeeds } = moduleConfig;
+
+      // separate all the overrides.
+      // the overrides which don't contain a datafeed id or a job id will be applied to all jobs in the module
+      const generalOverrides = [];
+      const datafeedSpecificOverrides = [];
+      overrides.forEach(o => {
+        if (o.datafeed_id === undefined && o.job_id === undefined) {
+          generalOverrides.push(o);
+        } else {
+          datafeedSpecificOverrides.push(o);
+        }
+      });
+
+      generalOverrides.forEach(o => {
+        datafeeds.forEach(({ config }) => {
+          merge(config, o);
+        });
+      });
+
+      // collect all the overrides which contain either a job id or a datafeed id
+      datafeedSpecificOverrides.forEach(o => {
+        // either a job id or datafeed id has been specified, so create a new id
+        // containing either one plus the prefix
+        const tempId = o.datafeed_id !== undefined ? o.datafeed_id : o.job_id;
+        const dId = prefixDatafeedId(tempId, jobPrefix);
+
+        const datafeed = datafeeds.find(d => d.id === dId);
+        if (datafeed !== undefined) {
+          delete o.job_id;
+          delete o.datafeed_id;
+          merge(datafeed.config, o);
+        }
+      });
+    }
   }
 
 }

@@ -5,13 +5,15 @@
  */
 
 import { useState, useEffect, useContext } from 'react';
+
 import { groupsData } from '../api';
 import { Group } from '.././types';
-import { KibanaConfigContext } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { hasMlUserPermissions } from '../../ml/permissions/has_ml_user_permissions';
 import { MlCapabilitiesContext } from '../../ml/permissions/ml_capabilities_provider';
 import { useStateToaster } from '../../toasters';
 import { errorToToaster } from '../../ml/api/error_to_toaster';
+import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
+import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
 
 import * as i18n from './translations';
 
@@ -25,16 +27,16 @@ export const getSiemJobIdsFromGroupsData = (data: Group[]) =>
 export const useSiemJobs = (refetchData: boolean): Return => {
   const [siemJobs, setSiemJobs] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const config = useContext(KibanaConfigContext);
   const capabilities = useContext(MlCapabilitiesContext);
   const userPermissions = hasMlUserPermissions(capabilities);
   const [, dispatchToaster] = useStateToaster();
+  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
 
   const fetchFunc = async () => {
     if (userPermissions) {
       try {
         const data = await groupsData({
-          'kbn-version': config.kbnVersion,
+          'kbn-version': kbnVersion,
         });
 
         const siemJobIds = getSiemJobIdsFromGroupsData(data);

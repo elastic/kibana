@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Router } from '../../http/';
 import * as kbnTestServer from '../../../../test_utils/kbn_server';
 
 describe('legacy service', () => {
@@ -29,14 +28,13 @@ describe('legacy service', () => {
     afterEach(async () => await root.shutdown());
 
     it("handles http request in Legacy platform if New platform doesn't handle it", async () => {
+      const { http } = await root.setup();
       const rootUrl = '/route';
-      const router = new Router(rootUrl);
-      router.get({ path: '/new-platform', validate: false }, (req, res) =>
-        res.ok({ content: 'from-new-platform' })
+      const router = http.createRouter(rootUrl);
+      router.get({ path: '/new-platform', validate: false }, (context, req, res) =>
+        res.ok({ body: 'from-new-platform' })
       );
 
-      const { http } = await root.setup();
-      http.registerRouter(router);
       await root.start();
 
       const legacyPlatformUrl = `${rootUrl}/legacy-platform`;
@@ -47,21 +45,18 @@ describe('legacy service', () => {
         handler: () => 'ok from legacy server',
       });
 
-      await kbnTestServer.request
-        .get(root, '/route/new-platform')
-        .expect(200, { content: 'from-new-platform' });
+      await kbnTestServer.request.get(root, '/route/new-platform').expect(200, 'from-new-platform');
 
       await kbnTestServer.request.get(root, legacyPlatformUrl).expect(200, 'ok from legacy server');
     });
     it('throws error if Legacy and New platforms register handler for the same route', async () => {
+      const { http } = await root.setup();
       const rootUrl = '/route';
-      const router = new Router(rootUrl);
-      router.get({ path: '', validate: false }, (req, res) =>
-        res.ok({ content: 'from-new-platform' })
+      const router = http.createRouter(rootUrl);
+      router.get({ path: '', validate: false }, (context, req, res) =>
+        res.ok({ body: 'from-new-platform' })
       );
 
-      const { http } = await root.setup();
-      http.registerRouter(router);
       await root.start();
 
       const kbnServer = kbnTestServer.getKbnServer(root);

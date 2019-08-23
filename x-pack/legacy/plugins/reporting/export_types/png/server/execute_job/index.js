@@ -7,7 +7,7 @@
 import * as Rx from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { mergeMap, catchError, map, takeUntil } from 'rxjs/operators';
-import { oncePerServer } from '../../../../server/lib/once_per_server';
+import { oncePerServer } from '../../../../server/lib';
 import { generatePngObservableFactory } from '../lib/generate_png';
 import {
   decryptJobHeaders,
@@ -45,7 +45,8 @@ function executeJobFn(server) {
         content_type: 'image/png',
         content: buffer.toString('base64'),
         size: buffer.byteLength,
-      }))
+      })),
+      catchError(err => Rx.throwError(err))
     );
 
     const stop$ = Rx.fromEventPattern(cancellationToken.on);

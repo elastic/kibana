@@ -8,10 +8,13 @@ import { i18n } from '@kbn/i18n';
 import JoiNamespace from 'joi';
 import { resolve } from 'path';
 
-import { getConfigSchema, initServerWithKibana, KbnServer } from './server/kibana.index';
+import { getConfigSchema, initServerWithKibana } from './server/kibana.index';
 import { savedObjectMappings } from './server/saved_objects';
 
 const APP_ID = 'infra';
+const logsSampleDataLinkLabel = i18n.translate('xpack.infra.sampleDataLinkLabel', {
+  defaultMessage: 'Logs',
+});
 
 export function infra(kibana: any) {
   return new kibana.Plugin({
@@ -67,8 +70,15 @@ export function infra(kibana: any) {
     config(Joi: typeof JoiNamespace) {
       return getConfigSchema(Joi);
     },
-    init(server: KbnServer) {
+    init(server: any) {
       initServerWithKibana(server);
+      server.addAppLinksToSampleDataset('logs', [
+        {
+          path: `/app/${APP_ID}#/logs`,
+          label: logsSampleDataLinkLabel,
+          icon: 'loggingApp',
+        },
+      ]);
     },
   });
 }

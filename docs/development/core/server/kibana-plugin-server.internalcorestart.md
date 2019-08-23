@@ -10,10 +10,3 @@
 ```typescript
 export interface InternalCoreStart 
 ```
-
-## Properties
-
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [plugins](./kibana-plugin-server.internalcorestart.plugins.md) | <code>PluginsServiceStart</code> |  |
-
