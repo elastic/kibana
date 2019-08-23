@@ -480,8 +480,6 @@ export interface FilterBar {
   ids?: string[] | null;
   /** The location values users have configured for the agents. */
   locations?: string[] | null;
-  /** The names users have configured for the monitors. */
-  names?: string[] | null;
   /** The ports of the monitored endpoints. */
   ports?: number[] | null;
   /** The schemes used by the monitors. */

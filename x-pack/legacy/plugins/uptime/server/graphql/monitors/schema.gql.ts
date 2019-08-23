@@ -13,8 +13,6 @@ export const monitorsSchema = gql`
     ids: [String!]
     "The location values users have configured for the agents."
     locations: [String!]
-    "The names users have configured for the monitors."
-    names: [String!]
     "The ports of the monitored endpoints."
     ports: [Int!]
     "The schemes used by the monitors."

@@ -19,6 +19,7 @@ export interface UptimeUrlParams {
   // monitorListSortDirection: string;
   // monitorListSortField: string;
   search: string;
+  filters: string;
   selectedPingStatus: string;
 }
 
@@ -27,6 +28,7 @@ const {
   AUTOREFRESH_IS_PAUSED,
   DATE_RANGE_START,
   DATE_RANGE_END,
+  FILTERS,
   // TODO: reintroduce for pagination and sorting
   // MONITOR_LIST_PAGE_INDEX,
   // MONITOR_LIST_PAGE_SIZE,
@@ -70,6 +72,7 @@ export const getSupportedUrlParams = (params: {
     autorefreshIsPaused,
     dateRangeStart,
     dateRangeEnd,
+    filters,
     // TODO: reintroduce for pagination and sorting
     // monitorListPageIndex,
     // monitorListPageSize,
@@ -84,6 +87,7 @@ export const getSupportedUrlParams = (params: {
     autorefreshIsPaused: parseIsPaused(autorefreshIsPaused, AUTOREFRESH_IS_PAUSED),
     dateRangeStart: dateRangeStart || DATE_RANGE_START,
     dateRangeEnd: dateRangeEnd || DATE_RANGE_END,
+    filters: filters || FILTERS,
     // TODO: reintroduce for pagination and sorting
     // monitorListPageIndex: parseUrlInt(monitorListPageIndex, MONITOR_LIST_PAGE_INDEX),
     // monitorListPageSize: parseUrlInt(monitorListPageSize, MONITOR_LIST_PAGE_SIZE),
