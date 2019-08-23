@@ -19,12 +19,13 @@
 
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
-import { Schemas, AggGroupNames } from 'ui/vis/editors/default';
+import { Schemas } from 'ui/vis/editors/default/schemas';
+import { AggGroupNames } from 'ui/vis/editors/default';
 import { PointSeriesOptions } from './editors/point_series_options';
 import { MetricsAxisOptions } from './editors/metrics_axes_options';
 import {
   getPositions,
-  LegendPositions,
+  Positions,
   getChartTypes,
   ChartTypes,
   getChartModes,
@@ -59,7 +60,7 @@ export default function PointSeriesVisType(Private) {
           {
             id: 'CategoryAxis-1',
             type: AxisTypes.CATEGORY,
-            position: LegendPositions.BOTTOM,
+            position: Positions.BOTTOM,
             show: true,
             style: {},
             scale: {
@@ -78,7 +79,7 @@ export default function PointSeriesVisType(Private) {
             id: 'ValueAxis-1',
             name: 'LeftAxis-1',
             type: AxisTypes.VALUE,
-            position: LegendPositions.LEFT,
+            position: Positions.LEFT,
             show: true,
             style: {},
             scale: {
@@ -112,7 +113,7 @@ export default function PointSeriesVisType(Private) {
         ],
         addTooltip: true,
         addLegend: true,
-        legendPosition: LegendPositions.RIGHT,
+        legendPosition: Positions.RIGHT,
         times: [],
         addTimeMarker: false,
         labels: {},
