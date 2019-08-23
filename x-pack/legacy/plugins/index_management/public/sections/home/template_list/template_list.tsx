@@ -17,24 +17,29 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { SectionError, SectionLoading } from '../../../components';
-import { TemplatesTable } from './templates_table';
+import { TemplateTable } from './template_table';
 import { loadIndexTemplates } from '../../../services/api';
 import { Template } from '../../../../common/types';
 import { trackUiMetric, METRIC_TYPE } from '../../../services/track_ui_metric';
-import { UIM_TEMPLATE_LIST_LOAD, BASE_PATH } from '../../../../common/constants';
+import {
+  getTemplateEditLink,
+  getTemplateListLink,
+  getTemplateCloneLink,
+} from '../../../services/routing';
+import { UIM_TEMPLATE_LIST_LOAD } from '../../../../common/constants';
 import { TemplateDetails } from './template_details';
 
 interface MatchParams {
   templateName?: Template['name'];
 }
 
-export const TemplatesList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
+export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
   match: {
     params: { templateName },
   },
   history,
 }) => {
-  const { error, isLoading, data: templates, createRequest: reload } = loadIndexTemplates();
+  const { error, isLoading, data: templates, sendRequest: reload } = loadIndexTemplates();
 
   let content;
 
@@ -48,7 +53,15 @@ export const TemplatesList: React.FunctionComponent<RouteComponentProps<MatchPar
   );
 
   const closeTemplateDetails = () => {
-    history.push(`${BASE_PATH}templates`);
+    history.push(getTemplateListLink());
+  };
+
+  const editTemplate = (name: Template['name']) => {
+    history.push(getTemplateEditLink(name));
+  };
+
+  const cloneTemplate = (name: Template['name']) => {
+    history.push(getTemplateCloneLink(name));
   };
 
   // Track component loaded
@@ -61,7 +74,7 @@ export const TemplatesList: React.FunctionComponent<RouteComponentProps<MatchPar
       <SectionLoading>
         <FormattedMessage
           id="xpack.idxMgmt.indexTemplatesList.loadingIndexTemplatesDescription"
-          defaultMessage="Loading index templates…"
+          defaultMessage="Loading templates…"
         />
       </SectionLoading>
     );
@@ -71,7 +84,7 @@ export const TemplatesList: React.FunctionComponent<RouteComponentProps<MatchPar
         title={
           <FormattedMessage
             id="xpack.idxMgmt.indexTemplatesList.loadingIndexTemplatesErrorMessage"
-            defaultMessage="Error loading index templates"
+            defaultMessage="Error loading templates"
           />
         }
         error={error}
@@ -85,7 +98,7 @@ export const TemplatesList: React.FunctionComponent<RouteComponentProps<MatchPar
           <h1 data-test-subj="title">
             <FormattedMessage
               id="xpack.idxMgmt.indexTemplatesList.emptyPrompt.noIndexTemplatesTitle"
-              defaultMessage="You don't have any index templates yet"
+              defaultMessage="You don't have any templates yet"
             />
           </h1>
         }
@@ -101,7 +114,7 @@ export const TemplatesList: React.FunctionComponent<RouteComponentProps<MatchPar
               <EuiText color="subdued">
                 <FormattedMessage
                   id="xpack.idxMgmt.home.indexTemplatesDescription"
-                  defaultMessage="Use index templates to automatically apply mappings and other properties to new indices."
+                  defaultMessage="Use templates to automatically apply settings, mappings, and aliases to indices."
                 />
               </EuiText>
             </EuiTitle>
@@ -115,31 +128,35 @@ export const TemplatesList: React.FunctionComponent<RouteComponentProps<MatchPar
               label={
                 <FormattedMessage
                   id="xpack.idxMgmt.indexTemplatesTable.systemIndexTemplatesSwitchLabel"
-                  defaultMessage="Include system index templates"
+                  defaultMessage="Include system templates"
                 />
               }
             />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="l" />
-        <TemplatesTable
+        <TemplateTable
           templates={showSystemTemplates ? templates : filteredTemplates}
           reload={reload}
+          editTemplate={editTemplate}
+          cloneTemplate={cloneTemplate}
         />
       </Fragment>
     );
   }
 
   return (
-    <section data-test-subj="templatesList">
+    <div data-test-subj="templateList">
       {content}
       {templateName && (
         <TemplateDetails
           templateName={templateName}
           onClose={closeTemplateDetails}
+          editTemplate={editTemplate}
+          cloneTemplate={cloneTemplate}
           reload={reload}
         />
       )}
-    </section>
+    </div>
   );
 };

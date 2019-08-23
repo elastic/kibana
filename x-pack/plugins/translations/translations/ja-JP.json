@@ -4688,7 +4688,6 @@
     "xpack.grokDebugger.unavailableLicenseInformationMessage": "現在ライセンス情報が利用できないため {grokLogParsingTool} デバッガーを使用できません。",
     "xpack.idxMgmt.appTitle": "インデックス管理",
     "xpack.idxMgmt.badgeAriaLabel": "{label}。これをフィルタリングするよう選択。",
-    "xpack.idxMgmt.breadcrumb": "インデックス管理",
     "xpack.idxMgmt.clearCacheIndicesAction.successMessage": "キャッシュ [{indexNames}] が削除されました:",
     "xpack.idxMgmt.closeIndicesAction.successfullyClosedIndicesMessage": "[{indexNames}] がクローズされました",
     "xpack.idxMgmt.deleteIndicesAction.successfullyDeletedIndicesMessage": "[{indexNames}] が削除されました",
