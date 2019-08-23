@@ -18,4 +18,5 @@ export const {
   getOperationResultType,
   operationDefinitionMap,
   isColumnTransferable,
+  changeField,
 } = actual;

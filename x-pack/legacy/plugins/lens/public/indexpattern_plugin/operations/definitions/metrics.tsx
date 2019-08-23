@@ -46,15 +46,6 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
           (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
       );
     },
-    toEsAggsConfig: (column, columnId) => ({
-      id: columnId,
-      enabled: true,
-      type: column.operationType,
-      schema: 'metric',
-      params: {
-        field: column.sourceField,
-      },
-    }),
     buildColumn: ({ suggestedPriority, field }) => ({
       label: ofName(field ? field.name : ''),
       dataType: 'number',
@@ -64,6 +55,22 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
       isBucketed: false,
       isMetric: true,
       scale: 'ratio',
+    }),
+    onFieldChange: (oldColumn, indexPattern, field) => {
+      return {
+        ...oldColumn,
+        label: ofName(field.name),
+        sourceField: field.name,
+      };
+    },
+    toEsAggsConfig: (column, columnId) => ({
+      id: columnId,
+      enabled: true,
+      type: column.operationType,
+      schema: 'metric',
+      params: {
+        field: column.sourceField,
+      },
     }),
   } as OperationDefinition<T>;
 }

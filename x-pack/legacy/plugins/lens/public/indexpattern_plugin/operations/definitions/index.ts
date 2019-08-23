@@ -79,6 +79,7 @@ interface BaseBuildColumnArgs {
   suggestedPriority: DimensionPriority | undefined;
   layerId: string;
   columns: Partial<Record<string, IndexPatternColumn>>;
+  indexPattern: IndexPattern;
 }
 
 type FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> = BaseOperationDefinitionProps<
@@ -94,6 +95,23 @@ type FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> = BaseOpera
       field: IndexPatternField;
     }
   ) => C;
+  /**
+   * This method will be called if the user changes the field of an operation.
+   * You must implement it and return the new column after the field change.
+   * The most simple implementation will just change the field on the column, and keep
+   * the rest the same. Some implementations might want to change labels, or their parameters
+   * when changing the field.
+   *
+   * This will only be called for switching the field, not for initially selecting a field.
+   *
+   * See {@link OperationDefinition#transfer} for controlling column building when switching an
+   * index pattern not just a field.
+   *
+   * @param oldColumn The column before the user changed the field.
+   * @param indexPattern The index pattern that field is on.
+   * @param field The field that the user changed to.
+   */
+  onFieldChange: (oldColumn: C, indexPattern: IndexPattern, field: IndexPatternField) => C;
 };
 
 type DocumentBasedOperationDefinition<
@@ -181,5 +199,5 @@ export const operationDefinitions: PossibleOperationDefinition[] = Object.values
  */
 export const operationDefinitionMap = (internalOperationDefinitionMap as unknown) as Record<
   OperationType,
-  OperationDefinition<BaseIndexPatternColumn>
+  FieldBasedOperationDefinition<BaseIndexPatternColumn> | DocumentBasedOperationDefinition<BaseIndexPatternColumn>
 >;

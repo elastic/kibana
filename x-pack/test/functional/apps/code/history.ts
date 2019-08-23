@@ -22,7 +22,8 @@ export default function manageRepositoriesFunctionalTests({
   const find = getService('find');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
-  describe('History', function() {
+  // FLAKY: https://github.com/elastic/kibana/issues/37859
+  describe.skip('History', function() {
     this.tags('smoke');
     const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
 
@@ -129,7 +130,8 @@ export default function manageRepositoriesFunctionalTests({
         });
       });
 
-      it('in search page, change language filters can go back and forward', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/39163
+      it.skip('in search page, change language filters can go back and forward', async () => {
         log.debug('it select typescript language filter');
         const url = `${PageObjects.common.getHostPort()}/app/code#/search?q=string&p=&langs=typescript`;
         await browser.get(url);

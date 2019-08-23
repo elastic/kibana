@@ -154,6 +154,25 @@ function getPossibleOperationForField(
 }
 
 /**
+ * Changes the field of the passed in colum. To do so, this method uses the `onFieldChange` function of
+ * the operation definition of the column. Returns a new column object with the field changed.
+ * @param column The column object with the old field configured
+ * @param indexPattern The index pattern associated to the layer of the column
+ * @param newField The new field the column should be switched to
+ */
+export function changeField(column: IndexPatternColumn, indexPattern: IndexPattern, newField: IndexPatternField) {
+  const operationDefinition = operationDefinitionMap[column.operationType];
+
+  if(!('onFieldChange' in operationDefinition)) {
+    throw new Error('Invariant error: Cannot change field if operation isn\'t a field based operaiton');
+  }
+
+  // This has to be casted back to an index pattern column, because the `operationDefinitionMap` only
+  // works on the base type `BaseIndexPatternColumn`
+  return operationDefinition.onFieldChange(column, indexPattern, newField) as IndexPatternColumn;
+}
+
+/**
  * Builds a column object based on the context passed in. It tries
  * to find the applicable operation definition and then calls the `buildColumn`
  * function of that definition. It passes in the given `field` (if available),
@@ -201,6 +220,7 @@ export function buildColumn({
     columns,
     suggestedPriority,
     layerId,
+    indexPattern,
   };
 
   // check for the operation for field getter to determine whether
