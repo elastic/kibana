@@ -27,10 +27,14 @@ export class Job extends events.EventEmitter {
     this.payload = payload;
     this.created_by = options.created_by || false;
     this.timeout = options.timeout || 10000;
-    this.maxAttempts = options.max_attempts || 3;
+    this.maxAttempts = options.max_attempts;
     this.priority = Math.max(Math.min(options.priority || 10, 20), -20);
     this.indexSettings = options.indexSettings || {};
     this.browser_type = options.browser_type;
+
+    if (typeof this.maxAttempts !== 'number' || this.maxAttempts < 1) {
+      throw new Error('Invalid maxAttempts!');
+    }
 
     this.debug = (msg, err) => {
       const logger = options.logger || function () {};

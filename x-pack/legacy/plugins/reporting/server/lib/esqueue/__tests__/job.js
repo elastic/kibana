@@ -329,6 +329,9 @@ describe('Job Class', function () {
         expect(indexArgs.body).to.have.property('priority', minPriority);
       });
     });
+
+    it(`should throw error if invalid maxAttempts`, function () {
+    });
   });
 
   describe('get method', function () {

@@ -23,6 +23,7 @@ function enqueueJobFn(server: KbnServer) {
   const config = server.config();
   const queueConfig = config.get('xpack.reporting.queue');
   const browserType = config.get('xpack.reporting.capture.browser.type');
+  const maxAttempts = config.get('xpack.reporting.capture.maxAttempts');
   const exportTypesRegistry = server.plugins.reporting.exportTypesRegistry;
 
   return async function enqueueJob(
@@ -42,6 +43,7 @@ function enqueueJobFn(server: KbnServer) {
       timeout: queueConfig.timeout,
       created_by: get(user, 'username', false),
       browser_type: browserType,
+      max_attempts: maxAttempts,
     };
 
     return new Promise((resolve, reject) => {
