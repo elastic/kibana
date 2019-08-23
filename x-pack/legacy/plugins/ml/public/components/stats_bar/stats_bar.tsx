@@ -5,7 +5,7 @@
  */
 
 import React, { FC } from 'react';
-import { Stat } from '../stat';
+import { Stat } from './stat';
 import { StatsBarStat, StatsBarStats, StatsKey } from '../../../common/types/common';
 
 interface StatsBarProps {

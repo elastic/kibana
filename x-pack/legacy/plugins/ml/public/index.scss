@@ -50,7 +50,6 @@
   @import 'components/messagebar/index';
   @import 'components/navigation_menu/index';
   @import 'components/rule_editor/index'; // SASSTODO: This file overwrites EUI directly
-  @import 'components/stat/index';
   @import 'components/stats_bar/index';
 
   // Hacks are last so they can overwrite anything above if needed
