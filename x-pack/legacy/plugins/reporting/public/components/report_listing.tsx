@@ -145,8 +145,7 @@ class ReportListingUi extends Component<Props, State> {
 
   public componentDidMount() {
     this.mounted = true;
-    const result = chrome.getInjected('reportingPollConfig');
-    const { jobsRefresh } = result;
+    const { jobsRefresh } = chrome.getInjected('reportingPollConfig');
     this.poller = new Poller({
       functionToPoll: () => {
         return this.fetchJobs();
