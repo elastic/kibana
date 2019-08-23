@@ -52,6 +52,7 @@ import { initEs } from './init_es';
 import { initLocalService } from './init_local';
 import { initQueue } from './init_queue';
 import { initWorkers } from './init_workers';
+import { ClusterNodeAdapter } from './distributed/cluster/cluster_node_adapter';
 
 export class CodePlugin {
   private isCodeNode = false;
@@ -63,6 +64,7 @@ export class CodePlugin {
   private indexScheduler: IndexScheduler | null = null;
   private updateScheduler: UpdateScheduler | null = null;
   private lspService: LspService | null = null;
+  private codeServices: CodeServices | null = null;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.log = {} as Logger;
@@ -119,7 +121,10 @@ export class CodePlugin {
     const codeNodeUrl = this.serverOptions.codeNodeUrl;
     const rndString = crypto.randomBytes(20).toString('hex');
     checkRoute(server, rndString);
-    if (codeNodeUrl) {
+    if (this.serverOptions.clusterEnabled) {
+      this.initDevMode(server);
+      this.codeServices = await this.initClusterNode(server, codeServerRouter);
+    } else if (codeNodeUrl) {
       const checkResult = await this.retryUntilAvailable(
         async () => await checkCodeNode(codeNodeUrl, this.log, rndString),
         5000
@@ -127,17 +132,61 @@ export class CodePlugin {
       if (checkResult.me) {
         const codeServices = new CodeServices(new CodeNodeAdapter(codeServerRouter, this.log));
         this.log.info('Initializing Code plugin as code-node.');
-        await this.initCodeNode(server, codeServices);
+        this.codeServices = await this.initCodeNode(server, codeServices);
       } else {
-        await this.initNonCodeNode(codeNodeUrl, core);
+        this.codeServices = await this.initNonCodeNode(codeNodeUrl, core);
       }
     } else {
       const codeServices = new CodeServices(new LocalHandlerAdapter());
       // codeNodeUrl not set, single node mode
       this.log.info('Initializing Code plugin as single-node.');
       this.initDevMode(server);
-      await this.initCodeNode(server, codeServices);
+      this.codeServices = await this.initCodeNode(server, codeServices);
     }
+    await this.codeServices.start();
+  }
+
+  private async initClusterNode(server: any, codeServerRouter: CodeServerRouter) {
+    this.log.info('Initializing Code plugin as cluster-node');
+    const { esClient, repoConfigController, repoIndexInitializerFactory } = await initEs(
+      server,
+      this.log
+    );
+    const codeServices = new CodeServices(
+      new ClusterNodeAdapter(codeServerRouter, this.log, this.serverOptions, esClient)
+    );
+
+    this.queue = initQueue(server, this.log, esClient);
+
+    const { gitOps, lspService } = initLocalService(
+      server,
+      this.log,
+      this.serverOptions,
+      codeServices,
+      esClient,
+      repoConfigController
+    );
+    this.lspService = lspService;
+    this.gitOps = gitOps;
+    const { indexScheduler, updateScheduler } = initWorkers(
+      server,
+      this.log,
+      esClient,
+      this.queue!,
+      lspService,
+      gitOps,
+      this.serverOptions,
+      codeServices
+    );
+    this.indexScheduler = indexScheduler;
+    this.updateScheduler = updateScheduler;
+
+    // Execute index version checking and try to migrate index data if necessary.
+    await tryMigrateIndices(esClient, this.log);
+
+    this.initRoutes(server, codeServices, repoIndexInitializerFactory, repoConfigController);
+
+    return codeServices;
   }
 
   private async initCodeNode(server: any, codeServices: CodeServices) {
@@ -176,6 +225,7 @@ export class CodePlugin {
     await tryMigrateIndices(esClient, this.log);
 
     this.initRoutes(server, codeServices, repoIndexInitializerFactory, repoConfigController);
+    return codeServices;
   }
 
   public async stop() {
@@ -185,6 +235,9 @@ export class CodePlugin {
       if (this.updateScheduler) this.updateScheduler.stop();
       if (this.queue) this.queue.destroy();
       if (this.lspService) await this.lspService.shutdown();
+    }
+    if (this.codeServices) {
+      await this.codeServices.stop();
     }
   }
 
@@ -201,6 +254,7 @@ export class CodePlugin {
     codeServices.registerHandler(SetupDefinition, null);
     const { repoConfigController, repoIndexInitializerFactory } = await initEs(server, this.log);
     this.initRoutes(server, codeServices, repoIndexInitializerFactory, repoConfigController);
+    return codeServices;
   }
 
   private async initRoutes(
