@@ -18,7 +18,7 @@ const validateIndexPattern = (indexPattern: string) => {
     const errors = getIndexPatternErrors(indexPattern);
 
     if (errors[ILLEGAL_CHARACTERS]) {
-      return i18n.translate('xpack.idxMgmt.templateValidation.indexPatternSpacesError', {
+      return i18n.translate('xpack.idxMgmt.templateValidation.indexPatternInvalidCharactersError', {
         defaultMessage:
           "'{indexPattern}' index pattern contains the invalid {characterListLength, plural, one {character} other {characters}} { characterList }.",
         values: {

@@ -34,15 +34,21 @@ export const TemplateDeleteModal = ({
       if (hasDeletedTemplates) {
         const successMessage =
           templatesDeleted.length === 1
-            ? i18n.translate('xpack.idxMgmt.deleteTemplatesModal.successNotificationMessageText', {
-                defaultMessage: "Deleted template '{templateName}'",
-                values: { templateName: templatesToDelete[0] },
-              })
-            : i18n.translate('xpack.idxMgmt.deleteTemplatesModal.successNotificationMessageText', {
-                defaultMessage:
-                  'Deleted {numSuccesses, plural, one {# template} other {# templates}}',
-                values: { numSuccesses: templatesDeleted.length },
-              });
+            ? i18n.translate(
+                'xpack.idxMgmt.deleteTemplatesModal.successDeleteSingleNotificationMessageText',
+                {
+                  defaultMessage: "Deleted template '{templateName}'",
+                  values: { templateName: templatesToDelete[0] },
+                }
+              )
+            : i18n.translate(
+                'xpack.idxMgmt.deleteTemplatesModal.successDeleteMultipleNotificationMessageText',
+                {
+                  defaultMessage:
+                    'Deleted {numSuccesses, plural, one {# template} other {# templates}}',
+                  values: { numSuccesses: templatesDeleted.length },
+                }
+              );
 
         callback({ hasDeletedTemplates });
         toastNotifications.addSuccess(successMessage);
