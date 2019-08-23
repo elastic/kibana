@@ -10,7 +10,7 @@ import React from 'react';
 import { calculateClass } from '../lib/calculate_class';
 import { vents } from '../lib/vents';
 import { i18n } from '@kbn/i18n';
-import { EuiToolTip, EuiBadge } from '@elastic/eui';
+import { EuiToolTip, EuiBadge, EuiFlexItem } from '@elastic/eui';
 
 function getColor(classes) {
   const classList = classes.split(' ');
@@ -109,7 +109,8 @@ export class Shard extends React.Component {
 
     // data attrs for automated testing verification
     return (
-      <div
+      <EuiFlexItem
+        grow={false}
         onMouseEnter={this.toggle}
         onMouseLeave={this.toggle}
         className={classes}
@@ -118,7 +119,7 @@ export class Shard extends React.Component {
         data-test-subj="shardIcon"
       >
         {shardUi}
-      </div>
+      </EuiFlexItem>
     );
   }
 }

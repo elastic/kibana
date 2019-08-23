@@ -26,7 +26,7 @@
 
   // This allows the border to be flush
   &:last-child {
-    width: 0px;
+    width: 0;
   }
 
   &:first-child {
@@ -42,7 +42,8 @@
     width: $euiSizeXXL;
   }
 
-  &--events, &--eventsEmitted {
+  &--events,
+  &--eventsEmitted {
     width: $euiSizeXXL * 4;
   }
 

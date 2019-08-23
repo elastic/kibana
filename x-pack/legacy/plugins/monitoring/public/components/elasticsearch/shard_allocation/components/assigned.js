@@ -67,7 +67,9 @@ export class Assigned extends React.Component {
       >
         <EuiFlexGroup>
           <EuiFlexItem grow={false} className="title eui-textNoWrap">{name}{master}</EuiFlexItem>
-          <EuiFlexItem>{shards}</EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup gutterSize="s">{shards}</EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
     );

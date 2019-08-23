@@ -7,6 +7,7 @@
 import React from 'react';
 import { includes, isFunction } from 'lodash';
 import {
+  EuiIcon,
   EuiKeyboardAccessible,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -82,12 +83,13 @@ export class HorizontalLegend extends React.Component {
           onClick={event => this.props.onToggle(event, row.id)}
         >
           <span className="monRhythmChart__legendLabel">
-            <span
-              className="fa fa-circle monRhythmChart__legendIndicator"
-              style={{ color: row.color }}
-              aria-label={i18n.translate('xpack.monitoring.chart.horizontalLegend.toggleButtonAriaLabel', {
-                defaultMessage: 'toggle button'
-              })}
+            <EuiIcon
+              className="monRhythmChart__legendIndicator"
+              aria-label={i18n.translate('xpack.monitoring.chart.horizontalLegend.toggleButtonAriaLabel',
+                { defaultMessage: 'toggle button' })}
+              size="l"
+              type="dot"
+              color={row.color}
             />
             { ' ' + row.label + ' ' }
           </span>

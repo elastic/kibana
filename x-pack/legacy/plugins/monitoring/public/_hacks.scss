@@ -1,11 +1,6 @@
 @import '@elastic/eui/src/components/header/variables';
 
-#monitoring-app {
-  // SASSTODO: PUI tooltips can be replaced with EuiToolTip
-  .pui-tooltip-inner {
-    font-size: $euiFontSizeXS;
-  }
-
+#monitoring-app { // sass-lint:disable-line no-ids
   .monitoring-tooltip__trigger,
   .monitoring-tooltip__trigger:hover {
     color: $euiTextColor;

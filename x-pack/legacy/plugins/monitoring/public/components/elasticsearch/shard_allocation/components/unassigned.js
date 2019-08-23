@@ -10,6 +10,10 @@ import _ from 'lodash';
 import React from 'react';
 import { Shard } from './shard';
 import { i18n } from '@kbn/i18n';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 
 export class Unassigned extends React.Component {
   static displayName = i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.unassignedDisplayName', {
@@ -27,7 +31,7 @@ export class Unassigned extends React.Component {
     const shards = _.sortBy(this.props.shards, 'shard').map(this.createShard);
     return (
       <td className="unassigned" data-test-subj="clusterView-Unassigned">
-        <div className="children">{shards}</div>
+        <EuiFlexGroup wrap className="children">{shards}</EuiFlexGroup>
       </td>
     );
   }
