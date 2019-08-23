@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -31,9 +31,14 @@ import { WmsInternalOptions } from './wms_internal_options';
 import { TileMapOptionsProps } from './tile_map_options';
 import { TileMapVisParams } from '../types';
 
+// TODO: Below import is temporary, use `react-use` lib instead.
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { useMount } from '../../../../../plugins/kibana_react/public/util/use_mount';
+
 const mapLayerForOption = ({ id }: TmsLayer) => ({ text: id, value: id });
 
 function WmsOptions({
+  forceUpdateVis,
   serviceSettings,
   stateParams,
   setValue,
@@ -62,7 +67,7 @@ function WmsOptions({
     }
   };
 
-  useEffect(() => {
+  const onMount = () => {
     serviceSettings
       .getTMSServices()
       .then(services => {
@@ -76,10 +81,18 @@ function WmsOptions({
 
         if (!wms.selectedTmsLayer && newBaseLayers.length) {
           setWmsOption('selectedTmsLayer', newBaseLayers[0]);
+
+          // apply default changes directly to visualization
+          // without it, these values will be reset after visualization loading
+          // caused by vis state watcher at line 138 in src/legacy/ui/public/vis/editors/default/default.js
+          // the approach could be revised after removing angular
+          forceUpdateVis();
         }
       })
       .catch((error: Error) => toastNotifications.addWarning(error.message));
-  }, []);
+  };
+
+  useMount(onMount);
 
   return (
     <EuiPanel paddingSize="s">

@@ -38,6 +38,7 @@ uiModules
     ['setValue', { watchDepth: 'reference' }],
     ['setValidity', { watchDepth: 'reference' }],
     ['setTouched', { watchDepth: 'reference' }],
+    ['forceUpdateVis', { watchDepth: 'reference' }],
     'hasHistogramAgg',
   ]))
   .directive('visEditorVisOptions', function ($compile) {
@@ -53,6 +54,7 @@ uiModules
         editorState: '=',
         onAggParamsChange: '=',
         hasHistogramAgg: '=',
+        forceUpdateVis: '=',
       },
       link: function ($scope, $el, attrs, ngModelCtrl) {
         $scope.setValue = (paramName, value) =>
@@ -81,7 +83,8 @@ uiModules
             ui-state="uiState"
             set-value="setValue"
             set-validity="setValidity"
-            set-touched="setTouched">
+            set-touched="setTouched"
+            force-update-vis="forceUpdateVis">
           </vis-options-react-wrapper>`;
         const $editor = $compile(comp)($scope);
         $el.append($editor);

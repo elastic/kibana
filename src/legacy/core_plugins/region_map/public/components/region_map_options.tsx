@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { EuiIcon, EuiLink, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -33,6 +33,10 @@ import { WmsOptions } from '../../../tile_map/public/components/wms_options';
 import { mapToLayerWithId } from '../util';
 import { RegionMapVisParams } from '../types';
 import { RegionMapsConfig } from '../plugin';
+
+// TODO: Below import is temporary, use `react-use` lib instead.
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { useMount } from '../../../../../plugins/kibana_react/public/util/use_mount';
 
 const mapLayerForOption = ({ layerId, name }: VectorLayer) => ({
   text: name,
@@ -50,18 +54,24 @@ export type RegionMapOptionsProps = {
 } & VisOptionsProps<RegionMapVisParams>;
 
 function RegionMapOptions(props: RegionMapOptionsProps) {
-  const { includeElasticMapsService, serviceSettings, stateParams, vis, setValue } = props;
+  const {
+    includeElasticMapsService,
+    serviceSettings,
+    stateParams,
+    vis,
+    setValue,
+    forceUpdateVis,
+  } = props;
   const [vectorLayers, setVectorLayers] = useState<VectorLayer[]>(
     vis.type.editorConfig.collections.vectorLayers
   );
   const [vectorLayerOptions, setVectorLayerOptions] = useState(vectorLayers.map(mapLayerForOption));
-  const currentLayerId = stateParams.selectedLayer && stateParams.selectedLayer.layerId;
   const fieldOptions = useMemo(
     () =>
       ((stateParams.selectedLayer && stateParams.selectedLayer.fields) || []).map(
         mapFieldForOption
       ),
-    [currentLayerId]
+    [stateParams.selectedLayer]
   );
 
   const setEmsHotLink = useCallback(
@@ -69,7 +79,7 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
       const emsHotLink = await serviceSettings.getEMSHotLink(layer);
       setValue('emsHotLink', emsHotLink);
     },
-    [setValue]
+    [setValue, serviceSettings]
   );
 
   const setLayer = useCallback(
@@ -82,7 +92,7 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
         setEmsHotLink(newLayer);
       }
     },
-    [vectorLayers, setValue]
+    [vectorLayers, setEmsHotLink, setValue]
   );
 
   const setField = useCallback(
@@ -91,10 +101,10 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
         setValue(paramName, stateParams.selectedLayer.fields.find(f => f.name === value));
       }
     },
-    [currentLayerId, setValue]
+    [setValue, stateParams.selectedLayer]
   );
 
-  useEffect(() => {
+  const onMount = () => {
     async function setDefaultValues() {
       try {
         const layers = await serviceSettings.getFileLayers();
@@ -127,6 +137,12 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
           if (newLayer.isEMS) {
             setEmsHotLink(newLayer);
           }
+
+          // apply default changes directly to visualization
+          // without it, these values will be reset after visualization loading
+          // caused by vis state watcher at line 138 in src/legacy/ui/public/vis/editors/default/default.js
+          // the approach could be revised after removing angular
+          forceUpdateVis();
         }
       } catch (error) {
         toastNotifications.addWarning(error.message);
@@ -136,7 +152,9 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
     if (includeElasticMapsService) {
       setDefaultValues();
     }
-  }, []);
+  };
+
+  useMount(onMount);
 
   return (
     <>
