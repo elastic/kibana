@@ -40,19 +40,11 @@ const validateIndexPattern = (indexPattern: string) => {
   }
 };
 
-export const INVALID_NAME_CHARS = ['"', '*', '\\', '<', '|', ',', '>', '/', '?'];
+export const INVALID_NAME_CHARS = ['"', '*', '\\', ',', '/', '?'];
 
 const doesStringIncludeChar = (string: string, chars: string[]) => {
-  let containsChar = false;
-  let invalidChar: string | null = null;
-
-  for (let i = 0; i < chars.length; i++) {
-    if (string.includes(chars[i])) {
-      containsChar = true;
-      invalidChar = chars[i];
-      break;
-    }
-  }
+  const invalidChar = chars.find(char => string.includes(char)) || null;
+  const containsChar = invalidChar !== null;
 
   return { containsChar, invalidChar };
 };

@@ -5,9 +5,8 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCodeEditor, EuiCallOut } from '@elastic/eui';
+import { EuiCodeBlock, EuiCallOut } from '@elastic/eui';
 import { Template } from '../../../../../../common/types';
 
 interface Props {
@@ -20,19 +19,7 @@ export const TabSettings: React.FunctionComponent<Props> = ({ templateDetails })
   if (settings) {
     return (
       <div data-test-subj="settingsTab">
-        <EuiCodeEditor
-          mode="json"
-          theme="textmate"
-          width="100%"
-          isReadOnly
-          value={settings}
-          aria-label={i18n.translate(
-            'xpack.idxMgmt.templateDetails.settingsTab.settingsEditorAriaLabel',
-            {
-              defaultMessage: 'Settings code editor',
-            }
-          )}
-        />
+        <EuiCodeBlock lang="json">{settings}</EuiCodeBlock>
       </div>
     );
   }

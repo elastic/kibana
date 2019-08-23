@@ -21,10 +21,6 @@ import {
   EuiSpacer,
   EuiPopover,
   EuiButton,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiText,
-  EuiIcon,
   EuiContextMenu,
 } from '@elastic/eui';
 import {

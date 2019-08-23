@@ -13,7 +13,7 @@ import { Template } from '../../../common/types';
 import { saveTemplate } from '../../services/api';
 import { BASE_PATH } from '../../../common/constants';
 
-const emptyObject = JSON.stringify({}, null, 2);
+const emptyObject = '{\n\n}';
 
 const DEFAULT_TEMPLATE: Template = {
   name: '',

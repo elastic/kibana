@@ -13,18 +13,6 @@ import { Template } from '../../../common/types';
 import { saveTemplate, loadIndexTemplate } from '../../services/api';
 import { BASE_PATH } from '../../../common/constants';
 
-const emptyObject = JSON.stringify({}, null, 2);
-
-const DEFAULT_TEMPLATE: Template = {
-  name: '',
-  indexPatterns: [],
-  version: '',
-  order: '',
-  settings: emptyObject,
-  mappings: emptyObject,
-  aliases: emptyObject,
-};
-
 interface MatchParams {
   name: string;
 }
@@ -60,18 +48,6 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
     setSaveError(null);
   };
 
-  const renderTemplateForm = (templateData: Template) => {
-    return (
-      <TemplateForm
-        template={templateData}
-        onSave={onSave}
-        isSaving={isSaving}
-        saveError={saveError}
-        clearSaveError={clearSaveError}
-      />
-    );
-  };
-
   let content;
 
   useEffect(() => {
@@ -88,22 +64,17 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
       </SectionLoading>
     );
   } else if (templateToCloneError) {
-    // If error, display callout, but allow user to proceed with default create flow
     content = (
-      <Fragment>
-        <SectionError
-          title={
-            <FormattedMessage
-              id="xpack.idxMgmt.templateCreate.loadingTemplateToCloneErrorMessage"
-              defaultMessage="Error loading template to clone"
-            />
-          }
-          error={templateToCloneError}
-          data-test-subj="sectionError"
-        />
-        <EuiSpacer size="l" />
-        {renderTemplateForm(DEFAULT_TEMPLATE)}
-      </Fragment>
+      <SectionError
+        title={
+          <FormattedMessage
+            id="xpack.idxMgmt.templateCreate.loadingTemplateToCloneErrorMessage"
+            defaultMessage="Error loading template to clone"
+          />
+        }
+        error={templateToCloneError}
+        data-test-subj="sectionError"
+      />
     );
   } else if (templateToClone) {
     const templateData = {
@@ -111,7 +82,15 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
       ...{ name: `${name}-copy` },
     } as Template;
 
-    content = renderTemplateForm(templateData);
+    content = (
+      <TemplateForm
+        template={templateData}
+        onSave={onSave}
+        isSaving={isSaving}
+        saveError={saveError}
+        clearSaveError={clearSaveError}
+      />
+    );
   }
 
   return (

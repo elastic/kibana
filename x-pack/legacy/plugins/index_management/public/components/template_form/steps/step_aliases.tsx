@@ -103,7 +103,7 @@ export const StepAliases: React.FunctionComponent<StepProps> = ({
           mode="json"
           theme="textmate"
           width="100%"
-          height="300px"
+          height="600px"
           setOptions={{
             showLineNumbers: false,
             tabSize: 2,

@@ -5,9 +5,8 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCodeEditor, EuiCallOut } from '@elastic/eui';
+import { EuiCodeBlock, EuiCallOut } from '@elastic/eui';
 import { Template } from '../../../../../../common/types';
 
 interface Props {
@@ -20,19 +19,7 @@ export const TabMappings: React.FunctionComponent<Props> = ({ templateDetails })
   if (mappings) {
     return (
       <div data-test-subj="mappingsTab">
-        <EuiCodeEditor
-          mode="json"
-          theme="textmate"
-          width="100%"
-          isReadOnly
-          value={mappings}
-          aria-label={i18n.translate(
-            'xpack.idxMgmt.templateDetails.mappingsTab.mappingsEditorAriaLabel',
-            {
-              defaultMessage: 'Mappings code editor',
-            }
-          )}
-        />
+        <EuiCodeBlock lang="json">{mappings}</EuiCodeBlock>
       </div>
     );
   }

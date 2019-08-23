@@ -23,8 +23,10 @@ const parseJson = (jsonString: string) => {
   return parsedJson;
 };
 
-const hasEntries = (data?: object) => {
-  return data ? Object.entries(data).length > 0 : false;
+const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
+
+const stringifyJson = (json: any) => {
+  return JSON.stringify(json, null, 2);
 };
 
 export function deserializeTemplateList(indexTemplatesByName: any): TemplateListItem[] {
@@ -87,9 +89,9 @@ export function deserializeTemplate(templateEs: TemplateEs): Template {
     version: version || version === 0 ? version : '',
     order: order || order === 0 ? order : '',
     indexPatterns: indexPatterns.sort(),
-    settings: hasEntries(settings) ? JSON.stringify(settings, null, 2) : undefined,
-    aliases: hasEntries(aliases) ? JSON.stringify(aliases, null, 2) : undefined,
-    mappings: hasEntries(mappings) ? JSON.stringify(mappings, null, 2) : undefined,
+    settings: hasEntries(settings) ? stringifyJson(settings) : undefined,
+    aliases: hasEntries(aliases) ? stringifyJson(aliases) : undefined,
+    mappings: hasEntries(mappings) ? stringifyJson(mappings) : undefined,
     ilmPolicy: settings && settings.index && settings.index.lifecycle,
   };
 
