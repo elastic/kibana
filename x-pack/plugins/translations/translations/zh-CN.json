@@ -4851,7 +4851,6 @@
     "xpack.grokDebugger.unavailableLicenseInformationMessage": "您不能使用 {grokLogParsingTool} Debugger，因为许可证信息当前不可用。",
     "xpack.idxMgmt.appTitle": "索引管理",
     "xpack.idxMgmt.badgeAriaLabel": "{label}。选择以基于此选项进行筛选。",
-    "xpack.idxMgmt.breadcrumb": "索引管理",
     "xpack.idxMgmt.clearCacheIndicesAction.successMessage": "已成功清除缓存：[{indexNames}]",
     "xpack.idxMgmt.closeIndicesAction.successfullyClosedIndicesMessage": "已成功关闭：[{indexNames}]",
     "xpack.idxMgmt.deleteIndicesAction.successfullyDeletedIndicesMessage": "已成功删除：[{indexNames}]",
