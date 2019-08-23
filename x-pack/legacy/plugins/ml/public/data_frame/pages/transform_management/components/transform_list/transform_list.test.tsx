@@ -12,7 +12,14 @@ import { DataFrameTransformList } from './transform_list';
 
 describe('Data Frame: Transform List <DataFrameTransformList />', () => {
   test('Minimal initialization', () => {
-    const wrapper = shallow(<DataFrameTransformList />);
+    const wrapper = shallow(
+      <DataFrameTransformList
+        isInitialized={true}
+        transforms={[]}
+        errorMessage={undefined}
+        transformsLoading={false}
+      />
+    );
 
     expect(wrapper).toMatchSnapshot();
   });
