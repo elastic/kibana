@@ -17,7 +17,38 @@
  * under the License.
  */
 
-export function processImportResponse(response) {
+import {
+  SavedObjectsImportResponse,
+  SavedObjectsImportConflictError,
+  SavedObjectsImportUnsupportedTypeError,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportError,
+} from 'src/core/server';
+
+export interface ProcessedImportResponse {
+  failedImports: Array<{
+    obj: Pick<SavedObjectsImportError, 'id' | 'type' | 'title'>;
+    error:
+      | SavedObjectsImportConflictError
+      | SavedObjectsImportUnsupportedTypeError
+      | SavedObjectsImportMissingReferencesError
+      | SavedObjectsImportUnknownError;
+  }>;
+  unmatchedReferences: Array<{
+    existingIndexPatternId: string;
+    list: Array<Record<string, any>>;
+    newIndexPatternId: string | undefined;
+  }>;
+  status: 'success' | 'idle';
+  importCount: number;
+  conflictedSavedObjectsLinkedToSavedSearches: undefined;
+  conflictedSearchDocs: undefined;
+}
+
+export function processImportResponse(
+  response: SavedObjectsImportResponse
+): ProcessedImportResponse {
   // Go through the failures and split between unmatchedReferences and failedImports
   const failedImports = [];
   const unmatchedReferences = new Map();
@@ -29,7 +60,9 @@ export function processImportResponse(response) {
     // Currently only supports resolving references on index patterns
     const indexPatternRefs = error.references.filter(ref => ref.type === 'index-pattern');
     for (const missingReference of indexPatternRefs) {
-      const conflict = unmatchedReferences.get(`${missingReference.type}:${missingReference.id}`) || {
+      const conflict = unmatchedReferences.get(
+        `${missingReference.type}:${missingReference.id}`
+      ) || {
         existingIndexPatternId: missingReference.id,
         list: [],
         newIndexPatternId: undefined,
@@ -44,9 +77,11 @@ export function processImportResponse(response) {
     unmatchedReferences: Array.from(unmatchedReferences.values()),
     // Import won't be successful in the scenario unmatched references exist, import API returned errors of type unknown or import API
     // returned errors of type missing_references.
-    status: unmatchedReferences.size === 0 && !failedImports.some(issue => issue.error.type === 'conflict')
-      ? 'success'
-      : 'idle',
+    status:
+      unmatchedReferences.size === 0 &&
+      !failedImports.some(issue => issue.error.type === 'conflict')
+        ? 'success'
+        : 'idle',
     importCount: response.successCount,
     conflictedSavedObjectsLinkedToSavedSearches: undefined,
     conflictedSearchDocs: undefined,
