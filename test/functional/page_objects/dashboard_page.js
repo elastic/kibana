@@ -348,7 +348,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async clickSave() {
       log.debug('DashboardPage.clickSave');
-      await testSubjects.clickWhenNotDisabled('confirmSaveSavedObjectButton');
+      await testSubjects.click('confirmSaveSavedObjectButton');
     }
 
     async pressEnterKey() {
@@ -547,6 +547,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       const isAlreadyChecked = (await saveAsNewCheckbox.getAttribute('aria-checked') === 'true');
       if (isAlreadyChecked !== checked) {
         log.debug('Flipping save as new checkbox');
+        const saveAsNewCheckbox = await testSubjects.find('saveAsNewCheckbox');
         await retry.try(() => saveAsNewCheckbox.click());
       }
     }
@@ -557,6 +558,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       const isAlreadyChecked = (await storeTimeCheckbox.getAttribute('aria-checked') === 'true');
       if (isAlreadyChecked !== checked) {
         log.debug('Flipping store time checkbox');
+        const storeTimeCheckbox = await testSubjects.find('storeTimeWithDashboard');
         await retry.try(() => storeTimeCheckbox.click());
       }
     }
