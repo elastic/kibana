@@ -105,30 +105,6 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
   const [activeTab, setActiveTab] = useState<string>(SUMMARY_TAB_ID);
   const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);
 
-  const contextMenuItems = [
-    {
-      name: i18n.translate('xpack.idxMgmt.templateDetails.editButtonLabel', {
-        defaultMessage: 'Edit',
-      }),
-      icon: 'pencil',
-      onClick: () => editTemplate(decodedTemplateName),
-    },
-    {
-      name: i18n.translate('xpack.idxMgmt.templateDetails.cloneButtonLabel', {
-        defaultMessage: 'Clone',
-      }),
-      icon: 'copy',
-      onClick: () => cloneTemplate(decodedTemplateName),
-    },
-    {
-      name: i18n.translate('xpack.idxMgmt.templateDetails.deleteButtonLabel', {
-        defaultMessage: 'Delete',
-      }),
-      icon: 'trash',
-      onClick: () => setTemplateToDelete([decodedTemplateName]),
-    },
-  ];
-
   let content;
 
   if (isLoading) {
@@ -229,7 +205,6 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
                 />
               </EuiButtonEmpty>
             </EuiFlexItem>
-
             {templateDetails && (
               <EuiFlexItem grow={false}>
                 {/* Manage templates context menu */}
@@ -267,7 +242,34 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
                             defaultMessage: 'Template options',
                           }
                         ),
-                        items: contextMenuItems,
+                        items: [
+                          {
+                            name: i18n.translate('xpack.idxMgmt.templateDetails.editButtonLabel', {
+                              defaultMessage: 'Edit',
+                            }),
+                            icon: 'pencil',
+                            onClick: () => editTemplate(decodedTemplateName),
+                            disabled: templateDetails.isManaged,
+                          },
+                          {
+                            name: i18n.translate('xpack.idxMgmt.templateDetails.cloneButtonLabel', {
+                              defaultMessage: 'Clone',
+                            }),
+                            icon: 'copy',
+                            onClick: () => cloneTemplate(decodedTemplateName),
+                          },
+                          {
+                            name: i18n.translate(
+                              'xpack.idxMgmt.templateDetails.deleteButtonLabel',
+                              {
+                                defaultMessage: 'Delete',
+                              }
+                            ),
+                            icon: 'trash',
+                            onClick: () => setTemplateToDelete([decodedTemplateName]),
+                            disabled: templateDetails.isManaged,
+                          },
+                        ],
                       },
                     ]}
                   />

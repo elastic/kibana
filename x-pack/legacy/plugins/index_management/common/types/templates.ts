@@ -15,6 +15,7 @@ export interface TemplateListItem {
   ilmPolicy?: {
     name: string;
   };
+  isManaged: boolean;
 }
 export interface Template {
   name: string;
@@ -27,6 +28,7 @@ export interface Template {
   ilmPolicy?: {
     name: string;
   };
+  isManaged: boolean;
 }
 
 export interface TemplateEs {

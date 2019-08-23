@@ -23,6 +23,7 @@ const DEFAULT_TEMPLATE: Template = {
   settings: emptyObject,
   mappings: emptyObject,
   aliases: emptyObject,
+  isManaged: false,
 };
 
 export const TemplateCreate: React.FunctionComponent<RouteComponentProps> = ({ history }) => {

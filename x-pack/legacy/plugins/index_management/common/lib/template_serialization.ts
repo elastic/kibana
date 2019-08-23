@@ -29,7 +29,10 @@ const stringifyJson = (json: any) => {
   return JSON.stringify(json, null, 2);
 };
 
-export function deserializeTemplateList(indexTemplatesByName: any): TemplateListItem[] {
+export function deserializeTemplateList(
+  indexTemplatesByName: any,
+  managedTemplatePrefix?: string
+): TemplateListItem[] {
   const indexTemplateNames: string[] = Object.keys(indexTemplatesByName);
 
   const deserializedTemplates: TemplateListItem[] = indexTemplateNames.map((name: string) => {
@@ -51,6 +54,7 @@ export function deserializeTemplateList(indexTemplatesByName: any): TemplateList
       hasAliases: hasEntries(aliases),
       hasMappings: hasEntries(mappings),
       ilmPolicy: settings && settings.index && settings.index.lifecycle,
+      isManaged: Boolean(managedTemplatePrefix && name.startsWith(managedTemplatePrefix)),
     };
   });
 
@@ -73,7 +77,10 @@ export function serializeTemplate(template: Template): TemplateEs {
   return serializedTemplate;
 }
 
-export function deserializeTemplate(templateEs: TemplateEs): Template {
+export function deserializeTemplate(
+  templateEs: TemplateEs,
+  managedTemplatePrefix?: string
+): Template {
   const {
     name,
     version,
@@ -93,6 +100,7 @@ export function deserializeTemplate(templateEs: TemplateEs): Template {
     aliases: hasEntries(aliases) ? stringifyJson(aliases) : undefined,
     mappings: hasEntries(mappings) ? stringifyJson(mappings) : undefined,
     ilmPolicy: settings && settings.index && settings.index.lifecycle,
+    isManaged: Boolean(managedTemplatePrefix && name.startsWith(managedTemplatePrefix)),
   };
 
   return deserializedTemplate;
