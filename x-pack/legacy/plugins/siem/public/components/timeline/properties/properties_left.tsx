@@ -151,7 +151,7 @@ export const PropertiesLeft = React.memo<Props>(
               />
             </EuiToolTip>
           </LockIconContainer>
-          <DatePicker style={{ width: datePickerWidth }}>
+          <DatePicker grow={1} style={{ width: datePickerWidth }}>
             <SuperDatePicker id="timeline" timelineId={timelineId} />
           </DatePicker>
         </EuiFlexGroup>
