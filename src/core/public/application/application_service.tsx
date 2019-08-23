@@ -134,13 +134,9 @@ export class ApplicationService {
       currentAppId$,
 
       navigateToApp: (appId, { path, state }: { path?: string; state?: any } = {}) => {
-        let appPath: string;
-        if (path) {
-          const pathWithoutPrecedingSlash = path.replace(/^\//, '');
-          appPath = `/app/${appId}/${pathWithoutPrecedingSlash}`;
-        } else {
-          appPath = `/app/${appId}`;
-        }
+        const appPath = path
+          ? `/app/${appId}/${path.replace(/^\//, '')}` // Remove preceding slash from path if present
+          : `/app/${appId}`;
 
         if (legacyMode) {
           // If we're in legacy mode, do a full page refresh to load the NP app.

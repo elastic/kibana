@@ -69,14 +69,14 @@ export class CapabilitiesService {
   }: StartDeps): Promise<CapabilitiesStart> {
     const capabilities = deepFreeze(injectedMetadata.getCapabilities());
     const availableApps = new Map(
-      [...apps.entries()].filter(
+      [...apps].filter(
         ([appId]) =>
           capabilities.navLinks[appId] === undefined || capabilities.navLinks[appId] === true
       )
     );
 
     const availableLegacyApps = new Map(
-      [...legacyApps.entries()].filter(
+      [...legacyApps].filter(
         ([appId]) =>
           capabilities.navLinks[appId] === undefined || capabilities.navLinks[appId] === true
       )

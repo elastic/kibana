@@ -67,7 +67,7 @@ export class AppContainer extends React.Component<Props, State> {
 
   async mountApp() {
     const { apps, legacyApps, match, basePath, currentAppId$, redirectTo } = this.props;
-    const appId = match.params.appId;
+    const { appId } = match.params;
 
     const mount = apps.get(appId);
     if (mount) {

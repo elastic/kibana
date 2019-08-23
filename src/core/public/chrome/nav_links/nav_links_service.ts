@@ -99,7 +99,7 @@ export class NavLinksService {
   private readonly stop$ = new ReplaySubject(1);
 
   public start({ application, http }: StartDeps): ChromeNavLinks {
-    const appLinks = [...application.availableApps.entries()].map(
+    const appLinks = [...application.availableApps].map(
       ([appId, app]) =>
         [
           appId,
@@ -111,7 +111,7 @@ export class NavLinksService {
         ] as [string, NavLinkWrapper]
     );
 
-    const legacyAppLinks = [...application.availableLegacyApps.entries()].map(
+    const legacyAppLinks = [...application.availableLegacyApps].map(
       ([appId, app]) =>
         [
           appId,

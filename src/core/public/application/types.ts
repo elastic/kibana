@@ -74,7 +74,7 @@ export interface AppBase {
  */
 export interface App extends AppBase {
   /**
-   * A mount function called when the user navigates to this app's `rootRoute`.
+   * A mount function called when the user navigates to this app's route.
    * @param context The mount context for this app.
    * @param targetDomElement An HTMLElement to mount the application onto.
    * @returns An unmounting function that will be called to unmount the application.
@@ -138,7 +138,7 @@ export interface AppMountParameters {
    *     application.register({
    *     id: 'my-app',
    *     async mount(context, params) {
-   *       const { renderApp } = await import('./applcation');
+   *       const { renderApp } = await import('./application');
    *       return renderApp(context, params);
    *     },
    *   });
