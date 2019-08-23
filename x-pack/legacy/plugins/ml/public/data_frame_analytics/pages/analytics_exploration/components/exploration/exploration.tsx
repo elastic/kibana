@@ -437,6 +437,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
       )}
       {clearTable === false && columns.length > 0 && (
         <MlInMemoryTable
+          allowNeutralSort={false}
           className="mlDataFrameAnalyticsExploration"
           columns={columns}
           compressed

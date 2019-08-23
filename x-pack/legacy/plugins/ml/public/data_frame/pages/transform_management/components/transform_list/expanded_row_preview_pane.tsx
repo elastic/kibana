@@ -164,6 +164,7 @@ export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
 
   return (
     <TransformTable
+      allowNeutralSort={false}
       loading={dataFramePreviewData.length === 0 && isLoading === true}
       compressed
       items={dataFramePreviewData}

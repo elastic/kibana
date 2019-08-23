@@ -8,13 +8,16 @@ import { Component, HTMLAttributes, ReactElement, ReactNode } from 'react';
 
 import { CommonProps, EuiInMemoryTable } from '@elastic/eui';
 
+// At some point this could maybe solved with a generic <T>.
+type Item = any;
+
 // Not using an enum here because the original HorizontalAlignment is also a union type of string.
 type HorizontalAlignment = 'left' | 'center' | 'right';
 
-type SortableFunc = (item: any) => any;
+type SortableFunc = (item: Item) => any;
 type Sortable = boolean | SortableFunc;
 type DATA_TYPES = any;
-type FooterFunc = (payload: { items: any; pagination: any }) => ReactNode;
+type FooterFunc = (payload: { items: Item[]; pagination: any }) => ReactNode;
 type RenderFunc = (value: any, record?: any) => ReactNode;
 export interface FieldDataColumnType {
   field: string;
@@ -33,33 +36,33 @@ export interface ComputedColumnType {
   render: RenderFunc;
   name?: ReactNode;
   description?: string;
-  sortable?: (item: any) => any;
+  sortable?: (item: Item) => any;
   width?: string;
   truncateText?: boolean;
 }
 
 type ICON_TYPES = any;
-type IconTypesFunc = (item: any) => ICON_TYPES; // (item) => oneOf(ICON_TYPES)
+type IconTypesFunc = (item: Item) => ICON_TYPES; // (item) => oneOf(ICON_TYPES)
 type BUTTON_ICON_COLORS = any;
-type ButtonIconColorsFunc = (item: any) => BUTTON_ICON_COLORS; // (item) => oneOf(ICON_BUTTON_COLORS)
+type ButtonIconColorsFunc = (item: Item) => BUTTON_ICON_COLORS; // (item) => oneOf(ICON_BUTTON_COLORS)
 interface DefaultItemActionType {
   type?: 'icon' | 'button';
   name: string;
   description: string;
-  onClick?(item: any): void;
+  onClick?(item: Item): void;
   href?: string;
   target?: string;
-  available?(item: any): boolean;
-  enabled?(item: any): boolean;
+  available?(item: Item): boolean;
+  enabled?(item: Item): boolean;
   isPrimary?: boolean;
   icon?: ICON_TYPES | IconTypesFunc; // required when type is 'icon'
   color?: BUTTON_ICON_COLORS | ButtonIconColorsFunc;
 }
 
 interface CustomItemActionType {
-  render(item: any, enabled: boolean): ReactNode;
-  available?(item: any): boolean;
-  enabled?(item: any): boolean;
+  render(item: Item, enabled: boolean): ReactNode;
+  available?(item: Item): boolean;
+  enabled?(item: Item): boolean;
   isPrimary?: boolean;
 }
 
@@ -141,7 +144,7 @@ type Sorting = boolean | { sort: PropertySortType };
 
 type SelectionType = any;
 
-type ItemIdTypeFunc = (item: any) => string;
+type ItemIdTypeFunc = (item: Item) => string;
 type ItemIdType =
   | string // the name of the item id property
   | ItemIdTypeFunc;
@@ -151,7 +154,7 @@ export type EuiInMemoryTableProps = CommonProps & {
   hasActions?: boolean;
   isExpandable?: boolean;
   isSelectable?: boolean;
-  items?: any[];
+  items?: Item[];
   loading?: boolean;
   message?: HTMLAttributes<HTMLDivElement>;
   error?: string;
@@ -163,7 +166,7 @@ export type EuiInMemoryTableProps = CommonProps & {
   allowNeutralSort?: boolean;
   selection?: SelectionType;
   itemId?: ItemIdType;
-  itemIdToExpandedRowMap?: Record<string, any>;
+  itemIdToExpandedRowMap?: Record<string, Item>;
   rowProps?: () => void | Record<string, any>;
   cellProps?: () => void | Record<string, any>;
   onTableChange?: (arg: {

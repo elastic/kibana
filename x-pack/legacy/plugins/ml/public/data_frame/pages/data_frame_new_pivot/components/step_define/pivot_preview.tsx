@@ -282,8 +282,9 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
       {status !== PIVOT_PREVIEW_STATUS.LOADING && (
         <EuiProgress size="xs" color="accent" max={1} value={0} />
       )}
-      {dataFramePreviewData.length > 0 && clearTable === false && (
+      {dataFramePreviewData.length > 0 && clearTable === false && columns.length > 0 && (
         <MlInMemoryTable
+          allowNeutralSort={false}
           compressed
           items={dataFramePreviewData}
           columns={columns}

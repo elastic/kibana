@@ -310,6 +310,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     <Fragment>
       <ProgressBar isLoading={isLoading} />
       <AnalyticsTable
+        allowNeutralSort={false}
         className="mlAnalyticsTable"
         columns={columns}
         error={searchError}

@@ -416,8 +416,9 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
       {status !== SOURCE_INDEX_STATUS.LOADING && (
         <EuiProgress size="xs" color="accent" max={1} value={0} />
       )}
-      {clearTable === false && (
+      {clearTable === false && columns.length > 0 && sorting !== false && (
         <MlInMemoryTable
+          allowNeutralSort={false}
           compressed
           items={tableItems}
           columns={columns}

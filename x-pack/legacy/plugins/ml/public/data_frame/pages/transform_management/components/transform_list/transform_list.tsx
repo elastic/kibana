@@ -370,6 +370,7 @@ export const DataFrameTransformList: SFC = () => {
     <Fragment>
       <ProgressBar isLoading={isLoading} />
       <TransformTable
+        allowNeutralSort={false}
         className="mlTransformTable"
         columns={columns}
         error={searchError}
