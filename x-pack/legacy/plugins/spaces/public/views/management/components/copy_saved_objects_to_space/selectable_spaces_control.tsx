@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useState } from 'react';
 import { EuiSelectable, EuiLoadingSpinner } from '@elastic/eui';
 import { SpaceAvatar } from '../../../../components';
 import { Space } from '../../../../../common/model/space';
@@ -27,20 +27,18 @@ interface SpaceOption {
 export const SelectableSpacesControl = (props: Props) => {
   const [options, setOptions] = useState<SpaceOption[]>([]);
 
-  useEffect(() => {
-    //  TODO: update once https://github.com/elastic/eui/issues/2071 is fixed to not care about options length
-    if (options.length === 0) {
-      setOptions(
-        props.spaces.map(space => ({
-          label: space.name,
-          prepend: <SpaceAvatar space={space} size={'s'} />,
-          checked: props.selectedSpaceIds.includes(space.id) ? 'on' : null,
-          ['data-space-id']: space.id,
-          ['data-test-subj']: `cts-space-selector-row-${space.id}`,
-        }))
-      );
-    }
-  }, [props.spaces, props.selectedSpaceIds]);
+  //  TODO: update once https://github.com/elastic/eui/issues/2071 is fixed
+  if (options.length === 0) {
+    setOptions(
+      props.spaces.map(space => ({
+        label: space.name,
+        prepend: <SpaceAvatar space={space} size={'s'} />,
+        checked: props.selectedSpaceIds.includes(space.id) ? 'on' : null,
+        ['data-space-id']: space.id,
+        ['data-test-subj']: `cts-space-selector-row-${space.id}`,
+      }))
+    );
+  }
 
   function updateSelectedSpaces(selectedOptions: SpaceOption[]) {
     if (props.disabled) return;
