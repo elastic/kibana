@@ -105,7 +105,7 @@ export class SetViewControl extends Component {
       min: -90,
       max: 90,
       onChange: this._onLatChange,
-      label: i18n.translate('xpack.maps.viewControl.latitudeLabel', {
+      label: i18n.translate('xpack.maps.setViewControl.latitudeLabel', {
         defaultMessage: 'Latitude'
       }),
       dataTestSubj: 'latitudeInput',
@@ -116,7 +116,7 @@ export class SetViewControl extends Component {
       min: -180,
       max: 180,
       onChange: this._onLonChange,
-      label: i18n.translate('xpack.maps.viewControl.longitudeLabel', {
+      label: i18n.translate('xpack.maps.setViewControl.longitudeLabel', {
         defaultMessage: 'Longitude'
       }),
       dataTestSubj: 'longitudeInput',
@@ -127,7 +127,7 @@ export class SetViewControl extends Component {
       min: 0,
       max: 24,
       onChange: this._onZoomChange,
-      label: i18n.translate('xpack.maps.viewControl.zoomLabel', {
+      label: i18n.translate('xpack.maps.setViewControl.zoomLabel', {
         defaultMessage: 'Zoom'
       }),
       dataTestSubj: 'zoomInput',
@@ -150,7 +150,7 @@ export class SetViewControl extends Component {
             data-test-subj="submitViewButton"
           >
             <FormattedMessage
-              id="xpack.maps.viewControl.submitButtonLabel"
+              id="xpack.maps.setViewControl.submitButtonLabel"
               defaultMessage="Go"
             />
           </EuiButton>
@@ -171,10 +171,10 @@ export class SetViewControl extends Component {
             data-test-subj="toggleSetViewVisibilityButton"
             iconType="crosshairs"
             color="text"
-            aria-label={i18n.translate('xpack.maps.viewControl.goToButtonLabel', {
+            aria-label={i18n.translate('xpack.maps.setViewControl.goToButtonLabel', {
               defaultMessage: 'Go to'
             })}
-            title={i18n.translate('xpack.maps.viewControl.goToButtonLabel', {
+            title={i18n.translate('xpack.maps.setViewControl.goToButtonLabel', {
               defaultMessage: 'Go to'
             })}
           />
