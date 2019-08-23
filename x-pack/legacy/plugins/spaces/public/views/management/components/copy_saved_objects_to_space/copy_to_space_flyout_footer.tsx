@@ -9,14 +9,14 @@ import { ProcessedImportResponse } from 'ui/management/saved_objects_management'
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiStat, EuiHorizontalRule } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { CTSImportRetry } from './types';
+import { ImportRetry } from '../../../../lib/copy_saved_objects_to_space/types';
 
 interface Props {
   copyInProgress: boolean;
   conflictResolutionInProgress: boolean;
   initialCopyFinished: boolean;
   copyResult: Record<string, ProcessedImportResponse>;
-  retries: Record<string, CTSImportRetry[]>;
+  retries: Record<string, ImportRetry[]>;
   numberOfSelectedSpaces: number;
   onCopyStart: () => void;
   onCopyFinish: () => void;

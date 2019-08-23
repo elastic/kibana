@@ -12,14 +12,14 @@ import { SpaceAvatar } from '../../../../components';
 import { Space } from '../../../../../common/model/space';
 import { CopyStatusSummaryIndicator } from './copy_status_summary_indicator';
 import { SpaceCopyResultDetails } from './cts_space_result_details';
-import { CTSImportRetry } from './types';
+import { ImportRetry } from '../../../../lib/copy_saved_objects_to_space/types';
 
 interface Props {
   savedObject: SavedObjectsManagementRecord;
   space: Space;
   summarizedCopyResult: SummarizedCopyToSpaceResult;
-  retries: CTSImportRetry[];
-  onRetriesChange: (retries: CTSImportRetry[]) => void;
+  retries: ImportRetry[];
+  onRetriesChange: (retries: ImportRetry[]) => void;
   conflictResolutionInProgress: boolean;
 }
 

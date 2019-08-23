@@ -22,7 +22,7 @@ import {
   SummarizedCopyToSpaceResult,
 } from '../../../../lib/copy_saved_objects_to_space';
 import { Space } from '../../../../../common/model/space';
-import { CopyOptions, CTSImportRetry } from './types';
+import { CopyOptions, ImportRetry } from '../../../../lib/copy_saved_objects_to_space/types';
 import { SpaceResult } from './cts_space_result';
 
 interface Props {
@@ -30,14 +30,14 @@ interface Props {
   copyInProgress: boolean;
   conflictResolutionInProgress: boolean;
   copyResult: Record<string, ProcessedImportResponse>;
-  retries: Record<string, CTSImportRetry[]>;
-  onRetriesChange: (retries: Record<string, CTSImportRetry[]>) => void;
+  retries: Record<string, ImportRetry[]>;
+  onRetriesChange: (retries: Record<string, ImportRetry[]>) => void;
   spaces: Space[];
   copyOptions: CopyOptions;
 }
 
 export const ProcessingCopyToSpace = (props: Props) => {
-  function updateRetries(spaceId: string, updatedRetries: CTSImportRetry[]) {
+  function updateRetries(spaceId: string, updatedRetries: ImportRetry[]) {
     props.onRetriesChange({
       ...props.retries,
       [spaceId]: updatedRetries,

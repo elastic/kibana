@@ -7,9 +7,9 @@
 import React from 'react';
 import { EuiSwitch, EuiSpacer, EuiHorizontalRule, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { CopyOptions } from '../../../../lib/copy_saved_objects_to_space/types';
 import { Space } from '../../../../../common/model/space';
 import { SelectableSpacesControl } from './selectable_spaces_control';
-import { CopyOptions } from './types';
 
 interface Props {
   spaces: Space[];

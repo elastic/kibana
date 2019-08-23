@@ -11,14 +11,14 @@ import { EuiText, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Space } from '../../../../../common/model/space';
 import { CopyStatusIndicator } from './copy_status_indicator';
-import { CTSImportRetry } from './types';
+import { ImportRetry } from '../../../../lib/copy_saved_objects_to_space/types';
 
 interface Props {
   savedObject: SavedObjectsManagementRecord;
   summarizedCopyResult: SummarizedCopyToSpaceResult;
   space: Space;
-  retries: CTSImportRetry[];
-  onRetriesChange: (retries: CTSImportRetry[]) => void;
+  retries: ImportRetry[];
+  onRetriesChange: (retries: ImportRetry[]) => void;
   conflictResolutionInProgress: boolean;
 }
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsImportRetry } from 'src/core/server';
+import { SavedObjectsImportRetry, SavedObjectsImportResponse } from 'src/core/server';
 
 export interface CopyOptions {
   includeRelated: boolean;
@@ -12,4 +12,8 @@ export interface CopyOptions {
   selectedSpaceIds: string[];
 }
 
-export type CTSImportRetry = Omit<SavedObjectsImportRetry, 'replaceReferences'>;
+export type ImportRetry = Omit<SavedObjectsImportRetry, 'replaceReferences'>;
+
+export interface CopySavedObjectsToSpaceResponse {
+  [spaceId: string]: SavedObjectsImportResponse;
+}

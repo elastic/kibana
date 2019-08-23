@@ -33,7 +33,7 @@ import { useKibanaSpaces } from '../../../../lib/hooks';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';
 import { CopyToSpaceFlyoutFooter } from './copy_to_space_flyout_footer';
 import { CopyToSpaceForm } from './copy_to_space_form';
-import { CopyOptions, CTSImportRetry } from './types';
+import { CopyOptions, ImportRetry } from '../../../../lib/copy_saved_objects_to_space/types';
 
 interface Props {
   onClose: () => void;
@@ -57,11 +57,11 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
   const [copyInProgress, setCopyInProgress] = useState(false);
   const [conflictResolutionInProgress, setConflictResolutionInProgress] = useState(false);
   const [copyResult, setCopyResult] = useState<Record<string, ProcessedImportResponse>>({});
-  const [retries, setRetries] = useState<Record<string, CTSImportRetry[]>>({});
+  const [retries, setRetries] = useState<Record<string, ImportRetry[]>>({});
 
   const initialCopyFinished = Object.values(copyResult).length > 0;
 
-  const onRetriesChange = (updatedRetries: Record<string, CTSImportRetry[]>) => {
+  const onRetriesChange = (updatedRetries: Record<string, ImportRetry[]>) => {
     setRetries(updatedRetries);
   };
 
