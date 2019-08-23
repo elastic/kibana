@@ -37,6 +37,20 @@ Wrap your React application in the created context.
 </context.Provider>
 ```
 
+Or use already pre-created `<KibanaContextProvider>` component.
+
+```jsx
+import { KibanaContextProvider } from 'kibana-react';
+
+<KibanaContextProvider services={{ ...core, ...plugins }}>
+  <KibanaApplication />
+</KibanaContextProvider>
+
+<KibanaContextProvider services={{ notifications, overlays, embeddable }}>
+  <KibanaApplication />
+</KibanaContextProvider>
+```
+
 
 ## Accessing context
 
@@ -152,7 +166,7 @@ import { createContext } from 'kibana-react';
 
 class MyPlugin {
   start(core) {
-    const { overlays } = createContext(core);
+    const { value: { overlays } } = createContext(core);
 
     overlays.openModal(
       <div>
@@ -192,7 +206,7 @@ import { createContext } from 'kibana-react';
 
 class MyPlugin {
   start(core) {
-    const { notifications } = createContext(core);
+    const { value: { notifications } } = createContext(core);
 
     notifications.toasts.show({
       title: <div>Hello</div>,

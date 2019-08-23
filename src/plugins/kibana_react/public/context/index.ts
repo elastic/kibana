@@ -17,5 +17,12 @@
  * under the License.
  */
 
-export { context, createContext, useKibana, withKibana, UseKibana } from './context';
+export {
+  context,
+  createKibanaReactContext,
+  KibanaContextProvider,
+  useKibana,
+  withKibana,
+  UseKibana,
+} from './context';
 export { KibanaReactContext, KibanaReactContextValue } from './types';

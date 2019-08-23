@@ -22,20 +22,20 @@ import { KibanaReactContext, KibanaReactContextValue, KibanaServices } from './t
 import { createReactOverlays } from '../overlays';
 import { createNotifications } from '../notifications';
 
+const { useMemo, useContext, createElement, createContext } = React;
+
 const defaultContextValue = {
   services: {},
-  overlays: undefined,
-  notifications: undefined,
+  overlays: createReactOverlays({}),
+  notifications: createNotifications({}),
 };
 
-export const context = React.createContext<KibanaReactContextValue<KibanaServices>>(
-  defaultContextValue
-);
+export const context = createContext<KibanaReactContextValue<KibanaServices>>(defaultContextValue);
 
 export const useKibana = <Extra extends object = {}>(): KibanaReactContextValue<
   KibanaServices & Extra
 > =>
-  React.useContext((context as unknown) as React.Context<
+  useContext((context as unknown) as React.Context<
     KibanaReactContextValue<KibanaServices & Extra>
   >);
 
@@ -53,24 +53,35 @@ export const UseKibana: React.FC<{
   children: (kibana: KibanaReactContextValue<any>) => React.ReactNode;
 }> = ({ children }) => <>{children(useKibana())}</>;
 
-export const createContext = <Services extends KibanaServices>(
+export const createKibanaReactContext = <Services extends KibanaServices>(
   services: Services
 ): KibanaReactContext<Services> => {
-  const overlays = services.overlays ? createReactOverlays(services) : undefined;
-  const notifications = services.notifications ? createNotifications(services) : undefined;
-
   const value: KibanaReactContextValue<Services> = {
     services,
-    overlays,
-    notifications,
-  } as KibanaReactContextValue<Services>;
+    overlays: createReactOverlays(services),
+    notifications: createNotifications(services),
+  };
 
-  const Provider: React.FC<{}> = ({ children }) =>
-    React.createElement(context.Provider as React.ComponentType<any>, { value, children });
+  const Provider: React.FC<{ services?: Services }> = ({
+    services: newServices = {},
+    children,
+  }) => {
+    const oldValue = useKibana();
+    const { value: newValue } = useMemo(
+      () => createKibanaReactContext({ ...services, ...oldValue.services, ...newServices }),
+      Object.keys(services)
+    );
+    return createElement(context.Provider as React.ComponentType<any>, {
+      value: newValue,
+      children,
+    });
+  };
 
   return {
-    ...value,
+    value,
     Provider,
     Consumer: (context.Consumer as unknown) as React.Consumer<KibanaReactContextValue<Services>>,
   };
 };
+
+export const { Provider: KibanaContextProvider } = createKibanaReactContext({});
