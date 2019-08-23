@@ -3,18 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-let mockSpaces: Space[] = [];
-let mockIsLoading = true;
-jest.mock('../../../../lib/hooks', () => {
-  return {
-    useKibanaSpaces: () => {
-      return {
-        isLoading: mockIsLoading,
-        spaces: mockSpaces,
-      };
-    },
-  };
-});
 import React from 'react';
 import Boom from 'boom';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
@@ -30,9 +18,40 @@ import { spacesManagerMock } from '../../../../lib/mocks';
 import { SpacesManager } from '../../../../lib';
 import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
 
-const setup = () => {
+interface SetupOpts {
+  mockSpaces?: Space[];
+  returnBeforeSpacesLoad?: boolean;
+}
+
+const setup = async (opts: SetupOpts = {}) => {
   const onClose = jest.fn();
+
   const mockSpacesManager = spacesManagerMock.create();
+  mockSpacesManager.getSpaces.mockResolvedValue(
+    opts.mockSpaces || [
+      {
+        id: 'space-1',
+        name: 'Space 1',
+        disabledFeatures: [],
+      },
+      {
+        id: 'space-2',
+        name: 'Space 2',
+        disabledFeatures: [],
+      },
+      {
+        id: 'space-3',
+        name: 'Space 3',
+        disabledFeatures: [],
+      },
+      {
+        id: 'my-active-space',
+        name: 'my active space',
+        disabledFeatures: [],
+      },
+    ]
+  );
+
   const mockToastNotifications = {
     addError: jest.fn(),
     addSuccess: jest.fn(),
@@ -64,6 +83,12 @@ const setup = () => {
     />
   );
 
+  if (!opts.returnBeforeSpacesLoad) {
+    // Wait for spaces manager to complete and flyout to rerender
+    await Promise.resolve();
+    wrapper.update();
+  }
+
   return { wrapper, onClose, mockSpacesManager, mockToastNotifications, savedObjectToCopy };
 };
 
@@ -72,57 +97,23 @@ describe('CopyToSpaceFlyout', () => {
     jest.useFakeTimers();
   });
 
-  beforeEach(() => {
-    mockIsLoading = false;
-    mockSpaces = [
-      {
-        id: 'space-1',
-        name: 'Space 1',
-        disabledFeatures: [],
-      },
-      {
-        id: 'space-2',
-        name: 'Space 2',
-        disabledFeatures: [],
-      },
-      {
-        id: 'space-3',
-        name: 'Space 3',
-        disabledFeatures: [],
-      },
-      {
-        id: 'my-active-space',
-        name: 'my active space',
-        disabledFeatures: [],
-      },
-    ];
-  });
-
-  it('waits for spaces to load', () => {
-    mockIsLoading = true;
-
-    let { wrapper } = setup();
+  it('waits for spaces to load', async () => {
+    const { wrapper } = await setup({ returnBeforeSpacesLoad: true });
 
     expect(wrapper.find(CopyToSpaceForm)).toHaveLength(0);
     expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(0);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
 
-    wrapper.unmount();
-
-    mockIsLoading = false;
-    mockSpaces = [{ id: 'foo', name: 'Foo Space', disabledFeatures: [] }];
-
-    wrapper = setup().wrapper;
+    await Promise.resolve();
+    wrapper.update();
 
     expect(wrapper.find(CopyToSpaceForm)).toHaveLength(1);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
     expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(0);
   });
 
-  it('shows a message within an EuiEmptyPrompt when no spaces are available', () => {
-    mockSpaces = [];
-
-    const { wrapper, onClose } = setup();
+  it('shows a message within an EuiEmptyPrompt when no spaces are available', async () => {
+    const { wrapper, onClose } = await setup({ mockSpaces: [] });
 
     expect(wrapper.find(CopyToSpaceForm)).toHaveLength(0);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
@@ -130,10 +121,10 @@ describe('CopyToSpaceFlyout', () => {
     expect(onClose).toHaveBeenCalledTimes(0);
   });
 
-  it('shows a message within an EuiEmptyPrompt when only the active space is available', () => {
-    mockSpaces = [{ id: 'my-active-space', name: '', disabledFeatures: [] }];
-
-    const { wrapper, onClose } = setup();
+  it('shows a message within an EuiEmptyPrompt when only the active space is available', async () => {
+    const { wrapper, onClose } = await setup({
+      mockSpaces: [{ id: 'my-active-space', name: '', disabledFeatures: [] }],
+    });
 
     expect(wrapper.find(CopyToSpaceForm)).toHaveLength(0);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
@@ -142,7 +133,7 @@ describe('CopyToSpaceFlyout', () => {
   });
 
   it('handles errors thrown from copySavedObjects API call', async () => {
-    const { wrapper, mockSpacesManager, mockToastNotifications } = setup();
+    const { wrapper, mockSpacesManager, mockToastNotifications } = await setup();
 
     mockSpacesManager.copySavedObjects.mockImplementation(() => {
       return Promise.reject(Boom.serverUnavailable('Something bad happened'));
@@ -173,7 +164,7 @@ describe('CopyToSpaceFlyout', () => {
   });
 
   it('handles errors thrown from resolveCopySavedObjectsErrors API call', async () => {
-    const { wrapper, mockSpacesManager, mockToastNotifications } = setup();
+    const { wrapper, mockSpacesManager, mockToastNotifications } = await setup();
 
     mockSpacesManager.copySavedObjects.mockResolvedValue({
       'space-1': {
@@ -249,7 +240,7 @@ describe('CopyToSpaceFlyout', () => {
       mockSpacesManager,
       mockToastNotifications,
       savedObjectToCopy,
-    } = setup();
+    } = await setup();
 
     mockSpacesManager.copySavedObjects.mockResolvedValue({
       'space-1': {
@@ -309,7 +300,7 @@ describe('CopyToSpaceFlyout', () => {
       mockSpacesManager,
       mockToastNotifications,
       savedObjectToCopy,
-    } = setup();
+    } = await setup();
 
     mockSpacesManager.copySavedObjects.mockResolvedValue({
       'space-1': {
@@ -388,7 +379,7 @@ describe('CopyToSpaceFlyout', () => {
   });
 
   it('displays an error when missing references are encountered', async () => {
-    const { wrapper, onClose, mockSpacesManager, mockToastNotifications } = setup();
+    const { wrapper, onClose, mockSpacesManager, mockToastNotifications } = await setup();
 
     mockSpacesManager.copySavedObjects.mockResolvedValue({
       'space-1': {
