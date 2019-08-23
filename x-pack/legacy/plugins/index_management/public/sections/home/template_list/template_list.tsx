@@ -21,6 +21,11 @@ import { TemplateTable } from './template_table';
 import { loadIndexTemplates } from '../../../services/api';
 import { Template } from '../../../../common/types';
 import { trackUiMetric, METRIC_TYPE } from '../../../services/track_ui_metric';
+import {
+  getTemplateEditLink,
+  getTemplateListLink,
+  getTemplateCloneLink,
+} from '../../../services/routing';
 import { UIM_TEMPLATE_LIST_LOAD, BASE_PATH } from '../../../../common/constants';
 import { TemplateDetails } from './template_details';
 
@@ -48,15 +53,15 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
   );
 
   const closeTemplateDetails = () => {
-    history.push(`${BASE_PATH}templates`);
+    history.push(getTemplateListLink());
   };
 
   const editTemplate = (name: Template['name']) => {
-    history.push(`${BASE_PATH}edit_template/${encodeURIComponent(name)}`);
+    history.push(getTemplateEditLink(name));
   };
 
   const cloneTemplate = (name: Template['name']) => {
-    history.push(`${BASE_PATH}clone_template/${encodeURIComponent(name)}`);
+    history.push(getTemplateCloneLink(name));
   };
 
   // Track component loaded

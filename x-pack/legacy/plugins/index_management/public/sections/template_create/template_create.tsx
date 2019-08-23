@@ -11,7 +11,7 @@ import { TemplateForm } from '../../components';
 import { setBreadcrumbs } from '../../services/set_breadcrumbs';
 import { Template } from '../../../common/types';
 import { saveTemplate } from '../../services/api';
-import { BASE_PATH } from '../../../common/constants';
+import { getTemplateDetailsLink } from '../../services/routing';
 
 const emptyObject = '{\n\n}';
 
@@ -44,7 +44,7 @@ export const TemplateCreate: React.FunctionComponent<RouteComponentProps> = ({ h
       return;
     }
 
-    history.push(`${BASE_PATH}templates/${encodeURIComponent(name)}`);
+    history.push(getTemplateDetailsLink(name));
   };
 
   const clearSaveError = () => {

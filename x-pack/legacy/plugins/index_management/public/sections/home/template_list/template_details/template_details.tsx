@@ -32,6 +32,7 @@ import {
 import { Template } from '../../../../../common/types';
 import { TemplateDeleteModal, SectionLoading, SectionError } from '../../../../components';
 import { loadIndexTemplate } from '../../../../services/api';
+import { decodePath } from '../../../../services/routing';
 import { trackUiMetric, METRIC_TYPE } from '../../../../services/track_ui_metric';
 import { TabSummary, TabMappings, TabSettings, TabAliases } from './tabs';
 
@@ -98,8 +99,8 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
   cloneTemplate,
   reload,
 }) => {
-  const { error, data: templateDetails, isLoading } = loadIndexTemplate(templateName);
-
+  const decodedTemplateName = decodePath(templateName);
+  const { error, data: templateDetails, isLoading } = loadIndexTemplate(decodedTemplateName);
   const [templateToDelete, setTemplateToDelete] = useState<Array<Template['name']>>([]);
   const [activeTab, setActiveTab] = useState<string>(SUMMARY_TAB_ID);
   const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);
@@ -110,21 +111,21 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
         defaultMessage: 'Edit',
       }),
       icon: 'pencil',
-      onClick: () => editTemplate(templateName),
+      onClick: () => editTemplate(decodedTemplateName),
     },
     {
       name: i18n.translate('xpack.idxMgmt.templateDetails.cloneButtonLabel', {
         defaultMessage: 'Clone',
       }),
       icon: 'copy',
-      onClick: () => cloneTemplate(templateName),
+      onClick: () => cloneTemplate(decodedTemplateName),
     },
     {
       name: i18n.translate('xpack.idxMgmt.templateDetails.deleteButtonLabel', {
         defaultMessage: 'Delete',
       }),
       icon: 'trash',
-      onClick: () => setTemplateToDelete([templateName]),
+      onClick: () => setTemplateToDelete([decodedTemplateName]),
     },
   ];
 
@@ -206,7 +207,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
         <EuiFlyoutHeader>
           <EuiTitle size="m">
             <h2 id="templateDetailsFlyoutTitle" data-test-subj="title">
-              {templateName}
+              {decodedTemplateName}
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>

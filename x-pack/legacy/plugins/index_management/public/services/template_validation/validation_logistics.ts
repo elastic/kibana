@@ -40,7 +40,7 @@ const validateIndexPattern = (indexPattern: string) => {
   }
 };
 
-export const INVALID_NAME_CHARS = ['"', '*', '\\', ',', '/', '?'];
+export const INVALID_NAME_CHARS = ['"', '*', '\\', ',', '?'];
 
 const doesStringIncludeChar = (string: string, chars: string[]) => {
   const invalidChar = chars.find(char => string.includes(char)) || null;

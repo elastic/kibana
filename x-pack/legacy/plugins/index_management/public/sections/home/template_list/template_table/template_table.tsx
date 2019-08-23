@@ -12,6 +12,7 @@ import { TemplateListItem, Template } from '../../../../../common/types';
 import { BASE_PATH, UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../common/constants';
 import { TemplateDeleteModal } from '../../../../components';
 import { trackUiMetric, METRIC_TYPE } from '../../../../services/track_ui_metric';
+import { getTemplateDetailsLink } from '../../../../services/routing';
 
 interface Props {
   templates: TemplateListItem[];
@@ -41,7 +42,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
         return (
           /* eslint-disable-next-line @elastic/eui/href-or-on-click */
           <EuiLink
-            href={encodeURI(`#${BASE_PATH}templates/${name}`)}
+            href={getTemplateDetailsLink(name, true)}
             data-test-subj="templateDetailsLink"
             onClick={() => trackUiMetric(METRIC_TYPE.CLICK, UIM_TEMPLATE_SHOW_DETAILS_CLICK)}
           >

@@ -7,9 +7,9 @@ import React, { useEffect, useState, Fragment } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageBody, EuiPageContent, EuiTitle, EuiSpacer, EuiCallOut } from '@elastic/eui';
-import { BASE_PATH } from '../../../common/constants';
 import { setBreadcrumbs } from '../../services/set_breadcrumbs';
 import { loadIndexTemplate, updateTemplate } from '../../services/api';
+import { decodePath, getTemplateDetailsLink } from '../../services/routing';
 import { SectionLoading, SectionError, TemplateForm } from '../../components';
 import { Template } from '../../../common/types';
 
@@ -23,10 +23,11 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
   },
   history,
 }) => {
+  const decodedTemplateName = decodePath(name);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 
-  const { error, data: template, isLoading } = loadIndexTemplate(name);
+  const { error, data: template, isLoading } = loadIndexTemplate(decodedTemplateName);
 
   useEffect(() => {
     setBreadcrumbs('templateEdit');
@@ -45,7 +46,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
       return;
     }
 
-    history.push(`${BASE_PATH}templates/${encodeURIComponent(name)}`);
+    history.push(getTemplateDetailsLink(name));
   };
 
   const clearSaveError = () => {
@@ -123,7 +124,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
             <FormattedMessage
               id="xpack.idxMgmt.editTemplate.editTemplatePageTitle"
               defaultMessage="Edit template '{name}'"
-              values={{ name }}
+              values={{ name: decodedTemplateName }}
             />
           </h1>
         </EuiTitle>

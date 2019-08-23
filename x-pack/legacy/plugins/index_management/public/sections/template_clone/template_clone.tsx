@@ -3,15 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect, useState, Fragment } from 'react';
+import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { TemplateForm, SectionLoading, SectionError } from '../../components';
 import { setBreadcrumbs } from '../../services/set_breadcrumbs';
+import { decodePath, getTemplateDetailsLink } from '../../services/routing';
 import { Template } from '../../../common/types';
 import { saveTemplate, loadIndexTemplate } from '../../services/api';
-import { BASE_PATH } from '../../../common/constants';
 
 interface MatchParams {
   name: string;
@@ -23,16 +23,21 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
   },
   history,
 }) => {
+  const decodedTemplateName = decodePath(name);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 
-  const { error: templateToCloneError, data: templateToClone, isLoading } = loadIndexTemplate(name);
+  const { error: templateToCloneError, data: templateToClone, isLoading } = loadIndexTemplate(
+    decodedTemplateName
+  );
 
   const onSave = async (template: Template) => {
     setIsSaving(true);
     setSaveError(null);
 
     const { error } = await saveTemplate(template, true);
+
+    const { name: newTemplateName } = template;
 
     setIsSaving(false);
 
@@ -41,7 +46,7 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
       return;
     }
 
-    history.push(`${BASE_PATH}templates`);
+    history.push(getTemplateDetailsLink(newTemplateName));
   };
 
   const clearSaveError = () => {
@@ -79,7 +84,7 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
   } else if (templateToClone) {
     const templateData = {
       ...templateToClone,
-      ...{ name: `${name}-copy` },
+      ...{ name: `${decodedTemplateName}-copy` },
     } as Template;
 
     content = (
@@ -101,7 +106,7 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
             <FormattedMessage
               id="xpack.idxMgmt.createTemplate.cloneTemplatePageTitle"
               defaultMessage="Clone template '{name}'"
-              values={{ name }}
+              values={{ name: decodedTemplateName }}
             />
           </h1>
         </EuiTitle>
