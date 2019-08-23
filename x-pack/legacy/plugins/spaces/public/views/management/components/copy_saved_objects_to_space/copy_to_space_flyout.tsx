@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiFlyout,
   EuiIcon,
@@ -29,7 +29,6 @@ import {
 import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
 import { Space } from '../../../../../common/model/space';
 import { SpacesManager } from '../../../../lib';
-import { useKibanaSpaces } from '../../../../lib/hooks';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';
 import { CopyToSpaceFlyoutFooter } from './copy_to_space_flyout_footer';
 import { CopyToSpaceForm } from './copy_to_space_form';
@@ -51,7 +50,29 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
     selectedSpaceIds: [],
   });
 
-  const { isLoading, spaces } = useKibanaSpaces('copySavedObjectsIntoSpace');
+  const [{ isLoading, spaces }, setSpacesState] = useState<{ isLoading: boolean; spaces: Space[] }>(
+    {
+      isLoading: true,
+      spaces: [],
+    }
+  );
+  useEffect(() => {
+    spacesManager
+      .getSpaces('copySavedObjectsIntoSpace')
+      .then(response => {
+        setSpacesState({
+          isLoading: false,
+          spaces: response,
+        });
+      })
+      .catch(e => {
+        toastNotifications.addError(e, {
+          title: i18n.translate('xpack.spaces.management.copyToSpace.spacesLoadErrorTitle', {
+            defaultMessage: 'Error loading available spaces',
+          }),
+        });
+      });
+  }, []);
   const eligibleSpaces = spaces.filter(space => space.id !== props.activeSpace.id);
 
   const [copyInProgress, setCopyInProgress] = useState(false);
