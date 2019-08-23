@@ -21,7 +21,7 @@ import { EuiCodeBlock } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DocViewRenderProps } from 'ui/registry/doc_views';
 
-export function JsonCodeEditor({ hit }: DocViewRenderProps) {
+export function JsonCodeBlock({ hit }: DocViewRenderProps) {
   const label = i18n.translate('kbnDocViews.json.codeEditorAriaLabel', {
     defaultMessage: 'Read only JSON view of an elasticsearch document',
   });
