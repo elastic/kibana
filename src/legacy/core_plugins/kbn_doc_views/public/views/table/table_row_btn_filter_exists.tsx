@@ -18,7 +18,7 @@
  */
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export interface Props {
@@ -49,9 +49,12 @@ export function DocViewTableRowBtnFilterExists({
           )
         }
       >
-        <button className="kbnDocViewer__actionButton" disabled>
-          <i className="fa fa-asterisk text-muted" />
-        </button>
+        <EuiButtonIcon
+          disabled
+          className="kbnDocViewer__actionButton"
+          iconType={'indexOpen'}
+          iconSize={'s'}
+        />
       </EuiToolTip>
     );
   }
@@ -65,16 +68,16 @@ export function DocViewTableRowBtnFilterExists({
         />
       }
     >
-      <button
+      <EuiButtonIcon
         aria-label={i18n.translate('kbnDocViews.table.filterForFieldPresentButtonAriaLabel', {
           defaultMessage: 'Filter for field present',
         })}
+        onClick={onClick}
         className="kbnDocViewer__actionButton"
         data-test-subj="addExistsFilterButton"
-        onClick={onClick}
-      >
-        <i className="fa fa-asterisk" />
-      </button>
+        iconType={'indexOpen'}
+        iconSize={'s'}
+      />
     </EuiToolTip>
   );
 }

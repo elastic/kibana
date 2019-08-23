@@ -18,7 +18,7 @@
  */
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export interface Props {
@@ -30,9 +30,12 @@ export interface Props {
 export function DocViewTableRowBtnToggleColumn({ onClick, active, disabled = false }: Props) {
   if (disabled) {
     return (
-      <button disabled>
-        <i className="fa fa-columns text-muted" />
-      </button>
+      <EuiButtonIcon
+        className="kbnDocViewer__actionButton"
+        disabled
+        iconType={'tableOfContents'}
+        iconSize={'s'}
+      />
     );
   }
   return (
@@ -44,17 +47,17 @@ export function DocViewTableRowBtnToggleColumn({ onClick, active, disabled = fal
         />
       }
     >
-      <button
+      <EuiButtonIcon
         aria-label={i18n.translate('kbnDocViews.table.toggleColumnInTableButtonAriaLabel', {
           defaultMessage: 'Toggle column in table',
         })}
         aria-pressed={active}
+        onClick={onClick}
         className="kbnDocViewer__actionButton"
         data-test-subj="toggleColumnButton"
-        onClick={onClick}
-      >
-        <i className="fa fa-columns" />
-      </button>
+        iconType={'tableOfContents'}
+        iconSize={'s'}
+      />
     </EuiToolTip>
   );
 }

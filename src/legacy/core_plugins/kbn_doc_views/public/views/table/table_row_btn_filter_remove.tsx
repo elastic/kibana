@@ -18,7 +18,7 @@
  */
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export interface Props {
@@ -37,9 +37,12 @@ export function DocViewTableRowBtnFilterRemove({ onClick, disabled = false }: Pr
           />
         }
       >
-        <button className="kbnDocViewer__actionButton" disabled>
-          <i className="fa fa-search-minus text-muted" />
-        </button>
+        <EuiButtonIcon
+          className="kbnDocViewer__actionButton"
+          disabled
+          iconType={'magnifyWithMinus'}
+          iconSize={'s'}
+        />
       </EuiToolTip>
     );
   }
@@ -53,16 +56,16 @@ export function DocViewTableRowBtnFilterRemove({ onClick, disabled = false }: Pr
         />
       }
     >
-      <button
+      <EuiButtonIcon
         aria-label={i18n.translate('kbnDocViews.table.filterOutValueButtonAriaLabel', {
           defaultMessage: 'Filter out value',
         })}
         className="kbnDocViewer__actionButton"
         data-test-subj="removeInclusiveFilterButton"
         onClick={onClick}
-      >
-        <i className="fa fa-search-minus"></i>
-      </button>
+        iconType={'magnifyWithMinus'}
+        iconSize={'s'}
+      />
     </EuiToolTip>
   );
 }
