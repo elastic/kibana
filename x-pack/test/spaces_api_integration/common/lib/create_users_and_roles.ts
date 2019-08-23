@@ -181,6 +181,66 @@ export const createUsersAndRoles = async (es: any, supertest: SuperTest<any>) =>
     })
     .expect(204);
 
+  await supertest
+    .put('/api/security/role/kibana_rbac_default_space_saved_objects_all_user')
+    .send({
+      kibana: [
+        {
+          base: [],
+          feature: {
+            savedObjectsManagement: ['all'],
+          },
+          spaces: ['default'],
+        },
+      ],
+    })
+    .expect(204);
+
+  await supertest
+    .put('/api/security/role/kibana_rbac_default_space_saved_objects_read_user')
+    .send({
+      kibana: [
+        {
+          base: [],
+          feature: {
+            savedObjectsManagement: ['read'],
+          },
+          spaces: ['default'],
+        },
+      ],
+    })
+    .expect(204);
+
+  await supertest
+    .put('/api/security/role/kibana_rbac_space_1_saved_objects_all_user')
+    .send({
+      kibana: [
+        {
+          base: [],
+          feature: {
+            savedObjectsManagement: ['all'],
+          },
+          spaces: ['space_1'],
+        },
+      ],
+    })
+    .expect(204);
+
+  await supertest
+    .put('/api/security/role/kibana_rbac_space_1_saved_objects_read_user')
+    .send({
+      kibana: [
+        {
+          base: [],
+          feature: {
+            savedObjectsManagement: ['read'],
+          },
+          spaces: ['space_1'],
+        },
+      ],
+    })
+    .expect(204);
+
   await es.shield.putUser({
     username: AUTHENTICATION.NOT_A_KIBANA_USER.username,
     body: {
@@ -318,6 +378,46 @@ export const createUsersAndRoles = async (es: any, supertest: SuperTest<any>) =>
       roles: ['kibana_rbac_space_1_2_read_user'],
       full_name: 'a kibana rbac space 1 and 2 read-only user',
       email: 'a_kibana_rbac_space_1_2_readonly_user@elastic.co',
+    },
+  });
+
+  await es.shield.putUser({
+    username: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_SAVED_OBJECTS_ALL_USER.username,
+    body: {
+      password: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_SAVED_OBJECTS_ALL_USER.password,
+      roles: ['kibana_rbac_default_space_saved_objects_all_user'],
+      full_name: 'a kibana rbac default space saved objects management all user',
+      email: 'a_kibana_rbac_default_space_saved_objects_all_user@elastic.co',
+    },
+  });
+
+  await es.shield.putUser({
+    username: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_SAVED_OBJECTS_READ_USER.username,
+    body: {
+      password: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_SAVED_OBJECTS_READ_USER.password,
+      roles: ['kibana_rbac_default_space_saved_objects_read_user'],
+      full_name: 'a kibana rbac default space saved objects management read user',
+      email: 'a_kibana_rbac_default_space_saved_objects_read_user@elastic.co',
+    },
+  });
+
+  await es.shield.putUser({
+    username: AUTHENTICATION.KIBANA_RBAC_SPACE_1_SAVED_OBJECTS_ALL_USER.username,
+    body: {
+      password: AUTHENTICATION.KIBANA_RBAC_SPACE_1_SAVED_OBJECTS_ALL_USER.password,
+      roles: ['kibana_rbac_space_1_saved_objects_all_user'],
+      full_name: 'a kibana rbac space 1 saved objects management all user',
+      email: 'a_kibana_rbac_space_1_saved_objects_all_user@elastic.co',
+    },
+  });
+
+  await es.shield.putUser({
+    username: AUTHENTICATION.KIBANA_RBAC_SPACE_1_SAVED_OBJECTS_READ_USER.username,
+    body: {
+      password: AUTHENTICATION.KIBANA_RBAC_SPACE_1_SAVED_OBJECTS_READ_USER.password,
+      roles: ['kibana_rbac_space_1_saved_objects_read_user'],
+      full_name: 'a kibana rbac space 1 saved objects management read user',
+      email: 'a_kibana_rbac_space_1_saved_objects_read_user@elastic.co',
     },
   });
 
