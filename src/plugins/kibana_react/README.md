@@ -95,6 +95,30 @@ export default withKibana(Demo);
 Wrappers around Core's `uiSettings` service.
 
 
+### `useUiSetting` hook
+
+`useUiSetting` synchronously returns the latest setting from `CoreStart['uiSettings']` service.
+
+```tsx
+import { useUiSetting } from 'kibana-react';
+
+const Demo = () => {
+  const darkMode = useUiSetting<boolean>('theme:darkMode');
+  return (
+    <div>
+      {darkMode ? 'dark' : 'light'}
+    </div>
+  );
+};
+```
+
+#### Reference
+
+```tsx
+useUiSetting<T>(key: string, defaultValue: T): T;
+```
+
+
 ### `useUiSetting$` hook
 
 `useUiSetting$` synchronously returns the latest setting from `CoreStart['uiSettings']` service and
@@ -111,6 +135,12 @@ const Demo = () => {
     </div>
   );
 };
+```
+
+#### Reference
+
+```tsx
+useUiSetting$<T>(key: string, defaultValue: T): [T, (newValue: T) => void];
 ```
 
 

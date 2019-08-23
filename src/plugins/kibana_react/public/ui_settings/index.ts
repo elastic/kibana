@@ -17,6 +17,4 @@
  * under the License.
  */
 
-export * from './context';
-export * from './overlays';
-export * from './ui_settings';
+export * from './use_ui_setting';
