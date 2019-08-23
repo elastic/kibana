@@ -14,7 +14,7 @@ export type OnResize = ({ delta, id }: { delta: number; id: string }) => void;
 export const resizeCursorStyle = 'col-resize';
 export const globalResizeCursorClassName = 'global-resize-cursor';
 
-/** This polyfill is for Safari only. `movementX` is more accurate and "feels" better, so only use this function on Safari */
+/** This polyfill is for Safari and IE-11 only. `movementX` is more accurate and "feels" better, so only use this function on Safari and IE-11 */
 export const calculateDeltaX = ({ prevX, screenX }: { prevX: number; screenX: number }) =>
   prevX !== 0 ? screenX - prevX : 0;
 
