@@ -19,7 +19,6 @@ import { Readable } from 'stream';
 import { Request } from 'hapi';
 import { ResponseObject } from 'hapi';
 import { ResponseToolkit } from 'hapi';
-import { SavedObjectsMapping } from 'src/core/server/legacy/plugins/collect_legacy_ui_exports';
 import { Server } from 'hapi';
 import { Stream } from 'stream';
 import { Type } from '@kbn/config-schema';
@@ -948,7 +947,7 @@ export interface SavedObjectsImportUnsupportedTypeError {
     type: 'unsupported_type';
 }
 
-// @internal (undocumented)
+// @internal @deprecated (undocumented)
 export interface SavedObjectsLegacyService<Request = any> {
     // Warning: (ae-forgotten-export) The symbol "ScopedSavedObjectsClientProvider" needs to be exported by the entry point index.d.ts
     // 
@@ -971,6 +970,26 @@ export interface SavedObjectsLegacyService<Request = any> {
     schema: SavedObjectsSchema;
     // (undocumented)
     types: string[];
+}
+
+// @internal (undocumented)
+export interface SavedObjectsLegacyUiExports {
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectsMapping" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    savedObjectMappings: SavedObjectsMapping[];
+    // Warning: (ae-forgotten-export) The symbol "MigrationDefinition" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    savedObjectMigrations: MigrationDefinition;
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectsSchemaDefinition" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    savedObjectSchemas: SavedObjectsSchemaDefinition;
+    // Warning: (ae-forgotten-export) The symbol "PropertyValidators" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    savedObjectValidations: PropertyValidators;
 }
 
 // @public (undocumented)
@@ -1025,7 +1044,6 @@ export interface SavedObjectsResolveImportErrorsOptions {
 // 
 // @public (undocumented)
 export class SavedObjectsSchema {
-    // Warning: (ae-forgotten-export) The symbol "SavedObjectsSchemaDefinition" needs to be exported by the entry point index.d.ts
     constructor(schemaDefinition?: SavedObjectsSchemaDefinition);
     // (undocumented)
     getConvertToAliasScript(type: string): string | undefined;

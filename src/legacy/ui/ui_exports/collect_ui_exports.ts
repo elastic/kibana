@@ -17,14 +17,14 @@
  * under the License.
  */
 
+import { SavedObjectsLegacyUiExports } from 'src/core/server';
+// @ts-ignore
 import { UI_EXPORT_DEFAULTS } from './ui_export_defaults';
+// @ts-ignore
 import * as uiExportTypeReducers from './ui_export_types';
+// @ts-ignore
 import { reduceExportSpecs } from '../../plugin_discovery';
 
-export function collectUiExports(pluginSpecs) {
-  return reduceExportSpecs(
-    pluginSpecs,
-    uiExportTypeReducers,
-    UI_EXPORT_DEFAULTS
-  );
+export function collectUiExports(pluginSpecs: unknown[]): SavedObjectsLegacyUiExports {
+  return reduceExportSpecs(pluginSpecs, uiExportTypeReducers, UI_EXPORT_DEFAULTS);
 }

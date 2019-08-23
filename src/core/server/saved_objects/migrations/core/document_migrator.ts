@@ -67,14 +67,16 @@ import Semver from 'semver';
 import { Logger } from 'src/core/server/logging';
 import { RawSavedObjectDoc } from '../../serialization';
 import { SavedObjectsMigrationVersion } from '../../types';
+import { MigrationLogger, SavedObjectsMigrationLogger } from './migration_logger';
 
-// TODO why would log be undefined?
-export type TransformFn = (doc: RawSavedObjectDoc, log?: Logger) => RawSavedObjectDoc;
+export type TransformFn = (doc: RawSavedObjectDoc) => RawSavedObjectDoc;
+
+type MigrationFn = (doc: RawSavedObjectDoc, log: SavedObjectsMigrationLogger) => RawSavedObjectDoc;
 
 type ValidateDoc = (doc: RawSavedObjectDoc) => void;
 
 export interface MigrationDefinition {
-  [type: string]: { [version: string]: TransformFn };
+  [type: string]: { [version: string]: MigrationFn };
 }
 
 interface Opts {
@@ -294,10 +296,10 @@ function markAsUpToDate(doc: RawSavedObjectDoc, migrations: ActiveMigrations) {
  * If a specific transform function fails, this tacks on a bit of information
  * about the document and transform that caused the failure.
  */
-function wrapWithTry(version: string, prop: string, transform: TransformFn, log: Logger) {
+function wrapWithTry(version: string, prop: string, transform: MigrationFn, log: Logger) {
   return function tryTransformDoc(doc: RawSavedObjectDoc) {
     try {
-      const result = transform(doc, log);
+      const result = transform(doc, new MigrationLogger(log));
 
       // A basic sanity check to help migration authors detect basic errors
       // (e.g. forgetting to return the transformed doc)

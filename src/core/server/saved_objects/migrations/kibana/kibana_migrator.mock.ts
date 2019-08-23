@@ -19,7 +19,7 @@
 
 import { KibanaMigrator, mergeProperties } from './kibana_migrator';
 import { buildActiveMappings } from '../core';
-import { SavedObjectsMapping } from 'src/core/server/legacy/plugins/collect_legacy_ui_exports';
+import { SavedObjectsMapping } from '../../mappings';
 
 const createMigrator = (
   {

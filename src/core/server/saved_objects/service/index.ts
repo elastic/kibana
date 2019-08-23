@@ -27,6 +27,7 @@ import { SavedObjectsResolveImportErrorsOptions } from '../import/types';
 
 /**
  * @internal
+ * @deprecated
  */
 export interface SavedObjectsLegacyService<Request = any> {
   // ATTENTION: these types are incomplete

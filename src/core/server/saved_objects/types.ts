@@ -18,6 +18,10 @@
  */
 
 import { SavedObjectsClient } from './service/saved_objects_client';
+import { SavedObjectsMapping } from './mappings';
+import { MigrationDefinition } from './migrations/core/document_migrator';
+import { SavedObjectsSchemaDefinition } from './schema';
+import { PropertyValidators } from './validation';
 
 /**
  * Information about the migrations that have been applied to this SavedObject.
@@ -201,3 +205,11 @@ export interface SavedObjectsBaseOptions {
  * @public
  */
 export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
+
+/** @internal */
+export interface SavedObjectsLegacyUiExports {
+  savedObjectMappings: SavedObjectsMapping[];
+  savedObjectMigrations: MigrationDefinition;
+  savedObjectSchemas: SavedObjectsSchemaDefinition;
+  savedObjectValidations: PropertyValidators;
+}

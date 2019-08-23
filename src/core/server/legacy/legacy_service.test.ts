@@ -338,7 +338,7 @@ describe('once LegacyService is set up in `devClusterMaster` mode', () => {
     await devClusterLegacyService.setup(setupDeps);
     await devClusterLegacyService.start(startDeps);
 
-    const [[cliArgs, config, basePathProxy]] = MockClusterManager.create.mock.calls;
+    const [[cliArgs, , basePathProxy]] = MockClusterManager.create.mock.calls;
     expect(cliArgs.basePath).toBe(false);
     expect(basePathProxy).not.toBeDefined();
   });
@@ -361,7 +361,7 @@ describe('once LegacyService is set up in `devClusterMaster` mode', () => {
 
     expect(MockClusterManager.create).toBeCalledTimes(1);
 
-    const [[cliArgs, config, basePathProxy]] = MockClusterManager.create.mock.calls;
+    const [[cliArgs, , basePathProxy]] = MockClusterManager.create.mock.calls;
     expect(cliArgs.basePath).toEqual(true);
     expect(basePathProxy).toBeInstanceOf(BasePathProxyServer);
   });

@@ -24,9 +24,8 @@
 
 import { once } from 'lodash';
 import { Logger } from 'src/core/server/logging';
-import { SavedObjectsMapping } from 'src/core/server/legacy/plugins/collect_legacy_ui_exports';
 import { KibanaConfig } from 'src/core/server/kibana_config';
-import { MappingProperties } from '../../mappings';
+import { MappingProperties, SavedObjectsMapping } from '../../mappings';
 import { SavedObjectsSchema, SavedObjectsSchemaDefinition } from '../../schema';
 import { RawSavedObjectDoc, SavedObjectsSerializer } from '../../serialization';
 import { docValidator, PropertyValidators } from '../../validation';

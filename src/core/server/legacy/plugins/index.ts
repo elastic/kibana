@@ -17,4 +17,3 @@
  * under the License.
  */
 export { findLegacyPluginSpecs } from './find_legacy_plugin_specs';
-export { SavedObjectsLegacyUiExports, collectLegacyUiExports } from './collect_legacy_ui_exports';

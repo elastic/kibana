@@ -521,7 +521,8 @@ describe('DocumentMigrator', () => {
       migrations: {
         dog: {
           '1.2.3': (doc, log) => {
-            log!.info(logTestMsg);
+            log.info(logTestMsg);
+            log.warning(logTestMsg);
             return doc;
           },
         },
@@ -536,6 +537,7 @@ describe('DocumentMigrator', () => {
     };
     migrator.migrate(doc);
     expect(mockLogger.info.mock.calls[0][0]).toEqual(logTestMsg);
+    expect(mockLogger.warn.mock.calls[1][0]).toEqual(logTestMsg);
   });
 
   test('extracts the latest migration version info', () => {

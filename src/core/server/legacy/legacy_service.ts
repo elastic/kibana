@@ -20,18 +20,15 @@
 import { combineLatest, ConnectableObservable, EMPTY, Observable, Subscription } from 'rxjs';
 import { first, map, mergeMap, publishReplay, tap } from 'rxjs/operators';
 import { CoreService } from '../../types';
-import { InternalCoreSetup, InternalCoreStart } from '../../server';
+import { InternalCoreSetup, InternalCoreStart, SavedObjectsLegacyUiExports } from '../../server';
 import { Config } from '../config';
 import { CoreContext } from '../core_context';
 import { DevConfig, DevConfigType } from '../dev';
 import { BasePathProxyServer, HttpConfig, HttpConfigType } from '../http';
 import { Logger } from '../logging';
 import { PluginsServiceSetup, PluginsServiceStart } from '../plugins';
-import {
-  findLegacyPluginSpecs,
-  collectLegacyUiExports,
-  SavedObjectsLegacyUiExports,
-} from './plugins';
+import { findLegacyPluginSpecs } from './plugins';
+import { collectUiExports as collectLegacyUiExports } from '../../../legacy/ui/ui_exports/collect_ui_exports';
 
 interface LegacyKbnServer {
   applyLoggingConfiguration: (settings: Readonly<Record<string, any>>) => void;

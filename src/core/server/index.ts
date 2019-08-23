@@ -165,6 +165,7 @@ export {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,
+  SavedObjectsLegacyUiExports,
 } from './types';
 
 export { LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy';
