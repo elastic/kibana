@@ -23,9 +23,12 @@ import { PageRouter } from '../routes';
 import { createStore } from '../store';
 import { ApolloClientContext } from '../utils/apollo_context';
 import { HistoryContext } from '../utils/history_context';
-import { createContext, useUiSetting$ } from '../../../../../../src/plugins/kibana_react/public';
+import {
+  useUiSetting$,
+  KibanaContextProvider,
+} from '../../../../../../src/plugins/kibana_react/public';
 
-const { Provider: KibanaProvider } = createContext(npStart.core);
+const { uiSettings } = npStart.core;
 
 export async function startApp(libs: InfraFrontendLibs) {
   const history = createHashHistory();
@@ -63,8 +66,8 @@ export async function startApp(libs: InfraFrontendLibs) {
   };
 
   libs.framework.render(
-    <KibanaProvider>
+    <KibanaContextProvider services={{ uiSettings }}>
       <InfraPluginRoot />
-    </KibanaProvider>
+    </KibanaContextProvider>
   );
 }
