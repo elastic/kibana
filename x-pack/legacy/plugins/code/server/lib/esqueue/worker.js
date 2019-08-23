@@ -461,16 +461,21 @@ export class Worker extends events.EventEmitter {
       version: true,
       body: query
     })
-      .then((results) => {
+      .then(async (results) => {
         const jobs = results.hits.hits;
         if (jobs.length > 0) {
           this.debug(`${jobs.length} outstanding jobs returned`);
         }
-        return jobs.filter(async job => {
+        const filtered = [];
+        for (const job of jobs) {
           const payload = job._source.payload.payload;
           const repoUrl = payload.uri || payload.url;
-          return await this.codeServices.isResourceLocal(repoUrl);
-        });
+          const isLocal = await this.codeServices.isResourceLocal(repoUrl);
+          if (isLocal) {
+            filtered.push(job);
+          }
+        }
+        return filtered;
       })
       .catch((err) => {
       // ignore missing indices errors
