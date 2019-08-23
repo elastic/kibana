@@ -53,7 +53,7 @@ export default (kibana) => {
         } = kbnServer;
 
         const testGlobs = [
-          'src/legacy/ui/public/**/*.js',
+          // 'src/legacy/ui/public/**/*.js',
           '!src/legacy/ui/public/flot-charts/**/*',
         ];
         const testingPluginIds = config.get('tests_bundle.pluginId');
