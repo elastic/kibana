@@ -10,7 +10,8 @@
       "PUT"
     ],
     "patterns": [
-      "_monitoring/bulk"
+      "_monitoring/bulk",
+      "_monitoring/{type}/bulk"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/es-monitoring.html"
   }
