@@ -16,15 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
+import { EuiCodeBlock } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { DocViewRenderProps } from 'ui/registry/doc_views';
 
-import expect from '@kbn/expect';
-import { geohashColumns } from '../decode_geo_hash';
-
-describe('decode_geo_hash', function () {
-  it('geohashColumns', function () {
-    expect(geohashColumns(1)).to.equal(8);
-    expect(geohashColumns(2)).to.equal(8 * 4);
-    expect(geohashColumns(3)).to.equal(8 * 4 * 8);
-    expect(geohashColumns(4)).to.equal(8 * 4 * 8 * 4);
+export function JsonCodeBlock({ hit }: DocViewRenderProps) {
+  const label = i18n.translate('kbnDocViews.json.codeEditorAriaLabel', {
+    defaultMessage: 'Read only JSON view of an elasticsearch document',
   });
-});
+  return (
+    <EuiCodeBlock aria-label={label} language="json" isCopyable paddingSize="s">
+      {JSON.stringify(hit, null, 2)}
+    </EuiCodeBlock>
+  );
+}
