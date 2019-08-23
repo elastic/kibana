@@ -17,10 +17,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  summarizeCopyResult,
-  SummarizedCopyToSpaceResult,
-} from '../../../../lib/copy_saved_objects_to_space';
+import { summarizeCopyResult } from '../../../../lib/copy_saved_objects_to_space';
 import { Space } from '../../../../../common/model/space';
 import { CopyOptions, ImportRetry } from '../../../../lib/copy_saved_objects_to_space/types';
 import { SpaceResult } from './cts_space_result';
@@ -97,7 +94,7 @@ export const ProcessingCopyToSpace = (props: Props) => {
           props.savedObject,
           spaceCopyResult,
           props.copyOptions.includeRelated
-        ) as SummarizedCopyToSpaceResult;
+        );
 
         return (
           <Fragment key={id}>

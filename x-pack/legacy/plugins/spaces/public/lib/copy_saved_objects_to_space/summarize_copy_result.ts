@@ -47,7 +47,7 @@ export function summarizeCopyResult(
   savedObject: SavedObjectsManagementRecord,
   copyResult: ProcessedImportResponse | undefined,
   includeRelated: boolean
-): SummarizedCopyToSpaceResult | null {
+): SummarizedCopyToSpaceResult {
   const successful = Boolean(copyResult && copyResult.failedImports.length === 0);
 
   const conflicts = copyResult
