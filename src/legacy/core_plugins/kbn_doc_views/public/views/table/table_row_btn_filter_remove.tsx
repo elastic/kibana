@@ -38,6 +38,9 @@ export function DocViewTableRowBtnFilterRemove({ onClick, disabled = false }: Pr
         }
       >
         <EuiButtonIcon
+          aria-label={i18n.translate('kbnDocViews.table.filterOutValueButtonAriaLabel', {
+            defaultMessage: 'Filter out value',
+          })}
           className="kbnDocViewer__actionButton"
           disabled
           iconType={'magnifyWithMinus'}

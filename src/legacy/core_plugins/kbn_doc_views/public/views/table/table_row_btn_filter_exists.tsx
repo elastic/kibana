@@ -50,6 +50,9 @@ export function DocViewTableRowBtnFilterExists({
         }
       >
         <EuiButtonIcon
+          aria-label={i18n.translate('kbnDocViews.table.filterForFieldPresentButtonAriaLabel', {
+            defaultMessage: 'Filter for field present',
+          })}
           disabled
           className="kbnDocViewer__actionButton"
           iconType={'indexOpen'}

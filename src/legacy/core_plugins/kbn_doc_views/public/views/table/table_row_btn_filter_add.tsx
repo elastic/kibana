@@ -38,6 +38,9 @@ export function DocViewTableRowBtnFilterAdd({ onClick, disabled = false }: Props
         }
       >
         <EuiButtonIcon
+          aria-label={i18n.translate('kbnDocViews.table.filterForValueButtonAriaLabel', {
+            defaultMessage: 'Filter for value',
+          })}
           className="kbnDocViewer__actionButton"
           disabled
           iconType={'magnifyWithPlus'}

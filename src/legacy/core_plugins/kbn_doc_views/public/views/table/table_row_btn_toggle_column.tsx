@@ -31,6 +31,9 @@ export function DocViewTableRowBtnToggleColumn({ onClick, active, disabled = fal
   if (disabled) {
     return (
       <EuiButtonIcon
+        aria-label={i18n.translate('kbnDocViews.table.toggleColumnInTableButtonAriaLabel', {
+          defaultMessage: 'Toggle column in table',
+        })}
         className="kbnDocViewer__actionButton"
         disabled
         iconType={'tableOfContents'}
