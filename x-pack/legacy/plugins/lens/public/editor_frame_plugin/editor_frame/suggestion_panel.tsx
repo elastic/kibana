@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiIcon, EuiTitle, EuiPanel, EuiIconTip, EuiToolTip } from '@elastic/eui';
 import { toExpression } from '@kbn/interpreter/common';
@@ -55,6 +55,15 @@ const SuggestionPreview = ({
     setExpressionError(false);
   }, [previewExpression]);
 
+  const onRenderFailure = useCallback(
+    (e: unknown) => {
+      // eslint-disable-next-line no-console
+      console.error(`Failed to render preview: `, e);
+      setExpressionError(true);
+    },
+    [setExpressionError]
+  );
+
   return (
     <EuiToolTip content={suggestion.title}>
       <EuiPanel
@@ -80,14 +89,10 @@ const SuggestionPreview = ({
             />
           </div>
         ) : previewExpression ? (
-          <ExpressionRendererComponent
-            className="lnsSuggestionChartWrapper"
+          <MemoizedPreviewExpression
+            ExpressionRendererComponent={ExpressionRendererComponent}
             expression={previewExpression}
-            onRenderFailure={(e: unknown) => {
-              // eslint-disable-next-line no-console
-              console.error(`Failed to render preview: `, e);
-              setExpressionError(true);
-            }}
+            onRenderFailure={onRenderFailure}
           />
         ) : (
           <div className="lnsSidebar__suggestionIcon">
@@ -99,7 +104,27 @@ const SuggestionPreview = ({
   );
 };
 
-export const SuggestionPanel = debouncedComponent(InnerSuggestionPanel, 2000);
+function PreviewExpression({
+  expression,
+  onRenderFailure,
+  ExpressionRendererComponent,
+}: {
+  expression: string;
+  onRenderFailure: (e: unknown) => void;
+  ExpressionRendererComponent: ExpressionRenderer;
+}) {
+  return (
+    <ExpressionRendererComponent
+      className="lnsSuggestionChartWrapper"
+      expression={expression}
+      onRenderFailure={onRenderFailure}
+    />
+  );
+}
+
+const MemoizedPreviewExpression = debouncedComponent(memo(PreviewExpression), 2000);
+
+export const SuggestionPanel = InnerSuggestionPanel;
 
 function InnerSuggestionPanel({
   activeDatasourceId,

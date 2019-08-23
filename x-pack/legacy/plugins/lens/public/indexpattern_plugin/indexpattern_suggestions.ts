@@ -6,7 +6,6 @@
 
 import _, { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { generateId } from '../id_generator';
 import { DatasourceSuggestion, TableChangeType } from '../types';
 import {
   columnToOperation,
@@ -17,6 +16,11 @@ import {
 } from './indexpattern';
 import { buildColumn, getOperationTypesForField, operationDefinitionMap } from './operations';
 import { hasField } from './utils';
+
+let idState = 0;
+function generateId() {
+  return '' + idState++;
+}
 
 function buildSuggestion({
   state,
@@ -68,6 +72,7 @@ export function getDatasourceSuggestionsForField(
   indexPatternId: string,
   field: IndexPatternField
 ): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
+  idState = 0;
   const layers = Object.keys(state.layers);
   const layerIds = layers.filter(id => state.layers[id].indexPatternId === indexPatternId);
 
@@ -318,6 +323,7 @@ function createNewLayerWithMetricAggregation(
 export function getDatasourceSuggestionsFromCurrentState(
   state: IndexPatternPrivateState
 ): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
+  idState = 0;
   return _.flatten(
     Object.entries(state.layers || {})
       .filter(([_id, layer]) => layer.columnOrder.length)
