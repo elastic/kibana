@@ -46,11 +46,6 @@ describe('config validation', () => {
     method: 'post',
   };
 
-  const defaultCompositeUrlValues: Record<string, any> = {
-    scheme: 'http',
-    path: null,
-  };
-
   test('config validation passes when only required fields are provided', () => {
     const config: Record<string, any> = {
       url: 'http://mylisteningserver:9200/endpoint',
