@@ -19,11 +19,10 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
 import { CourierRequestHandlerProvider } from 'ui/vis/request_handlers/courier';
 // @ts-ignore
 import { AggConfigs } from 'ui/vis/agg_configs.js';
-
+import { createFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import chrome from 'ui/chrome';
 
 // need to get rid of angular from these
@@ -35,7 +34,7 @@ import { IndexPatternsProvider } from '../../../data/public';
 const courierRequestHandlerProvider = CourierRequestHandlerProvider;
 const courierRequestHandler = courierRequestHandlerProvider().handler;
 
-import { ExpressionFunction } from '../../types';
+import { ExpressionFunction, KibanaDatatableColumn } from '../../types';
 import { KibanaContext, KibanaDatatable } from '../../common';
 
 const name = 'esaggs';
@@ -46,6 +45,7 @@ interface Arguments {
   index: string | null;
   metricsAtAllLevels: boolean;
   partialRows: boolean;
+  includeFormatHints: boolean;
   aggConfigs: string;
 }
 
@@ -76,6 +76,11 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
       default: false,
       help: '',
     },
+    includeFormatHints: {
+      types: ['boolean'],
+      default: false,
+      help: '',
+    },
     aggConfigs: {
       types: ['string'],
       default: '""',
@@ -98,12 +103,12 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 0);
 
-    const response: Pick<KibanaDatatable, 'columns' | 'rows'> = await courierRequestHandler({
+    const response = await courierRequestHandler({
       searchSource,
       aggs,
-      timeRange: get(context, 'timeRange', null),
-      query: get(context, 'query', null),
-      filters: get(context, 'filters', null),
+      timeRange: get(context, 'timeRange', undefined),
+      query: get(context, 'query', undefined),
+      filters: get(context, 'filters', undefined),
       forceFetch: true,
       metricsAtAllLevels: args.metricsAtAllLevels,
       partialRows: args.partialRows,
@@ -112,13 +117,21 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
       abortSignal,
     });
 
-    return {
+    const table: KibanaDatatable = {
       type: 'kibana_datatable',
       rows: response.rows,
-      columns: response.columns.map(column => ({
-        id: column.id,
-        name: column.name,
-      })),
+      columns: response.columns.map(column => {
+        const cleanedColumn: KibanaDatatableColumn = {
+          id: column.id,
+          name: column.name,
+        };
+        if (args.includeFormatHints) {
+          cleanedColumn.formatHint = createFormat(column.aggConfig);
+        }
+        return cleanedColumn;
+      }),
     };
+
+    return table;
   },
 });

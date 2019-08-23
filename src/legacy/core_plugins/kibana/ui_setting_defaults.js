@@ -706,7 +706,7 @@ export function getUiSettingDefaults() {
       name: i18n.translate('kbn.advancedSettings.format.bytesFormatTitle', {
         defaultMessage: 'Bytes format',
       }),
-      value: '0,0.[000]b',
+      value: '0,0.[0]b',
       type: 'string',
       description: i18n.translate('kbn.advancedSettings.format.bytesFormatText', {
         defaultMessage: 'Default {numeralFormatLink} for the "bytes" format',

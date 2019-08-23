@@ -156,6 +156,11 @@ export const RENOVATE_PACKAGE_GROUPS: PackageGroup[] = [
     packageNames: ['jsts'],
     allowedVersions: '^1.6.2',
   },
+
+  {
+    name: 'storybook',
+    packageWords: ['storybook'],
+  },
 ];
 
 /**

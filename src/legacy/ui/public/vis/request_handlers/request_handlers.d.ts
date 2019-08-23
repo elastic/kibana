@@ -43,7 +43,7 @@ export interface RequestHandlerParams {
   abortSignal?: AbortSignal;
 }
 
-export type RequestHandler = <T>(params: RequestHandlerParams) => T;
+export type RequestHandler<T = unknown> = (params: RequestHandlerParams) => T;
 
 export interface RequestHandlerDescription {
   name: string;

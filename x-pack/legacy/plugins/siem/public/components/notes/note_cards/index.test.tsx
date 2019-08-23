@@ -45,7 +45,6 @@ describe('NoteCards', () => {
         showAddNote={true}
         toggleShowAddNote={jest.fn()}
         updateNote={jest.fn()}
-        width="100%"
       />
     );
 
@@ -62,7 +61,6 @@ describe('NoteCards', () => {
         showAddNote={true}
         toggleShowAddNote={jest.fn()}
         updateNote={jest.fn()}
-        width="100%"
       />
     );
 
@@ -79,7 +77,6 @@ describe('NoteCards', () => {
         showAddNote={true}
         toggleShowAddNote={jest.fn()}
         updateNote={jest.fn()}
-        width="100%"
       />
     );
 
@@ -103,7 +100,6 @@ describe('NoteCards', () => {
         showAddNote={true}
         toggleShowAddNote={jest.fn()}
         updateNote={jest.fn()}
-        width="100%"
       />
     );
 
@@ -120,7 +116,6 @@ describe('NoteCards', () => {
         showAddNote={false}
         toggleShowAddNote={jest.fn()}
         updateNote={jest.fn()}
-        width="100%"
       />
     );
 

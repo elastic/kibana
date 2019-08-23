@@ -260,7 +260,7 @@ describe('http service', () => {
       );
 
       const router = createRouter('/new-platform');
-      router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ header: 'ok' }));
+      router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
 
       await root.start();
 
@@ -283,7 +283,7 @@ describe('http service', () => {
       const { createRouter } = http;
 
       const router = createRouter('/new-platform');
-      router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ header: 'ok' }));
+      router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
 
       await root.start();
 
