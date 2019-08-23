@@ -17,29 +17,4 @@
  * under the License.
  */
 
-import React, { PureComponent } from 'react';
-import chrome from 'ui/chrome';
-import { ExitFullScreenButton as ExitFullScreenButtonUi } from '../../../../plugins/kibana_react/public';
-
-/**
- * DO NOT USE THIS COMPONENT, IT IS DEPRECATED.
- * Use the one in `src/plugins/kibana_react`.
- */
-
-interface Props {
-  onExitFullScreenMode: () => void;
-}
-
-export class ExitFullScreenButton extends PureComponent<Props> {
-  public componentWillMount() {
-    chrome.setVisible(false);
-  }
-
-  public componentWillUnmount() {
-    chrome.setVisible(true);
-  }
-
-  public render() {
-    return <ExitFullScreenButtonUi onExitFullScreenMode={this.props.onExitFullScreenMode} />;
-  }
-}
+export { ExitFullScreenButton } from './exit_full_screen_button';
