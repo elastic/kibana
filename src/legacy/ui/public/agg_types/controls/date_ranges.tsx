@@ -111,7 +111,7 @@ function DateRangesParamEditor({
     );
 
   return (
-    <EuiFormRow compressed>
+    <EuiFormRow compressed fullWidth>
       <>
         <EuiText size="xs">
           <EuiLink href={getDocLink('date.dateMath')} target="_blank" rel="noopener">
