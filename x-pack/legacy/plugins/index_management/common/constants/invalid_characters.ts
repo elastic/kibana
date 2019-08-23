@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { TemplatesList } from './templates_list';
+export const INVALID_INDEX_PATTERN_CHARS = ['\\', '/', '?', '"', '<', '>', '|'];
