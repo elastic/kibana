@@ -8,6 +8,7 @@ import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { SpaceAvatar } from '../../components';
 import { spacesManagerMock } from '../../lib/mocks';
+import { SpacesManager } from '../../lib';
 import { NavControlPopover } from './nav_control_popover';
 
 describe('NavControlPopover', () => {
@@ -16,7 +17,7 @@ describe('NavControlPopover', () => {
 
     const wrapper = shallow(
       <NavControlPopover
-        spacesManager={spacesManager}
+        spacesManager={(spacesManager as unknown) as SpacesManager}
         anchorPosition={'downRight'}
         capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
       />
@@ -46,7 +47,7 @@ describe('NavControlPopover', () => {
 
     const wrapper = mount<any, any>(
       <NavControlPopover
-        spacesManager={spacesManager}
+        spacesManager={(spacesManager as unknown) as SpacesManager}
         anchorPosition={'rightCenter'}
         capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
       />

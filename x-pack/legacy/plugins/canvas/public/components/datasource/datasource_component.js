@@ -15,6 +15,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
+import { getDefaultIndex } from '../../lib/es_service';
 import { DatasourceSelector } from './datasource_selector';
 import { DatasourcePreview } from './datasource_preview';
 
@@ -40,6 +41,12 @@ export class DatasourceComponent extends PureComponent {
     isInvalid: PropTypes.bool,
     setInvalid: PropTypes.func,
   };
+
+  state = { defaultIndex: '' };
+
+  componentDidMount() {
+    getDefaultIndex().then(defaultIndex => this.setState({ defaultIndex }));
+  }
 
   componentDidUpdate(prevProps) {
     const { args, resetArgs, datasource, selectDatasource } = this.props;
@@ -100,6 +107,8 @@ export class DatasourceComponent extends PureComponent {
       setInvalid,
     } = this.props;
 
+    const { defaultIndex } = this.state;
+
     if (selecting) {
       return <DatasourceSelector datasources={datasources} onSelect={this.setSelectedDatasource} />;
     }
@@ -130,6 +139,7 @@ export class DatasourceComponent extends PureComponent {
             datasourceDef,
             isInvalid,
             setInvalid,
+            defaultIndex,
           })}
           <EuiSpacer size="m" />
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">

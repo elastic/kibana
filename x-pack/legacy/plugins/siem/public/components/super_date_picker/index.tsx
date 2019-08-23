@@ -12,7 +12,7 @@ import {
   OnRefreshProps,
   OnTimeChangeProps,
 } from '@elastic/eui';
-import { get, getOr, take } from 'lodash/fp';
+import { getOr, take } from 'lodash/fp';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
@@ -20,6 +20,18 @@ import { ActionCreator } from 'typescript-fsa';
 import { inputsModel, State } from '../../store';
 import { inputsActions, timelineActions } from '../../store/actions';
 import { InputsModelId } from '../../store/inputs/constants';
+import {
+  policySelector,
+  durationSelector,
+  kindSelector,
+  startSelector,
+  endSelector,
+  fromStrSelector,
+  toStrSelector,
+  isLoadingSelector,
+  refetchSelector,
+} from './selectors';
+import { InputsRange } from '../../store/inputs/model';
 
 const MAX_RECENTLY_USED_RANGES = 9;
 
@@ -239,23 +251,34 @@ export const SuperDatePickerComponent = class extends Component<
   };
 };
 
-const mapStateToProps = (state: State, { id }: OwnProps) => {
-  const myState = getOr({}, `inputs.${id}`, state);
-  return {
-    policy: get('policy.kind', myState),
-    duration: get('policy.duration', myState),
-    kind: get('timerange.kind', myState),
-    start: get('timerange.from', myState),
-    end: get('timerange.to', myState),
-    fromStr: get('timerange.fromStr', myState),
-    toStr: get('timerange.toStr', myState),
-    isLoading: myState.query.filter((i: inputsModel.GlobalQuery) => i.loading === true).length > 0,
-    refetch: myState.query.map((i: inputsModel.GlobalQuery) => i.refetch),
+export const makeMapStateToProps = () => {
+  const getPolicySelector = policySelector();
+  const getDurationSelector = durationSelector();
+  const getKindSelector = kindSelector();
+  const getStartSelector = startSelector();
+  const getEndSelector = endSelector();
+  const getFromStrSelector = fromStrSelector();
+  const getToStrSelector = toStrSelector();
+  const getIsLoadingSelector = isLoadingSelector();
+  const getRefetchQuerySelector = refetchSelector();
+  return (state: State, { id }: OwnProps) => {
+    const inputsRange: InputsRange = getOr({}, `inputs.${id}`, state);
+    return {
+      policy: getPolicySelector(inputsRange),
+      duration: getDurationSelector(inputsRange),
+      kind: getKindSelector(inputsRange),
+      start: getStartSelector(inputsRange),
+      end: getEndSelector(inputsRange),
+      fromStr: getFromStrSelector(inputsRange),
+      toStr: getToStrSelector(inputsRange),
+      isLoading: getIsLoadingSelector(inputsRange),
+      refetch: getRefetchQuerySelector(inputsRange),
+    };
   };
 };
 
 export const SuperDatePicker = connect(
-  mapStateToProps,
+  makeMapStateToProps,
   {
     setAbsoluteSuperDatePicker: inputsActions.setAbsoluteRangeDatePicker,
     setRelativeSuperDatePicker: inputsActions.setRelativeRangeDatePicker,

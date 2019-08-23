@@ -21,6 +21,7 @@ export { Authenticator, ProviderLoginAttempt } from './authenticator';
 export { AuthenticationResult } from './authentication_result';
 export { DeauthenticationResult } from './deauthentication_result';
 export { OIDCAuthenticationFlow } from './providers';
+export { CreateAPIKeyResult } from './api_keys';
 
 interface SetupAuthenticationParams {
   core: CoreSetup;
@@ -103,7 +104,7 @@ export async function setupAuthentication({
       // authentication (username and password) or arbitrary external page managed by 3rd party
       // Identity Provider for SSO authentication mechanisms. Authentication provider is the one who
       // decides what location user should be redirected to.
-      return response.redirected(undefined, {
+      return response.redirected({
         headers: {
           location: authenticationResult.redirectURL!,
         },
@@ -116,19 +117,20 @@ export async function setupAuthentication({
       // proxy Elasticsearch "native" errors
       const statusCode = getErrorStatusCode(error);
       if (typeof statusCode === 'number') {
-        return response.customError(error, {
+        return response.customError({
+          body: error,
           statusCode,
           headers: authenticationResult.authResponseHeaders,
         });
       }
 
-      return response.unauthorized(undefined, {
+      return response.unauthorized({
         headers: authenticationResult.authResponseHeaders,
       });
     }
 
     authLogger.info('Could not handle authentication attempt');
-    return response.unauthorized(undefined, {
+    return response.unauthorized({
       headers: authenticationResult.authResponseHeaders,
     });
   });

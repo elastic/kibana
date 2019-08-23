@@ -6,8 +6,13 @@
 
 import { JobType } from './log_analysis';
 
+export const bucketSpan = 900000;
+
 export const getJobIdPrefix = (spaceId: string, sourceId: string) =>
   `kibana-logs-ui-${spaceId}-${sourceId}-`;
 
 export const getJobId = (spaceId: string, sourceId: string, jobType: JobType) =>
   `${getJobIdPrefix(spaceId, sourceId)}${jobType}`;
+
+export const getDatafeedId = (spaceId: string, sourceId: string, jobType: JobType) =>
+  `datafeed-${getJobId(spaceId, sourceId, jobType)}`;

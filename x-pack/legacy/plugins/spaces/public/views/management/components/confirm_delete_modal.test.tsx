@@ -8,6 +8,7 @@ import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
 import { spacesManagerMock } from '../../../lib/mocks';
+import { SpacesManager } from '../../../lib';
 
 describe('ConfirmDeleteModal', () => {
   it('renders as expected', () => {
@@ -26,7 +27,7 @@ describe('ConfirmDeleteModal', () => {
       shallowWithIntl(
         <ConfirmDeleteModal.WrappedComponent
           space={space}
-          spacesManager={spacesManager}
+          spacesManager={(spacesManager as unknown) as SpacesManager}
           onCancel={onCancel}
           onConfirm={onConfirm}
           intl={null as any}
@@ -50,7 +51,7 @@ describe('ConfirmDeleteModal', () => {
     const wrapper = mountWithIntl(
       <ConfirmDeleteModal.WrappedComponent
         space={space}
-        spacesManager={spacesManager}
+        spacesManager={(spacesManager as unknown) as SpacesManager}
         onCancel={onCancel}
         onConfirm={onConfirm}
         intl={null as any}

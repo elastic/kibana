@@ -8,6 +8,7 @@ import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { DeleteSpacesButton } from './delete_spaces_button';
 import { spacesManagerMock } from '../../../lib/mocks';
+import { SpacesManager } from '../../../lib';
 
 const space = {
   id: 'my-space',
@@ -22,7 +23,7 @@ describe('DeleteSpacesButton', () => {
     const wrapper = shallowWithIntl(
       <DeleteSpacesButton.WrappedComponent
         space={space}
-        spacesManager={spacesManager}
+        spacesManager={(spacesManager as unknown) as SpacesManager}
         onDelete={jest.fn()}
         intl={null as any}
       />
