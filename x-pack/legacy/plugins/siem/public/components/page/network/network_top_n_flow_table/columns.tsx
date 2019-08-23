@@ -9,7 +9,6 @@ import numeral from '@elastic/numeral';
 import React from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { CountryFlag } from '../../../source_destination/country_flag';
 import {
   AutonomousSystemItem,
@@ -56,36 +55,35 @@ export const getNetworkTopNFlowColumns = (
 
       if (ip != null) {
         return (
-          <DraggableWrapper
-            key={id}
-            dataProvider={{
-              and: [],
-              enabled: true,
-              id,
-              name: ip,
-              excluded: false,
-              kqlQuery: '',
-              queryMatch: { field: ipAttr, value: ip, operator: IS_OPERATOR },
-            }}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                <EuiFlexGroup alignItems="center" gutterSize="none">
-                  {geo ? (
-                    <EuiFlexItem grow={false}>
-                      <CountryFlag countryCode={geo} displayCountryNameOnHover={true} />
-                    </EuiFlexItem>
-                  ) : null}
-                  <EuiFlexItem grow={false}>
-                    <IPDetailsLink ip={ip} />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              )
-            }
-          />
+          <>
+            <DraggableWrapper
+              key={id}
+              dataProvider={{
+                and: [],
+                enabled: true,
+                id,
+                name: ip,
+                excluded: false,
+                kqlQuery: '',
+                queryMatch: { field: ipAttr, value: ip, operator: IS_OPERATOR },
+              }}
+              render={(dataProvider, _, snapshot) =>
+                snapshot.isDragging ? (
+                  <DragEffects>
+                    <Provider dataProvider={dataProvider} />
+                  </DragEffects>
+                ) : (
+                  <IPDetailsLink ip={ip} />
+                )
+              }
+            />
+            {geo && (
+              // TODO: Remove div and replace with draggable
+              <div>
+                <CountryFlag countryCode={geo} /> {geo}
+              </div>
+            )}
+          </>
         );
       } else {
         return getEmptyTagValue();
@@ -120,32 +118,6 @@ export const getNetworkTopNFlowColumns = (
       const as: AutonomousSystemItem | null = get(asAttr, node);
       if (as != null) {
         const id = escapeDataProviderId(`${tableId}-table-${flowTarget}-ip-${ipAddress}`);
-        if (as.name && as.number) {
-          return (
-            <EuiFlexGroup direction="column" gutterSize="none">
-              <EuiFlexItem>
-                {getRowItemDraggables({
-                  rowItems: [as.name],
-                  attrName: `${flowTarget}.as.organization.name`,
-                  idPrefix: `${id}-name`,
-                })}
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <div style={{ display: 'flex' }}>
-                  <div>{`(AS`}</div>
-                  <div>
-                    {getRowItemDraggables({
-                      rowItems: [`${as.number}`],
-                      attrName: `${flowTarget}.as.number`,
-                      idPrefix: `${id}-number`,
-                    })}
-                  </div>
-                  <div>{`)`}</div>
-                </div>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
-        }
         return (
           <>
             {as.name &&
@@ -155,15 +127,14 @@ export const getNetworkTopNFlowColumns = (
                 idPrefix: `${id}-name`,
               })}
             {as.number && (
-              <div style={{ display: 'flex' }}>
-                <div>{`AS`}</div>
-                <div>
-                  {getRowItemDraggables({
-                    rowItems: [`${as.number}`],
-                    attrName: `${flowTarget}.as.number`,
-                    idPrefix: `${id}-number`,
-                  })}
-                </div>
+              // TODO: Possible to get rid of div and make all one draggable, including "AS" string?
+              <div>
+                {`AS`}
+                {getRowItemDraggables({
+                  rowItems: [`${as.number}`],
+                  attrName: `${flowTarget}.as.number`,
+                  idPrefix: `${id}-number`,
+                })}
               </div>
             )}
           </>
@@ -174,6 +145,7 @@ export const getNetworkTopNFlowColumns = (
     },
   },
   {
+    align: 'right',
     field: 'node.network.bytes_in',
     name: i18n.BYTES_IN,
     sortable: true,
@@ -186,6 +158,7 @@ export const getNetworkTopNFlowColumns = (
     },
   },
   {
+    align: 'right',
     field: 'node.network.bytes_out',
     name: i18n.BYTES_OUT,
     sortable: true,
@@ -198,6 +171,7 @@ export const getNetworkTopNFlowColumns = (
     },
   },
   {
+    align: 'right',
     field: `node.${flowTarget}.flows`,
     name: i18n.FLOWS,
     sortable: true,
@@ -210,6 +184,7 @@ export const getNetworkTopNFlowColumns = (
     },
   },
   {
+    align: 'right',
     field: `node.${flowTarget}.${getOppositeField(flowTarget)}_ips`,
     name: flowTarget === FlowTargetNew.source ? i18n.DESTINATION_IPS : i18n.SOURCE_IPS,
     sortable: true,
