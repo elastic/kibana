@@ -52,8 +52,8 @@ interface Job {
 
 interface Props {
   badLicenseMessage: string;
-  showLinks: boolean;
-  enableLinks: boolean;
+  showLinks?: boolean;
+  enableLinks?: boolean;
   redirect: (url: string) => void;
   intl: InjectedIntl;
 }
@@ -145,7 +145,8 @@ class ReportListingUi extends Component<Props, State> {
 
   public componentDidMount() {
     this.mounted = true;
-    const { jobsRefresh } = chrome.getInjected('reportingPollConfig');
+    const result = chrome.getInjected('reportingPollConfig');
+    const { jobsRefresh } = result;
     this.poller = new Poller({
       functionToPoll: () => {
         return this.fetchJobs();
@@ -315,6 +316,7 @@ class ReportListingUi extends Component<Props, State> {
         }
         pagination={pagination}
         onChange={this.onTableChange}
+        data-test-subj="reportJobListing"
       />
     );
   }
