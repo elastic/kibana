@@ -18,7 +18,6 @@ import { I18nContext } from 'ui/i18n';
 
 import { GisMap } from '../connected_components/gis_map';
 import { createMapStore } from '../reducers/store';
-import { getInitialLayers } from '../angular/get_initial_layers';
 import {
   setGotoWithCenter,
   replaceLayerList,
@@ -26,7 +25,6 @@ import {
   setRefreshConfig,
   disableScrollZoom,
 } from '../actions/map_actions';
-import { DEFAULT_IS_LAYER_TOC_OPEN } from '../reducers/ui';
 import {
   setReadOnly,
   setIsLayerTOCOpen,
@@ -47,11 +45,15 @@ export class MapEmbeddable extends Embeddable {
         editUrl: config.editUrl,
         indexPatterns: config.indexPatterns,
         editable: config.editable,
-        defaultTitle: config.savedMap.title
+        defaultTitle: config.title
       },
       parent);
 
-    this._savedMap = config.savedMap;
+    this._layerList = config.layerList;
+    // for unknown reasons, super constructor resets this.input to parent.getInputForChild<TEmbeddableInput>(this.id)
+    // This means that this.input !== initialInput
+    // Work around so initialInput is available during render
+    this._initialInput = initialInput;
     this._store = createMapStore();
 
     this._subscription = this.getInput$().subscribe((input) => this.onContainerStateChanged(input));
@@ -101,36 +103,23 @@ export class MapEmbeddable extends Embeddable {
     this._store.dispatch(setReadOnly(true));
     this._store.dispatch(disableScrollZoom());
 
-    if (_.has(this.input, 'isLayerTOCOpen')) {
-      this._store.dispatch(setIsLayerTOCOpen(this.input.isLayerTOCOpen));
-    } else if (this._savedMap.uiStateJSON) {
-      const uiState = JSON.parse(this._savedMap.uiStateJSON);
-      this._store.dispatch(setIsLayerTOCOpen(_.get(uiState, 'isLayerTOCOpen', DEFAULT_IS_LAYER_TOC_OPEN)));
+    if (_.has(this._initialInput, 'isLayerTOCOpen')) {
+      this._store.dispatch(setIsLayerTOCOpen(this._initialInput.isLayerTOCOpen));
     }
 
-    if (_.has(this.input, 'openTOCDetails')) {
-      this._store.dispatch(setOpenTOCDetails(this.input.openTOCDetails));
-    } else if (this._savedMap.uiStateJSON) {
-      const uiState = JSON.parse(this._savedMap.uiStateJSON);
-      this._store.dispatch(setOpenTOCDetails(_.get(uiState, 'openTOCDetails', [])));
+    if (_.has(this._initialInput, 'openTOCDetails')) {
+      this._store.dispatch(setOpenTOCDetails(this._initialInput.openTOCDetails));
     }
 
-    if (this.input.mapCenter) {
+    if (this._initialInput.mapCenter) {
       this._store.dispatch(setGotoWithCenter({
-        lat: this.input.mapCenter.lat,
-        lon: this.input.mapCenter.lon,
-        zoom: this.input.mapCenter.zoom,
-      }));
-    } else if (this._savedMap.mapStateJSON) {
-      const mapState = JSON.parse(this._savedMap.mapStateJSON);
-      this._store.dispatch(setGotoWithCenter({
-        lat: mapState.center.lat,
-        lon: mapState.center.lon,
-        zoom: mapState.zoom,
+        lat: this._initialInput.mapCenter.lat,
+        lon: this._initialInput.mapCenter.lon,
+        zoom: this._initialInput.mapCenter.zoom,
       }));
     }
-    const layerList = getInitialLayers(this._savedMap.layerListJSON);
-    this._store.dispatch(replaceLayerList(layerList));
+
+    this._store.dispatch(replaceLayerList(this._layerList));
     this._dispatchSetQuery(this.input);
     this._dispatchSetRefreshConfig(this.input);
 
@@ -162,7 +151,7 @@ export class MapEmbeddable extends Embeddable {
     if (this._unsubscribeFromStore) {
       this._unsubscribeFromStore();
     }
-    this._savedMap.destroy();
+
     if (this._domNode) {
       unmountComponentAtNode(this._domNode);
     }
