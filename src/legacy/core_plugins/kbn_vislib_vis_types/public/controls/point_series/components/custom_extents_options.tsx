@@ -79,7 +79,7 @@ function CustomExtentsOptions({
 
   return (
     <>
-      <EuiTitle size="xs">
+      <EuiTitle size="xxs">
         <h3>
           <FormattedMessage
             id="kbnVislibVisTypes.controls.pointSeries.valueAxes.customExtentsTitle"

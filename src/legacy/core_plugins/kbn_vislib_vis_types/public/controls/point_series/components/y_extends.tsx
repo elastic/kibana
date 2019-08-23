@@ -18,6 +18,7 @@
  */
 
 import React, { useEffect } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { Scale } from '../../../types';
@@ -71,27 +72,35 @@ function YExtends({ scale, setScale, setValidity }: YExtendsProps) {
   }, [isValid, setValidity]);
 
   return (
-    <>
-      <NumberInputOption
-        label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.maxLabel', {
-          defaultMessage: 'Max',
-        })}
-        step={0.1}
-        paramName="max"
-        value={max}
-        setValue={setScale}
-      />
-      <NumberInputOption
-        errors={errors}
-        label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.minLabel', {
-          defaultMessage: 'Min',
-        })}
-        step={0.1}
-        paramName="min"
-        value={min}
-        setValue={setScale}
-      />
-    </>
+    <EuiFormRow error={errors} isInvalid={!!errors.length} fullWidth compressed>
+      <>
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem>
+            <NumberInputOption
+              isInvalid={!!errors.length}
+              label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.minLabel', {
+                defaultMessage: 'Min',
+              })}
+              step={0.1}
+              paramName="min"
+              value={min}
+              setValue={setScale}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <NumberInputOption
+              label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.maxLabel', {
+                defaultMessage: 'Max',
+              })}
+              step={0.1}
+              paramName="max"
+              value={max}
+              setValue={setScale}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
+    </EuiFormRow>
   );
 }
 

@@ -18,7 +18,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiTitle } from '@elastic/eui';
+import { EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -53,7 +53,7 @@ function LabelOptions({ stateParams, setValue, axis, axisName, index }: LabelOpt
 
   return (
     <>
-      <EuiTitle size="xs">
+      <EuiTitle size="xxs">
         <h3>
           <FormattedMessage
             id="kbnVislibVisTypes.controls.pointSeries.categoryAxis.labelsTitle"
@@ -76,6 +76,7 @@ function LabelOptions({ stateParams, setValue, axis, axisName, index }: LabelOpt
 
       <SwitchOption
         dataTestSubj={`${axisName === 'valueAxes' ? 'y' : 'x'}AxisFilterLabelsCheckbox-${axis.id}`}
+        disabled={!axis.labels.show}
         label={i18n.translate(
           'kbnVislibVisTypes.controls.pointSeries.categoryAxis.filterLabelsLabel',
           {
@@ -87,17 +88,30 @@ function LabelOptions({ stateParams, setValue, axis, axisName, index }: LabelOpt
         setValue={setAxisLabel}
       />
 
-      <SelectOption
-        label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.categoryAxis.rotateLabel', {
-          defaultMessage: 'Rotate',
-        })}
-        options={rotateOptions}
-        paramName="rotate"
-        value={axis.labels.rotate}
-        setValue={(paramName, value) => setAxisLabel(paramName, Number(value))}
-      />
-
-      <TruncateLabelsOption value={axis.labels.truncate} setValue={setAxisLabel} />
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <SelectOption
+            disabled={!axis.labels.show}
+            label={i18n.translate(
+              'kbnVislibVisTypes.controls.pointSeries.categoryAxis.rotateLabel',
+              {
+                defaultMessage: 'Rotate',
+              }
+            )}
+            options={rotateOptions}
+            paramName="rotate"
+            value={axis.labels.rotate}
+            setValue={(paramName, value) => setAxisLabel(paramName, Number(value))}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <TruncateLabelsOption
+            disabled={!axis.labels.show}
+            value={axis.labels.truncate}
+            setValue={setAxisLabel}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 }
