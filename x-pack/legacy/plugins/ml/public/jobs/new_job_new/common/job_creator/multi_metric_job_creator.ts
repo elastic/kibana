@@ -140,7 +140,6 @@ export class MultiMetricJobCreator extends JobCreator {
 
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
     this._overrideConfigs(job, datafeed);
-    this.jobId = '';
     this.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
     const detectors = getRichDetectors(job, datafeed);
 
