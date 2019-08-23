@@ -4,19 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
   const log = getService('log');
   const inspector = getService('inspector');
-  const retry = getService('retry');
-  const testSubjects = getService('testSubjects');
 
   describe('hybrid', () => {
     before(async () => {
-      log.debug('loading hybrid test data');
       await esArchiver.load('hybrid/kibana');
       await esArchiver.load('hybrid/logstash');
       await esArchiver.load('hybrid/rollup');
@@ -26,14 +23,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       await esArchiver.unload('hybrid/kibana');
       await esArchiver.unload('hybrid/logstash');
       await esArchiver.unload('hybrid/rollup');
-      log.debug('unloading hybrid test data');
     });
 
     it('hybrid visualization', async () => {
-      const fromTime = '2019-08-19 01:55:07.240';
-      const toTime = '2019-08-22 23:09:36.205';
-
-      const inspectorExpectedData = [
+      const expectedData = [
         ['2019-08-19 00:00', 'gif', '2'],
         ['2019-08-19 00:00', 'jpg', '2'],
         ['2019-08-19 00:00', 'css', '1'],
@@ -84,15 +77,16 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         ['2019-08-22 00:00', 'php', '11'],
         ['2019-08-22 16:00', 'jpg', '3'],
       ];
-      log.debug('navigateToApp visualize');
+      const fromTime = '2019-08-19 01:55:07.240';
+      const toTime = '2019-08-22 23:09:36.205';
+
       await PageObjects.common.navigateToApp('visualize');
       await PageObjects.visualize.clickVisualizationByName('hybrid_histogram_line_chart');
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
       await inspector.open();
       await inspector.setTablePageSize('50');
-      const inspectorData = await inspector.getTableData();
-      log.debug(inspectorData);
-      expect(inspectorData).to.eql(inspectorExpectedData);
+      await inspector.expectTableData(expectedData);
     });
   });
 }
