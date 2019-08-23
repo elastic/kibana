@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { identity } from 'lodash';
 import { AggConfig, Vis } from 'ui/vis';
-import { SerializedFieldFormat } from 'src/plugins/data/common';
+import { SerializedFieldFormat } from 'src/plugins/data/common/expressions/types/common';
 // @ts-ignore
 import { FieldFormat } from '../../../../field_formats/field_format';
 // @ts-ignore
@@ -90,7 +90,7 @@ export const createFormat = (agg: AggConfig): SerializedFieldFormat => {
 
 export type FormatFactory = (mapping?: SerializedFieldFormat) => FieldFormat;
 
-export const getFormat: FormatFactory = (mapping: SerializedFieldFormat = {}): FieldFormat => {
+export const getFormat: FormatFactory = (mapping = {}) => {
   if (!mapping) {
     return getDefaultFieldFormat();
   }

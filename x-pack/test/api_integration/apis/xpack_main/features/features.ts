@@ -134,7 +134,8 @@ export default function({ getService }: FtrProviderContext) {
             'maps',
             'uptime',
             'siem',
-            'lens',
+            'alerting',
+            'actions',
           ].sort()
         );
       });

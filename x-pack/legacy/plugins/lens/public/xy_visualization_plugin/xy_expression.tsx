@@ -173,7 +173,7 @@ export function XYChart({
 
       <Axis
         id={getAxisId('x')}
-        position={Position.Bottom}
+        position={isHorizontal ? Position.Left : Position.Bottom}
         title={args.xTitle}
         showGridLines={false}
         hide={layers[0].hide}
@@ -182,7 +182,7 @@ export function XYChart({
 
       <Axis
         id={getAxisId('y')}
-        position={Position.Left}
+        position={isHorizontal ? Position.Bottom : Position.Left}
         title={args.yTitle}
         showGridLines={false}
         hide={layers[0].hide}
