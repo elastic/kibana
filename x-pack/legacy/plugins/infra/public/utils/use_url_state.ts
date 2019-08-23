@@ -8,7 +8,7 @@ import { Location } from 'history';
 import { useMemo, useCallback } from 'react';
 import { decode, encode, RisonValue } from 'rison-node';
 
-import { QueryString } from 'ui/utils/query_string';
+import { QueryString } from '../../../../../../src/legacy/ui/public/utils/query_string';
 import { useHistory } from './history_context';
 
 export const useUrlState = <State>({
