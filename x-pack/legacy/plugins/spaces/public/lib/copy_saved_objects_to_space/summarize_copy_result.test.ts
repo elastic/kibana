@@ -7,7 +7,7 @@
 import { summarizeCopyResult } from './summarize_copy_result';
 import { ProcessedImportResponse } from 'ui/management/saved_objects_management';
 
-const createSavedObjectRecord = () => ({
+const createSavedObjectsManagementRecord = () => ({
   type: 'dashboard',
   id: 'foo',
   meta: { icon: 'foo-icon', title: 'my-dashboard' },
@@ -57,11 +57,15 @@ const createCopyResult = (
 
 describe('summarizeCopyResult', () => {
   it('indicates the result is processing when not provided', () => {
-    const savedObjectRecord = createSavedObjectRecord();
+    const SavedObjectsManagementRecord = createSavedObjectsManagementRecord();
     const copyResult = undefined;
     const includeRelated = true;
 
-    const summarizedResult = summarizeCopyResult(savedObjectRecord, copyResult, includeRelated);
+    const summarizedResult = summarizeCopyResult(
+      SavedObjectsManagementRecord,
+      copyResult,
+      includeRelated
+    );
 
     expect(summarizedResult).toMatchInlineSnapshot(`
             Object {
@@ -97,11 +101,15 @@ describe('summarizeCopyResult', () => {
   });
 
   it('processes failedImports to extract conflicts, including transient conflicts', () => {
-    const savedObjectRecord = createSavedObjectRecord();
+    const SavedObjectsManagementRecord = createSavedObjectsManagementRecord();
     const copyResult = createCopyResult({ withConflicts: true });
     const includeRelated = true;
 
-    const summarizedResult = summarizeCopyResult(savedObjectRecord, copyResult, includeRelated);
+    const summarizedResult = summarizeCopyResult(
+      SavedObjectsManagementRecord,
+      copyResult,
+      includeRelated
+    );
     expect(summarizedResult).toMatchInlineSnapshot(`
       Object {
         "hasConflicts": true,
@@ -167,11 +175,15 @@ describe('summarizeCopyResult', () => {
   });
 
   it('processes failedImports to extract unresolvable errors', () => {
-    const savedObjectRecord = createSavedObjectRecord();
+    const SavedObjectsManagementRecord = createSavedObjectsManagementRecord();
     const copyResult = createCopyResult({ withUnresolvableError: true });
     const includeRelated = true;
 
-    const summarizedResult = summarizeCopyResult(savedObjectRecord, copyResult, includeRelated);
+    const summarizedResult = summarizeCopyResult(
+      SavedObjectsManagementRecord,
+      copyResult,
+      includeRelated
+    );
     expect(summarizedResult).toMatchInlineSnapshot(`
             Object {
               "hasConflicts": false,
@@ -233,11 +245,15 @@ describe('summarizeCopyResult', () => {
   });
 
   it('processes a result without errors', () => {
-    const savedObjectRecord = createSavedObjectRecord();
+    const SavedObjectsManagementRecord = createSavedObjectsManagementRecord();
     const copyResult = createCopyResult();
     const includeRelated = true;
 
-    const summarizedResult = summarizeCopyResult(savedObjectRecord, copyResult, includeRelated);
+    const summarizedResult = summarizeCopyResult(
+      SavedObjectsManagementRecord,
+      copyResult,
+      includeRelated
+    );
     expect(summarizedResult).toMatchInlineSnapshot(`
             Object {
               "hasConflicts": false,
@@ -275,11 +291,15 @@ describe('summarizeCopyResult', () => {
   });
 
   it('does not include references unless requested', () => {
-    const savedObjectRecord = createSavedObjectRecord();
+    const SavedObjectsManagementRecord = createSavedObjectsManagementRecord();
     const copyResult = createCopyResult();
     const includeRelated = false;
 
-    const summarizedResult = summarizeCopyResult(savedObjectRecord, copyResult, includeRelated);
+    const summarizedResult = summarizeCopyResult(
+      SavedObjectsManagementRecord,
+      copyResult,
+      includeRelated
+    );
     expect(summarizedResult).toMatchInlineSnapshot(`
             Object {
               "hasConflicts": false,

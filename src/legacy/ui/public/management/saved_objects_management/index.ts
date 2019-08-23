@@ -20,8 +20,8 @@
 export { SavedObjectsManagementActionRegistry } from './saved_objects_management_action_registry';
 export {
   SavedObjectsManagementAction,
-  SavedObjectRecord,
-  SavedObjectReference,
+  SavedObjectsManagementRecord,
+  SavedObjectsManagementRecordReference,
 } from './saved_objects_management_action';
 export {
   processImportResponse,

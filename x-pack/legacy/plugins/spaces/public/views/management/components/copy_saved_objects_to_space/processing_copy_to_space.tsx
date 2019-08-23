@@ -5,7 +5,10 @@
  */
 
 import React, { Fragment } from 'react';
-import { ProcessedImportResponse, SavedObjectRecord } from 'ui/management/saved_objects_management';
+import {
+  ProcessedImportResponse,
+  SavedObjectsManagementRecord,
+} from 'ui/management/saved_objects_management';
 import {
   EuiSpacer,
   EuiText,
@@ -23,7 +26,7 @@ import { CopyOptions, CTSImportRetry } from './types';
 import { SpaceResult } from './cts_space_result';
 
 interface Props {
-  savedObject: SavedObjectRecord;
+  savedObject: SavedObjectsManagementRecord;
   copyInProgress: boolean;
   conflictResolutionInProgress: boolean;
   copyResult: Record<string, ProcessedImportResponse>;

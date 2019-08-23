@@ -6,7 +6,7 @@
 import React from 'react';
 import {
   SavedObjectsManagementAction,
-  SavedObjectRecord,
+  SavedObjectsManagementRecord,
 } from 'ui/management/saved_objects_management';
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
@@ -26,7 +26,7 @@ export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagem
     }),
     icon: 'spacesApp',
     type: 'icon',
-    onClick: (object: SavedObjectRecord) => {
+    onClick: (object: SavedObjectsManagementRecord) => {
       this.start(object);
     },
   };

@@ -19,19 +19,19 @@
 
 import { ReactNode } from '@elastic/eui/node_modules/@types/react';
 
-export interface SavedObjectReference {
+export interface SavedObjectsManagementRecordReference {
   type: string;
   id: string;
   name: string;
 }
-export interface SavedObjectRecord {
+export interface SavedObjectsManagementRecord {
   type: string;
   id: string;
   meta: {
     icon: string;
     title: string;
   };
-  references: SavedObjectReference[];
+  references: SavedObjectsManagementRecordReference[];
 }
 
 export abstract class SavedObjectsManagementAction {
@@ -42,21 +42,21 @@ export abstract class SavedObjectsManagementAction {
     description: string;
     icon: string;
     type: string;
-    available?: (item: SavedObjectRecord) => boolean;
-    enabled?: (item: SavedObjectRecord) => boolean;
-    onClick?: (item: SavedObjectRecord) => void;
-    render?: (item: SavedObjectRecord) => any;
+    available?: (item: SavedObjectsManagementRecord) => boolean;
+    enabled?: (item: SavedObjectsManagementRecord) => boolean;
+    onClick?: (item: SavedObjectsManagementRecord) => void;
+    render?: (item: SavedObjectsManagementRecord) => any;
   };
 
   private callbacks: Function[] = [];
 
-  protected record: SavedObjectRecord | null = null;
+  protected record: SavedObjectsManagementRecord | null = null;
 
   public registerOnFinishCallback(callback: Function) {
     this.callbacks.push(callback);
   }
 
-  protected start(record: SavedObjectRecord) {
+  protected start(record: SavedObjectsManagementRecord) {
     this.record = record;
   }
 

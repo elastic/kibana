@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ProcessedImportResponse, SavedObjectRecord } from 'ui/management/saved_objects_management';
+import {
+  ProcessedImportResponse,
+  SavedObjectsManagementRecord,
+} from 'ui/management/saved_objects_management';
 
 export interface SummarizedSavedObjectResult {
   type: string;
@@ -41,7 +44,7 @@ export type SummarizedCopyToSpaceResult =
   | ProcessingResponse;
 
 export function summarizeCopyResult(
-  savedObject: SavedObjectRecord,
+  savedObject: SavedObjectsManagementRecord,
   copyResult: ProcessedImportResponse | undefined,
   includeRelated: boolean
 ): SummarizedCopyToSpaceResult | null {

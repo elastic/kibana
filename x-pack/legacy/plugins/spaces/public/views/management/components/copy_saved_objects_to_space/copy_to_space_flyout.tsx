@@ -22,7 +22,7 @@ import { mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  SavedObjectRecord,
+  SavedObjectsManagementRecord,
   processImportResponse,
   ProcessedImportResponse,
 } from 'ui/management/saved_objects_management';
@@ -37,7 +37,7 @@ import { CopyOptions, CTSImportRetry } from './types';
 
 interface Props {
   onClose: () => void;
-  savedObject: SavedObjectRecord;
+  savedObject: SavedObjectsManagementRecord;
   spacesManager: SpacesManager;
   activeSpace: Space;
   toastNotifications: ToastNotifications;

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
-import { SavedObjectRecord } from 'ui/management/saved_objects_management';
+import { SavedObjectsManagementRecord } from 'ui/management/saved_objects_management';
 import { SummarizedCopyToSpaceResult } from '../../../../lib/copy_saved_objects_to_space';
 import { SpaceAvatar } from '../../../../components';
 import { Space } from '../../../../../common/model/space';
@@ -15,7 +15,7 @@ import { SpaceCopyResultDetails } from './cts_space_result_details';
 import { CTSImportRetry } from './types';
 
 interface Props {
-  savedObject: SavedObjectRecord;
+  savedObject: SavedObjectsManagementRecord;
   space: Space;
   summarizedCopyResult: SummarizedCopyToSpaceResult;
   retries: CTSImportRetry[];

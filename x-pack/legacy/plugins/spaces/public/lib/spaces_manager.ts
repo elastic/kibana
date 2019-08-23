@@ -7,7 +7,7 @@ import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 import { EventEmitter } from 'events';
 import { kfetch } from 'ui/kfetch';
-import { SavedObjectRecord } from 'ui/management/saved_objects_management';
+import { SavedObjectsManagementRecord } from 'ui/management/saved_objects_management';
 import { Space } from '../../common/model/space';
 import { GetSpacePurpose } from '../../common/model/types';
 
@@ -54,7 +54,7 @@ export class SpacesManager extends EventEmitter {
   }
 
   public async copySavedObjects(
-    objects: Array<Pick<SavedObjectRecord, 'type' | 'id'>>,
+    objects: Array<Pick<SavedObjectsManagementRecord, 'type' | 'id'>>,
     spaces: string[],
     includeReferences: boolean,
     overwrite: boolean
@@ -72,7 +72,7 @@ export class SpacesManager extends EventEmitter {
   }
 
   public async resolveCopySavedObjectsErrors(
-    objects: Array<Pick<SavedObjectRecord, 'type' | 'id'>>,
+    objects: Array<Pick<SavedObjectsManagementRecord, 'type' | 'id'>>,
     retries: unknown,
     includeReferences: boolean
   ) {

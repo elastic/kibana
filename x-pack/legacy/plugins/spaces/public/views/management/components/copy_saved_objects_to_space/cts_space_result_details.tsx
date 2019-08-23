@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { SavedObjectRecord } from 'ui/management/saved_objects_management';
+import { SavedObjectsManagementRecord } from 'ui/management/saved_objects_management';
 import { SummarizedCopyToSpaceResult } from 'plugins/spaces/lib/copy_saved_objects_to_space';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -14,7 +14,7 @@ import { CopyStatusIndicator } from './copy_status_indicator';
 import { CTSImportRetry } from './types';
 
 interface Props {
-  savedObject: SavedObjectRecord;
+  savedObject: SavedObjectsManagementRecord;
   summarizedCopyResult: SummarizedCopyToSpaceResult;
   space: Space;
   retries: CTSImportRetry[];
