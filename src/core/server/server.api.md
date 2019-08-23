@@ -132,9 +132,7 @@ export interface CoreStart {
 
 // @public
 export interface CustomHttpResponseOptions<T extends HttpResponsePayload | ResponseError> {
-    // (undocumented)
     body?: T;
-    // Warning: (ae-forgotten-export) The symbol "ResponseHeaders" needs to be exported by the entry point index.d.ts
     headers?: ResponseHeaders;
     // (undocumented)
     statusCode: number;
@@ -605,6 +603,13 @@ export type ResponseError = string | Error | {
 
 // @public
 export type ResponseErrorAttributes = Record<string, any>;
+
+// @public
+export type ResponseHeaders = {
+    [header in KnownHeaders]?: string | string[];
+} & {
+    [header: string]: string | string[];
+};
 
 // @public
 export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B extends ObjectType> {

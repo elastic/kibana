@@ -4,6 +4,8 @@
 
 ## CustomHttpResponseOptions.body property
 
+HTTP message to send to the client
+
 <b>Signature:</b>
 
 ```typescript

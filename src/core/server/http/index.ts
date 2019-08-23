@@ -38,6 +38,7 @@ export {
   RequestHandler,
   ResponseError,
   ResponseErrorAttributes,
+  ResponseHeaders,
   kibanaResponseFactory,
   KibanaResponseFactory,
   RouteConfig,

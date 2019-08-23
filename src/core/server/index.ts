@@ -103,6 +103,7 @@ export {
   RequestHandlerReturn,
   ResponseError,
   ResponseErrorAttributes,
+  ResponseHeaders,
   kibanaResponseFactory,
   KibanaResponseFactory,
   RouteConfig,

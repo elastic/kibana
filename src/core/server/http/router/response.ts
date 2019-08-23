@@ -70,6 +70,7 @@ export type HttpResponsePayload = undefined | string | Record<string, any> | Buf
  * @public
  */
 export interface CustomHttpResponseOptions<T extends HttpResponsePayload | ResponseError> {
+  /** HTTP message to send to the client */
   body?: T;
   /** HTTP Headers with additional information about response */
   headers?: ResponseHeaders;

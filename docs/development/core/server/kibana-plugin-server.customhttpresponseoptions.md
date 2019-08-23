@@ -16,7 +16,7 @@ export interface CustomHttpResponseOptions<T extends HttpResponsePayload | Respo
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [body](./kibana-plugin-server.customhttpresponseoptions.body.md) | <code>T</code> |  |
+|  [body](./kibana-plugin-server.customhttpresponseoptions.body.md) | <code>T</code> | HTTP message to send to the client |
 |  [headers](./kibana-plugin-server.customhttpresponseoptions.headers.md) | <code>ResponseHeaders</code> | HTTP Headers with additional information about response |
 |  [statusCode](./kibana-plugin-server.customhttpresponseoptions.statuscode.md) | <code>number</code> |  |
 
