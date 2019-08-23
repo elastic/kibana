@@ -48,7 +48,7 @@ class ExitFullScreenButtonUi extends PureComponent<Props> {
       <div className="hideInPercy">
         <EuiScreenReaderOnly>
           <p aria-live="polite">
-            {i18n.translate('common.ui.exitFullScreenButton.fullScreenModeDescription', {
+            {i18n.translate('kibana-react.exitFullScreenButton.fullScreenModeDescription', {
               defaultMessage: 'In full screen mode, press ESC to exit.',
             })}
           </p>
@@ -57,7 +57,7 @@ class ExitFullScreenButtonUi extends PureComponent<Props> {
           <KuiButton
             type="hollow"
             aria-label={i18n.translate(
-              'common.ui.exitFullScreenButton.exitFullScreenModeButtonAreaLabel',
+              'kibana-react.exitFullScreenButton.exitFullScreenModeButtonAreaLabel',
               {
                 defaultMessage: 'Exit full screen mode',
               }
@@ -70,7 +70,7 @@ class ExitFullScreenButtonUi extends PureComponent<Props> {
               data-test-subj="exitFullScreenModeLogo"
             />
             <span className="dshExitFullScreenButton__text" data-test-subj="exitFullScreenModeText">
-              {i18n.translate('common.ui.exitFullScreenButton.exitFullScreenModeButtonLabel', {
+              {i18n.translate('kibana-react.exitFullScreenButton.exitFullScreenModeButtonLabel', {
                 defaultMessage: 'Exit full screen',
               })}
               <span className="kuiIcon fa fa-angle-left" />
