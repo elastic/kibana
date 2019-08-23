@@ -4820,11 +4820,6 @@ ansi-colors@^3.0.0:
   resolved "https://registry.yarnpkg.com/ansi-colors/-/ansi-colors-3.2.1.tgz#9638047e4213f3428a11944a7d4b31cba0a3ff95"
   integrity sha512-Xt+zb6nqgvV9SWAVp0EG3lRsHcbq5DDgqjPPz6pwgtj6RKz65zGXMNa82oJfOSBA/to6GmRP7Dr+6o+kbApTzQ==
 
-ansi-colors@^3.0.5:
-  version "3.0.5"
-  resolved "https://registry.yarnpkg.com/ansi-colors/-/ansi-colors-3.0.5.tgz#cb9dc64993b64fd6945485f797fc3853137d9a7b"
-  integrity sha512-VVjWpkfaphxUBFarydrQ3n26zX5nIK7hcbT3/ielrvwDDyBBjuh2vuSw1P9zkPq0cfqvdw7lkYHnu+OLSfIBsg==
-
 ansi-cyan@^0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/ansi-cyan/-/ansi-cyan-0.1.1.tgz#538ae528af8982f28ae30d86f2f17456d2609873"
