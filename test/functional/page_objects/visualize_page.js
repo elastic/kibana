@@ -710,7 +710,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async selectYAxisMode(mode) {
-      const selector = await find.byCssSelector(`#valueAxisMode0 > option[label="${mode}"]`);
+      const selector = await find.byCssSelector(`#valueAxisMode0 > option[value="${mode}"]`);
       await selector.click();
     }
 

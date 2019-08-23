@@ -28,7 +28,7 @@ export function PointSeriesPageProvider({ getService }) {
     }
 
     async clickAxisOptions() {
-      return await find.clickByPartialLinkText('Metrics & Axes');
+      return await find.clickByPartialLinkText('Metrics & axes');
     }
 
     async clickAddAxis() {

@@ -143,7 +143,7 @@ export default function PointSeriesVisType(Private) {
       optionTabs: [
         {
           name: 'advanced',
-          title: 'Metrics & Axes',
+          title: 'Metrics & axes',
           editor: i18n.translate('kbnVislibVisTypes.histogram.tabs.metricsAxesTitle', {
             defaultMessage: 'Metrics & axes',
           }),
