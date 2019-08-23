@@ -19704,7 +19704,7 @@ mocha@3.5.3:
     mkdirp "0.5.1"
     supports-color "3.1.2"
 
-mocha@^2.0.1, mocha@^2.3.4:
+mocha@^2.0.1:
   version "2.5.3"
   resolved "https://registry.yarnpkg.com/mocha/-/mocha-2.5.3.tgz#161be5bdeb496771eb9b35745050b622b5aefc58"
   integrity sha1-FhvlvetJZ3HrmzV0UFC2IrWu/Fg=

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import dateMath from '../src/index';
+import dateMath from '../src';
 import moment from 'moment';
 import sinon from 'sinon';
 import expect from '@kbn/expect';
