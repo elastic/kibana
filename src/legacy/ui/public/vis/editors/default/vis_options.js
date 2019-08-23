@@ -72,8 +72,8 @@ uiModules
           }
         };
 
-        $scope.setVisType = (vis, type) => {
-          vis.type.type = type;
+        $scope.setVisType = (visType, type) => {
+          visType.type = type;
         };
 
         const comp = typeof $scope.editor === 'string' ?
@@ -82,7 +82,6 @@ uiModules
             component="editor"
             aggs="editorState.aggs"
             has-histogram-agg="hasHistogramAgg"
-            aggs="editorState.aggs"
             current-tab="$parent.$parent.sidebar.section"
             state-params="editorState.params"
             vis="vis"

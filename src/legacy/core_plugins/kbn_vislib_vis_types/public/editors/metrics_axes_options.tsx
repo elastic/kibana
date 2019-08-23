@@ -249,7 +249,7 @@ function MetricsAxisOptions(props: VisOptionsProps<BasicVislibParams>) {
 
   useEffect(() => {
     const types = uniq(seriesParamsTypes);
-    setVisType(vis, types.length === 1 ? types[0] : 'histogram');
+    setVisType(vis.type, types.length === 1 ? types[0] : 'histogram');
   }, [seriesParamsTypes, seriesParamsTypesString, vis, setVisType]);
 
   return (

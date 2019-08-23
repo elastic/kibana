@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiPanel,
   EuiTitle,
@@ -58,31 +58,34 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
     [stateParams.valueAxes, stateParams.seriesParams]
   );
 
+  const removeButtonTooltip = useMemo(
+    () =>
+      i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.removeButtonTooltip', {
+        defaultMessage: 'Remove Y axis',
+      }),
+    [i18n]
+  );
+
   const renderRemoveButton = useCallback(
     (axis: ValueAxis) => (
-      <EuiToolTip
-        position="bottom"
-        content={i18n.translate(
-          'kbnVislibVisTypes.controls.pointSeries.valueAxes.removeButtonAriaLabel',
-          {
-            defaultMessage: 'Remove Y axis',
-          }
-        )}
-      >
+      <EuiToolTip position="bottom" content={removeButtonTooltip}>
         <EuiButtonIcon
           color="danger"
           iconType="cross"
           onClick={() => removeValueAxis(axis)}
-          aria-label={i18n.translate(
-            'kbnVislibVisTypes.controls.pointSeries.valueAxes.removeButtonAriaLabel',
-            {
-              defaultMessage: 'Remove Y axis',
-            }
-          )}
+          aria-label={removeButtonTooltip}
         />
       </EuiToolTip>
     ),
     [removeValueAxis]
+  );
+
+  const addButtonTooltip = useMemo(
+    () =>
+      i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.addButtonTooltip', {
+        defaultMessage: 'Add Y axis',
+      }),
+    [i18n]
   );
 
   const getButtonContent = useCallback(
@@ -114,24 +117,11 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip
-            position="bottom"
-            content={i18n.translate(
-              'kbnVislibVisTypes.controls.pointSeries.valueAxes.addButtonAriaLabel',
-              {
-                defaultMessage: 'Add Y axis',
-              }
-            )}
-          >
+          <EuiToolTip position="bottom" content={addButtonTooltip}>
             <EuiButtonIcon
               iconType="plusInCircleFilled"
               onClick={addValueAxis}
-              aria-label={i18n.translate(
-                'kbnVislibVisTypes.controls.pointSeries.valueAxes.addButtonAriaLabel',
-                {
-                  defaultMessage: 'Add Y axis',
-                }
-              )}
+              aria-label={addButtonTooltip}
               data-test-subj="visualizeAddYAxisButton"
             />
           </EuiToolTip>
