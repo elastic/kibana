@@ -53,96 +53,30 @@ describe('config validation', () => {
 
   test('config validation passes when only required fields are provided', () => {
     const config: Record<string, any> = {
-      url: {
-        host: 'mylisteningserver',
-        port: 9200,
-      },
+      url: 'http://mylisteningserver:9200/endpoint',
     };
     expect(validateConfig(actionType, config)).toEqual({
       ...defaultValues,
-      url: {
-        ...defaultCompositeUrlValues,
-        ...config.url,
-      },
+      ...config,
     });
-  });
-
-  test('config validation passes when valid schemes are provided', () => {
-    const httpConfig: Record<string, any> = {
-      url: {
-        host: 'mylisteningserver',
-        port: 9200,
-        scheme: 'http',
-      },
-    };
-    expect(validateConfig(actionType, httpConfig)).toEqual({
-      ...defaultValues,
-      ...httpConfig,
-      url: {
-        ...defaultCompositeUrlValues,
-        ...httpConfig.url,
-      },
-    });
-
-    const httpsConfig: Record<string, any> = {
-      url: {
-        host: 'mylisteningserver',
-        port: 9200,
-        scheme: 'https',
-      },
-    };
-    expect(validateConfig(actionType, httpsConfig)).toEqual({
-      ...defaultValues,
-      url: {
-        ...defaultCompositeUrlValues,
-        ...httpsConfig.url,
-      },
-    });
-  });
-
-  test('should validate and throw error when scheme on config is invalid', () => {
-    const config: Record<string, any> = {
-      url: {
-        host: 'mylisteningserver',
-        port: 9200,
-        scheme: 'ftp',
-      },
-    };
-    expect(() => {
-      validateConfig(actionType, config);
-    }).toThrowErrorMatchingInlineSnapshot(`
-"error validating action type config: [url]: types that failed validation:
-- [url.0]: expected value of type [string] but got [Object]
-- [url.1.scheme]: types that failed validation:"
-`);
   });
 
   test('config validation passes when valid methods are provided', () => {
     ['post', 'put'].forEach(method => {
       const config: Record<string, any> = {
-        url: {
-          host: 'mylisteningserver',
-          port: 9200,
-        },
+        url: 'http://mylisteningserver:9200/endpoint',
         method,
       };
       expect(validateConfig(actionType, config)).toEqual({
         ...defaultValues,
         ...config,
-        url: {
-          ...defaultCompositeUrlValues,
-          ...config.url,
-        },
       });
     });
   });
 
   test('should validate and throw error when method on config is invalid', () => {
     const config: Record<string, any> = {
-      url: {
-        host: 'mylisteningserver',
-        port: 9200,
-      },
+      url: 'http://mylisteningserver:9200/endpoint',
       method: 'https',
     };
     expect(() => {

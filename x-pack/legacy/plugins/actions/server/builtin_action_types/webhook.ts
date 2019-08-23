@@ -8,7 +8,6 @@ import axios, { AxiosError, AxiosResponse } from 'axios';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
 import { nullableType } from './lib/nullable';
-import { portSchema } from './lib/schemas';
 import { isOk, promiseResult, Result } from './lib/result_type';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 
@@ -17,29 +16,13 @@ enum WebhookMethods {
   POST = 'post',
   PUT = 'put',
 }
-enum WebhookSchemes {
-  HTTP = 'http',
-  HTTPS = 'https',
-}
 
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 
 const HeadersSchema = schema.recordOf(schema.string(), schema.string());
 
-export const CompositeUrlSchema = schema.object({
-  host: schema.string(),
-  port: portSchema(),
-  path: nullableType(schema.string()),
-  scheme: schema.oneOf(
-    [schema.literal(WebhookSchemes.HTTP), schema.literal(WebhookSchemes.HTTPS)],
-    {
-      defaultValue: WebhookSchemes.HTTP,
-    }
-  ),
-});
-
 const ConfigSchema = schema.object({
-  url: schema.oneOf([schema.string(), CompositeUrlSchema]),
+  url: schema.string(),
   method: schema.oneOf([schema.literal(WebhookMethods.POST), schema.literal(WebhookMethods.PUT)], {
     defaultValue: WebhookMethods.POST,
   }),
@@ -71,13 +54,6 @@ export const actionType: ActionType = {
   executor,
 };
 
-function asComposedUrl(url: string | TypeOf<typeof CompositeUrlSchema>): string {
-  if (typeof url === 'string') {
-    return url;
-  }
-  return `${url.scheme}://${url.host}${url.port ? `:${url.port}` : ''}${url.path || ''}`;
-}
-
 // action executor
 async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionTypeExecutorResult> {
   const log = (level: string, msg: string) =>
@@ -91,7 +67,7 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
   const result: Result<AxiosResponse, AxiosError> = await promiseResult(
     axios.request({
       method,
-      url: asComposedUrl(url),
+      url,
       auth: {
         username,
         password,

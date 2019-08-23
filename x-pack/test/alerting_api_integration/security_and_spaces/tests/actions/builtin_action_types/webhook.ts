@@ -162,23 +162,6 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       expect(result.status).to.eql('ok');
     });
 
-    it('should support composite webhook targets', async () => {
-      const webhookActionId = await createWebhookAction(webhookSimulatorURL, {
-        url: extractCompositesOfURL(webhookSimulatorURL),
-      });
-      const { body: result } = await supertest
-        .post(`/api/action/${webhookActionId}/_execute`)
-        .set('kbn-xsrf', 'test')
-        .send({
-          params: {
-            body: 'success',
-          },
-        })
-        .expect(200);
-
-      expect(result.status).to.eql('ok');
-    });
-
     it('should handle unreachable webhook targets', async () => {
       const webhookActionId = await createWebhookAction('http://some.non.existent.com/endpoint');
       const { body: result } = await supertest
