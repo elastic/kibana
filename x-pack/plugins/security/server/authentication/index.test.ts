@@ -206,7 +206,7 @@ describe('setupAuthentication()', () => {
       await authHandler(httpServerMock.createKibanaRequest(), mockResponse, mockAuthToolkit);
 
       expect(mockResponse.redirected).toHaveBeenCalledTimes(1);
-      expect(mockResponse.redirected).toHaveBeenCalledWith(undefined, {
+      expect(mockResponse.redirected).toHaveBeenCalledWith({
         headers: { location: '/some/url' },
       });
       expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
@@ -243,8 +243,8 @@ describe('setupAuthentication()', () => {
       await authHandler(httpServerMock.createKibanaRequest(), mockResponse, mockAuthToolkit);
 
       expect(mockResponse.customError).toHaveBeenCalledTimes(1);
-      const [[error]] = mockResponse.customError.mock.calls;
-      expect(error).toBe(esError);
+      const [[response]] = mockResponse.customError.mock.calls;
+      expect(response.body).toBe(esError);
 
       expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
       expect(mockResponse.redirected).not.toHaveBeenCalled();
@@ -267,8 +267,8 @@ describe('setupAuthentication()', () => {
       await authHandler(httpServerMock.createKibanaRequest(), mockResponse, mockAuthToolkit);
 
       expect(mockResponse.customError).toHaveBeenCalledTimes(1);
-      const [[error, options]] = mockResponse.customError.mock.calls;
-      expect(error).toBe(originalError);
+      const [[options]] = mockResponse.customError.mock.calls;
+      expect(options.body).toBe(originalError);
       expect(options!.headers).toEqual({ 'WWW-Authenticate': 'Negotiate' });
 
       expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
@@ -282,9 +282,9 @@ describe('setupAuthentication()', () => {
       await authHandler(httpServerMock.createKibanaRequest(), mockResponse, mockAuthToolkit);
 
       expect(mockResponse.unauthorized).toHaveBeenCalledTimes(1);
-      const [[error]] = mockResponse.unauthorized.mock.calls;
+      const [[response]] = mockResponse.unauthorized.mock.calls;
 
-      expect(error).toBeUndefined();
+      expect(response!.body).toBeUndefined();
 
       expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
       expect(mockResponse.redirected).not.toHaveBeenCalled();
