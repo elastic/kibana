@@ -3728,8 +3728,6 @@
     "xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.jobExistsDescription": "当前有 {serviceName}（{transactionType}）的作业正在运行。",
     "xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.jobExistsDescription.viewJobLinkText": "查看现有作业",
     "xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.jobExistsTitle": "作业已存在",
-    "xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.noPatternTitle": "没有可用的 APM 索引模式。要创建作业，请通过{setupInstructionLink}导入 APM 索引模式",
-    "xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.noPatternTitle.setupInstructionLinkText": "设置说明",
     "xpack.apm.serviceDetails.enableAnomalyDetectionPanel.createMLJobDescription": "在这里可以创建 Machine Learning 作业以基于 {serviceName} 服务内 APM 事务的持续时间计算异常分数。启用后，一旦异常分数 >=75，{transactionDurationGraphText}将显示预期边界并标注图表。",
     "xpack.apm.serviceDetails.enableAnomalyDetectionPanel.createMLJobDescription.transactionDurationGraphText": "事务持续时间图表",
     "xpack.apm.serviceDetails.enableAnomalyDetectionPanel.createNewJobButtonLabel": "创建新作业",
