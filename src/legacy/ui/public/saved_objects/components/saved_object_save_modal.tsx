@@ -20,6 +20,6 @@
 /**
  * @deprecated
  *
- * Do not import this component from here. Improt from `src/plugins/kibana_react` instead.
+ * Do not import this component from here. Import from `src/plugins/kibana_react` instead.
  */
 export { SavedObjectSaveModal } from '../../../../../plugins/kibana_react/public';

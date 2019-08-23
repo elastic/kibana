@@ -8,13 +8,14 @@ import { Request } from 'hapi';
 import { i18n } from '@kbn/i18n';
 
 import { cryptoFactory, LevelLogger, oncePerServer } from '../../../server/lib';
-import { JobDocOutputExecuted, JobDocPayload, KbnServer } from '../../../types';
+import { JobDocOutputExecuted, KbnServer, ExecuteImmediateJobFactory } from '../../../types';
 import {
   CONTENT_TYPE_CSV,
   CSV_FROM_SAVEDOBJECT_JOB_TYPE,
   PLUGIN_ID,
 } from '../../../common/constants';
-import { CsvResultFromSearch, createGenerateCsv } from './lib';
+import { CsvResultFromSearch, JobDocPayloadPanelCsv } from '../types';
+import { createGenerateCsv } from './lib';
 
 interface FakeRequest {
   headers: any;
@@ -22,7 +23,10 @@ interface FakeRequest {
   server: KbnServer;
 }
 
-type ExecuteJobFn = (job: JobDocPayload, realRequest?: Request) => Promise<JobDocOutputExecuted>;
+type ExecuteJobFn = (
+  job: JobDocPayloadPanelCsv,
+  realRequest?: Request
+) => Promise<JobDocOutputExecuted>;
 
 function executeJobFactoryFn(server: KbnServer): ExecuteJobFn {
   const crypto = cryptoFactory(server);
@@ -36,7 +40,7 @@ function executeJobFactoryFn(server: KbnServer): ExecuteJobFn {
   const generateCsv = createGenerateCsv(logger);
 
   return async function executeJob(
-    job: JobDocPayload,
+    job: JobDocPayloadPanelCsv,
     realRequest?: Request
   ): Promise<JobDocOutputExecuted> {
     const { basePath, jobParams } = job;
@@ -107,4 +111,6 @@ function executeJobFactoryFn(server: KbnServer): ExecuteJobFn {
   };
 }
 
-export const executeJobFactory = oncePerServer(executeJobFactoryFn);
+export const executeJobFactory: ExecuteImmediateJobFactory = oncePerServer(
+  executeJobFactoryFn as ExecuteImmediateJobFactory
+);

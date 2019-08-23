@@ -4,17 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { loadServiceTransactionTypes } from '../services/rest/apm/services';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
+import { callApmApi } from '../services/rest/callApmApi';
+
+const INITIAL_DATA = { transactionTypes: [] };
 
 export function useServiceTransactionTypes(urlParams: IUrlParams) {
   const { serviceName, start, end } = urlParams;
-  const { data: transactionTypes = [] } = useFetcher(() => {
+  const { data = INITIAL_DATA } = useFetcher(() => {
     if (serviceName && start && end) {
-      return loadServiceTransactionTypes({ serviceName, start, end });
+      return callApmApi({
+        pathname: '/api/apm/services/{serviceName}/transaction_types',
+        params: {
+          path: { serviceName },
+          query: { start, end }
+        }
+      });
     }
   }, [serviceName, start, end]);
 
-  return transactionTypes;
+  return data.transactionTypes;
 }
