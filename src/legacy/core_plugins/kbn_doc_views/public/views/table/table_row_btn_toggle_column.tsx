@@ -45,8 +45,9 @@ export function DocViewTableRowBtnToggleColumn({ onClick, active, disabled = fal
           defaultMessage: 'Toggle column in table',
         })}
         aria-pressed={active}
-        onClick={onClick}
         className="kbnDocViewer__actionButton"
+        data-test-subj="toggleColumnButton"
+        onClick={onClick}
       >
         <i className="fa fa-columns" />
       </button>

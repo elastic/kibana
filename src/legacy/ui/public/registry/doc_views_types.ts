@@ -46,12 +46,12 @@ export type DocViewFilterFn = (
 ) => void;
 
 export interface DocViewRenderProps {
-  columns: string[];
-  filter: DocViewFilterFn;
+  columns?: string[];
+  filter?: DocViewFilterFn;
   hit: ElasticSearchHit;
   indexPattern: IndexPattern;
-  onAddColumn: (columnName: string) => void;
-  onRemoveColumn: (columnName: string) => void;
+  onAddColumn?: (columnName: string) => void;
+  onRemoveColumn?: (columnName: string) => void;
 }
 export type DocViewRenderFn = (
   domeNode: HTMLDivElement,

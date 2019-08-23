@@ -66,11 +66,12 @@ export function DocViewTableRowBtnFilterExists({
       }
     >
       <button
-        onClick={onClick}
-        className="kbnDocViewer__actionButton"
         aria-label={i18n.translate('kbnDocViews.table.filterForFieldPresentButtonAriaLabel', {
           defaultMessage: 'Filter for field present',
         })}
+        className="kbnDocViewer__actionButton"
+        data-test-subj="addExistsFilterButton"
+        onClick={onClick}
       >
         <i className="fa fa-asterisk" />
       </button>

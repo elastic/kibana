@@ -31,7 +31,10 @@ export function DocViewTableRowIconUnderscore() {
         />
       }
     >
-      <i className="fa fa-warning text-color-warning kbnDocViewer__underscore" />
+      <i
+        data-test-subj="underscoreWarning"
+        className="fa fa-warning text-color-warning kbnDocViewer__underscore"
+      />
     </EuiToolTip>
   );
 }

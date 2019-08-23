@@ -61,12 +61,11 @@ export function DocViewTableRow({
   });
 
   const displayUnderscoreWarning = !fieldMapping && field.indexOf('_') === 0;
-  const displayNoMappingWarning =
-    !fieldMapping && Array.isArray(valueRaw) && typeof value[0] === 'object';
+  const displayNoMappingWarning = !fieldMapping && !displayUnderscoreWarning;
 
   return (
     <tr key={field} data-test-subj={`tableDocViewRow-${field}`}>
-      {onFilter && (
+      {typeof onFilter === 'function' && (
         <td className="kbnDocViewer__buttons">
           <DocViewTableRowBtnFilterAdd
             disabled={!fieldMapping || !fieldMapping.filterable}
@@ -79,7 +78,6 @@ export function DocViewTableRow({
           {typeof onToggleColumn === 'function' && (
             <DocViewTableRowBtnToggleColumn active={isColumnActive} onClick={onToggleColumn} />
           )}
-
           <DocViewTableRowBtnFilterExists
             disabled={!fieldMapping || isMetaField || fieldMapping.scripted}
             onClick={() => onFilter('_exists_', field, '+')}

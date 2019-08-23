@@ -30,7 +30,10 @@ export function DocViewTableRowIconNoMapping() {
         />
       }
     >
-      <i className="fa fa-warning text-color-warning kbnDocViewer__noMapping" />
+      <i
+        data-test-subj="noMappingWarning"
+        className="fa fa-warning text-color-warning kbnDocViewer__noMapping"
+      />
     </EuiToolTip>
   );
 }

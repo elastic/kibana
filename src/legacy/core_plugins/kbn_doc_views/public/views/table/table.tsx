@@ -62,10 +62,10 @@ export function DocViewTable({
           .sort()
           .map(field => {
             const value = formatValue(field);
-            const isCollapsible = value.length > COLLAPSE_LINE_LENGTH;
+            const isCollapsible = value && value.length > COLLAPSE_LINE_LENGTH;
             const isCollapsed = isCollapsible && !fieldRowOpen[field];
             const toggleColumn =
-              onRemoveColumn && onAddColumn
+              onRemoveColumn && onAddColumn && Array.isArray(columns)
                 ? () => {
                     if (columns.includes(field)) {
                       onRemoveColumn(field);
@@ -81,8 +81,8 @@ export function DocViewTable({
                 field={field}
                 fieldMapping={mapping[field]}
                 isCollapsed={isCollapsed}
-                isCollapsible={value.length > COLLAPSE_LINE_LENGTH}
-                isColumnActive={columns && columns.includes(field)}
+                isCollapsible={isCollapsible}
+                isColumnActive={Array.isArray(columns) && columns.includes(field)}
                 isMetaField={indexPattern.metaFields.includes(field)}
                 onFilter={filter}
                 onToggleCollapse={() => toggleValueCollapse(field)}
