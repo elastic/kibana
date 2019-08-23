@@ -18,6 +18,8 @@ export const globalResizeCursorClassName = 'global-resize-cursor';
 export const calculateDeltaX = ({ prevX, screenX }: { prevX: number; screenX: number }) =>
   prevX !== 0 ? screenX - prevX : 0;
 
+const isSafari = /^((?!chrome|android|crios|fxios|Firefox).)*safari/i.test(navigator.userAgent);
+
 interface Props {
   /** the `onResize` callback will be invoked with this id */
   id: string;
@@ -84,7 +86,8 @@ export class Resizeable extends React.PureComponent<Props, State> {
     this.dragSubscription = this.drag$.subscribe(event => {
       // We do a feature detection of event.movementX here and if it is missing
       // we calculate the delta manually. Browsers IE-11 and Safari will call calculateDelta
-      const delta = event.movementX == null ? this.calculateDelta(event) : event.movementX;
+      const delta =
+        event.movementX == null || isSafari ? this.calculateDelta(event) : event.movementX;
       if (!this.state.isResizing) {
         this.setState({ isResizing: true });
       }
