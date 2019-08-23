@@ -2001,14 +2001,6 @@
     normalize-path "^2.0.1"
     through2 "^2.0.3"
 
-"@hapi/basic@^5.1.1":
-  version "5.1.1"
-  resolved "https://registry.yarnpkg.com/@hapi/basic/-/basic-5.1.1.tgz#5d359ffe173ea6571eb983e2b9cf221ff85ab089"
-  integrity sha512-fHyVvf2xurgGBJJaLpRMtDF4AaPSs679nGk8/FjBw3p8/Kj5fuPv5kD1+fJ4ZSdPt1rHHGvKIDK0aVysbbUDMg==
-  dependencies:
-    "@hapi/boom" "7.x.x"
-    "@hapi/hoek" "8.x.x"
-
 "@hapi/boom@7.x.x":
   version "7.4.2"
   resolved "https://registry.yarnpkg.com/@hapi/boom/-/boom-7.4.2.tgz#c16957cd09796f6c1bfb4031bdc39d66d6d750c3"
@@ -2025,11 +2017,6 @@
   version "6.2.1"
   resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-6.2.1.tgz#d3a66329159af879bfdf0b0cff2229c43c5a3451"
   integrity sha512-+ryw4GU9pjr1uT6lBuErHJg3NYqzwJTvZ75nKuJijEzpd00Uqi6oiawTGDDf5Hl0zWmI7qHfOtaqB0kpQZJQzA==
-
-"@hapi/hoek@8.x.x":
-  version "8.2.1"
-  resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-8.2.1.tgz#924af04cbb22e17359c620d2a9c946e63f58eb77"
-  integrity sha512-JPiBy+oSmsq3St7XlipfN5pNA6bDJ1kpa73PrK/zR29CVClDVqy04AanM/M/qx5bSF+I61DdCfAvRrujau+zRg==
 
 "@hapi/wreck@^15.0.1":
   version "15.0.1"

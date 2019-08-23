@@ -6,24 +6,37 @@
 import expect from '@kbn/expect';
 import Joi from 'joi';
 import Hapi, { Util } from 'hapi';
-import HapiBasic from '@hapi/basic';
+import { fromNullable } from 'fp-ts/lib/Option';
 
 interface WebhookRequest extends Hapi.Request {
   payload: string;
 }
 
-async function validate(
-  request: Hapi.Request,
-  username: string,
-  password: string,
-  h: Hapi.ResponseToolkit
-): Promise<{ isValid: boolean; credentials: any }> {
-  return { isValid: true, credentials: { username, password } };
-}
-
 export async function initPlugin(server: Hapi.Server, path: string) {
-  await server.register(HapiBasic);
-  server.auth.strategy('simple', 'basic', { validate });
+  server.auth.scheme('identifyCredentialsIfPresent', function identifyCredentialsIfPresent(
+    s: Hapi.Server,
+    options?: Hapi.ServerAuthSchemeOptions
+  ) {
+    const scheme = {
+      async authenticate(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+        const credentials = fromNullable(request.headers.authorization)
+          .map(authorization => authorization.split(/\s+/))
+          .filter(parts => parts.length > 1)
+          .map(parts => Buffer.from(parts[1], 'base64').toString())
+          .filter(credentialsPart => credentialsPart.indexOf(':') !== -1)
+          .map(credentialsPart => {
+            const [username, password] = credentialsPart.split(':');
+            return { username, password };
+          })
+          .getOrElse({ username: '', password: '' });
+
+        return h.authenticated({ credentials });
+      },
+    };
+
+    return scheme;
+  });
+  server.auth.strategy('simple', 'identifyCredentialsIfPresent');
 
   server.route({
     method: ['POST', 'PUT'],

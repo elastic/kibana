@@ -5,7 +5,6 @@
  */
 
 import axios, { AxiosError, AxiosResponse } from 'axios';
-import { fromNullable } from 'fp-ts/lib/Option';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { nullableType } from './lib/nullable';
 import { portSchema } from './lib/schemas';
@@ -159,7 +158,7 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
 
       return errorResult(
         id,
-        fromNullable(data).getOrElse('Unknown Error'),
+        statusText,
         ACTION_DESCRIPTION,
         ACTION_I18N_IDENTIFIERS.INVALID_RESPONSE_ERROR
       );
