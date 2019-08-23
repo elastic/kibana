@@ -168,7 +168,7 @@ export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
       compressed
       items={dataFramePreviewData}
       columns={columns}
-      onChange={onTableChange}
+      onTableChange={onTableChange}
       pagination={pagination}
       sorting={sorting}
       error={errorMessage}

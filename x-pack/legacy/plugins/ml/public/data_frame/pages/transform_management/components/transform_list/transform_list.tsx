@@ -379,7 +379,7 @@ export const DataFrameTransformList: SFC = () => {
         items={filterActive ? filteredTransforms : transforms}
         itemId={DataFrameTransformListColumn.id}
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-        onChange={onTableChange}
+        onTableChange={onTableChange}
         pagination={pagination}
         selection={selection}
         sorting={sorting}
