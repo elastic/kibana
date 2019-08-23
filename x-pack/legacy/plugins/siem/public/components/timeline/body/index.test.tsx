@@ -16,6 +16,9 @@ import { TestProviders } from '../../../mock/test_providers';
 import { Body } from '.';
 import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
+import { wait } from '../../../lib/helpers';
+
+jest.mock('../../../lib/settings/use_kibana_ui_setting');
 
 const testBodyHeight = 700;
 const mockGetNotesByIds = (eventId: string[]) => [];
@@ -23,6 +26,12 @@ const mockSort: Sort = {
   columnId: '@timestamp',
   sortDirection: Direction.desc,
 };
+
+jest.mock(
+  'react-visibility-sensor',
+  () => ({ children }: { children: (args: { isVisible: boolean }) => React.ReactNode }) =>
+    children({ isVisible: true })
+);
 
 describe('Body', () => {
   describe('rendering', () => {
@@ -38,7 +47,6 @@ describe('Body', () => {
             eventIdToNoteIds={{}}
             height={testBodyHeight}
             id={'timeline-test'}
-            isLoading={false}
             getNotesByIds={mockGetNotesByIds}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
@@ -53,7 +61,6 @@ describe('Body', () => {
             sort={mockSort}
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
-            width={100}
           />
         </TestProviders>
       );
@@ -78,7 +85,6 @@ describe('Body', () => {
             eventIdToNoteIds={{}}
             height={testBodyHeight}
             id={'timeline-test'}
-            isLoading={false}
             getNotesByIds={mockGetNotesByIds}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
@@ -93,7 +99,6 @@ describe('Body', () => {
             sort={mockSort}
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
-            width={100}
           />
         </TestProviders>
       );
@@ -118,7 +123,6 @@ describe('Body', () => {
             eventIdToNoteIds={{}}
             height={testBodyHeight}
             id={'timeline-test'}
-            isLoading={false}
             getNotesByIds={mockGetNotesByIds}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
@@ -133,7 +137,6 @@ describe('Body', () => {
             sort={mockSort}
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
-            width={100}
           />
         </TestProviders>
       );
@@ -146,7 +149,7 @@ describe('Body', () => {
       ).toEqual(true);
     });
 
-    test('it renders a tooltip for timestamp', () => {
+    test('it renders a tooltip for timestamp', async () => {
       const headersJustTimestamp = defaultHeaders.filter(h => h.id === '@timestamp');
 
       const wrapper = mount(
@@ -160,7 +163,6 @@ describe('Body', () => {
             eventIdToNoteIds={{}}
             height={testBodyHeight}
             id={'timeline-test'}
-            isLoading={false}
             getNotesByIds={mockGetNotesByIds}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
@@ -175,12 +177,13 @@ describe('Body', () => {
             sort={mockSort}
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
-            width={100}
           />
         </TestProviders>
       );
-
-      headersJustTimestamp.forEach(h => {
+      wrapper.update();
+      await wait();
+      wrapper.update();
+      headersJustTimestamp.forEach(() => {
         expect(
           wrapper
             .find('[data-test-subj="data-driven-columns"]')
