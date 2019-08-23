@@ -11,6 +11,7 @@ import { IndexPatternPrivateState, TermsIndexPatternColumn } from '../indexpatte
 import { EuiRange, EuiSelect } from '@elastic/eui';
 import { UiSettingsClientContract } from 'src/core/public';
 import { Storage } from 'ui/storage';
+import { createMockedIndexPattern } from '../mocks';
 
 jest.mock('ui/new_platform');
 
@@ -72,6 +73,34 @@ describe('terms', () => {
           }),
         })
       );
+    });
+  });
+
+  describe('onFieldChange', () => {
+    it('should change correctly to new field', () => {
+      const oldColumn: TermsIndexPatternColumn = {
+        operationType: 'terms',
+        sourceField: 'source',
+        label: 'Top values of source',
+        isBucketed: true,
+        dataType: 'string',
+        params: {
+          size: 5,
+          orderBy: {
+            type: 'alphabetical',
+          },
+          orderDirection: 'asc',
+        },
+      };
+      const indexPattern = createMockedIndexPattern();
+      const newDateField = indexPattern.fields.find(i => i.name === 'dest')!;
+
+      const column = termsOperation.onFieldChange(oldColumn, indexPattern, newDateField);
+      expect(column).toHaveProperty('sourceField', 'dest');
+      expect(column).toHaveProperty('params.size', 5);
+      expect(column).toHaveProperty('params.orderBy.type', 'alphabetical');
+      expect(column).toHaveProperty('params.orderDirection', 'asc');
+      expect(column.label).toContain('dest');
     });
   });
 
@@ -142,6 +171,7 @@ describe('terms', () => {
       const termsColumn = termsOperation.buildColumn({
         layerId: 'first',
         suggestedPriority: undefined,
+        indexPattern: createMockedIndexPattern(),
         field: {
           aggregatable: true,
           searchable: true,
@@ -157,6 +187,7 @@ describe('terms', () => {
       const termsColumn = termsOperation.buildColumn({
         layerId: 'first',
         suggestedPriority: undefined,
+        indexPattern: createMockedIndexPattern(),
         columns: {
           col1: {
             label: 'Count',
