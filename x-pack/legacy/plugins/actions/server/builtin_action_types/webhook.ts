@@ -5,12 +5,19 @@
  */
 
 import axios, { AxiosError, AxiosResponse } from 'axios';
-import { i18n } from '@kbn/i18n';
+import { fromNullable } from 'fp-ts/lib/Option';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { nullableType } from './lib/nullable';
 import { portSchema } from './lib/schemas';
 import { isOk, promiseResult, Result } from './lib/result_type';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
+import {
+  successResult,
+  errorResult,
+  retryResult,
+  retryResultSeconds,
+  getRetryAfterIntervalFromHeaders,
+} from './lib/action_executor_result';
 
 // config definition
 enum WebhookMethods {
@@ -91,6 +98,14 @@ function describeWebhookErrorSource(error: AxiosError): string {
 }
 
 // action executor
+const ACTION_DESCRIPTION = 'calling a remote webhook';
+enum ACTION_I18N_IDENTIFIERS {
+  INVALID_RESPONSE_ERROR = 'webhook.invalidResponseErrorMessage',
+  INVALID_RESPONSE_RETRY_LATER_ERROR = 'webhook.invalidResponseRetryLaterErrorMessage',
+  INVALID_RESPONSE_RETRY_LATER_DATE_ERROR = 'webhook.invalidResponseRetryDateErrorMessage',
+  UNREACHABLE_ERROR = 'webhook.unreachableErrorMessage',
+}
+
 async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionTypeExecutorResult> {
   const log = (msg: string) => execOptions.services.log(['warn', 'actions', 'webhook'], msg);
 
@@ -113,42 +128,50 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
   );
 
   if (isOk(result)) {
-    const { value: response } = result;
-    log(`response from ${id} webhook event: ${response.status}`);
+    const {
+      value: { status, statusText, headers: responseHeaders },
+    } = result;
+    log(`response from ${id} webhook event: [HTTP ${status}] ${statusText}`);
 
-    if (response.status >= 200 && response.status < 300) {
-      return {
-        status: 'ok',
-        data: response.data,
-      };
+    if (status >= 200 && status < 300) {
+      return successResult(data);
     } else {
-      const message = i18n.translate('xpack.actions.builtin.webhook.invalidResponseErrorMessage', {
-        defaultMessage: `an http error {code} occurred in action "{id}", due to an unknown webhook event: {data}`,
-        values: {
+      // special handling for 5xx
+      if (status >= 500) {
+        return retryResult(
           id,
-          code: response.status,
-          data: response.data,
-        },
-      });
-      return {
-        status: 'error',
-        message,
-      };
+          statusText,
+          ACTION_DESCRIPTION,
+          ACTION_I18N_IDENTIFIERS.INVALID_RESPONSE_RETRY_LATER_ERROR
+        );
+      }
+
+      // special handling for rate limiting
+      if (status === 429) {
+        return retryResultSeconds(
+          id,
+          statusText,
+          ACTION_DESCRIPTION,
+          ACTION_I18N_IDENTIFIERS.INVALID_RESPONSE_RETRY_LATER_DATE_ERROR,
+          getRetryAfterIntervalFromHeaders(responseHeaders)
+        );
+      }
+
+      return errorResult(
+        id,
+        fromNullable(data).getOrElse('Unknown Error'),
+        ACTION_DESCRIPTION,
+        ACTION_I18N_IDENTIFIERS.INVALID_RESPONSE_ERROR
+      );
     }
   } else {
     const { error } = result;
-    const message = i18n.translate('xpack.actions.builtin.webhook.unreachableErrorMessage', {
-      defaultMessage: `error in action "{id}", due to {eventSource}: {errorMessage}`,
-      values: {
-        id,
-        eventSource: describeWebhookErrorSource(error),
-        errorMessage: error.message,
-      },
-    });
     log(`error on ${id} webhook event: ${error.message}`);
-    return {
-      status: 'error',
-      message,
-    };
+    return errorResult(
+      id,
+      error.message,
+      describeWebhookErrorSource(error),
+      ACTION_I18N_IDENTIFIERS.UNREACHABLE_ERROR
+    );
   }
 }

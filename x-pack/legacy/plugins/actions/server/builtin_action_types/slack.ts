@@ -4,9 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
+import {
+  successResult,
+  errorResult,
+  errorResultWithStaticMessage,
+  retryResult,
+  retryResultSeconds,
+  getRetryAfterIntervalFromHeaders,
+} from './lib/action_executor_result';
 
 import {
   ActionType,
@@ -52,7 +59,14 @@ export function getActionType({ executor }: { executor?: ExecutorType } = {}): A
 export const actionType = getActionType();
 
 // action executor
-
+const ACTION_DESCRIPTION = 'posting a slack message';
+enum ACTION_I18N_IDENTIFIERS {
+  POSTING_ERROR = 'slack.errorPostingErrorMessage',
+  RETRY_LATER_ERROR = 'slack.errorPostingRetryLaterErrorMessage',
+  RETRY_LATER_DATE_ERROR = 'slack.errorPostingRetryDateErrorMessage',
+  UNEXPECTED_NULL_ERROR = 'slack.unexpectedNullResponseErrorMessage',
+  UNEXPECTED_TEXT_ERROR = 'slack.unexpectedTextResponseErrorMessage',
+}
 async function slackExecutor(
   execOptions: ActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult> {
@@ -69,111 +83,60 @@ async function slackExecutor(
     result = await webhook.send(message);
   } catch (err) {
     if (err.original == null || err.original.response == null) {
-      return errorResult(id, err.message);
+      return errorResult(
+        id,
+        err.message,
+        ACTION_DESCRIPTION,
+        ACTION_I18N_IDENTIFIERS.POSTING_ERROR
+      );
     }
 
     const { status, statusText, headers } = err.original.response;
 
     // special handling for 5xx
     if (status >= 500) {
-      return retryResult(id, err.message);
+      return retryResult(
+        id,
+        err.message,
+        ACTION_DESCRIPTION,
+        ACTION_I18N_IDENTIFIERS.RETRY_LATER_ERROR
+      );
     }
 
     // special handling for rate limiting
     if (status === 429) {
-      const retryAfterString = headers['retry-after'];
-      if (retryAfterString != null) {
-        const retryAfter = parseInt(retryAfterString, 10);
-        if (!isNaN(retryAfter)) {
-          return retryResultSeconds(id, err.message, retryAfter);
-        }
-      }
+      return retryResultSeconds(
+        id,
+        err.message,
+        ACTION_DESCRIPTION,
+        ACTION_I18N_IDENTIFIERS.RETRY_LATER_DATE_ERROR,
+        getRetryAfterIntervalFromHeaders(headers)
+      );
     }
 
-    return errorResult(id, `${err.message} - ${statusText}`);
+    return errorResult(
+      id,
+      `${err.message} - ${statusText}`,
+      ACTION_DESCRIPTION,
+      ACTION_I18N_IDENTIFIERS.POSTING_ERROR
+    );
   }
 
   if (result == null) {
-    const errMessage = i18n.translate(
-      'xpack.actions.builtin.slack.unexpectedNullResponseErrorMessage',
-      {
-        defaultMessage: 'unexpected null response from slack',
-      }
+    return errorResultWithStaticMessage(
+      id,
+      'unexpected null response from slack',
+      ACTION_I18N_IDENTIFIERS.UNEXPECTED_NULL_ERROR
     );
-    return errorResult(id, errMessage);
   }
 
   if (result.text !== 'ok') {
-    const errMessage = i18n.translate(
-      'xpack.actions.builtin.slack.unexpectedTextResponseErrorMessage',
-      {
-        defaultMessage: 'unexpected text response from slack',
-      }
+    return errorResultWithStaticMessage(
+      id,
+      'unexpected text response from slack',
+      ACTION_I18N_IDENTIFIERS.UNEXPECTED_TEXT_ERROR
     );
-    return errorResult(id, errMessage);
   }
 
   return successResult(result);
-}
-
-function successResult(data: any): ActionTypeExecutorResult {
-  return { status: 'ok', data };
-}
-
-function errorResult(id: string, message: string): ActionTypeExecutorResult {
-  const errMessage = i18n.translate('xpack.actions.builtin.slack.errorPostingErrorMessage', {
-    defaultMessage: 'an error occurred in action "{id}" posting a slack message: {message}',
-    values: {
-      id,
-      message,
-    },
-  });
-  return {
-    status: 'error',
-    message: errMessage,
-  };
-}
-
-function retryResult(id: string, message: string): ActionTypeExecutorResult {
-  const errMessage = i18n.translate(
-    'xpack.actions.builtin.slack.errorPostingRetryLaterErrorMessage',
-    {
-      defaultMessage: 'an error occurred in action "{id}" posting a slack message, retry later',
-      values: {
-        id,
-      },
-    }
-  );
-  return {
-    status: 'error',
-    message: errMessage,
-    retry: true,
-  };
-}
-
-function retryResultSeconds(
-  id: string,
-  message: string,
-  retryAfter: number = 60
-): ActionTypeExecutorResult {
-  const retryEpoch = Date.now() + retryAfter * 1000;
-  const retry = new Date(retryEpoch);
-  const retryString = retry.toISOString();
-  const errMessage = i18n.translate(
-    'xpack.actions.builtin.slack.errorPostingRetryDateErrorMessage',
-    {
-      defaultMessage:
-        'an error occurred in action "{id}" posting a slack message, retry at {retryString}: {message}',
-      values: {
-        id,
-        retryString,
-        message,
-      },
-    }
-  );
-  return {
-    status: 'error',
-    message: errMessage,
-    retry,
-  };
 }
