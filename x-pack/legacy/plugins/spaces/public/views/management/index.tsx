@@ -15,7 +15,6 @@ import {
 import { SavedObjectsManagementActionRegistry } from 'ui/management/saved_objects_management';
 // @ts-ignore
 import routes from 'ui/routes';
-import { SpacesManager } from '../../lib';
 import { AdvancedSettingsSubtitle } from './components/advanced_settings_subtitle';
 import { AdvancedSettingsTitle } from './components/advanced_settings_title';
 import { start as spacesNPStart } from '../../legacy';
