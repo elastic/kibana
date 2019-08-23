@@ -5,7 +5,14 @@
  */
 
 import React from 'react';
-import { EuiSwitch, EuiSpacer, EuiHorizontalRule, EuiFormRow } from '@elastic/eui';
+import {
+  EuiSwitch,
+  EuiSpacer,
+  EuiHorizontalRule,
+  EuiFormRow,
+  EuiListGroup,
+  EuiListGroupItem,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CopyOptions } from '../../../../lib/copy_saved_objects_to_space/types';
 import { Space } from '../../../../../common/model/space';
@@ -18,9 +25,6 @@ interface Props {
 }
 
 export const CopyToSpaceForm = (props: Props) => {
-  const setIncludeRelated = (includeRelated: boolean) =>
-    props.onUpdate({ ...props.copyOptions, includeRelated });
-
   const setOverwrite = (overwrite: boolean) => props.onUpdate({ ...props.copyOptions, overwrite });
 
   const setSelectedSpaceIds = (selectedSpaceIds: string[]) =>
@@ -28,17 +32,20 @@ export const CopyToSpaceForm = (props: Props) => {
 
   return (
     <div data-test-subj="copy-to-space-form">
-      <EuiSwitch
-        data-test-subj="cts-form-include-related-objects"
-        label={
-          <FormattedMessage
-            id="xpack.spaces.management.copyToSpace.includeRelatedObjects"
-            defaultMessage="Include related objects"
-          />
-        }
-        checked={props.copyOptions.includeRelated}
-        onChange={e => setIncludeRelated(e.target.checked)}
-      />
+      <EuiListGroup className="spcCopyToSpaceOptionsView" flush>
+        <EuiListGroupItem
+          className="spcCopyToSpaceIncludeRelated"
+          iconType={'check'}
+          label={
+            <span className="spcCopyToSpaceIncludeRelated__label">
+              <FormattedMessage
+                id="xpack.spaces.management.copyToSpace.includeRelatedFormLabel"
+                defaultMessage="Including related saved objects"
+              />
+            </span>
+          }
+        />
+      </EuiListGroup>
 
       <EuiSpacer />
 
