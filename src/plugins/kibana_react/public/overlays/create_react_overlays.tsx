@@ -22,17 +22,23 @@ import { KibanaServices } from '../context/types';
 import { KibanaReactOverlays } from './types';
 
 export const createReactOverlays = (services: KibanaServices): KibanaReactOverlays => {
-  if (!services.overlays) {
-    throw new TypeError(
-      'Could not create KibanaReactOverlays as overlays service is not available.'
-    );
-  }
+  const checkCoreService = () => {
+    if (!services.overlays) {
+      throw new TypeError(
+        'Could not create KibanaReactOverlays as overlays service is not available.'
+      );
+    }
+  };
 
-  const openFlyout: KibanaReactOverlays['openFlyout'] = (node, options?) =>
-    services.overlays!.openFlyout(<>{node}</>, options);
+  const openFlyout: KibanaReactOverlays['openFlyout'] = (node, options?) => {
+    checkCoreService();
+    return services.overlays!.openFlyout(<>{node}</>, options);
+  };
 
-  const openModal: KibanaReactOverlays['openModal'] = (node, options?) =>
-    services.overlays!.openModal(<>{node}</>, options);
+  const openModal: KibanaReactOverlays['openModal'] = (node, options?) => {
+    checkCoreService();
+    return services.overlays!.openModal(<>{node}</>, options);
+  };
 
   const overlays: KibanaReactOverlays = {
     openFlyout,

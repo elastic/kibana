@@ -22,12 +22,6 @@ import { KibanaServices } from '../context/types';
 import { KibanaReactNotifications } from './types';
 
 export const createNotifications = (services: KibanaServices): KibanaReactNotifications => {
-  if (!services.notifications) {
-    throw new TypeError(
-      'Could not create KibanaReactNotifications as notifications service is not available.'
-    );
-  }
-
   const show: KibanaReactNotifications['toasts']['show'] = ({
     title,
     body,
@@ -36,6 +30,11 @@ export const createNotifications = (services: KibanaServices): KibanaReactNotifi
     toastLifeTimeMs,
     onClose,
   }) => {
+    if (!services.notifications) {
+      throw new TypeError(
+        'Could not create KibanaReactNotifications as notifications service is not available.'
+      );
+    }
     services.notifications!.toasts.add({
       title,
       text: <>{body || null}</>,

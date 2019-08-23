@@ -23,7 +23,8 @@ import { createNotifications } from './create_notifications';
 import { notificationServiceMock } from '../../../../core/public/mocks';
 
 test('throws if no overlays service provided', () => {
-  expect(() => createNotifications({})).toThrowErrorMatchingInlineSnapshot(
+  const notifications = createNotifications({});
+  expect(() => notifications.toasts.show({})).toThrowErrorMatchingInlineSnapshot(
     `"Could not create KibanaReactNotifications as notifications service is not available."`
   );
 });

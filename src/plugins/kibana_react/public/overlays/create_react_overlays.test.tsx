@@ -21,7 +21,8 @@ import * as React from 'react';
 import { createReactOverlays } from './create_react_overlays';
 
 test('throws if no overlays service provided', () => {
-  expect(() => createReactOverlays({})).toThrowErrorMatchingInlineSnapshot(
+  const overlays = createReactOverlays({});
+  expect(() => overlays.openFlyout(null)).toThrowErrorMatchingInlineSnapshot(
     `"Could not create KibanaReactOverlays as overlays service is not available."`
   );
 });
