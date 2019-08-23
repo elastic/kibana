@@ -21,7 +21,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { act, Simulate } from 'react-dom/test-utils';
 import { useUiSetting$ } from './use_ui_setting';
-import { createContext } from '../context';
+import { createKibanaReactContext } from '../context';
 import { KibanaServices } from '../context/types';
 import { Subject } from 'rxjs';
 import { useObservable } from '../util/use_observable';
@@ -73,7 +73,7 @@ describe('useUiSetting', () => {
 
   test('returns setting value', async () => {
     const [core] = mock();
-    const { Provider } = createContext(core);
+    const { Provider } = createKibanaReactContext(core);
 
     ReactDOM.render(
       <Provider>
@@ -90,7 +90,7 @@ describe('useUiSetting', () => {
 
   test('calls uiSettings.get() method with correct key and default value', async () => {
     const [core] = mock();
-    const { Provider } = createContext(core);
+    const { Provider } = createKibanaReactContext(core);
 
     ReactDOM.render(
       <Provider>
@@ -122,7 +122,7 @@ describe('useUiSetting$', () => {
 
   test('synchronously renders setting value', async () => {
     const [core] = mock();
-    const { Provider } = createContext(core);
+    const { Provider } = createKibanaReactContext(core);
 
     ReactDOM.render(
       <Provider>
@@ -139,7 +139,7 @@ describe('useUiSetting$', () => {
 
   test('calls Core with correct arguments', async () => {
     const core = coreMock.createStart();
-    const { Provider } = createContext(core);
+    const { Provider } = createKibanaReactContext(core);
 
     ReactDOM.render(
       <Provider>
@@ -153,7 +153,7 @@ describe('useUiSetting$', () => {
 
   test('subscribes to observable using useObservable', async () => {
     const [core, subject] = mock();
-    const { Provider } = createContext(core);
+    const { Provider } = createKibanaReactContext(core);
 
     expect(useObservableSpy).toHaveBeenCalledTimes(0);
 
@@ -170,7 +170,7 @@ describe('useUiSetting$', () => {
 
   test('can set new hook value', async () => {
     const [core] = mock();
-    const { Provider } = createContext(core);
+    const { Provider } = createKibanaReactContext(core);
 
     ReactDOM.render(
       <Provider>

@@ -28,7 +28,7 @@ import {
   DashboardReactContext,
 } from './dashboard_container';
 import { DashboardCapabilities } from '../types';
-import { createContext } from '../../../../../../../../plugins/kibana_react/public';
+import { createKibanaReactContext } from '../../../../../../../../plugins/kibana_react/public';
 
 export const DASHBOARD_CONTAINER_TYPE = 'dashboard';
 
@@ -57,7 +57,7 @@ export class DashboardContainerFactory extends EmbeddableFactory<
     }
 
     this.allowEditing = !!capabilities.createNew && !!capabilities.showWriteControls;
-    this.context = createContext<DashboardOptions>(options);
+    this.context = createKibanaReactContext<DashboardOptions>(options);
   }
 
   public isEditable() {
