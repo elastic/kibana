@@ -141,15 +141,20 @@ async function combineFieldsAndAggs(
     if (a.type === METRIC_AGG_TYPE) {
       switch (a.dslName) {
         case ES_AGGREGATION.COUNT:
+          // count doesn't take any fields, so break here
           break;
         case ES_AGGREGATION.CARDINALITY:
+          // distinct count (i.e. cardinality) takes keywords, ips
+          // as well as numerical fields
           keywordFields.forEach(f => {
             mix(f, a);
           });
           ipFields.forEach(f => {
             mix(f, a);
           });
+        // note, no break to fall through to add numerical fields.
         default:
+          // all other aggs take numerical fields
           numericalFields.forEach(f => {
             mix(f, a);
           });
