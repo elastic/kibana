@@ -41,6 +41,7 @@ import { Start as EmbeddableStartContract } from '../../../../../../embeddable_a
 import {
   KibanaReactContext,
   KibanaReactContextValue,
+  KibanaContextProvider,
 } from '../../../../../../../../plugins/kibana_react/public';
 
 export interface DashboardContainerInput extends ContainerInput {
@@ -91,8 +92,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   constructor(
     initialInput: DashboardContainerInput,
-    options: DashboardContainerOptions,
-    private readonly context: DashboardReactContext,
+    private readonly options: DashboardContainerOptions,
     parent?: Container
   ) {
     super(
@@ -121,12 +121,11 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   }
 
   public render(dom: HTMLElement) {
-    const { Provider } = this.context;
     ReactDOM.render(
       <I18nProvider>
-        <Provider>
+        <KibanaContextProvider services={this.options}>
           <DashboardViewport container={this} />
-        </Provider>
+        </KibanaContextProvider>
       </I18nProvider>,
       dom
     );

@@ -64,7 +64,7 @@ beforeEach(async () => {
       }),
     },
   });
-  container = new DashboardContainer(input, options, context);
+  container = new DashboardContainer(input, options);
 
   const contactCardEmbeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,

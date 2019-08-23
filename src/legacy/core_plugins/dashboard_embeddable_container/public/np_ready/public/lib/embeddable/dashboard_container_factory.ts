@@ -25,10 +25,8 @@ import {
   DashboardContainer,
   DashboardContainerInput,
   DashboardContainerOptions,
-  DashboardReactContext,
 } from './dashboard_container';
 import { DashboardCapabilities } from '../types';
-import { createKibanaReactContext } from '../../../../../../../../plugins/kibana_react/public';
 
 export const DASHBOARD_CONTAINER_TYPE = 'dashboard';
 
@@ -44,7 +42,6 @@ export class DashboardContainerFactory extends EmbeddableFactory<
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
   private readonly allowEditing: boolean;
-  private readonly context: DashboardReactContext;
 
   constructor(private readonly options: DashboardOptions) {
     super({ savedObjectMetaData: options.savedObjectMetaData });
@@ -57,7 +54,6 @@ export class DashboardContainerFactory extends EmbeddableFactory<
     }
 
     this.allowEditing = !!capabilities.createNew && !!capabilities.showWriteControls;
-    this.context = createKibanaReactContext<DashboardOptions>(options);
   }
 
   public isEditable() {
@@ -82,6 +78,6 @@ export class DashboardContainerFactory extends EmbeddableFactory<
     initialInput: DashboardContainerInput,
     parent?: Container
   ): Promise<DashboardContainer | ErrorEmbeddable> {
-    return new DashboardContainer(initialInput, this.options, this.context, parent);
+    return new DashboardContainer(initialInput, this.options, parent);
   }
 }

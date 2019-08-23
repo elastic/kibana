@@ -31,7 +31,7 @@ import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
 } from '../../../../../../../embeddable_api/public/np_ready/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
-import { createKibanaReactContext } from '../../../../../../../../../plugins/kibana_react/public';
+import { KibanaContextProvider } from '../../../../../../../../../plugins/kibana_react/public';
 
 let dashboardContainer: DashboardContainer | undefined;
 
@@ -69,8 +69,7 @@ function prepare(props?: Partial<DashboardGridProps>) {
     SavedObjectFinder: () => null,
     ExitFullScreenButton: () => null,
   };
-  const context = createKibanaReactContext(options);
-  dashboardContainer = new DashboardContainer(initialInput, options, context);
+  dashboardContainer = new DashboardContainer(initialInput, options);
   const defaultTestProps: DashboardGridProps = {
     container: dashboardContainer,
     kibana: null as any,
@@ -79,7 +78,7 @@ function prepare(props?: Partial<DashboardGridProps>) {
 
   return {
     props: Object.assign(defaultTestProps, props),
-    context,
+    options,
   };
 }
 
@@ -94,11 +93,11 @@ afterAll(() => {
 });
 
 test('renders DashboardGrid', () => {
-  const { props, context } = prepare();
+  const { props, options } = prepare();
   const component = mountWithIntl(
-    <context.Provider>
+    <KibanaContextProvider services={options}>
       <DashboardGrid {...props} />
-    </context.Provider>
+    </KibanaContextProvider>
   );
 
   const panelElements = component.find('EmbeddableChildPanelUi');
@@ -106,11 +105,11 @@ test('renders DashboardGrid', () => {
 });
 
 test('renders DashboardGrid with no visualizations', async () => {
-  const { props, context } = prepare();
+  const { props, options } = prepare();
   const component = mountWithIntl(
-    <context.Provider>
+    <KibanaContextProvider services={options}>
       <DashboardGrid {...props} />
-    </context.Provider>
+    </KibanaContextProvider>
   );
 
   props.container.updateInput({ panels: {} });
@@ -120,11 +119,11 @@ test('renders DashboardGrid with no visualizations', async () => {
 });
 
 test('DashboardGrid removes panel when removed from container', async () => {
-  const { props, context } = prepare();
+  const { props, options } = prepare();
   const component = mountWithIntl(
-    <context.Provider>
+    <KibanaContextProvider services={options}>
       <DashboardGrid {...props} />
-    </context.Provider>
+    </KibanaContextProvider>
   );
 
   const originalPanels = props.container.getInput().panels;
@@ -138,11 +137,11 @@ test('DashboardGrid removes panel when removed from container', async () => {
 });
 
 test('DashboardGrid renders expanded panel', async () => {
-  const { props, context } = prepare();
+  const { props, options } = prepare();
   const component = mountWithIntl(
-    <context.Provider>
+    <KibanaContextProvider services={options}>
       <DashboardGrid {...props} />
-    </context.Provider>
+    </KibanaContextProvider>
   );
 
   props.container.updateInput({ expandedPanelId: '1' });
@@ -166,11 +165,11 @@ test('DashboardGrid renders expanded panel', async () => {
 });
 
 test('DashboardGrid unmount unsubscribes', async done => {
-  const { props, context } = prepare();
+  const { props, options } = prepare();
   const component = mountWithIntl(
-    <context.Provider>
+    <KibanaContextProvider services={options}>
       <DashboardGrid {...props} />
-    </context.Provider>
+    </KibanaContextProvider>
   );
 
   component.unmount();

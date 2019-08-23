@@ -32,7 +32,6 @@ import {
   ContactCardEmbeddable,
   ContactCardEmbeddableOutput,
 } from '../../../../../../embeddable_api/public/np_ready/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable';
-import { createKibanaReactContext } from '../../../../../../../../plugins/kibana_react/public';
 
 const options: DashboardContainerOptions = {
   application: {} as any,
@@ -66,11 +65,7 @@ test('DashboardContainer initializes embeddables', async done => {
       }),
     },
   });
-  const container = new DashboardContainer(
-    initialInput,
-    options,
-    createKibanaReactContext(options)
-  );
+  const container = new DashboardContainer(initialInput, options);
 
   const subscription = container.getOutput$().subscribe(output => {
     if (container.getOutput().embeddableLoaded['123']) {
@@ -91,11 +86,7 @@ test('DashboardContainer initializes embeddables', async done => {
 });
 
 test('DashboardContainer.addNewEmbeddable', async () => {
-  const container = new DashboardContainer(
-    getSampleDashboardInput(),
-    options,
-    createKibanaReactContext(options)
-  );
+  const container = new DashboardContainer(getSampleDashboardInput(), options);
   const embeddable = await container.addNewEmbeddable<ContactCardEmbeddableInput>(
     CONTACT_CARD_EMBEDDABLE,
     {
@@ -124,11 +115,7 @@ test('Container view mode change propagates to existing children', async () => {
       }),
     },
   });
-  const container = new DashboardContainer(
-    initialInput,
-    options,
-    createKibanaReactContext(options)
-  );
+  const container = new DashboardContainer(initialInput, options);
   await nextTick();
 
   const embeddable = await container.getChild('123');
@@ -138,11 +125,7 @@ test('Container view mode change propagates to existing children', async () => {
 });
 
 test('Container view mode change propagates to new children', async () => {
-  const container = new DashboardContainer(
-    getSampleDashboardInput(),
-    options,
-    createKibanaReactContext(options)
-  );
+  const container = new DashboardContainer(getSampleDashboardInput(), options);
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
     ContactCardEmbeddableOutput,

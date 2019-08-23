@@ -26,17 +26,13 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { nextTick } from 'test_utils/enzyme_helpers';
 import { EmbeddableFactory } from '../../embeddable_api';
 import { DashboardViewport, DashboardViewportProps } from './dashboard_viewport';
-import {
-  DashboardContainer,
-  DashboardContainerOptions,
-  DashboardReactContext,
-} from '../dashboard_container';
+import { DashboardContainer, DashboardContainerOptions } from '../dashboard_container';
 import { getSampleDashboardInput } from '../../test_helpers';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
 } from '../../../../../../../embeddable_api/public/np_ready/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
-import { createKibanaReactContext } from '../../../../../../../../../plugins/kibana_react/public';
+import { KibanaContextProvider } from '../../../../../../../../../plugins/kibana_react/public';
 
 let dashboardContainer: DashboardContainer | undefined;
 
@@ -44,7 +40,7 @@ const ExitFullScreenButton = () => <div data-test-subj="exitFullScreenModeText">
 
 function getProps(
   props?: Partial<DashboardViewportProps>
-): { props: DashboardViewportProps; context: DashboardReactContext } {
+): { props: DashboardViewportProps; options: DashboardContainerOptions } {
   const embeddableFactories = new Map<string, EmbeddableFactory>();
   embeddableFactories.set(
     CONTACT_CARD_EMBEDDABLE,
@@ -65,8 +61,6 @@ function getProps(
     ExitFullScreenButton,
   };
 
-  const context = createKibanaReactContext(options);
-
   const input = getSampleDashboardInput({
     panels: {
       '1': {
@@ -82,24 +76,24 @@ function getProps(
     },
   });
 
-  dashboardContainer = new DashboardContainer(input, options, context);
+  dashboardContainer = new DashboardContainer(input, options);
   const defaultTestProps: DashboardViewportProps = {
     container: dashboardContainer,
   };
 
   return {
     props: Object.assign(defaultTestProps, props),
-    context,
+    options,
   };
 }
 
 test('renders DashboardViewport', () => {
-  const { props, context } = getProps();
+  const { props, options } = getProps();
   const component = mount(
     <I18nProvider>
-      <context.Provider>
+      <KibanaContextProvider services={options}>
         <DashboardViewport {...props} />
-      </context.Provider>
+      </KibanaContextProvider>
     </I18nProvider>
   );
   const panels = findTestSubject(component, 'dashboardPanel');
@@ -107,13 +101,13 @@ test('renders DashboardViewport', () => {
 });
 
 test('renders DashboardViewport with no visualizations', () => {
-  const { props, context } = getProps();
+  const { props, options } = getProps();
   props.container.updateInput({ panels: {} });
   const component = mount(
     <I18nProvider>
-      <context.Provider>
+      <KibanaContextProvider services={options}>
         <DashboardViewport {...props} />
-      </context.Provider>
+      </KibanaContextProvider>
     </I18nProvider>
   );
   const panels = findTestSubject(component, 'dashboardPanel');
@@ -123,13 +117,13 @@ test('renders DashboardViewport with no visualizations', () => {
 });
 
 test('renders exit full screen button when in full screen mode', async () => {
-  const { props, context } = getProps();
+  const { props, options } = getProps();
   props.container.updateInput({ isFullScreenMode: true });
   const component = mount(
     <I18nProvider>
-      <context.Provider>
+      <KibanaContextProvider services={options}>
         <DashboardViewport {...props} />
-      </context.Provider>
+      </KibanaContextProvider>
     </I18nProvider>
   );
 
@@ -155,12 +149,12 @@ test('renders exit full screen button when in full screen mode', async () => {
 });
 
 test('DashboardViewport unmount unsubscribes', async done => {
-  const { props, context } = getProps();
+  const { props, options } = getProps();
   const component = mount(
     <I18nProvider>
-      <context.Provider>
+      <KibanaContextProvider services={options}>
         <DashboardViewport {...props} />
-      </context.Provider>
+      </KibanaContextProvider>
     </I18nProvider>
   );
   component.unmount();

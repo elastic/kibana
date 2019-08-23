@@ -42,7 +42,7 @@ import { embeddablePluginMock } from '../../../../../embeddable_api/public/np_re
 import { EditModeAction } from '../../../../../embeddable_api/public/np_ready/public/lib/test_samples/actions/edit_mode_action';
 // eslint-disable-next-line
 import { inspectorPluginMock } from '../../../../../../../plugins/inspector/public/mocks';
-import { createKibanaReactContext } from '../../../../../../../plugins/kibana_react/public';
+import { KibanaContextProvider } from '../../../../../../../plugins/kibana_react/public';
 
 test('DashboardContainer in edit mode shows edit mode actions', async () => {
   const inspector = inspectorPluginMock.createStartContract();
@@ -68,11 +68,7 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
     SavedObjectFinder: () => null,
     ExitFullScreenButton: () => null,
   };
-  const container = new DashboardContainer(
-    initialInput,
-    options,
-    createKibanaReactContext(options)
-  );
+  const container = new DashboardContainer(initialInput, options);
 
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
@@ -84,16 +80,18 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
 
   const component = mount(
     <I18nProvider>
-      <EmbeddablePanel
-        embeddable={embeddable}
-        getActions={() => Promise.resolve([])}
-        getAllEmbeddableFactories={(() => []) as any}
-        getEmbeddableFactory={(() => null) as any}
-        notifications={{} as any}
-        overlays={{} as any}
-        inspector={inspector}
-        SavedObjectFinder={() => null}
-      />
+      <KibanaContextProvider services={options}>
+        <EmbeddablePanel
+          embeddable={embeddable}
+          getActions={() => Promise.resolve([])}
+          getAllEmbeddableFactories={(() => []) as any}
+          getEmbeddableFactory={(() => null) as any}
+          notifications={{} as any}
+          overlays={{} as any}
+          inspector={inspector}
+          SavedObjectFinder={() => null}
+        />
+      </KibanaContextProvider>
     </I18nProvider>
   );
 
