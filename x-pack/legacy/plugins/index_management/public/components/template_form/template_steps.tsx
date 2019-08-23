@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 
 interface Props {
   currentStep: number;
-  maxCompletedStep: number;
   updateCurrentStep: (step: number, maxCompletedStep: number) => void;
+  isCurrentStepValid: boolean;
 }
 
 const stepNamesMap: { [key: number]: string } = {
@@ -34,14 +34,15 @@ const stepNamesMap: { [key: number]: string } = {
 
 export const TemplateSteps: React.FunctionComponent<Props> = ({
   currentStep,
-  maxCompletedStep,
   updateCurrentStep,
+  isCurrentStepValid,
 }) => {
   const steps = [1, 2, 3, 4, 5].map(step => {
     return {
       title: stepNamesMap[step],
-      isComplete: maxCompletedStep >= step,
+      isComplete: currentStep > step,
       isSelected: currentStep === step,
+      disabled: step !== currentStep && !isCurrentStepValid,
       onClick: () => updateCurrentStep(step, step - 1),
     };
   });

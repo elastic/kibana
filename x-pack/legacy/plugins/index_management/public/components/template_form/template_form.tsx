@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
@@ -65,7 +65,6 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
 }) => {
   // hooks
   const [currentStep, setCurrentStep] = useState<number>(1);
-  const [maxCompletedStep, setMaxCompletedStep] = useState<number>(0);
   const [template, setTemplate] = useState<Template>(initialTemplate);
   const [validation, setValidation] = useState<{ [key: number]: TemplateValidation }>({
     1: defaultValidation,
@@ -84,53 +83,47 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
   const stepErrors = validation[currentStep].errors;
   const isStepValid = validation[currentStep].isValid;
 
-  const validationErrors = Object.keys(stepErrors).reduce((acc: any, key: string) => {
-    return [...acc, ...stepErrors[key]];
-  }, []);
+  const updateValidation = (templateToValidate: Template): void => {
+    const stepValidation = validateStep(templateToValidate);
+
+    const newValidation = {
+      ...validation,
+      ...{
+        [currentStep]: stepValidation,
+      },
+    };
+
+    setValidation(newValidation);
+  };
 
   const updateTemplate = (updatedTemplate: Partial<Template>): void => {
     const newTemplate = { ...template, ...updatedTemplate };
 
+    updateValidation(newTemplate);
     setTemplate(newTemplate);
   };
 
-  const updateCurrentStep = (nextStep: number, nextMaxCompletedStep: number) => {
+  const updateCurrentStep = (nextStep: number) => {
     // All steps needs validation, except for the last step
     const shouldValidate = currentStep !== lastStep;
 
-    if (shouldValidate) {
-      const stepValidation = validateStep(template);
-
-      const { isValid: isCurrentStepValid } = stepValidation;
-
-      const newValidation = {
-        ...validation,
-        ...{
-          [currentStep]: stepValidation,
-        },
-      };
-
-      setValidation(newValidation);
-
-      // If step is invalid do not let user proceed
-      if (!isCurrentStepValid) {
-        return;
-      }
+    // If step is invalid do not let user proceed
+    if (shouldValidate && !isStepValid) {
+      return;
     }
 
     setCurrentStep(nextStep);
-    setMaxCompletedStep(nextMaxCompletedStep);
     clearSaveError();
   };
 
   const onBack = () => {
     const prevStep = currentStep - 1;
-    updateCurrentStep(prevStep, prevStep - 1);
+    updateCurrentStep(prevStep);
   };
 
   const onNext = () => {
     const nextStep = currentStep + 1;
-    updateCurrentStep(nextStep, Math.max(currentStep, maxCompletedStep));
+    updateCurrentStep(nextStep);
   };
 
   const saveButtonLabel = isEditing ? (
@@ -145,12 +138,16 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
     />
   );
 
+  useEffect(() => {
+    updateValidation(template);
+  }, []);
+
   return (
     <Fragment>
       <TemplateSteps
         currentStep={currentStep}
-        maxCompletedStep={maxCompletedStep}
         updateCurrentStep={updateCurrentStep}
+        isCurrentStepValid={isStepValid}
       />
 
       <EuiSpacer size="l" />
@@ -171,7 +168,7 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
         </Fragment>
       ) : null}
 
-      <EuiForm isInvalid={!isStepValid} error={validationErrors} data-test-subj="templateForm">
+      <EuiForm data-test-subj="templateForm">
         <CurrentStepComponent
           template={template}
           updateTemplate={updateTemplate}
@@ -202,6 +199,7 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
                     iconType="arrowRight"
                     onClick={onNext}
                     iconSide="right"
+                    disabled={!isStepValid}
                     data-test-subj="nextButton"
                   >
                     <FormattedMessage

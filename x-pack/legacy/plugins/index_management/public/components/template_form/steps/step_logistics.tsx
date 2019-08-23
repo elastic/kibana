@@ -34,11 +34,18 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
   const { name, order, version, indexPatterns } = template;
   const { name: nameError, indexPatterns: indexPatternsError } = errors;
 
+  // hooks
   const [allIndexPatterns, setAllIndexPatterns] = useState<Template['indexPatterns']>([]);
+  const [touchedFields, setTouchedFields] = useState({
+    name: false,
+    indexPatterns: false,
+  });
 
   const indexPatternOptions = indexPatterns
     ? indexPatterns.map(pattern => ({ label: pattern, value: pattern }))
     : [];
+
+  const { name: isNameTouched, indexPatterns: isIndexPatternsTouched } = touchedFields;
 
   return (
     <div data-test-subj="stepLogistics">
@@ -98,13 +105,14 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
               defaultMessage="Name"
             />
           }
-          isInvalid={Boolean(nameError)}
+          isInvalid={isNameTouched && Boolean(nameError)}
           error={nameError}
           fullWidth
         >
           <EuiFieldText
             value={name}
             readOnly={isEditing}
+            onBlur={() => setTouchedFields(prevTouched => ({ ...prevTouched, name: true }))}
             data-test-subj="nameInput"
             onChange={e => {
               updateTemplate({ name: e.target.value });
@@ -150,7 +158,7 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
               }}
             />
           }
-          isInvalid={Boolean(indexPatternsError)}
+          isInvalid={isIndexPatternsTouched && Boolean(indexPatternsError)}
           error={indexPatternsError}
           fullWidth
         >
@@ -159,6 +167,9 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
             fullWidth
             data-test-subj="indexPatternsComboBox"
             selectedOptions={indexPatternOptions}
+            onBlur={() =>
+              setTouchedFields(prevTouched => ({ ...prevTouched, indexPatterns: true }))
+            }
             onChange={(selectedPattern: EuiComboBoxOptionProps[]) => {
               const newIndexPatterns = selectedPattern.map(({ value }) => value as string);
               updateTemplate({ indexPatterns: newIndexPatterns });

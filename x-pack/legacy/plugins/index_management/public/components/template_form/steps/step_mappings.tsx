@@ -105,7 +105,7 @@ export const StepMappings: React.FunctionComponent<StepProps> = ({
           mode="json"
           theme="textmate"
           width="100%"
-          height="600px"
+          height="500px"
           setOptions={{
             showLineNumbers: false,
             tabSize: 2,
