@@ -131,6 +131,13 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
           retries,
           copyOptions.includeRelated
         );
+
+        toastNotifications.addSuccess(
+          i18n.translate('xpack.spaces.management.copyToSpace.resolveCopySuccessTitle', {
+            defaultMessage: 'Overwrite successful',
+          })
+        );
+
         onClose();
       } catch (e) {
         setCopyInProgress(false);

@@ -52,6 +52,20 @@ export const CopyToSpaceFlyoutFooter = (props: Props) => {
   const getButton = () => {
     let actionButton;
     if (initialCopyFinished) {
+      const hasPendingOverwrites = summarizedResults.overwriteConflictCount > 0;
+
+      const buttonText = hasPendingOverwrites ? (
+        <FormattedMessage
+          id="xpack.spaces.management.copyToSpace.finishPendingOverwritesCopyToSpacesButton"
+          defaultMessage="Overwrite {overwriteCount} objects"
+          values={{ overwriteCount: summarizedResults.overwriteConflictCount }}
+        />
+      ) : (
+        <FormattedMessage
+          id="xpack.spaces.management.copyToSpace.finishCopyToSpacesButton"
+          defaultMessage="Finish"
+        />
+      );
       actionButton = (
         <EuiButton
           fill
@@ -69,10 +83,7 @@ export const CopyToSpaceFlyoutFooter = (props: Props) => {
           onClick={() => props.onCopyFinish()}
           data-test-subj="cts-finish-button"
         >
-          <FormattedMessage
-            id="xpack.spaces.management.copyToSpace.finishCopyToSpacesButton"
-            defaultMessage="Finish"
-          />
+          {buttonText}
         </EuiButton>
       );
     } else {
