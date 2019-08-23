@@ -27,6 +27,25 @@ interface State {
   query: Query;
   indexPatternTitles: string[];
   persistedDoc?: Document;
+  localQueryBarState: {
+    query?: Query;
+    dateRange?: {
+      from: string;
+      to: string;
+    };
+  };
+}
+
+function isLocalStateDirty(
+  localState: State['localQueryBarState'],
+  query: Query,
+  dateRange: State['dateRange']
+) {
+  return Boolean(
+    (localState.query && query && localState.query.query !== query.query) ||
+      (localState.dateRange && dateRange.fromDate !== localState.dateRange.from) ||
+      (localState.dateRange && dateRange.toDate !== localState.dateRange.to)
+  );
 }
 
 export function App({
@@ -57,6 +76,7 @@ export function App({
       toDate: timeDefaults.to,
     },
     indexPatternTitles: [],
+    localQueryBarState: {},
   });
 
   const lastKnownDocRef = useRef<Document | undefined>(undefined);
@@ -152,9 +172,8 @@ export function App({
           <QueryBar
             data-test-subj="lnsApp_queryBar"
             screenTitle={'lens'}
-            onChange={() => {}}
-            isDirty={false}
-            onSubmit={({ dateRange, query }) => {
+            onSubmit={payload => {
+              const { dateRange, query } = payload;
               setState({
                 ...state,
                 dateRange: {
@@ -162,8 +181,13 @@ export function App({
                   toDate: dateRange.to,
                 },
                 query: query || state.query,
+                localQueryBarState: payload,
               });
             }}
+            onChange={uncommitedQueryBarState => {
+              setState({ ...state, localQueryBarState: uncommitedQueryBarState });
+            }}
+            isDirty={isLocalStateDirty(state.localQueryBarState, state.query, state.dateRange)}
             appName={'lens'}
             indexPatterns={state.indexPatternTitles}
             store={store}
