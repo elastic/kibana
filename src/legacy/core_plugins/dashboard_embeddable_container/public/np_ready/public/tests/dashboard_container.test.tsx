@@ -42,7 +42,7 @@ import { embeddablePluginMock } from '../../../../../embeddable_api/public/np_re
 import { EditModeAction } from '../../../../../embeddable_api/public/np_ready/public/lib/test_samples/actions/edit_mode_action';
 // eslint-disable-next-line
 import { inspectorPluginMock } from '../../../../../../../plugins/inspector/public/mocks';
-import { createContext } from '../../../../../../../plugins/kibana_react/public';
+import { createKibanaReactContext } from '../../../../../../../plugins/kibana_react/public';
 
 test('DashboardContainer in edit mode shows edit mode actions', async () => {
   const inspector = inspectorPluginMock.createStartContract();
@@ -68,7 +68,11 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
     SavedObjectFinder: () => null,
     ExitFullScreenButton: () => null,
   };
-  const container = new DashboardContainer(initialInput, options, createContext(options));
+  const container = new DashboardContainer(
+    initialInput,
+    options,
+    createKibanaReactContext(options)
+  );
 
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,

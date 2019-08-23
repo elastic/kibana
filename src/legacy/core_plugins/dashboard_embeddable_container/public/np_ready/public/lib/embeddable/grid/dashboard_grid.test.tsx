@@ -31,7 +31,7 @@ import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
 } from '../../../../../../../embeddable_api/public/np_ready/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
-import { createContext } from '../../../../../../../../../plugins/kibana_react/public';
+import { createKibanaReactContext } from '../../../../../../../../../plugins/kibana_react/public';
 
 let dashboardContainer: DashboardContainer | undefined;
 
@@ -69,7 +69,7 @@ function prepare(props?: Partial<DashboardGridProps>) {
     SavedObjectFinder: () => null,
     ExitFullScreenButton: () => null,
   };
-  const context = createContext(options);
+  const context = createKibanaReactContext(options);
   dashboardContainer = new DashboardContainer(initialInput, options, context);
   const defaultTestProps: DashboardGridProps = {
     container: dashboardContainer,
