@@ -14,6 +14,25 @@ export interface StatsBarStat {
   show?: boolean;
 }
 
+export interface TransformStatsBarStats {
+  total: StatsBarStat;
+  batch: StatsBarStat;
+  continuous: StatsBarStat;
+  failed: StatsBarStat;
+  started: StatsBarStat;
+}
+
+export interface JobStatsBarStats {
+  activeNodes: StatsBarStat;
+  total: StatsBarStat;
+  open: StatsBarStat;
+  failed: StatsBarStat;
+  closed: StatsBarStat;
+  activeDatafeeds: StatsBarStat;
+}
+
+export type StatsBarStats = TransformStatsBarStats | JobStatsBarStats;
+export type StatsKey = keyof StatsBarStats;
 // converts a dictionary to an array. note this loses the dictionary `key` information.
 // however it's able to retain the type information of the dictionary elements.
 export function dictionaryToArray<TValue>(dict: Dictionary<TValue>): TValue[] {

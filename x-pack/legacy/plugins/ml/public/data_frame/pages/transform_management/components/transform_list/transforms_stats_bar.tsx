@@ -6,18 +6,10 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Stat } from '../../../../../components/stat';
+import { StatsBar } from '../../../../../components/stats_bar';
 import { DATA_FRAME_TRANSFORM_STATE, DATA_FRAME_MODE, DataFrameTransformListRow } from './common';
 
-import { StatsBarStat } from '../../../../../../common/types/common';
-
-interface TransFormStats {
-  total: StatsBarStat;
-  batch: StatsBarStat;
-  continuous: StatsBarStat;
-  failed: StatsBarStat;
-  started: StatsBarStat;
-}
+import { TransformStatsBarStats } from '../../../../../../common/types/common';
 
 function createTranformStats(transformsList: DataFrameTransformListRow[]) {
   const transformStats = {
@@ -94,19 +86,8 @@ interface Props {
   transformsList: DataFrameTransformListRow[];
 }
 
-type StatsKey = keyof TransFormStats;
-
 export const TransformStatsBar: FC<Props> = ({ transformsList }) => {
-  const transformStats: TransFormStats = createTranformStats(transformsList);
-  const stats = Object.keys(transformStats).map(k => transformStats[k as StatsKey]);
+  const transformStats: TransformStatsBarStats = createTranformStats(transformsList);
 
-  return (
-    <div className="jobs-stats-bar" data-test-subj="mlTransformStatsBar">
-      {stats
-        .filter(s => s.show)
-        .map(s => (
-          <Stat key={s.label} stat={s} />
-        ))}
-    </div>
-  );
+  return <StatsBar stats={transformStats} dataTestSub={'mlTransformStatsBar'} />;
 };

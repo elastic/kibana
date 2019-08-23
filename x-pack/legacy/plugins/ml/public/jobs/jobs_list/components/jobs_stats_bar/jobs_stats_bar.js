@@ -6,7 +6,7 @@
 
 
 import { JOB_STATE, DATAFEED_STATE } from 'plugins/ml/../common/constants/states';
-import { Stat } from '../../../../components/stat';
+import { StatsBar } from '../../../../components/stats_bar';
 
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -102,14 +102,9 @@ function createJobStats(jobsSummaryList) {
 
 export const JobStatsBar = ({ jobsSummaryList }) => {
   const jobStats = createJobStats(jobsSummaryList);
-  const stats = Object.keys(jobStats).map(k => jobStats[k]);
 
   return (
-    <div className="jobs-stats-bar" data-test-subj="mlJobStatsBar">
-      {
-        stats.filter(s => (s.show)).map(s => <Stat key={s.label} stat={s} />)
-      }
-    </div>
+    <StatsBar stats={jobStats} dataTestSub={'mlJobStatsBar'}/>
   );
 };
 
