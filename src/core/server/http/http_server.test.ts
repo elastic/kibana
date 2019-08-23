@@ -508,7 +508,6 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
 });
 
 test('with defined `redirectHttpFromPort`', async () => {
-
   const router = new Router('/', logger, enhanceWithContext);
   router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'value:/' }));
 
