@@ -17,22 +17,5 @@
  * under the License.
  */
 
-import * as React from 'react';
-import { KibanaReactContextValue, Core } from './types';
-
-export const context = React.createContext<KibanaReactContextValue>({
-  core: {},
-});
-
-export const createContext = (core: Core, plugins?: any) => {
-  const value: KibanaReactContextValue = { core };
-  const Provider: React.FC = ({ children }) =>
-    React.createElement(context.Provider, { value, children });
-
-  return {
-    Provider,
-    Consumer: context.Consumer,
-  };
-};
-
-export const useKibana = (): KibanaReactContextValue => React.useContext(context);
+export * from './types';
+export * from './create_notifications';

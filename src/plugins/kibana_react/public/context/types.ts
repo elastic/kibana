@@ -17,5 +17,23 @@
  * under the License.
  */
 
-export { context, createContext, useKibana } from './context';
-export { KibanaReactContextValue } from './types';
+import * as React from 'react';
+import { CoreStart } from '../../../../core/public';
+import { KibanaReactOverlays } from '../overlays';
+import { KibanaReactNotifications } from '../notifications';
+
+export { CoreStart };
+
+export type KibanaServices = Partial<CoreStart>;
+
+export interface KibanaReactContextValue<Services extends KibanaServices> {
+  readonly services: Services;
+  readonly overlays: KibanaReactOverlays;
+  readonly notifications: KibanaReactNotifications;
+}
+
+export interface KibanaReactContext<T extends KibanaServices> {
+  value: KibanaReactContextValue<T>;
+  Provider: React.FC<{ services?: T }>;
+  Consumer: React.Consumer<KibanaReactContextValue<T>>;
+}
