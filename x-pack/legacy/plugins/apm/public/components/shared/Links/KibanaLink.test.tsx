@@ -8,7 +8,7 @@ import { Location } from 'history';
 import React from 'react';
 import { getRenderedHref } from '../../../utils/testHelpers';
 import { KibanaLink } from './KibanaLink';
-import * as hooks from '../../../hooks/useCore';
+import * as kibanaCore from '../../../../../observability/public/context/kibana_core';
 import { InternalCoreStart } from 'src/core/public';
 
 describe('KibanaLink', () => {
@@ -21,7 +21,7 @@ describe('KibanaLink', () => {
       }
     } as unknown) as InternalCoreStart;
 
-    jest.spyOn(hooks, 'useCore').mockReturnValue(coreMock);
+    jest.spyOn(kibanaCore, 'useKibanaCore').mockReturnValue(coreMock);
   });
 
   afterEach(() => {

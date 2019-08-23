@@ -7,10 +7,10 @@
 import { i18n } from '@kbn/i18n';
 import { useEffect } from 'react';
 import { capabilities } from 'ui/capabilities';
-import { useCore } from '../../../hooks/useCore';
+import { useKibanaCore } from '../../../../../observability/public';
 
 export const useUpdateBadgeEffect = () => {
-  const { chrome } = useCore();
+  const { chrome } = useKibanaCore();
 
   useEffect(() => {
     const uiCapabilities = capabilities.get();
