@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { createHash } from 'crypto';
 import { LicenseFeature } from './license_feature';
 import { LICENSE_STATUS, LICENSE_TYPE } from './constants';
-import { LicenseType } from './types';
+import { LicenseType, ILicensingPluginSetup } from './types';
 
 function toLicenseType(minimumLicenseRequired: LICENSE_TYPE | string) {
   if (typeof minimumLicenseRequired !== 'string') {
@@ -22,8 +22,8 @@ function toLicenseType(minimumLicenseRequired: LICENSE_TYPE | string) {
   return LICENSE_TYPE[minimumLicenseRequired as LicenseType];
 }
 
-export class LicensingPluginSetup {
-  private readonly _license: any;
+export class LicensingPluginSetup implements ILicensingPluginSetup {
+  private readonly hasLicense: boolean;
   private readonly license: any;
   private readonly features: any;
   private _signature!: string;
@@ -36,7 +36,7 @@ export class LicensingPluginSetup {
     private error: Error | null,
     private clusterSource: string
   ) {
-    this._license = license;
+    this.hasLicense = Boolean(license);
     this.license = license || {};
     this.features = features;
     this.featuresMap = new Map<string, LicenseFeature>();
@@ -63,7 +63,7 @@ export class LicensingPluginSetup {
   }
 
   public get isAvailable() {
-    return !!this._license;
+    return this.hasLicense;
   }
 
   public get isBasic() {
@@ -75,7 +75,7 @@ export class LicensingPluginSetup {
   }
 
   public get reasonUnavailable() {
-    if (!this._license) {
+    if (!this.isAvailable) {
       return `[${this.clusterSource}] Elasticsearch cluster did not respond with license information.`;
     }
 
@@ -168,7 +168,7 @@ export class LicensingPluginSetup {
     return this.objectified;
   }
 
-  feature(name: string) {
+  getFeature(name: string) {
     if (!this.featuresMap.has(name)) {
       this.featuresMap.set(name, new LicenseFeature(name, this.features[name], this));
     }
