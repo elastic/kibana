@@ -79,3 +79,7 @@ export function isCompletedBatchAnalytics(item: DataFrameAnalyticsListRow) {
   // For now all analytics jobs are batch jobs.
   return false;
 }
+
+export function getResultsUrl(jobId: string) {
+  return `ml#/data_frame_analytics/exploration?_g=(ml:(jobId:${jobId}))`;
+}

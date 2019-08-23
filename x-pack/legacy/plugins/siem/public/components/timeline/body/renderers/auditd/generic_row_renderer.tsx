@@ -31,10 +31,10 @@ export const createGenericAuditRowRenderer = ({
       action.toLowerCase() === actionName
     );
   },
-  renderRow: ({ browserFields, data, width, children }) => (
+  renderRow: ({ browserFields, data, children }) => (
     <Row>
       {children}
-      <RowRendererContainer width={width}>
+      <RowRendererContainer>
         <AuditdGenericDetails
           browserFields={browserFields}
           data={data}
@@ -65,10 +65,10 @@ export const createGenericFileRowRenderer = ({
       action.toLowerCase() === actionName
     );
   },
-  renderRow: ({ browserFields, data, width, children }) => (
+  renderRow: ({ browserFields, data, children }) => (
     <Row>
       {children}
-      <RowRendererContainer width={width}>
+      <RowRendererContainer>
         <AuditdGenericFileDetails
           browserFields={browserFields}
           data={data}
