@@ -25721,9 +25721,10 @@ static-extend@^0.1.1:
     define-property "^0.2.5"
     object-copy "^0.1.0"
 
-"static-fs@link:../../projects/static-fs":
-  version "0.0.0"
-  uid ""
+static-fs@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/static-fs/-/static-fs-1.0.0.tgz#331ad0fe902fb8e4d16187254b460b53ba739bd5"
+  integrity sha512-YR0BZQ46QDapA3s89QpJqz4O16Ip7KQ5+0MlzSD0j6XMfOO45/qsUdkxR9brsuFJZ40BGgG3zIn+fGP7n9KvRQ==
 
 static-module@^1.1.0:
   version "1.5.0"
