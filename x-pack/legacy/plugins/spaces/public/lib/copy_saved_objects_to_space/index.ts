@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SpacesClient } from './spaces_client';
+export * from './summarize_copy_result';
+export { CopyToSpaceSavedObjectsManagementAction } from './copy_saved_objects_to_space_action';
