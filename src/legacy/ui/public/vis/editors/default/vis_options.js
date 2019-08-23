@@ -34,6 +34,7 @@ uiModules
     ['aggs', { watchDepth: 'collection' }],
     ['stateParams', { watchDepth: 'collection' }],
     ['vis', { watchDepth: 'collection' }],
+    ['uiState', { watchDepth: 'collection' }],
     ['setValue', { watchDepth: 'reference' }],
     ['setValidity', { watchDepth: 'reference' }],
     ['setVisType', { watchDepth: 'reference' }],
@@ -79,11 +80,13 @@ uiModules
           $scope.editor :
           `<vis-options-react-wrapper
             component="editor"
+            aggs="editorState.aggs"
             has-histogram-agg="hasHistogramAgg"
             aggs="editorState.aggs"
             current-tab="$parent.$parent.sidebar.section"
             state-params="editorState.params"
             vis="vis"
+            ui-state="uiState"
             set-value="setValue"
             set-validity="setValidity"
             set-vis-type="setVisType"

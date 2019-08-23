@@ -22,6 +22,7 @@ import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 
 interface TextInputOptionProps<ParamName extends string> {
   id?: string;
+  disabled?: boolean;
   helpText?: React.ReactNode;
   label?: React.ReactNode;
   paramName: ParamName;
@@ -31,6 +32,7 @@ interface TextInputOptionProps<ParamName extends string> {
 
 function TextInputOption<ParamName extends string>({
   id,
+  disabled,
   helpText,
   label,
   paramName,
@@ -42,6 +44,7 @@ function TextInputOption<ParamName extends string>({
       <EuiFieldText
         id={id}
         fullWidth
+        disabled={disabled}
         value={value}
         onChange={ev => setValue(paramName, ev.target.value)}
       />

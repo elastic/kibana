@@ -38,6 +38,7 @@ import {
   getAxisModes,
   getScaleTypes
 } from './utils/collections';
+import { palettes } from '@elastic/eui/lib/services';
 
 export default function PointSeriesVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
@@ -116,7 +117,14 @@ export default function PointSeriesVisType(Private) {
         legendPosition: LegendPositions.RIGHT,
         times: [],
         addTimeMarker: false,
-        labels: {},
+        thresholdLine: {
+          show: false,
+          value: 10,
+          width: 1,
+          style: 'full',
+          color: palettes.euiPaletteColorBlind.colors[9]
+        },
+        labels: {}
       },
     },
     editorConfig: {

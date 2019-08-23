@@ -47,6 +47,15 @@ export interface Scale {
   setYExtents?: boolean;
   type: string;
 }
+
+interface ThresholdLine {
+  show: boolean;
+  value: number;
+  width: number;
+  style: 'full' | 'dashed' | 'dot-dashed';
+  color: string;
+}
+
 export interface Axis {
   id: string;
   labels: Labels;
@@ -79,6 +88,7 @@ export interface BasicVislibParams extends CommonVislibParams {
   categoryAxes: Axis[];
   orderBucketsBySum?: boolean;
   labels: Labels;
+  thresholdLine: ThresholdLine;
   valueAxes: ValueAxis[];
   grid: {
     categoryLines: boolean;

@@ -25,6 +25,7 @@ interface NumberInputOptionProps<ParamName extends string> {
   label?: React.ReactNode;
   max?: number;
   min?: number;
+  step?: string | number;
   paramName: ParamName;
   step?: number;
   value?: number | '';
@@ -45,6 +46,7 @@ function NumberInputOption<ParamName extends string>({
     <EuiFormRow label={label} error={errors} isInvalid={!!errors.length} fullWidth compressed>
       <EuiFieldNumber
         fullWidth
+        step={step}
         max={max}
         min={min}
         step={step}

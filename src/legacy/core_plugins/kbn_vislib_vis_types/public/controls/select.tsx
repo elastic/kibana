@@ -21,10 +21,12 @@ import React from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 
 interface SelectOptionProps<ParamName extends string, ValidParamValues extends string | number> {
+  disabled?: boolean;
+  helpText?: React.ReactNode;
   id?: string;
   label: string;
   labelAppend?: React.ReactNode;
-  options: Array<{ value: ValidParamValues; text: string }>;
+  options: ReadonlyArray<{ readonly value: ValidParamValues; readonly text: string }>;
   paramName: ParamName;
   value?: ValidParamValues;
   setValue: (paramName: ParamName, value: ValidParamValues) => void;
@@ -33,6 +35,8 @@ interface SelectOptionProps<ParamName extends string, ValidParamValues extends s
 const emptyValue = { text: '', value: 'EMPTY_VALUE', disabled: true, hidden: true };
 
 function SelectOption<ParamName extends string, ValidParamValues extends string | number>({
+  disabled,
+  helpText,
   id,
   label,
   labelAppend,
@@ -42,8 +46,16 @@ function SelectOption<ParamName extends string, ValidParamValues extends string 
   setValue,
 }: SelectOptionProps<ParamName, ValidParamValues>) {
   return (
-    <EuiFormRow id={id} label={label} fullWidth={true} compressed labelAppend={labelAppend}>
+    <EuiFormRow
+      compressed
+      fullWidth
+      helpText={helpText}
+      id={id}
+      label={label}
+      labelAppend={labelAppend}
+    >
       <EuiSelect
+        disabled={disabled}
         options={[emptyValue, ...options]}
         value={value === undefined ? emptyValue.value : value}
         onChange={ev => setValue(paramName, ev.target.value as ValidParamValues)}
