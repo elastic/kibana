@@ -18,19 +18,7 @@
  */
 
 import { EventEmitter } from 'events';
-
-// TODO: add a more specific TabularData type.
-type TabularData = any;
-type TabularCallback = () => TabularData | Promise<TabularData>;
-
-interface TabularHolder {
-  data: TabularData | null;
-  options: TabularLoaderOptions;
-}
-
-interface TabularLoaderOptions {
-  returnsFormattedValues?: boolean;
-}
+import { TabularCallback, TabularHolder, TabularLoaderOptions } from './types';
 
 class DataAdapter extends EventEmitter {
   private tabular?: TabularCallback;

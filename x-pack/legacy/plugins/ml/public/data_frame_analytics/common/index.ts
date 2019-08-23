@@ -16,3 +16,15 @@ export {
   IndexPattern,
   REFRESH_ANALYTICS_LIST_STATE,
 } from './analytics';
+
+export {
+  getDefaultSelectableFields,
+  getFlattenedFields,
+  sortColumns,
+  toggleSelectedField,
+  EsId,
+  EsDoc,
+  EsDocSource,
+  EsFieldName,
+  MAX_COLUMNS,
+} from './fields';

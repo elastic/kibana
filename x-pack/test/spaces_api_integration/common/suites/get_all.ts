@@ -15,6 +15,7 @@ interface GetAllTest {
 
 interface GetAllTests {
   exists: GetAllTest;
+  copySavedObjectsPurpose: GetAllTest;
 }
 
 interface GetAllTestDefinition {
@@ -75,6 +76,17 @@ export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
           .auth(user.username, user.password)
           .expect(tests.exists.statusCode)
           .then(tests.exists.response);
+      });
+
+      describe('copySavedObjects purpose', () => {
+        it(`should return ${tests.copySavedObjectsPurpose.statusCode}`, async () => {
+          return supertest
+            .get(`${getUrlPrefix(spaceId)}/api/spaces/space`)
+            .query({ purpose: 'copySavedObjectsIntoSpace' })
+            .auth(user.username, user.password)
+            .expect(tests.copySavedObjectsPurpose.statusCode)
+            .then(tests.copySavedObjectsPurpose.response);
+        });
       });
     });
   };

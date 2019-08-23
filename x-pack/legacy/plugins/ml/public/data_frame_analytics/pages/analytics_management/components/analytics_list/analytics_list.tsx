@@ -37,7 +37,6 @@ import { getAnalyticsFactory } from '../../services/analytics_service';
 import { getColumns } from './columns';
 import { ExpandedRow } from './expanded_row';
 import { ProgressBar, AnalyticsTable } from './analytics_table';
-import { useRefreshInterval } from './use_refresh_interval';
 
 function getItemIdToExpandedRowMap(
   itemIds: DataFrameAnalyticsId[],
@@ -65,12 +64,15 @@ function stringMatch(str: string | undefined, substr: string) {
 
 interface Props {
   isManagementTable?: boolean;
+  blockRefresh?: boolean;
 }
 // isManagementTable - for use in Kibana managagement ML section
-export const DataFrameAnalyticsList: FC<Props> = ({ isManagementTable }) => {
+export const DataFrameAnalyticsList: FC<Props> = ({
+  isManagementTable = false,
+  blockRefresh = false,
+}) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [blockRefresh, setBlockRefresh] = useState(false);
   const [filterActive, setFilterActive] = useState(false);
 
   const [analytics, setAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
@@ -101,8 +103,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({ isManagementTable }) => {
     isLoading: setIsLoading,
     onRefresh: () => getAnalytics(true),
   });
-  // Call useRefreshInterval() after the subscription above is set up.
-  useRefreshInterval(setBlockRefresh);
 
   const onQueryChange = ({ query, error }: { query: Query; error: any }) => {
     if (error) {
