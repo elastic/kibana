@@ -6,6 +6,6 @@
     "patterns": [
       "_remote/info"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-remote-info.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-remote-info.html"
   }
 }

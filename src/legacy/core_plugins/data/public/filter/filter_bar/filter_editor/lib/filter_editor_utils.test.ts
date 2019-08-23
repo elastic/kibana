@@ -18,7 +18,7 @@
  */
 
 import { FilterStateStore, toggleFilterNegated } from '@kbn/es-query';
-import { fixtures } from '../../../../index_patterns';
+import { mockFields, mockIndexPattern } from '../../../../index_patterns';
 import { IndexPattern, Field } from '../../../../index';
 import {
   buildFilter,
@@ -57,7 +57,6 @@ jest.mock(
   { virtual: true }
 );
 
-const { mockFields, mockIndexPattern } = fixtures;
 const mockedFields = mockFields as Field[];
 const mockedIndexPattern = mockIndexPattern as IndexPattern;
 
@@ -264,6 +263,7 @@ describe('Filter editor utils', () => {
         mockedIndexPattern,
         mockedFields[0],
         isOperator,
+        false,
         params,
         alias,
         state
@@ -285,6 +285,7 @@ describe('Filter editor utils', () => {
         mockedIndexPattern,
         mockedFields[0],
         isOneOfOperator,
+        false,
         params,
         alias,
         state
@@ -306,6 +307,7 @@ describe('Filter editor utils', () => {
         mockedIndexPattern,
         mockedFields[0],
         isBetweenOperator,
+        false,
         params,
         alias,
         state
@@ -326,6 +328,7 @@ describe('Filter editor utils', () => {
         mockedIndexPattern,
         mockedFields[0],
         existsOperator,
+        false,
         params,
         alias,
         state
@@ -338,6 +341,22 @@ describe('Filter editor utils', () => {
       }
     });
 
+    it('should include disabled state', () => {
+      const params = undefined;
+      const alias = 'bar';
+      const state = FilterStateStore.APP_STATE;
+      const filter = buildFilter(
+        mockedIndexPattern,
+        mockedFields[0],
+        doesNotExistOperator,
+        true,
+        params,
+        alias,
+        state
+      );
+      expect(filter.meta.disabled).toBe(true);
+    });
+
     it('should negate based on operator', () => {
       const params = undefined;
       const alias = 'bar';
@@ -346,6 +365,7 @@ describe('Filter editor utils', () => {
         mockedIndexPattern,
         mockedFields[0],
         doesNotExistOperator,
+        false,
         params,
         alias,
         state

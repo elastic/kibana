@@ -5,9 +5,13 @@
  */
 
 import { Annotation } from '../../../common/types/annotations';
-import { DslName, AggFieldNamePair } from '../../../common/types/fields';
+import { AggFieldNamePair } from '../../../common/types/fields';
 import { ExistingJobsAndGroups } from '../job_service';
 import { PrivilegesResponse } from '../../../common/types/privileges';
+import {
+  DataFrameTransformEndpointRequest,
+  DataFrameTransformEndpointResult,
+} from '../../data_frame/pages/transform_management/components/transform_list/common';
 
 // TODO This is not a complete representation of all methods of `ml.*`.
 // It just satisfies needs for other parts of the code area which use
@@ -29,24 +33,41 @@ declare interface Ml {
     indexAnnotation(annotation: Annotation): Promise<object>;
   };
 
+  dataFrameAnalytics: {
+    getDataFrameAnalytics(analyticsId?: string): Promise<any>;
+    getDataFrameAnalyticsStats(analyticsId?: string): Promise<any>;
+    createDataFrameAnalytics(analyticsId: string, analyticsConfig: any): Promise<any>;
+    deleteDataFrameAnalytics(analyticsId: string): Promise<any>;
+    startDataFrameAnalytics(analyticsId: string): Promise<any>;
+    stopDataFrameAnalytics(
+      analyticsId: string,
+      force?: boolean,
+      waitForCompletion?: boolean
+    ): Promise<any>;
+    getAnalyticsAuditMessages(analyticsId: string): Promise<any>;
+  };
+
   dataFrame: {
     getDataFrameTransforms(jobId?: string): Promise<any>;
     getDataFrameTransformsStats(jobId?: string): Promise<any>;
     createDataFrameTransform(jobId: string, jobConfig: any): Promise<any>;
-    deleteDataFrameTransform(jobId: string): Promise<any>;
+    deleteDataFrameTransforms(
+      jobsData: DataFrameTransformEndpointRequest[]
+    ): Promise<DataFrameTransformEndpointResult>;
     getDataFrameTransformsPreview(payload: any): Promise<any>;
-    startDataFrameTransform(jobId: string, force?: boolean): Promise<any>;
-    stopDataFrameTransform(
-      jobId: string,
-      force?: boolean,
-      waitForCompletion?: boolean
-    ): Promise<any>;
+    startDataFrameTransforms(
+      jobsData: DataFrameTransformEndpointRequest[]
+    ): Promise<DataFrameTransformEndpointResult>;
+    stopDataFrameTransforms(
+      jobsData: DataFrameTransformEndpointRequest[]
+    ): Promise<DataFrameTransformEndpointResult>;
     getTransformAuditMessages(transformId: string): Promise<any>;
   };
 
   hasPrivileges(obj: object): Promise<any>;
 
   checkMlPrivileges(): Promise<PrivilegesResponse>;
+  checkManageMLPrivileges(): Promise<PrivilegesResponse>;
   getJobStats(obj: object): Promise<any>;
   getDatafeedStats(obj: object): Promise<any>;
   esSearch(obj: object): any;
@@ -62,6 +83,9 @@ declare interface Ml {
       job_ids: string[];
     }>
   >;
+
+  getVisualizerFieldStats(obj: object): Promise<any>;
+  getVisualizerOverallStats(obj: object): Promise<any>;
 
   jobs: {
     jobsSummary(jobIds: string[]): Promise<object>;
@@ -103,6 +127,10 @@ declare interface Ml {
       end: number
     ): Promise<{ progress: number; isRunning: boolean }>;
   };
+
+  estimateBucketSpan(
+    data: object
+  ): Promise<{ name: string; ms: number; error?: boolean; message?: { msg: string } | string }>;
 }
 
 declare const ml: Ml;

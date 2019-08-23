@@ -8,9 +8,10 @@ import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/type
 import { IndexPattern } from 'ui/index_patterns';
 import { JobCreator } from './job_creator';
 import { Field, Aggregation, SplitField, AggFieldPair } from '../../../../../common/types/fields';
-import { Detector } from './configs';
+import { Job, Datafeed, Detector } from './configs';
 import { createBasicDetector } from './util/default_configs';
 import { JOB_TYPE, CREATED_BY_LABEL } from './util/constants';
+import { getRichDetectors } from './util/general';
 
 export class PopulationJobCreator extends JobCreator {
   // a population job has one overall over (split) field, which is the same for all detectors
@@ -100,10 +101,6 @@ export class PopulationJobCreator extends JobCreator {
   private _createDetector(agg: Aggregation, field: Field) {
     const dtr: Detector = createBasicDetector(agg, field);
 
-    if (field !== null) {
-      dtr.field_name = field.id;
-    }
-
     if (this._splitField !== null) {
       dtr.over_field_name = this._splitField.id;
     }
@@ -124,5 +121,28 @@ export class PopulationJobCreator extends JobCreator {
         value: null,
       },
     }));
+  }
+
+  public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
+    this._overrideConfigs(job, datafeed);
+    this.createdBy = CREATED_BY_LABEL.POPULATION;
+    const detectors = getRichDetectors(job, datafeed);
+
+    this.removeAllDetectors();
+
+    if (detectors.length) {
+      if (detectors[0].overField !== null) {
+        this.setSplitField(detectors[0].overField);
+      }
+    }
+    detectors.forEach((d, i) => {
+      const dtr = detectors[i];
+      if (dtr.agg !== null && dtr.field !== null) {
+        this.addDetector(dtr.agg, dtr.field);
+        if (dtr.byField !== null) {
+          this.setByField(dtr.byField, i);
+        }
+      }
+    });
   }
 }

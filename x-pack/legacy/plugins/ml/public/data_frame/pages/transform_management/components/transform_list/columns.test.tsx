@@ -8,7 +8,7 @@ import { getColumns } from './columns';
 
 describe('Data Frame: Job List Columns', () => {
   test('getColumns()', () => {
-    const columns = getColumns([], () => {});
+    const columns = getColumns([], () => {}, []);
 
     expect(columns).toHaveLength(9);
     expect(columns[0].isExpander).toBeTruthy();

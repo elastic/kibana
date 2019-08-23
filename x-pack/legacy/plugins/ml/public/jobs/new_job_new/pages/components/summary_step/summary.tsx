@@ -5,18 +5,29 @@
  */
 
 import React, { Fragment, FC, useContext, useState, useEffect } from 'react';
-import { EuiButton, EuiButtonEmpty, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { toastNotifications } from 'ui/notify';
 import { WizardNav } from '../wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
+import { JobRunner } from '../../../common/job_runner';
 import { mlJobService } from '../../../../../services/job_service';
 import { JsonFlyout } from './json_flyout';
 import { isSingleMetricJobCreator } from '../../../common/job_creator';
 import { JobDetails } from './job_details';
 import { DetectorChart } from './detector_chart';
 import { JobProgress } from './components/job_progress';
+import { PostSaveOptions } from './components/post_save_options';
+import { convertToAdvancedJob } from '../../../common/job_creator/util/general';
 
 export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const { jobCreator, jobValidator, jobValidatorUpdated, resultsLoader } = useContext(
@@ -24,7 +35,9 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   );
   const [progress, setProgress] = useState(resultsLoader.progress);
   const [showJsonFlyout, setShowJsonFlyout] = useState(false);
+  const [creatingJob, setCreatingJob] = useState(false);
   const [isValid, setIsValid] = useState(jobValidator.validationSummary.basic);
+  const [jobRunner, setJobRunner] = useState<JobRunner | null>(null);
 
   useEffect(() => {
     jobCreator.subscribeToProgress(setProgress);
@@ -32,16 +45,19 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
 
   async function start() {
     setShowJsonFlyout(false);
+    setCreatingJob(true);
     try {
-      await jobCreator.createAndStartJob();
+      const jr = await jobCreator.createAndStartJob();
+      setJobRunner(jr);
     } catch (error) {
       // catch and display all job creation errors
       toastNotifications.addDanger({
-        title: i18n.translate('xpack.ml.newJob.wizard.createJobError', {
+        title: i18n.translate('xpack.ml.newJob.wizard.summaryStep.createJobError', {
           defaultMessage: `Job creation error`,
         }),
         text: error.message,
       });
+      setCreatingJob(false);
     }
   }
 
@@ -59,6 +75,10 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
     setShowJsonFlyout(!showJsonFlyout);
   }
 
+  const convertToAdvanced = () => {
+    convertToAdvancedJob(jobCreator);
+  };
+
   useEffect(() => {
     setIsValid(jobValidator.validationSummary.basic);
   }, [jobValidatorUpdated]);
@@ -75,25 +95,60 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
 
           {progress === 0 && <WizardNav previous={() => setCurrentStep(WIZARD_STEPS.VALIDATION)} />}
           <EuiHorizontalRule />
-          {progress < 100 && (
+          <EuiFlexGroup>
+            {progress < 100 && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  onClick={start}
+                  isDisabled={creatingJob === true || isValid === false}
+                  data-test-subj="mlJobWizardButtonCreateJob"
+                >
+                  <FormattedMessage
+                    id="xpack.ml.newJob.wizard.summaryStep.createJobButton"
+                    defaultMessage="Create job"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+            {creatingJob === false && (
+              <Fragment>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    onClick={toggleJsonFlyout}
+                    isDisabled={progress > 0}
+                    data-test-subj="mlJobWizardButtonPreviewJobJson"
+                  >
+                    <FormattedMessage
+                      id="xpack.ml.newJob.wizard.summaryStep.previewJsonButton"
+                      defaultMessage="Preview job JSON"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty onClick={convertToAdvanced}>
+                    <FormattedMessage
+                      id="xpack.ml.newJob.wizard.summaryStep.convertToAdvancedButton"
+                      defaultMessage="Convert to advanced job"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </Fragment>
+            )}
+            {progress > 0 && (
+              <EuiFlexItem grow={false}>
+                <EuiButton onClick={viewResults} data-test-subj="mlJobWizardButtonViewResults">
+                  View results
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+          {progress === 100 && (
             <Fragment>
-              <EuiButton onClick={start} isDisabled={progress > 0} disabled={isValid === false}>
-                Create job
-              </EuiButton>
-              &emsp;
-              <EuiButtonEmpty size="s" onClick={toggleJsonFlyout} isDisabled={progress > 0}>
-                Preview job JSON
-              </EuiButtonEmpty>
-              {showJsonFlyout && (
-                <JsonFlyout closeFlyout={() => setShowJsonFlyout(false)} jobCreator={jobCreator} />
-              )}
-              &emsp;
+              <PostSaveOptions jobRunner={jobRunner} />
             </Fragment>
           )}
-          {progress > 0 && (
-            <Fragment>
-              <EuiButton onClick={viewResults}>View results</EuiButton>
-            </Fragment>
+          {showJsonFlyout && (
+            <JsonFlyout closeFlyout={() => setShowJsonFlyout(false)} jobCreator={jobCreator} />
           )}
         </Fragment>
       )}

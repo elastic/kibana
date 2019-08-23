@@ -13,4 +13,17 @@ export interface Endpoint {
 
 export interface ResourceLocator {
   locate(req: Request, resource: string): Promise<Endpoint>;
+
+  /**
+   * Returns whether the resource resides on the local node. This should support both url and uri of the repository.
+   *
+   * @param resource the name of the resource.
+   */
+  isResourceLocal(resource: string): Promise<boolean>;
+
+  /**
+   * Allocates the resource to nodes and returns the endpoint corresponds to the allocated node.
+   * If the resource cannot be allocated to any node, it returns undefined.
+   */
+  allocate(req: Request, resource: string): Promise<Endpoint | undefined>;
 }

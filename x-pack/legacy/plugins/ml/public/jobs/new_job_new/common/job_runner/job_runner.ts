@@ -28,6 +28,7 @@ export class JobRunner {
   private _stopRefreshPoll: {
     stop: boolean;
   };
+  private _subscribers: ProgressSubscriber[];
 
   constructor(jobCreator: JobCreator) {
     this._jobId = jobCreator.jobId;
@@ -38,9 +39,7 @@ export class JobRunner {
     this._stopRefreshPoll = jobCreator.stopAllRefreshPolls;
 
     this._progress$ = new BehaviorSubject(this._percentageComplete);
-    // link the _subscribers list from the JobCreator
-    // to the progress BehaviorSubject.
-    jobCreator.subscribers.forEach(s => this._progress$.subscribe(s));
+    this._subscribers = jobCreator.subscribers;
   }
 
   public get datafeedState(): DATAFEED_STATE {
@@ -66,10 +65,25 @@ export class JobRunner {
   // start the datafeed and then start polling for progress
   // the complete percentage is added to an observable
   // so all pre-subscribed listeners can follow along.
-  public async startDatafeed(): Promise<void> {
+  private async _startDatafeed(
+    start: number | undefined,
+    end: number | undefined,
+    pollProgress: boolean
+  ): Promise<boolean> {
     try {
+      // link the _subscribers list from the JobCreator
+      // to the progress BehaviorSubject.
+      const subscriptions =
+        pollProgress === true ? this._subscribers.map(s => this._progress$.subscribe(s)) : [];
+
       await this.openJob();
-      await mlJobService.startDatafeed(this._datafeedId, this._jobId, this._start, this._end);
+      const { started } = await mlJobService.startDatafeed(
+        this._datafeedId,
+        this._jobId,
+        start,
+        end
+      );
+
       this._datafeedState = DATAFEED_STATE.STARTED;
       this._percentageComplete = 0;
 
@@ -83,14 +97,30 @@ export class JobRunner {
           setTimeout(async () => {
             await check();
           }, this._refreshInterval);
+        } else {
+          // job has finished running, unsubscribe everyone
+          subscriptions.forEach(s => s.unsubscribe());
         }
       };
       // wait for the first check to run and then return success.
       // all subsequent checks will update the observable
-      await check();
+      if (pollProgress === true) {
+        await check();
+      }
+      return started;
     } catch (error) {
       throw error;
     }
+  }
+
+  public async startDatafeed() {
+    return await this._startDatafeed(this._start, this._end, true);
+  }
+
+  public async startDatafeedInRealTime(continueJob: boolean) {
+    // if continuing a job, set the start to be the end date
+    const start = continueJob ? this._end : this._start;
+    return await this._startDatafeed(start, undefined, false);
   }
 
   public async getProgress(): Promise<{ progress: Progress; isRunning: boolean }> {

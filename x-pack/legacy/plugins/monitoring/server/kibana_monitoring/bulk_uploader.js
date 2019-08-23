@@ -68,10 +68,7 @@ export class BulkUploader {
   start(collectorSet) {
     this._log.info('Starting monitoring stats collection');
     const filterCollectorSet = _collectorSet => {
-      const filterUsage = this._lastFetchUsageTime && this._lastFetchUsageTime + this._usageInterval > Date.now();
-      if (!filterUsage) {
-        this._lastFetchUsageTime = Date.now();
-      }
+      const successfulUploadInLastDay = this._lastFetchUsageTime && this._lastFetchUsageTime + this._usageInterval > Date.now();
 
       return _collectorSet.getFilteredCollectorSet(c => {
         // this is internal bulk upload, so filter out API-only collectors
@@ -79,7 +76,7 @@ export class BulkUploader {
           return false;
         }
         // Only collect usage data at the same interval as telemetry would (default to once a day)
-        if (filterUsage && _collectorSet.isUsageCollector(c)) {
+        if (successfulUploadInLastDay && _collectorSet.isUsageCollector(c)) {
           return false;
         }
         return true;
@@ -123,9 +120,10 @@ export class BulkUploader {
    */
   async _fetchAndUpload(collectorSet) {
     const collectorsReady = await collectorSet.areAllCollectorsReady();
+    const hasUsageCollectors = collectorSet.some(collectorSet.isUsageCollector);
     if (!collectorsReady) {
       this._log.debug('Skipping bulk uploading because not all collectors are ready');
-      if (collectorSet.some(collectorSet.isUsageCollector)) {
+      if (hasUsageCollectors) {
         this._lastFetchUsageTime = null;
         this._log.debug('Resetting lastFetchWithUsage because not all collectors are ready');
       }
@@ -138,7 +136,15 @@ export class BulkUploader {
     if (payload) {
       try {
         this._log.debug(`Uploading bulk stats payload to the local cluster`);
-        await this._onPayload(payload);
+        const result = await this._onPayload(payload);
+        const sendSuccessful = !result.ignored && !result.errors;
+        if (!sendSuccessful && hasUsageCollectors) {
+          this._lastFetchUsageTime = null;
+          this._log.debug('Resetting lastFetchWithUsage because uploading to the cluster was not successful.');
+        }
+        if (sendSuccessful && hasUsageCollectors) {
+          this._lastFetchUsageTime = Date.now();
+        }
         this._log.debug(`Uploaded bulk stats payload to the local cluster`);
       } catch (err) {
         this._log.warn(err.stack);
@@ -149,8 +155,8 @@ export class BulkUploader {
     }
   }
 
-  _onPayload(payload) {
-    return sendBulkPayload(this._cluster, this._interval, payload);
+  async _onPayload(payload) {
+    return await sendBulkPayload(this._cluster, this._interval, payload);
   }
 
   /*

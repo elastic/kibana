@@ -5,31 +5,28 @@
  */
 
 import moment from 'moment';
-import React, { Fragment, FC, useContext, useState, useEffect } from 'react';
+import React, { Fragment, FC, useState, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiDatePickerRange, EuiDatePicker } from '@elastic/eui';
 
-import { KibanaContext, isKibanaContext } from '../../../../../data_frame/common/kibana_context';
+import { useKibanaContext } from '../../../../../contexts/kibana';
+import { TimeRange } from './time_range';
 
 const WIDTH = '512px';
 
 interface Props {
-  setStart: (s: number) => void;
-  setEnd: (e: number) => void;
-  start: number;
-  end: number;
+  setTimeRange: (d: TimeRange) => void;
+  timeRange: TimeRange;
 }
 
 type Moment = moment.Moment;
 
-export const TimeRangePicker: FC<Props> = ({ setStart, setEnd, start, end }) => {
-  const kibanaContext = useContext(KibanaContext);
-  if (!isKibanaContext(kibanaContext)) {
-    return null;
-  }
-  const dateFormat = kibanaContext.kibanaConfig.get('dateFormat');
+export const TimeRangePicker: FC<Props> = ({ setTimeRange, timeRange }) => {
+  const kibanaContext = useKibanaContext();
+  const dateFormat: string = kibanaContext.kibanaConfig.get('dateFormat');
 
-  const [startMoment, setStartMoment] = useState<Moment | undefined>(moment(start));
-  const [endMoment, setEndMoment] = useState<Moment | undefined>(moment(end));
+  const [startMoment, setStartMoment] = useState<Moment | undefined>(moment(timeRange.start));
+  const [endMoment, setEndMoment] = useState<Moment | undefined>(moment(timeRange.end));
 
   function handleChangeStart(date: Moment | null) {
     setStartMoment(date || undefined);
@@ -42,8 +39,10 @@ export const TimeRangePicker: FC<Props> = ({ setStart, setEnd, start, end }) => 
   // update the parent start and end if the timepicker changes
   useEffect(() => {
     if (startMoment !== undefined && endMoment !== undefined) {
-      setStart(startMoment.valueOf());
-      setEnd(endMoment.valueOf());
+      setTimeRange({
+        start: startMoment.valueOf(),
+        end: endMoment.valueOf(),
+      });
     }
   }, [startMoment, endMoment]);
 
@@ -51,9 +50,9 @@ export const TimeRangePicker: FC<Props> = ({ setStart, setEnd, start, end }) => 
   // the parent start and end updates.
   // this happens if the use full data button is pressed.
   useEffect(() => {
-    setStartMoment(moment(start));
-    setEndMoment(moment(end));
-  }, [start, end]);
+    setStartMoment(moment(timeRange.start));
+    setEndMoment(moment(timeRange.end));
+  }, [JSON.stringify(timeRange)]);
 
   return (
     <Fragment>
@@ -66,9 +65,15 @@ export const TimeRangePicker: FC<Props> = ({ setStart, setEnd, start, end }) => 
               onChange={handleChangeStart}
               startDate={startMoment}
               endDate={endMoment}
-              aria-label="Start date"
+              aria-label={i18n.translate(
+                'xpack.ml.newJob.wizard.timeRangeStep.timeRangePicker.startDateLabel',
+                {
+                  defaultMessage: 'Start date',
+                }
+              )}
               showTimeSelect
               dateFormat={dateFormat}
+              maxDate={endMoment}
             />
           }
           endDateControl={
@@ -77,9 +82,15 @@ export const TimeRangePicker: FC<Props> = ({ setStart, setEnd, start, end }) => 
               onChange={handleChangeEnd}
               startDate={startMoment}
               endDate={endMoment}
-              aria-label="End date"
+              aria-label={i18n.translate(
+                'xpack.ml.newJob.wizard.timeRangeStep.timeRangePicker.endDateLabel',
+                {
+                  defaultMessage: 'End date',
+                }
+              )}
               showTimeSelect
               dateFormat={dateFormat}
+              minDate={startMoment}
             />
           }
         />

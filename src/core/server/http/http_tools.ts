@@ -71,6 +71,7 @@ export function getServerOptions(config: HttpConfig, { configureTLS = true } = {
       passphrase: ssl.keyPassphrase,
       secureOptions: ssl.getSecureOptions(),
       requestCert: ssl.requestCert,
+      rejectUnauthorized: ssl.rejectUnauthorized,
     };
 
     options.tls = tlsOptions;
@@ -97,11 +98,7 @@ export function createServer(serverOptions: ServerOptions, listenerOptions: List
   server.listener.keepAliveTimeout = listenerOptions.keepaliveTimeout;
   server.listener.setTimeout(listenerOptions.socketTimeout);
   server.listener.on('timeout', socket => {
-    if (socket.writable) {
-      socket.end(Buffer.from('HTTP/1.1 408 Request Timeout\r\n\r\n', 'ascii'));
-    } else {
-      socket.destroy();
-    }
+    socket.destroy();
   });
   server.listener.on('clientError', (err, socket) => {
     if (socket.writable) {

@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPattern } from 'ui/index_patterns';
+import { IndexPattern, IndexPatterns } from 'ui/index_patterns';
+import { SavedSearchLoader } from 'src/legacy/core_plugins/kibana/public/discover/types';
+
 import {
   Field,
   Aggregation,
@@ -14,22 +16,39 @@ import {
   EVENT_RATE_FIELD_ID,
 } from '../../common/types/fields';
 import { ES_FIELD_TYPES } from '../../common/constants/field_types';
-import { ML_JOB_AGGREGATION } from '../../common/constants/aggregation_types';
+import {
+  ML_JOB_AGGREGATION,
+  KIBANA_AGGREGATION,
+  ES_AGGREGATION,
+} from '../../common/constants/aggregation_types';
 import { ml } from './ml_api_service';
 
 // called in the angular routing resolve block to initialize the
 // newJobCapsService with the currently selected index pattern
-export function loadNewJobCapabilities(indexPatterns: any, $route: Record<string, any>) {
-  return new Promise(resolve => {
-    indexPatterns
-      .get($route.current.params.index)
-      .then(async (indexPattern: IndexPattern) => {
-        await newJobCapsService.initializeFromIndexPattern(indexPattern);
-        resolve(newJobCapsService.newJobCaps);
-      })
-      .catch((error: any) => {
-        resolve(error);
-      });
+export function loadNewJobCapabilities(
+  indexPatterns: IndexPatterns,
+  savedSearches: SavedSearchLoader,
+  $route: Record<string, any>
+) {
+  return new Promise(async (resolve, reject) => {
+    // get the index pattern id or saved search id from the url params
+    const { index: indexPatternId, savedSearchId } = $route.current.params;
+
+    if (indexPatternId !== undefined) {
+      // index pattern is being used
+      const indexPattern: IndexPattern = await indexPatterns.get(indexPatternId);
+      await newJobCapsService.initializeFromIndexPattern(indexPattern);
+      resolve(newJobCapsService.newJobCaps);
+    } else if (savedSearchId !== undefined) {
+      // saved search is being used
+      // load the index pattern from the saved search
+      const savedSearch = await savedSearches.get(savedSearchId);
+      const indexPattern = savedSearch.searchSource.getField('index');
+      await newJobCapsService.initializeFromIndexPattern(indexPattern);
+      resolve(newJobCapsService.newJobCaps);
+    } else {
+      reject();
+    }
   });
 }
 
@@ -73,7 +92,7 @@ class NewJobCapsService {
       if (this._includeCountAgg === true) {
         const { countField, countAggs } = createCountFieldAndAggs();
 
-        fields.push(countField);
+        fields.splice(0, 0, countField);
         aggs.push(...countAggs);
       }
 
@@ -82,6 +101,16 @@ class NewJobCapsService {
     } catch (error) {
       console.error('Unable to load new job capabilities', error); // eslint-disable-line no-console
     }
+  }
+
+  public getFieldById(id: string): Field | null {
+    const field = this._fields.find(f => f.id === id);
+    return field === undefined ? null : field;
+  }
+
+  public getAggById(id: string): Aggregation | null {
+    const agg = this._aggs.find(f => f.id === id);
+    return agg === undefined ? null : agg;
   }
 }
 
@@ -170,8 +199,8 @@ function createCountFieldAndAggs() {
     {
       id: ML_JOB_AGGREGATION.COUNT,
       title: 'Count',
-      kibanaName: 'count',
-      dslName: 'count',
+      kibanaName: KIBANA_AGGREGATION.COUNT,
+      dslName: ES_AGGREGATION.COUNT,
       type: 'metrics',
       mlModelPlotAgg: {
         min: 'min',
@@ -182,8 +211,8 @@ function createCountFieldAndAggs() {
     {
       id: ML_JOB_AGGREGATION.HIGH_COUNT,
       title: 'High count',
-      kibanaName: 'count',
-      dslName: 'count',
+      kibanaName: KIBANA_AGGREGATION.COUNT,
+      dslName: ES_AGGREGATION.COUNT,
       type: 'metrics',
       mlModelPlotAgg: {
         min: 'min',
@@ -194,8 +223,8 @@ function createCountFieldAndAggs() {
     {
       id: ML_JOB_AGGREGATION.LOW_COUNT,
       title: 'Low count',
-      kibanaName: 'count',
-      dslName: 'count',
+      kibanaName: KIBANA_AGGREGATION.COUNT,
+      dslName: ES_AGGREGATION.COUNT,
       type: 'metrics',
       mlModelPlotAgg: {
         min: 'min',

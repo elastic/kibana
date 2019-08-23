@@ -23,6 +23,8 @@ import { createStore, networkModel, State } from '../../../../store';
 import { DomainsTable } from '.';
 import { mockDomainsData } from './mock';
 
+jest.mock('../../../../lib/settings/use_kibana_ui_setting');
+
 describe('Domains Table Component', () => {
   const loadPage = jest.fn();
   const ip = '10.10.10.10';
@@ -108,7 +110,7 @@ describe('Domains Table Component', () => {
           .find('.euiTable thead tr th button')
           .first()
           .text()
-      ).toEqual('Domain NameClick to sort in ascending order');
+      ).toEqual('Domain nameClick to sort in ascending order');
       expect(
         wrapper
           .find('.euiTable thead tr th button')
