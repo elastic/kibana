@@ -85,8 +85,6 @@ const Demo = () => {
     }</UseKibana>
   );
 };
-
-export default withKibana(Demo);
 ```
 
 
