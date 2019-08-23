@@ -22,6 +22,12 @@ import React, { Component } from 'react';
 import { getLastValue } from '../../../common/get_last_value';
 import reactcss from 'reactcss';
 
+const RENDER_MODES = {
+  POSITIVE: 'positive',
+  NEGATIVE: 'negative',
+  MIXED: 'mixed',
+};
+
 export class TopN extends Component {
   constructor(props) {
     super(props);
@@ -59,25 +65,50 @@ export class TopN extends Component {
     };
   }
 
+  static getRenderMode = (min, max) => {
+    if (min >= 0) {
+      return RENDER_MODES.POSITIVE;
+    } else if (max < 0) {
+      return RENDER_MODES.NEGATIVE;
+    }
+    return RENDER_MODES.MIXED;
+  };
+
+  static calcInnerBarStyles = (renderMode, isPositive) => {
+    if (renderMode === RENDER_MODES.MIXED) {
+      return {
+        [isPositive ? 'marginLeft' : 'marginRight']: '50%',
+      };
+    }
+    return {};
+  };
+
+  static calcInnerBarDivStyles = (item, width, isPositive) => {
+    return {
+      backgroundColor: item.color,
+      width: width + '%',
+      float: isPositive ? 'left' : 'right',
+    };
+  };
+
   renderRow({ min, max }) {
     return item => {
-      const ONE_PERCENT_OFFSET = 1.01;
+      const renderMode = TopN.getRenderMode(min, max);
       const key = `${item.id || item.label}`;
       const lastValue = getLastValue(item.data);
       const formatter = item.tickFormatter || this.props.tickFormatter;
-      const value = formatter(lastValue);
-      const minWithOffset = min < 0 ? min * ONE_PERCENT_OFFSET : 0;
-      const intervalLength = max - minWithOffset;
-      const inIntervalLength = lastValue - minWithOffset;
-      const width = `${100 * (inIntervalLength / intervalLength)}%`;
+      const intervalLength = max - min + 1;
+      const width = Math.min(100, 100 * (Math.abs(lastValue) / intervalLength));
+      const isPositiveValue = lastValue >= 0;
 
-      const backgroundColor = item.color;
       const styles = reactcss(
         {
           default: {
             innerBar: {
-              width,
-              backgroundColor,
+              ...TopN.calcInnerBarStyles(renderMode, isPositiveValue),
+            },
+            innerBarValue: {
+              ...TopN.calcInnerBarDivStyles(item, width, isPositiveValue),
             },
             label: {
               maxWidth: this.state.labelMaxWidth,
@@ -97,10 +128,12 @@ export class TopN extends Component {
             {item.label}
           </td>
           <td width="100%" className="tvbVisTopN__bar">
-            <div className="tvbVisTopN__innerBar" style={styles.innerBar} />
+            <div className="tvbVisTopN__innerBar" style={styles.innerBar}>
+              <div style={styles.innerBarValue} />
+            </div>
           </td>
           <td className="tvbVisTopN__value" data-test-subj="tsvbTopNValue">
-            {value}
+            {formatter(lastValue)}
           </td>
         </tr>
       );

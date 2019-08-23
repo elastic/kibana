@@ -35,7 +35,11 @@
 }
 
 .tvbVisTopN__innerBar {
-  min-height: $euiSize;
+  position: relative;
+  > div {
+    width: 100%;
+    min-height: $euiSize;
+  }
 }
 
 .tvbVisTopN--reversed {
