@@ -263,8 +263,6 @@ function buildSuggestion({
     xAccessor: xValue.columnId,
     splitAccessor: splitBy ? splitBy.columnId : generateId(),
     accessors: yValues.map(col => col.columnId),
-    // TODO check whether we need this
-    title: '',
   };
 
   const state: State = {

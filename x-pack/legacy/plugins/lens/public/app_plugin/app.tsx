@@ -152,6 +152,8 @@ export function App({
           <QueryBar
             data-test-subj="lnsApp_queryBar"
             screenTitle={'lens'}
+            onChange={() => {}}
+            isDirty={false}
             onSubmit={({ dateRange, query }) => {
               setState({
                 ...state,

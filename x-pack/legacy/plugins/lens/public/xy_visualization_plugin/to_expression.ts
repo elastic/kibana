@@ -163,7 +163,6 @@ export const buildExpression = (
                 arguments: {
                   layerId: [layer.layerId],
 
-                  title: [layer.title],
                   hide: [Boolean(layer.hide)],
 
                   xAccessor: [layer.xAccessor],
