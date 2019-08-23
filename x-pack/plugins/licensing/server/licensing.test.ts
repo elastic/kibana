@@ -9,14 +9,15 @@ import { take, skip } from 'rxjs/operators';
 import { merge } from 'lodash';
 import { ClusterClient } from 'src/core/server';
 import { coreMock } from '../../../../src/core/server/mocks';
+import { ILicensingPluginSetup } from './types';
 import { LicensingPlugin } from './licensing_plugin';
 import { LicensingPluginSetup } from './licensing_plugin_setup';
 import { LICENSE_STATUS } from './constants';
 
 interface TestServices {
   plugin: LicensingPlugin;
-  service$: BehaviorSubject<LicensingPluginSetup>;
-  licensing: LicensingPluginSetup;
+  service$: BehaviorSubject<ILicensingPluginSetup>;
+  licensing: ILicensingPluginSetup;
   clusterClient: jest.Mocked<PublicMethodsOf<ClusterClient>>;
 }
 
