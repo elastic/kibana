@@ -20,7 +20,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { summarizeCopyResult } from '../../../../lib/copy_saved_objects_to_space';
 import { Space } from '../../../../../common/model/space';
 import { CopyOptions, ImportRetry } from '../../../../lib/copy_saved_objects_to_space/types';
-import { SpaceResult } from './cts_space_result';
+import { SpaceResult } from './space_result';
 
 interface Props {
   savedObject: SavedObjectsManagementRecord;

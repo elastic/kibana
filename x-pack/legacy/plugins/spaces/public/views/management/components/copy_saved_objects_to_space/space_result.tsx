@@ -11,7 +11,7 @@ import { SummarizedCopyToSpaceResult } from '../../../../lib/copy_saved_objects_
 import { SpaceAvatar } from '../../../../components';
 import { Space } from '../../../../../common/model/space';
 import { CopyStatusSummaryIndicator } from './copy_status_summary_indicator';
-import { SpaceCopyResultDetails } from './cts_space_result_details';
+import { SpaceCopyResultDetails } from './space_result_details';
 import { ImportRetry } from '../../../../lib/copy_saved_objects_to_space/types';
 
 interface Props {
