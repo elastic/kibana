@@ -20,34 +20,32 @@ export type Err<E> = {
 };
 export type Result<T, E> = Ok<T> | Err<E>;
 
-function asOk<T>(value: T): Ok<T> {
+export function asOk<T>(value: T): Ok<T> {
   return {
     tag: 'ok',
     value,
   };
 }
 
-function asErr<T>(error: T): Err<T> {
+export function asErr<T>(error: T): Err<T> {
   return {
     tag: 'err',
     error,
   };
 }
 
-function isOk<T, E>(result: Result<T, E>): result is Ok<T> {
+export function isOk<T, E>(result: Result<T, E>): result is Ok<T> {
   return result.tag === 'ok';
 }
 
-function isErr<T, E>(result: Result<T, E>): result is Err<E> {
+export function isErr<T, E>(result: Result<T, E>): result is Err<E> {
   return !isOk(result);
 }
 
-async function promiseResult<T, E>(future: Promise<T>): Promise<Result<T, E>> {
+export async function promiseResult<T, E>(future: Promise<T>): Promise<Result<T, E>> {
   try {
     return asOk(await future);
   } catch (e) {
     return asErr(e);
   }
 }
-
-export { isOk, asOk, isErr, asErr, promiseResult };
