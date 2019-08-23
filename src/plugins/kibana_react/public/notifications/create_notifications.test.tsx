@@ -25,7 +25,7 @@ import { notificationServiceMock } from '../../../../core/public/mocks';
 test('throws if no overlays service provided', () => {
   const notifications = createNotifications({});
   expect(() => notifications.toasts.show({})).toThrowErrorMatchingInlineSnapshot(
-    `"Could not create KibanaReactNotifications as notifications service is not available."`
+    `"Could not show notification as notifications service is not available."`
   );
 });
 
@@ -67,10 +67,10 @@ test('can display React element as title', () => {
 
   expect(notifications.toasts.add).toHaveBeenCalledTimes(1);
   expect((notifications.toasts.add.mock.calls[0][0] as any).title).toMatchInlineSnapshot(`
-    <div>
-      bar
-    </div>
-  `);
+        <div>
+          bar
+        </div>
+    `);
 });
 
 test('can display React element as toast body', () => {
@@ -81,12 +81,12 @@ test('can display React element as toast body', () => {
 
   expect(notifications.toasts.add).toHaveBeenCalledTimes(1);
   expect((notifications.toasts.add.mock.calls[0][0] as any).text).toMatchInlineSnapshot(`
-    <React.Fragment>
-      <div>
-        baz
-      </div>
-    </React.Fragment>
-  `);
+        <React.Fragment>
+          <div>
+            baz
+          </div>
+        </React.Fragment>
+    `);
 });
 
 test('can set toast properties', () => {
@@ -102,17 +102,17 @@ test('can set toast properties', () => {
   });
 
   expect(notifications.toasts.add.mock.calls[0][0]).toMatchInlineSnapshot(`
-    Object {
-      "color": "danger",
-      "iconType": "foo",
-      "onClose": undefined,
-      "text": <React.Fragment>
-        1
-      </React.Fragment>,
-      "title": "2",
-      "toastLifeTimeMs": 3,
-    }
-  `);
+        Object {
+          "color": "danger",
+          "iconType": "foo",
+          "onClose": undefined,
+          "text": <React.Fragment>
+            1
+          </React.Fragment>,
+          "title": "2",
+          "toastLifeTimeMs": 3,
+        }
+    `);
 });
 
 test('can display success, warning and danger toasts', () => {

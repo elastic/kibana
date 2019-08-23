@@ -23,7 +23,7 @@ import { createReactOverlays } from './create_react_overlays';
 test('throws if no overlays service provided', () => {
   const overlays = createReactOverlays({});
   expect(() => overlays.openFlyout(null)).toThrowErrorMatchingInlineSnapshot(
-    `"Could not create KibanaReactOverlays as overlays service is not available."`
+    `"Could not show overlay as overlays service is not available."`
   );
 });
 
@@ -54,12 +54,12 @@ test('can open flyout with React element', () => {
 
   expect(openFlyout).toHaveBeenCalledTimes(1);
   expect(openFlyout.mock.calls[0][0]).toMatchInlineSnapshot(`
-    <React.Fragment>
-      <div>
-        foo
-      </div>
-    </React.Fragment>
-  `);
+        <React.Fragment>
+          <div>
+            foo
+          </div>
+        </React.Fragment>
+    `);
 });
 
 test('can open modal with React element', () => {
@@ -78,12 +78,12 @@ test('can open modal with React element', () => {
 
   expect(openModal).toHaveBeenCalledTimes(1);
   expect(openModal.mock.calls[0][0]).toMatchInlineSnapshot(`
-    <React.Fragment>
-      <div>
-        bar
-      </div>
-    </React.Fragment>
-  `);
+        <React.Fragment>
+          <div>
+            bar
+          </div>
+        </React.Fragment>
+    `);
 });
 
 test('passes through flyout options when opening flyout', () => {

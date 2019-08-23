@@ -24,9 +24,7 @@ import { KibanaReactOverlays } from './types';
 export const createReactOverlays = (services: KibanaServices): KibanaReactOverlays => {
   const checkCoreService = () => {
     if (!services.overlays) {
-      throw new TypeError(
-        'Could not create KibanaReactOverlays as overlays service is not available.'
-      );
+      throw new TypeError('Could not show overlay as overlays service is not available.');
     }
   };
 

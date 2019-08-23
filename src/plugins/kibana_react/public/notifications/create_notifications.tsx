@@ -31,9 +31,7 @@ export const createNotifications = (services: KibanaServices): KibanaReactNotifi
     onClose,
   }) => {
     if (!services.notifications) {
-      throw new TypeError(
-        'Could not create KibanaReactNotifications as notifications service is not available.'
-      );
+      throw new TypeError('Could not show notification as notifications service is not available.');
     }
     services.notifications!.toasts.add({
       title,
