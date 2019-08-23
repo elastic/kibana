@@ -25,7 +25,7 @@ import { BasicVislibParams, SeriesParam, ValueAxis } from '../../../types';
 import { ChartTypes } from '../../../utils/collections';
 import { SelectOption } from '../../select';
 import { LineOptions } from './line_options';
-import { SetChartValueByIndex } from '../../../editors/metrics_axis_options';
+import { SetChartValueByIndex } from '../../../editors/metrics_axes_options';
 
 export type SetChart = <T extends keyof SeriesParam>(paramName: T, value: SeriesParam[T]) => void;
 
@@ -49,6 +49,13 @@ function ChartOptions({
       setChartByIndex(index, paramName, value);
     },
     [setChartByIndex, index]
+  );
+
+  const setValueAxis = useCallback(
+    (paramName, value) => {
+      changeValueAxis(index, paramName, value);
+    },
+    [changeValueAxis, index]
   );
 
   const valueAxesOptions = useMemo(
@@ -99,7 +106,7 @@ function ChartOptions({
         options={valueAxesOptions}
         paramName="valueAxis"
         value={chart.valueAxis}
-        setValue={(...props) => changeValueAxis(index, ...props)}
+        setValue={setValueAxis}
       />
 
       {(chart.type === ChartTypes.LINE || chart.type === ChartTypes.AREA) && (

@@ -18,33 +18,33 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LegendPositions, Rotates } from '../../utils/collections';
+import { Positions, Rotates } from '../../utils/collections';
 
-function mapPositionOpposite(position: LegendPositions) {
+function mapPositionOpposite(position: Positions) {
   switch (position) {
     case 'bottom':
-      return LegendPositions.TOP;
+      return Positions.TOP;
     case 'top':
-      return LegendPositions.BOTTOM;
+      return Positions.BOTTOM;
     case 'left':
-      return LegendPositions.RIGHT;
+      return Positions.RIGHT;
     case 'right':
-      return LegendPositions.LEFT;
+      return Positions.LEFT;
     default:
       throw new Error('Invalid legend position.');
   }
 }
 
-function mapPosition(position: LegendPositions) {
+function mapPosition(position: Positions) {
   switch (position) {
-    case LegendPositions.BOTTOM:
-      return LegendPositions.LEFT;
-    case LegendPositions.TOP:
-      return LegendPositions.RIGHT;
-    case LegendPositions.LEFT:
-      return LegendPositions.BOTTOM;
-    case LegendPositions.RIGHT:
-      return LegendPositions.TOP;
+    case Positions.BOTTOM:
+      return Positions.LEFT;
+    case Positions.TOP:
+      return Positions.RIGHT;
+    case Positions.LEFT:
+      return Positions.BOTTOM;
+    case Positions.RIGHT:
+      return Positions.TOP;
   }
 }
 

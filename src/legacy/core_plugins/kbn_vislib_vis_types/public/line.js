@@ -19,9 +19,9 @@
 
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
-import { Schemas } from 'ui/vis/editors/default/schemas';
+import { Schemas, AggGroupNames } from 'ui/vis/editors/default';
 import { PointSeriesOptions } from './editors/point_series_options';
-import { MetricsAxisOptions } from './editors/metrics_axis_options';
+import { MetricsAxisOptions } from './editors/metrics_axes_options';
 import {
   getPositions,
   LegendPositions,
@@ -154,7 +154,7 @@ export default function PointSeriesVisType(Private) {
       ],
       schemas: new Schemas([
         {
-          group: 'metrics',
+          group: AggGroupNames.Metrics,
           name: 'metric',
           title: i18n.translate('kbnVislibVisTypes.line.metricTitle', { defaultMessage: 'Y-axis' }),
           min: 1,
@@ -164,7 +164,7 @@ export default function PointSeriesVisType(Private) {
           ]
         },
         {
-          group: 'metrics',
+          group: AggGroupNames.Metrics,
           name: 'radius',
           title: i18n.translate('kbnVislibVisTypes.line.radiusTitle', { defaultMessage: 'Dot size' }),
           min: 0,
@@ -172,7 +172,7 @@ export default function PointSeriesVisType(Private) {
           aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality', 'top_hits']
         },
         {
-          group: 'buckets',
+          group: AggGroupNames.Buckets,
           name: 'segment',
           title: i18n.translate('kbnVislibVisTypes.line.segmentTitle', { defaultMessage: 'X-axis' }),
           min: 0,
@@ -180,7 +180,7 @@ export default function PointSeriesVisType(Private) {
           aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
         },
         {
-          group: 'buckets',
+          group: AggGroupNames.Buckets,
           name: 'group',
           title: i18n.translate('kbnVislibVisTypes.line.groupTitle', { defaultMessage: 'Split series' }),
           min: 0,
@@ -188,7 +188,7 @@ export default function PointSeriesVisType(Private) {
           aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
         },
         {
-          group: 'buckets',
+          group: AggGroupNames.Buckets,
           name: 'split',
           title: i18n.translate('kbnVislibVisTypes.line.splitTitle', { defaultMessage: 'Split chart' }),
           min: 0,

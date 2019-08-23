@@ -25,7 +25,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { VisOptionsProps } from 'ui/vis/editors/default';
 import { BasicVislibParams, ValueAxis } from '../../types';
 import { ChartOptions } from './components/chart_options';
-import { SetChartValueByIndex } from '../../editors/metrics_axis_options';
+import { SetChartValueByIndex } from '../../editors/metrics_axes_options';
 
 interface SeriesPanelProps extends VisOptionsProps<BasicVislibParams> {
   addValueAxis: () => ValueAxis;

@@ -19,9 +19,9 @@
 
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
-import { Schemas } from 'ui/vis/editors/default/schemas';
+import { Schemas, AggGroupNames } from 'ui/vis/editors/default';
 import { PointSeriesOptions } from './editors/point_series_options';
-import { MetricsAxisOptions } from './editors/metrics_axis_options';
+import { MetricsAxisOptions } from './editors/metrics_axes_options';
 import {
   getPositions,
   LegendPositions,
@@ -158,7 +158,7 @@ export default function PointSeriesVisType(Private) {
       ],
       schemas: new Schemas([
         {
-          group: 'metrics',
+          group: AggGroupNames.Metrics,
           name: 'metric',
           title: i18n.translate('kbnVislibVisTypes.area.metricsTitle', {
             defaultMessage: 'Y-axis',
@@ -168,7 +168,7 @@ export default function PointSeriesVisType(Private) {
           defaults: [{ schema: 'metric', type: 'count' }],
         },
         {
-          group: 'metrics',
+          group: AggGroupNames.Metrics,
           name: 'radius',
           title: i18n.translate('kbnVislibVisTypes.area.radiusTitle', {
             defaultMessage: 'Dot size',

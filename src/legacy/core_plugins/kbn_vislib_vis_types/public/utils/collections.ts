@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export enum LegendPositions {
+export enum Positions {
   RIGHT = 'right',
   LEFT = 'left',
   TOP = 'top',
@@ -31,25 +31,25 @@ const getPositions = () => [
     text: i18n.translate('kbnVislibVisTypes.legendPositions.topText', {
       defaultMessage: 'Top',
     }),
-    value: LegendPositions.TOP,
+    value: Positions.TOP,
   },
   {
     text: i18n.translate('kbnVislibVisTypes.legendPositions.leftText', {
       defaultMessage: 'Left',
     }),
-    value: LegendPositions.LEFT,
+    value: Positions.LEFT,
   },
   {
     text: i18n.translate('kbnVislibVisTypes.legendPositions.rightText', {
       defaultMessage: 'Right',
     }),
-    value: LegendPositions.RIGHT,
+    value: Positions.RIGHT,
   },
   {
     text: i18n.translate('kbnVislibVisTypes.legendPositions.bottomText', {
       defaultMessage: 'Bottom',
     }),
-    value: LegendPositions.BOTTOM,
+    value: Positions.BOTTOM,
   },
 ];
 

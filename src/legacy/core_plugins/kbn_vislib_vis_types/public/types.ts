@@ -18,7 +18,7 @@
  */
 
 import {
-  LegendPositions,
+  Positions,
   ChartModes,
   ChartTypes,
   AxisModes,
@@ -29,7 +29,7 @@ import {
 
 export interface CommonVislibParams {
   addTooltip: boolean;
-  legendPosition: LegendPositions;
+  legendPosition: Positions;
 }
 
 interface Labels {
@@ -60,7 +60,7 @@ interface ThresholdLine {
 export interface Axis {
   id: string;
   labels: Labels;
-  position: LegendPositions;
+  position: Positions;
   scale: Scale;
   show: boolean;
   style: object;

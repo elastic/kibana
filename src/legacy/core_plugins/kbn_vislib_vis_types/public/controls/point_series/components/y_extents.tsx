@@ -37,7 +37,7 @@ const minError = i18n.translate(
   }
 );
 
-function areExtendsValid(min: number | '' = '', max: number | '' = ''): boolean {
+function areExtentsValid(min: number | '' = '', max: number | '' = ''): boolean {
   if (min === '' || max === '') {
     return true;
   }
@@ -45,17 +45,17 @@ function areExtendsValid(min: number | '' = '', max: number | '' = ''): boolean 
   return max > min;
 }
 
-interface YExtendsProps {
+interface YExtentsProps {
   scale: Scale;
   setScale: SetScale;
   setValidity: (isValid: boolean) => void;
 }
 
-function YExtends({ scale, setScale, setValidity }: YExtendsProps) {
+function YExtents({ scale, setScale, setValidity }: YExtentsProps) {
   const { min, max, type } = scale;
   const errors = [];
 
-  if (!areExtendsValid(min, max)) {
+  if (!areExtentsValid(min, max)) {
     errors.push(rangeError);
   }
 
@@ -104,4 +104,4 @@ function YExtends({ scale, setScale, setValidity }: YExtendsProps) {
   );
 }
 
-export { YExtends };
+export { YExtents };

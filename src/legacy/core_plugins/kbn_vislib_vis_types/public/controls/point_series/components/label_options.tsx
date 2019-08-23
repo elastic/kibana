@@ -31,14 +31,14 @@ import { rotateOptions } from './../utils';
 
 interface LabelOptionsProps extends VisOptionsProps<BasicVislibParams> {
   axis: Axis;
-  axisName: 'categoryAxes' | 'valueAxes';
+  axesName: 'categoryAxes' | 'valueAxes';
   index: number;
 }
 
-function LabelOptions({ stateParams, setValue, axis, axisName, index }: LabelOptionsProps) {
+function LabelOptions({ stateParams, setValue, axis, axesName, index }: LabelOptionsProps) {
   const setAxisLabel = useCallback(
     <T extends keyof Axis['labels']>(paramName: T, value: Axis['labels'][T]) => {
-      const axes = [...stateParams[axisName]];
+      const axes = [...stateParams[axesName]];
       axes[index] = {
         ...axes[index],
         labels: {
@@ -46,9 +46,16 @@ function LabelOptions({ stateParams, setValue, axis, axisName, index }: LabelOpt
           [paramName]: value,
         },
       };
-      setValue(axisName, axes);
+      setValue(axesName, axes);
     },
-    [axisName, index, setValue, stateParams]
+    [axesName, index, setValue, stateParams]
+  );
+
+  const setAxisLabelRotate = useCallback(
+    (paramName: 'rotate', value: Axis['labels']['rotate']) => {
+      setAxisLabel(paramName, Number(value));
+    },
+    [setAxisLabel]
   );
 
   return (
@@ -75,7 +82,7 @@ function LabelOptions({ stateParams, setValue, axis, axisName, index }: LabelOpt
       />
 
       <SwitchOption
-        dataTestSubj={`${axisName === 'valueAxes' ? 'y' : 'x'}AxisFilterLabelsCheckbox-${axis.id}`}
+        dataTestSubj={`${axesName === 'valueAxes' ? 'y' : 'x'}AxisFilterLabelsCheckbox-${axis.id}`}
         disabled={!axis.labels.show}
         label={i18n.translate(
           'kbnVislibVisTypes.controls.pointSeries.categoryAxis.filterLabelsLabel',
@@ -101,7 +108,7 @@ function LabelOptions({ stateParams, setValue, axis, axisName, index }: LabelOpt
             options={rotateOptions}
             paramName="rotate"
             value={axis.labels.rotate}
-            setValue={(paramName, value) => setAxisLabel(paramName, Number(value))}
+            setValue={setAxisLabelRotate}
           />
         </EuiFlexItem>
         <EuiFlexItem>

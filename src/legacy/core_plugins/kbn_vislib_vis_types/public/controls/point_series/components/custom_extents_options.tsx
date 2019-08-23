@@ -25,7 +25,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { ValueAxis } from '../../../types';
 import { SwitchOption } from '../../switch';
 import { NumberInputOption } from '../../number_input';
-import { YExtends } from './y_extends';
+import { YExtents } from './y_extents';
 import { SetScale } from './value_axis_options';
 
 interface CustomExtentsOptionsProps {
@@ -119,7 +119,7 @@ function CustomExtentsOptions({
             <EuiFormErrorText>
               <FormattedMessage
                 id="kbnVislibVisTypes.controls.pointSeries.valueAxes.scaleToDataBounds.minNeededBoundsMargin"
-                defaultMessage="Bounds margin must be greater than or equal to 0"
+                defaultMessage="Bounds margin must be greater than or equal to 0."
               />
             </EuiFormErrorText>
           )}
@@ -139,7 +139,7 @@ function CustomExtentsOptions({
       />
 
       {axis.scale.setYExtents && (
-        <YExtends scale={axis.scale} setScale={setValueAxisScale} setValidity={setValidity} />
+        <YExtents scale={axis.scale} setScale={setValueAxisScale} setValidity={setValidity} />
       )}
     </>
   );

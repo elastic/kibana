@@ -524,7 +524,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       // it would be nice to get the correct axis by name like "LeftAxis-1"
       // instead of an incremented index, but this link isn't under the div above
       const advancedLink =
-        await find.byCssSelector(`#axisOptionsValueAxis-1 .visEditorSidebar__advancedLinkIcon`);
+        await find.byCssSelector(`#axisOptionsValueAxis-1`);
 
       const advancedLinkState = await advancedLink.getAttribute('type');
       if (advancedLinkState.includes('arrowRight')) {

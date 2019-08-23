@@ -183,11 +183,6 @@
   @include __legacySelectStyles__bad;
 }
 
-.visEditorSidebar__formTitle {
-  @include euiTitle('xxs');
-  margin: $euiSizeS 0;
-}
-
 .visEditorSidebar__formRow {
   display: flex;
   align-items: center;

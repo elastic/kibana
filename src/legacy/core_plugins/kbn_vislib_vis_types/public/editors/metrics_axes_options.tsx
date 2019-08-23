@@ -22,14 +22,14 @@ import { cloneDeep, capitalize, get, uniq } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 
 import { AggConfig } from 'ui/vis';
-import { VisOptionsProps } from 'ui/vis/editors/default';
+import { VisOptionsProps, AggGroupNames } from 'ui/vis/editors/default';
 import { safeMakeLabel } from 'ui/agg_types/agg_utils';
 import { BasicVislibParams, ValueAxis, SeriesParam } from '../types';
 import { SeriesPanel } from '../controls/point_series/series_panel';
 import { CategoryAxisPanel } from '../controls/point_series/category_axis_panel';
 import { ValueAxesPanel } from '../controls/point_series/value_axes_panel';
 import { mapPositionOpposite, mapPosition } from '../controls/point_series/utils';
-import { makeSerie, isAxisHorizontal, countNextAxisNumber } from './metrics_axis_options_helper';
+import { makeSerie, isAxisHorizontal, countNextAxisNumber } from './metrics_axes_options_helper';
 
 export type SetChartValueByIndex = <T extends keyof SeriesParam>(
   index: number,
@@ -164,7 +164,8 @@ function MetricsAxisOptions(props: VisOptionsProps<BasicVislibParams>) {
 
   const removeValueAxis = useCallback(
     (axis: ValueAxis) => {
-      setValue('valueAxes', stateParams.valueAxes.filter(valAxis => valAxis.id !== axis.id));
+      const newValueAxes = stateParams.valueAxes.filter(valAxis => valAxis.id !== axis.id);
+      setValue('valueAxes', newValueAxes);
 
       let chartIndex;
       stateParams.seriesParams.forEach(({ valueAxis }, index) => {
@@ -174,7 +175,8 @@ function MetricsAxisOptions(props: VisOptionsProps<BasicVislibParams>) {
       });
 
       if (chartIndex !== undefined) {
-        setChartByIndex(chartIndex, 'valueAxis', axis.id);
+        // if a seriesParam has valueAxis equals to removed one, then we reset it to the first valueAxis
+        setChartByIndex(chartIndex, 'valueAxis', newValueAxes[0].id);
       }
     },
     [stateParams.seriesParams, stateParams.valueAxes, setChartByIndex, setValue]
@@ -192,7 +194,7 @@ function MetricsAxisOptions(props: VisOptionsProps<BasicVislibParams>) {
     const schemaTitle = vis.type.schemas.metrics[0].title;
 
     const metrics = aggs.filter(agg => {
-      const isMetric = agg.type && agg.type.type === 'metrics';
+      const isMetric = agg.type && agg.type.type === AggGroupNames.Metrics;
       return isMetric && agg.schema.title === schemaTitle;
     });
 

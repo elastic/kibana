@@ -23,14 +23,14 @@ import { EuiSpacer, EuiAccordion } from '@elastic/eui';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
 import { BasicVislibParams, ValueAxis } from '../../../types';
-import { LegendPositions } from '../../../utils/collections';
+import { Positions } from '../../../utils/collections';
 import { SelectOption } from '../../select';
 import { SwitchOption } from './../../switch';
 import { TextInputOption } from './../../text_input';
 import { LabelOptions } from './label_options';
 import { CustomExtentsOptions } from './custom_extents_options';
-import { isAxisHorizontal } from '../../../editors/metrics_axis_options_helper';
-import { SetValueAxisByIndex } from '../../../editors/metrics_axis_options';
+import { isAxisHorizontal } from '../../../editors/metrics_axes_options_helper';
+import { SetValueAxisByIndex } from '../../../editors/metrics_axes_options';
 
 export type SetScale = <T extends keyof ValueAxis['scale']>(
   paramName: T,
@@ -104,11 +104,11 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
   );
 
   const isPositionDisabled = useCallback(
-    (position: LegendPositions) => {
+    (position: Positions) => {
       if (isCategoryAxisHorizontal) {
         return isAxisHorizontal(position);
       }
-      return [LegendPositions.LEFT, LegendPositions.RIGHT].includes(position);
+      return [Positions.LEFT, Positions.RIGHT].includes(position);
     },
     [isCategoryAxisHorizontal]
   );
@@ -116,7 +116,7 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
   const positions = useMemo(
     () =>
       vis.type.editorConfig.collections.positions.map(
-        (position: { text: string; value: LegendPositions }) => ({
+        (position: { text: string; value: Positions }) => ({
           ...position,
           disabled: isPositionDisabled(position.value),
         })
@@ -198,7 +198,7 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
       >
         <>
           <EuiSpacer size="m" />
-          <LabelOptions axis={axis} axisName="valueAxes" index={index} {...props} />
+          <LabelOptions axis={axis} axesName="valueAxes" index={index} {...props} />
           <CustomExtentsOptions
             axis={axis}
             setValueAxisScale={setValueAxisScale}

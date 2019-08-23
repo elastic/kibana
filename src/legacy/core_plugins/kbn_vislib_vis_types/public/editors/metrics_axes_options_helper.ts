@@ -19,7 +19,7 @@
 
 import { ChartModes, ChartTypes, InterpolationModes } from '../utils/collections';
 import { ValueAxis, SeriesParam } from '../types';
-import { LegendPositions } from '../utils/collections';
+import { Positions } from '../utils/collections';
 
 const makeSerie = (
   id: string,
@@ -44,8 +44,8 @@ const makeSerie = (
   };
 };
 
-const isAxisHorizontal = (position: LegendPositions) =>
-  [LegendPositions.TOP, LegendPositions.BOTTOM].includes(position);
+const isAxisHorizontal = (position: Positions) =>
+  [Positions.TOP, Positions.BOTTOM].includes(position);
 
 const RADIX = 10;
 
