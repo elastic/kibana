@@ -7,7 +7,7 @@
 import { useRef } from 'react';
 import { useFetcher } from './useFetcher';
 import { useUrlParams } from './useUrlParams';
-import { loadTransactionBreakdown } from '../services/rest/apm/transaction_groups';
+import { callApmApi } from '../services/rest/callApmApi';
 
 export function useTransactionBreakdown() {
   const {
@@ -21,13 +21,19 @@ export function useTransactionBreakdown() {
     status
   } = useFetcher(() => {
     if (serviceName && start && end && transactionType) {
-      return loadTransactionBreakdown({
-        start,
-        end,
-        serviceName,
-        transactionName,
-        transactionType,
-        uiFilters
+      return callApmApi({
+        pathname:
+          '/api/apm/services/{serviceName}/transaction_groups/breakdown',
+        params: {
+          path: { serviceName },
+          query: {
+            start,
+            end,
+            transactionName,
+            transactionType,
+            uiFilters: JSON.stringify(uiFilters)
+          }
+        }
       });
     }
   }, [serviceName, start, end, transactionType, transactionName, uiFilters]);

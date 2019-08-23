@@ -27,6 +27,12 @@ const mockSort: Sort = {
   sortDirection: Direction.desc,
 };
 
+jest.mock(
+  'react-visibility-sensor',
+  () => ({ children }: { children: (args: { isVisible: boolean }) => React.ReactNode }) =>
+    children({ isVisible: true })
+);
+
 describe('Body', () => {
   describe('rendering', () => {
     test('it renders the column headers', () => {
@@ -55,7 +61,6 @@ describe('Body', () => {
             sort={mockSort}
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
-            width={100}
           />
         </TestProviders>
       );
@@ -94,7 +99,6 @@ describe('Body', () => {
             sort={mockSort}
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
-            width={100}
           />
         </TestProviders>
       );
@@ -133,7 +137,6 @@ describe('Body', () => {
             sort={mockSort}
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
-            width={100}
           />
         </TestProviders>
       );
@@ -174,13 +177,13 @@ describe('Body', () => {
             sort={mockSort}
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
-            width={100}
           />
         </TestProviders>
       );
+      wrapper.update();
       await wait();
       wrapper.update();
-      headersJustTimestamp.forEach(h => {
+      headersJustTimestamp.forEach(() => {
         expect(
           wrapper
             .find('[data-test-subj="data-driven-columns"]')

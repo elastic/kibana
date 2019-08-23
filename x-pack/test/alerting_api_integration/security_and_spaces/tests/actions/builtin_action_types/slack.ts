@@ -8,7 +8,10 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { SLACK_ACTION_SIMULATOR_URI } from '../../../../common/fixtures/plugins/actions';
+import {
+  getExternalServiceSimulatorPath,
+  ExternalServiceSimulator,
+} from '../../../../common/fixtures/plugins/actions';
 
 // eslint-disable-next-line import/no-default-export
 export default function slackTest({ getService }: FtrProviderContext) {
@@ -23,7 +26,9 @@ export default function slackTest({ getService }: FtrProviderContext) {
     before(() => {
       const kibanaServer = getService('kibanaServer');
       const kibanaUrl = kibanaServer.status && kibanaServer.status.kibanaServerUrl;
-      slackSimulatorURL = `${kibanaUrl}${SLACK_ACTION_SIMULATOR_URI}`;
+      slackSimulatorURL = `${kibanaUrl}${getExternalServiceSimulatorPath(
+        ExternalServiceSimulator.SLACK
+      )}`;
     });
 
     after(() => esArchiver.unload('empty_kibana'));

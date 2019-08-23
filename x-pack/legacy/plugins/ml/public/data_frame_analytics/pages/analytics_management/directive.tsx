@@ -11,19 +11,12 @@ import ReactDOM from 'react-dom';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
-import { IndexPattern, IndexPatterns } from 'ui/index_patterns';
+import { IndexPatterns } from 'ui/index_patterns';
 import { I18nContext } from 'ui/i18n';
 import { IPrivate } from 'ui/private';
 
 import { InjectorService } from '../../../../common/types/angular';
-// @ts-ignore
 import { SearchItemsProvider } from '../../../jobs/new_job/utils/new_job_utils';
-// Simple drop-in type until new_job_utils offers types.
-type CreateSearchItems = () => {
-  indexPattern: IndexPattern;
-  savedSearch: any;
-  combinedQuery: any;
-};
 
 import { KibanaConfigTypeFix, KibanaContext } from '../../../contexts/kibana';
 
@@ -39,7 +32,7 @@ module.directive('mlDataFrameAnalyticsManagement', ($injector: InjectorService) 
       const kibanaConfig = $injector.get<KibanaConfigTypeFix>('config');
       const Private = $injector.get<IPrivate>('Private');
 
-      const createSearchItems: CreateSearchItems = Private(SearchItemsProvider);
+      const createSearchItems = Private(SearchItemsProvider);
       const { indexPattern, savedSearch, combinedQuery } = createSearchItems();
 
       const kibanaContext = {
