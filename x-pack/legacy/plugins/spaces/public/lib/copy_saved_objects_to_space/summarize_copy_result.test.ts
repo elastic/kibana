@@ -68,36 +68,33 @@ describe('summarizeCopyResult', () => {
     );
 
     expect(summarizedResult).toMatchInlineSnapshot(`
-            Object {
-              "objects": Array [
-                Object {
-                  "conflicts": Array [],
-                  "hasUnresolvableErrors": false,
-                  "id": "foo",
-                  "missingReferences": Array [],
-                  "name": "my-dashboard",
-                  "type": "dashboard",
-                },
-                Object {
-                  "conflicts": Array [],
-                  "hasUnresolvableErrors": false,
-                  "id": "foo-viz",
-                  "missingReferences": Array [],
-                  "name": "Foo Viz",
-                  "type": "visualization",
-                },
-                Object {
-                  "conflicts": Array [],
-                  "hasUnresolvableErrors": false,
-                  "id": "bar-viz",
-                  "missingReferences": Array [],
-                  "name": "Bar Viz",
-                  "type": "visualization",
-                },
-              ],
-              "processing": true,
-            }
-        `);
+      Object {
+        "objects": Array [
+          Object {
+            "conflicts": Array [],
+            "hasUnresolvableErrors": false,
+            "id": "foo",
+            "name": "my-dashboard",
+            "type": "dashboard",
+          },
+          Object {
+            "conflicts": Array [],
+            "hasUnresolvableErrors": false,
+            "id": "foo-viz",
+            "name": "Foo Viz",
+            "type": "visualization",
+          },
+          Object {
+            "conflicts": Array [],
+            "hasUnresolvableErrors": false,
+            "id": "bar-viz",
+            "name": "Bar Viz",
+            "type": "visualization",
+          },
+        ],
+        "processing": true,
+      }
+    `);
   });
 
   it('processes failedImports to extract conflicts, including transient conflicts', () => {
@@ -119,7 +116,6 @@ describe('summarizeCopyResult', () => {
             "conflicts": Array [],
             "hasUnresolvableErrors": false,
             "id": "foo",
-            "missingReferences": Array [],
             "name": "my-dashboard",
             "type": "dashboard",
           },
@@ -137,7 +133,6 @@ describe('summarizeCopyResult', () => {
             ],
             "hasUnresolvableErrors": false,
             "id": "foo-viz",
-            "missingReferences": Array [],
             "name": "Foo Viz",
             "type": "visualization",
           },
@@ -145,7 +140,6 @@ describe('summarizeCopyResult', () => {
             "conflicts": Array [],
             "hasUnresolvableErrors": false,
             "id": "bar-viz",
-            "missingReferences": Array [],
             "name": "Bar Viz",
             "type": "visualization",
           },
@@ -163,7 +157,6 @@ describe('summarizeCopyResult', () => {
             ],
             "hasUnresolvableErrors": false,
             "id": "transient-index-pattern-conflict",
-            "missingReferences": Array [],
             "name": "transient-index-pattern-conflict",
             "type": "index-pattern",
           },
@@ -185,63 +178,36 @@ describe('summarizeCopyResult', () => {
       includeRelated
     );
     expect(summarizedResult).toMatchInlineSnapshot(`
-            Object {
-              "hasConflicts": false,
-              "hasUnresolvableErrors": true,
-              "objects": Array [
-                Object {
-                  "conflicts": Array [],
-                  "hasUnresolvableErrors": false,
-                  "id": "foo",
-                  "missingReferences": Array [
-                    Object {
-                      "error": Object {
-                        "blocking": Array [],
-                        "references": Array [],
-                        "type": "missing_references",
-                      },
-                      "obj": Object {
-                        "id": "bar-viz",
-                        "type": "visualization",
-                      },
-                    },
-                  ],
-                  "name": "my-dashboard",
-                  "type": "dashboard",
-                },
-                Object {
-                  "conflicts": Array [],
-                  "hasUnresolvableErrors": false,
-                  "id": "foo-viz",
-                  "missingReferences": Array [],
-                  "name": "Foo Viz",
-                  "type": "visualization",
-                },
-                Object {
-                  "conflicts": Array [],
-                  "hasUnresolvableErrors": true,
-                  "id": "bar-viz",
-                  "missingReferences": Array [
-                    Object {
-                      "error": Object {
-                        "blocking": Array [],
-                        "references": Array [],
-                        "type": "missing_references",
-                      },
-                      "obj": Object {
-                        "id": "bar-viz",
-                        "type": "visualization",
-                      },
-                    },
-                  ],
-                  "name": "Bar Viz",
-                  "type": "visualization",
-                },
-              ],
-              "processing": false,
-              "successful": false,
-            }
-        `);
+      Object {
+        "hasConflicts": false,
+        "hasUnresolvableErrors": true,
+        "objects": Array [
+          Object {
+            "conflicts": Array [],
+            "hasUnresolvableErrors": false,
+            "id": "foo",
+            "name": "my-dashboard",
+            "type": "dashboard",
+          },
+          Object {
+            "conflicts": Array [],
+            "hasUnresolvableErrors": false,
+            "id": "foo-viz",
+            "name": "Foo Viz",
+            "type": "visualization",
+          },
+          Object {
+            "conflicts": Array [],
+            "hasUnresolvableErrors": true,
+            "id": "bar-viz",
+            "name": "Bar Viz",
+            "type": "visualization",
+          },
+        ],
+        "processing": false,
+        "successful": false,
+      }
+    `);
   });
 
   it('processes a result without errors', () => {
@@ -255,39 +221,36 @@ describe('summarizeCopyResult', () => {
       includeRelated
     );
     expect(summarizedResult).toMatchInlineSnapshot(`
-            Object {
-              "hasConflicts": false,
-              "hasUnresolvableErrors": false,
-              "objects": Array [
-                Object {
-                  "conflicts": Array [],
-                  "hasUnresolvableErrors": false,
-                  "id": "foo",
-                  "missingReferences": Array [],
-                  "name": "my-dashboard",
-                  "type": "dashboard",
-                },
-                Object {
-                  "conflicts": Array [],
-                  "hasUnresolvableErrors": false,
-                  "id": "foo-viz",
-                  "missingReferences": Array [],
-                  "name": "Foo Viz",
-                  "type": "visualization",
-                },
-                Object {
-                  "conflicts": Array [],
-                  "hasUnresolvableErrors": false,
-                  "id": "bar-viz",
-                  "missingReferences": Array [],
-                  "name": "Bar Viz",
-                  "type": "visualization",
-                },
-              ],
-              "processing": false,
-              "successful": true,
-            }
-        `);
+      Object {
+        "hasConflicts": false,
+        "hasUnresolvableErrors": false,
+        "objects": Array [
+          Object {
+            "conflicts": Array [],
+            "hasUnresolvableErrors": false,
+            "id": "foo",
+            "name": "my-dashboard",
+            "type": "dashboard",
+          },
+          Object {
+            "conflicts": Array [],
+            "hasUnresolvableErrors": false,
+            "id": "foo-viz",
+            "name": "Foo Viz",
+            "type": "visualization",
+          },
+          Object {
+            "conflicts": Array [],
+            "hasUnresolvableErrors": false,
+            "id": "bar-viz",
+            "name": "Bar Viz",
+            "type": "visualization",
+          },
+        ],
+        "processing": false,
+        "successful": true,
+      }
+    `);
   });
 
   it('does not include references unless requested', () => {
@@ -301,22 +264,21 @@ describe('summarizeCopyResult', () => {
       includeRelated
     );
     expect(summarizedResult).toMatchInlineSnapshot(`
-            Object {
-              "hasConflicts": false,
-              "hasUnresolvableErrors": false,
-              "objects": Array [
-                Object {
-                  "conflicts": Array [],
-                  "hasUnresolvableErrors": false,
-                  "id": "foo",
-                  "missingReferences": Array [],
-                  "name": "my-dashboard",
-                  "type": "dashboard",
-                },
-              ],
-              "processing": false,
-              "successful": true,
-            }
-        `);
+      Object {
+        "hasConflicts": false,
+        "hasUnresolvableErrors": false,
+        "objects": Array [
+          Object {
+            "conflicts": Array [],
+            "hasUnresolvableErrors": false,
+            "id": "foo",
+            "name": "my-dashboard",
+            "type": "dashboard",
+          },
+        ],
+        "processing": false,
+        "successful": true,
+      }
+    `);
   });
 });

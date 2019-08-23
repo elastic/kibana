@@ -425,24 +425,19 @@ describe('CopyToSpaceFlyout', () => {
     const spaceResult = findTestSubject(wrapper, `cts-space-result-space-2`);
     spaceResult.simulate('click');
 
-    const missingRefIconTip = spaceResult.find(
-      'EuiIconTip[data-test-subj="cts-object-result-missing-refs-my-viz"]'
+    const errorIconTip = spaceResult.find(
+      'EuiIconTip[data-test-subj="cts-object-result-error-my-viz"]'
     );
 
-    expect(missingRefIconTip.props()).toMatchInlineSnapshot(`
+    expect(errorIconTip.props()).toMatchInlineSnapshot(`
       Object {
         "color": "danger",
         "content": <FormattedMessage
-          defaultMessage="This saved object requires a saved object which doesn't exist in this space: {type}:{id}."
-          id="xpack.spaces.management.copyToSpace.copyStatus.missingRefsErrorMessage"
-          values={
-            Object {
-              "id": "missing-index-pattern",
-              "type": "index-pattern",
-            }
-          }
+          defaultMessage="There was an error copying this saved object."
+          id="xpack.spaces.management.copyToSpace.copyStatus.unresolvableErrorMessage"
+          values={Object {}}
         />,
-        "data-test-subj": "cts-object-result-missing-refs-my-viz",
+        "data-test-subj": "cts-object-result-error-my-viz",
         "type": "cross",
       }
     `);

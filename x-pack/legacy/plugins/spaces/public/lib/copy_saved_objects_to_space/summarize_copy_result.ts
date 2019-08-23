@@ -14,7 +14,6 @@ export interface SummarizedSavedObjectResult {
   id: string;
   name: string;
   conflicts: ProcessedImportResponse['failedImports'];
-  missingReferences: ProcessedImportResponse['failedImports'];
   hasUnresolvableErrors: boolean;
 }
 
@@ -54,10 +53,6 @@ export function summarizeCopyResult(
     ? copyResult.failedImports.filter(failed => failed.error.type === 'conflict')
     : [];
 
-  const missingReferences = copyResult
-    ? copyResult.failedImports.filter(failed => failed.error.type === 'missing_references')
-    : [];
-
   const unresolvableErrors = copyResult
     ? copyResult.failedImports.filter(failed => failed.error.type !== 'conflict')
     : [];
@@ -76,7 +71,6 @@ export function summarizeCopyResult(
     conflicts: conflicts.filter(
       c => c.obj.type === savedObject.type && c.obj.id === savedObject.id
     ),
-    missingReferences,
     hasUnresolvableErrors: unresolvableErrors.some(
       e => e.obj.type === savedObject.type && e.obj.id === savedObject.id
     ),
@@ -89,9 +83,6 @@ export function summarizeCopyResult(
         id: ref.id,
         name: ref.name,
         conflicts: conflicts.filter(c => c.obj.type === ref.type && c.obj.id === ref.id),
-        missingReferences: missingReferences.filter(
-          m => m.obj.type === ref.type && m.obj.id === ref.id
-        ),
         hasUnresolvableErrors: unresolvableErrors.some(
           e => e.obj.type === ref.type && e.obj.id === ref.id
         ),
@@ -108,9 +99,6 @@ export function summarizeCopyResult(
         id: conflict.obj.id,
         name: conflict.obj.title || conflict.obj.id,
         conflicts: conflicts.filter(c => c.obj.type === conflict.obj.type && conflict.obj.id),
-        missingReferences: missingReferences.filter(
-          m => m.obj.type === conflict.obj.type && m.obj.id === conflict.obj.id
-        ),
         hasUnresolvableErrors: unresolvableErrors.some(
           e => e.obj.type === conflict.obj.type && e.obj.id === conflict.obj.id
         ),
