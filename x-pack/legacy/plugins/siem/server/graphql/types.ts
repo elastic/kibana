@@ -973,11 +973,13 @@ export interface Overview {
 }
 
 export interface AutonomousSystem {
-  as_org?: string | null;
+  number?: number | null;
 
-  asn?: string | null;
+  organization?: AutonomousSystemOrganization | null;
+}
 
-  ip?: string | null;
+export interface AutonomousSystemOrganization {
+  name?: string | null;
 }
 
 export interface DomainsData {
@@ -5527,26 +5529,31 @@ export namespace OverviewResolvers {
 
 export namespace AutonomousSystemResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = AutonomousSystem> {
-    as_org?: AsOrgResolver<string | null, TypeParent, Context>;
+    number?: NumberResolver<number | null, TypeParent, Context>;
 
-    asn?: AsnResolver<string | null, TypeParent, Context>;
-
-    ip?: IpResolver<string | null, TypeParent, Context>;
+    organization?: OrganizationResolver<AutonomousSystemOrganization | null, TypeParent, Context>;
   }
 
-  export type AsOrgResolver<
-    R = string | null,
+  export type NumberResolver<
+    R = number | null,
     Parent = AutonomousSystem,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type AsnResolver<
-    R = string | null,
+  export type OrganizationResolver<
+    R = AutonomousSystemOrganization | null,
     Parent = AutonomousSystem,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type IpResolver<
+}
+
+export namespace AutonomousSystemOrganizationResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = AutonomousSystemOrganization> {
+    name?: NameResolver<string | null, TypeParent, Context>;
+  }
+
+  export type NameResolver<
     R = string | null,
-    Parent = AutonomousSystem,
+    Parent = AutonomousSystemOrganization,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }

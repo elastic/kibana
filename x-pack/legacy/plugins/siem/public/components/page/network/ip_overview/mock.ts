@@ -11,7 +11,7 @@ export const mockData: Readonly<Record<string, IpOverviewData>> = {
     source: {
       firstSeen: '2019-02-07T17:19:41.636Z',
       lastSeen: '2019-02-07T17:19:41.636Z',
-      autonomousSystem: { as_org: 'Test Org', asn: 'Test ASN', ip: '10.10.10.10' },
+      autonomousSystem: { organization: { name: 'Test Org' }, number: 12345 },
       geo: {
         continent_name: ['North America'],
         city_name: ['New York'],
@@ -28,7 +28,7 @@ export const mockData: Readonly<Record<string, IpOverviewData>> = {
     destination: {
       firstSeen: '2019-02-07T17:19:41.648Z',
       lastSeen: '2019-02-07T17:19:41.648Z',
-      autonomousSystem: { as_org: 'Test Org', asn: 'Test ASN', ip: '10.10.10.10' },
+      autonomousSystem: { organization: { name: 'Test Org' }, number: 12345 },
       geo: {
         continent_name: ['North America'],
         city_name: ['New York'],

@@ -59,19 +59,21 @@ export const autonomousSystemRenderer = (
   as: AutonomousSystem,
   flowTarget: FlowTarget
 ): React.ReactElement =>
-  as && as.as_org && as.asn ? (
+  as && as.organization && as.organization.name && as.number ? (
     <EuiFlexGroup alignItems="center" gutterSize="none">
       <EuiFlexItem grow={false}>
         <DefaultDraggable
-          id={`${IpOverviewId}-${flowTarget}.autonomous_system.as_org`}
-          field={`${flowTarget}.autonomous_system.as_org`}
-          value={as.as_org}
+          id={`${IpOverviewId}-${flowTarget}.as.organization.name`}
+          field={`${flowTarget}.as.organization.name`}
+          value={as.organization.name}
         />
-        {' /'}
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{'/'}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <DefaultDraggable
-          id={`${IpOverviewId}-${flowTarget}.autonomous_system.asn`}
-          field={`${flowTarget}.autonomous_system.asn`}
-          value={as.asn}
+          id={`${IpOverviewId}-${flowTarget}.as.number`}
+          field={`${flowTarget}.as.number`}
+          value={`${as.number}`}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

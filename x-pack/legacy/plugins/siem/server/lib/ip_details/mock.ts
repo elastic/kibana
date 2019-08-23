@@ -52,7 +52,7 @@ export const responseAggs: IpOverviewHit = {
         value: 1551388820000,
         value_as_string: '2019-02-28T21:20:20.000Z',
       },
-      autonomous_system: {
+      autonomousSystem: {
         doc_count: 0,
         results: {
           hits: {
@@ -112,7 +112,7 @@ export const responseAggs: IpOverviewHit = {
         value: 1551388804322,
         value_as_string: '2019-02-28T21:20:04.322Z',
       },
-      autonomous_system: {
+      autonomousSystem: {
         doc_count: 0,
         results: {
           hits: {
