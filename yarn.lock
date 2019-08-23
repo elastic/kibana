@@ -948,15 +948,7 @@
     pirates "^4.0.0"
     source-map-support "^0.5.9"
 
-"@babel/runtime-corejs2@^7.2.0":
-  version "7.5.5"
-  resolved "https://registry.yarnpkg.com/@babel/runtime-corejs2/-/runtime-corejs2-7.5.5.tgz#c3214c08ef20341af4187f1c9fbdc357fbec96b2"
-  integrity sha512-FYATQVR00NSNi7mUfpPDp7E8RYMXDuO8gaix7u/w3GekfUinKgX1AcTxs7SoiEmoEW9mbpjrwqWSW6zCmw5h8A==
-  dependencies:
-    core-js "^2.6.5"
-    regenerator-runtime "^0.13.2"
-
-"@babel/runtime-corejs2@^7.4.2":
+"@babel/runtime-corejs2@^7.2.0", "@babel/runtime-corejs2@^7.4.2":
   version "7.5.5"
   resolved "https://registry.yarnpkg.com/@babel/runtime-corejs2/-/runtime-corejs2-7.5.5.tgz#c3214c08ef20341af4187f1c9fbdc357fbec96b2"
   integrity sha512-FYATQVR00NSNi7mUfpPDp7E8RYMXDuO8gaix7u/w3GekfUinKgX1AcTxs7SoiEmoEW9mbpjrwqWSW6zCmw5h8A==
@@ -1057,10 +1049,10 @@
     debug "^3.1.0"
     lodash.once "^4.1.1"
 
-"@elastic/charts@^10.0.1":
-  version "10.0.1"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-10.0.1.tgz#791a4459960e404ceb644a02138a208398d0419f"
-  integrity sha512-eRcTfvSPM8RN4tfsuuQA9nc0fNroJRedQMmdeDjRB395KIeOdzD4arFDWU3jgQucB/rQXqa4aROH3I3B4Joouw==
+"@elastic/charts@^10.2.0":
+  version "10.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-10.2.0.tgz#bad5d8b491317df6ac7572b08257e425f121cd74"
+  integrity sha512-z7Gysk+hY59zsclLJr/8Ojchqm+DvhfAhlAJEwVS8xuZSBjnb6CTcFVzsr8xEa99E6F3C2yavrdL6nKOpa6WDw==
   dependencies:
     "@types/d3-shape" "^1.3.1"
     "@types/luxon" "^1.11.1"
