@@ -20,7 +20,7 @@
 import { addSearchStrategy } from './search_strategy_registry';
 import { isDefaultTypeIndexPattern } from './is_default_type_index_pattern';
 import { SearchError } from './search_error';
-import { getSearchParams, getMSearchParams } from '../fetch';
+import { getSearchParams, getMSearchParams } from '../fetch/get_search_params';
 
 function getAllFetchParams(searchRequests, Promise) {
   return Promise.map(searchRequests, (searchRequest) => {
