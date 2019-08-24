@@ -1,18 +1,18 @@
 {
   "job_type": "anomaly_detector",
   "description": "Detect anomalies in the log entry ingestion rate",
-  "groups": ["logs-ui"],
+  "groups": ["logs-ui-x"],
   "analysis_config": {
     "bucket_span": "15m",
-    "summary_count_field_name": "doc_count_per_minute",
     "detectors": [
       {
         "detector_description": "count",
         "function": "count",
+        "partition_field_name": "event.dataset",
         "detector_index": 0
       }
     ],
-    "influencers": []
+    "influencers": ["event.dataset"]
   },
   "analysis_limits": {
     "model_memory_limit": "10mb"
