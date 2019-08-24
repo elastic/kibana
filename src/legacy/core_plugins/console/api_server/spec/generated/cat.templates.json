@@ -16,6 +16,6 @@
       "_cat/templates",
       "_cat/templates/{name}"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cat-templates.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cat-templates.html"
   }
 }

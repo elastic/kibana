@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiModalBody, EuiModalHeader, EuiSpacer } from '@elastic/eui';
+import { EuiModalBody, EuiModalHeader } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
@@ -17,6 +17,8 @@ import { TitleRow } from '../title_row';
 export const HeaderContainer = styled.div`
   width: 100%;
 `;
+
+HeaderContainer.displayName = 'HeaderContainer';
 
 export const OpenTimelineModal = pure<OpenTimelineProps>(
   ({
@@ -54,8 +56,6 @@ export const OpenTimelineModal = pure<OpenTimelineProps>(
             title={title}
           />
 
-          <EuiSpacer data-test-subj="title-row-spacer" size="l" />
-
           <SearchRow
             data-test-subj="search-row"
             onlyFavorites={onlyFavorites}
@@ -90,3 +90,5 @@ export const OpenTimelineModal = pure<OpenTimelineProps>(
     </>
   )
 );
+
+OpenTimelineModal.displayName = 'OpenTimelineModal';

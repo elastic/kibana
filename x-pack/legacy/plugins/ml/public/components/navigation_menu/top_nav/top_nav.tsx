@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useContext, useState, useEffect } from 'react';
+import React, { FC, Fragment, useState, useEffect } from 'react';
 import { EuiSuperDatePicker } from '@elastic/eui';
 import { TimeHistory, TimeRange } from 'ui/timefilter/time_history';
 
 import { mlTimefilterRefresh$ } from '../../../services/timefilter_refresh_service';
-import { NavigationMenuContext } from '../../../util/context_utils';
+import { useUiContext } from '../../../contexts/ui/use_ui_context';
 
 interface Duration {
   start: string;
@@ -28,9 +28,8 @@ function getRecentlyUsedRangesFactory(timeHistory: TimeHistory) {
 }
 
 export const TopNav: FC = () => {
-  const navigationMenuContext = useContext(NavigationMenuContext);
-  const timefilter = navigationMenuContext.timefilter;
-  const getRecentlyUsedRanges = getRecentlyUsedRangesFactory(navigationMenuContext.timeHistory);
+  const { chrome, timefilter, timeHistory } = useUiContext();
+  const getRecentlyUsedRanges = getRecentlyUsedRangesFactory(timeHistory);
 
   const [refreshInterval, setRefreshInterval] = useState(timefilter.getRefreshInterval());
   const [time, setTime] = useState(timefilter.getTime());
@@ -42,7 +41,7 @@ export const TopNav: FC = () => {
     timefilter.isTimeRangeSelectorEnabled
   );
 
-  const dateFormat = navigationMenuContext.chrome.getUiSettingsClient().get('dateFormat');
+  const dateFormat = chrome.getUiSettingsClient().get('dateFormat');
 
   useEffect(() => {
     timefilter.on('refreshIntervalUpdate', timefilterUpdateListener);
@@ -104,7 +103,13 @@ export const TopNav: FC = () => {
             isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
             refreshInterval={refreshInterval.value}
             onTimeChange={updateFilter}
-            onRefresh={() => mlTimefilterRefresh$.next()}
+            onRefresh={() => {
+              // This check is a workaround to catch a bug in EuiSuperDatePicker which
+              // might not have disabled the refresh interval after a props change.
+              if (!refreshInterval.pause) {
+                mlTimefilterRefresh$.next();
+              }
+            }}
             onRefreshChange={updateInterval}
             recentlyUsedRanges={recentlyUsedRanges}
             dateFormat={dateFormat}

@@ -127,4 +127,84 @@ export const jobs = {
     });
   },
 
+  newJobCaps(indexPatternTitle, isRollup = false) {
+    const isRollupString = (isRollup ===  true) ? `?rollup=true` : '';
+    return http({
+      url: `${basePath}/jobs/new_job_caps/${indexPatternTitle}${isRollupString}`,
+      method: 'GET',
+    });
+  },
+
+  newJobLineChart(
+    indexPatternTitle,
+    timeField,
+    start,
+    end,
+    intervalMs,
+    query,
+    aggFieldNamePairs,
+    splitFieldName,
+    splitFieldValue
+  ) {
+    return http({
+      url: `${basePath}/jobs/new_job_line_chart`,
+      method: 'POST',
+      data: {
+        indexPatternTitle,
+        timeField,
+        start,
+        end,
+        intervalMs,
+        query,
+        aggFieldNamePairs,
+        splitFieldName,
+        splitFieldValue
+      }
+    });
+  },
+
+  newJobPopulationsChart(
+    indexPatternTitle,
+    timeField,
+    start,
+    end,
+    intervalMs,
+    query,
+    aggFieldNamePairs,
+    splitFieldName,
+  ) {
+    return http({
+      url: `${basePath}/jobs/new_job_population_chart`,
+      method: 'POST',
+      data: {
+        indexPatternTitle,
+        timeField,
+        start,
+        end,
+        intervalMs,
+        query,
+        aggFieldNamePairs,
+        splitFieldName,
+      }
+    });
+  },
+
+  getAllJobAndGroupIds() {
+    return http({
+      url: `${basePath}/jobs/all_jobs_and_group_ids`,
+      method: 'GET',
+    });
+  },
+
+  getLookBackProgress(jobId, start, end) {
+    return http({
+      url: `${basePath}/jobs/look_back_progress`,
+      method: 'POST',
+      data: {
+        jobId,
+        start,
+        end,
+      }
+    });
+  },
 };

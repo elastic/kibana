@@ -6,14 +6,13 @@
 
 import queryString from 'querystring';
 import { Action } from 'redux-actions';
-import { kfetch } from 'ui/kfetch';
+import { npStart } from 'ui/new_platform';
 import { TextDocumentPositionParams } from 'vscode-languageserver';
 import Url from 'url';
 import { call, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 import { parseGoto, parseLspUrl, toCanonicalUrl } from '../../common/uri_util';
 import { FileTree } from '../../model';
 import {
-  closeReferences,
   fetchFile,
   FetchFileResponse,
   fetchRepoTree,
@@ -26,6 +25,10 @@ import {
   revealPosition,
   fetchRepos,
   turnOnDefaultRepoScope,
+  findDefinitions,
+  findDefinitionsSuccess,
+  findDefinitionsFailed,
+  closePanel,
 } from '../actions';
 import { loadRepo, loadRepoFailed, loadRepoSuccess } from '../actions/status';
 import { PathTypes } from '../common/types';
@@ -55,19 +58,35 @@ function* handleReferences(action: Action<TextDocumentPositionParams>) {
   }
 }
 
+function* handleDefinitions(action: Action<TextDocumentPositionParams>) {
+  try {
+    const params: TextDocumentPositionParams = action.payload!;
+    const { title, files } = yield call(requestFindDefinitions, params);
+    const repos = Object.keys(files).map((repo: string) => ({ repo, files: files[repo] }));
+    yield put(findDefinitionsSuccess({ title, repos }));
+  } catch (error) {
+    yield put(findDefinitionsFailed(error));
+  }
+}
+
 function requestFindReferences(params: TextDocumentPositionParams) {
-  return kfetch({
-    pathname: `/api/code/lsp/findReferences`,
-    method: 'POST',
+  return npStart.core.http.post(`/api/code/lsp/findReferences`, {
+    body: JSON.stringify(params),
+  });
+}
+
+function requestFindDefinitions(params: TextDocumentPositionParams) {
+  return npStart.core.http.post(`/api/code/lsp/findDefinitions`, {
     body: JSON.stringify(params),
   });
 }
 
 export function* watchLspMethods() {
   yield takeLatest(String(findReferences), handleReferences);
+  yield takeLatest(String(findDefinitions), handleDefinitions);
 }
 
-function* handleCloseReferences(action: Action<boolean>) {
+function* handleClosePanel(action: Action<boolean>) {
   if (action.payload) {
     const search = yield select(urlQueryStringSelector);
     const { pathname } = history.location;
@@ -88,7 +107,7 @@ function* handleCloseReferences(action: Action<boolean>) {
 }
 
 export function* watchCloseReference() {
-  yield takeLatest(String(closeReferences), handleCloseReferences);
+  yield takeLatest(String(closePanel), handleClosePanel);
 }
 
 function* handleReference(url: string) {
@@ -100,6 +119,24 @@ function* handleReference(url: string) {
   if (uri && position) {
     yield put(
       findReferences({
+        textDocument: {
+          uri: toCanonicalUrl({ revision, schema, repoUri, file }),
+        },
+        position,
+      })
+    );
+  }
+}
+
+function* openDefinitions(url: string) {
+  const refUrl = yield select(refUrlSelector);
+  if (refUrl === url) {
+    return;
+  }
+  const { uri, position, schema, repoUri, file, revision } = parseLspUrl(url);
+  if (uri && position) {
+    yield put(
+      findDefinitions({
         textDocument: {
           uri: toCanonicalUrl({ revision, schema, repoUri, file }),
         },
@@ -130,7 +167,7 @@ function* handleFile(repoUri: string, file: string, revision: string) {
 }
 
 function fetchRepo(repoUri: string) {
-  return kfetch({ pathname: `/api/code/repo/${repoUri}` });
+  return npStart.core.http.get(`/api/code/repo/${repoUri}`);
 }
 
 function* loadRepoSaga(action: any) {
@@ -173,14 +210,17 @@ function* handleMainRouteChange(action: Action<Match>) {
       const { tab, refUrl } = queryParams;
       if (tab === 'references' && refUrl) {
         yield call(handleReference, decodeURIComponent(refUrl as string));
+      } else if (tab === 'definitions' && refUrl) {
+        yield call(openDefinitions, decodeURIComponent(refUrl as string));
       } else {
-        yield put(closeReferences(false));
+        yield put(closePanel(false));
       }
-    }
-    yield call(handleFile, repoUri, file, revision);
-    const commits = yield select((state: RootState) => state.revision.treeCommits[file]);
-    if (commits === undefined) {
-      yield put(fetchTreeCommits({ revision, uri: repoUri, path: file }));
+      yield call(handleFile, repoUri, file, revision);
+    } else {
+      const commits = yield select((state: RootState) => state.revision.treeCommits[file]);
+      if (commits === undefined) {
+        yield put(fetchTreeCommits({ revision, uri: repoUri, path: file }));
+      }
     }
   }
   const lastRequestPath = yield select(lastRequestPathSelector);

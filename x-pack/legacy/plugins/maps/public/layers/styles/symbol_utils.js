@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { maki } from '@kbn/maki';
+import maki from '@elastic/maki';
 import xml2js from 'xml2js';
 import { parseXmlString } from '../../../common/parse_xml_string';
 
@@ -62,39 +62,19 @@ export function buildSrcUrl(svgString) {
   return domUrl.createObjectURL(svg);
 }
 
-export async function styleSvg(svgString, fill) {
+export async function styleSvg(svgString, fill, stroke, strokeWidth) {
   const svgXml = await parseXmlString(svgString);
+  let style = '';
   if (fill) {
-    svgXml.svg.$.style = `fill: ${fill};`;
+    style += `fill:${fill};`;
   }
+  if (stroke) {
+    style += `stroke:${stroke};`;
+  }
+  if (strokeWidth) {
+    style += `stroke-width:${strokeWidth};`;
+  }
+  if (style) svgXml.svg.$.style = style;
   const builder = new xml2js.Builder();
   return builder.buildObject(svgXml);
-}
-
-function addImageToMap(imageUrl, imageId, symbolId, mbMap) {
-  return new Promise((resolve, reject) => {
-    const img = new Image(LARGE_MAKI_ICON_SIZE, LARGE_MAKI_ICON_SIZE);
-    img.onload = () => {
-      mbMap.addImage(imageId, img);
-      resolve();
-    };
-    img.onerror = (err) => {
-      reject(err);
-    };
-    img.src = imageUrl;
-  });
-}
-
-export async function loadImage(imageId, symbolId, color, mbMap) {
-  let symbolSvg;
-  try {
-    symbolSvg = getMakiSymbolSvg(symbolId);
-  } catch(error) {
-    return;
-  }
-
-  const styledSvg = await styleSvg(symbolSvg, color);
-  const imageUrl = buildSrcUrl(styledSvg);
-
-  await addImageToMap(imageUrl, imageId, symbolId, mbMap);
 }

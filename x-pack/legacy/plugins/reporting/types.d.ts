@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Request } from 'hapi';
+
 interface UiSettings {
   get: (value: string) => string;
 }
@@ -32,41 +34,8 @@ export interface KbnServer {
   }) => UiSettings;
 }
 
-export interface ExportTypeDefinition {
-  id: string;
-  name: string;
-  jobType: string;
-  jobContentExtension: string;
-  createJobFactory: () => any;
-  executeJobFactory: () => any;
-  validLicenses: string[];
-}
-
-export interface ExportTypesRegistry {
-  register: (exportTypeDefinition: ExportTypeDefinition) => void;
-}
-
 export interface ConfigObject {
   get: (path?: string) => any;
-}
-
-export interface Size {
-  width: number;
-  height: number;
-}
-
-export interface ViewZoomWidthHeight {
-  zoom: number;
-  width: number;
-  height: number;
-}
-
-export type EvalArgs = any[];
-export type EvalFn<T> = (...evalArgs: EvalArgs) => T;
-
-export interface EvaluateOptions {
-  fn: EvalFn<any>;
-  args: EvalArgs; // Arguments to be passed into the function defined by fn.
 }
 
 export interface ElementPosition {
@@ -81,10 +50,6 @@ export interface ElementPosition {
     x: number;
     y: number;
   };
-}
-
-export interface HeadlessElementInfo {
-  position: ElementPosition;
 }
 
 export interface ConditionalHeaders {
@@ -109,16 +74,8 @@ export interface TimeRangeParams {
   max: Date | string | number;
 }
 
-type PostPayloadState = Partial<{
-  state: {
-    query: any;
-    sort: any[];
-    columns: string[]; // TODO
-  };
-}>;
-
 // retain POST payload data, needed for async
-export interface JobParamPostPayload extends PostPayloadState {
+export interface JobParamPostPayload {
   timerange: TimeRangeParams;
 }
 
@@ -127,9 +84,6 @@ export interface JobParams {
   savedObjectType: string;
   savedObjectId: string;
   isImmediate: boolean;
-  post?: JobParamPostPayload;
-  panel?: any; // has to be resolved by the request handler
-  visType?: string; // has to be resolved by the request handler
 }
 
 export interface JobDocPayload {
@@ -140,9 +94,8 @@ export interface JobDocPayload {
   relativeUrl?: string;
   timeRange?: any;
   title: string;
+  type: string | null;
   urls?: string[];
-  type?: string | null; // string if completed job; null if incomplete job;
-  objects?: string | null; // string if completed job; null if incomplete job;
 }
 
 export interface JobDocOutput {
@@ -179,20 +132,23 @@ export interface JobDocOutputExecuted {
   content: string | null; // defaultOutput is null
   max_size_reached: boolean;
   size: number;
-  csv_contains_formulas?: string[];
 }
 
 export interface ESQueueWorker {
   on: (event: string, handler: any) => void;
 }
 
-export type ESQueueWorkerExecuteFn = (job: JobDoc, cancellationToken: any) => void;
+export type ESQueueCreateJobFn = (
+  jobParams: JobParams,
+  headers: ConditionalHeaders,
+  request: Request
+) => Promise<JobParams>;
 
-export interface ExportType {
-  jobType: string;
-  createJobFactory: any;
-  executeJobFactory: (server: KbnServer) => ESQueueWorkerExecuteFn;
-}
+export type ESQueueWorkerExecuteFn = (job: JobDoc, cancellationToken: any) => void;
+export type ImmediateExecuteFn = (
+  jobDocPayload: JobDocPayload,
+  request: Request
+) => Promise<JobDocOutputExecuted>;
 
 export interface ESQueueWorkerOptions {
   kibanaName: string;
@@ -207,6 +163,30 @@ export interface ESQueueInstance {
     workerFn: any,
     workerOptions: ESQueueWorkerOptions
   ) => ESQueueWorker;
+}
+
+export type CreateJobFactory = (server: KbnServer) => ESQueueCreateJobFn;
+export type ExecuteJobFactory = (server: KbnServer) => ESQueueWorkerExecuteFn;
+export type ExecuteImmediateJobFactory = (server: KbnServer) => ImmediateExecuteFn;
+
+export interface ExportTypeDefinition {
+  id: string;
+  name: string;
+  jobType: string;
+  jobContentExtension: string;
+  createJobFactory: CreateJobFactory;
+  executeJobFactory: ExecuteJobFactory | ExecuteImmediateJobFactory;
+  validLicenses: string[];
+}
+
+export interface ExportType {
+  jobType: string;
+  createJobFactory: any;
+  executeJobFactory: (server: KbnServer) => ESQueueWorkerExecuteFn;
+}
+
+export interface ExportTypesRegistry {
+  register: (exportTypeDefinition: ExportTypeDefinition) => void;
 }
 
 export { LevelLogger as Logger } from './server/lib/level_logger';

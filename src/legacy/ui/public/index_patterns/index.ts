@@ -17,14 +17,46 @@
  * under the License.
  */
 
-export { IndexPatternSelect } from './components/index_pattern_select';
-export { Field, FieldType } from './_field';
-export { IndexPattern, StaticIndexPattern } from './_index_pattern';
-export { IndexPatterns, IndexPatternsProvider } from './index_patterns';
+/**
+ * Nothing to see here!
+ *
+ * Index Patterns have moved to the data plugin, and are being re-exported
+ * from ui/index_patterns for backwards compatibility.
+ */
 
+import { setup as data } from '../../../core_plugins/data/public/legacy';
+
+export const {
+  FieldList, // only used in Discover and StubIndexPattern
+  flattenHitWrapper,
+  formatHitProvider,
+  IndexPatternSelect, // only used in x-pack/plugin/maps and input control vis
+} = data.indexPatterns;
+
+// static code
 export {
+  CONTAINS_SPACES,
+  getFromSavedObject,
+  getRoutes,
+  isFilterable,
+  IndexPatternsProvider, // LEGACY
+  validateIndexPattern,
+  ILLEGAL_CHARACTERS,
   INDEX_PATTERN_ILLEGAL_CHARACTERS,
   INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-} from './constants';
+  IndexPatternAlreadyExists,
+  IndexPatternMissingIndices,
+  NoDefaultIndexPattern,
+  NoDefinedIndexPatterns,
+  mockFields,
+  mockIndexPattern,
+} from '../../../core_plugins/data/public';
 
-export { validateIndexPattern, CONTAINS_SPACES, ILLEGAL_CHARACTERS } from './validate';
+// types
+export {
+  Field,
+  FieldType,
+  IndexPattern,
+  IndexPatterns,
+  StaticIndexPattern,
+} from '../../../core_plugins/data/public';

@@ -24,6 +24,7 @@ import {
   EuiFieldNumber,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiFormErrorText,
   EuiIcon,
   EuiSpacer,
   EuiButtonEmpty,
@@ -32,7 +33,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { isEqual, omit } from 'lodash';
-import { AggParamEditorProps } from 'ui/vis/editors/default';
 
 const FROM_PLACEHOLDER = '\u2212\u221E';
 const TO_PLACEHOLDER = '+\u221E';
@@ -49,7 +49,29 @@ interface RangeValuesModel extends RangeValues {
   id: string;
 }
 
-function RangesParamEditor({ agg, value = [], setValue }: AggParamEditorProps<RangeValues[]>) {
+interface RangesParamEditorProps {
+  dataTestSubj?: string;
+  error?: React.ReactNode;
+  value?: RangeValues[];
+  hidePlaceholders?: boolean;
+  setValue(value: RangeValues[]): void;
+  setValidity?(isValid: boolean): void;
+  setTouched?(isTouched: boolean): void;
+  addRangeValues?(): RangeValues;
+  validateRange?(range: RangeValues, index: number): boolean[];
+}
+
+function RangesParamEditor({
+  addRangeValues,
+  dataTestSubj = 'range',
+  error,
+  value = [],
+  hidePlaceholders,
+  setValue,
+  setTouched,
+  setValidity,
+  validateRange,
+}: RangesParamEditorProps) {
   const [ranges, setRanges] = useState(() => value.map(range => ({ ...range, id: generateId() })));
 
   // set up an initial range when there is no default range
@@ -73,8 +95,15 @@ function RangesParamEditor({ agg, value = [], setValue }: AggParamEditorProps<Ra
     // do not set internal id parameter into saved object
     setValue(rangeValues.map(range => omit(range, 'id')));
     setRanges(rangeValues);
+
+    if (setTouched) {
+      setTouched(true);
+    }
   };
-  const onAddRange = () => updateRanges([...ranges, { id: generateId() }]);
+  const onAddRange = () =>
+    addRangeValues
+      ? updateRanges([...ranges, { ...addRangeValues(), id: generateId() }])
+      : updateRanges([...ranges, { id: generateId() }]);
   const onRemoveRange = (id: string) => updateRanges(ranges.filter(range => range.id !== id));
   const onChangeRange = (id: string, key: string, newValue: string) =>
     updateRanges(
@@ -88,10 +117,24 @@ function RangesParamEditor({ agg, value = [], setValue }: AggParamEditorProps<Ra
       )
     );
 
+  const hasInvalidRange =
+    validateRange &&
+    ranges.some(({ from, to, id }, index) => {
+      const [isFromValid, isToValid] = validateRange({ from, to }, index);
+
+      return !isFromValid || !isToValid;
+    });
+
+  useEffect(() => {
+    if (setValidity) {
+      setValidity(!hasInvalidRange);
+    }
+  }, [hasInvalidRange, setValidity]);
+
   return (
-    <EuiFormRow compressed>
+    <EuiFormRow compressed fullWidth>
       <>
-        {ranges.map(({ from, to, id }) => {
+        {ranges.map(({ from, to, id }, index) => {
           const deleteBtnTitle = i18n.translate(
             'common.ui.aggTypes.ranges.removeRangeButtonAriaLabel',
             {
@@ -103,19 +146,28 @@ function RangesParamEditor({ agg, value = [], setValue }: AggParamEditorProps<Ra
             }
           );
 
+          let isFromValid = true;
+          let isToValid = true;
+
+          if (validateRange) {
+            [isFromValid, isToValid] = validateRange({ from, to }, index);
+          }
+
           return (
             <Fragment key={id}>
-              <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem>
                   <EuiFieldNumber
                     aria-label={i18n.translate('common.ui.aggTypes.ranges.fromLabel', {
                       defaultMessage: 'From',
                     })}
+                    data-test-subj={`${dataTestSubj}${index}__from`}
                     value={isEmpty(from) ? '' : from}
-                    placeholder={FROM_PLACEHOLDER}
+                    placeholder={hidePlaceholders ? undefined : FROM_PLACEHOLDER}
                     onChange={ev => onChangeRange(id, 'from', ev.target.value)}
                     fullWidth={true}
                     compressed={true}
+                    isInvalid={!isFromValid}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -126,11 +178,13 @@ function RangesParamEditor({ agg, value = [], setValue }: AggParamEditorProps<Ra
                     aria-label={i18n.translate('common.ui.aggTypes.ranges.toLabel', {
                       defaultMessage: 'To',
                     })}
+                    data-test-subj={`${dataTestSubj}${index}__to`}
                     value={isEmpty(to) ? '' : to}
-                    placeholder={TO_PLACEHOLDER}
+                    placeholder={hidePlaceholders ? undefined : TO_PLACEHOLDER}
                     onChange={ev => onChangeRange(id, 'to', ev.target.value)}
                     fullWidth={true}
                     compressed={true}
+                    isInvalid={!isToValid}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -148,6 +202,8 @@ function RangesParamEditor({ agg, value = [], setValue }: AggParamEditorProps<Ra
             </Fragment>
           );
         })}
+
+        {hasInvalidRange && error && <EuiFormErrorText>{error}</EuiFormErrorText>}
 
         <EuiSpacer size="s" />
         <EuiFlexItem>
