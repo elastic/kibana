@@ -30,7 +30,7 @@ export const PageControls = () => {
   const totalPages = workpad.pages.length;
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="none">
+    <EuiFlexGroup alignItems="center" gutterSize="none" style={{ margin: '0 12px' }}>
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           color="ghost"

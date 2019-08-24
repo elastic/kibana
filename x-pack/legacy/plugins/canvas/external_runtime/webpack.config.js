@@ -85,7 +85,6 @@ module.exports = {
             },
           },
         ],
-        sideEffects: true,
       },
       {
         test: /\.module\.s(a|c)ss$/,
@@ -113,7 +112,6 @@ module.exports = {
             },
           },
         ],
-        sideEffects: true,
       },
       {
         test: /\.less$/,
@@ -130,7 +128,6 @@ module.exports = {
           },
           { loader: 'less-loader' },
         ],
-        sideEffects: true,
       },
       {
         test: /\.scss$/,
@@ -148,7 +145,6 @@ module.exports = {
           },
           { loader: 'sass-loader' },
         ],
-        sideEffects: true,
       },
       {
         test: require.resolve('jquery'),
@@ -156,14 +152,13 @@ module.exports = {
       },
       {
         test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/,
-        loader: 'file-loader',
+        loader: 'url-loader',
         sideEffects: false,
       },
       {
         test: /\.html$/,
         loader: 'html-loader',
         exclude: /node_modules/,
-        sideEffects: true,
       },
       {
         test: [

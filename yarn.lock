@@ -3563,11 +3563,6 @@
   dependencies:
     "@types/node" "*"
 
-"@types/keymirror@^0.1.1":
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/@types/keymirror/-/keymirror-0.1.1.tgz#1fe48e6e5e2a969cafecf0f24485ae23c72abd30"
-  integrity sha1-H+SObl4qlpyv7PDyRIWuI8cqvTA=
-
 "@types/license-checker@15.0.0":
   version "15.0.0"
   resolved "https://registry.yarnpkg.com/@types/license-checker/-/license-checker-15.0.0.tgz#685d69e2cf61ffd862320434601f51c85e28bba1"

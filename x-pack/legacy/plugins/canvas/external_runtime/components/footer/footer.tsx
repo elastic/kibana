@@ -44,15 +44,15 @@ export const Footer = ({ hidden = false }: Props) => {
     <div className={css.root} style={{ height: FOOTER_HEIGHT }}>
       <Scrubber />
       <div className={css.bar} style={{ bottom: autohide && hidden ? -FOOTER_HEIGHT : 0 }}>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={1}>
+        <EuiFlexGroup gutterSize="none">
+          <EuiFlexItem className={css.title}>
             <Title />
           </EuiFlexItem>
-          <EuiFlexItem grow={1}>
-            <PageControls />
-          </EuiFlexItem>
-          <EuiFlexItem grow={1}>
-            <Settings />
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s">
+              <PageControls />
+              <Settings />
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </div>

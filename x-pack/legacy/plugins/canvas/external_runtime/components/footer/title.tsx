@@ -23,11 +23,9 @@ export const Title = () => {
       <EuiFlexItem grow={false}>
         <EuiIcon type="logoKibana" size="l" />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
         <EuiText color="ghost" size="s">
-          <div className="eui-textTruncate" style={{ maxWidth: '50px' }}>
-            {workpad.name}
-          </div>
+          <div className="eui-textTruncate">{workpad.name}</div>
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>

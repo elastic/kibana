@@ -4,9 +4,17 @@
 
 .bar {
   composes: euiBottomBar from global;
-  composes: euiBottomBar--paddingSmall from global;
 }
 
 :global .kbnCanvas :local .bar {
   transition: bottom 0.25s;
+  padding: 12px;
+}
+
+:global .kbnCanvas :local .title {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-grow: 1;
 }

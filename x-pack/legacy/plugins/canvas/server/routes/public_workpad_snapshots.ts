@@ -8,7 +8,10 @@ import Boom from 'boom';
 import { Server, RouteOptions } from 'hapi';
 import { readFileSync } from 'fs';
 
-import { API_ROUTE_SNAPSHOT_RUNTIME } from '../../common/lib/constants';
+import {
+  API_ROUTE_SNAPSHOT_RUNTIME,
+  API_ROUTE_SNAPSHOT_RUNTIME_DOWNLOAD,
+} from '../../common/lib/constants';
 
 // @ts-ignore
 import { RUNTIME_FILE } from '../../external_runtime/constants';
@@ -22,10 +25,25 @@ export function publicWorkpadSnapshots(server: Server) {
   server.route({
     method: 'GET',
     path: API_ROUTE_SNAPSHOT_RUNTIME,
-    handler(request, handler) {
+    handler(_request, handler) {
       try {
         const response = handler.response(readFileSync(RUNTIME_FILE));
         response.type('text/javascript');
+        return response;
+      } catch (error) {
+        throw Boom.internal();
+      }
+    },
+    options: PUBLIC_OPTIONS,
+  });
+
+  // download runtime
+  server.route({
+    method: 'GET',
+    path: API_ROUTE_SNAPSHOT_RUNTIME_DOWNLOAD,
+    handler(_request, handler) {
+      try {
+        const response = handler.response(readFileSync(RUNTIME_FILE));
         return response;
       } catch (error) {
         throw Boom.internal();
