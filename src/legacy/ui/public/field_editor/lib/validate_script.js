@@ -19,7 +19,7 @@
 
 import { kfetch } from 'ui/kfetch';
 
-export const executeScript = async ({ name, lang, script, indexPatternTitle, additionalFields = [] }) => {
+export const executeScript = async ({ name, lang, script, indexPatternTitle, additionalQuery = '', additionalFields = [] }) => {
   // Using _msearch because _search with index name in path dorks everything up
   const header = {
     index: indexPatternTitle,
@@ -44,6 +44,10 @@ export const executeScript = async ({ name, lang, script, indexPatternTitle, add
 
   if (additionalFields.length > 0) {
     search._source = additionalFields;
+  }
+
+  if (additionalQuery !== '') {
+    search.query = { query_string: { query: additionalQuery } };
   }
 
   const body = `${JSON.stringify(header)}\n${JSON.stringify(search)}\n`;
