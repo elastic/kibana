@@ -29,12 +29,16 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiCallOut,
+  EuiFieldText,
 } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
 
 export class TestScript extends Component {
   state = {
     isLoading: false,
     additionalFields: [],
+    searchQuery: '',
   }
 
   componentDidMount() {
@@ -65,6 +69,7 @@ export class TestScript extends Component {
       lang,
       script,
       indexPatternTitle: indexPattern.title,
+      additionalQuery: this.state.searchQuery,
       additionalFields: this.state.additionalFields.map(option => {
         return option.value;
       })
@@ -181,6 +186,22 @@ export class TestScript extends Component {
           />
         </EuiFormRow>
 
+        <EuiFormRow label="Search query">
+
+          <EuiFieldText
+            placeholder={i18n.translate('common.ui.savedObjects.finder.searchPlaceholder', {
+              defaultMessage: 'Search query…',
+            })}
+            value={this.state.searchQuery}
+            onChange={e => {
+              this.setState({
+                searchQuery: e.target.value,
+              });
+            }}
+          />
+
+        </EuiFormRow>
+
         <EuiButton
           onClick={this.previewScript}
           disabled={this.props.script ? false : true}
@@ -201,7 +222,7 @@ export class TestScript extends Component {
           <h3>Preview results</h3>
           <p>
             Run your script to preview the first 10 results. You can also select some
-            additional fields to include in your results to gain more context.
+            additional fields to include in your results to gain more context or add a query to filter on specific documents.
           </p>
         </EuiText>
         <EuiSpacer />
