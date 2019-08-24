@@ -43,7 +43,7 @@ export const networkFilterExpression = () =>
   createSelector(
     selectNetworkByType,
     network =>
-      network.filterQuery && network.filterQuery.keury ? network.filterQuery.kuery.expression : null
+      network.filterQuery && network.filterQuery.kuery ? network.filterQuery.kuery.expression : null
   );
 
 export const networkFilterQueryAsKuery = () =>

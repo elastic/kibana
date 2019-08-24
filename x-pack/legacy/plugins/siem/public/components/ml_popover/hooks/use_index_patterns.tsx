@@ -13,11 +13,12 @@ import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting'
 import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
 
 import * as i18n from './translations';
+import { IndexPatternSavedObject } from '../types';
 
-type Return = [boolean, string[]];
+type Return = [boolean, IndexPatternSavedObject[]];
 
 export const useIndexPatterns = (refreshToggle = false): Return => {
-  const [indexPatterns, setIndexPatterns] = useState<string[]>([]);
+  const [indexPatterns, setIndexPatterns] = useState<IndexPatternSavedObject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [, dispatchToaster] = useStateToaster();
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);

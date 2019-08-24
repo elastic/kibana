@@ -17,14 +17,7 @@ export const ERROR_DESCRIPTION = i18n.translate(
   'xpack.siem.components.embeddables.indexPatternsMissingPrompt.errorDescription',
   {
     defaultMessage:
-      'An ECS compliant Index Pattern must be configured to view event data on the map. Please configure one of the following index patterns and refresh the page.',
-  }
-);
-
-export const ERROR_INDEX_PATTERNS = i18n.translate(
-  'xpack.siem.components.embeddables.indexPatternsMissingPrompt.errorIndexPatternsDescription',
-  {
-    defaultMessage: 'auditbeat-*, filebeat-*, packetbeat-*, winlogbeat-*',
+      'An ECS compliant Kibana Index Pattern must be configured to view event data on the map. Please configure one of the following index patterns specified in Kibana Advanced Settings (siem:defaultIndex) and refresh the page.',
   }
 );
 
