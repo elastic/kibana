@@ -28,6 +28,10 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
       '^test_utils/enzyme_helpers': `${xPackKibanaDirectory}/test_utils/enzyme_helpers.tsx`,
       '^test_utils/find_test_subject': `${xPackKibanaDirectory}/test_utils/find_test_subject.ts`,
     },
+    coverageDirectory: '<rootDir>/../target/kibana-coverage/jest',
+    coverageReporters: [
+      'html',
+    ],
     setupFiles: [
       `${kibanaDirectory}/src/dev/jest/setup/babel_polyfill.js`,
       `<rootDir>/dev-tools/jest/setup/polyfills.js`,
