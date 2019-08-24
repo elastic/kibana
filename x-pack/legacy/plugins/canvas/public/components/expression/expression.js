@@ -70,12 +70,15 @@ export const Expression = ({
           setExpression(formState.expression);
         }
       })}
+
+      {/* Error code below is to pass a non breaking space so the editor does not jump */}
+
       <ExpressionInput
         ref={refExpressionInput}
         fontSize={fontSize}
         isCompact={isCompact}
         functionDefinitions={functionDefinitions}
-        error={error}
+        error={error ? error : `\u00A0`}
         value={formState.expression}
         onChange={updateValue}
       />
