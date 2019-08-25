@@ -107,7 +107,13 @@ export const TopNav: FC = () => {
             isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
             refreshInterval={refreshInterval.value}
             onTimeChange={updateFilter}
-            onRefresh={() => mlTimefilterRefresh$.next()}
+            onRefresh={() => {
+              // This check is a workaround to catch a bug in EuiSuperDatePicker which
+              // might not have disabled the refresh interval after a props change.
+              if (!refreshInterval.pause) {
+                mlTimefilterRefresh$.next();
+              }
+            }}
             onRefreshChange={updateInterval}
             recentlyUsedRanges={recentlyUsedRanges}
             dateFormat={dateFormat}
