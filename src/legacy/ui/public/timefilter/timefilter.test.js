@@ -38,7 +38,7 @@ jest.mock('ui/chrome',
     },
   }), { virtual: true });
 
-jest.mock('./lib/parse_querystring',
+jest.mock('ui/timefilter/lib/parse_querystring',
   () => ({
     parseQueryString: () => {
       return {
