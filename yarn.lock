@@ -4030,7 +4030,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/styled-components@^3.0.1":
+"@types/styled-components@^3.0.2":
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/@types/styled-components/-/styled-components-3.0.2.tgz#274133bfafaca17f28707b667858bce197ae3b84"
   integrity sha512-nG9swaAqmSrUDXyjpE0NxabjVYAGlmtqWXlCpRWRIZBMbTkdcyQULC+ElvTfghTc+1ANJjn6DCyUQirF5a2OOg==
