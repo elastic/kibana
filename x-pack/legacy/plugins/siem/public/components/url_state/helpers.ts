@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty } from 'lodash/fp';
 import { decode, encode, RisonValue } from 'rison-node';
 import { Location } from 'history';
 import { QueryString } from 'ui/utils/query_string';
@@ -40,7 +39,8 @@ export const replaceStateKeyInQueryString = <UrlState extends any>(
 ) => (queryString: string) => {
   const previousQueryValues = QueryString.decode(queryString);
   if (
-    isEmpty(urlState) ||
+    urlState == null ||
+    (typeof urlState === 'string' && urlState === '') ||
     (urlState && urlState.filterQuery === null) ||
     (urlState && urlState.filterQuery != null && urlState.filterQuery.expression === '')
   ) {

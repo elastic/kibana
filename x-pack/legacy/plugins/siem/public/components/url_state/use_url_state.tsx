@@ -5,8 +5,8 @@
  */
 
 import { Location } from 'history';
-import { throttle, get, isEqual, difference } from 'lodash/fp';
-import { useState, useEffect, useRef } from 'react';
+import { get, isEqual, difference } from 'lodash/fp';
+import { useEffect, useRef } from 'react';
 
 import { convertKueryToElasticSearchQuery } from '../../lib/keury';
 import { InputsModelId, TimeRangeKinds } from '../../store/inputs/constants';
@@ -73,7 +73,7 @@ export const useUrlStateHooks = ({
   const apolloClient = useApolloClient();
   const prevProps = usePrevious({ location, urlState });
 
-  const replaceUrlState = (
+  const replaceStateInLocation = (
     urlStateToReplace: UrlInputsModel | KqlQuery | string,
     urlStateKey: string,
     latestLocation: Location = location
@@ -90,8 +90,6 @@ export const useUrlStateHooks = ({
     }
     return newLocation;
   };
-
-  const replaceStateInLocation = throttle(0, replaceUrlState);
 
   const handleInitialize = (initLocation: Location, type: UrlStateType) => {
     let myLocation: Location = initLocation;
@@ -244,9 +242,10 @@ export const useUrlStateHooks = ({
     if (isInitializing) {
       handleInitialize(initializeLocation(location), type);
     } else if (!isEqual(urlState, prevProps.urlState)) {
+      let newLocation: Location = location;
       URL_STATE_KEYS[type].forEach((urlKey: KeyUrlState) => {
         if (!isEqual(urlState[urlKey], prevProps.urlState[urlKey])) {
-          replaceStateInLocation(urlState[urlKey], urlKey);
+          newLocation = replaceStateInLocation(urlState[urlKey], urlKey, newLocation);
         }
       });
     } else if (location.pathname !== prevProps.location.pathname) {
@@ -264,11 +263,14 @@ export const useUrlStateHooks = ({
  * to bring back the `+` in the kql
  */
 export const initializeLocation = (location: Location): Location => {
+  if (location.pathname === '/') {
+    location.pathname = window.location.hash.substring(1);
+  }
   const substringIndex =
     window.location.href.indexOf(`#${location.pathname}`) >= 0
       ? window.location.href.indexOf(`#${location.pathname}`) + location.pathname.length + 1
       : -1;
-  if (substringIndex >= 0) {
+  if (substringIndex >= 0 && location.pathname !== '/') {
     location.search = window.location.href.substring(substringIndex);
   }
   return location;

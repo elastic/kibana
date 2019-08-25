@@ -24,7 +24,16 @@ import {
   addGlobalLinkTo,
   addTimelineLinkTo,
 } from './actions';
-import { setIsInspected, toggleLockTimeline, updateInputTimerange, upsertQuery } from './helpers';
+import {
+  setIsInspected,
+  toggleLockTimeline,
+  updateInputTimerange,
+  upsertQuery,
+  removeGlobalLink,
+  addGlobalLink,
+  removeTimelineLink,
+  addTimelineLink,
+} from './helpers';
 import { InputsModel, TimeRange } from './model';
 
 export type InputsState = InputsModel;
@@ -147,32 +156,8 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
   .case(setInspectionParameter, (state, { id, inputId, isInspected, selectedInspectIndex }) =>
     setIsInspected({ id, inputId, isInspected, selectedInspectIndex, state })
   )
-  .case(removeGlobalLinkTo, state => ({
-    ...state,
-    global: {
-      ...state.global,
-      linkTo: [],
-    },
-  }))
-  .case(addGlobalLinkTo, (state, { linkToId }) => ({
-    ...state,
-    global: {
-      ...state.timeline,
-      linkTo: [linkToId],
-    },
-  }))
-  .case(removeTimelineLinkTo, state => ({
-    ...state,
-    timeline: {
-      ...state.timeline,
-      linkTo: [],
-    },
-  }))
-  .case(addTimelineLinkTo, (state, { linkToId }) => ({
-    ...state,
-    timeline: {
-      ...state.timeline,
-      linkTo: [linkToId],
-    },
-  }))
+  .case(removeGlobalLinkTo, state => removeGlobalLink(state))
+  .case(addGlobalLinkTo, (state, { linkToId }) => addGlobalLink(linkToId, state))
+  .case(removeTimelineLinkTo, state => removeTimelineLink(state))
+  .case(addTimelineLinkTo, (state, { linkToId }) => addTimelineLink(linkToId, state))
   .build();

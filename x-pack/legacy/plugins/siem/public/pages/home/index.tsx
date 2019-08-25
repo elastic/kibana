@@ -8,12 +8,10 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPage, EuiPageBody } from '@ela
 import { FormattedMessage } from '@kbn/i18n/react';
 import * as React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 import chrome from 'ui/chrome';
 
 import { i18n } from '@kbn/i18n';
-import { useEffect } from 'react';
 import { AutoSizer } from '../../components/auto_sizer';
 import { DragDropContextWrapper } from '../../components/drag_and_drop/drag_drop_context_wrapper';
 import { Flyout, flyoutHeaderHeight } from '../../components/flyout';
@@ -34,6 +32,7 @@ import { MlHostConditionalContainer } from '../../components/ml/conditional_link
 import { MlNetworkConditionalContainer } from '../../components/ml/conditional_links/ml_network_conditional_container';
 import { navTabs } from './home_navigations';
 import { UseUrlState } from '../../components/url_state';
+import { useGlobalLoading } from '../../utils/use_global_loading';
 
 const WrappedByAutoSizer = styled.div`
   height: 100%;
@@ -76,16 +75,6 @@ const calculateFlyoutHeight = ({
   globalHeaderSize: number;
   windowHeight: number;
 }): number => Math.max(0, windowHeight - globalHeaderSize);
-
-const useGlobalLoading = () => {
-  const [isInitializing, setIsInitializing] = React.useState(true);
-  useEffect(() => {
-    if (isInitializing) {
-      setIsInitializing(false);
-    }
-  });
-  return isInitializing;
-};
 
 export const HomePage = React.memo(() => {
   const isGlobalInitializing = useGlobalLoading();

@@ -23,7 +23,6 @@ import { FlowTargetSelectConnected } from '../../components/page/network/flow_ta
 import { IpOverview } from '../../components/page/network/ip_overview';
 import { UsersTable } from '../../components/page/network/users_table';
 import { TlsTable } from '../../components/page/network/tls_table';
-import { UseUrlState } from '../../components/url_state';
 import { DomainsQuery } from '../../containers/domains';
 import { GlobalTime } from '../../containers/global_time';
 import { IpOverviewQuery } from '../../containers/ip_overview';

@@ -29,7 +29,7 @@ export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
   host: [CONSTANTS.kqlQuery, CONSTANTS.timerange, CONSTANTS.timelineId],
   network: [CONSTANTS.kqlQuery, CONSTANTS.timerange, CONSTANTS.timelineId],
   timeline: [CONSTANTS.timelineId, CONSTANTS.timerange],
-  overview: [CONSTANTS.timelineId],
+  overview: [CONSTANTS.timelineId, CONSTANTS.timerange],
 };
 
 export type LocationTypes =
@@ -63,7 +63,6 @@ export interface UrlStateProps<TCache = object> {
 
 export interface UrlStateStateToPropsType {
   urlState: UrlState;
-  queryLocation: LocationTypes;
 }
 
 export interface UrlStateDispatchToPropsType {

@@ -15,7 +15,6 @@ import {
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
 import { KqlMode, TimelineModel } from './model';
-import { TimelineResult } from '../../graphql/types';
 
 const actionCreator = actionCreatorFactory('x-pack/siem/local/timeline');
 

@@ -17,7 +17,6 @@ import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
 import { KqlMode, timelineDefaults, TimelineModel } from './model';
 import { TimelineById, TimelineState } from './types';
-import { TimelineResult } from '../../graphql/types';
 
 const EMPTY_TIMELINE_BY_ID: TimelineById = {}; // stable reference
 
@@ -106,7 +105,7 @@ export const addTimelineNoteToEvent = ({
 
 interface AddTimelineParams {
   id: string;
-  timeline: TimelineResult;
+  timeline: TimelineModel;
 }
 
 const mergeTimeline = (timeline: TimelineResult): TimelineModel => {

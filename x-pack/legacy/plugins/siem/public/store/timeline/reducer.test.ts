@@ -103,6 +103,7 @@ describe('Timeline', () => {
       const update = addTimelineToStore({
         id: 'foo',
         timeline: {
+          ...timelineByIdMock.foo,
           savedObjectId: 'superUniqueId',
           title: 'saved object timeline',
           version: 'doNotForgetVersion',
@@ -153,7 +154,21 @@ describe('Timeline', () => {
               width: 180,
             },
           ],
-          dataProviders: [],
+          dataProviders: [
+            {
+              and: [],
+              enabled: true,
+              excluded: false,
+              id: '123',
+              kqlQuery: '',
+              name: 'data provider 1',
+              queryMatch: {
+                field: '',
+                operator: ':',
+                value: '',
+              },
+            },
+          ],
           dateRange: {
             end: 0,
             start: 0,
