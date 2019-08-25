@@ -4124,10 +4124,10 @@
   resolved "https://registry.yarnpkg.com/@types/webpack-env/-/webpack-env-1.13.9.tgz#a67287861c928ebf4159a908d1fb1a2a34d4097a"
   integrity sha512-p8zp5xqkly3g4cCmo2mKOHI9+Z/kObmDj0BmjbDDJQlgDTiEGTbm17MEwTAusV6XceCy+bNw9q/ZHXHyKo3zkg==
 
-"@types/wrap-ansi@^2.0.14":
-  version "2.0.14"
-  resolved "https://registry.yarnpkg.com/@types/wrap-ansi/-/wrap-ansi-2.0.14.tgz#5afbdd8374de9ff8ad752cb03ab9f225f7c2ee24"
-  integrity sha1-Wvvdg3Ten/itdSywOrnyJffC7iQ=
+"@types/wrap-ansi@^2.0.15":
+  version "2.0.15"
+  resolved "https://registry.yarnpkg.com/@types/wrap-ansi/-/wrap-ansi-2.0.15.tgz#87affc11a46864cb6853b642e89363633d544aa7"
+  integrity sha512-kPagHsyqrq5Qg4dSbxFmcX8ea0JYs43PfBcuKK53LT4XTZxbvGnmnY6U6a5QgySb5lEGYiqpg0/HESvTYrlzyQ==
 
 "@types/write-pkg@^3.1.0":
   version "3.1.0"
