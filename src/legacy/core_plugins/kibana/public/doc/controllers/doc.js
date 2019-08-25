@@ -23,9 +23,11 @@ import 'ui/index_patterns';
 import html from '../index.html';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
-import { timefilter } from 'ui/timefilter';
 import 'plugins/kibana/doc_viewer';
 import { getRootBreadcrumbs } from 'plugins/kibana/discover/breadcrumbs';
+
+import { setup as data } from '../../../../data/public/legacy';
+const { timefilter } = data.timefilter;
 
 const app = uiModules.get('apps/doc', [
   'kibana/courier',

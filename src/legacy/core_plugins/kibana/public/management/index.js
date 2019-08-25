@@ -31,8 +31,11 @@ import landingTemplate from './landing.html';
 import { capabilities } from 'ui/capabilities';
 import { management, SidebarNav, MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
-import { timefilter } from 'ui/timefilter';
 import { EuiPageContent, EuiTitle, EuiText, EuiSpacer, EuiIcon, EuiHorizontalRule } from '@elastic/eui';
+
+
+import { setup as data } from '../../../data/public/legacy';
+const { timefilter } = data.timefilter;
 
 const SIDENAV_ID = 'management-sidenav';
 const LANDING_ID = 'management-landing';

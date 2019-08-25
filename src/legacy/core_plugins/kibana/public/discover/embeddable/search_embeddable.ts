@@ -28,8 +28,8 @@ import { Adapters } from 'ui/inspector/types';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
 import { Filter, FilterStateStore } from '@kbn/es-query';
-import { getTime, TimeRange } from 'ui/timefilter';
-import { Query, onlyDisabledFiltersChanged } from '../../../../data/public';
+import { TimeRange } from 'src/plugins/data/public';
+import { Query, onlyDisabledFiltersChanged, getTime } from '../../../../data/public';
 import {
   APPLY_FILTER_TRIGGER,
   Embeddable,

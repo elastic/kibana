@@ -28,6 +28,9 @@ import { IndexPattern } from '../../../index';
 import { coreMock } from '../../../../../../../core/public/mocks';
 const setupMock = coreMock.createSetup();
 
+import { timefilterServiceMock } from '../../../timefilter/timefilter_service.mock';
+const timefilterSetupMock = timefilterServiceMock.createSetupContract();
+
 setupMock.uiSettings.get.mockImplementation((key: string) => {
   switch (key) {
     case 'timepicker:quickRanges':
@@ -99,6 +102,7 @@ describe('QueryBar', () => {
     const component = shallowWithIntl(
       <QueryBar.WrappedComponent
         uiSettings={setupMock.uiSettings}
+        timeHistory={timefilterSetupMock.history}
         query={kqlQuery}
         onSubmit={noop}
         appName={'discover'}
@@ -119,6 +123,7 @@ describe('QueryBar', () => {
     shallowWithIntl(
       <QueryBar.WrappedComponent
         uiSettings={setupMock.uiSettings}
+        timeHistory={timefilterSetupMock.history}
         query={kqlQuery}
         onSubmit={noop}
         appName={'discover'}
@@ -139,6 +144,7 @@ describe('QueryBar', () => {
     const component = shallowWithIntl(
       <QueryBar.WrappedComponent
         uiSettings={setupMock.uiSettings}
+        timeHistory={timefilterSetupMock.history}
         onSubmit={noop}
         onChange={noop}
         isDirty={false}
@@ -156,6 +162,7 @@ describe('QueryBar', () => {
     const component = shallowWithIntl(
       <QueryBar.WrappedComponent
         uiSettings={setupMock.uiSettings}
+        timeHistory={timefilterSetupMock.history}
         onSubmit={noop}
         onChange={noop}
         isDirty={false}
@@ -174,6 +181,7 @@ describe('QueryBar', () => {
     const component = shallowWithIntl(
       <QueryBar.WrappedComponent
         uiSettings={setupMock.uiSettings}
+        timeHistory={timefilterSetupMock.history}
         onSubmit={noop}
         onChange={noop}
         isDirty={false}
@@ -195,6 +203,7 @@ describe('QueryBar', () => {
     const component = shallowWithIntl(
       <QueryBar.WrappedComponent
         uiSettings={setupMock.uiSettings}
+        timeHistory={timefilterSetupMock.history}
         query={kqlQuery}
         onSubmit={noop}
         onChange={noop}
@@ -216,6 +225,7 @@ describe('QueryBar', () => {
     const component = shallowWithIntl(
       <QueryBar.WrappedComponent
         uiSettings={setupMock.uiSettings}
+        timeHistory={timefilterSetupMock.history}
         query={kqlQuery}
         onSubmit={noop}
         onChange={noop}
@@ -238,6 +248,7 @@ describe('QueryBar', () => {
     const component = shallowWithIntl(
       <QueryBar.WrappedComponent
         uiSettings={setupMock.uiSettings}
+        timeHistory={timefilterSetupMock.history}
         onSubmit={noop}
         onChange={noop}
         isDirty={false}

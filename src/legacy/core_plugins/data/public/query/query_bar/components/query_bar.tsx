@@ -22,7 +22,6 @@ import { doesKueryExpressionHaveLuceneSyntaxError } from '@kbn/es-query';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import { Storage } from 'ui/storage';
-import { timeHistory } from 'ui/timefilter';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSuperDatePicker } from '@elastic/eui';
 
@@ -39,6 +38,7 @@ import { QueryBarInput } from './query_bar_input';
 
 import { getQueryLog } from '../lib/get_query_log';
 import { Query } from '../index';
+import { TimeHistory } from '../../../timefilter';
 
 interface DateRange {
   from: string;
@@ -67,6 +67,7 @@ interface Props {
   customSubmitButton?: any;
   isDirty: boolean;
   uiSettings: UiSettingsClientContract;
+  timeHistory: TimeHistory;
 }
 
 interface State {
@@ -146,7 +147,7 @@ export class QueryBarUI extends Component<Props, State> {
 
   public onSubmit = ({ query, dateRange }: { query?: Query; dateRange: DateRange }) => {
     this.handleLuceneSyntaxWarning();
-    timeHistory.add(dateRange);
+    this.props.timeHistory.add(dateRange);
 
     this.props.onSubmit({ query, dateRange });
   };
@@ -256,7 +257,7 @@ export class QueryBarUI extends Component<Props, State> {
       return null;
     }
 
-    const recentlyUsedRanges = timeHistory
+    const recentlyUsedRanges = this.props.timeHistory
       .get()
       .map(({ from, to }: { from: string; to: string }) => {
         return {

@@ -39,17 +39,24 @@ import { onlyDisabledFiltersChanged } from './lib/only_disabled';
 import { PartitionedFilters } from './partitioned_filters';
 
 import { IndexPatterns } from '../../index_patterns';
+import { Timefilter } from '../../timefilter';
 
 export class FilterManager {
   private indexPatterns: IndexPatterns;
   private filters: Filter[] = [];
+  private timefilter: Timefilter;
   private updated$: Subject<void> = new Subject();
   private fetch$: Subject<void> = new Subject();
   private uiSettings: UiSettingsClientContract;
 
-  constructor(indexPatterns: IndexPatterns, uiSettings: UiSettingsClientContract) {
+  constructor(
+    indexPatterns: IndexPatterns,
+    uiSettings: UiSettingsClientContract,
+    timefilter: Timefilter
+  ) {
     this.indexPatterns = indexPatterns;
     this.uiSettings = uiSettings;
+    this.timefilter = timefilter;
   }
 
   private mergeIncomingFilters(partitionedFilters: PartitionedFilters): Filter[] {
@@ -191,7 +198,7 @@ export class FilterManager {
 
   public async addFiltersAndChangeTimeFilter(filters: Filter[]) {
     const timeFilter = await extractTimeFilter(this.indexPatterns, filters);
-    if (timeFilter) changeTimeFilter(timeFilter);
+    if (timeFilter) changeTimeFilter(this.timefilter, timeFilter);
     return this.addFilters(filters.filter(filter => filter !== timeFilter));
   }
 

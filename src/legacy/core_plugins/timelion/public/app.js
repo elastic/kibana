@@ -27,8 +27,10 @@ import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_regis
 import { fatalError, toastNotifications } from 'ui/notify';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { recentlyAccessed } from 'ui/persisted_log';
-import { timefilter } from 'ui/timefilter';
 import { getSavedSheetBreadcrumbs, getCreateBreadcrumbs } from './breadcrumbs';
+
+import { setup as data } from '../../data/public/legacy';
+const { timefilter } = data.timefilter;
 
 // import the uiExports that we want to "use"
 import 'uiExports/fieldFormats';

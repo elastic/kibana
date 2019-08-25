@@ -7,7 +7,7 @@
 import React from 'react';
 import { prettyDuration, commonDurationRanges } from '@elastic/eui';
 
-import { TimeRange } from '../../../../../../../src/plugins/data/public';
+import { TimeRange } from 'src/plugins/data/public';
 import {
   Action,
   IEmbeddable,

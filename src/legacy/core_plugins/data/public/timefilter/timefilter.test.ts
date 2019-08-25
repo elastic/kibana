@@ -17,30 +17,6 @@
  * under the License.
  */
 
-import './timefilter.test.mocks';
-
-jest.mock(
-  'ui/chrome',
-  () => ({
-    getBasePath: () => `/some/base/path`,
-    getUiSettingsClient: () => {
-      return {
-        get: (key: string) => {
-          switch (key) {
-            case 'timepicker:timeDefaults':
-              return { from: 'now-15m', to: 'now' };
-            case 'timepicker:refreshIntervalDefaults':
-              return { pause: false, value: 0 };
-            default:
-              throw new Error(`Unexpected config key: ${key}`);
-          }
-        },
-      };
-    },
-  }),
-  { virtual: true }
-);
-
 jest.mock(
   './lib/parse_querystring',
   () => ({
@@ -58,9 +34,28 @@ jest.mock(
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { timefilter } from './timefilter';
+import { TimefilterManager } from './timefilter';
 import { Subscription } from 'rxjs';
 import { TimeRange, RefreshInterval } from 'src/plugins/data/public';
+
+import { coreMock } from '../../../../../core/public/mocks';
+const setupMock = coreMock.createSetup();
+
+import { timefilterServiceMock } from './timefilter_service.mock';
+const timefilterSetupMock = timefilterServiceMock.createSetupContract();
+
+setupMock.uiSettings.get.mockImplementation((key: string) => {
+  switch (key) {
+    case 'timepicker:timeDefaults':
+      return { from: 'now-15m', to: 'now' };
+    case 'timepicker:refreshIntervalDefaults':
+      return { pause: false, value: 0 };
+    default:
+      throw new Error(`Unexpected config key: ${key}`);
+  }
+});
+
+const timefilter = new TimefilterManager(setupMock.uiSettings, timefilterSetupMock.history);
 
 function stubNowTime(nowTime: any) {
   // @ts-ignore

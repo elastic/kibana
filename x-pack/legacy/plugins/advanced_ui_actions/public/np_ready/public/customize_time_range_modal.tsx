@@ -19,7 +19,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TimeRange } from '../../../../../../../src/plugins/data/public';
+import { TimeRange } from 'src/plugins/data/public';
 import {
   Embeddable,
   IContainer,

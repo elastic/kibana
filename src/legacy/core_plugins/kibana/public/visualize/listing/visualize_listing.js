@@ -20,7 +20,6 @@
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import 'ui/directives/kbn_href';
 import { uiModules } from 'ui/modules';
-import { timefilter } from 'ui/timefilter';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import chrome from 'ui/chrome';
 import { wrapInI18nContext } from 'ui/i18n';
@@ -31,6 +30,9 @@ import { VisualizeListingTable } from './visualize_listing_table';
 import { NewVisModal } from '../wizard/new_vis_modal';
 import { createVisualizeEditUrl, VisualizeConstants } from '../visualize_constants';
 import { visualizations } from 'plugins/visualizations';
+
+import { setup as data } from '../../../../data/public/legacy';
+const { timefilter } = data.timefilter;
 
 import { i18n } from '@kbn/i18n';
 

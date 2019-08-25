@@ -37,7 +37,6 @@ import 'ui/visualize';
 import 'ui/fixed_scroll';
 import 'ui/index_patterns';
 import 'ui/state_management/app_state';
-import { timefilter } from 'ui/timefilter';
 import { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
 import { toastNotifications } from 'ui/notify';
 import { VisProvider } from 'ui/vis';
@@ -75,6 +74,7 @@ import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
 
 import { setup as data } from '../../../../../core_plugins/data/public/legacy';
 
+const { timefilter } = data.timefilter;
 const { savedQueryService } = data.search.services;
 
 const fetchStatuses = {
