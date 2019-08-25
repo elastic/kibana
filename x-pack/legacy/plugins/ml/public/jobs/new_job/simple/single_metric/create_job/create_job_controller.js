@@ -622,13 +622,13 @@ module
       moveToAdvancedJobCreation(job);
     };
 
-    const fetchSub$ = subscribeWithScope($scope, timefilter.getFetch$(), {
+    const fetchSub = subscribeWithScope($scope, timefilter.getFetch$(), {
       next: $scope.loadVis
     });
 
     $scope.$on('$destroy', () => {
       globalForceStop = true;
-      fetchSub$.unsubscribe();
+      fetchSub.unsubscribe();
     });
 
     $scope.$evalAsync(() => {

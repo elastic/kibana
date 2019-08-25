@@ -758,7 +758,7 @@ module
       preLoadJob($scope, appState);
     });
 
-    const fetchSub$ = subscribeWithScope($scope, timefilter.getFetch$(), {
+    const fetchSub = subscribeWithScope($scope, timefilter.getFetch$(), {
       next: () => {
         $scope.loadVis();
         if ($scope.formConfig.splitField !== undefined) {
@@ -770,6 +770,6 @@ module
     $scope.$on('$destroy', () => {
       globalForceStop = true;
       angular.element(window).off('resize');
-      fetchSub$.unsubscribe();
+      fetchSub.unsubscribe();
     });
   });
