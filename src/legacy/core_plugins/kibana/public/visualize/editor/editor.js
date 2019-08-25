@@ -47,7 +47,6 @@ import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import { recentlyAccessed } from 'ui/persisted_log';
-import { timefilter } from 'ui/timefilter';
 import { getVisualizeLoader } from '../../../../../ui/public/visualize/loader';
 import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
@@ -55,9 +54,10 @@ import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 import { npStart } from 'ui/new_platform';
-import { setup as data } from '../../../../../core_plugins/data/public/legacy';
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 
+import { setup as data } from '../../../../../core_plugins/data/public/legacy';
+const { timefilter } = data.timefilter;
 const { savedQueryService } = data.search.services;
 
 uiRoutes

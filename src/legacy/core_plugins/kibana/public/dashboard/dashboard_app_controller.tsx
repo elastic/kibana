@@ -39,8 +39,6 @@ import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 
-import { timefilter } from 'ui/timefilter';
-
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing/get_unhashable_states_provider';
 
 import {
@@ -58,7 +56,8 @@ import { capabilities } from 'ui/capabilities';
 import { Subscription } from 'rxjs';
 import { npStart } from 'ui/new_platform';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
-import { data } from '../../../data/public/setup';
+
+import { setup as data } from '../../../data/public/legacy';
 
 import {
   DashboardContainer,
@@ -89,6 +88,7 @@ import { DashboardAppScope } from './dashboard_app';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../visualize/embeddable';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
 
+const { timefilter } = data.timefilter;
 const { savedQueryService } = data.search.services;
 
 export class DashboardAppController {

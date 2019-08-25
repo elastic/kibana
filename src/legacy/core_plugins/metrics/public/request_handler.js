@@ -19,8 +19,10 @@
 
 import { validateInterval } from './lib/validate_interval';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
-import { timefilter } from 'ui/timefilter';
 import { kfetch } from 'ui/kfetch';
+
+import { setup as data } from '../../data/public/legacy';
+const { timefilter } = data.timefilter;
 
 export const createMetricsRequestHandler = function(config) {
   const timezone = timezoneProvider(config)();

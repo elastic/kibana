@@ -17,8 +17,7 @@
  * under the License.
  */
 
-export { TimeRange, RefreshInterval } from '../../../../plugins/data/public';
+import { setup as data } from '../../../core_plugins/data/public/legacy';
 
-export { timefilter, Timefilter, registerTimefilterWithGlobalState } from './timefilter';
-export { timeHistory, TimeHistory } from './time_history';
-export { getTime } from './get_time';
+export const timefilter = data.timefilter.timefilter;
+export const timeHistory = data.timefilter.history;

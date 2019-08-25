@@ -19,9 +19,14 @@
 
 import moment from 'moment';
 import { TimeRange } from 'src/plugins/data/public';
-import { PersistedLog } from '../persisted_log';
+import { PersistedLog } from 'ui/persisted_log';
 
-export class TimeHistory {
+export interface TimeHistory {
+  add: (time: TimeRange) => void;
+  get: () => TimeRange[];
+}
+
+export class TimeHistoryManager implements TimeHistory {
   private history: PersistedLog;
 
   constructor() {
@@ -52,5 +57,3 @@ export class TimeHistory {
     return this.history.get();
   }
 }
-
-export const timeHistory = new TimeHistory();

@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { TimeRange } from '../../../../../../../src/plugins/data/public';
+import { TimeRange } from 'src/plugins/data/public';
 import { SEARCH_EMBEDDABLE_TYPE } from '../../../../../../../src/legacy/core_plugins/kibana/public/discover/embeddable/search_embeddable';
 import { VisualizeEmbeddable } from '../../../../../../../src/legacy/core_plugins/kibana/public/visualize/embeddable/visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../../../../src/legacy/core_plugins/kibana/public/visualize/embeddable/constants';

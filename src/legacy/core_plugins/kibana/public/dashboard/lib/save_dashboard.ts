@@ -18,7 +18,7 @@
  */
 
 import { SaveOptions } from 'ui/saved_objects/saved_object';
-import { Timefilter } from 'ui/timefilter';
+import { Timefilter } from '../../../../data/public';
 import { updateSavedDashboard } from './update_saved_dashboard';
 import { DashboardStateManager } from '../dashboard_state_manager';
 

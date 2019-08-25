@@ -36,10 +36,9 @@ import {
   LOADING_STATUS,
   QueryActionsProvider,
 } from './query';
-import { timefilter } from 'ui/timefilter';
 
-// load directives
-import '../../../data/public/legacy';
+import { setup as data } from '../../../data/public/legacy';
+const { timefilter } = data.timefilter;
 
 const module = uiModules.get('apps/context', [
   'elasticsearch',

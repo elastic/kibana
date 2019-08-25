@@ -13,7 +13,6 @@ import { i18n } from '@kbn/i18n';
 import { capabilities } from 'ui/capabilities';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
-import { timefilter } from 'ui/timefilter';
 import { Provider } from 'react-redux';
 import { createMapStore } from '../reducers/store';
 import { GisMap } from '../connected_components/gis_map';
@@ -54,6 +53,8 @@ import {
 } from '../../common/constants';
 import { FilterStateStore } from '@kbn/es-query';
 import { setup as data } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
+
+const { timefilter } = data.timefilter;
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 

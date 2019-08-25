@@ -24,7 +24,7 @@ import { calculateObjectHash } from '../lib/calculate_object_hash';
 import { getRequestInspectorStats, getResponseInspectorStats } from '../../courier/utils/courier_inspector_utils';
 import { tabifyAggResponse } from '../../agg_response/tabify/tabify';
 import { buildTabularInspectorData } from '../../inspector/build_tabular_inspector_data';
-import { getTime } from '../../timefilter/get_time';
+import { getTime } from '../../../../core_plugins/data/public';
 
 const CourierRequestHandlerProvider = function () {
 

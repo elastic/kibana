@@ -35,8 +35,8 @@ import { Filter, FilterStateStore } from '@kbn/es-query';
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
-import { timefilter, getTime, TimeRange } from 'ui/timefilter';
-import { Query, onlyDisabledFiltersChanged } from '../../../../data/public';
+import { TimeRange } from 'src/plugins/data/public';
+import { Query, onlyDisabledFiltersChanged, getTime } from '../../../../data/public';
 import {
   APPLY_FILTER_TRIGGER,
   Embeddable,
@@ -49,6 +49,7 @@ import searchTemplate from './search_template.html';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { getSort } from '../doc_table/lib/get_sort';
 import { SortOrder } from '../doc_table/components/table_header/helpers';
+import { setup as data } from '../../../../data/public/legacy';
 
 const config = chrome.getUiSettingsClient();
 
@@ -140,7 +141,9 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       requests: new RequestAdapter(),
     };
     this.initializeSearchScope();
-    this.autoRefreshFetchSubscription = timefilter.getAutoRefreshFetch$().subscribe(this.fetch);
+    this.autoRefreshFetchSubscription = data.timefilter.timefilter
+      .getAutoRefreshFetch$()
+      .subscribe(this.fetch);
 
     this.subscription = Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
       this.panelTitle = this.output.title || '';

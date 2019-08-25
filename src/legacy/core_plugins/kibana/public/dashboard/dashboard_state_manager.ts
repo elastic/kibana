@@ -22,14 +22,13 @@ import _ from 'lodash';
 
 import { Filter } from '@kbn/es-query';
 import { stateMonitorFactory, StateMonitor } from 'ui/state_management/state_monitor_factory';
-import { Timefilter } from 'ui/timefilter';
 import { AppStateClass as TAppStateClass } from 'ui/state_management/app_state';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import { Moment } from 'moment';
 
 import { DashboardContainer } from 'src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
 import { ViewMode } from '../../../embeddable_api/public/np_ready/public';
-import { Query } from '../../../data/public';
+import { Query, Timefilter } from '../../../data/public';
 
 import { getAppStateDefaults, migrateAppState } from './lib';
 import { convertPanelStateToSavedDashboardPanel } from './lib/embeddable_saved_object_converters';

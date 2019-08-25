@@ -20,7 +20,6 @@
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import 'ui/directives/kbn_href';
 import { uiModules } from 'ui/modules';
-import { timefilter } from 'ui/timefilter';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import chrome from 'ui/chrome';
 import { wrapInI18nContext } from 'ui/i18n';
@@ -31,6 +30,9 @@ import { VisualizeListingTable } from './visualize_listing_table';
 import { NewVisModal } from '../wizard/new_vis_modal';
 import { VisualizeConstants } from '../visualize_constants';
 import { visualizations } from 'plugins/visualizations';
+
+import { setup as data } from '../../../../data/public/legacy';
+
 import { i18n } from '@kbn/i18n';
 
 const app = uiModules.get('app/visualize', ['ngRoute', 'react']);
@@ -46,8 +48,8 @@ export function VisualizeListingController($injector, createNewVis) {
   this.visTypeRegistry = Private(VisTypesRegistryProvider);
   this.visTypeAliases = visualizations.types.visTypeAliasRegistry.get();
 
-  timefilter.disableAutoRefreshSelector();
-  timefilter.disableTimeRangeSelector();
+  data.timefilter.timefilter.disableAutoRefreshSelector();
+  data.timefilter.timefilter.disableTimeRangeSelector();
 
   this.showNewVisModal = false;
 

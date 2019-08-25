@@ -34,6 +34,8 @@ import { SavedQueryManagementComponent } from './saved_query_management/saved_qu
 import { SavedQueryService } from '../lib/saved_query_service';
 import { createSavedQueryService } from '../lib/saved_query_service';
 
+import { setup as data } from '../../../../../data/public/legacy';
+
 interface DateRange {
   from: string;
   to: string;
@@ -379,6 +381,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         <QueryBar
           uiSettings={this.props.uiSettings}
           savedObjectsClient={this.props.savedObjectsClient}
+          timeHistory={data.timefilter.history}
           query={this.state.query}
           screenTitle={this.props.screenTitle}
           onSubmit={this.onQueryBarSubmit}

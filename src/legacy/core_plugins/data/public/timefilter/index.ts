@@ -17,12 +17,7 @@
  * under the License.
  */
 
-import { chromeServiceMock } from '../../../../../../../../core/public/mocks';
-
-jest.doMock('ui/new_platform', () => ({
-  npStart: {
-    core: {
-      chrome: chromeServiceMock.createStartContract(),
-    },
-  },
-}));
+export { TimefilterService, TimefilterSetup } from './timefilter_service';
+export { Timefilter } from './timefilter';
+export { TimeHistory } from './time_history';
+export { getTime } from './get_time';
