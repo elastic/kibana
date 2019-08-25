@@ -738,13 +738,13 @@ module
       preLoadJob($scope, appState);
     });
 
-    const fetchSub$ = subscribeWithScope($scope, timefilter.getFetch$(), {
+    const fetchSub = subscribeWithScope($scope, timefilter.getFetch$(), {
       next: $scope.loadVis
     });
 
     $scope.$on('$destroy', () => {
       globalForceStop = true;
       angular.element(window).off('resize');
-      fetchSub$.unsubscribe();
+      fetchSub.unsubscribe();
     });
   });
