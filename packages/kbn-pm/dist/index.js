@@ -94,7 +94,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _cli__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "run", function() { return _cli__WEBPACK_IMPORTED_MODULE_0__["run"]; });
 
+<<<<<<< HEAD
 /* harmony import */ var _production__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(371);
+=======
+/* harmony import */ var _production__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(390);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "buildProductionProjects", function() { return _production__WEBPACK_IMPORTED_MODULE_1__["buildProductionProjects"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "prepareExternalProjectDependencies", function() { return _production__WEBPACK_IMPORTED_MODULE_1__["prepareExternalProjectDependencies"]; });
@@ -105,10 +109,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _utils_project__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(53);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Project", function() { return _utils_project__WEBPACK_IMPORTED_MODULE_3__["Project"]; });
 
+<<<<<<< HEAD
 /* harmony import */ var _utils_workspaces__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(134);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "copyWorkspacePackages", function() { return _utils_workspaces__WEBPACK_IMPORTED_MODULE_4__["copyWorkspacePackages"]; });
 
 /* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(135);
+=======
+/* harmony import */ var _utils_workspaces__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(153);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "copyWorkspacePackages", function() { return _utils_workspaces__WEBPACK_IMPORTED_MODULE_4__["copyWorkspacePackages"]; });
+
+/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(154);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "getProjectPaths", function() { return _config__WEBPACK_IMPORTED_MODULE_5__["getProjectPaths"]; });
 
 /*
@@ -152,7 +163,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(16);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_3__);
 /* harmony import */ var _commands__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(17);
+<<<<<<< HEAD
 /* harmony import */ var _run__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(361);
+=======
+/* harmony import */ var _run__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(380);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(33);
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
@@ -2502,9 +2517,15 @@ module.exports = require("path");
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "commands", function() { return commands; });
 /* harmony import */ var _bootstrap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(18);
+<<<<<<< HEAD
 /* harmony import */ var _clean__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(136);
 /* harmony import */ var _run__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(159);
 /* harmony import */ var _watch__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(160);
+=======
+/* harmony import */ var _clean__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(155);
+/* harmony import */ var _run__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(178);
+/* harmony import */ var _watch__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(179);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -4291,7 +4312,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var util__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(util__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(52);
 /* harmony import */ var _project__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(53);
+<<<<<<< HEAD
 /* harmony import */ var _workspaces__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(134);
+=======
+/* harmony import */ var _workspaces__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(153);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -7896,7 +7921,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(52);
 /* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(33);
 /* harmony import */ var _package_json__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(54);
+<<<<<<< HEAD
 /* harmony import */ var _scripts__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(95);
+=======
+/* harmony import */ var _scripts__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(114);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -8132,7 +8161,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isLinkDependency", function() { return isLinkDependency; });
 /* harmony import */ var read_pkg__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(55);
 /* harmony import */ var read_pkg__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(read_pkg__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var write_pkg__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(83);
+/* harmony import */ var write_pkg__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(93);
 /* harmony import */ var write_pkg__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(write_pkg__WEBPACK_IMPORTED_MODULE_1__);
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
@@ -8154,8 +8183,9 @@ __webpack_require__.r(__webpack_exports__);
  */
 
 
-function readPackageJson(dir) {
-  return read_pkg__WEBPACK_IMPORTED_MODULE_0___default()(dir, {
+function readPackageJson(cwd) {
+  return read_pkg__WEBPACK_IMPORTED_MODULE_0___default()({
+    cwd,
     normalize: false
   });
 }
@@ -8170,51 +8200,45 @@ const isLinkDependency = depVersion => depVersion.startsWith('link:');
 
 "use strict";
 
+const {promisify} = __webpack_require__(29);
+const fs = __webpack_require__(23);
 const path = __webpack_require__(16);
-const loadJsonFile = __webpack_require__(56);
-const pathType = __webpack_require__(63);
+const parseJson = __webpack_require__(56);
 
-module.exports = (fp, opts) => {
-	if (typeof fp !== 'string') {
-		opts = fp;
-		fp = '.';
+const readFileAsync = promisify(fs.readFile);
+
+module.exports = async options => {
+	options = {
+		cwd: process.cwd(),
+		normalize: true,
+		...options
+	};
+
+	const filePath = path.resolve(options.cwd, 'package.json');
+	const json = parseJson(await readFileAsync(filePath, 'utf8'));
+
+	if (options.normalize) {
+		__webpack_require__(68)(json);
 	}
 
-	opts = opts || {};
-
-	return pathType.dir(fp)
-		.then(isDir => {
-			if (isDir) {
-				fp = path.join(fp, 'package.json');
-			}
-
-			return loadJsonFile(fp);
-		})
-		.then(x => {
-			if (opts.normalize !== false) {
-				__webpack_require__(65)(x);
-			}
-
-			return x;
-		});
+	return json;
 };
 
-module.exports.sync = (fp, opts) => {
-	if (typeof fp !== 'string') {
-		opts = fp;
-		fp = '.';
+module.exports.sync = options => {
+	options = {
+		cwd: process.cwd(),
+		normalize: true,
+		...options
+	};
+
+	const filePath = path.resolve(options.cwd, 'package.json');
+	const json = parseJson(fs.readFileSync(filePath, 'utf8'));
+
+	if (options.normalize) {
+		__webpack_require__(68)(json);
 	}
 
-	opts = opts || {};
-	fp = pathType.dirSync(fp) ? path.join(fp, 'package.json') : fp;
-
-	const x = loadJsonFile.sync(fp);
-
-	if (opts.normalize !== false) {
-		__webpack_require__(65)(x);
-	}
-
-	return x;
+	return json;
 };
 
 
@@ -8224,16 +8248,55 @@ module.exports.sync = (fp, opts) => {
 
 "use strict";
 
-const path = __webpack_require__(16);
-const fs = __webpack_require__(22);
-const stripBom = __webpack_require__(57);
-const parseJson = __webpack_require__(58);
-const pify = __webpack_require__(62);
+const errorEx = __webpack_require__(57);
+const fallback = __webpack_require__(59);
+const {default: LinesAndColumns} = __webpack_require__(60);
+const {codeFrameColumns} = __webpack_require__(61);
 
-const parse = (data, fp) => parseJson(stripBom(data), path.relative('.', fp));
+const JSONError = errorEx('JSONError', {
+	fileName: errorEx.append('in %s'),
+	codeFrame: errorEx.append('\n\n%s\n')
+});
 
-module.exports = fp => pify(fs.readFile)(fp, 'utf8').then(data => parse(data, fp));
-module.exports.sync = fp => parse(fs.readFileSync(fp, 'utf8'), fp);
+module.exports = (string, reviver, filename) => {
+	if (typeof reviver === 'string') {
+		filename = reviver;
+		reviver = null;
+	}
+
+	try {
+		try {
+			return JSON.parse(string, reviver);
+		} catch (error) {
+			fallback(string, reviver);
+			throw error;
+		}
+	} catch (error) {
+		error.message = error.message.replace(/\n/g, '');
+		const indexMatch = error.message.match(/in JSON at position (\d+) while parsing near/);
+
+		const jsonError = new JSONError(error);
+		if (filename) {
+			jsonError.fileName = filename;
+		}
+
+		if (indexMatch && indexMatch.length > 0) {
+			const lines = new LinesAndColumns(string);
+			const index = Number(indexMatch[1]);
+			const location = lines.locationForIndex(index);
+
+			const codeFrame = codeFrameColumns(
+				string,
+				{start: {line: location.line + 1, column: location.column + 1}},
+				{highlightCode: true}
+			);
+
+			jsonError.codeFrame = codeFrame;
+		}
+
+		throw jsonError;
+	}
+};
 
 
 /***/ }),
@@ -8242,70 +8305,9 @@ module.exports.sync = fp => parse(fs.readFileSync(fp, 'utf8'), fp);
 
 "use strict";
 
-module.exports = x => {
-	if (typeof x !== 'string') {
-		throw new TypeError('Expected a string, got ' + typeof x);
-	}
-
-	// Catches EFBBBF (UTF-8 BOM) because the buffer-to-string
-	// conversion translates it to FEFF (UTF-16 BOM)
-	if (x.charCodeAt(0) === 0xFEFF) {
-		return x.slice(1);
-	}
-
-	return x;
-};
-
-
-/***/ }),
-/* 58 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-const errorEx = __webpack_require__(59);
-const fallback = __webpack_require__(61);
-
-const JSONError = errorEx('JSONError', {
-	fileName: errorEx.append('in %s')
-});
-
-module.exports = (input, reviver, filename) => {
-	if (typeof reviver === 'string') {
-		filename = reviver;
-		reviver = null;
-	}
-
-	try {
-		try {
-			return JSON.parse(input, reviver);
-		} catch (err) {
-			fallback(input, reviver);
-
-			throw err;
-		}
-	} catch (err) {
-		err.message = err.message.replace(/\n/g, '');
-
-		const jsonErr = new JSONError(err);
-		if (filename) {
-			jsonErr.fileName = filename;
-		}
-
-		throw jsonErr;
-	}
-};
-
-
-/***/ }),
-/* 59 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
 
 var util = __webpack_require__(29);
-var isArrayish = __webpack_require__(60);
+var isArrayish = __webpack_require__(58);
 
 var errorEx = function errorEx(name, properties) {
 	if (!name || name.constructor !== String) {
@@ -8438,7 +8440,7 @@ module.exports = errorEx;
 
 
 /***/ }),
-/* 60 */
+/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8455,7 +8457,7 @@ module.exports = function isArrayish(obj) {
 
 
 /***/ }),
-/* 61 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8494,246 +8496,923 @@ function parseJson (txt, reviver, context) {
 
 
 /***/ }),
+/* 60 */
+/***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+var LF = '\n';
+var CR = '\r';
+var LinesAndColumns = (function () {
+    function LinesAndColumns(string) {
+        this.string = string;
+        var offsets = [0];
+        for (var offset = 0; offset < string.length;) {
+            switch (string[offset]) {
+                case LF:
+                    offset += LF.length;
+                    offsets.push(offset);
+                    break;
+                case CR:
+                    offset += CR.length;
+                    if (string[offset] === LF) {
+                        offset += LF.length;
+                    }
+                    offsets.push(offset);
+                    break;
+                default:
+                    offset++;
+                    break;
+            }
+        }
+        this.offsets = offsets;
+    }
+    LinesAndColumns.prototype.locationForIndex = function (index) {
+        if (index < 0 || index > this.string.length) {
+            return null;
+        }
+        var line = 0;
+        var offsets = this.offsets;
+        while (offsets[line + 1] <= index) {
+            line++;
+        }
+        var column = index - offsets[line];
+        return { line: line, column: column };
+    };
+    LinesAndColumns.prototype.indexForLocation = function (location) {
+        var line = location.line, column = location.column;
+        if (line < 0 || line >= this.offsets.length) {
+            return null;
+        }
+        if (column < 0 || column > this.lengthOfLine(line)) {
+            return null;
+        }
+        return this.offsets[line] + column;
+    };
+    LinesAndColumns.prototype.lengthOfLine = function (line) {
+        var offset = this.offsets[line];
+        var nextOffset = line === this.offsets.length - 1 ? this.string.length : this.offsets[line + 1];
+        return nextOffset - offset;
+    };
+    return LinesAndColumns;
+}());
+/* harmony default export */ __webpack_exports__["default"] = (LinesAndColumns);
+
+
+/***/ }),
+/* 61 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.codeFrameColumns = codeFrameColumns;
+exports.default = _default;
+
+function _highlight() {
+  const data = _interopRequireWildcard(__webpack_require__(62));
+
+  _highlight = function () {
+    return data;
+  };
+
+  return data;
+}
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
+
+let deprecationWarningShown = false;
+
+function getDefs(chalk) {
+  return {
+    gutter: chalk.grey,
+    marker: chalk.red.bold,
+    message: chalk.red.bold
+  };
+}
+
+const NEWLINE = /\r\n|[\n\r\u2028\u2029]/;
+
+function getMarkerLines(loc, source, opts) {
+  const startLoc = Object.assign({
+    column: 0,
+    line: -1
+  }, loc.start);
+  const endLoc = Object.assign({}, startLoc, loc.end);
+  const {
+    linesAbove = 2,
+    linesBelow = 3
+  } = opts || {};
+  const startLine = startLoc.line;
+  const startColumn = startLoc.column;
+  const endLine = endLoc.line;
+  const endColumn = endLoc.column;
+  let start = Math.max(startLine - (linesAbove + 1), 0);
+  let end = Math.min(source.length, endLine + linesBelow);
+
+  if (startLine === -1) {
+    start = 0;
+  }
+
+  if (endLine === -1) {
+    end = source.length;
+  }
+
+  const lineDiff = endLine - startLine;
+  const markerLines = {};
+
+  if (lineDiff) {
+    for (let i = 0; i <= lineDiff; i++) {
+      const lineNumber = i + startLine;
+
+      if (!startColumn) {
+        markerLines[lineNumber] = true;
+      } else if (i === 0) {
+        const sourceLength = source[lineNumber - 1].length;
+        markerLines[lineNumber] = [startColumn, sourceLength - startColumn + 1];
+      } else if (i === lineDiff) {
+        markerLines[lineNumber] = [0, endColumn];
+      } else {
+        const sourceLength = source[lineNumber - i].length;
+        markerLines[lineNumber] = [0, sourceLength];
+      }
+    }
+  } else {
+    if (startColumn === endColumn) {
+      if (startColumn) {
+        markerLines[startLine] = [startColumn, 0];
+      } else {
+        markerLines[startLine] = true;
+      }
+    } else {
+      markerLines[startLine] = [startColumn, endColumn - startColumn];
+    }
+  }
+
+  return {
+    start,
+    end,
+    markerLines
+  };
+}
+
+function codeFrameColumns(rawLines, loc, opts = {}) {
+  const highlighted = (opts.highlightCode || opts.forceColor) && (0, _highlight().shouldHighlight)(opts);
+  const chalk = (0, _highlight().getChalk)(opts);
+  const defs = getDefs(chalk);
+
+  const maybeHighlight = (chalkFn, string) => {
+    return highlighted ? chalkFn(string) : string;
+  };
+
+  const lines = rawLines.split(NEWLINE);
+  const {
+    start,
+    end,
+    markerLines
+  } = getMarkerLines(loc, lines, opts);
+  const hasColumns = loc.start && typeof loc.start.column === "number";
+  const numberMaxWidth = String(end).length;
+  const highlightedLines = highlighted ? (0, _highlight().default)(rawLines, opts) : rawLines;
+  let frame = highlightedLines.split(NEWLINE).slice(start, end).map((line, index) => {
+    const number = start + 1 + index;
+    const paddedNumber = ` ${number}`.slice(-numberMaxWidth);
+    const gutter = ` ${paddedNumber} | `;
+    const hasMarker = markerLines[number];
+    const lastMarkerLine = !markerLines[number + 1];
+
+    if (hasMarker) {
+      let markerLine = "";
+
+      if (Array.isArray(hasMarker)) {
+        const markerSpacing = line.slice(0, Math.max(hasMarker[0] - 1, 0)).replace(/[^\t]/g, " ");
+        const numberOfMarkers = hasMarker[1] || 1;
+        markerLine = ["\n ", maybeHighlight(defs.gutter, gutter.replace(/\d/g, " ")), markerSpacing, maybeHighlight(defs.marker, "^").repeat(numberOfMarkers)].join("");
+
+        if (lastMarkerLine && opts.message) {
+          markerLine += " " + maybeHighlight(defs.message, opts.message);
+        }
+      }
+
+      return [maybeHighlight(defs.marker, ">"), maybeHighlight(defs.gutter, gutter), line, markerLine].join("");
+    } else {
+      return ` ${maybeHighlight(defs.gutter, gutter)}${line}`;
+    }
+  }).join("\n");
+
+  if (opts.message && !hasColumns) {
+    frame = `${" ".repeat(numberMaxWidth + 1)}${opts.message}\n${frame}`;
+  }
+
+  if (highlighted) {
+    return chalk.reset(frame);
+  } else {
+    return frame;
+  }
+}
+
+function _default(rawLines, lineNumber, colNumber, opts = {}) {
+  if (!deprecationWarningShown) {
+    deprecationWarningShown = true;
+    const message = "Passing lineNumber and colNumber is deprecated to @babel/code-frame. Please use `codeFrameColumns`.";
+
+    if (process.emitWarning) {
+      process.emitWarning(message, "DeprecationWarning");
+    } else {
+      const deprecationError = new Error(message);
+      deprecationError.name = "DeprecationWarning";
+      console.warn(new Error(message));
+    }
+  }
+
+  colNumber = Math.max(colNumber, 0);
+  const location = {
+    start: {
+      column: colNumber,
+      line: lineNumber
+    }
+  };
+  return codeFrameColumns(rawLines, location, opts);
+}
+
+/***/ }),
 /* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-const processFn = (fn, opts) => function () {
-	const P = opts.promiseModule;
-	const args = new Array(arguments.length);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.shouldHighlight = shouldHighlight;
+exports.getChalk = getChalk;
+exports.default = highlight;
 
-	for (let i = 0; i < arguments.length; i++) {
-		args[i] = arguments[i];
-	}
+function _jsTokens() {
+  const data = _interopRequireWildcard(__webpack_require__(63));
 
-	return new P((resolve, reject) => {
-		if (opts.errorFirst) {
-			args.push(function (err, result) {
-				if (opts.multiArgs) {
-					const results = new Array(arguments.length - 1);
+  _jsTokens = function () {
+    return data;
+  };
 
-					for (let i = 1; i < arguments.length; i++) {
-						results[i - 1] = arguments[i];
-					}
+  return data;
+}
 
-					if (err) {
-						results.unshift(err);
-						reject(results);
-					} else {
-						resolve(results);
-					}
-				} else if (err) {
-					reject(err);
-				} else {
-					resolve(result);
-				}
-			});
-		} else {
-			args.push(function (result) {
-				if (opts.multiArgs) {
-					const results = new Array(arguments.length - 1);
+function _esutils() {
+  const data = _interopRequireDefault(__webpack_require__(64));
 
-					for (let i = 0; i < arguments.length; i++) {
-						results[i] = arguments[i];
-					}
+  _esutils = function () {
+    return data;
+  };
 
-					resolve(results);
-				} else {
-					resolve(result);
-				}
-			});
-		}
+  return data;
+}
 
-		fn.apply(this, args);
-	});
-};
+function _chalk() {
+  const data = _interopRequireDefault(__webpack_require__(2));
 
-module.exports = (obj, opts) => {
-	opts = Object.assign({
-		exclude: [/.+(Sync|Stream)$/],
-		errorFirst: true,
-		promiseModule: Promise
-	}, opts);
+  _chalk = function () {
+    return data;
+  };
 
-	const filter = key => {
-		const match = pattern => typeof pattern === 'string' ? key === pattern : pattern.test(key);
-		return opts.include ? opts.include.some(match) : !opts.exclude.some(match);
-	};
+  return data;
+}
 
-	let ret;
-	if (typeof obj === 'function') {
-		ret = function () {
-			if (opts.excludeMain) {
-				return obj.apply(this, arguments);
-			}
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-			return processFn(obj, opts).apply(this, arguments);
-		};
-	} else {
-		ret = Object.create(Object.getPrototypeOf(obj));
-	}
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
 
-	for (const key in obj) { // eslint-disable-line guard-for-in
-		const x = obj[key];
-		ret[key] = typeof x === 'function' && filter(key) ? processFn(x, opts) : x;
-	}
+function getDefs(chalk) {
+  return {
+    keyword: chalk.cyan,
+    capitalized: chalk.yellow,
+    jsx_tag: chalk.yellow,
+    punctuator: chalk.yellow,
+    number: chalk.magenta,
+    string: chalk.green,
+    regex: chalk.magenta,
+    comment: chalk.grey,
+    invalid: chalk.white.bgRed.bold
+  };
+}
 
-	return ret;
-};
+const NEWLINE = /\r\n|[\n\r\u2028\u2029]/;
+const JSX_TAG = /^[a-z][\w-]*$/i;
+const BRACKET = /^[()[\]{}]$/;
 
+function getTokenType(match) {
+  const [offset, text] = match.slice(-2);
+  const token = (0, _jsTokens().matchToToken)(match);
+
+  if (token.type === "name") {
+    if (_esutils().default.keyword.isReservedWordES6(token.value)) {
+      return "keyword";
+    }
+
+    if (JSX_TAG.test(token.value) && (text[offset - 1] === "<" || text.substr(offset - 2, 2) == "</")) {
+      return "jsx_tag";
+    }
+
+    if (token.value[0] !== token.value[0].toLowerCase()) {
+      return "capitalized";
+    }
+  }
+
+  if (token.type === "punctuator" && BRACKET.test(token.value)) {
+    return "bracket";
+  }
+
+  if (token.type === "invalid" && (token.value === "@" || token.value === "#")) {
+    return "punctuator";
+  }
+
+  return token.type;
+}
+
+function highlightTokens(defs, text) {
+  return text.replace(_jsTokens().default, function (...args) {
+    const type = getTokenType(args);
+    const colorize = defs[type];
+
+    if (colorize) {
+      return args[0].split(NEWLINE).map(str => colorize(str)).join("\n");
+    } else {
+      return args[0];
+    }
+  });
+}
+
+function shouldHighlight(options) {
+  return _chalk().default.supportsColor || options.forceColor;
+}
+
+function getChalk(options) {
+  let chalk = _chalk().default;
+
+  if (options.forceColor) {
+    chalk = new (_chalk().default.constructor)({
+      enabled: true,
+      level: 1
+    });
+  }
+
+  return chalk;
+}
+
+function highlight(code, options = {}) {
+  if (shouldHighlight(options)) {
+    const chalk = getChalk(options);
+    const defs = getDefs(chalk);
+    return highlightTokens(defs, code);
+  } else {
+    return code;
+  }
+}
 
 /***/ }),
 /* 63 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-"use strict";
+// Copyright 2014, 2015, 2016, 2017, 2018 Simon Lydell
+// License: MIT. (See LICENSE.)
 
-const fs = __webpack_require__(23);
-const pify = __webpack_require__(64);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+})
 
-function type(fn, fn2, fp) {
-	if (typeof fp !== 'string') {
-		return Promise.reject(new TypeError(`Expected a string, got ${typeof fp}`));
-	}
+// This regex comes from regex.coffee, and is inserted here by generate-index.js
+// (run `npm run build`).
+exports.default = /((['"])(?:(?!\2|\\).|\\(?:\r\n|[\s\S]))*(\2)?|`(?:[^`\\$]|\\[\s\S]|\$(?!\{)|\$\{(?:[^{}]|\{[^}]*\}?)*\}?)*(`)?)|(\/\/.*)|(\/\*(?:[^*]|\*(?!\/))*(\*\/)?)|(\/(?!\*)(?:\[(?:(?![\]\\]).|\\.)*\]|(?![\/\]\\]).|\\.)+\/(?:(?!\s*(?:\b|[\u0080-\uFFFF$\\'"~({]|[+\-!](?!=)|\.?\d))|[gmiyus]{1,6}\b(?![\u0080-\uFFFF$\\]|\s*(?:[+\-*%&|^<>!=?({]|\/(?![\/*])))))|(0[xX][\da-fA-F]+|0[oO][0-7]+|0[bB][01]+|(?:\d*\.\d+|\d+\.?)(?:[eE][+-]?\d+)?)|((?!\d)(?:(?!\s)[$\w\u0080-\uFFFF]|\\u[\da-fA-F]{4}|\\u\{[\da-fA-F]+\})+)|(--|\+\+|&&|\|\||=>|\.{3}|(?:[+\-\/%&|^]|\*{1,2}|<{1,2}|>{1,3}|!=?|={1,2})=?|[?~.,:;[\](){}])|(\s+)|(^$|[\s\S])/g
 
-	return pify(fs[fn])(fp)
-		.then(stats => stats[fn2]())
-		.catch(err => {
-			if (err.code === 'ENOENT') {
-				return false;
-			}
-
-			throw err;
-		});
+exports.matchToToken = function(match) {
+  var token = {type: "invalid", value: match[0], closed: undefined}
+       if (match[ 1]) token.type = "string" , token.closed = !!(match[3] || match[4])
+  else if (match[ 5]) token.type = "comment"
+  else if (match[ 6]) token.type = "comment", token.closed = !!match[7]
+  else if (match[ 8]) token.type = "regex"
+  else if (match[ 9]) token.type = "number"
+  else if (match[10]) token.type = "name"
+  else if (match[11]) token.type = "punctuator"
+  else if (match[12]) token.type = "whitespace"
+  return token
 }
-
-function typeSync(fn, fn2, fp) {
-	if (typeof fp !== 'string') {
-		throw new TypeError(`Expected a string, got ${typeof fp}`);
-	}
-
-	try {
-		return fs[fn](fp)[fn2]();
-	} catch (err) {
-		if (err.code === 'ENOENT') {
-			return false;
-		}
-
-		throw err;
-	}
-}
-
-exports.file = type.bind(null, 'stat', 'isFile');
-exports.dir = type.bind(null, 'stat', 'isDirectory');
-exports.symlink = type.bind(null, 'lstat', 'isSymbolicLink');
-exports.fileSync = typeSync.bind(null, 'statSync', 'isFile');
-exports.dirSync = typeSync.bind(null, 'statSync', 'isDirectory');
-exports.symlinkSync = typeSync.bind(null, 'lstatSync', 'isSymbolicLink');
 
 
 /***/ }),
 /* 64 */
 /***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
+/*
+  Copyright (C) 2013 Yusuke Suzuki <utatane.tea@gmail.com>
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  ARE DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 
 
-const processFn = (fn, opts) => function () {
-	const P = opts.promiseModule;
-	const args = new Array(arguments.length);
+(function () {
+    'use strict';
 
-	for (let i = 0; i < arguments.length; i++) {
-		args[i] = arguments[i];
-	}
-
-	return new P((resolve, reject) => {
-		if (opts.errorFirst) {
-			args.push(function (err, result) {
-				if (opts.multiArgs) {
-					const results = new Array(arguments.length - 1);
-
-					for (let i = 1; i < arguments.length; i++) {
-						results[i - 1] = arguments[i];
-					}
-
-					if (err) {
-						results.unshift(err);
-						reject(results);
-					} else {
-						resolve(results);
-					}
-				} else if (err) {
-					reject(err);
-				} else {
-					resolve(result);
-				}
-			});
-		} else {
-			args.push(function (result) {
-				if (opts.multiArgs) {
-					const results = new Array(arguments.length - 1);
-
-					for (let i = 0; i < arguments.length; i++) {
-						results[i] = arguments[i];
-					}
-
-					resolve(results);
-				} else {
-					resolve(result);
-				}
-			});
-		}
-
-		fn.apply(this, args);
-	});
-};
-
-module.exports = (obj, opts) => {
-	opts = Object.assign({
-		exclude: [/.+(Sync|Stream)$/],
-		errorFirst: true,
-		promiseModule: Promise
-	}, opts);
-
-	const filter = key => {
-		const match = pattern => typeof pattern === 'string' ? key === pattern : pattern.test(key);
-		return opts.include ? opts.include.some(match) : !opts.exclude.some(match);
-	};
-
-	let ret;
-	if (typeof obj === 'function') {
-		ret = function () {
-			if (opts.excludeMain) {
-				return obj.apply(this, arguments);
-			}
-
-			return processFn(obj, opts).apply(this, arguments);
-		};
-	} else {
-		ret = Object.create(Object.getPrototypeOf(obj));
-	}
-
-	for (const key in obj) { // eslint-disable-line guard-for-in
-		const x = obj[key];
-		ret[key] = typeof x === 'function' && filter(key) ? processFn(x, opts) : x;
-	}
-
-	return ret;
-};
+    exports.ast = __webpack_require__(65);
+    exports.code = __webpack_require__(66);
+    exports.keyword = __webpack_require__(67);
+}());
+/* vim: set sw=4 ts=4 et tw=80 : */
 
 
 /***/ }),
 /* 65 */
+/***/ (function(module, exports) {
+
+/*
+  Copyright (C) 2013 Yusuke Suzuki <utatane.tea@gmail.com>
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  ARE DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+(function () {
+    'use strict';
+
+    function isExpression(node) {
+        if (node == null) { return false; }
+        switch (node.type) {
+            case 'ArrayExpression':
+            case 'AssignmentExpression':
+            case 'BinaryExpression':
+            case 'CallExpression':
+            case 'ConditionalExpression':
+            case 'FunctionExpression':
+            case 'Identifier':
+            case 'Literal':
+            case 'LogicalExpression':
+            case 'MemberExpression':
+            case 'NewExpression':
+            case 'ObjectExpression':
+            case 'SequenceExpression':
+            case 'ThisExpression':
+            case 'UnaryExpression':
+            case 'UpdateExpression':
+                return true;
+        }
+        return false;
+    }
+
+    function isIterationStatement(node) {
+        if (node == null) { return false; }
+        switch (node.type) {
+            case 'DoWhileStatement':
+            case 'ForInStatement':
+            case 'ForStatement':
+            case 'WhileStatement':
+                return true;
+        }
+        return false;
+    }
+
+    function isStatement(node) {
+        if (node == null) { return false; }
+        switch (node.type) {
+            case 'BlockStatement':
+            case 'BreakStatement':
+            case 'ContinueStatement':
+            case 'DebuggerStatement':
+            case 'DoWhileStatement':
+            case 'EmptyStatement':
+            case 'ExpressionStatement':
+            case 'ForInStatement':
+            case 'ForStatement':
+            case 'IfStatement':
+            case 'LabeledStatement':
+            case 'ReturnStatement':
+            case 'SwitchStatement':
+            case 'ThrowStatement':
+            case 'TryStatement':
+            case 'VariableDeclaration':
+            case 'WhileStatement':
+            case 'WithStatement':
+                return true;
+        }
+        return false;
+    }
+
+    function isSourceElement(node) {
+      return isStatement(node) || node != null && node.type === 'FunctionDeclaration';
+    }
+
+    function trailingStatement(node) {
+        switch (node.type) {
+        case 'IfStatement':
+            if (node.alternate != null) {
+                return node.alternate;
+            }
+            return node.consequent;
+
+        case 'LabeledStatement':
+        case 'ForStatement':
+        case 'ForInStatement':
+        case 'WhileStatement':
+        case 'WithStatement':
+            return node.body;
+        }
+        return null;
+    }
+
+    function isProblematicIfStatement(node) {
+        var current;
+
+        if (node.type !== 'IfStatement') {
+            return false;
+        }
+        if (node.alternate == null) {
+            return false;
+        }
+        current = node.consequent;
+        do {
+            if (current.type === 'IfStatement') {
+                if (current.alternate == null)  {
+                    return true;
+                }
+            }
+            current = trailingStatement(current);
+        } while (current);
+
+        return false;
+    }
+
+    module.exports = {
+        isExpression: isExpression,
+        isStatement: isStatement,
+        isIterationStatement: isIterationStatement,
+        isSourceElement: isSourceElement,
+        isProblematicIfStatement: isProblematicIfStatement,
+
+        trailingStatement: trailingStatement
+    };
+}());
+/* vim: set sw=4 ts=4 et tw=80 : */
+
+
+/***/ }),
+/* 66 */
+/***/ (function(module, exports) {
+
+/*
+  Copyright (C) 2013-2014 Yusuke Suzuki <utatane.tea@gmail.com>
+  Copyright (C) 2014 Ivan Nikulin <ifaaan@gmail.com>
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  ARE DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+(function () {
+    'use strict';
+
+    var ES6Regex, ES5Regex, NON_ASCII_WHITESPACES, IDENTIFIER_START, IDENTIFIER_PART, ch;
+
+    // See `tools/generate-identifier-regex.js`.
+    ES5Regex = {
+        // ECMAScript 5.1/Unicode v7.0.0 NonAsciiIdentifierStart:
+        NonAsciiIdentifierStart: /[\xAA\xB5\xBA\xC0-\xD6\xD8-\xF6\xF8-\u02C1\u02C6-\u02D1\u02E0-\u02E4\u02EC\u02EE\u0370-\u0374\u0376\u0377\u037A-\u037D\u037F\u0386\u0388-\u038A\u038C\u038E-\u03A1\u03A3-\u03F5\u03F7-\u0481\u048A-\u052F\u0531-\u0556\u0559\u0561-\u0587\u05D0-\u05EA\u05F0-\u05F2\u0620-\u064A\u066E\u066F\u0671-\u06D3\u06D5\u06E5\u06E6\u06EE\u06EF\u06FA-\u06FC\u06FF\u0710\u0712-\u072F\u074D-\u07A5\u07B1\u07CA-\u07EA\u07F4\u07F5\u07FA\u0800-\u0815\u081A\u0824\u0828\u0840-\u0858\u08A0-\u08B2\u0904-\u0939\u093D\u0950\u0958-\u0961\u0971-\u0980\u0985-\u098C\u098F\u0990\u0993-\u09A8\u09AA-\u09B0\u09B2\u09B6-\u09B9\u09BD\u09CE\u09DC\u09DD\u09DF-\u09E1\u09F0\u09F1\u0A05-\u0A0A\u0A0F\u0A10\u0A13-\u0A28\u0A2A-\u0A30\u0A32\u0A33\u0A35\u0A36\u0A38\u0A39\u0A59-\u0A5C\u0A5E\u0A72-\u0A74\u0A85-\u0A8D\u0A8F-\u0A91\u0A93-\u0AA8\u0AAA-\u0AB0\u0AB2\u0AB3\u0AB5-\u0AB9\u0ABD\u0AD0\u0AE0\u0AE1\u0B05-\u0B0C\u0B0F\u0B10\u0B13-\u0B28\u0B2A-\u0B30\u0B32\u0B33\u0B35-\u0B39\u0B3D\u0B5C\u0B5D\u0B5F-\u0B61\u0B71\u0B83\u0B85-\u0B8A\u0B8E-\u0B90\u0B92-\u0B95\u0B99\u0B9A\u0B9C\u0B9E\u0B9F\u0BA3\u0BA4\u0BA8-\u0BAA\u0BAE-\u0BB9\u0BD0\u0C05-\u0C0C\u0C0E-\u0C10\u0C12-\u0C28\u0C2A-\u0C39\u0C3D\u0C58\u0C59\u0C60\u0C61\u0C85-\u0C8C\u0C8E-\u0C90\u0C92-\u0CA8\u0CAA-\u0CB3\u0CB5-\u0CB9\u0CBD\u0CDE\u0CE0\u0CE1\u0CF1\u0CF2\u0D05-\u0D0C\u0D0E-\u0D10\u0D12-\u0D3A\u0D3D\u0D4E\u0D60\u0D61\u0D7A-\u0D7F\u0D85-\u0D96\u0D9A-\u0DB1\u0DB3-\u0DBB\u0DBD\u0DC0-\u0DC6\u0E01-\u0E30\u0E32\u0E33\u0E40-\u0E46\u0E81\u0E82\u0E84\u0E87\u0E88\u0E8A\u0E8D\u0E94-\u0E97\u0E99-\u0E9F\u0EA1-\u0EA3\u0EA5\u0EA7\u0EAA\u0EAB\u0EAD-\u0EB0\u0EB2\u0EB3\u0EBD\u0EC0-\u0EC4\u0EC6\u0EDC-\u0EDF\u0F00\u0F40-\u0F47\u0F49-\u0F6C\u0F88-\u0F8C\u1000-\u102A\u103F\u1050-\u1055\u105A-\u105D\u1061\u1065\u1066\u106E-\u1070\u1075-\u1081\u108E\u10A0-\u10C5\u10C7\u10CD\u10D0-\u10FA\u10FC-\u1248\u124A-\u124D\u1250-\u1256\u1258\u125A-\u125D\u1260-\u1288\u128A-\u128D\u1290-\u12B0\u12B2-\u12B5\u12B8-\u12BE\u12C0\u12C2-\u12C5\u12C8-\u12D6\u12D8-\u1310\u1312-\u1315\u1318-\u135A\u1380-\u138F\u13A0-\u13F4\u1401-\u166C\u166F-\u167F\u1681-\u169A\u16A0-\u16EA\u16EE-\u16F8\u1700-\u170C\u170E-\u1711\u1720-\u1731\u1740-\u1751\u1760-\u176C\u176E-\u1770\u1780-\u17B3\u17D7\u17DC\u1820-\u1877\u1880-\u18A8\u18AA\u18B0-\u18F5\u1900-\u191E\u1950-\u196D\u1970-\u1974\u1980-\u19AB\u19C1-\u19C7\u1A00-\u1A16\u1A20-\u1A54\u1AA7\u1B05-\u1B33\u1B45-\u1B4B\u1B83-\u1BA0\u1BAE\u1BAF\u1BBA-\u1BE5\u1C00-\u1C23\u1C4D-\u1C4F\u1C5A-\u1C7D\u1CE9-\u1CEC\u1CEE-\u1CF1\u1CF5\u1CF6\u1D00-\u1DBF\u1E00-\u1F15\u1F18-\u1F1D\u1F20-\u1F45\u1F48-\u1F4D\u1F50-\u1F57\u1F59\u1F5B\u1F5D\u1F5F-\u1F7D\u1F80-\u1FB4\u1FB6-\u1FBC\u1FBE\u1FC2-\u1FC4\u1FC6-\u1FCC\u1FD0-\u1FD3\u1FD6-\u1FDB\u1FE0-\u1FEC\u1FF2-\u1FF4\u1FF6-\u1FFC\u2071\u207F\u2090-\u209C\u2102\u2107\u210A-\u2113\u2115\u2119-\u211D\u2124\u2126\u2128\u212A-\u212D\u212F-\u2139\u213C-\u213F\u2145-\u2149\u214E\u2160-\u2188\u2C00-\u2C2E\u2C30-\u2C5E\u2C60-\u2CE4\u2CEB-\u2CEE\u2CF2\u2CF3\u2D00-\u2D25\u2D27\u2D2D\u2D30-\u2D67\u2D6F\u2D80-\u2D96\u2DA0-\u2DA6\u2DA8-\u2DAE\u2DB0-\u2DB6\u2DB8-\u2DBE\u2DC0-\u2DC6\u2DC8-\u2DCE\u2DD0-\u2DD6\u2DD8-\u2DDE\u2E2F\u3005-\u3007\u3021-\u3029\u3031-\u3035\u3038-\u303C\u3041-\u3096\u309D-\u309F\u30A1-\u30FA\u30FC-\u30FF\u3105-\u312D\u3131-\u318E\u31A0-\u31BA\u31F0-\u31FF\u3400-\u4DB5\u4E00-\u9FCC\uA000-\uA48C\uA4D0-\uA4FD\uA500-\uA60C\uA610-\uA61F\uA62A\uA62B\uA640-\uA66E\uA67F-\uA69D\uA6A0-\uA6EF\uA717-\uA71F\uA722-\uA788\uA78B-\uA78E\uA790-\uA7AD\uA7B0\uA7B1\uA7F7-\uA801\uA803-\uA805\uA807-\uA80A\uA80C-\uA822\uA840-\uA873\uA882-\uA8B3\uA8F2-\uA8F7\uA8FB\uA90A-\uA925\uA930-\uA946\uA960-\uA97C\uA984-\uA9B2\uA9CF\uA9E0-\uA9E4\uA9E6-\uA9EF\uA9FA-\uA9FE\uAA00-\uAA28\uAA40-\uAA42\uAA44-\uAA4B\uAA60-\uAA76\uAA7A\uAA7E-\uAAAF\uAAB1\uAAB5\uAAB6\uAAB9-\uAABD\uAAC0\uAAC2\uAADB-\uAADD\uAAE0-\uAAEA\uAAF2-\uAAF4\uAB01-\uAB06\uAB09-\uAB0E\uAB11-\uAB16\uAB20-\uAB26\uAB28-\uAB2E\uAB30-\uAB5A\uAB5C-\uAB5F\uAB64\uAB65\uABC0-\uABE2\uAC00-\uD7A3\uD7B0-\uD7C6\uD7CB-\uD7FB\uF900-\uFA6D\uFA70-\uFAD9\uFB00-\uFB06\uFB13-\uFB17\uFB1D\uFB1F-\uFB28\uFB2A-\uFB36\uFB38-\uFB3C\uFB3E\uFB40\uFB41\uFB43\uFB44\uFB46-\uFBB1\uFBD3-\uFD3D\uFD50-\uFD8F\uFD92-\uFDC7\uFDF0-\uFDFB\uFE70-\uFE74\uFE76-\uFEFC\uFF21-\uFF3A\uFF41-\uFF5A\uFF66-\uFFBE\uFFC2-\uFFC7\uFFCA-\uFFCF\uFFD2-\uFFD7\uFFDA-\uFFDC]/,
+        // ECMAScript 5.1/Unicode v7.0.0 NonAsciiIdentifierPart:
+        NonAsciiIdentifierPart: /[\xAA\xB5\xBA\xC0-\xD6\xD8-\xF6\xF8-\u02C1\u02C6-\u02D1\u02E0-\u02E4\u02EC\u02EE\u0300-\u0374\u0376\u0377\u037A-\u037D\u037F\u0386\u0388-\u038A\u038C\u038E-\u03A1\u03A3-\u03F5\u03F7-\u0481\u0483-\u0487\u048A-\u052F\u0531-\u0556\u0559\u0561-\u0587\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7\u05D0-\u05EA\u05F0-\u05F2\u0610-\u061A\u0620-\u0669\u066E-\u06D3\u06D5-\u06DC\u06DF-\u06E8\u06EA-\u06FC\u06FF\u0710-\u074A\u074D-\u07B1\u07C0-\u07F5\u07FA\u0800-\u082D\u0840-\u085B\u08A0-\u08B2\u08E4-\u0963\u0966-\u096F\u0971-\u0983\u0985-\u098C\u098F\u0990\u0993-\u09A8\u09AA-\u09B0\u09B2\u09B6-\u09B9\u09BC-\u09C4\u09C7\u09C8\u09CB-\u09CE\u09D7\u09DC\u09DD\u09DF-\u09E3\u09E6-\u09F1\u0A01-\u0A03\u0A05-\u0A0A\u0A0F\u0A10\u0A13-\u0A28\u0A2A-\u0A30\u0A32\u0A33\u0A35\u0A36\u0A38\u0A39\u0A3C\u0A3E-\u0A42\u0A47\u0A48\u0A4B-\u0A4D\u0A51\u0A59-\u0A5C\u0A5E\u0A66-\u0A75\u0A81-\u0A83\u0A85-\u0A8D\u0A8F-\u0A91\u0A93-\u0AA8\u0AAA-\u0AB0\u0AB2\u0AB3\u0AB5-\u0AB9\u0ABC-\u0AC5\u0AC7-\u0AC9\u0ACB-\u0ACD\u0AD0\u0AE0-\u0AE3\u0AE6-\u0AEF\u0B01-\u0B03\u0B05-\u0B0C\u0B0F\u0B10\u0B13-\u0B28\u0B2A-\u0B30\u0B32\u0B33\u0B35-\u0B39\u0B3C-\u0B44\u0B47\u0B48\u0B4B-\u0B4D\u0B56\u0B57\u0B5C\u0B5D\u0B5F-\u0B63\u0B66-\u0B6F\u0B71\u0B82\u0B83\u0B85-\u0B8A\u0B8E-\u0B90\u0B92-\u0B95\u0B99\u0B9A\u0B9C\u0B9E\u0B9F\u0BA3\u0BA4\u0BA8-\u0BAA\u0BAE-\u0BB9\u0BBE-\u0BC2\u0BC6-\u0BC8\u0BCA-\u0BCD\u0BD0\u0BD7\u0BE6-\u0BEF\u0C00-\u0C03\u0C05-\u0C0C\u0C0E-\u0C10\u0C12-\u0C28\u0C2A-\u0C39\u0C3D-\u0C44\u0C46-\u0C48\u0C4A-\u0C4D\u0C55\u0C56\u0C58\u0C59\u0C60-\u0C63\u0C66-\u0C6F\u0C81-\u0C83\u0C85-\u0C8C\u0C8E-\u0C90\u0C92-\u0CA8\u0CAA-\u0CB3\u0CB5-\u0CB9\u0CBC-\u0CC4\u0CC6-\u0CC8\u0CCA-\u0CCD\u0CD5\u0CD6\u0CDE\u0CE0-\u0CE3\u0CE6-\u0CEF\u0CF1\u0CF2\u0D01-\u0D03\u0D05-\u0D0C\u0D0E-\u0D10\u0D12-\u0D3A\u0D3D-\u0D44\u0D46-\u0D48\u0D4A-\u0D4E\u0D57\u0D60-\u0D63\u0D66-\u0D6F\u0D7A-\u0D7F\u0D82\u0D83\u0D85-\u0D96\u0D9A-\u0DB1\u0DB3-\u0DBB\u0DBD\u0DC0-\u0DC6\u0DCA\u0DCF-\u0DD4\u0DD6\u0DD8-\u0DDF\u0DE6-\u0DEF\u0DF2\u0DF3\u0E01-\u0E3A\u0E40-\u0E4E\u0E50-\u0E59\u0E81\u0E82\u0E84\u0E87\u0E88\u0E8A\u0E8D\u0E94-\u0E97\u0E99-\u0E9F\u0EA1-\u0EA3\u0EA5\u0EA7\u0EAA\u0EAB\u0EAD-\u0EB9\u0EBB-\u0EBD\u0EC0-\u0EC4\u0EC6\u0EC8-\u0ECD\u0ED0-\u0ED9\u0EDC-\u0EDF\u0F00\u0F18\u0F19\u0F20-\u0F29\u0F35\u0F37\u0F39\u0F3E-\u0F47\u0F49-\u0F6C\u0F71-\u0F84\u0F86-\u0F97\u0F99-\u0FBC\u0FC6\u1000-\u1049\u1050-\u109D\u10A0-\u10C5\u10C7\u10CD\u10D0-\u10FA\u10FC-\u1248\u124A-\u124D\u1250-\u1256\u1258\u125A-\u125D\u1260-\u1288\u128A-\u128D\u1290-\u12B0\u12B2-\u12B5\u12B8-\u12BE\u12C0\u12C2-\u12C5\u12C8-\u12D6\u12D8-\u1310\u1312-\u1315\u1318-\u135A\u135D-\u135F\u1380-\u138F\u13A0-\u13F4\u1401-\u166C\u166F-\u167F\u1681-\u169A\u16A0-\u16EA\u16EE-\u16F8\u1700-\u170C\u170E-\u1714\u1720-\u1734\u1740-\u1753\u1760-\u176C\u176E-\u1770\u1772\u1773\u1780-\u17D3\u17D7\u17DC\u17DD\u17E0-\u17E9\u180B-\u180D\u1810-\u1819\u1820-\u1877\u1880-\u18AA\u18B0-\u18F5\u1900-\u191E\u1920-\u192B\u1930-\u193B\u1946-\u196D\u1970-\u1974\u1980-\u19AB\u19B0-\u19C9\u19D0-\u19D9\u1A00-\u1A1B\u1A20-\u1A5E\u1A60-\u1A7C\u1A7F-\u1A89\u1A90-\u1A99\u1AA7\u1AB0-\u1ABD\u1B00-\u1B4B\u1B50-\u1B59\u1B6B-\u1B73\u1B80-\u1BF3\u1C00-\u1C37\u1C40-\u1C49\u1C4D-\u1C7D\u1CD0-\u1CD2\u1CD4-\u1CF6\u1CF8\u1CF9\u1D00-\u1DF5\u1DFC-\u1F15\u1F18-\u1F1D\u1F20-\u1F45\u1F48-\u1F4D\u1F50-\u1F57\u1F59\u1F5B\u1F5D\u1F5F-\u1F7D\u1F80-\u1FB4\u1FB6-\u1FBC\u1FBE\u1FC2-\u1FC4\u1FC6-\u1FCC\u1FD0-\u1FD3\u1FD6-\u1FDB\u1FE0-\u1FEC\u1FF2-\u1FF4\u1FF6-\u1FFC\u200C\u200D\u203F\u2040\u2054\u2071\u207F\u2090-\u209C\u20D0-\u20DC\u20E1\u20E5-\u20F0\u2102\u2107\u210A-\u2113\u2115\u2119-\u211D\u2124\u2126\u2128\u212A-\u212D\u212F-\u2139\u213C-\u213F\u2145-\u2149\u214E\u2160-\u2188\u2C00-\u2C2E\u2C30-\u2C5E\u2C60-\u2CE4\u2CEB-\u2CF3\u2D00-\u2D25\u2D27\u2D2D\u2D30-\u2D67\u2D6F\u2D7F-\u2D96\u2DA0-\u2DA6\u2DA8-\u2DAE\u2DB0-\u2DB6\u2DB8-\u2DBE\u2DC0-\u2DC6\u2DC8-\u2DCE\u2DD0-\u2DD6\u2DD8-\u2DDE\u2DE0-\u2DFF\u2E2F\u3005-\u3007\u3021-\u302F\u3031-\u3035\u3038-\u303C\u3041-\u3096\u3099\u309A\u309D-\u309F\u30A1-\u30FA\u30FC-\u30FF\u3105-\u312D\u3131-\u318E\u31A0-\u31BA\u31F0-\u31FF\u3400-\u4DB5\u4E00-\u9FCC\uA000-\uA48C\uA4D0-\uA4FD\uA500-\uA60C\uA610-\uA62B\uA640-\uA66F\uA674-\uA67D\uA67F-\uA69D\uA69F-\uA6F1\uA717-\uA71F\uA722-\uA788\uA78B-\uA78E\uA790-\uA7AD\uA7B0\uA7B1\uA7F7-\uA827\uA840-\uA873\uA880-\uA8C4\uA8D0-\uA8D9\uA8E0-\uA8F7\uA8FB\uA900-\uA92D\uA930-\uA953\uA960-\uA97C\uA980-\uA9C0\uA9CF-\uA9D9\uA9E0-\uA9FE\uAA00-\uAA36\uAA40-\uAA4D\uAA50-\uAA59\uAA60-\uAA76\uAA7A-\uAAC2\uAADB-\uAADD\uAAE0-\uAAEF\uAAF2-\uAAF6\uAB01-\uAB06\uAB09-\uAB0E\uAB11-\uAB16\uAB20-\uAB26\uAB28-\uAB2E\uAB30-\uAB5A\uAB5C-\uAB5F\uAB64\uAB65\uABC0-\uABEA\uABEC\uABED\uABF0-\uABF9\uAC00-\uD7A3\uD7B0-\uD7C6\uD7CB-\uD7FB\uF900-\uFA6D\uFA70-\uFAD9\uFB00-\uFB06\uFB13-\uFB17\uFB1D-\uFB28\uFB2A-\uFB36\uFB38-\uFB3C\uFB3E\uFB40\uFB41\uFB43\uFB44\uFB46-\uFBB1\uFBD3-\uFD3D\uFD50-\uFD8F\uFD92-\uFDC7\uFDF0-\uFDFB\uFE00-\uFE0F\uFE20-\uFE2D\uFE33\uFE34\uFE4D-\uFE4F\uFE70-\uFE74\uFE76-\uFEFC\uFF10-\uFF19\uFF21-\uFF3A\uFF3F\uFF41-\uFF5A\uFF66-\uFFBE\uFFC2-\uFFC7\uFFCA-\uFFCF\uFFD2-\uFFD7\uFFDA-\uFFDC]/
+    };
+
+    ES6Regex = {
+        // ECMAScript 6/Unicode v7.0.0 NonAsciiIdentifierStart:
+        NonAsciiIdentifierStart: /[\xAA\xB5\xBA\xC0-\xD6\xD8-\xF6\xF8-\u02C1\u02C6-\u02D1\u02E0-\u02E4\u02EC\u02EE\u0370-\u0374\u0376\u0377\u037A-\u037D\u037F\u0386\u0388-\u038A\u038C\u038E-\u03A1\u03A3-\u03F5\u03F7-\u0481\u048A-\u052F\u0531-\u0556\u0559\u0561-\u0587\u05D0-\u05EA\u05F0-\u05F2\u0620-\u064A\u066E\u066F\u0671-\u06D3\u06D5\u06E5\u06E6\u06EE\u06EF\u06FA-\u06FC\u06FF\u0710\u0712-\u072F\u074D-\u07A5\u07B1\u07CA-\u07EA\u07F4\u07F5\u07FA\u0800-\u0815\u081A\u0824\u0828\u0840-\u0858\u08A0-\u08B2\u0904-\u0939\u093D\u0950\u0958-\u0961\u0971-\u0980\u0985-\u098C\u098F\u0990\u0993-\u09A8\u09AA-\u09B0\u09B2\u09B6-\u09B9\u09BD\u09CE\u09DC\u09DD\u09DF-\u09E1\u09F0\u09F1\u0A05-\u0A0A\u0A0F\u0A10\u0A13-\u0A28\u0A2A-\u0A30\u0A32\u0A33\u0A35\u0A36\u0A38\u0A39\u0A59-\u0A5C\u0A5E\u0A72-\u0A74\u0A85-\u0A8D\u0A8F-\u0A91\u0A93-\u0AA8\u0AAA-\u0AB0\u0AB2\u0AB3\u0AB5-\u0AB9\u0ABD\u0AD0\u0AE0\u0AE1\u0B05-\u0B0C\u0B0F\u0B10\u0B13-\u0B28\u0B2A-\u0B30\u0B32\u0B33\u0B35-\u0B39\u0B3D\u0B5C\u0B5D\u0B5F-\u0B61\u0B71\u0B83\u0B85-\u0B8A\u0B8E-\u0B90\u0B92-\u0B95\u0B99\u0B9A\u0B9C\u0B9E\u0B9F\u0BA3\u0BA4\u0BA8-\u0BAA\u0BAE-\u0BB9\u0BD0\u0C05-\u0C0C\u0C0E-\u0C10\u0C12-\u0C28\u0C2A-\u0C39\u0C3D\u0C58\u0C59\u0C60\u0C61\u0C85-\u0C8C\u0C8E-\u0C90\u0C92-\u0CA8\u0CAA-\u0CB3\u0CB5-\u0CB9\u0CBD\u0CDE\u0CE0\u0CE1\u0CF1\u0CF2\u0D05-\u0D0C\u0D0E-\u0D10\u0D12-\u0D3A\u0D3D\u0D4E\u0D60\u0D61\u0D7A-\u0D7F\u0D85-\u0D96\u0D9A-\u0DB1\u0DB3-\u0DBB\u0DBD\u0DC0-\u0DC6\u0E01-\u0E30\u0E32\u0E33\u0E40-\u0E46\u0E81\u0E82\u0E84\u0E87\u0E88\u0E8A\u0E8D\u0E94-\u0E97\u0E99-\u0E9F\u0EA1-\u0EA3\u0EA5\u0EA7\u0EAA\u0EAB\u0EAD-\u0EB0\u0EB2\u0EB3\u0EBD\u0EC0-\u0EC4\u0EC6\u0EDC-\u0EDF\u0F00\u0F40-\u0F47\u0F49-\u0F6C\u0F88-\u0F8C\u1000-\u102A\u103F\u1050-\u1055\u105A-\u105D\u1061\u1065\u1066\u106E-\u1070\u1075-\u1081\u108E\u10A0-\u10C5\u10C7\u10CD\u10D0-\u10FA\u10FC-\u1248\u124A-\u124D\u1250-\u1256\u1258\u125A-\u125D\u1260-\u1288\u128A-\u128D\u1290-\u12B0\u12B2-\u12B5\u12B8-\u12BE\u12C0\u12C2-\u12C5\u12C8-\u12D6\u12D8-\u1310\u1312-\u1315\u1318-\u135A\u1380-\u138F\u13A0-\u13F4\u1401-\u166C\u166F-\u167F\u1681-\u169A\u16A0-\u16EA\u16EE-\u16F8\u1700-\u170C\u170E-\u1711\u1720-\u1731\u1740-\u1751\u1760-\u176C\u176E-\u1770\u1780-\u17B3\u17D7\u17DC\u1820-\u1877\u1880-\u18A8\u18AA\u18B0-\u18F5\u1900-\u191E\u1950-\u196D\u1970-\u1974\u1980-\u19AB\u19C1-\u19C7\u1A00-\u1A16\u1A20-\u1A54\u1AA7\u1B05-\u1B33\u1B45-\u1B4B\u1B83-\u1BA0\u1BAE\u1BAF\u1BBA-\u1BE5\u1C00-\u1C23\u1C4D-\u1C4F\u1C5A-\u1C7D\u1CE9-\u1CEC\u1CEE-\u1CF1\u1CF5\u1CF6\u1D00-\u1DBF\u1E00-\u1F15\u1F18-\u1F1D\u1F20-\u1F45\u1F48-\u1F4D\u1F50-\u1F57\u1F59\u1F5B\u1F5D\u1F5F-\u1F7D\u1F80-\u1FB4\u1FB6-\u1FBC\u1FBE\u1FC2-\u1FC4\u1FC6-\u1FCC\u1FD0-\u1FD3\u1FD6-\u1FDB\u1FE0-\u1FEC\u1FF2-\u1FF4\u1FF6-\u1FFC\u2071\u207F\u2090-\u209C\u2102\u2107\u210A-\u2113\u2115\u2118-\u211D\u2124\u2126\u2128\u212A-\u2139\u213C-\u213F\u2145-\u2149\u214E\u2160-\u2188\u2C00-\u2C2E\u2C30-\u2C5E\u2C60-\u2CE4\u2CEB-\u2CEE\u2CF2\u2CF3\u2D00-\u2D25\u2D27\u2D2D\u2D30-\u2D67\u2D6F\u2D80-\u2D96\u2DA0-\u2DA6\u2DA8-\u2DAE\u2DB0-\u2DB6\u2DB8-\u2DBE\u2DC0-\u2DC6\u2DC8-\u2DCE\u2DD0-\u2DD6\u2DD8-\u2DDE\u3005-\u3007\u3021-\u3029\u3031-\u3035\u3038-\u303C\u3041-\u3096\u309B-\u309F\u30A1-\u30FA\u30FC-\u30FF\u3105-\u312D\u3131-\u318E\u31A0-\u31BA\u31F0-\u31FF\u3400-\u4DB5\u4E00-\u9FCC\uA000-\uA48C\uA4D0-\uA4FD\uA500-\uA60C\uA610-\uA61F\uA62A\uA62B\uA640-\uA66E\uA67F-\uA69D\uA6A0-\uA6EF\uA717-\uA71F\uA722-\uA788\uA78B-\uA78E\uA790-\uA7AD\uA7B0\uA7B1\uA7F7-\uA801\uA803-\uA805\uA807-\uA80A\uA80C-\uA822\uA840-\uA873\uA882-\uA8B3\uA8F2-\uA8F7\uA8FB\uA90A-\uA925\uA930-\uA946\uA960-\uA97C\uA984-\uA9B2\uA9CF\uA9E0-\uA9E4\uA9E6-\uA9EF\uA9FA-\uA9FE\uAA00-\uAA28\uAA40-\uAA42\uAA44-\uAA4B\uAA60-\uAA76\uAA7A\uAA7E-\uAAAF\uAAB1\uAAB5\uAAB6\uAAB9-\uAABD\uAAC0\uAAC2\uAADB-\uAADD\uAAE0-\uAAEA\uAAF2-\uAAF4\uAB01-\uAB06\uAB09-\uAB0E\uAB11-\uAB16\uAB20-\uAB26\uAB28-\uAB2E\uAB30-\uAB5A\uAB5C-\uAB5F\uAB64\uAB65\uABC0-\uABE2\uAC00-\uD7A3\uD7B0-\uD7C6\uD7CB-\uD7FB\uF900-\uFA6D\uFA70-\uFAD9\uFB00-\uFB06\uFB13-\uFB17\uFB1D\uFB1F-\uFB28\uFB2A-\uFB36\uFB38-\uFB3C\uFB3E\uFB40\uFB41\uFB43\uFB44\uFB46-\uFBB1\uFBD3-\uFD3D\uFD50-\uFD8F\uFD92-\uFDC7\uFDF0-\uFDFB\uFE70-\uFE74\uFE76-\uFEFC\uFF21-\uFF3A\uFF41-\uFF5A\uFF66-\uFFBE\uFFC2-\uFFC7\uFFCA-\uFFCF\uFFD2-\uFFD7\uFFDA-\uFFDC]|\uD800[\uDC00-\uDC0B\uDC0D-\uDC26\uDC28-\uDC3A\uDC3C\uDC3D\uDC3F-\uDC4D\uDC50-\uDC5D\uDC80-\uDCFA\uDD40-\uDD74\uDE80-\uDE9C\uDEA0-\uDED0\uDF00-\uDF1F\uDF30-\uDF4A\uDF50-\uDF75\uDF80-\uDF9D\uDFA0-\uDFC3\uDFC8-\uDFCF\uDFD1-\uDFD5]|\uD801[\uDC00-\uDC9D\uDD00-\uDD27\uDD30-\uDD63\uDE00-\uDF36\uDF40-\uDF55\uDF60-\uDF67]|\uD802[\uDC00-\uDC05\uDC08\uDC0A-\uDC35\uDC37\uDC38\uDC3C\uDC3F-\uDC55\uDC60-\uDC76\uDC80-\uDC9E\uDD00-\uDD15\uDD20-\uDD39\uDD80-\uDDB7\uDDBE\uDDBF\uDE00\uDE10-\uDE13\uDE15-\uDE17\uDE19-\uDE33\uDE60-\uDE7C\uDE80-\uDE9C\uDEC0-\uDEC7\uDEC9-\uDEE4\uDF00-\uDF35\uDF40-\uDF55\uDF60-\uDF72\uDF80-\uDF91]|\uD803[\uDC00-\uDC48]|\uD804[\uDC03-\uDC37\uDC83-\uDCAF\uDCD0-\uDCE8\uDD03-\uDD26\uDD50-\uDD72\uDD76\uDD83-\uDDB2\uDDC1-\uDDC4\uDDDA\uDE00-\uDE11\uDE13-\uDE2B\uDEB0-\uDEDE\uDF05-\uDF0C\uDF0F\uDF10\uDF13-\uDF28\uDF2A-\uDF30\uDF32\uDF33\uDF35-\uDF39\uDF3D\uDF5D-\uDF61]|\uD805[\uDC80-\uDCAF\uDCC4\uDCC5\uDCC7\uDD80-\uDDAE\uDE00-\uDE2F\uDE44\uDE80-\uDEAA]|\uD806[\uDCA0-\uDCDF\uDCFF\uDEC0-\uDEF8]|\uD808[\uDC00-\uDF98]|\uD809[\uDC00-\uDC6E]|[\uD80C\uD840-\uD868\uD86A-\uD86C][\uDC00-\uDFFF]|\uD80D[\uDC00-\uDC2E]|\uD81A[\uDC00-\uDE38\uDE40-\uDE5E\uDED0-\uDEED\uDF00-\uDF2F\uDF40-\uDF43\uDF63-\uDF77\uDF7D-\uDF8F]|\uD81B[\uDF00-\uDF44\uDF50\uDF93-\uDF9F]|\uD82C[\uDC00\uDC01]|\uD82F[\uDC00-\uDC6A\uDC70-\uDC7C\uDC80-\uDC88\uDC90-\uDC99]|\uD835[\uDC00-\uDC54\uDC56-\uDC9C\uDC9E\uDC9F\uDCA2\uDCA5\uDCA6\uDCA9-\uDCAC\uDCAE-\uDCB9\uDCBB\uDCBD-\uDCC3\uDCC5-\uDD05\uDD07-\uDD0A\uDD0D-\uDD14\uDD16-\uDD1C\uDD1E-\uDD39\uDD3B-\uDD3E\uDD40-\uDD44\uDD46\uDD4A-\uDD50\uDD52-\uDEA5\uDEA8-\uDEC0\uDEC2-\uDEDA\uDEDC-\uDEFA\uDEFC-\uDF14\uDF16-\uDF34\uDF36-\uDF4E\uDF50-\uDF6E\uDF70-\uDF88\uDF8A-\uDFA8\uDFAA-\uDFC2\uDFC4-\uDFCB]|\uD83A[\uDC00-\uDCC4]|\uD83B[\uDE00-\uDE03\uDE05-\uDE1F\uDE21\uDE22\uDE24\uDE27\uDE29-\uDE32\uDE34-\uDE37\uDE39\uDE3B\uDE42\uDE47\uDE49\uDE4B\uDE4D-\uDE4F\uDE51\uDE52\uDE54\uDE57\uDE59\uDE5B\uDE5D\uDE5F\uDE61\uDE62\uDE64\uDE67-\uDE6A\uDE6C-\uDE72\uDE74-\uDE77\uDE79-\uDE7C\uDE7E\uDE80-\uDE89\uDE8B-\uDE9B\uDEA1-\uDEA3\uDEA5-\uDEA9\uDEAB-\uDEBB]|\uD869[\uDC00-\uDED6\uDF00-\uDFFF]|\uD86D[\uDC00-\uDF34\uDF40-\uDFFF]|\uD86E[\uDC00-\uDC1D]|\uD87E[\uDC00-\uDE1D]/,
+        // ECMAScript 6/Unicode v7.0.0 NonAsciiIdentifierPart:
+        NonAsciiIdentifierPart: /[\xAA\xB5\xB7\xBA\xC0-\xD6\xD8-\xF6\xF8-\u02C1\u02C6-\u02D1\u02E0-\u02E4\u02EC\u02EE\u0300-\u0374\u0376\u0377\u037A-\u037D\u037F\u0386-\u038A\u038C\u038E-\u03A1\u03A3-\u03F5\u03F7-\u0481\u0483-\u0487\u048A-\u052F\u0531-\u0556\u0559\u0561-\u0587\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7\u05D0-\u05EA\u05F0-\u05F2\u0610-\u061A\u0620-\u0669\u066E-\u06D3\u06D5-\u06DC\u06DF-\u06E8\u06EA-\u06FC\u06FF\u0710-\u074A\u074D-\u07B1\u07C0-\u07F5\u07FA\u0800-\u082D\u0840-\u085B\u08A0-\u08B2\u08E4-\u0963\u0966-\u096F\u0971-\u0983\u0985-\u098C\u098F\u0990\u0993-\u09A8\u09AA-\u09B0\u09B2\u09B6-\u09B9\u09BC-\u09C4\u09C7\u09C8\u09CB-\u09CE\u09D7\u09DC\u09DD\u09DF-\u09E3\u09E6-\u09F1\u0A01-\u0A03\u0A05-\u0A0A\u0A0F\u0A10\u0A13-\u0A28\u0A2A-\u0A30\u0A32\u0A33\u0A35\u0A36\u0A38\u0A39\u0A3C\u0A3E-\u0A42\u0A47\u0A48\u0A4B-\u0A4D\u0A51\u0A59-\u0A5C\u0A5E\u0A66-\u0A75\u0A81-\u0A83\u0A85-\u0A8D\u0A8F-\u0A91\u0A93-\u0AA8\u0AAA-\u0AB0\u0AB2\u0AB3\u0AB5-\u0AB9\u0ABC-\u0AC5\u0AC7-\u0AC9\u0ACB-\u0ACD\u0AD0\u0AE0-\u0AE3\u0AE6-\u0AEF\u0B01-\u0B03\u0B05-\u0B0C\u0B0F\u0B10\u0B13-\u0B28\u0B2A-\u0B30\u0B32\u0B33\u0B35-\u0B39\u0B3C-\u0B44\u0B47\u0B48\u0B4B-\u0B4D\u0B56\u0B57\u0B5C\u0B5D\u0B5F-\u0B63\u0B66-\u0B6F\u0B71\u0B82\u0B83\u0B85-\u0B8A\u0B8E-\u0B90\u0B92-\u0B95\u0B99\u0B9A\u0B9C\u0B9E\u0B9F\u0BA3\u0BA4\u0BA8-\u0BAA\u0BAE-\u0BB9\u0BBE-\u0BC2\u0BC6-\u0BC8\u0BCA-\u0BCD\u0BD0\u0BD7\u0BE6-\u0BEF\u0C00-\u0C03\u0C05-\u0C0C\u0C0E-\u0C10\u0C12-\u0C28\u0C2A-\u0C39\u0C3D-\u0C44\u0C46-\u0C48\u0C4A-\u0C4D\u0C55\u0C56\u0C58\u0C59\u0C60-\u0C63\u0C66-\u0C6F\u0C81-\u0C83\u0C85-\u0C8C\u0C8E-\u0C90\u0C92-\u0CA8\u0CAA-\u0CB3\u0CB5-\u0CB9\u0CBC-\u0CC4\u0CC6-\u0CC8\u0CCA-\u0CCD\u0CD5\u0CD6\u0CDE\u0CE0-\u0CE3\u0CE6-\u0CEF\u0CF1\u0CF2\u0D01-\u0D03\u0D05-\u0D0C\u0D0E-\u0D10\u0D12-\u0D3A\u0D3D-\u0D44\u0D46-\u0D48\u0D4A-\u0D4E\u0D57\u0D60-\u0D63\u0D66-\u0D6F\u0D7A-\u0D7F\u0D82\u0D83\u0D85-\u0D96\u0D9A-\u0DB1\u0DB3-\u0DBB\u0DBD\u0DC0-\u0DC6\u0DCA\u0DCF-\u0DD4\u0DD6\u0DD8-\u0DDF\u0DE6-\u0DEF\u0DF2\u0DF3\u0E01-\u0E3A\u0E40-\u0E4E\u0E50-\u0E59\u0E81\u0E82\u0E84\u0E87\u0E88\u0E8A\u0E8D\u0E94-\u0E97\u0E99-\u0E9F\u0EA1-\u0EA3\u0EA5\u0EA7\u0EAA\u0EAB\u0EAD-\u0EB9\u0EBB-\u0EBD\u0EC0-\u0EC4\u0EC6\u0EC8-\u0ECD\u0ED0-\u0ED9\u0EDC-\u0EDF\u0F00\u0F18\u0F19\u0F20-\u0F29\u0F35\u0F37\u0F39\u0F3E-\u0F47\u0F49-\u0F6C\u0F71-\u0F84\u0F86-\u0F97\u0F99-\u0FBC\u0FC6\u1000-\u1049\u1050-\u109D\u10A0-\u10C5\u10C7\u10CD\u10D0-\u10FA\u10FC-\u1248\u124A-\u124D\u1250-\u1256\u1258\u125A-\u125D\u1260-\u1288\u128A-\u128D\u1290-\u12B0\u12B2-\u12B5\u12B8-\u12BE\u12C0\u12C2-\u12C5\u12C8-\u12D6\u12D8-\u1310\u1312-\u1315\u1318-\u135A\u135D-\u135F\u1369-\u1371\u1380-\u138F\u13A0-\u13F4\u1401-\u166C\u166F-\u167F\u1681-\u169A\u16A0-\u16EA\u16EE-\u16F8\u1700-\u170C\u170E-\u1714\u1720-\u1734\u1740-\u1753\u1760-\u176C\u176E-\u1770\u1772\u1773\u1780-\u17D3\u17D7\u17DC\u17DD\u17E0-\u17E9\u180B-\u180D\u1810-\u1819\u1820-\u1877\u1880-\u18AA\u18B0-\u18F5\u1900-\u191E\u1920-\u192B\u1930-\u193B\u1946-\u196D\u1970-\u1974\u1980-\u19AB\u19B0-\u19C9\u19D0-\u19DA\u1A00-\u1A1B\u1A20-\u1A5E\u1A60-\u1A7C\u1A7F-\u1A89\u1A90-\u1A99\u1AA7\u1AB0-\u1ABD\u1B00-\u1B4B\u1B50-\u1B59\u1B6B-\u1B73\u1B80-\u1BF3\u1C00-\u1C37\u1C40-\u1C49\u1C4D-\u1C7D\u1CD0-\u1CD2\u1CD4-\u1CF6\u1CF8\u1CF9\u1D00-\u1DF5\u1DFC-\u1F15\u1F18-\u1F1D\u1F20-\u1F45\u1F48-\u1F4D\u1F50-\u1F57\u1F59\u1F5B\u1F5D\u1F5F-\u1F7D\u1F80-\u1FB4\u1FB6-\u1FBC\u1FBE\u1FC2-\u1FC4\u1FC6-\u1FCC\u1FD0-\u1FD3\u1FD6-\u1FDB\u1FE0-\u1FEC\u1FF2-\u1FF4\u1FF6-\u1FFC\u200C\u200D\u203F\u2040\u2054\u2071\u207F\u2090-\u209C\u20D0-\u20DC\u20E1\u20E5-\u20F0\u2102\u2107\u210A-\u2113\u2115\u2118-\u211D\u2124\u2126\u2128\u212A-\u2139\u213C-\u213F\u2145-\u2149\u214E\u2160-\u2188\u2C00-\u2C2E\u2C30-\u2C5E\u2C60-\u2CE4\u2CEB-\u2CF3\u2D00-\u2D25\u2D27\u2D2D\u2D30-\u2D67\u2D6F\u2D7F-\u2D96\u2DA0-\u2DA6\u2DA8-\u2DAE\u2DB0-\u2DB6\u2DB8-\u2DBE\u2DC0-\u2DC6\u2DC8-\u2DCE\u2DD0-\u2DD6\u2DD8-\u2DDE\u2DE0-\u2DFF\u3005-\u3007\u3021-\u302F\u3031-\u3035\u3038-\u303C\u3041-\u3096\u3099-\u309F\u30A1-\u30FA\u30FC-\u30FF\u3105-\u312D\u3131-\u318E\u31A0-\u31BA\u31F0-\u31FF\u3400-\u4DB5\u4E00-\u9FCC\uA000-\uA48C\uA4D0-\uA4FD\uA500-\uA60C\uA610-\uA62B\uA640-\uA66F\uA674-\uA67D\uA67F-\uA69D\uA69F-\uA6F1\uA717-\uA71F\uA722-\uA788\uA78B-\uA78E\uA790-\uA7AD\uA7B0\uA7B1\uA7F7-\uA827\uA840-\uA873\uA880-\uA8C4\uA8D0-\uA8D9\uA8E0-\uA8F7\uA8FB\uA900-\uA92D\uA930-\uA953\uA960-\uA97C\uA980-\uA9C0\uA9CF-\uA9D9\uA9E0-\uA9FE\uAA00-\uAA36\uAA40-\uAA4D\uAA50-\uAA59\uAA60-\uAA76\uAA7A-\uAAC2\uAADB-\uAADD\uAAE0-\uAAEF\uAAF2-\uAAF6\uAB01-\uAB06\uAB09-\uAB0E\uAB11-\uAB16\uAB20-\uAB26\uAB28-\uAB2E\uAB30-\uAB5A\uAB5C-\uAB5F\uAB64\uAB65\uABC0-\uABEA\uABEC\uABED\uABF0-\uABF9\uAC00-\uD7A3\uD7B0-\uD7C6\uD7CB-\uD7FB\uF900-\uFA6D\uFA70-\uFAD9\uFB00-\uFB06\uFB13-\uFB17\uFB1D-\uFB28\uFB2A-\uFB36\uFB38-\uFB3C\uFB3E\uFB40\uFB41\uFB43\uFB44\uFB46-\uFBB1\uFBD3-\uFD3D\uFD50-\uFD8F\uFD92-\uFDC7\uFDF0-\uFDFB\uFE00-\uFE0F\uFE20-\uFE2D\uFE33\uFE34\uFE4D-\uFE4F\uFE70-\uFE74\uFE76-\uFEFC\uFF10-\uFF19\uFF21-\uFF3A\uFF3F\uFF41-\uFF5A\uFF66-\uFFBE\uFFC2-\uFFC7\uFFCA-\uFFCF\uFFD2-\uFFD7\uFFDA-\uFFDC]|\uD800[\uDC00-\uDC0B\uDC0D-\uDC26\uDC28-\uDC3A\uDC3C\uDC3D\uDC3F-\uDC4D\uDC50-\uDC5D\uDC80-\uDCFA\uDD40-\uDD74\uDDFD\uDE80-\uDE9C\uDEA0-\uDED0\uDEE0\uDF00-\uDF1F\uDF30-\uDF4A\uDF50-\uDF7A\uDF80-\uDF9D\uDFA0-\uDFC3\uDFC8-\uDFCF\uDFD1-\uDFD5]|\uD801[\uDC00-\uDC9D\uDCA0-\uDCA9\uDD00-\uDD27\uDD30-\uDD63\uDE00-\uDF36\uDF40-\uDF55\uDF60-\uDF67]|\uD802[\uDC00-\uDC05\uDC08\uDC0A-\uDC35\uDC37\uDC38\uDC3C\uDC3F-\uDC55\uDC60-\uDC76\uDC80-\uDC9E\uDD00-\uDD15\uDD20-\uDD39\uDD80-\uDDB7\uDDBE\uDDBF\uDE00-\uDE03\uDE05\uDE06\uDE0C-\uDE13\uDE15-\uDE17\uDE19-\uDE33\uDE38-\uDE3A\uDE3F\uDE60-\uDE7C\uDE80-\uDE9C\uDEC0-\uDEC7\uDEC9-\uDEE6\uDF00-\uDF35\uDF40-\uDF55\uDF60-\uDF72\uDF80-\uDF91]|\uD803[\uDC00-\uDC48]|\uD804[\uDC00-\uDC46\uDC66-\uDC6F\uDC7F-\uDCBA\uDCD0-\uDCE8\uDCF0-\uDCF9\uDD00-\uDD34\uDD36-\uDD3F\uDD50-\uDD73\uDD76\uDD80-\uDDC4\uDDD0-\uDDDA\uDE00-\uDE11\uDE13-\uDE37\uDEB0-\uDEEA\uDEF0-\uDEF9\uDF01-\uDF03\uDF05-\uDF0C\uDF0F\uDF10\uDF13-\uDF28\uDF2A-\uDF30\uDF32\uDF33\uDF35-\uDF39\uDF3C-\uDF44\uDF47\uDF48\uDF4B-\uDF4D\uDF57\uDF5D-\uDF63\uDF66-\uDF6C\uDF70-\uDF74]|\uD805[\uDC80-\uDCC5\uDCC7\uDCD0-\uDCD9\uDD80-\uDDB5\uDDB8-\uDDC0\uDE00-\uDE40\uDE44\uDE50-\uDE59\uDE80-\uDEB7\uDEC0-\uDEC9]|\uD806[\uDCA0-\uDCE9\uDCFF\uDEC0-\uDEF8]|\uD808[\uDC00-\uDF98]|\uD809[\uDC00-\uDC6E]|[\uD80C\uD840-\uD868\uD86A-\uD86C][\uDC00-\uDFFF]|\uD80D[\uDC00-\uDC2E]|\uD81A[\uDC00-\uDE38\uDE40-\uDE5E\uDE60-\uDE69\uDED0-\uDEED\uDEF0-\uDEF4\uDF00-\uDF36\uDF40-\uDF43\uDF50-\uDF59\uDF63-\uDF77\uDF7D-\uDF8F]|\uD81B[\uDF00-\uDF44\uDF50-\uDF7E\uDF8F-\uDF9F]|\uD82C[\uDC00\uDC01]|\uD82F[\uDC00-\uDC6A\uDC70-\uDC7C\uDC80-\uDC88\uDC90-\uDC99\uDC9D\uDC9E]|\uD834[\uDD65-\uDD69\uDD6D-\uDD72\uDD7B-\uDD82\uDD85-\uDD8B\uDDAA-\uDDAD\uDE42-\uDE44]|\uD835[\uDC00-\uDC54\uDC56-\uDC9C\uDC9E\uDC9F\uDCA2\uDCA5\uDCA6\uDCA9-\uDCAC\uDCAE-\uDCB9\uDCBB\uDCBD-\uDCC3\uDCC5-\uDD05\uDD07-\uDD0A\uDD0D-\uDD14\uDD16-\uDD1C\uDD1E-\uDD39\uDD3B-\uDD3E\uDD40-\uDD44\uDD46\uDD4A-\uDD50\uDD52-\uDEA5\uDEA8-\uDEC0\uDEC2-\uDEDA\uDEDC-\uDEFA\uDEFC-\uDF14\uDF16-\uDF34\uDF36-\uDF4E\uDF50-\uDF6E\uDF70-\uDF88\uDF8A-\uDFA8\uDFAA-\uDFC2\uDFC4-\uDFCB\uDFCE-\uDFFF]|\uD83A[\uDC00-\uDCC4\uDCD0-\uDCD6]|\uD83B[\uDE00-\uDE03\uDE05-\uDE1F\uDE21\uDE22\uDE24\uDE27\uDE29-\uDE32\uDE34-\uDE37\uDE39\uDE3B\uDE42\uDE47\uDE49\uDE4B\uDE4D-\uDE4F\uDE51\uDE52\uDE54\uDE57\uDE59\uDE5B\uDE5D\uDE5F\uDE61\uDE62\uDE64\uDE67-\uDE6A\uDE6C-\uDE72\uDE74-\uDE77\uDE79-\uDE7C\uDE7E\uDE80-\uDE89\uDE8B-\uDE9B\uDEA1-\uDEA3\uDEA5-\uDEA9\uDEAB-\uDEBB]|\uD869[\uDC00-\uDED6\uDF00-\uDFFF]|\uD86D[\uDC00-\uDF34\uDF40-\uDFFF]|\uD86E[\uDC00-\uDC1D]|\uD87E[\uDC00-\uDE1D]|\uDB40[\uDD00-\uDDEF]/
+    };
+
+    function isDecimalDigit(ch) {
+        return 0x30 <= ch && ch <= 0x39;  // 0..9
+    }
+
+    function isHexDigit(ch) {
+        return 0x30 <= ch && ch <= 0x39 ||  // 0..9
+            0x61 <= ch && ch <= 0x66 ||     // a..f
+            0x41 <= ch && ch <= 0x46;       // A..F
+    }
+
+    function isOctalDigit(ch) {
+        return ch >= 0x30 && ch <= 0x37;  // 0..7
+    }
+
+    // 7.2 White Space
+
+    NON_ASCII_WHITESPACES = [
+        0x1680, 0x180E,
+        0x2000, 0x2001, 0x2002, 0x2003, 0x2004, 0x2005, 0x2006, 0x2007, 0x2008, 0x2009, 0x200A,
+        0x202F, 0x205F,
+        0x3000,
+        0xFEFF
+    ];
+
+    function isWhiteSpace(ch) {
+        return ch === 0x20 || ch === 0x09 || ch === 0x0B || ch === 0x0C || ch === 0xA0 ||
+            ch >= 0x1680 && NON_ASCII_WHITESPACES.indexOf(ch) >= 0;
+    }
+
+    // 7.3 Line Terminators
+
+    function isLineTerminator(ch) {
+        return ch === 0x0A || ch === 0x0D || ch === 0x2028 || ch === 0x2029;
+    }
+
+    // 7.6 Identifier Names and Identifiers
+
+    function fromCodePoint(cp) {
+        if (cp <= 0xFFFF) { return String.fromCharCode(cp); }
+        var cu1 = String.fromCharCode(Math.floor((cp - 0x10000) / 0x400) + 0xD800);
+        var cu2 = String.fromCharCode(((cp - 0x10000) % 0x400) + 0xDC00);
+        return cu1 + cu2;
+    }
+
+    IDENTIFIER_START = new Array(0x80);
+    for(ch = 0; ch < 0x80; ++ch) {
+        IDENTIFIER_START[ch] =
+            ch >= 0x61 && ch <= 0x7A ||  // a..z
+            ch >= 0x41 && ch <= 0x5A ||  // A..Z
+            ch === 0x24 || ch === 0x5F;  // $ (dollar) and _ (underscore)
+    }
+
+    IDENTIFIER_PART = new Array(0x80);
+    for(ch = 0; ch < 0x80; ++ch) {
+        IDENTIFIER_PART[ch] =
+            ch >= 0x61 && ch <= 0x7A ||  // a..z
+            ch >= 0x41 && ch <= 0x5A ||  // A..Z
+            ch >= 0x30 && ch <= 0x39 ||  // 0..9
+            ch === 0x24 || ch === 0x5F;  // $ (dollar) and _ (underscore)
+    }
+
+    function isIdentifierStartES5(ch) {
+        return ch < 0x80 ? IDENTIFIER_START[ch] : ES5Regex.NonAsciiIdentifierStart.test(fromCodePoint(ch));
+    }
+
+    function isIdentifierPartES5(ch) {
+        return ch < 0x80 ? IDENTIFIER_PART[ch] : ES5Regex.NonAsciiIdentifierPart.test(fromCodePoint(ch));
+    }
+
+    function isIdentifierStartES6(ch) {
+        return ch < 0x80 ? IDENTIFIER_START[ch] : ES6Regex.NonAsciiIdentifierStart.test(fromCodePoint(ch));
+    }
+
+    function isIdentifierPartES6(ch) {
+        return ch < 0x80 ? IDENTIFIER_PART[ch] : ES6Regex.NonAsciiIdentifierPart.test(fromCodePoint(ch));
+    }
+
+    module.exports = {
+        isDecimalDigit: isDecimalDigit,
+        isHexDigit: isHexDigit,
+        isOctalDigit: isOctalDigit,
+        isWhiteSpace: isWhiteSpace,
+        isLineTerminator: isLineTerminator,
+        isIdentifierStartES5: isIdentifierStartES5,
+        isIdentifierPartES5: isIdentifierPartES5,
+        isIdentifierStartES6: isIdentifierStartES6,
+        isIdentifierPartES6: isIdentifierPartES6
+    };
+}());
+/* vim: set sw=4 ts=4 et tw=80 : */
+
+
+/***/ }),
+/* 67 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/*
+  Copyright (C) 2013 Yusuke Suzuki <utatane.tea@gmail.com>
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  ARE DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+(function () {
+    'use strict';
+
+    var code = __webpack_require__(66);
+
+    function isStrictModeReservedWordES6(id) {
+        switch (id) {
+        case 'implements':
+        case 'interface':
+        case 'package':
+        case 'private':
+        case 'protected':
+        case 'public':
+        case 'static':
+        case 'let':
+            return true;
+        default:
+            return false;
+        }
+    }
+
+    function isKeywordES5(id, strict) {
+        // yield should not be treated as keyword under non-strict mode.
+        if (!strict && id === 'yield') {
+            return false;
+        }
+        return isKeywordES6(id, strict);
+    }
+
+    function isKeywordES6(id, strict) {
+        if (strict && isStrictModeReservedWordES6(id)) {
+            return true;
+        }
+
+        switch (id.length) {
+        case 2:
+            return (id === 'if') || (id === 'in') || (id === 'do');
+        case 3:
+            return (id === 'var') || (id === 'for') || (id === 'new') || (id === 'try');
+        case 4:
+            return (id === 'this') || (id === 'else') || (id === 'case') ||
+                (id === 'void') || (id === 'with') || (id === 'enum');
+        case 5:
+            return (id === 'while') || (id === 'break') || (id === 'catch') ||
+                (id === 'throw') || (id === 'const') || (id === 'yield') ||
+                (id === 'class') || (id === 'super');
+        case 6:
+            return (id === 'return') || (id === 'typeof') || (id === 'delete') ||
+                (id === 'switch') || (id === 'export') || (id === 'import');
+        case 7:
+            return (id === 'default') || (id === 'finally') || (id === 'extends');
+        case 8:
+            return (id === 'function') || (id === 'continue') || (id === 'debugger');
+        case 10:
+            return (id === 'instanceof');
+        default:
+            return false;
+        }
+    }
+
+    function isReservedWordES5(id, strict) {
+        return id === 'null' || id === 'true' || id === 'false' || isKeywordES5(id, strict);
+    }
+
+    function isReservedWordES6(id, strict) {
+        return id === 'null' || id === 'true' || id === 'false' || isKeywordES6(id, strict);
+    }
+
+    function isRestrictedWord(id) {
+        return id === 'eval' || id === 'arguments';
+    }
+
+    function isIdentifierNameES5(id) {
+        var i, iz, ch;
+
+        if (id.length === 0) { return false; }
+
+        ch = id.charCodeAt(0);
+        if (!code.isIdentifierStartES5(ch)) {
+            return false;
+        }
+
+        for (i = 1, iz = id.length; i < iz; ++i) {
+            ch = id.charCodeAt(i);
+            if (!code.isIdentifierPartES5(ch)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function decodeUtf16(lead, trail) {
+        return (lead - 0xD800) * 0x400 + (trail - 0xDC00) + 0x10000;
+    }
+
+    function isIdentifierNameES6(id) {
+        var i, iz, ch, lowCh, check;
+
+        if (id.length === 0) { return false; }
+
+        check = code.isIdentifierStartES6;
+        for (i = 0, iz = id.length; i < iz; ++i) {
+            ch = id.charCodeAt(i);
+            if (0xD800 <= ch && ch <= 0xDBFF) {
+                ++i;
+                if (i >= iz) { return false; }
+                lowCh = id.charCodeAt(i);
+                if (!(0xDC00 <= lowCh && lowCh <= 0xDFFF)) {
+                    return false;
+                }
+                ch = decodeUtf16(ch, lowCh);
+            }
+            if (!check(ch)) {
+                return false;
+            }
+            check = code.isIdentifierPartES6;
+        }
+        return true;
+    }
+
+    function isIdentifierES5(id, strict) {
+        return isIdentifierNameES5(id) && !isReservedWordES5(id, strict);
+    }
+
+    function isIdentifierES6(id, strict) {
+        return isIdentifierNameES6(id) && !isReservedWordES6(id, strict);
+    }
+
+    module.exports = {
+        isKeywordES5: isKeywordES5,
+        isKeywordES6: isKeywordES6,
+        isReservedWordES5: isReservedWordES5,
+        isReservedWordES6: isReservedWordES6,
+        isRestrictedWord: isRestrictedWord,
+        isIdentifierNameES5: isIdentifierNameES5,
+        isIdentifierNameES6: isIdentifierNameES6,
+        isIdentifierES5: isIdentifierES5,
+        isIdentifierES6: isIdentifierES6
+    };
+}());
+/* vim: set sw=4 ts=4 et tw=80 : */
+
+
+/***/ }),
+/* 68 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = normalize
 
-var fixer = __webpack_require__(66)
+var fixer = __webpack_require__(69)
 normalize.fixer = fixer
 
-var makeWarning = __webpack_require__(81)
+var makeWarning = __webpack_require__(91)
 
 var fieldsToFix = ['name','version','description','repository','modules','scripts'
                   ,'files','bin','man','bugs','keywords','readme','homepage','license']
@@ -8770,17 +9449,17 @@ function ucFirst (string) {
 
 
 /***/ }),
-/* 66 */
+/* 69 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var semver = __webpack_require__(67)
-var validateLicense = __webpack_require__(68);
-var hostedGitInfo = __webpack_require__(73)
-var isBuiltinModule = __webpack_require__(77)
+var semver = __webpack_require__(70)
+var validateLicense = __webpack_require__(71);
+var hostedGitInfo = __webpack_require__(76)
+var isBuiltinModule = __webpack_require__(80).isCore
 var depTypes = ["dependencies","devDependencies","optionalDependencies"]
-var extractDescription = __webpack_require__(79)
-var url = __webpack_require__(74)
-var typos = __webpack_require__(80)
+var extractDescription = __webpack_require__(89)
+var url = __webpack_require__(77)
+var typos = __webpack_require__(90)
 
 var fixer = module.exports = {
   // default warning function
@@ -9074,7 +9753,8 @@ var fixer = module.exports = {
     } else{
       if (
         typeof(data.license) !== 'string' ||
-        data.license.length < 1
+        data.license.length < 1 ||
+        data.license.trim() === ''
       ) {
         this.warn("invalidLicense")
       } else {
@@ -9193,7 +9873,7 @@ function bugsTypos(bugs, warn) {
 
 
 /***/ }),
-/* 67 */
+/* 70 */
 /***/ (function(module, exports) {
 
 exports = module.exports = SemVer;
@@ -10495,11 +11175,11 @@ function intersects(r1, r2, loose) {
 
 
 /***/ }),
-/* 68 */
+/* 71 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var parse = __webpack_require__(69);
-var correct = __webpack_require__(71);
+var parse = __webpack_require__(72);
+var correct = __webpack_require__(74);
 
 var genericWarning = (
   'license should be ' +
@@ -10585,10 +11265,10 @@ module.exports = function(argument) {
 
 
 /***/ }),
-/* 69 */
+/* 72 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var parser = __webpack_require__(70).parser
+var parser = __webpack_require__(73).parser
 
 module.exports = function (argument) {
   return parser.parse(argument)
@@ -10596,7 +11276,7 @@ module.exports = function (argument) {
 
 
 /***/ }),
-/* 70 */
+/* 73 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(module) {/* parser generated by jison 0.4.17 */
@@ -11960,10 +12640,10 @@ if ( true && __webpack_require__.c[__webpack_require__.s] === module) {
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(5)(module)))
 
 /***/ }),
-/* 71 */
+/* 74 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var licenseIDs = __webpack_require__(72);
+var licenseIDs = __webpack_require__(75);
 
 function valid(string) {
   return licenseIDs.indexOf(string) > -1;
@@ -12203,20 +12883,20 @@ module.exports = function(identifier) {
 
 
 /***/ }),
-/* 72 */
+/* 75 */
 /***/ (function(module) {
 
 module.exports = ["Glide","Abstyles","AFL-1.1","AFL-1.2","AFL-2.0","AFL-2.1","AFL-3.0","AMPAS","APL-1.0","Adobe-Glyph","APAFML","Adobe-2006","AGPL-1.0","Afmparse","Aladdin","ADSL","AMDPLPA","ANTLR-PD","Apache-1.0","Apache-1.1","Apache-2.0","AML","APSL-1.0","APSL-1.1","APSL-1.2","APSL-2.0","Artistic-1.0","Artistic-1.0-Perl","Artistic-1.0-cl8","Artistic-2.0","AAL","Bahyph","Barr","Beerware","BitTorrent-1.0","BitTorrent-1.1","BSL-1.0","Borceux","BSD-2-Clause","BSD-2-Clause-FreeBSD","BSD-2-Clause-NetBSD","BSD-3-Clause","BSD-3-Clause-Clear","BSD-4-Clause","BSD-Protection","BSD-Source-Code","BSD-3-Clause-Attribution","0BSD","BSD-4-Clause-UC","bzip2-1.0.5","bzip2-1.0.6","Caldera","CECILL-1.0","CECILL-1.1","CECILL-2.0","CECILL-2.1","CECILL-B","CECILL-C","ClArtistic","MIT-CMU","CNRI-Jython","CNRI-Python","CNRI-Python-GPL-Compatible","CPOL-1.02","CDDL-1.0","CDDL-1.1","CPAL-1.0","CPL-1.0","CATOSL-1.1","Condor-1.1","CC-BY-1.0","CC-BY-2.0","CC-BY-2.5","CC-BY-3.0","CC-BY-4.0","CC-BY-ND-1.0","CC-BY-ND-2.0","CC-BY-ND-2.5","CC-BY-ND-3.0","CC-BY-ND-4.0","CC-BY-NC-1.0","CC-BY-NC-2.0","CC-BY-NC-2.5","CC-BY-NC-3.0","CC-BY-NC-4.0","CC-BY-NC-ND-1.0","CC-BY-NC-ND-2.0","CC-BY-NC-ND-2.5","CC-BY-NC-ND-3.0","CC-BY-NC-ND-4.0","CC-BY-NC-SA-1.0","CC-BY-NC-SA-2.0","CC-BY-NC-SA-2.5","CC-BY-NC-SA-3.0","CC-BY-NC-SA-4.0","CC-BY-SA-1.0","CC-BY-SA-2.0","CC-BY-SA-2.5","CC-BY-SA-3.0","CC-BY-SA-4.0","CC0-1.0","Crossword","CrystalStacker","CUA-OPL-1.0","Cube","curl","D-FSL-1.0","diffmark","WTFPL","DOC","Dotseqn","DSDP","dvipdfm","EPL-1.0","ECL-1.0","ECL-2.0","eGenix","EFL-1.0","EFL-2.0","MIT-advertising","MIT-enna","Entessa","ErlPL-1.1","EUDatagrid","EUPL-1.0","EUPL-1.1","Eurosym","Fair","MIT-feh","Frameworx-1.0","FreeImage","FTL","FSFAP","FSFUL","FSFULLR","Giftware","GL2PS","Glulxe","AGPL-3.0","GFDL-1.1","GFDL-1.2","GFDL-1.3","GPL-1.0","GPL-2.0","GPL-3.0","LGPL-2.1","LGPL-3.0","LGPL-2.0","gnuplot","gSOAP-1.3b","HaskellReport","HPND","IBM-pibs","IPL-1.0","ICU","ImageMagick","iMatix","Imlib2","IJG","Info-ZIP","Intel-ACPI","Intel","Interbase-1.0","IPA","ISC","JasPer-2.0","JSON","LPPL-1.0","LPPL-1.1","LPPL-1.2","LPPL-1.3a","LPPL-1.3c","Latex2e","BSD-3-Clause-LBNL","Leptonica","LGPLLR","Libpng","libtiff","LAL-1.2","LAL-1.3","LiLiQ-P-1.1","LiLiQ-Rplus-1.1","LiLiQ-R-1.1","LPL-1.02","LPL-1.0","MakeIndex","MTLL","MS-PL","MS-RL","MirOS","MITNFA","MIT","Motosoto","MPL-1.0","MPL-1.1","MPL-2.0","MPL-2.0-no-copyleft-exception","mpich2","Multics","Mup","NASA-1.3","Naumen","NBPL-1.0","NetCDF","NGPL","NOSL","NPL-1.0","NPL-1.1","Newsletr","NLPL","Nokia","NPOSL-3.0","NLOD-1.0","Noweb","NRL","NTP","Nunit","OCLC-2.0","ODbL-1.0","PDDL-1.0","OCCT-PL","OGTSL","OLDAP-2.2.2","OLDAP-1.1","OLDAP-1.2","OLDAP-1.3","OLDAP-1.4","OLDAP-2.0","OLDAP-2.0.1","OLDAP-2.1","OLDAP-2.2","OLDAP-2.2.1","OLDAP-2.3","OLDAP-2.4","OLDAP-2.5","OLDAP-2.6","OLDAP-2.7","OLDAP-2.8","OML","OPL-1.0","OSL-1.0","OSL-1.1","OSL-2.0","OSL-2.1","OSL-3.0","OpenSSL","OSET-PL-2.1","PHP-3.0","PHP-3.01","Plexus","PostgreSQL","psfrag","psutils","Python-2.0","QPL-1.0","Qhull","Rdisc","RPSL-1.0","RPL-1.1","RPL-1.5","RHeCos-1.1","RSCPL","RSA-MD","Ruby","SAX-PD","Saxpath","SCEA","SWL","SMPPL","Sendmail","SGI-B-1.0","SGI-B-1.1","SGI-B-2.0","OFL-1.0","OFL-1.1","SimPL-2.0","Sleepycat","SNIA","Spencer-86","Spencer-94","Spencer-99","SMLNJ","SugarCRM-1.1.3","SISSL","SISSL-1.2","SPL-1.0","Watcom-1.0","TCL","Unlicense","TMate","TORQUE-1.1","TOSL","Unicode-TOU","UPL-1.0","NCSA","Vim","VOSTROM","VSL-1.0","W3C-19980720","W3C","Wsuipa","Xnet","X11","Xerox","XFree86-1.1","xinetd","xpp","XSkat","YPL-1.0","YPL-1.1","Zed","Zend-2.0","Zimbra-1.3","Zimbra-1.4","Zlib","zlib-acknowledgement","ZPL-1.1","ZPL-2.0","ZPL-2.1","BSD-3-Clause-No-Nuclear-License","BSD-3-Clause-No-Nuclear-Warranty","BSD-3-Clause-No-Nuclear-License-2014","eCos-2.0","GPL-2.0-with-autoconf-exception","GPL-2.0-with-bison-exception","GPL-2.0-with-classpath-exception","GPL-2.0-with-font-exception","GPL-2.0-with-GCC-exception","GPL-3.0-with-autoconf-exception","GPL-3.0-with-GCC-exception","StandardML-NJ","WXwindows"];
 
 /***/ }),
-/* 73 */
+/* 76 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var url = __webpack_require__(74)
-var gitHosts = __webpack_require__(75)
-var GitHost = module.exports = __webpack_require__(76)
+var url = __webpack_require__(77)
+var gitHosts = __webpack_require__(78)
+var GitHost = module.exports = __webpack_require__(79)
 
 var protocolToRepresentationMap = {
   'git+ssh': 'sshurl',
@@ -12337,13 +13017,13 @@ function parseGitUrl (giturl) {
 
 
 /***/ }),
-/* 74 */
+/* 77 */
 /***/ (function(module, exports) {
 
 module.exports = require("url");
 
 /***/ }),
-/* 75 */
+/* 78 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -12418,12 +13098,12 @@ Object.keys(gitHosts).forEach(function (name) {
 
 
 /***/ }),
-/* 76 */
+/* 79 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var gitHosts = __webpack_require__(75)
+var gitHosts = __webpack_require__(78)
 var extend = Object.assign || __webpack_require__(29)._extend
 
 var GitHost = module.exports = function (type, user, auth, project, committish, defaultRepresentation, opts) {
@@ -12539,41 +13219,659 @@ GitHost.prototype.toString = function (opts) {
 
 
 /***/ }),
-/* 77 */
+/* 80 */
 /***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
+var core = __webpack_require__(81);
+var async = __webpack_require__(83);
+async.core = core;
+async.isCore = function isCore(x) { return core[x]; };
+async.sync = __webpack_require__(88);
 
-var builtinModules = __webpack_require__(78);
+exports = async;
+module.exports = async;
 
-module.exports = function (str) {
-	if (typeof str !== 'string') {
-		throw new TypeError('Expected a string');
-	}
 
-	return builtinModules.indexOf(str) !== -1;
+/***/ }),
+/* 81 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var current = (process.versions && process.versions.node && process.versions.node.split('.')) || [];
+
+function specifierIncluded(specifier) {
+    var parts = specifier.split(' ');
+    var op = parts.length > 1 ? parts[0] : '=';
+    var versionParts = (parts.length > 1 ? parts[1] : parts[0]).split('.');
+
+    for (var i = 0; i < 3; ++i) {
+        var cur = Number(current[i] || 0);
+        var ver = Number(versionParts[i] || 0);
+        if (cur === ver) {
+            continue; // eslint-disable-line no-restricted-syntax, no-continue
+        }
+        if (op === '<') {
+            return cur < ver;
+        } else if (op === '>=') {
+            return cur >= ver;
+        } else {
+            return false;
+        }
+    }
+    return op === '>=';
+}
+
+function matchesRange(range) {
+    var specifiers = range.split(/ ?&& ?/);
+    if (specifiers.length === 0) { return false; }
+    for (var i = 0; i < specifiers.length; ++i) {
+        if (!specifierIncluded(specifiers[i])) { return false; }
+    }
+    return true;
+}
+
+function versionIncluded(specifierValue) {
+    if (typeof specifierValue === 'boolean') { return specifierValue; }
+    if (specifierValue && typeof specifierValue === 'object') {
+        for (var i = 0; i < specifierValue.length; ++i) {
+            if (matchesRange(specifierValue[i])) { return true; }
+        }
+        return false;
+    }
+    return matchesRange(specifierValue);
+}
+
+var data = __webpack_require__(82);
+
+var core = {};
+for (var mod in data) { // eslint-disable-line no-restricted-syntax
+    if (Object.prototype.hasOwnProperty.call(data, mod)) {
+        core[mod] = versionIncluded(data[mod]);
+    }
+}
+module.exports = core;
+
+
+/***/ }),
+/* 82 */
+/***/ (function(module) {
+
+module.exports = {"assert":true,"async_hooks":">= 8","buffer_ieee754":"< 0.9.7","buffer":true,"child_process":true,"cluster":true,"console":true,"constants":true,"crypto":true,"_debugger":"< 8","dgram":true,"dns":true,"domain":true,"events":true,"freelist":"< 6","fs":true,"fs/promises":">= 10 && < 10.1","_http_agent":">= 0.11.1","_http_client":">= 0.11.1","_http_common":">= 0.11.1","_http_incoming":">= 0.11.1","_http_outgoing":">= 0.11.1","_http_server":">= 0.11.1","http":true,"http2":">= 8.8","https":true,"inspector":">= 8.0.0","_linklist":"< 8","module":true,"net":true,"node-inspect/lib/_inspect":">= 7.6.0","node-inspect/lib/internal/inspect_client":">= 7.6.0","node-inspect/lib/internal/inspect_repl":">= 7.6.0","os":true,"path":true,"perf_hooks":">= 8.5","process":">= 1","punycode":true,"querystring":true,"readline":true,"repl":true,"smalloc":">= 0.11.5 && < 3","_stream_duplex":">= 0.9.4","_stream_transform":">= 0.9.4","_stream_wrap":">= 1.4.1","_stream_passthrough":">= 0.9.4","_stream_readable":">= 0.9.4","_stream_writable":">= 0.9.4","stream":true,"string_decoder":true,"sys":true,"timers":true,"_tls_common":">= 0.11.13","_tls_legacy":">= 0.11.3 && < 10","_tls_wrap":">= 0.11.3","tls":true,"trace_events":">= 10","tty":true,"url":true,"util":true,"v8/tools/arguments":">= 10","v8/tools/codemap":[">= 4.4.0 && < 5",">= 5.2.0"],"v8/tools/consarray":[">= 4.4.0 && < 5",">= 5.2.0"],"v8/tools/csvparser":[">= 4.4.0 && < 5",">= 5.2.0"],"v8/tools/logreader":[">= 4.4.0 && < 5",">= 5.2.0"],"v8/tools/profile_view":[">= 4.4.0 && < 5",">= 5.2.0"],"v8/tools/splaytree":[">= 4.4.0 && < 5",">= 5.2.0"],"v8":">= 1","vm":true,"worker_threads":">= 11.7","zlib":true};
+
+/***/ }),
+/* 83 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var core = __webpack_require__(81);
+var fs = __webpack_require__(23);
+var path = __webpack_require__(16);
+var caller = __webpack_require__(84);
+var nodeModulesPaths = __webpack_require__(85);
+var normalizeOptions = __webpack_require__(87);
+
+var defaultIsFile = function isFile(file, cb) {
+    fs.stat(file, function (err, stat) {
+        if (!err) {
+            return cb(null, stat.isFile() || stat.isFIFO());
+        }
+        if (err.code === 'ENOENT' || err.code === 'ENOTDIR') return cb(null, false);
+        return cb(err);
+    });
+};
+
+module.exports = function resolve(x, options, callback) {
+    var cb = callback;
+    var opts = options;
+    if (typeof options === 'function') {
+        cb = opts;
+        opts = {};
+    }
+    if (typeof x !== 'string') {
+        var err = new TypeError('Path must be a string.');
+        return process.nextTick(function () {
+            cb(err);
+        });
+    }
+
+    opts = normalizeOptions(x, opts);
+
+    var isFile = opts.isFile || defaultIsFile;
+    var readFile = opts.readFile || fs.readFile;
+
+    var extensions = opts.extensions || ['.js'];
+    var basedir = opts.basedir || path.dirname(caller());
+    var parent = opts.filename || basedir;
+
+    opts.paths = opts.paths || [];
+
+    // ensure that `basedir` is an absolute path at this point, resolving against the process' current working directory
+    var absoluteStart = path.resolve(basedir);
+
+    if (opts.preserveSymlinks === false) {
+        fs.realpath(absoluteStart, function (realPathErr, realStart) {
+            if (realPathErr && realPathErr.code !== 'ENOENT') cb(err);
+            else init(realPathErr ? absoluteStart : realStart);
+        });
+    } else {
+        init(absoluteStart);
+    }
+
+    var res;
+    function init(basedir) {
+        if ((/^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[/\\])/).test(x)) {
+            res = path.resolve(basedir, x);
+            if (x === '..' || x.slice(-1) === '/') res += '/';
+            if ((/\/$/).test(x) && res === basedir) {
+                loadAsDirectory(res, opts.package, onfile);
+            } else loadAsFile(res, opts.package, onfile);
+        } else loadNodeModules(x, basedir, function (err, n, pkg) {
+            if (err) cb(err);
+            else if (n) cb(null, n, pkg);
+            else if (core[x]) return cb(null, x);
+            else {
+                var moduleError = new Error("Cannot find module '" + x + "' from '" + parent + "'");
+                moduleError.code = 'MODULE_NOT_FOUND';
+                cb(moduleError);
+            }
+        });
+    }
+
+    function onfile(err, m, pkg) {
+        if (err) cb(err);
+        else if (m) cb(null, m, pkg);
+        else loadAsDirectory(res, function (err, d, pkg) {
+            if (err) cb(err);
+            else if (d) cb(null, d, pkg);
+            else {
+                var moduleError = new Error("Cannot find module '" + x + "' from '" + parent + "'");
+                moduleError.code = 'MODULE_NOT_FOUND';
+                cb(moduleError);
+            }
+        });
+    }
+
+    function loadAsFile(x, thePackage, callback) {
+        var loadAsFilePackage = thePackage;
+        var cb = callback;
+        if (typeof loadAsFilePackage === 'function') {
+            cb = loadAsFilePackage;
+            loadAsFilePackage = undefined;
+        }
+
+        var exts = [''].concat(extensions);
+        load(exts, x, loadAsFilePackage);
+
+        function load(exts, x, loadPackage) {
+            if (exts.length === 0) return cb(null, undefined, loadPackage);
+            var file = x + exts[0];
+
+            var pkg = loadPackage;
+            if (pkg) onpkg(null, pkg);
+            else loadpkg(path.dirname(file), onpkg);
+
+            function onpkg(err, pkg_, dir) {
+                pkg = pkg_;
+                if (err) return cb(err);
+                if (dir && pkg && opts.pathFilter) {
+                    var rfile = path.relative(dir, file);
+                    var rel = rfile.slice(0, rfile.length - exts[0].length);
+                    var r = opts.pathFilter(pkg, x, rel);
+                    if (r) return load(
+                        [''].concat(extensions.slice()),
+                        path.resolve(dir, r),
+                        pkg
+                    );
+                }
+                isFile(file, onex);
+            }
+            function onex(err, ex) {
+                if (err) return cb(err);
+                if (ex) return cb(null, file, pkg);
+                load(exts.slice(1), x, pkg);
+            }
+        }
+    }
+
+    function loadpkg(dir, cb) {
+        if (dir === '' || dir === '/') return cb(null);
+        if (process.platform === 'win32' && (/^\w:[/\\]*$/).test(dir)) {
+            return cb(null);
+        }
+        if ((/[/\\]node_modules[/\\]*$/).test(dir)) return cb(null);
+
+        var pkgfile = path.join(dir, 'package.json');
+        isFile(pkgfile, function (err, ex) {
+            // on err, ex is false
+            if (!ex) return loadpkg(path.dirname(dir), cb);
+
+            readFile(pkgfile, function (err, body) {
+                if (err) cb(err);
+                try { var pkg = JSON.parse(body); } catch (jsonErr) {}
+
+                if (pkg && opts.packageFilter) {
+                    pkg = opts.packageFilter(pkg, pkgfile);
+                }
+                cb(null, pkg, dir);
+            });
+        });
+    }
+
+    function loadAsDirectory(x, loadAsDirectoryPackage, callback) {
+        var cb = callback;
+        var fpkg = loadAsDirectoryPackage;
+        if (typeof fpkg === 'function') {
+            cb = fpkg;
+            fpkg = opts.package;
+        }
+
+        var pkgfile = path.join(x, 'package.json');
+        isFile(pkgfile, function (err, ex) {
+            if (err) return cb(err);
+            if (!ex) return loadAsFile(path.join(x, 'index'), fpkg, cb);
+
+            readFile(pkgfile, function (err, body) {
+                if (err) return cb(err);
+                try {
+                    var pkg = JSON.parse(body);
+                } catch (jsonErr) {}
+
+                if (opts.packageFilter) {
+                    pkg = opts.packageFilter(pkg, pkgfile);
+                }
+
+                if (pkg.main) {
+                    if (typeof pkg.main !== 'string') {
+                        var mainError = new TypeError('package “' + pkg.name + '” `main` must be a string');
+                        mainError.code = 'INVALID_PACKAGE_MAIN';
+                        return cb(mainError);
+                    }
+                    if (pkg.main === '.' || pkg.main === './') {
+                        pkg.main = 'index';
+                    }
+                    loadAsFile(path.resolve(x, pkg.main), pkg, function (err, m, pkg) {
+                        if (err) return cb(err);
+                        if (m) return cb(null, m, pkg);
+                        if (!pkg) return loadAsFile(path.join(x, 'index'), pkg, cb);
+
+                        var dir = path.resolve(x, pkg.main);
+                        loadAsDirectory(dir, pkg, function (err, n, pkg) {
+                            if (err) return cb(err);
+                            if (n) return cb(null, n, pkg);
+                            loadAsFile(path.join(x, 'index'), pkg, cb);
+                        });
+                    });
+                    return;
+                }
+
+                loadAsFile(path.join(x, '/index'), pkg, cb);
+            });
+        });
+    }
+
+    function processDirs(cb, dirs) {
+        if (dirs.length === 0) return cb(null, undefined);
+        var dir = dirs[0];
+
+        var file = path.join(dir, x);
+        loadAsFile(file, opts.package, onfile);
+
+        function onfile(err, m, pkg) {
+            if (err) return cb(err);
+            if (m) return cb(null, m, pkg);
+            loadAsDirectory(path.join(dir, x), opts.package, ondir);
+        }
+
+        function ondir(err, n, pkg) {
+            if (err) return cb(err);
+            if (n) return cb(null, n, pkg);
+            processDirs(cb, dirs.slice(1));
+        }
+    }
+    function loadNodeModules(x, start, cb) {
+        processDirs(cb, nodeModulesPaths(start, opts, x));
+    }
 };
 
 
 /***/ }),
-/* 78 */
+/* 84 */
+/***/ (function(module, exports) {
+
+module.exports = function () {
+    // see https://code.google.com/p/v8/wiki/JavaScriptStackTraceApi
+    var origPrepareStackTrace = Error.prepareStackTrace;
+    Error.prepareStackTrace = function (_, stack) { return stack; };
+    var stack = (new Error()).stack;
+    Error.prepareStackTrace = origPrepareStackTrace;
+    return stack[2].getFileName();
+};
+
+
+/***/ }),
+/* 85 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var path = __webpack_require__(16);
+var parse = path.parse || __webpack_require__(86);
+
+var getNodeModulesDirs = function getNodeModulesDirs(absoluteStart, modules) {
+    var prefix = '/';
+    if ((/^([A-Za-z]:)/).test(absoluteStart)) {
+        prefix = '';
+    } else if ((/^\\\\/).test(absoluteStart)) {
+        prefix = '\\\\';
+    }
+
+    var paths = [absoluteStart];
+    var parsed = parse(absoluteStart);
+    while (parsed.dir !== paths[paths.length - 1]) {
+        paths.push(parsed.dir);
+        parsed = parse(parsed.dir);
+    }
+
+    return paths.reduce(function (dirs, aPath) {
+        return dirs.concat(modules.map(function (moduleDir) {
+            return path.join(prefix, aPath, moduleDir);
+        }));
+    }, []);
+};
+
+module.exports = function nodeModulesPaths(start, opts, request) {
+    var modules = opts && opts.moduleDirectory
+        ? [].concat(opts.moduleDirectory)
+        : ['node_modules'];
+
+    if (opts && typeof opts.paths === 'function') {
+        return opts.paths(
+            request,
+            start,
+            function () { return getNodeModulesDirs(start, modules); },
+            opts
+        );
+    }
+
+    var dirs = getNodeModulesDirs(start, modules);
+    return opts && opts.paths ? dirs.concat(opts.paths) : dirs;
+};
+
+
+/***/ }),
+/* 86 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var blacklist = [
-	'freelist',
-	'sys'
-];
+var isWindows = process.platform === 'win32';
 
-module.exports = Object.keys(process.binding('natives')).filter(function (el) {
-	return !/^_|^internal|\//.test(el) && blacklist.indexOf(el) === -1;
-}).sort();
+// Regex to split a windows path into three parts: [*, device, slash,
+// tail] windows-only
+var splitDeviceRe =
+    /^([a-zA-Z]:|[\\\/]{2}[^\\\/]+[\\\/]+[^\\\/]+)?([\\\/])?([\s\S]*?)$/;
+
+// Regex to split the tail part of the above into [*, dir, basename, ext]
+var splitTailRe =
+    /^([\s\S]*?)((?:\.{1,2}|[^\\\/]+?|)(\.[^.\/\\]*|))(?:[\\\/]*)$/;
+
+var win32 = {};
+
+// Function to split a filename into [root, dir, basename, ext]
+function win32SplitPath(filename) {
+  // Separate device+slash from tail
+  var result = splitDeviceRe.exec(filename),
+      device = (result[1] || '') + (result[2] || ''),
+      tail = result[3] || '';
+  // Split the tail into dir, basename and extension
+  var result2 = splitTailRe.exec(tail),
+      dir = result2[1],
+      basename = result2[2],
+      ext = result2[3];
+  return [device, dir, basename, ext];
+}
+
+win32.parse = function(pathString) {
+  if (typeof pathString !== 'string') {
+    throw new TypeError(
+        "Parameter 'pathString' must be a string, not " + typeof pathString
+    );
+  }
+  var allParts = win32SplitPath(pathString);
+  if (!allParts || allParts.length !== 4) {
+    throw new TypeError("Invalid path '" + pathString + "'");
+  }
+  return {
+    root: allParts[0],
+    dir: allParts[0] + allParts[1].slice(0, -1),
+    base: allParts[2],
+    ext: allParts[3],
+    name: allParts[2].slice(0, allParts[2].length - allParts[3].length)
+  };
+};
+
+
+
+// Split a filename into [root, dir, basename, ext], unix version
+// 'root' is just a slash, or nothing.
+var splitPathRe =
+    /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$/;
+var posix = {};
+
+
+function posixSplitPath(filename) {
+  return splitPathRe.exec(filename).slice(1);
+}
+
+
+posix.parse = function(pathString) {
+  if (typeof pathString !== 'string') {
+    throw new TypeError(
+        "Parameter 'pathString' must be a string, not " + typeof pathString
+    );
+  }
+  var allParts = posixSplitPath(pathString);
+  if (!allParts || allParts.length !== 4) {
+    throw new TypeError("Invalid path '" + pathString + "'");
+  }
+  allParts[1] = allParts[1] || '';
+  allParts[2] = allParts[2] || '';
+  allParts[3] = allParts[3] || '';
+
+  return {
+    root: allParts[0],
+    dir: allParts[0] + allParts[1].slice(0, -1),
+    base: allParts[2],
+    ext: allParts[3],
+    name: allParts[2].slice(0, allParts[2].length - allParts[3].length)
+  };
+};
+
+
+if (isWindows)
+  module.exports = win32.parse;
+else /* posix */
+  module.exports = posix.parse;
+
+module.exports.posix = posix.parse;
+module.exports.win32 = win32.parse;
 
 
 /***/ }),
-/* 79 */
+/* 87 */
+/***/ (function(module, exports) {
+
+module.exports = function (x, opts) {
+    /**
+     * This file is purposefully a passthrough. It's expected that third-party
+     * environments will override it at runtime in order to inject special logic
+     * into `resolve` (by manipulating the options). One such example is the PnP
+     * code path in Yarn.
+     */
+
+    return opts || {};
+};
+
+
+/***/ }),
+/* 88 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var core = __webpack_require__(81);
+var fs = __webpack_require__(23);
+var path = __webpack_require__(16);
+var caller = __webpack_require__(84);
+var nodeModulesPaths = __webpack_require__(85);
+var normalizeOptions = __webpack_require__(87);
+
+var defaultIsFile = function isFile(file) {
+    try {
+        var stat = fs.statSync(file);
+    } catch (e) {
+        if (e && (e.code === 'ENOENT' || e.code === 'ENOTDIR')) return false;
+        throw e;
+    }
+    return stat.isFile() || stat.isFIFO();
+};
+
+module.exports = function (x, options) {
+    if (typeof x !== 'string') {
+        throw new TypeError('Path must be a string.');
+    }
+    var opts = normalizeOptions(x, options);
+
+    var isFile = opts.isFile || defaultIsFile;
+    var readFileSync = opts.readFileSync || fs.readFileSync;
+
+    var extensions = opts.extensions || ['.js'];
+    var basedir = opts.basedir || path.dirname(caller());
+    var parent = opts.filename || basedir;
+
+    opts.paths = opts.paths || [];
+
+    // ensure that `basedir` is an absolute path at this point, resolving against the process' current working directory
+    var absoluteStart = path.resolve(basedir);
+
+    if (opts.preserveSymlinks === false) {
+        try {
+            absoluteStart = fs.realpathSync(absoluteStart);
+        } catch (realPathErr) {
+            if (realPathErr.code !== 'ENOENT') {
+                throw realPathErr;
+            }
+        }
+    }
+
+    if ((/^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[/\\])/).test(x)) {
+        var res = path.resolve(absoluteStart, x);
+        if (x === '..' || x.slice(-1) === '/') res += '/';
+        var m = loadAsFileSync(res) || loadAsDirectorySync(res);
+        if (m) return m;
+    } else {
+        var n = loadNodeModulesSync(x, absoluteStart);
+        if (n) return n;
+    }
+
+    if (core[x]) return x;
+
+    var err = new Error("Cannot find module '" + x + "' from '" + parent + "'");
+    err.code = 'MODULE_NOT_FOUND';
+    throw err;
+
+    function loadAsFileSync(x) {
+        var pkg = loadpkg(path.dirname(x));
+
+        if (pkg && pkg.dir && pkg.pkg && opts.pathFilter) {
+            var rfile = path.relative(pkg.dir, x);
+            var r = opts.pathFilter(pkg.pkg, x, rfile);
+            if (r) {
+                x = path.resolve(pkg.dir, r); // eslint-disable-line no-param-reassign
+            }
+        }
+
+        if (isFile(x)) {
+            return x;
+        }
+
+        for (var i = 0; i < extensions.length; i++) {
+            var file = x + extensions[i];
+            if (isFile(file)) {
+                return file;
+            }
+        }
+    }
+
+    function loadpkg(dir) {
+        if (dir === '' || dir === '/') return;
+        if (process.platform === 'win32' && (/^\w:[/\\]*$/).test(dir)) {
+            return;
+        }
+        if ((/[/\\]node_modules[/\\]*$/).test(dir)) return;
+
+        var pkgfile = path.join(dir, 'package.json');
+
+        if (!isFile(pkgfile)) {
+            return loadpkg(path.dirname(dir));
+        }
+
+        var body = readFileSync(pkgfile);
+
+        try {
+            var pkg = JSON.parse(body);
+        } catch (jsonErr) {}
+
+        if (pkg && opts.packageFilter) {
+            pkg = opts.packageFilter(pkg, dir);
+        }
+
+        return { pkg: pkg, dir: dir };
+    }
+
+    function loadAsDirectorySync(x) {
+        var pkgfile = path.join(x, '/package.json');
+        if (isFile(pkgfile)) {
+            try {
+                var body = readFileSync(pkgfile, 'UTF8');
+                var pkg = JSON.parse(body);
+            } catch (e) {}
+
+            if (opts.packageFilter) {
+                pkg = opts.packageFilter(pkg, x);
+            }
+
+            if (pkg.main) {
+                if (typeof pkg.main !== 'string') {
+                    var mainError = new TypeError('package “' + pkg.name + '” `main` must be a string');
+                    mainError.code = 'INVALID_PACKAGE_MAIN';
+                    throw mainError;
+                }
+                if (pkg.main === '.' || pkg.main === './') {
+                    pkg.main = 'index';
+                }
+                try {
+                    var m = loadAsFileSync(path.resolve(x, pkg.main));
+                    if (m) return m;
+                    var n = loadAsDirectorySync(path.resolve(x, pkg.main));
+                    if (n) return n;
+                } catch (e) {}
+            }
+        }
+
+        return loadAsFileSync(path.join(x, '/index'));
+    }
+
+    function loadNodeModulesSync(x, start) {
+        var dirs = nodeModulesPaths(start, opts, x);
+        for (var i = 0; i < dirs.length; i++) {
+            var dir = dirs[i];
+            var m = loadAsFileSync(path.join(dir, '/', x));
+            if (m) return m;
+            var n = loadAsDirectorySync(path.join(dir, '/', x));
+            if (n) return n;
+        }
+    }
+};
+
+
+/***/ }),
+/* 89 */
 /***/ (function(module, exports) {
 
 module.exports = extractDescription
@@ -12593,17 +13891,17 @@ function extractDescription (d) {
 
 
 /***/ }),
-/* 80 */
+/* 90 */
 /***/ (function(module) {
 
 module.exports = {"topLevel":{"dependancies":"dependencies","dependecies":"dependencies","depdenencies":"dependencies","devEependencies":"devDependencies","depends":"dependencies","dev-dependencies":"devDependencies","devDependences":"devDependencies","devDepenencies":"devDependencies","devdependencies":"devDependencies","repostitory":"repository","repo":"repository","prefereGlobal":"preferGlobal","hompage":"homepage","hampage":"homepage","autohr":"author","autor":"author","contributers":"contributors","publicationConfig":"publishConfig","script":"scripts"},"bugs":{"web":"url","name":"url"},"script":{"server":"start","tests":"test"}};
 
 /***/ }),
-/* 81 */
+/* 91 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var util = __webpack_require__(29)
-var messages = __webpack_require__(82)
+var messages = __webpack_require__(92)
 
 module.exports = function() {
   var args = Array.prototype.slice.call(arguments, 0)
@@ -12628,22 +13926,27 @@ function makeTypoWarning (providedName, probableName, field) {
 
 
 /***/ }),
-/* 82 */
+/* 92 */
 /***/ (function(module) {
 
 module.exports = {"repositories":"'repositories' (plural) Not supported. Please pick one as the 'repository' field","missingRepository":"No repository field.","brokenGitUrl":"Probably broken git url: %s","nonObjectScripts":"scripts must be an object","nonStringScript":"script values must be string commands","nonArrayFiles":"Invalid 'files' member","invalidFilename":"Invalid filename in 'files' list: %s","nonArrayBundleDependencies":"Invalid 'bundleDependencies' list. Must be array of package names","nonStringBundleDependency":"Invalid bundleDependencies member: %s","nonDependencyBundleDependency":"Non-dependency in bundleDependencies: %s","nonObjectDependencies":"%s field must be an object","nonStringDependency":"Invalid dependency: %s %s","deprecatedArrayDependencies":"specifying %s as array is deprecated","deprecatedModules":"modules field is deprecated","nonArrayKeywords":"keywords should be an array of strings","nonStringKeyword":"keywords should be an array of strings","conflictingName":"%s is also the name of a node core module.","nonStringDescription":"'description' field should be a string","missingDescription":"No description","missingReadme":"No README data","missingLicense":"No license field.","nonEmailUrlBugsString":"Bug string field must be url, email, or {email,url}","nonUrlBugsUrlField":"bugs.url field must be a string url. Deleted.","nonEmailBugsEmailField":"bugs.email field must be a string email. Deleted.","emptyNormalizedBugs":"Normalized value of bugs field is an empty object. Deleted.","nonUrlHomepage":"homepage field must be a string url. Deleted.","invalidLicense":"license should be a valid SPDX license expression","typo":"%s should probably be %s."};
 
 /***/ }),
-/* 83 */
+/* 93 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 const path = __webpack_require__(16);
+<<<<<<< HEAD
 const writeJsonFile = __webpack_require__(84);
 const sortKeys = __webpack_require__(89);
 
 const opts = {detectIndent: true};
+=======
+const writeJsonFile = __webpack_require__(94);
+const sortKeys = __webpack_require__(108);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 const dependencyKeys = new Set([
 	'dependencies',
@@ -12694,12 +13997,13 @@ module.exports.sync = (fp, data) => {
 
 
 /***/ }),
-/* 84 */
+/* 94 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 const path = __webpack_require__(16);
+<<<<<<< HEAD
 const fs = __webpack_require__(22);
 const writeFileAtomic = __webpack_require__(85);
 const sortKeys = __webpack_require__(89);
@@ -12709,6 +14013,17 @@ const detectIndent = __webpack_require__(94);
 
 const init = (fn, fp, data, opts) => {
 	if (!fp) {
+=======
+const fs = __webpack_require__(95);
+const writeFileAtomic = __webpack_require__(99);
+const sortKeys = __webpack_require__(108);
+const makeDir = __webpack_require__(110);
+const pify = __webpack_require__(111);
+const detectIndent = __webpack_require__(113);
+
+const init = (fn, filePath, data, options) => {
+	if (!filePath) {
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 		throw new TypeError('Expected a filepath');
 	}
 
@@ -12774,10 +14089,21 @@ module.exports.sync = (fp, data, opts) => {
 
 
 /***/ }),
-/* 85 */
+/* 95 */
 /***/ (function(module, exports, __webpack_require__) {
 
+<<<<<<< HEAD
 "use strict";
+=======
+var fs = __webpack_require__(23)
+var polyfills = __webpack_require__(96)
+var legacy = __webpack_require__(97)
+var clone = __webpack_require__(98)
+
+var queue = []
+
+var util = __webpack_require__(29)
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = writeFile
 module.exports.sync = writeFileSync
@@ -13122,7 +14448,11 @@ function writeFileSync (filename, data, options) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 87 */
+=======
+/* 96 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 // Note: since nyc uses this module to output coverage, any lines
@@ -13131,10 +14461,2437 @@ function writeFileSync (filename, data, options) {
 var assert = __webpack_require__(30)
 var signals = __webpack_require__(88)
 
+<<<<<<< HEAD
+=======
+var origCwd = process.cwd
+var cwd = null
+
+var platform = process.env.GRACEFUL_FS_PLATFORM || process.platform
+
+process.cwd = function() {
+  if (!cwd)
+    cwd = origCwd.call(process)
+  return cwd
+}
+try {
+  process.cwd()
+} catch (er) {}
+
+var chdir = process.chdir
+process.chdir = function(d) {
+  cwd = null
+  chdir.call(process, d)
+}
+
+module.exports = patch
+
+function patch (fs) {
+  // (re-)implement some things that are known busted or missing.
+
+  // lchmod, broken prior to 0.6.2
+  // back-port the fix here.
+  if (constants.hasOwnProperty('O_SYMLINK') &&
+      process.version.match(/^v0\.6\.[0-2]|^v0\.5\./)) {
+    patchLchmod(fs)
+  }
+
+  // lutimes implementation, or no-op
+  if (!fs.lutimes) {
+    patchLutimes(fs)
+  }
+
+  // https://github.com/isaacs/node-graceful-fs/issues/4
+  // Chown should not fail on einval or eperm if non-root.
+  // It should not fail on enosys ever, as this just indicates
+  // that a fs doesn't support the intended operation.
+
+  fs.chown = chownFix(fs.chown)
+  fs.fchown = chownFix(fs.fchown)
+  fs.lchown = chownFix(fs.lchown)
+
+  fs.chmod = chmodFix(fs.chmod)
+  fs.fchmod = chmodFix(fs.fchmod)
+  fs.lchmod = chmodFix(fs.lchmod)
+
+  fs.chownSync = chownFixSync(fs.chownSync)
+  fs.fchownSync = chownFixSync(fs.fchownSync)
+  fs.lchownSync = chownFixSync(fs.lchownSync)
+
+  fs.chmodSync = chmodFixSync(fs.chmodSync)
+  fs.fchmodSync = chmodFixSync(fs.fchmodSync)
+  fs.lchmodSync = chmodFixSync(fs.lchmodSync)
+
+  fs.stat = statFix(fs.stat)
+  fs.fstat = statFix(fs.fstat)
+  fs.lstat = statFix(fs.lstat)
+
+  fs.statSync = statFixSync(fs.statSync)
+  fs.fstatSync = statFixSync(fs.fstatSync)
+  fs.lstatSync = statFixSync(fs.lstatSync)
+
+  // if lchmod/lchown do not exist, then make them no-ops
+  if (!fs.lchmod) {
+    fs.lchmod = function (path, mode, cb) {
+      if (cb) process.nextTick(cb)
+    }
+    fs.lchmodSync = function () {}
+  }
+  if (!fs.lchown) {
+    fs.lchown = function (path, uid, gid, cb) {
+      if (cb) process.nextTick(cb)
+    }
+    fs.lchownSync = function () {}
+  }
+
+  // on Windows, A/V software can lock the directory, causing this
+  // to fail with an EACCES or EPERM if the directory contains newly
+  // created files.  Try again on failure, for up to 60 seconds.
+
+  // Set the timeout this long because some Windows Anti-Virus, such as Parity
+  // bit9, may lock files for up to a minute, causing npm package install
+  // failures. Also, take care to yield the scheduler. Windows scheduling gives
+  // CPU to a busy looping process, which can cause the program causing the lock
+  // contention to be starved of CPU by node, so the contention doesn't resolve.
+  if (platform === "win32") {
+    fs.rename = (function (fs$rename) { return function (from, to, cb) {
+      var start = Date.now()
+      var backoff = 0;
+      fs$rename(from, to, function CB (er) {
+        if (er
+            && (er.code === "EACCES" || er.code === "EPERM")
+            && Date.now() - start < 60000) {
+          setTimeout(function() {
+            fs.stat(to, function (stater, st) {
+              if (stater && stater.code === "ENOENT")
+                fs$rename(from, to, CB);
+              else
+                cb(er)
+            })
+          }, backoff)
+          if (backoff < 100)
+            backoff += 10;
+          return;
+        }
+        if (cb) cb(er)
+      })
+    }})(fs.rename)
+  }
+
+  // if read() returns EAGAIN, then just try it again.
+  fs.read = (function (fs$read) { return function (fd, buffer, offset, length, position, callback_) {
+    var callback
+    if (callback_ && typeof callback_ === 'function') {
+      var eagCounter = 0
+      callback = function (er, _, __) {
+        if (er && er.code === 'EAGAIN' && eagCounter < 10) {
+          eagCounter ++
+          return fs$read.call(fs, fd, buffer, offset, length, position, callback)
+        }
+        callback_.apply(this, arguments)
+      }
+    }
+    return fs$read.call(fs, fd, buffer, offset, length, position, callback)
+  }})(fs.read)
+
+  fs.readSync = (function (fs$readSync) { return function (fd, buffer, offset, length, position) {
+    var eagCounter = 0
+    while (true) {
+      try {
+        return fs$readSync.call(fs, fd, buffer, offset, length, position)
+      } catch (er) {
+        if (er.code === 'EAGAIN' && eagCounter < 10) {
+          eagCounter ++
+          continue
+        }
+        throw er
+      }
+    }
+  }})(fs.readSync)
+
+  function patchLchmod (fs) {
+    fs.lchmod = function (path, mode, callback) {
+      fs.open( path
+             , constants.O_WRONLY | constants.O_SYMLINK
+             , mode
+             , function (err, fd) {
+        if (err) {
+          if (callback) callback(err)
+          return
+        }
+        // prefer to return the chmod error, if one occurs,
+        // but still try to close, and report closing errors if they occur.
+        fs.fchmod(fd, mode, function (err) {
+          fs.close(fd, function(err2) {
+            if (callback) callback(err || err2)
+          })
+        })
+      })
+    }
+
+    fs.lchmodSync = function (path, mode) {
+      var fd = fs.openSync(path, constants.O_WRONLY | constants.O_SYMLINK, mode)
+
+      // prefer to return the chmod error, if one occurs,
+      // but still try to close, and report closing errors if they occur.
+      var threw = true
+      var ret
+      try {
+        ret = fs.fchmodSync(fd, mode)
+        threw = false
+      } finally {
+        if (threw) {
+          try {
+            fs.closeSync(fd)
+          } catch (er) {}
+        } else {
+          fs.closeSync(fd)
+        }
+      }
+      return ret
+    }
+  }
+
+  function patchLutimes (fs) {
+    if (constants.hasOwnProperty("O_SYMLINK")) {
+      fs.lutimes = function (path, at, mt, cb) {
+        fs.open(path, constants.O_SYMLINK, function (er, fd) {
+          if (er) {
+            if (cb) cb(er)
+            return
+          }
+          fs.futimes(fd, at, mt, function (er) {
+            fs.close(fd, function (er2) {
+              if (cb) cb(er || er2)
+            })
+          })
+        })
+      }
+
+      fs.lutimesSync = function (path, at, mt) {
+        var fd = fs.openSync(path, constants.O_SYMLINK)
+        var ret
+        var threw = true
+        try {
+          ret = fs.futimesSync(fd, at, mt)
+          threw = false
+        } finally {
+          if (threw) {
+            try {
+              fs.closeSync(fd)
+            } catch (er) {}
+          } else {
+            fs.closeSync(fd)
+          }
+        }
+        return ret
+      }
+
+    } else {
+      fs.lutimes = function (_a, _b, _c, cb) { if (cb) process.nextTick(cb) }
+      fs.lutimesSync = function () {}
+    }
+  }
+
+  function chmodFix (orig) {
+    if (!orig) return orig
+    return function (target, mode, cb) {
+      return orig.call(fs, target, mode, function (er) {
+        if (chownErOk(er)) er = null
+        if (cb) cb.apply(this, arguments)
+      })
+    }
+  }
+
+  function chmodFixSync (orig) {
+    if (!orig) return orig
+    return function (target, mode) {
+      try {
+        return orig.call(fs, target, mode)
+      } catch (er) {
+        if (!chownErOk(er)) throw er
+      }
+    }
+  }
+
+
+  function chownFix (orig) {
+    if (!orig) return orig
+    return function (target, uid, gid, cb) {
+      return orig.call(fs, target, uid, gid, function (er) {
+        if (chownErOk(er)) er = null
+        if (cb) cb.apply(this, arguments)
+      })
+    }
+  }
+
+  function chownFixSync (orig) {
+    if (!orig) return orig
+    return function (target, uid, gid) {
+      try {
+        return orig.call(fs, target, uid, gid)
+      } catch (er) {
+        if (!chownErOk(er)) throw er
+      }
+    }
+  }
+
+
+  function statFix (orig) {
+    if (!orig) return orig
+    // Older versions of Node erroneously returned signed integers for
+    // uid + gid.
+    return function (target, cb) {
+      return orig.call(fs, target, function (er, stats) {
+        if (!stats) return cb.apply(this, arguments)
+        if (stats.uid < 0) stats.uid += 0x100000000
+        if (stats.gid < 0) stats.gid += 0x100000000
+        if (cb) cb.apply(this, arguments)
+      })
+    }
+  }
+
+  function statFixSync (orig) {
+    if (!orig) return orig
+    // Older versions of Node erroneously returned signed integers for
+    // uid + gid.
+    return function (target) {
+      var stats = orig.call(fs, target)
+      if (stats.uid < 0) stats.uid += 0x100000000
+      if (stats.gid < 0) stats.gid += 0x100000000
+      return stats;
+    }
+  }
+
+  // ENOSYS means that the fs doesn't support the op. Just ignore
+  // that, because it doesn't matter.
+  //
+  // if there's no getuid, or if getuid() is something other
+  // than 0, and the error is EINVAL or EPERM, then just ignore
+  // it.
+  //
+  // This specific case is a silent failure in cp, install, tar,
+  // and most other unix tools that manage permissions.
+  //
+  // When running as root, or if other types of errors are
+  // encountered, then it's strict.
+  function chownErOk (er) {
+    if (!er)
+      return true
+
+    if (er.code === "ENOSYS")
+      return true
+
+    var nonroot = !process.getuid || process.getuid() !== 0
+    if (nonroot) {
+      if (er.code === "EINVAL" || er.code === "EPERM")
+        return true
+    }
+
+    return false
+  }
+}
+
+
+/***/ }),
+/* 97 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var Stream = __webpack_require__(28).Stream
+
+module.exports = legacy
+
+function legacy (fs) {
+  return {
+    ReadStream: ReadStream,
+    WriteStream: WriteStream
+  }
+
+  function ReadStream (path, options) {
+    if (!(this instanceof ReadStream)) return new ReadStream(path, options);
+
+    Stream.call(this);
+
+    var self = this;
+
+    this.path = path;
+    this.fd = null;
+    this.readable = true;
+    this.paused = false;
+
+    this.flags = 'r';
+    this.mode = 438; /*=0666*/
+    this.bufferSize = 64 * 1024;
+
+    options = options || {};
+
+    // Mixin options into this
+    var keys = Object.keys(options);
+    for (var index = 0, length = keys.length; index < length; index++) {
+      var key = keys[index];
+      this[key] = options[key];
+    }
+
+    if (this.encoding) this.setEncoding(this.encoding);
+
+    if (this.start !== undefined) {
+      if ('number' !== typeof this.start) {
+        throw TypeError('start must be a Number');
+      }
+      if (this.end === undefined) {
+        this.end = Infinity;
+      } else if ('number' !== typeof this.end) {
+        throw TypeError('end must be a Number');
+      }
+
+      if (this.start > this.end) {
+        throw new Error('start must be <= end');
+      }
+
+      this.pos = this.start;
+    }
+
+    if (this.fd !== null) {
+      process.nextTick(function() {
+        self._read();
+      });
+      return;
+    }
+
+    fs.open(this.path, this.flags, this.mode, function (err, fd) {
+      if (err) {
+        self.emit('error', err);
+        self.readable = false;
+        return;
+      }
+
+      self.fd = fd;
+      self.emit('open', fd);
+      self._read();
+    })
+  }
+
+  function WriteStream (path, options) {
+    if (!(this instanceof WriteStream)) return new WriteStream(path, options);
+
+    Stream.call(this);
+
+    this.path = path;
+    this.fd = null;
+    this.writable = true;
+
+    this.flags = 'w';
+    this.encoding = 'binary';
+    this.mode = 438; /*=0666*/
+    this.bytesWritten = 0;
+
+    options = options || {};
+
+    // Mixin options into this
+    var keys = Object.keys(options);
+    for (var index = 0, length = keys.length; index < length; index++) {
+      var key = keys[index];
+      this[key] = options[key];
+    }
+
+    if (this.start !== undefined) {
+      if ('number' !== typeof this.start) {
+        throw TypeError('start must be a Number');
+      }
+      if (this.start < 0) {
+        throw new Error('start must be >= zero');
+      }
+
+      this.pos = this.start;
+    }
+
+    this.busy = false;
+    this._queue = [];
+
+    if (this.fd === null) {
+      this._open = fs.open;
+      this._queue.push([this._open, this.path, this.flags, this.mode, undefined]);
+      this.flush();
+    }
+  }
+}
+
+
+/***/ }),
+/* 98 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = clone
+
+function clone (obj) {
+  if (obj === null || typeof obj !== 'object')
+    return obj
+
+  if (obj instanceof Object)
+    var copy = { __proto__: obj.__proto__ }
+  else
+    var copy = Object.create(null)
+
+  Object.getOwnPropertyNames(obj).forEach(function (key) {
+    Object.defineProperty(copy, key, Object.getOwnPropertyDescriptor(obj, key))
+  })
+
+  return copy
+}
+
+
+/***/ }),
+/* 99 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+module.exports = writeFile
+module.exports.sync = writeFileSync
+module.exports._getTmpname = getTmpname // for testing
+module.exports._cleanupOnExit = cleanupOnExit
+
+var fs = __webpack_require__(100)
+var MurmurHash3 = __webpack_require__(104)
+var onExit = __webpack_require__(105)
+var path = __webpack_require__(16)
+var activeFiles = {}
+
+// if we run inside of a worker_thread, `process.pid` is not unique
+/* istanbul ignore next */
+var threadId = (function getId () {
+  try {
+    var workerThreads = __webpack_require__(107)
+
+    /// if we are in main thread, this is set to `0`
+    return workerThreads.threadId
+  } catch (e) {
+    // worker_threads are not available, fallback to 0
+    return 0
+  }
+})()
+
+var invocations = 0
+function getTmpname (filename) {
+  return filename + '.' +
+    MurmurHash3(__filename)
+      .hash(String(process.pid))
+      .hash(String(threadId))
+      .hash(String(++invocations))
+      .result()
+}
+
+function cleanupOnExit (tmpfile) {
+  return function () {
+    try {
+      fs.unlinkSync(typeof tmpfile === 'function' ? tmpfile() : tmpfile)
+    } catch (_) {}
+  }
+}
+
+function writeFile (filename, data, options, callback) {
+  if (options) {
+    if (options instanceof Function) {
+      callback = options
+      options = {}
+    } else if (typeof options === 'string') {
+      options = { encoding: options }
+    }
+  } else {
+    options = {}
+  }
+
+  var Promise = options.Promise || global.Promise
+  var truename
+  var fd
+  var tmpfile
+  /* istanbul ignore next -- The closure only gets called when onExit triggers */
+  var removeOnExitHandler = onExit(cleanupOnExit(() => tmpfile))
+  var absoluteName = path.resolve(filename)
+
+  new Promise(function serializeSameFile (resolve) {
+    // make a queue if it doesn't already exist
+    if (!activeFiles[absoluteName]) activeFiles[absoluteName] = []
+
+    activeFiles[absoluteName].push(resolve) // add this job to the queue
+    if (activeFiles[absoluteName].length === 1) resolve() // kick off the first one
+  }).then(function getRealPath () {
+    return new Promise(function (resolve) {
+      fs.realpath(filename, function (_, realname) {
+        truename = realname || filename
+        tmpfile = getTmpname(truename)
+        resolve()
+      })
+    })
+  }).then(function stat () {
+    return new Promise(function stat (resolve) {
+      if (options.mode && options.chown) resolve()
+      else {
+        // Either mode or chown is not explicitly set
+        // Default behavior is to copy it from original file
+        fs.stat(truename, function (err, stats) {
+          if (err || !stats) resolve()
+          else {
+            options = Object.assign({}, options)
+
+            if (options.mode == null) {
+              options.mode = stats.mode
+            }
+            if (options.chown == null && process.getuid) {
+              options.chown = { uid: stats.uid, gid: stats.gid }
+            }
+            resolve()
+          }
+        })
+      }
+    })
+  }).then(function thenWriteFile () {
+    return new Promise(function (resolve, reject) {
+      fs.open(tmpfile, 'w', options.mode, function (err, _fd) {
+        fd = _fd
+        if (err) reject(err)
+        else resolve()
+      })
+    })
+  }).then(function write () {
+    return new Promise(function (resolve, reject) {
+      if (Buffer.isBuffer(data)) {
+        fs.write(fd, data, 0, data.length, 0, function (err) {
+          if (err) reject(err)
+          else resolve()
+        })
+      } else if (data != null) {
+        fs.write(fd, String(data), 0, String(options.encoding || 'utf8'), function (err) {
+          if (err) reject(err)
+          else resolve()
+        })
+      } else resolve()
+    })
+  }).then(function syncAndClose () {
+    return new Promise(function (resolve, reject) {
+      if (options.fsync !== false) {
+        fs.fsync(fd, function (err) {
+          if (err) fs.close(fd, () => reject(err))
+          else fs.close(fd, resolve)
+        })
+      } else {
+        fs.close(fd, resolve)
+      }
+    })
+  }).then(function chown () {
+    fd = null
+    if (options.chown) {
+      return new Promise(function (resolve, reject) {
+        fs.chown(tmpfile, options.chown.uid, options.chown.gid, function (err) {
+          if (err) reject(err)
+          else resolve()
+        })
+      })
+    }
+  }).then(function chmod () {
+    if (options.mode) {
+      return new Promise(function (resolve, reject) {
+        fs.chmod(tmpfile, options.mode, function (err) {
+          if (err) reject(err)
+          else resolve()
+        })
+      })
+    }
+  }).then(function rename () {
+    return new Promise(function (resolve, reject) {
+      fs.rename(tmpfile, truename, function (err) {
+        if (err) reject(err)
+        else resolve()
+      })
+    })
+  }).then(function success () {
+    removeOnExitHandler()
+    callback()
+  }, function fail (err) {
+    return new Promise(resolve => {
+      return fd ? fs.close(fd, resolve) : resolve()
+    }).then(() => {
+      removeOnExitHandler()
+      fs.unlink(tmpfile, function () {
+        callback(err)
+      })
+    })
+  }).then(function checkQueue () {
+    activeFiles[absoluteName].shift() // remove the element added by serializeSameFile
+    if (activeFiles[absoluteName].length > 0) {
+      activeFiles[absoluteName][0]() // start next job if one is pending
+    } else delete activeFiles[absoluteName]
+  })
+}
+
+function writeFileSync (filename, data, options) {
+  if (typeof options === 'string') options = { encoding: options }
+  else if (!options) options = {}
+  try {
+    filename = fs.realpathSync(filename)
+  } catch (ex) {
+    // it's ok, it'll happen on a not yet existing file
+  }
+  var tmpfile = getTmpname(filename)
+
+  if (!options.mode || !options.chown) {
+    // Either mode or chown is not explicitly set
+    // Default behavior is to copy it from original file
+    try {
+      var stats = fs.statSync(filename)
+      options = Object.assign({}, options)
+      if (!options.mode) {
+        options.mode = stats.mode
+      }
+      if (!options.chown && process.getuid) {
+        options.chown = { uid: stats.uid, gid: stats.gid }
+      }
+    } catch (ex) {
+      // ignore stat errors
+    }
+  }
+
+  var fd
+  var cleanup = cleanupOnExit(tmpfile)
+  var removeOnExitHandler = onExit(cleanup)
+
+  try {
+    fd = fs.openSync(tmpfile, 'w', options.mode)
+    if (Buffer.isBuffer(data)) {
+      fs.writeSync(fd, data, 0, data.length, 0)
+    } else if (data != null) {
+      fs.writeSync(fd, String(data), 0, String(options.encoding || 'utf8'))
+    }
+    if (options.fsync !== false) {
+      fs.fsyncSync(fd)
+    }
+    fs.closeSync(fd)
+    if (options.chown) fs.chownSync(tmpfile, options.chown.uid, options.chown.gid)
+    if (options.mode) fs.chmodSync(tmpfile, options.mode)
+    fs.renameSync(tmpfile, filename)
+    removeOnExitHandler()
+  } catch (err) {
+    if (fd) {
+      try {
+        fs.closeSync(fd)
+      } catch (ex) {
+        // ignore close errors at this stage, error may have closed fd already.
+      }
+    }
+    removeOnExitHandler()
+    cleanup()
+    throw err
+  }
+}
+
+
+/***/ }),
+/* 100 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var fs = __webpack_require__(23)
+var polyfills = __webpack_require__(101)
+var legacy = __webpack_require__(103)
+var queue = []
+
+var util = __webpack_require__(29)
+
+function noop () {}
+
+var debug = noop
+if (util.debuglog)
+  debug = util.debuglog('gfs4')
+else if (/\bgfs4\b/i.test(process.env.NODE_DEBUG || ''))
+  debug = function() {
+    var m = util.format.apply(util, arguments)
+    m = 'GFS4: ' + m.split(/\n/).join('\nGFS4: ')
+    console.error(m)
+  }
+
+if (/\bgfs4\b/i.test(process.env.NODE_DEBUG || '')) {
+  process.on('exit', function() {
+    debug(queue)
+    __webpack_require__(30).equal(queue.length, 0)
+  })
+}
+
+module.exports = patch(__webpack_require__(102))
+if (process.env.TEST_GRACEFUL_FS_GLOBAL_PATCH) {
+  module.exports = patch(fs)
+}
+
+// Always patch fs.close/closeSync, because we want to
+// retry() whenever a close happens *anywhere* in the program.
+// This is essential when multiple graceful-fs instances are
+// in play at the same time.
+module.exports.close =
+fs.close = (function (fs$close) { return function (fd, cb) {
+  return fs$close.call(fs, fd, function (err) {
+    if (!err)
+      retry()
+
+    if (typeof cb === 'function')
+      cb.apply(this, arguments)
+  })
+}})(fs.close)
+
+module.exports.closeSync =
+fs.closeSync = (function (fs$closeSync) { return function (fd) {
+  // Note that graceful-fs also retries when fs.closeSync() fails.
+  // Looks like a bug to me, although it's probably a harmless one.
+  var rval = fs$closeSync.apply(fs, arguments)
+  retry()
+  return rval
+}})(fs.closeSync)
+
+function patch (fs) {
+  // Everything that references the open() function needs to be in here
+  polyfills(fs)
+  fs.gracefulify = patch
+  fs.FileReadStream = ReadStream;  // Legacy name.
+  fs.FileWriteStream = WriteStream;  // Legacy name.
+  fs.createReadStream = createReadStream
+  fs.createWriteStream = createWriteStream
+  var fs$readFile = fs.readFile
+  fs.readFile = readFile
+  function readFile (path, options, cb) {
+    if (typeof options === 'function')
+      cb = options, options = null
+
+    return go$readFile(path, options, cb)
+
+    function go$readFile (path, options, cb) {
+      return fs$readFile(path, options, function (err) {
+        if (err && (err.code === 'EMFILE' || err.code === 'ENFILE'))
+          enqueue([go$readFile, [path, options, cb]])
+        else {
+          if (typeof cb === 'function')
+            cb.apply(this, arguments)
+          retry()
+        }
+      })
+    }
+  }
+
+  var fs$writeFile = fs.writeFile
+  fs.writeFile = writeFile
+  function writeFile (path, data, options, cb) {
+    if (typeof options === 'function')
+      cb = options, options = null
+
+    return go$writeFile(path, data, options, cb)
+
+    function go$writeFile (path, data, options, cb) {
+      return fs$writeFile(path, data, options, function (err) {
+        if (err && (err.code === 'EMFILE' || err.code === 'ENFILE'))
+          enqueue([go$writeFile, [path, data, options, cb]])
+        else {
+          if (typeof cb === 'function')
+            cb.apply(this, arguments)
+          retry()
+        }
+      })
+    }
+  }
+
+  var fs$appendFile = fs.appendFile
+  if (fs$appendFile)
+    fs.appendFile = appendFile
+  function appendFile (path, data, options, cb) {
+    if (typeof options === 'function')
+      cb = options, options = null
+
+    return go$appendFile(path, data, options, cb)
+
+    function go$appendFile (path, data, options, cb) {
+      return fs$appendFile(path, data, options, function (err) {
+        if (err && (err.code === 'EMFILE' || err.code === 'ENFILE'))
+          enqueue([go$appendFile, [path, data, options, cb]])
+        else {
+          if (typeof cb === 'function')
+            cb.apply(this, arguments)
+          retry()
+        }
+      })
+    }
+  }
+
+  var fs$readdir = fs.readdir
+  fs.readdir = readdir
+  function readdir (path, options, cb) {
+    var args = [path]
+    if (typeof options !== 'function') {
+      args.push(options)
+    } else {
+      cb = options
+    }
+    args.push(go$readdir$cb)
+
+    return go$readdir(args)
+
+    function go$readdir$cb (err, files) {
+      if (files && files.sort)
+        files.sort()
+
+      if (err && (err.code === 'EMFILE' || err.code === 'ENFILE'))
+        enqueue([go$readdir, [args]])
+      else {
+        if (typeof cb === 'function')
+          cb.apply(this, arguments)
+        retry()
+      }
+    }
+  }
+
+  function go$readdir (args) {
+    return fs$readdir.apply(fs, args)
+  }
+
+  if (process.version.substr(0, 4) === 'v0.8') {
+    var legStreams = legacy(fs)
+    ReadStream = legStreams.ReadStream
+    WriteStream = legStreams.WriteStream
+  }
+
+  var fs$ReadStream = fs.ReadStream
+  ReadStream.prototype = Object.create(fs$ReadStream.prototype)
+  ReadStream.prototype.open = ReadStream$open
+
+  var fs$WriteStream = fs.WriteStream
+  WriteStream.prototype = Object.create(fs$WriteStream.prototype)
+  WriteStream.prototype.open = WriteStream$open
+
+  fs.ReadStream = ReadStream
+  fs.WriteStream = WriteStream
+
+  function ReadStream (path, options) {
+    if (this instanceof ReadStream)
+      return fs$ReadStream.apply(this, arguments), this
+    else
+      return ReadStream.apply(Object.create(ReadStream.prototype), arguments)
+  }
+
+  function ReadStream$open () {
+    var that = this
+    open(that.path, that.flags, that.mode, function (err, fd) {
+      if (err) {
+        if (that.autoClose)
+          that.destroy()
+
+        that.emit('error', err)
+      } else {
+        that.fd = fd
+        that.emit('open', fd)
+        that.read()
+      }
+    })
+  }
+
+  function WriteStream (path, options) {
+    if (this instanceof WriteStream)
+      return fs$WriteStream.apply(this, arguments), this
+    else
+      return WriteStream.apply(Object.create(WriteStream.prototype), arguments)
+  }
+
+  function WriteStream$open () {
+    var that = this
+    open(that.path, that.flags, that.mode, function (err, fd) {
+      if (err) {
+        that.destroy()
+        that.emit('error', err)
+      } else {
+        that.fd = fd
+        that.emit('open', fd)
+      }
+    })
+  }
+
+  function createReadStream (path, options) {
+    return new ReadStream(path, options)
+  }
+
+  function createWriteStream (path, options) {
+    return new WriteStream(path, options)
+  }
+
+  var fs$open = fs.open
+  fs.open = open
+  function open (path, flags, mode, cb) {
+    if (typeof mode === 'function')
+      cb = mode, mode = null
+
+    return go$open(path, flags, mode, cb)
+
+    function go$open (path, flags, mode, cb) {
+      return fs$open(path, flags, mode, function (err, fd) {
+        if (err && (err.code === 'EMFILE' || err.code === 'ENFILE'))
+          enqueue([go$open, [path, flags, mode, cb]])
+        else {
+          if (typeof cb === 'function')
+            cb.apply(this, arguments)
+          retry()
+        }
+      })
+    }
+  }
+
+  return fs
+}
+
+function enqueue (elem) {
+  debug('ENQUEUE', elem[0].name, elem[1])
+  queue.push(elem)
+}
+
+function retry () {
+  var elem = queue.shift()
+  if (elem) {
+    debug('RETRY', elem[0].name, elem[1])
+    elem[0].apply(null, elem[1])
+  }
+}
+
+
+/***/ }),
+/* 101 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var fs = __webpack_require__(102)
+var constants = __webpack_require__(26)
+
+var origCwd = process.cwd
+var cwd = null
+
+var platform = process.env.GRACEFUL_FS_PLATFORM || process.platform
+
+process.cwd = function() {
+  if (!cwd)
+    cwd = origCwd.call(process)
+  return cwd
+}
+try {
+  process.cwd()
+} catch (er) {}
+
+var chdir = process.chdir
+process.chdir = function(d) {
+  cwd = null
+  chdir.call(process, d)
+}
+
+module.exports = patch
+
+function patch (fs) {
+  // (re-)implement some things that are known busted or missing.
+
+  // lchmod, broken prior to 0.6.2
+  // back-port the fix here.
+  if (constants.hasOwnProperty('O_SYMLINK') &&
+      process.version.match(/^v0\.6\.[0-2]|^v0\.5\./)) {
+    patchLchmod(fs)
+  }
+
+  // lutimes implementation, or no-op
+  if (!fs.lutimes) {
+    patchLutimes(fs)
+  }
+
+  // https://github.com/isaacs/node-graceful-fs/issues/4
+  // Chown should not fail on einval or eperm if non-root.
+  // It should not fail on enosys ever, as this just indicates
+  // that a fs doesn't support the intended operation.
+
+  fs.chown = chownFix(fs.chown)
+  fs.fchown = chownFix(fs.fchown)
+  fs.lchown = chownFix(fs.lchown)
+
+  fs.chmod = chmodFix(fs.chmod)
+  fs.fchmod = chmodFix(fs.fchmod)
+  fs.lchmod = chmodFix(fs.lchmod)
+
+  fs.chownSync = chownFixSync(fs.chownSync)
+  fs.fchownSync = chownFixSync(fs.fchownSync)
+  fs.lchownSync = chownFixSync(fs.lchownSync)
+
+  fs.chmodSync = chmodFixSync(fs.chmodSync)
+  fs.fchmodSync = chmodFixSync(fs.fchmodSync)
+  fs.lchmodSync = chmodFixSync(fs.lchmodSync)
+
+  fs.stat = statFix(fs.stat)
+  fs.fstat = statFix(fs.fstat)
+  fs.lstat = statFix(fs.lstat)
+
+  fs.statSync = statFixSync(fs.statSync)
+  fs.fstatSync = statFixSync(fs.fstatSync)
+  fs.lstatSync = statFixSync(fs.lstatSync)
+
+  // if lchmod/lchown do not exist, then make them no-ops
+  if (!fs.lchmod) {
+    fs.lchmod = function (path, mode, cb) {
+      if (cb) process.nextTick(cb)
+    }
+    fs.lchmodSync = function () {}
+  }
+  if (!fs.lchown) {
+    fs.lchown = function (path, uid, gid, cb) {
+      if (cb) process.nextTick(cb)
+    }
+    fs.lchownSync = function () {}
+  }
+
+  // on Windows, A/V software can lock the directory, causing this
+  // to fail with an EACCES or EPERM if the directory contains newly
+  // created files.  Try again on failure, for up to 60 seconds.
+
+  // Set the timeout this long because some Windows Anti-Virus, such as Parity
+  // bit9, may lock files for up to a minute, causing npm package install
+  // failures. Also, take care to yield the scheduler. Windows scheduling gives
+  // CPU to a busy looping process, which can cause the program causing the lock
+  // contention to be starved of CPU by node, so the contention doesn't resolve.
+  if (platform === "win32") {
+    fs.rename = (function (fs$rename) { return function (from, to, cb) {
+      var start = Date.now()
+      var backoff = 0;
+      fs$rename(from, to, function CB (er) {
+        if (er
+            && (er.code === "EACCES" || er.code === "EPERM")
+            && Date.now() - start < 60000) {
+          setTimeout(function() {
+            fs.stat(to, function (stater, st) {
+              if (stater && stater.code === "ENOENT")
+                fs$rename(from, to, CB);
+              else
+                cb(er)
+            })
+          }, backoff)
+          if (backoff < 100)
+            backoff += 10;
+          return;
+        }
+        if (cb) cb(er)
+      })
+    }})(fs.rename)
+  }
+
+  // if read() returns EAGAIN, then just try it again.
+  fs.read = (function (fs$read) { return function (fd, buffer, offset, length, position, callback_) {
+    var callback
+    if (callback_ && typeof callback_ === 'function') {
+      var eagCounter = 0
+      callback = function (er, _, __) {
+        if (er && er.code === 'EAGAIN' && eagCounter < 10) {
+          eagCounter ++
+          return fs$read.call(fs, fd, buffer, offset, length, position, callback)
+        }
+        callback_.apply(this, arguments)
+      }
+    }
+    return fs$read.call(fs, fd, buffer, offset, length, position, callback)
+  }})(fs.read)
+
+  fs.readSync = (function (fs$readSync) { return function (fd, buffer, offset, length, position) {
+    var eagCounter = 0
+    while (true) {
+      try {
+        return fs$readSync.call(fs, fd, buffer, offset, length, position)
+      } catch (er) {
+        if (er.code === 'EAGAIN' && eagCounter < 10) {
+          eagCounter ++
+          continue
+        }
+        throw er
+      }
+    }
+  }})(fs.readSync)
+}
+
+function patchLchmod (fs) {
+  fs.lchmod = function (path, mode, callback) {
+    fs.open( path
+           , constants.O_WRONLY | constants.O_SYMLINK
+           , mode
+           , function (err, fd) {
+      if (err) {
+        if (callback) callback(err)
+        return
+      }
+      // prefer to return the chmod error, if one occurs,
+      // but still try to close, and report closing errors if they occur.
+      fs.fchmod(fd, mode, function (err) {
+        fs.close(fd, function(err2) {
+          if (callback) callback(err || err2)
+        })
+      })
+    })
+  }
+
+  fs.lchmodSync = function (path, mode) {
+    var fd = fs.openSync(path, constants.O_WRONLY | constants.O_SYMLINK, mode)
+
+    // prefer to return the chmod error, if one occurs,
+    // but still try to close, and report closing errors if they occur.
+    var threw = true
+    var ret
+    try {
+      ret = fs.fchmodSync(fd, mode)
+      threw = false
+    } finally {
+      if (threw) {
+        try {
+          fs.closeSync(fd)
+        } catch (er) {}
+      } else {
+        fs.closeSync(fd)
+      }
+    }
+    return ret
+  }
+}
+
+function patchLutimes (fs) {
+  if (constants.hasOwnProperty("O_SYMLINK")) {
+    fs.lutimes = function (path, at, mt, cb) {
+      fs.open(path, constants.O_SYMLINK, function (er, fd) {
+        if (er) {
+          if (cb) cb(er)
+          return
+        }
+        fs.futimes(fd, at, mt, function (er) {
+          fs.close(fd, function (er2) {
+            if (cb) cb(er || er2)
+          })
+        })
+      })
+    }
+
+    fs.lutimesSync = function (path, at, mt) {
+      var fd = fs.openSync(path, constants.O_SYMLINK)
+      var ret
+      var threw = true
+      try {
+        ret = fs.futimesSync(fd, at, mt)
+        threw = false
+      } finally {
+        if (threw) {
+          try {
+            fs.closeSync(fd)
+          } catch (er) {}
+        } else {
+          fs.closeSync(fd)
+        }
+      }
+      return ret
+    }
+
+  } else {
+    fs.lutimes = function (_a, _b, _c, cb) { if (cb) process.nextTick(cb) }
+    fs.lutimesSync = function () {}
+  }
+}
+
+function chmodFix (orig) {
+  if (!orig) return orig
+  return function (target, mode, cb) {
+    return orig.call(fs, target, mode, function (er) {
+      if (chownErOk(er)) er = null
+      if (cb) cb.apply(this, arguments)
+    })
+  }
+}
+
+function chmodFixSync (orig) {
+  if (!orig) return orig
+  return function (target, mode) {
+    try {
+      return orig.call(fs, target, mode)
+    } catch (er) {
+      if (!chownErOk(er)) throw er
+    }
+  }
+}
+
+
+function chownFix (orig) {
+  if (!orig) return orig
+  return function (target, uid, gid, cb) {
+    return orig.call(fs, target, uid, gid, function (er) {
+      if (chownErOk(er)) er = null
+      if (cb) cb.apply(this, arguments)
+    })
+  }
+}
+
+function chownFixSync (orig) {
+  if (!orig) return orig
+  return function (target, uid, gid) {
+    try {
+      return orig.call(fs, target, uid, gid)
+    } catch (er) {
+      if (!chownErOk(er)) throw er
+    }
+  }
+}
+
+
+function statFix (orig) {
+  if (!orig) return orig
+  // Older versions of Node erroneously returned signed integers for
+  // uid + gid.
+  return function (target, cb) {
+    return orig.call(fs, target, function (er, stats) {
+      if (!stats) return cb.apply(this, arguments)
+      if (stats.uid < 0) stats.uid += 0x100000000
+      if (stats.gid < 0) stats.gid += 0x100000000
+      if (cb) cb.apply(this, arguments)
+    })
+  }
+}
+
+function statFixSync (orig) {
+  if (!orig) return orig
+  // Older versions of Node erroneously returned signed integers for
+  // uid + gid.
+  return function (target) {
+    var stats = orig.call(fs, target)
+    if (stats.uid < 0) stats.uid += 0x100000000
+    if (stats.gid < 0) stats.gid += 0x100000000
+    return stats;
+  }
+}
+
+// ENOSYS means that the fs doesn't support the op. Just ignore
+// that, because it doesn't matter.
+//
+// if there's no getuid, or if getuid() is something other
+// than 0, and the error is EINVAL or EPERM, then just ignore
+// it.
+//
+// This specific case is a silent failure in cp, install, tar,
+// and most other unix tools that manage permissions.
+//
+// When running as root, or if other types of errors are
+// encountered, then it's strict.
+function chownErOk (er) {
+  if (!er)
+    return true
+
+  if (er.code === "ENOSYS")
+    return true
+
+  var nonroot = !process.getuid || process.getuid() !== 0
+  if (nonroot) {
+    if (er.code === "EINVAL" || er.code === "EPERM")
+      return true
+  }
+
+  return false
+}
+
+
+/***/ }),
+/* 102 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var fs = __webpack_require__(23)
+
+module.exports = clone(fs)
+
+function clone (obj) {
+  if (obj === null || typeof obj !== 'object')
+    return obj
+
+  if (obj instanceof Object)
+    var copy = { __proto__: obj.__proto__ }
+  else
+    var copy = Object.create(null)
+
+  Object.getOwnPropertyNames(obj).forEach(function (key) {
+    Object.defineProperty(copy, key, Object.getOwnPropertyDescriptor(obj, key))
+  })
+
+  return copy
+}
+
+
+/***/ }),
+/* 103 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var Stream = __webpack_require__(28).Stream
+
+module.exports = legacy
+
+function legacy (fs) {
+  return {
+    ReadStream: ReadStream,
+    WriteStream: WriteStream
+  }
+
+  function ReadStream (path, options) {
+    if (!(this instanceof ReadStream)) return new ReadStream(path, options);
+
+    Stream.call(this);
+
+    var self = this;
+
+    this.path = path;
+    this.fd = null;
+    this.readable = true;
+    this.paused = false;
+
+    this.flags = 'r';
+    this.mode = 438; /*=0666*/
+    this.bufferSize = 64 * 1024;
+
+    options = options || {};
+
+    // Mixin options into this
+    var keys = Object.keys(options);
+    for (var index = 0, length = keys.length; index < length; index++) {
+      var key = keys[index];
+      this[key] = options[key];
+    }
+
+    if (this.encoding) this.setEncoding(this.encoding);
+
+    if (this.start !== undefined) {
+      if ('number' !== typeof this.start) {
+        throw TypeError('start must be a Number');
+      }
+      if (this.end === undefined) {
+        this.end = Infinity;
+      } else if ('number' !== typeof this.end) {
+        throw TypeError('end must be a Number');
+      }
+
+      if (this.start > this.end) {
+        throw new Error('start must be <= end');
+      }
+
+      this.pos = this.start;
+    }
+
+    if (this.fd !== null) {
+      process.nextTick(function() {
+        self._read();
+      });
+      return;
+    }
+
+    fs.open(this.path, this.flags, this.mode, function (err, fd) {
+      if (err) {
+        self.emit('error', err);
+        self.readable = false;
+        return;
+      }
+
+      self.fd = fd;
+      self.emit('open', fd);
+      self._read();
+    })
+  }
+
+  function WriteStream (path, options) {
+    if (!(this instanceof WriteStream)) return new WriteStream(path, options);
+
+    Stream.call(this);
+
+    this.path = path;
+    this.fd = null;
+    this.writable = true;
+
+    this.flags = 'w';
+    this.encoding = 'binary';
+    this.mode = 438; /*=0666*/
+    this.bytesWritten = 0;
+
+    options = options || {};
+
+    // Mixin options into this
+    var keys = Object.keys(options);
+    for (var index = 0, length = keys.length; index < length; index++) {
+      var key = keys[index];
+      this[key] = options[key];
+    }
+
+    if (this.start !== undefined) {
+      if ('number' !== typeof this.start) {
+        throw TypeError('start must be a Number');
+      }
+      if (this.start < 0) {
+        throw new Error('start must be >= zero');
+      }
+
+      this.pos = this.start;
+    }
+
+    this.busy = false;
+    this._queue = [];
+
+    if (this.fd === null) {
+      this._open = fs.open;
+      this._queue.push([this._open, this.path, this.flags, this.mode, undefined]);
+      this.flush();
+    }
+  }
+}
+
+
+/***/ }),
+/* 104 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/**
+ * @preserve
+ * JS Implementation of incremental MurmurHash3 (r150) (as of May 10, 2013)
+ *
+ * @author <a href="mailto:jensyt@gmail.com">Jens Taylor</a>
+ * @see http://github.com/homebrewing/brauhaus-diff
+ * @author <a href="mailto:gary.court@gmail.com">Gary Court</a>
+ * @see http://github.com/garycourt/murmurhash-js
+ * @author <a href="mailto:aappleby@gmail.com">Austin Appleby</a>
+ * @see http://sites.google.com/site/murmurhash/
+ */
+(function(){
+    var cache;
+
+    // Call this function without `new` to use the cached object (good for
+    // single-threaded environments), or with `new` to create a new object.
+    //
+    // @param {string} key A UTF-16 or ASCII string
+    // @param {number} seed An optional positive integer
+    // @return {object} A MurmurHash3 object for incremental hashing
+    function MurmurHash3(key, seed) {
+        var m = this instanceof MurmurHash3 ? this : cache;
+        m.reset(seed)
+        if (typeof key === 'string' && key.length > 0) {
+            m.hash(key);
+        }
+
+        if (m !== this) {
+            return m;
+        }
+    };
+
+    // Incrementally add a string to this hash
+    //
+    // @param {string} key A UTF-16 or ASCII string
+    // @return {object} this
+    MurmurHash3.prototype.hash = function(key) {
+        var h1, k1, i, top, len;
+
+        len = key.length;
+        this.len += len;
+
+        k1 = this.k1;
+        i = 0;
+        switch (this.rem) {
+            case 0: k1 ^= len > i ? (key.charCodeAt(i++) & 0xffff) : 0;
+            case 1: k1 ^= len > i ? (key.charCodeAt(i++) & 0xffff) << 8 : 0;
+            case 2: k1 ^= len > i ? (key.charCodeAt(i++) & 0xffff) << 16 : 0;
+            case 3:
+                k1 ^= len > i ? (key.charCodeAt(i) & 0xff) << 24 : 0;
+                k1 ^= len > i ? (key.charCodeAt(i++) & 0xff00) >> 8 : 0;
+        }
+
+        this.rem = (len + this.rem) & 3; // & 3 is same as % 4
+        len -= this.rem;
+        if (len > 0) {
+            h1 = this.h1;
+            while (1) {
+                k1 = (k1 * 0x2d51 + (k1 & 0xffff) * 0xcc9e0000) & 0xffffffff;
+                k1 = (k1 << 15) | (k1 >>> 17);
+                k1 = (k1 * 0x3593 + (k1 & 0xffff) * 0x1b870000) & 0xffffffff;
+
+                h1 ^= k1;
+                h1 = (h1 << 13) | (h1 >>> 19);
+                h1 = (h1 * 5 + 0xe6546b64) & 0xffffffff;
+
+                if (i >= len) {
+                    break;
+                }
+
+                k1 = ((key.charCodeAt(i++) & 0xffff)) ^
+                     ((key.charCodeAt(i++) & 0xffff) << 8) ^
+                     ((key.charCodeAt(i++) & 0xffff) << 16);
+                top = key.charCodeAt(i++);
+                k1 ^= ((top & 0xff) << 24) ^
+                      ((top & 0xff00) >> 8);
+            }
+
+            k1 = 0;
+            switch (this.rem) {
+                case 3: k1 ^= (key.charCodeAt(i + 2) & 0xffff) << 16;
+                case 2: k1 ^= (key.charCodeAt(i + 1) & 0xffff) << 8;
+                case 1: k1 ^= (key.charCodeAt(i) & 0xffff);
+            }
+
+            this.h1 = h1;
+        }
+
+        this.k1 = k1;
+        return this;
+    };
+
+    // Get the result of this hash
+    //
+    // @return {number} The 32-bit hash
+    MurmurHash3.prototype.result = function() {
+        var k1, h1;
+        
+        k1 = this.k1;
+        h1 = this.h1;
+
+        if (k1 > 0) {
+            k1 = (k1 * 0x2d51 + (k1 & 0xffff) * 0xcc9e0000) & 0xffffffff;
+            k1 = (k1 << 15) | (k1 >>> 17);
+            k1 = (k1 * 0x3593 + (k1 & 0xffff) * 0x1b870000) & 0xffffffff;
+            h1 ^= k1;
+        }
+
+        h1 ^= this.len;
+
+        h1 ^= h1 >>> 16;
+        h1 = (h1 * 0xca6b + (h1 & 0xffff) * 0x85eb0000) & 0xffffffff;
+        h1 ^= h1 >>> 13;
+        h1 = (h1 * 0xae35 + (h1 & 0xffff) * 0xc2b20000) & 0xffffffff;
+        h1 ^= h1 >>> 16;
+
+        return h1 >>> 0;
+    };
+
+    // Reset the hash object for reuse
+    //
+    // @param {number} seed An optional positive integer
+    MurmurHash3.prototype.reset = function(seed) {
+        this.h1 = typeof seed === 'number' ? seed : 0;
+        this.rem = this.k1 = this.len = 0;
+        return this;
+    };
+
+    // A cached object to use. This can be safely used if you're in a single-
+    // threaded environment, otherwise you need to create new hashes to use.
+    cache = new MurmurHash3();
+
+    if (true) {
+        module.exports = MurmurHash3;
+    } else {}
+}());
+
+
+/***/ }),
+/* 105 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// Note: since nyc uses this module to output coverage, any lines
+// that are in the direct sync flow of nyc's outputCoverage are
+// ignored, since we can never get coverage for them.
+var assert = __webpack_require__(30)
+var signals = __webpack_require__(106)
+
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 var EE = __webpack_require__(45)
 /* istanbul ignore if */
 if (typeof EE !== 'function') {
   EE = EE.EventEmitter
+<<<<<<< HEAD
+=======
+}
+
+var emitter
+if (process.__signal_exit_emitter__) {
+  emitter = process.__signal_exit_emitter__
+} else {
+  emitter = process.__signal_exit_emitter__ = new EE()
+  emitter.count = 0
+  emitter.emitted = {}
+}
+
+// Because this emitter is a global, we have to check to see if a
+// previous version of this library failed to enable infinite listeners.
+// I know what you're about to say.  But literally everything about
+// signal-exit is a compromise with evil.  Get used to it.
+if (!emitter.infinite) {
+  emitter.setMaxListeners(Infinity)
+  emitter.infinite = true
+}
+
+module.exports = function (cb, opts) {
+  assert.equal(typeof cb, 'function', 'a callback must be provided for exit handler')
+
+  if (loaded === false) {
+    load()
+  }
+
+  var ev = 'exit'
+  if (opts && opts.alwaysLast) {
+    ev = 'afterexit'
+  }
+
+  var remove = function () {
+    emitter.removeListener(ev, cb)
+    if (emitter.listeners('exit').length === 0 &&
+        emitter.listeners('afterexit').length === 0) {
+      unload()
+    }
+  }
+  emitter.on(ev, cb)
+
+  return remove
+}
+
+module.exports.unload = unload
+function unload () {
+  if (!loaded) {
+    return
+  }
+  loaded = false
+
+  signals.forEach(function (sig) {
+    try {
+      process.removeListener(sig, sigListeners[sig])
+    } catch (er) {}
+  })
+  process.emit = originalProcessEmit
+  process.reallyExit = originalProcessReallyExit
+  emitter.count -= 1
+}
+
+function emit (event, code, signal) {
+  if (emitter.emitted[event]) {
+    return
+  }
+  emitter.emitted[event] = true
+  emitter.emit(event, code, signal)
+}
+
+// { <signal>: <listener fn>, ... }
+var sigListeners = {}
+signals.forEach(function (sig) {
+  sigListeners[sig] = function listener () {
+    // If there are no other listeners, an exit is coming!
+    // Simplest way: remove us and then re-send the signal.
+    // We know that this will kill the process, so we can
+    // safely emit now.
+    var listeners = process.listeners(sig)
+    if (listeners.length === emitter.count) {
+      unload()
+      emit('exit', null, sig)
+      /* istanbul ignore next */
+      emit('afterexit', null, sig)
+      /* istanbul ignore next */
+      process.kill(process.pid, sig)
+    }
+  }
+})
+
+module.exports.signals = function () {
+  return signals
+}
+
+module.exports.load = load
+
+var loaded = false
+
+function load () {
+  if (loaded) {
+    return
+  }
+  loaded = true
+
+  // This is the number of onSignalExit's that are in play.
+  // It's important so that we can count the correct number of
+  // listeners on signals, and don't wait for the other one to
+  // handle it instead of us.
+  emitter.count += 1
+
+  signals = signals.filter(function (sig) {
+    try {
+      process.on(sig, sigListeners[sig])
+      return true
+    } catch (er) {
+      return false
+    }
+  })
+
+  process.emit = processEmit
+  process.reallyExit = processReallyExit
+}
+
+var originalProcessReallyExit = process.reallyExit
+function processReallyExit (code) {
+  process.exitCode = code || 0
+  emit('exit', process.exitCode, null)
+  /* istanbul ignore next */
+  emit('afterexit', process.exitCode, null)
+  /* istanbul ignore next */
+  originalProcessReallyExit.call(process, process.exitCode)
+}
+
+var originalProcessEmit = process.emit
+function processEmit (ev, arg) {
+  if (ev === 'exit') {
+    if (arg !== undefined) {
+      process.exitCode = arg
+    }
+    var ret = originalProcessEmit.apply(this, arguments)
+    emit('exit', process.exitCode, null)
+    /* istanbul ignore next */
+    emit('afterexit', process.exitCode, null)
+    return ret
+  } else {
+    return originalProcessEmit.apply(this, arguments)
+  }
+}
+
+
+/***/ }),
+/* 106 */
+/***/ (function(module, exports) {
+
+// This is not the set of all possible signals.
+//
+// It IS, however, the set of all signals that trigger
+// an exit on either Linux or BSD systems.  Linux is a
+// superset of the signal names supported on BSD, and
+// the unknown signals just fail to register, so we can
+// catch that easily enough.
+//
+// Don't bother with SIGKILL.  It's uncatchable, which
+// means that we can't fire any callbacks anyway.
+//
+// If a user does happen to register a handler on a non-
+// fatal signal like SIGWINCH or something, and then
+// exit, it'll end up firing `process.emit('exit')`, so
+// the handler will be fired anyway.
+//
+// SIGBUS, SIGFPE, SIGSEGV and SIGILL, when not raised
+// artificially, inherently leave the process in a
+// state from which it is not safe to try and enter JS
+// listeners.
+module.exports = [
+  'SIGABRT',
+  'SIGALRM',
+  'SIGHUP',
+  'SIGINT',
+  'SIGTERM'
+]
+
+if (process.platform !== 'win32') {
+  module.exports.push(
+    'SIGVTALRM',
+    'SIGXCPU',
+    'SIGXFSZ',
+    'SIGUSR2',
+    'SIGTRAP',
+    'SIGSYS',
+    'SIGQUIT',
+    'SIGIOT'
+    // should detect profiler and enable/disable accordingly.
+    // see #21
+    // 'SIGPROF'
+  )
+}
+
+if (process.platform === 'linux') {
+  module.exports.push(
+    'SIGIO',
+    'SIGPOLL',
+    'SIGPWR',
+    'SIGSTKFLT',
+    'SIGUNUSED'
+  )
+}
+
+
+/***/ }),
+/* 107 */
+/***/ (function(module, exports) {
+
+module.exports = require(undefined);
+
+/***/ }),
+/* 108 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+const isPlainObj = __webpack_require__(109);
+
+module.exports = (obj, opts) => {
+	if (!isPlainObj(obj)) {
+		throw new TypeError('Expected a plain object');
+	}
+
+	opts = opts || {};
+
+	// DEPRECATED
+	if (typeof opts === 'function') {
+		throw new TypeError('Specify the compare function as an option instead');
+	}
+
+	const deep = opts.deep;
+	const seenInput = [];
+	const seenOutput = [];
+
+	const sortKeys = x => {
+		const seenIndex = seenInput.indexOf(x);
+
+		if (seenIndex !== -1) {
+			return seenOutput[seenIndex];
+		}
+
+		const ret = {};
+		const keys = Object.keys(x).sort(opts.compare);
+
+		seenInput.push(x);
+		seenOutput.push(ret);
+
+		for (let i = 0; i < keys.length; i++) {
+			const key = keys[i];
+			const val = x[key];
+
+			if (deep && Array.isArray(val)) {
+				const retArr = [];
+
+				for (let j = 0; j < val.length; j++) {
+					retArr[j] = isPlainObj(val[j]) ? sortKeys(val[j]) : val[j];
+				}
+
+				ret[key] = retArr;
+				continue;
+			}
+
+			ret[key] = deep && isPlainObj(val) ? sortKeys(val) : val;
+		}
+
+		return ret;
+	};
+
+	return sortKeys(obj);
+};
+
+
+/***/ }),
+/* 109 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var toString = Object.prototype.toString;
+
+module.exports = function (x) {
+	var prototype;
+	return toString.call(x) === '[object Object]' && (prototype = Object.getPrototypeOf(x), prototype === null || prototype === Object.getPrototypeOf({}));
+};
+
+
+/***/ }),
+/* 110 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+const fs = __webpack_require__(23);
+const path = __webpack_require__(16);
+const pify = __webpack_require__(111);
+const semver = __webpack_require__(112);
+
+const defaults = {
+	mode: 0o777 & (~process.umask()),
+	fs
+};
+
+const useNativeRecursiveOption = semver.satisfies(process.version, '>=10.12.0');
+
+// https://github.com/nodejs/node/issues/8987
+// https://github.com/libuv/libuv/pull/1088
+const checkPath = pth => {
+	if (process.platform === 'win32') {
+		const pathHasInvalidWinCharacters = /[<>:"|?*]/.test(pth.replace(path.parse(pth).root, ''));
+
+		if (pathHasInvalidWinCharacters) {
+			const error = new Error(`Path contains invalid characters: ${pth}`);
+			error.code = 'EINVAL';
+			throw error;
+		}
+	}
+};
+
+const permissionError = pth => {
+	// This replicates the exception of `fs.mkdir` with native the
+	// `recusive` option when run on an invalid drive under Windows.
+	const error = new Error(`operation not permitted, mkdir '${pth}'`);
+	error.code = 'EPERM';
+	error.errno = -4048;
+	error.path = pth;
+	error.syscall = 'mkdir';
+	return error;
+};
+
+const makeDir = (input, options) => Promise.resolve().then(() => {
+	checkPath(input);
+	options = Object.assign({}, defaults, options);
+
+	// TODO: Use util.promisify when targeting Node.js 8
+	const mkdir = pify(options.fs.mkdir);
+	const stat = pify(options.fs.stat);
+
+	if (useNativeRecursiveOption && options.fs.mkdir === fs.mkdir) {
+		const pth = path.resolve(input);
+
+		return mkdir(pth, {
+			mode: options.mode,
+			recursive: true
+		}).then(() => pth);
+	}
+
+	const make = pth => {
+		return mkdir(pth, options.mode)
+			.then(() => pth)
+			.catch(error => {
+				if (error.code === 'EPERM') {
+					throw error;
+				}
+
+				if (error.code === 'ENOENT') {
+					if (path.dirname(pth) === pth) {
+						throw permissionError(pth);
+					}
+
+					if (error.message.includes('null bytes')) {
+						throw error;
+					}
+
+					return make(path.dirname(pth)).then(() => make(pth));
+				}
+
+				return stat(pth)
+					.then(stats => stats.isDirectory() ? pth : Promise.reject())
+					.catch(() => {
+						throw error;
+					});
+			});
+	};
+
+	return make(path.resolve(input));
+});
+
+module.exports = makeDir;
+module.exports.default = makeDir;
+
+module.exports.sync = (input, options) => {
+	checkPath(input);
+	options = Object.assign({}, defaults, options);
+
+	if (useNativeRecursiveOption && options.fs.mkdirSync === fs.mkdirSync) {
+		const pth = path.resolve(input);
+
+		fs.mkdirSync(pth, {
+			mode: options.mode,
+			recursive: true
+		});
+
+		return pth;
+	}
+
+	const make = pth => {
+		try {
+			options.fs.mkdirSync(pth, options.mode);
+		} catch (error) {
+			if (error.code === 'EPERM') {
+				throw error;
+			}
+
+			if (error.code === 'ENOENT') {
+				if (path.dirname(pth) === pth) {
+					throw permissionError(pth);
+				}
+
+				if (error.message.includes('null bytes')) {
+					throw error;
+				}
+
+				make(path.dirname(pth));
+				return make(pth);
+			}
+
+			try {
+				if (!options.fs.statSync(pth).isDirectory()) {
+					throw new Error('The path is not a directory');
+				}
+			} catch (_) {
+				throw error;
+			}
+		}
+
+		return pth;
+	};
+
+	return make(path.resolve(input));
+};
+
+
+/***/ }),
+/* 111 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+const processFn = (fn, options) => function (...args) {
+	const P = options.promiseModule;
+
+	return new P((resolve, reject) => {
+		if (options.multiArgs) {
+			args.push((...result) => {
+				if (options.errorFirst) {
+					if (result[0]) {
+						reject(result);
+					} else {
+						result.shift();
+						resolve(result);
+					}
+				} else {
+					resolve(result);
+				}
+			});
+		} else if (options.errorFirst) {
+			args.push((error, result) => {
+				if (error) {
+					reject(error);
+				} else {
+					resolve(result);
+				}
+			});
+		} else {
+			args.push(resolve);
+		}
+
+		fn.apply(this, args);
+	});
+};
+
+module.exports = (input, options) => {
+	options = Object.assign({
+		exclude: [/.+(Sync|Stream)$/],
+		errorFirst: true,
+		promiseModule: Promise
+	}, options);
+
+	const objType = typeof input;
+	if (!(input !== null && (objType === 'object' || objType === 'function'))) {
+		throw new TypeError(`Expected \`input\` to be a \`Function\` or \`Object\`, got \`${input === null ? 'null' : objType}\``);
+	}
+
+	const filter = key => {
+		const match = pattern => typeof pattern === 'string' ? key === pattern : pattern.test(key);
+		return options.include ? options.include.some(match) : !options.exclude.some(match);
+	};
+
+	let ret;
+	if (objType === 'function') {
+		ret = function (...args) {
+			return options.excludeMain ? input(...args) : processFn(input, options).apply(this, args);
+		};
+	} else {
+		ret = Object.create(Object.getPrototypeOf(input));
+	}
+
+	for (const key in input) { // eslint-disable-line guard-for-in
+		const property = input[key];
+		ret[key] = typeof property === 'function' && filter(key) ? processFn(property, options) : property;
+	}
+
+	return ret;
+};
+
+
+/***/ }),
+/* 112 */
+/***/ (function(module, exports) {
+
+exports = module.exports = SemVer
+
+var debug
+/* istanbul ignore next */
+if (typeof process === 'object' &&
+    process.env &&
+    process.env.NODE_DEBUG &&
+    /\bsemver\b/i.test(process.env.NODE_DEBUG)) {
+  debug = function () {
+    var args = Array.prototype.slice.call(arguments, 0)
+    args.unshift('SEMVER')
+    console.log.apply(console, args)
+  }
+} else {
+  debug = function () {}
+}
+
+// Note: this is the semver.org version of the spec that it implements
+// Not necessarily the package version of this code.
+exports.SEMVER_SPEC_VERSION = '2.0.0'
+
+var MAX_LENGTH = 256
+var MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER ||
+  /* istanbul ignore next */ 9007199254740991
+
+// Max safe segment length for coercion.
+var MAX_SAFE_COMPONENT_LENGTH = 16
+
+// The actual regexps go on exports.re
+var re = exports.re = []
+var src = exports.src = []
+var R = 0
+
+// The following Regular Expressions can be used for tokenizing,
+// validating, and parsing SemVer version strings.
+
+// ## Numeric Identifier
+// A single `0`, or a non-zero digit followed by zero or more digits.
+
+var NUMERICIDENTIFIER = R++
+src[NUMERICIDENTIFIER] = '0|[1-9]\\d*'
+var NUMERICIDENTIFIERLOOSE = R++
+src[NUMERICIDENTIFIERLOOSE] = '[0-9]+'
+
+// ## Non-numeric Identifier
+// Zero or more digits, followed by a letter or hyphen, and then zero or
+// more letters, digits, or hyphens.
+
+var NONNUMERICIDENTIFIER = R++
+src[NONNUMERICIDENTIFIER] = '\\d*[a-zA-Z-][a-zA-Z0-9-]*'
+
+// ## Main Version
+// Three dot-separated numeric identifiers.
+
+var MAINVERSION = R++
+src[MAINVERSION] = '(' + src[NUMERICIDENTIFIER] + ')\\.' +
+                   '(' + src[NUMERICIDENTIFIER] + ')\\.' +
+                   '(' + src[NUMERICIDENTIFIER] + ')'
+
+var MAINVERSIONLOOSE = R++
+src[MAINVERSIONLOOSE] = '(' + src[NUMERICIDENTIFIERLOOSE] + ')\\.' +
+                        '(' + src[NUMERICIDENTIFIERLOOSE] + ')\\.' +
+                        '(' + src[NUMERICIDENTIFIERLOOSE] + ')'
+
+// ## Pre-release Version Identifier
+// A numeric identifier, or a non-numeric identifier.
+
+var PRERELEASEIDENTIFIER = R++
+src[PRERELEASEIDENTIFIER] = '(?:' + src[NUMERICIDENTIFIER] +
+                            '|' + src[NONNUMERICIDENTIFIER] + ')'
+
+var PRERELEASEIDENTIFIERLOOSE = R++
+src[PRERELEASEIDENTIFIERLOOSE] = '(?:' + src[NUMERICIDENTIFIERLOOSE] +
+                                 '|' + src[NONNUMERICIDENTIFIER] + ')'
+
+// ## Pre-release Version
+// Hyphen, followed by one or more dot-separated pre-release version
+// identifiers.
+
+var PRERELEASE = R++
+src[PRERELEASE] = '(?:-(' + src[PRERELEASEIDENTIFIER] +
+                  '(?:\\.' + src[PRERELEASEIDENTIFIER] + ')*))'
+
+var PRERELEASELOOSE = R++
+src[PRERELEASELOOSE] = '(?:-?(' + src[PRERELEASEIDENTIFIERLOOSE] +
+                       '(?:\\.' + src[PRERELEASEIDENTIFIERLOOSE] + ')*))'
+
+// ## Build Metadata Identifier
+// Any combination of digits, letters, or hyphens.
+
+var BUILDIDENTIFIER = R++
+src[BUILDIDENTIFIER] = '[0-9A-Za-z-]+'
+
+// ## Build Metadata
+// Plus sign, followed by one or more period-separated build metadata
+// identifiers.
+
+var BUILD = R++
+src[BUILD] = '(?:\\+(' + src[BUILDIDENTIFIER] +
+             '(?:\\.' + src[BUILDIDENTIFIER] + ')*))'
+
+// ## Full Version String
+// A main version, followed optionally by a pre-release version and
+// build metadata.
+
+// Note that the only major, minor, patch, and pre-release sections of
+// the version string are capturing groups.  The build metadata is not a
+// capturing group, because it should not ever be used in version
+// comparison.
+
+var FULL = R++
+var FULLPLAIN = 'v?' + src[MAINVERSION] +
+                src[PRERELEASE] + '?' +
+                src[BUILD] + '?'
+
+src[FULL] = '^' + FULLPLAIN + '$'
+
+// like full, but allows v1.2.3 and =1.2.3, which people do sometimes.
+// also, 1.0.0alpha1 (prerelease without the hyphen) which is pretty
+// common in the npm registry.
+var LOOSEPLAIN = '[v=\\s]*' + src[MAINVERSIONLOOSE] +
+                 src[PRERELEASELOOSE] + '?' +
+                 src[BUILD] + '?'
+
+var LOOSE = R++
+src[LOOSE] = '^' + LOOSEPLAIN + '$'
+
+var GTLT = R++
+src[GTLT] = '((?:<|>)?=?)'
+
+// Something like "2.*" or "1.2.x".
+// Note that "x.x" is a valid xRange identifer, meaning "any version"
+// Only the first item is strictly required.
+var XRANGEIDENTIFIERLOOSE = R++
+src[XRANGEIDENTIFIERLOOSE] = src[NUMERICIDENTIFIERLOOSE] + '|x|X|\\*'
+var XRANGEIDENTIFIER = R++
+src[XRANGEIDENTIFIER] = src[NUMERICIDENTIFIER] + '|x|X|\\*'
+
+var XRANGEPLAIN = R++
+src[XRANGEPLAIN] = '[v=\\s]*(' + src[XRANGEIDENTIFIER] + ')' +
+                   '(?:\\.(' + src[XRANGEIDENTIFIER] + ')' +
+                   '(?:\\.(' + src[XRANGEIDENTIFIER] + ')' +
+                   '(?:' + src[PRERELEASE] + ')?' +
+                   src[BUILD] + '?' +
+                   ')?)?'
+
+var XRANGEPLAINLOOSE = R++
+src[XRANGEPLAINLOOSE] = '[v=\\s]*(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
+                        '(?:\\.(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
+                        '(?:\\.(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
+                        '(?:' + src[PRERELEASELOOSE] + ')?' +
+                        src[BUILD] + '?' +
+                        ')?)?'
+
+var XRANGE = R++
+src[XRANGE] = '^' + src[GTLT] + '\\s*' + src[XRANGEPLAIN] + '$'
+var XRANGELOOSE = R++
+src[XRANGELOOSE] = '^' + src[GTLT] + '\\s*' + src[XRANGEPLAINLOOSE] + '$'
+
+// Coercion.
+// Extract anything that could conceivably be a part of a valid semver
+var COERCE = R++
+src[COERCE] = '(?:^|[^\\d])' +
+              '(\\d{1,' + MAX_SAFE_COMPONENT_LENGTH + '})' +
+              '(?:\\.(\\d{1,' + MAX_SAFE_COMPONENT_LENGTH + '}))?' +
+              '(?:\\.(\\d{1,' + MAX_SAFE_COMPONENT_LENGTH + '}))?' +
+              '(?:$|[^\\d])'
+
+// Tilde ranges.
+// Meaning is "reasonably at or greater than"
+var LONETILDE = R++
+src[LONETILDE] = '(?:~>?)'
+
+var TILDETRIM = R++
+src[TILDETRIM] = '(\\s*)' + src[LONETILDE] + '\\s+'
+re[TILDETRIM] = new RegExp(src[TILDETRIM], 'g')
+var tildeTrimReplace = '$1~'
+
+var TILDE = R++
+src[TILDE] = '^' + src[LONETILDE] + src[XRANGEPLAIN] + '$'
+var TILDELOOSE = R++
+src[TILDELOOSE] = '^' + src[LONETILDE] + src[XRANGEPLAINLOOSE] + '$'
+
+// Caret ranges.
+// Meaning is "at least and backwards compatible with"
+var LONECARET = R++
+src[LONECARET] = '(?:\\^)'
+
+var CARETTRIM = R++
+src[CARETTRIM] = '(\\s*)' + src[LONECARET] + '\\s+'
+re[CARETTRIM] = new RegExp(src[CARETTRIM], 'g')
+var caretTrimReplace = '$1^'
+
+var CARET = R++
+src[CARET] = '^' + src[LONECARET] + src[XRANGEPLAIN] + '$'
+var CARETLOOSE = R++
+src[CARETLOOSE] = '^' + src[LONECARET] + src[XRANGEPLAINLOOSE] + '$'
+
+// A simple gt/lt/eq thing, or just "" to indicate "any version"
+var COMPARATORLOOSE = R++
+src[COMPARATORLOOSE] = '^' + src[GTLT] + '\\s*(' + LOOSEPLAIN + ')$|^$'
+var COMPARATOR = R++
+src[COMPARATOR] = '^' + src[GTLT] + '\\s*(' + FULLPLAIN + ')$|^$'
+
+// An expression to strip any whitespace between the gtlt and the thing
+// it modifies, so that `> 1.2.3` ==> `>1.2.3`
+var COMPARATORTRIM = R++
+src[COMPARATORTRIM] = '(\\s*)' + src[GTLT] +
+                      '\\s*(' + LOOSEPLAIN + '|' + src[XRANGEPLAIN] + ')'
+
+// this one has to use the /g flag
+re[COMPARATORTRIM] = new RegExp(src[COMPARATORTRIM], 'g')
+var comparatorTrimReplace = '$1$2$3'
+
+// Something like `1.2.3 - 1.2.4`
+// Note that these all use the loose form, because they'll be
+// checked against either the strict or loose comparator form
+// later.
+var HYPHENRANGE = R++
+src[HYPHENRANGE] = '^\\s*(' + src[XRANGEPLAIN] + ')' +
+                   '\\s+-\\s+' +
+                   '(' + src[XRANGEPLAIN] + ')' +
+                   '\\s*$'
+
+var HYPHENRANGELOOSE = R++
+src[HYPHENRANGELOOSE] = '^\\s*(' + src[XRANGEPLAINLOOSE] + ')' +
+                        '\\s+-\\s+' +
+                        '(' + src[XRANGEPLAINLOOSE] + ')' +
+                        '\\s*$'
+
+// Star ranges basically just allow anything at all.
+var STAR = R++
+src[STAR] = '(<|>)?=?\\s*\\*'
+
+// Compile to actual regexp objects.
+// All are flag-free, unless they were created above with a flag.
+for (var i = 0; i < R; i++) {
+  debug(i, src[i])
+  if (!re[i]) {
+    re[i] = new RegExp(src[i])
+  }
+}
+
+exports.parse = parse
+function parse (version, options) {
+  if (!options || typeof options !== 'object') {
+    options = {
+      loose: !!options,
+      includePrerelease: false
+    }
+  }
+
+  if (version instanceof SemVer) {
+    return version
+  }
+
+  if (typeof version !== 'string') {
+    return null
+  }
+
+  if (version.length > MAX_LENGTH) {
+    return null
+  }
+
+  var r = options.loose ? re[LOOSE] : re[FULL]
+  if (!r.test(version)) {
+    return null
+  }
+
+  try {
+    return new SemVer(version, options)
+  } catch (er) {
+    return null
+  }
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 }
 
 var emitter
@@ -13694,7 +17451,11 @@ module.exports = (obj, opts) => {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 94 */
+=======
+/* 113 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13823,7 +17584,11 @@ module.exports = str => {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 95 */
+=======
+/* 114 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -13832,7 +17597,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "runScriptInPackage", function() { return runScriptInPackage; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "runScriptInPackageStreaming", function() { return runScriptInPackageStreaming; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "yarnWorkspacesInfo", function() { return yarnWorkspacesInfo; });
+<<<<<<< HEAD
 /* harmony import */ var _child_process__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(96);
+=======
+/* harmony import */ var _child_process__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(115);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -13896,7 +17665,11 @@ async function yarnWorkspacesInfo(directory) {
 }
 
 /***/ }),
+<<<<<<< HEAD
 /* 96 */
+=======
+/* 115 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -13905,11 +17678,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "spawnStreaming", function() { return spawnStreaming; });
 /* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
 /* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(chalk__WEBPACK_IMPORTED_MODULE_0__);
+<<<<<<< HEAD
 /* harmony import */ var execa__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(97);
 /* harmony import */ var execa__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(execa__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var log_symbols__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(125);
 /* harmony import */ var log_symbols__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(log_symbols__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var strong_log_transformer__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(126);
+=======
+/* harmony import */ var execa__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(116);
+/* harmony import */ var execa__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(execa__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var log_symbols__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(144);
+/* harmony import */ var log_symbols__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(log_symbols__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var strong_log_transformer__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(145);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /* harmony import */ var strong_log_transformer__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(strong_log_transformer__WEBPACK_IMPORTED_MODULE_3__);
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
@@ -13973,12 +17754,17 @@ function spawnStreaming(command, args, opts, {
 }
 
 /***/ }),
+<<<<<<< HEAD
 /* 97 */
+=======
+/* 116 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 const path = __webpack_require__(16);
+<<<<<<< HEAD
 const childProcess = __webpack_require__(98);
 const crossSpawn = __webpack_require__(99);
 const stripEof = __webpack_require__(114);
@@ -13989,6 +17775,18 @@ const pFinally = __webpack_require__(122);
 const onExit = __webpack_require__(87);
 const errname = __webpack_require__(123);
 const stdio = __webpack_require__(124);
+=======
+const childProcess = __webpack_require__(117);
+const crossSpawn = __webpack_require__(118);
+const stripEof = __webpack_require__(133);
+const npmRunPath = __webpack_require__(134);
+const isStream = __webpack_require__(136);
+const _getStream = __webpack_require__(137);
+const pFinally = __webpack_require__(141);
+const onExit = __webpack_require__(105);
+const errname = __webpack_require__(142);
+const stdio = __webpack_require__(143);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 const TEN_MEGABYTES = 1000 * 1000 * 10;
 
@@ -14341,21 +18139,35 @@ module.exports.shellSync = (cmd, opts) => handleShell(module.exports.sync, cmd, 
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 98 */
+=======
+/* 117 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports) {
 
 module.exports = require("child_process");
 
 /***/ }),
+<<<<<<< HEAD
 /* 99 */
+=======
+/* 118 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+<<<<<<< HEAD
 const cp = __webpack_require__(98);
 const parse = __webpack_require__(100);
 const enoent = __webpack_require__(113);
+=======
+const cp = __webpack_require__(117);
+const parse = __webpack_require__(119);
+const enoent = __webpack_require__(132);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 function spawn(command, args, options) {
     // Parse the arguments
@@ -14393,18 +18205,30 @@ module.exports._enoent = enoent;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 100 */
+=======
+/* 119 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 const path = __webpack_require__(16);
+<<<<<<< HEAD
 const niceTry = __webpack_require__(101);
 const resolveCommand = __webpack_require__(102);
 const escape = __webpack_require__(108);
 const readShebang = __webpack_require__(109);
 const semver = __webpack_require__(112);
+=======
+const niceTry = __webpack_require__(120);
+const resolveCommand = __webpack_require__(121);
+const escape = __webpack_require__(127);
+const readShebang = __webpack_require__(128);
+const semver = __webpack_require__(131);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 const isWin = process.platform === 'win32';
 const isExecutableRegExp = /\.(?:com|exe)$/i;
@@ -14525,7 +18349,11 @@ module.exports = parse;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 101 */
+=======
+/* 120 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -14544,15 +18372,24 @@ module.exports = function(fn) {
 }
 
 /***/ }),
+<<<<<<< HEAD
 /* 102 */
+=======
+/* 121 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 const path = __webpack_require__(16);
+<<<<<<< HEAD
 const which = __webpack_require__(103);
 const pathKey = __webpack_require__(107)();
+=======
+const which = __webpack_require__(122);
+const pathKey = __webpack_require__(126)();
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 function resolveCommandAttempt(parsed, withoutPathExt) {
     const cwd = process.cwd();
@@ -14598,7 +18435,11 @@ module.exports = resolveCommand;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 103 */
+=======
+/* 122 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = which
@@ -14610,7 +18451,11 @@ var isWindows = process.platform === 'win32' ||
 
 var path = __webpack_require__(16)
 var COLON = isWindows ? ';' : ':'
+<<<<<<< HEAD
 var isexe = __webpack_require__(104)
+=======
+var isexe = __webpack_require__(123)
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 function getNotFoundError (cmd) {
   var er = new Error('not found: ' + cmd)
@@ -14739,15 +18584,25 @@ function whichSync (cmd, opt) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 104 */
+=======
+/* 123 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 var fs = __webpack_require__(23)
 var core
 if (process.platform === 'win32' || global.TESTING_WINDOWS) {
+<<<<<<< HEAD
   core = __webpack_require__(105)
 } else {
   core = __webpack_require__(106)
+=======
+  core = __webpack_require__(124)
+} else {
+  core = __webpack_require__(125)
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 }
 
 module.exports = isexe
@@ -14802,7 +18657,11 @@ function sync (path, options) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 105 */
+=======
+/* 124 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = isexe
@@ -14850,7 +18709,11 @@ function sync (path, options) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 106 */
+=======
+/* 125 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = isexe
@@ -14897,7 +18760,11 @@ function checkMode (stat, options) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 107 */
+=======
+/* 126 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -14917,7 +18784,11 @@ module.exports = opts => {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 108 */
+=======
+/* 127 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -14969,14 +18840,22 @@ module.exports.argument = escapeArgument;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 109 */
+=======
+/* 128 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 const fs = __webpack_require__(23);
+<<<<<<< HEAD
 const shebangCommand = __webpack_require__(110);
+=======
+const shebangCommand = __webpack_require__(129);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 function readShebang(command) {
     // Read the first 150 bytes from the file
@@ -15008,12 +18887,20 @@ module.exports = readShebang;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 110 */
+=======
+/* 129 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+<<<<<<< HEAD
 var shebangRegex = __webpack_require__(111);
+=======
+var shebangRegex = __webpack_require__(130);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = function (str) {
 	var match = str.match(shebangRegex);
@@ -15034,7 +18921,11 @@ module.exports = function (str) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 111 */
+=======
+/* 130 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15043,7 +18934,11 @@ module.exports = /^#!.*/;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 112 */
+=======
+/* 131 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports) {
 
 exports = module.exports = SemVer;
@@ -16373,7 +20268,11 @@ function coerce(version) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 113 */
+=======
+/* 132 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16439,7 +20338,11 @@ module.exports = {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 114 */
+=======
+/* 133 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16461,13 +20364,21 @@ module.exports = function (x) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 115 */
+=======
+/* 134 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 const path = __webpack_require__(16);
+<<<<<<< HEAD
 const pathKey = __webpack_require__(116);
+=======
+const pathKey = __webpack_require__(135);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = opts => {
 	opts = Object.assign({
@@ -16507,7 +20418,11 @@ module.exports.env = opts => {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 116 */
+=======
+/* 135 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16527,7 +20442,11 @@ module.exports = opts => {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 117 */
+=======
+/* 136 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16555,13 +20474,22 @@ isStream.transform = function (stream) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 118 */
+=======
+/* 137 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+<<<<<<< HEAD
 const pump = __webpack_require__(119);
 const bufferStream = __webpack_require__(121);
+=======
+const pump = __webpack_require__(138);
+const bufferStream = __webpack_require__(140);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 class MaxBufferError extends Error {
 	constructor() {
@@ -16612,11 +20540,19 @@ module.exports.MaxBufferError = MaxBufferError;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 119 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var once = __webpack_require__(51)
 var eos = __webpack_require__(120)
+=======
+/* 138 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var once = __webpack_require__(51)
+var eos = __webpack_require__(139)
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 var fs = __webpack_require__(23) // we only need fs to get the ReadStream and WriteStream prototypes
 
 var noop = function () {}
@@ -16700,7 +20636,11 @@ module.exports = pump
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 120 */
+=======
+/* 139 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 var once = __webpack_require__(51);
@@ -16793,7 +20733,11 @@ module.exports = eos;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 121 */
+=======
+/* 140 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16851,7 +20795,11 @@ module.exports = options => {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 122 */
+=======
+/* 141 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16873,7 +20821,11 @@ module.exports = (promise, onFinally) => {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 123 */
+=======
+/* 142 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16919,7 +20871,11 @@ function errname(uv, code) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 124 */
+=======
+/* 143 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16967,7 +20923,11 @@ module.exports = opts => {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 125 */
+=======
+/* 144 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16994,7 +20954,11 @@ module.exports = isSupported ? main : fallbacks;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 126 */
+=======
+/* 145 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 // Copyright IBM Corp. 2014,2018. All Rights Reserved.
@@ -17002,12 +20966,21 @@ module.exports = isSupported ? main : fallbacks;
 // This file is licensed under the Apache License 2.0.
 // License text available at https://opensource.org/licenses/Apache-2.0
 
+<<<<<<< HEAD
 module.exports = __webpack_require__(127);
 module.exports.cli = __webpack_require__(131);
 
 
 /***/ }),
 /* 127 */
+=======
+module.exports = __webpack_require__(146);
+module.exports.cli = __webpack_require__(150);
+
+
+/***/ }),
+/* 146 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -17022,9 +20995,15 @@ var stream = __webpack_require__(28);
 var util = __webpack_require__(29);
 var fs = __webpack_require__(23);
 
+<<<<<<< HEAD
 var through = __webpack_require__(128);
 var duplexer = __webpack_require__(129);
 var StringDecoder = __webpack_require__(130).StringDecoder;
+=======
+var through = __webpack_require__(147);
+var duplexer = __webpack_require__(148);
+var StringDecoder = __webpack_require__(149).StringDecoder;
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = Logger;
 
@@ -17213,7 +21192,11 @@ function lineMerger(host) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 128 */
+=======
+/* 147 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 var Stream = __webpack_require__(28)
@@ -17327,7 +21310,11 @@ function through (write, end, opts) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 129 */
+=======
+/* 148 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 var Stream = __webpack_require__(28)
@@ -17420,13 +21407,21 @@ function duplex(writer, reader) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 130 */
+=======
+/* 149 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports) {
 
 module.exports = require("string_decoder");
 
 /***/ }),
+<<<<<<< HEAD
 /* 131 */
+=======
+/* 150 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -17437,11 +21432,19 @@ module.exports = require("string_decoder");
 
 
 
+<<<<<<< HEAD
 var minimist = __webpack_require__(132);
 var path = __webpack_require__(16);
 
 var Logger = __webpack_require__(127);
 var pkg = __webpack_require__(133);
+=======
+var minimist = __webpack_require__(151);
+var path = __webpack_require__(16);
+
+var Logger = __webpack_require__(146);
+var pkg = __webpack_require__(152);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = cli;
 
@@ -17495,7 +21498,11 @@ function usage($0, p) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 132 */
+=======
+/* 151 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports) {
 
 module.exports = function (args, opts) {
@@ -17737,13 +21744,21 @@ function isNumber (x) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 133 */
+=======
+/* 152 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module) {
 
 module.exports = {"name":"strong-log-transformer","version":"2.1.0","description":"Stream transformer that prefixes lines with timestamps and other things.","author":"Ryan Graham <ryan@strongloop.com>","license":"Apache-2.0","repository":{"type":"git","url":"git://github.com/strongloop/strong-log-transformer"},"keywords":["logging","streams"],"bugs":{"url":"https://github.com/strongloop/strong-log-transformer/issues"},"homepage":"https://github.com/strongloop/strong-log-transformer","directories":{"test":"test"},"bin":{"sl-log-transformer":"bin/sl-log-transformer.js"},"main":"index.js","scripts":{"test":"tap --100 test/test-*"},"dependencies":{"duplexer":"^0.1.1","minimist":"^1.2.0","through":"^2.3.4"},"devDependencies":{"tap":"^12.0.1"},"engines":{"node":">=4"}};
 
 /***/ }),
+<<<<<<< HEAD
 /* 134 */
+=======
+/* 153 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -17756,7 +21771,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var util__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(29);
 /* harmony import */ var util__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(util__WEBPACK_IMPORTED_MODULE_2__);
+<<<<<<< HEAD
 /* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(135);
+=======
+/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(154);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /* harmony import */ var _fs__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(20);
 /* harmony import */ var _package_json__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(54);
 /* harmony import */ var _projects__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(35);
@@ -17787,7 +21806,7 @@ __webpack_require__.r(__webpack_exports__);
 
 const glob = Object(util__WEBPACK_IMPORTED_MODULE_2__["promisify"])(glob__WEBPACK_IMPORTED_MODULE_0___default.a);
 async function workspacePackagePaths(rootPath) {
-  const rootPkgJson = await Object(_package_json__WEBPACK_IMPORTED_MODULE_5__["readPackageJson"])(path__WEBPACK_IMPORTED_MODULE_1___default.a.join(rootPath, 'package.json'));
+  const rootPkgJson = await Object(_package_json__WEBPACK_IMPORTED_MODULE_5__["readPackageJson"])(rootPath);
 
   if (!rootPkgJson.workspaces) {
     return [];
@@ -17849,7 +21868,11 @@ function packagesFromGlobPattern({
 }
 
 /***/ }),
+<<<<<<< HEAD
 /* 135 */
+=======
+/* 154 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -17914,7 +21937,11 @@ function getProjectPaths(rootPath, options = {}) {
 }
 
 /***/ }),
+<<<<<<< HEAD
 /* 136 */
+=======
+/* 155 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -17922,9 +21949,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "CleanCommand", function() { return CleanCommand; });
 /* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
 /* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(chalk__WEBPACK_IMPORTED_MODULE_0__);
+<<<<<<< HEAD
 /* harmony import */ var del__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(137);
 /* harmony import */ var del__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(del__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var ora__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(152);
+=======
+/* harmony import */ var del__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(156);
+/* harmony import */ var del__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(del__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var ora__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(171);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /* harmony import */ var ora__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(ora__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(16);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_3__);
@@ -18024,18 +22057,31 @@ const CleanCommand = {
 };
 
 /***/ }),
+<<<<<<< HEAD
 /* 137 */
+=======
+/* 156 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 const path = __webpack_require__(16);
+<<<<<<< HEAD
 const globby = __webpack_require__(138);
 const isPathCwd = __webpack_require__(145);
 const isPathInCwd = __webpack_require__(146);
 const pify = __webpack_require__(149);
 const rimraf = __webpack_require__(150);
 const pMap = __webpack_require__(151);
+=======
+const globby = __webpack_require__(157);
+const isPathCwd = __webpack_require__(164);
+const isPathInCwd = __webpack_require__(165);
+const pify = __webpack_require__(168);
+const rimraf = __webpack_require__(169);
+const pMap = __webpack_require__(170);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 const rimrafP = pify(rimraf);
 
@@ -18101,16 +22147,28 @@ module.exports.sync = (patterns, options) => {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 138 */
+=======
+/* 157 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+<<<<<<< HEAD
 var Promise = __webpack_require__(139);
 var arrayUnion = __webpack_require__(141);
 var objectAssign = __webpack_require__(143);
 var glob = __webpack_require__(36);
 var pify = __webpack_require__(144);
+=======
+var Promise = __webpack_require__(158);
+var arrayUnion = __webpack_require__(160);
+var objectAssign = __webpack_require__(162);
+var glob = __webpack_require__(36);
+var pify = __webpack_require__(163);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 var globP = pify(glob, Promise).bind(glob);
 
@@ -18196,17 +22254,29 @@ module.exports.hasMagic = function (patterns, opts) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 139 */
+=======
+/* 158 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+<<<<<<< HEAD
 module.exports = typeof Promise === 'function' ? Promise : __webpack_require__(140);
 
 
 /***/ }),
 /* 140 */
+=======
+module.exports = typeof Promise === 'function' ? Promise : __webpack_require__(159);
+
+
+/***/ }),
+/* 159 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -18505,12 +22575,20 @@ module.exports = Promise;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 141 */
+=======
+/* 160 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+<<<<<<< HEAD
 var arrayUniq = __webpack_require__(142);
+=======
+var arrayUniq = __webpack_require__(161);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = function () {
 	return arrayUniq([].concat.apply([], arguments));
@@ -18518,7 +22596,11 @@ module.exports = function () {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 142 */
+=======
+/* 161 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -18587,7 +22669,11 @@ if ('Set' in global) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 143 */
+=======
+/* 162 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -18684,7 +22770,11 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 144 */
+=======
+/* 163 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -18759,7 +22849,11 @@ pify.all = pify;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 145 */
+=======
+/* 164 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -18770,24 +22864,40 @@ module.exports = path_ => path.resolve(path_) === process.cwd();
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 146 */
+=======
+/* 165 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+<<<<<<< HEAD
 const isPathInside = __webpack_require__(147);
+=======
+const isPathInside = __webpack_require__(166);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = path => isPathInside(path, process.cwd());
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 147 */
+=======
+/* 166 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 const path = __webpack_require__(16);
+<<<<<<< HEAD
 const pathIsInside = __webpack_require__(148);
+=======
+const pathIsInside = __webpack_require__(167);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = (childPath, parentPath) => {
 	childPath = path.resolve(childPath);
@@ -18802,7 +22912,11 @@ module.exports = (childPath, parentPath) => {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 148 */
+=======
+/* 167 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -18837,7 +22951,11 @@ function stripTrailingSep(thePath) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 149 */
+=======
+/* 168 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -18912,7 +23030,11 @@ module.exports = (input, options) => {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 150 */
+=======
+/* 169 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = rimraf
@@ -19282,7 +23404,11 @@ function rmkidsSync (p, options) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 151 */
+=======
+/* 170 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19361,15 +23487,25 @@ module.exports.default = pMap;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 152 */
+=======
+/* 171 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 const chalk = __webpack_require__(2);
+<<<<<<< HEAD
 const cliCursor = __webpack_require__(153);
 const cliSpinners = __webpack_require__(157);
 const logSymbols = __webpack_require__(125);
+=======
+const cliCursor = __webpack_require__(172);
+const cliSpinners = __webpack_require__(176);
+const logSymbols = __webpack_require__(144);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 class Ora {
 	constructor(options) {
@@ -19516,12 +23652,20 @@ module.exports.promise = (action, options) => {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 153 */
+=======
+/* 172 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+<<<<<<< HEAD
 const restoreCursor = __webpack_require__(154);
+=======
+const restoreCursor = __webpack_require__(173);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 let hidden = false;
 
@@ -19562,13 +23706,22 @@ exports.toggle = (force, stream) => {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 154 */
+=======
+/* 173 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+<<<<<<< HEAD
 const onetime = __webpack_require__(155);
 const signalExit = __webpack_require__(87);
+=======
+const onetime = __webpack_require__(174);
+const signalExit = __webpack_require__(105);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = onetime(() => {
 	signalExit(() => {
@@ -19578,12 +23731,20 @@ module.exports = onetime(() => {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 155 */
+=======
+/* 174 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+<<<<<<< HEAD
 const mimicFn = __webpack_require__(156);
+=======
+const mimicFn = __webpack_require__(175);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = (fn, opts) => {
 	// TODO: Remove this in v3
@@ -19624,7 +23785,11 @@ module.exports = (fn, opts) => {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 156 */
+=======
+/* 175 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19640,22 +23805,38 @@ module.exports = (to, from) => {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 157 */
+=======
+/* 176 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+<<<<<<< HEAD
 module.exports = __webpack_require__(158);
 
 
 /***/ }),
 /* 158 */
+=======
+module.exports = __webpack_require__(177);
+
+
+/***/ }),
+/* 177 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module) {
 
 module.exports = {"dots":{"interval":80,"frames":["⠋","⠙","⠹","⠸","⠼","⠴","⠦","⠧","⠇","⠏"]},"dots2":{"interval":80,"frames":["⣾","⣽","⣻","⢿","⡿","⣟","⣯","⣷"]},"dots3":{"interval":80,"frames":["⠋","⠙","⠚","⠞","⠖","⠦","⠴","⠲","⠳","⠓"]},"dots4":{"interval":80,"frames":["⠄","⠆","⠇","⠋","⠙","⠸","⠰","⠠","⠰","⠸","⠙","⠋","⠇","⠆"]},"dots5":{"interval":80,"frames":["⠋","⠙","⠚","⠒","⠂","⠂","⠒","⠲","⠴","⠦","⠖","⠒","⠐","⠐","⠒","⠓","⠋"]},"dots6":{"interval":80,"frames":["⠁","⠉","⠙","⠚","⠒","⠂","⠂","⠒","⠲","⠴","⠤","⠄","⠄","⠤","⠴","⠲","⠒","⠂","⠂","⠒","⠚","⠙","⠉","⠁"]},"dots7":{"interval":80,"frames":["⠈","⠉","⠋","⠓","⠒","⠐","⠐","⠒","⠖","⠦","⠤","⠠","⠠","⠤","⠦","⠖","⠒","⠐","⠐","⠒","⠓","⠋","⠉","⠈"]},"dots8":{"interval":80,"frames":["⠁","⠁","⠉","⠙","⠚","⠒","⠂","⠂","⠒","⠲","⠴","⠤","⠄","⠄","⠤","⠠","⠠","⠤","⠦","⠖","⠒","⠐","⠐","⠒","⠓","⠋","⠉","⠈","⠈"]},"dots9":{"interval":80,"frames":["⢹","⢺","⢼","⣸","⣇","⡧","⡗","⡏"]},"dots10":{"interval":80,"frames":["⢄","⢂","⢁","⡁","⡈","⡐","⡠"]},"dots11":{"interval":100,"frames":["⠁","⠂","⠄","⡀","⢀","⠠","⠐","⠈"]},"dots12":{"interval":80,"frames":["⢀⠀","⡀⠀","⠄⠀","⢂⠀","⡂⠀","⠅⠀","⢃⠀","⡃⠀","⠍⠀","⢋⠀","⡋⠀","⠍⠁","⢋⠁","⡋⠁","⠍⠉","⠋⠉","⠋⠉","⠉⠙","⠉⠙","⠉⠩","⠈⢙","⠈⡙","⢈⠩","⡀⢙","⠄⡙","⢂⠩","⡂⢘","⠅⡘","⢃⠨","⡃⢐","⠍⡐","⢋⠠","⡋⢀","⠍⡁","⢋⠁","⡋⠁","⠍⠉","⠋⠉","⠋⠉","⠉⠙","⠉⠙","⠉⠩","⠈⢙","⠈⡙","⠈⠩","⠀⢙","⠀⡙","⠀⠩","⠀⢘","⠀⡘","⠀⠨","⠀⢐","⠀⡐","⠀⠠","⠀⢀","⠀⡀"]},"line":{"interval":130,"frames":["-","\\","|","/"]},"line2":{"interval":100,"frames":["⠂","-","–","—","–","-"]},"pipe":{"interval":100,"frames":["┤","┘","┴","└","├","┌","┬","┐"]},"simpleDots":{"interval":400,"frames":[".  ",".. ","...","   "]},"simpleDotsScrolling":{"interval":200,"frames":[".  ",".. ","..."," ..","  .","   "]},"star":{"interval":70,"frames":["✶","✸","✹","✺","✹","✷"]},"star2":{"interval":80,"frames":["+","x","*"]},"flip":{"interval":70,"frames":["_","_","_","-","`","`","'","´","-","_","_","_"]},"hamburger":{"interval":100,"frames":["☱","☲","☴"]},"growVertical":{"interval":120,"frames":["▁","▃","▄","▅","▆","▇","▆","▅","▄","▃"]},"growHorizontal":{"interval":120,"frames":["▏","▎","▍","▌","▋","▊","▉","▊","▋","▌","▍","▎"]},"balloon":{"interval":140,"frames":[" ",".","o","O","@","*"," "]},"balloon2":{"interval":120,"frames":[".","o","O","°","O","o","."]},"noise":{"interval":100,"frames":["▓","▒","░"]},"bounce":{"interval":120,"frames":["⠁","⠂","⠄","⠂"]},"boxBounce":{"interval":120,"frames":["▖","▘","▝","▗"]},"boxBounce2":{"interval":100,"frames":["▌","▀","▐","▄"]},"triangle":{"interval":50,"frames":["◢","◣","◤","◥"]},"arc":{"interval":100,"frames":["◜","◠","◝","◞","◡","◟"]},"circle":{"interval":120,"frames":["◡","⊙","◠"]},"squareCorners":{"interval":180,"frames":["◰","◳","◲","◱"]},"circleQuarters":{"interval":120,"frames":["◴","◷","◶","◵"]},"circleHalves":{"interval":50,"frames":["◐","◓","◑","◒"]},"squish":{"interval":100,"frames":["╫","╪"]},"toggle":{"interval":250,"frames":["⊶","⊷"]},"toggle2":{"interval":80,"frames":["▫","▪"]},"toggle3":{"interval":120,"frames":["□","■"]},"toggle4":{"interval":100,"frames":["■","□","▪","▫"]},"toggle5":{"interval":100,"frames":["▮","▯"]},"toggle6":{"interval":300,"frames":["ဝ","၀"]},"toggle7":{"interval":80,"frames":["⦾","⦿"]},"toggle8":{"interval":100,"frames":["◍","◌"]},"toggle9":{"interval":100,"frames":["◉","◎"]},"toggle10":{"interval":100,"frames":["㊂","㊀","㊁"]},"toggle11":{"interval":50,"frames":["⧇","⧆"]},"toggle12":{"interval":120,"frames":["☗","☖"]},"toggle13":{"interval":80,"frames":["=","*","-"]},"arrow":{"interval":100,"frames":["←","↖","↑","↗","→","↘","↓","↙"]},"arrow2":{"interval":80,"frames":["⬆️ ","↗️ ","➡️ ","↘️ ","⬇️ ","↙️ ","⬅️ ","↖️ "]},"arrow3":{"interval":120,"frames":["▹▹▹▹▹","▸▹▹▹▹","▹▸▹▹▹","▹▹▸▹▹","▹▹▹▸▹","▹▹▹▹▸"]},"bouncingBar":{"interval":80,"frames":["[    ]","[=   ]","[==  ]","[=== ]","[ ===]","[  ==]","[   =]","[    ]","[   =]","[  ==]","[ ===]","[====]","[=== ]","[==  ]","[=   ]"]},"bouncingBall":{"interval":80,"frames":["( ●    )","(  ●   )","(   ●  )","(    ● )","(     ●)","(    ● )","(   ●  )","(  ●   )","( ●    )","(●     )"]},"smiley":{"interval":200,"frames":["😄 ","😝 "]},"monkey":{"interval":300,"frames":["🙈 ","🙈 ","🙉 ","🙊 "]},"hearts":{"interval":100,"frames":["💛 ","💙 ","💜 ","💚 ","❤️ "]},"clock":{"interval":100,"frames":["🕐 ","🕑 ","🕒 ","🕓 ","🕔 ","🕕 ","🕖 ","🕗 ","🕘 ","🕙 ","🕚 "]},"earth":{"interval":180,"frames":["🌍 ","🌎 ","🌏 "]},"moon":{"interval":80,"frames":["🌑 ","🌒 ","🌓 ","🌔 ","🌕 ","🌖 ","🌗 ","🌘 "]},"runner":{"interval":140,"frames":["🚶 ","🏃 "]},"pong":{"interval":80,"frames":["▐⠂       ▌","▐⠈       ▌","▐ ⠂      ▌","▐ ⠠      ▌","▐  ⡀     ▌","▐  ⠠     ▌","▐   ⠂    ▌","▐   ⠈    ▌","▐    ⠂   ▌","▐    ⠠   ▌","▐     ⡀  ▌","▐     ⠠  ▌","▐      ⠂ ▌","▐      ⠈ ▌","▐       ⠂▌","▐       ⠠▌","▐       ⡀▌","▐      ⠠ ▌","▐      ⠂ ▌","▐     ⠈  ▌","▐     ⠂  ▌","▐    ⠠   ▌","▐    ⡀   ▌","▐   ⠠    ▌","▐   ⠂    ▌","▐  ⠈     ▌","▐  ⠂     ▌","▐ ⠠      ▌","▐ ⡀      ▌","▐⠠       ▌"]},"shark":{"interval":120,"frames":["▐|\\____________▌","▐_|\\___________▌","▐__|\\__________▌","▐___|\\_________▌","▐____|\\________▌","▐_____|\\_______▌","▐______|\\______▌","▐_______|\\_____▌","▐________|\\____▌","▐_________|\\___▌","▐__________|\\__▌","▐___________|\\_▌","▐____________|\\▌","▐____________/|▌","▐___________/|_▌","▐__________/|__▌","▐_________/|___▌","▐________/|____▌","▐_______/|_____▌","▐______/|______▌","▐_____/|_______▌","▐____/|________▌","▐___/|_________▌","▐__/|__________▌","▐_/|___________▌","▐/|____________▌"]},"dqpb":{"interval":100,"frames":["d","q","p","b"]},"weather":{"interval":100,"frames":["☀️ ","☀️ ","☀️ ","🌤 ","⛅️ ","🌥 ","☁️ ","🌧 ","🌨 ","🌧 ","🌨 ","🌧 ","🌨 ","⛈ ","🌨 ","🌧 ","🌨 ","☁️ ","🌥 ","⛅️ ","🌤 ","☀️ ","☀️ "]},"christmas":{"interval":400,"frames":["🌲","🎄"]}};
 
 /***/ }),
+<<<<<<< HEAD
 /* 159 */
+=======
+/* 178 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -19715,7 +23896,11 @@ const RunCommand = {
 };
 
 /***/ }),
+<<<<<<< HEAD
 /* 160 */
+=======
+/* 179 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -19726,7 +23911,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(33);
 /* harmony import */ var _utils_parallelize__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(34);
 /* harmony import */ var _utils_projects__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(35);
+<<<<<<< HEAD
 /* harmony import */ var _utils_watch__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(161);
+=======
+/* harmony import */ var _utils_watch__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(180);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -19810,14 +23999,23 @@ const WatchCommand = {
 };
 
 /***/ }),
+<<<<<<< HEAD
 /* 161 */
+=======
+/* 180 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "waitUntilWatchIsReady", function() { return waitUntilWatchIsReady; });
+<<<<<<< HEAD
 /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(162);
 /* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(261);
+=======
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(181);
+/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(280);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -19884,11 +24082,16 @@ function waitUntilWatchIsReady(stream, opts = {}) {
 }
 
 /***/ }),
+<<<<<<< HEAD
 /* 162 */
+=======
+/* 181 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+<<<<<<< HEAD
 /* harmony import */ var _internal_Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(163);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Observable", function() { return _internal_Observable__WEBPACK_IMPORTED_MODULE_0__["Observable"]; });
 
@@ -19926,10 +24129,50 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "animationFrameScheduler", function() { return _internal_scheduler_animationFrame__WEBPACK_IMPORTED_MODULE_11__["animationFrame"]; });
 
 /* harmony import */ var _internal_scheduler_VirtualTimeScheduler__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(214);
+=======
+/* harmony import */ var _internal_Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(182);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Observable", function() { return _internal_Observable__WEBPACK_IMPORTED_MODULE_0__["Observable"]; });
+
+/* harmony import */ var _internal_observable_ConnectableObservable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(200);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "ConnectableObservable", function() { return _internal_observable_ConnectableObservable__WEBPACK_IMPORTED_MODULE_1__["ConnectableObservable"]; });
+
+/* harmony import */ var _internal_operators_groupBy__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(205);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "GroupedObservable", function() { return _internal_operators_groupBy__WEBPACK_IMPORTED_MODULE_2__["GroupedObservable"]; });
+
+/* harmony import */ var _internal_symbol_observable__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(197);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "observable", function() { return _internal_symbol_observable__WEBPACK_IMPORTED_MODULE_3__["observable"]; });
+
+/* harmony import */ var _internal_Subject__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(201);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Subject", function() { return _internal_Subject__WEBPACK_IMPORTED_MODULE_4__["Subject"]; });
+
+/* harmony import */ var _internal_BehaviorSubject__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(206);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BehaviorSubject", function() { return _internal_BehaviorSubject__WEBPACK_IMPORTED_MODULE_5__["BehaviorSubject"]; });
+
+/* harmony import */ var _internal_ReplaySubject__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(207);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "ReplaySubject", function() { return _internal_ReplaySubject__WEBPACK_IMPORTED_MODULE_6__["ReplaySubject"]; });
+
+/* harmony import */ var _internal_AsyncSubject__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(224);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "AsyncSubject", function() { return _internal_AsyncSubject__WEBPACK_IMPORTED_MODULE_7__["AsyncSubject"]; });
+
+/* harmony import */ var _internal_scheduler_asap__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(225);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "asapScheduler", function() { return _internal_scheduler_asap__WEBPACK_IMPORTED_MODULE_8__["asap"]; });
+
+/* harmony import */ var _internal_scheduler_async__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(229);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "asyncScheduler", function() { return _internal_scheduler_async__WEBPACK_IMPORTED_MODULE_9__["async"]; });
+
+/* harmony import */ var _internal_scheduler_queue__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(208);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "queueScheduler", function() { return _internal_scheduler_queue__WEBPACK_IMPORTED_MODULE_10__["queue"]; });
+
+/* harmony import */ var _internal_scheduler_animationFrame__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(230);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "animationFrameScheduler", function() { return _internal_scheduler_animationFrame__WEBPACK_IMPORTED_MODULE_11__["animationFrame"]; });
+
+/* harmony import */ var _internal_scheduler_VirtualTimeScheduler__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(233);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "VirtualTimeScheduler", function() { return _internal_scheduler_VirtualTimeScheduler__WEBPACK_IMPORTED_MODULE_12__["VirtualTimeScheduler"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "VirtualAction", function() { return _internal_scheduler_VirtualTimeScheduler__WEBPACK_IMPORTED_MODULE_12__["VirtualAction"]; });
 
+<<<<<<< HEAD
 /* harmony import */ var _internal_Scheduler__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(195);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Scheduler", function() { return _internal_Scheduler__WEBPACK_IMPORTED_MODULE_13__["Scheduler"]; });
 
@@ -20039,13 +24282,128 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "using", function() { return _internal_observable_using__WEBPACK_IMPORTED_MODULE_48__["using"]; });
 
 /* harmony import */ var _internal_observable_zip__WEBPACK_IMPORTED_MODULE_49__ = __webpack_require__(260);
+=======
+/* harmony import */ var _internal_Scheduler__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(214);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Scheduler", function() { return _internal_Scheduler__WEBPACK_IMPORTED_MODULE_13__["Scheduler"]; });
+
+/* harmony import */ var _internal_Subscription__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(190);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Subscription", function() { return _internal_Subscription__WEBPACK_IMPORTED_MODULE_14__["Subscription"]; });
+
+/* harmony import */ var _internal_Subscriber__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(184);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Subscriber", function() { return _internal_Subscriber__WEBPACK_IMPORTED_MODULE_15__["Subscriber"]; });
+
+/* harmony import */ var _internal_Notification__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(216);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Notification", function() { return _internal_Notification__WEBPACK_IMPORTED_MODULE_16__["Notification"]; });
+
+/* harmony import */ var _internal_util_pipe__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(198);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "pipe", function() { return _internal_util_pipe__WEBPACK_IMPORTED_MODULE_17__["pipe"]; });
+
+/* harmony import */ var _internal_util_noop__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(199);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "noop", function() { return _internal_util_noop__WEBPACK_IMPORTED_MODULE_18__["noop"]; });
+
+/* harmony import */ var _internal_util_identity__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(234);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "identity", function() { return _internal_util_identity__WEBPACK_IMPORTED_MODULE_19__["identity"]; });
+
+/* harmony import */ var _internal_util_isObservable__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(235);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "isObservable", function() { return _internal_util_isObservable__WEBPACK_IMPORTED_MODULE_20__["isObservable"]; });
+
+/* harmony import */ var _internal_util_ArgumentOutOfRangeError__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(236);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "ArgumentOutOfRangeError", function() { return _internal_util_ArgumentOutOfRangeError__WEBPACK_IMPORTED_MODULE_21__["ArgumentOutOfRangeError"]; });
+
+/* harmony import */ var _internal_util_EmptyError__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(237);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "EmptyError", function() { return _internal_util_EmptyError__WEBPACK_IMPORTED_MODULE_22__["EmptyError"]; });
+
+/* harmony import */ var _internal_util_ObjectUnsubscribedError__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(202);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "ObjectUnsubscribedError", function() { return _internal_util_ObjectUnsubscribedError__WEBPACK_IMPORTED_MODULE_23__["ObjectUnsubscribedError"]; });
+
+/* harmony import */ var _internal_util_UnsubscriptionError__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(195);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "UnsubscriptionError", function() { return _internal_util_UnsubscriptionError__WEBPACK_IMPORTED_MODULE_24__["UnsubscriptionError"]; });
+
+/* harmony import */ var _internal_util_TimeoutError__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(238);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TimeoutError", function() { return _internal_util_TimeoutError__WEBPACK_IMPORTED_MODULE_25__["TimeoutError"]; });
+
+/* harmony import */ var _internal_observable_bindCallback__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(239);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "bindCallback", function() { return _internal_observable_bindCallback__WEBPACK_IMPORTED_MODULE_26__["bindCallback"]; });
+
+/* harmony import */ var _internal_observable_bindNodeCallback__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(241);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "bindNodeCallback", function() { return _internal_observable_bindNodeCallback__WEBPACK_IMPORTED_MODULE_27__["bindNodeCallback"]; });
+
+/* harmony import */ var _internal_observable_combineLatest__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(242);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "combineLatest", function() { return _internal_observable_combineLatest__WEBPACK_IMPORTED_MODULE_28__["combineLatest"]; });
+
+/* harmony import */ var _internal_observable_concat__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(253);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "concat", function() { return _internal_observable_concat__WEBPACK_IMPORTED_MODULE_29__["concat"]; });
+
+/* harmony import */ var _internal_observable_defer__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(263);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "defer", function() { return _internal_observable_defer__WEBPACK_IMPORTED_MODULE_30__["defer"]; });
+
+/* harmony import */ var _internal_observable_empty__WEBPACK_IMPORTED_MODULE_31__ = __webpack_require__(217);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "empty", function() { return _internal_observable_empty__WEBPACK_IMPORTED_MODULE_31__["empty"]; });
+
+/* harmony import */ var _internal_observable_forkJoin__WEBPACK_IMPORTED_MODULE_32__ = __webpack_require__(264);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "forkJoin", function() { return _internal_observable_forkJoin__WEBPACK_IMPORTED_MODULE_32__["forkJoin"]; });
+
+/* harmony import */ var _internal_observable_from__WEBPACK_IMPORTED_MODULE_33__ = __webpack_require__(254);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "from", function() { return _internal_observable_from__WEBPACK_IMPORTED_MODULE_33__["from"]; });
+
+/* harmony import */ var _internal_observable_fromEvent__WEBPACK_IMPORTED_MODULE_34__ = __webpack_require__(265);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "fromEvent", function() { return _internal_observable_fromEvent__WEBPACK_IMPORTED_MODULE_34__["fromEvent"]; });
+
+/* harmony import */ var _internal_observable_fromEventPattern__WEBPACK_IMPORTED_MODULE_35__ = __webpack_require__(266);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "fromEventPattern", function() { return _internal_observable_fromEventPattern__WEBPACK_IMPORTED_MODULE_35__["fromEventPattern"]; });
+
+/* harmony import */ var _internal_observable_generate__WEBPACK_IMPORTED_MODULE_36__ = __webpack_require__(267);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "generate", function() { return _internal_observable_generate__WEBPACK_IMPORTED_MODULE_36__["generate"]; });
+
+/* harmony import */ var _internal_observable_iif__WEBPACK_IMPORTED_MODULE_37__ = __webpack_require__(268);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "iif", function() { return _internal_observable_iif__WEBPACK_IMPORTED_MODULE_37__["iif"]; });
+
+/* harmony import */ var _internal_observable_interval__WEBPACK_IMPORTED_MODULE_38__ = __webpack_require__(269);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "interval", function() { return _internal_observable_interval__WEBPACK_IMPORTED_MODULE_38__["interval"]; });
+
+/* harmony import */ var _internal_observable_merge__WEBPACK_IMPORTED_MODULE_39__ = __webpack_require__(271);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "merge", function() { return _internal_observable_merge__WEBPACK_IMPORTED_MODULE_39__["merge"]; });
+
+/* harmony import */ var _internal_observable_never__WEBPACK_IMPORTED_MODULE_40__ = __webpack_require__(272);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "never", function() { return _internal_observable_never__WEBPACK_IMPORTED_MODULE_40__["never"]; });
+
+/* harmony import */ var _internal_observable_of__WEBPACK_IMPORTED_MODULE_41__ = __webpack_require__(218);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "of", function() { return _internal_observable_of__WEBPACK_IMPORTED_MODULE_41__["of"]; });
+
+/* harmony import */ var _internal_observable_onErrorResumeNext__WEBPACK_IMPORTED_MODULE_42__ = __webpack_require__(273);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "onErrorResumeNext", function() { return _internal_observable_onErrorResumeNext__WEBPACK_IMPORTED_MODULE_42__["onErrorResumeNext"]; });
+
+/* harmony import */ var _internal_observable_pairs__WEBPACK_IMPORTED_MODULE_43__ = __webpack_require__(274);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "pairs", function() { return _internal_observable_pairs__WEBPACK_IMPORTED_MODULE_43__["pairs"]; });
+
+/* harmony import */ var _internal_observable_race__WEBPACK_IMPORTED_MODULE_44__ = __webpack_require__(275);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "race", function() { return _internal_observable_race__WEBPACK_IMPORTED_MODULE_44__["race"]; });
+
+/* harmony import */ var _internal_observable_range__WEBPACK_IMPORTED_MODULE_45__ = __webpack_require__(276);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "range", function() { return _internal_observable_range__WEBPACK_IMPORTED_MODULE_45__["range"]; });
+
+/* harmony import */ var _internal_observable_throwError__WEBPACK_IMPORTED_MODULE_46__ = __webpack_require__(223);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "throwError", function() { return _internal_observable_throwError__WEBPACK_IMPORTED_MODULE_46__["throwError"]; });
+
+/* harmony import */ var _internal_observable_timer__WEBPACK_IMPORTED_MODULE_47__ = __webpack_require__(277);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "timer", function() { return _internal_observable_timer__WEBPACK_IMPORTED_MODULE_47__["timer"]; });
+
+/* harmony import */ var _internal_observable_using__WEBPACK_IMPORTED_MODULE_48__ = __webpack_require__(278);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "using", function() { return _internal_observable_using__WEBPACK_IMPORTED_MODULE_48__["using"]; });
+
+/* harmony import */ var _internal_observable_zip__WEBPACK_IMPORTED_MODULE_49__ = __webpack_require__(279);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "zip", function() { return _internal_observable_zip__WEBPACK_IMPORTED_MODULE_49__["zip"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "EMPTY", function() { return _internal_observable_empty__WEBPACK_IMPORTED_MODULE_31__["EMPTY"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "NEVER", function() { return _internal_observable_never__WEBPACK_IMPORTED_MODULE_40__["NEVER"]; });
 
+<<<<<<< HEAD
 /* harmony import */ var _internal_config__WEBPACK_IMPORTED_MODULE_50__ = __webpack_require__(169);
+=======
+/* harmony import */ var _internal_config__WEBPACK_IMPORTED_MODULE_50__ = __webpack_require__(188);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "config", function() { return _internal_config__WEBPACK_IMPORTED_MODULE_50__["config"]; });
 
 /** PURE_IMPORTS_START  PURE_IMPORTS_END */
@@ -20106,16 +24464,27 @@ __webpack_require__.r(__webpack_exports__);
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 163 */
+=======
+/* 182 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Observable", function() { return Observable; });
+<<<<<<< HEAD
 /* harmony import */ var _util_toSubscriber__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(164);
 /* harmony import */ var _internal_symbol_observable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(178);
 /* harmony import */ var _util_pipe__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(179);
 /* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(169);
+=======
+/* harmony import */ var _util_toSubscriber__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(183);
+/* harmony import */ var _internal_symbol_observable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(197);
+/* harmony import */ var _util_pipe__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(198);
+/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(188);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _util_toSubscriber,_internal_symbol_observable,_util_pipe,_config PURE_IMPORTS_END */
 
 
@@ -20229,15 +24598,25 @@ function getPromiseCtor(promiseCtor) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 164 */
+=======
+/* 183 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toSubscriber", function() { return toSubscriber; });
+<<<<<<< HEAD
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(165);
 /* harmony import */ var _symbol_rxSubscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(177);
 /* harmony import */ var _Observer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(168);
+=======
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(184);
+/* harmony import */ var _symbol_rxSubscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(196);
+/* harmony import */ var _Observer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(187);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _Subscriber,_symbol_rxSubscriber,_Observer PURE_IMPORTS_END */
 
 
@@ -20260,12 +24639,17 @@ function toSubscriber(nextOrObserver, error, complete) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 165 */
+=======
+/* 184 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Subscriber", function() { return Subscriber; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _util_isFunction__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(167);
 /* harmony import */ var _Observer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(168);
@@ -20273,6 +24657,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _internal_symbol_rxSubscriber__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(177);
 /* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(169);
 /* harmony import */ var _util_hostReportError__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(170);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _util_isFunction__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(186);
+/* harmony import */ var _Observer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(187);
+/* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(190);
+/* harmony import */ var _internal_symbol_rxSubscriber__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(196);
+/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(188);
+/* harmony import */ var _util_hostReportError__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(189);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_util_isFunction,_Observer,_Subscription,_internal_symbol_rxSubscriber,_config,_util_hostReportError PURE_IMPORTS_END */
 
 
@@ -20514,7 +24907,11 @@ function isTrustedSubscriber(obj) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 166 */
+=======
+/* 185 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -20727,7 +25124,11 @@ function __importDefault(mod) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 167 */
+=======
+/* 186 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -20741,14 +25142,23 @@ function isFunction(x) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 168 */
+=======
+/* 187 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "empty", function() { return empty; });
+<<<<<<< HEAD
 /* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(169);
 /* harmony import */ var _util_hostReportError__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(170);
+=======
+/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(188);
+/* harmony import */ var _util_hostReportError__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(189);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _config,_util_hostReportError PURE_IMPORTS_END */
 
 
@@ -20769,7 +25179,11 @@ var empty = {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 169 */
+=======
+/* 188 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -20797,7 +25211,11 @@ var config = {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 170 */
+=======
+/* 189 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -20811,18 +25229,31 @@ function hostReportError(err) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 171 */
+=======
+/* 190 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Subscription", function() { return Subscription; });
+<<<<<<< HEAD
 /* harmony import */ var _util_isArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(172);
 /* harmony import */ var _util_isObject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(173);
 /* harmony import */ var _util_isFunction__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(167);
 /* harmony import */ var _util_tryCatch__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(174);
 /* harmony import */ var _util_errorObject__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(175);
 /* harmony import */ var _util_UnsubscriptionError__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(176);
+=======
+/* harmony import */ var _util_isArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(191);
+/* harmony import */ var _util_isObject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(192);
+/* harmony import */ var _util_isFunction__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(186);
+/* harmony import */ var _util_tryCatch__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(193);
+/* harmony import */ var _util_errorObject__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(194);
+/* harmony import */ var _util_UnsubscriptionError__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(195);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _util_isArray,_util_isObject,_util_isFunction,_util_tryCatch,_util_errorObject,_util_UnsubscriptionError PURE_IMPORTS_END */
 
 
@@ -20958,7 +25389,11 @@ function flattenUnsubscriptionErrors(errors) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 172 */
+=======
+/* 191 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -20970,7 +25405,11 @@ var isArray = Array.isArray || (function (x) { return x && typeof x.length === '
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 173 */
+=======
+/* 192 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -20984,13 +25423,21 @@ function isObject(x) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 174 */
+=======
+/* 193 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "tryCatch", function() { return tryCatch; });
+<<<<<<< HEAD
 /* harmony import */ var _errorObject__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(175);
+=======
+/* harmony import */ var _errorObject__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(194);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _errorObject PURE_IMPORTS_END */
 
 var tryCatchTarget;
@@ -21011,7 +25458,11 @@ function tryCatch(fn) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 175 */
+=======
+/* 194 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -21023,13 +25474,21 @@ var errorObject = { e: {} };
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 176 */
+=======
+/* 195 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "UnsubscriptionError", function() { return UnsubscriptionError; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib PURE_IMPORTS_END */
 
 var UnsubscriptionError = /*@__PURE__*/ (function (_super) {
@@ -21049,7 +25508,11 @@ var UnsubscriptionError = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 177 */
+=======
+/* 196 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -21065,7 +25528,11 @@ var $$rxSubscriber = rxSubscriber;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 178 */
+=======
+/* 197 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -21077,14 +25544,22 @@ var observable = typeof Symbol === 'function' && Symbol.observable || '@@observa
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 179 */
+=======
+/* 198 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "pipe", function() { return pipe; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "pipeFromArray", function() { return pipeFromArray; });
+<<<<<<< HEAD
 /* harmony import */ var _noop__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(180);
+=======
+/* harmony import */ var _noop__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(199);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _noop PURE_IMPORTS_END */
 
 function pipe() {
@@ -21109,7 +25584,11 @@ function pipeFromArray(fns) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 180 */
+=======
+/* 199 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -21121,19 +25600,32 @@ function noop() { }
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 181 */
+=======
+/* 200 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ConnectableObservable", function() { return ConnectableObservable; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "connectableObservableDescriptor", function() { return connectableObservableDescriptor; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(182);
 /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(163);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(165);
 /* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(171);
 /* harmony import */ var _operators_refCount__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(185);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(201);
+/* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(182);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(184);
+/* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(190);
+/* harmony import */ var _operators_refCount__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(204);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subject,_Observable,_Subscriber,_Subscription,_operators_refCount PURE_IMPORTS_END */
 
 
@@ -21280,7 +25772,11 @@ var RefCountSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 182 */
+=======
+/* 201 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -21288,6 +25784,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SubjectSubscriber", function() { return SubjectSubscriber; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Subject", function() { return Subject; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AnonymousSubject", function() { return AnonymousSubject; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(163);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(165);
@@ -21295,6 +25792,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _util_ObjectUnsubscribedError__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(183);
 /* harmony import */ var _SubjectSubscription__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(184);
 /* harmony import */ var _internal_symbol_rxSubscriber__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(177);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(182);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(184);
+/* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(190);
+/* harmony import */ var _util_ObjectUnsubscribedError__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(202);
+/* harmony import */ var _SubjectSubscription__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(203);
+/* harmony import */ var _internal_symbol_rxSubscriber__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(196);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Observable,_Subscriber,_Subscription,_util_ObjectUnsubscribedError,_SubjectSubscription,_internal_symbol_rxSubscriber PURE_IMPORTS_END */
 
 
@@ -21456,13 +25962,21 @@ var AnonymousSubject = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 183 */
+=======
+/* 202 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ObjectUnsubscribedError", function() { return ObjectUnsubscribedError; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib PURE_IMPORTS_END */
 
 var ObjectUnsubscribedError = /*@__PURE__*/ (function (_super) {
@@ -21480,14 +25994,23 @@ var ObjectUnsubscribedError = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 184 */
+=======
+/* 203 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SubjectSubscription", function() { return SubjectSubscription; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(171);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(190);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscription PURE_IMPORTS_END */
 
 
@@ -21523,14 +26046,23 @@ var SubjectSubscription = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 185 */
+=======
+/* 204 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "refCount", function() { return refCount; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
@@ -21592,18 +26124,30 @@ var RefCountSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 186 */
+=======
+/* 205 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "groupBy", function() { return groupBy; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GroupedObservable", function() { return GroupedObservable; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
 /* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(171);
 /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(163);
 /* harmony import */ var _Subject__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(182);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+/* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(190);
+/* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(182);
+/* harmony import */ var _Subject__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(201);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber,_Subscription,_Observable,_Subject PURE_IMPORTS_END */
 
 
@@ -21789,15 +26333,25 @@ var InnerRefCountSubscription = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 187 */
+=======
+/* 206 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BehaviorSubject", function() { return BehaviorSubject; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(182);
 /* harmony import */ var _util_ObjectUnsubscribedError__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(183);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(201);
+/* harmony import */ var _util_ObjectUnsubscribedError__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(202);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subject,_util_ObjectUnsubscribedError PURE_IMPORTS_END */
 
 
@@ -21844,12 +26398,17 @@ var BehaviorSubject = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 188 */
+=======
+/* 207 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ReplaySubject", function() { return ReplaySubject; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(182);
 /* harmony import */ var _scheduler_queue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(189);
@@ -21857,6 +26416,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _operators_observeOn__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(196);
 /* harmony import */ var _util_ObjectUnsubscribedError__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(183);
 /* harmony import */ var _SubjectSubscription__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(184);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(201);
+/* harmony import */ var _scheduler_queue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(208);
+/* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(190);
+/* harmony import */ var _operators_observeOn__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(215);
+/* harmony import */ var _util_ObjectUnsubscribedError__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(202);
+/* harmony import */ var _SubjectSubscription__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(203);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subject,_scheduler_queue,_Subscription,_operators_observeOn,_util_ObjectUnsubscribedError,_SubjectSubscription PURE_IMPORTS_END */
 
 
@@ -21977,14 +26545,23 @@ var ReplayEvent = /*@__PURE__*/ (function () {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 189 */
+=======
+/* 208 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "queue", function() { return queue; });
+<<<<<<< HEAD
 /* harmony import */ var _QueueAction__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(190);
 /* harmony import */ var _QueueScheduler__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(193);
+=======
+/* harmony import */ var _QueueAction__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(209);
+/* harmony import */ var _QueueScheduler__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(212);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _QueueAction,_QueueScheduler PURE_IMPORTS_END */
 
 
@@ -21993,14 +26570,23 @@ var queue = /*@__PURE__*/ new _QueueScheduler__WEBPACK_IMPORTED_MODULE_1__["Queu
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 190 */
+=======
+/* 209 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "QueueAction", function() { return QueueAction; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _AsyncAction__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(191);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _AsyncAction__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(210);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_AsyncAction PURE_IMPORTS_END */
 
 
@@ -22045,14 +26631,23 @@ var QueueAction = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 191 */
+=======
+/* 210 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AsyncAction", function() { return AsyncAction; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Action__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(192);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Action__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(211);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Action PURE_IMPORTS_END */
 
 
@@ -22150,14 +26745,23 @@ var AsyncAction = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 192 */
+=======
+/* 211 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Action", function() { return Action; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(171);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(190);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscription PURE_IMPORTS_END */
 
 
@@ -22179,14 +26783,23 @@ var Action = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 193 */
+=======
+/* 212 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "QueueScheduler", function() { return QueueScheduler; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _AsyncScheduler__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(194);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _AsyncScheduler__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(213);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_AsyncScheduler PURE_IMPORTS_END */
 
 
@@ -22202,14 +26815,23 @@ var QueueScheduler = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 194 */
+=======
+/* 213 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AsyncScheduler", function() { return AsyncScheduler; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Scheduler__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(195);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Scheduler__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(214);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Scheduler PURE_IMPORTS_END */
 
 
@@ -22271,7 +26893,11 @@ var AsyncScheduler = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 195 */
+=======
+/* 214 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -22299,7 +26925,11 @@ var Scheduler = /*@__PURE__*/ (function () {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 196 */
+=======
+/* 215 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -22308,9 +26938,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ObserveOnOperator", function() { return ObserveOnOperator; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ObserveOnSubscriber", function() { return ObserveOnSubscriber; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ObserveOnMessage", function() { return ObserveOnMessage; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
 /* harmony import */ var _Notification__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(197);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+/* harmony import */ var _Notification__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(216);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber,_Notification PURE_IMPORTS_END */
 
 
@@ -22380,15 +27016,25 @@ var ObserveOnMessage = /*@__PURE__*/ (function () {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 197 */
+=======
+/* 216 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Notification", function() { return Notification; });
+<<<<<<< HEAD
 /* harmony import */ var _observable_empty__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(198);
 /* harmony import */ var _observable_of__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(199);
 /* harmony import */ var _observable_throwError__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(204);
+=======
+/* harmony import */ var _observable_empty__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(217);
+/* harmony import */ var _observable_of__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(218);
+/* harmony import */ var _observable_throwError__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(223);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _observable_empty,_observable_of,_observable_throwError PURE_IMPORTS_END */
 
 
@@ -22462,7 +27108,11 @@ var Notification = /*@__PURE__*/ (function () {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 198 */
+=======
+/* 217 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -22470,7 +27120,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "EMPTY", function() { return EMPTY; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "empty", function() { return empty; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "emptyScheduled", function() { return emptyScheduled; });
+<<<<<<< HEAD
 /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(163);
+=======
+/* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(182);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _Observable PURE_IMPORTS_END */
 
 var EMPTY = /*@__PURE__*/ new _Observable__WEBPACK_IMPORTED_MODULE_0__["Observable"](function (subscriber) { return subscriber.complete(); });
@@ -22484,16 +27138,27 @@ function emptyScheduled(scheduler) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 199 */
+=======
+/* 218 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "of", function() { return of; });
+<<<<<<< HEAD
 /* harmony import */ var _util_isScheduler__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(200);
 /* harmony import */ var _fromArray__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(201);
 /* harmony import */ var _empty__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(198);
 /* harmony import */ var _scalar__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(203);
+=======
+/* harmony import */ var _util_isScheduler__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(219);
+/* harmony import */ var _fromArray__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(220);
+/* harmony import */ var _empty__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(217);
+/* harmony import */ var _scalar__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(222);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _util_isScheduler,_fromArray,_empty,_scalar PURE_IMPORTS_END */
 
 
@@ -22524,7 +27189,11 @@ function of() {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 200 */
+=======
+/* 219 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -22538,15 +27207,25 @@ function isScheduler(value) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 201 */
+=======
+/* 220 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fromArray", function() { return fromArray; });
+<<<<<<< HEAD
 /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(163);
 /* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(171);
 /* harmony import */ var _util_subscribeToArray__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(202);
+=======
+/* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(182);
+/* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(190);
+/* harmony import */ var _util_subscribeToArray__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(221);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _Observable,_Subscription,_util_subscribeToArray PURE_IMPORTS_END */
 
 
@@ -22577,7 +27256,11 @@ function fromArray(input, scheduler) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 202 */
+=======
+/* 221 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -22598,13 +27281,21 @@ var subscribeToArray = function (array) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 203 */
+=======
+/* 222 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "scalar", function() { return scalar; });
+<<<<<<< HEAD
 /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(163);
+=======
+/* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(182);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _Observable PURE_IMPORTS_END */
 
 function scalar(value) {
@@ -22620,13 +27311,21 @@ function scalar(value) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 204 */
+=======
+/* 223 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "throwError", function() { return throwError; });
+<<<<<<< HEAD
 /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(163);
+=======
+/* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(182);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _Observable PURE_IMPORTS_END */
 
 function throwError(error, scheduler) {
@@ -22645,15 +27344,25 @@ function dispatch(_a) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 205 */
+=======
+/* 224 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AsyncSubject", function() { return AsyncSubject; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(182);
 /* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(171);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(201);
+/* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(190);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subject,_Subscription PURE_IMPORTS_END */
 
 
@@ -22704,14 +27413,23 @@ var AsyncSubject = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 206 */
+=======
+/* 225 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "asap", function() { return asap; });
+<<<<<<< HEAD
 /* harmony import */ var _AsapAction__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(207);
 /* harmony import */ var _AsapScheduler__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(209);
+=======
+/* harmony import */ var _AsapAction__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(226);
+/* harmony import */ var _AsapScheduler__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(228);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _AsapAction,_AsapScheduler PURE_IMPORTS_END */
 
 
@@ -22720,15 +27438,25 @@ var asap = /*@__PURE__*/ new _AsapScheduler__WEBPACK_IMPORTED_MODULE_1__["AsapSc
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 207 */
+=======
+/* 226 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AsapAction", function() { return AsapAction; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _util_Immediate__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(208);
 /* harmony import */ var _AsyncAction__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(191);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _util_Immediate__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(227);
+/* harmony import */ var _AsyncAction__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(210);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_util_Immediate,_AsyncAction PURE_IMPORTS_END */
 
 
@@ -22771,7 +27499,11 @@ var AsapAction = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 208 */
+=======
+/* 227 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -22801,14 +27533,23 @@ var Immediate = {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 209 */
+=======
+/* 228 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AsapScheduler", function() { return AsapScheduler; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _AsyncScheduler__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(194);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _AsyncScheduler__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(213);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_AsyncScheduler PURE_IMPORTS_END */
 
 
@@ -22845,14 +27586,23 @@ var AsapScheduler = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 210 */
+=======
+/* 229 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "async", function() { return async; });
+<<<<<<< HEAD
 /* harmony import */ var _AsyncAction__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(191);
 /* harmony import */ var _AsyncScheduler__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(194);
+=======
+/* harmony import */ var _AsyncAction__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(210);
+/* harmony import */ var _AsyncScheduler__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(213);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _AsyncAction,_AsyncScheduler PURE_IMPORTS_END */
 
 
@@ -22861,14 +27611,23 @@ var async = /*@__PURE__*/ new _AsyncScheduler__WEBPACK_IMPORTED_MODULE_1__["Asyn
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 211 */
+=======
+/* 230 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "animationFrame", function() { return animationFrame; });
+<<<<<<< HEAD
 /* harmony import */ var _AnimationFrameAction__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(212);
 /* harmony import */ var _AnimationFrameScheduler__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(213);
+=======
+/* harmony import */ var _AnimationFrameAction__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(231);
+/* harmony import */ var _AnimationFrameScheduler__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(232);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _AnimationFrameAction,_AnimationFrameScheduler PURE_IMPORTS_END */
 
 
@@ -22877,14 +27636,23 @@ var animationFrame = /*@__PURE__*/ new _AnimationFrameScheduler__WEBPACK_IMPORTE
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 212 */
+=======
+/* 231 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AnimationFrameAction", function() { return AnimationFrameAction; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _AsyncAction__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(191);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _AsyncAction__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(210);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_AsyncAction PURE_IMPORTS_END */
 
 
@@ -22926,14 +27694,23 @@ var AnimationFrameAction = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 213 */
+=======
+/* 232 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AnimationFrameScheduler", function() { return AnimationFrameScheduler; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _AsyncScheduler__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(194);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _AsyncScheduler__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(213);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_AsyncScheduler PURE_IMPORTS_END */
 
 
@@ -22970,16 +27747,26 @@ var AnimationFrameScheduler = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 214 */
+=======
+/* 233 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "VirtualTimeScheduler", function() { return VirtualTimeScheduler; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "VirtualAction", function() { return VirtualAction; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _AsyncAction__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(191);
 /* harmony import */ var _AsyncScheduler__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(194);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _AsyncAction__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(210);
+/* harmony import */ var _AsyncScheduler__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(213);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_AsyncAction,_AsyncScheduler PURE_IMPORTS_END */
 
 
@@ -23091,7 +27878,11 @@ var VirtualAction = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 215 */
+=======
+/* 234 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -23105,13 +27896,21 @@ function identity(x) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 216 */
+=======
+/* 235 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isObservable", function() { return isObservable; });
+<<<<<<< HEAD
 /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(163);
+=======
+/* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(182);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _Observable PURE_IMPORTS_END */
 
 function isObservable(obj) {
@@ -23121,13 +27920,21 @@ function isObservable(obj) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 217 */
+=======
+/* 236 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ArgumentOutOfRangeError", function() { return ArgumentOutOfRangeError; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib PURE_IMPORTS_END */
 
 var ArgumentOutOfRangeError = /*@__PURE__*/ (function (_super) {
@@ -23145,13 +27952,21 @@ var ArgumentOutOfRangeError = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 218 */
+=======
+/* 237 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "EmptyError", function() { return EmptyError; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib PURE_IMPORTS_END */
 
 var EmptyError = /*@__PURE__*/ (function (_super) {
@@ -23169,13 +27984,21 @@ var EmptyError = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 219 */
+=======
+/* 238 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TimeoutError", function() { return TimeoutError; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib PURE_IMPORTS_END */
 
 var TimeoutError = /*@__PURE__*/ (function (_super) {
@@ -23193,17 +28016,29 @@ var TimeoutError = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 220 */
+=======
+/* 239 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "bindCallback", function() { return bindCallback; });
+<<<<<<< HEAD
 /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(163);
 /* harmony import */ var _AsyncSubject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(205);
 /* harmony import */ var _operators_map__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(221);
 /* harmony import */ var _util_isArray__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(172);
 /* harmony import */ var _util_isScheduler__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(200);
+=======
+/* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(182);
+/* harmony import */ var _AsyncSubject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(224);
+/* harmony import */ var _operators_map__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(240);
+/* harmony import */ var _util_isArray__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(191);
+/* harmony import */ var _util_isScheduler__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(219);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _Observable,_AsyncSubject,_operators_map,_util_isArray,_util_isScheduler PURE_IMPORTS_END */
 
 
@@ -23306,15 +28141,24 @@ function dispatchError(state) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 221 */
+=======
+/* 240 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "map", function() { return map; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MapOperator", function() { return MapOperator; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
@@ -23363,17 +28207,29 @@ var MapSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 222 */
+=======
+/* 241 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "bindNodeCallback", function() { return bindNodeCallback; });
+<<<<<<< HEAD
 /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(163);
 /* harmony import */ var _AsyncSubject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(205);
 /* harmony import */ var _operators_map__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(221);
 /* harmony import */ var _util_isScheduler__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(200);
 /* harmony import */ var _util_isArray__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(172);
+=======
+/* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(182);
+/* harmony import */ var _AsyncSubject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(224);
+/* harmony import */ var _operators_map__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(240);
+/* harmony import */ var _util_isScheduler__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(219);
+/* harmony import */ var _util_isArray__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(191);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _Observable,_AsyncSubject,_operators_map,_util_isScheduler,_util_isArray PURE_IMPORTS_END */
 
 
@@ -23484,7 +28340,11 @@ function dispatchError(arg) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 223 */
+=======
+/* 242 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -23492,12 +28352,21 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "combineLatest", function() { return combineLatest; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "CombineLatestOperator", function() { return CombineLatestOperator; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "CombineLatestSubscriber", function() { return CombineLatestSubscriber; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _util_isScheduler__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(200);
 /* harmony import */ var _util_isArray__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(172);
 /* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(224);
 /* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(225);
 /* harmony import */ var _fromArray__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(201);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _util_isScheduler__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(219);
+/* harmony import */ var _util_isArray__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(191);
+/* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(243);
+/* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(244);
+/* harmony import */ var _fromArray__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(220);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_util_isScheduler,_util_isArray,_OuterSubscriber,_util_subscribeToResult,_fromArray PURE_IMPORTS_END */
 
 
@@ -23602,14 +28471,23 @@ var CombineLatestSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 224 */
+=======
+/* 243 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "OuterSubscriber", function() { return OuterSubscriber; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
@@ -23634,14 +28512,23 @@ var OuterSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 225 */
+=======
+/* 244 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "subscribeToResult", function() { return subscribeToResult; });
+<<<<<<< HEAD
 /* harmony import */ var _InnerSubscriber__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(226);
 /* harmony import */ var _subscribeTo__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(227);
+=======
+/* harmony import */ var _InnerSubscriber__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(245);
+/* harmony import */ var _subscribeTo__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(246);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _InnerSubscriber,_subscribeTo PURE_IMPORTS_END */
 
 
@@ -23653,14 +28540,23 @@ function subscribeToResult(outerSubscriber, result, outerValue, outerIndex) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 226 */
+=======
+/* 245 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "InnerSubscriber", function() { return InnerSubscriber; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
@@ -23692,12 +28588,17 @@ var InnerSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 227 */
+=======
+/* 246 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "subscribeTo", function() { return subscribeTo; });
+<<<<<<< HEAD
 /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(163);
 /* harmony import */ var _subscribeToArray__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(202);
 /* harmony import */ var _subscribeToPromise__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(228);
@@ -23708,6 +28609,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _isObject__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(173);
 /* harmony import */ var _symbol_iterator__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(230);
 /* harmony import */ var _symbol_observable__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(178);
+=======
+/* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(182);
+/* harmony import */ var _subscribeToArray__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(221);
+/* harmony import */ var _subscribeToPromise__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(247);
+/* harmony import */ var _subscribeToIterable__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(248);
+/* harmony import */ var _subscribeToObservable__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(250);
+/* harmony import */ var _isArrayLike__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(251);
+/* harmony import */ var _isPromise__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(252);
+/* harmony import */ var _isObject__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(192);
+/* harmony import */ var _symbol_iterator__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(249);
+/* harmony import */ var _symbol_observable__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(197);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _Observable,_subscribeToArray,_subscribeToPromise,_subscribeToIterable,_subscribeToObservable,_isArrayLike,_isPromise,_isObject,_symbol_iterator,_symbol_observable PURE_IMPORTS_END */
 
 
@@ -23755,13 +28668,21 @@ var subscribeTo = function (result) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 228 */
+=======
+/* 247 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "subscribeToPromise", function() { return subscribeToPromise; });
+<<<<<<< HEAD
 /* harmony import */ var _hostReportError__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(170);
+=======
+/* harmony import */ var _hostReportError__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(189);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _hostReportError PURE_IMPORTS_END */
 
 var subscribeToPromise = function (promise) {
@@ -23780,13 +28701,21 @@ var subscribeToPromise = function (promise) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 229 */
+=======
+/* 248 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "subscribeToIterable", function() { return subscribeToIterable; });
+<<<<<<< HEAD
 /* harmony import */ var _symbol_iterator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(230);
+=======
+/* harmony import */ var _symbol_iterator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(249);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _symbol_iterator PURE_IMPORTS_END */
 
 var subscribeToIterable = function (iterable) {
@@ -23817,7 +28746,11 @@ var subscribeToIterable = function (iterable) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 230 */
+=======
+/* 249 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -23838,13 +28771,21 @@ var $$iterator = iterator;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 231 */
+=======
+/* 250 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "subscribeToObservable", function() { return subscribeToObservable; });
+<<<<<<< HEAD
 /* harmony import */ var _symbol_observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(178);
+=======
+/* harmony import */ var _symbol_observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(197);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _symbol_observable PURE_IMPORTS_END */
 
 var subscribeToObservable = function (obj) {
@@ -23862,7 +28803,11 @@ var subscribeToObservable = function (obj) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 232 */
+=======
+/* 251 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -23874,7 +28819,11 @@ var isArrayLike = (function (x) { return x && typeof x.length === 'number' && ty
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 233 */
+=======
+/* 252 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -23888,16 +28837,27 @@ function isPromise(value) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 234 */
+=======
+/* 253 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "concat", function() { return concat; });
+<<<<<<< HEAD
 /* harmony import */ var _util_isScheduler__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(200);
 /* harmony import */ var _of__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(199);
 /* harmony import */ var _from__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(235);
 /* harmony import */ var _operators_concatAll__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(241);
+=======
+/* harmony import */ var _util_isScheduler__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(219);
+/* harmony import */ var _of__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(218);
+/* harmony import */ var _from__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(254);
+/* harmony import */ var _operators_concatAll__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(260);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _util_isScheduler,_of,_from,_operators_concatAll PURE_IMPORTS_END */
 
 
@@ -23917,12 +28877,17 @@ function concat() {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 235 */
+=======
+/* 254 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "from", function() { return from; });
+<<<<<<< HEAD
 /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(163);
 /* harmony import */ var _util_isPromise__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(233);
 /* harmony import */ var _util_isArrayLike__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(232);
@@ -23933,6 +28898,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _fromIterable__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(239);
 /* harmony import */ var _fromObservable__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(240);
 /* harmony import */ var _util_subscribeTo__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(227);
+=======
+/* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(182);
+/* harmony import */ var _util_isPromise__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(252);
+/* harmony import */ var _util_isArrayLike__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(251);
+/* harmony import */ var _util_isInteropObservable__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(255);
+/* harmony import */ var _util_isIterable__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(256);
+/* harmony import */ var _fromArray__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(220);
+/* harmony import */ var _fromPromise__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(257);
+/* harmony import */ var _fromIterable__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(258);
+/* harmony import */ var _fromObservable__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(259);
+/* harmony import */ var _util_subscribeTo__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(246);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _Observable,_util_isPromise,_util_isArrayLike,_util_isInteropObservable,_util_isIterable,_fromArray,_fromPromise,_fromIterable,_fromObservable,_util_subscribeTo PURE_IMPORTS_END */
 
 
@@ -23971,13 +28948,21 @@ function from(input, scheduler) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 236 */
+=======
+/* 255 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isInteropObservable", function() { return isInteropObservable; });
+<<<<<<< HEAD
 /* harmony import */ var _symbol_observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(178);
+=======
+/* harmony import */ var _symbol_observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(197);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _symbol_observable PURE_IMPORTS_END */
 
 function isInteropObservable(input) {
@@ -23987,13 +28972,21 @@ function isInteropObservable(input) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 237 */
+=======
+/* 256 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isIterable", function() { return isIterable; });
+<<<<<<< HEAD
 /* harmony import */ var _symbol_iterator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(230);
+=======
+/* harmony import */ var _symbol_iterator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(249);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _symbol_iterator PURE_IMPORTS_END */
 
 function isIterable(input) {
@@ -24003,15 +28996,25 @@ function isIterable(input) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 238 */
+=======
+/* 257 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fromPromise", function() { return fromPromise; });
+<<<<<<< HEAD
 /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(163);
 /* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(171);
 /* harmony import */ var _util_subscribeToPromise__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(228);
+=======
+/* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(182);
+/* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(190);
+/* harmony import */ var _util_subscribeToPromise__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(247);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _Observable,_Subscription,_util_subscribeToPromise PURE_IMPORTS_END */
 
 
@@ -24041,16 +29044,27 @@ function fromPromise(input, scheduler) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 239 */
+=======
+/* 258 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fromIterable", function() { return fromIterable; });
+<<<<<<< HEAD
 /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(163);
 /* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(171);
 /* harmony import */ var _symbol_iterator__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(230);
 /* harmony import */ var _util_subscribeToIterable__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(229);
+=======
+/* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(182);
+/* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(190);
+/* harmony import */ var _symbol_iterator__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(249);
+/* harmony import */ var _util_subscribeToIterable__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(248);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _Observable,_Subscription,_symbol_iterator,_util_subscribeToIterable PURE_IMPORTS_END */
 
 
@@ -24106,16 +29120,27 @@ function fromIterable(input, scheduler) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 240 */
+=======
+/* 259 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fromObservable", function() { return fromObservable; });
+<<<<<<< HEAD
 /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(163);
 /* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(171);
 /* harmony import */ var _symbol_observable__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(178);
 /* harmony import */ var _util_subscribeToObservable__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(231);
+=======
+/* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(182);
+/* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(190);
+/* harmony import */ var _symbol_observable__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(197);
+/* harmony import */ var _util_subscribeToObservable__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(250);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _Observable,_Subscription,_symbol_observable,_util_subscribeToObservable PURE_IMPORTS_END */
 
 
@@ -24144,13 +29169,21 @@ function fromObservable(input, scheduler) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 241 */
+=======
+/* 260 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "concatAll", function() { return concatAll; });
+<<<<<<< HEAD
 /* harmony import */ var _mergeAll__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(242);
+=======
+/* harmony import */ var _mergeAll__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(261);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _mergeAll PURE_IMPORTS_END */
 
 function concatAll() {
@@ -24160,14 +29193,23 @@ function concatAll() {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 242 */
+=======
+/* 261 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "mergeAll", function() { return mergeAll; });
+<<<<<<< HEAD
 /* harmony import */ var _mergeMap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(243);
 /* harmony import */ var _util_identity__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(215);
+=======
+/* harmony import */ var _mergeMap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(262);
+/* harmony import */ var _util_identity__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(234);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _mergeMap,_util_identity PURE_IMPORTS_END */
 
 
@@ -24181,7 +29223,11 @@ function mergeAll(concurrent) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 243 */
+=======
+/* 262 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -24189,11 +29235,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "mergeMap", function() { return mergeMap; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MergeMapOperator", function() { return MergeMapOperator; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MergeMapSubscriber", function() { return MergeMapSubscriber; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(225);
 /* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(224);
 /* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(221);
 /* harmony import */ var _observable_from__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(235);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(244);
+/* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(243);
+/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(240);
+/* harmony import */ var _observable_from__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(254);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_util_subscribeToResult,_OuterSubscriber,_map,_observable_from PURE_IMPORTS_END */
 
 
@@ -24292,15 +29346,25 @@ var MergeMapSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 244 */
+=======
+/* 263 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "defer", function() { return defer; });
+<<<<<<< HEAD
 /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(163);
 /* harmony import */ var _from__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(235);
 /* harmony import */ var _empty__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(198);
+=======
+/* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(182);
+/* harmony import */ var _from__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(254);
+/* harmony import */ var _empty__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(217);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _Observable,_from,_empty PURE_IMPORTS_END */
 
 
@@ -24323,12 +29387,17 @@ function defer(observableFactory) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 245 */
+=======
+/* 264 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "forkJoin", function() { return forkJoin; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(163);
 /* harmony import */ var _util_isArray__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(172);
@@ -24336,6 +29405,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(225);
 /* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(224);
 /* harmony import */ var _operators_map__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(221);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(182);
+/* harmony import */ var _util_isArray__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(191);
+/* harmony import */ var _empty__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(217);
+/* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(244);
+/* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(243);
+/* harmony import */ var _operators_map__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(240);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Observable,_util_isArray,_empty,_util_subscribeToResult,_OuterSubscriber,_operators_map PURE_IMPORTS_END */
 
 
@@ -24413,16 +29491,27 @@ var ForkJoinSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 246 */
+=======
+/* 265 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fromEvent", function() { return fromEvent; });
+<<<<<<< HEAD
 /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(163);
 /* harmony import */ var _util_isArray__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(172);
 /* harmony import */ var _util_isFunction__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(167);
 /* harmony import */ var _operators_map__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(221);
+=======
+/* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(182);
+/* harmony import */ var _util_isArray__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(191);
+/* harmony import */ var _util_isFunction__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(186);
+/* harmony import */ var _operators_map__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(240);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _Observable,_util_isArray,_util_isFunction,_operators_map PURE_IMPORTS_END */
 
 
@@ -24489,16 +29578,27 @@ function isEventTarget(sourceObj) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 247 */
+=======
+/* 266 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fromEventPattern", function() { return fromEventPattern; });
+<<<<<<< HEAD
 /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(163);
 /* harmony import */ var _util_isArray__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(172);
 /* harmony import */ var _util_isFunction__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(167);
 /* harmony import */ var _operators_map__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(221);
+=======
+/* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(182);
+/* harmony import */ var _util_isArray__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(191);
+/* harmony import */ var _util_isFunction__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(186);
+/* harmony import */ var _operators_map__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(240);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _Observable,_util_isArray,_util_isFunction,_operators_map PURE_IMPORTS_END */
 
 
@@ -24534,15 +29634,25 @@ function fromEventPattern(addHandler, removeHandler, resultSelector) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 248 */
+=======
+/* 267 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "generate", function() { return generate; });
+<<<<<<< HEAD
 /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(163);
 /* harmony import */ var _util_identity__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(215);
 /* harmony import */ var _util_isScheduler__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(200);
+=======
+/* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(182);
+/* harmony import */ var _util_identity__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(234);
+/* harmony import */ var _util_isScheduler__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(219);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _Observable,_util_identity,_util_isScheduler PURE_IMPORTS_END */
 
 
@@ -24671,14 +29781,23 @@ function dispatch(state) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 249 */
+=======
+/* 268 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "iif", function() { return iif; });
+<<<<<<< HEAD
 /* harmony import */ var _defer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(244);
 /* harmony import */ var _empty__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(198);
+=======
+/* harmony import */ var _defer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(263);
+/* harmony import */ var _empty__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(217);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _defer,_empty PURE_IMPORTS_END */
 
 
@@ -24695,15 +29814,25 @@ function iif(condition, trueResult, falseResult) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 250 */
+=======
+/* 269 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "interval", function() { return interval; });
+<<<<<<< HEAD
 /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(163);
 /* harmony import */ var _scheduler_async__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(210);
 /* harmony import */ var _util_isNumeric__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(251);
+=======
+/* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(182);
+/* harmony import */ var _scheduler_async__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(229);
+/* harmony import */ var _util_isNumeric__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(270);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _Observable,_scheduler_async,_util_isNumeric PURE_IMPORTS_END */
 
 
@@ -24735,13 +29864,21 @@ function dispatch(state) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 251 */
+=======
+/* 270 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isNumeric", function() { return isNumeric; });
+<<<<<<< HEAD
 /* harmony import */ var _isArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(172);
+=======
+/* harmony import */ var _isArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(191);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _isArray PURE_IMPORTS_END */
 
 function isNumeric(val) {
@@ -24751,16 +29888,27 @@ function isNumeric(val) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 252 */
+=======
+/* 271 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "merge", function() { return merge; });
+<<<<<<< HEAD
 /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(163);
 /* harmony import */ var _util_isScheduler__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(200);
 /* harmony import */ var _operators_mergeAll__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(242);
 /* harmony import */ var _fromArray__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(201);
+=======
+/* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(182);
+/* harmony import */ var _util_isScheduler__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(219);
+/* harmony import */ var _operators_mergeAll__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(261);
+/* harmony import */ var _fromArray__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(220);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _Observable,_util_isScheduler,_operators_mergeAll,_fromArray PURE_IMPORTS_END */
 
 
@@ -24792,15 +29940,24 @@ function merge() {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 253 */
+=======
+/* 272 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NEVER", function() { return NEVER; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "never", function() { return never; });
+<<<<<<< HEAD
 /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(163);
 /* harmony import */ var _util_noop__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(180);
+=======
+/* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(182);
+/* harmony import */ var _util_noop__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(199);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _Observable,_util_noop PURE_IMPORTS_END */
 
 
@@ -24812,16 +29969,27 @@ function never() {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 254 */
+=======
+/* 273 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "onErrorResumeNext", function() { return onErrorResumeNext; });
+<<<<<<< HEAD
 /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(163);
 /* harmony import */ var _from__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(235);
 /* harmony import */ var _util_isArray__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(172);
 /* harmony import */ var _empty__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(198);
+=======
+/* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(182);
+/* harmony import */ var _from__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(254);
+/* harmony import */ var _util_isArray__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(191);
+/* harmony import */ var _empty__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(217);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _Observable,_from,_util_isArray,_empty PURE_IMPORTS_END */
 
 
@@ -24852,15 +30020,24 @@ function onErrorResumeNext() {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 255 */
+=======
+/* 274 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "pairs", function() { return pairs; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "dispatch", function() { return dispatch; });
+<<<<<<< HEAD
 /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(163);
 /* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(171);
+=======
+/* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(182);
+/* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(190);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _Observable,_Subscription PURE_IMPORTS_END */
 
 
@@ -24903,7 +30080,11 @@ function dispatch(state) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 256 */
+=======
+/* 275 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -24911,11 +30092,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "race", function() { return race; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RaceOperator", function() { return RaceOperator; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RaceSubscriber", function() { return RaceSubscriber; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _util_isArray__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(172);
 /* harmony import */ var _fromArray__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(201);
 /* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(224);
 /* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(225);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _util_isArray__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(191);
+/* harmony import */ var _fromArray__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(220);
+/* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(243);
+/* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(244);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_util_isArray,_fromArray,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
 
 
@@ -24997,14 +30186,22 @@ var RaceSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 257 */
+=======
+/* 276 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "range", function() { return range; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "dispatch", function() { return dispatch; });
+<<<<<<< HEAD
 /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(163);
+=======
+/* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(182);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _Observable PURE_IMPORTS_END */
 
 function range(start, count, scheduler) {
@@ -25055,16 +30252,27 @@ function dispatch(state) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 258 */
+=======
+/* 277 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "timer", function() { return timer; });
+<<<<<<< HEAD
 /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(163);
 /* harmony import */ var _scheduler_async__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(210);
 /* harmony import */ var _util_isNumeric__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(251);
 /* harmony import */ var _util_isScheduler__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(200);
+=======
+/* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(182);
+/* harmony import */ var _scheduler_async__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(229);
+/* harmony import */ var _util_isNumeric__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(270);
+/* harmony import */ var _util_isScheduler__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(219);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _Observable,_scheduler_async,_util_isNumeric,_util_isScheduler PURE_IMPORTS_END */
 
 
@@ -25109,15 +30317,25 @@ function dispatch(state) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 259 */
+=======
+/* 278 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "using", function() { return using; });
+<<<<<<< HEAD
 /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(163);
 /* harmony import */ var _from__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(235);
 /* harmony import */ var _empty__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(198);
+=======
+/* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(182);
+/* harmony import */ var _from__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(254);
+/* harmony import */ var _empty__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(217);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _Observable,_from,_empty PURE_IMPORTS_END */
 
 
@@ -25154,7 +30372,11 @@ function using(resourceFactory, observableFactory) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 260 */
+=======
+/* 279 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -25162,6 +30384,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "zip", function() { return zip; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ZipOperator", function() { return ZipOperator; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ZipSubscriber", function() { return ZipSubscriber; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _fromArray__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(201);
 /* harmony import */ var _util_isArray__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(172);
@@ -25169,6 +30392,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(224);
 /* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(225);
 /* harmony import */ var _internal_symbol_iterator__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(230);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _fromArray__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(220);
+/* harmony import */ var _util_isArray__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(191);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(184);
+/* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(243);
+/* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(244);
+/* harmony import */ var _internal_symbol_iterator__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(249);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_fromArray,_util_isArray,_Subscriber,_OuterSubscriber,_util_subscribeToResult,_.._internal_symbol_iterator PURE_IMPORTS_END */
 
 
@@ -25388,11 +30620,16 @@ var ZipBufferIterator = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 261 */
+=======
+/* 280 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+<<<<<<< HEAD
 /* harmony import */ var _internal_operators_audit__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(262);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "audit", function() { return _internal_operators_audit__WEBPACK_IMPORTED_MODULE_0__["audit"]; });
 
@@ -25529,10 +30766,149 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "mergeAll", function() { return _internal_operators_mergeAll__WEBPACK_IMPORTED_MODULE_44__["mergeAll"]; });
 
 /* harmony import */ var _internal_operators_mergeMap__WEBPACK_IMPORTED_MODULE_45__ = __webpack_require__(243);
+=======
+/* harmony import */ var _internal_operators_audit__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(281);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "audit", function() { return _internal_operators_audit__WEBPACK_IMPORTED_MODULE_0__["audit"]; });
+
+/* harmony import */ var _internal_operators_auditTime__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(282);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "auditTime", function() { return _internal_operators_auditTime__WEBPACK_IMPORTED_MODULE_1__["auditTime"]; });
+
+/* harmony import */ var _internal_operators_buffer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(283);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "buffer", function() { return _internal_operators_buffer__WEBPACK_IMPORTED_MODULE_2__["buffer"]; });
+
+/* harmony import */ var _internal_operators_bufferCount__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(284);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "bufferCount", function() { return _internal_operators_bufferCount__WEBPACK_IMPORTED_MODULE_3__["bufferCount"]; });
+
+/* harmony import */ var _internal_operators_bufferTime__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(285);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "bufferTime", function() { return _internal_operators_bufferTime__WEBPACK_IMPORTED_MODULE_4__["bufferTime"]; });
+
+/* harmony import */ var _internal_operators_bufferToggle__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(286);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "bufferToggle", function() { return _internal_operators_bufferToggle__WEBPACK_IMPORTED_MODULE_5__["bufferToggle"]; });
+
+/* harmony import */ var _internal_operators_bufferWhen__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(287);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "bufferWhen", function() { return _internal_operators_bufferWhen__WEBPACK_IMPORTED_MODULE_6__["bufferWhen"]; });
+
+/* harmony import */ var _internal_operators_catchError__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(288);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "catchError", function() { return _internal_operators_catchError__WEBPACK_IMPORTED_MODULE_7__["catchError"]; });
+
+/* harmony import */ var _internal_operators_combineAll__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(289);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "combineAll", function() { return _internal_operators_combineAll__WEBPACK_IMPORTED_MODULE_8__["combineAll"]; });
+
+/* harmony import */ var _internal_operators_combineLatest__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(290);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "combineLatest", function() { return _internal_operators_combineLatest__WEBPACK_IMPORTED_MODULE_9__["combineLatest"]; });
+
+/* harmony import */ var _internal_operators_concat__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(291);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "concat", function() { return _internal_operators_concat__WEBPACK_IMPORTED_MODULE_10__["concat"]; });
+
+/* harmony import */ var _internal_operators_concatAll__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(260);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "concatAll", function() { return _internal_operators_concatAll__WEBPACK_IMPORTED_MODULE_11__["concatAll"]; });
+
+/* harmony import */ var _internal_operators_concatMap__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(292);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "concatMap", function() { return _internal_operators_concatMap__WEBPACK_IMPORTED_MODULE_12__["concatMap"]; });
+
+/* harmony import */ var _internal_operators_concatMapTo__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(293);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "concatMapTo", function() { return _internal_operators_concatMapTo__WEBPACK_IMPORTED_MODULE_13__["concatMapTo"]; });
+
+/* harmony import */ var _internal_operators_count__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(294);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "count", function() { return _internal_operators_count__WEBPACK_IMPORTED_MODULE_14__["count"]; });
+
+/* harmony import */ var _internal_operators_debounce__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(295);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "debounce", function() { return _internal_operators_debounce__WEBPACK_IMPORTED_MODULE_15__["debounce"]; });
+
+/* harmony import */ var _internal_operators_debounceTime__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(296);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "debounceTime", function() { return _internal_operators_debounceTime__WEBPACK_IMPORTED_MODULE_16__["debounceTime"]; });
+
+/* harmony import */ var _internal_operators_defaultIfEmpty__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(297);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "defaultIfEmpty", function() { return _internal_operators_defaultIfEmpty__WEBPACK_IMPORTED_MODULE_17__["defaultIfEmpty"]; });
+
+/* harmony import */ var _internal_operators_delay__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(298);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "delay", function() { return _internal_operators_delay__WEBPACK_IMPORTED_MODULE_18__["delay"]; });
+
+/* harmony import */ var _internal_operators_delayWhen__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(300);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "delayWhen", function() { return _internal_operators_delayWhen__WEBPACK_IMPORTED_MODULE_19__["delayWhen"]; });
+
+/* harmony import */ var _internal_operators_dematerialize__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(301);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "dematerialize", function() { return _internal_operators_dematerialize__WEBPACK_IMPORTED_MODULE_20__["dematerialize"]; });
+
+/* harmony import */ var _internal_operators_distinct__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(302);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "distinct", function() { return _internal_operators_distinct__WEBPACK_IMPORTED_MODULE_21__["distinct"]; });
+
+/* harmony import */ var _internal_operators_distinctUntilChanged__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(303);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "distinctUntilChanged", function() { return _internal_operators_distinctUntilChanged__WEBPACK_IMPORTED_MODULE_22__["distinctUntilChanged"]; });
+
+/* harmony import */ var _internal_operators_distinctUntilKeyChanged__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(304);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "distinctUntilKeyChanged", function() { return _internal_operators_distinctUntilKeyChanged__WEBPACK_IMPORTED_MODULE_23__["distinctUntilKeyChanged"]; });
+
+/* harmony import */ var _internal_operators_elementAt__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(305);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "elementAt", function() { return _internal_operators_elementAt__WEBPACK_IMPORTED_MODULE_24__["elementAt"]; });
+
+/* harmony import */ var _internal_operators_endWith__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(310);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "endWith", function() { return _internal_operators_endWith__WEBPACK_IMPORTED_MODULE_25__["endWith"]; });
+
+/* harmony import */ var _internal_operators_every__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(311);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "every", function() { return _internal_operators_every__WEBPACK_IMPORTED_MODULE_26__["every"]; });
+
+/* harmony import */ var _internal_operators_exhaust__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(312);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "exhaust", function() { return _internal_operators_exhaust__WEBPACK_IMPORTED_MODULE_27__["exhaust"]; });
+
+/* harmony import */ var _internal_operators_exhaustMap__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(313);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "exhaustMap", function() { return _internal_operators_exhaustMap__WEBPACK_IMPORTED_MODULE_28__["exhaustMap"]; });
+
+/* harmony import */ var _internal_operators_expand__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(314);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "expand", function() { return _internal_operators_expand__WEBPACK_IMPORTED_MODULE_29__["expand"]; });
+
+/* harmony import */ var _internal_operators_filter__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(306);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "filter", function() { return _internal_operators_filter__WEBPACK_IMPORTED_MODULE_30__["filter"]; });
+
+/* harmony import */ var _internal_operators_finalize__WEBPACK_IMPORTED_MODULE_31__ = __webpack_require__(315);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "finalize", function() { return _internal_operators_finalize__WEBPACK_IMPORTED_MODULE_31__["finalize"]; });
+
+/* harmony import */ var _internal_operators_find__WEBPACK_IMPORTED_MODULE_32__ = __webpack_require__(316);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "find", function() { return _internal_operators_find__WEBPACK_IMPORTED_MODULE_32__["find"]; });
+
+/* harmony import */ var _internal_operators_findIndex__WEBPACK_IMPORTED_MODULE_33__ = __webpack_require__(317);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "findIndex", function() { return _internal_operators_findIndex__WEBPACK_IMPORTED_MODULE_33__["findIndex"]; });
+
+/* harmony import */ var _internal_operators_first__WEBPACK_IMPORTED_MODULE_34__ = __webpack_require__(318);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "first", function() { return _internal_operators_first__WEBPACK_IMPORTED_MODULE_34__["first"]; });
+
+/* harmony import */ var _internal_operators_groupBy__WEBPACK_IMPORTED_MODULE_35__ = __webpack_require__(205);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "groupBy", function() { return _internal_operators_groupBy__WEBPACK_IMPORTED_MODULE_35__["groupBy"]; });
+
+/* harmony import */ var _internal_operators_ignoreElements__WEBPACK_IMPORTED_MODULE_36__ = __webpack_require__(319);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "ignoreElements", function() { return _internal_operators_ignoreElements__WEBPACK_IMPORTED_MODULE_36__["ignoreElements"]; });
+
+/* harmony import */ var _internal_operators_isEmpty__WEBPACK_IMPORTED_MODULE_37__ = __webpack_require__(320);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "isEmpty", function() { return _internal_operators_isEmpty__WEBPACK_IMPORTED_MODULE_37__["isEmpty"]; });
+
+/* harmony import */ var _internal_operators_last__WEBPACK_IMPORTED_MODULE_38__ = __webpack_require__(321);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "last", function() { return _internal_operators_last__WEBPACK_IMPORTED_MODULE_38__["last"]; });
+
+/* harmony import */ var _internal_operators_map__WEBPACK_IMPORTED_MODULE_39__ = __webpack_require__(240);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "map", function() { return _internal_operators_map__WEBPACK_IMPORTED_MODULE_39__["map"]; });
+
+/* harmony import */ var _internal_operators_mapTo__WEBPACK_IMPORTED_MODULE_40__ = __webpack_require__(323);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "mapTo", function() { return _internal_operators_mapTo__WEBPACK_IMPORTED_MODULE_40__["mapTo"]; });
+
+/* harmony import */ var _internal_operators_materialize__WEBPACK_IMPORTED_MODULE_41__ = __webpack_require__(324);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "materialize", function() { return _internal_operators_materialize__WEBPACK_IMPORTED_MODULE_41__["materialize"]; });
+
+/* harmony import */ var _internal_operators_max__WEBPACK_IMPORTED_MODULE_42__ = __webpack_require__(325);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "max", function() { return _internal_operators_max__WEBPACK_IMPORTED_MODULE_42__["max"]; });
+
+/* harmony import */ var _internal_operators_merge__WEBPACK_IMPORTED_MODULE_43__ = __webpack_require__(328);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "merge", function() { return _internal_operators_merge__WEBPACK_IMPORTED_MODULE_43__["merge"]; });
+
+/* harmony import */ var _internal_operators_mergeAll__WEBPACK_IMPORTED_MODULE_44__ = __webpack_require__(261);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "mergeAll", function() { return _internal_operators_mergeAll__WEBPACK_IMPORTED_MODULE_44__["mergeAll"]; });
+
+/* harmony import */ var _internal_operators_mergeMap__WEBPACK_IMPORTED_MODULE_45__ = __webpack_require__(262);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "mergeMap", function() { return _internal_operators_mergeMap__WEBPACK_IMPORTED_MODULE_45__["mergeMap"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "flatMap", function() { return _internal_operators_mergeMap__WEBPACK_IMPORTED_MODULE_45__["mergeMap"]; });
 
+<<<<<<< HEAD
 /* harmony import */ var _internal_operators_mergeMapTo__WEBPACK_IMPORTED_MODULE_46__ = __webpack_require__(310);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "mergeMapTo", function() { return _internal_operators_mergeMapTo__WEBPACK_IMPORTED_MODULE_46__["mergeMapTo"]; });
 
@@ -25702,6 +31078,177 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "zip", function() { return _internal_operators_zip__WEBPACK_IMPORTED_MODULE_101__["zip"]; });
 
 /* harmony import */ var _internal_operators_zipAll__WEBPACK_IMPORTED_MODULE_102__ = __webpack_require__(360);
+=======
+/* harmony import */ var _internal_operators_mergeMapTo__WEBPACK_IMPORTED_MODULE_46__ = __webpack_require__(329);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "mergeMapTo", function() { return _internal_operators_mergeMapTo__WEBPACK_IMPORTED_MODULE_46__["mergeMapTo"]; });
+
+/* harmony import */ var _internal_operators_mergeScan__WEBPACK_IMPORTED_MODULE_47__ = __webpack_require__(330);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "mergeScan", function() { return _internal_operators_mergeScan__WEBPACK_IMPORTED_MODULE_47__["mergeScan"]; });
+
+/* harmony import */ var _internal_operators_min__WEBPACK_IMPORTED_MODULE_48__ = __webpack_require__(331);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "min", function() { return _internal_operators_min__WEBPACK_IMPORTED_MODULE_48__["min"]; });
+
+/* harmony import */ var _internal_operators_multicast__WEBPACK_IMPORTED_MODULE_49__ = __webpack_require__(332);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "multicast", function() { return _internal_operators_multicast__WEBPACK_IMPORTED_MODULE_49__["multicast"]; });
+
+/* harmony import */ var _internal_operators_observeOn__WEBPACK_IMPORTED_MODULE_50__ = __webpack_require__(215);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "observeOn", function() { return _internal_operators_observeOn__WEBPACK_IMPORTED_MODULE_50__["observeOn"]; });
+
+/* harmony import */ var _internal_operators_onErrorResumeNext__WEBPACK_IMPORTED_MODULE_51__ = __webpack_require__(333);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "onErrorResumeNext", function() { return _internal_operators_onErrorResumeNext__WEBPACK_IMPORTED_MODULE_51__["onErrorResumeNext"]; });
+
+/* harmony import */ var _internal_operators_pairwise__WEBPACK_IMPORTED_MODULE_52__ = __webpack_require__(334);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "pairwise", function() { return _internal_operators_pairwise__WEBPACK_IMPORTED_MODULE_52__["pairwise"]; });
+
+/* harmony import */ var _internal_operators_partition__WEBPACK_IMPORTED_MODULE_53__ = __webpack_require__(335);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "partition", function() { return _internal_operators_partition__WEBPACK_IMPORTED_MODULE_53__["partition"]; });
+
+/* harmony import */ var _internal_operators_pluck__WEBPACK_IMPORTED_MODULE_54__ = __webpack_require__(337);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "pluck", function() { return _internal_operators_pluck__WEBPACK_IMPORTED_MODULE_54__["pluck"]; });
+
+/* harmony import */ var _internal_operators_publish__WEBPACK_IMPORTED_MODULE_55__ = __webpack_require__(338);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "publish", function() { return _internal_operators_publish__WEBPACK_IMPORTED_MODULE_55__["publish"]; });
+
+/* harmony import */ var _internal_operators_publishBehavior__WEBPACK_IMPORTED_MODULE_56__ = __webpack_require__(339);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "publishBehavior", function() { return _internal_operators_publishBehavior__WEBPACK_IMPORTED_MODULE_56__["publishBehavior"]; });
+
+/* harmony import */ var _internal_operators_publishLast__WEBPACK_IMPORTED_MODULE_57__ = __webpack_require__(340);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "publishLast", function() { return _internal_operators_publishLast__WEBPACK_IMPORTED_MODULE_57__["publishLast"]; });
+
+/* harmony import */ var _internal_operators_publishReplay__WEBPACK_IMPORTED_MODULE_58__ = __webpack_require__(341);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "publishReplay", function() { return _internal_operators_publishReplay__WEBPACK_IMPORTED_MODULE_58__["publishReplay"]; });
+
+/* harmony import */ var _internal_operators_race__WEBPACK_IMPORTED_MODULE_59__ = __webpack_require__(342);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "race", function() { return _internal_operators_race__WEBPACK_IMPORTED_MODULE_59__["race"]; });
+
+/* harmony import */ var _internal_operators_reduce__WEBPACK_IMPORTED_MODULE_60__ = __webpack_require__(326);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "reduce", function() { return _internal_operators_reduce__WEBPACK_IMPORTED_MODULE_60__["reduce"]; });
+
+/* harmony import */ var _internal_operators_repeat__WEBPACK_IMPORTED_MODULE_61__ = __webpack_require__(343);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "repeat", function() { return _internal_operators_repeat__WEBPACK_IMPORTED_MODULE_61__["repeat"]; });
+
+/* harmony import */ var _internal_operators_repeatWhen__WEBPACK_IMPORTED_MODULE_62__ = __webpack_require__(344);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "repeatWhen", function() { return _internal_operators_repeatWhen__WEBPACK_IMPORTED_MODULE_62__["repeatWhen"]; });
+
+/* harmony import */ var _internal_operators_retry__WEBPACK_IMPORTED_MODULE_63__ = __webpack_require__(345);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "retry", function() { return _internal_operators_retry__WEBPACK_IMPORTED_MODULE_63__["retry"]; });
+
+/* harmony import */ var _internal_operators_retryWhen__WEBPACK_IMPORTED_MODULE_64__ = __webpack_require__(346);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "retryWhen", function() { return _internal_operators_retryWhen__WEBPACK_IMPORTED_MODULE_64__["retryWhen"]; });
+
+/* harmony import */ var _internal_operators_refCount__WEBPACK_IMPORTED_MODULE_65__ = __webpack_require__(204);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "refCount", function() { return _internal_operators_refCount__WEBPACK_IMPORTED_MODULE_65__["refCount"]; });
+
+/* harmony import */ var _internal_operators_sample__WEBPACK_IMPORTED_MODULE_66__ = __webpack_require__(347);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "sample", function() { return _internal_operators_sample__WEBPACK_IMPORTED_MODULE_66__["sample"]; });
+
+/* harmony import */ var _internal_operators_sampleTime__WEBPACK_IMPORTED_MODULE_67__ = __webpack_require__(348);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "sampleTime", function() { return _internal_operators_sampleTime__WEBPACK_IMPORTED_MODULE_67__["sampleTime"]; });
+
+/* harmony import */ var _internal_operators_scan__WEBPACK_IMPORTED_MODULE_68__ = __webpack_require__(327);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "scan", function() { return _internal_operators_scan__WEBPACK_IMPORTED_MODULE_68__["scan"]; });
+
+/* harmony import */ var _internal_operators_sequenceEqual__WEBPACK_IMPORTED_MODULE_69__ = __webpack_require__(349);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "sequenceEqual", function() { return _internal_operators_sequenceEqual__WEBPACK_IMPORTED_MODULE_69__["sequenceEqual"]; });
+
+/* harmony import */ var _internal_operators_share__WEBPACK_IMPORTED_MODULE_70__ = __webpack_require__(350);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "share", function() { return _internal_operators_share__WEBPACK_IMPORTED_MODULE_70__["share"]; });
+
+/* harmony import */ var _internal_operators_shareReplay__WEBPACK_IMPORTED_MODULE_71__ = __webpack_require__(351);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "shareReplay", function() { return _internal_operators_shareReplay__WEBPACK_IMPORTED_MODULE_71__["shareReplay"]; });
+
+/* harmony import */ var _internal_operators_single__WEBPACK_IMPORTED_MODULE_72__ = __webpack_require__(352);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "single", function() { return _internal_operators_single__WEBPACK_IMPORTED_MODULE_72__["single"]; });
+
+/* harmony import */ var _internal_operators_skip__WEBPACK_IMPORTED_MODULE_73__ = __webpack_require__(353);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "skip", function() { return _internal_operators_skip__WEBPACK_IMPORTED_MODULE_73__["skip"]; });
+
+/* harmony import */ var _internal_operators_skipLast__WEBPACK_IMPORTED_MODULE_74__ = __webpack_require__(354);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "skipLast", function() { return _internal_operators_skipLast__WEBPACK_IMPORTED_MODULE_74__["skipLast"]; });
+
+/* harmony import */ var _internal_operators_skipUntil__WEBPACK_IMPORTED_MODULE_75__ = __webpack_require__(355);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "skipUntil", function() { return _internal_operators_skipUntil__WEBPACK_IMPORTED_MODULE_75__["skipUntil"]; });
+
+/* harmony import */ var _internal_operators_skipWhile__WEBPACK_IMPORTED_MODULE_76__ = __webpack_require__(356);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "skipWhile", function() { return _internal_operators_skipWhile__WEBPACK_IMPORTED_MODULE_76__["skipWhile"]; });
+
+/* harmony import */ var _internal_operators_startWith__WEBPACK_IMPORTED_MODULE_77__ = __webpack_require__(357);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "startWith", function() { return _internal_operators_startWith__WEBPACK_IMPORTED_MODULE_77__["startWith"]; });
+
+/* harmony import */ var _internal_operators_subscribeOn__WEBPACK_IMPORTED_MODULE_78__ = __webpack_require__(358);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "subscribeOn", function() { return _internal_operators_subscribeOn__WEBPACK_IMPORTED_MODULE_78__["subscribeOn"]; });
+
+/* harmony import */ var _internal_operators_switchAll__WEBPACK_IMPORTED_MODULE_79__ = __webpack_require__(360);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "switchAll", function() { return _internal_operators_switchAll__WEBPACK_IMPORTED_MODULE_79__["switchAll"]; });
+
+/* harmony import */ var _internal_operators_switchMap__WEBPACK_IMPORTED_MODULE_80__ = __webpack_require__(361);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "switchMap", function() { return _internal_operators_switchMap__WEBPACK_IMPORTED_MODULE_80__["switchMap"]; });
+
+/* harmony import */ var _internal_operators_switchMapTo__WEBPACK_IMPORTED_MODULE_81__ = __webpack_require__(362);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "switchMapTo", function() { return _internal_operators_switchMapTo__WEBPACK_IMPORTED_MODULE_81__["switchMapTo"]; });
+
+/* harmony import */ var _internal_operators_take__WEBPACK_IMPORTED_MODULE_82__ = __webpack_require__(309);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "take", function() { return _internal_operators_take__WEBPACK_IMPORTED_MODULE_82__["take"]; });
+
+/* harmony import */ var _internal_operators_takeLast__WEBPACK_IMPORTED_MODULE_83__ = __webpack_require__(322);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "takeLast", function() { return _internal_operators_takeLast__WEBPACK_IMPORTED_MODULE_83__["takeLast"]; });
+
+/* harmony import */ var _internal_operators_takeUntil__WEBPACK_IMPORTED_MODULE_84__ = __webpack_require__(363);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "takeUntil", function() { return _internal_operators_takeUntil__WEBPACK_IMPORTED_MODULE_84__["takeUntil"]; });
+
+/* harmony import */ var _internal_operators_takeWhile__WEBPACK_IMPORTED_MODULE_85__ = __webpack_require__(364);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "takeWhile", function() { return _internal_operators_takeWhile__WEBPACK_IMPORTED_MODULE_85__["takeWhile"]; });
+
+/* harmony import */ var _internal_operators_tap__WEBPACK_IMPORTED_MODULE_86__ = __webpack_require__(308);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "tap", function() { return _internal_operators_tap__WEBPACK_IMPORTED_MODULE_86__["tap"]; });
+
+/* harmony import */ var _internal_operators_throttle__WEBPACK_IMPORTED_MODULE_87__ = __webpack_require__(365);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "throttle", function() { return _internal_operators_throttle__WEBPACK_IMPORTED_MODULE_87__["throttle"]; });
+
+/* harmony import */ var _internal_operators_throttleTime__WEBPACK_IMPORTED_MODULE_88__ = __webpack_require__(366);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "throttleTime", function() { return _internal_operators_throttleTime__WEBPACK_IMPORTED_MODULE_88__["throttleTime"]; });
+
+/* harmony import */ var _internal_operators_throwIfEmpty__WEBPACK_IMPORTED_MODULE_89__ = __webpack_require__(307);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "throwIfEmpty", function() { return _internal_operators_throwIfEmpty__WEBPACK_IMPORTED_MODULE_89__["throwIfEmpty"]; });
+
+/* harmony import */ var _internal_operators_timeInterval__WEBPACK_IMPORTED_MODULE_90__ = __webpack_require__(367);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "timeInterval", function() { return _internal_operators_timeInterval__WEBPACK_IMPORTED_MODULE_90__["timeInterval"]; });
+
+/* harmony import */ var _internal_operators_timeout__WEBPACK_IMPORTED_MODULE_91__ = __webpack_require__(368);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "timeout", function() { return _internal_operators_timeout__WEBPACK_IMPORTED_MODULE_91__["timeout"]; });
+
+/* harmony import */ var _internal_operators_timeoutWith__WEBPACK_IMPORTED_MODULE_92__ = __webpack_require__(369);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "timeoutWith", function() { return _internal_operators_timeoutWith__WEBPACK_IMPORTED_MODULE_92__["timeoutWith"]; });
+
+/* harmony import */ var _internal_operators_timestamp__WEBPACK_IMPORTED_MODULE_93__ = __webpack_require__(370);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "timestamp", function() { return _internal_operators_timestamp__WEBPACK_IMPORTED_MODULE_93__["timestamp"]; });
+
+/* harmony import */ var _internal_operators_toArray__WEBPACK_IMPORTED_MODULE_94__ = __webpack_require__(371);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "toArray", function() { return _internal_operators_toArray__WEBPACK_IMPORTED_MODULE_94__["toArray"]; });
+
+/* harmony import */ var _internal_operators_window__WEBPACK_IMPORTED_MODULE_95__ = __webpack_require__(372);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "window", function() { return _internal_operators_window__WEBPACK_IMPORTED_MODULE_95__["window"]; });
+
+/* harmony import */ var _internal_operators_windowCount__WEBPACK_IMPORTED_MODULE_96__ = __webpack_require__(373);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "windowCount", function() { return _internal_operators_windowCount__WEBPACK_IMPORTED_MODULE_96__["windowCount"]; });
+
+/* harmony import */ var _internal_operators_windowTime__WEBPACK_IMPORTED_MODULE_97__ = __webpack_require__(374);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "windowTime", function() { return _internal_operators_windowTime__WEBPACK_IMPORTED_MODULE_97__["windowTime"]; });
+
+/* harmony import */ var _internal_operators_windowToggle__WEBPACK_IMPORTED_MODULE_98__ = __webpack_require__(375);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "windowToggle", function() { return _internal_operators_windowToggle__WEBPACK_IMPORTED_MODULE_98__["windowToggle"]; });
+
+/* harmony import */ var _internal_operators_windowWhen__WEBPACK_IMPORTED_MODULE_99__ = __webpack_require__(376);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "windowWhen", function() { return _internal_operators_windowWhen__WEBPACK_IMPORTED_MODULE_99__["windowWhen"]; });
+
+/* harmony import */ var _internal_operators_withLatestFrom__WEBPACK_IMPORTED_MODULE_100__ = __webpack_require__(377);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "withLatestFrom", function() { return _internal_operators_withLatestFrom__WEBPACK_IMPORTED_MODULE_100__["withLatestFrom"]; });
+
+/* harmony import */ var _internal_operators_zip__WEBPACK_IMPORTED_MODULE_101__ = __webpack_require__(378);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "zip", function() { return _internal_operators_zip__WEBPACK_IMPORTED_MODULE_101__["zip"]; });
+
+/* harmony import */ var _internal_operators_zipAll__WEBPACK_IMPORTED_MODULE_102__ = __webpack_require__(379);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "zipAll", function() { return _internal_operators_zipAll__WEBPACK_IMPORTED_MODULE_102__["zipAll"]; });
 
 /** PURE_IMPORTS_START  PURE_IMPORTS_END */
@@ -25813,17 +31360,29 @@ __webpack_require__.r(__webpack_exports__);
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 262 */
+=======
+/* 281 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "audit", function() { return audit; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _util_tryCatch__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(174);
 /* harmony import */ var _util_errorObject__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(175);
 /* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(224);
 /* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(225);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _util_tryCatch__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(193);
+/* harmony import */ var _util_errorObject__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(194);
+/* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(243);
+/* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(244);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_util_tryCatch,_util_errorObject,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
 
 
@@ -25896,15 +31455,25 @@ var AuditSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 263 */
+=======
+/* 282 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "auditTime", function() { return auditTime; });
+<<<<<<< HEAD
 /* harmony import */ var _scheduler_async__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(210);
 /* harmony import */ var _audit__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(262);
 /* harmony import */ var _observable_timer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(258);
+=======
+/* harmony import */ var _scheduler_async__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(229);
+/* harmony import */ var _audit__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(281);
+/* harmony import */ var _observable_timer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(277);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _scheduler_async,_audit,_observable_timer PURE_IMPORTS_END */
 
 
@@ -25919,15 +31488,25 @@ function auditTime(duration, scheduler) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 264 */
+=======
+/* 283 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "buffer", function() { return buffer; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(224);
 /* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(225);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(243);
+/* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(244);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
 
 
@@ -25968,14 +31547,23 @@ var BufferSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 265 */
+=======
+/* 284 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "bufferCount", function() { return bufferCount; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
@@ -26069,16 +31657,27 @@ var BufferSkipCountSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 266 */
+=======
+/* 285 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "bufferTime", function() { return bufferTime; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _scheduler_async__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(210);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(165);
 /* harmony import */ var _util_isScheduler__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(200);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _scheduler_async__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(229);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(184);
+/* harmony import */ var _util_isScheduler__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(219);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_scheduler_async,_Subscriber,_util_isScheduler PURE_IMPORTS_END */
 
 
@@ -26230,16 +31829,27 @@ function dispatchBufferClose(arg) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 267 */
+=======
+/* 286 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "bufferToggle", function() { return bufferToggle; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(171);
 /* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(225);
 /* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(224);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(190);
+/* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(244);
+/* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(243);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscription,_util_subscribeToResult,_OuterSubscriber PURE_IMPORTS_END */
 
 
@@ -26350,18 +31960,31 @@ var BufferToggleSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 268 */
+=======
+/* 287 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "bufferWhen", function() { return bufferWhen; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(171);
 /* harmony import */ var _util_tryCatch__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(174);
 /* harmony import */ var _util_errorObject__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(175);
 /* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(224);
 /* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(225);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(190);
+/* harmony import */ var _util_tryCatch__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(193);
+/* harmony import */ var _util_errorObject__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(194);
+/* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(243);
+/* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(244);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscription,_util_tryCatch,_util_errorObject,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
 
 
@@ -26447,15 +32070,25 @@ var BufferWhenSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 269 */
+=======
+/* 288 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "catchError", function() { return catchError; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(224);
 /* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(225);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(243);
+/* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(244);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
 
 
@@ -26504,13 +32137,21 @@ var CatchSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 270 */
+=======
+/* 289 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "combineAll", function() { return combineAll; });
+<<<<<<< HEAD
 /* harmony import */ var _observable_combineLatest__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(223);
+=======
+/* harmony import */ var _observable_combineLatest__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(242);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _observable_combineLatest PURE_IMPORTS_END */
 
 function combineAll(project) {
@@ -26520,15 +32161,25 @@ function combineAll(project) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 271 */
+=======
+/* 290 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "combineLatest", function() { return combineLatest; });
+<<<<<<< HEAD
 /* harmony import */ var _util_isArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(172);
 /* harmony import */ var _observable_combineLatest__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(223);
 /* harmony import */ var _observable_from__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(235);
+=======
+/* harmony import */ var _util_isArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(191);
+/* harmony import */ var _observable_combineLatest__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(242);
+/* harmony import */ var _observable_from__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(254);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _util_isArray,_observable_combineLatest,_observable_from PURE_IMPORTS_END */
 
 
@@ -26552,13 +32203,21 @@ function combineLatest() {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 272 */
+=======
+/* 291 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "concat", function() { return concat; });
+<<<<<<< HEAD
 /* harmony import */ var _observable_concat__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(234);
+=======
+/* harmony import */ var _observable_concat__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(253);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _observable_concat PURE_IMPORTS_END */
 
 function concat() {
@@ -26572,13 +32231,21 @@ function concat() {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 273 */
+=======
+/* 292 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "concatMap", function() { return concatMap; });
+<<<<<<< HEAD
 /* harmony import */ var _mergeMap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(243);
+=======
+/* harmony import */ var _mergeMap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(262);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _mergeMap PURE_IMPORTS_END */
 
 function concatMap(project, resultSelector) {
@@ -26588,13 +32255,21 @@ function concatMap(project, resultSelector) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 274 */
+=======
+/* 293 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "concatMapTo", function() { return concatMapTo; });
+<<<<<<< HEAD
 /* harmony import */ var _concatMap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(273);
+=======
+/* harmony import */ var _concatMap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(292);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _concatMap PURE_IMPORTS_END */
 
 function concatMapTo(innerObservable, resultSelector) {
@@ -26604,14 +32279,23 @@ function concatMapTo(innerObservable, resultSelector) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 275 */
+=======
+/* 294 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "count", function() { return count; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
@@ -26669,15 +32353,25 @@ var CountSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 276 */
+=======
+/* 295 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "debounce", function() { return debounce; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(224);
 /* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(225);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(243);
+/* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(244);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
 
 
@@ -26757,15 +32451,25 @@ var DebounceSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 277 */
+=======
+/* 296 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "debounceTime", function() { return debounceTime; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
 /* harmony import */ var _scheduler_async__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(210);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+/* harmony import */ var _scheduler_async__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(229);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber,_scheduler_async PURE_IMPORTS_END */
 
 
@@ -26833,14 +32537,23 @@ function dispatchNext(subscriber) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 278 */
+=======
+/* 297 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "defaultIfEmpty", function() { return defaultIfEmpty; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
@@ -26883,17 +32596,29 @@ var DefaultIfEmptySubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 279 */
+=======
+/* 298 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "delay", function() { return delay; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _scheduler_async__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(210);
 /* harmony import */ var _util_isDate__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(280);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(165);
 /* harmony import */ var _Notification__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(197);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _scheduler_async__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(229);
+/* harmony import */ var _util_isDate__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(299);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(184);
+/* harmony import */ var _Notification__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(216);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_scheduler_async,_util_isDate,_Subscriber,_Notification PURE_IMPORTS_END */
 
 
@@ -26987,7 +32712,11 @@ var DelayMessage = /*@__PURE__*/ (function () {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 280 */
+=======
+/* 299 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -27001,17 +32730,29 @@ function isDate(value) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 281 */
+=======
+/* 300 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "delayWhen", function() { return delayWhen; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
 /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(163);
 /* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(224);
 /* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(225);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+/* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(182);
+/* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(243);
+/* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(244);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber,_Observable,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
 
 
@@ -27142,14 +32883,23 @@ var SubscriptionDelaySubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 282 */
+=======
+/* 301 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "dematerialize", function() { return dematerialize; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
@@ -27180,16 +32930,26 @@ var DeMaterializeSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 283 */
+=======
+/* 302 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "distinct", function() { return distinct; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DistinctSubscriber", function() { return DistinctSubscriber; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(224);
 /* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(225);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(243);
+/* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(244);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
 
 
@@ -27258,16 +33018,27 @@ var DistinctSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 284 */
+=======
+/* 303 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "distinctUntilChanged", function() { return distinctUntilChanged; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
 /* harmony import */ var _util_tryCatch__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(174);
 /* harmony import */ var _util_errorObject__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(175);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+/* harmony import */ var _util_tryCatch__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(193);
+/* harmony import */ var _util_errorObject__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(194);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber,_util_tryCatch,_util_errorObject PURE_IMPORTS_END */
 
 
@@ -27330,13 +33101,21 @@ var DistinctUntilChangedSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 285 */
+=======
+/* 304 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "distinctUntilKeyChanged", function() { return distinctUntilKeyChanged; });
+<<<<<<< HEAD
 /* harmony import */ var _distinctUntilChanged__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(284);
+=======
+/* harmony import */ var _distinctUntilChanged__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(303);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _distinctUntilChanged PURE_IMPORTS_END */
 
 function distinctUntilKeyChanged(key, compare) {
@@ -27346,17 +33125,29 @@ function distinctUntilKeyChanged(key, compare) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 286 */
+=======
+/* 305 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "elementAt", function() { return elementAt; });
+<<<<<<< HEAD
 /* harmony import */ var _util_ArgumentOutOfRangeError__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(217);
 /* harmony import */ var _filter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(287);
 /* harmony import */ var _throwIfEmpty__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(288);
 /* harmony import */ var _defaultIfEmpty__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(278);
 /* harmony import */ var _take__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(290);
+=======
+/* harmony import */ var _util_ArgumentOutOfRangeError__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(236);
+/* harmony import */ var _filter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(306);
+/* harmony import */ var _throwIfEmpty__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(307);
+/* harmony import */ var _defaultIfEmpty__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(297);
+/* harmony import */ var _take__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(309);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _util_ArgumentOutOfRangeError,_filter,_throwIfEmpty,_defaultIfEmpty,_take PURE_IMPORTS_END */
 
 
@@ -27378,14 +33169,23 @@ function elementAt(index, defaultValue) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 287 */
+=======
+/* 306 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "filter", function() { return filter; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
@@ -27432,14 +33232,23 @@ var FilterSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 288 */
+=======
+/* 307 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "throwIfEmpty", function() { return throwIfEmpty; });
+<<<<<<< HEAD
 /* harmony import */ var _tap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(289);
 /* harmony import */ var _util_EmptyError__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(218);
+=======
+/* harmony import */ var _tap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(308);
+/* harmony import */ var _util_EmptyError__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(237);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _tap,_util_EmptyError PURE_IMPORTS_END */
 
 
@@ -27464,16 +33273,27 @@ function defaultErrorFactory() {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 289 */
+=======
+/* 308 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "tap", function() { return tap; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
 /* harmony import */ var _util_noop__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(180);
 /* harmony import */ var _util_isFunction__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(167);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+/* harmony import */ var _util_noop__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(199);
+/* harmony import */ var _util_isFunction__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(186);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber,_util_noop,_util_isFunction PURE_IMPORTS_END */
 
 
@@ -27552,16 +33372,27 @@ var TapSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 290 */
+=======
+/* 309 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "take", function() { return take; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
 /* harmony import */ var _util_ArgumentOutOfRangeError__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(217);
 /* harmony import */ var _observable_empty__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(198);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+/* harmony import */ var _util_ArgumentOutOfRangeError__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(236);
+/* harmony import */ var _observable_empty__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(217);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber,_util_ArgumentOutOfRangeError,_observable_empty PURE_IMPORTS_END */
 
 
@@ -27614,17 +33445,29 @@ var TakeSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 291 */
+=======
+/* 310 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "endWith", function() { return endWith; });
+<<<<<<< HEAD
 /* harmony import */ var _observable_fromArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(201);
 /* harmony import */ var _observable_scalar__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(203);
 /* harmony import */ var _observable_empty__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(198);
 /* harmony import */ var _observable_concat__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(234);
 /* harmony import */ var _util_isScheduler__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(200);
+=======
+/* harmony import */ var _observable_fromArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(220);
+/* harmony import */ var _observable_scalar__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(222);
+/* harmony import */ var _observable_empty__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(217);
+/* harmony import */ var _observable_concat__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(253);
+/* harmony import */ var _util_isScheduler__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(219);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _observable_fromArray,_observable_scalar,_observable_empty,_observable_concat,_util_isScheduler PURE_IMPORTS_END */
 
 
@@ -27660,14 +33503,23 @@ function endWith() {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 292 */
+=======
+/* 311 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "every", function() { return every; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
@@ -27722,15 +33574,25 @@ var EverySubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 293 */
+=======
+/* 312 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "exhaust", function() { return exhaust; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(224);
 /* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(225);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(243);
+/* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(244);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
 
 
@@ -27779,17 +33641,29 @@ var SwitchFirstSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 294 */
+=======
+/* 313 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "exhaustMap", function() { return exhaustMap; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(224);
 /* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(225);
 /* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(221);
 /* harmony import */ var _observable_from__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(235);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(243);
+/* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(244);
+/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(240);
+/* harmony import */ var _observable_from__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(254);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_OuterSubscriber,_util_subscribeToResult,_map,_observable_from PURE_IMPORTS_END */
 
 
@@ -27865,7 +33739,11 @@ var ExhaustMapSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 295 */
+=======
+/* 314 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -27873,11 +33751,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "expand", function() { return expand; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ExpandOperator", function() { return ExpandOperator; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ExpandSubscriber", function() { return ExpandSubscriber; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _util_tryCatch__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(174);
 /* harmony import */ var _util_errorObject__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(175);
 /* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(224);
 /* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(225);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _util_tryCatch__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(193);
+/* harmony import */ var _util_errorObject__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(194);
+/* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(243);
+/* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(244);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_util_tryCatch,_util_errorObject,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
 
 
@@ -27981,15 +33867,25 @@ var ExpandSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 296 */
+=======
+/* 315 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "finalize", function() { return finalize; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
 /* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(171);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+/* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(190);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber,_Subscription PURE_IMPORTS_END */
 
 
@@ -28019,7 +33915,11 @@ var FinallySubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 297 */
+=======
+/* 316 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -28027,8 +33927,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "find", function() { return find; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FindValueOperator", function() { return FindValueOperator; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FindValueSubscriber", function() { return FindValueSubscriber; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
@@ -28090,13 +33995,21 @@ var FindValueSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 298 */
+=======
+/* 317 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "findIndex", function() { return findIndex; });
+<<<<<<< HEAD
 /* harmony import */ var _operators_find__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(297);
+=======
+/* harmony import */ var _operators_find__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(316);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _operators_find PURE_IMPORTS_END */
 
 function findIndex(predicate, thisArg) {
@@ -28106,18 +34019,31 @@ function findIndex(predicate, thisArg) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 299 */
+=======
+/* 318 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "first", function() { return first; });
+<<<<<<< HEAD
 /* harmony import */ var _util_EmptyError__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(218);
 /* harmony import */ var _filter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(287);
 /* harmony import */ var _take__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(290);
 /* harmony import */ var _defaultIfEmpty__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(278);
 /* harmony import */ var _throwIfEmpty__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(288);
 /* harmony import */ var _util_identity__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(215);
+=======
+/* harmony import */ var _util_EmptyError__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(237);
+/* harmony import */ var _filter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(306);
+/* harmony import */ var _take__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(309);
+/* harmony import */ var _defaultIfEmpty__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(297);
+/* harmony import */ var _throwIfEmpty__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(307);
+/* harmony import */ var _util_identity__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(234);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _util_EmptyError,_filter,_take,_defaultIfEmpty,_throwIfEmpty,_util_identity PURE_IMPORTS_END */
 
 
@@ -28133,14 +34059,23 @@ function first(predicate, defaultValue) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 300 */
+=======
+/* 319 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ignoreElements", function() { return ignoreElements; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
@@ -28170,14 +34105,23 @@ var IgnoreElementsSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 301 */
+=======
+/* 320 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isEmpty", function() { return isEmpty; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
@@ -28214,18 +34158,31 @@ var IsEmptySubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 302 */
+=======
+/* 321 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "last", function() { return last; });
+<<<<<<< HEAD
 /* harmony import */ var _util_EmptyError__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(218);
 /* harmony import */ var _filter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(287);
 /* harmony import */ var _takeLast__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(303);
 /* harmony import */ var _throwIfEmpty__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(288);
 /* harmony import */ var _defaultIfEmpty__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(278);
 /* harmony import */ var _util_identity__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(215);
+=======
+/* harmony import */ var _util_EmptyError__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(237);
+/* harmony import */ var _filter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(306);
+/* harmony import */ var _takeLast__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(322);
+/* harmony import */ var _throwIfEmpty__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(307);
+/* harmony import */ var _defaultIfEmpty__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(297);
+/* harmony import */ var _util_identity__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(234);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _util_EmptyError,_filter,_takeLast,_throwIfEmpty,_defaultIfEmpty,_util_identity PURE_IMPORTS_END */
 
 
@@ -28241,16 +34198,27 @@ function last(predicate, defaultValue) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 303 */
+=======
+/* 322 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "takeLast", function() { return takeLast; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
 /* harmony import */ var _util_ArgumentOutOfRangeError__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(217);
 /* harmony import */ var _observable_empty__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(198);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+/* harmony import */ var _util_ArgumentOutOfRangeError__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(236);
+/* harmony import */ var _observable_empty__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(217);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber,_util_ArgumentOutOfRangeError,_observable_empty PURE_IMPORTS_END */
 
 
@@ -28318,14 +34286,23 @@ var TakeLastSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 304 */
+=======
+/* 323 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "mapTo", function() { return mapTo; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
@@ -28357,15 +34334,25 @@ var MapToSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 305 */
+=======
+/* 324 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "materialize", function() { return materialize; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
 /* harmony import */ var _Notification__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(197);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+/* harmony import */ var _Notification__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(216);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber,_Notification PURE_IMPORTS_END */
 
 
@@ -28407,13 +34394,21 @@ var MaterializeSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 306 */
+=======
+/* 325 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "max", function() { return max; });
+<<<<<<< HEAD
 /* harmony import */ var _reduce__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(307);
+=======
+/* harmony import */ var _reduce__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(326);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _reduce PURE_IMPORTS_END */
 
 function max(comparer) {
@@ -28426,16 +34421,27 @@ function max(comparer) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 307 */
+=======
+/* 326 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "reduce", function() { return reduce; });
+<<<<<<< HEAD
 /* harmony import */ var _scan__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(308);
 /* harmony import */ var _takeLast__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(303);
 /* harmony import */ var _defaultIfEmpty__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(278);
 /* harmony import */ var _util_pipe__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(179);
+=======
+/* harmony import */ var _scan__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(327);
+/* harmony import */ var _takeLast__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(322);
+/* harmony import */ var _defaultIfEmpty__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(297);
+/* harmony import */ var _util_pipe__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(198);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _scan,_takeLast,_defaultIfEmpty,_util_pipe PURE_IMPORTS_END */
 
 
@@ -28457,14 +34463,23 @@ function reduce(accumulator, seed) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 308 */
+=======
+/* 327 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "scan", function() { return scan; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
@@ -28539,13 +34554,21 @@ var ScanSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 309 */
+=======
+/* 328 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "merge", function() { return merge; });
+<<<<<<< HEAD
 /* harmony import */ var _observable_merge__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(252);
+=======
+/* harmony import */ var _observable_merge__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(271);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _observable_merge PURE_IMPORTS_END */
 
 function merge() {
@@ -28559,13 +34582,21 @@ function merge() {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 310 */
+=======
+/* 329 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "mergeMapTo", function() { return mergeMapTo; });
+<<<<<<< HEAD
 /* harmony import */ var _mergeMap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(243);
+=======
+/* harmony import */ var _mergeMap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(262);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _mergeMap PURE_IMPORTS_END */
 
 function mergeMapTo(innerObservable, resultSelector, concurrent) {
@@ -28584,7 +34615,11 @@ function mergeMapTo(innerObservable, resultSelector, concurrent) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 311 */
+=======
+/* 330 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -28592,11 +34627,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "mergeScan", function() { return mergeScan; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MergeScanOperator", function() { return MergeScanOperator; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MergeScanSubscriber", function() { return MergeScanSubscriber; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _util_tryCatch__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(174);
 /* harmony import */ var _util_errorObject__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(175);
 /* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(225);
 /* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(224);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _util_tryCatch__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(193);
+/* harmony import */ var _util_errorObject__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(194);
+/* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(244);
+/* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(243);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_util_tryCatch,_util_errorObject,_util_subscribeToResult,_OuterSubscriber PURE_IMPORTS_END */
 
 
@@ -28691,13 +34734,21 @@ var MergeScanSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 312 */
+=======
+/* 331 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "min", function() { return min; });
+<<<<<<< HEAD
 /* harmony import */ var _reduce__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(307);
+=======
+/* harmony import */ var _reduce__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(326);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _reduce PURE_IMPORTS_END */
 
 function min(comparer) {
@@ -28710,14 +34761,22 @@ function min(comparer) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 313 */
+=======
+/* 332 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "multicast", function() { return multicast; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MulticastOperator", function() { return MulticastOperator; });
+<<<<<<< HEAD
 /* harmony import */ var _observable_ConnectableObservable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(181);
+=======
+/* harmony import */ var _observable_ConnectableObservable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(200);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _observable_ConnectableObservable PURE_IMPORTS_END */
 
 function multicast(subjectOrSubjectFactory, selector) {
@@ -28759,18 +34818,30 @@ var MulticastOperator = /*@__PURE__*/ (function () {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 314 */
+=======
+/* 333 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "onErrorResumeNext", function() { return onErrorResumeNext; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "onErrorResumeNextStatic", function() { return onErrorResumeNextStatic; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _observable_from__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(235);
 /* harmony import */ var _util_isArray__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(172);
 /* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(224);
 /* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(225);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _observable_from__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(254);
+/* harmony import */ var _util_isArray__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(191);
+/* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(243);
+/* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(244);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_observable_from,_util_isArray,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
 
 
@@ -28843,14 +34914,23 @@ var OnErrorResumeNextSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 315 */
+=======
+/* 334 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "pairwise", function() { return pairwise; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
@@ -28887,14 +34967,23 @@ var PairwiseSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 316 */
+=======
+/* 335 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "partition", function() { return partition; });
+<<<<<<< HEAD
 /* harmony import */ var _util_not__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(317);
 /* harmony import */ var _filter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(287);
+=======
+/* harmony import */ var _util_not__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(336);
+/* harmony import */ var _filter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(306);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _util_not,_filter PURE_IMPORTS_END */
 
 
@@ -28910,7 +34999,11 @@ function partition(predicate, thisArg) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 317 */
+=======
+/* 336 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -28929,13 +35022,21 @@ function not(pred, thisArg) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 318 */
+=======
+/* 337 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "pluck", function() { return pluck; });
+<<<<<<< HEAD
 /* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(221);
+=======
+/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(240);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _map PURE_IMPORTS_END */
 
 function pluck() {
@@ -28969,14 +35070,23 @@ function plucker(props, length) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 319 */
+=======
+/* 338 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "publish", function() { return publish; });
+<<<<<<< HEAD
 /* harmony import */ var _Subject__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(182);
 /* harmony import */ var _multicast__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(313);
+=======
+/* harmony import */ var _Subject__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(201);
+/* harmony import */ var _multicast__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(332);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _Subject,_multicast PURE_IMPORTS_END */
 
 
@@ -28989,14 +35099,23 @@ function publish(selector) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 320 */
+=======
+/* 339 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "publishBehavior", function() { return publishBehavior; });
+<<<<<<< HEAD
 /* harmony import */ var _BehaviorSubject__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(187);
 /* harmony import */ var _multicast__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(313);
+=======
+/* harmony import */ var _BehaviorSubject__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(206);
+/* harmony import */ var _multicast__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(332);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _BehaviorSubject,_multicast PURE_IMPORTS_END */
 
 
@@ -29007,14 +35126,23 @@ function publishBehavior(value) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 321 */
+=======
+/* 340 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "publishLast", function() { return publishLast; });
+<<<<<<< HEAD
 /* harmony import */ var _AsyncSubject__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(205);
 /* harmony import */ var _multicast__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(313);
+=======
+/* harmony import */ var _AsyncSubject__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(224);
+/* harmony import */ var _multicast__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(332);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _AsyncSubject,_multicast PURE_IMPORTS_END */
 
 
@@ -29025,14 +35153,23 @@ function publishLast() {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 322 */
+=======
+/* 341 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "publishReplay", function() { return publishReplay; });
+<<<<<<< HEAD
 /* harmony import */ var _ReplaySubject__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(188);
 /* harmony import */ var _multicast__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(313);
+=======
+/* harmony import */ var _ReplaySubject__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(207);
+/* harmony import */ var _multicast__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(332);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _ReplaySubject,_multicast PURE_IMPORTS_END */
 
 
@@ -29048,14 +35185,23 @@ function publishReplay(bufferSize, windowTime, selectorOrScheduler, scheduler) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 323 */
+=======
+/* 342 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "race", function() { return race; });
+<<<<<<< HEAD
 /* harmony import */ var _util_isArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(172);
 /* harmony import */ var _observable_race__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(256);
+=======
+/* harmony import */ var _util_isArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(191);
+/* harmony import */ var _observable_race__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(275);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _util_isArray,_observable_race PURE_IMPORTS_END */
 
 
@@ -29075,15 +35221,25 @@ function race() {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 324 */
+=======
+/* 343 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "repeat", function() { return repeat; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
 /* harmony import */ var _observable_empty__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(198);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+/* harmony import */ var _observable_empty__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(217);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber,_observable_empty PURE_IMPORTS_END */
 
 
@@ -29140,18 +35296,31 @@ var RepeatSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 325 */
+=======
+/* 344 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "repeatWhen", function() { return repeatWhen; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(182);
 /* harmony import */ var _util_tryCatch__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(174);
 /* harmony import */ var _util_errorObject__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(175);
 /* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(224);
 /* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(225);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(201);
+/* harmony import */ var _util_tryCatch__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(193);
+/* harmony import */ var _util_errorObject__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(194);
+/* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(243);
+/* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(244);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subject,_util_tryCatch,_util_errorObject,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
 
 
@@ -29236,14 +35405,23 @@ var RepeatWhenSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 326 */
+=======
+/* 345 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "retry", function() { return retry; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
@@ -29289,18 +35467,31 @@ var RetrySubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 327 */
+=======
+/* 346 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "retryWhen", function() { return retryWhen; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(182);
 /* harmony import */ var _util_tryCatch__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(174);
 /* harmony import */ var _util_errorObject__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(175);
 /* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(224);
 /* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(225);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(201);
+/* harmony import */ var _util_tryCatch__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(193);
+/* harmony import */ var _util_errorObject__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(194);
+/* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(243);
+/* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(244);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subject,_util_tryCatch,_util_errorObject,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
 
 
@@ -29378,15 +35569,25 @@ var RetryWhenSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 328 */
+=======
+/* 347 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "sample", function() { return sample; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(224);
 /* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(225);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(243);
+/* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(244);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
 
 
@@ -29435,15 +35636,25 @@ var SampleSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 329 */
+=======
+/* 348 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "sampleTime", function() { return sampleTime; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
 /* harmony import */ var _scheduler_async__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(210);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+/* harmony import */ var _scheduler_async__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(229);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber,_scheduler_async PURE_IMPORTS_END */
 
 
@@ -29495,7 +35706,11 @@ function dispatchNotification(state) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 330 */
+=======
+/* 349 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -29503,10 +35718,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "sequenceEqual", function() { return sequenceEqual; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SequenceEqualOperator", function() { return SequenceEqualOperator; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SequenceEqualSubscriber", function() { return SequenceEqualSubscriber; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
 /* harmony import */ var _util_tryCatch__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(174);
 /* harmony import */ var _util_errorObject__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(175);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+/* harmony import */ var _util_tryCatch__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(193);
+/* harmony import */ var _util_errorObject__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(194);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber,_util_tryCatch,_util_errorObject PURE_IMPORTS_END */
 
 
@@ -29614,15 +35836,25 @@ var SequenceEqualCompareToSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 331 */
+=======
+/* 350 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "share", function() { return share; });
+<<<<<<< HEAD
 /* harmony import */ var _multicast__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(313);
 /* harmony import */ var _refCount__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(185);
 /* harmony import */ var _Subject__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(182);
+=======
+/* harmony import */ var _multicast__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(332);
+/* harmony import */ var _refCount__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(204);
+/* harmony import */ var _Subject__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(201);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _multicast,_refCount,_Subject PURE_IMPORTS_END */
 
 
@@ -29637,13 +35869,21 @@ function share() {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 332 */
+=======
+/* 351 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "shareReplay", function() { return shareReplay; });
+<<<<<<< HEAD
 /* harmony import */ var _ReplaySubject__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(188);
+=======
+/* harmony import */ var _ReplaySubject__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(207);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _ReplaySubject PURE_IMPORTS_END */
 
 function shareReplay(bufferSize, windowTime, scheduler) {
@@ -29686,15 +35926,25 @@ function shareReplayOperator(bufferSize, windowTime, scheduler) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 333 */
+=======
+/* 352 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "single", function() { return single; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
 /* harmony import */ var _util_EmptyError__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(218);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+/* harmony import */ var _util_EmptyError__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(237);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber,_util_EmptyError PURE_IMPORTS_END */
 
 
@@ -29766,14 +36016,23 @@ var SingleSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 334 */
+=======
+/* 353 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "skip", function() { return skip; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
@@ -29808,15 +36067,25 @@ var SkipSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 335 */
+=======
+/* 354 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "skipLast", function() { return skipLast; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
 /* harmony import */ var _util_ArgumentOutOfRangeError__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(217);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+/* harmony import */ var _util_ArgumentOutOfRangeError__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(236);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber,_util_ArgumentOutOfRangeError PURE_IMPORTS_END */
 
 
@@ -29870,15 +36139,25 @@ var SkipLastSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 336 */
+=======
+/* 355 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "skipUntil", function() { return skipUntil; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(224);
 /* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(225);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(243);
+/* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(244);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
 
 
@@ -29922,14 +36201,23 @@ var SkipUntilSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 337 */
+=======
+/* 356 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "skipWhile", function() { return skipWhile; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
@@ -29978,17 +36266,29 @@ var SkipWhileSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 338 */
+=======
+/* 357 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "startWith", function() { return startWith; });
+<<<<<<< HEAD
 /* harmony import */ var _observable_fromArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(201);
 /* harmony import */ var _observable_scalar__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(203);
 /* harmony import */ var _observable_empty__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(198);
 /* harmony import */ var _observable_concat__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(234);
 /* harmony import */ var _util_isScheduler__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(200);
+=======
+/* harmony import */ var _observable_fromArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(220);
+/* harmony import */ var _observable_scalar__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(222);
+/* harmony import */ var _observable_empty__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(217);
+/* harmony import */ var _observable_concat__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(253);
+/* harmony import */ var _util_isScheduler__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(219);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _observable_fromArray,_observable_scalar,_observable_empty,_observable_concat,_util_isScheduler PURE_IMPORTS_END */
 
 
@@ -30024,13 +36324,21 @@ function startWith() {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 339 */
+=======
+/* 358 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "subscribeOn", function() { return subscribeOn; });
+<<<<<<< HEAD
 /* harmony import */ var _observable_SubscribeOnObservable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(340);
+=======
+/* harmony import */ var _observable_SubscribeOnObservable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(359);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _observable_SubscribeOnObservable PURE_IMPORTS_END */
 
 function subscribeOn(scheduler, delay) {
@@ -30055,16 +36363,27 @@ var SubscribeOnOperator = /*@__PURE__*/ (function () {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 340 */
+=======
+/* 359 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SubscribeOnObservable", function() { return SubscribeOnObservable; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(163);
 /* harmony import */ var _scheduler_asap__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(206);
 /* harmony import */ var _util_isNumeric__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(251);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(182);
+/* harmony import */ var _scheduler_asap__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(225);
+/* harmony import */ var _util_isNumeric__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(270);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Observable,_scheduler_asap,_util_isNumeric PURE_IMPORTS_END */
 
 
@@ -30119,14 +36438,23 @@ var SubscribeOnObservable = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 341 */
+=======
+/* 360 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "switchAll", function() { return switchAll; });
+<<<<<<< HEAD
 /* harmony import */ var _switchMap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(342);
 /* harmony import */ var _util_identity__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(215);
+=======
+/* harmony import */ var _switchMap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(361);
+/* harmony import */ var _util_identity__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(234);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _switchMap,_util_identity PURE_IMPORTS_END */
 
 
@@ -30137,17 +36465,29 @@ function switchAll() {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 342 */
+=======
+/* 361 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "switchMap", function() { return switchMap; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(224);
 /* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(225);
 /* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(221);
 /* harmony import */ var _observable_from__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(235);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(243);
+/* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(244);
+/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(240);
+/* harmony import */ var _observable_from__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(254);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_OuterSubscriber,_util_subscribeToResult,_map,_observable_from PURE_IMPORTS_END */
 
 
@@ -30221,13 +36561,21 @@ var SwitchMapSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 343 */
+=======
+/* 362 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "switchMapTo", function() { return switchMapTo; });
+<<<<<<< HEAD
 /* harmony import */ var _switchMap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(342);
+=======
+/* harmony import */ var _switchMap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(361);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _switchMap PURE_IMPORTS_END */
 
 function switchMapTo(innerObservable, resultSelector) {
@@ -30237,15 +36585,25 @@ function switchMapTo(innerObservable, resultSelector) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 344 */
+=======
+/* 363 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "takeUntil", function() { return takeUntil; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(224);
 /* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(225);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(243);
+/* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(244);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
 
 
@@ -30284,14 +36642,23 @@ var TakeUntilSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 345 */
+=======
+/* 364 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "takeWhile", function() { return takeWhile; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
 
@@ -30342,16 +36709,26 @@ var TakeWhileSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 346 */
+=======
+/* 365 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "defaultThrottleConfig", function() { return defaultThrottleConfig; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "throttle", function() { return throttle; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(224);
 /* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(225);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(243);
+/* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(244);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
 
 
@@ -30446,16 +36823,27 @@ var ThrottleSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 347 */
+=======
+/* 366 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "throttleTime", function() { return throttleTime; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
 /* harmony import */ var _scheduler_async__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(210);
 /* harmony import */ var _throttle__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(346);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+/* harmony import */ var _scheduler_async__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(229);
+/* harmony import */ var _throttle__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(365);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber,_scheduler_async,_throttle PURE_IMPORTS_END */
 
 
@@ -30540,17 +36928,28 @@ function dispatchNext(arg) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 348 */
+=======
+/* 367 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "timeInterval", function() { return timeInterval; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TimeInterval", function() { return TimeInterval; });
+<<<<<<< HEAD
 /* harmony import */ var _scheduler_async__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(210);
 /* harmony import */ var _scan__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(308);
 /* harmony import */ var _observable_defer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(244);
 /* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(221);
+=======
+/* harmony import */ var _scheduler_async__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(229);
+/* harmony import */ var _scan__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(327);
+/* harmony import */ var _observable_defer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(263);
+/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(240);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _scheduler_async,_scan,_observable_defer,_map PURE_IMPORTS_END */
 
 
@@ -30584,16 +36983,27 @@ var TimeInterval = /*@__PURE__*/ (function () {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 349 */
+=======
+/* 368 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "timeout", function() { return timeout; });
+<<<<<<< HEAD
 /* harmony import */ var _scheduler_async__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(210);
 /* harmony import */ var _util_TimeoutError__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(219);
 /* harmony import */ var _timeoutWith__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(350);
 /* harmony import */ var _observable_throwError__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(204);
+=======
+/* harmony import */ var _scheduler_async__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(229);
+/* harmony import */ var _util_TimeoutError__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(238);
+/* harmony import */ var _timeoutWith__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(369);
+/* harmony import */ var _observable_throwError__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(223);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _scheduler_async,_util_TimeoutError,_timeoutWith,_observable_throwError PURE_IMPORTS_END */
 
 
@@ -30609,17 +37019,29 @@ function timeout(due, scheduler) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 350 */
+=======
+/* 369 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "timeoutWith", function() { return timeoutWith; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _scheduler_async__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(210);
 /* harmony import */ var _util_isDate__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(280);
 /* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(224);
 /* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(225);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _scheduler_async__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(229);
+/* harmony import */ var _util_isDate__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(299);
+/* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(243);
+/* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(244);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_scheduler_async,_util_isDate,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
 
 
@@ -30691,15 +37113,24 @@ var TimeoutWithSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 351 */
+=======
+/* 370 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "timestamp", function() { return timestamp; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Timestamp", function() { return Timestamp; });
+<<<<<<< HEAD
 /* harmony import */ var _scheduler_async__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(210);
 /* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(221);
+=======
+/* harmony import */ var _scheduler_async__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(229);
+/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(240);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _scheduler_async,_map PURE_IMPORTS_END */
 
 
@@ -30721,13 +37152,21 @@ var Timestamp = /*@__PURE__*/ (function () {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 352 */
+=======
+/* 371 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toArray", function() { return toArray; });
+<<<<<<< HEAD
 /* harmony import */ var _reduce__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(307);
+=======
+/* harmony import */ var _reduce__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(326);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _reduce PURE_IMPORTS_END */
 
 function toArrayReducer(arr, item, index) {
@@ -30744,16 +37183,27 @@ function toArray() {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 353 */
+=======
+/* 372 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "window", function() { return window; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(182);
 /* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(224);
 /* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(225);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(201);
+/* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(243);
+/* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(244);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subject,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
 
 
@@ -30824,15 +37274,25 @@ var WindowSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 354 */
+=======
+/* 373 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "windowCount", function() { return windowCount; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(165);
 /* harmony import */ var _Subject__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(182);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(184);
+/* harmony import */ var _Subject__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(201);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subscriber,_Subject PURE_IMPORTS_END */
 
 
@@ -30914,18 +37374,31 @@ var WindowCountSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 355 */
+=======
+/* 374 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "windowTime", function() { return windowTime; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(182);
 /* harmony import */ var _scheduler_async__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(210);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(165);
 /* harmony import */ var _util_isNumeric__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(251);
 /* harmony import */ var _util_isScheduler__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(200);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(201);
+/* harmony import */ var _scheduler_async__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(229);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(184);
+/* harmony import */ var _util_isNumeric__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(270);
+/* harmony import */ var _util_isScheduler__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(219);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subject,_scheduler_async,_Subscriber,_util_isNumeric,_util_isScheduler PURE_IMPORTS_END */
 
 
@@ -31084,12 +37557,17 @@ function dispatchWindowClose(state) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 356 */
+=======
+/* 375 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "windowToggle", function() { return windowToggle; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(182);
 /* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(171);
@@ -31097,6 +37575,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _util_errorObject__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(175);
 /* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(224);
 /* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(225);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(201);
+/* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(190);
+/* harmony import */ var _util_tryCatch__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(193);
+/* harmony import */ var _util_errorObject__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(194);
+/* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(243);
+/* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(244);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subject,_Subscription,_util_tryCatch,_util_errorObject,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
 
 
@@ -31230,18 +37717,31 @@ var WindowToggleSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 357 */
+=======
+/* 376 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "windowWhen", function() { return windowWhen; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _Subject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(182);
 /* harmony import */ var _util_tryCatch__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(174);
 /* harmony import */ var _util_errorObject__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(175);
 /* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(224);
 /* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(225);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _Subject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(201);
+/* harmony import */ var _util_tryCatch__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(193);
+/* harmony import */ var _util_errorObject__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(194);
+/* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(243);
+/* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(244);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_Subject,_util_tryCatch,_util_errorObject,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
 
 
@@ -31329,15 +37829,25 @@ var WindowSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 358 */
+=======
+/* 377 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "withLatestFrom", function() { return withLatestFrom; });
+<<<<<<< HEAD
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(166);
 /* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(224);
 /* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(225);
+=======
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(185);
+/* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(243);
+/* harmony import */ var _util_subscribeToResult__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(244);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START tslib,_OuterSubscriber,_util_subscribeToResult PURE_IMPORTS_END */
 
 
@@ -31424,13 +37934,21 @@ var WithLatestFromSubscriber = /*@__PURE__*/ (function (_super) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 359 */
+=======
+/* 378 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "zip", function() { return zip; });
+<<<<<<< HEAD
 /* harmony import */ var _observable_zip__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(260);
+=======
+/* harmony import */ var _observable_zip__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(279);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _observable_zip PURE_IMPORTS_END */
 
 function zip() {
@@ -31446,13 +37964,21 @@ function zip() {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 360 */
+=======
+/* 379 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "zipAll", function() { return zipAll; });
+<<<<<<< HEAD
 /* harmony import */ var _observable_zip__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(260);
+=======
+/* harmony import */ var _observable_zip__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(279);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /** PURE_IMPORTS_START _observable_zip PURE_IMPORTS_END */
 
 function zipAll(project) {
@@ -31462,7 +37988,11 @@ function zipAll(project) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 361 */
+=======
+/* 380 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -31470,6 +38000,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "runCommand", function() { return runCommand; });
 /* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
 /* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(chalk__WEBPACK_IMPORTED_MODULE_0__);
+<<<<<<< HEAD
 /* harmony import */ var indent_string__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(362);
 /* harmony import */ var indent_string__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(indent_string__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var wrap_ansi__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(363);
@@ -31479,6 +38010,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(33);
 /* harmony import */ var _utils_projects__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(35);
 /* harmony import */ var _utils_projects_tree__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(370);
+=======
+/* harmony import */ var indent_string__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(381);
+/* harmony import */ var indent_string__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(indent_string__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var wrap_ansi__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(382);
+/* harmony import */ var wrap_ansi__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(wrap_ansi__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(154);
+/* harmony import */ var _utils_errors__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(52);
+/* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(33);
+/* harmony import */ var _utils_projects__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(35);
+/* harmony import */ var _utils_projects_tree__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(389);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -31556,7 +38098,11 @@ function toArray(value) {
 }
 
 /***/ }),
+<<<<<<< HEAD
 /* 362 */
+=======
+/* 381 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -31590,13 +38136,22 @@ module.exports = (str, count, opts) => {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 363 */
+=======
+/* 382 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+<<<<<<< HEAD
 const stringWidth = __webpack_require__(364);
 const stripAnsi = __webpack_require__(368);
+=======
+const stringWidth = __webpack_require__(383);
+const stripAnsi = __webpack_require__(387);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 const ESCAPES = new Set([
 	'\u001B',
@@ -31790,13 +38345,22 @@ module.exports = (str, cols, opts) => {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 364 */
+=======
+/* 383 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+<<<<<<< HEAD
 const stripAnsi = __webpack_require__(365);
 const isFullwidthCodePoint = __webpack_require__(367);
+=======
+const stripAnsi = __webpack_require__(384);
+const isFullwidthCodePoint = __webpack_require__(386);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = str => {
 	if (typeof str !== 'string' || str.length === 0) {
@@ -31833,18 +38397,30 @@ module.exports = str => {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 365 */
+=======
+/* 384 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+<<<<<<< HEAD
 const ansiRegex = __webpack_require__(366);
+=======
+const ansiRegex = __webpack_require__(385);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = input => typeof input === 'string' ? input.replace(ansiRegex(), '') : input;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 366 */
+=======
+/* 385 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -31861,7 +38437,11 @@ module.exports = () => {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 367 */
+=======
+/* 386 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -31914,18 +38494,30 @@ module.exports = x => {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 368 */
+=======
+/* 387 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+<<<<<<< HEAD
 const ansiRegex = __webpack_require__(369);
+=======
+const ansiRegex = __webpack_require__(388);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = input => typeof input === 'string' ? input.replace(ansiRegex(), '') : input;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 369 */
+=======
+/* 388 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -31942,7 +38534,11 @@ module.exports = () => {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 370 */
+=======
+/* 389 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -32095,15 +38691,26 @@ function addProjectToTree(tree, pathParts, project) {
 }
 
 /***/ }),
+<<<<<<< HEAD
 /* 371 */
+=======
+/* 390 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+<<<<<<< HEAD
 /* harmony import */ var _build_production_projects__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(372);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "buildProductionProjects", function() { return _build_production_projects__WEBPACK_IMPORTED_MODULE_0__["buildProductionProjects"]; });
 
 /* harmony import */ var _prepare_project_dependencies__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(553);
+=======
+/* harmony import */ var _build_production_projects__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(391);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "buildProductionProjects", function() { return _build_production_projects__WEBPACK_IMPORTED_MODULE_0__["buildProductionProjects"]; });
+
+/* harmony import */ var _prepare_project_dependencies__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(576);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "prepareExternalProjectDependencies", function() { return _prepare_project_dependencies__WEBPACK_IMPORTED_MODULE_1__["prepareExternalProjectDependencies"]; });
 
 /*
@@ -32128,12 +38735,17 @@ __webpack_require__.r(__webpack_exports__);
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 372 */
+=======
+/* 391 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "buildProductionProjects", function() { return buildProductionProjects; });
+<<<<<<< HEAD
 /* harmony import */ var cpy__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(373);
 /* harmony import */ var cpy__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(cpy__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var del__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(137);
@@ -32141,6 +38753,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(16);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(135);
+=======
+/* harmony import */ var cpy__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(392);
+/* harmony import */ var cpy__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(cpy__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var del__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(156);
+/* harmony import */ var del__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(del__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(16);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(154);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /* harmony import */ var _utils_fs__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(20);
 /* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(33);
 /* harmony import */ var _utils_package_json__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(54);
@@ -32274,17 +38895,28 @@ async function copyToBuild(project, kibanaRoot, buildRoot) {
 }
 
 /***/ }),
+<<<<<<< HEAD
 /* 373 */
+=======
+/* 392 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 const EventEmitter = __webpack_require__(45);
 const path = __webpack_require__(16);
+<<<<<<< HEAD
 const arrify = __webpack_require__(374);
 const globby = __webpack_require__(375);
 const cpFile = __webpack_require__(544);
 const CpyError = __webpack_require__(552);
+=======
+const arrify = __webpack_require__(393);
+const globby = __webpack_require__(394);
+const cpFile = __webpack_require__(565);
+const CpyError = __webpack_require__(575);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 const preprocessSrcPath = (srcPath, options) => options.cwd ? path.resolve(options.cwd, srcPath) : srcPath;
 
@@ -32383,7 +39015,11 @@ module.exports = (src, dest, options = {}) => {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 374 */
+=======
+/* 393 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -32398,16 +39034,28 @@ module.exports = function (val) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 375 */
+=======
+/* 394 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+<<<<<<< HEAD
 const arrayUnion = __webpack_require__(141);
 const glob = __webpack_require__(36);
 const fastGlob = __webpack_require__(376);
 const dirGlob = __webpack_require__(539);
 const gitignore = __webpack_require__(540);
+=======
+const arrayUnion = __webpack_require__(160);
+const glob = __webpack_require__(36);
+const fastGlob = __webpack_require__(395);
+const dirGlob = __webpack_require__(558);
+const gitignore = __webpack_require__(561);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 const DEFAULT_FILTER = () => false;
 
@@ -32533,10 +39181,17 @@ module.exports.gitignore = gitignore;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 376 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const pkg = __webpack_require__(377);
+=======
+/* 395 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const pkg = __webpack_require__(396);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = pkg.async;
 module.exports.default = pkg.async;
@@ -32547,12 +39202,17 @@ module.exports.stream = pkg.stream;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 377 */
+=======
+/* 396 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+<<<<<<< HEAD
 var merge2 = __webpack_require__(378);
 var optionsManager = __webpack_require__(379);
 var taskManager = __webpack_require__(380);
@@ -32560,6 +39220,15 @@ var reader_async_1 = __webpack_require__(518);
 var reader_stream_1 = __webpack_require__(537);
 var reader_sync_1 = __webpack_require__(538);
 var arrayUtils = __webpack_require__(534);
+=======
+var merge2 = __webpack_require__(397);
+var optionsManager = __webpack_require__(398);
+var taskManager = __webpack_require__(399);
+var reader_async_1 = __webpack_require__(537);
+var reader_stream_1 = __webpack_require__(556);
+var reader_sync_1 = __webpack_require__(557);
+var arrayUtils = __webpack_require__(553);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /**
  * Returns a set of works based on provided tasks and class of the reader.
  */
@@ -32597,7 +39266,11 @@ exports.stream = stream;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 378 */
+=======
+/* 397 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -32711,7 +39384,11 @@ function pauseStreams (streams, options) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 379 */
+=======
+/* 398 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -32746,14 +39423,23 @@ exports.prepare = prepare;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 380 */
+=======
+/* 399 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+<<<<<<< HEAD
 var objectUtils = __webpack_require__(381);
 var patternUtils = __webpack_require__(382);
+=======
+var objectUtils = __webpack_require__(400);
+var patternUtils = __webpack_require__(401);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /**
  * Returns grouped patterns by base directory of each pattern.
  */
@@ -32865,7 +39551,11 @@ exports.generate = generate;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 381 */
+=======
+/* 400 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -32878,7 +39568,11 @@ exports.values = values;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 382 */
+=======
+/* 401 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -32894,8 +39588,13 @@ var __values = (this && this.__values) || function (o) {
     };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+<<<<<<< HEAD
 var globParent = __webpack_require__(383);
 var micromatch = __webpack_require__(387);
+=======
+var globParent = __webpack_require__(402);
+var micromatch = __webpack_require__(406);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 var GLOBSTAR = '**';
 /**
  * Convert a windows «path» to a unix-style «path».
@@ -33028,15 +39727,24 @@ exports.match = match;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 383 */
+=======
+/* 402 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var path = __webpack_require__(16);
+<<<<<<< HEAD
 var isglob = __webpack_require__(384);
 var pathDirname = __webpack_require__(386);
+=======
+var isglob = __webpack_require__(403);
+var pathDirname = __webpack_require__(405);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 var isWin32 = __webpack_require__(11).platform() === 'win32';
 
 module.exports = function globParent(str) {
@@ -33059,7 +39767,11 @@ module.exports = function globParent(str) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 384 */
+=======
+/* 403 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 /*!
@@ -33069,7 +39781,11 @@ module.exports = function globParent(str) {
  * Licensed under the MIT License.
  */
 
+<<<<<<< HEAD
 var isExtglob = __webpack_require__(385);
+=======
+var isExtglob = __webpack_require__(404);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = function isGlob(str) {
   if (typeof str !== 'string' || str === '') {
@@ -33090,7 +39806,11 @@ module.exports = function isGlob(str) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 385 */
+=======
+/* 404 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports) {
 
 /*!
@@ -33116,7 +39836,11 @@ module.exports = function isExtglob(str) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 386 */
+=======
+/* 405 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -33266,7 +39990,11 @@ module.exports.win32 = win32;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 387 */
+=======
+/* 406 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -33277,18 +40005,31 @@ module.exports.win32 = win32;
  */
 
 var util = __webpack_require__(29);
+<<<<<<< HEAD
 var braces = __webpack_require__(388);
 var toRegex = __webpack_require__(389);
 var extend = __webpack_require__(398);
+=======
+var braces = __webpack_require__(407);
+var toRegex = __webpack_require__(408);
+var extend = __webpack_require__(417);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * Local dependencies
  */
 
+<<<<<<< HEAD
 var compilers = __webpack_require__(492);
 var parsers = __webpack_require__(514);
 var cache = __webpack_require__(515);
 var utils = __webpack_require__(516);
+=======
+var compilers = __webpack_require__(511);
+var parsers = __webpack_require__(533);
+var cache = __webpack_require__(534);
+var utils = __webpack_require__(535);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 var MAX_LENGTH = 1024 * 64;
 
 /**
@@ -34152,7 +40893,11 @@ module.exports = micromatch;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 388 */
+=======
+/* 407 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -34162,18 +40907,31 @@ module.exports = micromatch;
  * Module dependencies
  */
 
+<<<<<<< HEAD
 var toRegex = __webpack_require__(389);
 var unique = __webpack_require__(401);
 var extend = __webpack_require__(398);
+=======
+var toRegex = __webpack_require__(408);
+var unique = __webpack_require__(420);
+var extend = __webpack_require__(417);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * Local dependencies
  */
 
+<<<<<<< HEAD
 var compilers = __webpack_require__(402);
 var parsers = __webpack_require__(417);
 var Braces = __webpack_require__(427);
 var utils = __webpack_require__(403);
+=======
+var compilers = __webpack_require__(421);
+var parsers = __webpack_require__(436);
+var Braces = __webpack_require__(446);
+var utils = __webpack_require__(422);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 var MAX_LENGTH = 1024 * 64;
 var cache = {};
 
@@ -34477,15 +41235,25 @@ module.exports = braces;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 389 */
+=======
+/* 408 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+<<<<<<< HEAD
 var define = __webpack_require__(390);
 var extend = __webpack_require__(398);
 var not = __webpack_require__(400);
+=======
+var define = __webpack_require__(409);
+var extend = __webpack_require__(417);
+var not = __webpack_require__(419);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 var MAX_LENGTH = 1024 * 64;
 
 /**
@@ -34632,7 +41400,11 @@ module.exports.makeRe = makeRe;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 390 */
+=======
+/* 409 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -34645,7 +41417,11 @@ module.exports.makeRe = makeRe;
 
 
 
+<<<<<<< HEAD
 var isDescriptor = __webpack_require__(391);
+=======
+var isDescriptor = __webpack_require__(410);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = function defineProperty(obj, prop, val) {
   if (typeof obj !== 'object' && typeof obj !== 'function') {
@@ -34670,7 +41446,11 @@ module.exports = function defineProperty(obj, prop, val) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 391 */
+=======
+/* 410 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -34683,9 +41463,15 @@ module.exports = function defineProperty(obj, prop, val) {
 
 
 
+<<<<<<< HEAD
 var typeOf = __webpack_require__(392);
 var isAccessor = __webpack_require__(393);
 var isData = __webpack_require__(396);
+=======
+var typeOf = __webpack_require__(411);
+var isAccessor = __webpack_require__(412);
+var isData = __webpack_require__(415);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = function isDescriptor(obj, key) {
   if (typeOf(obj) !== 'object') {
@@ -34699,7 +41485,11 @@ module.exports = function isDescriptor(obj, key) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 392 */
+=======
+/* 411 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports) {
 
 var toString = Object.prototype.toString;
@@ -34852,7 +41642,11 @@ function isBuffer(val) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 393 */
+=======
+/* 412 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -34865,7 +41659,11 @@ function isBuffer(val) {
 
 
 
+<<<<<<< HEAD
 var typeOf = __webpack_require__(394);
+=======
+var typeOf = __webpack_require__(413);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 // accessor descriptor properties
 var accessor = {
@@ -34928,10 +41726,17 @@ module.exports = isAccessorDescriptor;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 394 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var isBuffer = __webpack_require__(395);
+=======
+/* 413 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var isBuffer = __webpack_require__(414);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 var toString = Object.prototype.toString;
 
 /**
@@ -35050,7 +41855,11 @@ module.exports = function kindOf(val) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 395 */
+=======
+/* 414 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports) {
 
 /*!
@@ -35077,7 +41886,11 @@ function isSlowBuffer (obj) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 396 */
+=======
+/* 415 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -35090,7 +41903,11 @@ function isSlowBuffer (obj) {
 
 
 
+<<<<<<< HEAD
 var typeOf = __webpack_require__(397);
+=======
+var typeOf = __webpack_require__(416);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 // data descriptor properties
 var data = {
@@ -35139,10 +41956,17 @@ module.exports = isDataDescriptor;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 397 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var isBuffer = __webpack_require__(395);
+=======
+/* 416 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var isBuffer = __webpack_require__(414);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 var toString = Object.prototype.toString;
 
 /**
@@ -35261,13 +42085,21 @@ module.exports = function kindOf(val) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 398 */
+=======
+/* 417 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+<<<<<<< HEAD
 var isObject = __webpack_require__(399);
+=======
+var isObject = __webpack_require__(418);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = function extend(o/*, objects*/) {
   if (!isObject(o)) { o = {}; }
@@ -35301,7 +42133,11 @@ function hasOwn(obj, key) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 399 */
+=======
+/* 418 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -35321,13 +42157,21 @@ module.exports = function isExtendable(val) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 400 */
+=======
+/* 419 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+<<<<<<< HEAD
 var extend = __webpack_require__(398);
+=======
+var extend = __webpack_require__(417);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * The main export is a function that takes a `pattern` string and an `options` object.
@@ -35394,7 +42238,11 @@ module.exports = toRegex;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 401 */
+=======
+/* 420 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -35444,13 +42292,21 @@ module.exports.immutable = function uniqueImmutable(arr) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 402 */
+=======
+/* 421 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+<<<<<<< HEAD
 var utils = __webpack_require__(403);
+=======
+var utils = __webpack_require__(422);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = function(braces, options) {
   braces.compiler
@@ -35733,25 +42589,42 @@ function hasQueue(node) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 403 */
+=======
+/* 422 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+<<<<<<< HEAD
 var splitString = __webpack_require__(404);
+=======
+var splitString = __webpack_require__(423);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 var utils = module.exports;
 
 /**
  * Module dependencies
  */
 
+<<<<<<< HEAD
 utils.extend = __webpack_require__(398);
 utils.flatten = __webpack_require__(410);
 utils.isObject = __webpack_require__(408);
 utils.fillRange = __webpack_require__(411);
 utils.repeat = __webpack_require__(416);
 utils.unique = __webpack_require__(401);
+=======
+utils.extend = __webpack_require__(417);
+utils.flatten = __webpack_require__(429);
+utils.isObject = __webpack_require__(427);
+utils.fillRange = __webpack_require__(430);
+utils.repeat = __webpack_require__(435);
+utils.unique = __webpack_require__(420);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 utils.define = function(obj, key, val) {
   Object.defineProperty(obj, key, {
@@ -36083,7 +42956,11 @@ utils.escapeRegex = function(str) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 404 */
+=======
+/* 423 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -36096,7 +42973,11 @@ utils.escapeRegex = function(str) {
 
 
 
+<<<<<<< HEAD
 var extend = __webpack_require__(405);
+=======
+var extend = __webpack_require__(424);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = function(str, options, fn) {
   if (typeof str !== 'string') {
@@ -36261,14 +43142,23 @@ function keepEscaping(opts, str, idx) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 405 */
+=======
+/* 424 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+<<<<<<< HEAD
 var isExtendable = __webpack_require__(406);
 var assignSymbols = __webpack_require__(409);
+=======
+var isExtendable = __webpack_require__(425);
+var assignSymbols = __webpack_require__(428);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = Object.assign || function(obj/*, objects*/) {
   if (obj === null || typeof obj === 'undefined') {
@@ -36328,7 +43218,11 @@ function isEnum(obj, key) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 406 */
+=======
+/* 425 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -36341,7 +43235,11 @@ function isEnum(obj, key) {
 
 
 
+<<<<<<< HEAD
 var isPlainObject = __webpack_require__(407);
+=======
+var isPlainObject = __webpack_require__(426);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = function isExtendable(val) {
   return isPlainObject(val) || typeof val === 'function' || Array.isArray(val);
@@ -36349,7 +43247,11 @@ module.exports = function isExtendable(val) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 407 */
+=======
+/* 426 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -36362,7 +43264,11 @@ module.exports = function isExtendable(val) {
 
 
 
+<<<<<<< HEAD
 var isObject = __webpack_require__(408);
+=======
+var isObject = __webpack_require__(427);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 function isObjectObject(o) {
   return isObject(o) === true
@@ -36393,7 +43299,11 @@ module.exports = function isPlainObject(o) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 408 */
+=======
+/* 427 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -36412,7 +43322,11 @@ module.exports = function isObject(val) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 409 */
+=======
+/* 428 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -36459,7 +43373,11 @@ module.exports = function(receiver, objects) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 410 */
+=======
+/* 429 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -36488,7 +43406,11 @@ function flat(arr, res) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 411 */
+=======
+/* 430 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -36502,10 +43424,17 @@ function flat(arr, res) {
 
 
 var util = __webpack_require__(29);
+<<<<<<< HEAD
 var isNumber = __webpack_require__(412);
 var extend = __webpack_require__(398);
 var repeat = __webpack_require__(414);
 var toRegex = __webpack_require__(415);
+=======
+var isNumber = __webpack_require__(431);
+var extend = __webpack_require__(417);
+var repeat = __webpack_require__(433);
+var toRegex = __webpack_require__(434);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * Return a range of numbers or letters.
@@ -36703,7 +43632,11 @@ module.exports = fillRange;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 412 */
+=======
+/* 431 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -36716,7 +43649,11 @@ module.exports = fillRange;
 
 
 
+<<<<<<< HEAD
 var typeOf = __webpack_require__(413);
+=======
+var typeOf = __webpack_require__(432);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = function isNumber(num) {
   var type = typeOf(num);
@@ -36732,10 +43669,17 @@ module.exports = function isNumber(num) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 413 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var isBuffer = __webpack_require__(395);
+=======
+/* 432 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var isBuffer = __webpack_require__(414);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 var toString = Object.prototype.toString;
 
 /**
@@ -36854,7 +43798,11 @@ module.exports = function kindOf(val) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 414 */
+=======
+/* 433 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -36931,7 +43879,11 @@ function repeat(str, num) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 415 */
+=======
+/* 434 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -36944,8 +43896,13 @@ function repeat(str, num) {
 
 
 
+<<<<<<< HEAD
 var repeat = __webpack_require__(414);
 var isNumber = __webpack_require__(412);
+=======
+var repeat = __webpack_require__(433);
+var isNumber = __webpack_require__(431);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 var cache = {};
 
 function toRegexRange(min, max, options) {
@@ -37232,7 +44189,11 @@ module.exports = toRegexRange;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 416 */
+=======
+/* 435 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37257,14 +44218,23 @@ module.exports = function repeat(ele, num) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 417 */
+=======
+/* 436 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+<<<<<<< HEAD
 var Node = __webpack_require__(418);
 var utils = __webpack_require__(403);
+=======
+var Node = __webpack_require__(437);
+var utils = __webpack_require__(422);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * Braces parsers
@@ -37624,15 +44594,25 @@ function concatNodes(pos, node, parent, options) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 418 */
+=======
+/* 437 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+<<<<<<< HEAD
 var isObject = __webpack_require__(408);
 var define = __webpack_require__(419);
 var utils = __webpack_require__(426);
+=======
+var isObject = __webpack_require__(427);
+var define = __webpack_require__(438);
+var utils = __webpack_require__(445);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 var ownNames;
 
 /**
@@ -38123,7 +45103,11 @@ exports = module.exports = Node;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 419 */
+=======
+/* 438 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -38136,7 +45120,11 @@ exports = module.exports = Node;
 
 
 
+<<<<<<< HEAD
 var isDescriptor = __webpack_require__(420);
+=======
+var isDescriptor = __webpack_require__(439);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = function defineProperty(obj, prop, val) {
   if (typeof obj !== 'object' && typeof obj !== 'function') {
@@ -38161,7 +45149,11 @@ module.exports = function defineProperty(obj, prop, val) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 420 */
+=======
+/* 439 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -38174,9 +45166,15 @@ module.exports = function defineProperty(obj, prop, val) {
 
 
 
+<<<<<<< HEAD
 var typeOf = __webpack_require__(421);
 var isAccessor = __webpack_require__(422);
 var isData = __webpack_require__(424);
+=======
+var typeOf = __webpack_require__(440);
+var isAccessor = __webpack_require__(441);
+var isData = __webpack_require__(443);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = function isDescriptor(obj, key) {
   if (typeOf(obj) !== 'object') {
@@ -38190,7 +45188,11 @@ module.exports = function isDescriptor(obj, key) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 421 */
+=======
+/* 440 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports) {
 
 var toString = Object.prototype.toString;
@@ -38325,7 +45327,11 @@ function isBuffer(val) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 422 */
+=======
+/* 441 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -38338,7 +45344,11 @@ function isBuffer(val) {
 
 
 
+<<<<<<< HEAD
 var typeOf = __webpack_require__(423);
+=======
+var typeOf = __webpack_require__(442);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 // accessor descriptor properties
 var accessor = {
@@ -38401,7 +45411,11 @@ module.exports = isAccessorDescriptor;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 423 */
+=======
+/* 442 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports) {
 
 var toString = Object.prototype.toString;
@@ -38536,7 +45550,11 @@ function isBuffer(val) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 424 */
+=======
+/* 443 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -38549,7 +45567,11 @@ function isBuffer(val) {
 
 
 
+<<<<<<< HEAD
 var typeOf = __webpack_require__(425);
+=======
+var typeOf = __webpack_require__(444);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = function isDataDescriptor(obj, prop) {
   // data descriptor properties
@@ -38592,7 +45614,11 @@ module.exports = function isDataDescriptor(obj, prop) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 425 */
+=======
+/* 444 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports) {
 
 var toString = Object.prototype.toString;
@@ -38727,13 +45753,21 @@ function isBuffer(val) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 426 */
+=======
+/* 445 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+<<<<<<< HEAD
 var typeOf = __webpack_require__(413);
+=======
+var typeOf = __webpack_require__(432);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 var utils = module.exports;
 
 /**
@@ -39753,17 +46787,29 @@ function assert(val, message) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 427 */
+=======
+/* 446 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+<<<<<<< HEAD
 var extend = __webpack_require__(398);
 var Snapdragon = __webpack_require__(428);
 var compilers = __webpack_require__(402);
 var parsers = __webpack_require__(417);
 var utils = __webpack_require__(403);
+=======
+var extend = __webpack_require__(417);
+var Snapdragon = __webpack_require__(447);
+var compilers = __webpack_require__(421);
+var parsers = __webpack_require__(436);
+var utils = __webpack_require__(422);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * Customize Snapdragon parser and renderer
@@ -39864,17 +46910,29 @@ module.exports = Braces;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 428 */
+=======
+/* 447 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+<<<<<<< HEAD
 var Base = __webpack_require__(429);
 var define = __webpack_require__(390);
 var Compiler = __webpack_require__(459);
 var Parser = __webpack_require__(489);
 var utils = __webpack_require__(469);
+=======
+var Base = __webpack_require__(448);
+var define = __webpack_require__(409);
+var Compiler = __webpack_require__(478);
+var Parser = __webpack_require__(508);
+var utils = __webpack_require__(488);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 var regexCache = {};
 var cache = {};
 
@@ -40045,13 +47103,18 @@ module.exports.Parser = Parser;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 429 */
+=======
+/* 448 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var util = __webpack_require__(29);
+<<<<<<< HEAD
 var define = __webpack_require__(430);
 var CacheBase = __webpack_require__(431);
 var Emitter = __webpack_require__(432);
@@ -40059,6 +47122,15 @@ var isObject = __webpack_require__(408);
 var merge = __webpack_require__(450);
 var pascal = __webpack_require__(453);
 var cu = __webpack_require__(454);
+=======
+var define = __webpack_require__(449);
+var CacheBase = __webpack_require__(450);
+var Emitter = __webpack_require__(451);
+var isObject = __webpack_require__(427);
+var merge = __webpack_require__(469);
+var pascal = __webpack_require__(472);
+var cu = __webpack_require__(473);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * Optionally define a custom `cache` namespace to use.
@@ -40487,7 +47559,11 @@ module.exports.namespace = namespace;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 430 */
+=======
+/* 449 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40500,7 +47576,11 @@ module.exports.namespace = namespace;
 
 
 
+<<<<<<< HEAD
 var isDescriptor = __webpack_require__(420);
+=======
+var isDescriptor = __webpack_require__(439);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = function defineProperty(obj, prop, val) {
   if (typeof obj !== 'object' && typeof obj !== 'function') {
@@ -40525,12 +47605,17 @@ module.exports = function defineProperty(obj, prop, val) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 431 */
+=======
+/* 450 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+<<<<<<< HEAD
 var isObject = __webpack_require__(408);
 var Emitter = __webpack_require__(432);
 var visit = __webpack_require__(433);
@@ -40540,6 +47625,17 @@ var del = __webpack_require__(441);
 var get = __webpack_require__(439);
 var has = __webpack_require__(446);
 var set = __webpack_require__(449);
+=======
+var isObject = __webpack_require__(427);
+var Emitter = __webpack_require__(451);
+var visit = __webpack_require__(452);
+var toPath = __webpack_require__(455);
+var union = __webpack_require__(456);
+var del = __webpack_require__(460);
+var get = __webpack_require__(458);
+var has = __webpack_require__(465);
+var set = __webpack_require__(468);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * Create a `Cache` constructor that when instantiated will
@@ -40793,7 +47889,11 @@ module.exports.namespace = namespace;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 432 */
+=======
+/* 451 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -40962,7 +48062,11 @@ Emitter.prototype.hasListeners = function(event){
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 433 */
+=======
+/* 452 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40975,8 +48079,13 @@ Emitter.prototype.hasListeners = function(event){
 
 
 
+<<<<<<< HEAD
 var visit = __webpack_require__(434);
 var mapVisit = __webpack_require__(435);
+=======
+var visit = __webpack_require__(453);
+var mapVisit = __webpack_require__(454);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = function(collection, method, val) {
   var result;
@@ -40999,7 +48108,11 @@ module.exports = function(collection, method, val) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 434 */
+=======
+/* 453 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41012,7 +48125,11 @@ module.exports = function(collection, method, val) {
 
 
 
+<<<<<<< HEAD
 var isObject = __webpack_require__(408);
+=======
+var isObject = __webpack_require__(427);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = function visit(thisArg, method, target, val) {
   if (!isObject(thisArg) && typeof thisArg !== 'function') {
@@ -41039,14 +48156,22 @@ module.exports = function visit(thisArg, method, target, val) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 435 */
+=======
+/* 454 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var util = __webpack_require__(29);
+<<<<<<< HEAD
 var visit = __webpack_require__(434);
+=======
+var visit = __webpack_require__(453);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * Map `visit` over an array of objects.
@@ -41083,7 +48208,11 @@ function isObject(val) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 436 */
+=======
+/* 455 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41096,7 +48225,11 @@ function isObject(val) {
 
 
 
+<<<<<<< HEAD
 var typeOf = __webpack_require__(413);
+=======
+var typeOf = __webpack_require__(432);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = function toPath(args) {
   if (typeOf(args) !== 'arguments') {
@@ -41123,16 +48256,27 @@ function filter(arr) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 437 */
+=======
+/* 456 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+<<<<<<< HEAD
 var isObject = __webpack_require__(399);
 var union = __webpack_require__(438);
 var get = __webpack_require__(439);
 var set = __webpack_require__(440);
+=======
+var isObject = __webpack_require__(418);
+var union = __webpack_require__(457);
+var get = __webpack_require__(458);
+var set = __webpack_require__(459);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = function unionValue(obj, prop, value) {
   if (!isObject(obj)) {
@@ -41160,7 +48304,11 @@ function arrayify(val) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 438 */
+=======
+/* 457 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41196,7 +48344,11 @@ module.exports = function union(init) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 439 */
+=======
+/* 458 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports) {
 
 /*!
@@ -41252,7 +48404,11 @@ function toString(val) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 440 */
+=======
+/* 459 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41265,10 +48421,17 @@ function toString(val) {
 
 
 
+<<<<<<< HEAD
 var toPath = __webpack_require__(436);
 var extend = __webpack_require__(398);
 var isPlainObject = __webpack_require__(407);
 var isObject = __webpack_require__(399);
+=======
+var toPath = __webpack_require__(455);
+var extend = __webpack_require__(417);
+var isPlainObject = __webpack_require__(426);
+var isObject = __webpack_require__(418);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = function(obj, path, val) {
   if (!isObject(obj)) {
@@ -41322,7 +48485,11 @@ module.exports = function(obj, path, val) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 441 */
+=======
+/* 460 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41335,8 +48502,13 @@ module.exports = function(obj, path, val) {
 
 
 
+<<<<<<< HEAD
 var isObject = __webpack_require__(408);
 var has = __webpack_require__(442);
+=======
+var isObject = __webpack_require__(427);
+var has = __webpack_require__(461);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = function unset(obj, prop) {
   if (!isObject(obj)) {
@@ -41361,7 +48533,11 @@ module.exports = function unset(obj, prop) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 442 */
+=======
+/* 461 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41374,9 +48550,15 @@ module.exports = function unset(obj, prop) {
 
 
 
+<<<<<<< HEAD
 var isObject = __webpack_require__(443);
 var hasValues = __webpack_require__(445);
 var get = __webpack_require__(439);
+=======
+var isObject = __webpack_require__(462);
+var hasValues = __webpack_require__(464);
+var get = __webpack_require__(458);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = function(obj, prop, noZero) {
   if (isObject(obj)) {
@@ -41387,7 +48569,11 @@ module.exports = function(obj, prop, noZero) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 443 */
+=======
+/* 462 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41400,7 +48586,11 @@ module.exports = function(obj, prop, noZero) {
 
 
 
+<<<<<<< HEAD
 var isArray = __webpack_require__(444);
+=======
+var isArray = __webpack_require__(463);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = function isObject(val) {
   return val != null && typeof val === 'object' && isArray(val) === false;
@@ -41408,7 +48598,11 @@ module.exports = function isObject(val) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 444 */
+=======
+/* 463 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports) {
 
 var toString = {}.toString;
@@ -41419,7 +48613,11 @@ module.exports = Array.isArray || function (arr) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 445 */
+=======
+/* 464 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41462,7 +48660,11 @@ module.exports = function hasValue(o, noZero) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 446 */
+=======
+/* 465 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41475,9 +48677,15 @@ module.exports = function hasValue(o, noZero) {
 
 
 
+<<<<<<< HEAD
 var isObject = __webpack_require__(408);
 var hasValues = __webpack_require__(447);
 var get = __webpack_require__(439);
+=======
+var isObject = __webpack_require__(427);
+var hasValues = __webpack_require__(466);
+var get = __webpack_require__(458);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = function(val, prop) {
   return hasValues(isObject(val) && prop ? get(val, prop) : val);
@@ -41485,7 +48693,11 @@ module.exports = function(val, prop) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 447 */
+=======
+/* 466 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41498,8 +48710,13 @@ module.exports = function(val, prop) {
 
 
 
+<<<<<<< HEAD
 var typeOf = __webpack_require__(448);
 var isNumber = __webpack_require__(412);
+=======
+var typeOf = __webpack_require__(467);
+var isNumber = __webpack_require__(431);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = function hasValue(val) {
   // is-number checks for NaN and other edge cases
@@ -41552,10 +48769,17 @@ module.exports = function hasValue(val) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 448 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var isBuffer = __webpack_require__(395);
+=======
+/* 467 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var isBuffer = __webpack_require__(414);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 var toString = Object.prototype.toString;
 
 /**
@@ -41677,7 +48901,11 @@ module.exports = function kindOf(val) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 449 */
+=======
+/* 468 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41690,10 +48918,17 @@ module.exports = function kindOf(val) {
 
 
 
+<<<<<<< HEAD
 var split = __webpack_require__(404);
 var extend = __webpack_require__(398);
 var isPlainObject = __webpack_require__(407);
 var isObject = __webpack_require__(399);
+=======
+var split = __webpack_require__(423);
+var extend = __webpack_require__(417);
+var isPlainObject = __webpack_require__(426);
+var isObject = __webpack_require__(418);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = function(obj, prop, val) {
   if (!isObject(obj)) {
@@ -41735,14 +48970,23 @@ module.exports = function(obj, prop, val) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 450 */
+=======
+/* 469 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+<<<<<<< HEAD
 var isExtendable = __webpack_require__(451);
 var forIn = __webpack_require__(452);
+=======
+var isExtendable = __webpack_require__(470);
+var forIn = __webpack_require__(471);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 function mixinDeep(target, objects) {
   var len = arguments.length, i = 0;
@@ -41795,7 +49039,11 @@ module.exports = mixinDeep;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 451 */
+=======
+/* 470 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41808,7 +49056,11 @@ module.exports = mixinDeep;
 
 
 
+<<<<<<< HEAD
 var isPlainObject = __webpack_require__(407);
+=======
+var isPlainObject = __webpack_require__(426);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = function isExtendable(val) {
   return isPlainObject(val) || typeof val === 'function' || Array.isArray(val);
@@ -41816,7 +49068,11 @@ module.exports = function isExtendable(val) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 452 */
+=======
+/* 471 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41839,7 +49095,11 @@ module.exports = function forIn(obj, fn, thisArg) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 453 */
+=======
+/* 472 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports) {
 
 /*!
@@ -41866,14 +49126,22 @@ module.exports = pascalcase;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 454 */
+=======
+/* 473 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var util = __webpack_require__(29);
+<<<<<<< HEAD
 var utils = __webpack_require__(455);
+=======
+var utils = __webpack_require__(474);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * Expose class utils
@@ -42238,7 +49506,11 @@ cu.bubble = function(Parent, events) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 455 */
+=======
+/* 474 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -42252,10 +49524,17 @@ var utils = {};
  * Lazily required module dependencies
  */
 
+<<<<<<< HEAD
 utils.union = __webpack_require__(438);
 utils.define = __webpack_require__(390);
 utils.isObj = __webpack_require__(408);
 utils.staticExtend = __webpack_require__(456);
+=======
+utils.union = __webpack_require__(457);
+utils.define = __webpack_require__(409);
+utils.isObj = __webpack_require__(427);
+utils.staticExtend = __webpack_require__(475);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 
 /**
@@ -42266,7 +49545,11 @@ module.exports = utils;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 456 */
+=======
+/* 475 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -42279,8 +49562,13 @@ module.exports = utils;
 
 
 
+<<<<<<< HEAD
 var copy = __webpack_require__(457);
 var define = __webpack_require__(390);
+=======
+var copy = __webpack_require__(476);
+var define = __webpack_require__(409);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 var util = __webpack_require__(29);
 
 /**
@@ -42363,15 +49651,25 @@ module.exports = extend;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 457 */
+=======
+/* 476 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+<<<<<<< HEAD
 var typeOf = __webpack_require__(413);
 var copyDescriptor = __webpack_require__(458);
 var define = __webpack_require__(390);
+=======
+var typeOf = __webpack_require__(432);
+var copyDescriptor = __webpack_require__(477);
+var define = __webpack_require__(409);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * Copy static properties, prototype properties, and descriptors from one object to another.
@@ -42544,7 +49842,11 @@ module.exports.has = has;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 458 */
+=======
+/* 477 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -42632,16 +49934,27 @@ function isObject(val) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 459 */
+=======
+/* 478 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+<<<<<<< HEAD
 var use = __webpack_require__(460);
 var define = __webpack_require__(390);
 var debug = __webpack_require__(462)('snapdragon:compiler');
 var utils = __webpack_require__(469);
+=======
+var use = __webpack_require__(479);
+var define = __webpack_require__(409);
+var debug = __webpack_require__(481)('snapdragon:compiler');
+var utils = __webpack_require__(488);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * Create a new `Compiler` with the given `options`.
@@ -42795,7 +50108,11 @@ Compiler.prototype = {
 
     // source map support
     if (opts.sourcemap) {
+<<<<<<< HEAD
       var sourcemaps = __webpack_require__(488);
+=======
+      var sourcemaps = __webpack_require__(507);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
       sourcemaps(this);
       this.mapVisit(this.ast.nodes);
       this.applySourceMaps();
@@ -42816,7 +50133,11 @@ module.exports = Compiler;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 460 */
+=======
+/* 479 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -42829,7 +50150,11 @@ module.exports = Compiler;
 
 
 
+<<<<<<< HEAD
 var utils = __webpack_require__(461);
+=======
+var utils = __webpack_require__(480);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = function base(app, opts) {
   if (!utils.isObject(app) && typeof app !== 'function') {
@@ -42944,7 +50269,11 @@ module.exports = function base(app, opts) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 461 */
+=======
+/* 480 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -42958,8 +50287,13 @@ var utils = {};
  * Lazily required module dependencies
  */
 
+<<<<<<< HEAD
 utils.define = __webpack_require__(390);
 utils.isObject = __webpack_require__(408);
+=======
+utils.define = __webpack_require__(409);
+utils.isObject = __webpack_require__(427);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 
 utils.isString = function(val) {
@@ -42974,7 +50308,11 @@ module.exports = utils;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 462 */
+=======
+/* 481 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -42983,14 +50321,24 @@ module.exports = utils;
  */
 
 if (typeof process !== 'undefined' && process.type === 'renderer') {
+<<<<<<< HEAD
   module.exports = __webpack_require__(463);
 } else {
   module.exports = __webpack_require__(466);
+=======
+  module.exports = __webpack_require__(482);
+} else {
+  module.exports = __webpack_require__(485);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 }
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 463 */
+=======
+/* 482 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -42999,7 +50347,11 @@ if (typeof process !== 'undefined' && process.type === 'renderer') {
  * Expose `debug()` as the module.
  */
 
+<<<<<<< HEAD
 exports = module.exports = __webpack_require__(464);
+=======
+exports = module.exports = __webpack_require__(483);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 exports.log = log;
 exports.formatArgs = formatArgs;
 exports.save = save;
@@ -43181,7 +50533,11 @@ function localstorage() {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 464 */
+=======
+/* 483 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -43197,7 +50553,11 @@ exports.coerce = coerce;
 exports.disable = disable;
 exports.enable = enable;
 exports.enabled = enabled;
+<<<<<<< HEAD
 exports.humanize = __webpack_require__(465);
+=======
+exports.humanize = __webpack_require__(484);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * The currently active debug mode names, and names to skip.
@@ -43389,7 +50749,11 @@ function coerce(val) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 465 */
+=======
+/* 484 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports) {
 
 /**
@@ -43547,14 +50911,22 @@ function plural(ms, n, name) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 466 */
+=======
+/* 485 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
  * Module dependencies.
  */
 
+<<<<<<< HEAD
 var tty = __webpack_require__(467);
+=======
+var tty = __webpack_require__(486);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 var util = __webpack_require__(29);
 
 /**
@@ -43563,7 +50935,11 @@ var util = __webpack_require__(29);
  * Expose `debug()` as the module.
  */
 
+<<<<<<< HEAD
 exports = module.exports = __webpack_require__(464);
+=======
+exports = module.exports = __webpack_require__(483);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 exports.init = init;
 exports.log = log;
 exports.formatArgs = formatArgs;
@@ -43742,7 +51118,11 @@ function createWritableStdioStream (fd) {
 
     case 'PIPE':
     case 'TCP':
+<<<<<<< HEAD
       var net = __webpack_require__(468);
+=======
+      var net = __webpack_require__(487);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
       stream = new net.Socket({
         fd: fd,
         readable: false,
@@ -43801,19 +51181,31 @@ exports.enable(load());
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 467 */
+=======
+/* 486 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports) {
 
 module.exports = require("tty");
 
 /***/ }),
+<<<<<<< HEAD
 /* 468 */
+=======
+/* 487 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports) {
 
 module.exports = require("net");
 
 /***/ }),
+<<<<<<< HEAD
 /* 469 */
+=======
+/* 488 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -43823,9 +51215,15 @@ module.exports = require("net");
  * Module dependencies
  */
 
+<<<<<<< HEAD
 exports.extend = __webpack_require__(398);
 exports.SourceMap = __webpack_require__(470);
 exports.sourceMapResolve = __webpack_require__(481);
+=======
+exports.extend = __webpack_require__(417);
+exports.SourceMap = __webpack_require__(489);
+exports.sourceMapResolve = __webpack_require__(500);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * Convert backslash in the given string to forward slashes
@@ -43868,7 +51266,11 @@ exports.last = function(arr, n) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 470 */
+=======
+/* 489 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -43876,6 +51278,7 @@ exports.last = function(arr, n) {
  * Licensed under the New BSD license. See LICENSE.txt or:
  * http://opensource.org/licenses/BSD-3-Clause
  */
+<<<<<<< HEAD
 exports.SourceMapGenerator = __webpack_require__(471).SourceMapGenerator;
 exports.SourceMapConsumer = __webpack_require__(477).SourceMapConsumer;
 exports.SourceNode = __webpack_require__(480).SourceNode;
@@ -43883,6 +51286,15 @@ exports.SourceNode = __webpack_require__(480).SourceNode;
 
 /***/ }),
 /* 471 */
+=======
+exports.SourceMapGenerator = __webpack_require__(490).SourceMapGenerator;
+exports.SourceMapConsumer = __webpack_require__(496).SourceMapConsumer;
+exports.SourceNode = __webpack_require__(499).SourceNode;
+
+
+/***/ }),
+/* 490 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -43892,10 +51304,17 @@ exports.SourceNode = __webpack_require__(480).SourceNode;
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
+<<<<<<< HEAD
 var base64VLQ = __webpack_require__(472);
 var util = __webpack_require__(474);
 var ArraySet = __webpack_require__(475).ArraySet;
 var MappingList = __webpack_require__(476).MappingList;
+=======
+var base64VLQ = __webpack_require__(491);
+var util = __webpack_require__(493);
+var ArraySet = __webpack_require__(494).ArraySet;
+var MappingList = __webpack_require__(495).MappingList;
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * An instance of the SourceMapGenerator represents a source map which is
@@ -44304,7 +51723,11 @@ exports.SourceMapGenerator = SourceMapGenerator;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 472 */
+=======
+/* 491 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -44344,7 +51767,11 @@ exports.SourceMapGenerator = SourceMapGenerator;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+<<<<<<< HEAD
 var base64 = __webpack_require__(473);
+=======
+var base64 = __webpack_require__(492);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 // A single base 64 digit can contain 6 bits of data. For the base 64 variable
 // length quantities we use in the source map spec, the first bit is the sign,
@@ -44450,7 +51877,11 @@ exports.decode = function base64VLQ_decode(aStr, aIndex, aOutParam) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 473 */
+=======
+/* 492 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -44523,7 +51954,11 @@ exports.decode = function (charCode) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 474 */
+=======
+/* 493 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -44946,7 +52381,11 @@ exports.compareByGeneratedPositionsInflated = compareByGeneratedPositionsInflate
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 475 */
+=======
+/* 494 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -44956,7 +52395,11 @@ exports.compareByGeneratedPositionsInflated = compareByGeneratedPositionsInflate
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
+<<<<<<< HEAD
 var util = __webpack_require__(474);
+=======
+var util = __webpack_require__(493);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 var has = Object.prototype.hasOwnProperty;
 var hasNativeMap = typeof Map !== "undefined";
 
@@ -45073,7 +52516,11 @@ exports.ArraySet = ArraySet;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 476 */
+=======
+/* 495 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -45083,7 +52530,11 @@ exports.ArraySet = ArraySet;
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
+<<<<<<< HEAD
 var util = __webpack_require__(474);
+=======
+var util = __webpack_require__(493);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * Determine whether mappingB is after mappingA with respect to generated
@@ -45158,7 +52609,11 @@ exports.MappingList = MappingList;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 477 */
+=======
+/* 496 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -45168,11 +52623,19 @@ exports.MappingList = MappingList;
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
+<<<<<<< HEAD
 var util = __webpack_require__(474);
 var binarySearch = __webpack_require__(478);
 var ArraySet = __webpack_require__(475).ArraySet;
 var base64VLQ = __webpack_require__(472);
 var quickSort = __webpack_require__(479).quickSort;
+=======
+var util = __webpack_require__(493);
+var binarySearch = __webpack_require__(497);
+var ArraySet = __webpack_require__(494).ArraySet;
+var base64VLQ = __webpack_require__(491);
+var quickSort = __webpack_require__(498).quickSort;
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 function SourceMapConsumer(aSourceMap) {
   var sourceMap = aSourceMap;
@@ -46246,7 +53709,11 @@ exports.IndexedSourceMapConsumer = IndexedSourceMapConsumer;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 478 */
+=======
+/* 497 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -46363,7 +53830,11 @@ exports.search = function search(aNeedle, aHaystack, aCompare, aBias) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 479 */
+=======
+/* 498 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -46483,7 +53954,11 @@ exports.quickSort = function (ary, comparator) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 480 */
+=======
+/* 499 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -46493,8 +53968,13 @@ exports.quickSort = function (ary, comparator) {
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
+<<<<<<< HEAD
 var SourceMapGenerator = __webpack_require__(471).SourceMapGenerator;
 var util = __webpack_require__(474);
+=======
+var SourceMapGenerator = __webpack_require__(490).SourceMapGenerator;
+var util = __webpack_require__(493);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 // Matches a Windows-style `\r\n` newline or a `\n` newline used by all other
 // operating systems these days (capturing the result).
@@ -46902,17 +54382,29 @@ exports.SourceNode = SourceNode;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 481 */
+=======
+/* 500 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 // Copyright 2014, 2015, 2016, 2017 Simon Lydell
 // X11 (“MIT”) Licensed. (See LICENSE.)
 
+<<<<<<< HEAD
 var sourceMappingURL   = __webpack_require__(482)
 var resolveUrl         = __webpack_require__(483)
 var decodeUriComponent = __webpack_require__(484)
 var urix               = __webpack_require__(486)
 var atob               = __webpack_require__(487)
+=======
+var sourceMappingURL   = __webpack_require__(501)
+var resolveUrl         = __webpack_require__(502)
+var decodeUriComponent = __webpack_require__(503)
+var urix               = __webpack_require__(505)
+var atob               = __webpack_require__(506)
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 
 
@@ -47210,7 +54702,11 @@ module.exports = {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 482 */
+=======
+/* 501 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;// Copyright 2014 Simon Lydell
@@ -47273,13 +54769,17 @@ void (function(root, factory) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 483 */
+=======
+/* 502 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 // Copyright 2014 Simon Lydell
 // X11 (“MIT”) Licensed. (See LICENSE.)
 
-var url = __webpack_require__(74)
+var url = __webpack_require__(77)
 
 function resolveUrl(/* ...urls */) {
   return Array.prototype.reduce.call(arguments, function(resolved, nextUrl) {
@@ -47291,13 +54791,21 @@ module.exports = resolveUrl
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 484 */
+=======
+/* 503 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 // Copyright 2017 Simon Lydell
 // X11 (“MIT”) Licensed. (See LICENSE.)
 
+<<<<<<< HEAD
 var decodeUriComponent = __webpack_require__(485)
+=======
+var decodeUriComponent = __webpack_require__(504)
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 function customDecodeUriComponent(string) {
   // `decodeUriComponent` turns `+` into ` `, but that's not wanted.
@@ -47308,7 +54816,11 @@ module.exports = customDecodeUriComponent
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 485 */
+=======
+/* 504 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -47409,7 +54921,11 @@ module.exports = function (encodedURI) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 486 */
+=======
+/* 505 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 // Copyright 2014 Simon Lydell
@@ -47432,7 +54948,11 @@ module.exports = urix
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 487 */
+=======
+/* 506 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -47446,7 +54966,11 @@ module.exports = atob.atob = atob;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 488 */
+=======
+/* 507 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -47454,8 +54978,13 @@ module.exports = atob.atob = atob;
 
 var fs = __webpack_require__(23);
 var path = __webpack_require__(16);
+<<<<<<< HEAD
 var define = __webpack_require__(390);
 var utils = __webpack_require__(469);
+=======
+var define = __webpack_require__(409);
+var utils = __webpack_require__(488);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * Expose `mixin()`.
@@ -47598,12 +55127,17 @@ exports.comment = function(node) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 489 */
+=======
+/* 508 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+<<<<<<< HEAD
 var use = __webpack_require__(460);
 var util = __webpack_require__(29);
 var Cache = __webpack_require__(490);
@@ -47611,6 +55145,15 @@ var define = __webpack_require__(390);
 var debug = __webpack_require__(462)('snapdragon:parser');
 var Position = __webpack_require__(491);
 var utils = __webpack_require__(469);
+=======
+var use = __webpack_require__(479);
+var util = __webpack_require__(29);
+var Cache = __webpack_require__(509);
+var define = __webpack_require__(409);
+var debug = __webpack_require__(481)('snapdragon:parser');
+var Position = __webpack_require__(510);
+var utils = __webpack_require__(488);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * Create a new `Parser` with the given `input` and `options`.
@@ -48138,7 +55681,11 @@ module.exports = Parser;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 490 */
+=======
+/* 509 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -48245,13 +55792,21 @@ MapCache.prototype.del = function mapDelete(key) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 491 */
+=======
+/* 510 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+<<<<<<< HEAD
 var define = __webpack_require__(390);
+=======
+var define = __webpack_require__(409);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * Store position for a node
@@ -48266,14 +55821,23 @@ module.exports = function Position(start, parser) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 492 */
+=======
+/* 511 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+<<<<<<< HEAD
 var nanomatch = __webpack_require__(493);
 var extglob = __webpack_require__(504);
+=======
+var nanomatch = __webpack_require__(512);
+var extglob = __webpack_require__(523);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = function(snapdragon) {
   var compilers = snapdragon.compiler.compilers;
@@ -48350,7 +55914,11 @@ function escapeExtglobs(compiler) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 493 */
+=======
+/* 512 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -48361,17 +55929,29 @@ function escapeExtglobs(compiler) {
  */
 
 var util = __webpack_require__(29);
+<<<<<<< HEAD
 var toRegex = __webpack_require__(389);
 var extend = __webpack_require__(398);
+=======
+var toRegex = __webpack_require__(408);
+var extend = __webpack_require__(417);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * Local dependencies
  */
 
+<<<<<<< HEAD
 var compilers = __webpack_require__(494);
 var parsers = __webpack_require__(495);
 var cache = __webpack_require__(497);
 var utils = __webpack_require__(499);
+=======
+var compilers = __webpack_require__(513);
+var parsers = __webpack_require__(514);
+var cache = __webpack_require__(516);
+var utils = __webpack_require__(518);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 var MAX_LENGTH = 1024 * 64;
 
 /**
@@ -49200,7 +56780,11 @@ module.exports = nanomatch;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 494 */
+=======
+/* 513 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -49526,15 +57110,25 @@ module.exports = function(nanomatch, options) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 495 */
+=======
+/* 514 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+<<<<<<< HEAD
 var regexNot = __webpack_require__(400);
 var toRegex = __webpack_require__(389);
 var isOdd = __webpack_require__(496);
+=======
+var regexNot = __webpack_require__(419);
+var toRegex = __webpack_require__(408);
+var isOdd = __webpack_require__(515);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * Characters to use in negation regex (we want to "not" match
@@ -49921,7 +57515,11 @@ module.exports.not = NOT_REGEX;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 496 */
+=======
+/* 515 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -49934,7 +57532,11 @@ module.exports.not = NOT_REGEX;
 
 
 
+<<<<<<< HEAD
 var isNumber = __webpack_require__(412);
+=======
+var isNumber = __webpack_require__(431);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = function isOdd(i) {
   if (!isNumber(i)) {
@@ -49948,6 +57550,7 @@ module.exports = function isOdd(i) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 497 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -49956,6 +57559,16 @@ module.exports = new (__webpack_require__(498))();
 
 /***/ }),
 /* 498 */
+=======
+/* 516 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = new (__webpack_require__(517))();
+
+
+/***/ }),
+/* 517 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -49968,7 +57581,11 @@ module.exports = new (__webpack_require__(498))();
 
 
 
+<<<<<<< HEAD
 var MapCache = __webpack_require__(490);
+=======
+var MapCache = __webpack_require__(509);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * Create a new `FragmentCache` with an optional object to use for `caches`.
@@ -50090,7 +57707,11 @@ exports = module.exports = FragmentCache;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 499 */
+=======
+/* 518 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -50103,6 +57724,7 @@ var path = __webpack_require__(16);
  * Module dependencies
  */
 
+<<<<<<< HEAD
 var Snapdragon = __webpack_require__(428);
 utils.define = __webpack_require__(500);
 utils.diff = __webpack_require__(501);
@@ -50110,6 +57732,15 @@ utils.extend = __webpack_require__(398);
 utils.pick = __webpack_require__(502);
 utils.typeOf = __webpack_require__(503);
 utils.unique = __webpack_require__(401);
+=======
+var Snapdragon = __webpack_require__(447);
+utils.define = __webpack_require__(519);
+utils.diff = __webpack_require__(520);
+utils.extend = __webpack_require__(417);
+utils.pick = __webpack_require__(521);
+utils.typeOf = __webpack_require__(522);
+utils.unique = __webpack_require__(420);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * Returns true if the given value is effectively an empty string
@@ -50475,7 +58106,11 @@ utils.unixify = function(options) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 500 */
+=======
+/* 519 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -50488,7 +58123,11 @@ utils.unixify = function(options) {
 
 
 
+<<<<<<< HEAD
 var isDescriptor = __webpack_require__(420);
+=======
+var isDescriptor = __webpack_require__(439);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = function defineProperty(obj, prop, val) {
   if (typeof obj !== 'object' && typeof obj !== 'function') {
@@ -50513,7 +58152,11 @@ module.exports = function defineProperty(obj, prop, val) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 501 */
+=======
+/* 520 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -50567,7 +58210,11 @@ function diffArray(one, two) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 502 */
+=======
+/* 521 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -50580,7 +58227,11 @@ function diffArray(one, two) {
 
 
 
+<<<<<<< HEAD
 var isObject = __webpack_require__(408);
+=======
+var isObject = __webpack_require__(427);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = function pick(obj, keys) {
   if (!isObject(obj) && typeof obj !== 'function') {
@@ -50609,7 +58260,11 @@ module.exports = function pick(obj, keys) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 503 */
+=======
+/* 522 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports) {
 
 var toString = Object.prototype.toString;
@@ -50762,7 +58417,11 @@ function isBuffer(val) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 504 */
+=======
+/* 523 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -50772,18 +58431,31 @@ function isBuffer(val) {
  * Module dependencies
  */
 
+<<<<<<< HEAD
 var extend = __webpack_require__(398);
 var unique = __webpack_require__(401);
 var toRegex = __webpack_require__(389);
+=======
+var extend = __webpack_require__(417);
+var unique = __webpack_require__(420);
+var toRegex = __webpack_require__(408);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * Local dependencies
  */
 
+<<<<<<< HEAD
 var compilers = __webpack_require__(505);
 var parsers = __webpack_require__(511);
 var Extglob = __webpack_require__(513);
 var utils = __webpack_require__(512);
+=======
+var compilers = __webpack_require__(524);
+var parsers = __webpack_require__(530);
+var Extglob = __webpack_require__(532);
+var utils = __webpack_require__(531);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 var MAX_LENGTH = 1024 * 64;
 
 /**
@@ -51100,13 +58772,21 @@ module.exports = extglob;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 505 */
+=======
+/* 524 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+<<<<<<< HEAD
 var brackets = __webpack_require__(506);
+=======
+var brackets = __webpack_require__(525);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * Extglob compilers
@@ -51276,7 +58956,11 @@ module.exports = function(extglob) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 506 */
+=======
+/* 525 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -51286,17 +58970,29 @@ module.exports = function(extglob) {
  * Local dependencies
  */
 
+<<<<<<< HEAD
 var compilers = __webpack_require__(507);
 var parsers = __webpack_require__(509);
+=======
+var compilers = __webpack_require__(526);
+var parsers = __webpack_require__(528);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * Module dependencies
  */
 
+<<<<<<< HEAD
 var debug = __webpack_require__(462)('expand-brackets');
 var extend = __webpack_require__(398);
 var Snapdragon = __webpack_require__(428);
 var toRegex = __webpack_require__(389);
+=======
+var debug = __webpack_require__(481)('expand-brackets');
+var extend = __webpack_require__(417);
+var Snapdragon = __webpack_require__(447);
+var toRegex = __webpack_require__(408);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * Parses the given POSIX character class `pattern` and returns a
@@ -51494,13 +59190,21 @@ module.exports = brackets;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 507 */
+=======
+/* 526 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+<<<<<<< HEAD
 var posix = __webpack_require__(508);
+=======
+var posix = __webpack_require__(527);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = function(brackets) {
   brackets.compiler
@@ -51588,7 +59292,11 @@ module.exports = function(brackets) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 508 */
+=======
+/* 527 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -51617,14 +59325,23 @@ module.exports = {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 509 */
+=======
+/* 528 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+<<<<<<< HEAD
 var utils = __webpack_require__(510);
 var define = __webpack_require__(390);
+=======
+var utils = __webpack_require__(529);
+var define = __webpack_require__(409);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * Text regex
@@ -51843,14 +59560,23 @@ module.exports.TEXT_REGEX = TEXT_REGEX;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 510 */
+=======
+/* 529 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+<<<<<<< HEAD
 var toRegex = __webpack_require__(389);
 var regexNot = __webpack_require__(400);
+=======
+var toRegex = __webpack_require__(408);
+var regexNot = __webpack_require__(419);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 var cached;
 
 /**
@@ -51884,15 +59610,25 @@ exports.createRegex = function(pattern, include) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 511 */
+=======
+/* 530 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+<<<<<<< HEAD
 var brackets = __webpack_require__(506);
 var define = __webpack_require__(500);
 var utils = __webpack_require__(512);
+=======
+var brackets = __webpack_require__(525);
+var define = __webpack_require__(519);
+var utils = __webpack_require__(531);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * Characters to use in text regex (we want to "not" match
@@ -52047,14 +59783,23 @@ module.exports = parsers;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 512 */
+=======
+/* 531 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+<<<<<<< HEAD
 var regex = __webpack_require__(400);
 var Cache = __webpack_require__(498);
+=======
+var regex = __webpack_require__(419);
+var Cache = __webpack_require__(517);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * Utils
@@ -52123,7 +59868,11 @@ utils.createRegex = function(str) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 513 */
+=======
+/* 532 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52133,16 +59882,27 @@ utils.createRegex = function(str) {
  * Module dependencies
  */
 
+<<<<<<< HEAD
 var Snapdragon = __webpack_require__(428);
 var define = __webpack_require__(500);
 var extend = __webpack_require__(398);
+=======
+var Snapdragon = __webpack_require__(447);
+var define = __webpack_require__(519);
+var extend = __webpack_require__(417);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * Local dependencies
  */
 
+<<<<<<< HEAD
 var compilers = __webpack_require__(505);
 var parsers = __webpack_require__(511);
+=======
+var compilers = __webpack_require__(524);
+var parsers = __webpack_require__(530);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * Customize Snapdragon parser and renderer
@@ -52208,16 +59968,27 @@ module.exports = Extglob;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 514 */
+=======
+/* 533 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+<<<<<<< HEAD
 var extglob = __webpack_require__(504);
 var nanomatch = __webpack_require__(493);
 var regexNot = __webpack_require__(400);
 var toRegex = __webpack_require__(389);
+=======
+var extglob = __webpack_require__(523);
+var nanomatch = __webpack_require__(512);
+var regexNot = __webpack_require__(419);
+var toRegex = __webpack_require__(408);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 var not;
 
 /**
@@ -52298,6 +60069,7 @@ function textRegex(pattern) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 515 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -52306,6 +60078,16 @@ module.exports = new (__webpack_require__(498))();
 
 /***/ }),
 /* 516 */
+=======
+/* 534 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = new (__webpack_require__(517))();
+
+
+/***/ }),
+/* 535 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52318,6 +60100,7 @@ var path = __webpack_require__(16);
  * Module dependencies
  */
 
+<<<<<<< HEAD
 var Snapdragon = __webpack_require__(428);
 utils.define = __webpack_require__(500);
 utils.diff = __webpack_require__(501);
@@ -52325,6 +60108,15 @@ utils.extend = __webpack_require__(398);
 utils.pick = __webpack_require__(502);
 utils.typeOf = __webpack_require__(517);
 utils.unique = __webpack_require__(401);
+=======
+var Snapdragon = __webpack_require__(447);
+utils.define = __webpack_require__(519);
+utils.diff = __webpack_require__(520);
+utils.extend = __webpack_require__(417);
+utils.pick = __webpack_require__(521);
+utils.typeOf = __webpack_require__(536);
+utils.unique = __webpack_require__(420);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * Returns true if the platform is windows, or `path.sep` is `\\`.
@@ -52621,7 +60413,11 @@ utils.unixify = function(options) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 517 */
+=======
+/* 536 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports) {
 
 var toString = Object.prototype.toString;
@@ -52756,7 +60552,11 @@ function isBuffer(val) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 518 */
+=======
+/* 537 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52772,8 +60572,13 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+<<<<<<< HEAD
 var readdir = __webpack_require__(519);
 var reader_1 = __webpack_require__(532);
+=======
+var readdir = __webpack_require__(538);
+var reader_1 = __webpack_require__(551);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 var ReaderAsync = /** @class */ (function (_super) {
     __extends(ReaderAsync, _super);
     function ReaderAsync() {
@@ -52809,15 +60614,25 @@ exports.default = ReaderAsync;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 519 */
+=======
+/* 538 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+<<<<<<< HEAD
 const readdirSync = __webpack_require__(520);
 const readdirAsync = __webpack_require__(528);
 const readdirStream = __webpack_require__(531);
+=======
+const readdirSync = __webpack_require__(539);
+const readdirAsync = __webpack_require__(547);
+const readdirStream = __webpack_require__(550);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = exports = readdirAsyncPath;
 exports.readdir = exports.readdirAsync = exports.async = readdirAsyncPath;
@@ -52901,7 +60716,11 @@ function readdirStreamStat (dir, options) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 520 */
+=======
+/* 539 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52909,11 +60728,19 @@ function readdirStreamStat (dir, options) {
 
 module.exports = readdirSync;
 
+<<<<<<< HEAD
 const DirectoryReader = __webpack_require__(521);
 
 let syncFacade = {
   fs: __webpack_require__(526),
   forEach: __webpack_require__(527),
+=======
+const DirectoryReader = __webpack_require__(540);
+
+let syncFacade = {
+  fs: __webpack_require__(545),
+  forEach: __webpack_require__(546),
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
   sync: true
 };
 
@@ -52942,7 +60769,11 @@ function readdirSync (dir, options, internalOptions) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 521 */
+=======
+/* 540 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52951,9 +60782,15 @@ function readdirSync (dir, options, internalOptions) {
 const Readable = __webpack_require__(28).Readable;
 const EventEmitter = __webpack_require__(45).EventEmitter;
 const path = __webpack_require__(16);
+<<<<<<< HEAD
 const normalizeOptions = __webpack_require__(522);
 const stat = __webpack_require__(524);
 const call = __webpack_require__(525);
+=======
+const normalizeOptions = __webpack_require__(541);
+const stat = __webpack_require__(543);
+const call = __webpack_require__(544);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * Asynchronously reads the contents of a directory and streams the results
@@ -53329,14 +61166,22 @@ module.exports = DirectoryReader;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 522 */
+=======
+/* 541 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 const path = __webpack_require__(16);
+<<<<<<< HEAD
 const globToRegExp = __webpack_require__(523);
+=======
+const globToRegExp = __webpack_require__(542);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = normalizeOptions;
 
@@ -53513,7 +61358,11 @@ function normalizeOptions (options, internalOptions) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 523 */
+=======
+/* 542 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports) {
 
 module.exports = function (glob, opts) {
@@ -53650,13 +61499,21 @@ module.exports = function (glob, opts) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 524 */
+=======
+/* 543 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+<<<<<<< HEAD
 const call = __webpack_require__(525);
+=======
+const call = __webpack_require__(544);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = stat;
 
@@ -53731,7 +61588,11 @@ function symlinkStat (fs, path, lstats, callback) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 525 */
+=======
+/* 544 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53792,14 +61653,22 @@ function callOnce (fn) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 526 */
+=======
+/* 545 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 const fs = __webpack_require__(23);
+<<<<<<< HEAD
 const call = __webpack_require__(525);
+=======
+const call = __webpack_require__(544);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 /**
  * A facade around {@link fs.readdirSync} that allows it to be called
@@ -53863,7 +61732,11 @@ exports.lstat = function (path, callback) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 527 */
+=======
+/* 546 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53892,7 +61765,11 @@ function syncForEach (array, iterator, done) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 528 */
+=======
+/* 547 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53900,12 +61777,21 @@ function syncForEach (array, iterator, done) {
 
 module.exports = readdirAsync;
 
+<<<<<<< HEAD
 const maybe = __webpack_require__(529);
 const DirectoryReader = __webpack_require__(521);
 
 let asyncFacade = {
   fs: __webpack_require__(23),
   forEach: __webpack_require__(530),
+=======
+const maybe = __webpack_require__(548);
+const DirectoryReader = __webpack_require__(540);
+
+let asyncFacade = {
+  fs: __webpack_require__(23),
+  forEach: __webpack_require__(549),
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
   async: true
 };
 
@@ -53947,7 +61833,11 @@ function readdirAsync (dir, options, callback, internalOptions) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 529 */
+=======
+/* 548 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53974,7 +61864,11 @@ module.exports = function maybe (cb, promise) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 530 */
+=======
+/* 549 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54010,7 +61904,11 @@ function asyncForEach (array, iterator, done) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 531 */
+=======
+/* 550 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54018,11 +61916,19 @@ function asyncForEach (array, iterator, done) {
 
 module.exports = readdirStream;
 
+<<<<<<< HEAD
 const DirectoryReader = __webpack_require__(521);
 
 let streamFacade = {
   fs: __webpack_require__(23),
   forEach: __webpack_require__(530),
+=======
+const DirectoryReader = __webpack_require__(540);
+
+let streamFacade = {
+  fs: __webpack_require__(23),
+  forEach: __webpack_require__(549),
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
   async: true
 };
 
@@ -54042,15 +61948,24 @@ function readdirStream (dir, options, internalOptions) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 532 */
+=======
+/* 551 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var path = __webpack_require__(16);
+<<<<<<< HEAD
 var deep_1 = __webpack_require__(533);
 var entry_1 = __webpack_require__(536);
+=======
+var deep_1 = __webpack_require__(552);
+var entry_1 = __webpack_require__(555);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 var Reader = /** @class */ (function () {
     function Reader(options) {
         this.options = options;
@@ -54116,15 +62031,25 @@ exports.default = Reader;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 533 */
+=======
+/* 552 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+<<<<<<< HEAD
 var arrayUtils = __webpack_require__(534);
 var pathUtils = __webpack_require__(535);
 var patternUtils = __webpack_require__(382);
+=======
+var arrayUtils = __webpack_require__(553);
+var pathUtils = __webpack_require__(554);
+var patternUtils = __webpack_require__(401);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 var DeepFilter = /** @class */ (function () {
     function DeepFilter(options, micromatchOptions) {
         this.options = options;
@@ -54199,7 +62124,11 @@ exports.default = DeepFilter;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 534 */
+=======
+/* 553 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54222,7 +62151,11 @@ exports.max = max;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 535 */
+=======
+/* 554 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54240,13 +62173,21 @@ exports.isDotDirectory = isDotDirectory;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 536 */
+=======
+/* 555 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+<<<<<<< HEAD
 var patternUtils = __webpack_require__(382);
+=======
+var patternUtils = __webpack_require__(401);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 var DeepFilter = /** @class */ (function () {
     function DeepFilter(options, micromatchOptions) {
         this.options = options;
@@ -54318,7 +62259,11 @@ exports.default = DeepFilter;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 537 */
+=======
+/* 556 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54335,8 +62280,13 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var stream = __webpack_require__(28);
+<<<<<<< HEAD
 var readdir = __webpack_require__(519);
 var reader_1 = __webpack_require__(532);
+=======
+var readdir = __webpack_require__(538);
+var reader_1 = __webpack_require__(551);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 var TransformStream = /** @class */ (function (_super) {
     __extends(TransformStream, _super);
     function TransformStream(reader) {
@@ -54379,7 +62329,11 @@ exports.default = ReaderStream;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 538 */
+=======
+/* 557 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54395,8 +62349,13 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+<<<<<<< HEAD
 var readdir = __webpack_require__(519);
 var reader_1 = __webpack_require__(532);
+=======
+var readdir = __webpack_require__(538);
+var reader_1 = __webpack_require__(551);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 var ReaderSync = /** @class */ (function (_super) {
     __extends(ReaderSync, _super);
     function ReaderSync() {
@@ -54431,14 +62390,23 @@ exports.default = ReaderSync;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 539 */
+=======
+/* 558 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 const path = __webpack_require__(16);
+<<<<<<< HEAD
 const arrify = __webpack_require__(374);
 const pathType = __webpack_require__(63);
+=======
+const arrify = __webpack_require__(393);
+const pathType = __webpack_require__(559);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 const getExtensions = extensions => extensions.length > 1 ? `{${extensions.join(',')}}` : extensions[0];
 const getPath = filepath => filepath[0] === '!' ? filepath.slice(1) : filepath;
@@ -54486,17 +62454,168 @@ module.exports.sync = (input, opts) => {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 540 */
+=======
+/* 559 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+const fs = __webpack_require__(23);
+const pify = __webpack_require__(560);
+
+function type(fn, fn2, fp) {
+	if (typeof fp !== 'string') {
+		return Promise.reject(new TypeError(`Expected a string, got ${typeof fp}`));
+	}
+
+	return pify(fs[fn])(fp)
+		.then(stats => stats[fn2]())
+		.catch(err => {
+			if (err.code === 'ENOENT') {
+				return false;
+			}
+
+			throw err;
+		});
+}
+
+function typeSync(fn, fn2, fp) {
+	if (typeof fp !== 'string') {
+		throw new TypeError(`Expected a string, got ${typeof fp}`);
+	}
+
+	try {
+		return fs[fn](fp)[fn2]();
+	} catch (err) {
+		if (err.code === 'ENOENT') {
+			return false;
+		}
+
+		throw err;
+	}
+}
+
+exports.file = type.bind(null, 'stat', 'isFile');
+exports.dir = type.bind(null, 'stat', 'isDirectory');
+exports.symlink = type.bind(null, 'lstat', 'isSymbolicLink');
+exports.fileSync = typeSync.bind(null, 'statSync', 'isFile');
+exports.dirSync = typeSync.bind(null, 'statSync', 'isDirectory');
+exports.symlinkSync = typeSync.bind(null, 'lstatSync', 'isSymbolicLink');
+
+
+/***/ }),
+/* 560 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+const processFn = (fn, opts) => function () {
+	const P = opts.promiseModule;
+	const args = new Array(arguments.length);
+
+	for (let i = 0; i < arguments.length; i++) {
+		args[i] = arguments[i];
+	}
+
+	return new P((resolve, reject) => {
+		if (opts.errorFirst) {
+			args.push(function (err, result) {
+				if (opts.multiArgs) {
+					const results = new Array(arguments.length - 1);
+
+					for (let i = 1; i < arguments.length; i++) {
+						results[i - 1] = arguments[i];
+					}
+
+					if (err) {
+						results.unshift(err);
+						reject(results);
+					} else {
+						resolve(results);
+					}
+				} else if (err) {
+					reject(err);
+				} else {
+					resolve(result);
+				}
+			});
+		} else {
+			args.push(function (result) {
+				if (opts.multiArgs) {
+					const results = new Array(arguments.length - 1);
+
+					for (let i = 0; i < arguments.length; i++) {
+						results[i] = arguments[i];
+					}
+
+					resolve(results);
+				} else {
+					resolve(result);
+				}
+			});
+		}
+
+		fn.apply(this, args);
+	});
+};
+
+module.exports = (obj, opts) => {
+	opts = Object.assign({
+		exclude: [/.+(Sync|Stream)$/],
+		errorFirst: true,
+		promiseModule: Promise
+	}, opts);
+
+	const filter = key => {
+		const match = pattern => typeof pattern === 'string' ? key === pattern : pattern.test(key);
+		return opts.include ? opts.include.some(match) : !opts.exclude.some(match);
+	};
+
+	let ret;
+	if (typeof obj === 'function') {
+		ret = function () {
+			if (opts.excludeMain) {
+				return obj.apply(this, arguments);
+			}
+
+			return processFn(obj, opts).apply(this, arguments);
+		};
+	} else {
+		ret = Object.create(Object.getPrototypeOf(obj));
+	}
+
+	for (const key in obj) { // eslint-disable-line guard-for-in
+		const x = obj[key];
+		ret[key] = typeof x === 'function' && filter(key) ? processFn(x, opts) : x;
+	}
+
+	return ret;
+};
+
+
+/***/ }),
+/* 561 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 const fs = __webpack_require__(23);
 const path = __webpack_require__(16);
+<<<<<<< HEAD
 const fastGlob = __webpack_require__(376);
 const gitIgnore = __webpack_require__(541);
 const pify = __webpack_require__(542);
 const slash = __webpack_require__(543);
+=======
+const fastGlob = __webpack_require__(395);
+const gitIgnore = __webpack_require__(562);
+const pify = __webpack_require__(563);
+const slash = __webpack_require__(564);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 const DEFAULT_IGNORE = [
 	'**/node_modules/**',
@@ -54588,7 +62707,11 @@ module.exports.sync = o => {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 541 */
+=======
+/* 562 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -55020,7 +63143,11 @@ typeof process !== 'undefined' && (process.env && process.env.IGNORE_TEST_WIN32 
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 542 */
+=======
+/* 563 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -55111,7 +63238,11 @@ module.exports = (obj, opts) => {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 543 */
+=======
+/* 564 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -55129,17 +63260,28 @@ module.exports = function (str) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 544 */
+=======
+/* 565 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 const path = __webpack_require__(16);
 const fsConstants = __webpack_require__(23).constants;
+<<<<<<< HEAD
 const {Buffer} = __webpack_require__(545);
 const CpFileError = __webpack_require__(547);
 const fs = __webpack_require__(549);
 const ProgressEmitter = __webpack_require__(551);
+=======
+const {Buffer} = __webpack_require__(566);
+const CpFileError = __webpack_require__(568);
+const fs = __webpack_require__(570);
+const ProgressEmitter = __webpack_require__(574);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 module.exports = (src, dest, opts) => {
 	if (!src || !dest) {
@@ -55289,11 +63431,19 @@ module.exports.sync = (src, dest, opts) => {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 545 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* eslint-disable node/no-deprecated-api */
 var buffer = __webpack_require__(546)
+=======
+/* 566 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* eslint-disable node/no-deprecated-api */
+var buffer = __webpack_require__(567)
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 var Buffer = buffer.Buffer
 
 // alternative to using Object.keys for old browsers
@@ -55357,18 +63507,30 @@ SafeBuffer.allocUnsafeSlow = function (size) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 546 */
+=======
+/* 567 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports) {
 
 module.exports = require("buffer");
 
 /***/ }),
+<<<<<<< HEAD
 /* 547 */
+=======
+/* 568 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+<<<<<<< HEAD
 const NestedError = __webpack_require__(548);
+=======
+const NestedError = __webpack_require__(569);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 class CpFileError extends NestedError {
 	constructor(message, nested) {
@@ -55382,7 +63544,11 @@ module.exports = CpFileError;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 548 */
+=======
+/* 569 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 var inherits = __webpack_require__(43);
@@ -55436,15 +63602,25 @@ module.exports = NestedError;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 549 */
+=======
+/* 570 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 const fs = __webpack_require__(22);
+<<<<<<< HEAD
 const makeDir = __webpack_require__(91);
 const pify = __webpack_require__(550);
 const CpFileError = __webpack_require__(547);
+=======
+const makeDir = __webpack_require__(571);
+const pify = __webpack_require__(573);
+const CpFileError = __webpack_require__(568);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 const fsP = pify(fs);
 
@@ -55589,7 +63765,102 @@ if (fs.copyFileSync) {
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 550 */
+=======
+/* 571 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+const fs = __webpack_require__(23);
+const path = __webpack_require__(16);
+const pify = __webpack_require__(572);
+
+const defaults = {
+	mode: 0o777 & (~process.umask()),
+	fs
+};
+
+// https://github.com/nodejs/node/issues/8987
+// https://github.com/libuv/libuv/pull/1088
+const checkPath = pth => {
+	if (process.platform === 'win32') {
+		const pathHasInvalidWinCharacters = /[<>:"|?*]/.test(pth.replace(path.parse(pth).root, ''));
+
+		if (pathHasInvalidWinCharacters) {
+			const err = new Error(`Path contains invalid characters: ${pth}`);
+			err.code = 'EINVAL';
+			throw err;
+		}
+	}
+};
+
+module.exports = (input, opts) => Promise.resolve().then(() => {
+	checkPath(input);
+	opts = Object.assign({}, defaults, opts);
+
+	const mkdir = pify(opts.fs.mkdir);
+	const stat = pify(opts.fs.stat);
+
+	const make = pth => {
+		return mkdir(pth, opts.mode)
+			.then(() => pth)
+			.catch(err => {
+				if (err.code === 'ENOENT') {
+					if (err.message.includes('null bytes') || path.dirname(pth) === pth) {
+						throw err;
+					}
+
+					return make(path.dirname(pth)).then(() => make(pth));
+				}
+
+				return stat(pth)
+					.then(stats => stats.isDirectory() ? pth : Promise.reject())
+					.catch(() => {
+						throw err;
+					});
+			});
+	};
+
+	return make(path.resolve(input));
+});
+
+module.exports.sync = (input, opts) => {
+	checkPath(input);
+	opts = Object.assign({}, defaults, opts);
+
+	const make = pth => {
+		try {
+			opts.fs.mkdirSync(pth, opts.mode);
+		} catch (err) {
+			if (err.code === 'ENOENT') {
+				if (err.message.includes('null bytes') || path.dirname(pth) === pth) {
+					throw err;
+				}
+
+				make(path.dirname(pth));
+				return make(pth);
+			}
+
+			try {
+				if (!opts.fs.statSync(pth).isDirectory()) {
+					throw new Error('The path is not a directory');
+				}
+			} catch (_) {
+				throw err;
+			}
+		}
+
+		return pth;
+	};
+
+	return make(path.resolve(input));
+};
+
+
+/***/ }),
+/* 572 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -55680,7 +63951,103 @@ module.exports = (obj, opts) => {
 
 
 /***/ }),
+/* 573 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+const processFn = (fn, opts) => function () {
+	const P = opts.promiseModule;
+	const args = new Array(arguments.length);
+
+	for (let i = 0; i < arguments.length; i++) {
+		args[i] = arguments[i];
+	}
+
+	return new P((resolve, reject) => {
+		if (opts.errorFirst) {
+			args.push(function (err, result) {
+				if (opts.multiArgs) {
+					const results = new Array(arguments.length - 1);
+
+					for (let i = 1; i < arguments.length; i++) {
+						results[i - 1] = arguments[i];
+					}
+
+					if (err) {
+						results.unshift(err);
+						reject(results);
+					} else {
+						resolve(results);
+					}
+				} else if (err) {
+					reject(err);
+				} else {
+					resolve(result);
+				}
+			});
+		} else {
+			args.push(function (result) {
+				if (opts.multiArgs) {
+					const results = new Array(arguments.length - 1);
+
+					for (let i = 0; i < arguments.length; i++) {
+						results[i] = arguments[i];
+					}
+
+					resolve(results);
+				} else {
+					resolve(result);
+				}
+			});
+		}
+
+		fn.apply(this, args);
+	});
+};
+
+module.exports = (obj, opts) => {
+	opts = Object.assign({
+		exclude: [/.+(Sync|Stream)$/],
+		errorFirst: true,
+		promiseModule: Promise
+	}, opts);
+
+	const filter = key => {
+		const match = pattern => typeof pattern === 'string' ? key === pattern : pattern.test(key);
+		return opts.include ? opts.include.some(match) : !opts.exclude.some(match);
+	};
+
+	let ret;
+	if (typeof obj === 'function') {
+		ret = function () {
+			if (opts.excludeMain) {
+				return obj.apply(this, arguments);
+			}
+
+			return processFn(obj, opts).apply(this, arguments);
+		};
+	} else {
+		ret = Object.create(Object.getPrototypeOf(obj));
+	}
+
+	for (const key in obj) { // eslint-disable-line guard-for-in
+		const x = obj[key];
+		ret[key] = typeof x === 'function' && filter(key) ? processFn(x, opts) : x;
+	}
+
+	return ret;
+};
+
+
+/***/ }),
+<<<<<<< HEAD
 /* 551 */
+=======
+/* 574 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -55721,12 +64088,20 @@ module.exports = ProgressEmitter;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 552 */
+=======
+/* 575 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+<<<<<<< HEAD
 const NestedError = __webpack_require__(548);
+=======
+const NestedError = __webpack_require__(569);
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 
 class CpyError extends NestedError {
 	constructor(message, nested) {
@@ -55740,7 +64115,11 @@ module.exports = CpyError;
 
 
 /***/ }),
+<<<<<<< HEAD
 /* 553 */
+=======
+/* 576 */
+>>>>>>> 0fb213714c... Update read-pkg related packages (major) (#43118)
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
