@@ -12,10 +12,10 @@ import { isReservedSpace } from '../../../common/is_reserved_space';
 import { Space } from '../../../common/model/space';
 import { SpacesAuditLogger } from '../audit_logger';
 import { SpacesConfigType } from '../../new_platform/config';
+import { GetSpacePurpose } from '../../../common/model/types';
 
 type SpacesClientRequestFacade = Legacy.Request | KibanaRequest;
 
-export type GetSpacePurpose = 'any' | 'copySavedObjectsIntoSpace';
 const SUPPORTED_GET_SPACE_PURPOSES: GetSpacePurpose[] = ['any', 'copySavedObjectsIntoSpace'];
 
 const PURPOSE_PRIVILEGE_MAP: Record<
