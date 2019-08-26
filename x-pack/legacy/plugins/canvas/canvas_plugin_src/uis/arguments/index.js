@@ -6,6 +6,7 @@
 
 import { axisConfig } from './axis_config';
 import { datacolumn } from './datacolumn';
+import { dateFormat } from './date_format';
 import { filterGroup } from './filter_group';
 import { imageUpload } from './image_upload';
 import { number } from './number';
@@ -22,6 +23,7 @@ import { toggle } from './toggle';
 export const args = [
   axisConfig,
   datacolumn,
+  dateFormat,
   filterGroup,
   imageUpload,
   number,

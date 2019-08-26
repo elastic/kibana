@@ -66,12 +66,13 @@ import { BasePath } from './base_path_service';
  * And `response` object instructing HTTP server to create HTTP response with information sent back to the client as the response body, headers, and HTTP status.
  * Unlike, `hapi` route handler in the Legacy platform, any exception raised during the handler call will generate `500 Server error` response and log error details for further investigation. See below for returning custom error responses.
  * ```ts
- * const handler = async (request: KibanaRequest, response: ResponseFactory) => {
+ * const handler = async (context: RequestHandlerContext, request: KibanaRequest, response: ResponseFactory) => {
  *   const data = await findObject(request.params.id);
  *   // creates a command to respond with 'not found' error
  *   if (!data) return response.notFound();
  *   // creates a command to send found data to the client and set response headers
- *   return response.ok(data, {
+ *   return response.ok({
+ *     body: data,
  *     headers: {
  *       'content-type': 'application/json'
  *     }
@@ -97,7 +98,8 @@ import { BasePath } from './base_path_service';
  * async (context, request, response) => {
  *   const data = await findObject(request.params.id);
  *   if (!data) return response.notFound();
- *   return response.ok(data, {
+ *   return response.ok({
+ *     body: data,
  *     headers: {
  *       'content-type': 'application/json'
  *     }
@@ -289,7 +291,7 @@ export class HttpServer {
       if (shouldRedirect) {
         return toolkit.rewriteUrl(newURL);
       }
-      return response.notFound(new Error('not found'));
+      return response.notFound();
     });
   }
 
