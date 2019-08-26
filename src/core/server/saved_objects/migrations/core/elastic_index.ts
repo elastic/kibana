@@ -111,11 +111,11 @@ export function reader(
  */
 export async function write(callCluster: CallCluster, index: string, docs: RawDoc[]) {
   const result = await callCluster('bulk', {
+    index: index,
     body: docs.reduce((acc: object[], doc: RawDoc) => {
       acc.push({
         index: {
-          _id: doc._id,
-          _index: index,
+          _id: doc._id
         },
       });
 
