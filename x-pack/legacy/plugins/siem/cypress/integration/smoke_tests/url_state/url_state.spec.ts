@@ -16,10 +16,17 @@ import {
   DATE_PICKER_START_DATE_POPOVER_BUTTON,
   DATE_PICKER_START_DATE_POPOVER_BUTTON_TIMELINE,
   KQL_INPUT,
+  TIMELINE_TITLE,
 } from '../../lib/url_state';
 import { loginAndWaitForPage } from '../../lib/util/helpers';
-import { toggleTimelineVisibility } from '../../lib/timeline/helpers';
+import {
+  assertAtLeastOneEventMatchesSearch,
+  executeKQL,
+  hostExistsQuery,
+  toggleTimelineVisibility,
+} from '../../lib/timeline/helpers';
 import { NAVIGATION_NETWORK } from '../../lib/navigation/selectors';
+import { HOSTS_PAGE } from '../../lib/urls';
 
 describe('url state', () => {
   afterEach(() => {
@@ -181,5 +188,25 @@ describe('url state', () => {
     loginAndWaitForPage(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
     cy.get(NAVIGATION_NETWORK).click({ force: true });
     cy.get(KQL_INPUT, { timeout: 5000 }).should('have.attr', 'value', '');
+  });
+
+  it('sets and reads the url state for timeline by id', () => {
+    loginAndWaitForPage(HOSTS_PAGE);
+    toggleTimelineVisibility();
+    executeKQL(hostExistsQuery);
+    assertAtLeastOneEventMatchesSearch();
+    const bestTimelineName = 'The Best Timeline';
+    cy.get(TIMELINE_TITLE).type(bestTimelineName);
+    cy.hash().then(hash => {
+      const matched = hash.match(/(?<=timelineId=\').+?(?=\')/g);
+      const newTimelineId = matched && matched.length > 0 ? matched[0] : 'null';
+      expect(matched).to.have.lengthOf(1);
+      cy.log('hash', hash);
+      cy.log('matched', matched);
+      cy.log('newTimelineId', newTimelineId);
+      cy.visit(
+        `/app/siem#/timelines?timelineId='${newTimelineId}'&timerange=(global:(linkTo:!(),timerange:(from:1565274377369,kind:absolute,to:1565360777369)),timeline:(linkTo:!(),timerange:(from:1565274377369,kind:absolute,to:1565360777369)))`
+      ).then(() => cy.get(TIMELINE_TITLE).should('have.attr', 'value', bestTimelineName));
+    });
   });
 });

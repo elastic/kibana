@@ -47,3 +47,4 @@ export const DATE_PICKER_APPLY_BUTTON_TIMELINE =
   '[data-test-subj="timeline-properties"] button[data-test-subj="superDatePickerApplyTimeButton"]';
 export const DATE_PICKER_ABSOLUTE_INPUT = '[data-test-subj="superDatePickerAbsoluteDateInput"]';
 export const KQL_INPUT = '[data-test-subj="kqlInput"]';
+export const TIMELINE_TITLE = '[data-test-subj="timeline-title"]';
