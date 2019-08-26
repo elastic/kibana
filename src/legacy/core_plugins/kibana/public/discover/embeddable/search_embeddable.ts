@@ -312,7 +312,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       !onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
       !_.isEqual(this.prevQuery, this.input.query) ||
       !_.isEqual(this.prevTimeRange, this.input.timeRange) ||
-      !_.isEqual(searchScope.sort, this.input.sort);
+      !_.isEqual(searchScope.sort, this.input.sort || this.savedSearch.sort);
 
     // If there is column or sort data on the panel, that means the original columns or sort settings have
     // been overridden in a dashboard.
