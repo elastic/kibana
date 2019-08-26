@@ -8,10 +8,7 @@ import path from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { services } from './services';
-import {
-  getExternalServiceSimulatorPath,
-  ExternalServiceSimulator,
-} from './fixtures/plugins/actions';
+import { getAllExternalServiceSimulatorPaths } from './fixtures/plugins/actions';
 
 interface CreateTestConfigOptions {
   license: string;
@@ -59,9 +56,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'actions')}`,
-          `--server.xsrf.whitelist=${JSON.stringify([
-            getExternalServiceSimulatorPath(ExternalServiceSimulator.SLACK),
-          ])}`,
+          `--server.xsrf.whitelist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           ...(ssl
             ? [
                 `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,

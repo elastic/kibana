@@ -18,8 +18,27 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useKibana } from '../core';
+import { useKibana } from '../context';
 import { useObservable } from '../util/use_observable';
+
+/**
+ * Returns the current UI-settings value.
+ *
+ * Usage:
+ *
+ * ```js
+ * const darkMode = useUiSetting('theme:darkMode');
+ * ```
+ */
+export const useUiSetting = <T>(key: string, defaultValue?: T): T => {
+  const { services } = useKibana();
+
+  if (typeof services.uiSettings !== 'object') {
+    throw new TypeError('uiSettings service not available in kibana-react context.');
+  }
+
+  return services.uiSettings.get(key, defaultValue);
+};
 
 type Setter<T> = (newValue: T) => Promise<boolean>;
 
@@ -33,18 +52,22 @@ type Setter<T> = (newValue: T) => Promise<boolean>;
  * Usage:
  *
  * ```js
- * const [darkMode, setDarkMode] = useUiSetting('theme:darkMode');
+ * const [darkMode, setDarkMode] = useUiSetting$('theme:darkMode');
  * ```
- *
- * @todo As of this writing `uiSettings` service exists only on *setup* `core`
- *       object, but I assume it will be available on *start* `core` object, too,
- *       thus postfix assertion is used `core.uiSetting!`.
  */
-export const useUiSetting = <T>(key: string, defaultValue: T): [T, Setter<T>] => {
-  const { core } = useKibana();
-  const observable$ = useMemo(() => core.uiSettings!.get$(key, defaultValue), [key, defaultValue]);
-  const value = useObservable<T>(observable$, core.uiSettings!.get(key, defaultValue));
-  const set = useCallback((newValue: T) => core.uiSettings!.set(key, newValue), [key]);
+export const useUiSetting$ = <T>(key: string, defaultValue?: T): [T, Setter<T>] => {
+  const { services } = useKibana();
+
+  if (typeof services.uiSettings !== 'object') {
+    throw new TypeError('uiSettings service not available in kibana-react context.');
+  }
+
+  const observable$ = useMemo(() => services.uiSettings!.get$(key, defaultValue), [
+    key,
+    defaultValue,
+  ]);
+  const value = useObservable<T>(observable$, services.uiSettings!.get(key, defaultValue));
+  const set = useCallback((newValue: T) => services.uiSettings!.set(key, newValue), [key]);
 
   return [value, set];
 };
