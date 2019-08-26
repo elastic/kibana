@@ -221,22 +221,22 @@ export const metrics = {
   }),
   apm_acm_responses_valid_ok: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.acm.response.valid.ok',
-    title: i18n.translate('xpack.monitoring.metrics.apm.acm.response.okTitle', {
+    title: i18n.translate('xpack.monitoring.metrics.apm.acm.response.validOk.okTitle', {
       defaultMessage: 'Ok'
     }),
-    label: i18n.translate('xpack.monitoring.metrics.apm.acm.response.okLabel', {
+    label: i18n.translate('xpack.monitoring.metrics.apm.acm.response.validOk.okLabel', {
       defaultMessage: 'Ok'
     }),
-    description: i18n.translate('xpack.monitoring.metrics.apm.acm.response.okDescription', {
+    description: i18n.translate('xpack.monitoring.metrics.apm.acm.response.validOk.okDescription', {
       defaultMessage: '200 OK response count'
     })
   }),
   apm_acm_responses_valid_notmodified: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.acm.response.valid.notmodified',
-    title: i18n.translate('xpack.monitoring.metrics.apm.acm.response.okTitle', {
+    title: i18n.translate('xpack.monitoring.metrics.apm.acm.response.validNotModified.okTitle', {
       defaultMessage: 'Not modified'
     }),
-    label: i18n.translate('xpack.monitoring.metrics.apm.acm.response.okLabel', {
+    label: i18n.translate('xpack.monitoring.metrics.apm.acm.response.validNotModified.okLabel', {
       defaultMessage: 'Not modified'
     }),
     description: i18n.translate('xpack.monitoring.metrics.apm.acm.response.okDescription', {
