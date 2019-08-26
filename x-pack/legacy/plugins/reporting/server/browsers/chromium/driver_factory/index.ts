@@ -176,9 +176,7 @@ export class HeadlessChromiumDriverFactory {
       )(stderr$);
 
       const driver$ = Rx.of(
-        new HeadlessChromiumDriver(page, {
-          logger: this.logger,
-        })
+        new HeadlessChromiumDriver(page)
       );
 
       const processError$ = Rx.fromEvent(page, 'error').pipe(
