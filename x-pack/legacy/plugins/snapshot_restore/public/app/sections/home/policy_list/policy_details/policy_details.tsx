@@ -243,8 +243,9 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
                                     icon: 'play',
                                     onClick: () => {
                                       executePolicyPrompt(policyName, () =>
-                                        // Wait a little bit for policy to execute before
-                                        // reloading policy table and policy details
+                                        // Wait a little bit for policy to execute before reloading policy table
+                                        // and policy details so that History tab information is updated with
+                                        // results of the execution
                                         setTimeout(() => {
                                           onPolicyExecuted();
                                           reload();
