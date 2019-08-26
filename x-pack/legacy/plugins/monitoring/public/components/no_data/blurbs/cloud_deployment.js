@@ -29,7 +29,7 @@ export const CloudDeployment = () => {
             />
             <EuiLink href="https://cloud.elastic.co/deployments" target="_blank">
               cloud dashboard.
-            </EuiLink>
+            </EuiLink>{' '}
             <FormattedMessage
               id="xpack.monitoring.noData.blurbs.cloudDeploymentDescription"
               defaultMessage="For more information on Monitoring in Elastic Cloud, please see "
