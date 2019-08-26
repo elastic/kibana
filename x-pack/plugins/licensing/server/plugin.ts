@@ -14,7 +14,7 @@ import {
   Plugin as CorePlugin,
   PluginInitializerContext,
 } from 'src/core/server';
-import { Poller } from 'src/core/utils/poller';
+import { Poller } from '../../../../src/core/utils/poller';
 import { LicensingConfigType, LicensingPluginSetup, ILicense } from './types';
 import { LicensingConfig } from './licensing_config';
 import { License } from './license';
