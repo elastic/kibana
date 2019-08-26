@@ -238,6 +238,7 @@ export const PaginatedTable = memo<SiemTables>(
           <>
             <BasicTable
               columns={columns}
+              compressed
               items={pageOfItems}
               onChange={onChange}
               sorting={
@@ -300,9 +301,7 @@ const Panel = styled(EuiPanel)<{ loading: { loading?: boolean } }>`
 
 Panel.displayName = 'Panel';
 
-const BasicTable = styled(EuiBasicTable).attrs({
-  compressed: true,
-})`
+const BasicTable = styled(EuiBasicTable)`
   tbody {
     th,
     td {

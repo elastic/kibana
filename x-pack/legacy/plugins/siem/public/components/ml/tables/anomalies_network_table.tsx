@@ -72,6 +72,7 @@ export const AnomaliesNetworkTable = React.memo<AnomaliesNetworkTableProps>(
 
           <BasicTable
             columns={columns}
+            compressed
             items={networks}
             pagination={pagination}
             sorting={sorting}

@@ -77,11 +77,12 @@ export const getNetworkTopNFlowColumns = (
                 )
               }
             />
+
             {geo && (
-              // TODO: Remove div and replace with draggable
-              <div>
+              <>
+                {` `}
                 <CountryFlag countryCode={geo} /> {geo}
-              </div>
+              </>
             )}
           </>
         );
@@ -89,6 +90,7 @@ export const getNetworkTopNFlowColumns = (
         return getEmptyTagValue();
       }
     },
+    width: '15%',
   },
   {
     name: i18n.DOMAIN,
@@ -110,6 +112,7 @@ export const getNetworkTopNFlowColumns = (
         return getEmptyTagValue();
       }
     },
+    width: '20%',
   },
   {
     name: i18n.AUTONOMOUS_SYSTEM,
@@ -126,16 +129,16 @@ export const getNetworkTopNFlowColumns = (
                 attrName: `${flowTarget}.as.organization.name`,
                 idPrefix: `${id}-name`,
               })}
+
             {as.number && (
-              // TODO: Possible to get rid of div and make all one draggable, including "AS" string?
-              <div>
-                {`AS`}
+              <>
+                {` AS`}
                 {getRowItemDraggables({
                   rowItems: [`${as.number}`],
                   attrName: `${flowTarget}.as.number`,
                   idPrefix: `${id}-number`,
                 })}
-              </div>
+              </>
             )}
           </>
         );
@@ -143,6 +146,7 @@ export const getNetworkTopNFlowColumns = (
         return getEmptyTagValue();
       }
     },
+    width: '20%',
   },
   {
     align: 'right',
