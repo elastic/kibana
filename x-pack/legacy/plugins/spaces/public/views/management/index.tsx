@@ -11,18 +11,20 @@ import {
   PAGE_SUBTITLE_COMPONENT,
   PAGE_TITLE_COMPONENT,
   registerSettingsComponent,
-  // @ts-ignore
 } from 'ui/management';
+import { SavedObjectsManagementActionRegistry } from 'ui/management/saved_objects_management';
 // @ts-ignore
 import routes from 'ui/routes';
+import { SpacesManager } from '../../lib';
 import { AdvancedSettingsSubtitle } from './components/advanced_settings_subtitle';
 import { AdvancedSettingsTitle } from './components/advanced_settings_title';
+import { CopyToSpaceSavedObjectsManagementAction } from '../../lib/copy_saved_objects_to_space';
 
 const MANAGE_SPACES_KEY = 'spaces';
 
 routes.defaults(/\/management/, {
   resolve: {
-    spacesManagementSection(activeSpace: any) {
+    spacesManagementSection(activeSpace: any, spaceSelectorURL: string) {
       function getKibanaSection() {
         return management.getSection('kibana');
       }
@@ -45,6 +47,18 @@ routes.defaults(/\/management/, {
           });
         }
 
+        // Customize Saved Objects Management
+        const action = new CopyToSpaceSavedObjectsManagementAction(
+          new SpacesManager(spaceSelectorURL),
+          activeSpace.space
+        );
+        // This route resolve function executes any time the management screen is loaded, and we want to ensure
+        // that this action is only registered once.
+        if (!SavedObjectsManagementActionRegistry.has(action.id)) {
+          SavedObjectsManagementActionRegistry.register(action);
+        }
+
+        // Customize Advanced Settings
         const PageTitle = () => <AdvancedSettingsTitle space={activeSpace.space} />;
         registerSettingsComponent(PAGE_TITLE_COMPONENT, PageTitle, true);
 

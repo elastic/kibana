@@ -26,7 +26,6 @@ export const Influencers: FC = () => {
   const jobCreator = jc as MultiMetricJobCreator | PopulationJobCreator;
   const { fields } = newJobCapsService;
   const [influencers, setInfluencers] = useState([...jobCreator.influencers]);
-  const [splitField, setSplitField] = useState(jobCreator.splitField);
 
   useEffect(() => {
     jobCreator.removeAllInfluencers();
@@ -35,14 +34,6 @@ export const Influencers: FC = () => {
   }, [influencers.join()]);
 
   useEffect(() => {
-    // if the split field has changed auto add it to the influencers
-    if (splitField !== null && influencers.includes(splitField.name) === false) {
-      setInfluencers([...influencers, splitField.name]);
-    }
-  }, [splitField]);
-
-  useEffect(() => {
-    setSplitField(jobCreator.splitField);
     setInfluencers([...jobCreator.influencers]);
   }, [jobCreatorUpdated]);
 

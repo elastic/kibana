@@ -52,6 +52,29 @@ describe('GET spaces', () => {
     expect(resultSpaces.map(s => s.id)).toEqual(spaces.map(s => s.id));
   });
 
+  test(`'GET spaces' returns all available spaces with the 'any' purpose`, async () => {
+    const { response } = await request('GET', '/api/spaces/space?purpose=any');
+
+    const { statusCode, payload } = response;
+
+    expect(statusCode).toEqual(200);
+    const resultSpaces: Space[] = JSON.parse(payload);
+    expect(resultSpaces.map(s => s.id)).toEqual(spaces.map(s => s.id));
+  });
+
+  test(`'GET spaces' returns all available spaces with the 'copySavedObjectsIntoSpace' purpose`, async () => {
+    const { response } = await request(
+      'GET',
+      '/api/spaces/space?purpose=copySavedObjectsIntoSpace'
+    );
+
+    const { statusCode, payload } = response;
+
+    expect(statusCode).toEqual(200);
+    const resultSpaces: Space[] = JSON.parse(payload);
+    expect(resultSpaces.map(s => s.id)).toEqual(spaces.map(s => s.id));
+  });
+
   test(`returns result of routePreCheckLicense`, async () => {
     const { response } = await request('GET', '/api/spaces/space', {
       preCheckLicenseImpl: () => Boom.forbidden('test forbidden message'),

@@ -17,6 +17,22 @@
  * under the License.
  */
 
+import { TmsLayer } from 'ui/vis/map/service_settings';
+
+export interface WMSOptions {
+  selectedTmsLayer?: TmsLayer;
+  enabled: boolean;
+  url?: string;
+  options: {
+    version?: string;
+    layers?: string;
+    format: string;
+    transparent: boolean;
+    attribution?: string;
+    styles?: string;
+  };
+}
+
 export interface TileMapVisParams {
   colorSchema: string;
   mapType: 'Scaled Circle Markers' | 'Shaded Circle Markers' | 'Shaded geohash grid' | 'Heatmap';
@@ -26,19 +42,5 @@ export interface TileMapVisParams {
   legendPosition: 'bottomright' | 'bottomleft' | 'topright' | 'topleft';
   mapZoom: number;
   mapCenter: [number, number];
-  wms: {
-    selectedTmsLayer?: {
-      id: string;
-    };
-    enabled: boolean;
-    url?: string;
-    options: {
-      version?: string;
-      layers?: string;
-      format: string;
-      transparent: boolean;
-      attribution?: string;
-      styles?: string;
-    };
-  };
+  wms: WMSOptions;
 }
