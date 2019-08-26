@@ -135,6 +135,7 @@
         groupName: 'graphql related packages',
         packagePatterns: [
           '(\\b|_)graphql(\\b|_)',
+          '(\\b|_)apollo(\\b|_)',
         ],
       },
       {
