@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }) {
       const interval = '1000ms';
 
       await PageObjects.rollup.createNewRollUpJob(jobName, indexPattern, indexName,
-        interval, ' ', true, { time: '*/30 * * * * ?', cron: true });
+        interval, ' ', true, { time: '9,19,29,39,49,59 * * * * ?', cron: true });
 
       await PageObjects.common.navigateToApp('indexManagement');
 
