@@ -84,17 +84,6 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps> {
     return moment(val).format(xAxisFormat);
   };
 
-  public renderRectAnnotationTooltip = (details?: string) => (
-    <div style={{ minWidth: 200 }}>
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="alert" />
-        </EuiFlexItem>
-        <EuiFlexItem>{details}</EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
-  );
-
   public renderBarTooltip = (xInterval: number, domainStart: number, domainEnd: number) => (
     headerData: TooltipValue
   ): JSX.Element | string => {
@@ -109,13 +98,18 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps> {
     if (headerDataValue < domainStart || headerDataValue + xInterval > domainEnd) {
       return (
         <React.Fragment>
-          <EuiFlexGroup alignItems="center" className="dscHistogram__header--partial">
+          <EuiFlexGroup
+            alignItems="center"
+            className="dscHistogram__header--partial"
+            responsive={false}
+            gutterSize="xs"
+          >
             <EuiFlexItem grow={false}>
               <EuiIcon type="iInCircle" />
             </EuiFlexItem>
             <EuiFlexItem>{partialDataText}</EuiFlexItem>
           </EuiFlexGroup>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="xs" />
           <p>{formattedValue}</p>
         </React.Fragment>
       );
@@ -181,28 +175,21 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps> {
       },
     };
 
-    const partialAnnotationText = i18n.translate(
-      'kbn.discover.histogram.partialData.annotationText',
-      {
-        defaultMessage:
-          'This area may contain partial data. The selected time range does not fully cover it.',
-      }
-    );
-
-    const rectAnnotations = [
-      {
+    const rectAnnotations = [];
+    if (domainStart !== domainMin) {
+      rectAnnotations.push({
         coordinates: {
-          x0: domainStart,
+          x1: domainStart,
         },
-        details: partialAnnotationText,
-      },
-      {
+      });
+    }
+    if (domainEnd !== domainMax) {
+      rectAnnotations.push({
         coordinates: {
-          x1: domainEnd,
+          x0: domainEnd,
         },
-        details: partialAnnotationText,
-      },
-    ];
+      });
+    }
 
     const rectAnnotationStyle = {
       stroke: 'rgba(0, 0, 0, 0)',
@@ -228,6 +215,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps> {
         <Axis
           id={getAxisId('discover-histogram-left-axis')}
           position={Position.Left}
+          ticks={5}
           title={chartData.yAxisLabel}
         />
         <Axis
@@ -235,6 +223,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps> {
           position={Position.Bottom}
           title={chartData.xAxisLabel}
           tickFormat={this.formatXValue}
+          ticks={10}
         />
         <LineAnnotation
           annotationId={getAnnotationId('line-annotation')}
@@ -248,7 +237,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps> {
           annotationId={getAnnotationId('rect-annotation')}
           zIndex={2}
           style={rectAnnotationStyle}
-          renderTooltip={this.renderRectAnnotationTooltip}
+          hideTooltips={true}
         />
         <HistogramBarSeries
           id={getSpecId('discover-histogram')}
