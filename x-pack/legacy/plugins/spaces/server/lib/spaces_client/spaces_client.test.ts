@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SpacesClient, GetSpacePurpose } from './spaces_client';
+import { SpacesClient } from './spaces_client';
 import { AuthorizationService } from '../../../../security/server/lib/authorization/service';
 import { actionsFactory } from '../../../../security/server/lib/authorization/actions';
 import { SpacesConfigType, config } from '../../new_platform/config';
+import { GetSpacePurpose } from '../../../common/model/types';
 
 const createMockAuditLogger = () => {
   return {

@@ -19,7 +19,18 @@ type JobStatus =
   | 'created'
   | 'started'
   | 'opening'
-  | 'opened';
+  | 'opened'
+  | 'failed';
+
+interface AllJobStatuses {
+  [key: string]: JobStatus;
+}
+
+const getInitialJobStatuses = (): AllJobStatuses => {
+  return {
+    logEntryRate: 'unknown',
+  };
+};
 
 export const useLogAnalysisJobs = ({
   indexPattern,
@@ -32,16 +43,13 @@ export const useLogAnalysisJobs = ({
   spaceId: string;
   timeField: string;
 }) => {
-  const [jobStatus, setJobStatus] = useState<{
-    logEntryRate: JobStatus;
-  }>({
-    logEntryRate: 'unknown',
-  });
+  const [jobStatus, setJobStatus] = useState<AllJobStatuses>(getInitialJobStatuses());
 
   const [setupMlModuleRequest, setupMlModule] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
       createPromise: async (start, end) => {
+        setJobStatus(getInitialJobStatuses());
         return await callSetupMlModuleAPI(
           start,
           end,
@@ -57,14 +65,18 @@ export const useLogAnalysisJobs = ({
         const hasSuccessfullyStartedDatafeeds = datafeeds.every(
           datafeed => datafeed.success && datafeed.started
         );
+        const hasAnyErrors =
+          jobs.some(job => !!job.error) || datafeeds.some(datafeed => !!datafeed.error);
 
         setJobStatus(currentJobStatus => ({
           ...currentJobStatus,
-          logEntryRate: hasSuccessfullyCreatedJobs
+          logEntryRate: hasAnyErrors
+            ? 'failed'
+            : hasSuccessfullyCreatedJobs
             ? hasSuccessfullyStartedDatafeeds
               ? 'started'
-              : 'created'
-            : 'inconsistent',
+              : 'failed'
+            : 'failed',
         }));
       },
     },
@@ -114,10 +126,10 @@ export const useLogAnalysisJobs = ({
     setupMlModuleRequest.state,
   ]);
 
-  const didSetupFail = useMemo(
-    () => !isSettingUpMlModule && setupMlModuleRequest.state !== 'uninitialized' && isSetupRequired,
-    [setupMlModuleRequest.state, jobStatus]
-  );
+  const didSetupFail = useMemo(() => {
+    const jobStates = Object.values(jobStatus);
+    return jobStates.filter(state => state === 'failed').length > 0;
+  }, [jobStatus]);
 
   return {
     jobStatus,
