@@ -104,7 +104,6 @@ export class ChromeService {
     const appTitle$ = new BehaviorSubject<string>('Kibana');
     const brand$ = new BehaviorSubject<ChromeBrand>({});
     const isVisible$ = new BehaviorSubject(true);
-    const isLocked$ = new BehaviorSubject(false);
     const isCollapsed$ = new BehaviorSubject(!!localStorage.getItem(IS_COLLAPSED_KEY));
     const applicationClasses$ = new BehaviorSubject<Set<string>>(new Set());
     const helpExtension$ = new BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
@@ -123,14 +122,6 @@ export class ChromeService {
       );
     }
 
-    const BASE_SELECTOR = 'header-global-wrapper';
-    isLocked$.subscribe(isLocked => {
-      const el = document.querySelector(`.${BASE_SELECTOR}`);
-      if (el) {
-        el.classList.toggle(`${BASE_SELECTOR}--navIsLocked`, isLocked);
-      }
-    });
-
     return {
       navControls,
       navLinks,
@@ -140,28 +131,25 @@ export class ChromeService {
         <React.Fragment>
           <LoadingIndicator loadingCount$={http.getLoadingCount$()} />
 
-          <div className={`${BASE_SELECTOR} hide-for-sharing`} data-test-subj="headerGlobalNav">
-            <Header
-              appTitle$={appTitle$.pipe(takeUntil(this.stop$))}
-              badge$={badge$.pipe(takeUntil(this.stop$))}
-              basePath={http.basePath}
-              breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
-              kibanaDocLink={docLinks.links.kibana}
-              forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
-              helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
-              homeHref={http.basePath.prepend('/app/kibana#/home')}
-              isVisible$={isVisible$.pipe(
-                map(visibility => (FORCE_HIDDEN ? false : visibility)),
-                takeUntil(this.stop$)
-              )}
-              kibanaVersion={injectedMetadata.getKibanaVersion()}
-              navLinks$={navLinks.getNavLinks$()}
-              recentlyAccessed$={recentlyAccessed.get$()}
-              navControlsLeft$={navControls.getLeft$()}
-              navControlsRight$={navControls.getRight$()}
-              onIsLockedUpdate={(isLocked: boolean) => isLocked$.next(isLocked)}
-            />
-          </div>
+          <Header
+            appTitle$={appTitle$.pipe(takeUntil(this.stop$))}
+            badge$={badge$.pipe(takeUntil(this.stop$))}
+            basePath={http.basePath}
+            breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
+            kibanaDocLink={docLinks.links.kibana}
+            forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
+            helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
+            homeHref={http.basePath.prepend('/app/kibana#/home')}
+            isVisible$={isVisible$.pipe(
+              map(visibility => (FORCE_HIDDEN ? false : visibility)),
+              takeUntil(this.stop$)
+            )}
+            kibanaVersion={injectedMetadata.getKibanaVersion()}
+            navLinks$={navLinks.getNavLinks$()}
+            recentlyAccessed$={recentlyAccessed.get$()}
+            navControlsLeft$={navControls.getLeft$()}
+            navControlsRight$={navControls.getRight$()}
+          />
         </React.Fragment>
       ),
 
