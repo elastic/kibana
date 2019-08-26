@@ -127,6 +127,10 @@ module.exports = async ({ config }) => {
     KIBANA_ROOT,
     'packages/kbn-interpreter/target/common'
   );
+  config.resolve.alias['plugins/interpreter/registries'] = path.resolve(
+    KIBANA_ROOT,
+    'packages/kbn-interpreter/target/common/registries'
+  );
 
   return config;
 };
