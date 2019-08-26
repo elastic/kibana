@@ -20,5 +20,6 @@ export default function actionsTests({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./builtin_action_types/slack'));
     loadTestFile(require.resolve('./builtin_action_types/email'));
     loadTestFile(require.resolve('./builtin_action_types/es_index'));
+    loadTestFile(require.resolve('./builtin_action_types/pagerduty'));
   });
 }

@@ -54,7 +54,7 @@ interface FindResult {
 }
 
 interface CreateOptions {
-  data: Pick<Alert, Exclude<keyof Alert, 'createdBy' | 'updatedBy' | 'apiKey'>>;
+  data: Pick<Alert, Exclude<keyof Alert, 'createdBy' | 'updatedBy' | 'apiKey' | 'apiKeyOwner'>>;
   options?: {
     migrationVersion?: Record<string, string>;
   };
@@ -107,6 +107,7 @@ export class AlertsClient {
       ...data,
       createdBy: username,
       updatedBy: username,
+      apiKeyOwner: apiKey.created && username ? username : undefined,
       apiKey: apiKey.created
         ? Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64')
         : undefined,
@@ -192,6 +193,7 @@ export class AlertsClient {
     const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.alertTypeParams);
 
     const { actions, references } = this.extractReferences(data.actions);
+    const username = await this.getUserName();
     const updatedObject = await this.savedObjectsClient.update(
       'alert',
       id,
@@ -199,10 +201,11 @@ export class AlertsClient {
         ...data,
         alertTypeParams: validatedAlertTypeParams,
         actions,
+        updatedBy: username,
+        apiKeyOwner: apiKey.created ? username : null,
         apiKey: apiKey.created
           ? Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64')
           : null,
-        updatedBy: await this.getUserName(),
       },
       {
         ...options,
@@ -221,12 +224,14 @@ export class AlertsClient {
         existingObject.attributes.alertTypeId,
         existingObject.attributes.interval
       );
+      const username = await this.getUserName();
       await this.savedObjectsClient.update(
         'alert',
         id,
         {
           enabled: true,
-          updatedBy: await this.getUserName(),
+          updatedBy: username,
+          apiKeyOwner: apiKey.created ? username : null,
           scheduledTaskId: scheduledTask.id,
           apiKey: apiKey.created
             ? Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64')
@@ -247,6 +252,7 @@ export class AlertsClient {
           enabled: false,
           scheduledTaskId: null,
           apiKey: null,
+          apiKeyOwner: null,
           updatedBy: await this.getUserName(),
         },
         { references: existingObject.references }

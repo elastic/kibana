@@ -41,7 +41,15 @@ export class CodeNodeAdapter implements ServiceHandlerAdapter {
     isResourceLocal(resource: string): Promise<boolean> {
       return Promise.resolve(false);
     },
+
+    async allocate(httpRequest: Request, resource: string): Promise<Endpoint | undefined> {
+      return Promise.resolve(new LocalEndpoint(httpRequest, resource));
+    },
   };
+
+  async start(): Promise<void> {}
+
+  async stop(): Promise<void> {}
 
   getService<def extends ServiceDefinition>(serviceDefinition: def): ServiceMethodMap<def> {
     // services on code node dispatch to local directly
