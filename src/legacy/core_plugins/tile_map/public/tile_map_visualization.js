@@ -196,7 +196,7 @@ export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
     }
 
     _getMetricAgg() {
-      return this.vis.getAggConfig().byType('metrics');
+      return this.vis.getAggConfig().byType('metrics')[0];
     }
 
     _isFilteredByCollar() {
