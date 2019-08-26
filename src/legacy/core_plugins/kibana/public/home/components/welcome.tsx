@@ -49,7 +49,7 @@ interface Props {
   fetchTelemetry: () => Promise<any[]>;
   setOptIn: (enabled: boolean) => Promise<boolean>;
   getTelemetryBannerId: () => string;
-  showTelemetryOptIn: boolean;
+  shouldShowTelemetryOptIn: boolean;
 }
 interface State {
   step: number;
@@ -93,7 +93,7 @@ export class Welcome extends React.PureComponent<Props, State> {
 
   componentDidMount() {
     trackUiMetric(METRIC_TYPE.LOADED, 'welcomeScreenMount');
-    if (this.props.showTelemetryOptIn) {
+    if (this.props.shouldShowTelemetryOptIn) {
       trackUiMetric(METRIC_TYPE.COUNT, 'welcomeScreenWithTelemetryOptIn');
     }
     document.addEventListener('keydown', this.hideOnEsc);
@@ -104,7 +104,7 @@ export class Welcome extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { urlBasePath, showTelemetryOptIn, fetchTelemetry } = this.props;
+    const { urlBasePath, shouldShowTelemetryOptIn, fetchTelemetry } = this.props;
     const { step } = this.state;
 
     return (
@@ -135,7 +135,7 @@ export class Welcome extends React.PureComponent<Props, State> {
           <div className="homWelcome__content homWelcome-body">
             <EuiFlexGroup gutterSize="l">
               <EuiFlexItem>
-                {showTelemetryOptIn && step === 0 && (
+                {shouldShowTelemetryOptIn && step === 0 && (
                   <TelemetryOptInCard
                     urlBasePath={urlBasePath}
                     fetchTelemetry={fetchTelemetry}
@@ -143,7 +143,7 @@ export class Welcome extends React.PureComponent<Props, State> {
                     onDecline={this.handleTelemetrySelection.bind(this, false)}
                   />
                 )}
-                {(!showTelemetryOptIn || step === 1) && (
+                {(!shouldShowTelemetryOptIn || step === 1) && (
                   <SampleDataCard
                     urlBasePath={urlBasePath}
                     onConfirm={this.onSampleDataConfirm}

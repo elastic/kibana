@@ -30,7 +30,7 @@ import {
 } from 'react-router-dom';
 import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
-import { telemetryOptInProvider, showTelemetryOptIn } from '../kibana_services';
+import { telemetryOptInProvider, shouldShowTelemetryOptIn } from '../kibana_services';
 import chrome from 'ui/chrome';
 
 export function HomeApp({ directories }) {
@@ -92,7 +92,7 @@ export function HomeApp({ directories }) {
             find={savedObjectsClient.find}
             localStorage={localStorage}
             urlBasePath={chrome.getBasePath()}
-            showTelemetryOptIn={showTelemetryOptIn}
+            shouldShowTelemetryOptIn={shouldShowTelemetryOptIn}
             setOptIn={telemetryOptInProvider.setOptIn}
             fetchTelemetry={telemetryOptInProvider.fetchExample}
             getTelemetryBannerId={telemetryOptInProvider.getBannerId}

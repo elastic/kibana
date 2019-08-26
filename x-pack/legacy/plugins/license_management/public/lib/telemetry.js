@@ -24,7 +24,7 @@ export const setTelemetryOptInService = (aTelemetryOptInService) => {
 export const optInToTelemetry = async (enableTelemetry) => {
   await telemetryOptInService.setOptIn(enableTelemetry);
 };
-export const showTelemetryOptIn = () => {
+export const shouldShowTelemetryOptIn = () => {
   return telemetryEnabled && !telemetryOptInService.getOptIn();
 };
 export const getTelemetryFetcher = () => {
