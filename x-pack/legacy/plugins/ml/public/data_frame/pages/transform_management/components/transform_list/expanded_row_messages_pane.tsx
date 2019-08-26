@@ -94,6 +94,7 @@ export const ExpandedRowMessagesPane: React.SFC<Props> = ({ transformId }) => {
     <Fragment>
       <EuiSpacer size="s" />
       <EuiBasicTable
+        className="mlTransformTable__messagesPaneTable"
         items={messages}
         columns={columns}
         compressed={true}
