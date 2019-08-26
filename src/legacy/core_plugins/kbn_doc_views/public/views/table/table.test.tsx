@@ -157,7 +157,6 @@ describe('DocViewTable at Discover', () => {
     ([
       'addInclusiveFilterButton',
       'collapseBtn',
-      'noMappingWarning',
       'toggleColumnButton',
       'underscoreWarning',
     ] as const).forEach(element => {
@@ -170,6 +169,18 @@ describe('DocViewTable at Discover', () => {
           const disabled = btn.length ? btn.props().disabled : true;
           const clickAble = btn.length && !disabled ? true : false;
           expect(clickAble).toBe(elementExist);
+        });
+      }
+    });
+
+    (['noMappingWarning'] as const).forEach(element => {
+      const elementExist = check[element];
+
+      if (typeof elementExist === 'boolean') {
+        const el = findTestSubject(rowComponent, element);
+
+        it(`renders ${element} for '${check._property}' correctly`, () => {
+          expect(el.length).toBe(elementExist ? 1 : 0);
         });
       }
     });

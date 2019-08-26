@@ -42,6 +42,7 @@ export function DocViewTableRowIconUnderscore() {
       color="warning"
       iconProps={{
         className: 'kbnDocViewer__warning',
+        'data-test-subj': 'underscoreWarning',
       }}
       size="s"
       type="alert"

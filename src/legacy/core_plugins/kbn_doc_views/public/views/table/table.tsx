@@ -61,9 +61,11 @@ export function DocViewTable({
                     }
                   }
                 : undefined;
-            const displayUnderscoreWarning = !mapping[field] && field.indexOf('_') === 0;
             const isArrayOfObjects =
               Array.isArray(flattened[field]) && arrayContainsObjects(flattened[field]);
+            const displayUnderscoreWarning = !mapping[field] && field.indexOf('_') === 0;
+            const displayNoMappingWarning =
+              !mapping[field] && !displayUnderscoreWarning && !isArrayOfObjects;
 
             return (
               <DocViewTableRow
@@ -71,9 +73,7 @@ export function DocViewTable({
                 field={field}
                 fieldMapping={mapping[field]}
                 displayUnderscoreWarning={displayUnderscoreWarning}
-                displayNoMappingWarning={
-                  !mapping[field] && !displayUnderscoreWarning && !isArrayOfObjects
-                }
+                displayNoMappingWarning={displayNoMappingWarning}
                 isCollapsed={isCollapsed}
                 isCollapsible={isCollapsible}
                 isColumnActive={Array.isArray(columns) && columns.includes(field)}

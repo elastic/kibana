@@ -35,6 +35,7 @@ export function DocViewTableRowIconNoMapping() {
       content={tooltipContent}
       iconProps={{
         className: 'kbnDocViewer__warning',
+        'data-test-subj': 'noMappingWarning',
       }}
       size="s"
       type="alert"
