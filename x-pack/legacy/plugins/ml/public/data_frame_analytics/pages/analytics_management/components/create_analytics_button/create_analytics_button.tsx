@@ -14,13 +14,14 @@ import { createPermissionFailureMessage } from '../../../../../privilege/check_p
 
 import { useCreateAnalyticsForm } from '../../hooks/use_create_analytics_form';
 
+import { CreateAnalyticsAdvancedEditor } from '../create_analytics_advanced_editor';
 import { CreateAnalyticsForm } from '../create_analytics_form';
 import { CreateAnalyticsModal } from '../create_analytics_modal';
 
 export const CreateAnalyticsButton: FC = () => {
-  const { state, actions } = useCreateAnalyticsForm();
-  const { disabled, isModalVisible } = state;
-  const { openModal } = actions;
+  const createAnalyticsForm = useCreateAnalyticsForm();
+  const { disabled, isAdvancedEditorEnabled, isModalVisible } = createAnalyticsForm.state;
+  const { openModal } = createAnalyticsForm.actions;
 
   const button = (
     <EuiButton
@@ -52,8 +53,11 @@ export const CreateAnalyticsButton: FC = () => {
     <Fragment>
       {button}
       {isModalVisible && (
-        <CreateAnalyticsModal actions={actions} formState={state}>
-          <CreateAnalyticsForm actions={actions} formState={state} />
+        <CreateAnalyticsModal {...createAnalyticsForm}>
+          {isAdvancedEditorEnabled === false && <CreateAnalyticsForm {...createAnalyticsForm} />}
+          {isAdvancedEditorEnabled === true && (
+            <CreateAnalyticsAdvancedEditor {...createAnalyticsForm} />
+          )}
         </CreateAnalyticsModal>
       )}
     </Fragment>

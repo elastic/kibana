@@ -7,6 +7,7 @@
 import React, { Fragment, FC } from 'react';
 
 import {
+  EuiButtonEmpty,
   EuiCallOut,
   EuiComboBox,
   EuiForm,
@@ -15,6 +16,7 @@ import {
   EuiLink,
   EuiSpacer,
   EuiSwitch,
+  EuiText,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -23,8 +25,17 @@ import { metadata } from 'ui/metadata';
 
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 
-export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, formState }) => {
+export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
   const { setFormState } = actions;
+
+  const {
+    form,
+    indexPatternsWithNumericFields,
+    indexPatternTitles,
+    isJobCreated,
+    requestMessages,
+  } = state;
+
   const {
     createIndexPattern,
     destinationIndex,
@@ -32,19 +43,15 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, for
     destinationIndexNameExists,
     destinationIndexNameValid,
     destinationIndexPatternTitleExists,
-    indexPatternsWithNumericFields,
-    indexPatternTitles,
-    isJobCreated,
     jobId,
     jobIdEmpty,
     jobIdExists,
     jobIdValid,
-    requestMessages,
     sourceIndex,
     sourceIndexNameEmpty,
     sourceIndexNameExists,
     sourceIndexNameValid,
-  } = formState;
+  } = form;
 
   return (
     <EuiForm>
@@ -100,7 +107,6 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, for
               isInvalid={(!jobIdEmpty && !jobIdValid) || jobIdExists}
             />
           </EuiFormRow>
-
           <EuiFormRow
             label={i18n.translate('xpack.ml.dataframe.analytics.create.sourceIndexLabel', {
               defaultMessage: 'Source index',
@@ -180,7 +186,6 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, for
               )}
             </Fragment>
           </EuiFormRow>
-
           <EuiFormRow
             label={i18n.translate('xpack.ml.dataframe.analytics.create.destinationIndexLabel', {
               defaultMessage: 'Destination index',
@@ -233,7 +238,6 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, for
               isInvalid={!destinationIndexNameEmpty && !destinationIndexNameValid}
             />
           </EuiFormRow>
-
           <EuiFormRow
             isInvalid={createIndexPattern && destinationIndexPatternTitleExists}
             error={
@@ -255,6 +259,17 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, for
               onChange={() => setFormState({ createIndexPattern: !createIndexPattern })}
             />
           </EuiFormRow>
+          <EuiButtonEmpty onClick={actions.switchToAdvancedEditor} size="s" flush="left">
+            {i18n.translate('xpack.ml.dataframe.analytics.create.switchToAdvancedEditorButton', {
+              defaultMessage: 'Switch to advanced editor',
+            })}
+          </EuiButtonEmpty>
+          <EuiText size="s" color="subdued">
+            {i18n.translate('xpack.ml.dataframe.analytics.create.switchToAdvancedEditorHelpText', {
+              defaultMessage:
+                'Note you cannot switch back to this form once the advanced editor is enabled.',
+            })}
+          </EuiText>
         </Fragment>
       )}
     </EuiForm>

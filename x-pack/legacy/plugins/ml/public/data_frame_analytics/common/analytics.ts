@@ -26,7 +26,10 @@ export interface CreateRequestBody {
   // description?: string;
   dest: {
     index: IndexName;
-    results_field: string;
+    results_field?: string;
+  };
+  source: {
+    index: IndexName;
   };
 }
 

@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getInitialState, reducer, ACTION } from './reducer';
+import { ACTION } from './actions';
+import { reducer } from './reducer';
+import { getInitialState } from './state';
 
 describe('useCreateAnalyticsForm', () => {
   test('reducer(): provide a minimum required valid job config, then reset.', () => {
