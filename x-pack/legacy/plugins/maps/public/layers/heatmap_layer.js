@@ -8,13 +8,13 @@ import _ from 'lodash';
 import { AbstractLayer } from './layer';
 import { VectorLayer } from './vector_layer';
 import { HeatmapStyle } from './styles/heatmap_style';
-import { EMPTY_FEATURE_COLLECTION } from '../../common/constants';
+import { EMPTY_FEATURE_COLLECTION, LAYER_TYPE } from '../../common/constants';
 
 const SCALED_PROPERTY_NAME = '__kbn_heatmap_weight__';//unique name to store scaled value for weighting
 
 export class HeatmapLayer extends VectorLayer {
 
-  static type = 'HEATMAP';
+  static type = LAYER_TYPE.HEATMAP;
 
   static createDescriptor(options) {
     const heatmapLayerDescriptor = super.createDescriptor(options);

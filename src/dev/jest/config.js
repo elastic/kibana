@@ -66,7 +66,7 @@ export default {
   setupFilesAfterEnv: [
     '<rootDir>/src/dev/jest/setup/mocks.js',
   ],
-  coverageDirectory: '<rootDir>/target/jest-coverage',
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
   coverageReporters: [
     'html',
     'text',
