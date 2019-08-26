@@ -14,6 +14,7 @@ import {
   IndexPatternLayer,
   IndexPatternPrivateState,
   IndexPattern,
+  IndexPatternColumn,
 } from './indexpattern';
 import { buildColumn, getOperationTypesForField, operationDefinitionMap } from './operations';
 import { hasField } from './utils';
@@ -323,15 +324,14 @@ export function getDatasourceSuggestionsFromCurrentState(
       .filter(([_id, layer]) => layer.columnOrder.length)
       .map(([layerId, layer], index) => {
         const indexPattern = state.indexPatterns[layer.indexPatternId];
-        const onlyMetric = layer.columnOrder.every(columnId => !layer.columns[columnId].isBucketed);
-        const onlyBucket = layer.columnOrder.every(columnId => layer.columns[columnId].isBucketed);
+        const [buckets, metrics] = separateBucketColumns(layer);
         const timeDimension = layer.columnOrder.find(
           columnId =>
             layer.columns[columnId].isBucketed && layer.columns[columnId].dataType === 'date'
         );
 
         const suggestions: Array<DatasourceSuggestion<IndexPatternPrivateState>> = [];
-        if (onlyBucket) {
+        if (metrics.length === 0) {
           // intermediary chart without metric, don't try to suggest reduced versions
           suggestions.push(
             buildSuggestion({
@@ -342,12 +342,13 @@ export function getDatasourceSuggestionsFromCurrentState(
               changeType: 'unchanged',
             })
           );
-        } else if (onlyMetric) {
+        } else if (buckets.length === 0) {
           if (indexPattern.timeFieldName) {
             // suggest current metric over time if there is a default time field
             suggestions.push(createSuggestionWithDefaultDateHistogram(state, layerId));
           }
-          // suggest only metric
+          suggestions.push(...createAlternativeMetricSuggestions(indexPattern, layerId, state));
+          // also suggest simple current state
           suggestions.push(
             buildSuggestion({
               state,
@@ -365,6 +366,10 @@ export function getDatasourceSuggestionsFromCurrentState(
             // and no time dimension yet
             suggestions.push(createSuggestionWithDefaultDateHistogram(state, layerId));
           }
+
+          if (buckets.length === 2) {
+            suggestions.push(createChangedNestingSuggestion(state, layerId));
+          }
         }
 
         return suggestions;
@@ -375,6 +380,70 @@ export function getDatasourceSuggestionsFromCurrentState(
       table: { ...suggestion.table, datasourceSuggestionId: index },
     })
   );
+}
+
+function createChangedNestingSuggestion(state: IndexPatternPrivateState, layerId: string) {
+  const layer = state.layers[layerId];
+  const [firstBucket, secondBucket, ...rest] = layer.columnOrder;
+  const updatedLayer = { ...layer, columnOrder: [secondBucket, firstBucket, ...rest] };
+  return buildSuggestion({
+    state,
+    layerId,
+    isMultiRow: true,
+    updatedLayer,
+    label: i18n.translate('xpack.lens.indexpattern.suggestions.nestingChangeLabel', {
+      defaultMessage: 'Nest within {operation}',
+      values: {
+        operation: layer.columns[secondBucket].label,
+      },
+    }),
+    changeType: 'extended',
+  });
+}
+
+function createAlternativeMetricSuggestions(
+  indexPattern: IndexPattern,
+  layerId: string,
+  state: IndexPatternPrivateState
+) {
+  const layer = state.layers[layerId];
+  const suggestions: Array<DatasourceSuggestion<IndexPatternPrivateState>> = [];
+  layer.columnOrder.forEach(columnId => {
+    const column = layer.columns[columnId];
+    if (hasField(column)) {
+      const field = indexPattern.fields.find(
+        ({ name }) => hasField(column) && column.sourceField === name
+      )!;
+      const alternativeMetricOperations = getOperationTypesForField(field).filter(
+        operationType => operationType !== column.operationType
+      );
+      if (alternativeMetricOperations.length > 0) {
+        const newId = generateId();
+        const newColumn = buildColumn({
+          op: alternativeMetricOperations[0],
+          columns: layer.columns,
+          indexPattern,
+          layerId,
+          field,
+          suggestedPriority: undefined,
+        });
+        const updatedLayer = buildLayerByColumnOrder(
+          { ...layer, columns: { [newId]: newColumn } },
+          [newId]
+        );
+        suggestions.push(
+          buildSuggestion({
+            state,
+            layerId,
+            isMultiRow: false,
+            updatedLayer,
+            changeType: 'initial',
+          })
+        );
+      }
+    }
+  });
+  return suggestions;
 }
 
 function createSuggestionWithDefaultDateHistogram(
@@ -411,7 +480,6 @@ function createSuggestionWithDefaultDateHistogram(
 
 function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layerId: string) {
   const layer = state.layers[layerId];
-  const indexPattern = state.indexPatterns[layer.indexPatternId];
 
   const [availableBucketedColumns, availableMetricColumns] = separateBucketColumns(layer);
 
@@ -437,37 +505,7 @@ function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layer
     .concat(
       availableMetricColumns.map(columnId => {
         // build suggestions with only metrics
-        let column = layer.columns[columnId];
-        // if field based, suggest different metric
-        if (hasField(column)) {
-          const field = indexPattern.fields.find(
-            ({ name }) => hasField(column) && column.sourceField === name
-          )!;
-          const alternativeMetricOperations = getOperationTypesForField(field).filter(
-            operationType => operationType !== column.operationType
-          );
-          if (alternativeMetricOperations.length > 0) {
-            column = buildColumn({
-              op: alternativeMetricOperations[0],
-              columns: layer.columns,
-              indexPattern,
-              layerId,
-              field,
-              suggestedPriority: undefined,
-            });
-          }
-          return buildLayerByColumnOrder(
-            {
-              ...layer,
-              columns: {
-                [columnId]: column,
-              },
-            },
-            [columnId]
-          );
-        } else {
-          return buildLayerByColumnOrder(layer, [columnId]);
-        }
+        return buildLayerByColumnOrder(layer, [columnId]);
       })
     )
     .map(updatedLayer => {

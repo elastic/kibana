@@ -981,14 +981,14 @@ describe('IndexPattern Data Source suggestions', () => {
                 dataType: 'number',
                 isBucketed: false,
                 operationType: 'avg',
-                sourceField: 'op',
+                sourceField: 'bytes',
                 scale: 'ratio',
               },
             },
           },
         },
       });
-      expect(indexPatternDatasource.getDatasourceSuggestionsFromCurrentState(state)).toEqual([
+      expect(indexPatternDatasource.getDatasourceSuggestionsFromCurrentState(state)[0]).toEqual(
         expect.objectContaining({
           table: {
             datasourceSuggestionId: 0,
@@ -1017,28 +1017,8 @@ describe('IndexPattern Data Source suggestions', () => {
             ],
             layerId: 'first',
           },
-        }),
-        expect.objectContaining({
-          table: {
-            datasourceSuggestionId: 1,
-            isMultiRow: false,
-            changeType: 'unchanged',
-            label: undefined,
-            columns: [
-              {
-                columnId: 'col1',
-                operation: {
-                  label: 'My Op',
-                  dataType: 'number',
-                  isBucketed: false,
-                  scale: 'ratio',
-                },
-              },
-            ],
-            layerId: 'first',
-          },
-        }),
-      ]);
+        })
+      );
     });
 
     it('adds date histogram over default time field for tables without time dimension', async () => {
@@ -1140,13 +1120,11 @@ describe('IndexPattern Data Source suggestions', () => {
           },
         },
       });
-      // the single suggestion is the current unchanged state of the data table
-      expect(
-        indexPatternDatasource.getDatasourceSuggestionsFromCurrentState({
-          ...state,
-          indexPatterns: { 1: { ...state.indexPatterns['1'], timeFieldName: undefined } },
-        }).length
-      ).toEqual(1);
+      const suggestions = indexPatternDatasource.getDatasourceSuggestionsFromCurrentState({
+        ...state,
+        indexPatterns: { 1: { ...state.indexPatterns['1'], timeFieldName: undefined } },
+      });
+      suggestions.forEach(suggestion => expect(suggestion.table.columns.length).toBe(1));
     });
 
     it('returns simplified versions of table with more than 2 columns', () => {
@@ -1283,7 +1261,7 @@ describe('IndexPattern Data Source suggestions', () => {
       expect(suggestions.length).toBe(8);
     });
 
-    it('returns uses a different operation on field based columns for only metric suggestions', () => {
+    it('returns an only metric version of a given table', () => {
       const state: IndexPatternPrivateState = {
         currentIndexPatternId: '1',
         indexPatterns: {
@@ -1336,10 +1314,10 @@ describe('IndexPattern Data Source suggestions', () => {
       };
 
       const suggestions = indexPatternDatasource.getDatasourceSuggestionsFromCurrentState(state);
-      expect(suggestions[1].table.columns[0].operation.label).toBe('Sum of field1');
+      expect(suggestions[1].table.columns[0].operation.label).toBe('Average of field1');
     });
 
-    it('reuses document based column for only metric suggestions', () => {
+    it('returns an alternative metric for an only-metric table', () => {
       const state: IndexPatternPrivateState = {
         currentIndexPatternId: '1',
         indexPatterns: {
@@ -1353,12 +1331,6 @@ describe('IndexPattern Data Source suggestions', () => {
                 aggregatable: true,
                 searchable: true,
               },
-              {
-                name: 'field2',
-                type: 'date',
-                aggregatable: true,
-                searchable: true,
-              },
             ],
           },
         },
@@ -1367,31 +1339,22 @@ describe('IndexPattern Data Source suggestions', () => {
             ...persistedState.layers.first,
             columns: {
               col1: {
-                label: 'Date histogram',
-                dataType: 'date',
-                isBucketed: true,
-
-                operationType: 'date_histogram',
-                sourceField: 'field2',
-                params: {
-                  interval: 'd',
-                },
-              },
-              col2: {
-                label: 'Count',
+                label: 'Average of field1',
                 dataType: 'number',
                 isBucketed: false,
 
-                operationType: 'count',
+                operationType: 'avg',
+                sourceField: 'field1',
               },
             },
-            columnOrder: ['col1', 'col2'],
+            columnOrder: ['col1'],
           },
         },
       };
 
       const suggestions = indexPatternDatasource.getDatasourceSuggestionsFromCurrentState(state);
-      expect(suggestions[1].table.columns[0].operation.label).toBe('Count');
+      expect(suggestions[0].table.columns.length).toBe(1);
+      expect(suggestions[0].table.columns[0].operation.label).toBe('Sum of field1');
     });
   });
 });
