@@ -31,9 +31,6 @@
 // MUST STAY AT THE BOTTOM BECAUSE OF DARK THEME IMPORTS
 @import './dashboard/index';
 
-// Table list view control
-@import './table_list_view/index';
-
 // helper class that hides elements when rendered in percy
 @media only percy {
   .hideInPercy {
