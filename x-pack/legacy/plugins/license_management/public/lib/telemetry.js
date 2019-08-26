@@ -28,5 +28,5 @@ export const shouldShowTelemetryOptIn = () => {
   return telemetryEnabled && !telemetryOptInService.getOptIn();
 };
 export const getTelemetryFetcher = () => {
-  return fetchTelemetry(httpClient);
+  return fetchTelemetry(httpClient, { unencrypted: true });
 };
