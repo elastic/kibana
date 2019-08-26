@@ -14,10 +14,11 @@ import { getEMSClient } from '../../../meta';
 import { EMSTMSCreateSourceEditor } from './create_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
+import { EMS_TMS } from '../../../../common/constants';
 
 export class EMSTMSSource extends AbstractTMSSource {
 
-  static type = 'EMS_TMS';
+  static type = EMS_TMS;
   static title = i18n.translate('xpack.maps.source.emsTileTitle', {
     defaultMessage: 'Tiles'
   });
