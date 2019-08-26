@@ -16,7 +16,7 @@ import { useUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../infra/public';
 import { KueryBar } from '../components/functional/kuery_bar';
-import { FilterDropdowns } from '../components/filter_dropdowns';
+import { FilterDropdowns } from '../components/functional/filter_dropdowns';
 
 interface OverviewPageProps {
   basePath: string;
