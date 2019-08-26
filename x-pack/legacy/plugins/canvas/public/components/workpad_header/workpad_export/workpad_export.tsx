@@ -16,7 +16,7 @@ import { ExternalEmbedFlyout } from './flyout/external_embed_flyout';
 type ClosePopoverFn = () => void;
 
 type CopyTypes = 'pdf' | 'reportingConfig' | 'embed';
-type ExportTypes = 'pdf' | 'json' | 'embed' | 'runtime';
+type ExportTypes = 'pdf' | 'json' | 'embed' | 'runtime' | 'zip';
 type ExportUrlTypes = 'pdf';
 type CloseTypes = 'embed';
 

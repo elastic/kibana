@@ -35,6 +35,7 @@ export const LAUNCHED_FULLSCREEN = 'workpad-full-screen-launch';
 export const LAUNCHED_FULLSCREEN_AUTOPLAY = 'workpad-full-screen-launch-with-autoplay';
 export const SNAPSHOT_TYPE = 'canvas-snapshot';
 export const API_ROUTE_SNAPSHOT_BASE = '/public/canvas';
+export const API_ROUTE_SNAPSHOT_ZIP = `${API_ROUTE_SNAPSHOT_BASE}/zip`;
 export const API_ROUTE_SNAPSHOT_RUNTIME = `${API_ROUTE_SNAPSHOT_BASE}/runtime`;
 export const API_ROUTE_SNAPSHOT_RUNTIME_DOWNLOAD = `${API_ROUTE_SNAPSHOT_BASE}/kbnCanvas.js`;
 export const API_ROUTE_SNAPSHOT = `${API_ROUTE_SNAPSHOT_BASE}/snapshot`;

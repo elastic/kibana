@@ -5,10 +5,14 @@
  */
 
 import { Server, RouteOptions } from 'hapi';
+import archiver from 'archiver';
+import path from 'path';
+import { PassThrough } from 'stream';
 
 import {
   API_ROUTE_SNAPSHOT_RUNTIME,
   API_ROUTE_SNAPSHOT_RUNTIME_DOWNLOAD,
+  API_ROUTE_SNAPSHOT_ZIP,
 } from '../../common/lib/constants';
 
 // @ts-ignore
@@ -18,7 +22,7 @@ const PUBLIC_OPTIONS: RouteOptions = {
   auth: false,
 };
 
-export function publicWorkpadSnapshots(server: Server) {
+export function workpadSnapshots(server: Server) {
   // get runtime
   server.route({
     method: 'GET',
@@ -40,5 +44,26 @@ export function publicWorkpadSnapshots(server: Server) {
       return file;
     },
     options: PUBLIC_OPTIONS,
+  });
+
+  server.route({
+    method: 'POST',
+    path: API_ROUTE_SNAPSHOT_ZIP,
+    handler(request, handler) {
+      const workpad = request.payload;
+      const archive = archiver('zip');
+      const stream = new PassThrough();
+      archive.pipe(stream);
+      archive.append(JSON.stringify(workpad), { name: 'workpad.json' });
+      archive.file(path.resolve('../../external_runtime/index.html'), { name: 'index.html' });
+      archive.file(path.resolve('../../external_runtime/build/kbnCanvas.js'), {
+        name: 'kbnCanvas.js',
+      });
+      stream.end();
+      archive.finalize();
+      const response = handler.response(archive);
+      response.header('content-type', 'application/zip');
+      return response;
+    },
   });
 }

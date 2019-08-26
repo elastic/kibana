@@ -10,7 +10,6 @@ import { fetchAllRenderables } from '../../state/actions/elements';
 import { setPage } from '../../state/actions/pages';
 import { setAssets } from '../../state/actions/assets';
 import { ExportApp } from './export';
-import { ExternalEmbed } from './external_embed';
 
 export const routes = [
   {
@@ -37,25 +36,6 @@ export const routes = [
         },
         meta: {
           component: ExportApp,
-        },
-      },
-      {
-        name: 'externalEmbed',
-        path: '/external_embed/:id',
-        action: dispatch => async ({ params, router }) => {
-          const fetchedWorkpad = await workpadService.get(params.id);
-
-          if (fetchedWorkpad == null) {
-            return router.redirectTo('home');
-          }
-
-          const { assets, ...workpad } = fetchedWorkpad;
-          dispatch(setAssets(assets));
-          dispatch(setWorkpad(workpad, { loadPages: false }));
-          dispatch(fetchAllRenderables({ onlyActivePage: false }));
-        },
-        meta: {
-          component: ExternalEmbed,
         },
       },
     ],

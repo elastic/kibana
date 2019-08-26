@@ -86,6 +86,21 @@ export const ExternalEmbedFlyout = ({ onCopy, onExport, onClose }: Props) => (
           </EuiButton>
           <EuiSpacer />
           <EuiText size="s">
+            <p>TODO.</p>
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiButton
+            fill
+            onClick={() => {
+              onExport('zip');
+            }}
+            size="s"
+            style={{ width: '100%' }}
+          >
+            Download ZIP File
+          </EuiButton>
+          <EuiSpacer />
+          <EuiText size="s">
             <p>
               The Workpad is embedded in the HTML of the site by using an HTML placeholder.
               Parameters for the runtime are included inline.

@@ -31,7 +31,7 @@ export const AutoplaySettings = () => {
         id="cycle"
         label="Cycle Slides"
         checked={autoplay.enabled}
-        onClick={() => dispatch(setAutoplay(!autoplay.enabled))}
+        onChange={() => dispatch(setAutoplay(!autoplay.enabled))}
       />
       <EuiSpacer size="m" />
       <EuiSwitch
@@ -39,7 +39,7 @@ export const AutoplaySettings = () => {
         id="animate"
         label="Animate Cycle"
         checked={autoplay.animate}
-        onClick={() => dispatch(setAutoplayAnimate(!autoplay.animate))}
+        onChange={() => dispatch(setAutoplayAnimate(!autoplay.animate))}
       />
       <EuiHorizontalRule margin="m" />
       <CustomInterval

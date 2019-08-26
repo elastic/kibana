@@ -6,4 +6,3 @@
 
 export { routes } from './routes';
 export { ExportApp } from './export';
-export { ExternalEmbed } from './external_embed';

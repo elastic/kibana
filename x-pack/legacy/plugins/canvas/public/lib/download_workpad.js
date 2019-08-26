@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import fileSaver from 'file-saver';
-import resolvePathname from 'resolve-pathname';
+import chrome from 'ui/chrome';
 import { API_ROUTE_SNAPSHOT_RUNTIME_DOWNLOAD } from '../../common/lib/constants';
 import { notify } from './notify';
 import * as workpadService from './workpad_service';
@@ -33,8 +33,8 @@ export const downloadRenderedWorkpad = async renderedWorkpad => {
 
 export const downloadEmbedRuntime = async () => {
   try {
-    const base = resolvePathname('..', window.location.pathname);
-    const path = resolvePathname(API_ROUTE_SNAPSHOT_RUNTIME_DOWNLOAD.substring(1), base);
+    const basePath = chrome.getBasePath();
+    const path = `${basePath}${API_ROUTE_SNAPSHOT_RUNTIME_DOWNLOAD}`;
     window.open(path);
     return;
   } catch (err) {

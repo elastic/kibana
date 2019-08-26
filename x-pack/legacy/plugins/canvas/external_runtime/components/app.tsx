@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-// @ts-ignore
+// @ts-ignore Untyped package
 import { RenderFunctionsRegistry } from 'data/interpreter';
 import { Canvas } from './canvas';
 import {
@@ -13,7 +13,7 @@ import {
   ExternalEmbedStateProvider,
   ExternalEmbedState,
 } from '../context';
-// @ts-ignore
+// @ts-ignore Untyped local
 import { renderFunctions } from '../../canvas_plugin_src/renderers';
 import { CanvasRenderedWorkpad } from '../types';
 
