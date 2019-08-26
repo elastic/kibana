@@ -165,10 +165,12 @@ describe('DocViewTable at Discover', () => {
       const elementExist = check[element];
 
       if (typeof elementExist === 'boolean') {
-        const foundLength = findTestSubject(rowComponent, element).length;
+        const btn = findTestSubject(rowComponent, element);
 
         it(`renders ${element} for '${check._property}' correctly`, () => {
-          expect(foundLength).toBe(elementExist ? 1 : 0);
+          const disabled = btn.length ? btn.props().disabled : true;
+          const clickAble = btn.length && !disabled ? true : false;
+          expect(clickAble).toBe(elementExist);
         });
       }
     });

@@ -17,8 +17,8 @@
  * under the License.
  */
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 
 export interface Props {
   onClick: () => void;
@@ -26,24 +26,19 @@ export interface Props {
 }
 
 export function DocViewTableRowBtnCollapse({ onClick, isCollapsed }: Props) {
+  const label = i18n.translate('kbnDocViews.table.toggleFieldDetails', {
+    defaultMessage: 'Toggle field details',
+  });
   return (
-    <EuiToolTip
-      content={
-        <FormattedMessage
-          id="kbnDocViews.table.toggleFieldDetails"
-          defaultMessage="Toggle field details"
-        />
-      }
-    >
-      <button
+    <EuiToolTip content={label}>
+      <EuiButtonIcon
         aria-expanded={!isCollapsed}
-        aria-label="Toggle field details"
-        className="discover-table-open-button kbnDocViewer__collapseButton"
+        aria-label={label}
         data-test-subj="collapseBtn"
         onClick={() => onClick()}
-      >
-        <span className={`kuiIcon ${!isCollapsed ? 'fa-caret-down' : 'fa-caret-right'}`}></span>
-      </button>
+        iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
+        iconSize={'s'}
+      />
     </EuiToolTip>
   );
 }

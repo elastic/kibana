@@ -19,6 +19,7 @@
 import React, { useState } from 'react';
 import { DocViewRenderProps } from 'ui/registry/doc_views';
 import { DocViewTableRow } from './table_row';
+import { formatValue, arrayContainsObjects } from './table_helper';
 
 const COLLAPSE_LINE_LENGTH = 350;
 
@@ -32,7 +33,7 @@ export function DocViewTable({
 }: DocViewRenderProps) {
   const mapping = indexPattern.fields.byName;
   const flattened = indexPattern.flattenHit(hit);
-  const formatted = indexPattern.formatHit(hit, 'text');
+  const formatted = indexPattern.formatHit(hit, 'html');
   const [fieldRowOpen, setFieldRowOpen] = useState({} as Record<string, boolean>);
 
   function toggleValueCollapse(field: string) {
@@ -40,29 +41,15 @@ export function DocViewTable({
     setFieldRowOpen({ ...fieldRowOpen });
   }
 
-  // the formatting of array of objects with formatHit is optimzed for angular
-  // and since it's still in use in other places, we do some local formatting here
-  const formatValue = (field: string) => {
-    const value = flattened[field];
-    if (Array.isArray(value) && value.every(v => typeof v !== 'object')) {
-      return value.join(', ');
-    } else if (Array.isArray(value)) {
-      return value.map(v => JSON.stringify(v, null, 2)).join('\n');
-    } else if (typeof value === 'object') {
-      return JSON.stringify(value, null, 2);
-    } else {
-      return typeof formatted[field] === 'undefined' ? value : formatted[field];
-    }
-  };
-
   return (
     <table className="table table-condensed kbnDocViewerTable">
       <tbody>
         {Object.keys(flattened)
           .sort()
           .map(field => {
-            const value = formatValue(field);
-            const isCollapsible = value && value.length > COLLAPSE_LINE_LENGTH;
+            const valueRaw = flattened[field];
+            const value = formatValue(valueRaw, formatted[field]);
+            const isCollapsible = typeof value === 'string' && value.length > COLLAPSE_LINE_LENGTH;
             const isCollapsed = isCollapsible && !fieldRowOpen[field];
             const toggleColumn =
               onRemoveColumn && onAddColumn && Array.isArray(columns)
@@ -74,21 +61,27 @@ export function DocViewTable({
                     }
                   }
                 : undefined;
+            const displayUnderscoreWarning = !mapping[field] && field.indexOf('_') === 0;
+            const isArrayOfObjects =
+              Array.isArray(flattened[field]) && arrayContainsObjects(flattened[field]);
 
             return (
               <DocViewTableRow
                 key={field}
                 field={field}
                 fieldMapping={mapping[field]}
+                displayUnderscoreWarning={displayUnderscoreWarning}
+                displayNoMappingWarning={
+                  !mapping[field] && !displayUnderscoreWarning && !isArrayOfObjects
+                }
                 isCollapsed={isCollapsed}
                 isCollapsible={isCollapsible}
                 isColumnActive={Array.isArray(columns) && columns.includes(field)}
-                isMetaField={indexPattern.metaFields.includes(field)}
                 onFilter={filter}
                 onToggleCollapse={() => toggleValueCollapse(field)}
                 onToggleColumn={toggleColumn}
                 value={value}
-                valueRaw={flattened[field]}
+                valueRaw={valueRaw}
               />
             );
           })}

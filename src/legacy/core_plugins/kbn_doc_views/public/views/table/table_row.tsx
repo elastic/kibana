@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { FieldName } from 'ui/directives/field_name/field_name';
 import { FieldMapping, DocViewFilterFn } from 'ui/registry/doc_views_types';
 import classNames from 'classnames';
@@ -31,24 +31,26 @@ import { DocViewTableRowIconUnderscore } from './table_row_icon_underscore';
 export interface Props {
   field: string;
   fieldMapping?: FieldMapping;
+  displayNoMappingWarning: boolean;
+  displayUnderscoreWarning: boolean;
   isCollapsible: boolean;
   isColumnActive: boolean;
-  isMetaField: boolean;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
   onFilter?: DocViewFilterFn;
   onToggleColumn?: () => void;
-  value: string;
+  value: string | ReactNode;
   valueRaw: unknown;
 }
 
 export function DocViewTableRow({
   field,
   fieldMapping,
+  displayNoMappingWarning,
+  displayUnderscoreWarning,
   isCollapsible,
   isCollapsed,
   isColumnActive,
-  isMetaField,
   onFilter,
   onToggleCollapse,
   onToggleColumn,
@@ -59,9 +61,6 @@ export function DocViewTableRow({
     kbnDocViewer__value: true,
     'truncate-by-height': isCollapsible && isCollapsed,
   });
-
-  const displayUnderscoreWarning = !fieldMapping && field.indexOf('_') === 0;
-  const displayNoMappingWarning = !fieldMapping && !displayUnderscoreWarning;
 
   return (
     <tr key={field} data-test-subj={`tableDocViewRow-${field}`}>
@@ -79,7 +78,7 @@ export function DocViewTableRow({
             <DocViewTableRowBtnToggleColumn active={isColumnActive} onClick={onToggleColumn} />
           )}
           <DocViewTableRowBtnFilterExists
-            disabled={!fieldMapping || isMetaField || fieldMapping.scripted}
+            disabled={!fieldMapping || !fieldMapping.filterable}
             onClick={() => onFilter('_exists_', field, '+')}
             scripted={fieldMapping && fieldMapping.scripted}
           />
@@ -88,17 +87,24 @@ export function DocViewTableRow({
       <td className="kbnDocViewer__field">
         <FieldName field={fieldMapping} fieldName={field}></FieldName>
       </td>
-      <td>
-        {displayUnderscoreWarning && <DocViewTableRowIconUnderscore />}
-        {displayNoMappingWarning && <DocViewTableRowIconNoMapping />}
-
-        {isCollapsible && (
+      {isCollapsible ? (
+        <td>
           <DocViewTableRowBtnCollapse onClick={onToggleCollapse} isCollapsed={isCollapsed} />
-        )}
-        <div className={valueClassName} data-test-subj={`tableDocViewRow-${field}-value`}>
-          {value}
-        </div>
-      </td>
+          {displayUnderscoreWarning && <DocViewTableRowIconUnderscore />}
+          {displayNoMappingWarning && <DocViewTableRowIconNoMapping />}
+          <div className={valueClassName} data-test-subj={`tableDocViewRow-${field}-value`}>
+            {value}
+          </div>
+        </td>
+      ) : (
+        <td>
+          {displayUnderscoreWarning && <DocViewTableRowIconUnderscore />}
+          {displayNoMappingWarning && <DocViewTableRowIconNoMapping />}
+          <div className={valueClassName} data-test-subj={`tableDocViewRow-${field}-value`}>
+            {value}
+          </div>
+        </td>
+      )}
     </tr>
   );
 }

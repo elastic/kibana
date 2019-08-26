@@ -27,44 +27,27 @@ export interface Props {
 }
 
 export function DocViewTableRowBtnFilterAdd({ onClick, disabled = false }: Props) {
-  if (disabled) {
-    return (
-      <EuiToolTip
-        content={
-          <FormattedMessage
-            id="kbnDocViews.table.unindexedFieldsCanNotBeSearchedTooltip"
-            defaultMessage="Unindexed fields can not be searched"
-          />
-        }
-      >
-        <EuiButtonIcon
-          aria-label={i18n.translate('kbnDocViews.table.filterForValueButtonAriaLabel', {
-            defaultMessage: 'Filter for value',
-          })}
-          className="kbnDocViewer__actionButton"
-          disabled
-          iconType={'magnifyWithPlus'}
-          iconSize={'s'}
-        />
-      </EuiToolTip>
-    );
-  }
+  const tooltipContent = disabled ? (
+    <FormattedMessage
+      id="kbnDocViews.table.unindexedFieldsCanNotBeSearchedTooltip"
+      defaultMessage="Unindexed fields can not be searched"
+    />
+  ) : (
+    <FormattedMessage
+      id="kbnDocViews.table.filterForValueButtonTooltip"
+      defaultMessage="Filter for value"
+    />
+  );
 
   return (
-    <EuiToolTip
-      content={
-        <FormattedMessage
-          id="kbnDocViews.table.filterForValueButtonTooltip"
-          defaultMessage="Filter for value"
-        />
-      }
-    >
+    <EuiToolTip content={tooltipContent}>
       <EuiButtonIcon
         aria-label={i18n.translate('kbnDocViews.table.filterForValueButtonAriaLabel', {
           defaultMessage: 'Filter for value',
         })}
         className="kbnDocViewer__actionButton"
         data-test-subj="addInclusiveFilterButton"
+        disabled={disabled}
         onClick={onClick}
         iconType={'magnifyWithPlus'}
         iconSize={'s'}

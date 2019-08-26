@@ -32,45 +32,27 @@ export function DocViewTableRowBtnFilterExists({
   disabled = false,
   scripted = false,
 }: Props) {
-  if (disabled) {
-    return (
-      <EuiToolTip
-        content={
-          scripted ? (
-            <FormattedMessage
-              id="kbnDocViews.table.unableToFilterForPresenceOfScriptedFieldsTooltip"
-              defaultMessage="Unable to filter for presence of scripted fields"
-            />
-          ) : (
-            <FormattedMessage
-              id="kbnDocViews.table.unableToFilterForPresenceOfMetaFieldsTooltip"
-              defaultMessage="Unable to filter for presence of meta fields"
-            />
-          )
-        }
-      >
-        <EuiButtonIcon
-          aria-label={i18n.translate('kbnDocViews.table.filterForFieldPresentButtonAriaLabel', {
-            defaultMessage: 'Filter for field present',
-          })}
-          disabled
-          className="kbnDocViewer__actionButton"
-          iconType={'indexOpen'}
-          iconSize={'s'}
-        />
-      </EuiToolTip>
-    );
-  }
+  const tooltipContent = disabled ? (
+    scripted ? (
+      <FormattedMessage
+        id="kbnDocViews.table.unableToFilterForPresenceOfScriptedFieldsTooltip"
+        defaultMessage="Unable to filter for presence of scripted fields"
+      />
+    ) : (
+      <FormattedMessage
+        id="kbnDocViews.table.unableToFilterForPresenceOfMetaFieldsTooltip"
+        defaultMessage="Unable to filter for presence of meta fields"
+      />
+    )
+  ) : (
+    <FormattedMessage
+      id="kbnDocViews.table.filterForFieldPresentButtonTooltip"
+      defaultMessage="Filter for field present"
+    />
+  );
 
   return (
-    <EuiToolTip
-      content={
-        <FormattedMessage
-          id="kbnDocViews.table.filterForFieldPresentButtonTooltip"
-          defaultMessage="Filter for field present"
-        />
-      }
-    >
+    <EuiToolTip content={tooltipContent}>
       <EuiButtonIcon
         aria-label={i18n.translate('kbnDocViews.table.filterForFieldPresentButtonAriaLabel', {
           defaultMessage: 'Filter for field present',
@@ -78,6 +60,7 @@ export function DocViewTableRowBtnFilterExists({
         onClick={onClick}
         className="kbnDocViewer__actionButton"
         data-test-subj="addExistsFilterButton"
+        disabled={disabled}
         iconType={'indexOpen'}
         iconSize={'s'}
       />

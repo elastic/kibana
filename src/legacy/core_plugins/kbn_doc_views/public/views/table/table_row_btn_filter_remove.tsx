@@ -27,44 +27,27 @@ export interface Props {
 }
 
 export function DocViewTableRowBtnFilterRemove({ onClick, disabled = false }: Props) {
-  if (disabled) {
-    return (
-      <EuiToolTip
-        content={
-          <FormattedMessage
-            id="kbnDocViews.table.unindexedFieldsCanNotBeSearchedTooltip"
-            defaultMessage="Unindexed fields can not be searched"
-          />
-        }
-      >
-        <EuiButtonIcon
-          aria-label={i18n.translate('kbnDocViews.table.filterOutValueButtonAriaLabel', {
-            defaultMessage: 'Filter out value',
-          })}
-          className="kbnDocViewer__actionButton"
-          disabled
-          iconType={'magnifyWithMinus'}
-          iconSize={'s'}
-        />
-      </EuiToolTip>
-    );
-  }
+  const tooltipContent = disabled ? (
+    <FormattedMessage
+      id="kbnDocViews.table.unindexedFieldsCanNotBeSearchedTooltip"
+      defaultMessage="Unindexed fields can not be searched"
+    />
+  ) : (
+    <FormattedMessage
+      id="kbnDocViews.table.filterOutValueButtonTooltip"
+      defaultMessage="Filter out value"
+    />
+  );
 
   return (
-    <EuiToolTip
-      content={
-        <FormattedMessage
-          id="kbnDocViews.table.filterOutValueButtonTooltip"
-          defaultMessage="Filter out value"
-        />
-      }
-    >
+    <EuiToolTip content={tooltipContent}>
       <EuiButtonIcon
         aria-label={i18n.translate('kbnDocViews.table.filterOutValueButtonAriaLabel', {
           defaultMessage: 'Filter out value',
         })}
         className="kbnDocViewer__actionButton"
         data-test-subj="removeInclusiveFilterButton"
+        disabled={disabled}
         onClick={onClick}
         iconType={'magnifyWithMinus'}
         iconSize={'s'}
