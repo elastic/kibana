@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 
 import {
   EuiFieldText,
@@ -27,10 +27,12 @@ export class XYZTMSSource extends AbstractTMSSource {
   });
   static icon = 'grid';
 
-  static createDescriptor({ urlTemplate }) {
+  static createDescriptor({ urlTemplate, attributionText, attributionUrl }) {
     return {
       type: XYZTMSSource.type,
-      urlTemplate
+      urlTemplate,
+      attributionText,
+      attributionUrl
     };
   }
 
@@ -68,6 +70,14 @@ export class XYZTMSSource extends AbstractTMSSource {
     return this._descriptor.urlTemplate;
   }
 
+  getAttributions() {
+    const { attributionText, attributionUrl } = this._descriptor;
+    return [{
+      url: attributionUrl,
+      label: attributionText
+    }];
+  }
+
   getUrlTemplate() {
     return this._descriptor.urlTemplate;
   }
@@ -78,11 +88,14 @@ class XYZTMSEditor extends  React.Component {
 
   state = {
     tmsInput: '',
-    tmsCanPreview: false
+    tmsCanPreview: false,
+    attributionText: '',
+    attributionUrl: '',
   }
 
   _handleTMSInputChange(e) {
     const url = e.target.value;
+
     const canPreview = (url.indexOf('{x}') >= 0 && url.indexOf('{y}') >= 0 && url.indexOf('{z}') >= 0);
     this.setState({
       tmsInput: url,
@@ -94,14 +107,55 @@ class XYZTMSEditor extends  React.Component {
     }
   }
 
+  _handleTMSAttributionChange(attributionUpdate) {
+    this.setState(attributionUpdate, () => {
+      const {
+        attributionText,
+        attributionUrl,
+        tmsInput,
+        tmsCanPreview
+      } = this.state;
+
+      if (tmsCanPreview && tmsInput && attributionText && attributionUrl) {
+        this.props.onSourceConfigChange({
+          urlTemplate: tmsInput,
+          attributionText,
+          attributionUrl
+        });
+      }
+    });
+  }
+
   render() {
     return (
-      <EuiFormRow label="Url">
-        <EuiFieldText
-          placeholder={'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'}
-          onChange={(e) => this._handleTMSInputChange(e)}
-        />
-      </EuiFormRow>
+      <Fragment>
+        <EuiFormRow label="Url">
+          <EuiFieldText
+            placeholder={'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'}
+            onChange={e => this._handleTMSInputChange(e)}
+          />
+        </EuiFormRow>
+        <EuiFormRow label="Attribution text">
+          <EuiFieldText
+            placeholder={'© OpenStreetMap contributors'}
+            onChange={e =>
+              this._handleTMSAttributionChange(
+                { attributionText: e.target.value }
+              )
+            }
+          />
+        </EuiFormRow>
+        <EuiFormRow label="Attribution link">
+          <EuiFieldText
+            placeholder={'https://www.openstreetmap.org/copyright'}
+            onChange={e =>
+              this._handleTMSAttributionChange(
+                { attributionUrl: e.target.value }
+              )
+            }
+          />
+        </EuiFormRow>
+      </Fragment>
     );
   }
 }
