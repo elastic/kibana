@@ -5644,7 +5644,6 @@
     "xpack.maps.mapController.saveMapButtonLabel": "保存",
     "xpack.maps.mapController.saveMapDescription": "保存地图",
     "xpack.maps.mapController.saveSuccessMessage": "已保存“{title}”",
-    "xpack.maps.mapEmbeddableFactory": "无法加载地图，已保存对象格式错误",
     "xpack.maps.mapListing.advancedSettingsLinkText": "高级设置",
     "xpack.maps.mapListing.cancelTitle": "取消",
     "xpack.maps.mapListing.createMapButtonLabel": "创建地图",
