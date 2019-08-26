@@ -19,7 +19,7 @@
 
 import { PersistedState } from 'ui/persisted_state';
 import { AggConfigs } from 'ui/vis/agg_configs';
-import { Vis, VisType } from './../..';
+import { Vis } from './../..';
 
 export interface VisOptionsProps<VisParamType = unknown> {
   aggs: AggConfigs;
@@ -29,6 +29,6 @@ export interface VisOptionsProps<VisParamType = unknown> {
   uiState: PersistedState;
   setValue<T extends keyof VisParamType>(paramName: T, value: VisParamType[T]): void;
   setValidity(isValid: boolean): void;
-  setVisType(visType: VisType, type: string): void;
+  setVisType(type: string): void;
   setTouched(isTouched: boolean): void;
 }

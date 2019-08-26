@@ -72,8 +72,8 @@ uiModules
           }
         };
 
-        $scope.setVisType = (visType, type) => {
-          visType.type = type;
+        $scope.setVisType = (type) => {
+          $scope.vis.type.type = type;
         };
 
         const comp = typeof $scope.editor === 'string' ?

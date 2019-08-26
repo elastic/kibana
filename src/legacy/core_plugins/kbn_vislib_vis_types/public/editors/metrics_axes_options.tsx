@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { cloneDeep, capitalize, get, uniq } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 
@@ -83,20 +83,12 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
 
     stateParams.valueAxes.forEach((axis, axisNumber) => {
       let newCustomLabel = '';
-      const isFirst = axisNumber === 0;
       const matchingSeries: AggConfig[] = [];
 
       stateParams.seriesParams.forEach((series, seriesIndex) => {
-        if ((isFirst && !series.valueAxis) || series.valueAxis === axis.id) {
-          let seriesNumber = 0;
-          aggs.forEach((agg: AggConfig) => {
-            if (agg.schema.name === 'metric') {
-              if (seriesNumber === seriesIndex) {
-                matchingSeries.push(agg);
-              }
-              seriesNumber++;
-            }
-          });
+        if ((axisNumber === 0 && !series.valueAxis) || series.valueAxis === axis.id) {
+          const aggByIndex = aggs.bySchemaName.metric[seriesIndex];
+          matchingSeries.push(aggByIndex);
         }
       });
 
@@ -209,12 +201,9 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
     .join();
 
   useEffect(() => {
-    const schemaTitle = vis.type.schemas.metrics[0].title;
+    const schemaName = vis.type.schemas.metrics[0].name;
 
-    const metrics = aggs.filter(agg => {
-      const isMetric = agg.type && agg.type.type === AggGroupNames.Metrics;
-      return isMetric && agg.schema.title === schemaTitle;
-    });
+    const metrics = aggs.bySchemaName[schemaName];
 
     // update labels for existing params or create new one
     const updatedSeries = metrics.map(agg => {
@@ -241,11 +230,14 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
     setValue('seriesParams', updatedSeries);
   }, [aggsLabel, stateParams.valueAxes]);
 
-  const seriesParamsTypes = uniq(stateParams.seriesParams.map(({ type }) => type));
+  const visType = useMemo(() => {
+    const types = uniq(stateParams.seriesParams.map(({ type }) => type));
+    return types.length === 1 ? types[0] : 'histogram';
+  }, [stateParams.seriesParams]);
 
   useEffect(() => {
-    setVisType(vis.type, seriesParamsTypes.length === 1 ? seriesParamsTypes[0] : 'histogram');
-  }, [seriesParamsTypes.join(), vis]);
+    setVisType(visType);
+  }, [visType, setVisType]);
 
   return (
     <>
