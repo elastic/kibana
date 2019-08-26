@@ -38,9 +38,9 @@ import { ValidationVisOptionsProps } from '../validation_wrapper';
 
 interface ValueAxesPanelProps extends ValidationVisOptionsProps<BasicVislibParams> {
   isCategoryAxisHorizontal: boolean;
-  getUpdatedAxisName: (axisPosition: ValueAxis['position']) => string;
   addValueAxis: () => ValueAxis;
   removeValueAxis: (axis: ValueAxis) => void;
+  onValueAxisPositionChanged: (index: number, value: ValueAxis['position']) => void;
   setValueAxisByIndex: SetValueAxisByIndex;
 }
 

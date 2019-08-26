@@ -41,7 +41,7 @@ export interface ValueAxisOptionsParams extends ValidationVisOptionsProps<BasicV
   axis: ValueAxis;
   index: number;
   isCategoryAxisHorizontal: boolean;
-  getUpdatedAxisName: (axisPosition: ValueAxis['position']) => string;
+  onValueAxisPositionChanged: (index: number, value: ValueAxis['position']) => void;
   setValueAxisByIndex: SetValueAxisByIndex;
 }
 
@@ -52,7 +52,7 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
     isCategoryAxisHorizontal,
     stateParams,
     vis,
-    getUpdatedAxisName,
+    onValueAxisPositionChanged,
     setValue,
     setValueAxisByIndex,
   } = props;
@@ -97,10 +97,9 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
 
   const onPositionChanged = useCallback(
     (paramName: 'position', value: ValueAxis['position']) => {
-      setValueAxis(paramName, value);
-      setValueAxis('name', getUpdatedAxisName(axis.position));
+      onValueAxisPositionChanged(index, value);
     },
-    [setValueAxis, getUpdatedAxisName, axis.position]
+    [index, onValueAxisPositionChanged]
   );
 
   const isPositionDisabled = useCallback(

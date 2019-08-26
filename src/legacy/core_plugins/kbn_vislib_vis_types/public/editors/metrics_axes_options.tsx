@@ -53,6 +53,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
 
   const [lastCustomLabels, setLastCustomLabels] = useState({} as { [key: string]: string });
   const [isCategoryAxisHorizontal, setIsCategoryAxisHorizontal] = useState(true);
+  const [axesNumbers, setAxesNumbers] = useState({} as { [key: string]: number });
   // We track these so we can know when the agg is changed
   const [lastMatchingSeriesAggType, setLastMatchingSeriesAggType] = useState('');
   const [lastMatchingSeriesAggField, setLastMatchingSeriesAggField] = useState('');
@@ -134,19 +135,43 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
 
   const getUpdatedAxisName = useCallback(
     (axisPosition: ValueAxis['position']) => {
-      let axisName = capitalize(axisPosition) + AXIS_PREFIX;
-      axisName += stateParams.valueAxes.reduce((numberValue: number, axisItem: ValueAxis) => {
-        if (axisItem.name.substr(0, axisName.length) === axisName) {
-          const num = parseInt(axisItem.name.substr(axisName.length), RADIX);
-          if (num >= numberValue) {
-            numberValue = num + 1;
-          }
-        }
-        return numberValue;
-      }, 1);
-      return axisName;
+      const axisName = capitalize(axisPosition) + AXIS_PREFIX;
+      let lastAxisNumber = axesNumbers[axisPosition];
+
+      if (!lastAxisNumber) {
+        lastAxisNumber = stateParams.valueAxes.reduce(
+          (numberValue: number, axisItem: ValueAxis) => {
+            if (axisItem.name.substr(0, axisName.length) === axisName) {
+              const num = parseInt(axisItem.name.substr(axisName.length), RADIX);
+              if (num >= numberValue) {
+                numberValue = num + 1;
+              }
+            }
+            return numberValue;
+          },
+          0
+        );
+      }
+      const nextAxisNumber = lastAxisNumber + 1;
+      setAxesNumbers({ ...axesNumbers, [axisPosition]: nextAxisNumber });
+
+      return `${axisName}${nextAxisNumber}`;
     },
-    [stateParams.valueAxes]
+    [stateParams.valueAxes, axesNumbers, setAxesNumbers]
+  );
+
+  const onValueAxisPositionChanged = useCallback(
+    (index: number, value: ValueAxis['position']) => {
+      const valueAxes = [...stateParams.valueAxes];
+
+      valueAxes[index] = {
+        ...valueAxes[index],
+        name: getUpdatedAxisName(value),
+        position: value,
+      };
+      setValue('valueAxes', valueAxes);
+    },
+    [stateParams.valueAxes, setValue, getUpdatedAxisName]
   );
 
   const addValueAxis = useCallback(() => {
@@ -226,23 +251,25 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
 
   useEffect(() => {
     const chartPosition = stateParams.categoryAxes[0].position;
-    setIsCategoryAxisHorizontal(isAxisHorizontal(chartPosition));
+    const isChartHorizontal = isAxisHorizontal(chartPosition);
+    if (isChartHorizontal !== isCategoryAxisHorizontal) {
+      setIsCategoryAxisHorizontal(isChartHorizontal);
+    }
 
     stateParams.valueAxes.forEach((axis, index) => {
-      const axisIsHorizontal = isAxisHorizontal(axis.position);
-
-      if (axisIsHorizontal === isCategoryAxisHorizontal) {
+      if (isAxisHorizontal(axis.position) === isChartHorizontal) {
         const position = mapPosition(axis.position);
-        setValueAxisByIndex(index, 'position', position);
-        setValueAxisByIndex(index, 'name', getUpdatedAxisName(position));
+        onValueAxisPositionChanged(index, position);
       }
     });
   }, [
     isCategoryAxisHorizontal,
     stateParams.categoryAxes,
     stateParams.valueAxes,
-    getUpdatedAxisName,
-    setValueAxisByIndex,
+    onValueAxisPositionChanged,
+    setIsCategoryAxisHorizontal,
+    mapPosition,
+    isAxisHorizontal,
   ]);
 
   const seriesParamsTypes = stateParams.seriesParams.map(({ type }) => type);
@@ -266,7 +293,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
         addValueAxis={addValueAxis}
         isCategoryAxisHorizontal={isCategoryAxisHorizontal}
         removeValueAxis={removeValueAxis}
-        getUpdatedAxisName={getUpdatedAxisName}
+        onValueAxisPositionChanged={onValueAxisPositionChanged}
         setValueAxisByIndex={setValueAxisByIndex}
         {...props}
       />
