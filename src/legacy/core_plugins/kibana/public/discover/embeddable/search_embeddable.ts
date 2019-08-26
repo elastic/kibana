@@ -21,7 +21,11 @@
 import { getFilterGenerator } from 'ui/filter_manager';
 import angular from 'angular';
 import _ from 'lodash';
-import { SearchSource, getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier';
+import { SearchSource } from 'ui/courier';
+import {
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+} from 'ui/courier/utils/courier_inspector_utils';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { RequestAdapter } from 'ui/inspector/adapters';
 import { Adapters } from 'ui/inspector/types';

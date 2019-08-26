@@ -28,5 +28,3 @@ export {
   SearchError,
   getSearchErrorType,
 } from './search_strategy';
-
-export * from './utils/courier_inspector_utils';
