@@ -151,8 +151,11 @@ export class Properties extends React.PureComponent<Props, State> {
       noteWidth -
       settingsWidth;
 
+    // Passing the styles directly to the component because the width is
+    // being calculated and is recommended by Styled Components for performance
+    // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
     return (
-      <TimelineProperties data-test-subj="timeline-properties" width={width}>
+      <TimelineProperties style={{ width }} data-test-subj="timeline-properties">
         <PropertiesLeft
           isFavorite={isFavorite}
           timelineId={timelineId}
