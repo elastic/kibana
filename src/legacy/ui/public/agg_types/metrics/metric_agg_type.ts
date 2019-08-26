@@ -43,6 +43,7 @@ import { fieldFormats } from '../../registry/field_formats';
 
 export interface MetricAggTypeConfig extends AggTypeConfig {
   isScalable: () => boolean;
+  subtype: string;
 }
 
 export class MetricAggType extends AggType {
@@ -72,9 +73,11 @@ export class MetricAggType extends AggType {
         return field ? field.format : fieldFormats.getDefaultInstance('number');
       });
 
-    this.subtype = i18n.translate('common.ui.aggTypes.metrics.metricAggregationsSubtypeTitle', {
-      defaultMessage: 'Metric Aggregations',
-    });
+    this.subtype =
+      config.subtype ||
+      i18n.translate('common.ui.aggTypes.metrics.metricAggregationsSubtypeTitle', {
+        defaultMessage: 'Metric Aggregations',
+      });
 
     this.isScalable =
       config.isScalable ||

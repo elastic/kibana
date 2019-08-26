@@ -135,23 +135,28 @@ describe('CoordinateMapsVisualizationTest', function () {
         mapZoom: 2,
         mapCenter: [0, 0],
       };
-      const mockAggs = [
-        {
-          type: {
-            type: 'metrics'
-          },
-          fieldFormatter: (x) => {
-            return x;
-          },
-          makeLabel: () => {
-            return 'foobar';
-          }
-        }, {
-          type: {
-            type: 'buckets'
-          },
-          params: { useGeoCentroid: true }
-        }];
+      const mockAggs = {
+        byType: (type) => {
+          return mockAggs.aggs.find(agg => agg.type.type === type);
+        },
+        aggs: [
+          {
+            type: {
+              type: 'metrics'
+            },
+            fieldFormatter: (x) => {
+              return x;
+            },
+            makeLabel: () => {
+              return 'foobar';
+            }
+          }, {
+            type: {
+              type: 'buckets'
+            },
+            params: { useGeoCentroid: true }
+          }]
+      };
       vis.getAggConfig = function () {
         return mockAggs;
       };

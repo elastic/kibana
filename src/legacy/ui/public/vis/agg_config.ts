@@ -72,9 +72,10 @@ const getTypeFromRegistry = (type: string): AggType => {
 };
 
 const getSchemaFromRegistry = (schemas: any, schema: string): Schema => {
-  const registeredSchema = schemas.byName[schema];
+  let registeredSchema = schemas ? schemas.byName[schema] : null;
   if (!registeredSchema) {
-    throw new Error('unknown schema');
+    registeredSchema = Object.assign({}, unknownSchema);
+    registeredSchema.name = schema;
   }
 
   return registeredSchema;
@@ -438,13 +439,7 @@ export class AggConfig {
   }
 
   public setSchema(schema: string | Schema) {
-    if (this.aggConfigs.schemas) {
-      this.schema =
-        typeof schema === 'string'
-          ? getSchemaFromRegistry(this.aggConfigs.schemas, schema)
-          : schema;
-    } else {
-      this.schema = unknownSchema;
-    }
+    this.schema =
+      typeof schema === 'string' ? getSchemaFromRegistry(this.aggConfigs.schemas, schema) : schema;
   }
 }

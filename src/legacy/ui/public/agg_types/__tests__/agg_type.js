@@ -177,10 +177,10 @@ describe('AggType Class', function () {
           expect(aggType.getResponseAggs).to.be(football);
         });
 
-        it('defaults to _.noop', function () {
+        it('defaults to noop', function () {
           const aggType = new AggType({});
-
-          expect(aggType.getResponseAggs).to.be(_.noop);
+          const responseAggs = aggType.getRequestAggs();
+          expect(responseAggs).to.be(undefined);
         });
       });
     });
