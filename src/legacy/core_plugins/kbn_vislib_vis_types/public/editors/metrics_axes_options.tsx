@@ -24,7 +24,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { AggConfig } from 'ui/vis';
 import { AggGroupNames } from 'ui/vis/editors/default';
 import { safeMakeLabel } from 'ui/agg_types/agg_utils';
-import { BasicVislibParams, ValueAxis, SeriesParam } from '../types';
+import { BasicVislibParams, ValueAxis, SeriesParam, Axis } from '../types';
 import { ValidationVisOptionsProps } from '../controls/validation_wrapper';
 import { SeriesPanel } from '../controls/point_series/series_panel';
 import { CategoryAxisPanel } from '../controls/point_series/category_axis_panel';
@@ -168,6 +168,30 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
     [stateParams.valueAxes, setValue, getUpdatedAxisName]
   );
 
+  const onCategoryAxisPositionChanged = useCallback(
+    (chartPosition: Axis['position']) => {
+      const isChartHorizontal = isAxisHorizontal(chartPosition);
+      if (isChartHorizontal !== isCategoryAxisHorizontal) {
+        setIsCategoryAxisHorizontal(isChartHorizontal);
+      }
+
+      stateParams.valueAxes.forEach((axis, index) => {
+        if (isAxisHorizontal(axis.position) === isChartHorizontal) {
+          const position = mapPosition(axis.position);
+          onValueAxisPositionChanged(index, position);
+        }
+      });
+    },
+    [
+      stateParams.valueAxes,
+      isCategoryAxisHorizontal,
+      setIsCategoryAxisHorizontal,
+      isAxisHorizontal,
+      onValueAxisPositionChanged,
+      mapPosition,
+    ]
+  );
+
   const addValueAxis = useCallback(() => {
     let lastAxisIdNumber = axesNumbers[VALUE_AXIS_PREFIX];
 
@@ -258,29 +282,6 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
     setValue('seriesParams', updatedSeries);
   }, [aggsLabel, stateParams.valueAxes]);
 
-  useEffect(() => {
-    const chartPosition = stateParams.categoryAxes[0].position;
-    const isChartHorizontal = isAxisHorizontal(chartPosition);
-    if (isChartHorizontal !== isCategoryAxisHorizontal) {
-      setIsCategoryAxisHorizontal(isChartHorizontal);
-    }
-
-    stateParams.valueAxes.forEach((axis, index) => {
-      if (isAxisHorizontal(axis.position) === isChartHorizontal) {
-        const position = mapPosition(axis.position);
-        onValueAxisPositionChanged(index, position);
-      }
-    });
-  }, [
-    isCategoryAxisHorizontal,
-    stateParams.categoryAxes,
-    stateParams.valueAxes,
-    onValueAxisPositionChanged,
-    setIsCategoryAxisHorizontal,
-    mapPosition,
-    isAxisHorizontal,
-  ]);
-
   const seriesParamsTypes = stateParams.seriesParams.map(({ type }) => type);
   const seriesParamsTypesString = seriesParamsTypes.join();
 
@@ -307,7 +308,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
         {...props}
       />
       <EuiSpacer size="s" />
-      <CategoryAxisPanel {...props} />
+      <CategoryAxisPanel {...props} onPositionChanged={onCategoryAxisPositionChanged} />
     </>
   );
 }

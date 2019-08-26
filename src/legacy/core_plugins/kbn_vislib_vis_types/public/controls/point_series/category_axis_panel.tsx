@@ -27,9 +27,14 @@ import { BasicVislibParams, Axis } from '../../types';
 import { SwitchOption } from '../switch';
 import { SelectOption } from '../select';
 import { LabelOptions } from './components/label_options';
+import { Positions } from '../../utils/collections';
 
-function CategoryAxisPanel(props: VisOptionsProps<BasicVislibParams>) {
-  const { stateParams, setValue, vis } = props;
+interface CategoryAxisPanelProps extends VisOptionsProps<BasicVislibParams> {
+  onPositionChanged: (position: Positions) => void;
+}
+
+function CategoryAxisPanel(props: CategoryAxisPanelProps) {
+  const { onPositionChanged, stateParams, setValue, vis } = props;
 
   const setCategoryAxis = useCallback(
     <T extends keyof Axis>(paramName: T, value: Axis[T]) => {
@@ -41,6 +46,14 @@ function CategoryAxisPanel(props: VisOptionsProps<BasicVislibParams>) {
       setValue('categoryAxes', categoryAxes);
     },
     [setValue, stateParams.categoryAxes]
+  );
+
+  const setPosition = useCallback(
+    (paramName: 'position', value: Axis['position']) => {
+      setCategoryAxis(paramName, value);
+      onPositionChanged(value);
+    },
+    [setCategoryAxis, onPositionChanged]
   );
 
   return (
@@ -72,7 +85,7 @@ function CategoryAxisPanel(props: VisOptionsProps<BasicVislibParams>) {
         options={vis.type.editorConfig.collections.positions}
         paramName="position"
         value={stateParams.categoryAxes[0].position}
-        setValue={setCategoryAxis}
+        setValue={setPosition}
       />
 
       <EuiAccordion
