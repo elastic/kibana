@@ -5,8 +5,27 @@
  */
 
 import React, { FC } from 'react';
-import { Stat } from './stat';
-import { StatsBarStat, StatsBarStats, StatsKey } from '../../../common/types/common';
+import { Stat, StatsBarStat } from './stat';
+
+interface JobStatsBarStats {
+  activeNodes: StatsBarStat;
+  total: StatsBarStat;
+  open: StatsBarStat;
+  failed: StatsBarStat;
+  closed: StatsBarStat;
+  activeDatafeeds: StatsBarStat;
+}
+
+export interface TransformStatsBarStats {
+  total: StatsBarStat;
+  batch: StatsBarStat;
+  continuous: StatsBarStat;
+  failed: StatsBarStat;
+  started: StatsBarStat;
+}
+
+type StatsBarStats = TransformStatsBarStats | JobStatsBarStats;
+type StatsKey = keyof StatsBarStats;
 
 interface StatsBarProps {
   stats: StatsBarStats;

@@ -5,8 +5,12 @@
  */
 
 import React, { FC } from 'react';
-import { StatsBarStat } from '../../../common/types/common';
 
+export interface StatsBarStat {
+  label: string;
+  value: string | number;
+  show?: boolean;
+}
 interface StatProps {
   stat: StatsBarStat;
 }
