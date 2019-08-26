@@ -12,7 +12,7 @@ import {
   EuiLoadingSpinner,
   EuiToolTip,
 } from '@elastic/eui';
-import { noop } from 'lodash/fp';
+import { noop, debounce } from 'lodash/fp';
 import * as React from 'react';
 import styled from 'styled-components';
 
@@ -157,7 +157,7 @@ export const Actions = React.memo<Props>(
                 allowUnpinning={!eventHasNotes(noteIds)}
                 pinned={eventIsPinned}
                 data-test-subj="pin-event"
-                onClick={onPinClicked}
+                onClick={debounce(600, onPinClicked)}
               />
             </PinContainer>
           </EuiToolTip>
