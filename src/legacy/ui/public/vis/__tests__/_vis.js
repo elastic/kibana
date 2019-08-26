@@ -22,12 +22,11 @@ import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 import { VisProvider } from '..';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { VisTypesRegistryProvider } from '../../registry/vis_types';
+import { VisTypesRegistryProvider as visTypes } from '../../registry/vis_types';
 
 describe('Vis Class', function () {
   let indexPattern;
   let Vis;
-  let visTypes;
 
   let vis;
   const stateFixture = {
@@ -45,7 +44,6 @@ describe('Vis Class', function () {
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    visTypes = VisTypesRegistryProvider;
   }));
 
   beforeEach(function () {

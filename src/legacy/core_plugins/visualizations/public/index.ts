@@ -19,27 +19,20 @@
 
 import { FiltersService, FiltersSetup } from './filters';
 import { TypesService, TypesSetup } from './types';
-import { VisType } from '../../../ui/public/vis';
 
 class VisualizationsPlugin {
   private readonly filters: FiltersService;
   private readonly types: TypesService;
-  private visualizations: Map<string, VisType>;
 
   constructor() {
     this.filters = new FiltersService();
     this.types = new TypesService();
-    this.visualizations = new Map();
   }
 
   public setup() {
     return {
       filters: this.filters.setup(),
       types: this.types.setup(),
-      visualizations: {
-        getAll: () => new Map(this.visualizations),
-        register: (obj: VisType): Map<string, VisType> => this.visualizations.set(obj.name, obj),
-      },
     };
   }
 

@@ -31,7 +31,7 @@ import React from 'react';
 import angular from 'angular';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { toastNotifications } from 'ui/notify';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { VisTypesRegistryProvider as visTypes } from 'ui/registry/vis_types';
 import { docTitle } from 'ui/doc_title';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
@@ -63,7 +63,6 @@ uiRoutes
     k7Breadcrumbs: getCreateBreadcrumbs,
     resolve: {
       savedVis: function (savedVisualizations, redirectWhenMissing, $route) {
-        const visTypes = VisTypesRegistryProvider;
         const visType = visTypes.get($route.current.params.type);
         const shouldHaveIndex = visType.requiresSearch && visType.options.showIndexSelection;
         const hasIndex = $route.current.params.indexPattern || $route.current.params.savedSearchId;

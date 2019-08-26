@@ -36,31 +36,21 @@ export default function ({ getService, getPageObjects }) {
     before('initialize tests', async () => {
       log.debug('Dashboard View Mode:initTests');
       await esArchiver.loadIfNeeded('logstash_functional');
-      log.debug('1');
       await esArchiver.load('dashboard_view_mode');
-      log.debug('2');
       await kibanaServer.uiSettings.replace({
         'defaultIndex': 'logstash-*'
       });
-      log.debug('3');
       await browser.setWindowSize(1600, 1000);
 
       await PageObjects.common.navigateToApp('discover');
-      log.debug('4');
       await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
-      log.debug('5');
       await PageObjects.discover.saveSearch(savedSearchName);
 
       await PageObjects.common.navigateToApp('dashboard');
-      log.debug('6');
       await PageObjects.dashboard.clickNewDashboard();
-      log.debug('7');
       await PageObjects.dashboard.addVisualizations(PageObjects.dashboard.getTestVisualizationNames());
-      log.debug('8');
       await dashboardAddPanel.addSavedSearch(savedSearchName);
-      log.debug('9');
       await PageObjects.dashboard.saveDashboard(dashboardName);
-      log.debug('10');
     });
 
     describe('Dashboard viewer', () => {

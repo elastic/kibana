@@ -17,8 +17,12 @@
  * under the License.
  */
 
-import { BaseVisType, AngularVisTypeProvider, ReactVisType, VislibVisTypeProvider } from './vis_types';
-// import chrome from 'ui/chrome';
+import {
+  BaseVisType,
+  AngularVisTypeProvider,
+  ReactVisType,
+  VislibVisTypeProvider
+} from './vis_types';
 
 export const visFactory = {
   createBaseVisualization: (config) => {
@@ -30,21 +34,15 @@ export const visFactory = {
 };
 
 export const VisFactoryProvider = (Private) => {
-  /*
-  const $injector = await chrome.dangerouslyGetActiveInjector();
-  const Private = $injector.get('Private');
-*/
   const AngularVisType = Private(AngularVisTypeProvider);
   const VislibVisType = Private(VislibVisTypeProvider);
 
   return {
     ...visFactory,
     createAngularVisualization: (config) => {
-      // const AngularVisType = Private(AngularVisTypeProvider);
       return new AngularVisType(config);
     },
     createVislibVisualization: (config) => {
-      // const VislibVisType = Private(VislibVisTypeProvider);
       return new VislibVisType(config);
     }
   };
