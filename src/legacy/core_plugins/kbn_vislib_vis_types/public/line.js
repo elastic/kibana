@@ -17,12 +17,14 @@
  * under the License.
  */
 
+import React from 'react';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggGroupNames } from 'ui/vis/editors/default';
 import { PointSeriesOptions } from './editors/point_series_options';
 import { MetricsAxisOptions } from './editors/metrics_axes_options';
+import { ValidationWrapper } from './controls/validation_wrapper';
 import {
   getPositions,
   Positions,
@@ -143,7 +145,7 @@ export default function PointSeriesVisType(Private) {
           title: i18n.translate('kbnVislibVisTypes.line.tabs.metricsAxesTitle', {
             defaultMessage: 'Metrics & axes',
           }),
-          editor: MetricsAxisOptions,
+          editor: props => <ValidationWrapper {...props} component={MetricsAxisOptions} />,
         },
         {
           name: 'options',
