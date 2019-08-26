@@ -27,7 +27,6 @@ import { VisFactoryProvider, visFactory } from 'ui/vis/vis_factory';
 import { DefaultEditorSize } from 'ui/vis/editor_size';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import * as types from 'ui/vis/vis';
-import { VisType } from '../../../../ui/public/vis';
 
 import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
 
@@ -37,26 +36,11 @@ import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
  * @internal
  */
 export class TypesService {
-  private visualizationsMap: Map<string, VisType>;
-
-  private visualizationsInterface = {
-    get: (key: string) => this.visualizationsMap.get(key),
-    getAll: () => [...this.visualizationsMap.values()],
-    register: (obj: VisType) => {
-      this.visualizationsMap.set(obj.name, obj);
-      return this.visualizationsInterface;
-    },
-  };
-
-  constructor() {
-    this.visualizationsMap = new Map();
-  }
-
   public setup() {
     return {
-      Vis, // visualization instance
-      VisFactoryProvider, // tool for creating vis types
-      VisTypesRegistryProvider, // TYPES
+      Vis,
+      VisFactoryProvider,
+      VisTypesRegistryProvider,
       defaultFeedbackMessage, // make default in base vis type, or move?
       visTypeAliasRegistry,
     };
@@ -79,10 +63,5 @@ export type VisParams = types.VisParams;
 export type VisProvider = types.VisProvider;
 export type VisState = types.VisState;
 // todo: this breaks it // export { VisualizationController, VisType } from 'ui/vis/vis_types/vis_type';
+export { VisTypesPluginContract } from 'ui/registry/vis_types';
 export { Status } from 'ui/vis/update_status';
-
-export interface VisTypesPluginContract {
-  register: (visType: VisType) => VisTypesPluginContract;
-  get: (name: string) => VisType | undefined;
-  getAll: () => VisType[];
-}

@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
 import { VisRequestHandlersRegistryProvider as RequestHandlersProvider } from 'ui/registry/vis_request_handlers';
 import { VisResponseHandlersRegistryProvider as ResponseHandlerProvider } from 'ui/registry/vis_response_handlers';
-import { VisTypesRegistryProvider as visTypes } from 'ui/registry/vis_types';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { IndexPatternsProvider } from '../../../data/public';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { PersistedState } from 'ui/persisted_state';
@@ -82,6 +82,7 @@ export const visualization = () => ({
     const Private = $injector.get('Private');
     const requestHandlers = Private(RequestHandlersProvider);
     const responseHandlers = Private(ResponseHandlerProvider);
+    const visTypes = VisTypesRegistryProvider;
     const indexPatterns = Private(IndexPatternsProvider);
     const queryFilter = Private(FilterBarQueryFilterProvider);
 
