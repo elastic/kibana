@@ -72,7 +72,7 @@
     "@types/mime": "^2.0.1",
     "@types/mkdirp": "^0.5.2",
     "@types/mocha": "^5.2.6",
-    "@types/nock": "^10.0.0",
+    "@types/nock": "^10.0.3",
     "@types/node": "^10.12.27",
     "@types/node-fetch": "^2.1.4",
     "@types/nodemailer": "^6.2.0",
