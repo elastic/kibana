@@ -20,7 +20,7 @@ import React from 'react';
 import { unescape } from 'lodash';
 
 /**
- * convert <mark> markup of the given text to react
+ * Convert <mark> markup of the given string to ReactNodes
  * @param text
  */
 export function replaceMarkWithReactDom(text: string): React.ReactNode {
@@ -28,6 +28,9 @@ export function replaceMarkWithReactDom(text: string): React.ReactNode {
     <>
       {text.split('<mark>').map((markedText, idx) => {
         const sub = markedText.split('</mark>');
+        if (sub.length === 1) {
+          return markedText;
+        }
         return (
           <span key={idx}>
             <mark>{sub[0]}</mark>
@@ -38,8 +41,11 @@ export function replaceMarkWithReactDom(text: string): React.ReactNode {
     </>
   );
 }
-// current html of the formatter is angular flavored, this current workaround
-// should be removed when all consumers of the formatHit function are react based
+
+/**
+ * Current html of the formatter is angular flavored, this current workaround
+ * should be removed when all consumers of the formatHit function are react based
+ */
 export function convertAngularHtml(html: string): string | React.ReactNode {
   if (typeof html === 'string') {
     const cleaned = html.replace('<span ng-non-bindable>', '').replace('</span>', '');
@@ -51,17 +57,19 @@ export function convertAngularHtml(html: string): string | React.ReactNode {
   }
   return html;
 }
-
+/**
+ * Returns true if the given array contains at least 1 object
+ */
 export function arrayContainsObjects(value: unknown[]) {
-  return value.some(v => typeof v === 'object' && v !== null);
+  return Array.isArray(value) && value.some(v => typeof v === 'object' && v !== null);
 }
 
-// the formatting of array of objects with formatHit is optimized for angular
-// and since it's still in use in other places, we do some local formatting here
-export function formatValue(
-  value: string,
-  valueFormatted: Record<string, unknown>
-): string | React.ReactNode {
+/**
+ * The current field formatter provides html for angular usage
+ * This html is cleaned up and prepared for usage in the react world
+ * Furthermore <mark>test</mark> are converted to ReactNodes
+ */
+export function formatValue(value: unknown, valueFormatted: string): string | React.ReactNode {
   if (Array.isArray(value) && arrayContainsObjects(value)) {
     return value.map(v => JSON.stringify(v, null, 2)).join('\n');
   } else if (Array.isArray(value)) {
