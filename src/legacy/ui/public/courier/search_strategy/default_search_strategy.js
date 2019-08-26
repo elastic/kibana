@@ -121,22 +121,30 @@ async function msearch({ searchRequests, es, Promise, serializeFetchParams, conf
 }
 
 function search({ searchRequests, es, Promise, config, sessionId, esShardTimeout }) {
+  const failedSearchRequests = [];
   const abortController = new AbortController();
   const searchParams = getSearchParams(config, sessionId, esShardTimeout);
   const promises = searchRequests.map(async searchRequest => {
-    const { index, body } = searchRequest.fetchParams = await searchRequest.getFetchParams();
-    try {
-      const promise = es.search({ index: index.title || index, body, ...searchParams });
-      abortController.signal.addEventListener('abort', promise.abort);
-      return promise;
-    } catch (e) {
-      return JSON.parse(e.response);
-    }
+    return searchRequest.getFetchParams()
+      .then(fetchParams => {
+        const { index, body } = searchRequest.fetchParams = fetchParams;
+        const promise = es.search({ index: index.title || index, body, ...searchParams });
+        abortController.signal.addEventListener('abort', promise.abort);
+        return promise;
+      }, error => {
+        searchRequest.handleFailure(error);
+        failedSearchRequests.push(searchRequest);
+      })
+      .catch(({ response }) => {
+        // Copying the _msearch behavior where the errors for individual requests are returned
+        // instead of thrown
+        return JSON.parse(response);
+      });
   });
   return {
     searching: Promise.all(promises),
     abort: () => abortController.abort(),
-    failedSearchRequests: []
+    failedSearchRequests
   };
 }
 
