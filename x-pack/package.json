@@ -103,7 +103,6 @@
     "@types/tinycolor2": "^1.4.1",
     "@types/uuid": "^3.4.4",
     "abab": "^1.0.4",
-    "ansi-colors": "^3.0.5",
     "ansicolors": "0.3.2",
     "axios": "^0.19.0",
     "babel-jest": "^24.9.0",
@@ -362,7 +361,7 @@
     "vscode-languageserver": "^5.2.1",
     "wellknown": "^0.5.0",
     "xml2js": "^0.4.19",
-    "xregexp": "3.2.0"
+    "xregexp": "4.2.4"
   },
   "engines": {
     "yarn": "^1.10.1"
