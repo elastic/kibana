@@ -87,24 +87,16 @@ export function DocViewTableRow({
       <td className="kbnDocViewer__field">
         <FieldName field={fieldMapping} fieldName={field}></FieldName>
       </td>
-      {isCollapsible ? (
-        <td>
+      <td>
+        {isCollapsible && (
           <DocViewTableRowBtnCollapse onClick={onToggleCollapse} isCollapsed={isCollapsed} />
-          {displayUnderscoreWarning && <DocViewTableRowIconUnderscore />}
-          {displayNoMappingWarning && <DocViewTableRowIconNoMapping />}
-          <div className={valueClassName} data-test-subj={`tableDocViewRow-${field}-value`}>
-            {value}
-          </div>
-        </td>
-      ) : (
-        <td>
-          {displayUnderscoreWarning && <DocViewTableRowIconUnderscore />}
-          {displayNoMappingWarning && <DocViewTableRowIconNoMapping />}
-          <div className={valueClassName} data-test-subj={`tableDocViewRow-${field}-value`}>
-            {value}
-          </div>
-        </td>
-      )}
+        )}
+        {displayUnderscoreWarning && <DocViewTableRowIconUnderscore />}
+        {displayNoMappingWarning && <DocViewTableRowIconNoMapping />}
+        <div className={valueClassName} data-test-subj={`tableDocViewRow-${field}-value`}>
+          {value}
+        </div>
+      </td>
     </tr>
   );
 }
