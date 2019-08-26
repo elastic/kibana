@@ -64,16 +64,17 @@ module.exports = function (grunt) {
   ];
 
   const NODE = 'node';
+  const YARN = 'yarn';
   const scriptWithGithubChecks = ({ title, options, cmd, args }) => (
     process.env.CHECKS_REPORTER_ACTIVE === 'true' ? {
       options,
-      cmd: 'yarn',
+      cmd: YARN,
       args: ['run', 'github-checks-reporter', title, cmd, ...args],
     } : { options, cmd, args });
   const gruntTaskWithGithubChecks = (title, task) =>
     scriptWithGithubChecks({
       title,
-      cmd: 'yarn',
+      cmd: YARN,
       args: ['run', 'grunt', task]
     });
 
@@ -155,6 +156,19 @@ module.exports = function (grunt) {
       title: 'Mocha tests',
       cmd: NODE,
       args: [
+        'scripts/mocha'
+      ]
+    }),
+
+    // used by the test:mochaCoverage task
+    mochaCoverage: scriptWithGithubChecks({
+      title: 'Mocha tests coverage',
+      cmd: YARN,
+      args: [
+        'nyc',
+        '--reporter=html',
+        '--report-dir=./target/kibana-coverage/mocha',
+        NODE,
         'scripts/mocha'
       ]
     }),
