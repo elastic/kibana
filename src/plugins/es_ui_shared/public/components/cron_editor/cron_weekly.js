@@ -42,7 +42,7 @@ export const CronWeekly = ({
     <EuiFormRow
       label={(
         <FormattedMessage
-          id="es_ui.cronEditor.cronWeekly.fieldDateLabel"
+          id="esUi.cronEditor.cronWeekly.fieldDateLabel"
           defaultMessage="Day"
         />
       )}
@@ -58,7 +58,7 @@ export const CronWeekly = ({
           <EuiText size="xs">
             <strong>
               <FormattedMessage
-                id="es_ui.cronEditor.cronWeekly.textOnLabel"
+                id="esUi.cronEditor.cronWeekly.textOnLabel"
                 defaultMessage="On"
               />
             </strong>
@@ -71,7 +71,7 @@ export const CronWeekly = ({
     <EuiFormRow
       label={(
         <FormattedMessage
-          id="es_ui.cronEditor.cronWeekly.fieldTimeLabel"
+          id="esUi.cronEditor.cronWeekly.fieldTimeLabel"
           defaultMessage="Time"
         />
       )}
@@ -89,7 +89,7 @@ export const CronWeekly = ({
               <EuiText size="xs">
                 <strong>
                   <FormattedMessage
-                    id="es_ui.cronEditor.cronWeekly.fieldHour.textAtLabel"
+                    id="esUi.cronEditor.cronWeekly.fieldHour.textAtLabel"
                     defaultMessage="At"
                   />
                 </strong>

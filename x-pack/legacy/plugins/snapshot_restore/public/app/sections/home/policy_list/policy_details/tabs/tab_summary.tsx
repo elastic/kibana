@@ -49,19 +49,19 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
 
   // Only show 10 indices initially
   const [isShowingFullIndicesList, setIsShowingFullIndicesList] = useState<boolean>(false);
-  const hiddenIndicesCount = indices && indices.length > 10 ? indices.length - 10 : 0;
+  const displayIndices = typeof indices === 'string' ? indices.split(',') : indices;
+  const hiddenIndicesCount =
+    displayIndices && displayIndices.length > 10 ? displayIndices.length - 10 : 0;
   const shortIndicesList =
-    indices && indices.length ? (
+    displayIndices && displayIndices.length ? (
       <ul>
-        {[...(Array.isArray(indices) ? indices : indices.split(','))]
-          .splice(0, 10)
-          .map((index: string) => (
-            <li key={index}>
-              <EuiTitle size="xs">
-                <span>{index}</span>
-              </EuiTitle>
-            </li>
-          ))}
+        {displayIndices.splice(0, 10).map((index: string) => (
+          <li key={index}>
+            <EuiTitle size="xs">
+              <span>{index}</span>
+            </EuiTitle>
+          </li>
+        ))}
         {hiddenIndicesCount ? (
           <li key="hiddenIndicesCount">
             <EuiTitle size="xs">
@@ -84,9 +84,9 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
       />
     );
   const fullIndicesList =
-    indices && indices.length && indices.length > 10 ? (
+    displayIndices && displayIndices.length && displayIndices.length > 10 ? (
       <ul>
-        {(Array.isArray(indices) ? indices : indices.split(',')).map((index: string) => (
+        {displayIndices.map((index: string) => (
           <li key={index}>
             <EuiTitle size="xs">
               <span>{index}</span>

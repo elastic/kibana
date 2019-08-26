@@ -42,7 +42,7 @@ export const CronMonthly = ({
     <EuiFormRow
       label={(
         <FormattedMessage
-          id="es_ui.cronEditor.cronMonthly.fieldDateLabel"
+          id="esUi.cronEditor.cronMonthly.fieldDateLabel"
           defaultMessage="Date"
         />
       )}
@@ -58,7 +58,7 @@ export const CronMonthly = ({
           <EuiText size="xs">
             <strong>
               <FormattedMessage
-                id="es_ui.cronEditor.cronMonthly.textOnTheLabel"
+                id="esUi.cronEditor.cronMonthly.textOnTheLabel"
                 defaultMessage="On the"
               />
             </strong>
@@ -71,7 +71,7 @@ export const CronMonthly = ({
     <EuiFormRow
       label={(
         <FormattedMessage
-          id="es_ui.cronEditor.cronMonthly.fieldTimeLabel"
+          id="esUi.cronEditor.cronMonthly.fieldTimeLabel"
           defaultMessage="Time"
         />
       )}
@@ -89,7 +89,7 @@ export const CronMonthly = ({
               <EuiText size="xs">
                 <strong>
                   <FormattedMessage
-                    id="es_ui.cronEditor.cronMonthly.fieldHour.textAtLabel"
+                    id="esUi.cronEditor.cronMonthly.fieldHour.textAtLabel"
                     defaultMessage="At"
                   />
                 </strong>

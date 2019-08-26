@@ -46,7 +46,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
 
   // States for choosing all indices, or a subset, including caching previously chosen subset list
   const [isAllIndices, setIsAllIndices] = useState<boolean>(!Boolean(config.indices));
-  const [cachedIndices, setCachedIndices] = useState<SnapshotConfig['indices']>([...indices]);
+  const [indicesSelection, setIndicesSelection] = useState<SnapshotConfig['indices']>([...indices]);
   const [indicesOptions, setIndicesOptions] = useState<Option[]>(
     indices.map(
       (index): Option => ({
@@ -117,7 +117,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
                   indices:
                     selectIndicesMode === 'custom'
                       ? indexPatterns.join(',')
-                      : [...(cachedIndices || [])],
+                      : [...(indicesSelection || [])],
                 });
               }
             }}
@@ -162,7 +162,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
                         <EuiLink
                           onClick={() => {
                             setSelectIndicesMode('list');
-                            updatePolicyConfig({ indices: cachedIndices });
+                            updatePolicyConfig({ indices: indicesSelection });
                           }}
                         >
                           <FormattedMessage
@@ -189,7 +189,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
                                   option.checked = undefined;
                                 });
                                 updatePolicyConfig({ indices: [] });
-                                setCachedIndices([]);
+                                setIndicesSelection([]);
                               }}
                             >
                               <FormattedMessage
@@ -204,7 +204,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
                                   option.checked = 'on';
                                 });
                                 updatePolicyConfig({ indices: [...indices] });
-                                setCachedIndices([]);
+                                setIndicesSelection([...indices]);
                               }}
                             >
                               <FormattedMessage
@@ -232,8 +232,8 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
                         }
                       });
                       setIndicesOptions(options);
-                      updatePolicyConfig({ indices: [...newSelectedIndices] });
-                      setCachedIndices([...newSelectedIndices]);
+                      updatePolicyConfig({ indices: newSelectedIndices });
+                      setIndicesSelection(newSelectedIndices);
                     }}
                     searchable
                     height={300}
@@ -315,7 +315,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
               defaultMessage="Ignore unavailable indices"
             />
           }
-          checked={config.ignoreUnavailable}
+          checked={Boolean(config.ignoreUnavailable)}
           onChange={e => {
             updatePolicyConfig({
               ignoreUnavailable: e.target.checked,
@@ -355,7 +355,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
               defaultMessage="Allow partial indices"
             />
           }
-          checked={config.partial}
+          checked={Boolean(config.partial)}
           onChange={e => {
             updatePolicyConfig({
               partial: e.target.checked,

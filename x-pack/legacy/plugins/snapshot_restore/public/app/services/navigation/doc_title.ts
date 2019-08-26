@@ -13,10 +13,10 @@ class DocTitleService {
   }
 
   public setTitle(page?: string): void {
-    if (page && page !== 'home' && textService.breadcrumbs[page]) {
-      this.changeDocTitle(`${textService.breadcrumbs[page]} - ${textService.breadcrumbs.home}`);
-    } else {
+    if (!page || page === 'home') {
       this.changeDocTitle(`${textService.breadcrumbs.home}`);
+    } else if (textService.breadcrumbs[page]) {
+      this.changeDocTitle(`${textService.breadcrumbs[page]} - ${textService.breadcrumbs.home}`);
     }
   }
 }

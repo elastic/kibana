@@ -344,7 +344,7 @@ export class CronEditor extends Component {
         <EuiFormRow
           label={(
             <FormattedMessage
-              id="es_ui.cronEditor.fieldFrequencyLabel"
+              id="esUi.cronEditor.fieldFrequencyLabel"
               defaultMessage="Frequency"
             />
           )}
@@ -359,7 +359,7 @@ export class CronEditor extends Component {
               <EuiText size="xs">
                 <strong>
                   <FormattedMessage
-                    id="es_ui.cronEditor.textEveryLabel"
+                    id="esUi.cronEditor.textEveryLabel"
                     defaultMessage="Every"
                   />
                 </strong>

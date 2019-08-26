@@ -40,7 +40,7 @@ export const CronDaily = ({
     <EuiFormRow
       label={(
         <FormattedMessage
-          id="es_ui.cronEditor.cronDaily.fieldTimeLabel"
+          id="esUi.cronEditor.cronDaily.fieldTimeLabel"
           defaultMessage="Time"
         />
       )}
@@ -58,7 +58,7 @@ export const CronDaily = ({
               <EuiText size="xs">
                 <strong>
                   <FormattedMessage
-                    id="es_ui.cronEditor.cronDaily.fieldHour.textAtLabel"
+                    id="esUi.cronEditor.cronDaily.fieldHour.textAtLabel"
                     defaultMessage="At"
                   />
                 </strong>

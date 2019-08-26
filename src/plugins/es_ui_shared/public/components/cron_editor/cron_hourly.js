@@ -36,7 +36,7 @@ export const CronHourly = ({
     <EuiFormRow
       label={(
         <FormattedMessage
-          id="es_ui.cronEditor.cronHourly.fieldTimeLabel"
+          id="esUi.cronEditor.cronHourly.fieldTimeLabel"
           defaultMessage="Minute"
         />
       )}
@@ -52,7 +52,7 @@ export const CronHourly = ({
           <EuiText size="xs">
             <strong>
               <FormattedMessage
-                id="es_ui.cronEditor.cronHourly.fieldMinute.textAtLabel"
+                id="esUi.cronEditor.cronHourly.fieldMinute.textAtLabel"
                 defaultMessage="At"
               />
             </strong>

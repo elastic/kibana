@@ -108,6 +108,8 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
     }
   };
 
+  const lastStep = Object.keys(stepMap).length;
+
   return (
     <Fragment>
       <PolicyNavigation
@@ -150,7 +152,7 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
           ) : null}
-          {currentStep < 3 ? (
+          {currentStep < lastStep ? (
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
@@ -165,7 +167,7 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
               </EuiButton>
             </EuiFlexItem>
           ) : null}
-          {currentStep === 3 ? (
+          {currentStep === lastStep ? (
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
