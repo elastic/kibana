@@ -16,26 +16,10 @@ interface Props {
   onChange: (privs: string[]) => void;
 }
 
-interface State {
-  availableClusterPrivileges: string[];
-}
-
-export class ClusterPrivileges extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      availableClusterPrivileges: this.getAvailableClusterPrivileges(props),
-    };
-  }
-
-  componentWillReceiveProps(nextProps: Props) {
-    this.setState({
-      availableClusterPrivileges: this.getAvailableClusterPrivileges(nextProps),
-    });
-  }
-
+export class ClusterPrivileges extends Component<Props, {}> {
   public render() {
-    return <EuiFlexGroup>{this.buildComboBox(this.state.availableClusterPrivileges)}</EuiFlexGroup>;
+    const availableClusterPrivileges = this.getAvailableClusterPrivileges();
+    return <EuiFlexGroup>{this.buildComboBox(availableClusterPrivileges)}</EuiFlexGroup>;
   }
 
   public buildComboBox = (items: string[]) => {
@@ -69,10 +53,10 @@ export class ClusterPrivileges extends Component<Props, State> {
     this.props.onChange([...this.props.role.elasticsearch.cluster, customPrivilege]);
   };
 
-  private getAvailableClusterPrivileges = (props: Props) => {
+  private getAvailableClusterPrivileges = () => {
     const availableClusterPrivileges = [
-      ...props.builtinClusterPrivileges,
-      ...props.role.elasticsearch.cluster,
+      ...this.props.builtinClusterPrivileges,
+      ...this.props.role.elasticsearch.cluster,
     ];
 
     return _.uniq(availableClusterPrivileges);
