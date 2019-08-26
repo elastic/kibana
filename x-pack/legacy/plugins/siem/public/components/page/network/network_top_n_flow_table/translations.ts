@@ -32,15 +32,15 @@ export const DOMAIN = i18n.translate('xpack.siem.networkTopNFlowTable.column.dom
 });
 
 export const BYTES_IN = i18n.translate('xpack.siem.networkTopNFlowTable.column.bytesTitle', {
-  defaultMessage: 'Bytes In',
+  defaultMessage: 'Bytes in',
 });
 
 export const BYTES_OUT = i18n.translate('xpack.siem.networkTopNFlowTable.column.bytesTitle', {
-  defaultMessage: 'Bytes Out',
+  defaultMessage: 'Bytes out',
 });
 
 export const AUTONOMOUS_SYSTEM = i18n.translate('xpack.siem.networkTopNFlowTable.column.asTitle', {
-  defaultMessage: 'Autonomous System',
+  defaultMessage: 'Autonomous system',
 });
 
 export const FLOWS = i18n.translate('xpack.siem.networkTopNFlowTable.flows', {
