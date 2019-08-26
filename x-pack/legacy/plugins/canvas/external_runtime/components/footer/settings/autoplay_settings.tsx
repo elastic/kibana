@@ -5,13 +5,8 @@
  */
 
 import React from 'react';
-import { EuiSpacer, EuiHorizontalRule, EuiSwitch } from '@elastic/eui';
-import {
-  useExternalEmbedState,
-  setAutoplay,
-  setAutoplayAnimate,
-  setAutoplayInterval,
-} from '../../../context';
+import { EuiHorizontalRule, EuiSwitch } from '@elastic/eui';
+import { useExternalEmbedState, setAutoplay, setAutoplayInterval } from '../../../context';
 import { createTimeInterval } from '../../../../public/lib/time_interval';
 // @ts-ignore Untyped local
 import { CustomInterval } from '../../../../public/components/workpad_header/control_settings/custom_interval';
@@ -32,14 +27,6 @@ export const AutoplaySettings = () => {
         label="Cycle Slides"
         checked={autoplay.enabled}
         onChange={() => dispatch(setAutoplay(!autoplay.enabled))}
-      />
-      <EuiSpacer size="m" />
-      <EuiSwitch
-        name="animate"
-        id="animate"
-        label="Animate Cycle"
-        checked={autoplay.animate}
-        onChange={() => dispatch(setAutoplayAnimate(!autoplay.animate))}
       />
       <EuiHorizontalRule margin="m" />
       <CustomInterval

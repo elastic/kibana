@@ -7,16 +7,14 @@
 const path = require('path');
 
 const LIBRARY_NAME = 'KbnCanvas';
-const RUNTIME_NAME = 'kbnCanvas';
+const RUNTIME_NAME = 'kbn_canvas';
 const KIBANA_ROOT = path.resolve(__dirname, '../../../../..');
 const RUNTIME_SRC = path.resolve(KIBANA_ROOT, 'x-pack/legacy/plugins/canvas/external_runtime');
-const BUILT_ASSETS = path.resolve(RUNTIME_SRC, 'build');
-const RUNTIME_OUTPUT = BUILT_ASSETS;
+const RUNTIME_OUTPUT = path.resolve(RUNTIME_SRC, 'build');
 const RUNTIME_FILE = path.resolve(RUNTIME_OUTPUT, RUNTIME_NAME + '.js');
 const STATS_OUTPUT = path.resolve(RUNTIME_OUTPUT, 'webpack_stats.json');
 
 module.exports = {
-  BUILT_ASSETS,
   KIBANA_ROOT,
   LIBRARY_NAME,
   RUNTIME_FILE,

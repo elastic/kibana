@@ -117,7 +117,7 @@ export const WorkpadExport: FunctionComponent<Props> = ({
         },
       },
       {
-        name: 'Embed on a Website',
+        name: 'Embed on a website',
         icon: <EuiIcon type="globe" size="m" />,
         onClick: () => {
           setShowFlyout(true);

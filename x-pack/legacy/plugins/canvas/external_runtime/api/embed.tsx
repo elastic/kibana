@@ -22,10 +22,13 @@ export interface Options {
   page?: number;
 }
 
+const PREFIX = 'kbn-canvas';
+const EMBED = `${PREFIX}-embed`;
+
 const getAttributes = (element: Element, attributes: string[]) => {
   const result: { [key: string]: string } = {};
   attributes.forEach(attribute => {
-    const key = `kbn-${attribute}`;
+    const key = `${PREFIX}-${attribute}`;
     const value = element.getAttribute(key);
 
     if (value) {
@@ -78,7 +81,7 @@ const updateArea = async (area: Element) => {
       };
 
       area.classList.add('kbnCanvas');
-      area.removeAttribute(`kbn-embed`);
+      area.removeAttribute(EMBED);
 
       render(<App workpad={workpad} {...options} />, area);
     }
@@ -90,10 +93,8 @@ const updateArea = async (area: Element) => {
  * other option handling for embedding strategies.
  */
 export const embed = () => {
-  const embedAreas = document.querySelectorAll('[kbn-embed]');
-  const validAreas = Array.from(embedAreas).filter(
-    area => area.getAttribute('kbn-embed') === 'canvas'
-  );
+  const embedAreas = document.querySelectorAll(`[${EMBED}]`);
+  const validAreas = Array.from(embedAreas).filter(area => area.getAttribute(EMBED) === 'canvas');
 
   validAreas.forEach(updateArea);
 };

@@ -8,7 +8,7 @@ import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { ExternalEmbedFlyout } from '../external_embed_flyout';
 
-storiesOf('components/Export/ExternalEmbedPanel', module)
+storiesOf('components/Export/ExternalEmbedFlyout', module)
   .addParameters({
     info: {
       inline: true,
@@ -24,11 +24,9 @@ storiesOf('components/Export/ExternalEmbedPanel', module)
     },
   })
   .add('default', () => (
-    <div className="euiPanel">
-      <ExternalEmbedFlyout
-        onCopy={action('onCopy')}
-        onExport={action('onExport')}
-        onClose={action('onClose')}
-      />
-    </div>
+    <ExternalEmbedFlyout
+      onCopy={action('onCopy')}
+      onExport={action('onExport')}
+      onClose={action('onClose')}
+    />
   ));

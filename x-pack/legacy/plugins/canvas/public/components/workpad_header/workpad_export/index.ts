@@ -20,6 +20,7 @@ import {
   downloadWorkpad,
   downloadRenderedWorkpad,
   downloadEmbedRuntime,
+  downloadZippedEmbed,
   // @ts-ignore Untyped local
 } from '../../../lib/download_workpad';
 import { WorkpadExport as Component, Props as ComponentProps } from './workpad_export';
@@ -27,7 +28,7 @@ import { getPdfUrl, createPdf } from './utils';
 import { CanvasWorkpad } from '../../../../types';
 import { CanvasRenderedWorkpad } from '../../../../external_runtime/types';
 // @ts-ignore Untyped local.
-import { fetch } from '../../../../common/lib/fetch';
+import { fetch, arrayBufferFetch } from '../../../../common/lib/fetch';
 import { API_ROUTE_SNAPSHOT_ZIP } from '../../../../common/lib/constants';
 
 const mapStateToProps = (state: any) => ({
@@ -108,20 +109,9 @@ export const WorkpadExport = compose<ComponentProps, Props>(
             return;
           case 'zip':
             const basePath = chrome.getBasePath();
-            fetch
+            arrayBufferFetch
               .post(`${basePath}${API_ROUTE_SNAPSHOT_ZIP}`, JSON.stringify(renderedWorkpad))
-              .then(blob => {
-                const url = window.URL.createObjectURL(new Blob([blob.data]));
-                const link = document.createElement('a');
-                link.href = url;
-                link.setAttribute('download', `workpad.zip`);
-                // 3. Append to html page
-                document.body.appendChild(link);
-                // 4. Force download
-                link.click();
-                // 5. Clean up and remove the link
-                document.body.removeChild(link);
-              });
+              .then(blob => downloadZippedEmbed(blob.data));
             return;
           default:
             throw new Error(`Unknown export type: ${type}`);

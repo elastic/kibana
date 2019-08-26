@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const BUILT_ASSETS: string;
 export const KIBANA_ROOT: string;
 export const LIBRARY_NAME: string;
 export const RUNTIME_FILE: string;

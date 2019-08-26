@@ -41,3 +41,12 @@ export const downloadEmbedRuntime = async () => {
     notify.error(err, { title: `Couldn't download embed runtime` });
   }
 };
+
+export const downloadZippedEmbed = async data => {
+  try {
+    const zip = new Blob([data], { type: 'octet/stream' });
+    fileSaver.saveAs(zip, 'canvas-workpad-embed.zip');
+  } catch (err) {
+    notify.error(err, { title: `Couldn't download ZIP file` });
+  }
+};

@@ -19,7 +19,7 @@ const {
   RUNTIME_SRC,
   KIBANA_ROOT,
   STATS_OUTPUT,
-  RUNTIME_OUTPUT,
+  RUNTIME_FILE,
 } = require('../external_runtime/constants');
 
 run(
@@ -28,7 +28,7 @@ run(
 
     const clean = () => {
       log.info('Deleting previous build.');
-      del.sync([RUNTIME_OUTPUT], { force: true });
+      del.sync([RUNTIME_FILE], { force: true });
     };
 
     if (flags.clean) {

@@ -15,3 +15,13 @@ export const fetch = axios.create({
   },
   timeout: FETCH_TIMEOUT,
 });
+
+export const arrayBufferFetch = axios.create({
+  responseType: 'arraybuffer',
+  headers: {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    'kbn-xsrf': 'professionally-crafted-string-of-text',
+  },
+  timeout: FETCH_TIMEOUT,
+});
