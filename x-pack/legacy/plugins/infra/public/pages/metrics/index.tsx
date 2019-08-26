@@ -39,6 +39,7 @@ import { InfraMetricLayoutSection } from './layouts/types';
 import { withMetricPageProviders } from './page_providers';
 import { useMetadata } from '../../containers/metadata/use_metadata';
 import { Source } from '../../containers/source';
+import { InfraLoadingPanel } from '../../components/loading';
 
 const DetailPageContent = euiStyled(PageContent)`
   overflow: auto;
@@ -112,6 +113,19 @@ export const MetricDetail = withMetricPageProviders(
           },
           []
         );
+
+        if (metadataLoading && !filteredLayouts.length) {
+          return (
+            <InfraLoadingPanel
+              height="100vh"
+              width="100%"
+              text={intl.formatMessage({
+                id: 'xpack.infra.metrics.loadingNodeDataText',
+                defaultMessage: 'Loading data',
+              })}
+            />
+          );
+        }
 
         return (
           <WithMetricsTime>

@@ -7,6 +7,7 @@
 import { advancedFilter } from './advanced_filter';
 import { dropdownFilter } from './dropdown_filter';
 import { debug } from './debug';
+import { embeddable } from './embeddable';
 import { error } from './error';
 import { image } from './image';
 import { repeatImage } from './repeat_image';
@@ -25,6 +26,7 @@ export const renderFunctions = [
   advancedFilter,
   dropdownFilter,
   debug,
+  embeddable,
   error,
   image,
   repeatImage,
