@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { debounce } from 'lodash/fp';
 import { mount } from 'enzyme';
 import * as React from 'react';
 
@@ -11,6 +11,8 @@ import { TestProviders } from '../../../../mock';
 import { ACTIONS_COLUMN_WIDTH } from '../helpers';
 
 import { Actions } from '.';
+
+jest.mock('lodash/fp');
 
 describe('Actions', () => {
   test('it renders a checkbox for selecting the event when `showCheckboxes` is `true`', () => {
@@ -157,9 +159,16 @@ describe('Actions', () => {
     expect(toggleShowNotes).toBeCalled();
   });
   describe('mock debounce from lodash/fp', () => {
-    jest.mock('lodash/fp', () => ({
-      debounce: (time: number, faker: () => void) => faker,
-    }));
+    beforeEach(() => {
+      // @ts-ignore property mockImplementation does not exists
+      debounce.mockImplementation((time: number, fn: () => void) => {
+        return fn();
+      });
+    });
+    afterEach(() => {
+      jest.resetAllMocks();
+    });
+
     test('it invokes onPinClicked when the button for pinning events is clicked', () => {
       const onPinClicked = jest.fn();
 
@@ -190,7 +199,7 @@ describe('Actions', () => {
         .first()
         .simulate('click');
 
-      expect(onPinClicked).toBeCalled();
+      expect(onPinClicked).toHaveBeenCalled();
     });
   });
 });
