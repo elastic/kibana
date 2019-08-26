@@ -28,7 +28,8 @@ export const appEntryTemplate = (bundle) => `
 
 // import global polyfills
 import Symbol_observable from 'symbol-observable';
-import '@babel/polyfill';
+import 'core-js/stable';
+import 'regenerator-runtime/runtime';
 import 'custom-event-polyfill';
 import 'whatwg-fetch';
 import 'abortcontroller-polyfill';
