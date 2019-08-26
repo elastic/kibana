@@ -130,7 +130,7 @@ export class APIKeys {
    */
   async invalidate(
     request: KibanaRequest,
-    body: InvalidateAPIKeyParams
+    params: InvalidateAPIKeyParams
   ): Promise<InvalidateAPIKeyResult | null> {
     if (this.isSecurityFeatureDisabled()) {
       return null;
@@ -143,10 +143,14 @@ export class APIKeys {
     try {
       result = (await this.clusterClient
         .asScoped(request)
-        .callAsCurrentUser('shield.invalidateAPIKey', { body })) as InvalidateAPIKeyResult;
+        .callAsCurrentUser('shield.invalidateAPIKey', {
+          body: {
+            id: params.id,
+          },
+        })) as InvalidateAPIKeyResult;
       this.logger.debug('API key was invalidated successfully');
     } catch (e) {
-      this.logger.debug(`Failed to invalidate API key: ${e.message}`);
+      this.logger.error(`Failed to invalidate API key: ${e.message}`);
       throw e;
     }
 
