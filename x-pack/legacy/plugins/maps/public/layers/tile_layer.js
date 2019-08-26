@@ -6,11 +6,11 @@
 
 import { AbstractLayer } from './layer';
 import _ from 'lodash';
-import { SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
+import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE } from '../../common/constants';
 
 export class TileLayer extends AbstractLayer {
 
-  static type = 'TILE';
+  static type = LAYER_TYPE.TILE;
 
   constructor({ layerDescriptor, source, style }) {
     super({ layerDescriptor, source, style });

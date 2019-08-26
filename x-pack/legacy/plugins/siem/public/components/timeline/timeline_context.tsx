@@ -6,8 +6,6 @@
 
 import * as React from 'react';
 
-export interface TimelineContextData {
-  isLoading: boolean;
-}
+export const TimelineContext = React.createContext<boolean>(false);
 
-export const TimelineContext = React.createContext<TimelineContextData>({ isLoading: false });
+export const TimelineWidthContext = React.createContext<number>(0);
