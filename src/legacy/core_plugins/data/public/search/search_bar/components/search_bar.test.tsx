@@ -25,6 +25,9 @@ import { IndexPattern } from 'ui/index_patterns';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 const setupMock = coreMock.createSetup();
 
+import { timefilterServiceMock } from '../../../timefilter/timefilter_service.mock';
+const timefilterSetupMock = timefilterServiceMock.createSetupContract();
+
 jest.mock('../../../../../data/public', () => {
   return {
     FilterBar: () => <div className="filterBar"></div>,
@@ -98,6 +101,7 @@ describe('SearchBar', () => {
   it('Should render query bar when no options provided (in reality - timepicker)', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
+        history={timefilterSetupMock.history}
         uiSettings={setupMock.uiSettings}
         savedQueryService={mockSavedQueryService}
         appName={'test'}
@@ -114,6 +118,7 @@ describe('SearchBar', () => {
   it('Should render empty when timepicker is off and no options provided', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
+        history={timefilterSetupMock.history}
         uiSettings={setupMock.uiSettings}
         savedQueryService={mockSavedQueryService}
         appName={'test'}
@@ -131,6 +136,7 @@ describe('SearchBar', () => {
   it('Should render filter bar, when required fields are provided', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
+        history={timefilterSetupMock.history}
         uiSettings={setupMock.uiSettings}
         savedQueryService={mockSavedQueryService}
         appName={'test'}
@@ -150,6 +156,7 @@ describe('SearchBar', () => {
   it('Should NOT render filter bar, if disabled', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
+        history={timefilterSetupMock.history}
         uiSettings={setupMock.uiSettings}
         savedQueryService={mockSavedQueryService}
         appName={'test'}
@@ -170,6 +177,7 @@ describe('SearchBar', () => {
   it('Should render query bar, when required fields are provided', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
+        history={timefilterSetupMock.history}
         uiSettings={setupMock.uiSettings}
         savedQueryService={mockSavedQueryService}
         appName={'test'}
@@ -190,6 +198,7 @@ describe('SearchBar', () => {
   it('Should NOT render query bar, if disabled', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
+        history={timefilterSetupMock.history}
         uiSettings={setupMock.uiSettings}
         savedQueryService={mockSavedQueryService}
         appName={'test'}
@@ -211,6 +220,7 @@ describe('SearchBar', () => {
   it('Should render query bar and filter bar', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
+        history={timefilterSetupMock.history}
         uiSettings={setupMock.uiSettings}
         savedQueryService={mockSavedQueryService}
         appName={'test'}
