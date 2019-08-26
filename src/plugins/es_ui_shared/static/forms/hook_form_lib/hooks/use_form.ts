@@ -36,7 +36,7 @@ export const useForm = <T = FormData>(
     deserializer = (data: any) => data,
     options = { errorDisplayDelay: DEFAULT_ERROR_DISPLAY_TIMEOUT, stripEmptyFields: true },
   } = formConfig;
-  const defaultValueDeSerialized =
+  const defaultValueDeserialized =
     Object.keys(defaultValue).length === 0 ? defaultValue : deserializer(defaultValue);
   const [isSubmitted, setSubmitted] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
@@ -140,7 +140,7 @@ export const useForm = <T = FormData>(
   const getFields: Form<T>['getFields'] = () => fieldsRefs.current;
 
   const getFieldDefaultValue: Form['getFieldDefaultValue'] = fieldName =>
-    get(defaultValueDeSerialized, fieldName);
+    get(defaultValueDeserialized, fieldName);
 
   const readFieldConfigFromSchema: Form<T>['__readFieldConfigFromSchema'] = fieldName => {
     const config = (get(schema ? schema : {}, fieldName) as FieldConfig) || {};
@@ -153,8 +153,10 @@ export const useForm = <T = FormData>(
       e.preventDefault();
     }
 
+    if (!isSubmitted) {
+      setSubmitted(true); // User has attempted to submit the form at least once
+    }
     setSubmitting(true);
-    setSubmitted(true); // User has attempted to submit the form at least once
 
     const isFormValid = await validateFields();
     const formData = serializer(getFormData() as T);

@@ -76,13 +76,13 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     );
   };
 
-  const runFormatters = (input: unknown): unknown => {
-    const isEmptyString = typeof input === 'string' && input.trim() === '';
+  const formatInputValue = (inputValue: unknown): unknown => {
+    const isEmptyString = typeof inputValue === 'string' && inputValue.trim() === '';
 
     if (isEmptyString) {
-      return input;
+      return inputValue;
     }
-    return formatters.reduce((output, formatter) => formatter(output), input);
+    return formatters.reduce((output, formatter) => formatter(output), inputValue);
   };
 
   const onValueChange = () => {
@@ -295,7 +295,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
   const setValue: Field['setValue'] = newValue => {
     onValueChange();
 
-    const formattedValue = runFormatters(newValue);
+    const formattedValue = formatInputValue(newValue);
     setStateValue(formattedValue);
 
     // Update the form data observable
