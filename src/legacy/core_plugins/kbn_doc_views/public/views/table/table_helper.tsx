@@ -69,7 +69,10 @@ export function arrayContainsObjects(value: unknown[]) {
  * This html is cleaned up and prepared for usage in the react world
  * Furthermore <mark>test</mark> are converted to ReactNodes
  */
-export function formatValue(value: unknown, valueFormatted: string): string | React.ReactNode {
+export function formatValue(
+  value: null | string | number | boolean | object | Array<string | object | null>,
+  valueFormatted: string
+): string | React.ReactNode {
   if (Array.isArray(value) && arrayContainsObjects(value)) {
     return value.map(v => JSON.stringify(v, null, 2)).join('\n');
   } else if (Array.isArray(value)) {

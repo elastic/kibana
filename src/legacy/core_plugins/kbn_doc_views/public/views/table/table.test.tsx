@@ -154,14 +154,13 @@ describe('DocViewTable at Discover', () => {
       expect(rowComponent.length).toBe(1);
     });
 
-    [
+    ([
       'addInclusiveFilterButton',
       'collapseBtn',
       'noMappingWarning',
       'toggleColumnButton',
       'underscoreWarning',
-    ].forEach(element => {
-      // @ts-ignore
+    ] as const).forEach(element => {
       const elementExist = check[element];
 
       if (typeof elementExist === 'boolean') {
