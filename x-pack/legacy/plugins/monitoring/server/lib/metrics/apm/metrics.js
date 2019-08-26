@@ -138,12 +138,12 @@ export const metrics = {
     title: i18n.translate('xpack.monitoring.metrics.apm.requestsTitle', {
       defaultMessage: 'Request Count Intake API',
     }),
-    label: i18n.translate('xpack.monitoring.metrics.apm.requests.requestedLabel', {
-      defaultMessage: 'Requested',
+    label: i18n.translate('xpack.monitoring.metrics.apm.requests.server.requestedLabel', {
+      defaultMessage: 'Requested'
     }),
-    description: i18n.translate('xpack.monitoring.metrics.apm.requests.requestedDescription', {
-      defaultMessage: 'HTTP Requests received by server',
-    }),
+    description: i18n.translate('xpack.monitoring.metrics.apm.requests.server.requestedDescription', {
+      defaultMessage: 'HTTP Requests received by server'
+    })
   }),
   apm_acm_requests: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.acm.request.count',
@@ -160,15 +160,15 @@ export const metrics = {
 
   apm_server_responses_count: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.count',
-    title: i18n.translate('xpack.monitoring.metrics.apm.responseCountTitle', {
-      defaultMessage: 'Response Count Intake API',
+    title: i18n.translate('xpack.monitoring.metrics.apm.server.responseCountTitle', {
+      defaultMessage: 'Response Count Intake API'
     }),
-    label: i18n.translate('xpack.monitoring.metrics.apm.responseCount.totalLabel', {
-      defaultMessage: 'Total',
+    label: i18n.translate('xpack.monitoring.metrics.apm.server.responseCount.totalLabel', {
+      defaultMessage: 'Total'
     }),
-    description: i18n.translate('xpack.monitoring.metrics.apm.responseCount.totalDescription', {
-      defaultMessage: 'HTTP Requests responded to by server',
-    }),
+    description: i18n.translate('xpack.monitoring.metrics.apm.server.responseCount.totalDescription', {
+      defaultMessage: 'HTTP Requests responded to by server'
+    })
   }),
   apm_server_responses_errors_count: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.errors.count',
@@ -188,10 +188,10 @@ export const metrics = {
     title: i18n.translate('xpack.monitoring.metrics.apm.acmResponseCountTitle', {
       defaultMessage: 'Response Count Agent Configuration Management'
     }),
-    label: i18n.translate('xpack.monitoring.metrics.apm.acmResponseCount.totalLabel', {
+    label: i18n.translate('xpack.monitoring.metrics.apm.acm.responseCount.totalLabel', {
       defaultMessage: 'Total'
     }),
-    description: i18n.translate('xpack.monitoring.metrics.apm.acmResponseCount.totalDescription', {
+    description: i18n.translate('xpack.monitoring.metrics.apm.acm.responseCount.totalDescription', {
       defaultMessage: 'HTTP Requests responded to by server'
     })
   }),
@@ -209,180 +209,167 @@ export const metrics = {
   }),
   apm_server_responses_valid_ok: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.valid.ok',
-    title: i18n.translate('xpack.monitoring.metrics.apm.response.okTitle', {
-      defaultMessage: 'Ok',
+    title: i18n.translate('xpack.monitoring.metrics.apm.server.response.okTitle', {
+      defaultMessage: 'Ok'
     }),
-    label: i18n.translate('xpack.monitoring.metrics.apm.response.okLabel', {
-      defaultMessage: 'Ok',
+    label: i18n.translate('xpack.monitoring.metrics.apm.server.response.okLabel', {
+      defaultMessage: 'Ok'
     }),
-    description: i18n.translate('xpack.monitoring.metrics.apm.response.okDescription', {
-      defaultMessage: '200 OK response count',
-    }),
+    description: i18n.translate('xpack.monitoring.metrics.apm.server.response.okDescription', {
+      defaultMessage: '200 OK response count'
+    })
   }),
   apm_acm_responses_valid_ok: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.acm.response.valid.ok',
-    title: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.okTitle', {
+    title: i18n.translate('xpack.monitoring.metrics.apm.acm.response.okTitle', {
       defaultMessage: 'Ok'
     }),
-    label: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.okLabel', {
+    label: i18n.translate('xpack.monitoring.metrics.apm.acm.response.okLabel', {
       defaultMessage: 'Ok'
     }),
-    description: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.okDescription', {
+    description: i18n.translate('xpack.monitoring.metrics.apm.acm.response.okDescription', {
       defaultMessage: '200 OK response count'
     })
   }),
   apm_acm_responses_valid_notmodified: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.acm.response.valid.notmodified',
-    title: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.okTitle', {
+    title: i18n.translate('xpack.monitoring.metrics.apm.acm.response.okTitle', {
       defaultMessage: 'Not modified'
     }),
-    label: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.okLabel', {
+    label: i18n.translate('xpack.monitoring.metrics.apm.acm.response.okLabel', {
       defaultMessage: 'Not modified'
     }),
-    description: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.okDescription', {
+    description: i18n.translate('xpack.monitoring.metrics.apm.acm.response.okDescription', {
       defaultMessage: 'Not modified'
     })
   }),
   apm_server_responses_valid_accepted: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.valid.accepted',
-    title: i18n.translate('xpack.monitoring.metrics.apm.response.acceptedTitle', {
-      defaultMessage: 'Accepted',
+    title: i18n.translate('xpack.monitoring.metrics.apm.server.response.acceptedTitle', {
+      defaultMessage: 'Accepted'
     }),
-    label: i18n.translate('xpack.monitoring.metrics.apm.response.acceptedLabel', {
-      defaultMessage: 'Accepted',
+    label: i18n.translate('xpack.monitoring.metrics.apm.server.response.acceptedLabel', {
+      defaultMessage: 'Accepted'
     }),
-    description: i18n.translate('xpack.monitoring.metrics.apm.response.acceptedDescription', {
-      defaultMessage: 'HTTP Requests successfully reporting new events',
-    }),
+    description: i18n.translate('xpack.monitoring.metrics.apm.server.response.acceptedDescription', {
+      defaultMessage: 'HTTP Requests successfully reporting new events'
+    })
   }),
   apm_responses_valid_accepted_acm: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.acm.response.valid.accepted',
-    title: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.acceptedTitle', {
+    title: i18n.translate('xpack.monitoring.metrics.apm.acm.response.acceptedTitle', {
       defaultMessage: 'Accepted'
     }),
-    label: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.acceptedLabel', {
+    label: i18n.translate('xpack.monitoring.metrics.apm.acm.response.acceptedLabel', {
       defaultMessage: 'Accepted'
     }),
-    description: i18n.translate('xpack.monitoring.metrics.apm.acmResponse.acceptedDescription', {
+    description: i18n.translate('xpack.monitoring.metrics.apm.acm.response.acceptedDescription', {
       defaultMessage: 'HTTP Requests successfully reporting new events'
     })
   }),
   apm_server_responses_errors_toolarge: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.errors.toolarge',
-    title: i18n.translate('xpack.monitoring.metrics.apm.responseErrorsTitle', {
-      defaultMessage: 'Response Errors Intake API',
+    title: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrorsTitle', {
+      defaultMessage: 'Response Errors Intake API'
     }),
-    label: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.tooLargeLabelTitle', {
-      defaultMessage: 'Too large',
+    label: i18n.translate('xpack.monitoring.metrics.apm.sever.responseErrors.tooLargeLabelTitle', {
+      defaultMessage: 'Too large'
     }),
-    description: i18n.translate(
-      'xpack.monitoring.metrics.apm.responseErrors.tooLargeLabelDescription',
-      {
-        defaultMessage: 'HTTP Requests rejected due to excessive payload size',
-      }
-    ),
+    description: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrors.tooLargeLabelDescription', {
+      defaultMessage: 'HTTP Requests rejected due to excessive payload size'
+    })
   }),
   apm_server_responses_errors_validate: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.errors.validate',
-    title: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.validateTitle', {
-      defaultMessage: 'Validate',
+    title: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrors.validateTitle', {
+      defaultMessage: 'Validate'
     }),
-    label: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.validateLabel', {
-      defaultMessage: 'Validate',
+    label: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrors.validateLabel', {
+      defaultMessage: 'Validate'
     }),
-    description: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.validateDescription', {
-      defaultMessage: 'HTTP Requests rejected due to payload validation error',
-    }),
+    description: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrors.validateDescription', {
+      defaultMessage: 'HTTP Requests rejected due to payload validation error'
+    })
   }),
   apm_server_responses_errors_method: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.errors.method',
-    title: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.methodTitle', {
-      defaultMessage: 'Method',
+    title: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrors.methodTitle', {
+      defaultMessage: 'Method'
     }),
-    label: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.methodLabel', {
-      defaultMessage: 'Method',
+    label: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrors.methodLabel', {
+      defaultMessage: 'Method'
     }),
-    description: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.methodDescription', {
-      defaultMessage: 'HTTP Requests rejected due to incorrect HTTP method',
-    }),
+    description: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrors.methodDescription', {
+      defaultMessage: 'HTTP Requests rejected due to incorrect HTTP method'
+    })
   }),
   apm_server_responses_errors_unauthorized: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.errors.unauthorized',
-    title: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.unauthorizedTitle', {
-      defaultMessage: 'Unauthorized',
+    title: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrors.unauthorizedTitle', {
+      defaultMessage: 'Unauthorized'
     }),
-    label: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.unauthorizedLabel', {
-      defaultMessage: 'Unauthorized',
+    label: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrors.unauthorizedLabel', {
+      defaultMessage: 'Unauthorized'
     }),
-    description: i18n.translate(
-      'xpack.monitoring.metrics.apm.responseErrors.unauthorizedDescription',
-      {
-        defaultMessage: 'HTTP Requests rejected due to invalid secret token',
-      }
-    ),
+    description: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrors.unauthorizedDescription', {
+      defaultMessage: 'HTTP Requests rejected due to invalid secret token'
+    })
   }),
   apm_server_responses_errors_ratelimit: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.errors.ratelimit',
-    title: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.rateLimitTitle', {
-      defaultMessage: 'Rate limit',
+    title: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrors.rateLimitTitle', {
+      defaultMessage: 'Rate limit'
     }),
-    label: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.rateLimitLabel', {
-      defaultMessage: 'Rate limit',
+    label: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrors.rateLimitLabel', {
+      defaultMessage: 'Rate limit'
     }),
-    description: i18n.translate(
-      'xpack.monitoring.metrics.apm.responseErrors.rateLimitDescription',
-      {
-        defaultMessage: 'HTTP Requests rejected to due excessive rate limit',
-      }
-    ),
+    description: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrors.rateLimitDescription', {
+      defaultMessage: 'HTTP Requests rejected to due excessive rate limit'
+    })
   }),
   apm_server_responses_errors_queue: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.errors.queue',
-    title: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.queueTitle', {
-      defaultMessage: 'Queue',
+    title: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrors.queueTitle', {
+      defaultMessage: 'Queue'
     }),
-    label: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.queueLabel', {
-      defaultMessage: 'Queue',
+    label: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrors.queueLabel', {
+      defaultMessage: 'Queue'
     }),
-    description: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.queueDescription', {
-      defaultMessage: 'HTTP Requests rejected to due internal queue filling up',
-    }),
+    description: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrors.queueDescription', {
+      defaultMessage: 'HTTP Requests rejected to due internal queue filling up'
+    })
   }),
   apm_server_responses_errors_decode: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.errors.decode',
-    title: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.decodeTitle', {
-      defaultMessage: 'Decode',
+    title: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrors.decodeTitle', {
+      defaultMessage: 'Decode'
     }),
-    label: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.decodeLabel', {
-      defaultMessage: 'Decode',
+    label: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrors.decodeLabel', {
+      defaultMessage: 'Decode'
     }),
-    description: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.decodeDescription', {
-      defaultMessage:
-        'HTTP Requests rejected to due decoding errors - invalid json, incorrect data type for entity',
-    }),
+    description: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrors.decodeDescription', {
+      defaultMessage: 'HTTP Requests rejected to due decoding errors - invalid json, incorrect data type for entity'
+    })
   }),
   apm_server_responses_errors_forbidden: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.errors.forbidden',
-    title: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.forbiddenTitle', {
-      defaultMessage: 'Forbidden',
+    title: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrors.forbiddenTitle', {
+      defaultMessage: 'Forbidden'
     }),
-    label: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.forbiddenLabel', {
-      defaultMessage: 'Forbidden',
+    label: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrors.forbiddenLabel', {
+      defaultMessage: 'Forbidden'
     }),
-    description: i18n.translate(
-      'xpack.monitoring.metrics.apm.responseErrors.forbiddenDescription',
-      {
-        defaultMessage: 'Forbidden HTTP Requests rejected - CORS violation, disabled enpoint',
-      }
-    ),
+    description: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrors.forbiddenDescription', {
+      defaultMessage: 'Forbidden HTTP Requests rejected - CORS violation, disabled enpoint'
+    })
   }),
   apm_server_responses_errors_concurrency: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.errors.concurrency',
-    title: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.concurrencyTitle', {
-      defaultMessage: 'Concurrency',
+    title: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrors.concurrencyTitle', {
+      defaultMessage: 'Concurrency'
     }),
-    label: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.concurrencyLabel', {
-      defaultMessage: 'Concurrency',
+    label: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrors.concurrencyLabel', {
+      defaultMessage: 'Concurrency'
     }),
     description: i18n.translate(
       'xpack.monitoring.metrics.apm.responseErrors.concurrencyDescription',
@@ -393,86 +380,86 @@ export const metrics = {
   }),
   apm_server_responses_errors_closed: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.errors.closed',
-    title: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.closedTitle', {
-      defaultMessage: 'Closed',
+    title: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrors.closedTitle', {
+      defaultMessage: 'Closed'
     }),
-    label: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.closedLabel', {
-      defaultMessage: 'Closed',
+    label: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrors.closedLabel', {
+      defaultMessage: 'Closed'
     }),
-    description: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.closedDescription', {
-      defaultMessage: 'HTTP Requests rejected during server shutdown',
-    }),
+    description: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrors.closedDescription', {
+      defaultMessage: 'HTTP Requests rejected during server shutdown'
+    })
   }),
   apm_server_responses_errors_internal: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.errors.internal',
-    title: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.internalTitle', {
-      defaultMessage: 'Internal',
+    title: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrors.internalTitle', {
+      defaultMessage: 'Internal'
     }),
-    label: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.internalLabel', {
-      defaultMessage: 'Internal',
+    label: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrors.internalLabel', {
+      defaultMessage: 'Internal'
     }),
-    description: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.internalDescription', {
-      defaultMessage: 'HTTP Requests rejected due to a miscellaneous internal error',
-    }),
+    description: i18n.translate('xpack.monitoring.metrics.apm.server.responseErrors.internalDescription', {
+      defaultMessage: 'HTTP Requests rejected due to a miscellaneous internal error'
+    })
   }),
 
   apm_acm_responses_errors_forbidden: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.acm.response.errors.forbidden',
-    title: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.acmForbiddenTitle', {
+    title: i18n.translate('xpack.monitoring.metrics.apm.acm.responseErrors.acmForbiddenTitle', {
       defaultMessage: 'Response Errors Agent Configuration Management'
     }),
-    label: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.acmForbiddenLabel', {
+    label: i18n.translate('xpack.monitoring.metrics.apm.acm.responseErrors.acmForbiddenLabel', {
       defaultMessage: 'Forbidden'
     }),
-    description: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.acmForbiddenDescription', {
+    description: i18n.translate('xpack.monitoring.metrics.apm.acm.responseErrors.acmForbiddenDescription', {
       defaultMessage: 'Forbidden HTTP Requests rejected - CORS violation, disabled enpoint'
     })
   }),
   apm_acm_responses_errors_unauthorized: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.acm.response.errors.forbidden',
-    title: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.acmUnauthorizedTitle', {
+    title: i18n.translate('xpack.monitoring.metrics.apm.acm.responseErrors.acmUnauthorizedTitle', {
       defaultMessage: 'Unauthorized'
     }),
-    label: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.acmUnauthorizedLabel', {
+    label: i18n.translate('xpack.monitoring.metrics.apm.acm.responseErrors.acmUnauthorizedLabel', {
       defaultMessage: 'Unauthorized'
     }),
-    description: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.acmForbiddenDescription', {
+    description: i18n.translate('xpack.monitoring.metrics.apm.acm.responseErrors.acmForbiddenDescription', {
       defaultMessage: 'Forbidden HTTP Requests rejected - CORS violation, disabled enpoint'
     })
   }),
   apm_acm_responses_errors_unavailable: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.acm.response.errors.unavailable',
-    title: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.acmUnavailableTitle', {
+    title: i18n.translate('xpack.monitoring.metrics.apm.acm.responseErrors.acmUnavailableTitle', {
       defaultMessage: 'Unavailable'
     }),
-    label: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.acmUnavailableLabel', {
+    label: i18n.translate('xpack.monitoring.metrics.acm.apm.responseErrors.acmUnavailableLabel', {
       defaultMessage: 'Unavailable'
     }),
-    description: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.acmUnavailableDescription', {
+    description: i18n.translate('xpack.monitoring.metrics.acm.apm.responseErrors.acmUnavailableDescription', {
       defaultMessage: 'Unavailable HTTP Responses'
     })
   }),
   apm_acm_responses_errors_method: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.acm.response.errors.method',
-    title: i18n.translate('xpack.monitoring.metrics.apm.acmResponseErrors.methodTitle', {
+    title: i18n.translate('xpack.monitoring.metrics.apm.server.acmResponseErrors.methodTitle', {
       defaultMessage: 'Method'
     }),
-    label: i18n.translate('xpack.monitoring.metrics.apm.acmResponseErrors.methodLabel', {
+    label: i18n.translate('xpack.monitoring.metrics.apm.server.acmResponseErrors.methodLabel', {
       defaultMessage: 'Method'
     }),
-    description: i18n.translate('xpack.monitoring.metrics.apm.acmResponseErrors.methodDescription', {
+    description: i18n.translate('xpack.monitoring.metrics.apm.server.acmResponseErrors.methodDescription', {
       defaultMessage: 'HTTP Requests rejected due to incorrect HTTP method'
     })
   }),
   apm_acm_responses_errors_invalid_query: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.acm.response.errors.invalidquery',
-    title: i18n.translate('xpack.monitoring.metrics.apm.acmResponseErrors.invalidQueryTitle', {
+    title: i18n.translate('xpack.monitoring.metrics.apm.acm.responseErrors.invalidQueryTitle', {
       defaultMessage: 'Invalid Query'
     }),
-    label: i18n.translate('xpack.monitoring.metrics.apm.acmResponseErrors.invalidQueryLabel', {
+    label: i18n.translate('xpack.monitoring.metrics.apm.acm.responseErrors.invalidQueryLabel', {
       defaultMessage: 'Invalid Query'
     }),
-    description: i18n.translate('xpack.monitoring.metrics.apm.acmResponseErrors.invalidQueryDescription', {
+    description: i18n.translate('xpack.monitoring.metrics.apm.acm.responseErrors.invalidQueryDescription', {
       defaultMessage: 'HTTP invalid query'
     })
   }),
