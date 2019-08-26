@@ -18,14 +18,14 @@ import { IPosition } from 'monaco-editor';
 import queryString from 'querystring';
 import React from 'react';
 import { parseSchema } from '../../../common/uri_util';
-import { GroupedFileReferences, GroupedRepoReferences } from '../../actions';
+import { GroupedFileResults, GroupedRepoResults } from '../../actions';
 import { history } from '../../utils/url';
 import { CodeBlock } from '../codeblock/codeblock';
 
 interface Props {
   isLoading: boolean;
   title: string;
-  references: GroupedRepoReferences[];
+  references: GroupedRepoResults[];
   refUrl?: string;
   onClose(): void;
 }
@@ -85,12 +85,12 @@ export class ReferencesPanel extends React.Component<Props, State> {
   }
 
   private renderGroupByRepo() {
-    return this.props.references.map((ref: GroupedRepoReferences) => {
+    return this.props.references.map((ref: GroupedRepoResults) => {
       return this.renderReferenceRepo(ref);
     });
   }
 
-  private renderReferenceRepo({ repo, files }: GroupedRepoReferences) {
+  private renderReferenceRepo({ repo, files }: GroupedRepoResults) {
     const [org, name] = repo.split('/').slice(1);
     const buttonContent = (
       <span>
@@ -112,7 +112,7 @@ export class ReferencesPanel extends React.Component<Props, State> {
     );
   }
 
-  private renderReference(file: GroupedFileReferences) {
+  private renderReference(file: GroupedFileResults) {
     const key = `${file.uri}`;
     const lineNumberFn = (l: number) => {
       return file.lineNumbers[l - 1];

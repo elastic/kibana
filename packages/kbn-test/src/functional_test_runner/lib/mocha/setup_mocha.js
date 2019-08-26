@@ -45,7 +45,7 @@ export async function setupMocha(lifecycle, log, config, providers) {
   });
 
   // global afterEach hook in root suite triggers after all others
-  mocha.suite.afterEach('global after each', async function () {
+  mocha.suite.afterEach('global after each', async function() {
     await lifecycle.trigger('afterEachTest', this.currentTest);
   });
 
@@ -62,8 +62,8 @@ export async function setupMocha(lifecycle, log, config, providers) {
   filterSuitesByTags({
     log,
     mocha,
-    include: config.get('suiteTags.include'),
-    exclude: config.get('suiteTags.exclude'),
+    include: config.get('suiteTags.include').map(tag => tag.replace(/-\d+$/, '')),
+    exclude: config.get('suiteTags.exclude').map(tag => tag.replace(/-\d+$/, '')),
   });
 
   return mocha;

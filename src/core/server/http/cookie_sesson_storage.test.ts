@@ -28,6 +28,7 @@ import { KibanaRequest } from './router';
 import { Env } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { configServiceMock } from '../config/config_service.mock';
+import { contextServiceMock } from '../context/context_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 
 import { httpServerMock } from './http_server.mocks';
@@ -39,6 +40,11 @@ let logger: ReturnType<typeof loggingServiceMock.create>;
 let env: Env;
 let coreContext: CoreContext;
 const configService = configServiceMock.create();
+const contextSetup = contextServiceMock.createSetupContract();
+
+const setupDeps = {
+  context: contextSetup,
+};
 
 configService.atPath.mockReturnValue(
   new BehaviorSubject({
@@ -98,7 +104,7 @@ const cookieOptions = {
 describe('Cookie based SessionStorage', () => {
   describe('#set()', () => {
     it('Should write to session storage & set cookies', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -132,7 +138,7 @@ describe('Cookie based SessionStorage', () => {
   });
   describe('#get()', () => {
     it('reads from session storage', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('');
 
       router.get({ path: '/', validate: false }, async (context, req, res) => {
@@ -140,9 +146,9 @@ describe('Cookie based SessionStorage', () => {
         const sessionValue = await sessionStorage.get();
         if (!sessionValue) {
           sessionStorage.set({ value: userData, expires: Date.now() + sessionDurationMs });
-          return res.ok({});
+          return res.ok();
         }
-        return res.ok({ value: sessionValue.value });
+        return res.ok({ body: { value: sessionValue.value } });
       });
 
       const factory = await createCookieSessionStorageFactory(
@@ -168,13 +174,13 @@ describe('Cookie based SessionStorage', () => {
         .expect(200, { value: userData });
     });
     it('returns null for empty session', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
 
       const router = createRouter('');
       router.get({ path: '/', validate: false }, async (context, req, res) => {
         const sessionStorage = factory.asScoped(req);
         const sessionValue = await sessionStorage.get();
-        return res.ok({ value: sessionValue });
+        return res.ok({ body: { value: sessionValue } });
       });
 
       const factory = await createCookieSessionStorageFactory(
@@ -193,7 +199,7 @@ describe('Cookie based SessionStorage', () => {
     });
 
     it('returns null for invalid session & clean cookies', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
 
       const router = createRouter('');
 
@@ -203,10 +209,10 @@ describe('Cookie based SessionStorage', () => {
         if (!setOnce) {
           setOnce = true;
           sessionStorage.set({ value: userData, expires: Date.now() + sessionDurationMs });
-          return res.ok({ value: userData });
+          return res.ok({ body: { value: userData } });
         }
         const sessionValue = await sessionStorage.get();
-        return res.ok({ value: sessionValue });
+        return res.ok({ body: { value: sessionValue } });
       });
 
       const factory = await createCookieSessionStorageFactory(
@@ -326,7 +332,7 @@ describe('Cookie based SessionStorage', () => {
 
   describe('#clear()', () => {
     it('clears session storage & remove cookies', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
 
       const router = createRouter('');
 
