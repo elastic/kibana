@@ -56,6 +56,8 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
         label: index,
         checked:
           isAllIndices ||
+          // If indices is a string, we default to custom input mode, so we mark individual indices
+          // as selected if user goes back to list mode
           typeof restoreIndices === 'string' ||
           (Array.isArray(restoreIndices) && restoreIndices.includes(index))
             ? 'on'

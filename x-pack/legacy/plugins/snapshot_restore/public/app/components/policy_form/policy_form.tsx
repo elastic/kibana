@@ -38,6 +38,7 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
   isSaving,
   saveError,
   clearSaveError,
+  onCancel,
   onSave,
 }) => {
   const {
@@ -137,64 +138,77 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
           </Fragment>
         ) : null}
 
-        <EuiFlexGroup>
-          {currentStep > 1 ? (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconType="arrowLeft"
-                onClick={() => onBack()}
-                disabled={!validation.isValid}
-              >
-                <FormattedMessage
-                  id="xpack.snapshotRestore.policyForm.backButtonLabel"
-                  defaultMessage="Back"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          ) : null}
-          {currentStep < lastStep ? (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                iconType="arrowRight"
-                onClick={() => onNext()}
-                disabled={!validation.isValid}
-              >
-                <FormattedMessage
-                  id="xpack.snapshotRestore.policyForm.nextButtonLabel"
-                  defaultMessage="Next"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          ) : null}
-          {currentStep === lastStep ? (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                color="secondary"
-                iconType="check"
-                onClick={() => savePolicy()}
-                isLoading={isSaving}
-              >
-                {isSaving ? (
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.policyForm.savingButtonLabel"
-                    defaultMessage="Saving…"
-                  />
-                ) : isEditing ? (
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.policyForm.saveButtonLabel"
-                    defaultMessage="Save policy"
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.policyForm.createButtonLabel"
-                    defaultMessage="Create policy"
-                  />
-                )}
-              </EuiButton>
-            </EuiFlexItem>
-          ) : null}
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup>
+              {currentStep > 1 ? (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    iconType="arrowLeft"
+                    onClick={() => onBack()}
+                    disabled={!validation.isValid}
+                  >
+                    <FormattedMessage
+                      id="xpack.snapshotRestore.policyForm.backButtonLabel"
+                      defaultMessage="Back"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              ) : null}
+              {currentStep < lastStep ? (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill
+                    iconType="arrowRight"
+                    onClick={() => onNext()}
+                    disabled={!validation.isValid}
+                  >
+                    <FormattedMessage
+                      id="xpack.snapshotRestore.policyForm.nextButtonLabel"
+                      defaultMessage="Next"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              ) : null}
+              {currentStep === lastStep ? (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill
+                    color="secondary"
+                    iconType="check"
+                    onClick={() => savePolicy()}
+                    isLoading={isSaving}
+                  >
+                    {isSaving ? (
+                      <FormattedMessage
+                        id="xpack.snapshotRestore.policyForm.savingButtonLabel"
+                        defaultMessage="Saving…"
+                      />
+                    ) : isEditing ? (
+                      <FormattedMessage
+                        id="xpack.snapshotRestore.policyForm.saveButtonLabel"
+                        defaultMessage="Save policy"
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="xpack.snapshotRestore.policyForm.createButtonLabel"
+                        defaultMessage="Create policy"
+                      />
+                    )}
+                  </EuiButton>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={() => onCancel()}>
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyForm.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiForm>
       <EuiSpacer size="m" />

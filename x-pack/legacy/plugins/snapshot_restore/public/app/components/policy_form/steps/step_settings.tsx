@@ -53,6 +53,8 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
         label: index,
         checked:
           isAllIndices ||
+          // If indices is a string, we default to custom input mode, so we mark individual indices
+          // as selected if user goes back to list mode
           typeof config.indices === 'string' ||
           (Array.isArray(config.indices) && config.indices.includes(index))
             ? 'on'
