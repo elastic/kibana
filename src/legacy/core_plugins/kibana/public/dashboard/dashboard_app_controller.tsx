@@ -444,7 +444,6 @@ export class DashboardAppController {
         },
         []
       );
-      courier.fetch();
     };
 
     const updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
@@ -462,7 +461,6 @@ export class DashboardAppController {
           timefilter.setRefreshInterval(savedQuery.attributes.timefilter.refreshInterval);
         }
       }
-      courier.fetch();
     };
 
     $scope.$watch('savedQuery', (newSavedQuery: SavedQuery, oldSavedQuery: SavedQuery) => {
