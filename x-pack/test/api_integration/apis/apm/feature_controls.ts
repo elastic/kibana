@@ -31,7 +31,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
   const endpoints = [
     {
-      url: `/api/apm/services/foo/errors?start=${start}&end=${end}&uiFilters=%7B%7D`,
+      url: `/api/apm/services/foo/errors?start=${start}&end=${end}&uiFilters=%7B%7D&_debug=true`,
       expectForbidden: expect404,
       expectResponse: expect200,
     },

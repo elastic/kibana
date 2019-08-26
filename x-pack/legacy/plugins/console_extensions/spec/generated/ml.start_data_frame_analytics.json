@@ -8,6 +8,7 @@
     ],
     "patterns": [
       "_ml/data_frame/analytics/{id}/_start"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current/start-dfanalytics.html"
   }
 }
