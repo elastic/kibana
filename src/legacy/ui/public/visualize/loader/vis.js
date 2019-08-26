@@ -32,7 +32,7 @@ import _ from 'lodash';
 import { VisTypesRegistryProvider } from '../../registry/vis_types';
 import { PersistedState } from '../../persisted_state';
 import { FilterBarQueryFilterProvider } from '../../filter_manager/query_filter';
-import { timefilter } from 'ui/timefilter';
+import { setup as data } from '../../../../core_plugins/data/public/legacy';
 
 export function VisProvider(Private, indexPatterns, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);
@@ -51,7 +51,7 @@ export function VisProvider(Private, indexPatterns, getAppState) {
 
       this.API = {
         indexPatterns: indexPatterns,
-        timeFilter: timefilter,
+        timeFilter: data.timefilter.timefilter,
         queryFilter: queryFilter,
         events: {
           filter: data => {
