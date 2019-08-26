@@ -42,6 +42,7 @@ import { help as joinRows } from './join_rows';
 import { help as location } from './location';
 import { help as lt } from './lt';
 import { help as lte } from './lte';
+import { help as mapCenter } from './map_center';
 import { help as mapColumn } from './mapColumn';
 import { help as markdown } from './markdown';
 import { help as math } from './math';
@@ -62,6 +63,7 @@ import { help as rowCount } from './rowCount';
 import { help as savedMap } from './saved_map';
 import { help as savedSearch } from './saved_search';
 import { help as savedVisualization } from './saved_visualization';
+import { help as searchSort } from './search_sort';
 import { help as seriesStyle } from './seriesStyle';
 import { help as shape } from './shape';
 import { help as sort } from './sort';
@@ -190,6 +192,7 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   location,
   lt,
   lte,
+  mapCenter,
   mapColumn,
   markdown,
   math,
@@ -211,6 +214,7 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   savedSearch,
   savedVisualization,
   seriesStyle,
+  searchSort,
   shape,
   sort,
   staticColumn,

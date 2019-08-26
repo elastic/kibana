@@ -14,6 +14,17 @@ export const help: FunctionHelp<FunctionFactory<typeof savedSearch>> = {
     defaultMessage: `Returns an embeddable for a saved search object`,
   }),
   args: {
-    id: 'The id of the saved search object',
+    id: i18n.translate('xpack.canvas.functions.savedSearch.args.idHelpText', {
+      defaultMessage: `The id of the saved search object`,
+    }),
+    columns: i18n.translate('xpack.canvas.functions.savedSearch.args.columnsHelpText', {
+      defaultMessage: `The names of the columns to include in the search`,
+    }),
+    sort: i18n.translate('xpack.canvas.functions.savedSearch.args.sortHelpText', {
+      defaultMessage: `The columns and directions to sort by`,
+    }),
+    title: i18n.translate('xpack.canvas.functions.savedSearch.args.titleHelpText', {
+      defaultMessage: `The title for the displayed panel`,
+    }),
   },
 };

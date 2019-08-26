@@ -24,6 +24,9 @@ describe('savedMap', () => {
   const fn = savedMap().fn;
   const args = {
     id: 'some-id',
+    center: null,
+    title: 'Title',
+    showLayersMenu: false,
   };
 
   it('accepts null context', () => {

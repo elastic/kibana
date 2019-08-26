@@ -14,6 +14,11 @@ export const help: FunctionHelp<FunctionFactory<typeof savedVisualization>> = {
     defaultMessage: `Returns an embeddable for a saved visualization object`,
   }),
   args: {
-    id: 'The id of the saved visualization object',
+    id: i18n.translate('xpack.canvas.functions.savedVisualization.args.idHelpText', {
+      defaultMessage: `The id of the saved visualization object`,
+    }),
+    title: i18n.translate('xpack.canvas.functions.savedVisualization.args.titleHelpText', {
+      defaultMessage: `The title for the displayed panel`,
+    }),
   },
 };

@@ -32,6 +32,7 @@ import { image } from './image';
 import { joinRows } from './join_rows';
 import { lt } from './lt';
 import { lte } from './lte';
+import { mapCenter } from './map_center';
 import { mapColumn } from './mapColumn';
 import { math } from './math';
 import { metric } from './metric';
@@ -50,6 +51,7 @@ import { revealImage } from './revealImage';
 import { savedMap } from './saved_map';
 import { savedSearch } from './saved_search';
 import { savedVisualization } from './saved_visualization';
+import { searchSort } from './search_sort';
 import { seriesStyle } from './seriesStyle';
 import { shape } from './shape';
 import { sort } from './sort';
@@ -91,6 +93,7 @@ export const functions = [
   lt,
   lte,
   joinRows,
+  mapCenter,
   mapColumn,
   math,
   metric,
@@ -109,6 +112,7 @@ export const functions = [
   savedMap,
   savedSearch,
   savedVisualization,
+  searchSort,
   seriesStyle,
   shape,
   sort,

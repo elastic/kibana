@@ -413,3 +413,22 @@ export const addElement = createThunk('addElement', ({ dispatch }, pageId, eleme
   // select the new element
   dispatch(selectToplevelNodes([newElement.id]));
 });
+
+export const updateExpressionArguments = createThunk(
+  'updateExpressionArguments',
+  ({ dispatch, getState }, payload) => {
+    const updateExpressionArguments = createAction('updateExpressionArguments');
+    dispatch(updateExpressionArguments(payload));
+
+    if (payload.fetchRenderable) {
+      const pageWithElement = getState().persistent.workpad.pages.find(page => {
+        return page.elements.find(element => element.id === payload.elementId) !== undefined;
+      });
+
+      if (pageWithElement) {
+        const element = pageWithElement.elements.find(element => element.id === payload.elementId);
+        dispatch(fetchRenderable(element));
+      }
+    }
+  }
+);

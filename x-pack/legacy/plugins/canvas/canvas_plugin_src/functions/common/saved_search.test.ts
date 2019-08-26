@@ -24,6 +24,9 @@ describe('savedSearch', () => {
   const fn = savedSearch().fn;
   const args = {
     id: 'some-id',
+    title: 'title',
+    columns: [],
+    sort: [],
   };
 
   it('accepts null context', () => {

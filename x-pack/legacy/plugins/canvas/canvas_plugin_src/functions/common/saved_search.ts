@@ -13,11 +13,14 @@ import {
 } from '../../expression_types';
 
 import { buildEmbeddableFilters } from '../../../server/lib/build_embeddable_filters';
-import { Filter } from '../../../types';
+import { Filter, SearchSort } from '../../../types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   id: string;
+  title: string | null;
+  columns: string[];
+  sort: SearchSort[];
 }
 
 type Return = EmbeddableExpression<Partial<SearchInput> & { id: SearchInput['id'] }>;
@@ -30,18 +33,43 @@ export function savedSearch(): ExpressionFunction<'savedSearch', Filter | null, 
     args: {
       id: {
         types: ['string'],
-        required: false,
+        required: true,
         help: argHelp.id,
+      },
+      title: {
+        types: ['string'],
+        required: false,
+        help: argHelp.title,
+      },
+      columns: {
+        types: ['string'],
+        required: false,
+        multi: true,
+        help: argHelp.columns,
+      },
+      sort: {
+        types: ['searchSort'],
+        required: false,
+        multi: true,
+        help: argHelp.sort,
       },
     },
     type: EmbeddableExpressionType,
-    fn: (context, { id }) => {
+    fn: (context, args) => {
       const filters = context ? context.and : [];
+
+      const sort = Array.isArray(args.sort)
+        ? args.sort.map(s => [s.column, s.direction])
+        : args.sort;
+
       return {
         type: EmbeddableExpressionType,
         input: {
-          id,
+          id: args.id,
+          columns: args.columns,
+          sort,
           ...buildEmbeddableFilters(filters),
+          title: args.title ? args.title : undefined,
         },
         embeddableType: EmbeddableTypes.search,
       };

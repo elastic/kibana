@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { VisualizeInput } from 'src/legacy/core_plugins/kibana/public/visualize/embeddable';
+import { VisualizeInput } from '../../../../../../../src/legacy/core_plugins/kibana/public/visualize/embeddable';
 import {
   EmbeddableTypes,
   EmbeddableExpressionType,
@@ -16,7 +16,10 @@ import { getFunctionHelp } from '../../strings';
 
 interface Arguments {
   id: string;
+  title: string | null;
 }
+
+export { VisualizeInput };
 
 type Return = EmbeddableExpression<VisualizeInput>;
 
@@ -33,19 +36,25 @@ export function savedVisualization(): ExpressionFunction<
     args: {
       id: {
         types: ['string'],
-        required: false,
+        required: true,
         help: argHelp.id,
+      },
+      title: {
+        types: ['string'],
+        required: false,
+        help: argHelp.title,
       },
     },
     type: EmbeddableExpressionType,
-    fn: (context, { id }) => {
+    fn: (context, args) => {
       const filters = context ? context.and : [];
 
       return {
         type: EmbeddableExpressionType,
         input: {
-          id,
+          ...args,
           ...buildEmbeddableFilters(filters),
+          title: args.title ? args.title : undefined,
         },
         embeddableType: EmbeddableTypes.visualization,
       };

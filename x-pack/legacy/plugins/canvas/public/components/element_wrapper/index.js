@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 import { connectAdvanced } from 'react-redux';
 import { compose, withPropsOnChange, mapProps } from 'recompose';
 import isEqual from 'react-fast-compare';
-import { getResolvedArgs, getSelectedPage } from '../../state/selectors/workpad';
+import { getResolvedArgs, getSelectedPage, isWriteable } from '../../state/selectors/workpad';
 import { getState, getValue } from '../../lib/resolved_arg';
 import { ElementWrapper as Component } from './element_wrapper';
 import { createHandlers as createHandlersWithDispatch } from './lib/handlers';
@@ -44,6 +44,7 @@ function selectorFactory(dispatch) {
         filter: element.filter,
         expression: element.expression,
       },
+      isWriteable: isWriteable(nextState),
     };
 
     // update props only if something actually changed
@@ -62,6 +63,9 @@ export const ElementWrapper = compose(
     props => {
       const { element, createHandlers } = props;
       const handlers = createHandlers(element, props.selectedPage);
+      if (!props.isWriteable) {
+        handlers.onEmbeddableInputChange = () => undefined;
+      }
       // this removes element and createHandlers from passed props
       return { handlers };
     }

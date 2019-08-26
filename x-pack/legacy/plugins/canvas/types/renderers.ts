@@ -17,6 +17,8 @@ export interface RendererHandlers {
   getFilter: () => string;
   /** Sets the value of the filter property on the element object persisted on the workpad */
   setFilter: (filter: string) => void;
+  /** Handler to invoke when input for an embeddable changes so we can update the backing expression */
+  onEmbeddableInputChange: (args: any, fetchRenderable?: boolean) => void;
 }
 
 export interface RendererSpec<RendererConfig = {}> {

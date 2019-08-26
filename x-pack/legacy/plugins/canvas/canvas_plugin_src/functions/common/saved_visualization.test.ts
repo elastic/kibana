@@ -24,6 +24,7 @@ describe('savedVisualization', () => {
   const fn = savedVisualization().fn;
   const args = {
     id: 'some-id',
+    title: 'title',
   };
 
   it('accepts null context', () => {

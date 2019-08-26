@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { fromExpression, toExpression } from '@kbn/interpreter/common';
 import { handleActions } from 'redux-actions';
 import immutable from 'object-path-immutable';
 import { get } from 'lodash';
@@ -87,6 +88,36 @@ const trimElement = ({ id, position, expression, filter }) => ({
   ...(filter !== void 0 && { filter }),
 });
 
+const astFromObject = function(obj) {
+  const args = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (key !== 'fn' && value !== undefined) {
+      args[key] = Array.isArray(value) ? value : [value];
+    }
+  }
+
+  return {
+    type: 'expression',
+    chain: [
+      {
+        function: obj.fn,
+        type: 'function',
+        arguments: args,
+      },
+    ],
+  };
+};
+
+const getValueForArgument = value => {
+  if (Array.isArray(value)) {
+    return value.map(getValueForArgument);
+  } else if (typeof value === 'object') {
+    return astFromObject(value);
+  } else {
+    return value;
+  }
+};
+
 export const elementsReducer = handleActions(
   {
     // TODO: This takes the entire element, which is not necessary, it could just take the id.
@@ -164,6 +195,46 @@ export const elementsReducer = handleActions(
       return nodeIndices.reduce((state, { location, index }) => {
         return del(state, `pages.${pageIndex}.${location}.${index}`);
       }, workpadState);
+    },
+    ['updateExpressionArguments']: (
+      workpadState,
+      { payload: { elementId, expressionArguments } }
+    ) => {
+      const pageWithElement = workpadState.pages.find(page => {
+        return page.elements.find(element => element.id === elementId) !== undefined;
+      });
+
+      if (!pageWithElement) {
+        return workpadState;
+      }
+
+      const element = pageWithElement.elements.find(element => element.id === elementId);
+
+      const ast = fromExpression(element.expression);
+
+      /*
+        For every entry in the expressionArguments object, if the ast has a matching
+        function, update the args with the values from expressionArguments
+      */
+      for (const [functionName, updatedArgs] of Object.entries(expressionArguments)) {
+        const matchingFunction = ast.chain.find(fn => fn.function === functionName);
+
+        if (matchingFunction) {
+          for (const [key, value] of Object.entries(updatedArgs)) {
+            if (value !== undefined) {
+              const argValue = getValueForArgument(value);
+
+              matchingFunction.arguments[key] = Array.isArray(argValue) ? argValue : [argValue];
+            }
+          }
+        }
+      }
+
+      const newExpression = toExpression(ast);
+
+      return assignNodeProperties(workpadState, pageWithElement.id, elementId, {
+        expression: newExpression,
+      });
     },
   },
   {}

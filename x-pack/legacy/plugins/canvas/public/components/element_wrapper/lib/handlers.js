@@ -5,7 +5,7 @@
  */
 
 import { isEqual } from 'lodash';
-import { setFilter } from '../../../state/actions/elements';
+import { setFilter, updateExpressionArguments } from '../../../state/actions/elements';
 
 export const createHandlers = dispatch => {
   let isComplete = false;
@@ -30,6 +30,16 @@ export const createHandlers = dispatch => {
 
       onComplete(fn) {
         completeFn = fn;
+      },
+
+      onEmbeddableInputChange(updatedArgs, refetch = false) {
+        dispatch(
+          updateExpressionArguments({
+            elementId: element.id,
+            expressionArguments: updatedArgs,
+            fetchRenderable: refetch,
+          })
+        );
       },
 
       done() {
