@@ -11,8 +11,6 @@ Use the gauge visualization to:
 
 * Determine how a specified field is performing versus how it is expected to perform
 
-//TODO add image
-
 [float]
 [[gauge-chart-choose-data]]
 === Choose the data you want to display
@@ -31,36 +29,50 @@ To choose the data that you want to display in the gauge, specify the aggregatio
 [[customize-format-gauge-chart]]
 === Change the display options
 
+To make the chart look the way you want, change the style, range, and label options.
+
 . Select *Options*.
 
-. Change the display and range options.
-
-. To change the colors, expand *Color Options*, then select new colors from the *Color Schema* dropdown.
-
-. To change the style options, expand *Style*, then select the options.
+. Change the style, range, and label options.
 
 . Click *Apply changes* image:images/apply-changes-button.png[].
 
 [float]
 [[gauge-example]]
-== Example: Create a gauge visualization
+== Gauge visualization tutorial
+
+To create a gauge visualization for monitoring the average amount spent on each order at an eCommerce store, use the following tutorial.
 
 [float]
 [[gauge-before-you-begin]]
 === Before you begin
 
+For this example, you'll need to add the <<add-sample-data, Sample eCommerce orders data>>.
+
 [float]
 [[gauge-metricbeat-data]]
 === Create the visualization
 
-[float]
-[[gauge-metricbeat-data-aggregation]]
-=== Choose the data aggregation
+To create the gauge visualization, use the visualization builder.
 
-[float]
-[[gauge-metricbeat-data-bucket]]
-=== Choose the bucket aggregation
+. In the side navigation, click *Visualize*.
+
+. On the *Visualizations* page, click *[eCommerce] Average Sales Price*.
 
 [float]
 [[gauge-metricbeat-data-format]]
 === Format the gauge
+
+Change the gauge format and colors.
+
+. At this point, there isn't enough data to appear. Open the time filter, then select *Last 7 days*.
+
+. Select *Options*.
+
+. From the *Gauge type* dropdown, select *Arc*.
+
+. From the *Color schema* dropdown, select *Greens*.
+
+. Click *Apply changes* image:images/apply-changes-button.png[].
+
+image:images/visualize-gauge01.png[Example gauge]

@@ -139,7 +139,7 @@ image:images/visualize-area-chart01.png[Example area chart]
 [[chart-metricbeat-data-personalize]]
 === Customize the area chart
 
-To customize the area chart, change the line style and position the legend. 
+Change the line style and position of the legend. 
 
 . Select *Metrics & Axes*.
 
