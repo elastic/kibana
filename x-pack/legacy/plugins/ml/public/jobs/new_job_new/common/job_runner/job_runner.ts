@@ -28,6 +28,7 @@ export class JobRunner {
   private _stopRefreshPoll: {
     stop: boolean;
   };
+  private _subscribers: ProgressSubscriber[];
 
   constructor(jobCreator: JobCreator) {
     this._jobId = jobCreator.jobId;
@@ -38,9 +39,7 @@ export class JobRunner {
     this._stopRefreshPoll = jobCreator.stopAllRefreshPolls;
 
     this._progress$ = new BehaviorSubject(this._percentageComplete);
-    // link the _subscribers list from the JobCreator
-    // to the progress BehaviorSubject.
-    jobCreator.subscribers.forEach(s => this._progress$.subscribe(s));
+    this._subscribers = jobCreator.subscribers;
   }
 
   public get datafeedState(): DATAFEED_STATE {
@@ -72,6 +71,11 @@ export class JobRunner {
     pollProgress: boolean
   ): Promise<boolean> {
     try {
+      // link the _subscribers list from the JobCreator
+      // to the progress BehaviorSubject.
+      const subscriptions =
+        pollProgress === true ? this._subscribers.map(s => this._progress$.subscribe(s)) : [];
+
       await this.openJob();
       const { started } = await mlJobService.startDatafeed(
         this._datafeedId,
@@ -93,6 +97,9 @@ export class JobRunner {
           setTimeout(async () => {
             await check();
           }, this._refreshInterval);
+        } else {
+          // job has finished running, unsubscribe everyone
+          subscriptions.forEach(s => s.unsubscribe());
         }
       };
       // wait for the first check to run and then return success.
