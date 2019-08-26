@@ -49,11 +49,11 @@ const isAxisHorizontal = (position: Positions) =>
 
 const RADIX = 10;
 
-function countNextAxisNumber(axisName: string) {
+function countNextAxisNumber(axisName: string, axisProp: 'id' | 'name' = 'id') {
   return (value: number, axis: ValueAxis) => {
     const nameLength = axisName.length;
-    if (axis.id.substr(0, nameLength) === axisName) {
-      const num = parseInt(axis.id.substr(nameLength), RADIX);
+    if (axis[axisProp].substr(0, nameLength) === axisName) {
+      const num = parseInt(axis[axisProp].substr(nameLength), RADIX);
       if (num >= value) {
         value = num + 1;
       }

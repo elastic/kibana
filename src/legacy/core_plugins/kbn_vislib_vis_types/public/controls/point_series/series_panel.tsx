@@ -43,7 +43,7 @@ function SeriesPanel(props: SeriesPanelProps) {
         const axis = addValueAxis();
         newValueAxis = axis.id;
       }
-      // setChart
+
       setChartByIndex(index, paramName, newValueAxis);
 
       updateAxisTitle();

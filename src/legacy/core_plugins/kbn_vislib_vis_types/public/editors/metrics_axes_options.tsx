@@ -44,7 +44,6 @@ export type SetValueAxisByIndex = <T extends keyof ValueAxis>(
   value: ValueAxis[T]
 ) => void;
 
-const RADIX = 10;
 const VALUE_AXIS_PREFIX = 'ValueAxis-';
 const AXIS_PREFIX = 'Axis-';
 
@@ -84,6 +83,10 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
   );
 
   const updateAxisTitle = () => {
+    let lastMatchingType = lastMatchingSeriesAggType;
+    let lastMatchingFeild = lastMatchingSeriesAggField;
+    const lastLabels = lastCustomLabels;
+
     stateParams.valueAxes.forEach((axis, axisNumber) => {
       let newCustomLabel = '';
       const isFirst = axisNumber === 0;
@@ -124,40 +127,31 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
           // Override axis title with new custom label
           setValueAxisByIndex(axisNumber, 'title', { ...axis, text: newCustomLabel });
         }
-
-        setLastCustomLabels({ ...lastCustomLabels, [axis.id]: newCustomLabel });
+        lastLabels[axis.id] = newCustomLabel;
       }
-
-      setLastMatchingSeriesAggType(matchingSeriesAggType);
-      setLastMatchingSeriesAggField(matchingSeriesAggField);
+      lastMatchingType = matchingSeriesAggType;
+      lastMatchingFeild = matchingSeriesAggField;
     });
+
+    setLastCustomLabels(lastLabels);
+    setLastMatchingSeriesAggType(lastMatchingType);
+    setLastMatchingSeriesAggField(lastMatchingFeild);
   };
 
   const getUpdatedAxisName = useCallback(
     (axisPosition: ValueAxis['position']) => {
       const axisName = capitalize(axisPosition) + AXIS_PREFIX;
-      let lastAxisNumber = axesNumbers[axisPosition];
+      let lastAxisNameNumber = axesNumbers[axisPosition];
 
-      if (!lastAxisNumber) {
-        lastAxisNumber = stateParams.valueAxes.reduce(
-          (numberValue: number, axisItem: ValueAxis) => {
-            if (axisItem.name.substr(0, axisName.length) === axisName) {
-              const num = parseInt(axisItem.name.substr(axisName.length), RADIX);
-              if (num >= numberValue) {
-                numberValue = num + 1;
-              }
-            }
-            return numberValue;
-          },
-          0
-        );
+      if (!lastAxisNameNumber) {
+        lastAxisNameNumber = stateParams.valueAxes.reduce(countNextAxisNumber(axisName, 'name'), 0);
       }
-      const nextAxisNumber = lastAxisNumber + 1;
-      setAxesNumbers({ ...axesNumbers, [axisPosition]: nextAxisNumber });
+      const nextAxisNameNumber = lastAxisNameNumber + 1;
+      setAxesNumbers({ ...axesNumbers, [axisPosition]: nextAxisNameNumber });
 
-      return `${axisName}${nextAxisNumber}`;
+      return `${axisName}${nextAxisNameNumber}`;
     },
-    [stateParams.valueAxes, axesNumbers, setAxesNumbers]
+    [stateParams.valueAxes, axesNumbers, setAxesNumbers, countNextAxisNumber]
   );
 
   const onValueAxisPositionChanged = useCallback(
@@ -175,18 +169,33 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
   );
 
   const addValueAxis = useCallback(() => {
-    const firstAxis = stateParams.valueAxes[0];
-    const newAxis = cloneDeep(firstAxis);
-    newAxis.id =
-      VALUE_AXIS_PREFIX + stateParams.valueAxes.reduce(countNextAxisNumber(VALUE_AXIS_PREFIX), 1);
-    newAxis.position = mapPositionOpposite(firstAxis.position);
+    let lastAxisIdNumber = axesNumbers[VALUE_AXIS_PREFIX];
 
-    const axisName = capitalize(newAxis.position) + AXIS_PREFIX;
-    newAxis.name = axisName + stateParams.valueAxes.reduce(countNextAxisNumber(axisName), 1);
+    if (!lastAxisIdNumber) {
+      lastAxisIdNumber = stateParams.valueAxes.reduce(countNextAxisNumber(VALUE_AXIS_PREFIX), 0);
+    }
 
+    const newAxis = cloneDeep(stateParams.valueAxes[0]);
+    const nextAxisIdNumber = lastAxisIdNumber + 1;
+    newAxis.id = VALUE_AXIS_PREFIX + nextAxisIdNumber;
+    newAxis.position = mapPositionOpposite(newAxis.position);
+
+    newAxis.name = getUpdatedAxisName(newAxis.position);
+
+    setAxesNumbers({
+      ...axesNumbers,
+      [VALUE_AXIS_PREFIX]: nextAxisIdNumber,
+    });
     setValue('valueAxes', [...stateParams.valueAxes, newAxis]);
     return newAxis;
-  }, [stateParams.valueAxes, setValue]);
+  }, [
+    stateParams.valueAxes,
+    axesNumbers,
+    countNextAxisNumber,
+    mapPositionOpposite,
+    setAxesNumbers,
+    setValue,
+  ]);
 
   const removeValueAxis = useCallback(
     (axis: ValueAxis) => {
