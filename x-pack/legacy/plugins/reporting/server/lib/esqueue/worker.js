@@ -33,7 +33,7 @@ function getLogger(opts, id, logLevel) {
      */
     const logger = opts.logger || function () {};
     const message = `${id} - ${msg}`;
-    const tags = ['worker', logLevel];
+    const tags = [logLevel];
 
     if (err) {
       // The error message string could be very long if it contains the request
@@ -287,7 +287,6 @@ export class Worker extends events.EventEmitter {
 
           const formattedDocPath = `/${response._index}/${response._type}/${response._id}`;
           this.info(`Job data saved successfully: ${formattedDocPath}`);
-          return response;
         })
         .catch((err) => {
           if (err.statusCode === 409) return false;
