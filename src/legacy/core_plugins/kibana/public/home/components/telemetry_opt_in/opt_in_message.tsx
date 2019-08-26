@@ -18,7 +18,7 @@
  */
 
 import * as React from 'react';
-import { EuiLink, EuiText } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { OptInExampleFlyout } from './opt_in_details_component';
 
@@ -44,46 +44,41 @@ export class OptInMessage extends React.PureComponent<Props, State> {
   };
 
   render() {
+    const { fetchTelemetry } = this.props;
     const { showDetails, showExample } = this.state;
 
     const getDetails = () => (
-      <EuiText size="s">
-        <p tab-index="0">
-          <FormattedMessage
-            id="kbn.home.telemetry.optInMessage.detailsDescription"
-            defaultMessage="No information about the data you process or store will be sent. This feature
-              will periodically send basic feature usage statistics. See an {exampleLink} or read our {telemetryPrivacyStatementLink}.
-              You can disable this feature at any time."
-            values={{
-              exampleLink: (
-                <EuiLink onClick={this.toggleShowExample}>
-                  <FormattedMessage
-                    id="kbn.home.telemetry.optInMessage.detailsExampleLinkText"
-                    defaultMessage="example"
-                  />
-                </EuiLink>
-              ),
-              telemetryPrivacyStatementLink: (
-                <EuiLink
-                  href="https://www.elastic.co/legal/telemetry-privacy-statement"
-                  target="_blank"
-                >
-                  <FormattedMessage
-                    id="kbn.home.telemetry.optInMessage.detailsTelemetryPrivacyStatementLinkText"
-                    defaultMessage="telemetry privacy statement"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </p>
-      </EuiText>
+      <FormattedMessage
+        id="kbn.home.telemetry.optInMessage.detailsDescription"
+        defaultMessage="No information about the data you process or store will be sent. This feature will periodically send basic feature usage statistics. See an {exampleLink} or read our {telemetryPrivacyStatementLink}. You can disable this feature at any time."
+        values={{
+          exampleLink: (
+            <EuiLink onClick={this.toggleShowExample}>
+              <FormattedMessage
+                id="kbn.home.telemetry.optInMessage.detailsExampleLinkText"
+                defaultMessage="example"
+              />
+            </EuiLink>
+          ),
+          telemetryPrivacyStatementLink: (
+            <EuiLink
+              href="https://www.elastic.co/legal/telemetry-privacy-statement"
+              target="_blank"
+            >
+              <FormattedMessage
+                id="kbn.home.telemetry.optInMessage.detailsTelemetryPrivacyStatementLinkText"
+                defaultMessage="telemetry privacy statement"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
     );
 
     const getFlyoutDetails = () => (
       <OptInExampleFlyout
         onClose={() => this.setState({ showExample: false })}
-        fetchTelemetry={this.props.fetchTelemetry}
+        fetchTelemetry={fetchTelemetry}
       />
     );
 
@@ -98,15 +93,11 @@ export class OptInMessage extends React.PureComponent<Props, State> {
 
     return (
       <React.Fragment>
-        <EuiText>
-          <p tab-index="0">
-            <FormattedMessage
-              id="kbn.home.telemetry.optInMessageDescription"
-              defaultMessage="Help us improve the Elastic Stack by providing usage statistics for basic features. We will not share this data outside of Elastic."
-            />{' '}
-            {!showDetails && getReadMore()}
-          </p>
-        </EuiText>
+        <FormattedMessage
+          id="kbn.home.telemetry.optInMessageDescription"
+          defaultMessage="Help us improve the Elastic Stack by providing usage statistics for basic features. We will not share this data outside of Elastic."
+        />{' '}
+        {!showDetails && getReadMore()}
         {showDetails && getDetails()}
         {showDetails && showExample && getFlyoutDetails()}
       </React.Fragment>
