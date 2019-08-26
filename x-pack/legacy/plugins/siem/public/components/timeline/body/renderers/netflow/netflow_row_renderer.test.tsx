@@ -32,7 +32,6 @@ describe('netflowRowRenderer', () => {
     const children = netflowRowRenderer.renderRow({
       browserFields,
       data: getMockNetflowData(),
-      width: 500,
       children: <span>{'some children'}</span>,
     });
 
@@ -102,7 +101,6 @@ describe('netflowRowRenderer', () => {
     const children = netflowRowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: justIdAndTimestamp,
-      width: 500,
       children: <span>{'some children'}</span>,
     });
     const wrapper = mount(
@@ -117,7 +115,6 @@ describe('netflowRowRenderer', () => {
     const children = netflowRowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: getMockNetflowData(),
-      width: 500,
       children: <span>{'some children'}</span>,
     });
     const wrapper = mount(
