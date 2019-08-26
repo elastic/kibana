@@ -5780,8 +5780,6 @@
     "xpack.maps.styles.vector.symbolSizeLabel": "符号大小",
     "xpack.maps.toolbarOverlay.drawBoundsLabel": "绘制边界以筛选数据",
     "xpack.maps.toolbarOverlay.drawShapeLabel": "绘制形状以筛选数据",
-    "xpack.maps.toolbarOverlay.geofield.toolbarTitle": "选择地理字段",
-    "xpack.maps.toolbarOverlay.indexPattern.filterListTitle": "筛选列表",
     "xpack.maps.toolbarOverlay.tools.toolbarTitle": "工具",
     "xpack.maps.tooltip.closeAriaLabel": "关闭工具提示",
     "xpack.maps.tooltip.filterOnPropertyAriaLabel": "基于属性筛选",
