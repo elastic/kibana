@@ -12,6 +12,7 @@ import { FilterRatioIndexPatternColumn, IndexPatternPrivateState } from '../inde
 import { Storage } from 'ui/storage';
 import { UiSettingsClientContract } from 'src/core/public';
 import { QueryBarInput } from '../../../../../../../src/legacy/core_plugins/data/public/query';
+import { createMockedIndexPattern } from '../mocks';
 
 jest.mock('ui/new_platform');
 
@@ -39,6 +40,7 @@ describe('filter_ratio', () => {
               label: 'Filter Ratio',
               dataType: 'number',
               isBucketed: false,
+              isMetric: true,
 
               // Private
               operationType: 'filter_ratio',
@@ -61,6 +63,7 @@ describe('filter_ratio', () => {
         layerId: 'first',
         columns: {},
         suggestedPriority: undefined,
+        indexPattern: createMockedIndexPattern(),
       });
       expect(column.params.numerator).toEqual({ query: '', language: 'kuery' });
       expect(column.params.denominator).toEqual({ query: '', language: 'kuery' });

@@ -9,10 +9,14 @@
  * @param cb: callback to do something with a function that has been found
  */
 
-import { AST } from '../../types';
+import { ExpressionAST, ExpressionArgAST } from '../../types';
 
-export function collectFns(ast: AST, cb: (functionName: string) => void) {
-  if (ast.type === 'expression') {
+function isExpression(maybeExpression: ExpressionArgAST): maybeExpression is ExpressionAST {
+  return typeof maybeExpression === 'object';
+}
+
+export function collectFns(ast: ExpressionArgAST, cb: (functionName: string) => void) {
+  if (isExpression(ast)) {
     ast.chain.forEach(({ function: cFunction, arguments: cArguments }) => {
       cb(cFunction);
 

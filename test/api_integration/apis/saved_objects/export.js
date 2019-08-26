@@ -139,7 +139,7 @@ export default function ({ getService }) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message: 'child "type" fails because ["type" at position 0 fails because ' +
-                  '["0" must be one of [config, dashboard, index-pattern, search, url, visualization]]]',
+                  '["0" must be one of [config, dashboard, index-pattern, query, search, url, visualization]]]',
                 validation: {
                   source: 'payload',
                   keys: ['type.0'],
@@ -349,8 +349,7 @@ export default function ({ getService }) {
         });
       });
 
-      // FAILING: https://github.com/elastic/kibana/issues/43163
-      describe.skip('10,001 objects', () => {
+      describe('10,001 objects', () => {
         let customVisId;
         before(async () => {
           await esArchiver.load('saved_objects/10k');

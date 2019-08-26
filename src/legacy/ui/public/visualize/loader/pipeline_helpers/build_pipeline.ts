@@ -23,7 +23,7 @@ import { setBounds } from 'ui/agg_types/buckets/date_histogram';
 import { SearchSource } from 'ui/courier';
 import { AggConfig, Vis, VisParams, VisState } from 'ui/vis';
 import moment from 'moment';
-import { SerializedFieldFormat } from 'src/plugins/data/common';
+import { SerializedFieldFormat } from 'src/plugins/data/common/expressions/types/common';
 import { createFormat } from './utilities';
 
 interface SchemaConfigParams {
@@ -33,7 +33,7 @@ interface SchemaConfigParams {
 
 export interface SchemaConfig {
   accessor: number;
-  format: SerializedFieldFormat | {};
+  format: SerializedFieldFormat;
   params: SchemaConfigParams;
   aggType: string;
 }
@@ -508,7 +508,7 @@ export const buildPipeline = async (
     const visConfig = visState.params;
     visConfig.dimensions = await buildVislibDimensions(vis, params);
 
-    pipeline += `vislib ${prepareJson('visConfig', visState.params)}`;
+    pipeline += `vislib type='${vis.type.name}' ${prepareJson('visConfig', visState.params)}`;
   } else if (vis.type.toExpression) {
     pipeline += await vis.type.toExpression(vis, params);
   } else {

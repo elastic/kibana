@@ -99,7 +99,9 @@ export function VisualizeListingController($injector, createNewVis) {
       selectedItems.map(item => {
         return savedObjectClient.delete(item.savedObjectType, item.id);
       }),
-    ).catch(error => {
+    ).then(() => {
+      chrome.untrackNavLinksForDeletedSavedObjects(selectedItems.map(item => item.id));
+    }).catch(error => {
       toastNotifications.addError(error, {
         title: i18n.translate('kbn.visualize.visualizeListingDeleteErrorTitle', {
           defaultMessage: 'Error deleting visualization',

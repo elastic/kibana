@@ -29,7 +29,7 @@ import {
 
 import { isDraggedField } from './utils';
 import { LayerPanel } from './layerpanel';
-import { Datasource, DataType } from '..';
+import { Datasource } from '..';
 
 export type OperationType = IndexPatternColumn['operationType'];
 
@@ -43,11 +43,7 @@ export type IndexPatternColumn =
   | CountIndexPatternColumn
   | FilterRatioIndexPatternColumn;
 
-export interface BaseIndexPatternColumn {
-  label: string;
-  dataType: DataType;
-  isBucketed: boolean;
-
+export interface BaseIndexPatternColumn extends Operation {
   // Private
   operationType: OperationType;
   suggestedPriority?: DimensionPriority;
@@ -147,11 +143,13 @@ export type IndexPatternPrivateState = IndexPatternPersistedState & {
 };
 
 export function columnToOperation(column: IndexPatternColumn): Operation {
-  const { dataType, label, isBucketed } = column;
+  const { dataType, label, isBucketed, isMetric, scale } = column;
   return {
     label,
     dataType,
     isBucketed,
+    scale,
+    isMetric,
   };
 }
 
@@ -305,7 +303,7 @@ export function getIndexPatternDatasource({
             <I18nProvider>
               <IndexPatternDimensionPanel
                 state={state}
-                setState={newState => setState(newState)}
+                setState={setState}
                 uiSettings={uiSettings}
                 storage={storage}
                 layerId={props.layerId}
@@ -317,10 +315,7 @@ export function getIndexPatternDatasource({
         },
 
         renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps) => {
-          render(
-            <LayerPanel state={state} setState={newState => setState(newState)} {...props} />,
-            domElement
-          );
+          render(<LayerPanel state={state} setState={setState} {...props} />, domElement);
         },
 
         removeColumnInTableSpec: (columnId: string) => {

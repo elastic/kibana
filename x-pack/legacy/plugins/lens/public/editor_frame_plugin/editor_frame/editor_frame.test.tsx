@@ -154,7 +154,6 @@ describe('editor_frame', () => {
             initialVisualizationId="testVis"
             ExpressionRenderer={expressionRendererMock}
             doc={{
-              activeDatasourceId: 'testDatasource',
               visualizationType: 'testVis',
               title: '',
               expression: '',
@@ -482,7 +481,6 @@ describe('editor_frame', () => {
           initialVisualizationId="testVis"
           ExpressionRenderer={expressionRendererMock}
           doc={{
-            activeDatasourceId: 'testDatasource',
             visualizationType: 'testVis',
             title: '',
             expression: '',
@@ -725,7 +723,6 @@ describe('editor_frame', () => {
           initialVisualizationId="testVis"
           ExpressionRenderer={expressionRendererMock}
           doc={{
-            activeDatasourceId: 'testDatasource',
             visualizationType: 'testVis',
             title: '',
             expression: '',
@@ -779,7 +776,6 @@ describe('editor_frame', () => {
           initialVisualizationId="testVis"
           ExpressionRenderer={expressionRendererMock}
           doc={{
-            activeDatasourceId: 'testDatasource',
             visualizationType: 'testVis',
             title: '',
             expression: '',
@@ -1379,7 +1375,6 @@ describe('editor_frame', () => {
       expect(onChange).toHaveBeenNthCalledWith(1, {
         indexPatternTitles: ['resolved'],
         doc: {
-          activeDatasourceId: 'testDatasource',
           expression: '',
           id: undefined,
           state: {
@@ -1397,7 +1392,6 @@ describe('editor_frame', () => {
       expect(onChange).toHaveBeenLastCalledWith({
         indexPatternTitles: ['resolved'],
         doc: {
-          activeDatasourceId: 'testDatasource',
           expression: '',
           id: undefined,
           state: {
@@ -1457,7 +1451,6 @@ describe('editor_frame', () => {
       expect(onChange).toHaveBeenNthCalledWith(3, {
         indexPatternTitles: [],
         doc: {
-          activeDatasourceId: 'testDatasource',
           expression: expect.stringContaining('vis "expression"'),
           id: undefined,
           state: {

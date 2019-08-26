@@ -11,6 +11,6 @@
     "patterns": [
       "_snapshot/{repository}/{snapshot}"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/modules-snapshots.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-snapshots.html"
   }
 }

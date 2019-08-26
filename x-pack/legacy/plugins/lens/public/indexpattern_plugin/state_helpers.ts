@@ -77,7 +77,7 @@ export function changeColumn({
   layerId,
   columnId,
   newColumn,
-  keepParams,
+  keepParams = true,
 }: {
   state: IndexPatternPrivateState;
   layerId: string;
@@ -88,7 +88,7 @@ export function changeColumn({
   const oldColumn = state.layers[layerId].columns[columnId];
 
   const updatedColumn =
-    (typeof keepParams === 'boolean' ? keepParams : true) &&
+    keepParams &&
     oldColumn &&
     oldColumn.operationType === newColumn.operationType &&
     'params' in oldColumn

@@ -10,7 +10,7 @@ import { EuiButtonIcon } from '@elastic/eui';
 import { Storage } from 'ui/storage';
 import { i18n } from '@kbn/i18n';
 import { UiSettingsClientContract } from 'src/core/public';
-import { DatasourceDimensionPanelProps } from '../../types';
+import { DatasourceDimensionPanelProps, StateSetter } from '../../types';
 import {
   IndexPatternColumn,
   IndexPatternPrivateState,
@@ -18,15 +18,20 @@ import {
   OperationType,
 } from '../indexpattern';
 
-import { getAvailableOperationsByMetadata, buildColumn } from '../operations';
+import {
+  getAvailableOperationsByMetadata,
+  buildColumn,
+  operationDefinitionMap,
+  OperationDefinition,
+} from '../operations';
 import { PopoverEditor } from './popover_editor';
 import { DragContextState, ChildDragDropProvider, DragDrop } from '../../drag_drop';
 import { changeColumn, deleteColumn } from '../state_helpers';
-import { isDraggedField } from '../utils';
+import { isDraggedField, hasField } from '../utils';
 
 export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   state: IndexPatternPrivateState;
-  setState: (newState: IndexPatternPrivateState) => void;
+  setState: StateSetter<IndexPatternPrivateState>;
   dragDropContext: DragContextState;
   uiSettings: UiSettingsClientContract;
   storage: Storage;
@@ -109,18 +114,42 @@ export const IndexPatternDimensionPanel = memo(function IndexPatternDimensionPan
             return;
           }
 
-          props.setState(
-            changeColumn({
-              state: props.state,
-              layerId,
-              columnId: props.columnId,
-              newColumn: buildColumn({
+          const operationsForNewField =
+            operationFieldSupportMatrix.operationByField[droppedItem.field.name];
+
+          // We need to check if dragging in a new field, was just a field change on the same
+          // index pattern and on the same operations (therefore checking if the new field supports
+          // our previous operation)
+          const hasFieldChanged =
+            selectedColumn &&
+            hasField(selectedColumn) &&
+            selectedColumn.sourceField !== droppedItem.field.name &&
+            operationsForNewField &&
+            operationsForNewField.includes(selectedColumn.operationType);
+
+          // If only the field has changed use the onFieldChange method on the operation to get the
+          // new column, otherwise use the regular buildColumn to get a new column.
+          const newColumn = hasFieldChanged
+            ? (operationDefinitionMap[selectedColumn.operationType] as OperationDefinition<
+                IndexPatternColumn
+              >).onFieldChange(selectedColumn, currentIndexPattern, droppedItem.field)
+            : buildColumn({
                 columns: props.state.layers[props.layerId].columns,
                 indexPattern: currentIndexPattern,
                 layerId,
                 suggestedPriority: props.suggestedPriority,
                 field: droppedItem.field,
-              }),
+              });
+
+          props.setState(
+            changeColumn({
+              state: props.state,
+              layerId,
+              columnId: props.columnId,
+              newColumn,
+              // If the field has changed, the onFieldChange method needs to take care of everything including moving
+              // over params. If we create a new column above we want changeColumn to move over params.
+              keepParams: !hasFieldChanged,
             })
           );
         }}

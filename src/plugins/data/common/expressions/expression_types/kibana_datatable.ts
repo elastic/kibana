@@ -18,28 +18,24 @@
  */
 
 import { map } from 'lodash';
+import { SerializedFieldFormat } from '../types/common';
 
 const name = 'kibana_datatable';
 
-export interface SerializedFieldFormat<TParams = object> {
-  id?: string;
-  params?: TParams;
-}
-
-interface Column {
+export interface KibanaDatatableColumn {
   id: string;
   name: string;
   formatHint?: SerializedFieldFormat;
 }
 
-interface Row {
+export interface KibanaDatatableRow {
   [key: string]: unknown;
 }
 
 export interface KibanaDatatable {
   type: typeof name;
-  columns: Column[];
-  rows: Row[];
+  columns: KibanaDatatableColumn[];
+  rows: KibanaDatatableRow[];
 }
 
 export const kibanaDatatable = () => ({
