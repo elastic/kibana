@@ -63,6 +63,7 @@ export interface ChromeBreadcrumb {
   text: string;
   href?: string;
   'data-test-subj'?: string;
+  onClick?: () => void;
 }
 
 /** @public */

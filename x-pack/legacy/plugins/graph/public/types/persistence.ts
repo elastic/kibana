@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface SavedGraphWorkspace {
+import { SavedObject } from 'ui/saved_objects/saved_object';
+
+/**
+ * Workspace fetched from server.
+ * This type is returned by `SavedWorkspacesProvider#get`.
+ */
+export interface SavedGraphWorkspace extends SavedObject {
   title: string;
   description: string;
   numLinks: number;

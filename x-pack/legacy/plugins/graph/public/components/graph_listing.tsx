@@ -11,7 +11,7 @@ import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
 
 // @ts-ignore
 import { TableListView } from '../../../../../../src/legacy/core_plugins/kibana/public/table_list_view/table_list_view';
-import { SavedGraphWorkspace } from '../types/workspace';
+import { SavedGraphWorkspace } from '../types/persistence';
 
 export interface GraphListingProps {
   createItem: () => void;
@@ -146,7 +146,7 @@ function getTableColumns(getViewUrl: (record: SavedGraphWorkspace) => string): D
       render: (field, record) => (
         <EuiLink
           href={getViewUrl(record)}
-          data-test-subj={`dashboardListingTitleLink-${record.title.split(' ').join('-')}`}
+          data-test-subj={`graphListingTitleLink-${record.title.split(' ').join('-')}`}
         >
           {field}
         </EuiLink>

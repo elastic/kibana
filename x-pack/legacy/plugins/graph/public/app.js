@@ -31,20 +31,21 @@ import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { npStart } from 'ui/new_platform';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
+import { capabilities } from 'ui/capabilities';
 
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 
-import appTemplate from './templates/index.html';
-import listingTemplate from './templates/listing_ng_wrapper.html';
+import appTemplate from './angular/templates/index.html';
+import listingTemplate from './angular/templates/listing_ng_wrapper.html';
 import { getReadonlyBadge } from './badge';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { GraphListing } from './components/graph_listing';
 
-import './angular-venn-simple.js';
-import gws from './graphClientWorkspace.js';
+import './angular/angular_venn_simple.js';
+import gws from './angular/graph_client_workspace.js';
 import utils from './utils.js';
-import { SavedWorkspacesProvider } from './services/saved_workspaces';
+import { SavedWorkspacesProvider } from './angular/services/saved_workspaces';
 import {
   iconChoices,
   colorChoices,
@@ -54,16 +55,16 @@ import {
 } from './style_choices';
 import {
   getOutlinkEncoders,
-} from './services/outlink_encoders';
-import { capabilities } from 'ui/capabilities';
+} from './angular/services/outlink_encoders';
+import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs } from './services/url';
 
-import saveTemplate from './templates/save_workspace.html';
-import loadTemplate from './templates/load_workspace.html';
-import settingsTemplate from './templates/settings.html';
+import saveTemplate from './angular/templates/save_workspace.html';
+import loadTemplate from './angular/templates/load_workspace.html';
+import settingsTemplate from './angular/templates/settings.html';
 
-import './directives/graph_load';
-import './directives/graph_save';
-import './directives/graph_settings';
+import './angular/directives/graph_load';
+import './angular/directives/graph_save';
+import './angular/directives/graph_settings';
 
 const app = uiModules.get('app/graph');
 
@@ -103,31 +104,26 @@ uiRoutes
     controller($injector, $location, $scope, $route, Private, config, Promise, kbnBaseUrl) {
       checkLicense(Promise, kbnBaseUrl);
       const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
+      const graphService = services['Graph workspace'];
       const kbnUrl = $injector.get('kbnUrl');
 
       $scope.listingLimit = config.get('savedObjects:listingLimit');
       $scope.create = () => {
-        kbnUrl.redirect('/workspace/');
+        kbnUrl.redirect(getNewPath());
       };
       $scope.find = (search) => {
-        return services['Graph workspace'].find(search, $scope.listingLimit);
+        return graphService.find(search, $scope.listingLimit);
       };
-      $scope.editItem = ({ id }) => {
-        kbnUrl.redirect(`/workspace/${id}`);
+      $scope.editItem = (workspace) => {
+        kbnUrl.redirect(getEditPath(workspace));
       };
-      $scope.getViewUrl = ({ id }) => {
-        return chrome.addBasePath(`#/workspace/${id}`);
-      };
+      $scope.getViewUrl = (workspace) => getEditUrl(chrome, workspace);
       $scope.delete = (ids) => {
-        return services.dashboards.delete(ids);
+        return graphService.delete(ids);
       };
       $scope.capabilities = capabilities.get().graph;
       $scope.initialFilter = ($location.search()).filter || '';
-      chrome.breadcrumbs.set([{
-        text: i18n.translate('xpack.graph.graphBreadcrumbsTitle', {
-          defaultMessage: 'Graph',
-        }),
-      }]);
+      setBreadcrumbs({ chrome });
     }
   })
   .when('/workspace/:id?', {
@@ -916,22 +912,17 @@ app.controller('graphuiPlugin', function (
     },
   });
 
-  chrome.breadcrumbs.set([{
-    text: i18n.translate('xpack.graph.graphBreadcrumbsTitle', {
-      defaultMessage: 'Graph',
-    }),
-    onClick: () => {
+  setBreadcrumbs({
+    chrome,
+    savedWorkspace: $route.current.locals.savedWorkspace,
+    navigateTo: () => {
       canWipeWorkspace(function () {
         $scope.$evalAsync(() => {
           kbnUrl.changePath('/home/');
         });
       });
     }
-  }, {
-    text: $route.current.locals.savedWorkspace
-      ? $route.current.locals.savedWorkspace.title
-      : i18n.translate('xpack.graph.newWorkspaceTitle', { defaultMessage: 'Unsaved workspace' }),
-  }]);
+  });
 
   $scope.menus = {
     showSave: false,
