@@ -99,8 +99,8 @@ uiRoutes
       $scope.getViewUrl = ({ id }) => {
         return chrome.addBasePath(`#${createDashboardEditUrl(id)}`);
       };
-      $scope.delete = (ids) => {
-        return services.dashboards.delete(ids);
+      $scope.delete = (dashboards) => {
+        return services.dashboards.delete(dashboards.map(d => d.id));
       };
       $scope.hideWriteControls = dashboardConfig.getHideWriteControls();
       $scope.initialFilter = ($location.search()).filter || EMPTY_FILTER;

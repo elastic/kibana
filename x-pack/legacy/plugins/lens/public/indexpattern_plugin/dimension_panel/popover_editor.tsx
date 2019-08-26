@@ -28,7 +28,12 @@ import {
   IndexPatternField,
 } from '../indexpattern';
 import { IndexPatternDimensionPanelProps, OperationFieldSupportMatrix } from './dimension_panel';
-import { operationDefinitionMap, getOperationDisplay, buildColumn } from '../operations';
+import {
+  operationDefinitionMap,
+  getOperationDisplay,
+  buildColumn,
+  OperationDefinition,
+} from '../operations';
 import { deleteColumn, changeColumn } from '../state_helpers';
 import { FieldSelect } from './field_select';
 import { hasField } from '../utils';
@@ -272,17 +277,36 @@ export function PopoverEditor(props: PopoverEditorProps) {
                 );
               }}
               onChoose={choice => {
-                const column = buildColumn({
-                  columns: props.state.layers[props.layerId].columns,
-                  field: 'field' in choice ? fieldMap[choice.field] : undefined,
-                  indexPattern: currentIndexPattern,
-                  layerId: props.layerId,
-                  suggestedPriority: props.suggestedPriority,
-                  op:
-                    incompatibleSelectedOperationType ||
-                    ('field' in choice ? choice.operationType : undefined),
-                  asDocumentOperation: choice.type === 'document',
-                });
+                let column: IndexPatternColumn;
+                if (
+                  !incompatibleSelectedOperationType &&
+                  selectedColumn &&
+                  ('field' in choice && choice.operationType === selectedColumn.operationType)
+                ) {
+                  // If we just changed the field are not in an error state and the operation didn't change,
+                  // we use the operations onFieldChange method to calculate the new column.
+                  const operation = operationDefinitionMap[
+                    choice.operationType
+                  ] as OperationDefinition<IndexPatternColumn>;
+                  column = operation.onFieldChange(
+                    selectedColumn,
+                    currentIndexPattern,
+                    fieldMap[choice.field]
+                  );
+                } else {
+                  // Otherwise we'll use the buildColumn method to calculate a new column
+                  column = buildColumn({
+                    columns: props.state.layers[props.layerId].columns,
+                    field: 'field' in choice ? fieldMap[choice.field] : undefined,
+                    indexPattern: currentIndexPattern,
+                    layerId: props.layerId,
+                    suggestedPriority: props.suggestedPriority,
+                    op:
+                      incompatibleSelectedOperationType ||
+                      ('field' in choice ? choice.operationType : undefined),
+                    asDocumentOperation: choice.type === 'document',
+                  });
+                }
 
                 setState(
                   changeColumn({
@@ -290,6 +314,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
                     layerId,
                     columnId,
                     newColumn: column,
+                    keepParams: false,
                   })
                 );
                 setInvalidOperationType(null);

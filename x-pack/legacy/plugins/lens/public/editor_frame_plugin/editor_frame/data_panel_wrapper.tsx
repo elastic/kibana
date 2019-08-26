@@ -25,15 +25,16 @@ interface DataPanelWrapperProps {
 }
 
 export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
-  const setDatasourceState: StateSetter<unknown> = useMemo(() => {
-    return newState => {
+  const setDatasourceState: StateSetter<unknown> = useMemo(
+    () => updater => {
       props.dispatch({
         type: 'UPDATE_DATASOURCE_STATE',
-        updater: newState,
+        updater,
         datasourceId: props.activeDatasource!,
       });
-    };
-  }, [props.dispatch, props.activeDatasource]);
+    },
+    [props.dispatch, props.activeDatasource]
+  );
 
   const datasourceProps: DatasourceDataPanelProps = {
     dragDropContext: useContext(DragContext),

@@ -26,7 +26,7 @@ const FixedEuiRange = (EuiRange as unknown) as React.ComponentType<
 
 function ofName(name: string) {
   return i18n.translate('xpack.lens.indexPattern.termsOf', {
-    defaultMessage: 'Top Values of {name}',
+    defaultMessage: 'Top values of {name}',
     values: { name },
   });
 }
@@ -53,6 +53,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
         {
           dataType: type,
           isBucketed: true,
+          isMetric: false,
+          scale: 'ordinal',
         },
       ];
     }
@@ -80,9 +82,11 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       label: ofName(field.name),
       dataType: field.type as DataType,
       operationType: 'terms',
+      scale: 'ordinal',
       suggestedPriority,
       sourceField: field.name,
       isBucketed: true,
+      isMetric: false,
       params: {
         size: DEFAULT_SIZE,
         orderBy: existingMetricColumn
@@ -109,6 +113,13 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       missingBucketLabel: 'Missing',
     },
   }),
+  onFieldChange: (oldColumn, indexPattern, field) => {
+    return {
+      ...oldColumn,
+      label: ofName(field.name),
+      sourceField: field.name,
+    };
+  },
   onOtherColumnChanged: (currentColumn, columns) => {
     if (currentColumn.params.orderBy.type === 'column') {
       // check whether the column is still there and still a metric

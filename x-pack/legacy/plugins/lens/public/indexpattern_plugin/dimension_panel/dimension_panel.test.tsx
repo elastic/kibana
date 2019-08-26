@@ -95,6 +95,7 @@ describe('IndexPatternDimensionPanel', () => {
               label: 'Date Histogram of timestamp',
               dataType: 'date',
               isBucketed: true,
+              isMetric: false,
 
               // Private
               operationType: 'date_histogram',
@@ -208,6 +209,7 @@ describe('IndexPatternDimensionPanel', () => {
                   label: 'Max of bytes',
                   dataType: 'number',
                   isBucketed: false,
+                  isMetric: true,
 
                   // Private
                   operationType: 'max',
@@ -249,6 +251,7 @@ describe('IndexPatternDimensionPanel', () => {
                   label: 'Max of bytes',
                   dataType: 'number',
                   isBucketed: false,
+                  isMetric: true,
 
                   // Private
                   operationType: 'max',
@@ -290,6 +293,7 @@ describe('IndexPatternDimensionPanel', () => {
               label: 'Max of bytes',
               dataType: 'number',
               isBucketed: false,
+              isMetric: true,
 
               // Private
               operationType: 'max',
@@ -374,6 +378,7 @@ describe('IndexPatternDimensionPanel', () => {
                   label: 'Max of bytes',
                   dataType: 'number',
                   isBucketed: false,
+                  isMetric: true,
 
                   // Private
                   operationType: 'max',
@@ -547,6 +552,7 @@ describe('IndexPatternDimensionPanel', () => {
               col2: {
                 dataType: 'number',
                 isBucketed: false,
+                isMetric: true,
                 label: '',
                 operationType: 'avg',
                 sourceField: 'bytes',
@@ -584,6 +590,7 @@ describe('IndexPatternDimensionPanel', () => {
               col2: {
                 dataType: 'number',
                 isBucketed: false,
+                isMetric: true,
                 label: '',
                 operationType: 'count',
               },
@@ -778,6 +785,7 @@ describe('IndexPatternDimensionPanel', () => {
             col2: {
               dataType: 'number',
               isBucketed: false,
+              isMetric: true,
               label: '',
               operationType: 'count',
             },
@@ -860,6 +868,7 @@ describe('IndexPatternDimensionPanel', () => {
               label: 'Max of bytes',
               dataType: 'number',
               isBucketed: false,
+              isMetric: true,
 
               // Private
               operationType: 'max',
@@ -963,6 +972,7 @@ describe('IndexPatternDimensionPanel', () => {
                 label: 'Date Histogram of timestamp',
                 dataType: 'date',
                 isBucketed: true,
+                isMetric: false,
 
                 // Private
                 operationType: 'date_histogram',

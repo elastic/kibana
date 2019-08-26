@@ -123,33 +123,6 @@ describe('editor_frame state management', () => {
       expect(newState.visualization.state).toBe(newVisState);
     });
 
-    it('should update the datasource state on update', () => {
-      const newDatasourceState = {};
-      const newState = reducer(
-        {
-          datasourceStates: {
-            testDatasource: {
-              state: {},
-              isLoading: false,
-            },
-          },
-          activeDatasourceId: 'testDatasource',
-          title: 'bbb',
-          visualization: {
-            activeId: 'testVis',
-            state: {},
-          },
-        },
-        {
-          type: 'UPDATE_DATASOURCE_STATE',
-          updater: newDatasourceState,
-          datasourceId: 'testDatasource',
-        }
-      );
-
-      expect(newState.datasourceStates.testDatasource.state).toBe(newDatasourceState);
-    });
-
     it('should update the datasource state with passed in reducer', () => {
       const datasourceReducer = jest.fn(() => ({ changed: true }));
       const newState = reducer(
@@ -196,15 +169,13 @@ describe('editor_frame state management', () => {
           },
         },
         {
-          type: 'UPDATE_LAYER',
-          layerId: 'abc',
-          updater: layerReducer,
+          type: 'UPDATE_DATASOURCE_STATE',
+          updater: newDatasourceState,
           datasourceId: 'testDatasource',
         }
       );
 
-      expect(newState.datasourceStates.testDatasource.state).toEqual({ inserted: 'abc' });
-      expect(layerReducer).toHaveBeenCalledTimes(1);
+      expect(newState.datasourceStates.testDatasource.state).toBe(newDatasourceState);
     });
 
     it('should should switch active visualization', () => {

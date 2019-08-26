@@ -77,6 +77,7 @@ export interface OperationDefinition<C extends BaseIndexPatternColumn> {
     layerId: string;
     columns: Partial<Record<string, IndexPatternColumn>>;
     field?: IndexPatternField;
+    indexPattern: IndexPattern;
   }) => C;
   onOtherColumnChanged?: (
     currentColumn: C,
@@ -86,6 +87,23 @@ export interface OperationDefinition<C extends BaseIndexPatternColumn> {
   toEsAggsConfig: (column: C, columnId: string) => unknown;
   isTransferable: (column: C, newIndexPattern: IndexPattern) => boolean;
   transfer?: (column: C, newIndexPattern: IndexPattern) => C;
+  /**
+   * This method will be called if the user changes the field of an operation.
+   * You must implement it and return the new column after the field change.
+   * The most simple implementation will just change the field on the column, and keep
+   * the rest the same. Some implementations might want to change labels, or their parameters
+   * when changing the field.
+   *
+   * This will only be called for switching the field, not for initially selecting a field.
+   *
+   * See {@link OperationDefinition#transfer} for controlling column building when switching an
+   * index pattern not just a field.
+   *
+   * @param oldColumn The column before the user changed the field.
+   * @param indexPattern The index pattern that field is on.
+   * @param field The field that the user changed to.
+   */
+  onFieldChange: (oldColumn: C, indexPattern: IndexPattern, field: IndexPatternField) => C;
 }
 
 export function isColumnTransferable(column: IndexPatternColumn, newIndexPattern: IndexPattern) {
@@ -130,7 +148,7 @@ export function getAvailableOperationsByMetadata(indexPattern: IndexPattern) {
   > = {};
 
   const addToMap = (operation: OperationFieldTuple) => (operationMetadata: OperationMetadata) => {
-    const key = `${operationMetadata.dataType}-${operationMetadata.isBucketed ? 'true' : ''}`;
+    const key = JSON.stringify(operationMetadata);
 
     if (operationByMetadata[key]) {
       operationByMetadata[key].operations.push(operation);
@@ -196,5 +214,6 @@ export function buildColumn({
     suggestedPriority,
     field,
     layerId,
+    indexPattern,
   });
 }

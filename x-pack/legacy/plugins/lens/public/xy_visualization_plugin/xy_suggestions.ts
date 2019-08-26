@@ -12,6 +12,7 @@ import {
   VisualizationSuggestion,
   TableSuggestionColumn,
   TableSuggestion,
+  OperationMetadata,
 } from '../types';
 import { State, SeriesType } from './types';
 import { generateId } from '../id_generator';
@@ -140,6 +141,14 @@ function getSuggestion(
     ],
   };
 
+  const metadata: Record<string, OperationMetadata> = {};
+
+  [xValue, ...yValues, splitBy].forEach(col => {
+    if (col) {
+      metadata[col.columnId] = col.operation;
+    }
+  });
+
   return {
     title,
     // chart with multiple y values and split series will have a score of 1, single y value and no split series reduce score
@@ -150,13 +159,16 @@ function getSuggestion(
     previewExpression: buildExpression(
       {
         ...state,
-        layers: state.layers.map(layer => ({ ...layer, hide: true })),
+        layers: state.layers
+          .filter(layer => layer.layerId === layerId)
+          .map(layer => ({ ...layer, hide: true })),
         legend: {
           ...state.legend,
           isVisible: false,
         },
       },
-      { xTitle, yTitle }
+      { xTitle, yTitle },
+      { [layerId]: metadata }
     ),
   };
 }
