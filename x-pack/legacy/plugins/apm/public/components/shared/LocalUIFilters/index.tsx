@@ -43,6 +43,8 @@ const LocalUIFilters = ({
     params
   });
 
+  const hasValues = filters.some(filter => filter.value.length > 0);
+
   return (
     <>
       <EuiTitle size="s">
@@ -68,19 +70,23 @@ const LocalUIFilters = ({
           </React.Fragment>
         );
       })}
-      <EuiSpacer size="s" />
-      <ButtonWrapper>
-        <EuiButtonEmpty
-          size="xs"
-          iconType="cross"
-          flush="left"
-          onClick={clearValues}
-        >
-          {i18n.translate('xpack.apm.clearFilters', {
-            defaultMessage: 'Clear filters'
-          })}
-        </EuiButtonEmpty>
-      </ButtonWrapper>
+      {hasValues ? (
+        <>
+          <EuiSpacer size="s" />
+          <ButtonWrapper>
+            <EuiButtonEmpty
+              size="xs"
+              iconType="cross"
+              flush="left"
+              onClick={clearValues}
+            >
+              {i18n.translate('xpack.apm.clearFilters', {
+                defaultMessage: 'Clear filters'
+              })}
+            </EuiButtonEmpty>
+          </ButtonWrapper>
+        </>
+      ) : null}
     </>
   );
 };
