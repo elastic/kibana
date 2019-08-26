@@ -18,13 +18,14 @@
  */
 
 import { CoreService } from 'src/core/types';
-import { take } from 'rxjs/operators';
+import { first } from 'rxjs/operators';
 import { KibanaMigrator } from './migrations';
 import { CoreContext } from '../core_context';
 import { LegacyServiceSetup } from '../legacy/legacy_service';
 import { ElasticsearchServiceSetup } from '../elasticsearch';
 import { KibanaConfig } from '../kibana_config';
 import { retryCallCluster } from '../elasticsearch/retry_call_cluster';
+import { Logger } from '..';
 
 /**
  * @public
@@ -52,10 +53,15 @@ export interface SavedObjectsSetupDeps {
 export class SavedObjectsService
   implements CoreService<SavedObjectsServiceSetup, SavedObjectsServiceStart> {
   private migrator: KibanaMigrator | undefined;
+  logger: Logger;
 
-  constructor(private readonly coreContext: CoreContext) {}
+  constructor(private readonly coreContext: CoreContext) {
+    this.logger = coreContext.logger.get('savedobjects-service');
+  }
 
   public async setup(coreSetup: SavedObjectsSetupDeps) {
+    this.logger.debug('Setting up SavedObjects service');
+
     const {
       savedObjectSchemas,
       savedObjectMappings,
@@ -63,15 +69,12 @@ export class SavedObjectsService
       savedObjectValidations,
     } = await coreSetup.legacy.uiExports;
 
-    const adminClient = await coreSetup.elasticsearch.adminClient$.pipe(take(1)).toPromise();
+    const adminClient = await coreSetup.elasticsearch.adminClient$.pipe(first()).toPromise();
 
-    // const kibanaConfig = await this.coreContext.configService
-    //   .atPath<KibanaConfig>('kibana')
-    //   .toPromise(); <-- No idea why, but this makes Node.js process exit without any errors or hints to what went wrong ??
-    let kibanaConfig;
-    this.coreContext.configService.atPath<KibanaConfig>('kibana').subscribe(value => {
-      kibanaConfig = value;
-    });
+    const kibanaConfig = await this.coreContext.configService
+      .atPath<KibanaConfig>('kibana')
+      .pipe(first())
+      .toPromise();
 
     this.migrator = new KibanaMigrator({
       savedObjectSchemas,
@@ -89,6 +92,8 @@ export class SavedObjectsService
   }
 
   public async start(core: SavedObjectsStartDeps): Promise<SavedObjectsServiceStart> {
+    this.logger.debug('Starting SavedObjects service');
+
     /**
      * Note: We want to ensure that migrations have completed before
      * continuing with further Core startup steps that might use SavedObjects
