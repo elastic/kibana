@@ -20,8 +20,8 @@ export const paths = {
     {
       platforms: ['linux'],
       archiveFilename: 'chromium-312d84c-linux.zip',
-      archiveChecksum: '1bc18b0e35701f473157799b2cd16152',
-      rawChecksum: 'fea8f6f3eb9e9be28be8022e3b0f04cd',
+      archiveChecksum: '15ba9166a42f93ee92e42217b737018d',
+      rawChecksum: '3455db62ea4bd2d6e891e9155313305a',
       binaryRelativePath: 'headless_shell-linux/headless_shell',
     },
     {
