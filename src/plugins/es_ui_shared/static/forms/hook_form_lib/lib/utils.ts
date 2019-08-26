@@ -17,72 +17,12 @@
  * under the License.
  */
 
+import { set } from 'lodash';
 import { Field } from '../types';
 
-const numRegEx = /^\d+$/;
-
-const isNumber = (val: string) => numRegEx.test(val);
-
-export const getAt = (path: string, object: any, throwIfNotFound = true): unknown => {
-  const pathToArray = path.split('.');
-  const value = object[pathToArray[0]];
-
-  if (pathToArray.length === 1) {
-    return value;
-  }
-
-  if (value !== null && typeof value === 'object') {
-    return getAt(pathToArray.slice(1).join('.'), value, throwIfNotFound);
-  }
-
-  if (throwIfNotFound) {
-    throw new Error(`Can't access path "${path}" on ${JSON.stringify(object)}`);
-  }
-
-  return undefined;
-};
-
-const setAt = (path: string, object: any, value: unknown, createUnknownPath = true): any => {
-  const pathToArray = path.split('.');
-
-  if (pathToArray.length === 1) {
-    object[pathToArray[0]] = value;
-    return object;
-  }
-
-  let target = object;
-
-  pathToArray.slice(0, -1).forEach((key, i) => {
-    if (!{}.hasOwnProperty.call(target, key)) {
-      if (createUnknownPath) {
-        // If the path segment is a number, we create an Array
-        // otherwise we create an object.
-        target[key] = isNumber(pathToArray[i + 1]) ? [] : {};
-      } else {
-        throw new Error(`Can't set value "${value}" at "${path}" on ${JSON.stringify(object)}`);
-      }
-    }
-
-    target = target[key];
-
-    if (target === null || (typeof target !== 'object' && !Array.isArray(target))) {
-      throw new Error(
-        `Can't set value "${value}" on a primitive. Path provided: "${path}", target: ${JSON.stringify(
-          object
-        )}`
-      );
-    }
-  });
-
-  const keyToSet = pathToArray[pathToArray.length - 1];
-  target[keyToSet] = value;
-
-  return object;
-};
-
 export const unflattenObject = (object: any) =>
-  Object.entries(object).reduce((acc, [key, field]) => {
-    setAt(key, acc, field);
+  Object.entries(object).reduce((acc, [key, value]) => {
+    set(acc, key, value);
     return acc;
   }, {});
 

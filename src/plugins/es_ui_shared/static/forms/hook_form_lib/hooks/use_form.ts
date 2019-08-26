@@ -18,9 +18,10 @@
  */
 
 import { useState, useRef } from 'react';
+import { get } from 'lodash';
 
 import { Form, FormData, FieldConfig, FieldsMap, FormConfig } from '../types';
-import { getAt, mapFormFields, flattenObject, unflattenObject, Subject } from '../lib';
+import { mapFormFields, flattenObject, unflattenObject, Subject } from '../lib';
 
 const DEFAULT_ERROR_DISPLAY_TIMEOUT = 500;
 
@@ -139,10 +140,10 @@ export const useForm = <T = FormData>(
   const getFields: Form<T>['getFields'] = () => fieldsRefs.current;
 
   const getFieldDefaultValue: Form['getFieldDefaultValue'] = fieldName =>
-    getAt(fieldName, defaultValueDeSerialized, false);
+    get(defaultValueDeSerialized, fieldName);
 
   const readFieldConfigFromSchema: Form<T>['__readFieldConfigFromSchema'] = fieldName => {
-    const config = (getAt(fieldName, schema ? schema : {}, false) as FieldConfig) || {};
+    const config = (get(schema ? schema : {}, fieldName) as FieldConfig) || {};
 
     return config;
   };
