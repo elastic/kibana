@@ -22,17 +22,14 @@ interface RedirectToLogsProps extends RedirectToLogsType {
   }>;
 }
 
-export function buildSearchString(location: RouteComponentProps['location'], sourceId = 'default') {
+export const RedirectToLogs = injectI18n(({ location, match }: RedirectToLogsProps) => {
+  const sourceId = match.params.sourceId || 'default';
   const filter = getFilterFromLocation(location);
-  return compose(
+  const searchString = compose(
     replaceLogFilterInQueryString(filter),
     replaceLogPositionInQueryString(getTimeFromLocation(location)),
     replaceSourceIdInQueryString(sourceId)
   )('');
-}
-
-export const RedirectToLogs = injectI18n(({ location, match }: RedirectToLogsProps) => {
-  const searchString = buildSearchString(location, match.params.sourceId);
 
   return <Redirect to={`/logs/stream?${searchString}`} />;
 });

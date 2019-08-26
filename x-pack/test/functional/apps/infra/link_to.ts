@@ -5,7 +5,6 @@
  */
 
 import expect from '@kbn/expect';
-import { buildSearchString } from '../../../../legacy/plugins/infra/public/pages/link_to/redirect_to_logs';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -22,7 +21,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         search: '?time=1565707203194&filter=trace.id:433b4651687e18be2c6c8e3b11f53d09',
         state: undefined,
       };
-      const expectedSearchString = buildSearchString(location);
+      const expectedSearchString =
+        "ogFilter=(expression:'trace.id:433b4651687e18be2c6c8e3b11f53d09',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1565707203194))&sourceId=default&_g=()";
       const expectedRedirect = `/logs/stream?${expectedSearchString}`;
 
       await pageObjects.common.navigateToActualUrl(

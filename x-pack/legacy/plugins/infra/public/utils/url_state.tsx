@@ -10,7 +10,7 @@ import React from 'react';
 import { Route, RouteProps } from 'react-router-dom';
 import { decode, encode, RisonValue } from 'rison-node';
 
-import { QueryString } from '../../../../../../src/legacy/ui/public/utils/query_string';
+import { QueryString } from 'ui/utils/query_string';
 
 interface UrlStateContainerProps<UrlState> {
   urlState: UrlState | undefined;
