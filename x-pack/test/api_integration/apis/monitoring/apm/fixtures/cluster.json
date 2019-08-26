@@ -290,7 +290,7 @@
         [1535723940000, 0]
       ]
     }],
-    "apm_responses_valid": [{
+    "apm_server_responses_valid": [{
       "bucket_size": "30 seconds",
       "timeRange": {
         "min": 1535720389104,
@@ -360,7 +360,7 @@
         [1535723940000, 2]
       ]
     }],
-    "apm_responses_errors": [{
+    "apm_server_responses_errors": [{
       "bucket_size": "30 seconds",
       "timeRange": {
         "min": 1535720389104,
@@ -614,7 +614,7 @@
         [1535723940000, 0]
       ]
     }],
-    "apm_requests": [{
+    "apm_server_requests": [{
       "bucket_size": "30 seconds",
       "timeRange": {
         "min": 1535720389104,
