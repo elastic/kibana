@@ -130,6 +130,7 @@ export default function({ getService }: FtrProviderContext) {
             'canvas',
             'code',
             'infrastructure',
+            'lens',
             'logs',
             'maps',
             'uptime',
