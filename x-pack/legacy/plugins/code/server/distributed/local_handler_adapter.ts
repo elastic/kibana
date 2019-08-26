@@ -13,6 +13,10 @@ import { LocalEndpoint } from './local_endpoint';
 export class LocalHandlerAdapter implements ServiceHandlerAdapter {
   handlers: Map<any, any> = new Map<any, any>();
 
+  async start(): Promise<void> {}
+
+  async stop(): Promise<void> {}
+
   registerHandler<def extends ServiceDefinition>(
     serviceDefinition: def,
     serviceHandler: ServiceHandlerFor<def> | null
@@ -47,6 +51,10 @@ export class LocalHandlerAdapter implements ServiceHandlerAdapter {
 
     isResourceLocal(resource: string): Promise<boolean> {
       return Promise.resolve(true);
+    },
+
+    async allocate(httpRequest: Request, resource: string): Promise<Endpoint | undefined> {
+      return Promise.resolve(new LocalEndpoint(httpRequest, resource));
     },
   };
 }
