@@ -22,6 +22,12 @@ import { Promise } from 'bluebird';
 
 const { search } = defaultSearchStrategy;
 
+function getConfigStub(config = {}) {
+  return {
+    get: key => config[key]
+  };
+}
+
 describe('defaultSearchStrategy', function () {
 
   describe('search', function () {
@@ -30,33 +36,46 @@ describe('defaultSearchStrategy', function () {
 
     beforeEach(() => {
       const msearchMock = jest.fn().mockReturnValue(Promise.resolve([]));
+      const searchMock = jest.fn().mockReturnValue(Promise.resolve([]));
 
       searchArgs = {
         searchRequests: [],
-        es: { msearch: msearchMock },
+        es: {
+          msearch: msearchMock,
+          search: searchMock,
+        },
         Promise,
         serializeFetchParams: () => Promise.resolve('pretend this is a valid request body'),
       };
     });
 
     test('does not send max_concurrent_shard_requests by default', async () => {
+      searchArgs.config = getConfigStub({ 'courier:batchSearches': true });
       await search(searchArgs);
-      expect(searchArgs.es.msearch.mock.calls[0][0]).not.toHaveProperty('max_concurrent_shard_requests');
+      expect(searchArgs.es.msearch.mock.calls[0][0].max_concurrent_shard_requests).toBe(undefined);
     });
 
     test('allows configuration of max_concurrent_shard_requests', async () => {
-      searchArgs.maxConcurrentShardRequests = 42;
+      searchArgs.config = getConfigStub({
+        'courier:batchSearches': true,
+        'courier:maxConcurrentShardRequests': 42,
+      });
       await search(searchArgs);
       expect(searchArgs.es.msearch.mock.calls[0][0].max_concurrent_shard_requests).toBe(42);
     });
 
     test('should set rest_total_hits_as_int to true on a request', async () => {
+      searchArgs.config = getConfigStub({ 'courier:batchSearches': true });
       await search(searchArgs);
       expect(searchArgs.es.msearch.mock.calls[0][0]).toHaveProperty('rest_total_hits_as_int', true);
     });
 
     test('should set ignore_throttled=false when including frozen indices', async () => {
-      await search({ ...searchArgs, includeFrozen: true });
+      searchArgs.config = getConfigStub({
+        'courier:batchSearches': true,
+        'search:includeFrozen': true,
+      });
+      await search(searchArgs);
       expect(searchArgs.es.msearch.mock.calls[0][0]).toHaveProperty('ignore_throttled', false);
     });
 

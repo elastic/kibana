@@ -18,7 +18,7 @@
  */
 
 import expect from '@kbn/expect';
-import handleESError from '../handle_es_error';
+import { handleESError } from '../handle_es_error';
 import { errors as esErrors } from 'elasticsearch';
 
 describe('handleESError', function () {
