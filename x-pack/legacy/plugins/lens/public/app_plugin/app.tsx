@@ -98,6 +98,10 @@ export function App({
             isLoading: false,
             persistedDoc: doc,
             query: doc.state.query,
+            localQueryBarState: {
+              ...state.localQueryBarState,
+              query: doc.state.query,
+            },
             indexPatternTitles: doc.state.datasourceMetaData.filterableIndexPatterns.map(
               ({ title }) => title
             ),
