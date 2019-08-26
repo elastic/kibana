@@ -139,11 +139,16 @@ export class APIKeys {
     this.logger.debug('Trying to invalidate an API key');
 
     // User needs `manage_api_key` privilege to use this API
-    const result = (await this.clusterClient
-      .asScoped(request)
-      .callAsCurrentUser('shield.invalidateAPIKey', { body })) as InvalidateAPIKeyResult;
-
-    this.logger.debug('API key was invalidated successfully');
+    let result: InvalidateAPIKeyResult;
+    try {
+      result = (await this.clusterClient
+        .asScoped(request)
+        .callAsCurrentUser('shield.invalidateAPIKey', { body })) as InvalidateAPIKeyResult;
+      this.logger.debug('API key was invalidated successfully');
+    } catch (e) {
+      this.logger.debug(`Failed to invalidate API key: ${e.message}`);
+      throw e;
+    }
 
     return result;
   }
