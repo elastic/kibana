@@ -70,21 +70,15 @@ export const searchFilter = (jobs: Job[], filterQuery?: string): Job[] =>
 
 /**
  * Returns a string array of Index Pattern Titles
- * TODO: Add tests
+ *
  * @param indexPatterns IndexPatternSavedObject[] as provided from the useIndexPatterns() hook
  */
 export const getIndexPatternTitles = (indexPatterns: IndexPatternSavedObject[]): string[] =>
-  indexPatterns.reduce(
-    (acc: string[], v) => [
-      ...acc,
-      ...(v.attributes && v.attributes.title ? [v.attributes.title] : []),
-    ],
-    []
-  );
+  indexPatterns.reduce((acc: string[], v) => [...acc, v.attributes.title], []);
 
 /**
  * Returns a mapping of indexPatternTitle to indexPatternId
- * TODO: Fix Types + add tests
+ *
  * @param indexPatterns IndexPatternSavedObject[] as provided from the useIndexPatterns() hook
  */
 export const getIndexPatternTitleIdMapping = (

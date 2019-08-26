@@ -28,7 +28,7 @@ import { GlobalToaster, ManageGlobalToaster } from '../components/toasters';
 import { MlCapabilitiesProvider } from '../components/ml/permissions/ml_capabilities_provider';
 import { useKibanaUiSetting } from '../lib/settings/use_kibana_ui_setting';
 
-const startApp = (libs: AppFrontendLibs) => {
+export const startApp = (libs: AppFrontendLibs) => {
   const history = createHashHistory();
 
   const libs$ = new BehaviorSubject(libs);

@@ -20,7 +20,11 @@ export const IndexPatternsMissingPrompt = React.memo<{ indexPatterns: string }>(
         titleSize="xs"
         body={
           <>
-            <p>{i18n.ERROR_DESCRIPTION}</p>
+            {indexPatterns.length > 0 ? (
+              <p>{`${i18n.ERROR_DESCRIPTION} ${i18n.ERROR_EXISTING_INDICES_DESCRIPTION}`}</p>
+            ) : (
+              <p>{`${i18n.ERROR_DESCRIPTION}`}</p>
+            )}
             <p>{indexPatterns}</p>
           </>
         }

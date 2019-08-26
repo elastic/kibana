@@ -14,26 +14,33 @@ import uuid from 'uuid';
 import styled from 'styled-components';
 import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import {
+  APPLY_FILTER_ACTION,
   APPLY_FILTER_TRIGGER,
   CONTEXT_MENU_TRIGGER,
   EmbeddablePanel,
   PANEL_BADGE_TRIGGER,
   ViewMode,
 } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-
+// @ts-ignore Missing type defs as maps moves to Typescript
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../maps/common/constants';
 import { Loader } from '../loader';
-import { ESQuery } from '../../../common/typed_json';
 import {
-  UPDATE_GLOBAL_FILTER_ACTION_ID,
-  UpdateGlobalFilterAction,
-} from './update_global_filter_action';
+  APPLY_SIEM_FILTER_ACTION_ID,
+  ApplySiemFilterAction,
+} from './actions/apply_siem_filter_action';
 import { useIndexPatterns } from '../ml_popover/hooks/use_index_patterns';
-import { getLayerListJSONString } from './map_config';
+import { getLayerList } from './map_config';
 import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { getIndexPatternTitleIdMapping } from '../ml_popover/helpers';
 import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
+import { KueryFilterQuery } from '../../store';
+import {
+  EmbeddableOutput,
+  IEmbeddable,
+} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/embeddables/i_embeddable';
+import { IndexPatternMapping, MapEmbeddableInput } from './types';
+import * as i18n from './translations';
 
 const EmbeddableWrapper = styled(EuiFlexGroup)`
   position: relative;
@@ -41,78 +48,91 @@ const EmbeddableWrapper = styled(EuiFlexGroup)`
   margin: 0;
 `;
 
-export interface SavedMapProps {
+export interface EmbeddedMapProps {
   applyFilterQueryFromKueryExpression: (expression: string) => void;
-  filterQuery?: ESQuery | string;
-  startDate?: number;
-  endDate?: number;
+  queryExpression: string;
+  getFilterQueryDraft: () => KueryFilterQuery;
+  startDate: number;
+  endDate: number;
 }
 
-export const SavedMap = React.memo<SavedMapProps>(
-  ({ applyFilterQueryFromKueryExpression, filterQuery, startDate, endDate }) => {
-    const [embeddable, setEmbeddable] = React.useState(null);
-    const [, configuredIndexPatterns] = useIndexPatterns();
-    const [, setIsLoading] = useState(true);
+export const EmbeddedMap = React.memo<EmbeddedMapProps>(
+  ({
+    applyFilterQueryFromKueryExpression,
+    queryExpression,
+    getFilterQueryDraft,
+    startDate,
+    endDate,
+  }) => {
+    const [embeddable, setEmbeddable] = React.useState<IEmbeddable<
+      MapEmbeddableInput,
+      EmbeddableOutput
+    > | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
     const [isError, setIsError] = useState(false);
+
+    const [, kibanaIndexPatterns] = useIndexPatterns();
     const [siemDefaultIndices] = useKibanaUiSetting(DEFAULT_INDEX_KEY);
 
-    const loadEmbeddable = async (
-      id: string,
-      indexPatterns: Array<{ title: string; id: string }>
-    ) => {
+    const loadEmbeddable = async (id: string, indexPatterns: IndexPatternMapping[]) => {
       try {
         const factory = start.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
 
         const state = {
-          layerList: getLayerListJSONString(indexPatterns),
-          title: 'panel title',
+          layerList: getLayerList(indexPatterns),
+          title: i18n.MAP_TITLE,
         };
         const input = {
+          id,
           filters: [],
           hidePanelTitles: true,
-          id,
-          query: { query: '', language: 'kuery' },
+          query: { query: queryExpression, language: 'kuery' },
           refreshConfig: { value: 0, pause: true },
           timeRange: {
-            from: '2019-05-19T20:00:00.000Z',
-            to: '2019-05-19T20:30:00.000Z',
+            from: new Date(startDate).toISOString(),
+            to: new Date(endDate).toISOString(),
           },
           viewMode: ViewMode.VIEW,
           isLayerTOCOpen: false,
           openTOCDetails: [],
           hideFilterActions: false,
-          mapCenter: { lon: -70.64316, lat: 34.0006, zoom: 3.1 },
+          mapCenter: { lon: -1.05469, lat: 15.96133, zoom: 1 },
         };
 
         // @ts-ignore method added in https://github.com/elastic/kibana/pull/43878
         const embeddableObject = await factory.createFromState(state, input);
 
         setEmbeddable(embeddableObject);
-        setIsLoading(false);
       } catch (e) {
         // TODO: Throw toast
-        setIsLoading(false);
       }
     };
 
+    /**
+     * Temporary Embeddables API configuration override until ability to edit actions is addressed:
+     * https://github.com/elastic/kibana/issues/43643
+     */
     const setupEmbeddablesAPI = () => {
-      let actionLoaded = false;
       try {
         const actions = start.getTriggerActions(APPLY_FILTER_TRIGGER);
-        actionLoaded =
-          actions.length > 0 && actions.some(a => a.id === UPDATE_GLOBAL_FILTER_ACTION_ID);
-      } catch (e) {
-        actionLoaded = false;
-      }
+        const actionLoaded =
+          actions.length > 0 && actions.some(a => a.id === APPLY_SIEM_FILTER_ACTION_ID);
+        if (!actionLoaded) {
+          const updateGlobalFiltersAction = new ApplySiemFilterAction({
+            applyFilterQueryFromKueryExpression,
+            getFilterQueryDraft,
+          });
+          start.registerAction(updateGlobalFiltersAction);
+          start.attachAction(APPLY_FILTER_TRIGGER, updateGlobalFiltersAction.id);
 
-      if (!actionLoaded) {
-        const updateGlobalFiltersAction = new UpdateGlobalFilterAction({
-          applyFilterQueryFromKueryExpression,
-        });
-        start.registerAction(updateGlobalFiltersAction);
-        start.attachAction(APPLY_FILTER_TRIGGER, updateGlobalFiltersAction.id);
-        start.detachAction(CONTEXT_MENU_TRIGGER, 'CUSTOM_TIME_RANGE');
-        start.detachAction(PANEL_BADGE_TRIGGER, 'CUSTOM_TIME_RANGE_BADGE');
+          start.detachAction(CONTEXT_MENU_TRIGGER, 'CUSTOM_TIME_RANGE');
+          start.detachAction(PANEL_BADGE_TRIGGER, 'CUSTOM_TIME_RANGE_BADGE');
+          start.detachAction(APPLY_FILTER_TRIGGER, APPLY_FILTER_ACTION);
+        }
+      } catch (e) {
+        throw Error(
+          'Unable to get TriggerActions to perform initial Embeddables API configuration'
+        );
       }
     };
 
@@ -121,33 +141,34 @@ export const SavedMap = React.memo<SavedMapProps>(
       setIsLoading(true);
 
       const importIfNotExists = async () => {
-        // TODO: Can ip.attributes && ip.attributes.title be null?
-        const matchingIndexPatterns = configuredIndexPatterns.filter(ip =>
+        const matchingIndexPatterns = kibanaIndexPatterns.filter(ip =>
           siemDefaultIndices.includes(ip.attributes.title)
         );
 
-        // Ensure at least one siem:defaultIndex index pattern exists before trying to import
+        // Ensure at least one `siem:defaultIndex` index pattern exists before trying to import
         if (matchingIndexPatterns.length === 0) {
+          setIsLoading(false);
           setIsError(true);
           return;
         }
 
         setupEmbeddablesAPI();
         await loadEmbeddable(uuid.v4(), getIndexPatternTitleIdMapping(matchingIndexPatterns));
+        setIsLoading(false);
       };
 
-      if (configuredIndexPatterns.length > 0) {
+      if (kibanaIndexPatterns.length > 0) {
         importIfNotExists();
       }
-    }, [configuredIndexPatterns]);
+    }, [kibanaIndexPatterns]);
 
     // FilterQuery updated useEffect
     useEffect(() => {
-      if (embeddable != null && filterQuery != null) {
-        const query = { query: filterQuery, language: 'kuery' };
+      if (embeddable != null && queryExpression != null) {
+        const query = { query: queryExpression, language: 'kuery' };
         embeddable.updateInput({ query });
       }
-    }, [filterQuery]);
+    }, [queryExpression]);
 
     // DateRange updated useEffect
     useEffect(() => {
@@ -173,7 +194,7 @@ export const SavedMap = React.memo<SavedMapProps>(
               inspector={npStart.plugins.inspector}
               SavedObjectFinder={SavedObjectFinder}
             />
-          ) : isError ? (
+          ) : !isLoading && isError ? (
             <IndexPatternsMissingPrompt
               indexPatterns={
                 siemDefaultIndices ? siemDefaultIndices.join(', ') : 'No indices specified'
@@ -189,4 +210,4 @@ export const SavedMap = React.memo<SavedMapProps>(
   }
 );
 
-SavedMap.displayName = 'SavedMap';
+EmbeddedMap.displayName = 'EmbeddedMap';

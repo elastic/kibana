@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`IndexPatternsMissingPrompt renders correctly against snapshot when empty index pattern string is provided 1`] = `
+<EuiEmptyPrompt
+  actions={
+    <EuiButton
+      color="primary"
+      fill={true}
+      href="/test/base/path/app/kibana#/management/kibana/index_patterns"
+      iconSide="left"
+      size="m"
+      target="_blank"
+      type="button"
+    >
+      Configure index patterns
+    </EuiButton>
+  }
+  body={
+    <React.Fragment>
+      <p>
+        An ECS compliant Kibana Index Pattern must be configured to view event data on the map. 
+      </p>
+      <p>
+        
+      </p>
+    </React.Fragment>
+  }
+  iconColor="subdued"
+  iconType="gisApp"
+  title={
+    <h2>
+      Required Index Patterns Not Configured
+    </h2>
+  }
+  titleSize="xs"
+/>
+`;
+
+exports[`IndexPatternsMissingPrompt renders correctly against snapshot when index patterns are provided 1`] = `
+<EuiEmptyPrompt
+  actions={
+    <EuiButton
+      color="primary"
+      fill={true}
+      href="/test/base/path/app/kibana#/management/kibana/index_patterns"
+      iconSide="left"
+      size="m"
+      target="_blank"
+      type="button"
+    >
+      Configure index patterns
+    </EuiButton>
+  }
+  body={
+    <React.Fragment>
+      <p>
+        An ECS compliant Kibana Index Pattern must be configured to view event data on the map.  Please configure one of the following index patterns specified in Kibana Advanced Settings (siem:defaultIndex) and refresh the page.
+      </p>
+      <p>
+        auditbeat-*
+      </p>
+    </React.Fragment>
+  }
+  iconColor="subdued"
+  iconType="gisApp"
+  title={
+    <h2>
+      Required Index Patterns Not Configured
+    </h2>
+  }
+  titleSize="xs"
+/>
+`;

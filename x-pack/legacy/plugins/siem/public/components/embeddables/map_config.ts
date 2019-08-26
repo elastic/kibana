@@ -5,12 +5,19 @@
  */
 
 import uuid from 'uuid';
+import { IndexPatternMapping } from './types';
 
-export const getLayerListJSONString = (indexPatternIds: Array<{ title: string; id: string }>) => {
+/**
+ * Returns `Source/Destination Point-to-point` Map LayerList configuration, with a source,
+ * destination, and line layer for each of the provided indexPatterns
+ *
+ * @param indexPatternIds array of indexPatterns' title and id
+ */
+export const getLayerList = (indexPatternIds: IndexPatternMapping[]) => {
   return [
     {
       sourceDescriptor: { type: 'EMS_TMS', isAutoSelect: true },
-      id: '96029879-55cb-4d83-a8e2-5104053d5d36',
+      id: uuid.v4(),
       label: null,
       minZoom: 0,
       maxZoom: 24,
@@ -31,6 +38,13 @@ export const getLayerListJSONString = (indexPatternIds: Array<{ title: string; i
   ];
 };
 
+/**
+ * Returns Document Data Source layer configuration ('source.geo.location') for the given
+ * indexPattern title/id
+ *
+ * @param indexPatternTitle used as layer name in LayerToC UI: "${indexPatternTitle} | Source point"
+ * @param indexPatternId used as layer's indexPattern to query for data
+ */
 const getSourceLayer = (indexPatternTitle: string, indexPatternId: string) => ({
   sourceDescriptor: {
     id: uuid.v4(),
@@ -66,6 +80,13 @@ const getSourceLayer = (indexPatternTitle: string, indexPatternId: string) => ({
   joins: [],
 });
 
+/**
+ * Returns Document Data Source layer configuration ('destination.geo.location') for the given
+ * indexPattern title/id
+ *
+ * @param indexPatternTitle used as layer name in LayerToC UI: "${indexPatternTitle} | Destination point"
+ * @param indexPatternId used as layer's indexPattern to query for data
+ */
 const getDestinationLayer = (indexPatternTitle: string, indexPatternId: string) => ({
   sourceDescriptor: {
     id: uuid.v4(),
@@ -100,6 +121,13 @@ const getDestinationLayer = (indexPatternTitle: string, indexPatternId: string) 
   query: { query: 'source.geo.location:* and destination.geo.location:*', language: 'kuery' },
 });
 
+/**
+ * Returns Point-to-point Data Source layer configuration ('source.geo.location' &
+ * 'source.geo.location') for the given indexPattern title/id
+ *
+ * @param indexPatternTitle used as layer name in LayerToC UI: "${indexPatternTitle} | Line"
+ * @param indexPatternId used as layer's indexPattern to query for data
+ */
 const getLineLayer = (indexPatternTitle: string, indexPatternId: string) => ({
   sourceDescriptor: {
     type: 'ES_PEW_PEW',

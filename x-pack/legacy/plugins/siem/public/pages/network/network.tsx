@@ -34,7 +34,7 @@ import { AnomaliesNetworkTable } from '../../components/ml/tables/anomalies_netw
 import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
-import { SavedMap } from '../../components/embeddables/saved_map';
+import { EmbeddedMap } from '../../components/embeddables/embedded_map';
 import { NetworkFilter } from '../../containers/network';
 
 const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
@@ -76,11 +76,12 @@ const NetworkComponent = pure<NetworkComponentProps>(
                         type={networkModel.NetworkType.page}
                       >
                         {({ applyFilterQueryFromKueryExpression, filterQueryDraft }) => (
-                          <SavedMap
+                          <EmbeddedMap
                             applyFilterQueryFromKueryExpression={
                               applyFilterQueryFromKueryExpression
                             }
-                            filterQuery={queryExpression}
+                            queryExpression={queryExpression}
+                            getFilterQueryDraft={() => filterQueryDraft}
                             startDate={from}
                             endDate={to}
                           />

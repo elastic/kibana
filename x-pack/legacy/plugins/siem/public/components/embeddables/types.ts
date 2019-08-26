@@ -4,17 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface ImportSavedObjectError {
-  id: string;
-  type: string;
-  title: string;
-  error: {
-    type: string;
+import { Filter as ESFilterType } from '@kbn/es-query';
+import { TimeRange } from 'ui/timefilter/time_history';
+import { EmbeddableInput } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+
+export interface MapEmbeddableInput extends EmbeddableInput {
+  filters: ESFilterType[];
+  query: {
+    query: string;
+    language: string;
   };
+  refreshConfig: {
+    isPaused: boolean;
+    interval: number;
+  };
+  timeRange?: TimeRange;
 }
 
-export interface ImportSavedObjectResponse {
-  success: boolean;
-  successCount: number;
-  errors: ImportSavedObjectError[];
+export interface IndexPatternMapping {
+  title: string;
+  id: string;
 }
