@@ -110,54 +110,35 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     validationTypeToValidate?: string;
   }): ValidationError[] => {
     const validationErrors: ValidationError[] = [];
-    let skip = false;
-
-    const runValidation = ({
-      validator,
-      exitOnFail,
-      type: validationType = VALIDATION_TYPES.FIELD,
-    }: ValidationConfig) => {
-      if (
-        skip ||
-        (typeof validationTypeToValidate !== 'undefined' &&
-          validationType !== validationTypeToValidate)
-      ) {
-        return;
-      }
-      let validationResult;
-
-      try {
-        validationResult = validator({
-          value: (valueToValidate as unknown) as string,
-          errors: validationErrors,
-          form,
-          formData,
-          path,
-        });
-
-        if (validationResult && exitOnFail !== false) {
-          throw validationResult;
-        }
-      } catch (error) {
-        // If an error is thrown, skip the rest of the validations
-        skip = true;
-        validationResult = error;
-      }
-
-      return validationResult;
-    };
 
     // Execute each validations for the field sequentially
-    validations.forEach(validation => {
-      const validationResult = runValidation(validation);
+    for (const validation of validations) {
+      const { validator, exitOnFail, type: validationType = VALIDATION_TYPES.FIELD } = validation;
 
-      if (validationResult) {
-        validationErrors.push({
-          ...validationResult,
-          validationType: validation.type || VALIDATION_TYPES.FIELD,
-        });
+      if (
+        typeof validationTypeToValidate !== 'undefined' &&
+        validationType !== validationTypeToValidate
+      ) {
+        continue;
       }
-    });
+
+      const validationResult = validator({
+        value: (valueToValidate as unknown) as string,
+        errors: validationErrors,
+        form,
+        formData,
+        path,
+      }) as ValidationError;
+
+      validationErrors.push({
+        ...validationResult,
+        validationType: validationType || VALIDATION_TYPES.FIELD,
+      });
+
+      if (validationResult && exitOnFail) {
+        break;
+      }
+    }
 
     return validationErrors;
   };
