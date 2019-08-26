@@ -1,12 +1,11 @@
 import axios from 'axios';
-import get from 'lodash.get';
 import isEmpty from 'lodash.isempty';
 import { BackportOptions } from '../../options/options';
 import { HandledError } from '../HandledError';
 import { CommitSelected } from './Commit';
-import { GithubCommit, GithubIssue, GithubSearch } from './GithubApiTypes';
+import { GithubCommit, GithubSearch } from './GithubApiTypes';
 import { handleGithubError } from './handleGithubError';
-import { withFormattedCommitMessage } from './commitFormatters';
+import { getFormattedCommitMessage } from './commitFormatters';
 
 export async function fetchCommitBySha(
   options: BackportOptions & { sha: string }
@@ -28,24 +27,17 @@ export async function fetchCommitBySha(
 
     const commitRes = res.data.items[0];
     const fullSha = commitRes.sha;
-    const pullNumber = await fetchPullRequestNumberBySha(options, fullSha);
 
-    return withFormattedCommitMessage({
+    const message = getFormattedCommitMessage({
       message: commitRes.commit.message,
-      sha: fullSha,
-      pullNumber
+      sha: fullSha
     });
+
+    return {
+      message,
+      sha: fullSha
+    };
   } catch (e) {
     throw handleGithubError(e);
   }
-}
-
-async function fetchPullRequestNumberBySha(
-  { apiHostname, repoName, repoOwner, accessToken }: BackportOptions,
-  commitSha: string
-): Promise<number> {
-  const res = await axios.get<GithubSearch<GithubIssue>>(
-    `https://${apiHostname}/search/issues?q=repo:${repoOwner}/${repoName}+${commitSha}+base:master&access_token=${accessToken}`
-  );
-  return get(res.data.items[0], 'number');
 }

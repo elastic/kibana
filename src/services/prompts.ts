@@ -1,11 +1,16 @@
 import chalk from 'chalk';
-import inquirer, { Question } from 'inquirer';
+import inquirer, {
+  CheckboxQuestion,
+  ListQuestion,
+  ConfirmQuestion
+} from 'inquirer';
 import isEmpty from 'lodash.isempty';
 import { BranchChoice } from '../types/Config';
 import { CommitChoice } from './github/Commit';
-import { getHumanReadableReference } from './github/commitFormatters';
 
-async function prompt<T = never>(options: Question) {
+type Question = CheckboxQuestion | ListQuestion | ConfirmQuestion;
+
+async function prompt<T = unknown>(options: Question) {
   const { promptResult } = (await inquirer.prompt([
     { ...options, name: 'promptResult' }
   ])) as { promptResult: T };
@@ -28,7 +33,7 @@ export async function promptForCommits(
 
     return {
       name: `${position} ${c.message} ${backportTags}`,
-      short: getHumanReadableReference(c),
+      short: c.message,
       value: c
     };
   });

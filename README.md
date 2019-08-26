@@ -98,6 +98,7 @@ The above commands will start an interactive prompt. You can use the `arrow keys
 | --path           | Only list commits touching files under a specific path |                | string  |
 | --pr-description | Pull request description suffix                        |                | string  |
 | --pr-title       | Pull request title pattern                             |                | string  |
+| --pr             | Pull request to backport                               |                | number  |
 | --sha            | Sha of commit to backport                              |                | string  |
 | --upstream       | Name of organization and repository                    |                | string  |
 | --username       | Github username                                        |                | string  |

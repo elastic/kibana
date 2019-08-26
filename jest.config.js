@@ -1,9 +1,9 @@
 module.exports = {
-  setupFiles: ['./test/unit/automatic-mocks.ts'],
+  setupFiles: ['./src/test/automatic-mocks.ts'],
   transform: {
     '^.+\\.tsx?$': 'ts-jest'
   },
-  testRegex: 'test/(unit|integration)/.*test.ts$',
+  testRegex: '(test|src)/.*test.ts$',
   moduleFileExtensions: ['ts', 'js', 'json'],
   globals: {
     'ts-jest': {

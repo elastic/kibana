@@ -5,10 +5,20 @@ import ora = require('ora');
 import { fetchCommitBySha } from '../services/github/fetchCommitBySha';
 import { fetchCommitsByAuthor } from '../services/github/fetchCommitsByAuthor';
 import { getShortSha } from '../services/github/commitFormatters';
+import { fetchCommitByPullNumber } from '../services/github/fetchCommitByPullNumber';
 
 export async function getCommits(options: BackportOptions) {
   if (options.sha) {
     return [await getCommitBySha({ ...options, sha: options.sha })]; // must extract sha to satisfy the ts gods
+  }
+
+  if (options.pullNumber) {
+    return [
+      await getCommitByPullNumber({
+        ...options,
+        pullNumber: options.pullNumber
+      })
+    ];
   }
 
   return await getCommitsByPrompt(options);
@@ -20,6 +30,22 @@ export async function getCommitBySha(
   const spinner = ora(`Loading commit "${getShortSha(options.sha)}"`).start();
   try {
     const commit = await fetchCommitBySha(options);
+    spinner.stop();
+    return commit;
+  } catch (e) {
+    spinner.fail();
+    throw e;
+  }
+}
+
+export async function getCommitByPullNumber(
+  options: BackportOptions & { pullNumber: number } // pullNumber is required
+) {
+  const spinner = ora(
+    `Loading merge commit from pull request #${options.pullNumber}`
+  ).start();
+  try {
+    const commit = await fetchCommitByPullNumber(options);
     spinner.stop();
     return commit;
   } catch (e) {

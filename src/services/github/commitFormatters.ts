@@ -1,23 +1,33 @@
-import { CommitChoice, CommitSelected } from './Commit';
-
-export function getHumanReadableReference(commit: CommitSelected) {
-  return commit.pullNumber ? `#${commit.pullNumber}` : getShortSha(commit.sha);
-}
-
 export function getShortSha(sha: string) {
   return sha.slice(0, 8);
 }
 
 export function getFirstCommitMessageLine(message: string) {
-  return message.split('\n')[0].replace(/\s\(#\d+\)/g, '');
+  return message.split('\n')[0];
 }
 
-export function withFormattedCommitMessage<
-  T extends CommitSelected | CommitChoice
->(commit: T): T {
-  const firstMessageLine = getFirstCommitMessageLine(commit.message);
-  return {
-    ...commit,
-    message: `${firstMessageLine} (${getHumanReadableReference(commit)})`
-  };
+export function getFormattedCommitMessage({
+  message,
+  pullNumber,
+  sha
+}: {
+  message: string;
+  pullNumber?: number;
+  sha: string;
+}) {
+  const firstMessageLine = getFirstCommitMessageLine(message);
+  if (pullNumber) {
+    const messageHasPullNumber = firstMessageLine.includes(`#${pullNumber}`);
+
+    // message already contain pull number
+    if (messageHasPullNumber) {
+      return firstMessageLine;
+    }
+
+    // message doesn't contain pull number. Add it
+    return `${firstMessageLine} (#${pullNumber})`;
+  }
+
+  // pull number not available. Add commit
+  return `${firstMessageLine} (${getShortSha(sha)})`;
 }

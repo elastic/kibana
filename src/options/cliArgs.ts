@@ -92,6 +92,11 @@ export function getOptionsFromCliArgs(
       description: 'Description to be added to pull request',
       type: 'string'
     })
+    .option('pullNumber', {
+      description: 'Pull request to backport',
+      type: 'number',
+      alias: 'pr'
+    })
     .option('sha', {
       description: 'Commit sha to backport',
       type: 'string',
@@ -129,6 +134,7 @@ export function getOptionsFromCliArgs(
     path: cliArgs.path,
     prTitle: cliArgs.prTitle,
     prDescription: cliArgs.prDescription,
+    pullNumber: cliArgs.pullNumber,
     sha: cliArgs.sha,
     upstream: cliArgs.upstream,
     username: cliArgs.username
