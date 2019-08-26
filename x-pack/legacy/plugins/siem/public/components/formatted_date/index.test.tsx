@@ -9,22 +9,27 @@ import toJson from 'enzyme-to-json';
 import moment from 'moment-timezone';
 import * as React from 'react';
 
-import { AppTestingFrameworkAdapter } from '../../lib/adapters/framework/testing_framework_adapter';
-import { mockFrameworks, TestProviders } from '../../mock';
+import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
+
+import { mockFrameworks, TestProviders, MockFrameworks, getMockKibanaUiSetting } from '../../mock';
 
 import { PreferenceFormattedDate, FormattedDate } from '.';
 import { getEmptyValue } from '../empty_value';
-import { KibanaConfigContext } from '../../lib/adapters/framework/kibana_framework_adapter';
+
+const mockUseKibanaUiSetting: jest.Mock = useKibanaUiSetting as jest.Mock;
+jest.mock('../../lib/settings/use_kibana_ui_setting', () => ({
+  useKibanaUiSetting: jest.fn(),
+}));
 
 describe('formatted_date', () => {
   describe('PreferenceFormattedDate', () => {
     describe('rendering', () => {
+      beforeEach(() => {
+        mockUseKibanaUiSetting.mockClear();
+      });
       const isoDateString = '2019-02-25T22:27:05.000Z';
       const isoDate = new Date(isoDateString);
-      const configFormattedDateString = (
-        dateString: string,
-        config: Partial<AppTestingFrameworkAdapter>
-      ): string =>
+      const configFormattedDateString = (dateString: string, config: MockFrameworks): string =>
         moment
           .tz(
             dateString,
@@ -38,42 +43,37 @@ describe('formatted_date', () => {
       });
 
       test('it renders the UTC ISO8601 date string supplied when no configuration exists', () => {
-        const wrapper = mount(
-          <KibanaConfigContext.Provider value={{}}>
-            <PreferenceFormattedDate value={isoDate} />
-          </KibanaConfigContext.Provider>
-        );
+        mockUseKibanaUiSetting.mockImplementation(() => [null]);
+        const wrapper = mount(<PreferenceFormattedDate value={isoDate} />);
         expect(wrapper.text()).toEqual(isoDateString);
       });
 
       test('it renders the UTC ISO8601 date supplied when the default configuration exists', () => {
-        const wrapper = mount(
-          <KibanaConfigContext.Provider value={mockFrameworks.default_UTC}>
-            <PreferenceFormattedDate value={isoDate} />
-          </KibanaConfigContext.Provider>
+        mockUseKibanaUiSetting.mockImplementation(
+          getMockKibanaUiSetting(mockFrameworks.default_UTC)
         );
+
+        const wrapper = mount(<PreferenceFormattedDate value={isoDate} />);
         expect(wrapper.text()).toEqual(
           configFormattedDateString(isoDateString, mockFrameworks.default_UTC)
         );
       });
 
       test('it renders the correct tz when the default browser configuration exists', () => {
-        const wrapper = mount(
-          <KibanaConfigContext.Provider value={mockFrameworks.default_browser}>
-            <PreferenceFormattedDate value={isoDate} />
-          </KibanaConfigContext.Provider>
+        mockUseKibanaUiSetting.mockImplementation(
+          getMockKibanaUiSetting(mockFrameworks.default_browser)
         );
+        const wrapper = mount(<PreferenceFormattedDate value={isoDate} />);
         expect(wrapper.text()).toEqual(
           configFormattedDateString(isoDateString, mockFrameworks.default_browser)
         );
       });
 
       test('it renders the correct tz when a non-UTC configuration exists', () => {
-        const wrapper = mount(
-          <KibanaConfigContext.Provider value={mockFrameworks.default_MT}>
-            <PreferenceFormattedDate value={isoDate} />
-          </KibanaConfigContext.Provider>
+        mockUseKibanaUiSetting.mockImplementation(
+          getMockKibanaUiSetting(mockFrameworks.default_MT)
         );
+        const wrapper = mount(<PreferenceFormattedDate value={isoDate} />);
         expect(wrapper.text()).toEqual(
           configFormattedDateString(isoDateString, mockFrameworks.default_MT)
         );
@@ -83,72 +83,79 @@ describe('formatted_date', () => {
 
   describe('FormattedDate', () => {
     describe('rendering', () => {
+      beforeEach(() => {
+        mockUseKibanaUiSetting.mockClear();
+      });
+
       test('it renders against a numeric epoch', () => {
-        const wrapper = mount(
-          <KibanaConfigContext.Provider value={mockFrameworks.default_UTC}>
-            <FormattedDate fieldName="@timestamp" value={1559079339000} />
-          </KibanaConfigContext.Provider>
+        mockUseKibanaUiSetting.mockImplementation(
+          getMockKibanaUiSetting(mockFrameworks.default_UTC)
         );
+        const wrapper = mount(<FormattedDate fieldName="@timestamp" value={1559079339000} />);
         expect(wrapper.text()).toEqual('May 28, 2019 @ 21:35:39.000');
       });
 
       test('it renders against a string epoch', () => {
-        const wrapper = mount(
-          <KibanaConfigContext.Provider value={mockFrameworks.default_UTC}>
-            <FormattedDate fieldName="@timestamp" value={'1559079339000'} />
-          </KibanaConfigContext.Provider>
+        mockUseKibanaUiSetting.mockImplementation(
+          getMockKibanaUiSetting(mockFrameworks.default_UTC)
         );
+        const wrapper = mount(<FormattedDate fieldName="@timestamp" value={'1559079339000'} />);
         expect(wrapper.text()).toEqual('May 28, 2019 @ 21:35:39.000');
       });
 
       test('it renders against a ISO string', () => {
+        mockUseKibanaUiSetting.mockImplementation(
+          getMockKibanaUiSetting(mockFrameworks.default_UTC)
+        );
         const wrapper = mount(
-          <KibanaConfigContext.Provider value={mockFrameworks.default_UTC}>
-            <FormattedDate fieldName="@timestamp" value={'2019-05-28T22:04:49.957Z'} />
-          </KibanaConfigContext.Provider>
+          <FormattedDate fieldName="@timestamp" value={'2019-05-28T22:04:49.957Z'} />
         );
         expect(wrapper.text()).toEqual('May 28, 2019 @ 22:04:49.957');
       });
 
       test('it renders against an empty string as an empty string placeholder', () => {
+        mockUseKibanaUiSetting.mockImplementation(
+          getMockKibanaUiSetting(mockFrameworks.default_UTC)
+        );
         const wrapper = mount(
           <TestProviders>
-            <KibanaConfigContext.Provider value={mockFrameworks.default_UTC}>
-              <FormattedDate fieldName="@timestamp" value={''} />
-            </KibanaConfigContext.Provider>
+            <FormattedDate fieldName="@timestamp" value={''} />
           </TestProviders>
         );
         expect(wrapper.text()).toEqual('(Empty String)');
       });
 
       test('it renders against an null as a EMPTY_VALUE', () => {
+        mockUseKibanaUiSetting.mockImplementation(
+          getMockKibanaUiSetting(mockFrameworks.default_UTC)
+        );
         const wrapper = mount(
           <TestProviders>
-            <KibanaConfigContext.Provider value={mockFrameworks.default_UTC}>
-              <FormattedDate fieldName="@timestamp" value={null} />
-            </KibanaConfigContext.Provider>
+            <FormattedDate fieldName="@timestamp" value={null} />
           </TestProviders>
         );
         expect(wrapper.text()).toEqual(getEmptyValue());
       });
 
       test('it renders against an undefined as a EMPTY_VALUE', () => {
+        mockUseKibanaUiSetting.mockImplementation(
+          getMockKibanaUiSetting(mockFrameworks.default_UTC)
+        );
         const wrapper = mount(
           <TestProviders>
-            <KibanaConfigContext.Provider value={mockFrameworks.default_UTC}>
-              <FormattedDate fieldName="@timestamp" value={undefined} />
-            </KibanaConfigContext.Provider>
+            <FormattedDate fieldName="@timestamp" value={undefined} />
           </TestProviders>
         );
         expect(wrapper.text()).toEqual(getEmptyValue());
       });
 
       test('it renders against an invalid date time as just the string its self', () => {
+        mockUseKibanaUiSetting.mockImplementation(
+          getMockKibanaUiSetting(mockFrameworks.default_UTC)
+        );
         const wrapper = mount(
           <TestProviders>
-            <KibanaConfigContext.Provider value={mockFrameworks.default_UTC}>
-              <FormattedDate fieldName="@timestamp" value={'Rebecca Evan Braden'} />
-            </KibanaConfigContext.Provider>
+            <FormattedDate fieldName="@timestamp" value={'Rebecca Evan Braden'} />
           </TestProviders>
         );
         expect(wrapper.text()).toEqual('Rebecca Evan Braden');

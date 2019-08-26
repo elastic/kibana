@@ -52,11 +52,13 @@ export interface RequestParams {
 }
 
 export interface RequestStatistics {
-  [key: string]: {
-    label: string;
-    description?: string;
-    value: any;
-  };
+  [key: string]: RequestStatistic;
+}
+
+export interface RequestStatistic {
+  label: string;
+  description?: string;
+  value: any;
 }
 
 export interface Response {

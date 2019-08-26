@@ -13,6 +13,8 @@ import { mockTimelineData, TestProviders } from '../../../../mock';
 import { getEmptyValue } from '../../../empty_value';
 import { FormattedFieldValue } from './formatted_field';
 
+jest.mock('../../../../lib/settings/use_kibana_ui_setting');
+
 describe('Events', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
