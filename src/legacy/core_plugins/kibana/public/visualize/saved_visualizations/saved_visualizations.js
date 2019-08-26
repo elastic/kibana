@@ -18,7 +18,7 @@
  */
 
 import './_saved_vis';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { VisTypesRegistryProvider as visTypes } from 'ui/registry/vis_types';
 import { uiModules } from 'ui/modules';
 import { SavedObjectLoader, SavedObjectsClientProvider } from 'ui/saved_objects';
 import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
@@ -33,8 +33,6 @@ savedObjectManagementRegistry.register({
 });
 
 app.service('savedVisualizations', function (SavedVis, Private, kbnUrl, chrome) {
-  const visTypes = VisTypesRegistryProvider;
-
   const savedObjectClient = Private(SavedObjectsClientProvider);
   const saveVisualizationLoader = new SavedObjectLoader(SavedVis, kbnUrl, chrome, savedObjectClient);
 
