@@ -27,7 +27,6 @@ import {
 } from '../../lib/timeline/helpers';
 import { NAVIGATION_NETWORK } from '../../lib/navigation/selectors';
 import { HOSTS_PAGE } from '../../lib/urls';
-import { TIMELINE_TOGGLE_BUTTON } from '../../lib/timeline/selectors';
 
 describe('url state', () => {
   afterEach(() => {
