@@ -39,8 +39,9 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
+import { npStart } from 'ui/new_platform';
+
 export const EMPTY_FILTER = '';
-const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
 // saved object client does not support sorting by title because title is only mapped as analyzed
 // the legacy implementation got around this by pulling `listingLimit` items and doing client side sorting
@@ -51,6 +52,9 @@ class TableListViewUi extends React.Component {
 
   constructor(props) {
     super(props);
+
+    const perPage = npStart.core.uiSettings.get('savedObjects:perPage');
+    const pageSizeOptions = _.uniq([10, 20, 50, perPage]).sort();
 
     this.state = {
       items: [],
@@ -63,7 +67,8 @@ class TableListViewUi extends React.Component {
       filter: this.props.initialFilter,
       selectedIds: [],
       page: 0,
-      perPage: 20,
+      perPage,
+      pageSizeOptions,
     };
 
   }
@@ -309,10 +314,9 @@ class TableListViewUi extends React.Component {
 
   renderTable() {
     const pagination = {
-      pageIndex: this.state.page,
-      pageSize: this.state.perPage,
-      totalItemCount: this.state.items.length,
-      pageSizeOptions: PAGE_SIZE_OPTIONS,
+      initialPageIndex: this.state.page,
+      initialPageSize: this.state.perPage,
+      pageSizeOptions: this.state.pageSizeOptions,
     };
 
     const selection = this.props.deleteItems ? {
