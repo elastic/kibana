@@ -7,9 +7,9 @@
 import { EuiFilterGroup, EuiFilterButton } from '@elastic/eui';
 import React from 'react';
 import { get } from 'lodash';
-import { FilterBar as FilterBarType } from '../../common/graphql/types';
-import { UptimeGraphQLQueryProps, withUptimeGraphQL } from './higher_order';
-import { filterBarQuery } from '../queries';
+import { FilterBar as FilterBarType } from '../../../common/graphql/types';
+import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
+import { filterBarQuery } from '../../queries';
 import { FilterPopoverProps, FilterPopover } from './filter_popout';
 
 interface FilterBarQueryResult {
