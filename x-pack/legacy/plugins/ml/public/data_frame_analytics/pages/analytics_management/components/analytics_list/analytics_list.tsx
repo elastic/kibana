@@ -199,7 +199,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     );
   }
 
-  if (true || analytics.length === 0) {
+  if (analytics.length === 0) {
     return (
       <Fragment>
         <ProgressBar isLoading={isLoading} />
