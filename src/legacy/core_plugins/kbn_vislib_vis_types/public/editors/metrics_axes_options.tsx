@@ -50,12 +50,8 @@ const AXIS_PREFIX = 'Axis-';
 function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>) {
   const { stateParams, setValue, aggs, setVisType, vis } = props;
 
-  const [lastCustomLabels, setLastCustomLabels] = useState({} as { [key: string]: string });
   const [isCategoryAxisHorizontal, setIsCategoryAxisHorizontal] = useState(true);
   const [axesNumbers, setAxesNumbers] = useState({} as { [key: string]: number });
-  // We track these so we can know when the agg is changed
-  const [lastMatchingSeriesAggType, setLastMatchingSeriesAggType] = useState('');
-  const [lastMatchingSeriesAggField, setLastMatchingSeriesAggField] = useState('');
 
   const setValueAxisByIndex: SetValueAxisByIndex = useCallback(
     (index, paramName, value) => {
@@ -82,10 +78,8 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
     [stateParams.seriesParams, setValue]
   );
 
-  const updateAxisTitle = () => {
-    let lastMatchingType = lastMatchingSeriesAggType;
-    let lastMatchingFeild = lastMatchingSeriesAggField;
-    const lastLabels = lastCustomLabels;
+  const updateAxisTitle = useCallback(() => {
+    const axes = [...stateParams.valueAxes];
 
     stateParams.valueAxes.forEach((axis, axisNumber) => {
       let newCustomLabel = '';
@@ -110,33 +104,14 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
         newCustomLabel = matchingSeries[0].makeLabel();
       }
 
-      const matchingSeriesAggType = get(matchingSeries, '[0]type.name', '');
-      const matchingSeriesAggField = get(matchingSeries, '[0]params.field.name', '');
-
-      if (lastCustomLabels[axis.id] !== newCustomLabel && newCustomLabel !== '') {
-        const aggTypeIsChanged = lastMatchingSeriesAggType !== matchingSeriesAggType;
-        const aggFieldIsChanged = lastMatchingSeriesAggField !== matchingSeriesAggField;
-        const aggIsChanged = aggTypeIsChanged || aggFieldIsChanged;
-        const lastCustomLabelMatchesAxisTitle = lastCustomLabels[axis.id] === axis.title.text;
-        const isFirstRender = Object.keys(lastCustomLabels).length === 0;
-
-        if (
-          !isFirstRender &&
-          (aggIsChanged || axis.title.text === '' || lastCustomLabelMatchesAxisTitle)
-        ) {
-          // Override axis title with new custom label
-          setValueAxisByIndex(axisNumber, 'title', { ...axis, text: newCustomLabel });
-        }
-        lastLabels[axis.id] = newCustomLabel;
+      if (newCustomLabel !== '') {
+        // Override axis title with new custom label
+        axes[axisNumber] = { ...axes[axisNumber], title: { ...axis, text: newCustomLabel } };
       }
-      lastMatchingType = matchingSeriesAggType;
-      lastMatchingFeild = matchingSeriesAggField;
     });
 
-    setLastCustomLabels(lastLabels);
-    setLastMatchingSeriesAggType(lastMatchingType);
-    setLastMatchingSeriesAggField(lastMatchingFeild);
-  };
+    setValue('valueAxes', axes);
+  }, [stateParams.valueAxes, stateParams.seriesParams]);
 
   const getUpdatedAxisName = useCallback(
     (axisPosition: ValueAxis['position']) => {
@@ -248,8 +223,6 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
     .join();
 
   useEffect(() => {
-    updateAxisTitle();
-
     const schemaTitle = vis.type.schemas.metrics[0].title;
 
     const metrics = aggs.filter(agg => {
@@ -282,13 +255,11 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
     setValue('seriesParams', updatedSeries);
   }, [aggsLabel, stateParams.valueAxes]);
 
-  const seriesParamsTypes = stateParams.seriesParams.map(({ type }) => type);
-  const seriesParamsTypesString = seriesParamsTypes.join();
+  const seriesParamsTypes = uniq(stateParams.seriesParams.map(({ type }) => type));
 
   useEffect(() => {
-    const types = uniq(seriesParamsTypes);
-    setVisType(vis.type, types.length === 1 ? types[0] : 'histogram');
-  }, [seriesParamsTypes, seriesParamsTypesString, vis, setVisType]);
+    setVisType(vis.type, seriesParamsTypes.length === 1 ? seriesParamsTypes[0] : 'histogram');
+  }, [seriesParamsTypes, vis, setVisType]);
 
   return (
     <>
