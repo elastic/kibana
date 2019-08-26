@@ -46,7 +46,6 @@ inspector view as follows:
 
 ```js
 import React from 'react';
-import { viewRegistry } from 'ui/inspector';
 
 function MyInspectorComponent(props) {
   // props.adapters is the object of all adapters and may vary depending

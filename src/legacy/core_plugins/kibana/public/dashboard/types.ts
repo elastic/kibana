@@ -21,6 +21,7 @@ import { AppState } from 'ui/state_management/app_state';
 import { Filter } from '@kbn/es-query';
 import { Query } from 'src/legacy/core_plugins/data/public';
 import { AppState as TAppState } from 'ui/state_management/app_state';
+import { ViewMode } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import {
   RawSavedDashboardPanelTo60,
   RawSavedDashboardPanel610,
@@ -29,8 +30,6 @@ import {
   RawSavedDashboardPanel640To720,
   RawSavedDashboardPanel730ToLatest,
 } from './migrations/types';
-
-import { ViewMode } from '../../../embeddable_api/public';
 
 export type NavAction = (anchorElement?: any) => void;
 
@@ -113,6 +112,7 @@ export interface DashboardAppStateParameters {
   query: Query | string;
   filters: Filter[];
   viewMode: ViewMode;
+  savedQuery?: string;
 }
 
 // This could probably be improved if we flesh out AppState more... though AppState will be going away

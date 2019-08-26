@@ -31,7 +31,7 @@ const ELASTIC_LICENSE_HEADER = `
 `;
 
 module.exports = {
-  extends: ['@elastic/eslint-config-kibana'],
+  extends: ['@elastic/eslint-config-kibana', 'plugin:@elastic/eui/recommended'],
 
   overrides: [
     /**
@@ -40,6 +40,7 @@ module.exports = {
     {
       files: [
         '.eslintrc.js',
+        'packages/kbn-utility-types/**/*',
         'packages/kbn-eslint-plugin-eslint/**/*',
         'packages/kbn-config-schema/**/*',
         'packages/kbn-pm/**/*',

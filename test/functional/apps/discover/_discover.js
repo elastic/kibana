@@ -147,6 +147,8 @@ export default function ({ getService, getPageObjects }) {
         const time = await PageObjects.timePicker.getTimeConfig();
         expect(time.start).to.be('Sep 20, 2015 @ 00:00:00.000');
         expect(time.end).to.be('Sep 20, 2015 @ 03:00:00.000');
+        const rowData = await PageObjects.discover.getDocTableIndex(1);
+        expect(rowData).to.have.string('Sep 20, 2015 @ 02:57:03.761');
       });
 
       it('should modify the time range when the histogram is brushed', async function () {
@@ -156,9 +158,9 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
 
         const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
-        if (newDurationHours < 1 || newDurationHours >= 5) {
-          throw new Error(`expected new duration of ${newDurationHours} hours to be between 1 and 5 hours`);
-        }
+        expect(Math.round(newDurationHours)).to.be(3);
+        const rowData = await PageObjects.discover.getDocTableIndex(1);
+        expect(rowData).to.have.string('Sep 20, 2015 @ 02:56:02.323');
       });
 
       it('should show correct initial chart interval of Auto', async function () {

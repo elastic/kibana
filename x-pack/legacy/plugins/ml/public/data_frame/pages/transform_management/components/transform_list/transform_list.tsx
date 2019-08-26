@@ -8,7 +8,16 @@ import React, { Fragment, SFC, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiBadge, EuiButtonEmpty, EuiCallOut, EuiEmptyPrompt, SortDirection } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiEmptyPrompt,
+  EuiPopover,
+  EuiTitle,
+  SortDirection,
+} from '@elastic/eui';
 
 import {
   DataFrameTransformId,
@@ -17,12 +26,15 @@ import {
 } from '../../../../common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
 import { getTaskStateBadge } from './columns';
+import { DeleteAction } from './action_delete';
+import { StartAction } from './action_start';
+import { StopAction } from './action_stop';
 
 import {
   DataFrameTransformListColumn,
   DataFrameTransformListRow,
   ItemIdToExpandedRowMap,
-  DATA_FRAME_TASK_STATE,
+  DATA_FRAME_TRANSFORM_STATE,
   DATA_FRAME_MODE,
   Query,
   Clause,
@@ -66,6 +78,9 @@ export const DataFrameTransformList: SFC = () => {
   const [transforms, setTransforms] = useState<DataFrameTransformListRow[]>([]);
   const [filteredTransforms, setFilteredTransforms] = useState<DataFrameTransformListRow[]>([]);
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<DataFrameTransformId[]>([]);
+
+  const [transformSelection, setTransformSelection] = useState<DataFrameTransformListRow[]>([]);
+  const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
 
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
   const [searchError, setSearchError] = useState<any>(undefined);
@@ -152,7 +167,7 @@ export const DataFrameTransformList: SFC = () => {
         // filter other clauses, i.e. the mode and status filters
         if (Array.isArray(c.value)) {
           // the status value is an array of string(s) e.g. ['failed', 'stopped']
-          ts = transforms.filter(transform => c.value.includes(transform.stats.task_state));
+          ts = transforms.filter(transform => c.value.includes(transform.stats.state));
         } else {
           ts = transforms.filter(transform => transform.mode === c.value);
         }
@@ -218,7 +233,7 @@ export const DataFrameTransformList: SFC = () => {
     );
   }
 
-  const columns = getColumns(expandedRowItemIds, setExpandedRowItemIds);
+  const columns = getColumns(expandedRowItemIds, setExpandedRowItemIds, transformSelection);
 
   const sorting = {
     sort: {
@@ -237,7 +252,66 @@ export const DataFrameTransformList: SFC = () => {
     hidePerPageOptions: false,
   };
 
+  const bulkActionMenuItems = [
+    <div key="startAction" className="mlTransformBulkActionItem">
+      <StartAction items={transformSelection} />
+    </div>,
+    <div key="stopAction" className="mlTransformBulkActionItem">
+      <StopAction items={transformSelection} />
+    </div>,
+    <div key="deleteAction" className="mlTransformBulkActionItem">
+      <DeleteAction items={transformSelection} />
+    </div>,
+  ];
+
+  const renderToolsLeft = () => {
+    const buttonIcon = (
+      <EuiButtonIcon
+        size="s"
+        iconType="gear"
+        color="text"
+        onClick={() => {
+          setIsActionsMenuOpen(true);
+        }}
+        aria-label={i18n.translate(
+          'xpack.ml.dataframe.multiTransformActionsMenu.managementActionsAriaLabel',
+          {
+            defaultMessage: 'Management actions',
+          }
+        )}
+      />
+    );
+
+    const bulkActionIcon = (
+      <EuiPopover
+        key="bulkActionIcon"
+        id="transformBulkActionsMenu"
+        button={buttonIcon}
+        isOpen={isActionsMenuOpen}
+        closePopover={() => setIsActionsMenuOpen(false)}
+        panelPaddingSize="none"
+        anchorPosition="rightUp"
+      >
+        {bulkActionMenuItems}
+      </EuiPopover>
+    );
+
+    return [
+      <EuiTitle key="selectedText" size="s">
+        <h3>
+          {i18n.translate('xpack.ml.dataframe.multiTransformActionsMenu.transformsCount', {
+            defaultMessage: '{count} {count, plural, one {transform} other {transforms}} selected',
+            values: { count: transformSelection.length },
+          })}
+        </h3>
+      </EuiTitle>,
+      <div key="bulkActionsBorder" className="mlTransformBulkActionsBorder" />,
+      bulkActionIcon,
+    ];
+  };
+
   const search = {
+    toolsLeft: transformSelection.length > 0 ? renderToolsLeft() : undefined,
     onChange: onQueryChange,
     box: {
       incremental: true,
@@ -245,10 +319,10 @@ export const DataFrameTransformList: SFC = () => {
     filters: [
       {
         type: 'field_value_selection',
-        field: 'state.task_state',
+        field: 'state.state',
         name: i18n.translate('xpack.ml.dataframe.statusFilter', { defaultMessage: 'Status' }),
         multiSelect: 'or',
-        options: Object.values(DATA_FRAME_TASK_STATE).map(val => ({
+        options: Object.values(DATA_FRAME_TRANSFORM_STATE).map(val => ({
           value: val,
           name: val,
           view: getTaskStateBadge(val),
@@ -288,6 +362,10 @@ export const DataFrameTransformList: SFC = () => {
     setSortDirection(direction);
   };
 
+  const selection = {
+    onSelectionChange: (selected: DataFrameTransformListRow[]) => setTransformSelection(selected),
+  };
+
   return (
     <Fragment>
       <ProgressBar isLoading={isLoading} />
@@ -303,6 +381,7 @@ export const DataFrameTransformList: SFC = () => {
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         onChange={onTableChange}
         pagination={pagination}
+        selection={selection}
         sorting={sorting}
         search={search}
         data-test-subj="mlDataFramesTableTransforms"

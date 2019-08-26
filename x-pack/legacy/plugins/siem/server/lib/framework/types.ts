@@ -118,12 +118,12 @@ export interface MappingResponse {
 }
 
 interface FrameworkIndexFieldDescriptor {
-  name: string;
-  type: string;
-  searchable: boolean;
   aggregatable: boolean;
-  readFromDocValues: boolean;
   esTypes: string[];
+  name: string;
+  readFromDocValues: boolean;
+  searchable: boolean;
+  type: string;
 }
 
 export interface FrameworkIndexPatternsService {

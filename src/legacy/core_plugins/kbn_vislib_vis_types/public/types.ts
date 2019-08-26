@@ -17,7 +17,46 @@
  * under the License.
  */
 
+import { LegendPositions } from './utils/legend_positions';
+
 export interface CommonVislibParams {
   addTooltip: boolean;
-  legendPosition: 'right' | 'left' | 'top' | 'bottom';
+  legendPosition: LegendPositions;
+}
+
+interface Labels {
+  filter: boolean;
+  rotate?: number;
+  show: boolean;
+  truncate: number;
+}
+interface ThresholdLine {
+  show: boolean;
+  value: number;
+  width: number;
+  style: 'full' | 'dashed' | 'dot-dashed';
+  color: string;
+}
+export interface ValueAxis {
+  id: string;
+  labels: Labels;
+  name: string;
+  position: LegendPositions;
+  scale: { type: string };
+  show: boolean;
+  style: object;
+  title: { text: string };
+  type: string;
+}
+
+export interface BasicVislibParams extends CommonVislibParams {
+  addTimeMarker: boolean;
+  orderBucketsBySum?: boolean;
+  labels: Labels;
+  thresholdLine: ThresholdLine;
+  valueAxes: ValueAxis[];
+  grid: {
+    categoryLines: boolean;
+    valueAxis?: string;
+  };
 }

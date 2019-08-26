@@ -56,3 +56,5 @@ export const Package = pure<Props>(
     }
   }
 );
+
+Package.displayName = 'Package';

@@ -227,6 +227,13 @@ export const ml = {
     });
   },
 
+  checkManageMLPrivileges() {
+    return http({
+      url: `${basePath}/ml_capabilities?ignoreSpaces=true`,
+      method: 'GET'
+    });
+  },
+
   getNotificationSettings() {
     return http({
       url: `${basePath}/notification_settings`,

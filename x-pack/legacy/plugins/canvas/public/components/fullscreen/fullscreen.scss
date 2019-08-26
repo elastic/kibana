@@ -1,8 +1,9 @@
-body.canvas-isFullscreen {
+body.canvas-isFullscreen { // sass-lint:disable-line no-qualifying-elements
   // hide global loading indicator
   .kbnLoadingIndicator {
     display: none;
   }
+
   // remove space for global nav elements
   .header-global-wrapper + .app-wrapper {
     left: 0;
@@ -11,7 +12,7 @@ body.canvas-isFullscreen {
 
   // set the background color
   .canvasLayout {
-    background: #000; // This hex is OK, we always want it black
+    background: $euiColorInk;
   }
 
   // hide all the interface parts

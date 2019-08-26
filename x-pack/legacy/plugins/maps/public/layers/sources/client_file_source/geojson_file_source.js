@@ -18,12 +18,17 @@ import _ from 'lodash';
 import {
   DEFAULT_APPLY_GLOBAL_QUERY
 } from './constants';
+import { i18n } from '@kbn/i18n';
 
 export class GeojsonFileSource extends AbstractVectorSource {
 
   static type = GEOJSON_FILE;
-  static title = 'Upload GeoJSON vector file';
-  static description = 'Upload a GeoJSON file and index in Elasticsearch';
+  static title = i18n.translate('xpack.maps.source.geojsonFileTitle', {
+    defaultMessage: 'Upload GeoJSON vector file'
+  });
+  static description = i18n.translate('xpack.maps.source.geojsonFileDescription', {
+    defaultMessage: 'Upload a GeoJSON file and index in Elasticsearch'
+  });
   static icon = 'importAction';
   static isIndexingSource = true;
   static isBeta = true;
@@ -52,8 +57,12 @@ export class GeojsonFileSource extends AbstractVectorSource {
   ) => {
     return (indexResponses = {}) => {
       const { indexDataResp, indexPatternResp } = indexResponses;
-      if (!(indexDataResp && indexDataResp.success) ||
-        !(indexPatternResp && indexPatternResp.success)) {
+
+      const indexCreationFailed = !(indexDataResp && indexDataResp.success);
+      const allDocsFailed = indexDataResp.failures.length === indexDataResp.docCount;
+      const indexPatternCreationFailed =  !(indexPatternResp && indexPatternResp.success);
+
+      if (indexCreationFailed || allDocsFailed || indexPatternCreationFailed) {
         importErrorHandler(indexResponses);
         return;
       }

@@ -27,7 +27,7 @@ import { intervalOptions } from './_interval_options';
 import { TimeIntervalParamEditor } from '../controls/time_interval';
 import { timefilter } from '../../timefilter';
 import { DropPartialsParamEditor } from '../controls/drop_partials';
-import { dateHistogramInterval } from '../../../../core_plugins/data/common';
+import { dateHistogramInterval } from '../../../../core_plugins/data/public';
 import { i18n } from '@kbn/i18n';
 
 const config = chrome.getUiSettingsClient();
@@ -157,8 +157,9 @@ export const dateHistogramBucketAgg = new BucketAggType({
 
         const scaleMetrics = interval.scaled && interval.scale < 1;
         if (scaleMetrics && aggs) {
-          const all = _.every(aggs.bySchemaGroup.metrics, function (agg) {
-            return agg.type && agg.type.isScalable();
+          const metrics = aggs.filter(agg => agg.type && agg.type.type === 'metrics');
+          const all = _.every(metrics, function (agg) {
+            return agg.type.isScalable();
           });
           if (all) {
             output.metricScale = interval.scale;
