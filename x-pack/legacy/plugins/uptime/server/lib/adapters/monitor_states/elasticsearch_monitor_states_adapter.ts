@@ -4,28 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, flatten, set, sortBy } from 'lodash';
 import { DatabaseAdapter } from '../database';
-import {
-  UMMonitorStatesAdapter,
-  MonitorStatesCheckGroupsResult,
-  LegacyMonitorStatesQueryResult,
-  GetMonitorStatesResult,
-  EnrichMonitorStatesResult,
-  CursorPagination,
-} from './adapter_types';
-import {
-  MonitorSummary,
-  SummaryHistogram,
-  Check,
-  StatesIndexStatus,
-  CursorDirection,
-  SortOrder,
-} from '../../../../common/graphql/types';
-import { INDEX_NAMES, STATES, QUERY, CONTEXT_DEFAULTS } from '../../../../common/constants';
-import { getHistogramInterval, getFilteredQueryAndStatusFilter } from '../../helper';
-import { fetchMonitorLocCheckGroups } from './latest_check_group_fetcher';
-import { queryEnriched } from './query_enriched';
+import { UMMonitorStatesAdapter, GetMonitorStatesResult, CursorPagination } from './adapter_types';
+import { StatesIndexStatus } from '../../../../common/graphql/types';
+import { INDEX_NAMES, CONTEXT_DEFAULTS } from '../../../../common/constants';
+import { getFilteredQueryAndStatusFilter } from '../../helper';
+import { queryEnriched } from './enriched_fetcher';
 
 export type QueryContext = {
   database: any;

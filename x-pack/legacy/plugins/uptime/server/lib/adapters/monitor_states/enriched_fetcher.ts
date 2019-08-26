@@ -1,7 +1,7 @@
 import { QueryContext } from './elasticsearch_monitor_states_adapter';
 import { getHistogramInterval } from '../../helper';
 import { QUERY, INDEX_NAMES, STATES } from '../../../../common/constants';
-import { fetchMonitorLocCheckGroups } from './latest_check_group_fetcher';
+import { fetchMonitorLocCheckGroups } from './monitor_fetcher';
 import { get, flatten, sortBy } from 'lodash';
 import {
   MonitorSummary,
