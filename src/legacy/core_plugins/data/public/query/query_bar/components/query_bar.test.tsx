@@ -26,9 +26,9 @@ import { QueryBar } from './query_bar';
 import { IndexPattern } from '../../../index';
 
 import { coreMock } from '../../../../../../../core/public/mocks';
-const setupMock = coreMock.createSetup();
+const startMock = coreMock.createStart();
 
-setupMock.uiSettings.get.mockImplementation((key: string) => {
+startMock.uiSettings.get.mockImplementation((key: string) => {
   switch (key) {
     case 'timepicker:quickRanges':
       return [
@@ -98,7 +98,8 @@ describe('QueryBar', () => {
   it('Should render the given query', () => {
     const component = shallowWithIntl(
       <QueryBar.WrappedComponent
-        uiSettings={setupMock.uiSettings}
+        uiSettings={startMock.uiSettings}
+        savedObjectsClient={startMock.savedObjects.client}
         query={kqlQuery}
         onSubmit={noop}
         appName={'discover'}
@@ -118,7 +119,8 @@ describe('QueryBar', () => {
   it('Should create a unique PersistedLog based on the appName and query language', () => {
     shallowWithIntl(
       <QueryBar.WrappedComponent
-        uiSettings={setupMock.uiSettings}
+        uiSettings={startMock.uiSettings}
+        savedObjectsClient={startMock.savedObjects.client}
         query={kqlQuery}
         onSubmit={noop}
         appName={'discover'}
@@ -138,7 +140,8 @@ describe('QueryBar', () => {
   it('Should render only timepicker when no options provided', () => {
     const component = shallowWithIntl(
       <QueryBar.WrappedComponent
-        uiSettings={setupMock.uiSettings}
+        uiSettings={startMock.uiSettings}
+        savedObjectsClient={startMock.savedObjects.client}
         onSubmit={noop}
         onChange={noop}
         isDirty={false}
@@ -155,7 +158,8 @@ describe('QueryBar', () => {
   it('Should not show timepicker when asked', () => {
     const component = shallowWithIntl(
       <QueryBar.WrappedComponent
-        uiSettings={setupMock.uiSettings}
+        uiSettings={startMock.uiSettings}
+        savedObjectsClient={startMock.savedObjects.client}
         onSubmit={noop}
         onChange={noop}
         isDirty={false}
@@ -173,7 +177,8 @@ describe('QueryBar', () => {
   it('Should render timepicker with options', () => {
     const component = shallowWithIntl(
       <QueryBar.WrappedComponent
-        uiSettings={setupMock.uiSettings}
+        uiSettings={startMock.uiSettings}
+        savedObjectsClient={startMock.savedObjects.client}
         onSubmit={noop}
         onChange={noop}
         isDirty={false}
@@ -194,7 +199,8 @@ describe('QueryBar', () => {
   it('Should render only query input bar', () => {
     const component = shallowWithIntl(
       <QueryBar.WrappedComponent
-        uiSettings={setupMock.uiSettings}
+        uiSettings={startMock.uiSettings}
+        savedObjectsClient={startMock.savedObjects.client}
         query={kqlQuery}
         onSubmit={noop}
         onChange={noop}
@@ -215,7 +221,8 @@ describe('QueryBar', () => {
   it('Should NOT render query input bar if disabled', () => {
     const component = shallowWithIntl(
       <QueryBar.WrappedComponent
-        uiSettings={setupMock.uiSettings}
+        uiSettings={startMock.uiSettings}
+        savedObjectsClient={startMock.savedObjects.client}
         query={kqlQuery}
         onSubmit={noop}
         onChange={noop}
@@ -237,7 +244,8 @@ describe('QueryBar', () => {
   it('Should NOT render query input bar if missing options', () => {
     const component = shallowWithIntl(
       <QueryBar.WrappedComponent
-        uiSettings={setupMock.uiSettings}
+        uiSettings={startMock.uiSettings}
+        savedObjectsClient={startMock.savedObjects.client}
         onSubmit={noop}
         onChange={noop}
         isDirty={false}

@@ -23,7 +23,6 @@ import { TopNavMenuData } from './top_nav_menu_data';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { coreMock } from '../../../../../core/public/mocks';
-const setupMock = coreMock.createSetup();
 const startMock = coreMock.createStart();
 
 jest.mock('../../../../core_plugins/data/public', () => {
@@ -58,7 +57,7 @@ describe('TopNavMenu', () => {
     const component = shallowWithIntl(
       <TopNavMenu
         name="test"
-        uiSettings={setupMock.uiSettings}
+        uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
       />
     );
@@ -70,7 +69,7 @@ describe('TopNavMenu', () => {
     const component = shallowWithIntl(
       <TopNavMenu
         name="test"
-        uiSettings={setupMock.uiSettings}
+        uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
         config={[menuItems[0]]}
       />
@@ -83,7 +82,7 @@ describe('TopNavMenu', () => {
     const component = shallowWithIntl(
       <TopNavMenu
         name="test"
-        uiSettings={setupMock.uiSettings}
+        uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
         config={menuItems}
       />
@@ -96,7 +95,7 @@ describe('TopNavMenu', () => {
     const component = shallowWithIntl(
       <TopNavMenu
         name="test"
-        uiSettings={setupMock.uiSettings}
+        uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
         showSearchBar={true}
       />
