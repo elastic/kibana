@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DataFrameAnalyticsId } from '../../../../common';
-
-import { EsIndexName, IndexPatternTitle, FormMessage, State } from './state';
+import { FormMessage, State } from './state';
 
 export enum ACTION {
   ADD_REQUEST_MESSAGE = 'add_request_message',
@@ -41,22 +39,25 @@ export type Action =
     }
   // Actions with custom payloads:
   | { type: ACTION.ADD_REQUEST_MESSAGE; requestMessage: FormMessage }
-  | { type: ACTION.SET_ADVANCED_EDITOR_STR; advancedEditorStr: string }
+  | { type: ACTION.SET_ADVANCED_EDITOR_STR; advancedEditorStr: State['advancedEditorStr'] }
   | { type: ACTION.SET_FORM_STATE; payload: Partial<State['form']> }
-  | { type: ACTION.SET_INDEX_NAMES; indexNames: EsIndexName[] }
+  | { type: ACTION.SET_INDEX_NAMES; indexNames: State['indexNames'] }
   | {
       type: ACTION.SET_INDEX_PATTERN_TITLES;
       payload: {
-        indexPatternTitles: IndexPatternTitle[];
-        indexPatternsWithNumericFields: IndexPatternTitle[];
+        indexPatternTitles: State['indexPatternTitles'];
+        indexPatternsWithNumericFields: State['indexPatternsWithNumericFields'];
       };
     }
-  | { type: ACTION.SET_IS_JOB_CREATED; isJobCreated: boolean }
-  | { type: ACTION.SET_IS_JOB_STARTED; isJobStarted: boolean }
-  | { type: ACTION.SET_IS_MODAL_BUTTON_DISABLED; isModalButtonDisabled: boolean }
-  | { type: ACTION.SET_IS_MODAL_VISIBLE; isModalVisible: boolean }
-  | { type: ACTION.SET_JOB_CONFIG; payload: Record<string, any> }
-  | { type: ACTION.SET_JOB_IDS; jobIds: DataFrameAnalyticsId[] };
+  | { type: ACTION.SET_IS_JOB_CREATED; isJobCreated: State['isJobCreated'] }
+  | { type: ACTION.SET_IS_JOB_STARTED; isJobStarted: State['isJobStarted'] }
+  | {
+      type: ACTION.SET_IS_MODAL_BUTTON_DISABLED;
+      isModalButtonDisabled: State['isModalButtonDisabled'];
+    }
+  | { type: ACTION.SET_IS_MODAL_VISIBLE; isModalVisible: State['isModalVisible'] }
+  | { type: ACTION.SET_JOB_CONFIG; payload: State['jobConfig'] }
+  | { type: ACTION.SET_JOB_IDS; jobIds: State['jobIds'] };
 
 // Actions wrapping the dispatcher exposed by the custom hook
 export interface Actions {
@@ -64,10 +65,10 @@ export interface Actions {
   createAnalyticsJob: () => void;
   openModal: () => void;
   resetAdvancedEditorMessages: () => void;
-  setAdvancedEditorStr: (payload: string) => void;
+  setAdvancedEditorStr: (payload: State['advancedEditorStr']) => void;
   setFormState: (payload: Partial<State['form']>) => void;
-  setIsModalVisible: (payload: boolean) => void;
-  setJobConfig: (payload: Record<string, any>) => void;
+  setIsModalVisible: (payload: State['isModalVisible']) => void;
+  setJobConfig: (payload: State['jobConfig']) => void;
   startAnalyticsJob: () => void;
   switchToAdvancedEditor: () => void;
 }
