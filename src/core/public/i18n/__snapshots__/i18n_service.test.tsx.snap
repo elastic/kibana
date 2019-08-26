@@ -60,7 +60,7 @@ exports[`#start() returns \`Context\` component 1`] = `
           "euiSuperUpdateButton.cannotUpdateTooltip": "Cannot update",
           "euiSuperUpdateButton.clickToApplyTooltip": "Click to apply",
           "euiSuperUpdateButton.refreshButtonLabel": "Refresh",
-          "euiSuperUpdateButton.updateButtonLabel": "Uodate",
+          "euiSuperUpdateButton.updateButtonLabel": "Update",
           "euiSuperUpdateButton.updatingButtonLabel": "Updating",
           "euiTablePagination.rowsPerPage": "Rows per page",
           "euiTablePagination.rowsPerPageOption": [Function],

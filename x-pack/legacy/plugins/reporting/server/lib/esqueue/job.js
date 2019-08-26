@@ -35,7 +35,7 @@ export class Job extends events.EventEmitter {
     this.debug = (msg, err) => {
       const logger = options.logger || function () {};
       const message = `${this.id} - ${msg}`;
-      const tags = ['job', 'debug'];
+      const tags = ['debug'];
 
       if (err) {
         logger(`${message}: ${err}`, tags);
