@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import styled from 'styled-components';
 import { EuiLink, EuiPopover, EuiToolTip, EuiText, EuiTextColor } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState } from 'react';
@@ -14,6 +15,10 @@ import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
 import { Provider } from '../timeline/data_providers/provider';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
 import { MoreRowItems, Spacer } from '../page';
+
+const Subtext = styled.div`
+  font-size: ${props => props.theme.eui.euiFontSizeXS};
+`;
 
 export const getRowItemDraggable = ({
   rowItem,
@@ -180,14 +185,16 @@ export const Popover = React.memo<{
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <EuiPopover
-      button={<EuiLink onClick={() => setIsOpen(!isOpen)}>{`+${count} More`}</EuiLink>}
-      closePopover={() => setIsOpen(!isOpen)}
-      id={`${idPrefix}-popover`}
-      isOpen={isOpen}
-    >
-      {children}
-    </EuiPopover>
+    <Subtext>
+      <EuiPopover
+        button={<EuiLink onClick={() => setIsOpen(!isOpen)}>{`+${count} More`}</EuiLink>}
+        closePopover={() => setIsOpen(!isOpen)}
+        id={`${idPrefix}-popover`}
+        isOpen={isOpen}
+      >
+        {children}
+      </EuiPopover>
+    </Subtext>
   );
 });
 
