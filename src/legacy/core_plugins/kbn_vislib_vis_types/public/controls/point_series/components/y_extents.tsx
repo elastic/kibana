@@ -48,10 +48,10 @@ function areExtentsValid(min: number | '' = '', max: number | '' = ''): boolean 
 interface YExtentsProps {
   scale: Scale;
   setScale: SetScale;
-  setValidity: (isValid: boolean) => void;
+  setMultipleValidity: (paramName: string, isValid: boolean) => void;
 }
 
-function YExtents({ scale, setScale, setValidity }: YExtentsProps) {
+function YExtents({ scale, setScale, setMultipleValidity }: YExtentsProps) {
   const { min, max, type } = scale;
   const errors = [];
 
@@ -66,10 +66,10 @@ function YExtents({ scale, setScale, setValidity }: YExtentsProps) {
   const isValid = !errors.length;
 
   useEffect(() => {
-    setValidity(isValid);
+    setMultipleValidity('yExtents', isValid);
 
-    return () => setValidity(true);
-  }, [isValid, setValidity]);
+    return () => setMultipleValidity('yExtents', true);
+  }, [isValid, setMultipleValidity]);
 
   return (
     <EuiFormRow error={errors} isInvalid={!!errors.length} fullWidth compressed>

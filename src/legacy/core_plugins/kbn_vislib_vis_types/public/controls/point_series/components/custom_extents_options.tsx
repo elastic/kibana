@@ -18,7 +18,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { EuiTitle, EuiFormErrorText } from '@elastic/eui';
+import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -30,28 +30,32 @@ import { SetScale } from './value_axis_options';
 
 interface CustomExtentsOptionsProps {
   axis: ValueAxis;
-  setValidity(isValid: boolean): void;
+  setMultipleValidity(paramName: string, isValid: boolean): void;
   setValueAxis<T extends keyof ValueAxis>(paramName: T, value: ValueAxis[T]): void;
   setValueAxisScale: SetScale;
 }
 
 function CustomExtentsOptions({
   axis,
-  setValidity,
+  setMultipleValidity,
   setValueAxis,
   setValueAxisScale,
 }: CustomExtentsOptionsProps) {
   const [isBoundsMarginValid, setIsBoundsMarginValid] = useState(true);
+  const invalidBoundsMarginMessage = i18n.translate(
+    'kbnVislibVisTypes.controls.pointSeries.valueAxes.scaleToDataBounds.minNeededBoundsMargin',
+    { defaultMessage: 'Bounds margin must be greater than or equal to 0.' }
+  );
 
   const setBoundsMargin = useCallback(
     (paramName: 'boundsMargin', value: number | '') => {
       const isValid = value === '' ? true : value >= 0;
       setIsBoundsMarginValid(isValid);
-      setValidity(isValid);
+      setMultipleValidity('boundsMargin', isValid);
 
       setValueAxisScale(paramName, value);
     },
-    [setIsBoundsMarginValid, setValidity, setValueAxisScale]
+    [setIsBoundsMarginValid, setMultipleValidity, setValueAxisScale]
   );
 
   const onDefaultYExtentsChange = useCallback(
@@ -59,6 +63,7 @@ function CustomExtentsOptions({
       const scale = { ...axis.scale, [paramName]: value };
       if (!scale.defaultYExtents) {
         delete scale.boundsMargin;
+        setMultipleValidity('boundsMargin', true);
       }
       setValueAxis('scale', scale);
     },
@@ -103,6 +108,8 @@ function CustomExtentsOptions({
       {axis.scale.defaultYExtents && (
         <>
           <NumberInputOption
+            error={!isBoundsMarginValid ? [invalidBoundsMarginMessage] : undefined}
+            isInvalid={!isBoundsMarginValid}
             label={i18n.translate(
               'kbnVislibVisTypes.controls.pointSeries.valueAxes.scaleToDataBounds.boundsMargin',
               {
@@ -115,14 +122,6 @@ function CustomExtentsOptions({
             value={axis.scale.boundsMargin}
             setValue={setBoundsMargin}
           />
-          {!isBoundsMarginValid && (
-            <EuiFormErrorText>
-              <FormattedMessage
-                id="kbnVislibVisTypes.controls.pointSeries.valueAxes.scaleToDataBounds.minNeededBoundsMargin"
-                defaultMessage="Bounds margin must be greater than or equal to 0."
-              />
-            </EuiFormErrorText>
-          )}
         </>
       )}
 
@@ -139,7 +138,11 @@ function CustomExtentsOptions({
       />
 
       {axis.scale.setYExtents && (
-        <YExtents scale={axis.scale} setScale={setValueAxisScale} setValidity={setValidity} />
+        <YExtents
+          scale={axis.scale}
+          setScale={setValueAxisScale}
+          setMultipleValidity={setMultipleValidity}
+        />
       )}
     </>
   );

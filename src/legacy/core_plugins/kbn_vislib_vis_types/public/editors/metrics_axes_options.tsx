@@ -22,9 +22,10 @@ import { cloneDeep, capitalize, get, uniq } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 
 import { AggConfig } from 'ui/vis';
-import { VisOptionsProps, AggGroupNames } from 'ui/vis/editors/default';
+import { AggGroupNames } from 'ui/vis/editors/default';
 import { safeMakeLabel } from 'ui/agg_types/agg_utils';
 import { BasicVislibParams, ValueAxis, SeriesParam } from '../types';
+import { ValidationVisOptionsProps } from '../controls/validation_wrapper';
 import { SeriesPanel } from '../controls/point_series/series_panel';
 import { CategoryAxisPanel } from '../controls/point_series/category_axis_panel';
 import { ValueAxesPanel } from '../controls/point_series/value_axes_panel';
@@ -47,7 +48,7 @@ const RADIX = 10;
 const VALUE_AXIS_PREFIX = 'ValueAxis-';
 const AXIS_PREFIX = 'Axis-';
 
-function MetricsAxisOptions(props: VisOptionsProps<BasicVislibParams>) {
+function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>) {
   const { stateParams, setValue, aggs, setVisType, vis } = props;
 
   const [lastCustomLabels, setLastCustomLabels] = useState({} as { [key: string]: string });

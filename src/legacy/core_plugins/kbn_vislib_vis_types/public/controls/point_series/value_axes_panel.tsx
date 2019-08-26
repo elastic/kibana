@@ -31,12 +31,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { VisOptionsProps } from 'ui/vis/editors/default';
 import { BasicVislibParams, ValueAxis } from '../../types';
 import { ValueAxisOptions } from './components/value_axis_options';
 import { SetValueAxisByIndex } from '../../editors/metrics_axes_options';
+import { ValidationVisOptionsProps } from '../validation_wrapper';
 
-interface ValueAxesPanelProps extends VisOptionsProps<BasicVislibParams> {
+interface ValueAxesPanelProps extends ValidationVisOptionsProps<BasicVislibParams> {
   isCategoryAxisHorizontal: boolean;
   getUpdatedAxisName: (axisPosition: ValueAxis['position']) => string;
   addValueAxis: () => ValueAxis;

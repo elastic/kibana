@@ -21,7 +21,6 @@ import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiAccordion } from '@elastic/eui';
 
-import { VisOptionsProps } from 'ui/vis/editors/default';
 import { BasicVislibParams, ValueAxis } from '../../../types';
 import { Positions } from '../../../utils/collections';
 import { SelectOption } from '../../select';
@@ -31,13 +30,14 @@ import { LabelOptions } from './label_options';
 import { CustomExtentsOptions } from './custom_extents_options';
 import { isAxisHorizontal } from '../../../editors/metrics_axes_options_helper';
 import { SetValueAxisByIndex } from '../../../editors/metrics_axes_options';
+import { ValidationVisOptionsProps } from '../../validation_wrapper';
 
 export type SetScale = <T extends keyof ValueAxis['scale']>(
   paramName: T,
   value: ValueAxis['scale'][T]
 ) => void;
 
-export interface ValueAxisOptionsParams extends VisOptionsProps<BasicVislibParams> {
+export interface ValueAxisOptionsParams extends ValidationVisOptionsProps<BasicVislibParams> {
   axis: ValueAxis;
   index: number;
   isCategoryAxisHorizontal: boolean;
