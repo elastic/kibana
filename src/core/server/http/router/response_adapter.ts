@@ -20,13 +20,12 @@ import { ResponseObject as HapiResponseObject, ResponseToolkit as HapiResponseTo
 import typeDetect from 'type-detect';
 import Boom from 'boom';
 
-import { HttpResponsePayload, KibanaResponse, ResponseError, ResponseErrorMeta } from './response';
-
-declare module 'boom' {
-  interface Payload {
-    meta?: ResponseErrorMeta;
-  }
-}
+import {
+  HttpResponsePayload,
+  KibanaResponse,
+  ResponseError,
+  ResponseErrorAttributes,
+} from './response';
 
 function setHeaders(response: HapiResponseObject, headers: Record<string, string | string[]> = {}) {
   Object.entries(headers).forEach(([header, value]) => {
@@ -121,7 +120,7 @@ export class HapiResponseAdapter {
     });
 
     error.output.payload.message = getErrorMessage(payload);
-    error.output.payload.meta = getErrorMeta(payload);
+    error.output.payload.attributes = getErrorAttributes(payload);
 
     const headers = kibanaResponse.options.headers;
     if (headers) {
@@ -141,6 +140,6 @@ function getErrorMessage(payload?: ResponseError): string {
   return getErrorMessage(payload.message);
 }
 
-function getErrorMeta(payload?: ResponseError) {
-  return typeof payload === 'object' && 'meta' in payload ? payload.meta : undefined;
+function getErrorAttributes(payload?: ResponseError): ResponseErrorAttributes | undefined {
+  return typeof payload === 'object' && 'attributes' in payload ? payload.attributes : undefined;
 }

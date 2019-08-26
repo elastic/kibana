@@ -15,6 +15,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 function getViewString(lat, lon, zoom) {
   return `${lat},${lon},${zoom}`;
@@ -104,7 +105,9 @@ export class SetViewControl extends Component {
       min: -90,
       max: 90,
       onChange: this._onLatChange,
-      label: 'Latitude',
+      label: i18n.translate('xpack.maps.setViewControl.latitudeLabel', {
+        defaultMessage: 'Latitude'
+      }),
       dataTestSubj: 'latitudeInput',
     });
 
@@ -113,7 +116,9 @@ export class SetViewControl extends Component {
       min: -180,
       max: 180,
       onChange: this._onLonChange,
-      label: 'Longitude',
+      label: i18n.translate('xpack.maps.setViewControl.longitudeLabel', {
+        defaultMessage: 'Longitude'
+      }),
       dataTestSubj: 'longitudeInput',
     });
 
@@ -122,7 +127,9 @@ export class SetViewControl extends Component {
       min: 0,
       max: 24,
       onChange: this._onZoomChange,
-      label: 'Zoom',
+      label: i18n.translate('xpack.maps.setViewControl.zoomLabel', {
+        defaultMessage: 'Zoom'
+      }),
       dataTestSubj: 'zoomInput',
     });
 
@@ -142,7 +149,10 @@ export class SetViewControl extends Component {
             onClick={this._onSubmit}
             data-test-subj="submitViewButton"
           >
-            Go
+            <FormattedMessage
+              id="xpack.maps.setViewControl.submitButtonLabel"
+              defaultMessage="Go"
+            />
           </EuiButton>
         </EuiFormRow>
 
@@ -161,10 +171,10 @@ export class SetViewControl extends Component {
             data-test-subj="toggleSetViewVisibilityButton"
             iconType="crosshairs"
             color="text"
-            aria-label={i18n.translate('xpack.maps.viewControl.goToButtonLabel', {
+            aria-label={i18n.translate('xpack.maps.setViewControl.goToButtonLabel', {
               defaultMessage: 'Go to'
             })}
-            title={i18n.translate('xpack.maps.viewControl.goToButtonLabel', {
+            title={i18n.translate('xpack.maps.setViewControl.goToButtonLabel', {
               defaultMessage: 'Go to'
             })}
           />
