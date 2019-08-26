@@ -148,7 +148,7 @@ export const metrics = {
   apm_acm_requests: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.acm.request.count',
     title: i18n.translate('xpack.monitoring.metrics.apm.acm.requestsTitle', {
-      defaultMessage: 'Requests Agent Configuration Management',
+      defaultMessage: 'Requests Count Agent Configuration Management',
     }),
     label: i18n.translate('xpack.monitoring.metrics.apm.acm.requests.requestedLabel', {
       defaultMessage: 'Requested'
