@@ -14,12 +14,7 @@ import { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 import { Authenticator, ProviderSession } from './authenticator';
 import { LegacyAPI } from '../plugin';
-import {
-  createAPIKey,
-  CreateAPIKeyOptions,
-  invalidateAPIKey,
-  InvalidateAPIKeyOptions,
-} from './api_keys';
+import { APIKeys, CreateAPIKeyParams, InvalidateAPIKeyParams } from './api_keys';
 
 export { canRedirectRequest } from './can_redirect_request';
 export { Authenticator, ProviderLoginAttempt } from './authenticator';
@@ -142,24 +137,19 @@ export async function setupAuthentication({
 
   authLogger.debug('Successfully registered core authentication handler.');
 
+  const apiKeys = new APIKeys({
+    clusterClient,
+    logger: loggers.get('api-key'),
+    isSecurityFeatureDisabled,
+  });
   return {
     login: authenticator.login.bind(authenticator),
     logout: authenticator.logout.bind(authenticator),
     getCurrentUser,
-    createAPIKey: (request: KibanaRequest, body: CreateAPIKeyOptions['body']) =>
-      createAPIKey({
-        body,
-        loggers,
-        isSecurityFeatureDisabled,
-        callAsCurrentUser: clusterClient.asScoped(request).callAsCurrentUser,
-      }),
-    invalidateAPIKey: (request: KibanaRequest, body: InvalidateAPIKeyOptions['body']) =>
-      invalidateAPIKey({
-        body,
-        loggers,
-        isSecurityFeatureDisabled,
-        callAsCurrentUser: clusterClient.asScoped(request).callAsCurrentUser,
-      }),
+    createAPIKey: (request: KibanaRequest, body: CreateAPIKeyParams) =>
+      apiKeys.create(request, body),
+    invalidateAPIKey: (request: KibanaRequest, body: InvalidateAPIKeyParams) =>
+      apiKeys.invalidate(request, body),
     isAuthenticated: async (request: KibanaRequest) => {
       try {
         await getCurrentUser(request);

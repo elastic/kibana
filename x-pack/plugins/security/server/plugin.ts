@@ -19,9 +19,9 @@ import { AuthenticatedUser } from '../common/model';
 import { Authenticator, setupAuthentication } from './authentication';
 import { createConfig$ } from './config';
 import {
-  CreateAPIKeyOptions,
+  CreateAPIKeyParams,
   CreateAPIKeyResult,
-  InvalidateAPIKeyOptions,
+  InvalidateAPIKeyParams,
   InvalidateAPIKeyResult,
 } from './authentication/api_keys';
 
@@ -45,11 +45,11 @@ export interface PluginSetupContract {
     isAuthenticated: (request: KibanaRequest) => Promise<boolean>;
     createAPIKey: (
       request: KibanaRequest,
-      body: CreateAPIKeyOptions['body']
+      body: CreateAPIKeyParams
     ) => Promise<CreateAPIKeyResult | null>;
     invalidateAPIKey: (
       request: KibanaRequest,
-      body: InvalidateAPIKeyOptions['body']
+      body: InvalidateAPIKeyParams
     ) => Promise<InvalidateAPIKeyResult | null>;
   };
 

@@ -4,17 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LoggerFactory, ScopedClusterClient } from '../../../../../src/core/server';
+import { ClusterClient, KibanaRequest, Logger } from '../../../../../src/core/server';
 
-export interface CreateAPIKeyOptions {
-  loggers: LoggerFactory;
-  callAsCurrentUser: ScopedClusterClient['callAsCurrentUser'];
+/**
+ * Represents the options to create an APIKey class instance that will be
+ * shared between functions (create, invalidate, etc).
+ */
+export interface ConstructorOptions {
+  logger: Logger;
+  clusterClient: PublicMethodsOf<ClusterClient>;
   isSecurityFeatureDisabled: () => boolean;
-  body: {
-    name: string;
-    role_descriptors: Record<string, any>;
-    expiration?: string;
-  };
+}
+
+/**
+ * Represents the params for creating an API key
+ */
+export interface CreateAPIKeyParams {
+  name: string;
+  role_descriptors: Record<string, any>;
+  expiration?: string;
+}
+
+/**
+ * Represents the params for invalidating an API key
+ */
+export interface InvalidateAPIKeyParams {
+  id?: string;
+  name?: string;
+  realm_name?: string;
+  username?: string;
 }
 
 /**
@@ -40,18 +58,6 @@ export interface CreateAPIKeyResult {
    * Generated API key
    */
   api_key: string;
-}
-
-export interface InvalidateAPIKeyOptions {
-  loggers: LoggerFactory;
-  callAsCurrentUser: ScopedClusterClient['callAsCurrentUser'];
-  isSecurityFeatureDisabled: () => boolean;
-  body: {
-    id?: string;
-    name?: string;
-    realm_name?: string;
-    username?: string;
-  };
 }
 
 /**
@@ -83,48 +89,65 @@ export interface InvalidateAPIKeyResult {
   }>;
 }
 
-export async function createAPIKey({
-  body,
-  loggers,
-  callAsCurrentUser,
-  isSecurityFeatureDisabled,
-}: CreateAPIKeyOptions): Promise<CreateAPIKeyResult | null> {
-  const logger = loggers.get('api-keys');
+/**
+ * Class responsible for managing Elasticsearch API keys.
+ */
+export class APIKeys {
+  private readonly logger: Logger;
+  private readonly clusterClient: PublicMethodsOf<ClusterClient>;
+  private readonly isSecurityFeatureDisabled: () => boolean;
 
-  if (isSecurityFeatureDisabled()) {
-    return null;
+  constructor({ logger, clusterClient, isSecurityFeatureDisabled }: ConstructorOptions) {
+    this.logger = logger;
+    this.clusterClient = clusterClient;
+    this.isSecurityFeatureDisabled = isSecurityFeatureDisabled;
   }
 
-  logger.debug('Trying to create an API key');
+  /**
+   * Tries to create an API key for the current user.
+   * @param param0 The options to create an API key
+   */
+  async create(
+    request: KibanaRequest,
+    body: CreateAPIKeyParams
+  ): Promise<CreateAPIKeyResult | null> {
+    if (this.isSecurityFeatureDisabled()) {
+      return null;
+    }
 
-  // User needs `manage_api_key` privilege to use this API
-  const key = (await callAsCurrentUser('shield.createAPIKey', { body })) as CreateAPIKeyResult;
+    this.logger.debug('Trying to create an API key');
 
-  logger.debug('API key was created successfully');
+    // User needs `manage_api_key` privilege to use this API
+    const key = (await this.clusterClient
+      .asScoped(request)
+      .callAsCurrentUser('shield.createAPIKey', { body })) as CreateAPIKeyResult;
 
-  return key;
-}
+    this.logger.debug('API key was created successfully');
 
-export async function invalidateAPIKey({
-  body,
-  loggers,
-  callAsCurrentUser,
-  isSecurityFeatureDisabled,
-}: InvalidateAPIKeyOptions): Promise<InvalidateAPIKeyResult | null> {
-  const logger = loggers.get('api-keys');
-
-  if (isSecurityFeatureDisabled()) {
-    return null;
+    return key;
   }
 
-  logger.debug('Trying to invalidate an API key');
+  /**
+   * Tries to invalidate an API key.
+   * @param param0 The options to invalidate an API key.
+   */
+  async invalidate(
+    request: KibanaRequest,
+    body: InvalidateAPIKeyParams
+  ): Promise<InvalidateAPIKeyResult | null> {
+    if (this.isSecurityFeatureDisabled()) {
+      return null;
+    }
 
-  // User needs `manage_api_key` privilege to use this API
-  const result = (await callAsCurrentUser('shield.invalidateAPIKey', {
-    body,
-  })) as InvalidateAPIKeyResult;
+    this.logger.debug('Trying to invalidate an API key');
 
-  logger.debug('API key was invalidated successfully');
+    // User needs `manage_api_key` privilege to use this API
+    const result = (await this.clusterClient
+      .asScoped(request)
+      .callAsCurrentUser('shield.invalidateAPIKey', { body })) as InvalidateAPIKeyResult;
 
-  return result;
+    this.logger.debug('API key was invalidated successfully');
+
+    return result;
+  }
 }
