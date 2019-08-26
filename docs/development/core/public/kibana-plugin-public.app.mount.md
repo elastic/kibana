@@ -4,7 +4,7 @@
 
 ## App.mount property
 
-A mount function called when the user navigates to this app's `rootRoute`<!-- -->.
+A mount function called when the user navigates to this app's route.
 
 <b>Signature:</b>
 

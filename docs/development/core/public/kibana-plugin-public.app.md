@@ -16,5 +16,5 @@ export interface App extends AppBase
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [mount](./kibana-plugin-public.app.mount.md) | <code>(context: AppMountContext, params: AppMountParameters) =&gt; AppUnmount &#124; Promise&lt;AppUnmount&gt;</code> | A mount function called when the user navigates to this app's <code>rootRoute</code>. |
+|  [mount](./kibana-plugin-public.app.mount.md) | <code>(context: AppMountContext, params: AppMountParameters) =&gt; AppUnmount &#124; Promise&lt;AppUnmount&gt;</code> | A mount function called when the user navigates to this app's route. |
 

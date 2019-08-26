@@ -179,7 +179,7 @@ export type AppMounter = (params: AppMountParameters) => Promise<AppUnmount>;
 /** @public */
 export interface ApplicationSetup {
   /**
-   * Register an mountable application to the system. Apps will be mounted based on their `rootRoute`.
+   * Register an mountable application to the system.
    * @param app - an {@link App}
    */
   register(app: App): void;
@@ -200,7 +200,7 @@ export interface ApplicationSetup {
 /** @internal */
 export interface InternalApplicationSetup {
   /**
-   * Register an mountable application to the system. Apps will be mounted based on their `rootRoute`.
+   * Register an mountable application to the system.
    * @param plugin - opaque ID of the plugin that registers this application
    * @param app
    */

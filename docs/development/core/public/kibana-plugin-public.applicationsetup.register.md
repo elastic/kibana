@@ -4,7 +4,7 @@
 
 ## ApplicationSetup.register() method
 
-Register an mountable application to the system. Apps will be mounted based on their `rootRoute`<!-- -->.
+Register an mountable application to the system.
 
 <b>Signature:</b>
 

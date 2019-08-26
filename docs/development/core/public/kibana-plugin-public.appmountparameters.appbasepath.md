@@ -23,7 +23,7 @@ export class MyPlugin implements Plugin {
     application.register({
     id: 'my-app',
     async mount(context, params) {
-      const { renderApp } = await import('./applcation');
+      const { renderApp } = await import('./application');
       return renderApp(context, params);
     },
   });
