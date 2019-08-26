@@ -22,9 +22,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
-import { SwitchOption } from '../switch';
-import { SelectOption } from '../select';
-import { BasicVislibParams, ValueAxis } from '../../types';
+import { SelectOption, SwitchOption } from '../../common';
+import { BasicVislibParams, ValueAxis } from '../../../types';
 
 function GridOptions({
   stateParams,
