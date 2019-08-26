@@ -35,7 +35,6 @@ interface Props {
   onToggleExpanded: (eventId: string) => () => void;
   onToggleShowNotes: (eventId: string) => () => void;
   getNotesByIds: (noteIds: string[]) => Note[];
-  width: number;
   associateNote: (
     eventId: string,
     addNoteToEvent: AddNoteToEvent,
@@ -68,7 +67,6 @@ export const StatefulEventChild = React.memo<Props>(
     showNotes,
     onToggleShowNotes,
     updateNote,
-    width,
   }) => (
     <EuiFlexGroup data-test-subj="event-rows" direction="column" gutterSize="none">
       <EuiFlexItem data-test-subj="event-column-data" grow={false}>
@@ -104,7 +102,6 @@ export const StatefulEventChild = React.memo<Props>(
           showAddNote={showNotes}
           toggleShowAddNote={onToggleShowNotes(id)}
           updateNote={updateNote}
-          width={`${width - 10}px`}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
