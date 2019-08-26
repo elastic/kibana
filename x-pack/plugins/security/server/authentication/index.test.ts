@@ -398,9 +398,6 @@ describe('setupAuthentication()', () => {
       const apiKeysInstance = jest.requireMock('./api_keys').APIKeys.mock.instances[0];
       const options = {
         id: '123',
-        name: 'my-api-key',
-        realm_name: 'native1',
-        username: 'myuser',
       };
       apiKeysInstance.invalidate.mockResolvedValueOnce({ success: true });
       await expect(

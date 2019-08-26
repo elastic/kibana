@@ -29,10 +29,7 @@ export interface CreateAPIKeyParams {
  * Represents the params for invalidating an API key
  */
 export interface InvalidateAPIKeyParams {
-  id?: string;
-  name?: string;
-  realm_name?: string;
-  username?: string;
+  id: string;
 }
 
 /**

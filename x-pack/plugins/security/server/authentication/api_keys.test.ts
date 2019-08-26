@@ -78,7 +78,9 @@ describe('API Keys', () => {
   describe('invalidate()', () => {
     it('returns null when security feature is disabled', async () => {
       mockIsSecurityFeatureDisabled.mockReturnValue(true);
-      const result = await apiKeys.invalidate(httpServerMock.createKibanaRequest(), {});
+      const result = await apiKeys.invalidate(httpServerMock.createKibanaRequest(), {
+        id: '123',
+      });
       expect(result).toBeNull();
       expect(mockScopedClusterClient.callAsCurrentUser).not.toHaveBeenCalled();
     });
@@ -92,9 +94,6 @@ describe('API Keys', () => {
       });
       const result = await apiKeys.invalidate(httpServerMock.createKibanaRequest(), {
         id: '123',
-        name: 'my-api-key',
-        realm_name: 'native1',
-        username: 'myuser',
       });
       expect(result).toEqual({
         invalidated_api_keys: ['api-key-id-1'],
@@ -106,9 +105,6 @@ describe('API Keys', () => {
         {
           body: {
             id: '123',
-            name: 'my-api-key',
-            realm_name: 'native1',
-            username: 'myuser',
           },
         }
       );
