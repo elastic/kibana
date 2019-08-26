@@ -11,4 +11,5 @@ export enum CONSTANTS {
   networkDetails = 'network.details',
   networkPage = 'network.page',
   timerange = 'timerange',
+  selectedTab = 'selectedTab',
 }

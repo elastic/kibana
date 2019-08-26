@@ -8,13 +8,7 @@ import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import { setBreadcrumbs } from './breadcrumbs';
-import { TabNavigation, NavTab } from './tab_navigation';
-
-export interface TabNavigationComponentProps {
-  navTabs: NavTab[];
-  display?: 'default' | 'condensed' | undefined;
-  showBorder?: boolean;
-}
+import { TabNavigation, TabNavigationComponentProps } from './tab_navigation';
 
 export class SiemNavigationComponent extends React.Component<
   RouteComponentProps & TabNavigationComponentProps
@@ -30,26 +24,21 @@ export class SiemNavigationComponent extends React.Component<
   }
 
   public componentWillMount(): void {
-    const {
-      location,
-      match: { params },
-    } = this.props;
+    const { location } = this.props;
     if (location.pathname) {
-      setBreadcrumbs(location.pathname, params);
+      setBreadcrumbs(location.pathname);
     }
   }
 
   public componentWillReceiveProps(nextProps: Readonly<RouteComponentProps>): void {
     if (this.props.location.pathname !== nextProps.location.pathname) {
-      setBreadcrumbs(nextProps.location.pathname, nextProps.match.params);
+      setBreadcrumbs(nextProps.location.pathname);
     }
   }
 
   public render() {
-    const { location, navTabs } = this.props;
-    return (
-      <TabNavigation location={location.pathname} search={location.search} navTabs={navTabs} />
-    );
+    const { location, ...navProps } = this.props;
+    return <TabNavigation location={location} {...navProps} />;
   }
 }
 

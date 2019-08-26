@@ -8,21 +8,35 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
+import { RisonValue } from 'rison-node';
 import { UseUrlState } from '../../components/url_state';
+import { Anomaly } from '../../components/ml/types';
+import { CONSTANTS } from '../../components/url_state/constants';
+import { decodeRison, isRisonObject } from '../../components/ml/conditional_links/rison_helpers';
+
+import {
+  getQueryStringFromLocation,
+  getParamFromQueryString,
+} from '../../components/url_state/helpers';
 import { GlobalTime } from '../../containers/global_time';
-
-import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
-
 import { hostsModel, hostsSelectors, State } from '../../store';
 
 import { HostsComponentProps } from './hosts';
+import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
+import { navTabsHosts } from './hosts_navigations';
+
 import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
-import { Anomaly } from '../../components/ml/types';
 
 const HostsBodyComponent = pure<HostsComponentProps>(
-  ({ filterQuery, setAbsoluteRangeDatePicker, children }) => {
-    return (
+  ({ filterQuery, setAbsoluteRangeDatePicker, tabName, location, children }) => {
+    const defaultSelectedTab = navTabsHosts[0].id;
+    const queryString = getQueryStringFromLocation(location);
+    const kqlQuery = getParamFromQueryString(queryString, CONSTANTS.kqlQuery) || '';
+    const value: RisonValue = decodeRison(kqlQuery);
+    const selectedTabId =
+      isRisonObject(value) && value.selectedTab ? value.selectedTab : defaultSelectedTab;
+    return selectedTabId === tabName ? (
       <WithSource sourceId="default">
         {({ indicesExist, indexPattern }) =>
           indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
@@ -57,7 +71,7 @@ const HostsBodyComponent = pure<HostsComponentProps>(
           ) : null
         }
       </WithSource>
-    );
+    ) : null;
   }
 );
 

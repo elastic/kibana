@@ -14,6 +14,10 @@ import { UrlInputsModel } from '../../store/inputs/model';
 import { InputsModelId } from '../../store/inputs/constants';
 
 import { CONSTANTS } from './constants';
+import { navTabsHosts, navTabsHostDatails } from '../../pages/hosts/hosts_navigations';
+import { NetworkTableType, IpDetailsTableType } from '../../store/network/model';
+import { HostsTableType } from '../../store/hosts/model';
+import { NavTab, SiemTableType } from '../navigation/tab_navigation';
 
 export const LOCATION_KEYS: LocationKeysType[] = [
   CONSTANTS.hostsDetails,
@@ -29,6 +33,18 @@ export const LOCATION_MAPPED_TO_MODEL: LocationMappedToModel = {
   [CONSTANTS.networkDetails]: networkModel.NetworkType.details,
   [CONSTANTS.hostsPage]: hostsModel.HostsType.page,
   [CONSTANTS.hostsDetails]: hostsModel.HostsType.details,
+};
+
+export const LOCATION_MAPPED_TO_DEFAULT_TAB = {
+  [CONSTANTS.hostsPage]: HostsTableType.hosts,
+  [CONSTANTS.hostsDetails]: HostsTableType.anomalies,
+  [CONSTANTS.networkPage]: NetworkTableType.topNFlow,
+  [CONSTANTS.networkDetails]: IpDetailsTableType.domains,
+};
+
+export const LOCATION_MAPPED_TO_TABS = {
+  [CONSTANTS.hostsPage]: navTabsHosts,
+  [CONSTANTS.hostsDetails]: navTabsHostDatails('{HostName}'),
 };
 
 export type LocationTypes =
@@ -64,12 +80,20 @@ export interface LocationMappedToModel {
     | hostsModel.HostsType.page;
 }
 
+export interface LocationMappedToDefaultTab {
+  [CONSTANTS.hostsDetails]: NavTab[];
+  [CONSTANTS.hostsPage]: NavTab[];
+  [CONSTANTS.networkPage]: NavTab[];
+  [CONSTANTS.networkDetails]: NavTab[];
+}
+
 export type LocationKeysType = keyof LocationMappedToModel;
 
 export interface KqlQuery {
   filterQuery: KueryFilterQuery | null;
   queryLocation: LocationTypes;
   type: networkModel.NetworkType | hostsModel.HostsType;
+  selectedTab: SiemTableType;
 }
 
 export interface UrlState {

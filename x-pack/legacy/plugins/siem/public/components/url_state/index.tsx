@@ -23,6 +23,8 @@ import { hostsActions, inputsActions, networkActions } from '../../store/actions
 import { CONSTANTS } from './constants';
 import { UrlStateContainerPropTypes, UrlStateProps, KqlQueryObject } from './types';
 import { useUrlStateHooks } from './use_url_state';
+import { HostsTableType } from '../../store/hosts/model';
+import { NetworkTableType, IpDetailsTableType } from '../../store/network/model';
 
 export const UrlStateContainer = React.memo<UrlStateContainerPropTypes>(
   props => {
@@ -31,7 +33,8 @@ export const UrlStateContainer = React.memo<UrlStateContainerPropTypes>(
   },
   (prevProps, nextProps) =>
     prevProps.location.pathname === nextProps.location.pathname &&
-    isEqual(prevProps.urlState, nextProps.urlState)
+    isEqual(prevProps.urlState, nextProps.urlState) &&
+    prevProps.location.search === nextProps.location.search
 );
 
 UrlStateContainer.displayName = 'UrlStateContainer';
@@ -50,21 +53,25 @@ const makeMapStateToProps = () => {
         filterQuery: getHostsFilterQueryAsKuery(state, hostsModel.HostsType.details),
         queryLocation: CONSTANTS.hostsDetails,
         type: hostsModel.HostsType.details,
+        selectedTab: HostsTableType.authentications,
       },
       [CONSTANTS.hostsPage]: {
         filterQuery: getHostsFilterQueryAsKuery(state, hostsModel.HostsType.page),
         queryLocation: CONSTANTS.hostsPage,
         type: hostsModel.HostsType.page,
+        selectedTab: HostsTableType.hosts,
       },
       [CONSTANTS.networkDetails]: {
         filterQuery: getNetworkFilterQueryAsKuery(state, networkModel.NetworkType.details),
         queryLocation: CONSTANTS.networkDetails,
         type: networkModel.NetworkType.details,
+        selectedTab: NetworkTableType.topNFlow,
       },
       [CONSTANTS.networkPage]: {
         filterQuery: getNetworkFilterQueryAsKuery(state, networkModel.NetworkType.page),
         queryLocation: CONSTANTS.networkPage,
         type: networkModel.NetworkType.page,
+        selectedTab: IpDetailsTableType.domains,
       },
     };
 

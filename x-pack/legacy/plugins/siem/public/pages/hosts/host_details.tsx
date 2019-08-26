@@ -14,15 +14,12 @@ import { Breadcrumb } from 'ui/chrome';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { ActionCreator } from 'typescript-fsa';
+import { RisonValue } from 'rison-node';
 import { ESTermQuery } from '../../../common/typed_json';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
-import {
-  getHostsUrl,
-  HostComponentProps,
-  getHostDetailsUrl,
-} from '../../components/link_to/redirect_to_hosts';
+import { getHostsUrl, HostComponentProps } from '../../components/link_to/redirect_to_hosts';
 import { KpiHostsComponent } from '../../components/page/hosts';
 
 import { HostOverview } from '../../components/page/hosts/host_overview';
@@ -44,9 +41,15 @@ import { InputsModelId } from '../../store/inputs/constants';
 import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 import { KpiHostDetailsQuery } from '../../containers/kpi_host_details';
 import { hostToCriteria } from '../../components/ml/criteria/host_to_criteria';
-import { navTabsHostDatails, HostsTabName } from './hosts_navigations';
+import { navTabsHostDatails } from './hosts_navigations';
 import { SiemNavigation } from '../../components/navigation';
 import { Anomaly } from '../../components/ml/types';
+import {
+  getParamFromQueryString,
+  getQueryStringFromLocation,
+} from '../../components/url_state/helpers';
+import { decodeRison, isRisonObject } from '../../components/ml/conditional_links/rison_helpers';
+import { CONSTANTS } from '../../components/url_state/constants';
 
 const type = hostsModel.HostsType.details;
 
@@ -170,6 +173,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                           navTabs={navTabsHostDatails(hostName)}
                           display="default"
                           showBorder={true}
+                          navigationType="table"
                         />
                         <EuiSpacer />
                       </>
@@ -195,14 +199,21 @@ HostDetailsComponent.displayName = 'HostDetailsComponent';
 
 const HostDetailsBodyComponent = pure<HostDetailsComponentProps>(
   ({
-    match: {
-      params: { hostName, tabName },
-    },
     filterQueryExpression,
     setAbsoluteRangeDatePicker,
+    tabName,
+    match: { hostName },
+    location,
     children,
   }) => {
-    return (
+    const defaultSelectedTab = navTabsHostDatails(hostName)[0].id;
+    const queryString = getQueryStringFromLocation(location);
+    const kqlQuery = getParamFromQueryString(queryString, CONSTANTS.kqlQuery) || '';
+    const value: RisonValue = decodeRison(kqlQuery);
+    const selectedTabId =
+      isRisonObject(value) && value.selectedTab ? value.selectedTab : defaultSelectedTab;
+
+    return selectedTabId === tabName ? (
       <WithSource sourceId="default">
         {({ indicesExist, indexPattern }) =>
           indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
@@ -241,7 +252,7 @@ const HostDetailsBodyComponent = pure<HostDetailsComponentProps>(
           ) : null
         }
       </WithSource>
-    );
+    ) : null;
   }
 );
 
@@ -268,7 +279,7 @@ export const HostDetailsBody = connect(
   }
 )(HostDetailsBodyComponent);
 
-export const getBreadcrumbs = (hostId?: string, tabName?: HostsTabName): Breadcrumb[] => {
+export const getBreadcrumbs = (hostId?: string): Breadcrumb[] => {
   let breadcrumb = [
     {
       text: i18n.PAGE_TITLE,
@@ -280,16 +291,6 @@ export const getBreadcrumbs = (hostId?: string, tabName?: HostsTabName): Breadcr
       ...breadcrumb,
       {
         text: hostId,
-        href: getHostDetailsUrl(hostId),
-      },
-    ];
-  }
-  if (tabName) {
-    breadcrumb = [
-      ...breadcrumb,
-      {
-        text: tabName,
-        href: '',
       },
     ];
   }

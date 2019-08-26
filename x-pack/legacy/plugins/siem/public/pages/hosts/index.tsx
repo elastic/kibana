@@ -15,7 +15,6 @@ import { HostComponentProps } from '../../components/link_to/redirect_to_hosts';
 import { HostDetails, HostDetailsBody } from './host_details';
 import { Hosts } from './hosts';
 import {
-  HostsTabName,
   HostsQueryTabBody,
   AuthenticationsQueryTabBody,
   UncommonProcessTabBody,
@@ -23,6 +22,7 @@ import {
   EventsTabBody,
 } from './hosts_navigations';
 import { HostsBody } from './hosts_body';
+import { HostsTableType } from '../../store/hosts/model';
 
 export const HostsContainer = pure<HostComponentProps>(({ match }) => (
   <>
@@ -40,49 +40,23 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
                 defaultMessage: 'Hosts',
               })}
             />
-            <Route
-              path={match.url}
-              render={() => <HostsBody {...props} children={HostsQueryTabBody} />}
-            />
-          </>
-        )}
-      />
-      <Route
-        strict
-        exact
-        path={`${match.url}/:tabName(${HostsTabName.hosts}|${HostsTabName.authentications}|${HostsTabName.uncommonProcesses}|${HostsTabName.anomalies}|${HostsTabName.events})`}
-        render={props => (
-          <>
-            <PageRoute
+            <HostsBody {...props} tabName={HostsTableType.hosts} children={HostsQueryTabBody} />
+            <HostsBody
               {...props}
-              component={Hosts}
-              title={i18n.translate('xpack.siem.pages.hosts.hostsTitle', {
-                defaultMessage: 'Hosts',
-              })}
+              tabName={HostsTableType.authentications}
+              children={AuthenticationsQueryTabBody}
             />
-            <Route
-              path={`${match.url}/:tabName(${HostsTabName.hosts})`}
-              render={() => <HostsBody {...props} children={HostsQueryTabBody} />}
+            <HostsBody
+              {...props}
+              tabName={HostsTableType.uncommonProcesses}
+              children={UncommonProcessTabBody}
             />
-            <Route
-              path={`${match.url}/:tabName(${HostsTabName.authentications})`}
-              render={() => <HostsBody {...props} children={AuthenticationsQueryTabBody} />}
-            />
-            <Route
-              path={`${match.url}/:tabName(${HostsTabName.uncommonProcesses})`}
-              render={() => <HostsBody {...props} children={UncommonProcessTabBody} />}
-            />
-            <Route
-              path={`${match.url}/:tabName(${HostsTabName.anomalies})`}
-              render={() => <HostsBody {...props} children={AnomaliesTabBody} />}
-            />
-            <Route
-              path={`${match.url}/:tabName(${HostsTabName.events})`}
-              render={() => <HostsBody {...props} children={EventsTabBody} />}
-            />
+            <HostsBody {...props} tabName={HostsTableType.anomalies} children={AnomaliesTabBody} />
+            <HostsBody {...props} tabName={HostsTableType.events} children={EventsTabBody} />
           </>
         )}
       />
+
       <Route
         strict
         exact
@@ -97,49 +71,30 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
                   defaultMessage: 'Hosts',
                 })}
               />
-              <Route
-                path={match.url}
-                render={() => <HostDetailsBody {...props} children={HostsQueryTabBody} />}
+
+              <HostDetailsBody
+                {...props}
+                tabName={HostsTableType.authentications}
+                children={AuthenticationsQueryTabBody}
+              />
+              <HostDetailsBody
+                {...props}
+                tabName={HostsTableType.uncommonProcesses}
+                children={UncommonProcessTabBody}
+              />
+              <HostDetailsBody
+                {...props}
+                tabName={HostsTableType.anomalies}
+                children={AnomaliesTabBody}
+              />
+              <HostDetailsBody
+                {...props}
+                tabName={HostsTableType.events}
+                children={EventsTabBody}
               />
             </>
           );
         }}
-      />
-      <Route
-        strict
-        exact
-        path={`${match.url}/:hostName/:tabName(${HostsTabName.authentications}|${HostsTabName.uncommonProcesses}|${HostsTabName.anomalies}|${HostsTabName.events})`}
-        render={props => (
-          <>
-            <PageRoute
-              {...props}
-              component={HostDetails}
-              title={i18n.translate('xpack.siem.pages.hosts.hostsTitle', {
-                defaultMessage: 'Hosts',
-              })}
-            />
-            <Route
-              path={`${match.url}/:hostName/:tabName(${HostsTabName.hosts})`}
-              render={() => <HostDetailsBody {...props} children={HostsQueryTabBody} />}
-            />
-            <Route
-              path={`${match.url}/:hostName/:tabName(${HostsTabName.authentications})`}
-              render={() => <HostDetailsBody {...props} children={AuthenticationsQueryTabBody} />}
-            />
-            <Route
-              path={`${match.url}/:hostName/:tabName(${HostsTabName.uncommonProcesses})`}
-              render={() => <HostDetailsBody {...props} children={UncommonProcessTabBody} />}
-            />
-            <Route
-              path={`${match.url}/:hostName/:tabName(${HostsTabName.anomalies})`}
-              render={() => <HostDetailsBody {...props} children={AnomaliesTabBody} />}
-            />
-            <Route
-              path={`${match.url}/:hostName/:tabName(${HostsTabName.events})`}
-              render={() => <HostDetailsBody {...props} children={EventsTabBody} />}
-            />
-          </>
-        )}
       />
 
       <Redirect from="/hosts/" to="/hosts" />

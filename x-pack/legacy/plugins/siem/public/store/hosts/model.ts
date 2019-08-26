@@ -17,6 +17,7 @@ export enum HostsTableType {
   hosts = 'hosts',
   events = 'events',
   uncommonProcesses = 'uncommonProcesses',
+  anomalies = 'anomalies',
 }
 
 export interface BasicQueryPaginated {

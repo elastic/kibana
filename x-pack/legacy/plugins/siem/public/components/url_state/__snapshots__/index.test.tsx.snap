@@ -338,7 +338,7 @@ exports[`UrlStateContainer mounts and renders 1`] = `
                                 Object {
                                   "hash": "",
                                   "pathname": "/network",
-                                  "search": "?kqlQuery=(filterQuery:!n,queryLocation:network.page,type:page)",
+                                  "search": "?kqlQuery=(filterQuery:!n,queryLocation:network.page,selectedTab:domains,type:page)",
                                   "state": "",
                                 },
                               ],
@@ -405,7 +405,7 @@ exports[`UrlStateContainer mounts and renders 1`] = `
                                       Object {
                                         "hash": "",
                                         "pathname": "/network",
-                                        "search": "?kqlQuery=(filterQuery:!n,queryLocation:network.page,type:page)",
+                                        "search": "?kqlQuery=(filterQuery:!n,queryLocation:network.page,selectedTab:domains,type:page)",
                                         "state": "",
                                       },
                                     ],
@@ -485,7 +485,7 @@ exports[`UrlStateContainer mounts and renders 1`] = `
                                         Object {
                                           "hash": "",
                                           "pathname": "/network",
-                                          "search": "?kqlQuery=(filterQuery:!n,queryLocation:network.page,type:page)",
+                                          "search": "?kqlQuery=(filterQuery:!n,queryLocation:network.page,selectedTab:domains,type:page)",
                                           "state": "",
                                         },
                                       ],
@@ -539,21 +539,25 @@ exports[`UrlStateContainer mounts and renders 1`] = `
                                     "hosts.details": Object {
                                       "filterQuery": null,
                                       "queryLocation": "hosts.details",
+                                      "selectedTab": "authentications",
                                       "type": "details",
                                     },
                                     "hosts.page": Object {
                                       "filterQuery": null,
                                       "queryLocation": "hosts.page",
+                                      "selectedTab": "hosts",
                                       "type": "page",
                                     },
                                     "network.details": Object {
                                       "filterQuery": null,
                                       "queryLocation": "network.details",
+                                      "selectedTab": "topNFlow",
                                       "type": "details",
                                     },
                                     "network.page": Object {
                                       "filterQuery": null,
                                       "queryLocation": "network.page",
+                                      "selectedTab": "domains",
                                       "type": "page",
                                     },
                                   },

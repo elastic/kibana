@@ -23,76 +23,69 @@ import { hostsModel } from '../../store';
 import { manageQuery } from '../../components/page/manage_query';
 import { AuthenticationsQuery } from '../../containers/authentications';
 import { ESTermQuery } from '../../../common/typed_json';
+import { HostsTableType } from '../../store/hosts/model';
 
-const getTabsOnHostsUrl = (tabName: HostsTabName) => `#/hosts/${tabName}`;
-const getTabsOnHostDetailsUrl = (hostName: string, tabName: HostsTabName) => {
-  return `#/hosts/${hostName}/${tabName}`;
+const getTabsOnHostsUrl = (tabName: HostsTableType) => `#/hosts`;
+const getTabsOnHostDetailsUrl = (hostName: string, tabName: HostsTableType) => {
+  return `#/hosts/${hostName}`;
 };
 
-export enum HostsTabName {
-  hosts = 'hosts',
-  authentications = 'authentications',
-  uncommonProcesses = 'uncommon_processes',
-  anomalies = 'anomalies',
-  events = 'events',
-}
-
-export const navTabs: NavTab[] = [
+export const navTabsHosts: NavTab[] = [
   {
-    id: HostsTabName.hosts,
+    id: HostsTableType.hosts,
     name: i18n.NAVIGATION_HOSTS_TITLE,
-    href: getTabsOnHostsUrl(HostsTabName.hosts),
+    href: getTabsOnHostsUrl(HostsTableType.hosts),
     disabled: false,
   },
   {
-    id: HostsTabName.authentications,
+    id: HostsTableType.authentications,
     name: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
-    href: getTabsOnHostsUrl(HostsTabName.authentications),
+    href: getTabsOnHostsUrl(HostsTableType.authentications),
     disabled: false,
   },
   {
-    id: HostsTabName.uncommonProcesses,
+    id: HostsTableType.uncommonProcesses,
     name: i18n.NAVIGATION_UNCOMMON_PROCESSES_TITLE,
-    href: getTabsOnHostsUrl(HostsTabName.uncommonProcesses),
+    href: getTabsOnHostsUrl(HostsTableType.uncommonProcesses),
     disabled: false,
   },
   {
-    id: HostsTabName.anomalies,
+    id: HostsTableType.anomalies,
     name: i18n.NAVIGATION_ANOMALIES_TITLE,
-    href: getTabsOnHostsUrl(HostsTabName.anomalies),
+    href: getTabsOnHostsUrl(HostsTableType.anomalies),
     disabled: false,
   },
   {
-    id: HostsTabName.events,
+    id: HostsTableType.events,
     name: i18n.NAVIGATION_EVENTS_TITLE,
-    href: getTabsOnHostsUrl(HostsTabName.events),
+    href: getTabsOnHostsUrl(HostsTableType.events),
     disabled: false,
   },
 ];
 
 export const navTabsHostDatails = (hostName: string): NavTab[] => [
   {
-    id: HostsTabName.authentications,
+    id: HostsTableType.authentications,
     name: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
-    href: getTabsOnHostDetailsUrl(hostName, HostsTabName.authentications),
+    href: getTabsOnHostDetailsUrl(hostName, HostsTableType.authentications),
     disabled: false,
   },
   {
-    id: HostsTabName.uncommonProcesses,
+    id: HostsTableType.uncommonProcesses,
     name: i18n.NAVIGATION_UNCOMMON_PROCESSES_TITLE,
-    href: getTabsOnHostDetailsUrl(hostName, HostsTabName.uncommonProcesses),
+    href: getTabsOnHostDetailsUrl(hostName, HostsTableType.uncommonProcesses),
     disabled: false,
   },
   {
-    id: HostsTabName.anomalies,
+    id: HostsTableType.anomalies,
     name: i18n.NAVIGATION_ANOMALIES_TITLE,
-    href: getTabsOnHostDetailsUrl(hostName, HostsTabName.anomalies),
+    href: getTabsOnHostDetailsUrl(hostName, HostsTableType.anomalies),
     disabled: false,
   },
   {
-    id: HostsTabName.events,
+    id: HostsTableType.events,
     name: i18n.NAVIGATION_EVENTS_TITLE,
-    href: getTabsOnHostDetailsUrl(hostName, HostsTabName.events),
+    href: getTabsOnHostDetailsUrl(hostName, HostsTableType.events),
     disabled: false,
   },
 ];

@@ -31,7 +31,8 @@ import { InputsModelId } from '../../store/inputs/constants';
 import { SiemNavigation } from '../../components/navigation';
 
 import * as i18n from './translations';
-import { navTabs } from './hosts_navigations';
+import { navTabsHosts } from './hosts_navigations';
+import { HostsTableType } from '../../store/hosts/model';
 
 const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
 
@@ -43,8 +44,11 @@ interface HostsComponentReduxProps {
     to: number;
   }>;
 }
+interface OwnProps {
+  tabName: HostsTableType;
+}
 
-export type HostsComponentProps = RouteComponentProps & HostsComponentReduxProps;
+export type HostsComponentProps = RouteComponentProps & HostsComponentReduxProps & OwnProps;
 
 const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRangeDatePicker }) => {
   return (
@@ -92,7 +96,12 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                         )}
                       </KpiHostsQuery>
                       <EuiSpacer />
-                      <SiemNavigation navTabs={navTabs} display="default" showBorder={true} />
+                      <SiemNavigation
+                        navTabs={navTabsHosts}
+                        display="default"
+                        showBorder={true}
+                        navigationType="table"
+                      />
                       <EuiSpacer />
                     </>
                   )}
