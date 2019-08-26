@@ -17,18 +17,67 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiHorizontalRule,
+  EuiFlexGroup,
+  EuiToolTip,
+  EuiIcon
 } from '@elastic/eui';
-import { ClusterItemContainer } from './helpers';
+import { ClusterItemContainer, DisabledIfNoDataAndInSetupModeLink } from './helpers';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 export function BeatsPanel(props) {
-  if (!get(props, 'beats.total', 0) > 0) {
+  const { setupMode } = props;
+  const beatsTotal = get(props, 'beats.total') || 0;
+  // Do not show if we are not in setup mode
+  if (beatsTotal === 0 && !setupMode.enabled) {
     return null;
   }
 
   const goToBeats = () => props.changeUrl('beats');
   const goToInstances = () => props.changeUrl('beats/beats');
+
+  const setupModeBeatsData = get(setupMode.data, 'beats');
+  let setupModeInstancesData = null;
+  if (setupMode.enabled && setupMode.data) {
+    const {
+      totalUniqueInstanceCount,
+      totalUniqueFullyMigratedCount,
+      totalUniquePartiallyMigratedCount
+    } = setupModeBeatsData;
+    const hasInstances = totalUniqueInstanceCount > 0 || get(setupModeBeatsData, 'detected.mightExist', false);
+    const allMonitoredByMetricbeat = totalUniqueInstanceCount > 0 &&
+      (totalUniqueFullyMigratedCount === totalUniqueInstanceCount || totalUniquePartiallyMigratedCount === totalUniqueInstanceCount);
+    const internalCollectionOn = totalUniquePartiallyMigratedCount > 0;
+    if (hasInstances && (!allMonitoredByMetricbeat || internalCollectionOn)) {
+      let tooltipText = null;
+
+      if (!allMonitoredByMetricbeat) {
+        tooltipText = i18n.translate('xpack.monitoring.cluster.overview.beatsPanel.setupModeNodesTooltip.oneInternal', {
+          defaultMessage: `There's at least one instance that isn't being monitored using Metricbeat. Click the flag
+          icon to visit the instances listing page and find out more information about the status of each instance.`
+        });
+      }
+      else if (internalCollectionOn) {
+        tooltipText = i18n.translate('xpack.monitoring.cluster.overview.beatsPanel.setupModeNodesTooltip.disableInternal', {
+          defaultMessage: `All instances are being monitored using Metricbeat but internal collection still needs to be turned
+          off. Click the flag icon to visit the instances listing page and disable internal collection.`
+        });
+      }
+
+      setupModeInstancesData = (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            position="top"
+            content={tooltipText}
+          >
+            <EuiLink onClick={goToInstances}>
+              <EuiIcon type="flag" color="warning"/>
+            </EuiLink>
+          </EuiToolTip>
+        </EuiFlexItem>
+      );
+    }
+  }
 
   const beatTypes = props.beats.types.map((beat, index) => {
     return [
@@ -60,7 +109,9 @@ export function BeatsPanel(props) {
           <EuiPanel paddingSize="m">
             <EuiTitle size="s">
               <h3>
-                <EuiLink
+                <DisabledIfNoDataAndInSetupModeLink
+                  setupModeEnabled={setupMode.enabled}
+                  setupModeData={setupModeBeatsData}
                   onClick={goToBeats}
                   aria-label={i18n.translate('xpack.monitoring.cluster.overview.beatsPanel.overviewLinkAriaLabel', {
                     defaultMessage: 'Beats Overview'
@@ -71,7 +122,7 @@ export function BeatsPanel(props) {
                     id="xpack.monitoring.cluster.overview.beatsPanel.overviewLinkLabel"
                     defaultMessage="Overview"
                   />
-                </EuiLink>
+                </DisabledIfNoDataAndInSetupModeLink>
               </h3>
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
@@ -99,27 +150,32 @@ export function BeatsPanel(props) {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiPanel paddingSize="m">
-            <EuiTitle size="s">
-              <h3>
-                <EuiLink
-                  onClick={goToInstances}
-                  aria-label={i18n.translate(
-                    'xpack.monitoring.cluster.overview.beatsPanel.instancesTotalLinkAriaLabel',
-                    {
-                      defaultMessage: 'Beats Instances: {beatsTotal}',
-                      values: { beatsTotal: props.beats.total }
-                    }
-                  )}
-                  data-test-subj="beatsListing"
-                >
-                  <FormattedMessage
-                    id="xpack.monitoring.cluster.overview.beatsPanel.beatsTotalLinkLabel"
-                    defaultMessage="Beats: {beatsTotal}"
-                    values={{ beatsTotal: (<span data-test-subj="beatsTotal">{props.beats.total}</span>) }}
-                  />
-                </EuiLink>
-              </h3>
-            </EuiTitle>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="s">
+                  <h3>
+                    <EuiLink
+                      onClick={goToInstances}
+                      aria-label={i18n.translate(
+                        'xpack.monitoring.cluster.overview.beatsPanel.instancesTotalLinkAriaLabel',
+                        {
+                          defaultMessage: 'Beats Instances: {beatsTotal}',
+                          values: { beatsTotal }
+                        }
+                      )}
+                      data-test-subj="beatsListing"
+                    >
+                      <FormattedMessage
+                        id="xpack.monitoring.cluster.overview.beatsPanel.beatsTotalLinkLabel"
+                        defaultMessage="Beats: {beatsTotal}"
+                        values={{ beatsTotal: (<span data-test-subj="beatsTotal">{beatsTotal}</span>) }}
+                      />
+                    </EuiLink>
+                  </h3>
+                </EuiTitle>
+              </EuiFlexItem>
+              {setupModeInstancesData}
+            </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
               {beatTypes}

@@ -15,9 +15,15 @@ import {
   StartDatafeedResponse,
   StopDatafeedResponse,
 } from './types';
-import { throwIfNotOk, throwIfErrorAttached } from '../ml/api/throw_if_not_ok';
+import {
+  throwIfNotOk,
+  throwIfErrorAttached,
+  throwIfErrorAttachedToSetup,
+} from '../ml/api/throw_if_not_ok';
+import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
+import { DEFAULT_KBN_VERSION } from '../../../common/constants';
 
-const emptyIndexPattern: string = '';
+const emptyIndexPattern: string[] = [];
 
 /**
  * Fetches ML Groups Data
@@ -25,13 +31,14 @@ const emptyIndexPattern: string = '';
  * @param headers
  */
 export const groupsData = async (headers: Record<string, string | undefined>): Promise<Group[]> => {
+  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const response = await fetch(`${chrome.getBasePath()}/api/ml/jobs/groups`, {
     method: 'GET',
     credentials: 'same-origin',
     headers: {
       'content-type': 'application/json',
       'kbn-system-api': 'true',
-      'kbn-xsrf': chrome.getXsrfToken(),
+      'kbn-xsrf': kbnVersion,
       ...headers,
     },
   });
@@ -55,6 +62,7 @@ export const setupMlJob = async ({
   prefix = '',
   headers = {},
 }: MlSetupArgs): Promise<SetupMlResponse> => {
+  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const response = await fetch(`${chrome.getBasePath()}/api/ml/modules/setup/${configTemplate}`, {
     method: 'POST',
     credentials: 'same-origin',
@@ -63,17 +71,19 @@ export const setupMlJob = async ({
       groups,
       indexPatternName,
       startDatafeed: false,
-      useDedicatedIndex: false,
+      useDedicatedIndex: true,
     }),
     headers: {
       'kbn-system-api': 'true',
       'content-type': 'application/json',
-      'kbn-xsrf': chrome.getXsrfToken(),
+      'kbn-xsrf': kbnVersion,
       ...headers,
     },
   });
   await throwIfNotOk(response);
-  return await response.json();
+  const json = await response.json();
+  throwIfErrorAttachedToSetup(json);
+  return json;
 };
 
 /**
@@ -88,6 +98,7 @@ export const startDatafeeds = async (
   headers: Record<string, string | undefined>,
   start = 0
 ): Promise<StartDatafeedResponse> => {
+  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const response = await fetch(`${chrome.getBasePath()}/api/ml/jobs/force_start_datafeeds`, {
     method: 'POST',
     credentials: 'same-origin',
@@ -98,7 +109,7 @@ export const startDatafeeds = async (
     headers: {
       'kbn-system-api': 'true',
       'content-type': 'application/json',
-      'kbn-xsrf': chrome.getXsrfToken(),
+      'kbn-xsrf': kbnVersion,
       ...headers,
     },
   });
@@ -118,6 +129,7 @@ export const stopDatafeeds = async (
   datafeedIds: string[],
   headers: Record<string, string | undefined>
 ): Promise<[StopDatafeedResponse, CloseJobsResponse]> => {
+  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const stopDatafeedsResponse = await fetch(`${chrome.getBasePath()}/api/ml/jobs/stop_datafeeds`, {
     method: 'POST',
     credentials: 'same-origin',
@@ -127,7 +139,7 @@ export const stopDatafeeds = async (
     headers: {
       'kbn-system-api': 'true',
       'content-type': 'application/json',
-      'kbn-xsrf': chrome.getXsrfToken(),
+      'kbn-xsrf': kbnVersion,
       ...headers,
     },
   });
@@ -149,7 +161,7 @@ export const stopDatafeeds = async (
     headers: {
       'content-type': 'application/json',
       'kbn-system-api': 'true',
-      'kbn-xsrf': chrome.getXsrfToken(),
+      'kbn-xsrf': kbnVersion,
       ...headers,
     },
   });
@@ -168,13 +180,14 @@ export const jobsSummary = async (
   jobIds: string[],
   headers: Record<string, string | undefined>
 ): Promise<Job[]> => {
+  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const response = await fetch(`${chrome.getBasePath()}/api/ml/jobs/jobs_summary`, {
     method: 'POST',
     credentials: 'same-origin',
     body: JSON.stringify({ jobIds }),
     headers: {
       'content-type': 'application/json',
-      'kbn-xsrf': chrome.getXsrfToken(),
+      'kbn-xsrf': kbnVersion,
       'kbn-system-api': 'true',
       ...headers,
     },
@@ -190,7 +203,8 @@ export const jobsSummary = async (
  */
 export const getIndexPatterns = async (
   headers: Record<string, string | undefined>
-): Promise<string> => {
+): Promise<string[]> => {
+  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const response = await fetch(
     `${chrome.getBasePath()}/api/saved_objects/_find?type=index-pattern&fields=title&fields=type&per_page=10000`,
     {
@@ -198,7 +212,7 @@ export const getIndexPatterns = async (
       credentials: 'same-origin',
       headers: {
         'content-type': 'application/json',
-        'kbn-xsrf': chrome.getXsrfToken(),
+        'kbn-xsrf': kbnVersion,
         'kbn-system-api': 'true',
         ...headers,
       },
@@ -208,15 +222,13 @@ export const getIndexPatterns = async (
   const results: IndexPatternResponse = await response.json();
 
   if (results.saved_objects && Array.isArray(results.saved_objects)) {
-    return results.saved_objects
-      .reduce(
-        (acc: string[], v) => [
-          ...acc,
-          ...(v.attributes && v.attributes.title ? [v.attributes.title] : []),
-        ],
-        []
-      )
-      .join(', ');
+    return results.saved_objects.reduce(
+      (acc: string[], v) => [
+        ...acc,
+        ...(v.attributes && v.attributes.title ? [v.attributes.title] : []),
+      ],
+      []
+    );
   } else {
     return emptyIndexPattern;
   }

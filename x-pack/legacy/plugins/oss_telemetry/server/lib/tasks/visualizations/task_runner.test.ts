@@ -26,7 +26,7 @@ describe('visualizationsTaskRunner', () => {
       const mockCallWithInternal = () => Promise.reject(new Error('Things did not go well!'));
       mockKbnServer = getMockKbnServer(mockCallWithInternal);
 
-      const runner = visualizationsTaskRunner(mockTaskInstance, { server: mockKbnServer });
+      const runner = visualizationsTaskRunner(mockTaskInstance, mockKbnServer);
       const result = await runner();
       expect(result).toMatchObject({
         error: 'Things did not go well!',
@@ -45,7 +45,7 @@ describe('visualizationsTaskRunner', () => {
         .startOf('day')
         .toDate();
 
-    const runner = visualizationsTaskRunner(mockTaskInstance, { server: mockKbnServer });
+    const runner = visualizationsTaskRunner(mockTaskInstance, mockKbnServer);
     const result = await runner();
 
     expect(result).toMatchObject({
@@ -125,7 +125,7 @@ describe('visualizationsTaskRunner', () => {
     ]);
     mockKbnServer = getMockKbnServer(mockCallWithInternal);
 
-    const runner = visualizationsTaskRunner(mockTaskInstance, { server: mockKbnServer });
+    const runner = visualizationsTaskRunner(mockTaskInstance, mockKbnServer);
     const result = await runner();
 
     expect(result).toMatchObject({

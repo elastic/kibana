@@ -22,7 +22,7 @@ import { resolve } from 'path';
 import { coerce } from 'semver';
 import { promisify } from 'util';
 import { isConfigPath, PackageInfo } from '../../config';
-import { PluginManifest } from '../plugin';
+import { PluginManifest } from '../types';
 import { PluginDiscoveryError } from './plugin_discovery_error';
 
 const fsReadFileAsync = promisify(readFile);

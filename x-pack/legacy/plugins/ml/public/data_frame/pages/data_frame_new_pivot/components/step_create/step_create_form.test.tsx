@@ -7,9 +7,12 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { KibanaContext } from '../../../../common';
+import { KibanaContext } from '../../../../../contexts/kibana';
+import { kibanaContextValueMock } from '../../../../../contexts/kibana/__mocks__/kibana_context_value';
 
 import { StepCreateForm } from './step_create_form';
+
+jest.mock('../../../../../contexts/ui/use_ui_chrome_context');
 
 // workaround to make React.memo() work with enzyme
 jest.mock('react', () => {
@@ -27,26 +30,11 @@ describe('Data Frame: <StepCreateForm />', () => {
       onChange() {},
     };
 
-    const currentIndexPattern = {
-      id: 'the-index-pattern-id',
-      title: 'the-index-pattern-title',
-      fields: [],
-    };
-
     // Using a wrapping <div> element because shallow() would fail
     // with the Provider being the outer most component.
     const wrapper = shallow(
       <div>
-        <KibanaContext.Provider
-          value={{
-            combinedQuery: {},
-            currentIndexPattern,
-            currentSavedSearch: {},
-            indexPatterns: {},
-            kbnBaseUrl: 'url',
-            kibanaConfig: {},
-          }}
-        >
+        <KibanaContext.Provider value={kibanaContextValueMock}>
           <StepCreateForm {...props} />
         </KibanaContext.Provider>
       </div>

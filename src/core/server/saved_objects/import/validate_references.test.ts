@@ -107,6 +107,9 @@ describe('getNonExistingReferenceAsKeys()', () => {
           "type": "index-pattern",
         },
       ],
+      Object {
+        "namespace": undefined,
+      },
     ],
   ],
   "results": Array [
@@ -206,6 +209,9 @@ describe('getNonExistingReferenceAsKeys()', () => {
           "type": "search",
         },
       ],
+      Object {
+        "namespace": undefined,
+      },
     ],
   ],
   "results": Array [
@@ -434,6 +440,9 @@ Object {
           "type": "search",
         },
       ],
+      Object {
+        "namespace": undefined,
+      },
     ],
   ],
   "results": Array [

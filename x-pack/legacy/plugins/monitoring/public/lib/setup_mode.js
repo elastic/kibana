@@ -5,6 +5,7 @@
  */
 
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';
+import { get } from 'lodash';
 
 const angularState = {
   injector: null,
@@ -36,7 +37,7 @@ export const setNewlyDiscoveredClusterUuid = clusterUuid => {
   executor.run();
 };
 
-export const fetchCollectionData = async () => {
+export const fetchCollectionData = async (uuid, fetchWithoutClusterUuid = false) => {
   checkAngularState();
 
   const http = angularState.injector.get('$http');
@@ -45,8 +46,14 @@ export const fetchCollectionData = async () => {
   const ccs = globalState.ccs;
 
   let url = '../api/monitoring/v1/setup/collection';
-  if (clusterUuid) {
-    url += `/${clusterUuid}`;
+  if (uuid) {
+    url += `/node/${uuid}`;
+  }
+  else if (!fetchWithoutClusterUuid && clusterUuid) {
+    url += `/cluster/${clusterUuid}`;
+  }
+  else {
+    url += '/cluster';
   }
 
   try {
@@ -60,13 +67,47 @@ export const fetchCollectionData = async () => {
   }
 };
 
-const notifySetupModeDataChange = () => {
-  setupModeState.callbacks.forEach(cb => cb());
+const notifySetupModeDataChange = (oldData) => {
+  setupModeState.callbacks.forEach(cb => cb(oldData));
 };
 
-export const updateSetupModeData = async () => {
-  setupModeState.data = await fetchCollectionData();
-  notifySetupModeDataChange();
+export const updateSetupModeData = async (uuid, fetchWithoutClusterUuid = false) => {
+  const oldData = setupModeState.data;
+  const data = await fetchCollectionData(uuid, fetchWithoutClusterUuid);
+  setupModeState.data = data;
+  if (get(data, '_meta.isOnCloud', false)) {
+    return toggleSetupMode(false); // eslint-disable-line no-use-before-define
+  }
+  notifySetupModeDataChange(oldData);
+
+  const globalState = angularState.injector.get('globalState');
+  const clusterUuid = globalState.cluster_uuid;
+  if (!clusterUuid) {
+    const liveClusterUuid = get(data, '_meta.liveClusterUuid');
+    const migratedEsNodes = Object.values(get(data, 'elasticsearch.byUuid', {}))
+      .filter(node => node.isPartiallyMigrated || node.isFullyMigrated);
+    if (liveClusterUuid && migratedEsNodes.length > 0) {
+      setNewlyDiscoveredClusterUuid(liveClusterUuid);
+    }
+  }
+};
+
+export const disableElasticsearchInternalCollection = async () => {
+  checkAngularState();
+
+  const http = angularState.injector.get('$http');
+  const globalState = angularState.injector.get('globalState');
+  const clusterUuid = globalState.cluster_uuid;
+  const url = `../api/monitoring/v1/setup/collection/${clusterUuid}/disable_internal_collection`;
+  try {
+    const response = await http.post(url);
+    return response.data;
+  }
+  catch (err) {
+    const Private = angularState.injector.get('Private');
+    const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
+    return ajaxErrorHandlers(err);
+  }
 };
 
 export const toggleSetupMode = inSetupMode => {

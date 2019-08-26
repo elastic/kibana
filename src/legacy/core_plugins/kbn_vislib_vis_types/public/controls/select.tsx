@@ -19,23 +19,46 @@
 
 import React from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
-import { VisOptionsSetValue } from 'ui/vis/editors/default';
 
-interface SelectOptionProps {
+interface SelectOptionProps<ParamName extends string, ValidParamValues extends string> {
+  disabled?: boolean;
+  helpText?: React.ReactNode;
+  id?: string;
   label: string;
-  options: Array<{ value: string; text: string }>;
-  paramName: string;
-  value: string;
-  setValue: VisOptionsSetValue;
+  labelAppend?: React.ReactNode;
+  options: ReadonlyArray<{ readonly value: ValidParamValues; readonly text: string }>;
+  paramName: ParamName;
+  value?: ValidParamValues;
+  setValue: (paramName: ParamName, value: ValidParamValues) => void;
 }
 
-function SelectOption({ label, options, paramName, value, setValue }: SelectOptionProps) {
+const emptyValue = { text: '', value: 'EMPTY_VALUE', disabled: true, hidden: true };
+
+function SelectOption<ParamName extends string, ValidParamValues extends string>({
+  disabled,
+  helpText,
+  id,
+  label,
+  labelAppend,
+  options,
+  paramName,
+  value,
+  setValue,
+}: SelectOptionProps<ParamName, ValidParamValues>) {
   return (
-    <EuiFormRow label={label} fullWidth={true} compressed>
+    <EuiFormRow
+      compressed
+      fullWidth
+      helpText={helpText}
+      id={id}
+      label={label}
+      labelAppend={labelAppend}
+    >
       <EuiSelect
-        options={options}
-        value={value}
-        onChange={ev => setValue(paramName, ev.target.value)}
+        disabled={disabled}
+        options={[emptyValue, ...options]}
+        value={value || emptyValue.value}
+        onChange={ev => setValue(paramName, ev.target.value as ValidParamValues)}
         fullWidth={true}
       />
     </EuiFormRow>

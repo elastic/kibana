@@ -5,10 +5,9 @@
  */
 
 import { Action } from 'redux-actions';
-import chrome from 'ui/chrome';
-import { kfetch } from 'ui/kfetch';
+import { npStart } from 'ui/new_platform';
 import Url from 'url';
-import { call, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
+import { call, put, select, takeEvery, takeLatest, cancel } from 'redux-saga/effects';
 
 import {
   fetchDirectory,
@@ -46,6 +45,7 @@ import {
 import { treeCommitsSelector, currentPathSelector } from '../selectors';
 import { repoRoutePattern } from './patterns';
 import { FileTree } from '../../model';
+import { singletonRequestSaga } from '../utils/saga_utils';
 
 function* handleFetchRepoTree(action: Action<FetchRepoTreePayload>) {
   try {
@@ -93,10 +93,12 @@ function requestRepoTree({
   if (parents) {
     query.parents = true;
   }
-  return kfetch({
-    pathname: `/api/code/repo/${uri}/tree/${encodeURIComponent(revision)}/${path}`,
-    query,
-  });
+  return npStart.core.http.get(
+    `/api/code/repo/${uri}/tree/${encodeURIComponent(revision)}/${path}`,
+    {
+      query,
+    }
+  );
 }
 
 export function* watchFetchRepoTree() {
@@ -127,9 +129,7 @@ function* handleFetchBranches(action: Action<FetchRepoPayload>) {
 }
 
 function requestBranches({ uri }: FetchRepoPayload) {
-  return kfetch({
-    pathname: `/api/code/repo/${uri}/references`,
-  });
+  return npStart.core.http.get(`/api/code/repo/${uri}/references`);
 }
 
 function* handleFetchCommits(action: Action<FetchRepoPayloadWithRevision>) {
@@ -155,13 +155,15 @@ function* handleFetchMoreCommits(action: Action<string>) {
   }
 }
 
-function* handleFetchTreeCommits(action: Action<FetchFilePayload>) {
+function* handleFetchTreeCommits(action: Action<FetchFilePayload>, signal: AbortSignal, task: any) {
   try {
     const path = action.payload!.path;
-    const commits = yield call(requestCommits, action.payload!, path);
+    const commits = yield call(requestCommits, action.payload!, path, undefined, undefined, signal);
     yield put(fetchTreeCommitsSuccess({ path, commits }));
   } catch (err) {
     yield put(fetchTreeCommitsFailed(err));
+  } finally {
+    yield cancel(task);
   }
 }
 
@@ -169,24 +171,30 @@ function requestCommits(
   { uri, revision }: FetchRepoPayloadWithRevision,
   path?: string,
   loadMore?: boolean,
-  count?: number
+  count?: number,
+  signal?: AbortSignal
 ) {
   const pathStr = path ? `/${path}` : '';
-  const options: any = {
-    pathname: `/api/code/repo/${uri}/history/${encodeURIComponent(revision)}${pathStr}`,
-  };
+  let query: any = {};
   if (loadMore) {
-    options.query = { after: 1 };
+    query = { after: 1 };
   }
   if (count) {
-    options.count = count;
+    query = { count };
   }
-  return kfetch(options);
+  return npStart.core.http.get(
+    `/api/code/repo/${uri}/history/${encodeURIComponent(revision)}${pathStr}`,
+    {
+      query,
+      signal,
+    }
+  );
 }
 
 export async function requestFile(
   payload: FetchFilePayload,
-  line?: string
+  line?: string,
+  signal?: AbortSignal
 ): Promise<FetchFileResponse> {
   const { uri, revision, path } = payload;
   const url = `/api/code/repo/${uri}/blob/${encodeURIComponent(revision)}/${path}`;
@@ -194,7 +202,10 @@ export async function requestFile(
   if (line) {
     query.line = line;
   }
-  const response: Response = await fetch(chrome.addBasePath(Url.format({ pathname: url, query })));
+  const response: Response = await fetch(
+    npStart.core.http.basePath.prepend(Url.format({ pathname: url, query })),
+    { signal }
+  );
 
   if (response.status >= 200 && response.status < 300) {
     const contentType = response.headers.get('Content-Type');
@@ -240,9 +251,9 @@ export async function requestFile(
   throw new Error('invalid file type');
 }
 
-function* handleFetchFile(action: Action<FetchFilePayload>) {
+function* handleFetchFile(action: Action<FetchFilePayload>, signal: AbortSignal, task: any) {
   try {
-    const results = yield call(requestFile, action.payload!);
+    const results = yield call(requestFile, action.payload!, undefined, signal);
     if (results.isNotFound) {
       yield put(setNotFound(true));
       yield put(fetchFileFailed(new Error('file not found')));
@@ -254,6 +265,8 @@ function* handleFetchFile(action: Action<FetchFilePayload>) {
     }
   } catch (err) {
     yield put(fetchFileFailed(err));
+  } finally {
+    yield cancel(task);
   }
 }
 
@@ -269,9 +282,9 @@ function* handleFetchDirs(action: Action<FetchRepoTreePayload>) {
 export function* watchFetchBranchesAndCommits() {
   yield takeEvery(String(fetchRepoBranches), handleFetchBranches);
   yield takeEvery(String(fetchRepoCommits), handleFetchCommits);
-  yield takeLatest(String(fetchFile), handleFetchFile);
+  yield takeLatest(String(fetchFile), singletonRequestSaga(handleFetchFile));
   yield takeEvery(String(fetchDirectory), handleFetchDirs);
-  yield takeLatest(String(fetchTreeCommits), handleFetchTreeCommits);
+  yield takeLatest(String(fetchTreeCommits), singletonRequestSaga(handleFetchTreeCommits));
   yield takeLatest(String(fetchMoreCommits), handleFetchMoreCommits);
 }
 

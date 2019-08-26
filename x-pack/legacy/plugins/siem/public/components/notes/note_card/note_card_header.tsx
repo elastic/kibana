@@ -17,15 +17,21 @@ const Action = styled.span`
   margin-right: 5px;
 `;
 
+Action.displayName = 'Action';
+
 const Avatar = styled(EuiAvatar)`
   margin-right: 5px;
 `;
+
+Avatar.displayName = 'Avatar';
 
 const HeaderContainer = styled.div`
   align-items: center;
   display: flex;
   user-select: none;
 `;
+
+HeaderContainer.displayName = 'HeaderContainer';
 
 const User = styled.span`
   font-weight: 700;
@@ -42,3 +48,5 @@ export const NoteCardHeader = pure<{ created: Date; user: string }>(({ created, 
     </HeaderContainer>
   </EuiPanel>
 ));
+
+NoteCardHeader.displayName = 'NoteCardHeader';

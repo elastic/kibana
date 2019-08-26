@@ -167,12 +167,23 @@ export interface ChromeStart {
     setIsVisible(isVisible: boolean): void;
 }
 
+// @public
+export interface ContextSetup {
+    createContextContainer<TContext extends {}, THandlerReturn, THandlerParmaters extends any[] = []>(): IContextContainer<TContext, THandlerReturn, THandlerParmaters>;
+}
+
 // @internal (undocumented)
 export interface CoreContext {
+    // Warning: (ae-forgotten-export) The symbol "CoreId" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    coreId: CoreId;
 }
 
 // @public
 export interface CoreSetup {
+    // (undocumented)
+    context: ContextSetup;
     // (undocumented)
     fatalErrors: FatalErrorsSetup;
     // (undocumented)
@@ -199,6 +210,8 @@ export interface CoreStart {
     notifications: NotificationsStart;
     // (undocumented)
     overlays: OverlayStart;
+    // (undocumented)
+    savedObjects: SavedObjectsStart;
     // (undocumented)
     uiSettings: UiSettingsClientContract;
 }
@@ -477,6 +490,18 @@ export interface I18nStart {
     }) => JSX.Element;
 }
 
+// @public
+export interface IContextContainer<TContext extends {}, THandlerReturn, THandlerParameters extends any[] = []> {
+    createHandler(pluginOpaqueId: PluginOpaqueId, handler: IContextHandler<TContext, THandlerReturn, THandlerParameters>): (...rest: THandlerParameters) => THandlerReturn extends Promise<any> ? THandlerReturn : Promise<THandlerReturn>;
+    registerContext<TContextName extends keyof TContext>(pluginOpaqueId: PluginOpaqueId, contextName: TContextName, provider: IContextProvider<TContext, TContextName, THandlerParameters>): this;
+}
+
+// @public
+export type IContextHandler<TContext extends {}, TReturn, THandlerParameters extends any[] = []> = (context: TContext, ...rest: THandlerParameters) => TReturn;
+
+// @public
+export type IContextProvider<TContext extends Record<string, any>, TContextName extends keyof TContext, TProviderParameters extends any[] = []> = (context: Partial<TContext>, ...rest: TProviderParameters) => Promise<TContext[TContextName]> | TContext[TContextName];
+
 // @internal (undocumented)
 export interface InternalCoreSetup extends CoreSetup {
     // (undocumented)
@@ -567,7 +592,11 @@ export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = obj
 
 // @public
 export interface PluginInitializerContext {
+    readonly opaqueId: PluginOpaqueId;
 }
+
+// @public (undocumented)
+export type PluginOpaqueId = symbol;
 
 // Warning: (ae-forgotten-export) The symbol "RecursiveReadonlyArray" needs to be exported by the entry point index.d.ts
 // 
@@ -575,6 +604,177 @@ export interface PluginInitializerContext {
 export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T extends any[] ? RecursiveReadonlyArray<T[number]> : T extends object ? Readonly<{
     [K in keyof T]: RecursiveReadonly<T[K]>;
 }> : T;
+
+// @public (undocumented)
+export interface SavedObject<T extends SavedObjectAttributes = any> {
+    attributes: T;
+    // (undocumented)
+    error?: {
+        message: string;
+        statusCode: number;
+    };
+    id: string;
+    migrationVersion?: SavedObjectsMigrationVersion;
+    references: SavedObjectReference[];
+    type: string;
+    updated_at?: string;
+    version?: string;
+}
+
+// @public (undocumented)
+export type SavedObjectAttribute = string | number | boolean | null | undefined | SavedObjectAttributes | SavedObjectAttributes[];
+
+// @public
+export interface SavedObjectAttributes {
+    // (undocumented)
+    [key: string]: SavedObjectAttribute | SavedObjectAttribute[];
+}
+
+// @public
+export interface SavedObjectReference {
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    name: string;
+    // (undocumented)
+    type: string;
+}
+
+// @public (undocumented)
+export interface SavedObjectsBaseOptions {
+    namespace?: string;
+}
+
+// @public (undocumented)
+export interface SavedObjectsBatchResponse<T extends SavedObjectAttributes = SavedObjectAttributes> {
+    // (undocumented)
+    savedObjects: Array<SimpleSavedObject<T>>;
+}
+
+// @public (undocumented)
+export interface SavedObjectsBulkCreateObject<T extends SavedObjectAttributes = SavedObjectAttributes> extends SavedObjectsCreateOptions {
+    // (undocumented)
+    attributes: T;
+    // (undocumented)
+    type: string;
+}
+
+// @public (undocumented)
+export interface SavedObjectsBulkCreateOptions {
+    overwrite?: boolean;
+}
+
+// @public
+export class SavedObjectsClient {
+    // @internal
+    constructor(http: HttpServiceBase);
+    bulkCreate: (objects?: SavedObjectsBulkCreateObject<SavedObjectAttributes>[], options?: SavedObjectsBulkCreateOptions) => Promise<SavedObjectsBatchResponse<SavedObjectAttributes>>;
+    bulkGet: (objects?: {
+        id: string;
+        type: string;
+    }[]) => Promise<SavedObjectsBatchResponse<SavedObjectAttributes>>;
+    create: <T extends SavedObjectAttributes>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;
+    delete: (type: string, id: string) => Promise<{}>;
+    find: <T extends SavedObjectAttributes>(options: Pick<SavedObjectsFindOptions, "search" | "type" | "defaultSearchOperator" | "searchFields" | "sortField" | "hasReference" | "page" | "perPage" | "fields">) => Promise<SavedObjectsFindResponsePublic<T>>;
+    get: <T extends SavedObjectAttributes>(type: string, id: string) => Promise<SimpleSavedObject<T>>;
+    update<T extends SavedObjectAttributes>(type: string, id: string, attributes: T, { version, migrationVersion, references }?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
+}
+
+// @public
+export type SavedObjectsClientContract = PublicMethodsOf<SavedObjectsClient>;
+
+// @public (undocumented)
+export interface SavedObjectsCreateOptions {
+    id?: string;
+    migrationVersion?: SavedObjectsMigrationVersion;
+    overwrite?: boolean;
+    // (undocumented)
+    references?: SavedObjectReference[];
+}
+
+// @public (undocumented)
+export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
+    // (undocumented)
+    defaultSearchOperator?: 'AND' | 'OR';
+    fields?: string[];
+    // (undocumented)
+    hasReference?: {
+        type: string;
+        id: string;
+    };
+    // (undocumented)
+    page?: number;
+    // (undocumented)
+    perPage?: number;
+    search?: string;
+    searchFields?: string[];
+    // (undocumented)
+    sortField?: string;
+    // (undocumented)
+    sortOrder?: string;
+    // (undocumented)
+    type: string | string[];
+}
+
+// @public
+export interface SavedObjectsFindResponsePublic<T extends SavedObjectAttributes = SavedObjectAttributes> extends SavedObjectsBatchResponse<T> {
+    // (undocumented)
+    page: number;
+    // (undocumented)
+    perPage: number;
+    // (undocumented)
+    total: number;
+}
+
+// @public
+export interface SavedObjectsMigrationVersion {
+    // (undocumented)
+    [pluginName: string]: string;
+}
+
+// @public (undocumented)
+export interface SavedObjectsStart {
+    // (undocumented)
+    client: SavedObjectsClientContract;
+}
+
+// @public (undocumented)
+export interface SavedObjectsUpdateOptions {
+    migrationVersion?: SavedObjectsMigrationVersion;
+    // (undocumented)
+    references?: SavedObjectReference[];
+    // (undocumented)
+    version?: string;
+}
+
+// @public
+export class SimpleSavedObject<T extends SavedObjectAttributes> {
+    constructor(client: SavedObjectsClient, { id, type, version, attributes, error, references, migrationVersion }: SavedObject<T>);
+    // (undocumented)
+    attributes: T;
+    // (undocumented)
+    delete(): Promise<{}>;
+    // (undocumented)
+    error: SavedObject<T>['error'];
+    // (undocumented)
+    get(key: string): any;
+    // (undocumented)
+    has(key: string): boolean;
+    // (undocumented)
+    id: SavedObject<T>['id'];
+    // (undocumented)
+    migrationVersion: SavedObject<T>['migrationVersion'];
+    // (undocumented)
+    references: SavedObject<T>['references'];
+    // (undocumented)
+    save(): Promise<SimpleSavedObject<T>>;
+    // (undocumented)
+    set(key: string, value: any): T;
+    // (undocumented)
+    type: SavedObject<T>['type'];
+    // (undocumented)
+    _version?: SavedObject<T>['version'];
+}
 
 export { Toast }
 
