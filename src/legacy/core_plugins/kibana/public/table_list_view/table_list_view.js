@@ -317,7 +317,6 @@ class TableListViewUi extends React.Component {
     };
 
     const selection = this.props.deleteItems ? {
-      selectable: this.props.selectable,
       onSelectionChange: (selection) => {
         this.setState({
           selectedIds: selection.map(item => { return item.id; })
@@ -470,7 +469,6 @@ TableListViewUi.propTypes = {
   deleteItems: PropTypes.func,
   createItem: PropTypes.func,
   editItem: PropTypes.func,
-  selectable: PropTypes.func,
 
   listingLimit: PropTypes.number,
   initialFilter: PropTypes.string,

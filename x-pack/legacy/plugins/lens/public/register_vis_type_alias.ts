@@ -30,8 +30,6 @@ visualizations.types.visTypeAliasRegistry.add({
         return {
           id,
           title,
-          canDelete: !!capabilities.get().visualize.delete,
-          canEdit: !!capabilities.get().visualize.save,
           editUrl: `/app/lens#/edit/${id}`,
           icon: 'faceHappy',
           isExperimental: true,
