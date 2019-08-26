@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`returns the \`JsonCodeEditor\` component 1`] = `
+<EuiCodeBlock
+  aria-label="Read only JSON view of an elasticsearch document"
+  isCopyable={true}
+  language="json"
+  paddingSize="s"
+>
+  {
+  "_index": "test",
+  "_source": {
+    "test": 123
+  }
+}
+</EuiCodeBlock>
+`;
