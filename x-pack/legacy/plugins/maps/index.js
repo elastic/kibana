@@ -120,7 +120,7 @@ export function maps(kibana) {
         privileges: {
           all: {
             savedObject: {
-              all: ['map'],
+              all: ['map', 'query'],
               read: ['index-pattern']
             },
             ui: ['save', 'show'],
@@ -128,7 +128,7 @@ export function maps(kibana) {
           read: {
             savedObject: {
               all: [],
-              read: ['map', 'index-pattern']
+              read: ['map', 'index-pattern', 'query']
             },
             ui: ['show'],
           },

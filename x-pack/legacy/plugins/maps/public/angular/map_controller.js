@@ -55,6 +55,8 @@ import {
 import { FilterStateStore } from '@kbn/es-query';
 import { setup as data } from '../../../../../../src/legacy/core_plugins/data/public/legacy';
 
+// const { savedQueryService } = data.search.services;
+
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 
 const app = uiModules.get(MAP_APP_PATH, []);
@@ -122,6 +124,60 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
   $scope.refreshConfig = getInitialRefreshConfig({
     mapStateJSON: savedMap.mapStateJSON,
     globalState: globalState,
+  });
+  /* Saved Queries */
+  $scope.onQuerySaved = savedQuery => {
+    $scope.savedQuery = savedQuery;
+  };
+
+  $scope.onSavedQueryUpdated = savedQuery => {
+    $scope.savedQuery = savedQuery;
+  };
+
+  $scope.onClearSavedQuery = () => {
+    $scope.savedQuery = undefined;
+  };
+
+  const updateStateFromSavedQuery = (savedQuery) => {
+    // use the items from the saved query as the scope variables,
+    // then sync the app and global state,
+    // then dispatch set Query
+    $scope.query = savedQuery.attributes.query;
+    $scope.filters = savedQuery.attributes.filters || [];
+    if (savedQuery.attributes.timefilter) {
+      $scope.time = {
+        from: savedQuery.attributes.timefilter.timeFrom,
+        to: savedQuery.attributes.timefilter.timeTo,
+      };
+      if (savedQuery.attributes.timefilter.refreshInterval) {
+        $scope.refreshInterval = savedQuery.attributes.timefilter.refreshInterval;
+      }
+    }
+    syncAppAndGlobalState();
+    dispatchSetQuery();
+  };
+  $scope.$watch('savedQuery', (newSavedQuery, oldSavedQuery) => {
+    if (!newSavedQuery) {
+      $state.savedQuery = undefined;
+      $scope.query = {
+        query: '',
+        language: localStorage.get('kibana.userQueryLanguage')
+      };
+      syncAppAndGlobalState();
+      dispatchSetQuery();
+    } else {
+      $state.savedQuery = newSavedQuery.id;
+      if (newSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
+        updateStateFromSavedQuery(newSavedQuery);
+      }
+    }
+  });
+
+  $scope.$watch(() => $state.savedQuery, newSavedQueryId => {
+    if (!newSavedQueryId) {
+      $scope.savedQuery = undefined;
+      return;
+    }
   });
 
   async function onQueryChange({ filters, query, time }) {
@@ -388,6 +444,7 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
   timefilter.disableTimeRangeSelector();
   timefilter.disableAutoRefreshSelector();
   $scope.showDatePicker = true; // used by query-bar directive to enable timepikcer in query bar
+  $scope.showSavedQuery = true; //used by saved queries to show the saved query management component
   $scope.topNavMenu = [{
     id: 'full-screen',
     label: i18n.translate('xpack.maps.mapController.fullScreenButtonLabel', {
