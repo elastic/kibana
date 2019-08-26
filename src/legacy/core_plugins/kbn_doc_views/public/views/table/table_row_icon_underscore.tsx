@@ -17,24 +17,34 @@
  * under the License.
  */
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export function DocViewTableRowIconUnderscore() {
+  const ariaLabel = i18n.translate(
+    'kbnDocViews.table.fieldNamesBeginningWithUnderscoreUnsupportedAriaLabel',
+    {
+      defaultMessage: 'Warning',
+    }
+  );
+  const tooltipContent = i18n.translate(
+    'kbnDocViews.table.fieldNamesBeginningWithUnderscoreUnsupportedTooltip',
+    {
+      defaultMessage: 'Field names beginning with {underscoreSign} are not supported',
+      values: { underscoreSign: '_' },
+    }
+  );
+
   return (
-    <EuiToolTip
-      content={
-        <FormattedMessage
-          id="kbnDocViews.table.fieldNamesBeginningWithUnderscoreUnsupportedTooltip"
-          defaultMessage="Field names beginning with {underscoreSign} are not supported"
-          values={{ underscoreSign: '_' }}
-        />
-      }
-    >
-      <i
-        data-test-subj="underscoreWarning"
-        className="fa fa-warning text-color-warning kbnDocViewer__underscore"
-      />
-    </EuiToolTip>
+    <EuiIconTip
+      aria-label={ariaLabel}
+      content={tooltipContent}
+      color="warning"
+      iconProps={{
+        className: 'kbnDocViewer__warning',
+      }}
+      size="s"
+      type="alert"
+    />
   );
 }

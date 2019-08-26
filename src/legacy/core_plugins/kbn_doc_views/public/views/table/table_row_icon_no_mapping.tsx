@@ -17,23 +17,27 @@
  * under the License.
  */
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export function DocViewTableRowIconNoMapping() {
+  const ariaLabel = i18n.translate('kbnDocViews.table.noCachedMappingForThisFieldAriaLabel', {
+    defaultMessage: 'Warning',
+  });
+  const tooltipContent = i18n.translate('kbnDocViews.table.noCachedMappingForThisFieldTooltip', {
+    defaultMessage:
+      'No cached mapping for this field. Refresh field list from the Management > Index Patterns page',
+  });
   return (
-    <EuiToolTip
-      content={
-        <FormattedMessage
-          id="kbnDocViews.table.noCachedMappingForThisFieldTooltip"
-          defaultMessage="No cached mapping for this field. Refresh field list from the Management > Index Patterns page"
-        />
-      }
-    >
-      <i
-        data-test-subj="noMappingWarning"
-        className="fa fa-warning text-color-warning kbnDocViewer__noMapping"
-      />
-    </EuiToolTip>
+    <EuiIconTip
+      aria-label={ariaLabel}
+      color="warning"
+      content={tooltipContent}
+      iconProps={{
+        className: 'kbnDocViewer__warning',
+      }}
+      size="s"
+      type="alert"
+    />
   );
 }
