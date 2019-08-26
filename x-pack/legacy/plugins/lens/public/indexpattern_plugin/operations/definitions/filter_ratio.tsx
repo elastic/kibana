@@ -12,13 +12,21 @@ import {
   Query,
   QueryBarInput,
 } from '../../../../../../../../src/legacy/core_plugins/data/public/query';
-import { FilterRatioIndexPatternColumn } from '../../indexpattern';
 import { updateColumnParam } from '../../state_helpers';
 import { OperationDefinition } from '.';
+import { BaseIndexPatternColumn } from './column_types';
 
 const filterRatioLabel = i18n.translate('xpack.lens.indexPattern.filterRatio', {
   defaultMessage: 'Filter Ratio',
 });
+
+export interface FilterRatioIndexPatternColumn extends BaseIndexPatternColumn {
+  operationType: 'filter_ratio';
+  params: {
+    numerator: Query;
+    denominator: Query;
+  };
+}
 
 export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternColumn> = {
   type: 'filter_ratio',
@@ -70,7 +78,7 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
     // TODO parse the KQL tree and check whether this would work out
     return false;
   },
-  paramEditor: ({ state, setState, columnId: currentColumnId, uiSettings, storage, layerId }) => {
+  paramEditor: ({ state, setState, currentColumn, uiSettings, storage, layerId }) => {
     const [hasDenominator, setDenominator] = useState(false);
 
     return (
@@ -83,23 +91,12 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
           <QueryBarInput
             appName={'lens'}
             indexPatterns={[state.indexPatterns[state.layers[layerId].indexPatternId].title]}
-            query={
-              (state.layers[layerId].columns[currentColumnId] as FilterRatioIndexPatternColumn)
-                .params.numerator
-            }
+            query={currentColumn.params.numerator}
             screenTitle={''}
             store={storage}
             uiSettings={uiSettings}
             onChange={(newQuery: Query) => {
-              setState(
-                updateColumnParam(
-                  state,
-                  layerId,
-                  state.layers[layerId].columns[currentColumnId] as FilterRatioIndexPatternColumn,
-                  'numerator',
-                  newQuery
-                )
-              );
+              setState(updateColumnParam(state, layerId, currentColumn, 'numerator', newQuery));
             }}
           />
         </EuiFormRow>
@@ -113,23 +110,12 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
             <QueryBarInput
               appName={'lens'}
               indexPatterns={[state.indexPatterns[state.layers[layerId].indexPatternId].title]}
-              query={
-                (state.layers[layerId].columns[currentColumnId] as FilterRatioIndexPatternColumn)
-                  .params.denominator
-              }
+              query={currentColumn.params.denominator}
               screenTitle={''}
               store={storage}
               uiSettings={uiSettings}
               onChange={(newQuery: Query) => {
-                setState(
-                  updateColumnParam(
-                    state,
-                    layerId,
-                    state.layers[layerId].columns[currentColumnId] as FilterRatioIndexPatternColumn,
-                    'denominator',
-                    newQuery
-                  )
-                );
+                setState(updateColumnParam(state, layerId, currentColumn, 'denominator', newQuery));
               }}
             />
           ) : (

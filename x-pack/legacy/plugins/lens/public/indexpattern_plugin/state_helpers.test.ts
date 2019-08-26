@@ -11,15 +11,11 @@ import {
   deleteColumn,
   updateLayerIndexPattern,
 } from './state_helpers';
-import {
-  IndexPatternPrivateState,
-  DateHistogramIndexPatternColumn,
-  TermsIndexPatternColumn,
-  AvgIndexPatternColumn,
-  IndexPattern,
-  IndexPatternLayer,
-} from './indexpattern';
+import { IndexPatternPrivateState, IndexPattern, IndexPatternLayer } from './indexpattern';
 import { operationDefinitionMap } from './operations';
+import { TermsIndexPatternColumn } from './operations/definitions/terms';
+import { DateHistogramIndexPatternColumn } from './operations/definitions/date_histogram';
+import { AvgIndexPatternColumn } from './operations/definitions/metrics';
 
 jest.mock('ui/new_platform');
 jest.mock('./operations/operations');

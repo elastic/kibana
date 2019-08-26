@@ -5,12 +5,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CountIndexPatternColumn } from '../../indexpattern';
 import { OperationDefinition } from '.';
+import { ParameterlessIndexPatternColumn, BaseIndexPatternColumn } from './column_types';
 
 const countLabel = i18n.translate('xpack.lens.indexPattern.countOf', {
   defaultMessage: 'Count of documents',
 });
+
+export type CountIndexPatternColumn = ParameterlessIndexPatternColumn<
+  'count',
+  BaseIndexPatternColumn
+>;
 
 export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
   type: 'count',

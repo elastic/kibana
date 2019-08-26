@@ -5,7 +5,11 @@
  */
 
 import _ from 'lodash';
-import { BaseIndexPatternColumn, FieldBasedIndexPatternColumn, DraggedField } from './indexpattern';
+import { DraggedField } from './indexpattern';
+import {
+  BaseIndexPatternColumn,
+  FieldBasedIndexPatternColumn,
+} from './operations/definitions/column_types';
 
 export function hasField(column: BaseIndexPatternColumn): column is FieldBasedIndexPatternColumn {
   return 'sourceField' in column;

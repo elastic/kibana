@@ -11,21 +11,35 @@ import { minOperation, averageOperation, sumOperation, maxOperation } from './me
 import { dateHistogramOperation } from './date_histogram';
 import { countOperation } from './count';
 import { filterRatioOperation } from './filter_ratio';
-import {
-  IndexPatternColumn,
-  OperationType,
-  BaseIndexPatternColumn,
-  IndexPatternField,
-  IndexPatternPrivateState,
-  IndexPattern,
-  FieldBasedIndexPatternColumn,
-} from '../../indexpattern';
 import { DimensionPriority, StateSetter, OperationMetadata } from '../../../types';
+import { BaseIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
+import { IndexPatternPrivateState, IndexPattern, IndexPatternField } from '../../indexpattern';
+
+// List of all operation definitions registered to this data source.
+// If you want to implement a new operation, add it to this array and
+// its type will get propagated to everything else
+const internalOperationDefinitions = [
+  termsOperation,
+  dateHistogramOperation,
+  minOperation,
+  maxOperation,
+  averageOperation,
+  sumOperation,
+  countOperation,
+  filterRatioOperation,
+];
+
+export { termsOperation } from './terms';
+export { dateHistogramOperation } from './date_histogram';
+export { minOperation, averageOperation, sumOperation, maxOperation } from './metrics';
+export { countOperation } from './count';
+export { filterRatioOperation } from './filter_ratio';
 
 /**
  * Properties passed to the operation-specific part of the popover editor
  */
-export interface ParamEditorProps {
+export interface ParamEditorProps<C extends BaseIndexPatternColumn> {
+  currentColumn: C;
   state: IndexPatternPrivateState;
   setState: StateSetter<IndexPatternPrivateState>;
   columnId: string;
@@ -41,7 +55,6 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * Should be i18n-ified.
    */
   displayName: string;
-  // TODO move into field specific part
   /**
    * This function is called if another column in the same layer changed or got removed.
    * Can be used to update references to other columns (e.g. for sorting).
@@ -55,7 +68,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
   /**
    * React component for operation specific settings shown in the popover editor
    */
-  paramEditor?: React.ComponentType<ParamEditorProps>;
+  paramEditor?: React.ComponentType<ParamEditorProps<C>>;
   /**
    * Function turning a column into an agg config passed to the `esaggs` function
    * together with the agg configs returned from other columns.
@@ -82,14 +95,16 @@ interface BaseBuildColumnArgs {
   indexPattern: IndexPattern;
 }
 
-type FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> = BaseOperationDefinitionProps<
-  C
-> & {
+interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn>
+  extends BaseOperationDefinitionProps<C> {
   /**
    * Returns the meta data of the operation if applied to the given field. Undefined
    * if the field is not applicable to the operation.
    */
   getPossibleOperationForField: (field: IndexPatternField) => OperationMetadata | undefined;
+  /**
+   * Builds the column object for the given parameters. Should include default p
+   */
   buildColumn: (
     arg: BaseBuildColumnArgs & {
       field: IndexPatternField;
@@ -112,18 +127,17 @@ type FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> = BaseOpera
    * @param field The field that the user changed to.
    */
   onFieldChange: (oldColumn: C, indexPattern: IndexPattern, field: IndexPatternField) => C;
-};
+}
 
-type DocumentBasedOperationDefinition<
-  C extends BaseIndexPatternColumn
-> = BaseOperationDefinitionProps<C> & {
+interface DocumentBasedOperationDefinition<C extends BaseIndexPatternColumn>
+  extends BaseOperationDefinitionProps<C> {
   /**
    * Returns the meta data of the operation if applied to documents of the given index pattern.
    * Undefined if the operation is not applicable to the index pattern.
    */
   getPossibleOperationForDocument: (indexPattern: IndexPattern) => OperationMetadata | undefined;
   buildColumn: (arg: BaseBuildColumnArgs) => C;
-};
+}
 
 /**
  * Shape of an operation definition. If the type parameter of the definition
@@ -136,55 +150,38 @@ export type OperationDefinition<
   ? FieldBasedOperationDefinition<C>
   : DocumentBasedOperationDefinition<C>;
 
-// This type is like mapping over a union of types
-// Each possible column type out of the `IndexPatternColumn` union type
-// is wrapped into an `OperationDefinition`. The resulting type
-// is a union type of all operation definitions
-type PossibleOperationDefinition<
-  U extends IndexPatternColumn = IndexPatternColumn
-> = U extends IndexPatternColumn ? OperationDefinition<U> : never;
+// Helper to to infer the column type out of the operation definition.
+// This is done to avoid it to have to list out the column types along with
+// the operation definition types
+type ColumnFromOperationDefinition<D> = D extends OperationDefinition<infer C> ? C : never;
 
-// This type once again maps over the union of all operation definitions
-// and wraps them in an object with the definition as a single property. The key of
-// the property is the operation type of the definition.
-// E.g. the terms operation definition maps to `{ terms: OperationDefinition<TermsColumn> }`
-// and so on.
-type PossibleOperationDefinitionMapEntries<
-  U extends PossibleOperationDefinition = PossibleOperationDefinition
-> = U extends PossibleOperationDefinition ? { [K in U['type']]: U } : never;
+/**
+ * A union type of all available column types. If a column is of an unknown type somewhere
+ * withing the indexpattern data source it should be typed as `IndexPatternColumn` to make
+ * typeguards possible that consider all available column types.
+ */
+export type IndexPatternColumn = ColumnFromOperationDefinition<
+  (typeof internalOperationDefinitions)[number]
+>;
 
-// This is a helper type changing a union (`a | b | c`) into an intersection `a & b & c`
-type UnionToIntersection<U> = (U extends U ? (k: U) => void : never) extends ((k: infer I) => void)
-  ? I
-  : never;
+/**
+ * A union type of all available operation types. The operation type is a unique id of an operation.
+ * Each column is assigned to exactly one operation type.
+ */
+export type OperationType = (typeof internalOperationDefinitions)[number]['type'];
 
-// Here, the helper from above is used to turn the union of all partial operation definition entries
-// into an intersection - `{ terms: OperationDefinition<TermsColumn>, avg: OperationDefinition<AvgColumn>, ...}
-// This type makes sure that
-// a) there is an operation definition for each column type
-// b) Each operation definition maps to the correct key in the map and there are no mix-ups
-type AllOperationDefinitions = UnionToIntersection<PossibleOperationDefinitionMapEntries>;
-
-// This is the map of all available operation definitions. If you are adding a new
-// operation and column type, you have to add it to this list, otherwise typescript
-// will throw an error.
-const internalOperationDefinitionMap: AllOperationDefinitions = {
-  terms: termsOperation,
-  date_histogram: dateHistogramOperation,
-  min: minOperation,
-  max: maxOperation,
-  avg: averageOperation,
-  sum: sumOperation,
-  count: countOperation,
-  filter_ratio: filterRatioOperation,
-};
+/**
+ * This is an operation definition of an unspecified column out of all possible
+ * column types. It
+ */
+export type GenericOperationDefinition =
+  | FieldBasedOperationDefinition<IndexPatternColumn>
+  | DocumentBasedOperationDefinition<IndexPatternColumn>;
 
 /**
  * List of all available operation definitions
  */
-export const operationDefinitions: PossibleOperationDefinition[] = Object.values(
-  internalOperationDefinitionMap
-);
+export const operationDefinitions = internalOperationDefinitions as GenericOperationDefinition[];
 
 /**
  * Map of all operation visible to consumers (e.g. the dimension panel).
@@ -193,12 +190,11 @@ export const operationDefinitions: PossibleOperationDefinition[] = Object.values
  * situations.
  *
  * If you need a specifically typed version of an operation (e.g. explicitly working with terms),
- * you should import the terms definition directly from the sub folder. This map is
- * intended to be used in situations where the operation type is not known during compile
- * time.
+ * you should import the definition directly from this file
+ * (e.g. `import { termsOperation } from './operations/definitions'`). This map is
+ * intended to be used in situations where the operation type is not known during compile time.
  */
-export const operationDefinitionMap = (internalOperationDefinitionMap as unknown) as Record<
-  OperationType,
-  | FieldBasedOperationDefinition<BaseIndexPatternColumn>
-  | DocumentBasedOperationDefinition<BaseIndexPatternColumn>
->;
+export const operationDefinitionMap = internalOperationDefinitions.reduce(
+  (definitionMap, definition) => ({ ...definitionMap, [definition.type]: definition }),
+  {}
+) as Record<OperationType, GenericOperationDefinition>;

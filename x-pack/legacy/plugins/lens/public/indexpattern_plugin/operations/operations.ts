@@ -6,13 +6,14 @@
 
 import _ from 'lodash';
 import { DimensionPriority, OperationMetadata } from '../../types';
+import { IndexPatternField, IndexPattern } from '../indexpattern';
 import {
-  IndexPatternColumn,
-  IndexPatternField,
+  operationDefinitionMap,
+  operationDefinitions,
+  GenericOperationDefinition,
   OperationType,
-  IndexPattern,
-} from '../indexpattern';
-import { operationDefinitionMap, operationDefinitions, OperationDefinition } from './definitions';
+  IndexPatternColumn,
+} from './definitions';
 
 /**
  * Returns all available operation types as a list at runtime.
@@ -136,7 +137,7 @@ export function getAvailableOperationsByMetadata(indexPattern: IndexPattern) {
 }
 
 function getPossibleOperationForDocument(
-  operationDefinition: OperationDefinition<IndexPatternColumn>,
+  operationDefinition: GenericOperationDefinition,
   indexPattern: IndexPattern
 ): OperationMetadata | undefined {
   return 'getPossibleOperationForDocument' in operationDefinition
@@ -145,7 +146,7 @@ function getPossibleOperationForDocument(
 }
 
 function getPossibleOperationForField(
-  operationDefinition: OperationDefinition<IndexPatternColumn>,
+  operationDefinition: GenericOperationDefinition,
   field: IndexPatternField
 ): OperationMetadata | undefined {
   return 'getPossibleOperationForField' in operationDefinition
@@ -173,9 +174,7 @@ export function changeField(
     );
   }
 
-  // This has to be casted back to an index pattern column, because the `operationDefinitionMap` only
-  // works on the base type `BaseIndexPatternColumn`
-  return operationDefinition.onFieldChange(column, indexPattern, newField) as IndexPatternColumn;
+  return operationDefinition.onFieldChange(column, indexPattern, newField);
 }
 
 /**
@@ -204,10 +203,10 @@ export function buildColumn({
   field?: IndexPatternField;
   asDocumentOperation?: boolean;
 }): IndexPatternColumn {
-  let operationDefinition: OperationDefinition<IndexPatternColumn> | undefined;
+  let operationDefinition: GenericOperationDefinition | undefined;
 
   if (op) {
-    operationDefinition = operationDefinitionMap[op] as OperationDefinition<IndexPatternColumn>;
+    operationDefinition = operationDefinitionMap[op];
   } else if (asDocumentOperation) {
     operationDefinition = operationDefinitions.find(definition =>
       getPossibleOperationForDocument(definition, indexPattern)

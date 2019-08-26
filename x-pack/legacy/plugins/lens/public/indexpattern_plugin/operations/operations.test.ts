@@ -5,12 +5,9 @@
  */
 
 import { getOperationTypesForField, getAvailableOperationsByMetadata, buildColumn } from '.';
-import {
-  IndexPatternPrivateState,
-  AvgIndexPatternColumn,
-  MinIndexPatternColumn,
-  CountIndexPatternColumn,
-} from '../indexpattern';
+import { IndexPatternPrivateState } from '../indexpattern';
+import { AvgIndexPatternColumn, MinIndexPatternColumn } from './definitions/metrics';
+import { CountIndexPatternColumn } from './definitions/count';
 
 jest.mock('ui/new_platform');
 jest.mock('../loader');

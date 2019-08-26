@@ -5,16 +5,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  FieldBasedIndexPatternColumn,
-  MinIndexPatternColumn,
-  SumIndexPatternColumn,
-  AvgIndexPatternColumn,
-  MaxIndexPatternColumn,
-} from '../../indexpattern';
 import { OperationDefinition } from '.';
+import { ParameterlessIndexPatternColumn } from './column_types';
 
-function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
+function buildMetricOperation<T extends ParameterlessIndexPatternColumn<string>>(
   type: T['operationType'],
   displayName: string,
   ofName: (name: string) => string
@@ -74,6 +68,11 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
     }),
   } as OperationDefinition<T>;
 }
+
+export type SumIndexPatternColumn = ParameterlessIndexPatternColumn<'sum'>;
+export type AvgIndexPatternColumn = ParameterlessIndexPatternColumn<'avg'>;
+export type MinIndexPatternColumn = ParameterlessIndexPatternColumn<'min'>;
+export type MaxIndexPatternColumn = ParameterlessIndexPatternColumn<'max'>;
 
 export const minOperation = buildMetricOperation<MinIndexPatternColumn>(
   'min',

@@ -7,10 +7,11 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiForm, EuiFormRow, EuiRange, EuiSelect } from '@elastic/eui';
-import { TermsIndexPatternColumn, IndexPatternColumn } from '../../indexpattern';
+import { IndexPatternColumn } from '../../indexpattern';
 import { updateColumnParam } from '../../state_helpers';
 import { DataType } from '../../../types';
 import { OperationDefinition } from '.';
+import { FieldBasedIndexPatternColumn } from './column_types';
 
 type PropType<C> = C extends React.ComponentType<infer P> ? P : unknown;
 
@@ -36,6 +37,15 @@ function isSortableByColumn(column: IndexPatternColumn) {
 }
 
 const DEFAULT_SIZE = 3;
+
+export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
+  operationType: 'terms';
+  params: {
+    size: number;
+    orderBy: { type: 'alphabetical' } | { type: 'column'; columnId: string };
+    orderDirection: 'asc' | 'desc';
+  };
+}
 
 export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
   type: 'terms',
@@ -125,8 +135,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
     }
     return currentColumn;
   },
-  paramEditor: ({ state, setState, columnId: currentColumnId, layerId }) => {
-    const currentColumn = state.layers[layerId].columns[currentColumnId] as TermsIndexPatternColumn;
+  paramEditor: ({ state, setState, currentColumn, columnId: currentColumnId, layerId }) => {
     const SEPARATOR = '$$$';
     function toValue(orderBy: TermsIndexPatternColumn['params']['orderBy']) {
       if (orderBy.type === 'alphabetical') {

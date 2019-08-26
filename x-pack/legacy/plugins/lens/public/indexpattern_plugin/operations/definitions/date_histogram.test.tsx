@@ -5,9 +5,10 @@
  */
 
 import React from 'react';
-import { dateHistogramOperation } from './date_histogram';
+import { DateHistogramIndexPatternColumn } from './date_histogram';
+import { dateHistogramOperation } from '.';
 import { shallow } from 'enzyme';
-import { DateHistogramIndexPatternColumn, IndexPatternPrivateState } from '../../indexpattern';
+import { IndexPatternPrivateState } from '../../indexpattern';
 import { EuiRange, EuiSwitch } from '@elastic/eui';
 import { UiSettingsClientContract } from 'src/core/public';
 import { Storage } from 'ui/storage';
@@ -325,6 +326,7 @@ describe('date_histogram', () => {
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
+          currentColumn={state.layers.first.columns.col1 as DateHistogramIndexPatternColumn}
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
         />
@@ -340,6 +342,7 @@ describe('date_histogram', () => {
           state={state}
           setState={setStateSpy}
           columnId="col2"
+          currentColumn={state.layers.second.columns.col2 as DateHistogramIndexPatternColumn}
           layerId="second"
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
@@ -355,6 +358,7 @@ describe('date_histogram', () => {
           state={state}
           setState={jest.fn()}
           columnId="col1"
+          currentColumn={state.layers.third.columns.col1 as DateHistogramIndexPatternColumn}
           layerId="third"
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
@@ -372,6 +376,7 @@ describe('date_histogram', () => {
           setState={setStateSpy}
           columnId="col1"
           layerId="third"
+          currentColumn={state.layers.third.columns.col1 as DateHistogramIndexPatternColumn}
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
         />
@@ -392,6 +397,7 @@ describe('date_histogram', () => {
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
+          currentColumn={state.layers.first.columns.col1 as DateHistogramIndexPatternColumn}
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
         />
@@ -449,6 +455,7 @@ describe('date_histogram', () => {
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
+          currentColumn={state.layers.first.columns.col1 as DateHistogramIndexPatternColumn}
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
         />

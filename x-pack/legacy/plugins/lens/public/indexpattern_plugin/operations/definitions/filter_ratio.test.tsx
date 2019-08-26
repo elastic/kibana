@@ -7,8 +7,9 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { act } from 'react-dom/test-utils';
-import { filterRatioOperation } from './filter_ratio';
-import { FilterRatioIndexPatternColumn, IndexPatternPrivateState } from '../../indexpattern';
+import { FilterRatioIndexPatternColumn } from './filter_ratio';
+import { filterRatioOperation } from '.';
+import { IndexPatternPrivateState } from '../../indexpattern';
 import { Storage } from 'ui/storage';
 import { UiSettingsClientContract } from 'src/core/public';
 import { QueryBarInput } from '../../../../../../../../src/legacy/core_plugins/data/public/query';
@@ -104,6 +105,7 @@ describe('filter_ratio', () => {
             state={state}
             setState={jest.fn()}
             columnId="col1"
+            currentColumn={state.layers.first.columns.col1 as FilterRatioIndexPatternColumn}
             storage={storageMock}
             uiSettings={{} as UiSettingsClientContract}
           />
@@ -118,6 +120,7 @@ describe('filter_ratio', () => {
           state={state}
           setState={jest.fn()}
           columnId="col1"
+          currentColumn={state.layers.first.columns.col1 as FilterRatioIndexPatternColumn}
           storage={storageMock}
           uiSettings={{} as UiSettingsClientContract}
         />
@@ -135,6 +138,7 @@ describe('filter_ratio', () => {
           state={state}
           setState={setState}
           columnId="col1"
+          currentColumn={state.layers.first.columns.col1 as FilterRatioIndexPatternColumn}
           storage={storageMock}
           uiSettings={{} as UiSettingsClientContract}
         />
@@ -173,6 +177,7 @@ describe('filter_ratio', () => {
           state={state}
           setState={setState}
           columnId="col1"
+          currentColumn={state.layers.first.columns.col1 as FilterRatioIndexPatternColumn}
           storage={storageMock}
           uiSettings={{} as UiSettingsClientContract}
         />
