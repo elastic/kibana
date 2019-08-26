@@ -6,9 +6,7 @@ exports[`suricata_row_renderer renders correctly against snapshot 1`] = `
     <span>
       some children
     </span>
-    <RowRendererContainer
-      width={100}
-    >
+    <RowRendererContainer>
       <SuricataDetails
         browserFields={
           Object {

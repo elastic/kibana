@@ -41,6 +41,10 @@ const TEST_OPTIONS = {
     thresholdEnabled: true,
     watermarkLow: '80%',
   },
+  clustering: {
+    enabled: false,
+    codeNodes: [],
+  },
   repos: [],
   maxWorkspace: 5, // max workspace folder for each language server
 };
