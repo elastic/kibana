@@ -21,13 +21,17 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 export function ApmOverview({ stats, metrics, ...props }) {
   const seriesToShow = [
-    metrics.apm_responses_valid,
-    metrics.apm_responses_errors,
+    metrics.apm_server_responses_valid,
+    metrics.apm_server_responses_errors,
+
+    metrics.apm_acm_responses_valid,
+    metrics.apm_acm_responses_errors,
 
     metrics.apm_output_events_rate_success,
     metrics.apm_output_events_rate_failure,
 
-    metrics.apm_requests,
+    metrics.apm_server_requests,
+    metrics.apm_acm_requests,
     metrics.apm_transformations,
 
     metrics.apm_cpu,
