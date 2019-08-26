@@ -198,7 +198,7 @@ module.controller('MlExplorerController', function (
 
   subscriptions.add(mlTimefilterRefresh$.subscribe(() => {
     if ($scope.jobSelectionUpdateInProgress === false) {
-      explorer$.next({ action: EXPLORER_ACTION.RELOAD });
+      explorer$.next({ action: EXPLORER_ACTION.REDRAW });
     }
   }));
 
@@ -208,13 +208,6 @@ module.controller('MlExplorerController', function (
       explorer$.next({ action: EXPLORER_ACTION.RELOAD });
     }
   });
-
-  // Add a watcher for auto-refresh of the time filter to refresh all the data.
-  subscriptions.add(mlTimefilterRefresh$.subscribe(() => {
-    if ($scope.jobSelectionUpdateInProgress === false) {
-      explorer$.next({ action: EXPLORER_ACTION.RELOAD });
-    }
-  }));
 
   subscriptions.add(subscribeAppStateToObservable(AppState, 'mlShowCharts', showCharts$, () => $rootScope.$applyAsync()));
   subscriptions.add(subscribeAppStateToObservable(AppState, 'mlSelectInterval', interval$, () => $rootScope.$applyAsync()));

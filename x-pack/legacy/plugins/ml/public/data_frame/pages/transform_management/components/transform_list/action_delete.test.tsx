@@ -17,7 +17,7 @@ describe('Data Frame: Transform List Actions <DeleteAction />', () => {
     const item: DataFrameTransformListRow = dataFrameTransformListRow;
     const props = {
       disabled: false,
-      item,
+      items: [item],
       deleteTransform(d: DataFrameTransformListRow) {},
     };
 
