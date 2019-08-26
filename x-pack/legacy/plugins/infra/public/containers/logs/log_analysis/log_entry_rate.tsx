@@ -18,7 +18,17 @@ import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 
 type LogEntryRateResults = GetLogEntryRateSuccessResponsePayload['data'];
 
-export const useLogEntryRate = ({ sourceId }: { sourceId: string }) => {
+export const useLogEntryRate = ({
+  sourceId,
+  startTime,
+  endTime,
+  bucketDuration,
+}: {
+  sourceId: string;
+  startTime: number;
+  endTime: number;
+  bucketDuration: number;
+}) => {
   const [logEntryRate, setLogEntryRate] = useState<LogEntryRateResults | null>(null);
 
   const [getLogEntryRateRequest, getLogEntryRate] = useTrackedPromise(
@@ -31,12 +41,12 @@ export const useLogEntryRate = ({ sourceId }: { sourceId: string }) => {
           body: JSON.stringify(
             getLogEntryRateRequestPayloadRT.encode({
               data: {
-                sourceId, // TODO: get from hook arguments
+                sourceId,
                 timeRange: {
-                  startTime: Date.now(), // TODO: get from hook arguments
-                  endTime: Date.now() + 1000 * 60 * 60, // TODO: get from hook arguments
+                  startTime,
+                  endTime,
                 },
-                bucketDuration: 15 * 60 * 1000, // TODO: get from hook arguments
+                bucketDuration,
               },
             })
           ),
@@ -50,7 +60,7 @@ export const useLogEntryRate = ({ sourceId }: { sourceId: string }) => {
         setLogEntryRate(data);
       },
     },
-    [sourceId]
+    [sourceId, startTime, endTime, bucketDuration]
   );
 
   const isLoading = useMemo(() => getLogEntryRateRequest.state === 'pending', [
