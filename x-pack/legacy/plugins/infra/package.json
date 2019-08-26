@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@types/color": "^3.0.0",
-    "lodash": "^4.17.13"
+    "boom": "7.3.0",
+    "lodash": "^4.17.15"
   }
 }

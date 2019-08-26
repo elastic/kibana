@@ -131,25 +131,30 @@ async function combineFieldsAndAggs(
   aggs: Aggregation[],
   rollupFields: RollupFields
 ): Promise<NewJobCaps> {
-  const textAndKeywordFields = getTextAndKeywordFields(fields);
+  const keywordFields = getKeywordFields(fields);
   const numericalFields = getNumericalFields(fields);
+  const ipFields = getIpFields(fields);
 
   const mix = mixFactory(rollupFields);
 
   aggs.forEach(a => {
     if (a.type === METRIC_AGG_TYPE) {
       switch (a.dslName) {
-        case ES_AGGREGATION.CARDINALITY:
-          textAndKeywordFields.forEach(f => {
-            mix(f, a);
-          });
-          numericalFields.forEach(f => {
-            mix(f, a);
-          });
-          break;
         case ES_AGGREGATION.COUNT:
+          // count doesn't take any fields, so break here
           break;
+        case ES_AGGREGATION.CARDINALITY:
+          // distinct count (i.e. cardinality) takes keywords, ips
+          // as well as numerical fields
+          keywordFields.forEach(f => {
+            mix(f, a);
+          });
+          ipFields.forEach(f => {
+            mix(f, a);
+          });
+        // note, no break to fall through to add numerical fields.
         default:
+          // all other aggs take numerical fields
           numericalFields.forEach(f => {
             mix(f, a);
           });
@@ -213,15 +218,24 @@ function combineAllRollupFields(rollupConfigs: RollupJob[]): RollupFields {
   return rollupFields;
 }
 
-function getTextAndKeywordFields(fields: Field[]): Field[] {
-  return fields.filter(f => f.type === ES_FIELD_TYPES.KEYWORD || f.type === ES_FIELD_TYPES.TEXT);
+function getKeywordFields(fields: Field[]): Field[] {
+  return fields.filter(f => f.type === ES_FIELD_TYPES.KEYWORD);
+}
+
+function getIpFields(fields: Field[]): Field[] {
+  return fields.filter(f => f.type === ES_FIELD_TYPES.IP);
 }
 
 function getNumericalFields(fields: Field[]): Field[] {
   return fields.filter(
     f =>
+      f.type === ES_FIELD_TYPES.LONG ||
+      f.type === ES_FIELD_TYPES.INTEGER ||
+      f.type === ES_FIELD_TYPES.SHORT ||
+      f.type === ES_FIELD_TYPES.BYTE ||
       f.type === ES_FIELD_TYPES.DOUBLE ||
       f.type === ES_FIELD_TYPES.FLOAT ||
-      f.type === ES_FIELD_TYPES.LONG
+      f.type === ES_FIELD_TYPES.HALF_FLOAT ||
+      f.type === ES_FIELD_TYPES.SCALED_FLOAT
   );
 }
