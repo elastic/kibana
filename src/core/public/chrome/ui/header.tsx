@@ -24,9 +24,9 @@ import { Header as HeaderUI, HeaderProps } from './header/header';
 export const Header: FunctionComponent<HeaderProps> = props => {
   const [isLocked, setIsLocked] = useState(false);
   const className = classnames(
-    'header-global-wrapper',
+    'chrHeaderWrapper',
     {
-      'header-global-wrapper--isNavLocked': isLocked,
+      'chrHeaderWrapper--navIsLocked': isLocked,
     },
     'hide-for-sharing'
   );
