@@ -25,14 +25,8 @@ export function publicWorkpadSnapshots(server: Server) {
   server.route({
     method: 'GET',
     path: API_ROUTE_SNAPSHOT_RUNTIME,
-    handler(_request, handler) {
-      try {
-        const response = handler.response(readFileSync(RUNTIME_FILE));
-        response.type('text/javascript');
-        return response;
-      } catch (error) {
-        throw Boom.internal();
-      }
+    handler: {
+      file: RUNTIME_FILE,
     },
     options: PUBLIC_OPTIONS,
   });
@@ -42,12 +36,9 @@ export function publicWorkpadSnapshots(server: Server) {
     method: 'GET',
     path: API_ROUTE_SNAPSHOT_RUNTIME_DOWNLOAD,
     handler(_request, handler) {
-      try {
-        const response = handler.response(readFileSync(RUNTIME_FILE));
-        return response;
-      } catch (error) {
-        throw Boom.internal();
-      }
+      const file = handler.file(RUNTIME_FILE);
+      file.type('application/octet-stream');
+      return file;
     },
     options: PUBLIC_OPTIONS,
   });
