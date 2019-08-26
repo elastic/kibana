@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { createHash } from 'crypto';
 import { LicenseFeature } from './license_feature';
 import { LICENSE_STATUS, LICENSE_TYPE } from './constants';
-import { LicenseType, ILicensingPluginSetup } from './types';
+import { LicenseType, ILicense } from './types';
 
 function toLicenseType(minimumLicenseRequired: LICENSE_TYPE | string) {
   if (typeof minimumLicenseRequired !== 'string') {
@@ -22,13 +22,13 @@ function toLicenseType(minimumLicenseRequired: LICENSE_TYPE | string) {
   return LICENSE_TYPE[minimumLicenseRequired as LicenseType];
 }
 
-export class LicensingPluginSetup implements ILicensingPluginSetup {
+export class License implements ILicense {
   private readonly hasLicense: boolean;
   private readonly license: any;
   private readonly features: any;
   private _signature!: string;
   private objectified!: any;
-  private featuresMap: Map<string, LicenseFeature>;
+  private readonly featuresMap: Map<string, LicenseFeature>;
 
   constructor(
     license: any,

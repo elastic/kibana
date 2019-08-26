@@ -4,20 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BehaviorSubject, Observable, Subscription, timer } from 'rxjs';
+import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 import moment from 'moment';
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
-import { LicensingConfigType, LicensingPluginSubject, ILicensingPluginSetup } from './types';
+import {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin as CorePlugin,
+  PluginInitializerContext,
+} from 'src/core/server';
+import { Poller } from 'src/core/utils/poller';
+import { LicensingConfigType, LicensingPluginSetup, ILicense } from './types';
 import { LicensingConfig } from './licensing_config';
-import { LicensingPluginSetup } from './licensing_plugin_setup';
+import { License } from './license';
 
-export class LicensingPlugin implements Plugin<LicensingPluginSubject> {
+export class Plugin implements CorePlugin<LicensingPluginSetup> {
   private readonly logger: Logger;
   private readonly config$: Observable<LicensingConfig>;
-  private poller$!: Observable<number>;
-  private pollerSubscription!: Subscription;
-  private service$!: LicensingPluginSubject;
+  private poller!: Poller<ILicense>;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.logger = this.context.logger.get();
@@ -27,7 +32,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSubject> {
   }
 
   private hasLicenseInfoChanged(newLicense: any) {
-    const currentLicense = this.service$.getValue();
+    const currentLicense = this.poller.subject$.getValue();
 
     if ((currentLicense && !newLicense) || (newLicense && !currentLicense)) {
       return true;
@@ -60,7 +65,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSubject> {
         return { license: false, error: null, features: null };
       }
 
-      const currentLicense = this.service$.getValue();
+      const currentLicense = this.poller.subject$.getValue();
       const licenseInfo = [
         'type' in rawLicense && `type: ${rawLicense.type}`,
         'status' in rawLicense && `status: ${rawLicense.status}`,
@@ -87,42 +92,39 @@ export class LicensingPlugin implements Plugin<LicensingPluginSubject> {
   }
 
   private create({ clusterSource, pollingFrequency }: LicensingConfig, core: CoreSetup) {
-    const service$ = new BehaviorSubject<ILicensingPluginSetup>(
-      new LicensingPluginSetup(null, {}, null, clusterSource)
+    this.poller = new Poller<ILicense>(
+      pollingFrequency,
+      new License(null, {}, null, clusterSource),
+      async () => {
+        const { license, features, error } = await this.fetchInfo(
+          core,
+          clusterSource,
+          pollingFrequency
+        );
+
+        if (license !== false) {
+          return new License(license, features, error, clusterSource);
+        }
+      }
     );
 
-    this.poller$ = timer(pollingFrequency);
-    this.pollerSubscription = this.poller$.subscribe(async value => {
-      const { license, features, error } = await this.fetchInfo(
-        core,
-        clusterSource,
-        pollingFrequency
-      );
-
-      if (license !== false) {
-        service$.next(new LicensingPluginSetup(license, features, error, clusterSource));
-      }
-
-      return value;
-    });
-
-    this.service$ = service$;
-
-    return service$;
+    return this.poller;
   }
 
   public async setup(core: CoreSetup) {
     const config = await this.config$.pipe(first()).toPromise();
-    const service$ = this.create(config, core);
+    const poller = this.create(config, core);
 
-    return service$;
+    return {
+      license$: poller.subject$,
+    };
   }
 
   public async start(core: CoreStart) {}
 
   public stop() {
-    if (this.pollerSubscription) {
-      this.pollerSubscription.unsubscribe();
+    if (this.poller) {
+      this.poller.unsubscribe();
     }
   }
 }
