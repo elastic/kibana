@@ -63,7 +63,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
       };
       setValue('valueAxes', valueAxes);
     },
-    [stateParams.valueAxes, setValue]
+    [stateParams.valueAxes]
   );
 
   const setChartByIndex: SetChartValueByIndex = useCallback(
@@ -75,7 +75,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
       };
       setValue('seriesParams', series);
     },
-    [stateParams.seriesParams, setValue]
+    [stateParams.seriesParams]
   );
 
   const updateAxisTitle = useCallback(() => {
@@ -126,7 +126,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
 
       return `${axisName}${nextAxisNameNumber}`;
     },
-    [stateParams.valueAxes, axesNumbers, setAxesNumbers, countNextAxisNumber]
+    [stateParams.valueAxes, axesNumbers]
   );
 
   const onValueAxisPositionChanged = useCallback(
@@ -140,7 +140,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
       };
       setValue('valueAxes', valueAxes);
     },
-    [stateParams.valueAxes, setValue, getUpdatedAxisName]
+    [stateParams.valueAxes, getUpdatedAxisName]
   );
 
   const onCategoryAxisPositionChanged = useCallback(
@@ -157,14 +157,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
         }
       });
     },
-    [
-      stateParams.valueAxes,
-      isCategoryAxisHorizontal,
-      setIsCategoryAxisHorizontal,
-      isAxisHorizontal,
-      onValueAxisPositionChanged,
-      mapPosition,
-    ]
+    [stateParams.valueAxes, isCategoryAxisHorizontal, onValueAxisPositionChanged]
   );
 
   const addValueAxis = useCallback(() => {
@@ -187,14 +180,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
     });
     setValue('valueAxes', [...stateParams.valueAxes, newAxis]);
     return newAxis;
-  }, [
-    stateParams.valueAxes,
-    axesNumbers,
-    countNextAxisNumber,
-    mapPositionOpposite,
-    setAxesNumbers,
-    setValue,
-  ]);
+  }, [stateParams.valueAxes, axesNumbers]);
 
   const removeValueAxis = useCallback(
     (axis: ValueAxis) => {
@@ -213,7 +199,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
         setChartByIndex(chartIndex, 'valueAxis', newValueAxes[0].id);
       }
     },
-    [stateParams.seriesParams, stateParams.valueAxes, setChartByIndex, setValue]
+    [stateParams.seriesParams, stateParams.valueAxes, setChartByIndex]
   );
 
   const aggsLabel = aggs
@@ -259,7 +245,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
 
   useEffect(() => {
     setVisType(vis.type, seriesParamsTypes.length === 1 ? seriesParamsTypes[0] : 'histogram');
-  }, [seriesParamsTypes, vis, setVisType]);
+  }, [seriesParamsTypes.join(), vis]);
 
   return (
     <>

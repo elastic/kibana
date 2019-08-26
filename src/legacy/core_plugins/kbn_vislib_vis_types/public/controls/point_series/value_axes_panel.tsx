@@ -63,7 +63,7 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
       i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.removeButtonTooltip', {
         defaultMessage: 'Remove Y axis',
       }),
-    [i18n]
+    []
   );
 
   const renderRemoveButton = useCallback(
@@ -85,7 +85,7 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
       i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.addButtonTooltip', {
         defaultMessage: 'Add Y axis',
       }),
-    [i18n]
+    []
   );
 
   const getButtonContent = useCallback(

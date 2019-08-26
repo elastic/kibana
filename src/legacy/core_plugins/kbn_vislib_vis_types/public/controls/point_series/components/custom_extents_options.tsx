@@ -55,7 +55,7 @@ function CustomExtentsOptions({
 
       setValueAxisScale(paramName, value);
     },
-    [setIsBoundsMarginValid, setMultipleValidity, setValueAxisScale]
+    [setMultipleValidity, setValueAxisScale]
   );
 
   const onDefaultYExtentsChange = useCallback(
