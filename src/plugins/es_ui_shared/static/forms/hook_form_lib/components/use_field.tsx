@@ -36,7 +36,7 @@ export const UseField = ({
   path,
   config,
   form,
-  defaultValue = form.__getFieldDefaultValue(path),
+  defaultValue = form.getFieldDefaultValue(path),
   component = 'input',
   componentProps = {},
   children,

@@ -86,6 +86,20 @@ export const unflattenObject = (object: any) =>
     return acc;
   }, {});
 
+export const flattenObject = (
+  object: Record<string, any>,
+  to: Record<string, any> = {},
+  paths: string[] = []
+): Record<string, any> =>
+  Object.entries(object).reduce((acc, [key, value]) => {
+    const updatedPaths = [...paths, key];
+    if (value !== null && typeof value === 'object') {
+      return flattenObject(value, to, updatedPaths);
+    }
+    acc[updatedPaths.join('.')] = value;
+    return acc;
+  }, to);
+
 /**
  * Helper to map the object of fields to any of its value
  *

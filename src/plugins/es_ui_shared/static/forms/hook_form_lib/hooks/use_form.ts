@@ -20,7 +20,7 @@
 import { useState, useRef } from 'react';
 
 import { Form, FormData, FieldConfig, FieldsMap, FormConfig } from '../types';
-import { getAt, mapFormFields, unflattenObject, Subject } from '../lib';
+import { getAt, mapFormFields, flattenObject, unflattenObject, Subject } from '../lib';
 
 const DEFAULT_ERROR_DISPLAY_TIMEOUT = 500;
 
@@ -47,7 +47,7 @@ export const useForm = <T = FormData>(
   // render().
   // The <FormDataProvider> component is the one in charge of reading this observable
   // and updating its state to trigger the necessary view render.
-  const formData$ = useRef<Subject<T>>(new Subject<T>({} as T));
+  const formData$ = useRef<Subject<T>>(new Subject<T>(flattenObject(defaultValue) as T));
 
   // -- HELPERS
   // ----------------------------------
@@ -70,7 +70,7 @@ export const useForm = <T = FormData>(
 
   // -- API
   // ----------------------------------
-  const getFormData: Form<T>['__getFormData'] = (getDataOptions = { unflatten: true }) =>
+  const getFormData: Form<T>['getFormData'] = (getDataOptions = { unflatten: true }) =>
     getDataOptions.unflatten
       ? (unflattenObject(
           mapFormFields(stripEmptyFields(fieldsRefs.current), field => field.__getOutputValue())
@@ -136,7 +136,9 @@ export const useForm = <T = FormData>(
     fieldsRefs.current[fieldName].setErrors(errors);
   };
 
-  const getFieldDefaultValue: Form['__getFieldDefaultValue'] = fieldName =>
+  const getFields: Form<T>['getFields'] = () => fieldsRefs.current;
+
+  const getFieldDefaultValue: Form['getFieldDefaultValue'] = fieldName =>
     getAt(fieldName, defaultValueDeSerialized, false);
 
   const readFieldConfigFromSchema: Form<T>['__readFieldConfigFromSchema'] = fieldName => {
@@ -173,14 +175,15 @@ export const useForm = <T = FormData>(
     onSubmit: onSubmitForm,
     setFieldValue,
     setFieldErrors,
+    getFields,
+    getFormData,
+    getFieldDefaultValue,
     __formData$: formData$,
-    __getFormData: getFormData,
     __updateFormDataAt: updateFormDataAt,
     __readFieldConfigFromSchema: readFieldConfigFromSchema,
     __addField: addField,
     __removeField: removeField,
     __validateFields: validateFields,
-    __getFieldDefaultValue: getFieldDefaultValue,
   };
 
   return {

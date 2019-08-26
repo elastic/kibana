@@ -28,13 +28,14 @@ export interface Form<T = FormData> {
   onSubmit: (e?: FormEvent<HTMLFormElement> | MouseEvent) => Promise<{ data: T; isValid: boolean }>;
   setFieldValue: (fieldName: string, value: FieldValue) => void;
   setFieldErrors: (fieldName: string, errors: ValidationError[]) => void;
+  getFields: () => FieldsMap;
+  getFormData: (options?: { unflatten?: boolean }) => T;
+  getFieldDefaultValue: (fieldName: string) => unknown;
   readonly __formData$: MutableRefObject<Subject<T>>;
   __addField: (field: Field) => void;
   __removeField: (fieldNames: string | string[]) => void;
   __validateFields: (fieldNames?: string[]) => Promise<boolean>;
-  __getFormData: (options?: { unflatten?: boolean }) => T;
   __updateFormDataAt: (field: string, value: unknown) => T;
-  __getFieldDefaultValue: (fieldName: string) => unknown;
   __readFieldConfigFromSchema: (fieldName: string) => FieldConfig;
 }
 
@@ -74,7 +75,10 @@ export interface Field {
   readonly isValidating: boolean;
   readonly isUpdating: boolean;
   readonly form: Form;
-  getErrorsMessages: (validationType?: 'field' | string) => string | null;
+  getErrorsMessages: (args?: {
+    validationType?: 'field' | string;
+    errorCode?: string;
+  }) => string | null;
   onChange: (event: ChangeEvent<{ name?: string; value: string; checked?: boolean }>) => void;
   setValue: (value: FieldValue) => void;
   setErrors: (errors: ValidationError[]) => void;
@@ -118,6 +122,7 @@ export interface ValidationError {
 export type ValidationFunc<T = any> = (data: {
   path: string;
   value: unknown;
+  form: Form<T>;
   formData: T;
   errors: readonly ValidationError[];
 }) => ValidationError | void | undefined | Promise<ValidationError | void | undefined>;

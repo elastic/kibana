@@ -130,6 +130,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
         validationResult = validator({
           value: (valueToValidate as unknown) as string,
           errors: validationErrors,
+          form,
           formData,
           path,
         });
@@ -195,6 +196,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
         validationResult = await validator({
           value: (valueToValidate as unknown) as string,
           errors: validationErrors,
+          form,
           formData,
           path,
         });
@@ -239,7 +241,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
    */
   const validate: Field['validate'] = (validationData = {}) => {
     const {
-      formData = form.__getFormData({ unflatten: false }),
+      formData = form.getFormData({ unflatten: false }),
       value: valueToValidate = value,
       validationType,
     } = validationData;
@@ -300,6 +302,10 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     form.__updateFormDataAt(path, getOutputValue(formattedValue));
   };
 
+  const _setErrors: Field['setErrors'] = _errors => {
+    setErrors(_errors.map(error => ({ validationType: VALIDATION_TYPES.FIELD, ...error })));
+  };
+
   /**
    * Form <input /> "onChange" event handler
    *
@@ -323,15 +329,16 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
    *
    * @param validationType The validation type to return error messages from
    */
-  const getErrorsMessages: Field['getErrorsMessages'] = (
-    validationType = VALIDATION_TYPES.FIELD
-  ) => {
+  const getErrorsMessages: Field['getErrorsMessages'] = (args = {}) => {
+    const { errorCode, validationType = VALIDATION_TYPES.FIELD } = args;
     const errorMessages = errors.reduce((messages, error) => {
-      if (
+      const isSameErrorCode = errorCode && error.code === errorCode;
+      const isSamevalidationType =
         error.validationType === validationType ||
         (validationType === VALIDATION_TYPES.FIELD &&
-          !{}.hasOwnProperty.call(error, 'validationType'))
-      ) {
+          !{}.hasOwnProperty.call(error, 'validationType'));
+
+      if (isSameErrorCode || (typeof errorCode === 'undefined' && isSamevalidationType)) {
         return messages ? `${messages}, ${error.message}` : (error.message as string);
       }
       return messages;
@@ -366,7 +373,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     onChange,
     getErrorsMessages,
     setValue,
-    setErrors,
+    setErrors: _setErrors,
     clearErrors,
     validate,
     __getOutputValue: getOutputValue,
