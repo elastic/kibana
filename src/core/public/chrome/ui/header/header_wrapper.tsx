@@ -19,9 +19,9 @@
 
 import React, { FunctionComponent, useState } from 'react';
 import classnames from 'classnames';
-import { Header as HeaderUI, HeaderProps } from './header/header';
+import { Header, HeaderProps } from './';
 
-export const Header: FunctionComponent<HeaderProps> = props => {
+export const HeaderWrapper: FunctionComponent<HeaderProps> = props => {
   const [isLocked, setIsLocked] = useState(false);
   const className = classnames(
     'chrHeaderWrapper',
@@ -32,7 +32,7 @@ export const Header: FunctionComponent<HeaderProps> = props => {
   );
   return (
     <div className={className} data-test-subj="headerGlobalNav">
-      <HeaderUI {...props} onIsLockedUpdate={setIsLocked} />
+      <Header {...props} onIsLockedUpdate={setIsLocked} />
     </div>
   );
 };
