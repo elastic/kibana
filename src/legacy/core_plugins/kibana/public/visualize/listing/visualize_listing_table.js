@@ -26,7 +26,6 @@ import { TableListView } from './../../table_list_view';
 import {
   EuiIcon,
   EuiBetaBadge,
-  EuiButtonIcon,
   EuiLink,
   EuiButton,
   EuiEmptyPrompt,
