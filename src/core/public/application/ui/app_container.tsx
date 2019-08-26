@@ -45,10 +45,7 @@ export class AppContainer extends React.Component<Props, State> {
   private readonly containerDiv = React.createRef<HTMLDivElement>();
   private unmountFunc?: AppUnmount;
 
-  constructor(props: Props) {
-    super(props);
-    this.state = { appNotFound: false };
-  }
+  state: State = { appNotFound: false };
 
   componentDidMount() {
     this.mountApp();
