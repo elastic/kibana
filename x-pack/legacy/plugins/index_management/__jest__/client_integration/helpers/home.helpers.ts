@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import {
   registerTestBed,
@@ -15,6 +16,7 @@ import {
 import { IndexManagementHome } from '../../../public/sections/home';
 import { BASE_PATH } from '../../../common/constants';
 import { indexManagementStore } from '../../../public/store';
+import { Template } from '../../../common/types';
 
 const testBedConfig: TestBedConfig = {
   store: indexManagementStore,
@@ -28,13 +30,15 @@ const testBedConfig: TestBedConfig = {
 const initTestBed = registerTestBed(IndexManagementHome, testBedConfig);
 
 export interface IdxMgmtHomeTestBed extends TestBed<IdxMgmtTestSubjects> {
+  findAction: (action: 'edit' | 'clone' | 'delete') => ReactWrapper;
   actions: {
-    selectHomeTab: (tab: 'indices' | 'index templates') => void;
+    selectHomeTab: (tab: 'indicesTab' | 'templatesTab') => void;
     selectDetailsTab: (tab: 'summary' | 'settings' | 'mappings' | 'aliases') => void;
     clickReloadButton: () => void;
-    clickTemplateActionAt: (index: number, action: 'delete') => void;
+    clickTemplateAction: (name: Template['name'], action: 'edit' | 'clone' | 'delete') => void;
     clickTemplateAt: (index: number) => void;
     clickCloseDetailsButton: () => void;
+    clickActionMenu: (name: Template['name']) => void;
   };
 }
 
@@ -42,16 +46,21 @@ export const setup = async (): Promise<IdxMgmtHomeTestBed> => {
   const testBed = await initTestBed();
 
   /**
+   * Additional helpers
+   */
+  const findAction = (action: 'edit' | 'clone' | 'delete') => {
+    const actions = ['edit', 'clone', 'delete'];
+    const { component } = testBed;
+
+    return component.find('.euiContextMenuItem').at(actions.indexOf(action));
+  };
+
+  /**
    * User Actions
    */
 
-  const selectHomeTab = (tab: 'indices' | 'index templates') => {
-    const tabs = ['indices', 'index templates'];
-
-    testBed
-      .find('tab')
-      .at(tabs.indexOf(tab))
-      .simulate('click');
+  const selectHomeTab = (tab: 'indicesTab' | 'templatesTab') => {
+    testBed.find(tab).simulate('click');
   };
 
   const selectDetailsTab = (tab: 'summary' | 'settings' | 'mappings' | 'aliases') => {
@@ -68,23 +77,32 @@ export const setup = async (): Promise<IdxMgmtHomeTestBed> => {
     find('reloadButton').simulate('click');
   };
 
-  const clickTemplateActionAt = async (index: number, action: 'delete') => {
-    const { component, table } = testBed;
-    const { rows } = table.getMetaData('templatesTable');
-    const currentRow = rows[index];
-    const lastColumn = currentRow.columns[currentRow.columns.length - 1].reactWrapper;
-    const button = findTestSubject(lastColumn, `${action}TemplateButton`);
+  const clickActionMenu = async (templateName: Template['name']) => {
+    const { component } = testBed;
 
-    // @ts-ignore (remove when react 16.9.0 is released)
-    await act(async () => {
-      button.simulate('click');
-      component.update();
-    });
+    // When a table has > 2 actions, EUI displays an overflow menu with an id "<template_name>-actions"
+    // The template name may contain a period (.) so we use bracket syntax for selector
+    component.find(`div[id="${templateName}-actions"] button`).simulate('click');
+  };
+
+  const clickTemplateAction = (
+    templateName: Template['name'],
+    action: 'edit' | 'clone' | 'delete'
+  ) => {
+    const actions = ['edit', 'clone', 'delete'];
+    const { component } = testBed;
+
+    clickActionMenu(templateName);
+
+    component
+      .find('.euiContextMenuItem')
+      .at(actions.indexOf(action))
+      .simulate('click');
   };
 
   const clickTemplateAt = async (index: number) => {
     const { component, table, router } = testBed;
-    const { rows } = table.getMetaData('templatesTable');
+    const { rows } = table.getMetaData('templateTable');
     const templateLink = findTestSubject(rows[index].reactWrapper, 'templateDetailsLink');
 
     // @ts-ignore (remove when react 16.9.0 is released)
@@ -104,13 +122,15 @@ export const setup = async (): Promise<IdxMgmtHomeTestBed> => {
 
   return {
     ...testBed,
+    findAction,
     actions: {
       selectHomeTab,
       selectDetailsTab,
       clickReloadButton,
-      clickTemplateActionAt,
+      clickTemplateAction,
       clickTemplateAt,
       clickCloseDetailsButton,
+      clickActionMenu,
     },
   };
 };
@@ -122,14 +142,19 @@ export type TestSubjects =
   | 'appTitle'
   | 'cell'
   | 'closeDetailsButton'
+  | 'createTemplateButton'
   | 'deleteSystemTemplateCallOut'
   | 'deleteTemplateButton'
-  | 'deleteTemplatesButton'
   | 'deleteTemplatesConfirmation'
   | 'documentationLink'
   | 'emptyPrompt'
+  | 'manageTemplateButton'
   | 'mappingsTab'
+  | 'noAliasesCallout'
+  | 'noMappingsCallout'
+  | 'noSettingsCallout'
   | 'indicesList'
+  | 'indicesTab'
   | 'reloadButton'
   | 'row'
   | 'sectionError'
@@ -138,11 +163,11 @@ export type TestSubjects =
   | 'summaryTab'
   | 'summaryTitle'
   | 'systemTemplatesSwitch'
-  | 'tab'
   | 'templateDetails'
-  | 'templateDetails.deleteTemplateButton'
+  | 'templateDetails.manageTemplateButton'
   | 'templateDetails.sectionLoading'
   | 'templateDetails.tab'
   | 'templateDetails.title'
-  | 'templatesList'
-  | 'templatesTable';
+  | 'templateList'
+  | 'templateTable'
+  | 'templatesTab';

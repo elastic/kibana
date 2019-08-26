@@ -62,6 +62,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 ...updatedData,
                 id: createdAlert.id,
                 updatedBy: user.username,
+                apiKeyOwner: user.username,
               });
               break;
             default:

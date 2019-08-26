@@ -5,7 +5,7 @@
  */
 
 import { ConditionalHeaders } from '../../../../types';
-import { LevelLogger as Logger } from '../../../../server/lib/level_logger';
+import { LevelLogger } from '../../../../server/lib';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers/chromium/driver';
 import { WAITFOR_SELECTOR } from '../../constants';
 
@@ -13,12 +13,14 @@ export const openUrl = async (
   browser: HeadlessBrowser,
   url: string,
   conditionalHeaders: ConditionalHeaders,
-  logger: Logger
+  logger: LevelLogger
 ): Promise<void> => {
-  logger.debug(`opening ${url}`);
-
-  await browser.open(url, {
-    conditionalHeaders,
-    waitForSelector: WAITFOR_SELECTOR,
-  });
+  await browser.open(
+    url,
+    {
+      conditionalHeaders,
+      waitForSelector: WAITFOR_SELECTOR,
+    },
+    logger
+  );
 };
