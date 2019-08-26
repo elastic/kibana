@@ -12,16 +12,15 @@ import { i18n } from '@kbn/i18n';
 
 import { createPermissionFailureMessage } from '../../../../../privilege/check_privilege';
 
-import { useCreateAnalyticsForm } from '../../hooks/use_create_analytics_form';
+import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 
 import { CreateAnalyticsAdvancedEditor } from '../create_analytics_advanced_editor';
 import { CreateAnalyticsForm } from '../create_analytics_form';
 import { CreateAnalyticsModal } from '../create_analytics_modal';
 
-export const CreateAnalyticsButton: FC = () => {
-  const createAnalyticsForm = useCreateAnalyticsForm();
-  const { disabled, isAdvancedEditorEnabled, isModalVisible } = createAnalyticsForm.state;
-  const { openModal } = createAnalyticsForm.actions;
+export const CreateAnalyticsButton: FC<CreateAnalyticsFormProps> = props => {
+  const { disabled, isAdvancedEditorEnabled, isModalVisible } = props.state;
+  const { openModal } = props.actions;
 
   const button = (
     <EuiButton
@@ -53,11 +52,9 @@ export const CreateAnalyticsButton: FC = () => {
     <Fragment>
       {button}
       {isModalVisible && (
-        <CreateAnalyticsModal {...createAnalyticsForm}>
-          {isAdvancedEditorEnabled === false && <CreateAnalyticsForm {...createAnalyticsForm} />}
-          {isAdvancedEditorEnabled === true && (
-            <CreateAnalyticsAdvancedEditor {...createAnalyticsForm} />
-          )}
+        <CreateAnalyticsModal {...props}>
+          {isAdvancedEditorEnabled === false && <CreateAnalyticsForm {...props} />}
+          {isAdvancedEditorEnabled === true && <CreateAnalyticsAdvancedEditor {...props} />}
         </CreateAnalyticsModal>
       )}
     </Fragment>

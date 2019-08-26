@@ -21,20 +21,17 @@ export type IndexName = string;
 export type IndexPattern = string;
 export type DataFrameAnalyticsId = string;
 
-export interface CreateRequestBody {
+export interface DataFrameAnalyticsOutlierConfig {
+  id: DataFrameAnalyticsId;
   // Description attribute is not supported yet
   // description?: string;
   dest: {
     index: IndexName;
-    results_field?: string;
+    results_field: string;
   };
   source: {
     index: IndexName;
   };
-}
-
-export interface DataFrameAnalyticsOutlierConfig extends CreateRequestBody {
-  id: DataFrameAnalyticsId;
   analysis: {
     outlier_detection: {};
   };

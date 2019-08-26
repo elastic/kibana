@@ -28,11 +28,14 @@ import { CreateAnalyticsButton } from './components/create_analytics_button';
 import { DataFrameAnalyticsList } from './components/analytics_list';
 import { RefreshAnalyticsListButton } from './components/refresh_analytics_list_button';
 import { useRefreshInterval } from './components/analytics_list/use_refresh_interval';
+import { useCreateAnalyticsForm } from './hooks/use_create_analytics_form';
 
 export const Page: FC = () => {
   const [blockRefresh, setBlockRefresh] = useState(false);
 
   useRefreshInterval(setBlockRefresh);
+
+  const createAnalyticsForm = useCreateAnalyticsForm();
 
   return (
     <Fragment>
@@ -73,7 +76,7 @@ export const Page: FC = () => {
                 </EuiFlexItem>
                 {/* grow={false} fixes IE11 issue with nested flex */}
                 <EuiFlexItem grow={false}>
-                  <CreateAnalyticsButton />
+                  <CreateAnalyticsButton {...createAnalyticsForm} />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPageContentHeaderSection>
@@ -81,7 +84,10 @@ export const Page: FC = () => {
           <EuiPageContentBody>
             <EuiSpacer size="l" />
             <EuiPanel>
-              <DataFrameAnalyticsList blockRefresh={blockRefresh} />
+              <DataFrameAnalyticsList
+                blockRefresh={blockRefresh}
+                openCreateJobModal={createAnalyticsForm.actions.openModal}
+              />
             </EuiPanel>
           </EuiPageContentBody>
         </EuiPageBody>

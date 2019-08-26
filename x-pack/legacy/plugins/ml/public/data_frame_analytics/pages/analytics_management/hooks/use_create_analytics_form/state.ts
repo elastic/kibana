@@ -8,6 +8,12 @@ import { checkPermission } from '../../../../../privilege/check_privilege';
 
 import { DataFrameAnalyticsId, DataFrameAnalyticsOutlierConfig } from '../../../../common';
 
+// A recursive partial type to allow passing nested partial attributes.
+// Used for example for the optional `jobConfig.dest.results_field` property.
+type DeepPartial<T> = {
+  [P in keyof T]?: DeepPartial<T[P]>;
+};
+
 export type EsIndexName = string;
 export type IndexPatternTitle = string;
 
@@ -45,7 +51,7 @@ export interface State {
   isModalButtonDisabled: boolean;
   isModalVisible: boolean;
   isValid: boolean;
-  jobConfig: Partial<DataFrameAnalyticsOutlierConfig>;
+  jobConfig: DeepPartial<DataFrameAnalyticsOutlierConfig>;
   jobIds: DataFrameAnalyticsId[];
   requestMessages: FormMessage[];
 }
@@ -88,7 +94,7 @@ export const getInitialState = (): State => ({
 
 export const getJobConfigFromFormState = (
   formState: State['form']
-): Partial<DataFrameAnalyticsOutlierConfig> => {
+): DeepPartial<DataFrameAnalyticsOutlierConfig> => {
   return {
     source: {
       index: formState.sourceIndex,
