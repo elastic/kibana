@@ -12,6 +12,8 @@ import { MlPopover } from './ml_popover';
 /* eslint-disable no-console */
 const originalError = console.error;
 
+jest.mock('../../lib/settings/use_kibana_ui_setting');
+
 jest.mock('../ml/permissions/has_ml_admin_permissions', () => ({
   hasMlAdminPermissions: () => true,
 }));
