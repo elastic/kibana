@@ -36,7 +36,6 @@ import chrome from 'ui/chrome';
 import { spritesheet } from '@elastic/maki';
 import sprites1 from '@elastic/maki/dist/sprite@1.png';
 import sprites2 from '@elastic/maki/dist/sprite@2.png';
-import { i18n } from '@kbn/i18n';
 import { DrawTooltip } from './draw_tooltip';
 
 const mbDrawModes = MapboxDraw.modes;
@@ -104,20 +103,16 @@ export class MBMapContainer extends React.Component {
         indexPatternId: this.props.drawState.indexPatternId,
         geoFieldName: this.props.drawState.geoFieldName,
         geoFieldType: this.props.drawState.geoFieldType,
+        geometryLabel: this.props.drawState.geometryLabel,
+        relation: this.props.drawState.relation,
       };
       const filter = isBoundingBox
         ? createSpatialFilterWithBoundingBox({
           ...options,
-          geometryLabel: i18n.translate('xpack.maps.drawControl.defaultEnvelopeLabel', {
-            defaultMessage: 'extent'
-          }),
           geometry: getBoundingBoxGeometry(geometry)
         })
         : createSpatialFilterWithGeometry({
           ...options,
-          geometryLabel: i18n.translate('xpack.maps.drawControl.defaultShapeLabel', {
-            defaultMessage: 'shape'
-          }),
           geometry
         });
       this.props.addFilters([filter]);
