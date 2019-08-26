@@ -52,7 +52,7 @@ export interface FormConfig<T = FormData> {
   schema?: FormSchema<T>;
   defaultValue?: Partial<T>;
   serializer?: SerializerFunc<T>;
-  deSerializer?: SerializerFunc;
+  deserializer?: SerializerFunc;
   options?: FormOptions;
 }
 
@@ -99,7 +99,7 @@ export interface FieldConfig<T = FormData> {
   readonly defaultValue?: unknown;
   readonly validations?: Array<ValidationConfig<T>>;
   readonly formatters?: FormatterFunc[];
-  readonly deSerializer?: SerializerFunc;
+  readonly deserializer?: SerializerFunc;
   readonly serializer?: SerializerFunc;
   readonly fieldsToValidateOnChange?: string[];
   readonly isValidationAsync?: boolean;

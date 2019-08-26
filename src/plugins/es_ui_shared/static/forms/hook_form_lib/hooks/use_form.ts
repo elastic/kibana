@@ -32,11 +32,11 @@ export const useForm = <T = FormData>(
     schema,
     defaultValue = {},
     serializer = (data: any) => data,
-    deSerializer = (data: any) => data,
+    deserializer = (data: any) => data,
     options = { errorDisplayDelay: DEFAULT_ERROR_DISPLAY_TIMEOUT, stripEmptyFields: true },
   } = formConfig;
   const defaultValueDeSerialized =
-    Object.keys(defaultValue).length === 0 ? defaultValue : deSerializer(defaultValue);
+    Object.keys(defaultValue).length === 0 ? defaultValue : deserializer(defaultValue);
   const [isSubmitted, setSubmitted] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
   const [isValid, setIsValid] = useState(true);

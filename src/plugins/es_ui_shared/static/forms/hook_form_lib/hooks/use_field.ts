@@ -41,11 +41,11 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     isValidationAsync = false,
     errorDisplayDelay = form.options.errorDisplayDelay,
     serializer = (value: unknown) => value,
-    deSerializer = (value: unknown) => value,
+    deserializer = (value: unknown) => value,
   } = config;
 
   const [value, setStateValue] = useState(
-    typeof defaultValue === 'function' ? deSerializer(defaultValue()) : deSerializer(defaultValue)
+    typeof defaultValue === 'function' ? deserializer(defaultValue()) : deserializer(defaultValue)
   );
   const [errors, setErrors] = useState<ValidationError[]>([]);
   const [isPristine, setPristine] = useState(true);
