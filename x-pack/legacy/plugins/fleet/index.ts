@@ -14,6 +14,7 @@ import { mappings } from './server/mappings';
 
 export const config = Joi.object({
   enabled: Joi.boolean().default(true),
+  encryptionKey: Joi.string().default('xpack_fleet_default_encryptionKey'),
 }).default();
 
 export function fleet(kibana: any) {
