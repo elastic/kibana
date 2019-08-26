@@ -14,7 +14,6 @@ import {
   IndexPatternLayer,
   IndexPatternPrivateState,
   IndexPattern,
-  IndexPatternColumn,
 } from './indexpattern';
 import { buildColumn, getOperationTypesForField, operationDefinitionMap } from './operations';
 import { hasField } from './utils';
