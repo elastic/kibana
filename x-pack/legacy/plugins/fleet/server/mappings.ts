@@ -50,7 +50,7 @@ export const mappings = {
       type: {
         type: 'keyword',
       },
-      token: {
+      tokenHash: {
         type: 'keyword',
       },
       config_id: {

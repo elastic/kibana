@@ -26,7 +26,7 @@ export enum TokenType {
 export interface Token {
   id: string;
   type: TokenType;
-  token: string; // JWT token
+  tokenHash: string;
   created_at: string;
   expire_at?: string;
   active: boolean;
@@ -38,7 +38,7 @@ export interface Token {
 export interface TokenAdapter {
   create(data: {
     type: TokenType;
-    token: string;
+    tokenHash: string;
     active: boolean;
     config: { id: string; sharedId: string };
     expire_at?: string;
@@ -48,7 +48,7 @@ export interface TokenAdapter {
    * Get a token by token.
    * @param token
    */
-  getByToken(token: string): Promise<Token | null>;
+  getByTokenHash(tokenHash: string): Promise<Token | null>;
 
   /**
    * Update a token

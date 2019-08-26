@@ -60,7 +60,7 @@ describe('Token Adapter', () => {
       const token = await adapter.create({
         active: true,
         type: TokenType.ACCESS_TOKEN,
-        token: 'qwerty',
+        tokenHash: 'qwerty',
         config: { id: 'configId', sharedId: 'sharedId' },
       });
       const soToken = (await soAdapter.get<Token>('tokens', token.id)) as SavedObject;
@@ -69,7 +69,7 @@ describe('Token Adapter', () => {
       expect(soToken.attributes).toMatchObject({
         active: true,
         type: TokenType.ACCESS_TOKEN,
-        token: 'qwerty',
+        tokenHash: 'qwerty',
       });
     });
   });
@@ -81,7 +81,7 @@ describe('Token Adapter', () => {
         {
           active: true,
           type: TokenType.ACCESS_TOKEN,
-          token: 'qwerty',
+          tokenHash: 'qwerty',
           config_id: 'configId',
           config_shared_id: 'sharedId',
         },
@@ -101,30 +101,30 @@ describe('Token Adapter', () => {
     });
   });
 
-  describe('getByToken', () => {
+  describe('getByTokenHash', () => {
     beforeEach(async () => {
       await loadFixtures([
         {
           active: true,
           type: TokenType.ACCESS_TOKEN,
-          token: 'qwerty',
+          tokenHash: 'qwerty',
         },
         {
           active: true,
           type: TokenType.ACCESS_TOKEN,
-          token: 'azerty',
+          tokenHash: 'azerty',
         },
       ]);
     });
 
     it('allow to find a token', async () => {
-      const token = await adapter.getByToken('azerty');
+      const token = await adapter.getByTokenHash('azerty');
       expect(token).toBeDefined();
-      expect((token as Token).token).toBe('azerty');
+      expect((token as Token).tokenHash).toBe('azerty');
     });
 
     it('return null if the token does not exists', async () => {
-      const token = await adapter.getByToken('idonotexists');
+      const token = await adapter.getByTokenHash('idonotexists');
       expect(token).toBeNull();
     });
   });
@@ -136,7 +136,7 @@ describe('Token Adapter', () => {
         {
           active: true,
           type: TokenType.ACCESS_TOKEN,
-          token: 'qwerty',
+          tokenHash: 'qwerty',
         },
       ]);
 

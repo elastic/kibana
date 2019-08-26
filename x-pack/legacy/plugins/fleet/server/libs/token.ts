@@ -5,6 +5,7 @@
  */
 
 import { sign as signToken, verify as verifyToken } from 'jsonwebtoken';
+import { createHmac } from 'crypto';
 import { TokenVerificationResponse, TokenType } from './adapters/tokens/adapter_types';
 import { TokenAdapter } from './adapters/tokens/adapter_types';
 import { FrameworkLib } from './framework';
@@ -68,11 +69,12 @@ export class TokenLib {
         expiresIn: expire,
       }
     );
+    const tokenHash = await this._hashJWTToken(token);
 
     await this.adapter.create({
       active: true,
       type: TokenType.ENROLMENT_TOKEN,
-      token,
+      tokenHash,
       config,
     });
 
@@ -91,7 +93,8 @@ export class TokenLib {
   }
 
   private async _verifyPersistedToken(token: string) {
-    const persistedToken = await this.adapter.getByToken(token);
+    const tokenHash = await this._hashJWTToken(token);
+    const persistedToken = await this.adapter.getByTokenHash(tokenHash);
     if (!persistedToken) {
       throw new Error('Token not found');
     }
@@ -99,5 +102,13 @@ export class TokenLib {
     if (persistedToken.active === false) {
       throw new Error('Token is not active');
     }
+  }
+
+  private async _hashJWTToken(token: string): Promise<string> {
+    const encryptionKey = this.frameworkLib.getSetting('encryptionKey');
+
+    const hmac = createHmac('sha512', encryptionKey);
+
+    return hmac.update(token).digest('hex');
   }
 }

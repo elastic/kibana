@@ -19,13 +19,13 @@ export class TokenAdapter implements TokenAdapterType {
 
   public async create({
     type,
-    token,
+    tokenHash,
     active,
     config,
     expire_at,
   }: {
     type: TokenType;
-    token: string;
+    tokenHash: string;
     active: boolean;
     expire_at?: string;
     config: { id: string; sharedId: string };
@@ -33,7 +33,7 @@ export class TokenAdapter implements TokenAdapterType {
     const so = await this.soAdapter.create(SAVED_OBJECT_TYPE, {
       created_at: moment().toISOString(),
       type,
-      token,
+      tokenHash,
       config_id: config.id,
       config_shared_id: config.sharedId,
       expire_at,
@@ -46,11 +46,11 @@ export class TokenAdapter implements TokenAdapterType {
     };
   }
 
-  public async getByToken(token: string): Promise<Token | null> {
+  public async getByTokenHash(tokenHash: string): Promise<Token | null> {
     const res = await this.soAdapter.find({
       type: SAVED_OBJECT_TYPE,
-      searchFields: ['token'],
-      search: token,
+      searchFields: ['tokenHash'],
+      search: tokenHash,
     });
 
     const tokens = res.saved_objects.map(this._savedObjectToToken);

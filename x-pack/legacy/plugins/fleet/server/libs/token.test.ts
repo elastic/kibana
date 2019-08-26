@@ -5,6 +5,7 @@
  */
 
 import { sign } from 'jsonwebtoken';
+import { createHmac } from 'crypto';
 import { TokenLib } from './token';
 import { FrameworkLib } from './framework';
 import { MemoryTokenAdapter } from './adapters/tokens/memory';
@@ -26,15 +27,22 @@ function generateJWTToken(): string {
   );
 }
 
+function hashJWTToken(token: string) {
+  return createHmac('sha512', 'mockedEncryptionKey')
+    .update(token)
+    .digest('hex');
+}
+
 describe('Token Lib', () => {
   describe('verify', () => {
     it('should verify a valid token', async () => {
       const tokenAdapter = new MemoryTokenAdapter();
       const token = generateJWTToken();
+      const tokenHash = hashJWTToken(token);
       tokenAdapter.create({
         type: TokenType.ENROLMENT_TOKEN,
         active: true,
-        token,
+        tokenHash,
         config: { id: 'configId', sharedId: 'sharedId' },
       });
       const tokens = new TokenLib(tokenAdapter, new FrameworkLib({} as FrameworkAdapter));
@@ -49,10 +57,11 @@ describe('Token Lib', () => {
     it('should not verify a inactive token', async () => {
       const tokenAdapter = new MemoryTokenAdapter();
       const token = generateJWTToken();
+      const tokenHash = hashJWTToken(token);
       tokenAdapter.create({
         type: TokenType.ENROLMENT_TOKEN,
         active: false,
-        token,
+        tokenHash,
         config: { id: 'configId', sharedId: 'sharedId' },
       });
       const tokens = new TokenLib(tokenAdapter, new FrameworkLib({} as FrameworkAdapter));
@@ -113,10 +122,13 @@ describe('Token Lib', () => {
         sharedId: 'config_shared_id',
       });
 
-      const persistedToken = await tokenAdapter.getByToken(token);
+      const tokenHash = hashJWTToken(token);
+      const persistedToken = await tokenAdapter.getByTokenHash(tokenHash);
 
       expect(persistedToken).toMatchObject({
-        token,
+        tokenHash,
+        config_id: 'config_id',
+        config_shared_id: 'config_shared_id',
       });
     });
   });
