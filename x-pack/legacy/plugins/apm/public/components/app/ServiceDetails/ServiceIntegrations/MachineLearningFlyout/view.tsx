@@ -24,7 +24,6 @@ import React, { useState, useEffect } from 'react';
 import { isEmpty } from 'lodash';
 import { FETCH_STATUS, useFetcher } from '../../../../../hooks/useFetcher';
 import { getHasMLJob } from '../../../../../services/rest/ml';
-import { KibanaLink } from '../../../../shared/Links/KibanaLink';
 import { MLJobLink } from '../../../../shared/Links/MachineLearningLinks/MLJobLink';
 import { MLLink } from '../../../../shared/Links/MachineLearningLinks/MLLink';
 import { TransactionSelect } from './TransactionSelect';
@@ -32,7 +31,6 @@ import { IUrlParams } from '../../../../../context/UrlParamsContext/types';
 import { useServiceTransactionTypes } from '../../../../../hooks/useServiceTransactionTypes';
 
 interface Props {
-  hasIndexPattern: boolean;
   isCreatingJob: boolean;
   onClickCreate: ({ transactionType }: { transactionType: string }) => void;
   onClose: () => void;
@@ -40,7 +38,6 @@ interface Props {
 }
 
 export function MachineLearningFlyoutView({
-  hasIndexPattern,
   isCreatingJob,
   onClickCreate,
   onClose,
@@ -128,37 +125,6 @@ export function MachineLearningFlyoutView({
             <EuiSpacer size="m" />
           </div>
         )}
-
-        {!hasIndexPattern && (
-          <div>
-            <EuiCallOut
-              title={
-                <span>
-                  <FormattedMessage
-                    id="xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.noPatternTitle"
-                    defaultMessage="No APM index pattern available. To create a job, please import the APM index pattern via the {setupInstructionLink}"
-                    values={{
-                      setupInstructionLink: (
-                        <KibanaLink path={`/home/tutorial/apm`}>
-                          {i18n.translate(
-                            'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.noPatternTitle.setupInstructionLinkText',
-                            {
-                              defaultMessage: 'Setup Instructions'
-                            }
-                          )}
-                        </KibanaLink>
-                      )
-                    }}
-                  />
-                </span>
-              }
-              color="warning"
-              iconType="alert"
-            />
-            <EuiSpacer size="m" />
-          </div>
-        )}
-
         <EuiText>
           <p>
             <FormattedMessage
@@ -233,12 +199,7 @@ export function MachineLearningFlyoutView({
                   onClickCreate({ transactionType: selectedTransactionType })
                 }
                 fill
-                disabled={
-                  isCreatingJob ||
-                  hasMLJob ||
-                  !hasIndexPattern ||
-                  isLoadingMLJob
-                }
+                disabled={isCreatingJob || hasMLJob || isLoadingMLJob}
               >
                 {i18n.translate(
                   'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.createNewJobButtonLabel',
