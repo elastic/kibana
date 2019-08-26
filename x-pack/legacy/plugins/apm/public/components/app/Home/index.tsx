@@ -8,31 +8,42 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
-  EuiButtonEmpty
+  EuiButtonEmpty,
+  EuiTabs,
+  EuiSpacer
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { $ElementType } from 'utility-types';
 import { ApmHeader } from '../../shared/ApmHeader';
-import { HistoryTabs, IHistoryTab } from '../../shared/HistoryTabs';
 import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
 import { ServiceOverview } from '../ServiceOverview';
 import { TraceOverview } from '../TraceOverview';
 import { APMLink } from '../../shared/Links/apm/APMLink';
+import { ServiceOverviewLink } from '../../shared/Links/apm/ServiceOverviewLink';
+import { TraceOverviewLink } from '../../shared/Links/apm/TraceOverviewLink';
+import { EuiTabLink } from '../../shared/EuiTabLink';
 
-const homeTabs: IHistoryTab[] = [
+const homeTabs = [
   {
-    path: '/services',
-    title: i18n.translate('xpack.apm.home.servicesTabLabel', {
-      defaultMessage: 'Services'
-    }),
+    link: (
+      <ServiceOverviewLink>
+        {i18n.translate('xpack.apm.home.servicesTabLabel', {
+          defaultMessage: 'Services'
+        })}
+      </ServiceOverviewLink>
+    ),
     render: () => <ServiceOverview />,
     name: 'services'
   },
   {
-    path: '/traces',
-    title: i18n.translate('xpack.apm.home.tracesTabLabel', {
-      defaultMessage: 'Traces'
-    }),
+    link: (
+      <TraceOverviewLink>
+        {i18n.translate('xpack.apm.home.tracesTabLabel', {
+          defaultMessage: 'Traces'
+        })}
+      </TraceOverviewLink>
+    ),
     render: () => <TraceOverview />,
     name: 'traces'
   }
@@ -42,7 +53,15 @@ const SETTINGS_LINK_LABEL = i18n.translate('xpack.apm.settingsLinkLabel', {
   defaultMessage: 'Settings'
 });
 
-export function Home() {
+interface Props {
+  tab: 'traces' | 'services';
+}
+
+export function Home({ tab }: Props) {
+  const selectedTab = homeTabs.find(
+    homeTab => homeTab.name === tab
+  ) as $ElementType<typeof homeTabs, number>;
+
   return (
     <div>
       <ApmHeader>
@@ -64,7 +83,19 @@ export function Home() {
           </EuiFlexItem>
         </EuiFlexGroup>
       </ApmHeader>
-      <HistoryTabs tabs={homeTabs} />
+      <EuiTabs>
+        {homeTabs.map(homeTab => (
+          <EuiTabLink
+            onClick={() => null}
+            isSelected={homeTab === selectedTab}
+            key={homeTab.name}
+          >
+            {homeTab.link}
+          </EuiTabLink>
+        ))}
+      </EuiTabs>
+      <EuiSpacer />
+      {selectedTab.render()}
     </div>
   );
 }
