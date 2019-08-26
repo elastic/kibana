@@ -50,10 +50,6 @@ export class MapEmbeddable extends Embeddable {
       parent);
 
     this._layerList = config.layerList;
-    // for unknown reasons, super constructor resets this.input to parent.getInputForChild<TEmbeddableInput>(this.id)
-    // This means that this.input !== initialInput
-    // Work around so initialInput is available during render
-    this._initialInput = initialInput;
     this._store = createMapStore();
 
     this._subscription = this.getInput$().subscribe((input) => this.onContainerStateChanged(input));
@@ -103,19 +99,19 @@ export class MapEmbeddable extends Embeddable {
     this._store.dispatch(setReadOnly(true));
     this._store.dispatch(disableScrollZoom());
 
-    if (_.has(this._initialInput, 'isLayerTOCOpen')) {
-      this._store.dispatch(setIsLayerTOCOpen(this._initialInput.isLayerTOCOpen));
+    if (_.has(this.input, 'isLayerTOCOpen')) {
+      this._store.dispatch(setIsLayerTOCOpen(this.input.isLayerTOCOpen));
     }
 
-    if (_.has(this._initialInput, 'openTOCDetails')) {
-      this._store.dispatch(setOpenTOCDetails(this._initialInput.openTOCDetails));
+    if (_.has(this.input, 'openTOCDetails')) {
+      this._store.dispatch(setOpenTOCDetails(this.input.openTOCDetails));
     }
 
-    if (this._initialInput.mapCenter) {
+    if (this.input.mapCenter) {
       this._store.dispatch(setGotoWithCenter({
-        lat: this._initialInput.mapCenter.lat,
-        lon: this._initialInput.mapCenter.lon,
-        zoom: this._initialInput.mapCenter.zoom,
+        lat: this.input.mapCenter.lat,
+        lon: this.input.mapCenter.lon,
+        zoom: this.input.mapCenter.zoom,
       }));
     }
 

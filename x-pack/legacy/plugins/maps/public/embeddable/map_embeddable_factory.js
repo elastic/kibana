@@ -92,20 +92,10 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
     parent
   ) {
     const savedMap = await this._fetchSavedMap(savedObjectId);
-
-    let layerList;
-    let mergedInput;
-    try {
-      layerList = getInitialLayers(savedMap.layerListJSON);
-      mergedInput = mergeInputWithSavedMap(input, savedMap);
-    } catch (error) {
-      throw new Error(i18n.translate('xpack.maps.mapEmbeddableFactory.invalidSavedObject', {
-        defaultMessage: 'Unable to load map, malformed saved object',
-      }));
-    }
+    const layerList = getInitialLayers(savedMap.layerListJSON);
     const indexPatterns = await this._getIndexPatterns(layerList);
 
-    return new MapEmbeddable(
+    const embeddable = new MapEmbeddable(
       {
         layerList,
         title: savedMap.title,
@@ -113,9 +103,19 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
         indexPatterns,
         editable: this.isEditable(),
       },
-      mergedInput,
+      input,
       parent
     );
+
+    try {
+      embeddable.updateInput(mergeInputWithSavedMap(input, savedMap));
+    } catch (error) {
+      throw new Error(i18n.translate('xpack.maps.mapEmbeddableFactory.invalidSavedObject', {
+        defaultMessage: 'Unable to load map, malformed saved object',
+      }));
+    }
+
+    return embeddable;
   }
 
   async createFromState(

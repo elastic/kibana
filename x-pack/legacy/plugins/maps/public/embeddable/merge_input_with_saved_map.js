@@ -7,8 +7,15 @@
 import _ from 'lodash';
 import { DEFAULT_IS_LAYER_TOC_OPEN } from '../reducers/ui';
 
+const MAP_EMBEDDABLE_INPUT_KEYS = [
+  'hideFilterActions',
+  'isLayerTOCOpen',
+  'openTOCDetails',
+  'mapCenter'
+];
+
 export function mergeInputWithSavedMap(input, savedMap) {
-  const mergedInput = { ...input };
+  const mergedInput = _.pick(input, MAP_EMBEDDABLE_INPUT_KEYS);
 
   if (!_.has(input, 'isLayerTOCOpen') && savedMap.uiStateJSON) {
     const uiState = JSON.parse(savedMap.uiStateJSON);
