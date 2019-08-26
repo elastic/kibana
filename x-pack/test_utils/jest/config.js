@@ -27,7 +27,7 @@ export default {
     '<rootDir>/../src/dev/jest/setup/polyfills.js',
     '<rootDir>/../src/dev/jest/setup/enzyme.js',
   ],
-  coverageDirectory: '<rootDir>/../target/jest-coverage',
+  coverageDirectory: '<rootDir>/../target/kibana-coverage/jest',
   coverageReporters: ['html'],
   moduleFileExtensions: ['js', 'json', 'ts', 'tsx'],
   modulePathIgnorePatterns: ['__fixtures__/', 'target/'],

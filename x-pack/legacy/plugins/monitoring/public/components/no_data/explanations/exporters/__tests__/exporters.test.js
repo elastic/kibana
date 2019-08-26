@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { renderWithIntl } from '../../../../../../../../../test_utils/enzyme_helpers';
-import { ExplainExporters } from '../exporters';
+import { ExplainExporters, ExplainExportersCloud } from '../exporters';
 
 describe('ExplainExporters', () => {
   test('should explain about xpack.monitoring.exporters setting', () => {
@@ -16,6 +16,15 @@ describe('ExplainExporters', () => {
         data={'myMonitoringClusterExporter1'}
         context="esProd001"
       />
+    );
+    expect(component).toMatchSnapshot();
+  });
+});
+
+describe('ExplainExportersCloud', () => {
+  test('should explain about xpack.monitoring.exporters setting in a cloud environment', () => {
+    const component = renderWithIntl(
+      <ExplainExportersCloud />
     );
     expect(component).toMatchSnapshot();
   });
