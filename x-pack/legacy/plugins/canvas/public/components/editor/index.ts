@@ -4,14 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default {
-  getBasePath: () => '/abc',
-  trackSubUrlForApp: () => undefined, // noop
-  getUiSettingsClient: () => {
-    return {
-      get: () => {
-        return null;
-      },
-    };
-  },
-};
+export { Editor } from './editor';
