@@ -4,16 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import {
   registerTestBed,
   TestBed,
   TestBedConfig,
   findTestSubject,
+  nextTick,
 } from '../../../../../../test_utils';
 import { IndexManagementHome } from '../../../public/sections/home';
 import { BASE_PATH } from '../../../common/constants';
 import { indexManagementStore } from '../../../public/store';
+import { Template } from '../../../common/types';
 
 const testBedConfig: TestBedConfig = {
   store: indexManagementStore,
@@ -27,10 +30,15 @@ const testBedConfig: TestBedConfig = {
 const initTestBed = registerTestBed(IndexManagementHome, testBedConfig);
 
 export interface IdxMgmtHomeTestBed extends TestBed<IdxMgmtTestSubjects> {
+  findAction: (action: 'edit' | 'clone' | 'delete') => ReactWrapper;
   actions: {
-    selectTab: (tab: 'indices' | 'index templates') => void;
+    selectHomeTab: (tab: 'indicesTab' | 'templatesTab') => void;
+    selectDetailsTab: (tab: 'summary' | 'settings' | 'mappings' | 'aliases') => void;
     clickReloadButton: () => void;
-    clickTemplateActionAt: (index: number, action: 'delete') => void;
+    clickTemplateAction: (name: Template['name'], action: 'edit' | 'clone' | 'delete') => void;
+    clickTemplateAt: (index: number) => void;
+    clickCloseDetailsButton: () => void;
+    clickActionMenu: (name: Template['name']) => void;
   };
 }
 
@@ -38,14 +46,28 @@ export const setup = async (): Promise<IdxMgmtHomeTestBed> => {
   const testBed = await initTestBed();
 
   /**
+   * Additional helpers
+   */
+  const findAction = (action: 'edit' | 'clone' | 'delete') => {
+    const actions = ['edit', 'clone', 'delete'];
+    const { component } = testBed;
+
+    return component.find('.euiContextMenuItem').at(actions.indexOf(action));
+  };
+
+  /**
    * User Actions
    */
 
-  const selectTab = (tab: 'indices' | 'index templates') => {
-    const tabs = ['indices', 'index templates'];
+  const selectHomeTab = (tab: 'indicesTab' | 'templatesTab') => {
+    testBed.find(tab).simulate('click');
+  };
+
+  const selectDetailsTab = (tab: 'summary' | 'settings' | 'mappings' | 'aliases') => {
+    const tabs = ['summary', 'settings', 'mappings', 'aliases'];
 
     testBed
-      .find('tab')
+      .find('templateDetails.tab')
       .at(tabs.indexOf(tab))
       .simulate('click');
   };
@@ -55,26 +77,60 @@ export const setup = async (): Promise<IdxMgmtHomeTestBed> => {
     find('reloadButton').simulate('click');
   };
 
-  const clickTemplateActionAt = async (index: number, action: 'delete') => {
-    const { component, table } = testBed;
-    const { rows } = table.getMetaData('templatesTable');
-    const currentRow = rows[index];
-    const lastColumn = currentRow.columns[currentRow.columns.length - 1].reactWrapper;
-    const button = findTestSubject(lastColumn, `${action}TemplateButton`);
+  const clickActionMenu = async (templateName: Template['name']) => {
+    const { component } = testBed;
+
+    // When a table has > 2 actions, EUI displays an overflow menu with an id "<template_name>-actions"
+    // The template name may contain a period (.) so we use bracket syntax for selector
+    component.find(`div[id="${templateName}-actions"] button`).simulate('click');
+  };
+
+  const clickTemplateAction = (
+    templateName: Template['name'],
+    action: 'edit' | 'clone' | 'delete'
+  ) => {
+    const actions = ['edit', 'clone', 'delete'];
+    const { component } = testBed;
+
+    clickActionMenu(templateName);
+
+    component
+      .find('.euiContextMenuItem')
+      .at(actions.indexOf(action))
+      .simulate('click');
+  };
+
+  const clickTemplateAt = async (index: number) => {
+    const { component, table, router } = testBed;
+    const { rows } = table.getMetaData('templateTable');
+    const templateLink = findTestSubject(rows[index].reactWrapper, 'templateDetailsLink');
 
     // @ts-ignore (remove when react 16.9.0 is released)
     await act(async () => {
-      button.simulate('click');
+      const { href } = templateLink.props();
+      router.navigateTo(href!);
+      await nextTick();
       component.update();
     });
   };
 
+  const clickCloseDetailsButton = () => {
+    const { find } = testBed;
+
+    find('closeDetailsButton').simulate('click');
+  };
+
   return {
     ...testBed,
+    findAction,
     actions: {
-      selectTab,
+      selectHomeTab,
+      selectDetailsTab,
       clickReloadButton,
-      clickTemplateActionAt,
+      clickTemplateAction,
+      clickTemplateAt,
+      clickCloseDetailsButton,
+      clickActionMenu,
     },
   };
 };
@@ -82,19 +138,36 @@ export const setup = async (): Promise<IdxMgmtHomeTestBed> => {
 type IdxMgmtTestSubjects = TestSubjects;
 
 export type TestSubjects =
+  | 'aliasesTab'
   | 'appTitle'
   | 'cell'
+  | 'closeDetailsButton'
+  | 'createTemplateButton'
   | 'deleteSystemTemplateCallOut'
   | 'deleteTemplateButton'
-  | 'deleteTemplatesButton'
   | 'deleteTemplatesConfirmation'
   | 'documentationLink'
   | 'emptyPrompt'
+  | 'manageTemplateButton'
+  | 'mappingsTab'
+  | 'noAliasesCallout'
+  | 'noMappingsCallout'
+  | 'noSettingsCallout'
   | 'indicesList'
+  | 'indicesTab'
   | 'reloadButton'
   | 'row'
+  | 'sectionError'
   | 'sectionLoading'
+  | 'settingsTab'
+  | 'summaryTab'
+  | 'summaryTitle'
   | 'systemTemplatesSwitch'
-  | 'tab'
-  | 'templatesList'
-  | 'templatesTable';
+  | 'templateDetails'
+  | 'templateDetails.manageTemplateButton'
+  | 'templateDetails.sectionLoading'
+  | 'templateDetails.tab'
+  | 'templateDetails.title'
+  | 'templateList'
+  | 'templateTable'
+  | 'templatesTab';

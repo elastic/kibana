@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
+import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
 
 import {
   ActionType,
@@ -14,13 +16,11 @@ import {
   ExecutorType,
 } from '../types';
 
-// config definition
+// secrets definition
 
-const unencryptedConfigProperties: string[] = [];
+export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
 
-export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
-
-const ConfigSchema = schema.object({
+const SecretsSchema = schema.object({
   webhookUrl: schema.string(),
 });
 
@@ -41,9 +41,8 @@ export function getActionType({ executor }: { executor?: ExecutorType } = {}): A
   return {
     id: '.slack',
     name: 'slack',
-    unencryptedAttributes: unencryptedConfigProperties,
     validate: {
-      config: ConfigSchema,
+      secrets: SecretsSchema,
       params: ParamsSchema,
     },
     executor,
@@ -58,11 +57,12 @@ export const actionType = getActionType();
 async function slackExecutor(
   execOptions: ActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult> {
-  const config = execOptions.config as ActionTypeConfigType;
+  const id = execOptions.id;
+  const secrets = execOptions.secrets as ActionTypeSecretsType;
   const params = execOptions.params as ActionParamsType;
 
   let result: IncomingWebhookResult;
-  const { webhookUrl } = config;
+  const { webhookUrl } = secrets;
   const { message } = params;
 
   try {
@@ -70,36 +70,44 @@ async function slackExecutor(
     result = await webhook.send(message);
   } catch (err) {
     if (err.original == null || err.original.response == null) {
-      return errorResult(err.message);
+      return errorResult(id, err.message);
     }
 
     const { status, statusText, headers } = err.original.response;
 
     // special handling for 5xx
     if (status >= 500) {
-      return retryResult(err.message);
+      return retryResult(id, err.message);
     }
 
     // special handling for rate limiting
     if (status === 429) {
-      const retryAfterString = headers['retry-after'];
-      if (retryAfterString != null) {
-        const retryAfter = parseInt(retryAfterString, 10);
-        if (!isNaN(retryAfter)) {
-          return retryResultSeconds(err.message, retryAfter);
-        }
-      }
+      return getRetryAfterIntervalFromHeaders(headers)
+        .map(retry => retryResultSeconds(id, err.message, retry))
+        .getOrElse(retryResult(id, err.message));
     }
 
-    return errorResult(`${err.message} - ${statusText}`);
+    return errorResult(id, `${err.message} - ${statusText}`);
   }
 
   if (result == null) {
-    return errorResult(`unexpected null response from slack`);
+    const errMessage = i18n.translate(
+      'xpack.actions.builtin.slack.unexpectedNullResponseErrorMessage',
+      {
+        defaultMessage: 'unexpected null response from slack',
+      }
+    );
+    return errorResult(id, errMessage);
   }
 
   if (result.text !== 'ok') {
-    return errorResult(`unexpected text response from slack (expecting 'ok')`);
+    const errMessage = i18n.translate(
+      'xpack.actions.builtin.slack.unexpectedTextResponseErrorMessage',
+      {
+        defaultMessage: 'unexpected text response from slack',
+      }
+    );
+    return errorResult(id, errMessage);
   }
 
   return successResult(result);
@@ -109,28 +117,60 @@ function successResult(data: any): ActionTypeExecutorResult {
   return { status: 'ok', data };
 }
 
-function errorResult(message: string): ActionTypeExecutorResult {
+function errorResult(id: string, message: string): ActionTypeExecutorResult {
+  const errMessage = i18n.translate('xpack.actions.builtin.slack.errorPostingErrorMessage', {
+    defaultMessage: 'an error occurred in action "{id}" posting a slack message: {message}',
+    values: {
+      id,
+      message,
+    },
+  });
   return {
     status: 'error',
-    message: `an error occurred posting a slack message: ${message}`,
+    message: errMessage,
   };
 }
 
-function retryResult(message: string): ActionTypeExecutorResult {
+function retryResult(id: string, message: string): ActionTypeExecutorResult {
+  const errMessage = i18n.translate(
+    'xpack.actions.builtin.slack.errorPostingRetryLaterErrorMessage',
+    {
+      defaultMessage: 'an error occurred in action "{id}" posting a slack message, retry later',
+      values: {
+        id,
+      },
+    }
+  );
   return {
     status: 'error',
-    message: `an error occurred posting a slack message, retrying later`,
+    message: errMessage,
     retry: true,
   };
 }
 
-function retryResultSeconds(message: string, retryAfter: number = 60): ActionTypeExecutorResult {
+function retryResultSeconds(
+  id: string,
+  message: string,
+  retryAfter: number
+): ActionTypeExecutorResult {
   const retryEpoch = Date.now() + retryAfter * 1000;
   const retry = new Date(retryEpoch);
   const retryString = retry.toISOString();
+  const errMessage = i18n.translate(
+    'xpack.actions.builtin.slack.errorPostingRetryDateErrorMessage',
+    {
+      defaultMessage:
+        'an error occurred in action "{id}" posting a slack message, retry at {retryString}: {message}',
+      values: {
+        id,
+        retryString,
+        message,
+      },
+    }
+  );
   return {
     status: 'error',
-    message: `an error occurred posting a slack message, retry at ${retryString}: ${message}`,
+    message: errMessage,
     retry,
   };
 }

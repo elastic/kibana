@@ -32,7 +32,8 @@
 
 }
 
-.canvasArg__form, .canvasArg__accordion {
+.canvasArg__form,
+.canvasArg__accordion {
   &:hover {
     .canvasArg__remove {
       opacity: 1;
@@ -78,8 +79,9 @@
     background: transparent;
   }
 
-  &:before, &:after {
-    content: "";
+  &:before,
+  &:after {
+    content: '';
     height: 1px;
     position: absolute;
     left: 0;

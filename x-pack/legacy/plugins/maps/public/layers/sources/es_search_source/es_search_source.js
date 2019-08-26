@@ -284,7 +284,7 @@ export class ESSearchSource extends AbstractESSource {
     searchSource.setField('size', 1);
     const query = {
       language: 'kuery',
-      query: `_id:${docId}`
+      query: `_id:"${docId}"`
     };
     searchSource.setField('query', query);
     searchSource.setField('fields', this._descriptor.tooltipProperties);

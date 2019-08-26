@@ -18,6 +18,7 @@ export function deleteRoute(server: Hapi.Server) {
     method: 'DELETE',
     path: `/api/action/{id}`,
     options: {
+      tags: ['access:actions-all'],
       validate: {
         params: Joi.object()
           .keys({
@@ -26,10 +27,11 @@ export function deleteRoute(server: Hapi.Server) {
           .required(),
       },
     },
-    async handler(request: DeleteRequest) {
+    async handler(request: DeleteRequest, h: Hapi.ResponseToolkit) {
       const { id } = request.params;
       const actionsClient = request.getActionsClient!();
-      return await actionsClient.delete({ id });
+      await actionsClient.delete({ id });
+      return h.response().code(204);
     },
   });
 }

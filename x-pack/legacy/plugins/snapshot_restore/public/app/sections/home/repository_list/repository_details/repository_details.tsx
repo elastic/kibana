@@ -293,8 +293,8 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
           <EuiSpacer size="m" />
           <EuiButton onClick={verifyRepository} color="primary" isLoading={isLoadingVerification}>
             <FormattedMessage
-              id="xpack.snapshotRestore.repositoryDetails.reverifyButtonLabel"
-              defaultMessage="Re-verify repository"
+              id="xpack.snapshotRestore.repositoryDetails.verifyButtonLabel"
+              defaultMessage="Verify repository"
             />
           </EuiButton>
         </Fragment>
@@ -390,7 +390,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
       data-test-subj="repositoryDetail"
       aria-labelledby="srRepositoryDetailsFlyoutTitle"
       size="m"
-      maxWidth={400}
+      maxWidth={550}
     >
       <EuiFlyoutHeader>
         <EuiTitle size="m">

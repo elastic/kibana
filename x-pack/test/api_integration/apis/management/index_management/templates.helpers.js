@@ -7,17 +7,24 @@
 import { API_BASE_PATH, INDEX_PATTERNS } from './constants';
 
 export const registerHelpers = ({ supertest }) => {
-  const list = () => supertest.get(`${API_BASE_PATH}/templates`);
+  const getAllTemplates = () => supertest.get(`${API_BASE_PATH}/templates`);
+
+  const getOneTemplate = name => supertest.get(`${API_BASE_PATH}/templates/${name}`);
 
   const getTemplatePayload = name => ({
     name,
     order: 1,
     indexPatterns: INDEX_PATTERNS,
     version: 1,
-    settings: {
-      number_of_shards: 1
-    },
-    mappings: {
+    settings: JSON.stringify({
+      number_of_shards: 1,
+      index: {
+        lifecycle: {
+          name: 'my_policy',
+        }
+      }
+    }),
+    mappings: JSON.stringify({
       _source: {
         enabled: false
       },
@@ -30,10 +37,10 @@ export const registerHelpers = ({ supertest }) => {
           format: 'EEE MMM dd HH:mm:ss Z yyyy'
         }
       }
-    },
-    aliases: {
+    }),
+    aliases: JSON.stringify({
       alias1: {}
-    }
+    })
   });
 
   const createTemplate = payload =>
@@ -47,10 +54,18 @@ export const registerHelpers = ({ supertest }) => {
       .delete(`${API_BASE_PATH}/templates/${templatesToDelete.map(template => encodeURIComponent(template)).join(',')}`)
       .set('kbn-xsrf', 'xxx');
 
+  const updateTemplate = (payload, templateName) =>
+    supertest
+      .put(`${API_BASE_PATH}/templates/${templateName}`)
+      .set('kbn-xsrf', 'xxx')
+      .send(payload);
+
   return {
-    list,
+    getAllTemplates,
+    getOneTemplate,
     getTemplatePayload,
     createTemplate,
+    updateTemplate,
     deleteTemplates,
   };
 };

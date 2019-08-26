@@ -4,17 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 
 const DEFAULT_TAGS = ['info', 'alerting'];
-
-// config definition
-
-const unencryptedConfigProperties: string[] = [];
-
-const ConfigSchema = schema.object({});
 
 // params definition
 
@@ -30,9 +25,7 @@ const ParamsSchema = schema.object({
 export const actionType: ActionType = {
   id: '.server-log',
   name: 'server-log',
-  unencryptedAttributes: unencryptedConfigProperties,
   validate: {
-    config: ConfigSchema,
     params: ParamsSchema,
   },
   executor,
@@ -41,15 +34,23 @@ export const actionType: ActionType = {
 // action executor
 
 async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionTypeExecutorResult> {
+  const id = execOptions.id;
   const params = execOptions.params as ActionParamsType;
   const services = execOptions.services;
 
   try {
     services.log(params.tags, params.message);
   } catch (err) {
+    const message = i18n.translate('xpack.actions.builtin.serverLog.errorLoggingErrorMessage', {
+      defaultMessage: 'error in action "{id}" logging message: {errorMessage}',
+      values: {
+        id,
+        errorMessage: err.message,
+      },
+    });
     return {
       status: 'error',
-      message: `error logging message: ${err.message}`,
+      message,
     };
   }
 

@@ -9,6 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
 import { NOT_AVAILABLE_LABEL } from '../../common/i18n';
 
+const HOURS_CUT_OFF = 3600000000; // 1 hour (in microseconds)
+const MINUTES_CUT_OFF = 60000000; // 1 minute (in microseconds)
 const SECONDS_CUT_OFF = 10 * 1000000; // 10 seconds (in microseconds)
 const MILLISECONDS_CUT_OFF = 10 * 1000; // 10 milliseconds (in microseconds)
 const SPACE = ' ';
@@ -22,6 +24,38 @@ type FormatterValue = number | undefined | null;
 interface FormatterOptions {
   withUnit?: boolean;
   defaultValue?: string;
+}
+
+export function asHours(
+  value: FormatterValue,
+  { withUnit = true, defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
+) {
+  if (value == null) {
+    return defaultValue;
+  }
+  const hoursLabel =
+    SPACE +
+    i18n.translate('xpack.apm.formatters.hoursTimeUnitLabel', {
+      defaultMessage: 'h'
+    });
+  const formatted = asDecimal(value / 3600000000);
+  return `${formatted}${withUnit ? hoursLabel : ''}`;
+}
+
+export function asMinutes(
+  value: FormatterValue,
+  { withUnit = true, defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
+) {
+  if (value == null) {
+    return defaultValue;
+  }
+  const minutesLabel =
+    SPACE +
+    i18n.translate('xpack.apm.formatters.minutesTimeUnitLabel', {
+      defaultMessage: 'min'
+    });
+  const formatted = asDecimal(value / 60000000);
+  return `${formatted}${withUnit ? minutesLabel : ''}`;
 }
 
 export function asSeconds(
@@ -74,13 +108,20 @@ export function asMicros(
   return `${formatted}${withUnit ? microsLabel : ''}`;
 }
 
-type TimeFormatter = (
-  max: number
-) => (value: FormatterValue, options: FormatterOptions) => string;
+export type TimeFormatter = (
+  value: FormatterValue,
+  options?: FormatterOptions
+) => string;
 
-export const getTimeFormatter: TimeFormatter = memoize((max: number) => {
+type TimeFormatterBuilder = (max: number) => TimeFormatter;
+
+export const getTimeFormatter: TimeFormatterBuilder = memoize((max: number) => {
   const unit = timeUnit(max);
   switch (unit) {
+    case 'h':
+      return asHours;
+    case 'm':
+      return asMinutes;
     case 's':
       return asSeconds;
     case 'ms':
@@ -91,7 +132,11 @@ export const getTimeFormatter: TimeFormatter = memoize((max: number) => {
 });
 
 export function timeUnit(max: number) {
-  if (max > SECONDS_CUT_OFF) {
+  if (max > HOURS_CUT_OFF) {
+    return 'h';
+  } else if (max > MINUTES_CUT_OFF) {
+    return 'm';
+  } else if (max > SECONDS_CUT_OFF) {
     return 's';
   } else if (max > MILLISECONDS_CUT_OFF) {
     return 'ms';
@@ -142,53 +187,40 @@ export function asPercent(
   return numeral(decimal).format('0.0%');
 }
 
-type ByteFormatter = (value: number | null) => string;
-
-function asKilobytes(value: number | null) {
-  if (value === null || isNaN(value)) {
-    return '';
-  }
+function asKilobytes(value: number) {
   return `${asDecimal(value / 1000)} KB`;
 }
 
-function asMegabytes(value: number | null) {
-  if (value === null || isNaN(value)) {
-    return '';
-  }
+function asMegabytes(value: number) {
   return `${asDecimal(value / 1e6)} MB`;
 }
 
-function asGigabytes(value: number | null) {
-  if (value === null || isNaN(value)) {
-    return '';
-  }
+function asGigabytes(value: number) {
   return `${asDecimal(value / 1e9)} GB`;
 }
 
-function asTerabytes(value: number | null) {
-  if (value === null || isNaN(value)) {
-    return '';
-  }
+function asTerabytes(value: number) {
   return `${asDecimal(value / 1e12)} TB`;
 }
 
-export function asBytes(value: number | null | undefined) {
-  if (value === null || value === undefined || isNaN(value)) {
-    return '';
-  }
+function asBytes(value: number) {
   return `${asDecimal(value)} B`;
 }
 
-export function asDynamicBytes(value: number | null | undefined) {
-  if (value === null || value === undefined || isNaN(value)) {
-    return '';
-  }
+const bailIfNumberInvalid = (cb: (val: number) => string) => {
+  return (val: number | null | undefined) => {
+    if (val === null || val === undefined || isNaN(val)) {
+      return '';
+    }
+    return cb(val);
+  };
+};
+
+export const asDynamicBytes = bailIfNumberInvalid((value: number) => {
   return unmemoizedFixedByteFormatter(value)(value);
-}
+});
 
-type GetByteFormatter = (max: number) => ByteFormatter;
-
-const unmemoizedFixedByteFormatter: GetByteFormatter = max => {
+const unmemoizedFixedByteFormatter = (max: number) => {
   if (max > 1e12) {
     return asTerabytes;
   }
@@ -208,4 +240,8 @@ const unmemoizedFixedByteFormatter: GetByteFormatter = max => {
   return asBytes;
 };
 
-export const getFixedByteFormatter = memoize(unmemoizedFixedByteFormatter);
+export const getFixedByteFormatter = memoize((max: number) => {
+  const formatter = unmemoizedFixedByteFormatter(max);
+
+  return bailIfNumberInvalid(formatter);
+});

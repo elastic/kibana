@@ -4,7 +4,7 @@
 
 ## RouteConfigOptions.authRequired property
 
-A flag shows that authentication for a route: enabled when true disabled when false
+A flag shows that authentication for a route: `enabled` when true `disabled` when false
 
 Enabled by default.
 

@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const PageObjects = getPageObjects([
@@ -22,6 +21,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
+  const queryBar = getService('queryBar');
+  const savedQueryManagementComponent = getService('savedQueryManagementComponent');
 
   describe('feature controls security', () => {
     before(async () => {
@@ -81,7 +82,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
       it(`landing page shows "Create new Visualization" button`, async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
-        await testSubjects.existOrFail('visualizeLandingPage', 10000);
+        await testSubjects.existOrFail('visualizeLandingPage', { timeout: 10000 });
         await testSubjects.existOrFail('newItemButton');
       });
 
@@ -94,7 +95,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('visualizationLoader', 10000);
+        await testSubjects.existOrFail('visualizationLoader', { timeout: 10000 });
       });
 
       it('can save existing Visualization', async () => {
@@ -102,7 +103,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('visualizeSaveButton', 10000);
+        await testSubjects.existOrFail('visualizeSaveButton', { timeout: 10000 });
       });
 
       it('Embed code shows create short-url button', async () => {
@@ -113,6 +114,41 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       it('Permalinks shows create short-url button', async () => {
         await PageObjects.share.openShareMenuItem('Permalinks');
         await PageObjects.share.createShortUrlExistOrFail();
+        // close menu
+        await PageObjects.share.clickShareTopNavButton();
+      });
+
+      it('allow saving via the saved query management component popover with no saved query loaded', async () => {
+        await queryBar.setQuery('response:200');
+        await savedQueryManagementComponent.saveNewQuery('foo', 'bar', true, false);
+        await savedQueryManagementComponent.savedQueryExistOrFail('foo');
+        await savedQueryManagementComponent.closeSavedQueryManagementComponent();
+      });
+
+      it('allow saving a currently loaded saved query as a new query via the saved query management component ', async () => {
+        await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
+          'foo2',
+          'bar2',
+          true,
+          false
+        );
+        await savedQueryManagementComponent.savedQueryExistOrFail('foo2');
+        await savedQueryManagementComponent.closeSavedQueryManagementComponent();
+      });
+
+      it('allow saving changes to a currently loaded query via the saved query management component', async () => {
+        await savedQueryManagementComponent.loadSavedQuery('foo2');
+        await queryBar.setQuery('response:404');
+        await savedQueryManagementComponent.updateCurrentlyLoadedQuery('bar2', false, false);
+        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
+        await savedQueryManagementComponent.loadSavedQuery('foo2');
+        const queryString = await queryBar.getQueryString();
+        expect(queryString).to.eql('response:404');
+      });
+
+      it('allows deleting saved queries in the saved query management component ', async () => {
+        await savedQueryManagementComponent.deleteSavedQuery('foo2');
+        await savedQueryManagementComponent.savedQueryMissingOrFail('foo2');
       });
     });
 
@@ -162,7 +198,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
       it(`landing page shows "Create new Visualization" button`, async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
-        await testSubjects.existOrFail('visualizeLandingPage', 10000);
+        await testSubjects.existOrFail('visualizeLandingPage', { timeout: 10000 });
         await testSubjects.existOrFail('newItemButton');
       });
 
@@ -175,7 +211,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('visualizationLoader', 10000);
+        await testSubjects.existOrFail('visualizationLoader', { timeout: 10000 });
       });
 
       it(`can't save existing Visualization`, async () => {
@@ -183,8 +219,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('shareTopNavButton', 10000);
-        await testSubjects.missingOrFail('visualizeSaveButton', 10000);
+        await testSubjects.existOrFail('shareTopNavButton', { timeout: 10000 });
+        await testSubjects.missingOrFail('visualizeSaveButton', { timeout: 10000 });
       });
 
       it(`Embed Code doesn't show create short-url button`, async () => {
@@ -195,6 +231,33 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       it(`Permalinks doesn't show create short-url button`, async () => {
         await PageObjects.share.openShareMenuItem('Permalinks');
         await PageObjects.share.createShortUrlMissingOrFail();
+        // close the menu
+        await PageObjects.share.clickShareTopNavButton();
+      });
+
+      it('allows loading a saved query via the saved query management component', async () => {
+        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
+        const queryString = await queryBar.getQueryString();
+        expect(queryString).to.eql('response:200');
+      });
+
+      it('does not allow saving via the saved query management component popover with no query loaded', async () => {
+        await savedQueryManagementComponent.saveNewQueryMissingOrFail();
+      });
+
+      it('does not allow saving changes to saved query from the saved query management component', async () => {
+        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
+        await queryBar.setQuery('response:404');
+        await savedQueryManagementComponent.updateCurrentlyLoadedQueryMissingOrFail();
+      });
+
+      it('does not allow deleting a saved query from the saved query management component', async () => {
+        await savedQueryManagementComponent.deleteSavedQueryMissingOrFail('OKJpgs');
+      });
+
+      it('allows clearing the currently loaded saved query', async () => {
+        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
+        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
       });
     });
 
@@ -241,7 +304,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('homeApp', 10000);
+        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
       });
 
       it(`edit page redirects to home page`, async () => {
@@ -249,7 +312,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('homeApp', 10000);
+        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
       });
     });
   });

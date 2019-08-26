@@ -61,7 +61,9 @@ export default function (kibana) {
     },
 
     uiExports: {
-      hacks: ['plugins/kibana/dev_tools/hacks/hide_empty_tools'],
+      hacks: [
+        'plugins/kibana/dev_tools/hacks/hide_empty_tools',
+      ],
       fieldFormats: ['plugins/kibana/field_formats/register'],
       savedObjectTypes: [
         'plugins/kibana/visualize/saved_visualizations/saved_visualization_register',
@@ -171,7 +173,7 @@ export default function (kibana) {
           },
         },
         search: {
-          icon: 'search',
+          icon: 'discoverApp',
           defaultSearchField: 'title',
           isImportableAndExportable: true,
           getTitle(obj) {
@@ -235,9 +237,22 @@ export default function (kibana) {
       },
 
       injectDefaultVars(server, options) {
+        const mapConfig = server.config().get('map');
+        const tilemap = mapConfig.tilemap;
+
         return {
           kbnIndex: options.index,
           kbnBaseUrl,
+
+          // required on all pages due to hacks that use these values
+          mapConfig,
+          tilemapsConfig: {
+            deprecated: {
+              // If url is set, old settings must be used for backward compatibility
+              isOverridden: typeof tilemap.url === 'string' && tilemap.url !== '',
+              config: tilemap,
+            },
+          },
         };
       },
 
@@ -253,17 +268,20 @@ export default function (kibana) {
           show: true,
           createShortUrl: true,
           save: true,
+          saveQuery: true,
         },
         visualize: {
           show: true,
           createShortUrl: true,
           delete: true,
           save: true,
+          saveQuery: true,
         },
         dashboard: {
           createNew: true,
           show: true,
           showWriteControls: true,
+          saveQuery: true,
         },
         catalogue: {
           discover: true,

@@ -20,50 +20,40 @@
 import sinon from 'sinon';
 
 import { FilterStateStore } from '@kbn/es-query';
-
-import { Subscription } from 'rxjs';
 import { FilterStateManager } from './filter_state_manager';
 
+import { IndexPatterns } from 'ui/index_patterns';
 import { StubState } from './test_helpers/stub_state';
 import { getFilter } from './test_helpers/get_stub_filter';
 import { FilterManager } from './filter_manager';
 import { StubIndexPatterns } from './test_helpers/stub_index_pattern';
 
-jest.mock('ui/new_platform', () => ({
-  npStart: {
-    core: {
-      chrome: {
-        recentlyAccessed: false,
-      },
+import { coreMock } from '../../../../../../core/public/mocks';
+const setupMock = coreMock.createSetup();
+
+setupMock.uiSettings.get.mockImplementation((key: string) => {
+  return true;
+});
+
+jest.mock('ui/timefilter', () => {
+  return {
+    timefilter: {
+      setTime: jest.fn(),
     },
-  },
-  npSetup: {
-    core: {
-      uiSettings: {
-        get: () => true,
-      },
-    },
-  },
-}));
+  };
+});
 
 describe('filter_state_manager', () => {
   let appStateStub: StubState;
   let globalStateStub: StubState;
 
-  let subscription: Subscription | undefined;
   let filterManager: FilterManager;
 
   beforeEach(() => {
     appStateStub = new StubState();
     globalStateStub = new StubState();
     const indexPatterns = new StubIndexPatterns();
-    filterManager = new FilterManager(indexPatterns);
-  });
-
-  afterEach(() => {
-    if (subscription) {
-      subscription.unsubscribe();
-    }
+    filterManager = new FilterManager(indexPatterns as IndexPatterns, setupMock.uiSettings);
   });
 
   describe('app_state_undefined', () => {
@@ -162,6 +152,27 @@ describe('filter_state_manager', () => {
 
       sinon.assert.calledOnce(appStateStub.save);
       sinon.assert.calledOnce(globalStateStub.save);
+    });
+  });
+
+  describe('bug fixes', () => {
+    /*
+     ** This test is here to reproduce a bug where a filter manager update
+     ** would cause filter state manager detects those changes
+     ** And triggers *another* filter manager update.
+     */
+    test('should NOT re-trigger filter manager', async done => {
+      const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
+      filterManager.setFilters([f1]);
+      const setFiltersSpy = sinon.spy(filterManager, 'setFilters');
+
+      f1.meta.negate = true;
+      await filterManager.setFilters([f1]);
+
+      setTimeout(() => {
+        expect(setFiltersSpy.callCount).toEqual(1);
+        done();
+      }, 100);
     });
   });
 });

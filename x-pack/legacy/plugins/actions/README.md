@@ -21,7 +21,7 @@ action types.
 
 1. Develop and register an action type (see action types -> example).
 2. Create an action by using the RESTful API (see actions -> create action).
-3. Use alerts to fire actions or fire manually (see firing actions).
+3. Use alerts to execute actions or execute manually (see firing actions).
 
 ## Action types
 
@@ -51,9 +51,9 @@ This is the primary function for an action type. Whenever the action needs to ex
 |Property|Description|
 |---|---|
 |config|The decrypted configuration given to an action. This comes from the action saved object that is partially or fully encrypted within the data store. If you would like to validate the config before being passed to the executor, define `validate.config` within the action type.|
-|params|Parameters for the execution. These will be given at fire time by either an alert or manually provided when calling the plugin provided fire function.|
+|params|Parameters for the execution. These will be given at execution time by either an alert or manually provided when calling the plugin provided execute function.|
 |services.callCluster(path, opts)|Use this to do Elasticsearch queries on the cluster Kibana connects to. This function is the same as any other `callCluster` in Kibana.<br><br>**NOTE**: This currently authenticates as the Kibana internal user, but will change in a future PR.|
-|services.savedObjectsClient|This is an instance of the saved objects client. This provides the ability to do CRUD on any saved objects within the same space the alert lives in.<br><br>**NOTE**: This currently only works when security is disabled. A future PR will add support for enabling security using Elasticsearch API tokens.|
+|services.savedObjectsClient|This is an instance of the saved objects client. This provides the ability to do CRUD on any saved objects within the same space the alert lives in.<br><br>The scope of the saved objects client is tied to the user in context calling the execute API or the API key provided to the execute plugin function (only when security isenabled).|
 |services.log(tags, [data], [timestamp])|Use this to create server logs. (This is the same function as server.log)|
 
 ### Example
@@ -72,11 +72,10 @@ Payload:
 
 |Property|Description|Type|
 |---|---|---|
-|attributes.description|A description to reference and search in the future. This value will be used to populate dropdowns.|string|
-|attributes.actionTypeId|The id value of the action type you want to call when the action executes.|string|
-|attributes.actionTypeConfig|The configuration the action type expects. See related action type to see what attributes is expected. This will also validate against the action type if config validation is defined.|object|
-|references|An array of `name`, `type` and `id`. This is the same as `references` in the saved objects API. See the saved objects API documentation.<br><br>In most cases, you can leave this empty.|Array|
-|migrationVersion|The version of the most recent migrations. This is the same as `migrationVersion` in the saved objects API. See the saved objects API documentation.<br><br>In most cases, you can leave this empty.|object|
+|description|A description to reference and search in the future. This value will be used to populate dropdowns.|string|
+|actionTypeId|The id value of the action type you want to call when the action executes.|string|
+|config|The configuration the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if config validation is defined.|object|
+|secrets|The secrets the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if secrets validation is defined.|object|
 
 #### `DELETE /api/action/{id}`: Delete action
 
@@ -116,18 +115,17 @@ Payload:
 
 |Property|Description|Type|
 |---|---|---|
-|attributes.description|A description to reference and search in the future. This value will be used to populate dropdowns.|string|
-|attributes.actionTypeConfig|The configuration the action type expects. See related action type to see what attributes is expected. This will also validate against the action type if config validation is defined.|object|
-|references|An array of `name`, `type` and `id`. This is the same as `references` in the saved objects API. See the saved objects API documentation.<br><br>In most cases, you can leave this empty.|Array|
-|version|The document version when read|string|
+|description|A description to reference and search in the future. This value will be used to populate dropdowns.|string|
+|config|The configuration the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if config validation is defined.|object|
+|secrets|The secrets the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if secrets validation is defined.|object|
 
-#### `POST /api/action/{id}/_fire`: Fire action
+#### `POST /api/action/{id}/_execute`: Execute action
 
 Params:
 
 |Property|Description|Type|
 |---|---|---|
-|id|The id of the action you're trying to fire.|string|
+|id|The id of the action you're trying to execute.|string|
 
 Payload:
 
@@ -137,34 +135,33 @@ Payload:
 
 ## Firing actions
 
-The plugin exposes a fire function that you can use to fire actions.
+The plugin exposes an execute function that you can use to run actions.
 
-**server.plugins.actions.fire(options)**
+**server.plugins.actions.execute(options)**
 
 The following table describes the properties of the `options` object.
 
 |Property|Description|Type|
 |---|---|---|
-|id|The id of the action you want to fire.|string|
+|id|The id of the action you want to execute.|string|
 |params|The `params` value to give the action type executor.|object|
-|namespace|The saved object namespace the action exists within.|string|
-|basePath|This is a temporary parameter, but we need to capture and track the value of `request.getBasePath()` until future changes are made.<br><br>In most cases this can be `undefined` unless you need cross spaces support.|string|
+|spaceId|The space id the action is within.|string|
+|apiKey|The Elasticsearch API key to use for context. (Note: only required and used when security is enabled).|string|
 
 ### Example
 
-This example makes action `3c5b2bd4-5424-4e4b-8cf5-c0a58c762cc5` fire an email. The action plugin will load the saved object and find what action type to call with `params`.
+This example makes action `3c5b2bd4-5424-4e4b-8cf5-c0a58c762cc5` send an email. The action plugin will load the saved object and find what action type to call with `params`.
 
 ```
-server.plugins.actions.fire({
+server.plugins.actions.execute({
   id: '3c5b2bd4-5424-4e4b-8cf5-c0a58c762cc5',
+  spaceId: 'default', // The spaceId of the action
   params: {
     from: 'example@elastic.co',
     to: ['destination@elastic.co'],
     subject: 'My email subject',
     body: 'My email body',
   },
-  namespace: undefined, // The namespace the action exists within
-  basePath: undefined, // Usually `request.getBasePath();` or `undefined`
 });
 ```
 
@@ -175,6 +172,7 @@ Kibana ships with a set of built-in action types:
 - server log: logs messages to the Kibana log using `server.log()`
 - email: send an email
 - slack: post a message to a slack channel
+- index: index document(s) into elasticsearch
 
 ## server log, action id: `.log`
 
@@ -247,6 +245,27 @@ This action type interfaces with the [Slack Incoming Webhooks feature](https://a
 |---|---|---|
 |message|the message text|string|
 
+
+## index, action id: `.index`
+
+The config and params properties are modelled after the [Watcher Index Action](https://www.elastic.co/guide/en/elastic-stack-overview/master/actions-index.html).  The index can be set in the config or params, and if set in config, then the index set in the params will be ignored.
+
+#### config properties
+
+|Property|Description|Type|
+|---|---|---|
+|index|The Elasticsearch index to index into.|string _(optional)_|
+
+#### params properties
+
+|Property|Description|Type|
+|---|---|---|
+|index|The Elasticsearch index to index into.|string _(optional)_|
+|doc_id|The optional _id of the document.|string _(optional)_|
+|execution_time_field|The field that will store/index the action execution time.|string _(optional)_|
+|refresh|Setting of the refresh policy for the write request|boolean _(optional)_|
+|body|The documument body/bodies to index.|object or object[]|
+
 # Command Line Utility
 
 The [`kbn-action`](https://github.com/pmuellr/kbn-action) tool can be used to send HTTP requests to the Actions plugin.  For instance, to create a Slack action from the `.slack` Action Type, use the following command:
@@ -259,7 +278,7 @@ $ kbn-action create .slack "post to slack" '{"webhookUrl": "https://hooks.slack.
     "attributes": {
         "actionTypeId": ".slack",
         "description": "post to slack",
-        "actionTypeConfig": {}
+        "config": {}
     },
     "references": [],
     "updated_at": "2019-06-26T17:55:42.728Z",

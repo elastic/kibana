@@ -1,0 +1,32 @@
+{
+  "services": [
+    {
+      "id": "road_map",
+      "name": { "en": "Road Map - Bright" },
+      "attribution": [
+        {
+          "label": { "en": "OpenStreetMap contributors" },
+          "url": { "en": "https://www.openstreetmap.org/copyright" }
+        },
+        { "label": { "en": "OpenMapTiles" }, "url": { "en": "https://openmaptiles.org" } },
+        { "label": { "en": "MapTiler" }, "url": { "en": "https://www.maptiler.com" } },
+        {
+          "label": { "en": "Elastic Maps Service" },
+          "url": { "en": "https://www.elastic.co/elastic-maps-service" }
+        }
+      ],
+      "formats": [
+        {
+          "locale": "en",
+          "format": "vector",
+          "url": "/tiles/vector/osm.bright.json"
+        },
+        {
+          "locale": "en",
+          "format": "raster",
+          "url": "/tiles/raster/osm.bright.json"
+        }
+      ]
+    }
+  ]
+}

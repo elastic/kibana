@@ -126,7 +126,6 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}
-        loadingTitle={i18n.DOMAINS}
         loadPage={newActivePage => loadPage(newActivePage)}
         onChange={this.onChange}
         pageOfItems={data}

@@ -24,9 +24,6 @@ import { createSelectHandler } from '../../lib/create_select_handler';
 import { YesNo } from '../../yes_no';
 import { createTextHandler } from '../../lib/create_text_handler';
 import { IndexPattern } from '../../index_pattern';
-import { data } from 'plugins/data/setup';
-const { QueryBarInput } = data.query.ui;
-import { Storage } from 'ui/storage';
 import {
   htmlIdGenerator,
   EuiComboBox,
@@ -42,7 +39,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { getDefaultQueryLanguage } from '../../lib/get_default_query_language';
-const localStorage = new Storage(window.localStorage);
+import { QueryBarWrapper } from '../../query_bar_wrapper';
 
 export const TimeseriesConfig = injectI18n(function(props) {
   const handleSelectChange = createSelectHandler(props.onChange);
@@ -358,7 +355,7 @@ export const TimeseriesConfig = injectI18n(function(props) {
           label={<FormattedMessage id="tsvb.timeSeries.filterLabel" defaultMessage="Filter" />}
           fullWidth
         >
-          <QueryBarInput
+          <QueryBarWrapper
             query={{
               language:
                 model.filter && model.filter.language
@@ -367,9 +364,7 @@ export const TimeseriesConfig = injectI18n(function(props) {
               query: model.filter && model.filter.query ? model.filter.query : '',
             }}
             onChange={filter => props.onChange({ filter })}
-            appName={'VisEditor'}
             indexPatterns={[seriesIndexPattern]}
-            store={localStorage}
           />
         </EuiFormRow>
       </EuiFlexItem>

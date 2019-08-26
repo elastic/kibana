@@ -4,31 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema, TypeOf, Type } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
+import { schema, TypeOf } from '@kbn/config-schema';
 import nodemailerServices from 'nodemailer/lib/well-known/services.json';
 
 import { sendEmail, JSON_TRANSPORT_SERVICE } from './lib/send_email';
+import { nullableType } from './lib/nullable';
+import { portSchema } from './lib/schemas';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 
-const PORT_MAX = 256 * 256 - 1;
-
-function nullableType<V>(type: Type<V>) {
-  return schema.oneOf([type, schema.literal(null)], { defaultValue: () => null });
-}
-
 // config definition
-
-const unencryptedConfigProperties = ['service', 'host', 'port', 'secure', 'from'];
-
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 
 const ConfigSchema = schema.object(
   {
-    user: schema.string(),
-    password: schema.string(),
     service: nullableType(schema.string()),
     host: nullableType(schema.string()),
-    port: nullableType(schema.number({ min: 1, max: PORT_MAX })),
+    port: nullableType(portSchema()),
     secure: nullableType(schema.boolean()),
     from: schema.string(),
   },
@@ -43,6 +35,9 @@ function validateConfig(configObject: any): string | void {
 
   // Make sure service is set, or if not, both host/port must be set.
   // If service is set, host/port are ignored, when the email is sent.
+  // Note, not currently making these message translated, as will be
+  // emitted alongside messages from @kbn/config-schema, which does not
+  // translate messages.
   if (config.service == null) {
     if (config.host == null && config.port == null) {
       return 'either [service] or [host]/[port] is required';
@@ -62,6 +57,15 @@ function validateConfig(configObject: any): string | void {
     }
   }
 }
+
+// secrets definition
+
+export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
+
+const SecretsSchema = schema.object({
+  user: schema.string(),
+  password: schema.string(),
+});
 
 // params definition
 
@@ -97,9 +101,9 @@ function validateParams(paramsObject: any): string | void {
 export const actionType: ActionType = {
   id: '.email',
   name: 'email',
-  unencryptedAttributes: unencryptedConfigProperties,
   validate: {
     config: ConfigSchema,
+    secrets: SecretsSchema,
     params: ParamsSchema,
   },
   executor,
@@ -108,13 +112,15 @@ export const actionType: ActionType = {
 // action executor
 
 async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionTypeExecutorResult> {
+  const id = execOptions.id;
   const config = execOptions.config as ActionTypeConfigType;
+  const secrets = execOptions.secrets as ActionTypeSecretsType;
   const params = execOptions.params as ActionParamsType;
   const services = execOptions.services;
 
   const transport: any = {
-    user: config.user,
-    password: config.password,
+    user: secrets.user,
+    password: secrets.password,
   };
 
   if (config.service !== null) {
@@ -144,9 +150,16 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
   try {
     result = await sendEmail(services, sendEmailOptions);
   } catch (err) {
+    const message = i18n.translate('xpack.actions.builtin.email.errorSendingErrorMessage', {
+      defaultMessage: 'error in action "{id}" sending email: {errorMessage}',
+      values: {
+        id,
+        errorMessage: err.message,
+      },
+    });
     return {
       status: 'error',
-      message: `error sending email: ${err.message}`,
+      message,
     };
   }
 

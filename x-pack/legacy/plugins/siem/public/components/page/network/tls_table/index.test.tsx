@@ -17,6 +17,8 @@ import { createStore, networkModel, State } from '../../../../store';
 import { TlsTable } from '.';
 import { mockTlsData } from './mock';
 
+jest.mock('../../../../lib/settings/use_kibana_ui_setting');
+
 describe('Tls Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
@@ -88,7 +90,7 @@ describe('Tls Table Component', () => {
           .find('.euiTable thead tr th button')
           .first()
           .text()
-      ).toEqual('SHA1 FingerprintClick to sort in descending order');
+      ).toEqual('SHA1 fingerprintClick to sort in descending order');
     });
   });
 });

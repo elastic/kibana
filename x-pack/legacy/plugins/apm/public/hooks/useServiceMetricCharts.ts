@@ -5,10 +5,10 @@
  */
 
 import { MetricsChartsByAgentAPIResponse } from '../../server/lib/metrics/get_metrics_chart_data_by_agent';
-import { loadMetricsChartData } from '../services/rest/apm/metrics';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useUiFilters } from '../context/UrlParamsContext';
 import { useFetcher } from './useFetcher';
+import { callApmApi } from '../services/rest/callApmApi';
 
 const INITIAL_DATA: MetricsChartsByAgentAPIResponse = {
   charts: []
@@ -16,20 +16,23 @@ const INITIAL_DATA: MetricsChartsByAgentAPIResponse = {
 
 export function useServiceMetricCharts(
   urlParams: IUrlParams,
-  agentName?: string
+  agentName: string
 ) {
   const { serviceName, start, end } = urlParams;
   const uiFilters = useUiFilters(urlParams);
-  const { data = INITIAL_DATA, error, status } = useFetcher<
-    MetricsChartsByAgentAPIResponse
-  >(() => {
+  const { data = INITIAL_DATA, error, status } = useFetcher(() => {
     if (serviceName && start && end && agentName) {
-      return loadMetricsChartData({
-        serviceName,
-        start,
-        end,
-        agentName,
-        uiFilters
+      return callApmApi({
+        pathname: '/api/apm/services/{serviceName}/metrics/charts',
+        params: {
+          path: { serviceName },
+          query: {
+            start,
+            end,
+            agentName,
+            uiFilters: JSON.stringify(uiFilters)
+          }
+        }
       });
     }
   }, [serviceName, start, end, agentName, uiFilters]);

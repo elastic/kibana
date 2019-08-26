@@ -19,21 +19,48 @@ export default function ({ getService }) {
   } = initElasticsearchHelpers(es);
 
   const {
-    list,
+    getAllTemplates,
+    getOneTemplate,
     createTemplate,
     getTemplatePayload,
     deleteTemplates,
+    updateTemplate,
   } = registerHelpers({ supertest });
 
   describe('index templates', () => {
     after(() => Promise.all([cleanUpEsResources()]));
 
-    describe('list', function () {
-      it('should list all the index templates with the expected properties', async function () {
-        const { body } = await list().expect(200);
-        const expectedKeys = ['name', 'indexPatterns', 'settings', 'aliases', 'mappings'];
+    describe('get all', () => {
+      const templateName = `template-${getRandomString()}`;
+      const payload = getTemplatePayload(templateName);
 
-        expectedKeys.forEach(key => expect(Object.keys(body[0]).includes(key)).to.be(true));
+      beforeEach(async () => {
+        await createTemplate(payload).expect(200);
+      });
+
+      it('should list all the index templates with the expected properties', async () => {
+        const { body: templates } = await getAllTemplates().expect(200);
+
+        const createdTemplate = templates.find(template => template.name === payload.name);
+        const expectedKeys = ['name', 'indexPatterns', 'hasSettings', 'hasAliases', 'hasMappings', 'ilmPolicy'];
+        expectedKeys.forEach(key => expect(Object.keys(createdTemplate).includes(key)).to.be(true));
+      });
+    });
+
+    describe('get one', () => {
+      const templateName = `template-${getRandomString()}`;
+      const payload = getTemplatePayload(templateName);
+
+      beforeEach(async () => {
+        await createTemplate(payload).expect(200);
+      });
+
+      it('should list the index template with the expected properties', async () => {
+        const { body } = await getOneTemplate(templateName).expect(200);
+        const expectedKeys = ['name', 'indexPatterns', 'settings', 'aliases', 'mappings', 'ilmPolicy'];
+
+        expect(body.name).to.equal(templateName);
+        expectedKeys.forEach(key => expect(Object.keys(body).includes(key)).to.be(true));
       });
     });
 
@@ -62,6 +89,29 @@ export default function ({ getService }) {
 
         const { body } = await createTemplate(payload);
         expect(body.message).to.contain('index patterns are missing');
+      });
+    });
+
+    describe('update', () => {
+      it('should update an index template', async () => {
+        const templateName = `template-${getRandomString()}`;
+        const payload = getTemplatePayload(templateName);
+
+        await createTemplate(payload).expect(200);
+
+        let catTemplateResponse = await catTemplate(templateName);
+
+        const { name, version } = payload;
+
+        expect(catTemplateResponse.find(({ name: templateName }) => templateName === name).version).to.equal(version.toString());
+
+        // Update template with new version
+        const updatedVersion = 2;
+        await updateTemplate({ ...payload, version: updatedVersion }, templateName).expect(200);
+
+        catTemplateResponse = await catTemplate(templateName);
+
+        expect(catTemplateResponse.find(({ name: templateName }) => templateName === name).version).to.equal(updatedVersion.toString());
       });
     });
 

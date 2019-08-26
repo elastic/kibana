@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent, useContext, useState } from 'react';
+import React, { FunctionComponent, useState } from 'react';
 import moment from 'moment-timezone';
 
 import { i18n } from '@kbn/i18n';
@@ -43,13 +43,13 @@ import { KBN_FIELD_TYPES } from '../../../../../../common/constants/field_types'
 import { Dictionary } from '../../../../../../common/types/common';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
 
+import { useCurrentIndexPattern } from '../../../../../contexts/kibana';
+
 import {
-  isKibanaContext,
   toggleSelectedField,
   EsDoc,
   EsFieldName,
   MAX_COLUMNS,
-  KibanaContext,
   PivotQuery,
 } from '../../../../common';
 
@@ -100,13 +100,7 @@ interface Props {
 export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, query }) => {
   const [clearTable, setClearTable] = useState(false);
 
-  const kibanaContext = useContext(KibanaContext);
-
-  if (!isKibanaContext(kibanaContext)) {
-    return null;
-  }
-
-  const indexPattern = kibanaContext.currentIndexPattern;
+  const indexPattern = useCurrentIndexPattern();
 
   const [selectedFields, setSelectedFields] = useState([] as EsFieldName[]);
   const [isColumnsPopoverVisible, setColumnsPopoverVisible] = useState(false);
@@ -358,14 +352,14 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
         <EuiFlexItem grow={false}>
           <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem>
           <EuiFlexGroup alignItems="center" gutterSize="xs">
-            <EuiFlexItem>
+            <EuiFlexItem style={{ textAlign: 'right' }}>
               {docFieldsCount > MAX_COLUMNS && (
                 <EuiText size="s">
                   {i18n.translate('xpack.ml.dataframe.sourceIndexPreview.fieldSelection', {
                     defaultMessage:
-                      'showing {selectedFieldsLength, number} of {docFieldsCount, number} {docFieldsCount, plural, one {field} other {fields}}',
+                      '{selectedFieldsLength, number} of {docFieldsCount, number} {docFieldsCount, plural, one {field} other {fields}} selected',
                     values: { selectedFieldsLength: selectedFields.length, docFieldsCount },
                   })}
                 </EuiText>

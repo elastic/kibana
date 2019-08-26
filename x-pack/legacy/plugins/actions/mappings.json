@@ -7,11 +7,25 @@
       "actionTypeId": {
         "type": "keyword"
       },
-      "actionTypeConfig": {
+      "config": {
         "enabled": false,
         "type": "object"
       },
-      "actionTypeConfigSecrets": {
+      "secrets": {
+        "type": "binary"
+      }
+    }
+  },
+  "action_task_params": {
+    "properties": {
+      "actionId": {
+        "type": "keyword"
+      },
+      "params": {
+        "enabled": false,
+        "type": "object"
+      },
+      "apiKey": {
         "type": "binary"
       }
     }

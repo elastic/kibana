@@ -147,7 +147,7 @@ class HostsComponentQuery extends QueryTemplatePaginated<
             pageInfo: getOr({}, 'source.Hosts.pageInfo', data),
             refetch,
             startDate,
-            totalCount: getOr(0, 'source.Hosts.totalCount', data),
+            totalCount: getOr(-1, 'source.Hosts.totalCount', data),
           });
         }}
       </Query>
