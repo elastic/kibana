@@ -23,6 +23,7 @@ import { Form } from '../types';
 interface Props {
   path: string;
   form: Form<any>;
+  initialNumberOfItems?: number;
   children: (args: {
     items: ArrayItem[];
     addItem: () => void;
@@ -36,8 +37,8 @@ export interface ArrayItem {
   isNew: boolean;
 }
 
-export const UseArray = ({ path, form, children }: Props) => {
-  const defaultValues = form.__getFieldDefaultValue(path) as any[];
+export const UseArray = ({ path, form, initialNumberOfItems, children }: Props) => {
+  const defaultValues = form.getFieldDefaultValue(path) as any[];
   const uniqueId = useRef(0);
 
   const getInitialRowsFromValues = (values: any[]): ArrayItem[] =>
@@ -55,7 +56,7 @@ export const UseArray = ({ path, form, children }: Props) => {
 
   const initialState = defaultValues
     ? getInitialRowsFromValues(defaultValues)
-    : [getNewItemAtIndex(0)];
+    : new Array(initialNumberOfItems).fill('').map((_, i) => getNewItemAtIndex(i));
 
   const [items, setItems] = useState<ArrayItem[]>(initialState);
 

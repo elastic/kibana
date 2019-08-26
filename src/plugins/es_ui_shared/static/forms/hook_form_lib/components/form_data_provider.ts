@@ -23,7 +23,7 @@ import { Form, FormData } from '../types';
 import { Subscription } from '../lib';
 
 interface Props {
-  children: (formData: FormData) => JSX.Element;
+  children: (formData: FormData) => JSX.Element | null;
   form: Form<FormData>;
   pathsToWatch?: string | string[];
 }
