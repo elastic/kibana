@@ -28,7 +28,6 @@ export function createLifecycle() {
     beforeTests: [] as Listener[],
     beforeTestSuite: [] as Listener[],
     beforeEachTest: [] as Listener[],
-    afterEachTest: [] as Listener[],
     afterTestSuite: [] as Listener[],
     testFailure: [] as Listener[],
     testHookFailure: [] as Listener[],

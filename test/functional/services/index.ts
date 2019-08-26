@@ -22,7 +22,6 @@ import { services as commonServiceProviders } from '../../common/services';
 import { AppsMenuProvider } from './apps_menu';
 import { BrowserProvider } from './browser';
 import { ComboBoxProvider } from './combo_box';
-import { CoverageProvider } from './coverage';
 import {
   DashboardAddPanelProvider,
   DashboardExpectProvider,
@@ -68,7 +67,6 @@ export const services = {
   ...commonServiceProviders,
 
   __webdriver__: RemoteProvider,
-  coverage: CoverageProvider,
   filterBar: FilterBarProvider,
   queryBar: QueryBarProvider,
   find: FindProvider,
