@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import { Server, RouteOptions } from 'hapi';
-import { readFileSync } from 'fs';
 
 import {
   API_ROUTE_SNAPSHOT_RUNTIME,
@@ -36,6 +34,7 @@ export function publicWorkpadSnapshots(server: Server) {
     method: 'GET',
     path: API_ROUTE_SNAPSHOT_RUNTIME_DOWNLOAD,
     handler(_request, handler) {
+      // @ts-ignore No type for inert Hapi handler
       const file = handler.file(RUNTIME_FILE);
       file.type('application/octet-stream');
       return file;
