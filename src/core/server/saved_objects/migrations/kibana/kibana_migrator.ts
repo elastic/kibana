@@ -103,42 +103,44 @@ export class KibanaMigrator {
    * @returns
    * @memberof KibanaMigrator
    */
-  public awaitMigration = once(async (skipMigrations: boolean = false) => {
-    if (skipMigrations) {
-      this.log.warn(
-        'Skipping Saved Object migrations on startup. Note: Individual documents will still be migrated when reading or writing documents.'
-      );
-      return Object.keys(this.mappingProperties).map(() => ({ status: 'skipped' }));
-    }
+  public awaitMigration(skipMigrations: boolean = false) {
+    return once(async () => {
+      if (skipMigrations) {
+        this.log.warn(
+          'Skipping Saved Object migrations on startup. Note: Individual documents will still be migrated when reading or writing documents.'
+        );
+        return Object.keys(this.mappingProperties).map(() => ({ status: 'skipped' }));
+      }
 
-    const kibanaIndexName = this.kibanaConfig.index;
-    const indexMap = createIndexMap({
-      config: this.config,
-      kibanaIndexName,
-      indexMap: this.mappingProperties,
-      schema: this.schema,
-    });
-
-    const migrators = Object.keys(indexMap).map(index => {
-      return new IndexMigrator({
-        batchSize: this.config.get('migrations.batchSize'),
-        callCluster: this.callCluster, // server.plugins.elasticsearch!.getCluster('admin').callWithInternalUser,
-        documentMigrator: this.documentMigrator,
-        index,
-        log: this.log,
-        mappingProperties: indexMap[index].typeMappings,
-        pollInterval: this.config.get('migrations.pollInterval'),
-        scrollDuration: this.config.get('migrations.scrollDuration'),
-        serializer: this.serializer,
-        // Only necessary for the migrator of the kibana index.
-        obsoleteIndexTemplatePattern:
-          index === kibanaIndexName ? 'kibana_index_template*' : undefined,
-        convertToAliasScript: indexMap[index].script,
+      const kibanaIndexName = this.kibanaConfig.index;
+      const indexMap = createIndexMap({
+        config: this.config,
+        kibanaIndexName,
+        indexMap: this.mappingProperties,
+        schema: this.schema,
       });
-    });
 
-    return Promise.all(migrators.map(migrator => migrator.migrate()));
-  });
+      const migrators = Object.keys(indexMap).map(index => {
+        return new IndexMigrator({
+          batchSize: this.config.get('migrations.batchSize'),
+          callCluster: this.callCluster, // server.plugins.elasticsearch!.getCluster('admin').callWithInternalUser,
+          documentMigrator: this.documentMigrator,
+          index,
+          log: this.log,
+          mappingProperties: indexMap[index].typeMappings,
+          pollInterval: this.config.get('migrations.pollInterval'),
+          scrollDuration: this.config.get('migrations.scrollDuration'),
+          serializer: this.serializer,
+          // Only necessary for the migrator of the kibana index.
+          obsoleteIndexTemplatePattern:
+            index === kibanaIndexName ? 'kibana_index_template*' : undefined,
+          convertToAliasScript: indexMap[index].script,
+        });
+      });
+
+      return Promise.all(migrators.map(migrator => migrator.migrate()));
+    })();
+  }
 
   /**
    * Gets all the index mappings defined by Kibana's enabled plugins.

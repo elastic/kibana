@@ -18,13 +18,13 @@
  */
 
 import { SavedObjectsService, SavedObjectsServiceStart } from './saved_objects_service';
-import { kibanaMigratorMock } from './migrations/kibana/kibana_migrator.mock';
+import { mockKibanaMigrator } from './migrations/kibana/kibana_migrator.mock';
 
 type SavedObjectsServiceContract = PublicMethodsOf<SavedObjectsService>;
 
 const createStartContractMock = () => {
   const startContract: jest.Mocked<SavedObjectsServiceStart> = {
-    migrator: kibanaMigratorMock.create(),
+    migrator: mockKibanaMigrator.create(),
   };
 
   return startContract;

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ConfigService, Env } from './config';
+import { ConfigServiceContract, Env } from './config';
 import { LoggerFactory } from './logging';
 
 /** @internal */
@@ -31,6 +31,6 @@ export type CoreId = symbol;
 export interface CoreContext {
   coreId: CoreId;
   env: Env;
-  configService: ConfigService;
+  configService: ConfigServiceContract;
   logger: LoggerFactory;
 }

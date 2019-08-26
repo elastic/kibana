@@ -41,6 +41,6 @@ const createMigrator = (
   return mockMigrator;
 };
 
-export const kibanaMigratorMock = {
+export const mockKibanaMigrator = {
   create: createMigrator,
 };

@@ -18,14 +18,13 @@
  */
 
 import { CoreService } from 'src/core/types';
-import { take, retryWhen, concatMap } from 'rxjs/operators';
-import { defer, throwError, iif, timer } from 'rxjs';
-import elasticsearch from 'elasticsearch';
+import { take } from 'rxjs/operators';
 import { KibanaMigrator } from './migrations';
 import { CoreContext } from '../core_context';
 import { LegacyServiceSetup } from '../legacy/legacy_service';
-import { ElasticsearchServiceSetup, CallAPIOptions } from '../elasticsearch';
+import { ElasticsearchServiceSetup } from '../elasticsearch';
 import { KibanaConfig } from '../kibana_config';
+import { retryCallCluster } from '../elasticsearch/retry_call_cluster';
 
 /**
  * @public
@@ -40,10 +39,12 @@ export interface SavedObjectsServiceStart {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SavedObjectsServiceSetup {}
 
+/** @internal */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface StartDeps {}
+export interface SavedObjectsStartDeps {}
 
-export interface SetupDeps {
+/** @internal */
+export interface SavedObjectsSetupDeps {
   legacy: LegacyServiceSetup;
   elasticsearch: ElasticsearchServiceSetup;
 }
@@ -54,7 +55,7 @@ export class SavedObjectsService
 
   constructor(private readonly coreContext: CoreContext) {}
 
-  public async setup(coreSetup: SetupDeps) {
+  public async setup(coreSetup: SavedObjectsSetupDeps) {
     const {
       savedObjectSchemas,
       savedObjectMappings,
@@ -63,28 +64,6 @@ export class SavedObjectsService
     } = await coreSetup.legacy.uiExports;
 
     const adminClient = await coreSetup.elasticsearch.adminClient$.pipe(take(1)).toPromise();
-
-    const retryCallCluster = (
-      endpoint: string,
-      clientParams: Record<string, any> = {},
-      options?: CallAPIOptions
-    ) => {
-      return defer(() => adminClient.callAsInternalUser(endpoint, clientParams, options))
-        .pipe(
-          retryWhen(errors =>
-            errors.pipe(
-              concatMap((error, i) =>
-                iif(
-                  () => error instanceof elasticsearch.errors.NoConnections,
-                  timer(1000),
-                  throwError(error)
-                )
-              )
-            )
-          )
-        )
-        .toPromise();
-    };
 
     // const kibanaConfig = await this.coreContext.configService
     //   .atPath<KibanaConfig>('kibana')
@@ -103,20 +82,23 @@ export class SavedObjectsService
       kibanaVersion: this.coreContext.env.packageInfo.version,
       config: coreSetup.legacy.pluginExtendedConfig,
       kibanaConfig: (kibanaConfig as any) as KibanaConfig,
-      callCluster: retryCallCluster,
+      callCluster: retryCallCluster(adminClient.callAsInternalUser.bind(adminClient)),
     });
 
     return ({} as any) as Promise<SavedObjectsServiceSetup>;
   }
 
-  public async start(core: StartDeps): Promise<SavedObjectsServiceStart> {
+  public async start(core: SavedObjectsStartDeps): Promise<SavedObjectsServiceStart> {
     /**
      * Note: We want to ensure that migrations have completed before
-     * continuing with further Core startup steps such as running the legacy
-     * server, legacy plugins and allowing HTTP requests.
+     * continuing with further Core startup steps that might use SavedObjects
+     * such as running the legacy server, legacy plugins and allowing incoming
+     * HTTP requests.
      *
      * However, our build system optimize step and some tests depend on the
      * HTTP server running without an Elasticsearch server being available.
+     * So, when the `--skip-migrations` flag is true, we skip migrations all-
+     * together.
      */
     const cliArgs = this.coreContext.env.cliArgs;
     const skipMigrations = cliArgs.optimize || cliArgs.skipMigrations;

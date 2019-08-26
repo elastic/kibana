@@ -17,10 +17,20 @@
  * under the License.
  */
 
-export { ConfigService, ConfigServiceContract } from './config_service';
-export { RawConfigService } from './raw_config_service';
-export { Config, ConfigPath, isConfigPath, hasConfigPathIntersection } from './config';
-export { ObjectToConfigAdapter } from './object_to_config_adapter';
-export { CliArgs } from './env';
+import { CoreContext } from './core_context';
+import { getEnvOptions } from './config/__mocks__/env';
+import { Env, ConfigServiceContract } from './config';
+import { loggingServiceMock } from './logging/logging_service.mock';
+import { configServiceMock } from './config/config_service.mock';
 
-export { Env, EnvironmentMode, PackageInfo } from './env';
+function create(configService?: jest.Mocked<ConfigServiceContract>): CoreContext {
+  const env = Env.createDefault(getEnvOptions());
+  const logger = loggingServiceMock.create();
+  configService = configService || configServiceMock.create();
+
+  return { coreId: Symbol(), env, logger, configService };
+}
+
+export const mockCoreContext = {
+  create,
+};

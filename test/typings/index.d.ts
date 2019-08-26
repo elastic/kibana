@@ -17,10 +17,8 @@
  * under the License.
  */
 
-export { ConfigService, ConfigServiceContract } from './config_service';
-export { RawConfigService } from './raw_config_service';
-export { Config, ConfigPath, isConfigPath, hasConfigPathIntersection } from './config';
-export { ObjectToConfigAdapter } from './object_to_config_adapter';
-export { CliArgs } from './env';
+type MethodKeysOf<T> = {
+  [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never;
+}[keyof T];
 
-export { Env, EnvironmentMode, PackageInfo } from './env';
+type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;

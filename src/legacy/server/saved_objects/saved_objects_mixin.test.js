@@ -19,7 +19,7 @@
 
 import { savedObjectsMixin } from './saved_objects_mixin';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { kibanaMigratorMock } from '../../../core/server/saved_objects/migrations/kibana/kibana_migrator.mock';
+import { mockKibanaMigrator } from '../../../core/server/saved_objects/migrations/kibana/kibana_migrator.mock';
 
 const savedObjectMappings = [
   {
@@ -59,7 +59,7 @@ const savedObjectMappings = [
   },
 ];
 
-const migrator = kibanaMigratorMock.create({ savedObjectMappings });
+const migrator = mockKibanaMigrator.create({ savedObjectMappings });
 
 describe('Saved Objects Mixin', () => {
   let mockKbnServer;
