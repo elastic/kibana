@@ -19,7 +19,7 @@
 
 import { TimefilterService, TimefilterSetup } from '.';
 
-type TimefilterServiceClientContract = PublicMethodsOf<TimefilterService>;
+export type TimefilterServiceClientContract = PublicMethodsOf<TimefilterService>;
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<TimefilterSetup> = {

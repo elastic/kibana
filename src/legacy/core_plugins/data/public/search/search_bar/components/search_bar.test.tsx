@@ -25,6 +25,9 @@ import { IndexPattern } from 'ui/index_patterns';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 const startMock = coreMock.createStart();
 
+import { timefilterServiceMock } from '../../../timefilter/timefilter_service.mock';
+const timefilterSetupMock = timefilterServiceMock.createSetupContract();
+
 jest.mock('../../../../../data/public', () => {
   return {
     FilterBar: () => <div className="filterBar"></div>,
@@ -92,6 +95,7 @@ describe('SearchBar', () => {
       <SearchBar.WrappedComponent
         savedObjectsClient={startMock.savedObjects.client}
         uiSettings={startMock.uiSettings}
+        history={timefilterSetupMock.history}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
@@ -108,6 +112,7 @@ describe('SearchBar', () => {
       <SearchBar.WrappedComponent
         savedObjectsClient={startMock.savedObjects.client}
         uiSettings={startMock.uiSettings}
+        history={timefilterSetupMock.history}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
@@ -125,6 +130,7 @@ describe('SearchBar', () => {
       <SearchBar.WrappedComponent
         savedObjectsClient={startMock.savedObjects.client}
         uiSettings={startMock.uiSettings}
+        history={timefilterSetupMock.history}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
@@ -144,6 +150,7 @@ describe('SearchBar', () => {
       <SearchBar.WrappedComponent
         savedObjectsClient={startMock.savedObjects.client}
         uiSettings={startMock.uiSettings}
+        history={timefilterSetupMock.history}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
@@ -164,6 +171,7 @@ describe('SearchBar', () => {
       <SearchBar.WrappedComponent
         savedObjectsClient={startMock.savedObjects.client}
         uiSettings={startMock.uiSettings}
+        history={timefilterSetupMock.history}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
@@ -184,6 +192,7 @@ describe('SearchBar', () => {
       <SearchBar.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        history={timefilterSetupMock.history}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
@@ -205,6 +214,7 @@ describe('SearchBar', () => {
       <SearchBar.WrappedComponent
         uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
+        history={timefilterSetupMock.history}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}

@@ -24,12 +24,13 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
-import { SearchBar, SearchBarProps } from '../../../../core_plugins/data/public';
+import { SearchBar, SearchBarProps, TimeHistory } from '../../../../core_plugins/data/public';
 
 type Props = Partial<SearchBarProps> & {
   name: string;
   uiSettings: UiSettingsClientContract;
   savedObjectsClient: SavedObjectsClientContract;
+  history: TimeHistory;
   config?: TopNavMenuData[];
   showSearchBar?: boolean;
 };
@@ -61,6 +62,7 @@ export function TopNavMenu(props: Props) {
     return (
       <SearchBar
         savedObjectsClient={props.savedObjectsClient}
+        history={props.history}
         query={props.query}
         filters={props.filters}
         uiSettings={props.uiSettings}
