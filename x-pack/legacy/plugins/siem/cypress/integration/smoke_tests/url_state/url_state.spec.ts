@@ -18,7 +18,7 @@ import {
   KQL_INPUT,
   TIMELINE_TITLE,
 } from '../../lib/url_state';
-import { loginAndWaitForPage } from '../../lib/util/helpers';
+import { DEFAULT_TIMEOUT, loginAndWaitForPage } from '../../lib/util/helpers';
 import {
   assertAtLeastOneEventMatchesSearch,
   executeKQL,
@@ -27,6 +27,7 @@ import {
 } from '../../lib/timeline/helpers';
 import { NAVIGATION_NETWORK } from '../../lib/navigation/selectors';
 import { HOSTS_PAGE } from '../../lib/urls';
+import { TIMELINE_TOGGLE_BUTTON } from '../../lib/timeline/selectors';
 
 describe('url state', () => {
   afterEach(() => {
@@ -125,7 +126,9 @@ describe('url state', () => {
     loginAndWaitForPage(ABSOLUTE_DATE_RANGE.urlUnlinked);
 
     toggleTimelineVisibility();
-    cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON_TIMELINE).click({ force: true });
+    cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON_TIMELINE, { timeout: DEFAULT_TIMEOUT }).click({
+      force: true,
+    });
 
     cy.get(DATE_PICKER_ABSOLUTE_TAB)
       .first()
@@ -180,7 +183,7 @@ describe('url state', () => {
     cy.get(KQL_INPUT, { timeout: 5000 }).type('source.ip: "10.142.0.9" {enter}');
     cy.url().should(
       'include',
-      `kqlQuery=(filterQuery:(expression:'source.ip:%20%2210.142.0.9%22%20',kind:kuery),queryLocation:network.page,type:page)`
+      `kqlQuery=(filterQuery:(expression:'source.ip:%20%2210.142.0.9%22%20',kind:kuery),queryLocation:network.page)`
     );
   });
 
