@@ -118,17 +118,7 @@ export class EMSTMSSource extends AbstractTMSSource {
     if (!markdown) {
       return [];
     }
-
-    return markdown.split('|').map((attribution) => {
-      attribution = attribution.trim();
-      //this assumes attribution is plain markdown link
-      const extractLink = /\[(.*)\]\((.*)\)/;
-      const result = extractLink.exec(attribution);
-      return {
-        label: result ? result[1] : null,
-        url: result ? result[2] : null
-      };
-    });
+    return this.convertMarkdownLinkToObjectArr(markdown);
   }
 
   async getUrlTemplate() {
