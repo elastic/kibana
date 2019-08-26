@@ -352,7 +352,6 @@ describe('IndexPattern Data Panel', () => {
         `/api/lens/index_stats/my-fake-index-pattern`,
         {
           body: JSON.stringify({
-            query: { match_all: {} },
             earliest: 'now-7d',
             latest: 'now',
             size: 500,

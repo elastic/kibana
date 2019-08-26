@@ -12,13 +12,14 @@ import {
   EuiPopover,
   EuiLoadingSpinner,
   EuiButtonIcon,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import {
   Chart,
   Axis,
   getAxisId,
   getSpecId,
-  AreaSeries,
   BarSeries,
   Position,
   ScaleType,
@@ -40,7 +41,6 @@ export interface FieldItemProps {
   field: IndexPatternField;
   indexPattern: IndexPattern;
   highlight?: string;
-  metaData?: DataVisResults;
   exists: boolean;
   howManyDocs?: number;
   count?: number;
@@ -50,38 +50,31 @@ export interface FieldItemProps {
   dateRange: DatasourceDataPanelProps['dateRange'];
 }
 
-export interface DataVisResults {
-  fieldName: string;
-  count?: number;
-  examples?: number | string;
-  earliest?: number;
-  latest?: number;
-  min?: number;
-  max?: number;
-  avg?: number;
-  isTopValuesSampled?: boolean;
-  topValues?: Array<{ key: number; doc_count: number }>;
-  topValuesSampleSize?: number;
-  topValuesSamplerShardSize?: number;
-  median?: number;
-  distribution?: {
-    minPercentile: number;
-    maxPercentile: number;
-    percentiles: Array<{ percent: number; minValue: number; maxValue: number }>;
+export interface HistogramResult {
+  doc_count: number;
+  histo: {
+    buckets: Array<{
+      key: number;
+      doc_count: number;
+    }>;
   };
 }
 
-export interface HistogramResult {
-  buckets: Array<{
-    key: number;
-    doc_count: number;
-  }>;
+export interface TopValuesResult {
+  doc_count: number;
+  top_values: {
+    buckets: Array<{
+      key: number;
+      doc_count: number;
+    }>;
+  };
 }
 
 interface State {
-  fieldMetadata?: DataVisResults;
-  fieldHistogram?: HistogramResult;
   isLoading: boolean;
+  doc_count?: number;
+  histogram?: HistogramResult['histo'];
+  topValues?: TopValuesResult['top_values'];
 }
 
 function wrapOnDot(str?: string) {
@@ -91,25 +84,11 @@ function wrapOnDot(str?: string) {
   return str ? str.replace(/\./g, '.\u200B') : '';
 }
 
-function distributionToChart({ min, distribution }: DataVisResults) {
-  let currentPercentile = 0;
-  return [{ x: min!, y: distribution!.minPercentile }].concat(
-    distribution!.percentiles.map(percentile => {
-      currentPercentile = currentPercentile + percentile.percent;
-      return { x: percentile.minValue, y: currentPercentile };
-    })
-  );
-}
-
 export function FieldItem({
   field,
   indexPattern,
   highlight,
   exists,
-  howManyDocs,
-  count,
-  sampleCount,
-  cardinality,
   query,
   dateRange,
 }: FieldItemProps) {
@@ -154,50 +133,78 @@ export function FieldItem({
 
     setState(s => ({ ...s, isLoading: true }));
 
-    if (field.type !== 'number') {
-      npStart.core.http
-        .post(`/api/ml/data_visualizer/get_field_stats/${indexPattern.title}`, {
-          body: JSON.stringify({
-            query: toElasticsearchQuery(query, indexPattern),
-            fields: [
-              {
-                fieldName: field.name,
-                type: field.type === 'string' && field.esTypes ? field.esTypes[0] : field.type,
-                cardinality,
-              },
-            ],
-            samplerShardSize: 5000,
-            timeFieldName: indexPattern.timeFieldName,
-            earliest: dateRange.fromDate,
-            latest: dateRange.toDate,
-            interval: '1d',
-            maxExamples: 5,
-          }),
-        })
-        .then((results: [DataVisResults]) => {
-          setState(s => ({ ...s, isLoading: false, fieldMetadata: results[0] }));
-        })
-        .catch(() => {
-          setState(s => ({ ...s, isLoading: false }));
-        });
-    } else {
-      npStart.core.http
-        .post(`/api/lens/index_stats/${indexPattern.title}/field`, {
-          body: JSON.stringify({
-            query: toElasticsearchQuery(query, indexPattern),
-            earliest: dateRange.fromDate,
-            latest: dateRange.toDate,
-            timeFieldName: indexPattern.timeFieldName,
-            field,
-          }),
-        })
-        .then((results: HistogramResult) => {
-          setState(s => ({ ...s, isLoading: false, fieldHistogram: results }));
-        })
-        .catch(() => {
-          setState(s => ({ ...s, isLoading: false }));
-        });
-    }
+    // if (field.type !== 'number' && field.type !== 'string') {
+    // npStart.core.http
+    //   .post(`/api/ml/data_visualizer/get_field_stats/${indexPattern.title}`, {
+    //     body: JSON.stringify({
+    //       query: toElasticsearchQuery(query, indexPattern),
+    //       fields: [
+    //         {
+    //           fieldName: field.name,
+    //           type: field.type === 'string' && field.esTypes ? field.esTypes[0] : field.type,
+    //           cardinality,
+    //         },
+    //       ],
+    //       samplerShardSize: 5000,
+    //       timeFieldName: indexPattern.timeFieldName,
+    //       earliest: dateRange.fromDate,
+    //       latest: dateRange.toDate,
+    //       interval: '1d',
+    //       maxExamples: 5,
+    //     }),
+    //   })
+    //   .then((results: [DataVisResults]) => {
+    //     setState(s => ({ ...s, isLoading: false, fieldMetadata: results[0] }));
+    //   })
+    //   .catch(() => {
+    //     setState(s => ({ ...s, isLoading: false }));
+    //   });
+    // } else {
+    npStart.core.http
+      .post(`/api/lens/index_stats/${indexPattern.title}/field`, {
+        body: JSON.stringify({
+          query: toElasticsearchQuery(query, indexPattern),
+          earliest: dateRange.fromDate,
+          latest: dateRange.toDate,
+          timeFieldName: indexPattern.timeFieldName,
+          field,
+        }),
+      })
+      .then((results: HistogramResult | TopValuesResult) => {
+        if (field.type === 'string') {
+          setState(s => ({
+            ...s,
+            isLoading: false,
+            doc_count: results.doc_count,
+            // fieldMetadata: {
+            topValues: (results as TopValuesResult).top_values,
+            // },
+          }));
+        } else if (field.type === 'number') {
+          setState(s => ({
+            ...s,
+            isLoading: false,
+            doc_count: results.doc_count,
+            histogram: (results as HistogramResult).histo,
+          }));
+        } else if (field.type === 'date') {
+          setState(s => ({
+            ...s,
+            isLoading: false,
+            doc_count: results.doc_count,
+            histogram: (results as HistogramResult).histo,
+          }));
+        } else {
+          setState(s => ({
+            ...s,
+            isLoading: false,
+          }));
+        }
+      })
+      .catch(() => {
+        setState(s => ({ ...s, isLoading: false }));
+      });
+    // }
   }, [infoIsOpen, query, dateRange]);
 
   return (
@@ -218,7 +225,20 @@ export function FieldItem({
         {exists && (
           <EuiPopover
             id="lnsFieldListPanel__field"
-            button={<EuiButtonIcon iconType="magnifyWithPlus" onClick={() => setOpen(true)} />}
+            button={
+              <EuiButtonIcon
+                iconType="magnifyWithPlus"
+                onClick={() => setOpen(true)}
+                title={i18n.translate('xpack.lens.indexPattern.fieldStatsButtton', {
+                  defaultMessage: 'See more information about {fieldName}',
+                  values: { fieldName: field.name },
+                })}
+                aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtton', {
+                  defaultMessage: 'See more information about {fieldName}',
+                  values: { fieldName: field.name },
+                })}
+              />
+            }
             isOpen={infoIsOpen}
             closePopover={() => setOpen(false)}
             anchorPosition="rightUp"
@@ -226,7 +246,7 @@ export function FieldItem({
             <div>
               {state.isLoading && <EuiLoadingSpinner />}
 
-              {state.fieldHistogram && (
+              {state.histogram && (
                 <Chart className="lnsDistributionChart">
                   <Settings rotation={90} />
 
@@ -238,70 +258,69 @@ export function FieldItem({
                   <Axis id={getAxisId('doc_count')} position={Position.Bottom} />
 
                   <BarSeries
-                    data={state.fieldHistogram.buckets}
+                    data={state.histogram.buckets}
                     xAccessor={'key'}
                     yAccessors={['doc_count']}
-                    id={getSpecId('distribution')}
-                    xScaleType={ScaleType.Linear}
+                    id={getSpecId(
+                      i18n.translate('xpack.lens.indexPattern.fieldStatsCountLabel', {
+                        defaultMessage: 'Count',
+                      })
+                    )}
+                    xScaleType={field.type === 'date' ? ScaleType.Time : ScaleType.Linear}
                     yScaleType={ScaleType.Linear}
                   />
                 </Chart>
               )}
 
-              {state.fieldMetadata && cardinality && sampleCount && (
+              {state.topValues && (
                 <div>
-                  {state.fieldMetadata && (
+                  {state.doc_count && (
                     <div>
-                      {i18n.translate('xpack.lens.indexPattern.fieldSampleCountLabel', {
-                        defaultMessage: 'Sampled from {sampleCount} documents per shard',
-                        values: { sampleCount: state.fieldMetadata.topValuesSampleSize },
-                      })}
-                    </div>
-                  )}
-
-                  {state.fieldMetadata.distribution && cardinality / sampleCount > 0.02 ? (
-                    <Chart className="lnsDistributionChart">
-                      <Axis
-                        id={getAxisId('x')}
-                        position={Position.Bottom}
-                        title={'Values'}
-                        tickFormat={d => formatter.convert(d)}
-                      />
-
-                      <Axis
-                        id={getAxisId('y')}
-                        position={Position.Left}
-                        tickFormat={d => `${d}%`}
-                      />
-
-                      <AreaSeries
-                        data={distributionToChart(state.fieldMetadata)}
-                        xAccessor={'x'}
-                        yAccessors={['y']}
-                        id={getSpecId('distribution')}
-                        xScaleType={ScaleType.Linear}
-                        yScaleType={ScaleType.Linear}
-                      />
-                    </Chart>
-                  ) : (
-                    state.fieldMetadata.topValues &&
-                    count && (
                       <div>
-                        {state.fieldMetadata.topValues.map(topValue => (
-                          <EuiFlexGroup>
-                            <EuiFlexItem>{formatter.convert(topValue.key)}</EuiFlexItem>
-                            <EuiFlexItem grow={1}>
-                              <EuiProgress value={topValue.doc_count / count} max={1} size={'m'} />
+                        {state.topValues.buckets.map(topValue => (
+                          <EuiFlexGroup gutterSize="xs" alignItems="center" key={topValue.key}>
+                            <EuiFlexItem
+                              grow={false}
+                              style={{ width: 100 }}
+                              className="eui-textTruncate"
+                            >
+                              <EuiToolTip content={formatter.convert(topValue.key)}>
+                                <EuiText size="s" textAlign="right">
+                                  {formatter.convert(topValue.key)}
+                                </EuiText>
+                              </EuiToolTip>
                             </EuiFlexItem>
-                            <EuiFlexItem>
-                              {((topValue.doc_count / count) * 100).toFixed(1)}%
+                            <EuiFlexItem grow={1}>
+                              <EuiProgress
+                                value={topValue.doc_count / state.doc_count!}
+                                max={1}
+                                size="l"
+                              />
+                            </EuiFlexItem>
+                            <EuiFlexItem
+                              grow={false}
+                              style={{ width: 70 }}
+                              className="eui-textTruncate"
+                            >
+                              <EuiText size="s" textAlign="left">
+                                {((topValue.doc_count / state.doc_count!) * 100).toFixed(1)}%
+                              </EuiText>
                             </EuiFlexItem>
                           </EuiFlexGroup>
                         ))}
                       </div>
-                    )
+                    </div>
                   )}
                 </div>
+              )}
+
+              {state.doc_count && (
+                <EuiText size="s">
+                  {i18n.translate('xpack.lens.indexPattern.fieldSampleCountLabel', {
+                    defaultMessage: 'Sampled from {sampleCount} documents',
+                    values: { sampleCount: state.doc_count },
+                  })}
+                </EuiText>
               )}
             </div>
           </EuiPopover>

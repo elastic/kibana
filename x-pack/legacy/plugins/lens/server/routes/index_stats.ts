@@ -7,6 +7,7 @@
 import Boom from 'boom';
 import { get, uniq } from 'lodash';
 import { first } from 'rxjs/operators';
+import DateMath from '@elastic/datemath';
 import { KibanaRequest } from 'src/core/server';
 import { SearchResponse, AggregationSearchResponse } from 'elasticsearch';
 import {
@@ -160,92 +161,50 @@ export async function initStatsRoute(setup: LensCoreSetup) {
           },
         };
 
-        setup.http.server.log(['lens', 'info'], {
-          index: req.params.indexPatternTitle,
-          body: {
-            query: filters,
-            aggs: {
-              min_value: {
-                min: { field: field.name },
-              },
-              max_value: {
-                max: { field: field.name },
-              },
-            },
-            size: 0,
-          },
-        });
-
-        const minMaxResult: AggregationSearchResponse<
-          unknown,
-          {
-            aggs: {
-              sample: {
-                sampler: { shard_size: 5000 };
-                aggs: {
-                  min_value: {
-                    min: { field: string };
-                  };
-                  max_value: {
-                    max: { field: string };
-                  };
-                };
-              };
-            };
-          }
-        > = await requestClient.callAsCurrentUser('search', {
-          index: req.params.indexPatternTitle,
-          body: {
-            query: filters,
-            aggs: {
-              sample: {
-                sampler: { shard_size: 5000 },
-                aggs: {
-                  min_value: {
-                    min: { field: field.name },
-                  },
-                  max_value: {
-                    max: { field: field.name },
-                  },
+        if (field.type === 'number') {
+          return await getNumberHistogram(
+            (aggBody: unknown) =>
+              requestClient.callAsCurrentUser('search', {
+                index: req.params.indexPatternTitle,
+                body: {
+                  query: filters,
+                  aggs: aggBody,
                 },
-              },
-            },
-            size: 0,
-          },
-        });
-        setup.http.server.log(['lens', 'info'], JSON.stringify(minMaxResult));
-
-        const minValue = minMaxResult.aggregations.sample.min_value.value;
-        const maxValue = minMaxResult.aggregations.sample.max_value.value;
-
-        const histogramInterval = (maxValue - minValue) / 10;
-
-        const histogramResult: AggregationSearchResponse<
-          unknown,
-          {}
-        > = await requestClient.callAsCurrentUser('search', {
-          index: req.params.indexPatternTitle,
-          body: {
-            query: filters,
-            aggs: {
-              sample: {
-                sampler: { shard_size: 5000 },
-                aggs: {
-                  histo: {
-                    histogram: {
-                      field: field.name,
-                      interval: histogramInterval,
-                    },
-                  },
+                size: 0,
+              }),
+            field
+          );
+        } else if (field.type === 'string') {
+          return await getStringSamples(
+            (aggBody: unknown) =>
+              requestClient.callAsCurrentUser('search', {
+                index: req.params.indexPatternTitle,
+                body: {
+                  query: filters,
+                  aggs: aggBody,
                 },
-              },
-            },
-            size: 0,
-          },
-        });
-        setup.http.server.log(['lens', 'info'], JSON.stringify(histogramResult));
-
-        return histogramResult.aggregations.sample.histo;
+                size: 0,
+              }),
+            field
+          );
+        } else if (field.type === 'date') {
+          return await getDateHistogram(
+            (aggBody: unknown) =>
+              requestClient.callAsCurrentUser('search', {
+                index: req.params.indexPatternTitle,
+                body: {
+                  query: filters,
+                  aggs: aggBody,
+                },
+                size: 0,
+              }),
+            field,
+            {
+              earliest,
+              latest,
+            }
+          );
+        }
       } catch (e) {
         setup.http.server.log(['lens', 'info'], JSON.stringify(e));
         if (e.isBoom) {
@@ -335,4 +294,133 @@ export function recursiveFlatten(
     };
   });
   return returnTypes;
+}
+
+export async function getNumberHistogram(
+  aggSearchWithBody: (body: unknown) => Promise<AggregationSearchResponse<unknown>>,
+  field: { name: string; type: string }
+) {
+  const minMaxResult: AggregationSearchResponse<
+    unknown,
+    {
+      aggs: {
+        sample: {
+          sampler: { shard_size: 5000 };
+          aggs: {
+            min_value: {
+              min: { field: string };
+            };
+            max_value: {
+              max: { field: string };
+            };
+          };
+        };
+      };
+    }
+  > = await aggSearchWithBody({
+    sample: {
+      sampler: { shard_size: 5000 },
+      aggs: {
+        min_value: {
+          min: { field: field.name },
+        },
+        max_value: {
+          max: { field: field.name },
+        },
+      },
+    },
+  });
+
+  const minValue = minMaxResult.aggregations.sample.min_value.value;
+  const maxValue = minMaxResult.aggregations.sample.max_value.value;
+
+  const histogramInterval = (maxValue - minValue) / 10;
+
+  if (histogramInterval === 0) {
+    return { buckets: [] };
+  }
+
+  const histogramResult: AggregationSearchResponse<unknown, {}> = await aggSearchWithBody({
+    sample: {
+      sampler: { shard_size: 5000 },
+      aggs: {
+        histo: {
+          histogram: {
+            field: field.name,
+            interval: histogramInterval,
+          },
+        },
+      },
+    },
+  });
+
+  return histogramResult.aggregations.sample;
+}
+
+export async function getStringSamples(
+  aggSearchWithBody: (body: unknown) => Promise<AggregationSearchResponse<unknown>>,
+  field: { name: string; type: string }
+) {
+  const topValuesResult: AggregationSearchResponse<
+    unknown,
+    {
+      aggs: {
+        sample: {
+          sampler: { shard_size: 5000 };
+          aggs: {
+            top_values: {
+              terms: { field: string };
+            };
+          };
+        };
+      };
+    }
+  > = await aggSearchWithBody({
+    sample: {
+      sampler: { shard_size: 5000 },
+      aggs: {
+        top_values: {
+          terms: { field: field.name, size: 10 },
+        },
+      },
+    },
+  });
+
+  return topValuesResult.aggregations.sample;
+}
+
+// This one is not sampled so that it returns the full date range
+export async function getDateHistogram(
+  aggSearchWithBody: (body: unknown) => Promise<AggregationSearchResponse<unknown>>,
+  field: { name: string; type: string },
+  range: { earliest: string; latest: string }
+) {
+  const earliest = DateMath.parse(range.earliest);
+  const latest = DateMath.parse(range.latest);
+  if (!earliest) {
+    throw Error('Invalid earliest value');
+  }
+  if (!latest) {
+    throw Error('Invalid latest value');
+  }
+
+  // TODO: Respect rollup intervals
+  const fixedInterval = `${Math.round((latest.valueOf() - earliest.valueOf()) / 10)}ms`;
+
+  const results: AggregationSearchResponse<
+    unknown,
+    {
+      aggs: {
+        histo: {
+          date_histogram: { field: string };
+        };
+      };
+    }
+  > = await aggSearchWithBody({
+    histo: {
+      date_histogram: { field: field.name, fixed_interval: fixedInterval },
+    },
+  });
+
+  return results.aggregations;
 }

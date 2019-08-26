@@ -152,7 +152,7 @@ describe('editor_frame state management', () => {
     });
 
     it('should update the layer state with passed in reducer', () => {
-      const layerReducer = jest.fn((_state, layerId) => ({ inserted: layerId }));
+      const newDatasourceState = {};
       const newState = reducer(
         {
           datasourceStates: {
