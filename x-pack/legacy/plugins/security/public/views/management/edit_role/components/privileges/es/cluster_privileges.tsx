@@ -29,9 +29,6 @@ export class ClusterPrivileges extends Component<Props, State> {
   }
 
   componentWillReceiveProps(nextProps: Props) {
-    if (_.isEqual(nextProps.role.elasticsearch.cluster, this.props.role.elasticsearch.cluster)) {
-      return;
-    }
     this.setState({
       availableClusterPrivileges: this.getAvailableClusterPrivileges(nextProps),
     });
