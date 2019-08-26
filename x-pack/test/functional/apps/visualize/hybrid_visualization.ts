@@ -10,7 +10,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
   const inspector = getService('inspector');
 
-  describe('hybrid', () => {
+  describe('hybrid index pattern', () => {
     before(async () => {
       await esArchiver.load('hybrid/kibana');
       await esArchiver.load('hybrid/logstash');
@@ -23,7 +23,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       await esArchiver.unload('hybrid/rollup');
     });
 
-    it('hybrid visualization', async () => {
+    it('should render histogram line chart', async () => {
       const expectedData = [
         ['2019-08-19 00:00', 'gif', '2'],
         ['2019-08-19 00:00', 'jpg', '2'],
