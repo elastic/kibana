@@ -1,4 +1,5 @@
 JOB:
+  - kibana-visualRegression
   - x-pack-visualRegression
 
 # `~` is yaml for `null`
