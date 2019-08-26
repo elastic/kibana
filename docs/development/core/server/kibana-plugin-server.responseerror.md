@@ -11,6 +11,6 @@ Error message and optional data send to the client in case of error.
 ```typescript
 export declare type ResponseError = string | Error | {
     message: string | Error;
-    meta?: ResponseErrorMeta;
+    attributes?: ResponseErrorAttributes;
 };
 ```
