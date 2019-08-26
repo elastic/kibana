@@ -253,7 +253,7 @@ export const getFlightsSavedObjects = () => {
         }
       ],
       'migrationVersion': {
-        'map': '7.2.0'
+        'map': '7.4.0'
       },
       'attributes': {
         'title': i18n.translate('xpack.maps.sampleData.flightaSpec.mapsTitle', {
