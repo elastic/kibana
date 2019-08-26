@@ -18,7 +18,7 @@
  */
 // @ts-ignore
 import expect from '@kbn/expect';
-import Ipv4Address from '../ipv4_address';
+import Ipv4Address from './ipv4_address';
 
 describe('Ipv4Address', () => {
   it('should throw errors with invalid IP addresses', () => {
