@@ -11,6 +11,7 @@
     "patterns": [
       "_ml/data_frame/analytics/_stats",
       "_ml/data_frame/analytics/{id}/_stats"
-    ]
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current/get-dfanalytics-stats.html"
   }
 }
