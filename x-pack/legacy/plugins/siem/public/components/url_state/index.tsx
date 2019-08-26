@@ -116,7 +116,6 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   setHostsKql: hostsActions.applyHostsFilterQuery,
   setNetworkKql: networkActions.applyNetworkFilterQuery,
   setRelativeTimerange: inputsActions.setRelativeRangeDatePicker,
-  toggleTimelineLinkTo: inputsActions.toggleTimelineLinkTo,
   updateTimeline: dispatchUpdateTimeline(dispatch),
   updateTimelineIsLoading: timelineActions.updateIsLoading,
   dispatch,

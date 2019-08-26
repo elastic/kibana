@@ -65,7 +65,6 @@ export const useUrlStateHooks = ({
   setHostsKql,
   setNetworkKql,
   setRelativeTimerange,
-  toggleTimelineLinkTo,
   updateTimeline,
   updateTimelineIsLoading,
   urlState,
@@ -129,15 +128,43 @@ export const useUrlStateHooks = ({
   const setInitialStateFromUrl = (urlKey: KeyUrlState, newUrlStateString: string) => {
     if (urlKey === CONSTANTS.timerange) {
       const timerangeStateData: UrlInputsModel = decodeRisonUrlState(newUrlStateString);
+      const timelineId: InputsModelId = 'timeline';
+      const timelineLinkTo: LinkTo = { linkTo: get('timeline.linkTo', timerangeStateData) };
+      const timelineType: TimeRangeKinds = get('timeline.timerange.kind', timerangeStateData);
+      if (timelineType) {
+        if (timelineType === 'absolute') {
+          const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
+            get('timeline.timerange', timerangeStateData)
+          );
+          dispatch(
+            setAbsoluteTimerange({
+              ...absoluteRange,
+              id: timelineId,
+            })
+          );
+        }
+        if (timelineType === 'relative') {
+          const relativeRange = normalizeTimeRange<RelativeTimeRange>(
+            get('timeline.timerange', timerangeStateData)
+          );
+          dispatch(
+            setRelativeTimerange({
+              ...relativeRange,
+              id: timelineId,
+            })
+          );
+        }
+        if (timelineLinkTo.linkTo.length === 0) {
+          dispatch(removeTimelineLinkTo());
+        } else {
+          dispatch(addTimelineLinkTo({ linkToId: 'timeline' }));
+        }
+      }
+
       const globalId: InputsModelId = 'global';
       const globalLinkTo: LinkTo = { linkTo: get('global.linkTo', timerangeStateData) };
       const globalType: TimeRangeKinds = get('global.timerange.kind', timerangeStateData);
       if (globalType) {
-        if (globalLinkTo.linkTo.length === 0) {
-          dispatch(removeGlobalLinkTo());
-        } else {
-          dispatch(addGlobalLinkTo({ linkToId: 'timeline' }));
-        }
         if (globalType === 'absolute') {
           const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
             get('global.timerange', timerangeStateData)
@@ -160,37 +187,10 @@ export const useUrlStateHooks = ({
             })
           );
         }
-      }
-      const timelineId: InputsModelId = 'timeline';
-      const timelineLinkTo: LinkTo = { linkTo: get('timeline.linkTo', timerangeStateData) };
-      const timelineType: TimeRangeKinds = get('timeline.timerange.kind', timerangeStateData);
-      if (timelineType) {
-        if (timelineLinkTo.linkTo.length === 0) {
-          dispatch(removeTimelineLinkTo());
+        if (globalLinkTo.linkTo.length === 0) {
+          dispatch(removeGlobalLinkTo());
         } else {
-          dispatch(addTimelineLinkTo({ linkToId: 'timeline' }));
-        }
-        if (timelineType === 'absolute') {
-          const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
-            get('timeline.timerange', timerangeStateData)
-          );
-          dispatch(
-            setAbsoluteTimerange({
-              ...absoluteRange,
-              id: timelineId,
-            })
-          );
-        }
-        if (timelineType === 'relative') {
-          const relativeRange = normalizeTimeRange<RelativeTimeRange>(
-            get('timeline.timerange', timerangeStateData)
-          );
-          dispatch(
-            setRelativeTimerange({
-              ...relativeRange,
-              id: timelineId,
-            })
-          );
+          dispatch(addGlobalLinkTo({ linkToId: 'timeline' }));
         }
       }
     }
@@ -244,9 +244,7 @@ export const useUrlStateHooks = ({
     } else if (!isEqual(urlState, prevProps.urlState)) {
       let newLocation: Location = location;
       URL_STATE_KEYS[type].forEach((urlKey: KeyUrlState) => {
-        if (!isEqual(urlState[urlKey], prevProps.urlState[urlKey])) {
-          newLocation = replaceStateInLocation(urlState[urlKey], urlKey, newLocation);
-        }
+        newLocation = replaceStateInLocation(urlState[urlKey], urlKey, newLocation);
       });
     } else if (location.pathname !== prevProps.location.pathname) {
       handleInitialize(location, type);

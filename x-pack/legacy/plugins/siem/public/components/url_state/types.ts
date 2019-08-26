@@ -93,9 +93,6 @@ export interface UrlStateDispatchToPropsType {
     to: number;
     toStr: string;
   }>;
-  toggleTimelineLinkTo: ActionCreator<{
-    linkToId: InputsModelId;
-  }>;
   updateTimeline: DispatchUpdateTimeline;
   updateTimelineIsLoading: ActionCreator<{
     id: string;

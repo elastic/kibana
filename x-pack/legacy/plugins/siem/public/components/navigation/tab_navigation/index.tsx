@@ -5,33 +5,48 @@
  */
 import { EuiTab, EuiTabs, EuiLink } from '@elastic/eui';
 import { get, getOr } from 'lodash/fp';
+import { Location } from 'history';
 import * as React from 'react';
 import styled from 'styled-components';
-
 import classnames from 'classnames';
+
 import { trackUiAction as track, METRIC_TYPE } from '../../../lib/track_usage';
-import { NavigationParams } from '../breadcrumbs';
 import { HostsTableType } from '../../../store/hosts/model';
-import { TabNavigationComponentProps } from '..';
+import { UrlInputsModel } from '../../../store/inputs/model';
+import { CONSTANTS } from '../../url_state/constants';
+import { KqlQuery, UrlStateType, URL_STATE_KEYS, KeyUrlState } from '../../url_state/types';
+
+import { NavigationParams } from '../breadcrumbs';
+
+import {
+  replaceQueryStringInLocation,
+  replaceStateKeyInQueryString,
+  getQueryStringFromLocation,
+} from '../../url_state/helpers';
 
 export interface NavTab {
   id: string;
   name: string;
   href: string;
   disabled: boolean;
+  urlKey: UrlStateType;
 }
 
 interface NavMatchParams {
   params: NavigationParams;
 }
 
-interface TabNavigationRouteProps {
-  location: string;
-  search: string;
+export interface TabNavigationProps {
+  location: Location;
+  hosts: KqlQuery;
+  navTabs: Record<string, NavTab>;
+  network: KqlQuery;
+  [CONSTANTS.timerange]: UrlInputsModel;
+  [CONSTANTS.timelineId]: string;
+  display?: 'default' | 'condensed';
   match?: NavMatchParams;
+  showBorder?: boolean;
 }
-
-type TabNavigationProps = TabNavigationRouteProps & TabNavigationComponentProps;
 
 const TabContainer = styled.div`
   .euiLink {
@@ -52,13 +67,13 @@ interface TabNavigationState {
 export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNavigationState> {
   constructor(props: TabNavigationProps) {
     super(props);
-    const pathname = props.location;
+    const pathname = props.location.pathname;
     const match = props.match;
     const selectedTabId = this.mapLocationToTab(pathname, match);
     this.state = { selectedTabId };
   }
   public componentWillReceiveProps(nextProps: TabNavigationProps): void {
-    const pathname = nextProps.location;
+    const pathname = nextProps.location.pathname;
     const match = nextProps.match;
     const selectedTabId = this.mapLocationToTab(pathname, match);
 
@@ -96,7 +111,10 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
           className={classnames({ euiTab: true, showBorder: this.props.showBorder })}
           key={`navigation-${tab.id}`}
         >
-          <EuiLink data-test-subj={`navigation-link-${tab.id}`} href={tab.href + this.props.search}>
+          <EuiLink
+            data-test-subj={`navigation-link-${tab.id}`}
+            href={tab.href + this.getSearch(tab)}
+          >
             <EuiTab
               data-href={tab.href}
               data-test-subj={`navigation-${tab.id}`}
@@ -112,5 +130,33 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
         </TabContainer>
       );
     });
+  };
+
+  private getSearch = (tab: NavTab): string => {
+    return URL_STATE_KEYS[tab.urlKey].reduce<Location>(
+      (myLocation: Location, urlKey: KeyUrlState) => {
+        let urlStateToReplace: UrlInputsModel | KqlQuery | string = this.props[
+          CONSTANTS.timelineId
+        ];
+        if (urlKey === CONSTANTS.kqlQuery && tab.urlKey === 'host') {
+          urlStateToReplace = this.props.hosts;
+        } else if (urlKey === CONSTANTS.kqlQuery && tab.urlKey === 'network') {
+          urlStateToReplace = this.props.network;
+        } else if (urlKey === CONSTANTS.timerange) {
+          urlStateToReplace = this.props[CONSTANTS.timerange];
+        }
+        myLocation = replaceQueryStringInLocation(
+          myLocation,
+          replaceStateKeyInQueryString(urlKey, urlStateToReplace)(
+            getQueryStringFromLocation(myLocation)
+          )
+        );
+        return myLocation;
+      },
+      {
+        ...this.props.location,
+        search: '',
+      }
+    ).search;
   };
 }
