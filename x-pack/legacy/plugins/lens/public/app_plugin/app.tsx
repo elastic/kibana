@@ -76,7 +76,13 @@ export function App({
       toDate: timeDefaults.to,
     },
     indexPatternTitles: [],
-    localQueryBarState: {},
+    localQueryBarState: {
+      query: { query: '', language },
+      dateRange: {
+        from: timeDefaults.from,
+        to: timeDefaults.to,
+      },
+    },
   });
 
   const lastKnownDocRef = useRef<Document | undefined>(undefined);
@@ -184,8 +190,8 @@ export function App({
                 localQueryBarState: payload,
               });
             }}
-            onChange={uncommitedQueryBarState => {
-              setState({ ...state, localQueryBarState: uncommitedQueryBarState });
+            onChange={localQueryBarState => {
+              setState({ ...state, localQueryBarState });
             }}
             isDirty={isLocalStateDirty(state.localQueryBarState, state.query, state.dateRange)}
             appName={'lens'}
@@ -193,9 +199,13 @@ export function App({
             store={store}
             showDatePicker={true}
             showQueryInput={true}
-            query={state.query}
-            dateRangeFrom={state.dateRange && state.dateRange.fromDate}
-            dateRangeTo={state.dateRange && state.dateRange.toDate}
+            query={state.localQueryBarState.query}
+            dateRangeFrom={
+              state.localQueryBarState.dateRange && state.localQueryBarState.dateRange.from
+            }
+            dateRangeTo={
+              state.localQueryBarState.dateRange && state.localQueryBarState.dateRange.to
+            }
             uiSettings={uiSettings}
           />
         </div>
