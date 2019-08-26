@@ -23,7 +23,7 @@ import { RefreshInterval } from '../../../../plugins/data/public';
 
 // NOTE: These types are somewhat guessed, they may be incorrect.
 
-export { RefreshInterval };
+export { RefreshInterval, TimeRange };
 
 export interface Timefilter {
   time: TimeRange;
