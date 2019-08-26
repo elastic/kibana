@@ -3,6 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+/*
+ * Be Careful here by using iso date and epoch date
+ * because the conversion might not what you expect
+ * for different timezone better to calculate
+ * them on the fly
+ */
+
 export const ABSOLUTE_DATE_RANGE = {
   endTime: '1564691609186',
   endTimeFormat: '2019-08-01T20:33:29.186Z',

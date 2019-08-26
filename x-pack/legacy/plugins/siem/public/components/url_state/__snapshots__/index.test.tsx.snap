@@ -528,7 +528,6 @@ exports[`UrlStateContainer mounts and renders 1`] = `
                               setHostsKql={[Function]}
                               setNetworkKql={[Function]}
                               setRelativeTimerange={[Function]}
-                              toggleTimelineLinkTo={[Function]}
                               updateTimeline={[Function]}
                               updateTimelineIsLoading={[Function]}
                               urlState={

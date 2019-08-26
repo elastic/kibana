@@ -118,9 +118,6 @@ export const defaultProps: UrlStateContainerPropTypes = {
     to: number;
     toStr: string;
   }>,
-  toggleTimelineLinkTo: (jest.fn() as unknown) as ActionCreator<{
-    linkToId: InputsModelId;
-  }>,
   updateTimeline: (jest.fn() as unknown) as DispatchUpdateTimeline,
   updateTimelineIsLoading: (jest.fn() as unknown) as ActionCreator<{
     id: string;

@@ -24,6 +24,7 @@ import { manageQuery } from '../../components/page/manage_query';
 import { AuthenticationsQuery } from '../../containers/authentications';
 import { ESTermQuery } from '../../../common/typed_json';
 import { HostsTableType } from '../../store/hosts/model';
+import { SiemPageName } from '../home/home_navigations';
 
 const getTabsOnHostsUrl = (tabName: HostsTableType) => `#/hosts/${tabName}`;
 const getTabsOnHostDetailsUrl = (hostName: string, tabName: HostsTableType) => {
@@ -51,30 +52,35 @@ export const navTabsHosts: HostsNavTab = {
     name: i18n.NAVIGATION_ALL_HOSTS_TITLE,
     href: getTabsOnHostsUrl(HostsTableType.hosts),
     disabled: false,
+    urlKey: 'host',
   },
   [HostsTableType.authentications]: {
     id: HostsTableType.authentications,
     name: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
     href: getTabsOnHostsUrl(HostsTableType.authentications),
     disabled: false,
+    urlKey: 'host',
   },
   [HostsTableType.uncommonProcesses]: {
     id: HostsTableType.uncommonProcesses,
     name: i18n.NAVIGATION_UNCOMMON_PROCESSES_TITLE,
     href: getTabsOnHostsUrl(HostsTableType.uncommonProcesses),
     disabled: false,
+    urlKey: 'host',
   },
   [HostsTableType.anomalies]: {
     id: HostsTableType.anomalies,
     name: i18n.NAVIGATION_ANOMALIES_TITLE,
     href: getTabsOnHostsUrl(HostsTableType.anomalies),
     disabled: false,
+    urlKey: 'host',
   },
   [HostsTableType.events]: {
     id: HostsTableType.events,
     name: i18n.NAVIGATION_EVENTS_TITLE,
     href: getTabsOnHostsUrl(HostsTableType.events),
     disabled: false,
+    urlKey: 'host',
   },
 };
 
@@ -84,24 +90,28 @@ export const navTabsHostDetails = (hostName: string): Record<KeyHostDetailsNavTa
     name: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
     href: getTabsOnHostDetailsUrl(hostName, HostsTableType.authentications),
     disabled: false,
+    urlKey: 'host',
   },
   [HostsTableType.uncommonProcesses]: {
     id: HostsTableType.uncommonProcesses,
     name: i18n.NAVIGATION_UNCOMMON_PROCESSES_TITLE,
     href: getTabsOnHostDetailsUrl(hostName, HostsTableType.uncommonProcesses),
     disabled: false,
+    urlKey: 'host',
   },
   [HostsTableType.anomalies]: {
     id: HostsTableType.anomalies,
     name: i18n.NAVIGATION_ANOMALIES_TITLE,
     href: getTabsOnHostDetailsUrl(hostName, HostsTableType.anomalies),
     disabled: false,
+    urlKey: 'host',
   },
   [HostsTableType.events]: {
     id: HostsTableType.events,
     name: i18n.NAVIGATION_EVENTS_TITLE,
     href: getTabsOnHostDetailsUrl(hostName, HostsTableType.events),
     disabled: false,
+    urlKey: 'host',
   },
 });
 

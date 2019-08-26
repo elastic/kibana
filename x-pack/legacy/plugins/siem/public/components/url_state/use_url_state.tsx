@@ -5,7 +5,7 @@
  */
 
 import { Location } from 'history';
-import { get, isEqual, difference } from 'lodash/fp';
+import { get, isEqual, difference, isEmpty } from 'lodash/fp';
 import { useEffect, useRef } from 'react';
 
 import { convertKueryToElasticSearchQuery } from '../../lib/keury';
@@ -128,9 +128,27 @@ export const useUrlStateHooks = ({
   const setInitialStateFromUrl = (urlKey: KeyUrlState, newUrlStateString: string) => {
     if (urlKey === CONSTANTS.timerange) {
       const timerangeStateData: UrlInputsModel = decodeRisonUrlState(newUrlStateString);
+
+      const globalId: InputsModelId = 'global';
+      const globalLinkTo: LinkTo = { linkTo: get('global.linkTo', timerangeStateData) };
+      const globalType: TimeRangeKinds = get('global.timerange.kind', timerangeStateData);
+
       const timelineId: InputsModelId = 'timeline';
       const timelineLinkTo: LinkTo = { linkTo: get('timeline.linkTo', timerangeStateData) };
       const timelineType: TimeRangeKinds = get('timeline.timerange.kind', timerangeStateData);
+
+      if (isEmpty(globalLinkTo.linkTo)) {
+        dispatch(removeGlobalLinkTo());
+      } else {
+        dispatch(addGlobalLinkTo({ linkToId: 'timeline' }));
+      }
+
+      if (isEmpty(timelineLinkTo.linkTo)) {
+        dispatch(removeTimelineLinkTo());
+      } else {
+        dispatch(addTimelineLinkTo({ linkToId: 'global' }));
+      }
+
       if (timelineType) {
         if (timelineType === 'absolute') {
           const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
@@ -154,16 +172,8 @@ export const useUrlStateHooks = ({
             })
           );
         }
-        if (timelineLinkTo.linkTo.length === 0) {
-          dispatch(removeTimelineLinkTo());
-        } else {
-          dispatch(addTimelineLinkTo({ linkToId: 'timeline' }));
-        }
       }
 
-      const globalId: InputsModelId = 'global';
-      const globalLinkTo: LinkTo = { linkTo: get('global.linkTo', timerangeStateData) };
-      const globalType: TimeRangeKinds = get('global.timerange.kind', timerangeStateData);
       if (globalType) {
         if (globalType === 'absolute') {
           const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
@@ -186,11 +196,6 @@ export const useUrlStateHooks = ({
               id: globalId,
             })
           );
-        }
-        if (globalLinkTo.linkTo.length === 0) {
-          dispatch(removeGlobalLinkTo());
-        } else {
-          dispatch(addGlobalLinkTo({ linkToId: 'timeline' }));
         }
       }
     }

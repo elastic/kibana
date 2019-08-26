@@ -74,7 +74,7 @@ describe('UrlStateContainer', () => {
           mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
 
           // @ts-ignore property mock does not exists
-          expect(defaultProps.setRelativeTimerange.mock.calls[0][0]).toEqual({
+          expect(defaultProps.setRelativeTimerange.mock.calls[1][0]).toEqual({
             from: 1558591200000,
             fromStr: 'now-1d/d',
             kind: 'relative',
@@ -83,7 +83,7 @@ describe('UrlStateContainer', () => {
             id: 'global',
           });
           // @ts-ignore property mock does not exists
-          expect(defaultProps.setRelativeTimerange.mock.calls[1][0]).toEqual({
+          expect(defaultProps.setRelativeTimerange.mock.calls[0][0]).toEqual({
             from: 1558732849370,
             fromStr: 'now-15m',
             kind: 'relative',
@@ -101,14 +101,14 @@ describe('UrlStateContainer', () => {
           mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
 
           // @ts-ignore property mock does not exists
-          expect(defaultProps.setAbsoluteTimerange.mock.calls[0][0]).toEqual({
+          expect(defaultProps.setAbsoluteTimerange.mock.calls[1][0]).toEqual({
             from: 1556736012685,
             kind: 'absolute',
             to: 1556822416082,
             id: 'global',
           });
           // @ts-ignore property mock does not exists
-          expect(defaultProps.setAbsoluteTimerange.mock.calls[1][0]).toEqual({
+          expect(defaultProps.setAbsoluteTimerange.mock.calls[0][0]).toEqual({
             from: 1556736012685,
             kind: 'absolute',
             to: 1556822416082,

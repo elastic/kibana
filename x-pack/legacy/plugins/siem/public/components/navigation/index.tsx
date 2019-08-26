@@ -125,7 +125,7 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const SiemNavigation = compose<React.ComponentClass<TabNavigationProps>>(
+export const SiemNavigation = compose<React.ComponentClass>(
   withRouter,
   connect(makeMapStateToProps)
 )(SiemNavigationComponent);
