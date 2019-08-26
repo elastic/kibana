@@ -45,6 +45,11 @@ export class GeometryFilterForm extends Component {
     geoFields: PropTypes.array.isRequired,
     intitialGeometryLabel: PropTypes.string.isRequired,
     onSubmit: PropTypes.func.isRequired,
+    isFilterGeometryClosed: PropTypes.bool,
+  };
+
+  static defaultProps = {
+    isFilterGeometryClosed: true,
   };
 
   state = {
@@ -108,7 +113,13 @@ export class GeometryFilterForm extends Component {
       return null;
     }
 
-    const options = Object.values(ES_SPATIAL_RELATIONS)
+    const spatialRelations = this.props.isFilterGeometryClosed
+      ? Object.values(ES_SPATIAL_RELATIONS)
+      : Object.values(ES_SPATIAL_RELATIONS).filter(relation => {
+        // can not filter by within relation when filtering geometry is not closed
+        return relation !== ES_SPATIAL_RELATIONS.WITHIN;
+      });
+    const options = spatialRelations
       .map(relation => {
         return {
           value: relation,
@@ -165,21 +176,21 @@ export class GeometryFilterForm extends Component {
         </EuiFormRow>
 
         <EuiFormRow
-          className="mapFeatureTooltip_geoFieldSuperSelectWrapper"
+          className="mapGeometryFilter_geoFieldSuperSelectWrapper"
           label={i18n.translate('xpack.maps.geometryFilterForm.geoFieldLabel', {
             defaultMessage: 'Filtered field'
           })}
           compressed
         >
           <EuiSuperSelect
-            className="mapFeatureTooltip_geoFieldSuperSelect"
+            className="mapGeometryFilter_geoFieldSuperSelect"
             options={options}
             valueOfSelected={this.state.geoFieldTag}
             onChange={this._onGeoFieldChange}
             hasDividers={true}
             fullWidth={true}
             compressed={true}
-            itemClassName="mapFeatureTooltip__geoFieldItem"
+            itemClassName="mapGeometryFilter__geoFieldItem"
           />
         </EuiFormRow>
 

@@ -1,3 +1,15 @@
 .mapMetricEditorPanel {
   margin-bottom: $euiSizeS;
 }
+
+.mapGeometryFilter_geoFieldSuperSelect {
+  height: $euiSizeXL * 2;
+}
+
+.mapGeometryFilter_geoFieldSuperSelectWrapper {
+  height: $euiSizeXL * 3;
+}
+
+.mapGeometryFilter__geoFieldItem {
+  padding: $euiSizeXS;
+}
