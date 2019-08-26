@@ -253,7 +253,6 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
       highlightMsg,
     };
 
-    // console.log('render uiKeyPadMenuItemButton', visType.name, visType.title);
     return (
       <EuiKeyPadMenuItemButton
         key={visType.name}
