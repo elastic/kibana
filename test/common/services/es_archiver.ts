@@ -46,6 +46,7 @@ export function EsArchiverProvider({ getService, hasService }: FtrProviderContex
     KibanaServer.extendEsArchiver({
       esArchiver,
       kibanaServer: getService('kibanaServer'),
+      retry: getService('retry'),
       defaults: config.get('uiSettings.defaults'),
     });
   }
