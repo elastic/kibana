@@ -6,34 +6,57 @@
 
 import { SavedObjectsClientContract } from 'src/core/server';
 import { TaskManager } from '../../task_manager';
-import { SpacesPlugin } from '../../spaces';
+import { GetBasePathFunction } from './types';
 
 interface CreateExecuteFunctionOptions {
+  isSecurityEnabled: boolean;
   taskManager: TaskManager;
-  internalSavedObjectsRepository: SavedObjectsClientContract;
-  spaceIdToNamespace: SpacesPlugin['spaceIdToNamespace'];
+  getScopedSavedObjectsClient: (request: any) => SavedObjectsClientContract;
+  getBasePath: GetBasePathFunction;
 }
 
 export interface ExecuteOptions {
   id: string;
   params: Record<string, any>;
   spaceId: string;
+  apiKey?: string;
 }
 
 export function createExecuteFunction({
+  getBasePath,
   taskManager,
-  internalSavedObjectsRepository,
-  spaceIdToNamespace,
+  isSecurityEnabled,
+  getScopedSavedObjectsClient,
 }: CreateExecuteFunctionOptions) {
-  return async function execute({ id, params, spaceId }: ExecuteOptions) {
-    const namespace = spaceIdToNamespace(spaceId);
-    const actionSavedObject = await internalSavedObjectsRepository.get('action', id, { namespace });
+  return async function execute({ id, params, spaceId, apiKey }: ExecuteOptions) {
+    const requestHeaders: Record<string, string> = {};
+
+    if (isSecurityEnabled && !apiKey) {
+      throw new Error('API key is required. The attribute "apiKey" is missing.');
+    } else if (isSecurityEnabled) {
+      requestHeaders.authorization = `ApiKey ${apiKey}`;
+    }
+
+    // Since we're using API keys and accessing elasticsearch can only be done
+    // via a request, we're faking one with the proper authorization headers.
+    const fakeRequest: any = {
+      headers: requestHeaders,
+      getBasePath: () => getBasePath(spaceId),
+    };
+
+    const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest);
+    const actionSavedObject = await savedObjectsClient.get('action', id);
+    const actionTaskParamsRecord = await savedObjectsClient.create('action_task_params', {
+      actionId: id,
+      params,
+      apiKey,
+    });
+
     await taskManager.schedule({
       taskType: `actions:${actionSavedObject.attributes.actionTypeId}`,
       params: {
-        id,
         spaceId,
-        params,
+        actionTaskParamsId: actionTaskParamsRecord.id,
       },
       state: {},
       scope: ['actions'],

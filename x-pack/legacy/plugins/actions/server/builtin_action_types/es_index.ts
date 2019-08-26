@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 
 import { nullableType } from './lib/nullable';
@@ -52,9 +53,15 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
   const services = execOptions.services;
 
   if (config.index == null && params.index == null) {
+    const message = i18n.translate('xpack.actions.builtin.esIndex.indexParamRequiredErrorMessage', {
+      defaultMessage: 'index param needs to be set because not set in config for action {id}',
+      values: {
+        id,
+      },
+    });
     return {
       status: 'error',
-      message: `index param needs to be set because not set in config for action ${id}`,
+      message,
     };
   }
 
@@ -90,9 +97,16 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
   try {
     result = await services.callCluster('bulk', bulkParams);
   } catch (err) {
+    const message = i18n.translate('xpack.actions.builtin.esIndex.errorIndexingErrorMessage', {
+      defaultMessage: 'error in action "{id}" indexing data: {errorMessage}',
+      values: {
+        id,
+        errorMessage: err.message,
+      },
+    });
     return {
       status: 'error',
-      message: `error in action ${id} indexing documents: ${err.message}`,
+      message,
     };
   }
 

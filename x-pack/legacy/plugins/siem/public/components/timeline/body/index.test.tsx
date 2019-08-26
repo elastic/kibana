@@ -18,12 +18,20 @@ import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
 import { wait } from '../../../lib/helpers';
 
+jest.mock('../../../lib/settings/use_kibana_ui_setting');
+
 const testBodyHeight = 700;
 const mockGetNotesByIds = (eventId: string[]) => [];
 const mockSort: Sort = {
   columnId: '@timestamp',
   sortDirection: Direction.desc,
 };
+
+jest.mock(
+  'react-visibility-sensor',
+  () => ({ children }: { children: (args: { isVisible: boolean }) => React.ReactNode }) =>
+    children({ isVisible: true })
+);
 
 describe('Body', () => {
   describe('rendering', () => {
@@ -53,7 +61,6 @@ describe('Body', () => {
             sort={mockSort}
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
-            width={100}
           />
         </TestProviders>
       );
@@ -92,7 +99,6 @@ describe('Body', () => {
             sort={mockSort}
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
-            width={100}
           />
         </TestProviders>
       );
@@ -131,7 +137,6 @@ describe('Body', () => {
             sort={mockSort}
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
-            width={100}
           />
         </TestProviders>
       );
@@ -172,13 +177,13 @@ describe('Body', () => {
             sort={mockSort}
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
-            width={100}
           />
         </TestProviders>
       );
+      wrapper.update();
       await wait();
       wrapper.update();
-      headersJustTimestamp.forEach(h => {
+      headersJustTimestamp.forEach(() => {
         expect(
           wrapper
             .find('[data-test-subj="data-driven-columns"]')

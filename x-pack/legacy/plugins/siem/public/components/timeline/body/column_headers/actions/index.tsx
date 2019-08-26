@@ -67,7 +67,7 @@ export const CloseButton = pure<{
 CloseButton.displayName = 'CloseButton';
 
 export const Actions = React.memo<Props>(({ header, onColumnRemoved, show, sort }) => {
-  const { isLoading } = useContext(TimelineContext);
+  const isLoading = useContext(TimelineContext);
   return (
     <ActionsContainer
       alignItems="center"
