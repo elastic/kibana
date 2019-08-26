@@ -144,7 +144,7 @@ describe('UrlStateContainer', () => {
       });
 
       describe('kqlQuery action is not called called when the queryLocation does not match the router location', () => {
-        test.each(testCases)('%o', async (page, namespaceLower, namespaceUpper, examplePath) => {
+        test.each(testCases)('%o', (page, namespaceLower, namespaceUpper, examplePath) => {
           mockProps = getMockPropsObj({ page, examplePath, namespaceLower })
             .oppositeQueryLocationSearch.undefinedQuery;
           mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
@@ -158,7 +158,7 @@ describe('UrlStateContainer', () => {
 
     describe('Redux updates URL state', () => {
       describe('kqlQuery url state is set from redux data on component mount', () => {
-        test.each(testCases)('%o', async (page, namespaceLower, namespaceUpper, examplePath) => {
+        test.each(testCases)('%o', (page, namespaceLower, namespaceUpper, examplePath) => {
           mockProps = getMockPropsObj({ page, examplePath, namespaceLower }).noSearch.definedQuery;
           mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
 

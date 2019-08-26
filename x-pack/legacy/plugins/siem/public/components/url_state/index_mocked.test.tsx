@@ -31,7 +31,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
   });
 
   describe('componentDidUpdate', () => {
-    test('timerange redux state updates the url', async () => {
+    test('timerange redux state updates the url', () => {
       mockProps = getMockPropsObj({
         page: CONSTANTS.networkPage,
         examplePath: '/network',
@@ -80,7 +80,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
       });
     });
 
-    test('kql query redux state updates the url', async () => {
+    test('kql query redux state updates the url', () => {
       mockProps = getMockPropsObj({
         page: CONSTANTS.networkPage,
         examplePath: '/network',
@@ -112,7 +112,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
       });
     });
 
-    test('timelineID redux state updates the url', async () => {
+    test('timelineID redux state updates the url', () => {
       mockProps = getMockPropsObj({
         page: CONSTANTS.networkPage,
         examplePath: '/network',
@@ -145,7 +145,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
   describe('handleInitialize', () => {
     describe('Redux updates URL state', () => {
       describe('Timerange url state is set when not defined on component mount', () => {
-        test.each(testCases)('%o', async (page, namespaceLower, namespaceUpper, examplePath) => {
+        test.each(testCases)('%o', (page, namespaceLower, namespaceUpper, examplePath) => {
           mockProps = getMockPropsObj({ page, examplePath, namespaceLower }).noSearch
             .undefinedQuery;
           mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
@@ -168,7 +168,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
           });
         });
 
-        test('url state is set from redux data when location updates and initialization', async () => {
+        test('url state is set from redux data when location updates and initialization', () => {
           mockProps = getMockPropsObj({
             page: CONSTANTS.hostsPage,
             examplePath: '/hosts',
