@@ -305,7 +305,9 @@ const Panel = styled(EuiPanel)<{ loading: { loading?: boolean } }>`
 
 Panel.displayName = 'Panel';
 
-const BasicTable = styled(EuiBasicTable)`
+const BasicTable = styled(EuiBasicTable).attrs({
+  compressed: true,
+})`
   tbody {
     th,
     td {

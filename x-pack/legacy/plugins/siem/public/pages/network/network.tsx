@@ -96,89 +96,93 @@ const NetworkComponent = pure<NetworkComponentProps>(
 
                       <EuiSpacer />
 
-                      <NetworkTopNFlowQuery
-                        endDate={to}
-                        flowTarget={FlowTargetNew.source}
-                        filterQuery={filterQuery}
-                        skip={isInitializing}
-                        sourceId="default"
-                        startDate={from}
-                        type={networkModel.NetworkType.page}
-                      >
-                        {({
-                          id,
-                          inspect,
-                          loading,
-                          loadPage,
-                          networkTopNFlow,
-                          pageInfo,
-                          refetch,
-                          totalCount,
-                        }) => (
-                          <NetworkTopNFlowTableManage
-                            data={networkTopNFlow}
-                            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-                            flowTargeted={FlowTargetNew.source}
-                            id={id}
-                            indexPattern={indexPattern}
-                            inspect={inspect}
-                            loading={loading}
-                            loadPage={loadPage}
-                            refetch={refetch}
-                            setQuery={setQuery}
-                            showMorePagesIndicator={getOr(
-                              false,
-                              'showMorePagesIndicator',
-                              pageInfo
-                            )}
-                            totalCount={totalCount}
+                      <EuiFlexGroup>
+                        <EuiFlexItem>
+                          <NetworkTopNFlowQuery
+                            endDate={to}
+                            flowTarget={FlowTargetNew.source}
+                            filterQuery={filterQuery}
+                            skip={isInitializing}
+                            sourceId="default"
+                            startDate={from}
                             type={networkModel.NetworkType.page}
-                          />
-                        )}
-                      </NetworkTopNFlowQuery>
-
-                      <EuiSpacer />
-
-                      <NetworkTopNFlowQuery
-                        endDate={to}
-                        flowTarget={FlowTargetNew.destination}
-                        filterQuery={filterQuery}
-                        skip={isInitializing}
-                        sourceId="default"
-                        startDate={from}
-                        type={networkModel.NetworkType.page}
-                      >
-                        {({
-                          id,
-                          inspect,
-                          loading,
-                          loadPage,
-                          networkTopNFlow,
-                          pageInfo,
-                          refetch,
-                          totalCount,
-                        }) => (
-                          <NetworkTopNFlowTableManage
-                            data={networkTopNFlow}
-                            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-                            flowTargeted={FlowTargetNew.destination}
-                            id={id}
-                            indexPattern={indexPattern}
-                            inspect={inspect}
-                            loading={loading}
-                            loadPage={loadPage}
-                            refetch={refetch}
-                            setQuery={setQuery}
-                            showMorePagesIndicator={getOr(
-                              false,
-                              'showMorePagesIndicator',
-                              pageInfo
+                          >
+                            {({
+                              id,
+                              inspect,
+                              loading,
+                              loadPage,
+                              networkTopNFlow,
+                              pageInfo,
+                              refetch,
+                              totalCount,
+                            }) => (
+                              <NetworkTopNFlowTableManage
+                                data={networkTopNFlow}
+                                fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                                flowTargeted={FlowTargetNew.source}
+                                id={id}
+                                indexPattern={indexPattern}
+                                inspect={inspect}
+                                loading={loading}
+                                loadPage={loadPage}
+                                refetch={refetch}
+                                setQuery={setQuery}
+                                showMorePagesIndicator={getOr(
+                                  false,
+                                  'showMorePagesIndicator',
+                                  pageInfo
+                                )}
+                                totalCount={totalCount}
+                                type={networkModel.NetworkType.page}
+                              />
                             )}
-                            totalCount={totalCount}
+                          </NetworkTopNFlowQuery>
+                        </EuiFlexItem>
+
+                        <EuiFlexItem>
+                          <NetworkTopNFlowQuery
+                            endDate={to}
+                            flowTarget={FlowTargetNew.destination}
+                            filterQuery={filterQuery}
+                            skip={isInitializing}
+                            sourceId="default"
+                            startDate={from}
                             type={networkModel.NetworkType.page}
-                          />
-                        )}
-                      </NetworkTopNFlowQuery>
+                          >
+                            {({
+                              id,
+                              inspect,
+                              loading,
+                              loadPage,
+                              networkTopNFlow,
+                              pageInfo,
+                              refetch,
+                              totalCount,
+                            }) => (
+                              <NetworkTopNFlowTableManage
+                                data={networkTopNFlow}
+                                fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                                flowTargeted={FlowTargetNew.destination}
+                                id={id}
+                                indexPattern={indexPattern}
+                                inspect={inspect}
+                                loading={loading}
+                                loadPage={loadPage}
+                                refetch={refetch}
+                                setQuery={setQuery}
+                                showMorePagesIndicator={getOr(
+                                  false,
+                                  'showMorePagesIndicator',
+                                  pageInfo
+                                )}
+                                totalCount={totalCount}
+                                type={networkModel.NetworkType.page}
+                              />
+                            )}
+                          </NetworkTopNFlowQuery>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
 
                       <EuiSpacer />
 

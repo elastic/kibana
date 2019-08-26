@@ -7,7 +7,9 @@
 import styled from 'styled-components';
 import { EuiInMemoryTable } from '@elastic/eui';
 
-export const BasicTable = styled(EuiInMemoryTable)`
+export const BasicTable = styled(EuiInMemoryTable).attrs({
+  compressed: true,
+})`
   tbody {
     th,
     td {

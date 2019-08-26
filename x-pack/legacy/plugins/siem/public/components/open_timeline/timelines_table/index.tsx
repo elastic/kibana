@@ -24,7 +24,9 @@ import { getIconHeaderColumns } from './icon_header_columns';
 
 import * as i18n from '../translations';
 
-const BasicTable = styled(EuiBasicTable)`
+const BasicTable = styled(EuiBasicTable).attrs({
+  compressed: true,
+})`
   .euiTableCellContent {
     animation: none;
   }
