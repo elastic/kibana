@@ -66,7 +66,7 @@ const validateAdvancedEditor = (state: State): State => {
   } else if (!destinationIndexNameValid) {
     state.advancedEditorMessages.push({
       error: i18n.translate(
-        'xpack.ml.dataframe.analytics.create.advancedEditorMessage.sourceIndexNameValid',
+        'xpack.ml.dataframe.analytics.create.advancedEditorMessage.destinationIndexNameValid',
         {
           defaultMessage: 'Invalid destination index name.',
         }
