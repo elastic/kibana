@@ -80,7 +80,7 @@ describe('license', () => {
     const fake = license.getFeature('fake');
 
     expect(security).toBeInstanceOf(LicenseFeature);
-    expect(fake).toBeUndefined();
+    expect(fake).toBeInstanceOf(LicenseFeature);
   });
 
   describe('isActive', () => {
