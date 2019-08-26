@@ -35,8 +35,8 @@ function StylePanel({
   vis,
 }: GaugeOptionsInternalProps) {
   const diasableAlignment =
-    aggs.bySchemaGroup[AggGroupNames.Metrics].length === 1 &&
-    !aggs.bySchemaGroup[AggGroupNames.Buckets];
+    aggs.bySchemaGroup(AggGroupNames.Metrics).length === 1 &&
+    !aggs.bySchemaGroup(AggGroupNames.Buckets);
 
   const setGaugeType = useCallback(
     (paramName: 'gaugeType', value: GaugeVisParams['gauge']['gaugeType']) => {

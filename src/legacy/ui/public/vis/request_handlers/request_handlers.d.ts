@@ -20,16 +20,15 @@
 import { TimeRange } from 'ui/timefilter/time_history';
 import { Query } from 'src/legacy/core_plugins/data/public';
 import { Filter } from '@kbn/es-query';
+import { AggConfigs } from 'ui/vis/agg_configs';
 import { SearchSource } from '../../courier';
 import { QueryFilter } from '../../filter_manager/query_filter';
 import { Adapters } from '../../inspector/types';
 import { PersistedState } from '../../persisted_state';
-import { AggConfig } from '../agg_config';
-import { Vis } from '../vis';
 
 export interface RequestHandlerParams {
   searchSource: SearchSource;
-  aggs: AggConfig[];
+  aggs: AggConfigs;
   timeRange?: TimeRange;
   query?: Query;
   filters?: Filter[];
