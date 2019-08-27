@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { CronEditor } from './cron_editor';
+export { PolicyAdd } from './policy_add';
