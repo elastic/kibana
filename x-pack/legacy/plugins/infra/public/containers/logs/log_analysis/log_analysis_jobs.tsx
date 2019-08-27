@@ -44,6 +44,7 @@ export const useLogAnalysisJobs = ({
   timeField: string;
 }) => {
   const [jobStatus, setJobStatus] = useState<AllJobStatuses>(getInitialJobStatuses());
+  const [hasCompletedSetup, setHasCompletedSetup] = useState<boolean>(false);
 
   const [setupMlModuleRequest, setupMlModule] = useTrackedPromise(
     {
@@ -78,6 +79,8 @@ export const useLogAnalysisJobs = ({
               : 'failed'
             : 'failed',
         }));
+
+        setHasCompletedSetup(true);
       },
     },
     [indexPattern, spaceId, sourceId]
@@ -139,6 +142,7 @@ export const useLogAnalysisJobs = ({
     setupMlModuleRequest,
     isSettingUpMlModule,
     didSetupFail,
+    hasCompletedSetup,
   };
 };
 

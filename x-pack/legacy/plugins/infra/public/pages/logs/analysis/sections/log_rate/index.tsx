@@ -67,8 +67,7 @@ export const LogRateResults = ({
           body={
             <p>
               {i18n.translate('xpack.infra.logs.analysis.logRateSectionNoDataBody', {
-                defaultMessage:
-                  'Please allow a few minutes for our machine learning robots to begin collecting data. If you expect data to be here already, you may want to adjust your time range.',
+                defaultMessage: 'You may want to adjust your time range.',
               })}
             </p>
           }

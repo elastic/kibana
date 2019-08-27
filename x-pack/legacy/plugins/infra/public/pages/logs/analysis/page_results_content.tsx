@@ -18,6 +18,7 @@ import {
   EuiPageContentBody,
   EuiPanel,
   EuiBadge,
+  EuiCallOut,
 } from '@elastic/eui';
 import dateMath from '@elastic/datemath';
 import moment from 'moment';
@@ -40,7 +41,13 @@ const getLoadingState = () => {
   );
 };
 
-export const AnalysisResultsContent = ({ sourceId }: { sourceId: string }) => {
+export const AnalysisResultsContent = ({
+  sourceId,
+  isFirstUse,
+}: {
+  sourceId: string;
+  isFirstUse: boolean;
+}) => {
   useTrackPageview({ app: 'infra_logs', path: 'analysis_results' });
   useTrackPageview({ app: 'infra_logs', path: 'analysis_results', delay: 15000 });
 
@@ -180,6 +187,25 @@ export const AnalysisResultsContent = ({ sourceId }: { sourceId: string }) => {
             <EuiPageBody>
               <EuiPageContent>
                 <EuiPageContentBody>
+                  {isFirstUse ? (
+                    <EuiCallOut
+                      color="success"
+                      title={i18n.translate(
+                        'xpack.infra.logs.logsAnalysisResults.onboardingSuccessTitle',
+                        { defaultMessage: 'Success!' }
+                      )}
+                    >
+                      <p>
+                        {i18n.translate(
+                          'xpack.infra.logs.logsAnalysisResults.onboardingSuccessContent',
+                          {
+                            defaultMessage:
+                              'Please allow a few minutes for our machine learning robots to begin collecting data.',
+                          }
+                        )}
+                      </p>
+                    </EuiCallOut>
+                  ) : null}
                   <LogRateResults isLoading={isLoading} results={logEntryRate} />
                 </EuiPageContentBody>
               </EuiPageContent>
