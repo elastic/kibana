@@ -70,6 +70,7 @@ export class VisualizeDataLoader {
     const visParams = await getVisParams(this.vis, {
       searchSource: params.searchSource,
       timeRange: params.timeRange,
+      abortSignal: params.abortSignal,
     });
 
     const filters = params.filters || [];

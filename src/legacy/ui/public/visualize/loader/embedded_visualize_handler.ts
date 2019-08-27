@@ -461,23 +461,27 @@ export class EmbeddedVisualizeHandler {
     this.vis.requestError = undefined;
     this.vis.showRequestError = false;
 
-    return this.dataLoader
-      .fetch(this.dataLoaderParams)
-      .then(data => {
-        // Pipeline responses never throw errors, so we need to check for
-        // `type: 'error'`, and then throw so it can be caught below.
-        // TODO: We should revisit this after we have fully migrated
-        // to the new expression pipeline infrastructure.
-        if (data && data.type === 'error') {
-          throw data.error;
-        }
+    return (
+      this.dataLoader
+        // Don't pass in this.dataLoaderParams directly because it may be modified async in another
+        // call to fetch before the previous one has completed
+        .fetch({ ...this.dataLoaderParams })
+        .then(data => {
+          // Pipeline responses never throw errors, so we need to check for
+          // `type: 'error'`, and then throw so it can be caught below.
+          // TODO: We should revisit this after we have fully migrated
+          // to the new expression pipeline infrastructure.
+          if (data && data.type === 'error') {
+            throw data.error;
+          }
 
-        if (data && data.value) {
-          this.dataSubject.next(data.value);
-        }
-        return data;
-      })
-      .catch(this.handleDataLoaderError);
+          if (data && data.value) {
+            this.dataSubject.next(data.value);
+          }
+          return data;
+        })
+        .catch(this.handleDataLoaderError)
+    );
   };
 
   /**
