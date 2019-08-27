@@ -1129,10 +1129,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@13.3.0":
-  version "13.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-13.3.0.tgz#05c78ffcb2041ebafd807e23dd3d32553e8c1812"
-  integrity sha512-Z/1KGaqKY2PCJXdJ3XTSTcnZZxjFysafvIWNRs+O0C+IQsyy0cz5Sj8BaM9pUgYVjL2SaO04Hs9Yb09MDJwFGQ==
+"@elastic/eui@13.6.0":
+  version "13.6.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-13.6.0.tgz#a01b66f84bfc7eec2303df1c8d9a7d7443b59049"
+  integrity sha512-a7hD9jLIvA2yJZi+btDIRGRHRSjCwb/0/en3U29MtNB2cOEnNYQ1MGcI5/eIz6eKi93eb0ASG9qq6xVqVaAezQ==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
@@ -3801,10 +3801,10 @@
   resolved "https://registry.yarnpkg.com/@types/proper-lockfile/-/proper-lockfile-3.0.1.tgz#dd770a2abce3adbcce3bd1ed892ce2f5f17fbc86"
   integrity sha512-ODOjqxmaNs0Zkij+BJovsNJRSX7BJrr681o8ZnNTNIcTermvVFzLpz/XFtfg3vNrlPVTJY1l4e9h2LvHoxC1lg==
 
-"@types/puppeteer@^1.12.4":
-  version "1.12.4"
-  resolved "https://registry.yarnpkg.com/@types/puppeteer/-/puppeteer-1.12.4.tgz#8388efdb0b30a54a7e7c4831ca0d709191d77ff1"
-  integrity sha512-aaGbJaJ9TuF9vZfTeoh876sBa+rYJWPwtsmHmYr28pGr42ewJnkDTq2aeSKEmS39SqUdkwLj73y/d7rBSp7mDQ==
+"@types/puppeteer@^1.19.0":
+  version "1.19.0"
+  resolved "https://registry.yarnpkg.com/@types/puppeteer/-/puppeteer-1.19.0.tgz#59f0050bae019cee7c3af2bb840a25892a3078b6"
+  integrity sha512-Db9LWOuTm2bR/qgPE7PQCmnsCQ6flHdULuIDWTks8YdQ/SGHKg5WGWG54gl0734NDKCTF5MbqAp2qWuvBiyQ3Q==
   dependencies:
     "@types/node" "*"
 
@@ -13963,6 +13963,14 @@ growly@^1.3.0:
   resolved "https://registry.yarnpkg.com/growly/-/growly-1.3.0.tgz#f10748cbe76af964b7c96c93c6bcc28af120c081"
   integrity sha1-8QdIy+dq+WS3yWyTxrzCivEgwIE=
 
+grunt-available-tasks@^0.6.3:
+  version "0.6.3"
+  resolved "https://registry.yarnpkg.com/grunt-available-tasks/-/grunt-available-tasks-0.6.3.tgz#5be7f6fdda776b80a7b272a21f68bd3050f82260"
+  integrity sha1-W+f2/dp3a4CnsnKiH2i9MFD4ImA=
+  dependencies:
+    chalk "^1.1.1"
+    lodash "^4.10.0"
+
 grunt-babel@^8.0.0:
   version "8.0.0"
   resolved "https://registry.yarnpkg.com/grunt-babel/-/grunt-babel-8.0.0.tgz#92ef63aafadf938c488dc2f926ac9846e0c93d1b"
@@ -18535,7 +18543,7 @@ lodash@4.17.13, lodash@4.17.15:
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.13.tgz#0bdc3a6adc873d2f4e0c4bac285df91b64fc7b93"
   integrity sha512-vm3/XWXfWtRua0FkUyEHBZy8kCPjErNBT9fJx8Zvs+U6zjqPbTUOpkaoum3O5uiA8sm+yNMHXfYkTUHFoMxFNA==
 
-lodash@>4.17.4, lodash@^4.0.0, lodash@^4.0.1, lodash@^4.11.1, lodash@^4.13.1, lodash@^4.14.0, lodash@^4.15.0, lodash@^4.16.4, lodash@^4.17.0, lodash@^4.17.10, lodash@^4.17.11, lodash@^4.17.12, lodash@^4.17.13, lodash@^4.17.15, lodash@^4.17.2, lodash@^4.17.4, lodash@^4.17.5, lodash@^4.2.0, lodash@^4.2.1, lodash@^4.3.0, lodash@^4.5.0, lodash@^4.6.1, lodash@~4.17.10, lodash@~4.17.5:
+lodash@>4.17.4, lodash@^4.0.0, lodash@^4.0.1, lodash@^4.10.0, lodash@^4.11.1, lodash@^4.13.1, lodash@^4.14.0, lodash@^4.15.0, lodash@^4.16.4, lodash@^4.17.0, lodash@^4.17.10, lodash@^4.17.11, lodash@^4.17.12, lodash@^4.17.13, lodash@^4.17.15, lodash@^4.17.2, lodash@^4.17.4, lodash@^4.17.5, lodash@^4.2.0, lodash@^4.2.1, lodash@^4.3.0, lodash@^4.5.0, lodash@^4.6.1, lodash@~4.17.10, lodash@~4.17.5:
   version "4.17.15"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
   integrity sha512-8xOcRHvCjnocdS5cpwXQXVzmmh5e5+saE2QGoeQmbKmRS6J3VQppPOIt0MnmE+4xlZoumy0GPG0D0MVIQbNA1A==
@@ -22510,10 +22518,10 @@ punycode@^1.2.4, punycode@^1.4.1:
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-1.4.1.tgz#c0d5a63b2718800ad8e1eb0fa5269c84dd41845e"
   integrity sha1-wNWmOycYgArY4esPpSachN1BhF4=
 
-puppeteer-core@^1.13.0:
-  version "1.13.0"
-  resolved "https://registry.yarnpkg.com/puppeteer-core/-/puppeteer-core-1.13.0.tgz#f8001851e924e6e9ef6e9fae1778c3ab87c3f307"
-  integrity sha512-8MypjWVHu2EEdtN2HxhCsTtIYdJgiCcbGpHoosv265fzanfOICC2/DadLZq6/Qc/OKsovQmjkO+2vKMrV3BRfA==
+puppeteer-core@^1.19.0:
+  version "1.19.0"
+  resolved "https://registry.yarnpkg.com/puppeteer-core/-/puppeteer-core-1.19.0.tgz#3c3f98edb5862583e3a9c19cbc0da57ccc63ba5c"
+  integrity sha512-ZPbbjUymorIJomHBvdZX5+2gciUmQtAdepCrkweHH6rMJr96xd/dXzHgmYEOBMatH44SmJrcMtWkgsLHJqT89g==
   dependencies:
     debug "^4.1.0"
     extract-zip "^1.6.6"
