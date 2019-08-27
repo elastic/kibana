@@ -11,7 +11,7 @@ import { toastNotifications } from 'ui/notify';
 import * as callApmApi from '../../../../services/rest/callApmApi';
 import { ServiceOverview } from '..';
 import * as urlParamsHooks from '../../../../hooks/useUrlParams';
-import * as coreHooks from '../../../../hooks/useCore';
+import * as kibanaCore from '../../../../../../observability/public/context/kibana_core';
 import { InternalCoreStart } from 'src/core/public';
 import * as useLocalUIFilters from '../../../../hooks/useLocalUIFilters';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
@@ -39,7 +39,7 @@ describe('Service Overview -> View', () => {
         end: 'myEnd'
       }
     });
-    spyOn(coreHooks, 'useCore').and.returnValue(coreMock);
+    spyOn(kibanaCore, 'useKibanaCore').and.returnValue(coreMock);
 
     jest.spyOn(useLocalUIFilters, 'useLocalUIFilters').mockReturnValue({
       filters: [],
