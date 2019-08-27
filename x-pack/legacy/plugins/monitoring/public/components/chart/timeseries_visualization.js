@@ -138,16 +138,16 @@ export class TimeseriesVisualization extends React.Component {
 
     return (
       <div className={className}>
-        <div style={style} className="monRhythmChart__content">
-          <div className="monRhythmChart__visualization">
+        <EuiFlexGroup direction="column" className="monRhythmChart__content">
+          <EuiFlexItem className="monRhythmChart__visualization">
             <TimeseriesContainer
               seriesToShow={this.state.seriesToShow}
               updateLegend={this.debouncedUpdateLegend}
               {...this.props}
             />
-          </div>
+          </EuiFlexItem>
           { legend }
-        </div>
+        </EuiFlexGroup>
       </div>
     );
   }

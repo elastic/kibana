@@ -27,9 +27,9 @@ export class HorizontalLegend extends React.Component {
    */
   displayValue(value) {
     return (
-      <span className="monRhythmChart__legendValue">
+      <EuiFlexItem grow={false} className="monRhythmChart__legendValue">
         { value }
-      </span>
+      </EuiFlexItem>
     );
   }
 
@@ -64,7 +64,7 @@ export class HorizontalLegend extends React.Component {
   }
 
   createSeries(row, rowIdx) {
-    const classes = ['col-md-4 col-xs-6 monRhythmChart__legendItem'];
+    const classes = ['monRhythmChart__legendItem'];
 
     if (!includes(this.props.seriesFilter, row.id)) {
       classes.push('monRhythmChart__legendItem-isDisabled');
@@ -80,23 +80,26 @@ export class HorizontalLegend extends React.Component {
 
     return (
       <EuiKeyboardAccessible key={rowIdx}>
-        <div
+        <EuiFlexItem
+          grow={false}
           className={classes.join(' ')}
           onClick={event => this.props.onToggle(event, row.id)}
         >
-          <span className="monRhythmChart__legendLabel">
-            <EuiIcon
-              className="monRhythmChart__legendIndicator"
-              aria-label={i18n.translate('xpack.monitoring.chart.horizontalLegend.toggleButtonAriaLabel',
-                { defaultMessage: 'toggle button' })}
-              size="l"
-              type="dot"
-              color={row.color}
-            />
-            { ' ' + row.label + ' ' }
-          </span>
-          { this.formatter(this.props.seriesValues[row.id], row) }
-        </div>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false} className="monRhythmChart__legendLabel">
+              <EuiIcon
+                className="monRhythmChart__legendIndicator"
+                aria-label={i18n.translate('xpack.monitoring.chart.horizontalLegend.toggleButtonAriaLabel',
+                  { defaultMessage: 'toggle button' })}
+                size="l"
+                type="dot"
+                color={row.color}
+              />
+              { ' ' + row.label + ' ' }
+            </EuiFlexItem>
+            { this.formatter(this.props.seriesValues[row.id], row) }
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </EuiKeyboardAccessible>
     );
   }
@@ -105,11 +108,11 @@ export class HorizontalLegend extends React.Component {
     const rows = this.props.series.map(this.createSeries);
 
     return (
-      <div className="monRhythmChart__legendHorizontal">
-        <div className="row monRhythmChart__legend-series">
+      <EuiFlexItem grow={false} className="monRhythmChart__legendHorizontal">
+        <EuiFlexGroup wrap={true} className="monRhythmChart__legend-series">
           { rows }
-        </div>
-      </div>
+        </EuiFlexGroup>
+      </EuiFlexItem>
     );
   }
 }
