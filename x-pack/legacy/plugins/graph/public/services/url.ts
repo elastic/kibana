@@ -38,7 +38,7 @@ export function setBreadcrumbs(options: SetBreadcrumbOptions) {
   if ('savedWorkspace' in options) {
     options.chrome.breadcrumbs.set([
       {
-        text: i18n.translate('xpack.graph.graphBreadcrumbsTitle', {
+        text: i18n.translate('xpack.graph.home.breadcrumb', {
           defaultMessage: 'Graph',
         }),
         onClick: () => {
@@ -58,7 +58,7 @@ export function setBreadcrumbs(options: SetBreadcrumbOptions) {
   } else {
     options.chrome.breadcrumbs.set([
       {
-        text: i18n.translate('xpack.graph.graphBreadcrumbsTitle', {
+        text: i18n.translate('xpack.graph.home.breadcrumb', {
           defaultMessage: 'Graph',
         }),
         href: `#${getHomePath()}`,
