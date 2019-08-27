@@ -30,72 +30,80 @@ const getTabsOnHostDetailsUrl = (hostName: string, tabName: HostsTabName) => {
 };
 
 export enum HostsTabName {
-  hosts = 'hosts',
+  hosts = 'all_hosts',
   authentications = 'authentications',
   uncommonProcesses = 'uncommon_processes',
   anomalies = 'anomalies',
   events = 'events',
 }
 
-export const navTabs: NavTab[] = [
-  {
+// export const HostsTabNameMappedToDisplayName = {
+//   [HostsTabName.hosts]: i18n.NAVIGATION_ALL_HOSTS_TITLE,
+//   [HostsTabName.authentications]: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
+//   [HostsTabName.uncommonProcesses]: i18n.NAVIGATION_UNCOMMON_PROCESSES_TITLE,
+//   [HostsTabName.anomalies]: i18n.NAVIGATION_ANOMALIES_TITLE,
+//   [HostsTabName.events]: i18n.NAVIGATION_EVENTS_TITLE,
+// };
+
+export const navTabsHosts: NavTab = {
+  [HostsTabName.hosts]: {
     id: HostsTabName.hosts,
-    name: i18n.NAVIGATION_HOSTS_TITLE,
+    name: i18n.NAVIGATION_ALL_HOSTS_TITLE,
     href: getTabsOnHostsUrl(HostsTabName.hosts),
     disabled: false,
   },
-  {
+  [HostsTabName.authentications]: {
     id: HostsTabName.authentications,
     name: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
     href: getTabsOnHostsUrl(HostsTabName.authentications),
     disabled: false,
   },
-  {
+  [HostsTabName.uncommonProcesses]: {
     id: HostsTabName.uncommonProcesses,
     name: i18n.NAVIGATION_UNCOMMON_PROCESSES_TITLE,
     href: getTabsOnHostsUrl(HostsTabName.uncommonProcesses),
     disabled: false,
   },
-  {
+  [HostsTabName.anomalies]: {
     id: HostsTabName.anomalies,
     name: i18n.NAVIGATION_ANOMALIES_TITLE,
     href: getTabsOnHostsUrl(HostsTabName.anomalies),
     disabled: false,
   },
-  {
+  [HostsTabName.events]: {
     id: HostsTabName.events,
     name: i18n.NAVIGATION_EVENTS_TITLE,
     href: getTabsOnHostsUrl(HostsTabName.events),
     disabled: false,
   },
-];
+};
 
-export const navTabsHostDatails = (hostName: string): NavTab[] => [
-  {
+export const navTabsHostDatails = (hostName: string) => ({
+  [HostsTabName.authentications]: {
     id: HostsTabName.authentications,
     name: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
     href: getTabsOnHostDetailsUrl(hostName, HostsTabName.authentications),
     disabled: false,
   },
-  {
+  [HostsTabName.uncommonProcesses]: {
     id: HostsTabName.uncommonProcesses,
     name: i18n.NAVIGATION_UNCOMMON_PROCESSES_TITLE,
     href: getTabsOnHostDetailsUrl(hostName, HostsTabName.uncommonProcesses),
     disabled: false,
   },
-  {
+  [HostsTabName.anomalies]: {
     id: HostsTabName.anomalies,
     name: i18n.NAVIGATION_ANOMALIES_TITLE,
     href: getTabsOnHostDetailsUrl(hostName, HostsTabName.anomalies),
     disabled: false,
   },
-  {
+  [HostsTabName.events]: {
     id: HostsTabName.events,
     name: i18n.NAVIGATION_EVENTS_TITLE,
     href: getTabsOnHostDetailsUrl(hostName, HostsTabName.events),
     disabled: false,
   },
-];
+});
 
 interface OwnProps {
   type: hostsModel.HostsType;

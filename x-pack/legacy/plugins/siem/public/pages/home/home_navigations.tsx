@@ -12,29 +12,36 @@ import {
   getHostsUrl,
 } from '../../components/link_to';
 
-export const navTabs: NavTab[] = [
-  {
-    id: 'overview',
+export enum SiemPageName {
+  overview = 'overview',
+  hosts = 'hosts',
+  network = 'network',
+  timelines = 'timelines',
+}
+
+export const navTabs = {
+  [SiemPageName.overview]: {
+    id: SiemPageName.overview,
     name: i18n.OVERVIEW,
     href: getOverviewUrl(),
     disabled: false,
   },
-  {
-    id: 'hosts',
+  [SiemPageName.hosts]: {
+    id: SiemPageName.hosts,
     name: i18n.HOSTS,
     href: getHostsUrl(),
     disabled: false,
   },
-  {
-    id: 'network',
+  [SiemPageName.network]: {
+    id: SiemPageName.network,
     name: i18n.NETWORK,
     href: getNetworkUrl(),
     disabled: false,
   },
-  {
-    id: 'timelines',
+  [SiemPageName.timelines]: {
+    id: SiemPageName.timelines,
     name: i18n.TIMELINES,
     href: getTimelinesUrl(),
     disabled: false,
   },
-];
+};

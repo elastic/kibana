@@ -5,7 +5,7 @@
  */
 
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, get } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
@@ -44,7 +44,7 @@ import { InputsModelId } from '../../store/inputs/constants';
 import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 import { KpiHostDetailsQuery } from '../../containers/kpi_host_details';
 import { hostToCriteria } from '../../components/ml/criteria/host_to_criteria';
-import { navTabsHostDatails, HostsTabName } from './hosts_navigations';
+import { navTabsHostDatails } from './hosts_navigations';
 import { SiemNavigation } from '../../components/navigation';
 import { Anomaly } from '../../components/ml/types';
 
@@ -268,19 +268,21 @@ export const HostDetailsBody = connect(
   }
 )(HostDetailsBodyComponent);
 
-export const getBreadcrumbs = (hostId?: string, tabName?: HostsTabName): Breadcrumb[] => {
+export const getBreadcrumbs = (params): Breadcrumb[] => {
+  const hostName = get('hostName', params);
+  const tabName = get('tabName', params);
   let breadcrumb = [
     {
       text: i18n.PAGE_TITLE,
       href: getHostsUrl(),
     },
   ];
-  if (hostId) {
+  if (hostName) {
     breadcrumb = [
       ...breadcrumb,
       {
-        text: hostId,
-        href: getHostDetailsUrl(hostId),
+        text: hostName,
+        href: getHostDetailsUrl(hostName),
       },
     ];
   }
@@ -288,7 +290,7 @@ export const getBreadcrumbs = (hostId?: string, tabName?: HostsTabName): Breadcr
     breadcrumb = [
       ...breadcrumb,
       {
-        text: tabName,
+        text: i18n[`NAVIGATION_${tabName.toUpperCase()}_TITLE`],
         href: '',
       },
     ];

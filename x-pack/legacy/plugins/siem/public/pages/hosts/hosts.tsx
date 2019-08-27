@@ -31,7 +31,7 @@ import { InputsModelId } from '../../store/inputs/constants';
 import { SiemNavigation } from '../../components/navigation';
 
 import * as i18n from './translations';
-import { navTabs } from './hosts_navigations';
+import { navTabsHosts } from './hosts_navigations';
 
 const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
 
@@ -92,7 +92,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                         )}
                       </KpiHostsQuery>
                       <EuiSpacer />
-                      <SiemNavigation navTabs={navTabs} display="default" showBorder={true} />
+                      <SiemNavigation navTabs={navTabsHosts} display="default" showBorder={true} />
                       <EuiSpacer />
                     </>
                   )}

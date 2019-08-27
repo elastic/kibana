@@ -142,7 +142,7 @@ export const HomePage = pure(() => (
                   <Switch>
                     <Redirect from="/" exact={true} to="/overview" />
                     <Route
-                      path="/overview"
+                      path="/:pageName(overview)"
                       render={props => (
                         <PageRoute
                           {...props}
@@ -153,10 +153,10 @@ export const HomePage = pure(() => (
                         />
                       )}
                     />
-                    <Route path="/hosts" component={HostsContainer} />
-                    <Route path="/network" component={NetworkContainer} />
+                    <Route path="/:pageName(hosts)" component={HostsContainer} />
+                    <Route path="/:pageName(network)" component={NetworkContainer} />
                     <Route
-                      path="/timelines"
+                      path="/:pageName(timelines)"
                       render={props => (
                         <PageRoute
                           {...props}

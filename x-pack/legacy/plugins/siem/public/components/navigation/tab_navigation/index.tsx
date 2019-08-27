@@ -69,33 +69,41 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
     );
   }
 
-  public mapLocationToTab = (pathname: string) =>
-    this.props.navTabs.reduce((res, tab) => {
+  public mapLocationToTab = (pathname: string) => {
+    const { navTabs } = this.props;
+    return Object.keys(navTabs).reduce((res, tab) => {
+      tab = navTabs[tab];
       if (pathname.includes(tab.id)) {
         res = tab.id;
       }
       return res;
     }, '');
+  };
 
-  private renderTabs = () =>
-    this.props.navTabs.map((tab: NavTab) => (
-      <TabContainer
-        className={classnames({ euiTab: true, showBorder: this.props.showBorder })}
-        key={`navigation-${tab.id}`}
-      >
-        <EuiLink data-test-subj={`navigation-link-${tab.id}`} href={tab.href + this.props.search}>
-          <EuiTab
-            data-href={tab.href}
-            data-test-subj={`navigation-${tab.id}`}
-            disabled={tab.disabled}
-            isSelected={this.state.selectedTabId === tab.id}
-            onClick={() => {
-              track(METRIC_TYPE.CLICK, `tab_${tab.id}`);
-            }}
-          >
-            {tab.name}
-          </EuiTab>
-        </EuiLink>
-      </TabContainer>
-    ));
+  private renderTabs = () => {
+    const { navTabs } = this.props;
+    return Object.keys(navTabs).map(tabName => {
+      const tab = navTabs[tabName];
+      return (
+        <TabContainer
+          className={classnames({ euiTab: true, showBorder: this.props.showBorder })}
+          key={`navigation-${tab.id}`}
+        >
+          <EuiLink data-test-subj={`navigation-link-${tab.id}`} href={tab.href + this.props.search}>
+            <EuiTab
+              data-href={tab.href}
+              data-test-subj={`navigation-${tab.id}`}
+              disabled={tab.disabled}
+              isSelected={this.state.selectedTabId === tab.id}
+              onClick={() => {
+                track(METRIC_TYPE.CLICK, `tab_${tab.id}`);
+              }}
+            >
+              {tab.name}
+            </EuiTab>
+          </EuiLink>
+        </TabContainer>
+      );
+    });
+  };
 }

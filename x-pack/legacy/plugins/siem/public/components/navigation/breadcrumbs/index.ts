@@ -65,17 +65,16 @@ export const getBreadcrumbsForRoute = (
 ): Breadcrumb[] | null => {
   const removeSlash = pathname.replace(/\/$/, '');
   const trailingPath = removeSlash.match(/([^\/]+$)/);
-  const hostName = get('hostName', params);
-  const tabName = get('tabName', params);
+  const pageName = get('pageName', params);
+
   if (trailingPath !== null) {
+    if (pageName === 'hosts') {
+      return [...siemRootBreadcrumb, ...getHostDetailsBreadcrumbs(params)];
+    }
     if (Object.keys(rootBreadcrumbs).includes(trailingPath[0])) {
       return rootBreadcrumbs[trailingPath[0]];
     }
-    if (pathname.match(/hosts\/.*\/(authentications|uncommon_processes|anomalies|events)?/)) {
-      return [...siemRootBreadcrumb, ...getHostDetailsBreadcrumbs(hostName, tabName)];
-    } else if (pathname.match(/hosts\/.*?/)) {
-      return [...siemRootBreadcrumb, ...getHostDetailsBreadcrumbs(trailingPath[0])];
-    } else if (pathname.match(/network\/ip\/.*?/)) {
+    if (pathname.match(/network\/ip\/.*?/)) {
       return [...siemRootBreadcrumb, ...getIPDetailsBreadcrumbs(trailingPath[0])];
     }
   }
