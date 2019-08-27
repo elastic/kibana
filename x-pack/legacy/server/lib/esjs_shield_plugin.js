@@ -518,6 +518,26 @@
     });
 
     /**
+     * Invalidates an API key in Elasticsearch.
+     *
+     * @param {string} [id] An API key id.
+     * @param {string} [name] An API key name.
+     * @param {string} [realm_name] The name of an authentication realm.
+     * @param {string} [username] The username of a user.
+     *
+     * NOTE: While all parameters are optional, at least one of them is required.
+     *
+     * @returns {{invalidated_api_keys: string[], previously_invalidated_api_keys: string[], error_count: number, error_details?: object[]}}
+     */
+    shield.invalidateAPIKey = ca({
+      method: 'DELETE',
+      needBody: true,
+      url: {
+        fmt: '/_security/api_key',
+      },
+    });
+
+    /**
      * Gets an access token in exchange to the certificate chain for the target subject distinguished name.
      *
      * @param {string[]} x509_certificate_chain An ordered array of base64-encoded (Section 4 of RFC4648 - not
