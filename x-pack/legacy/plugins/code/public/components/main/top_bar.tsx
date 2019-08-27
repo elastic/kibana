@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
-import React, { ChangeEvent } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React from 'react';
 import { SearchOptions, SearchScope, Repository } from '../../../model';
 import { ReferenceInfo } from '../../../model/commit';
 import { MainRouteParams } from '../../common/types';
-import { encodeRevisionString, decodeRevisionString } from '../../../common/uri_util';
-import { history } from '../../utils/url';
+import { decodeRevisionString } from '../../../common/uri_util';
 import { Breadcrumb } from './breadcrumb';
 import { SearchBar } from '../search_bar';
 import { StatusIndicator } from '../status_indicator/status_indicator';
+import { BranchSelector } from './branch_selector';
 
 interface Props {
   routeParams: MainRouteParams;
@@ -21,6 +21,7 @@ interface Props {
   buttons: React.ReactNode;
   searchOptions: SearchOptions;
   branches: ReferenceInfo[];
+  tags: ReferenceInfo[];
   query: string;
   currentRepository?: Repository;
 }
@@ -42,11 +43,17 @@ export class TopBar extends React.Component<Props, { value: string }> {
     if (r.toUpperCase() === 'HEAD' && this.props.currentRepository) {
       return this.props.currentRepository.defaultBranch;
     }
+    if (this.props.branches.length === 0 && this.props.tags.length === 0) {
+      return r;
+    }
     const branch = this.props.branches.find(b => b.name === r);
+    const tag = this.props.tags.find(b => b.name === r);
     if (branch) {
       return branch.name;
+    } else if (tag) {
+      return tag.name;
     } else {
-      return '';
+      return `tree: ${r}`;
     }
   };
 
@@ -60,16 +67,9 @@ export class TopBar extends React.Component<Props, { value: string }> {
     }));
   }
 
-  public onChange = (e: ChangeEvent<HTMLSelectElement>) => {
+  getHrefFromRevision = (r: string) => {
     const { resource, org, repo, path = '', pathType } = this.props.routeParams;
-    const { value } = e.target;
-    this.setState({
-      value,
-    });
-    const revision = this.props.branches.find(b => b.name === value)!.name;
-    history.push(
-      `/${resource}/${org}/${repo}/${pathType}/${encodeRevisionString(revision)}/${path}`
-    );
+    return `#/${resource}/${org}/${repo}/${pathType}/${r}/${path}`;
   };
 
   public render() {
@@ -90,11 +90,11 @@ export class TopBar extends React.Component<Props, { value: string }> {
           <EuiFlexItem className="codeTopBar__left">
             <EuiFlexGroup gutterSize="l" alignItems="center">
               <EuiFlexItem className="codeContainer__select" grow={false}>
-                <EuiSelect
-                  options={this.branchOptions}
-                  value={branch}
-                  onChange={this.onChange}
-                  data-test-subj="codeBranchSelector"
+                <BranchSelector
+                  getHrefFromRevision={this.getHrefFromRevision}
+                  branches={this.props.branches}
+                  tags={this.props.tags}
+                  revision={branch!}
                 />
               </EuiFlexItem>
               <Breadcrumb routeParams={this.props.routeParams} />
