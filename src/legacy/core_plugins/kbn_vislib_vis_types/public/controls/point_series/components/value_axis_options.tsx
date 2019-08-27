@@ -29,7 +29,7 @@ import { TextInputOption } from './../../text_input';
 import { LabelOptions } from './label_options';
 import { CustomExtentsOptions } from './custom_extents_options';
 import { isAxisHorizontal } from '../../../editors/metrics_axes_options_helper';
-import { SetValueAxisByIndex } from '../../../editors/metrics_axes_options';
+import { SetParamByIndex } from '../../../editors/metrics_axes_options';
 import { ValidationVisOptionsProps } from '../../validation_wrapper';
 
 export type SetScale = <T extends keyof ValueAxis['scale']>(
@@ -42,7 +42,7 @@ export interface ValueAxisOptionsParams extends ValidationVisOptionsProps<BasicV
   index: number;
   isCategoryAxisHorizontal: boolean;
   onValueAxisPositionChanged: (index: number, value: ValueAxis['position']) => void;
-  setValueAxisByIndex: SetValueAxisByIndex;
+  setParamByIndex: SetParamByIndex;
 }
 
 function ValueAxisOptions(props: ValueAxisOptionsParams) {
@@ -54,13 +54,13 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
     vis,
     onValueAxisPositionChanged,
     setValue,
-    setValueAxisByIndex,
+    setParamByIndex,
   } = props;
 
   const setValueAxis = useCallback(
     <T extends keyof ValueAxis>(paramName: T, value: ValueAxis[T]) =>
-      setValueAxisByIndex(index, paramName, value),
-    [setValueAxisByIndex, index]
+      setParamByIndex('valueAxes', index, paramName, value),
+    [setParamByIndex, index]
   );
 
   const setValueAxisTitle = useCallback(

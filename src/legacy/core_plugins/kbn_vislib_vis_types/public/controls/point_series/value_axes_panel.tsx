@@ -33,7 +33,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { BasicVislibParams, ValueAxis } from '../../types';
 import { ValueAxisOptions } from './components/value_axis_options';
-import { SetValueAxisByIndex } from '../../editors/metrics_axes_options';
+import { SetParamByIndex } from '../../editors/metrics_axes_options';
 import { ValidationVisOptionsProps } from '../validation_wrapper';
 
 interface ValueAxesPanelProps extends ValidationVisOptionsProps<BasicVislibParams> {
@@ -41,7 +41,7 @@ interface ValueAxesPanelProps extends ValidationVisOptionsProps<BasicVislibParam
   addValueAxis: () => ValueAxis;
   removeValueAxis: (axis: ValueAxis) => void;
   onValueAxisPositionChanged: (index: number, value: ValueAxis['position']) => void;
-  setValueAxisByIndex: SetValueAxisByIndex;
+  setParamByIndex: SetParamByIndex;
 }
 
 function ValueAxesPanel(props: ValueAxesPanelProps) {

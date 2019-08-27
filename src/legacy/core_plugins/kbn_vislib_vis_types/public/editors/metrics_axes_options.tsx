@@ -31,16 +31,11 @@ import { ValueAxesPanel } from '../controls/point_series/value_axes_panel';
 import { mapPositionOpposite, mapPosition } from '../controls/point_series/utils';
 import { makeSerie, isAxisHorizontal, countNextAxisNumber } from './metrics_axes_options_helper';
 
-export type SetChartValueByIndex = <T extends keyof SeriesParam>(
+export type SetParamByIndex = <P extends keyof ValueAxis, O extends keyof SeriesParam>(
+  axesName: 'valueAxes' | 'seriesParams',
   index: number,
-  paramName: T,
-  value: SeriesParam[T]
-) => void;
-
-export type SetValueAxisByIndex = <T extends keyof ValueAxis>(
-  index: number,
-  paramName: T,
-  value: ValueAxis[T]
+  paramName: P | O,
+  value: ValueAxis[P] | SeriesParam[O]
 ) => void;
 
 const VALUE_AXIS_PREFIX = 'ValueAxis-';
@@ -52,29 +47,19 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
   const [isCategoryAxisHorizontal, setIsCategoryAxisHorizontal] = useState(true);
   const [axesNumbers, setAxesNumbers] = useState({} as { [key: string]: number });
 
-  const setValueAxisByIndex: SetValueAxisByIndex = useCallback(
-    (index, paramName, value) => {
-      const valueAxes = [...stateParams.valueAxes];
+  const setParamByIndex: SetParamByIndex = useCallback(
+    (axesName, index, paramName, value) => {
+      const items = stateParams[axesName];
+      const array = [...items] as typeof items;
 
-      valueAxes[index] = {
-        ...valueAxes[index],
+      array[index] = {
+        ...array[index],
         [paramName]: value,
       };
-      setValue('valueAxes', valueAxes);
-    },
-    [stateParams.valueAxes]
-  );
 
-  const setChartByIndex: SetChartValueByIndex = useCallback(
-    (index, paramName, value) => {
-      const series = [...stateParams.seriesParams];
-      series[index] = {
-        ...series[index],
-        [paramName]: value,
-      };
-      setValue('seriesParams', series);
+      setValue(axesName, array);
     },
-    [stateParams.seriesParams]
+    [stateParams]
   );
 
   const updateAxisTitle = useCallback(() => {
@@ -187,10 +172,10 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
 
       if (chartIndex !== undefined) {
         // if a seriesParam has valueAxis equals to removed one, then we reset it to the first valueAxis
-        setChartByIndex(chartIndex, 'valueAxis', newValueAxes[0].id);
+        setParamByIndex('seriesParams', chartIndex, 'valueAxis', newValueAxes[0].id);
       }
     },
-    [stateParams.seriesParams, stateParams.valueAxes, setChartByIndex]
+    [stateParams.seriesParams, stateParams.valueAxes, setParamByIndex]
   );
 
   const aggsLabel = aggs
@@ -243,7 +228,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
       <SeriesPanel
         addValueAxis={addValueAxis}
         updateAxisTitle={updateAxisTitle}
-        setChartByIndex={setChartByIndex}
+        setParamByIndex={setParamByIndex}
         {...props}
       />
       <EuiSpacer size="s" />
@@ -252,7 +237,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
         isCategoryAxisHorizontal={isCategoryAxisHorizontal}
         removeValueAxis={removeValueAxis}
         onValueAxisPositionChanged={onValueAxisPositionChanged}
-        setValueAxisByIndex={setValueAxisByIndex}
+        setParamByIndex={setParamByIndex}
         {...props}
       />
       <EuiSpacer size="s" />
