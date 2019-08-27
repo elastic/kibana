@@ -68,7 +68,6 @@ exports[`render correctly 1`] = `
           >
             <div
               className="codeFileTree__item kbn-resetFocusState"
-              data-test-subj="codeFileTreeNode-Directory-android"
               onClick={[Function]}
               onKeyDown={[Function]}
               role="button"
@@ -103,6 +102,14 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              data-test-subj="codeFileTreeNode-Directory-android"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -113,7 +120,6 @@ exports[`render correctly 1`] = `
           >
             <div
               className="codeFileTree__item kbn-resetFocusState"
-              data-test-subj="codeFileTreeNode-Directory-futures"
               onClick={[Function]}
               onKeyDown={[Function]}
               role="button"
@@ -148,6 +154,14 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              data-test-subj="codeFileTreeNode-Directory-futures"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -158,7 +172,6 @@ exports[`render correctly 1`] = `
           >
             <div
               className="codeFileTree__item kbn-resetFocusState"
-              data-test-subj="codeFileTreeNode-Directory-guava"
               onClick={[Function]}
               onKeyDown={[Function]}
               role="button"
@@ -193,6 +206,14 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              data-test-subj="codeFileTreeNode-Directory-guava"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
           <div
             className="euiSideNavItem__items"
@@ -205,7 +226,6 @@ exports[`render correctly 1`] = `
               >
                 <div
                   className="codeFileTree__item kbn-resetFocusState"
-                  data-test-subj="codeFileTreeNode-Directory-guava/javadoc-link"
                   onClick={[Function]}
                   onKeyDown={[Function]}
                   role="button"
@@ -240,6 +260,14 @@ exports[`render correctly 1`] = `
                     </div>
                   </span>
                 </div>
+                <div
+                  className="codeFileTree__node--link"
+                  data-test-subj="codeFileTreeNode-Directory-guava/javadoc-link"
+                  onClick={[Function]}
+                  onKeyDown={[Function]}
+                  role="button"
+                  tabIndex={0}
+                />
               </div>
             </div>
             <div
@@ -250,7 +278,6 @@ exports[`render correctly 1`] = `
               >
                 <div
                   className="codeFileTree__item kbn-resetFocusState codeFileTree__file"
-                  data-test-subj="codeFileTreeNode-File-guava/pom.xml"
                   onClick={[Function]}
                   onKeyDown={[Function]}
                   role="button"
@@ -279,6 +306,14 @@ exports[`render correctly 1`] = `
                     </div>
                   </span>
                 </div>
+                <div
+                  className="codeFileTree__node--link"
+                  data-test-subj="codeFileTreeNode-File-guava/pom.xml"
+                  onClick={[Function]}
+                  onKeyDown={[Function]}
+                  role="button"
+                  tabIndex={0}
+                />
               </div>
             </div>
             <div
@@ -289,7 +324,6 @@ exports[`render correctly 1`] = `
               >
                 <div
                   className="codeFileTree__item kbn-resetFocusState"
-                  data-test-subj="codeFileTreeNode-Directory-guava/src/com/google"
                   onClick={[Function]}
                   onKeyDown={[Function]}
                   role="button"
@@ -326,6 +360,11 @@ exports[`render correctly 1`] = `
                 </div>
                 <div
                   className="codeFileTree__node--fullWidth"
+                  data-test-subj="codeFileTreeNode-Directory-guava/src/com/google"
+                  onClick={[Function]}
+                  onKeyDown={[Function]}
+                  role="button"
+                  tabIndex={0}
                 />
               </div>
               <div
@@ -339,7 +378,6 @@ exports[`render correctly 1`] = `
                   >
                     <div
                       className="codeFileTree__item kbn-resetFocusState"
-                      data-test-subj="codeFileTreeNode-Directory-guava/src/com/google/common"
                       onClick={[Function]}
                       onKeyDown={[Function]}
                       role="button"
@@ -374,6 +412,14 @@ exports[`render correctly 1`] = `
                         </div>
                       </span>
                     </div>
+                    <div
+                      className="codeFileTree__node--link"
+                      data-test-subj="codeFileTreeNode-Directory-guava/src/com/google/common"
+                      onClick={[Function]}
+                      onKeyDown={[Function]}
+                      role="button"
+                      tabIndex={0}
+                    />
                   </div>
                 </div>
                 <div
@@ -384,7 +430,6 @@ exports[`render correctly 1`] = `
                   >
                     <div
                       className="codeFileTree__item kbn-resetFocusState"
-                      data-test-subj="codeFileTreeNode-Directory-guava/src/com/google/thirdparty/publicsuffix"
                       onClick={[Function]}
                       onKeyDown={[Function]}
                       role="button"
@@ -419,6 +464,14 @@ exports[`render correctly 1`] = `
                         </div>
                       </span>
                     </div>
+                    <div
+                      className="codeFileTree__node--link"
+                      data-test-subj="codeFileTreeNode-Directory-guava/src/com/google/thirdparty/publicsuffix"
+                      onClick={[Function]}
+                      onKeyDown={[Function]}
+                      role="button"
+                      tabIndex={0}
+                    />
                   </div>
                 </div>
               </div>
@@ -433,7 +486,6 @@ exports[`render correctly 1`] = `
           >
             <div
               className="codeFileTree__item kbn-resetFocusState"
-              data-test-subj="codeFileTreeNode-Directory-guava-bom"
               onClick={[Function]}
               onKeyDown={[Function]}
               role="button"
@@ -468,6 +520,14 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              data-test-subj="codeFileTreeNode-Directory-guava-bom"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -478,7 +538,6 @@ exports[`render correctly 1`] = `
           >
             <div
               className="codeFileTree__item kbn-resetFocusState"
-              data-test-subj="codeFileTreeNode-Directory-guava-gwt"
               onClick={[Function]}
               onKeyDown={[Function]}
               role="button"
@@ -513,6 +572,14 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              data-test-subj="codeFileTreeNode-Directory-guava-gwt"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -523,7 +590,6 @@ exports[`render correctly 1`] = `
           >
             <div
               className="codeFileTree__item kbn-resetFocusState"
-              data-test-subj="codeFileTreeNode-Directory-guava-testlib"
               onClick={[Function]}
               onKeyDown={[Function]}
               role="button"
@@ -558,6 +624,14 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              data-test-subj="codeFileTreeNode-Directory-guava-testlib"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -568,7 +642,6 @@ exports[`render correctly 1`] = `
           >
             <div
               className="codeFileTree__item kbn-resetFocusState"
-              data-test-subj="codeFileTreeNode-Directory-guava-tests"
               onClick={[Function]}
               onKeyDown={[Function]}
               role="button"
@@ -603,6 +676,14 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              data-test-subj="codeFileTreeNode-Directory-guava-tests"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -613,7 +694,6 @@ exports[`render correctly 1`] = `
           >
             <div
               className="codeFileTree__item kbn-resetFocusState"
-              data-test-subj="codeFileTreeNode-Directory-refactorings"
               onClick={[Function]}
               onKeyDown={[Function]}
               role="button"
@@ -648,6 +728,14 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              data-test-subj="codeFileTreeNode-Directory-refactorings"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -658,7 +746,6 @@ exports[`render correctly 1`] = `
           >
             <div
               className="codeFileTree__item kbn-resetFocusState"
-              data-test-subj="codeFileTreeNode-Directory-util"
               onClick={[Function]}
               onKeyDown={[Function]}
               role="button"
@@ -693,6 +780,14 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              data-test-subj="codeFileTreeNode-Directory-util"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -703,7 +798,6 @@ exports[`render correctly 1`] = `
           >
             <div
               className="codeFileTree__item kbn-resetFocusState codeFileTree__file"
-              data-test-subj="codeFileTreeNode-File-.gitattributes"
               onClick={[Function]}
               onKeyDown={[Function]}
               role="button"
@@ -732,6 +826,14 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              data-test-subj="codeFileTreeNode-File-.gitattributes"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -742,7 +844,6 @@ exports[`render correctly 1`] = `
           >
             <div
               className="codeFileTree__item kbn-resetFocusState codeFileTree__file"
-              data-test-subj="codeFileTreeNode-File-.gitignore"
               onClick={[Function]}
               onKeyDown={[Function]}
               role="button"
@@ -771,6 +872,14 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              data-test-subj="codeFileTreeNode-File-.gitignore"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -781,7 +890,6 @@ exports[`render correctly 1`] = `
           >
             <div
               className="codeFileTree__item kbn-resetFocusState codeFileTree__file"
-              data-test-subj="codeFileTreeNode-File-.travis.yml"
               onClick={[Function]}
               onKeyDown={[Function]}
               role="button"
@@ -810,6 +918,14 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              data-test-subj="codeFileTreeNode-File-.travis.yml"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -820,7 +936,6 @@ exports[`render correctly 1`] = `
           >
             <div
               className="codeFileTree__item kbn-resetFocusState codeFileTree__file"
-              data-test-subj="codeFileTreeNode-File-CONTRIBUTING.md"
               onClick={[Function]}
               onKeyDown={[Function]}
               role="button"
@@ -849,6 +964,14 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              data-test-subj="codeFileTreeNode-File-CONTRIBUTING.md"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -859,7 +982,6 @@ exports[`render correctly 1`] = `
           >
             <div
               className="codeFileTree__item kbn-resetFocusState codeFileTree__file"
-              data-test-subj="codeFileTreeNode-File-CONTRIBUTORS"
               onClick={[Function]}
               onKeyDown={[Function]}
               role="button"
@@ -888,6 +1010,14 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              data-test-subj="codeFileTreeNode-File-CONTRIBUTORS"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -898,7 +1028,6 @@ exports[`render correctly 1`] = `
           >
             <div
               className="codeFileTree__item kbn-resetFocusState codeFileTree__file"
-              data-test-subj="codeFileTreeNode-File-COPYING"
               onClick={[Function]}
               onKeyDown={[Function]}
               role="button"
@@ -927,6 +1056,14 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              data-test-subj="codeFileTreeNode-File-COPYING"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -937,7 +1074,6 @@ exports[`render correctly 1`] = `
           >
             <div
               className="codeFileTree__item kbn-resetFocusState codeFileTree__file"
-              data-test-subj="codeFileTreeNode-File-README.md"
               onClick={[Function]}
               onKeyDown={[Function]}
               role="button"
@@ -966,6 +1102,14 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              data-test-subj="codeFileTreeNode-File-README.md"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -976,7 +1120,6 @@ exports[`render correctly 1`] = `
           >
             <div
               className="codeFileTree__item kbn-resetFocusState codeFileTree__file"
-              data-test-subj="codeFileTreeNode-File-cycle_whitelist.txt"
               onClick={[Function]}
               onKeyDown={[Function]}
               role="button"
@@ -1005,6 +1148,14 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              data-test-subj="codeFileTreeNode-File-cycle_whitelist.txt"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -1015,7 +1166,6 @@ exports[`render correctly 1`] = `
           >
             <div
               className="codeFileTree__item kbn-resetFocusState codeFileTree__file"
-              data-test-subj="codeFileTreeNode-File-javadoc-stylesheet.css"
               onClick={[Function]}
               onKeyDown={[Function]}
               role="button"
@@ -1044,6 +1194,14 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              data-test-subj="codeFileTreeNode-File-javadoc-stylesheet.css"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
         <div
@@ -1054,7 +1212,6 @@ exports[`render correctly 1`] = `
           >
             <div
               className="codeFileTree__item kbn-resetFocusState codeFileTree__file"
-              data-test-subj="codeFileTreeNode-File-pom.xml"
               onClick={[Function]}
               onKeyDown={[Function]}
               role="button"
@@ -1083,6 +1240,14 @@ exports[`render correctly 1`] = `
                 </div>
               </span>
             </div>
+            <div
+              className="codeFileTree__node--link"
+              data-test-subj="codeFileTreeNode-File-pom.xml"
+              onClick={[Function]}
+              onKeyDown={[Function]}
+              role="button"
+              tabIndex={0}
+            />
           </div>
         </div>
       </div>
