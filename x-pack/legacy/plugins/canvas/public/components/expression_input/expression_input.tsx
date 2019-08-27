@@ -48,6 +48,8 @@ export class ExpressionInput extends React.Component<Props> {
     onChange: PropTypes.func.isRequired,
   };
 
+  editor: monacoEditor.editor.IStandaloneCodeEditor | null;
+
   undoHistory: string[];
   redoHistory: string[];
 
@@ -56,6 +58,8 @@ export class ExpressionInput extends React.Component<Props> {
 
     this.undoHistory = [];
     this.redoHistory = [];
+
+    this.editor = null;
   }
 
   undo() {
@@ -248,6 +252,8 @@ export class ExpressionInput extends React.Component<Props> {
     if (model) {
       model.updateOptions({ tabSize: 2 });
     }
+
+    this.editor = editor;
   };
 
   render() {
