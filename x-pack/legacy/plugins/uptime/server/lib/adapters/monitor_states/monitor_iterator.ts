@@ -1,24 +1,11 @@
 import { CursorDirection } from '../../../../common/graphql/types';
 import { QueryContext } from './elasticsearch_monitor_states_adapter';
-import { INDEX_NAMES } from '../../../../common/constants';
-import { get, set, sortBy } from 'lodash';
+import { get, sortBy } from 'lodash';
 import { CursorPagination } from './adapter_types';
-
-export type MonitorLocCheckGroup = {
-  monitorId: string;
-  location: string | null;
-  filterMatchesLatest: boolean;
-  checkGroup: string;
-  timestamp: Date;
-  up: number;
-  down: number;
-};
-
-export type MonitorIdWithGroups = {
-  id: string;
-  matchesFilter: boolean;
-  groups: MonitorLocCheckGroup[];
-};
+import { mostRecentCheckGroups } from './most_recent_check_groups_query';
+import { MonitorLocCheckGroup } from './monitor_loc_check_group';
+import { MonitorIdWithGroups } from './monitor_id_with_groups';
+import { filteredCheckGroupsQuery, CheckGroupsPageResult } from './filtered_check_groups_query';
 
 export class MonitorIterator {
   queryContext: QueryContext;
@@ -152,7 +139,11 @@ export class MonitorIterator {
   private async queryCheckGroupsPage(size: number): Promise<CheckGroupsPageResult> {
     const start = new Date();
 
-    const filteredQueryResult = await this.filteredCheckGroupsQuery(size);
+    const filteredQueryResult = await filteredCheckGroupsQuery(
+      this.queryContext,
+      this.searchAfter,
+      size
+    );
     const filteredCheckGroups = new Map<string, boolean>();
     const monitorIds: string[] = [];
     const monitorIdsMatchingStatusFilter: string[] = [];
@@ -170,7 +161,8 @@ export class MonitorIterator {
 
     let recentGroupsMatchingStatus = new Map<string, MonitorLocCheckGroup[]>();
     if (monitorIdsMatchingStatusFilter.length > 0) {
-      const mostRecentQueryResult = await this.mostRecentCheckGroups(
+      const mostRecentQueryResult = await mostRecentCheckGroups(
+        this.queryContext,
         monitorIdsMatchingStatusFilter
       );
       MonitorLoop: for (const monBucket of mostRecentQueryResult.aggregations.monitor.buckets) {
@@ -224,126 +216,4 @@ export class MonitorIterator {
       searchAfter: filteredQueryResult.aggregations.monitors.after_key,
     };
   }
-
-  private async mostRecentCheckGroups(monitorIds: string[]) {
-    const params = {
-      index: INDEX_NAMES.HEARTBEAT,
-      body: {
-        size: 0,
-        query: {
-          terms: { 'monitor.id': monitorIds },
-        },
-        aggs: {
-          monitor: {
-            terms: { field: 'monitor.id', size: monitorIds.length },
-            aggs: {
-              location: {
-                terms: { field: 'observer.geo.name', missing: 'N/A', size: 100 },
-                aggs: {
-                  top: {
-                    top_hits: {
-                      sort: [{ '@timestamp': 'desc' }],
-                      _source: {
-                        includes: [
-                          'monitor.check_group',
-                          '@timestamp',
-                          'summary.up',
-                          'summary.down',
-                        ],
-                      },
-                      size: 1,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    };
-
-    return await this.queryContext.database.search(this.queryContext.request, params);
-  }
-
-  private async filteredCheckGroupsQuery(size: number) {
-    const body = this.filteredCheckGroupsQueryBody(size, this.searchAfter);
-
-    const params = {
-      index: INDEX_NAMES.HEARTBEAT,
-      body,
-    };
-
-    return await this.queryContext.database.search(this.queryContext.request, params);
-  }
-
-  private filteredCheckGroupsQueryBody(size: number, searchAfter: any) {
-    const compositeOrder = cursorDirectionToOrder(this.queryContext.pagination.cursorDirection);
-
-    const query = this.queryContext.filterClause.filter || { match_all: {} };
-
-    // This clause is an optimization for the case where we only want to show 'up' monitors.
-    // We know we can exclude any down matches because an 'up' monitor may not have any 'down' matches.
-    // However, we can't optimize anything in any other case, because a sibling check in the same check_group
-    // or in another location may have a different status.
-    const statusFilterClause = !this.queryContext.statusFilter
-      ? { exists: { field: 'summary.down' } }
-      : this.queryContext.statusFilter === 'up'
-      ? { match_all: {} }
-      : { match: { 'summary.down': 0 } };
-
-    const body = {
-      size: 0,
-      query,
-      aggs: {
-        monitors: {
-          composite: {
-            size: size,
-            sources: [
-              {
-                monitor_id: {
-                  terms: { field: 'monitor.id', order: compositeOrder },
-                },
-              },
-            ],
-          },
-          aggs: {
-            summaries: {
-              filter: {
-                bool: { filter: [statusFilterClause] },
-              },
-              aggs: {
-                top: {
-                  top_hits: {
-                    sort: [{ '@timestamp': 'desc' }],
-                    _source: {
-                      includes: ['monitor.check_group', '@timestamp', 'summary.up', 'summary.down'],
-                    },
-                    size: 1,
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    };
-
-    if (searchAfter) {
-      if (typeof searchAfter === 'string') {
-        // This is usually passed through from the browser as string encoded JSON
-        searchAfter = JSON.parse(searchAfter);
-      }
-      set(body, 'aggs.monitors.composite.after', searchAfter);
-    }
-    return body;
-  }
 }
-
-type CheckGroupsPageResult = {
-  checkGroups: MonitorIdWithGroups[];
-  searchAfter: string;
-};
-
-const cursorDirectionToOrder = (cd: CursorDirection): 'asc' | 'desc' => {
-  return CursorDirection[cd] === CursorDirection.AFTER ? 'asc' : 'desc';
-};
