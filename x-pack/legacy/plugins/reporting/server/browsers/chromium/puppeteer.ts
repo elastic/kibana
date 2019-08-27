@@ -8,6 +8,6 @@ import puppeteer from 'puppeteer';
 // @ts-ignore lacking typedefs which this module fixes
 import puppeteerCore from 'puppeteer-core';
 
-export const launch: (
+export const puppeteerLaunch: (
   opts?: puppeteer.LaunchOptions
 ) => Promise<puppeteer.Browser> = puppeteerCore.launch.bind(puppeteerCore);

@@ -12,7 +12,7 @@ import * as Rx from 'rxjs';
 import { map, share, mergeMap, filter, partition, ignoreElements, tap } from 'rxjs/operators';
 import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 
-import { launch } from '../puppeteer';
+import { puppeteerLaunch } from '../puppeteer';
 import { LevelLogger as Logger } from '../../../lib/level_logger';
 import { HeadlessChromiumDriver } from '../driver';
 import { args, IArgOptions } from './args';
@@ -62,7 +62,7 @@ export class HeadlessChromiumDriverFactory {
       proxyConfig: this.browserConfig.proxy,
     });
 
-    return launch({
+    return puppeteerLaunch({
       userDataDir,
       executablePath: this.binaryPath,
       ignoreHTTPSErrors: true,
@@ -106,7 +106,7 @@ export class HeadlessChromiumDriverFactory {
       let browser: Browser;
       let page: Page;
       try {
-        browser = await launch({
+        browser = await puppeteerLaunch({
           pipe: !this.browserConfig.inspect,
           userDataDir,
           executablePath: this.binaryPath,
