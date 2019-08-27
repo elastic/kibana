@@ -25,6 +25,7 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiListGroup,
   EuiPagination,
   EuiText,
   EuiSpacer,
@@ -185,22 +186,20 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
                 <p>{savedQueryDescriptionText}</p>
               </EuiText>
               <div className="kbnSavedQueryManagement__listWrapper">
-                <ul
+                <EuiListGroup
+                  flush={true}
                   className="kbnSavedQueryManagement__list"
                   aria-labelledby={'savedQueryManagementPopoverTitle'}
                 >
                   {savedQueryRows()}
-                </ul>
+                </EuiListGroup>
               </div>
-              <EuiFlexGroup justifyContent="spaceAround" gutterSize="none">
-                <EuiFlexItem grow={false}>
-                  <EuiPagination
-                    pageCount={Math.ceil(savedQueries.length / pageCount)}
-                    activePage={activePage}
-                    onPageClick={goToPage}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <EuiPagination
+                className="kbnSavedQueryManagement__pagination"
+                pageCount={Math.ceil(savedQueries.length / pageCount)}
+                activePage={activePage}
+                onPageClick={goToPage}
+              />
             </Fragment>
           ) : (
             <Fragment>

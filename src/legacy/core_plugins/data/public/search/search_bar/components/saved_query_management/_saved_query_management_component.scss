@@ -3,9 +3,15 @@
 .kbnSavedQueryManagement__popover {
   max-width: $euiFormMaxWidth;
 }
+
 .kbnSavedQueryManagement__listWrapper {
   max-height: $euiSizeXXL * 5;
   overflow-y: hidden;
+}
+
+.kbnSavedQueryManagement__pagination {
+  justify-content: center;
+  padding: 0 $euiSizeM $euiSizeM;
 }
 
 .kbnSavedQueryManagement__text {
@@ -14,10 +20,29 @@
 
 .kbnSavedQueryManagement__list {
   @include euiYScrollWithShadows;
-  padding: $euiSizeM;
+  // Left/Right padding is calculated to match the left alignment of the
+  // popover text and buttons
+  padding: $euiSizeM $euiSizeXS !important; // Override flush
 }
 
-.kbnSavedQueryManagement__list li:first-child .saved-query-list-item-text {
+.kbnSavedQueryListItem {
+  margin-top: 0;
+  color: $euiLinkColor;
+}
+
+// Can't actually target the button with classes, but styles to override
+// are just user agent styles
+.kbnSavedQueryListItem-selected button {
   font-weight: $euiFontWeightBold;
 }
 
+// This will ensure the info icon and tooltip shows even if the label gets truncated
+.kbnSavedQueryListItem__label {
+  display: flex;
+  align-items: center;
+}
+
+.kbnSavedQueryListItem__labelText {
+  @include euiTextTruncate;
+  margin-right: $euiSizeXS;
+}
