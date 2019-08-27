@@ -15,6 +15,7 @@ exports[`Storyshots renderers/TimeFilter compact mode 1`] = `
     className="euiPopover__anchor canvasTimePickerPopover__anchor"
   >
     <button
+      aria-label="Displaying data Last 7 days. Click to open a calendar tool to select a new time range."
       className="canvasTimePickerPopover__button"
       onClick={[Function]}
     >
