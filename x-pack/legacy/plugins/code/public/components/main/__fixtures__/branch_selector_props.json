@@ -1,0 +1,412 @@
+{
+  "branches": [
+    {
+      "name": "VS",
+      "reference": "refs/remotes/origin/VS",
+      "type": "REMOTE_BRANCH",
+      "commit": {
+        "id": "ba73782df210e0a7744ac9b623d58081a1801738",
+        "author": "Bowden Kelly",
+        "committer": "Bowden Kelly",
+        "message": "added a few more files to project file\n",
+        "updated": "2018-02-27T00:18:24.000Z",
+        "parents": ["fe3461dc756f2c02bffe74209e2fbebe119663a3"],
+        "treeId": "53be7154f8f1e00c5b1d44f8d45618e4a380023c"
+      }
+    },
+    {
+      "name": "addAzure",
+      "reference": "refs/remotes/origin/addAzure",
+      "type": "REMOTE_BRANCH",
+      "commit": {
+        "id": "56993dd47e252e453aacb020c43502423c709412",
+        "author": "Bowden",
+        "committer": "Bowden",
+        "message": "fixed some imports\n",
+        "updated": "2018-03-12T16:43:29.000Z",
+        "parents": ["3b76dc49de5e18dc7bb0f23f7f33d106d58e3697"],
+        "treeId": "a8bb97b18f46b99ea5887274183c8d1086781176"
+      }
+    },
+    {
+      "name": "connectionRework",
+      "reference": "refs/remotes/origin/connectionRework",
+      "type": "REMOTE_BRANCH",
+      "commit": {
+        "id": "5120755a8421ef6bf8f5d8c64ca8cc1cac2bf3a8",
+        "author": "Bowden",
+        "committer": "Bowden",
+        "message": "updated git ignore to ignore coverage folder\n",
+        "updated": "2018-02-21T21:22:16.000Z",
+        "parents": ["e8ecc30c63126f97caa1d7115c9d7ff3b20ae2ff"],
+        "treeId": "befdda6fcbe2e723ac611ce3e06242a4f781bb5f"
+      }
+    },
+    {
+      "name": "master",
+      "reference": "refs/remotes/origin/master",
+      "type": "REMOTE_BRANCH",
+      "commit": {
+        "id": "261557d657fdfddf78119d15d38b1f6a7be005ed",
+        "author": "spacedragon",
+        "committer": "spacedragon",
+        "message": "add a dummy file\n",
+        "updated": "2019-03-28T02:24:27.000Z",
+        "parents": ["46971a8454761f1a11d8fde4d96ff8d29bc4e754"],
+        "treeId": "7b3ee2972005b6e36da666ab45340535c9cbe837"
+      }
+    },
+    {
+      "name": "noDatabase",
+      "reference": "refs/remotes/origin/noDatabase",
+      "type": "REMOTE_BRANCH",
+      "commit": {
+        "id": "a0e78c9d053c455614153a74ea4a2055d9cc7788",
+        "author": "Bowden",
+        "committer": "Bowden",
+        "message": "WIP - still need to use NO_DATABASE env var to safely avoid db errors\n",
+        "updated": "2018-01-10T17:28:58.000Z",
+        "parents": ["a92223a67267d1ee40d7191e4fcc95d8695f60d7"],
+        "treeId": "0867a12c7d805ad1d6ca96afc149dcb610896873"
+      }
+    },
+    {
+      "name": "simpleTemplate",
+      "reference": "refs/remotes/origin/simpleTemplate",
+      "type": "REMOTE_BRANCH",
+      "commit": {
+        "id": "a92223a67267d1ee40d7191e4fcc95d8695f60d7",
+        "author": "Bowden",
+        "committer": "Bowden",
+        "message": "updating README\n",
+        "updated": "2018-01-08T22:33:41.000Z",
+        "parents": ["bcc40c81491659385c293b9dd03dd14dcf49a83e"],
+        "treeId": "744959c50d005c7a7ab3f1ad76bf3aa2179a18b7"
+      }
+    },
+    {
+      "name": "template",
+      "reference": "refs/remotes/origin/template",
+      "type": "REMOTE_BRANCH",
+      "commit": {
+        "id": "a92223a67267d1ee40d7191e4fcc95d8695f60d7",
+        "author": "Bowden",
+        "committer": "Bowden",
+        "message": "updating README\n",
+        "updated": "2018-01-08T22:33:41.000Z",
+        "parents": ["bcc40c81491659385c293b9dd03dd14dcf49a83e"],
+        "treeId": "744959c50d005c7a7ab3f1ad76bf3aa2179a18b7"
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "v0.1.0",
+      "reference": "refs/tags/v0.1.0",
+      "type": "TAG",
+      "commit": {
+        "id": "a4ac502e360f982a8b406bedc9f4189ab25485ea",
+        "author": "Maxime Gréau",
+        "committer": "Maxime Gréau",
+        "message": "[maven-release-plugin] prepare release v0.1.0\n",
+        "updated": "2018-04-09T10:16:06.000Z",
+        "parents": ["be4248b908e4706f0f38879703a263ce07d79350"],
+        "treeId": "17d9ec7aaae075c6feb2ea310d1243e0ac429573"
+      }
+    },
+    {
+      "name": "v0.1.1",
+      "reference": "refs/tags/v0.1.1",
+      "type": "TAG",
+      "commit": {
+        "id": "836b82fd37a7e85a96e466ea9db85939f5924be4",
+        "author": "Maxime Gréau",
+        "committer": "Maxime Gréau",
+        "message": "[maven-release-plugin] prepare release v0.1.1\n",
+        "updated": "2018-04-09T13:42:13.000Z",
+        "parents": ["56f57df4792c20d24798e03af0cdadf5c6f96831"],
+        "treeId": "12c2297211f7a784c8adf5cb08b9c5ae7ab374a1"
+      }
+    },
+    {
+      "name": "v0.1.2",
+      "reference": "refs/tags/v0.1.2",
+      "type": "TAG",
+      "commit": {
+        "id": "72995ae72e9d93bb4c4304afbb0915e5ec94a2a3",
+        "author": "Maxime Gréau",
+        "committer": "Maxime Gréau",
+        "message": "[maven-release-plugin] prepare release v0.1.2\n",
+        "updated": "2018-04-16T09:21:13.000Z",
+        "parents": ["8936e3e1beb0c77ae292281ac94c20da0acd3b1d"],
+        "treeId": "b095727185f317ba7a7d80e82c220f3e375937eb"
+      }
+    },
+    {
+      "name": "v0.5.0",
+      "reference": "refs/tags/v0.5.0",
+      "type": "TAG",
+      "commit": {
+        "id": "1f4ceadcdd7c1bd9885e7d77e9042e27e889ae6e",
+        "author": "Maxime Gréau",
+        "committer": "Maxime Gréau",
+        "message": "[maven-release-plugin] prepare release v0.5.0\n",
+        "updated": "2018-05-28T15:54:06.000Z",
+        "parents": ["454f1c14a6a9fc1140d48964e7cb75195c4cc644"],
+        "treeId": "c0b2175dfdf9d3973fec7209e759686752187615"
+      }
+    },
+    {
+      "name": "v0.5.1",
+      "reference": "refs/tags/v0.5.1",
+      "type": "TAG",
+      "commit": {
+        "id": "31d89f451768ea53378c45bca809b4c5d7a73e15",
+        "author": "Maxime Gréau",
+        "committer": "Maxime Gréau",
+        "message": "[maven-release-plugin] prepare release v0.5.1\n",
+        "updated": "2018-05-28T21:07:12.000Z",
+        "parents": ["5c54a6be202b72de8b28d33fa3e78ce7f43a7272"],
+        "treeId": "13042613afe7a597dd2025191276caa08e0b0f86"
+      }
+    },
+    {
+      "name": "v0.6.0",
+      "reference": "refs/tags/v0.6.0",
+      "type": "TAG",
+      "commit": {
+        "id": "140978ec133da3c05b25004431bb9c68097363cf",
+        "author": "Felix Barnsteiner",
+        "committer": "Felix Barnsteiner",
+        "message": "[maven-release-plugin] prepare release v0.6.0\n",
+        "updated": "2018-07-05T08:21:29.000Z",
+        "parents": ["fd0adee74ec1c58338ec100f379a4806dbb73d65"],
+        "treeId": "d8bf0384f099cd74e202b97c4d125b4befd61b06"
+      }
+    },
+    {
+      "name": "v0.6.1",
+      "reference": "refs/tags/v0.6.1",
+      "type": "TAG",
+      "commit": {
+        "id": "c04b0d1e5f8b4837dea511a97d90214f43873f4b",
+        "author": "Felix Barnsteiner",
+        "committer": "Felix Barnsteiner",
+        "message": "[maven-release-plugin] prepare release v0.6.1\n",
+        "updated": "2018-08-07T09:06:37.000Z",
+        "parents": ["c2687d63c813b4643eda833ac759ff907294753c"],
+        "treeId": "88f1f4f57ad2e83ea032e3d63f464be37ea75841"
+      }
+    },
+    {
+      "name": "v0.6.2",
+      "reference": "refs/tags/v0.6.2",
+      "type": "TAG",
+      "commit": {
+        "id": "41e705e463482e54ecdb27667151bca56879ffc5",
+        "author": "Jenkins CI",
+        "committer": "Jenkins CI",
+        "message": "[maven-release-plugin] prepare release v0.6.2\n",
+        "updated": "2018-08-13T12:27:54.000Z",
+        "parents": ["ccda4b6ad37e05168aec2742b11e6ecd8e1aa021"],
+        "treeId": "d80686f8e6067af55625885a2e451b545e6701a8"
+      }
+    },
+    {
+      "name": "v0.7.0",
+      "reference": "refs/tags/v0.7.0",
+      "type": "TAG",
+      "commit": {
+        "id": "6b6e430fb6ff9180d5e89d2a4d845ddb4bf5b440",
+        "author": "Jenkins CI",
+        "committer": "Jenkins CI",
+        "message": "[maven-release-plugin] prepare release v0.7.0\n",
+        "updated": "2018-09-12T12:53:14.000Z",
+        "parents": ["c9d93470331d993b07e101211fbf4bbe99993a2b"],
+        "treeId": "b72efc4b58957e7411a785690ff3461b136a2fda"
+      }
+    },
+    {
+      "name": "v0.7.1",
+      "reference": "refs/tags/v0.7.1",
+      "type": "TAG",
+      "commit": {
+        "id": "338a03a1a5e44a7e00c455326a5431dc1f70afd5",
+        "author": "Jenkins CI",
+        "committer": "Jenkins CI",
+        "message": "[maven-release-plugin] prepare release v0.7.1\n",
+        "updated": "2018-10-24T08:51:21.000Z",
+        "parents": ["c2de8edb8ab49485b503fac256373bc25a80668d"],
+        "treeId": "47da3181c9bf78fbb706fd7dbc5a65249b4f7be4"
+      }
+    },
+    {
+      "name": "v1.0.0",
+      "reference": "refs/tags/v1.0.0",
+      "type": "TAG",
+      "commit": {
+        "id": "613d9d8d2c83375a2d0d4a534f7a9ac431455639",
+        "author": "Jenkins CI",
+        "committer": "Jenkins CI",
+        "message": "[maven-release-plugin] prepare release v1.0.0\n",
+        "updated": "2018-11-14T14:40:00.000Z",
+        "parents": ["96a627f8596a42d545b5f0f04f6e24287504b6bc"],
+        "treeId": "b8aaddb055ebe88ce077d37b78012acb6b42ce02"
+      }
+    },
+    {
+      "name": "v1.0.0.RC1",
+      "reference": "refs/tags/v1.0.0.RC1",
+      "type": "TAG",
+      "commit": {
+        "id": "48f7385e8c88be0b3c2305591b10b2cbf8a51843",
+        "author": "Jenkins CI",
+        "committer": "Jenkins CI",
+        "message": "[maven-release-plugin] prepare release v1.0.0.RC1\n",
+        "updated": "2018-11-06T09:02:48.000Z",
+        "parents": ["4ad7813f7fa5309f5d7fff541bd17668d00e938b"],
+        "treeId": "c694098a648b4dc7a5d891588923673cc8c10397"
+      }
+    },
+    {
+      "name": "v1.0.1",
+      "reference": "refs/tags/v1.0.1",
+      "type": "TAG",
+      "commit": {
+        "id": "352ddb69ba733036ac400c247486c516f62d65b2",
+        "author": "Jenkins CI",
+        "committer": "Jenkins CI",
+        "message": "[maven-release-plugin] prepare release v1.0.1\n",
+        "updated": "2018-11-15T16:12:30.000Z",
+        "parents": ["a48b483741dfd561ef00273f65404da9f16efa95"],
+        "treeId": "2c4427e4bdcf3f2f21fed786eefe9cc87606c990"
+      }
+    },
+    {
+      "name": "v1.1.0",
+      "reference": "refs/tags/v1.1.0",
+      "type": "TAG",
+      "commit": {
+        "id": "6c8ff30bc8ac8d7d82196c248090e8d65a835b54",
+        "author": "Jenkins CI",
+        "committer": "Jenkins CI",
+        "message": "[maven-release-plugin] prepare release v1.1.0\n",
+        "updated": "2018-11-27T13:49:02.000Z",
+        "parents": ["3464fe0118c6d60a37ebf59b77c2e431ee469101"],
+        "treeId": "7ee9bf61fc05f875858f7ddf8e9b034812f1b4b1"
+      }
+    },
+    {
+      "name": "v1.2.0",
+      "reference": "refs/tags/v1.2.0",
+      "type": "TAG",
+      "commit": {
+        "id": "ba3c62a4b32f17603dfadfc06d260fc62d8f9cfc",
+        "author": "Jenkins CI",
+        "committer": "Jenkins CI",
+        "message": "[maven-release-plugin] prepare release v1.2.0\n",
+        "updated": "2018-12-19T08:42:40.000Z",
+        "parents": ["a0754fdc6e18d729153a2bd1440f932ebbcdfe56"],
+        "treeId": "57528f17162333c9ac2c55a9e3b5542d7ab1ac71"
+      }
+    },
+    {
+      "name": "v1.3.0",
+      "reference": "refs/tags/v1.3.0",
+      "type": "TAG",
+      "commit": {
+        "id": "ddf65c5654be6786d0fe44f543f14c57715c0355",
+        "author": "Jenkins CI",
+        "committer": "Jenkins CI",
+        "message": "[maven-release-plugin] prepare release v1.3.0\n",
+        "updated": "2019-01-10T14:13:23.000Z",
+        "parents": ["5b7995504b159be365af1f7722819d87782b6352"],
+        "treeId": "3bf0bc3c366212b06f6e7a0ded2adc8dcd78c579"
+      }
+    },
+    {
+      "name": "v1.4.0",
+      "reference": "refs/tags/v1.4.0",
+      "type": "TAG",
+      "commit": {
+        "id": "e48a2b035463416a7d39b90e8568aaa5bf2e0671",
+        "author": "Jenkins CI",
+        "committer": "Jenkins CI",
+        "message": "[maven-release-plugin] prepare release v1.4.0\n",
+        "updated": "2019-02-14T09:02:25.000Z",
+        "parents": ["83d7533820cd340c9ed9da99781b5322ea41c26d"],
+        "treeId": "6bca998b5143cf8795eab96414903032f02fc19b"
+      }
+    },
+    {
+      "name": "v1.5.0",
+      "reference": "refs/tags/v1.5.0",
+      "type": "TAG",
+      "commit": {
+        "id": "3dcd470810216c162048a0e85ec76611074f49f8",
+        "author": "Jenkins CI",
+        "committer": "Jenkins CI",
+        "message": "[maven-release-plugin] prepare release v1.5.0\n",
+        "updated": "2019-03-26T10:38:10.000Z",
+        "parents": ["a04c1b59097853d760a07f579391dea16896fcd2"],
+        "treeId": "7ffe9081ebcd1c3d458a11a3e136edd5776eaf0a"
+      }
+    },
+    {
+      "name": "v1.6.0",
+      "reference": "refs/tags/v1.6.0",
+      "type": "TAG",
+      "commit": {
+        "id": "b294e4ee2602da3fde29aa24484507077f8bfa88",
+        "author": "Jenkins CI",
+        "committer": "Jenkins CI",
+        "message": "[maven-release-plugin] prepare release v1.6.0\n",
+        "updated": "2019-04-16T13:54:06.000Z",
+        "parents": ["ea9e613ce8c96869032e6207457604853c7d1909"],
+        "treeId": "612c8b2e13be700144edd6cf26ab097236bae2bd"
+      }
+    },
+    {
+      "name": "v1.6.1",
+      "reference": "refs/tags/v1.6.1",
+      "type": "TAG",
+      "commit": {
+        "id": "9385a9914420f0366ed5df2b12a718ecdbb45346",
+        "author": "Jenkins CI",
+        "committer": "Jenkins CI",
+        "message": "[maven-release-plugin] prepare release v1.6.1\n",
+        "updated": "2019-04-26T08:53:42.000Z",
+        "parents": ["6d54e100cccbee62db42fb828a9845921c08231f"],
+        "treeId": "656916ad6de50faba1b9d635f429290693e35095"
+      }
+    },
+    {
+      "name": "v1.7.0",
+      "reference": "refs/tags/v1.7.0",
+      "type": "TAG",
+      "commit": {
+        "id": "cebeef9d71236f0a6f87e682fd1d69d6f6d455e3",
+        "author": "Jenkins CI",
+        "committer": "Jenkins CI",
+        "message": "[maven-release-plugin] prepare release v1.7.0\n",
+        "updated": "2019-06-13T08:24:23.000Z",
+        "parents": ["c08608741f72ac2c8e6a7d247c4a906385722066"],
+        "treeId": "48e8d1d940815033021af1c2f8bd2ca1c0b5cbd3"
+      }
+    },
+    {
+      "name": "v1.8.0",
+      "reference": "refs/tags/v1.8.0",
+      "type": "TAG",
+      "commit": {
+        "id": "5118961eb75485437c2be97fbcf206ab4d51520f",
+        "author": "Jenkins CI",
+        "committer": "Jenkins CI",
+        "message": "[maven-release-plugin] prepare release v1.8.0\n",
+        "updated": "2019-07-30T13:34:38.000Z",
+        "parents": ["0cb1c7233d1613336da53a687af07b2b22d6fcd1"],
+        "treeId": "ce041e06aaf516276f06727cee9ecad84c46e73a"
+      }
+    }
+  ]
+}
