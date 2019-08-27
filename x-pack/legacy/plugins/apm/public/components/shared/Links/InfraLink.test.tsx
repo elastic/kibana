@@ -8,7 +8,7 @@ import { Location } from 'history';
 import React from 'react';
 import { getRenderedHref } from '../../../utils/testHelpers';
 import { InfraLink } from './InfraLink';
-import * as hooks from '../../../hooks/useCore';
+import * as kibanaCore from '../../../../../observability/public/context/kibana_core';
 import { InternalCoreStart } from 'src/core/public';
 
 const coreMock = ({
@@ -19,7 +19,7 @@ const coreMock = ({
   }
 } as unknown) as InternalCoreStart;
 
-jest.spyOn(hooks, 'useCore').mockReturnValue(coreMock);
+jest.spyOn(kibanaCore, 'useKibanaCore').mockReturnValue(coreMock);
 
 test('InfraLink produces the correct URL', async () => {
   const href = await getRenderedHref(

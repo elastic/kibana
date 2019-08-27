@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useContext } from 'react';
-import { CoreContext } from '../context/CoreContext';
+import { services as apiIntegrationServices } from '../api_integration/services';
 
-export function useCore() {
-  return useContext(CoreContext);
-}
+export const services = {
+  esSupertest: apiIntegrationServices.esSupertest,
+  supertestWithoutAuth: apiIntegrationServices.supertestWithoutAuth,
+};
