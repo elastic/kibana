@@ -237,8 +237,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async setScriptedFieldLanguageFilter(language) {
       await find.clickByCssSelector(
         'select[data-test-subj="scriptedFieldLanguageFilterDropdown"] > option[label="' +
-            language +
-            '"]'
+        language +
+        '"]'
       );
     }
 
@@ -285,7 +285,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await indexLink.click();
     }
 
-    async createIndexPattern(indexPatternName, timefield = '@timestamp') {
+    async createIndexPattern(indexPatternName, standardIndexPattern = true, timefield = '@timestamp') {
       await retry.try(async () => {
         await this.navigateTo();
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -293,6 +293,11 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickOptionalAddNewButton();
         await PageObjects.header.waitUntilLoadingHasFinished();
+        if (standardIndexPattern) {
+          await this.clickIndexPatternType('Standard');
+        } else {
+          await this.clickIndexPatternType('Rollup');
+        }
         await retry.try(async () => {
           await this.setIndexPatternField({ indexPatternName });
         });
@@ -323,6 +328,10 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       if (await testSubjects.isDisplayed('createIndexPatternButton')) {
         await testSubjects.click('createIndexPatternButton');
       }
+    }
+
+    async clickIndexPatternType(indexPatternType) {
+      await testSubjects.click(`create${indexPatternType}IndexPatternButton`);
     }
 
     async getIndexPatternIdFromUrl() {

@@ -10,11 +10,12 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
 
-  const log = getService('log');
+  // const log = getService('log');
   const es = getService('es');
-  const PageObjects = getPageObjects(['security', 'rollup', 'common', 'indexManagement']);
+  const PageObjects = getPageObjects(['security', 'rollup', 'common', 'indexManagement', 'settings']);
 
   describe('rollup jobs', function () {
+    const rollupJobName = 'rollup-to-be-' + Math.floor(Math.random() * 10000);
     async function loadDates(dates, prepend = 'to-be-rolled-up') {
       for (const day of dates) {
         await es.index({
@@ -39,35 +40,57 @@ export default function ({ getService, getPageObjects }) {
 
     });
     it('create new rollup job', async () => {
-
-      const jobName = 'rollup-to-be';
       const indexPattern = 'to-be*';
       const indexName = 'rollup-to-be';
       const interval = '1000ms';
 
-      await PageObjects.rollup.createNewRollUpJob(jobName, indexPattern, indexName,
+      await PageObjects.rollup.createNewRollUpJob(rollupJobName, indexPattern, indexName,
         interval, ' ', true, { time: '9,19,29,39,49,59 * * * * ?', cron: true });
 
       await PageObjects.common.navigateToApp('indexManagement');
 
+      // Wait a 10 seconds to ensure that the job has triggered.
+      await PageObjects.common.sleep(10000);
       await PageObjects.indexManagement.toggleRollupIndices();
       const indices = await PageObjects.indexManagement.getIndexList();
 
       indices.filter(i => i.indexName === indexName);
-
-      expect(indices[0].indexDocuments).to.be.ok;
-      expect(indices[0].indexDocuments).not.to.be('0');
-
-      log.debug(es);
-      es.transport.request({
-        path: `/_rollup/job/${jobName}`,
-        method: 'DELETE',
-      });
+      expect(indices[0].indexDocuments).to.be('3');
 
     });
+
+    it('create hybrid index pattern', async () => {
+      //Stop the rollup job created in the previous test.
+      await es.transport.request({
+        path: `/_rollup/job/${rollupJobName}/_stop?wait_for_completion=true`,
+        method: 'POST',
+      });
+
+      const now = new Date();
+      const futureDates = [
+        datemath.parse('now', { forceNow: now }),
+        datemath.parse('now+1d', { forceNow: now }),
+        datemath.parse('now+2d', { forceNow: now }),
+        datemath.parse('now+3d', { forceNow: now }),
+      ];
+
+      await loadDates(futureDates, 'live-data');
+
+      await PageObjects.common.navigateToApp('settings');
+      await PageObjects.settings.createIndexPattern();
+
+
+
+    });
+
     after(async () => {
+      es.transport.request({
+        path: `/_rollup/job/${rollupJobName}`,
+        method: 'DELETE',
+      });
       await es.indices.delete({ index: 'to-be*' });
       await es.indices.delete({ index: 'rollup*' });
+      await es.indices.delete({ index: 'live*' });
     });
   });
 }
