@@ -166,9 +166,9 @@ export const Page: FC = () => {
   const [nonMetricFieldQuery, setNonMetricFieldQuery] = useState(defaults.nonMetricFieldQuery);
 
   useEffect(() => {
-    timefilter.on('timeUpdate', loadOverallStats);
+    const timeUpdateSubscription = timefilter.getTimeUpdate$().subscribe(loadOverallStats);
     return () => {
-      timefilter.off('timeUpdate', loadOverallStats);
+      timeUpdateSubscription.unsubscribe();
     };
   }, []);
 

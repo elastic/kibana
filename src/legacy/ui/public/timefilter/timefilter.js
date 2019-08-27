@@ -18,23 +18,59 @@
  */
 
 import _ from 'lodash';
+import { Subject, BehaviorSubject } from 'rxjs';
 import moment from 'moment';
 import { calculateBounds, getTime } from './get_time';
-import { parseQueryString } from 'ui/timefilter/lib/parse_querystring';
-import { SimpleEmitter } from 'ui/utils/simple_emitter';
+import { parseQueryString } from './lib/parse_querystring';
+import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import uiRoutes from '../routes';
 import chrome from 'ui/chrome';
 import { areTimePickerValsDifferent } from './lib/diff_time_picker_vals';
 import { timeHistory } from './time_history';
 
-class Timefilter extends SimpleEmitter {
+class Timefilter {
   constructor() {
-    super();
+
+    // Fired when isTimeRangeSelectorEnabled \ isAutoRefreshSelectorEnabled are toggled
+    this.enabledUpdated$ = new BehaviorSubject();
+
+    // Fired when a user changes the timerange
+    this.timeUpdate$ = new Subject();
+
+    // Fired when a user changes the the autorefresh settings
+    this.refreshIntervalUpdate$ = new Subject();
+
+    // Used when search poll triggers an auto refresh
+    this.autoRefreshFetch$ = new Subject();
+
+    this.fetch$ = new Subject();
+
     this.isTimeRangeSelectorEnabled = false;
     this.isAutoRefreshSelectorEnabled = false;
     this._time = chrome.getUiSettingsClient().get('timepicker:timeDefaults');
     this.setRefreshInterval(chrome.getUiSettingsClient().get('timepicker:refreshIntervalDefaults'));
   }
+
+  getEnabledUpdated$ = () => {
+    return this.enabledUpdated$.asObservable();
+  }
+
+  getTimeUpdate$ = () => {
+    return this.timeUpdate$.asObservable();
+  }
+
+  getRefreshIntervalUpdate$ = () => {
+    return this.refreshIntervalUpdate$.asObservable();
+  }
+
+  getAutoRefreshFetch$ = () => {
+    return this.autoRefreshFetch$.asObservable();
+  }
+
+  getFetch$ = () => {
+    return this.fetch$.asObservable();
+  }
+
 
   getTime = () => {
     const { from, to } = this._time;
@@ -61,8 +97,8 @@ class Timefilter extends SimpleEmitter {
         to: newTime.to,
       };
       timeHistory.add(this._time);
-      this.emit('timeUpdate');
-      this.emit('fetch');
+      this.timeUpdate$.next();
+      this.fetch$.next();
     }
   }
 
@@ -91,9 +127,9 @@ class Timefilter extends SimpleEmitter {
     // Only send out an event if we already had a previous refresh interval (not for the initial set)
     // and the old and new refresh interval are actually different.
     if (prevRefreshInterval && areTimePickerValsDifferent(prevRefreshInterval, newRefreshInterval)) {
-      this.emit('refreshIntervalUpdate');
+      this.refreshIntervalUpdate$.next();
       if (!newRefreshInterval.pause && newRefreshInterval.value !== 0) {
-        this.emit('fetch');
+        this.fetch$.next();
       }
     }
   }
@@ -138,7 +174,7 @@ class Timefilter extends SimpleEmitter {
    */
   enableTimeRangeSelector = () => {
     this.isTimeRangeSelectorEnabled = true;
-    this.emit('enabledUpdated');
+    this.enabledUpdated$.next();
   }
 
   /**
@@ -146,7 +182,7 @@ class Timefilter extends SimpleEmitter {
    */
   disableTimeRangeSelector = () => {
     this.isTimeRangeSelectorEnabled = false;
-    this.emit('enabledUpdated');
+    this.enabledUpdated$.next();
   }
 
   /**
@@ -154,7 +190,7 @@ class Timefilter extends SimpleEmitter {
    */
   enableAutoRefreshSelector = () => {
     this.isAutoRefreshSelectorEnabled = true;
-    this.emit('enabledUpdated');
+    this.enabledUpdated$.next();
   }
 
   /**
@@ -162,7 +198,11 @@ class Timefilter extends SimpleEmitter {
    */
   disableAutoRefreshSelector = () => {
     this.isAutoRefreshSelectorEnabled = false;
-    this.emit('enabledUpdated');
+    this.enabledUpdated$.next();
+  }
+
+  notifyShouldFetch = () => {
+    this.autoRefreshFetch$.next();
   }
 
 }
@@ -209,9 +249,14 @@ export const registerTimefilterWithGlobalState = _.once((globalState, $rootScope
     globalState.save();
   };
 
-  $rootScope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', updateGlobalStateWithTime);
+  subscribeWithScope($rootScope, timefilter.getRefreshIntervalUpdate$(), {
+    next: updateGlobalStateWithTime
+  });
 
-  $rootScope.$listenAndDigestAsync(timefilter, 'timeUpdate', updateGlobalStateWithTime);
+  subscribeWithScope($rootScope, timefilter.getTimeUpdate$(), {
+    next: updateGlobalStateWithTime
+  });
+
 });
 
 uiRoutes
