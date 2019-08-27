@@ -74,12 +74,12 @@ export const useForm = <T = FormData>(
   const getFormData: Form<T>['getFormData'] = (getDataOptions = { unflatten: true }) =>
     getDataOptions.unflatten
       ? (unflattenObject(
-          mapFormFields(stripEmptyFields(fieldsRefs.current), field => field.__getOutputValue())
+          mapFormFields(stripEmptyFields(fieldsRefs.current), field => field.__serializeOutput())
         ) as T)
       : Object.entries(fieldsRefs.current).reduce(
           (acc, [key, field]) => ({
             ...acc,
-            [key]: field.__getOutputValue(),
+            [key]: field.__serializeOutput(),
           }),
           {} as T
         );
@@ -113,7 +113,7 @@ export const useForm = <T = FormData>(
     // Only update the formData if the path does not exist (it is the _first_ time
     // the field is added), to avoid entering an infinite loop when the form is re-rendered.
     if (!{}.hasOwnProperty.call(formData$.current.value, field.path)) {
-      updateFormDataAt(field.path, field.__getOutputValue());
+      updateFormDataAt(field.path, field.__serializeOutput());
     }
   };
 
