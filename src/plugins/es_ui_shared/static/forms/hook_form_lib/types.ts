@@ -73,7 +73,7 @@ export interface Field {
   readonly errors: ValidationError[];
   readonly isPristine: boolean;
   readonly isValidating: boolean;
-  readonly isUpdating: boolean;
+  readonly isChangingValue: boolean;
   readonly form: Form;
   getErrorsMessages: (args?: {
     validationType?: 'field' | string;
@@ -88,7 +88,7 @@ export interface Field {
     value?: unknown;
     validationType?: string;
   }) => FieldValidateResponse | Promise<FieldValidateResponse>;
-  __getOutputValue: (rawValue?: unknown) => unknown;
+  __serializeOutput: (rawValue?: unknown) => unknown;
 }
 
 export interface FieldConfig<T = FormData> {

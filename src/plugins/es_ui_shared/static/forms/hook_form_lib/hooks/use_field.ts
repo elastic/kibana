@@ -42,7 +42,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
   const [errors, setErrors] = useState<ValidationError[]>([]);
   const [isPristine, setPristine] = useState(true);
   const [isValidating, setValidating] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
+  const [isChangingValue, setIsChangingValue] = useState(false);
   const validateCounter = useRef(0);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
@@ -81,14 +81,14 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     if (isPristine) {
       setPristine(false);
     }
-    setIsUpdating(true);
+    setIsChangingValue(true);
 
     if (debounceTimeout.current) {
       clearTimeout(debounceTimeout.current);
     }
 
     debounceTimeout.current = setTimeout(() => {
-      setIsUpdating(false);
+      setIsChangingValue(false);
     }, errorDisplayDelay);
   };
 
@@ -207,7 +207,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     setStateValue(formattedValue);
 
     // Update the form data observable
-    form.__updateFormDataAt(path, getOutputValue(formattedValue));
+    form.__updateFormDataAt(path, serializeOutput(formattedValue));
   };
 
   const _setErrors: Field['setErrors'] = _errors => {
@@ -255,7 +255,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     return errorMessages ? errorMessages : null;
   };
 
-  const getOutputValue: Field['__getOutputValue'] = (rawValue = value) => serializer(rawValue);
+  const serializeOutput: Field['__serializeOutput'] = (rawValue = value) => serializer(rawValue);
 
   // -- EFFECTS
   // ----------------------------------
@@ -277,14 +277,14 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     form,
     isPristine,
     isValidating,
-    isUpdating,
+    isChangingValue,
     onChange,
     getErrorsMessages,
     setValue,
     setErrors: _setErrors,
     clearErrors,
     validate,
-    __getOutputValue: getOutputValue,
+    __serializeOutput: serializeOutput,
   };
 
   form.__addField(field);
