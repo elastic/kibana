@@ -24,6 +24,18 @@ const {
 
 run(
   async ({ log, flags }) => {
+    const options = {
+      cwd: KIBANA_ROOT,
+      stdio: ['ignore', 'inherit', 'inherit'],
+      buffer: false,
+    };
+
+    log.info('pre-req: Ensuring Kibana SCSS is built.');
+    // Ensure SASS has been built completely before building the runtime.
+    execa.sync(process.execPath, ['scripts/build_sass'], {
+      ...options,
+    });
+
     const webpackConfig = path.resolve(RUNTIME_SRC, 'webpack.config.js');
 
     const clean = () => {
@@ -34,12 +46,6 @@ run(
     if (flags.clean) {
       clean();
     }
-
-    const options = {
-      cwd: KIBANA_ROOT,
-      stdio: ['ignore', 'inherit', 'inherit'],
-      buffer: false,
-    };
 
     const env = {};
 
@@ -84,8 +90,8 @@ run(
     }
 
     clean();
-    log.info('Building Canvas External Runtime...');
-    execa.sync('yarn', ['webpack', '--config', webpackConfig, '--hide-modules'], {
+    log.info('Building Canvas Snapshot Runtime...');
+    execa.sync('yarn', ['webpack', '--config', webpackConfig, '--hide-modules', '--progress'], {
       ...options,
       env,
     });
@@ -93,7 +99,7 @@ run(
   },
   {
     description: `
-      Build script for the Canvas External Runtime.
+      Build script for the Canvas Snapshot Runtime.
     `,
     flags: {
       boolean: ['run', 'clean', 'help', 'stats', 'dev'],
