@@ -114,9 +114,11 @@ module.exports = (options) => ({
       // strip them off for babel on x-pack infra/siem plugins
       //
       // See https://github.com/babel/babel/issues/8244#issuecomment-466548733
+      //
+      // See https://babeljs.io/docs/en/options#matchpattern for matching/wildcard rules
       test: [
-        /x-pack[\/\\]legacy[\/\\]plugins[\/\\]infra[\/\\].*[\/\\]graphql/,
-        /x-pack[\/\\]legacy[\/\\]plugins[\/\\]siem[\/\\].*[\/\\]graphql/,
+        'x-pack/legacy/plugins/infra/**/graphql',
+        'x-pack/legacy/plugins/siem/**/graphql',
       ],
       plugins: [
         require.resolve('babel-plugin-typescript-strip-namespaces')

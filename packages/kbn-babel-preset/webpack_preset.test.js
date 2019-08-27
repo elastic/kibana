@@ -34,8 +34,8 @@ it('produces the expected preset', () => {
             <absolute path>/node_modules/babel-plugin-typescript-strip-namespaces/index.js,
           ],
           "test": Array [
-            /x-pack\\[\\\\/\\\\\\\\\\]legacy\\[\\\\/\\\\\\\\\\]plugins\\[\\\\/\\\\\\\\\\]infra\\[\\\\/\\\\\\\\\\]\\.\\*\\[\\\\/\\\\\\\\\\]graphql/,
-            /x-pack\\[\\\\/\\\\\\\\\\]legacy\\[\\\\/\\\\\\\\\\]plugins\\[\\\\/\\\\\\\\\\]siem\\[\\\\/\\\\\\\\\\]\\.\\*\\[\\\\/\\\\\\\\\\]graphql/,
+            "x-pack/legacy/plugins/infra/**/graphql",
+            "x-pack/legacy/plugins/siem/**/graphql",
           ],
         },
       ],
