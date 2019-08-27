@@ -29,15 +29,13 @@ import {
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { RequestAdapter } from 'ui/inspector/adapters';
 import { Adapters } from 'ui/inspector/types';
-import { getTime } from 'ui/timefilter/get_time';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
 import { Filter, FilterStateStore } from '@kbn/es-query';
-import { TimeRange } from 'ui/timefilter/time_history';
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
-import { timefilter } from 'ui/timefilter';
+import { timefilter, getTime, TimeRange } from 'ui/timefilter';
 import { Query, onlyDisabledFiltersChanged } from '../../../../data/public';
 import {
   APPLY_FILTER_TRIGGER,
@@ -105,6 +103,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
   private panelTitle: string = '';
   private filtersSearchSource: SearchSource;
   private searchInstance?: JQLite;
+  private autoRefreshFetchSubscription?: Subscription;
   private subscription?: Subscription;
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
   private filterGen: FilterManager;
@@ -141,7 +140,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       requests: new RequestAdapter(),
     };
     this.initializeSearchScope();
-    timefilter.on('autoRefreshFetch', this.fetch);
+    this.autoRefreshFetchSubscription = timefilter.getAutoRefreshFetch$().subscribe(this.fetch);
 
     this.subscription = Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
       this.panelTitle = this.output.title || '';
@@ -189,7 +188,9 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
-    timefilter.off('autoRefreshFetch', this.fetch);
+    if (this.autoRefreshFetchSubscription) {
+      this.autoRefreshFetchSubscription.unsubscribe();
+    }
   }
 
   private initializeSearchScope() {
