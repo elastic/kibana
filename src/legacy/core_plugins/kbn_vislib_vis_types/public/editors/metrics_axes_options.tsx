@@ -18,7 +18,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { cloneDeep, capitalize, uniq } from 'lodash';
+import { cloneDeep, capitalize, uniq, get } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 
 import { AggConfig } from 'ui/vis';
@@ -62,8 +62,18 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
     [stateParams, setValue]
   );
 
+  // stores previous aggs' custom labels
+  const [lastCustomLabels, setLastCustomLabels] = useState({} as { [key: string]: string });
+  // stores previous aggs' field and type
+  const [lastSeriesAgg, setLastSeriesAgg] = useState({} as {
+    [key: string]: { type: string; field: string };
+  });
+
   const updateAxisTitle = useCallback(() => {
-    const axes = [...stateParams.valueAxes];
+    const axes = cloneDeep(stateParams.valueAxes);
+    let isAxesChanged = false;
+    const lastLabels = { ...lastCustomLabels };
+    const lastMatchingSeriesAgg = { ...lastSeriesAgg };
 
     stateParams.valueAxes.forEach((axis, axisNumber) => {
       let newCustomLabel = '';
@@ -77,16 +87,44 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
       });
 
       if (matchingSeries.length === 1) {
+        // if several series matches to the axis, axis title is set according to the first serie.
         newCustomLabel = matchingSeries[0].makeLabel();
       }
 
-      if (newCustomLabel !== '') {
-        // Override axis title with new custom label
-        axes[axisNumber] = { ...axes[axisNumber], title: { ...axis, text: newCustomLabel } };
+      if (lastCustomLabels[axis.id] !== newCustomLabel && newCustomLabel !== '') {
+        const lastSeriesAggType = get(lastSeriesAgg, `${matchingSeries[0].id}.type`);
+        const lastSeriesAggField = get(lastSeriesAgg, `${matchingSeries[0].id}.field`);
+        const matchingSeriesAggType = get(matchingSeries, '[0]type.name', '');
+        const matchingSeriesAggField = get(matchingSeries, '[0]params.field.name', '');
+
+        const aggTypeIsChanged = lastSeriesAggType !== matchingSeriesAggType;
+        const aggFieldIsChanged = lastSeriesAggField !== matchingSeriesAggField;
+
+        lastMatchingSeriesAgg[matchingSeries[0].id] = {
+          type: matchingSeriesAggType,
+          field: matchingSeriesAggField,
+        };
+        lastLabels[axis.id] = newCustomLabel;
+
+        if (
+          aggTypeIsChanged ||
+          aggFieldIsChanged ||
+          axis.title.text === '' ||
+          lastCustomLabels[axis.id] === axis.title.text
+        ) {
+          // Override axis title with new custom label
+          axes[axisNumber] = { ...axes[axisNumber], title: { ...axis, text: newCustomLabel } };
+          isAxesChanged = true;
+        }
       }
     });
 
-    setValue('valueAxes', axes);
+    if (isAxesChanged) {
+      setValue('valueAxes', axes);
+    }
+
+    setLastSeriesAgg(lastMatchingSeriesAgg);
+    setLastCustomLabels(lastLabels);
   }, [stateParams.valueAxes, stateParams.seriesParams, setValue]);
 
   const getUpdatedAxisName = useCallback(
@@ -187,24 +225,26 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
   const metrics = useMemo(() => {
     const schemaName = vis.type.schemas.metrics[0].name;
     return aggs.bySchemaName[schemaName];
-  }, [vis.type.schemas.metrics[0].name, aggs]);
+  }, [vis.type.schemas.metrics[0].name, aggs, aggsLabel]);
 
   useEffect(() => {
     // update labels for existing params or create new one
     const updatedSeries = metrics.map(agg => {
       const params = stateParams.seriesParams.find(param => param.data.id === agg.id);
+      const label = agg.makeLabel();
+
       if (params) {
         return {
           ...params,
           data: {
             ...params.data,
-            label: agg.makeLabel(),
+            label,
           },
         };
       } else {
         const series = makeSerie(
           agg.id,
-          agg.makeLabel(),
+          label,
           stateParams.seriesParams,
           stateParams.valueAxes[0].id
         );
@@ -223,6 +263,10 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
   useEffect(() => {
     setVisType(visType);
   }, [visType, setVisType]);
+
+  useEffect(() => {
+    updateAxisTitle();
+  }, [aggsLabel]);
 
   return (
     <>
