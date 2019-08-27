@@ -63,6 +63,8 @@ export interface ChromeBreadcrumb {
     // (undocumented)
     href?: string;
     // (undocumented)
+    onClick?: () => void;
+    // (undocumented)
     text: string;
 }
 
