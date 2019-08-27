@@ -17,6 +17,13 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
+import {
+  ActionsColumnType,
+  ComputedColumnType,
+  ExpanderColumnType,
+  FieldDataColumnType,
+} from '../../../../../../common/types/eui/in_memory_table';
+
 import { DataFrameTransformId } from '../../../../common';
 import {
   getTransformProgress,
@@ -61,9 +68,10 @@ export const getTaskStateBadge = (
 
 export const getColumns = (
   expandedRowItemIds: DataFrameTransformId[],
-  setExpandedRowItemIds: React.Dispatch<React.SetStateAction<DataFrameTransformId[]>>
+  setExpandedRowItemIds: React.Dispatch<React.SetStateAction<DataFrameTransformId[]>>,
+  transformSelection: DataFrameTransformListRow[]
 ) => {
-  const actions = getActions();
+  const actions = getActions({ forceDisable: transformSelection.length > 0 });
 
   function toggleDetails(item: DataFrameTransformListRow) {
     const index = expandedRowItemIds.indexOf(item.config.id);
@@ -78,7 +86,17 @@ export const getColumns = (
     setExpandedRowItemIds([...expandedRowItemIds]);
   }
 
-  return [
+  const columns: [
+    ExpanderColumnType,
+    FieldDataColumnType,
+    FieldDataColumnType,
+    FieldDataColumnType,
+    FieldDataColumnType,
+    ComputedColumnType,
+    ComputedColumnType,
+    ComputedColumnType,
+    ActionsColumnType
+  ] = [
     {
       align: RIGHT_ALIGNMENT,
       width: '40px',
@@ -204,4 +222,6 @@ export const getColumns = (
       width: '200px',
     },
   ];
+
+  return columns;
 };

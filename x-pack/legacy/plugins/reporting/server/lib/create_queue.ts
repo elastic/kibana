@@ -23,7 +23,7 @@ function createQueueFn(server: KbnServer): Esqueue {
     timeout: queueConfig.timeout,
     dateSeparator: '.',
     client: server.plugins.elasticsearch.getCluster('admin'),
-    logger: createTaggedLogger(server, [PLUGIN_ID, 'esqueue']),
+    logger: createTaggedLogger(server, [PLUGIN_ID, 'esqueue', 'queue-worker']),
   };
 
   const queue: Esqueue = new Esqueue(index, queueOptions);

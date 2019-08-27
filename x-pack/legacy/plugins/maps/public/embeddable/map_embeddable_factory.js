@@ -20,6 +20,8 @@ import { createMapPath, MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/con
 import { createMapStore } from '../reducers/store';
 import { addLayerWithoutDataSync } from '../actions/map_actions';
 import { getQueryableUniqueIndexPatternIds } from '../selectors/map_selectors';
+import { getInitialLayers } from '../angular/get_initial_layers';
+import { mergeInputWithSavedMap } from './merge_input_with_saved_map';
 import '../angular/services/gis_map_saved_object_loader';
 import 'ui/vis/map/service_settings';
 
@@ -50,19 +52,20 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
     });
   }
 
-  async _getIndexPatterns(layerListJSON) {
+  async _getIndexPatterns(layerList) {
     // Need to extract layerList from store to get queryable index pattern ids
     const store = createMapStore();
+    let queryableIndexPatternIds;
     try {
-      JSON.parse(layerListJSON).forEach(layerDescriptor => {
+      layerList.forEach(layerDescriptor => {
         store.dispatch(addLayerWithoutDataSync(layerDescriptor));
       });
+      queryableIndexPatternIds = getQueryableUniqueIndexPatternIds(store.getState());
     } catch (error) {
-      throw new Error(i18n.translate('xpack.maps.mapEmbeddableFactory', {
-        defaultMessage: 'Unable to load map, malformed saved object',
+      throw new Error(i18n.translate('xpack.maps.mapEmbeddableFactory.invalidLayerList', {
+        defaultMessage: 'Unable to load map, malformed layer list',
       }));
     }
-    const queryableIndexPatternIds = getQueryableUniqueIndexPatternIds(store.getState());
 
     const promises = queryableIndexPatternIds.map(async (indexPatternId) => {
       try {
@@ -77,23 +80,59 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
     return _.compact(indexPatterns);
   }
 
+  async _fetchSavedMap(savedObjectId) {
+    const $injector = await chrome.dangerouslyGetActiveInjector();
+    const savedObjectLoader = $injector.get('gisMapSavedObjectLoader');
+    return await savedObjectLoader.get(savedObjectId);
+  }
+
   async createFromSavedObject(
     savedObjectId,
     input,
     parent
   ) {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const savedObjectLoader = $injector.get('gisMapSavedObjectLoader');
+    const savedMap = await this._fetchSavedMap(savedObjectId);
+    const layerList = getInitialLayers(savedMap.layerListJSON);
+    const indexPatterns = await this._getIndexPatterns(layerList);
 
-    const savedMap = await savedObjectLoader.get(savedObjectId);
-    const indexPatterns = await this._getIndexPatterns(savedMap.layerListJSON);
-
-    return new MapEmbeddable(
+    const embeddable = new MapEmbeddable(
       {
-        savedMap,
+        layerList,
+        title: savedMap.title,
         editUrl: chrome.addBasePath(createMapPath(savedObjectId)),
         indexPatterns,
         editable: this.isEditable(),
+      },
+      input,
+      parent
+    );
+
+    try {
+      embeddable.updateInput(mergeInputWithSavedMap(input, savedMap));
+    } catch (error) {
+      throw new Error(i18n.translate('xpack.maps.mapEmbeddableFactory.invalidSavedObject', {
+        defaultMessage: 'Unable to load map, malformed saved object',
+      }));
+    }
+
+    return embeddable;
+  }
+
+  async createFromState(
+    state,
+    input,
+    parent
+  ) {
+    const layerList = state && state.layerList ? state.layerList : getInitialLayers();
+    const indexPatterns = await this._getIndexPatterns(layerList);
+
+    return new MapEmbeddable(
+      {
+        layerList,
+        title: state && state.title ? state.title : '',
+        editUrl: null,
+        indexPatterns,
+        editable: false,
       },
       input,
       parent
@@ -102,7 +141,7 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
 
   async create(input) {
     window.location.href = chrome.addBasePath(createMapPath(''));
-    return new ErrorEmbeddable('Maps can only be created from a saved object', input);
+    return new ErrorEmbeddable('Maps can only be created with createFromSavedObject or createFromState', input);
   }
 }
 

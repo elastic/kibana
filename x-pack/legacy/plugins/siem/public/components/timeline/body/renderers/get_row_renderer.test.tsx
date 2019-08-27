@@ -31,7 +31,6 @@ describe('get_column_renderer', () => {
     const row = rowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: nonSuricata,
-      width: 100,
       children: <span>{'some child'}</span>,
     });
 
@@ -44,7 +43,6 @@ describe('get_column_renderer', () => {
     const row = rowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: nonSuricata,
-      width: 100,
       children: <span>{'some child'}</span>,
     });
     const wrapper = mount(
@@ -60,7 +58,6 @@ describe('get_column_renderer', () => {
     const row = rowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: suricata,
-      width: 100,
       children: <span>{'some child '}</span>,
     });
     const wrapper = mount(
