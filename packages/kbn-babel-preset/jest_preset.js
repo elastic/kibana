@@ -18,10 +18,9 @@
  */
 
 module.exports = () =>
-  require('./create_preset')({
+  require('./create_preset.js')({
     node: true,
-    filterPolyfills: true,
-    define: {
-      'global.__BUILT_WITH_BABEL__': 'true'
-    }
+    dynamicImports: true,
+    // don't filter polyfills so that regeneratorRuntime is defined for EUI
+    filterPolyfills: false
   });

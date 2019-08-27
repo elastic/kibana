@@ -261,7 +261,6 @@
   },
   "devDependencies": {
     "@babel/parser": "^7.5.5",
-    "@babel/plugin-syntax-dynamic-import": "^7.2.0",
     "@babel/types": "^7.5.5",
     "@elastic/eslint-config-kibana": "0.15.0",
     "@elastic/eslint-plugin-eui": "0.0.1",
@@ -347,7 +346,6 @@
     "archiver": "^3.0.0",
     "babel-eslint": "^10.0.2",
     "babel-jest": "^24.9.0",
-    "babel-plugin-dynamic-import-node": "^2.3.0",
     "backport": "4.6.4",
     "chai": "3.5.0",
     "chance": "1.0.18",

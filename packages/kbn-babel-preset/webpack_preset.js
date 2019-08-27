@@ -17,21 +17,9 @@
  * under the License.
  */
 
-module.exports = () => {
-  return {
-    presets: [
-      [
-        require.resolve('@babel/preset-env'),
-        {
-          useBuiltIns: 'entry',
-          modules: 'cjs',
-          corejs: 2,
-        },
-      ],
-      require('./common_preset'),
-    ],
-    plugins: [
-      '@babel/plugin-syntax-dynamic-import'
-    ]
-  };
-};
+module.exports = () =>
+  require('./create_preset')({
+    node: false,
+    dynamicImports: true,
+    filterPolyfills: true,
+  });
