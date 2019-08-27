@@ -18,7 +18,7 @@
  */
 
 
-import { EMSClient } from '../../../../../core_plugins/tile_map/common/ems_client';
+import { EMSClient } from '@elastic/ems-client';
 
 import EMS_CATALOGUE from './ems_mocks/sample_manifest.json';
 import EMS_FILES from './ems_mocks/sample_files.json';

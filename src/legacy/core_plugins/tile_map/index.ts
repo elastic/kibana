@@ -21,7 +21,7 @@ import { resolve } from 'path';
 import { Legacy } from 'kibana';
 
 // @ts-ignore
-import { EMSClient } from './common/ems_client';
+import { EMSClient } from '@elastic/ems-client';
 
 import { LegacyPluginApi, LegacyPluginInitializer } from '../../../../src/legacy/types';
 

@@ -18,4 +18,4 @@
  */
 
 
-export { EMSClient } from '../../../../core_plugins/tile_map/common/ems_client';
+export { EMSClient } from '@elastic/ems-client';
