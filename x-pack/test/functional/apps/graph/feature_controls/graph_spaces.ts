@@ -41,18 +41,21 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).to.contain('Graph');
       });
 
-      it('shows save button', async () => {
-        await PageObjects.common.navigateToApp('graph', {
+      it('landing page shows "Create new Workspace" button', async () => {
+        await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        await testSubjects.existOrFail('graphSaveButton');
+        await testSubjects.existOrFail('workspaceLandingPage', { timeout: 10000 });
+        await testSubjects.existOrFail('newItemButton');
       });
 
-      it('shows delete button', async () => {
-        await PageObjects.common.navigateToApp('graph', {
+      it('allows creating a new workspace', async () => {
+        await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        await testSubjects.existOrFail('graphDeleteButton');
+        await testSubjects.click('newItemButton');
+        const breadcrumb = await testSubjects.find('graphCurrentWorkspaceBreadcrumb');
+        expect(await breadcrumb.getVisibleText()).to.equal('Unsaved workspace');
       });
     });
 
