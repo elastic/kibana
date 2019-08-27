@@ -18,7 +18,6 @@
  */
 
 import { get, map } from 'lodash';
-import handleESError from '../../../lib/handle_es_error';
 
 export function registerValueSuggestions(server) {
   const serverConfig = server.config();
@@ -42,7 +41,7 @@ export function registerValueSuggestions(server) {
         const suggestions = map(buckets, 'key');
         return suggestions;
       } catch (error) {
-        throw handleESError(error);
+        throw server.plugins.elasticsearch.handleESError(error);
       }
     },
   });
