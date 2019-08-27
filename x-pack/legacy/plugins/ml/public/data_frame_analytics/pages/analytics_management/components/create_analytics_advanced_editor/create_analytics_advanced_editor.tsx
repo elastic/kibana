@@ -40,7 +40,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
   } = state.form;
 
   const onChange = (str: string) => {
-    setAdvancedEditorStr(str);
+    setAdvancedEditorRawString(str);
     try {
       setJobConfig(JSON.parse(str));
     } catch (e) {
