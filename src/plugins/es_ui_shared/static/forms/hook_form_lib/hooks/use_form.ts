@@ -91,9 +91,12 @@ export const useForm = <T = FormData>(
   };
 
   const validateFields: Form<T>['__validateFields'] = async fieldNames => {
+    // Fields that are dirty have already been validated when their value changed. Thus their errors array
+    // already contains any possible error.
+    // So when *no* fieldNames is provided, we only validate fields that haven't been changed by the user.
     const fieldsToValidate = fieldNames
       ? fieldNames.map(name => fieldsRefs.current[name]).filter(field => field !== undefined)
-      : fieldsToArray().filter(field => field.isPristine);
+      : fieldsToArray().filter(field => field.isPristine); // only validate fields that haven't been changed
 
     const formData = getFormData({ unflatten: false });
 
