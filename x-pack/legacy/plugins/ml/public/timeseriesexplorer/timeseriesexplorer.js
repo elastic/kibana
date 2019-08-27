@@ -151,7 +151,6 @@ export class TimeSeriesExplorer extends React.Component {
   state = getTimeseriesexplorerDefaultState();
 
   subscriptions = new Subscription();
-  timeUpdateSubscription = undefined;
 
   constructor(props) {
     super(props);
