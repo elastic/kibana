@@ -37,24 +37,6 @@ describe('$executor service', () => {
 
   afterEach(() => executor.destroy());
 
-  it('should register listener for fetch upon start', () => {
-    executor.start(scope);
-    const listeners = timefilter.listeners('fetch');
-    const handlerFunc = listeners.find(listener => {
-      return listener.name === 'reFetch';
-    });
-    expect(handlerFunc).to.not.be.null;
-  });
-
-  it('should register listener for refreshIntervalUpdate upon start', () => {
-    executor.start(scope);
-    const listeners = timefilter.listeners('refreshIntervalUpdate');
-    const handlerFunc = listeners.find(listener => {
-      return listener.name === 'killIfPaused';
-    });
-    expect(handlerFunc).to.not.be.null;
-  });
-
   it('should not call $timeout if the timefilter is not paused and set to zero', () => {
     executor.start(scope);
     expect($timeout.callCount).to.equal(0);
