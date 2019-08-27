@@ -31,16 +31,6 @@ jest.mock('ui/chrome',
     },
   }), { virtual: true });
 
-jest.mock('ui/timefilter/lib/parse_querystring',
-  () => ({
-    parseQueryString: () => {
-      return {
-        // Can not access local variable from within a mock
-        forceNow: global.nowTime
-      };
-    },
-  }), { virtual: true });
-
 import d3 from 'd3';
 import moment from 'moment';
 import { mount } from 'enzyme';

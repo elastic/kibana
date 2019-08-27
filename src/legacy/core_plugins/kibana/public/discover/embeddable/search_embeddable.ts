@@ -25,11 +25,10 @@ import { SearchSource } from 'ui/courier';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { RequestAdapter } from 'ui/inspector/adapters';
 import { Adapters } from 'ui/inspector/types';
-import { getTime } from 'ui/timefilter/get_time';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
 import { Filter, FilterStateStore } from '@kbn/es-query';
-import { TimeRange } from 'ui/timefilter/time_history';
+import { getTime, TimeRange } from 'ui/timefilter';
 import { Query, onlyDisabledFiltersChanged } from '../../../../data/public';
 import {
   APPLY_FILTER_TRIGGER,
