@@ -10,42 +10,47 @@ import { compatibilityShimFactory } from './compatibility_shim';
 const createMockServer = () => {
   return {
     expose: jest.fn(), //fool once_per_server
-    log: jest.fn()
+    log: jest.fn(),
   };
 };
+
+const createMockLogger = () => ({
+  warning: jest.fn(),
+});
 
 const createMockRequest = () => {
   return {
     getSavedObjectsClient: once(function () {
       return {
-        get: jest.fn()
+        get: jest.fn(),
       };
-    })
+    }),
   };
 };
 
 test(`passes title through if provided`, async () => {
-  const compatibilityShim = compatibilityShimFactory(createMockServer());
+  const logger = createMockLogger();
+  const compatibilityShim = compatibilityShimFactory(createMockServer(), logger);
   const title = 'test title';
 
   const createJobMock = jest.fn();
-  await compatibilityShim(createJobMock)({ title, relativeUrl: '/something' }, null, createMockRequest());
+  await compatibilityShim(createJobMock)({ title, relativeUrls: ['/something'] }, null, createMockRequest());
 
   expect(createJobMock.mock.calls.length).toBe(1);
   expect(createJobMock.mock.calls[0][0].title).toBe(title);
 });
 
-
 test(`gets the title from the savedObject`, async () => {
-  const compatibilityShim = compatibilityShimFactory(createMockServer());
+  const logger = createMockLogger();
+  const compatibilityShim = compatibilityShimFactory(createMockServer(), logger);
 
   const createJobMock = jest.fn();
   const mockRequest = createMockRequest();
   const title = 'savedTitle';
   mockRequest.getSavedObjectsClient().get.mockReturnValue({
     attributes: {
-      title
-    }
+      title,
+    },
   });
 
   await compatibilityShim(createJobMock)({ objectType: 'search', savedObjectId: 'abc' }, null, mockRequest);
@@ -55,19 +60,20 @@ test(`gets the title from the savedObject`, async () => {
 });
 
 test(`passes the objectType and savedObjectId to the savedObjectsClient`, async () => {
-  const compatibilityShim = compatibilityShimFactory(createMockServer());
+  const logger = createMockLogger();
+  const compatibilityShim = compatibilityShimFactory(createMockServer(), logger);
 
   const createJobMock = jest.fn();
   const mockRequest = createMockRequest();
   mockRequest.getSavedObjectsClient().get.mockReturnValue({
     attributes: {
-      title: ''
-    }
+      title: '',
+    },
   });
 
   const objectType = 'search';
   const savedObjectId = 'abc';
-  await compatibilityShim(createJobMock)({ objectType, savedObjectId, }, null, mockRequest);
+  await compatibilityShim(createJobMock)({ objectType, savedObjectId }, null, mockRequest);
 
   const getMock = mockRequest.getSavedObjectsClient().get.mock;
   expect(getMock.calls.length).toBe(1);
@@ -75,27 +81,53 @@ test(`passes the objectType and savedObjectId to the savedObjectsClient`, async 
   expect(getMock.calls[0][1]).toBe(savedObjectId);
 });
 
+test(`logs no warnings when title and relativeUrl is passed`, async () => {
+  const mockLogger = createMockLogger();
+  const compatibilityShim = compatibilityShimFactory(createMockServer(), mockLogger);
+
+  const createJobMock = jest.fn();
+  const mockRequest = createMockRequest();
+
+  await compatibilityShim(createJobMock)({ title: 'Phenomenal Dashboard', relativeUrl: '/abc' }, null, mockRequest);
+  expect(mockLogger.warning.mock.calls.length).toBe(0);
+});
+test(`logs no warnings when title and relativeUrls is passed`, async () => {
+  const mockLogger = createMockLogger();
+  const compatibilityShim = compatibilityShimFactory(createMockServer(), mockLogger);
+
+  const createJobMock = jest.fn();
+  const mockRequest = createMockRequest();
+
+  await compatibilityShim(createJobMock)({ title: 'Phenomenal Dashboard', relativeUrls: ['/abc', '/def'] }, null, mockRequest);
+  expect(mockLogger.warning.mock.calls.length).toBe(0);
+});
+
 test(`logs deprecations when generating the title/relativeUrl using the savedObject`, async () => {
-  const mockServer = createMockServer();
-  const compatibilityShim = compatibilityShimFactory(mockServer);
+  const mockLogger = createMockLogger();
+  const compatibilityShim = compatibilityShimFactory(createMockServer(), mockLogger);
 
   const createJobMock = jest.fn();
   const mockRequest = createMockRequest();
   mockRequest.getSavedObjectsClient().get.mockReturnValue({
     attributes: {
-      title: ''
-    }
+      title: '',
+    },
   });
 
   await compatibilityShim(createJobMock)({ objectType: 'search', savedObjectId: 'abc' }, null, mockRequest);
 
-  expect(mockServer.log.mock.calls.length).toBe(2);
-  expect(mockServer.log.mock.calls[0][0]).toEqual(['warning', 'reporting', 'deprecation']);
-  expect(mockServer.log.mock.calls[1][0]).toEqual(['warning', 'reporting', 'deprecation']);
+  expect(mockLogger.warning.mock.calls.length).toBe(2);
+  expect(mockLogger.warning.mock.calls[0][0]).toEqual(
+    'The relativeUrls have been derived from saved object parameters. This functionality will be removed with the next major version.'
+  );
+  expect(mockLogger.warning.mock.calls[1][0]).toEqual(
+    'The title has been derived from saved object parameters. This functionality will be removed with the next major version.'
+  );
 });
 
 test(`passes objectType through`, async () => {
-  const compatibilityShim = compatibilityShimFactory(createMockServer());
+  const logger = createMockLogger();
+  const compatibilityShim = compatibilityShimFactory(createMockServer(), logger);
 
   const createJobMock = jest.fn();
   const mockRequest = createMockRequest();
@@ -108,7 +140,8 @@ test(`passes objectType through`, async () => {
 });
 
 test(`passes the relativeUrls through`, async () => {
-  const compatibilityShim = compatibilityShimFactory(createMockServer());
+  const logger = createMockLogger();
+  const compatibilityShim = compatibilityShimFactory(createMockServer(), logger);
 
   const createJobMock = jest.fn();
 
@@ -120,7 +153,8 @@ test(`passes the relativeUrls through`, async () => {
 
 const testSavedObjectRelativeUrl = (objectType, expectedUrl) => {
   test(`generates the saved object relativeUrl for ${objectType}`, async () => {
-    const compatibilityShim = compatibilityShimFactory(createMockServer());
+    const logger = createMockLogger();
+    const compatibilityShim = compatibilityShimFactory(createMockServer(), logger);
     const createJobMock = jest.fn();
 
     await compatibilityShim(createJobMock)({ title: 'test', objectType, savedObjectId: 'abc', }, null, null);
@@ -134,7 +168,8 @@ testSavedObjectRelativeUrl('visualization', '/app/kibana#/visualize/edit/abc?');
 testSavedObjectRelativeUrl('dashboard', '/app/kibana#/dashboard/abc?');
 
 test(`appends the queryString to the relativeUrl when generating from the savedObject`, async () => {
-  const compatibilityShim = compatibilityShimFactory(createMockServer());
+  const logger = createMockLogger();
+  const compatibilityShim = compatibilityShimFactory(createMockServer(), logger);
   const createJobMock = jest.fn();
 
   await compatibilityShim(createJobMock)({ title: 'test', objectType: 'search', savedObjectId: 'abc', queryString: 'foo=bar' }, null, null);
@@ -143,7 +178,8 @@ test(`appends the queryString to the relativeUrl when generating from the savedO
 });
 
 test(`throw an Error if the objectType, savedObjectId and relativeUrls are provided`, async () => {
-  const compatibilityShim = compatibilityShimFactory(createMockServer());
+  const logger = createMockLogger();
+  const compatibilityShim = compatibilityShimFactory(createMockServer(), logger);
   const createJobMock = jest.fn();
 
   const promise = compatibilityShim(createJobMock)({
@@ -157,7 +193,8 @@ test(`throw an Error if the objectType, savedObjectId and relativeUrls are provi
 });
 
 test(`passes headers and request through`, async () => {
-  const compatibilityShim = compatibilityShimFactory(createMockServer());
+  const logger = createMockLogger();
+  const compatibilityShim = compatibilityShimFactory(createMockServer(), logger);
 
   const createJobMock = jest.fn();
 
