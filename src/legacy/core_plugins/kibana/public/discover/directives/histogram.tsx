@@ -200,7 +200,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps> {
 
     const tooltipProps = {
       headerFormatter: this.renderBarTooltip(xInterval, domainStart, domainEnd),
-      type: TooltipType.Follow,
+      type: TooltipType.VerticalCursor,
     };
 
     return (
