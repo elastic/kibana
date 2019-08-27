@@ -3,19 +3,21 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
   const inspector = getService('inspector');
+  const kibanaServer = getService('kibanaServer');
 
-  describe('hybrid index pattern', () => {
+  describe.only('hybrid index pattern', () => {
     before(async () => {
       await esArchiver.load('hybrid/kibana');
       await esArchiver.load('hybrid/logstash');
       await esArchiver.load('hybrid/rollup');
+      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
     });
 
     after(async () => {
