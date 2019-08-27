@@ -8,6 +8,7 @@ import { uiModules } from 'ui/modules';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { timefilter } from 'ui/timefilter';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../common/constants';
+import { contains } from 'lodash';
 
 function formatClusters(clusters) {
   return clusters.map(formatCluster);
@@ -32,22 +33,37 @@ uiModule.service('monitoringClusters', ($injector) => {
     }
 
     const $http = $injector.get('$http');
-    return $http.post(url, {
-      ccs,
-      timeRange: {
-        min: min.toISOString(),
-        max: max.toISOString()
-      },
-      codePaths
-    })
-      .then(response => response.data)
-      .then(data => {
-        return formatClusters(data); // return set of clusters
-      })
-      .catch(err => {
-        const Private = $injector.get('Private');
-        const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
-        return ajaxErrorHandlers(err);
-      });
+    const kbnUrl = $injector.get('kbnUrl');
+    const errorHandler = (err) => {
+      if ((!err || err.status) !== 403 && !contains(window.location.hash, 'no-data')) {
+        kbnUrl.changePath('/no-data', null, null, err);
+      }
+      const Private = $injector.get('Private');
+      const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
+      return ajaxErrorHandlers(err);
+    };
+
+    return $http.get('../api/monitoring/v1/clusters/remote_info').then(({ data }) => {
+      for (const clusterName in data) {
+        if (!data.hasOwnProperty(clusterName)) {
+          continue;
+        }
+        const cluster = data[clusterName];
+        if (!cluster.connected || !cluster.num_nodes_connected) {
+          const clusterError = `There seems to be some issues with ${clusterName} ` +
+          `cluster. Please make sure it's connected and has at least one node.`;
+          return Promise.reject(clusterError);
+        }
+      }
+
+      return $http.post(url, {
+        ccs,
+        timeRange: {
+          min: min.toISOString(),
+          max: max.toISOString()
+        },
+        codePaths
+      }).then(({ data }) => formatClusters(data));
+    }).catch(errorHandler);
   };
 });

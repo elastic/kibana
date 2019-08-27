@@ -18,7 +18,6 @@ import { timefilter } from 'ui/timefilter';
 import { I18nContext } from 'ui/i18n';
 import 'ui/directives/listen';
 import { CODE_PATH_LICENSE } from '../../../common/constants';
-import { AppStateProvider } from 'ui/state_management/app_state';
 
 const REACT_NODE_ID_NO_DATA = 'noDataReact';
 
@@ -29,13 +28,6 @@ export class NoDataController {
     this.registerCleanup($scope, $executor);
 
     Object.assign(this, this.getDefaultModel());
-
-    const Private = $injector.get('Private');
-    const AppState = Private(AppStateProvider);
-    const state = new AppState();
-    if (state.error) {
-      this.errors = [state.error];
-    }
     this.start($scope, $injector, $executor);
   }
 
@@ -64,6 +56,13 @@ export class NoDataController {
     const kbnUrl = $injector.get('kbnUrl');
     const monitoringClusters = $injector.get('monitoringClusters');
 
+    const errorFromLastState = kbnUrl.getState();
+    if (!errorFromLastState) {
+      $executor.run();
+    } else {
+      this.addError(errorFromLastState);
+    }
+
     const { updateModel } = new ModelUpdater($scope, model);
     const checkers = [
       new ClusterSettingsChecker($http),
@@ -91,7 +90,7 @@ export class NoDataController {
 
     // register the monitoringClusters service.
     $executor.register({
-      execute: () => monitoringClusters(undefined, undefined, [CODE_PATH_LICENSE]),
+      execute: () => monitoringClusters(undefined, undefined, [CODE_PATH_LICENSE]).catch(this.addError.bind(this)),
       handleResponse: clusters => {
         if (clusters && clusters.length) {
           if (clusters.length === 1) {
@@ -118,5 +117,12 @@ export class NoDataController {
       $executor.destroy();
       unmountComponentAtNode(document.getElementById(REACT_NODE_ID_NO_DATA));
     });
+  }
+
+  addError(error) {
+    if (error) {
+      this.errors = [error.data || error];
+    }
+    return Promise.reject(error);
   }
 }

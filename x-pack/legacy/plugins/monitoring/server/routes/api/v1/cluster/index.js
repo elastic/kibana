@@ -6,3 +6,4 @@
 
 export { clusterRoute } from './cluster';
 export { clustersRoute } from './clusters';
+export { clusterRemoteInfoRoute } from './remote';

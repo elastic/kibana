@@ -47,6 +47,12 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
   const self = this;
 
   /**
+   * Temporary state to avoid param manipulation
+   */
+  const _staticState = {};
+  self.getState = () => _staticState.state;
+
+  /**
    * Navigate to a url
    *
    * @param  {String} url - the new url, can be a template. See #eval
@@ -65,7 +71,11 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
    * @param  {Object} [paramObj] - optional set of parameters for the path template
    * @return {undefined}
    */
-  self.changePath = function (path, paramObj, appState) {
+  self.changePath = function (path, paramObj, appState, staticState) {
+    if (staticState) {
+      _staticState.state = staticState;
+      delete _staticState.expire;
+    }
     self._changeLocation('path', path, paramObj, false, appState);
   };
 
@@ -191,6 +201,12 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
       path: $location.path(),
       search: $location.search()
     };
+
+    if (_staticState.expire) {
+      delete _staticState.expire;
+      delete _staticState.state;
+    }
+    _staticState.expire = true;
 
     url = self.eval(url, paramObj);
     $location[type](url);

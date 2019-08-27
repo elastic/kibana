@@ -19,6 +19,7 @@ export {
 export {
   clusterRoute,
   clustersRoute,
+  clusterRemoteInfoRoute,
 } from './cluster';
 export {
   esIndexRoute,

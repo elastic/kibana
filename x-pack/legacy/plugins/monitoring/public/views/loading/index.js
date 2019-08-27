@@ -12,7 +12,6 @@ import { I18nContext } from 'ui/i18n';
 import template from './index.html';
 import { toggleSetupMode, getSetupModeState, initSetupModeState } from '../../lib/setup_mode';
 import { CODE_PATH_LICENSE } from '../../../common/constants';
-import { AppStateProvider } from 'ui/state_management/app_state';
 
 const REACT_DOM_ID = 'monitoringLoadingReactApp';
 
@@ -57,10 +56,6 @@ uiRoutes
                 kbnUrl.changePath('/elasticsearch/nodes');
                 $scope.$apply();
               });
-          }).catch((error) => {
-            const Private = $injector.get('Private');
-            const AppState = Private(AppStateProvider);
-            kbnUrl.changePath('/no-data', null, new AppState({ error: error && error.data }));
           });
       }
 
