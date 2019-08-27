@@ -96,6 +96,7 @@ export const SavedQueryListItem = ({
         }}
         aria-label={selectButtonAriaLabelText}
         label={label}
+        iconType={isSelected ? 'check' : undefined}
         extraAction={{
           color: 'danger',
           onClick: () => setShowDeletionConfirmationModal(true),
