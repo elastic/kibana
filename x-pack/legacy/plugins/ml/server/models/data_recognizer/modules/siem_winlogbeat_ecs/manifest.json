@@ -17,30 +17,6 @@
     {
       "id": "rare_process_windows_ecs",
       "file": "rare_process_windows_ecs.json"
-    }, {
-      "id": "file_events_windows_ecs",
-      "file": "file_events_windows_ecs.json"
-    }, {
-      "id": "rare_destination_port_process_windows_ecs",
-      "file": "rare_destination_port_process_windows_ecs.json"
-    }, {
-      "id": "rare_executable_windows_ecs",
-      "file": "rare_executable_windows_ecs.json"
-    }, {
-      "id": "rare_path_activity_windows_ecs",
-      "file": "rare_path_activity_windows_ecs.json"
-    }, {
-      "id": "rare_process_tree_windows_ecs",
-      "file": "rare_process_tree_windows_ecs.json"
-    }, {
-      "id": "rare_service_windows_ecs",
-      "file": "rare_service_windows_ecs.json"
-    }, {
-      "id": "rare_user_windows_ecs",
-      "file": "rare_user_windows_ecs.json"
-    }, {
-      "id": "unusual_powershell_script_windows_ecs",
-      "file": "unusual_powershell_script_windows_ecs.json"
     }
   ],
   "datafeeds": [
@@ -48,38 +24,6 @@
       "id": "datafeed_rare_process_windows_ecs",
       "file": "datafeed_rare_process_windows_ecs.json",
       "job_id": "rare_process_windows_ecs"
-    },{
-      "id": "datafeed_file_events_windows_ecs",
-      "file": "datafeed_file_events_windows_ecs.json",
-      "job_id": "file_events_windows_ecs"
-    },{
-      "id": "datafeed_rare_destination_port_process_windows_ecs",
-      "file": "datafeed_rare_destination_port_process_windows_ecs.json",
-      "job_id": "rare_destination_port_process_windows_ecs"
-    },{
-      "id": "datafeed_rare_executable_windows_ecs",
-      "file": "datafeed_rare_executable_windows_ecs.json",
-      "job_id": "rare_executable_windows_ecs"
-    },{
-      "id": "datafeed_rare_path_activity_windows_ecs",
-      "file": "datafeed_rare_path_activity_windows_ecs.json",
-      "job_id": "rare_path_activity_windows_ecs"
-    },{
-      "id": "datafeed_rare_process_tree_windows_ecs",
-      "file": "datafeed_rare_process_tree_windows_ecs.json",
-      "job_id": "rare_process_tree_windows_ecs"
-    },{
-      "id": "datafeed_rare_service_windows_ecs",
-      "file": "datafeed_rare_service_windows_ecs.json",
-      "job_id": "rare_service_windows_ecs"
-    },{
-      "id": "datafeed_rare_user_windows_ecs",
-      "file": "datafeed_rare_user_windows_ecs.json",
-      "job_id": "rare_user_windows_ecs"
-    },{
-      "id": "datafeed_unusual_powershell_script_windows_ecs",
-      "file": "datafeed_unusual_powershell_script_windows_ecs.json",
-      "job_id": "unusual_powershell_script_windows_ecs"
     }
   ]
 }
