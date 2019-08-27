@@ -37,7 +37,6 @@ const getSavedObjectRelativeUrl = (objectType, savedObjectId, queryString) => {
 };
 
 export function compatibilityShimFactory(server, logger) {
-  if (!logger) throw new Error('need that logger');
   return function compatibilityShimFactory(createJobFn) {
     return async function (
       {
