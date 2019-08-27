@@ -22,11 +22,13 @@ export const useRefreshInterval = (
   useEffect(() => {
     let analyticsRefreshInterval: null | number = null;
 
+    const refreshIntervalSubscription = timefilter
+      .getRefreshIntervalUpdate$()
+      .subscribe(setAutoRefresh);
     timefilter.disableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
 
     initAutoRefresh();
-    initAutoRefreshUpdate();
 
     function initAutoRefresh() {
       const { value } = timefilter.getRefreshInterval();
@@ -40,13 +42,6 @@ export const useRefreshInterval = (
       }
 
       setAutoRefresh();
-    }
-
-    function initAutoRefreshUpdate() {
-      // update the interval if it changes
-      timefilter.on('refreshIntervalUpdate', () => {
-        setAutoRefresh();
-      });
     }
 
     function setAutoRefresh() {
@@ -79,6 +74,7 @@ export const useRefreshInterval = (
 
     // useEffect cleanup
     return () => {
+      refreshIntervalSubscription.unsubscribe();
       clearRefreshInterval();
     };
   }, []); // [] as comparator makes sure this only runs once

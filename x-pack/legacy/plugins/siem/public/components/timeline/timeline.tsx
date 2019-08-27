@@ -34,7 +34,7 @@ import { Footer, footerHeight } from './footer';
 import { TimelineHeader } from './header';
 import { calculateBodyHeight, combineQueries } from './helpers';
 import { TimelineRefetch } from './refetch_timeline';
-import { TimelineContext } from './timeline_context';
+import { TimelineContext, TimelineWidthContext } from './timeline_context';
 
 const WrappedByAutoSizer = styled.div`
   width: 100%;
@@ -171,37 +171,38 @@ export const Timeline = React.memo<Props>(
                   refetch,
                 }) => (
                   <TimelineRefetch loading={loading} id={id} inspect={inspect} refetch={refetch}>
-                    <TimelineContext.Provider value={{ isLoading: loading }}>
-                      <StatefulBody
-                        browserFields={browserFields}
-                        data={events}
-                        id={id}
-                        height={calculateBodyHeight({
-                          flyoutHeight,
-                          flyoutHeaderHeight,
-                          timelineHeaderHeight,
-                          timelineFooterHeight: footerHeight,
-                        })}
-                        sort={sort}
-                        toggleColumn={toggleColumn}
-                        width={width}
-                      />
-                      <Footer
-                        serverSideEventCount={totalCount}
-                        hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                        height={footerHeight}
-                        isLive={isLive}
-                        isLoading={loading}
-                        itemsCount={events.length}
-                        itemsPerPage={itemsPerPage}
-                        itemsPerPageOptions={itemsPerPageOptions}
-                        onChangeItemsPerPage={onChangeItemsPerPage}
-                        onLoadMore={loadMore}
-                        nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                        tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
-                        getUpdatedAt={getUpdatedAt}
-                        compact={isCompactFooter(width)}
-                      />
+                    <TimelineContext.Provider value={loading}>
+                      <TimelineWidthContext.Provider value={width}>
+                        <StatefulBody
+                          browserFields={browserFields}
+                          data={events}
+                          id={id}
+                          height={calculateBodyHeight({
+                            flyoutHeight,
+                            flyoutHeaderHeight,
+                            timelineHeaderHeight,
+                            timelineFooterHeight: footerHeight,
+                          })}
+                          sort={sort}
+                          toggleColumn={toggleColumn}
+                        />
+                        <Footer
+                          serverSideEventCount={totalCount}
+                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                          height={footerHeight}
+                          isLive={isLive}
+                          isLoading={loading}
+                          itemsCount={events.length}
+                          itemsPerPage={itemsPerPage}
+                          itemsPerPageOptions={itemsPerPageOptions}
+                          onChangeItemsPerPage={onChangeItemsPerPage}
+                          onLoadMore={loadMore}
+                          nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                          tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
+                          getUpdatedAt={getUpdatedAt}
+                          compact={isCompactFooter(width)}
+                        />
+                      </TimelineWidthContext.Provider>
                     </TimelineContext.Provider>
                   </TimelineRefetch>
                 )}

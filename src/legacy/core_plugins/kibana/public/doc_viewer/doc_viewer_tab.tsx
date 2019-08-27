@@ -17,6 +17,7 @@
  * under the License.
  */
 import React from 'react';
+import { I18nProvider } from '@kbn/i18n/react';
 import { DocViewRenderProps, DocViewRenderFn } from 'ui/registry/doc_views';
 import { DocViewRenderTab } from './doc_viewer_render_tab';
 import { DocViewerError } from './doc_viewer_render_error';
@@ -77,7 +78,12 @@ export class DocViewerTab extends React.Component<Props, State> {
     }
 
     // doc view is provided by a react component
+
     const Component = component as any;
-    return <Component {...renderProps} />;
+    return (
+      <I18nProvider>
+        <Component {...renderProps} />
+      </I18nProvider>
+    );
   }
 }

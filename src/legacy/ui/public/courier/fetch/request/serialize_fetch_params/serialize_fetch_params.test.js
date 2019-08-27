@@ -146,7 +146,7 @@ describe('body', () => {
 
     test('should not set a timeout when timeout is 0', async () => {
       const request = await getBody({ requestFetchParams, timeout: 0 });
-      expect(request).not.toHaveProperty('timeout');
+      expect(request.timeout).toBe(undefined);
     });
   });
 });
