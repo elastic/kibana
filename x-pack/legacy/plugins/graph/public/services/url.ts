@@ -44,6 +44,7 @@ export function setBreadcrumbs(options: SetBreadcrumbOptions) {
         onClick: () => {
           options.navigateTo(getHomePath());
         },
+        'data-test-subj': 'graphHomeBreadcrumb',
       },
       {
         text: options.savedWorkspace
@@ -51,6 +52,7 @@ export function setBreadcrumbs(options: SetBreadcrumbOptions) {
           : i18n.translate('xpack.graph.newWorkspaceTitle', {
               defaultMessage: 'Unsaved workspace',
             }),
+        'data-test-subj': 'graphCurrentWorkspaceBreadcrumb',
       },
     ]);
   } else {
@@ -60,6 +62,7 @@ export function setBreadcrumbs(options: SetBreadcrumbOptions) {
           defaultMessage: 'Graph',
         }),
         href: `#${getHomePath()}`,
+        'data-test-subj': 'graphHomeBreadcrumb',
       },
     ]);
   }

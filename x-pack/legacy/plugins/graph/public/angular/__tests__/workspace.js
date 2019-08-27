@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const gws = require('../graphClientWorkspace.js');
+const gws = require('../graph_client_workspace.js');
 const expect = require('@kbn/expect');
 describe('graphui-workspace', function () {
 
