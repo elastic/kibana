@@ -207,7 +207,7 @@ export const useCreateAnalyticsForm = () => {
         message: i18n.translate(
           'xpack.ml.dataframe.analytics.create.errorGettingDataFrameAnalyticsList',
           {
-            defaultMessage: 'An error occurred getting the existing data frame analytics job Ids:',
+            defaultMessage: 'An error occurred getting the existing data frame analytics job IDs:',
           }
         ),
       });

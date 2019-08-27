@@ -62,7 +62,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
         <Fragment>
           <EuiFormRow
             label={i18n.translate('xpack.ml.dataframe.analytics.create.advancedEditor.jobIdLabel', {
-              defaultMessage: 'Analytics job id',
+              defaultMessage: 'Analytics job ID',
             })}
             isInvalid={(!jobIdEmpty && !jobIdValid) || jobIdExists}
             error={[
@@ -91,13 +91,13 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
           >
             <EuiFieldText
               disabled={isJobCreated}
-              placeholder="analytics job id"
+              placeholder="analytics job ID"
               value={jobId}
               onChange={e => setFormState({ jobId: e.target.value })}
               aria-label={i18n.translate(
                 'xpack.ml.dataframe.analytics.create.advancedEditor.jobIdInputAriaLabel',
                 {
-                  defaultMessage: 'Choose a unique analytics job id.',
+                  defaultMessage: 'Choose a unique analytics job ID.',
                 }
               )}
               isInvalid={(!jobIdEmpty && !jobIdValid) || jobIdExists}
