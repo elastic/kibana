@@ -21,7 +21,7 @@ export const Title = () => {
   return (
     <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiIcon type="logoKibana" size="l" />
+        <EuiIcon type="logoKibana" size="m" />
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
         <EuiText color="ghost" size="s">

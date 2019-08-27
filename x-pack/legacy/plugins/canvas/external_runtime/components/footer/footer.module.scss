@@ -1,3 +1,6 @@
+@import '@elastic/eui/src/global_styling/variables/_size.scss';
+@import '@elastic/eui/src/global_styling/variables/_colors.scss';
+
 :global .kbnCanvas :local .root .bar {
   position: absolute;
 }
@@ -8,7 +11,7 @@
 
 :global .kbnCanvas :local .bar {
   transition: bottom 0.25s;
-  padding: 12px;
+  padding: $euiSizeM;
 }
 
 :global .kbnCanvas :local .title {
@@ -17,4 +20,8 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   flex-grow: 1;
+}
+
+:global .kbnCanvas .euiIcon__fillNegative {
+  fill: $euiColorGhost !important;
 }

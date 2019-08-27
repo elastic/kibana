@@ -3,12 +3,12 @@
 @import '@elastic/eui/src/global_styling/mixins/_helpers.scss';
 
 :global .kbnCanvas :local .root {
-  background: #fff;
+  background: $euiColorGhost;
   position: absolute;
   bottom: -172px;
   left: 0;
   right: 0;
-  padding: 8px 0 48px 0;
+  padding: $euiSizeS 0 ($euiSizeL * 2) 0;
   transition: bottom 0.25s;
   height: 172px;
 }

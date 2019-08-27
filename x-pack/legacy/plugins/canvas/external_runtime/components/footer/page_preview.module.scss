@@ -1,5 +1,7 @@
+@import '@elastic/eui/src/global_styling/variables/_size.scss';
+
 :global .kbnCanvas :local .root {
-  margin: 0 8px;
+  margin: 0 $euiSizeS;
   cursor: pointer;
 }
 
