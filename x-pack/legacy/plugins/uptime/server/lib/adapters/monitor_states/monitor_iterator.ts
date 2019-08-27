@@ -125,7 +125,7 @@ export class MonitorIterator {
       this.bufferPos = 0;
     }
 
-    const results = await this.queryCheckGroupsPage(size);
+    const results = await this.queryNext(size);
     if (results.checkGroups.length === 0) {
       return false;
     }
@@ -136,84 +136,108 @@ export class MonitorIterator {
     return true;
   }
 
-  private async queryCheckGroupsPage(size: number): Promise<CheckGroupsPageResult> {
+  private async queryNext(size: number): Promise<CheckGroupsPageResult> {
     const start = new Date();
 
+    const { monitorIds, filteredCheckGroups, searchAfter } = await this.getPotentialMatches(size);
+    const matching = await this.fullMatches(monitorIds, filteredCheckGroups);
+
+    const elapsed = new Date().getTime() - start.getTime();
+    console.log('Exec Query in', elapsed, 'Len', matching.length);
+    return {
+      checkGroups: matching,
+      searchAfter: searchAfter,
+    };
+  }
+
+  private async getPotentialMatches(size: number) {
     const filteredQueryResult = await filteredCheckGroupsQuery(
       this.queryContext,
       this.searchAfter,
       size
     );
-    const filteredCheckGroups = new Map<string, boolean>();
+
+    const filteredCheckGroups = new Set<string>();
     const monitorIds: string[] = [];
-    const monitorIdsMatchingStatusFilter: string[] = [];
     get<any>(filteredQueryResult, 'aggregations.monitors.buckets', []).forEach((b: any) => {
       const monitorId = b.key.monitor_id;
       monitorIds.push(monitorId);
 
-      if (b.summaries.doc_count === 0) {
-        return; // This one didn't match the status filter, so no top hits were returned
+      // Doc count can be zero if status filter optimization does not match
+      if (b.summaries.doc_count > 0) {
+        const checkGroup = b.summaries.top.hits.hits[0]._source.monitor.check_group;
+        filteredCheckGroups.add(checkGroup);
       }
-      monitorIdsMatchingStatusFilter.push(monitorId);
-      const checkGroup = b.summaries.top.hits.hits[0]._source.monitor.check_group;
-      filteredCheckGroups.set(checkGroup, true);
     });
 
-    let recentGroupsMatchingStatus = new Map<string, MonitorLocCheckGroup[]>();
-    if (monitorIdsMatchingStatusFilter.length > 0) {
-      const mostRecentQueryResult = await mostRecentCheckGroups(
-        this.queryContext,
-        monitorIdsMatchingStatusFilter
-      );
-      MonitorLoop: for (const monBucket of mostRecentQueryResult.aggregations.monitor.buckets) {
-        const monitorId: string = monBucket.key;
-        const groups: MonitorLocCheckGroup[] = [];
-        LocationLoop: for (const locBucket of monBucket.location.buckets) {
-          const location = locBucket.key;
-          const topSource = locBucket.top.hits.hits[0]._source;
-          const checkGroup = topSource.monitor.check_group;
+    return {
+      monitorIds,
+      filteredCheckGroups,
+      searchAfter: filteredQueryResult.aggregations.monitors.after_key,
+    };
+  }
 
-          const mlcg: MonitorLocCheckGroup = {
-            monitorId: monitorId,
-            location: location,
-            checkGroup: checkGroup,
-            filterMatchesLatest: filteredCheckGroups.has(checkGroup),
-            timestamp: topSource['@timestamp'],
-            up: topSource.summary.up,
-            down: topSource.summary.down,
-          };
+  private async fullMatches(
+    monitorIds: string[],
+    filteredCheckGroups: Set<string>
+  ): Promise<MonitorIdWithGroups[]> {
+    let matches: MonitorIdWithGroups[] = [];
 
-          const locationStatus = topSource.down ? 'down' : 'up';
-
-          // This monitor doesn't match, so just skip ahead
-          if (this.queryContext.statusFilter && this.queryContext.statusFilter !== locationStatus) {
-            continue MonitorLoop;
-          }
-          groups.push(mlcg);
-        }
-        recentGroupsMatchingStatus.set(monitorId, groups);
-      }
+    if (monitorIds.length === 0) {
+      return matches;
     }
 
-    let miwgs: MonitorIdWithGroups[] = [];
+    const recentGroupsMatchingStatus = await this.fullyMatchingIds(monitorIds, filteredCheckGroups);
+
     monitorIds.forEach((id: string) => {
       const mostRecentGroups = recentGroupsMatchingStatus.get(id);
-      miwgs.push({
+      matches.push({
         id: id,
         matchesFilter: !!mostRecentGroups,
         groups: mostRecentGroups || [],
       });
     });
-    miwgs = sortBy(miwgs, miwg => miwg.id);
+    matches = sortBy(matches, miwg => miwg.id);
     if (this.queryContext.pagination.cursorDirection === CursorDirection.BEFORE) {
-      miwgs.reverse();
+      matches.reverse();
+    }
+    return matches;
+  }
+
+  private async fullyMatchingIds(monitorIds: string[], filteredCheckGroups: Set<string>) {
+    const mostRecentQueryResult = await mostRecentCheckGroups(this.queryContext, monitorIds);
+
+    let matching = new Map<string, MonitorLocCheckGroup[]>();
+    MonitorLoop: for (const monBucket of mostRecentQueryResult.aggregations.monitor.buckets) {
+      const monitorId: string = monBucket.key;
+      const groups: MonitorLocCheckGroup[] = [];
+      LocationLoop: for (const locBucket of monBucket.location.buckets) {
+        const location = locBucket.key;
+        const topSource = locBucket.top.hits.hits[0]._source;
+        const checkGroup = topSource.monitor.check_group;
+
+        const mlcg: MonitorLocCheckGroup = {
+          monitorId: monitorId,
+          location: location,
+          checkGroup: checkGroup,
+          filterMatchesLatest: filteredCheckGroups.has(checkGroup),
+          timestamp: topSource['@timestamp'],
+          up: topSource.summary.up,
+          down: topSource.summary.down,
+          status: topSource.summary.down > 0 ? 'down' : 'up',
+        };
+
+        console.log('MLCG', this.queryContext.statusFilter, mlcg);
+
+        // This monitor doesn't match, so just skip ahead and don't add it to the output
+        if (this.queryContext.statusFilter && this.queryContext.statusFilter !== mlcg.status) {
+          continue MonitorLoop;
+        }
+        groups.push(mlcg);
+      }
+      matching.set(monitorId, groups);
     }
 
-    const elapsed = new Date().getTime() - start.getTime();
-    console.log('Exec Query in', elapsed, 'Len', miwgs.length);
-    return {
-      checkGroups: miwgs,
-      searchAfter: filteredQueryResult.aggregations.monitors.after_key,
-    };
+    return matching;
   }
 }

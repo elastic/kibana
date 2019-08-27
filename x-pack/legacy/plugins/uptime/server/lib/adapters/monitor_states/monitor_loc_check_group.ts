@@ -6,4 +6,5 @@ export type MonitorLocCheckGroup = {
   timestamp: Date;
   up: number;
   down: number;
+  status: 'up' | 'down';
 };
