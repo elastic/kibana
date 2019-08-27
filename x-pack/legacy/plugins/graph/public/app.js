@@ -32,7 +32,6 @@ import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { npStart } from 'ui/new_platform';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { capabilities } from 'ui/capabilities';
-import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 
@@ -42,7 +41,9 @@ import { getReadonlyBadge } from './badge';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { GraphListing } from './components/graph_listing';
-import { GraphSaveModal } from './components/graph_save_modal';
+
+import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs } from './services/url';
+import { save } from  './services/save';
 
 import './angular/angular_venn_simple.js';
 import gws from './angular/graph_client_workspace.js';
@@ -58,7 +59,6 @@ import {
 import {
   getOutlinkEncoders,
 } from './angular/services/outlink_encoders';
-import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs } from './services/url';
 
 import saveTemplate from './angular/templates/save_workspace.html';
 import settingsTemplate from './angular/templates/settings.html';
@@ -895,42 +895,7 @@ app.controller('graphuiPlugin', function (
         return $scope.allSavingDisabled || $scope.selectedFields.length === 0;
       },
       run: () => {
-        const currentTitle = $scope.savedWorkspace.title;
-        const currentDescription = $scope.savedWorkspace.title;
-        const onSave = ({
-          newTitle,
-          newDescription,
-          newCopyOnSave,
-          isTitleDuplicateConfirmed,
-          onTitleDuplicate,
-        }) => {
-          $scope.savedWorkspace.title = newTitle;
-          $scope.savedWorkspace.description = newDescription;
-          $scope.savedWorkspace.copyOnSave = newCopyOnSave;
-          const saveOptions = {
-            confirmOverwrite: false,
-            isTitleDuplicateConfirmed,
-            onTitleDuplicate,
-          };
-          return $scope.saveWorkspace(saveOptions).then((response) => {
-            // If the save wasn't successful, put the original values back.
-            if (!(response.id)) {
-              $scope.savedWorkspace.title = currentTitle;
-              $scope.savedWorkspace.description = currentDescription;
-            }
-            return response;
-          });
-        };
-        const graphSaveModal = (
-          <GraphSaveModal
-            onSave={onSave}
-            onClose={() => {}}
-            title={$scope.savedWorkspace.title}
-            description={$scope.savedWorkspace.description}
-            showCopyOnSave={$scope.savedWorkspace.id}
-          />
-        );
-        showSaveModal(graphSaveModal);
+        save($scope.savedWorkspace, $scope.saveWorkspace);
       },
       testId: 'graphSaveButton',
     });
@@ -1205,8 +1170,6 @@ app.controller('graphuiPlugin', function (
     });
     $scope.savedWorkspace.numVertices = vertices.length;
     $scope.savedWorkspace.numLinks = links.length;
-    $scope.savedWorkspace.description = $scope.description;
-
 
     return $scope.savedWorkspace.save(saveOptions).then(function (id) {
       $scope.closeMenus();

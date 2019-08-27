@@ -21,7 +21,12 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nContext } from 'ui/i18n';
 
-export function showSaveModal(saveModal) {
+interface MinimalSaveModalProps {
+  onSave: (...args: any[]) => Promise<{ id?: string } | { error: Error }>;
+  onClose: () => void;
+}
+
+export function showSaveModal(saveModal: React.ReactElement<MinimalSaveModalProps>) {
   const container = document.createElement('div');
   const closeModal = () => {
     ReactDOM.unmountComponentAtNode(container);
@@ -30,21 +35,19 @@ export function showSaveModal(saveModal) {
 
   const onSave = saveModal.props.onSave;
 
-  const onSaveConfirmed = (...args) => {
-    onSave(...args).then(({ id, error }) => {
-      if (id || error) {
+  const onSaveConfirmed: MinimalSaveModalProps['onSave'] = (...args) => {
+    return onSave(...args).then(response => {
+      if (('id' in response && response.id) || 'error' in response) {
         closeModal();
       }
+      return response;
     });
   };
   document.body.appendChild(container);
-  const element = React.cloneElement(
-    saveModal,
-    {
-      onSave: onSaveConfirmed,
-      onClose: closeModal
-    }
-  );
+  const element = React.cloneElement(saveModal, {
+    onSave: onSaveConfirmed,
+    onClose: closeModal,
+  });
 
   ReactDOM.render(<I18nContext>{element}</I18nContext>, container);
 }
