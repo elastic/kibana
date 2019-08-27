@@ -16,14 +16,14 @@ test('skips non string parameters', () => {
   };
   const result = transformActionParams(params, {}, {});
   expect(result).toMatchInlineSnapshot(`
-Object {
-  "boolean": true,
-  "date": "2019-02-12T21:01:22.479Z",
-  "empty1": null,
-  "empty2": undefined,
-  "number": 1,
-}
-`);
+    Object {
+      "boolean": true,
+      "date": "2019-02-12T21:01:22.479Z",
+      "empty1": null,
+      "empty2": undefined,
+      "number": 1,
+    }
+  `);
 });
 
 test('missing parameters get emptied out', () => {
@@ -33,11 +33,11 @@ test('missing parameters get emptied out', () => {
   };
   const result = transformActionParams(params, {}, {});
   expect(result).toMatchInlineSnapshot(`
-Object {
-  "message1": "",
-  "message2": "This message \\"\\" is missing",
-}
-`);
+    Object {
+      "message1": "",
+      "message2": "This message \\"\\" is missing",
+    }
+  `);
 });
 
 test('context parameters are passed to templates', () => {
@@ -46,10 +46,10 @@ test('context parameters are passed to templates', () => {
   };
   const result = transformActionParams(params, {}, { foo: 'fooVal' });
   expect(result).toMatchInlineSnapshot(`
-Object {
-  "message": "Value \\"fooVal\\" exists",
-}
-`);
+    Object {
+      "message": "Value \\"fooVal\\" exists",
+    }
+  `);
 });
 
 test('state parameters are passed to templates', () => {
@@ -58,10 +58,10 @@ test('state parameters are passed to templates', () => {
   };
   const result = transformActionParams(params, { bar: 'barVal' }, {});
   expect(result).toMatchInlineSnapshot(`
-Object {
-  "message": "Value \\"barVal\\" exists",
-}
-`);
+    Object {
+      "message": "Value \\"barVal\\" exists",
+    }
+  `);
 });
 
 test('works recursively', () => {
@@ -72,10 +72,28 @@ test('works recursively', () => {
   };
   const result = transformActionParams(params, { value: 'state' }, { value: 'context' });
   expect(result).toMatchInlineSnapshot(`
-Object {
-  "body": Object {
-    "message": "State: \\"state\\", Context: \\"context\\"",
-  },
-}
-`);
+    Object {
+      "body": Object {
+        "message": "State: \\"state\\", Context: \\"context\\"",
+      },
+    }
+  `);
+});
+
+test('works recursively with arrays', () => {
+  const params = {
+    body: {
+      messages: ['State: "{{state.value}}", Context: "{{context.value}}"'],
+    },
+  };
+  const result = transformActionParams(params, { value: 'state' }, { value: 'context' });
+  expect(result).toMatchInlineSnapshot(`
+    Object {
+      "body": Object {
+        "messages": Array [
+          "State: \\"state\\", Context: \\"context\\"",
+        ],
+      },
+    }
+  `);
 });
