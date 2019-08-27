@@ -45,7 +45,7 @@ export class ESPewPewSource extends AbstractESSource {
     defaultMessage: 'Connections'
   });
   static description = i18n.translate('xpack.maps.source.pewPewDescription', {
-    defaultMessage: 'Graph source-destination connections. Destinations grouped in grids.'
+    defaultMessage: 'Graph aggregated source-destination connections. Sources are grouped into grids for each destination.'
   });
 
   static createDescriptor({ indexPatternId, sourceGeoField, destGeoField }) {
