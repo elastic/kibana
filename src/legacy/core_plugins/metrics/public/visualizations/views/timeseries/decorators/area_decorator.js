@@ -39,6 +39,7 @@ export function AreaSeriesDecorator({
   timeZone,
   enableHistogramMode,
   useDefaultGroupDomain,
+  sortIndex,
 }) {
   const id = getSpecId(seriesId);
   const groupId = getGroupId(seriesGroupId);
@@ -61,6 +62,7 @@ export function AreaSeriesDecorator({
     timeZone,
     enableHistogramMode,
     useDefaultGroupDomain,
+    sortIndex,
     ...areaSeriesStyle,
   };
 

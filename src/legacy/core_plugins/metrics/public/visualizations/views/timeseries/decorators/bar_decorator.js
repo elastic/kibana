@@ -38,6 +38,7 @@ export function BarSeriesDecorator({
   timeZone,
   enableHistogramMode,
   useDefaultGroupDomain,
+  sortIndex,
 }) {
   const id = getSpecId(seriesId);
   const groupId = getGroupId(seriesGroupId);
@@ -60,6 +61,7 @@ export function BarSeriesDecorator({
     timeZone,
     enableHistogramMode,
     useDefaultGroupDomain,
+    sortIndex,
     ...barSeriesStyle,
   };
 

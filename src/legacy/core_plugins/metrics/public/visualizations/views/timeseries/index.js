@@ -124,21 +124,24 @@ export const TimeSeries = ({
       })}
 
       {series.map(
-        ({
-          id,
-          label,
-          bars,
-          lines,
-          data,
-          hideInLegend,
-          xScaleType,
-          yScaleType,
-          groupId,
-          color,
-          stack,
-          points,
-          useDefaultGroupDomain,
-        }) => {
+        (
+          {
+            id,
+            label,
+            bars,
+            lines,
+            data,
+            hideInLegend,
+            xScaleType,
+            yScaleType,
+            groupId,
+            color,
+            stack,
+            points,
+            useDefaultGroupDomain,
+          },
+          sortIndex
+        ) => {
           const stackAccessors = getStackAccessors(stack);
           const isPercentage = stack === STACKED_OPTIONS.PERCENT;
           const key = `${id}-${label}`;
@@ -161,6 +164,7 @@ export const TimeSeries = ({
                 timeZone={timeZone}
                 enableHistogramMode={enableHistogramMode}
                 useDefaultGroupDomain={useDefaultGroupDomain}
+                sortIndex={sortIndex}
               />
             );
           }
@@ -184,6 +188,7 @@ export const TimeSeries = ({
                 timeZone={timeZone}
                 enableHistogramMode={enableHistogramMode}
                 useDefaultGroupDomain={useDefaultGroupDomain}
+                sortIndex={sortIndex}
               />
             );
           }
