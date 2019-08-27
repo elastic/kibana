@@ -20,12 +20,14 @@
 import {
   EuiPopover,
   EuiPopoverTitle,
+  EuiPopoverFooter,
   EuiButtonEmpty,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPagination,
   EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -119,6 +121,9 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
       aria-label={i18n.translate('data.search.searchBar.savedQueryPopoverButtonText', {
         defaultMessage: 'See saved queries',
       })}
+      title={i18n.translate('data.search.searchBar.savedQueryPopoverButtonText', {
+        defaultMessage: 'See saved queries',
+      })}
       data-test-subj="saved-query-management-popover-button"
     >
       #
@@ -164,10 +169,11 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
           setIsOpen(false);
         }}
         anchorPosition="downLeft"
+        panelPaddingSize="none"
         ownFocus
       >
         <div
-          className="saved-query-management-popover"
+          className="kbnSavedQueryManagement__popover"
           data-test-subj="saved-query-management-popover"
         >
           <EuiPopoverTitle id={'savedQueryManagementPopoverTitle'}>
@@ -175,22 +181,18 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
           </EuiPopoverTitle>
           {savedQueries.length > 0 ? (
             <Fragment>
-              <EuiFlexGroup wrap>
-                <EuiFlexItem>
-                  <EuiText>{savedQueryDescriptionText}</EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiFlexGroup>
-                <EuiFlexItem className="saved-query-list-wrapper">
-                  <ul
-                    className="saved-query-list"
-                    aria-labelledby={'savedQueryManagementPopoverTitle'}
-                  >
-                    {savedQueryRows()}
-                  </ul>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiFlexGroup justifyContent="spaceAround">
+              <EuiText size="s" color="subdued" className="kbnSavedQueryManagement__text">
+                <p>{savedQueryDescriptionText}</p>
+              </EuiText>
+              <div className="kbnSavedQueryManagement__listWrapper">
+                <ul
+                  className="kbnSavedQueryManagement__list"
+                  aria-labelledby={'savedQueryManagementPopoverTitle'}
+                >
+                  {savedQueryRows()}
+                </ul>
+              </div>
+              <EuiFlexGroup justifyContent="spaceAround" gutterSize="none">
                 <EuiFlexItem grow={false}>
                   <EuiPagination
                     pageCount={Math.ceil(savedQueries.length / pageCount)}
@@ -201,34 +203,27 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
               </EuiFlexGroup>
             </Fragment>
           ) : (
-            <EuiText grow={false}>{noSavedQueriesDescriptionText}</EuiText>
+            <Fragment>
+              <EuiText size="s" color="subdued" className="kbnSavedQueryManagement__text">
+                <p>{noSavedQueriesDescriptionText}</p>
+              </EuiText>
+              <EuiSpacer size="s" />
+            </Fragment>
           )}
-          <EuiFlexGroup direction="rowReverse" alignItems="center" justifyContent="flexEnd">
-            {showSaveQuery && loadedSavedQuery && (
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup>
+          <EuiPopoverFooter>
+            <EuiFlexGroup
+              direction="rowReverse"
+              gutterSize="s"
+              alignItems="center"
+              justifyContent="flexEnd"
+              responsive={false}
+              wrap={true}
+            >
+              {showSaveQuery && loadedSavedQuery && (
+                <Fragment>
                   <EuiFlexItem grow={false}>
                     <EuiButton
-                      onClick={() => onSaveAsNew()}
-                      aria-label={i18n.translate(
-                        'data.search.searchBar.savedQueryPopoverSaveAsNewButtonAriaLabel',
-                        {
-                          defaultMessage: 'Save as a new saved query',
-                        }
-                      )}
-                      data-test-subj="saved-query-management-save-as-new-button"
-                    >
-                      {i18n.translate(
-                        'data.search.searchBar.savedQueryPopoverSaveAsNewButtonText',
-                        {
-                          defaultMessage: 'Save as new',
-                        }
-                      )}
-                    </EuiButton>
-                  </EuiFlexItem>
-
-                  <EuiFlexItem>
-                    <EuiButton
+                      size="s"
                       fill
                       onClick={() => onSave()}
                       aria-label={i18n.translate(
@@ -248,44 +243,67 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
                       )}
                     </EuiButton>
                   </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            )}
-            {showSaveQuery && !loadedSavedQuery && (
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  onClick={() => onSave()}
-                  aria-label={i18n.translate(
-                    'data.search.searchBar.savedQueryPopoverSaveButtonAriaLabel',
-                    { defaultMessage: 'Save a new saved query' }
-                  )}
-                  data-test-subj="saved-query-management-save-button"
-                >
-                  {i18n.translate('data.search.searchBar.savedQueryPopoverSaveButtonText', {
-                    defaultMessage: 'Save',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem />
-            <EuiFlexItem grow={false}>
-              {loadedSavedQuery && (
-                <EuiButtonEmpty
-                  onClick={() => onClearSavedQuery()}
-                  aria-label={i18n.translate(
-                    'data.search.searchBar.savedQueryPopoverClearButtonAriaLabel',
-                    { defaultMessage: 'Clear current saved query' }
-                  )}
-                  data-test-subj="saved-query-management-clear-button"
-                >
-                  {i18n.translate('data.search.searchBar.savedQueryPopoverClearButtonText', {
-                    defaultMessage: 'Clear',
-                  })}
-                </EuiButtonEmpty>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      size="s"
+                      onClick={() => onSaveAsNew()}
+                      aria-label={i18n.translate(
+                        'data.search.searchBar.savedQueryPopoverSaveAsNewButtonAriaLabel',
+                        {
+                          defaultMessage: 'Save as a new saved query',
+                        }
+                      )}
+                      data-test-subj="saved-query-management-save-as-new-button"
+                    >
+                      {i18n.translate(
+                        'data.search.searchBar.savedQueryPopoverSaveAsNewButtonText',
+                        {
+                          defaultMessage: 'Save as new',
+                        }
+                      )}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </Fragment>
               )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
+              {showSaveQuery && !loadedSavedQuery && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    size="s"
+                    fill
+                    onClick={() => onSave()}
+                    aria-label={i18n.translate(
+                      'data.search.searchBar.savedQueryPopoverSaveButtonAriaLabel',
+                      { defaultMessage: 'Save a new saved query' }
+                    )}
+                    data-test-subj="saved-query-management-save-button"
+                  >
+                    {i18n.translate('data.search.searchBar.savedQueryPopoverSaveButtonText', {
+                      defaultMessage: 'Save current query',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem />
+              <EuiFlexItem grow={false}>
+                {loadedSavedQuery && (
+                  <EuiButtonEmpty
+                    size="s"
+                    flush="left"
+                    onClick={() => onClearSavedQuery()}
+                    aria-label={i18n.translate(
+                      'data.search.searchBar.savedQueryPopoverClearButtonAriaLabel',
+                      { defaultMessage: 'Clear current saved query' }
+                    )}
+                    data-test-subj="saved-query-management-clear-button"
+                  >
+                    {i18n.translate('data.search.searchBar.savedQueryPopoverClearButtonText', {
+                      defaultMessage: 'Clear',
+                    })}
+                  </EuiButtonEmpty>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPopoverFooter>
         </div>
       </EuiPopover>
     </Fragment>
