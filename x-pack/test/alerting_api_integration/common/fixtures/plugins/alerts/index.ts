@@ -167,14 +167,23 @@ export default function(kibana: any) {
       const alwaysFiringAlertType: AlertType = {
         id: 'test.always-firing',
         name: 'Test: Always Firing',
-        actionGroups: ['default'],
+        actionGroups: ['default', 'other'],
         async executor({ services, params, state }: AlertExecutorOptions) {
-          services
-            .alertInstanceFactory('1')
-            .replaceState({ instanceStateValue: true })
-            .fire('default', {
-              instanceContextValue: true,
-            });
+          let group = 'default';
+
+          if (params.groupsInSeriesToFire) {
+            const index = state.groupInSeriesIndex || 0;
+            group = params.groupsInSeriesToFire[index];
+          }
+
+          if (group) {
+            services
+              .alertInstanceFactory('1')
+              .replaceState({ instanceStateValue: true })
+              .fire(group, {
+                instanceContextValue: true,
+              });
+          }
           await services.callCluster('index', {
             index: params.index,
             refresh: 'wait_for',
@@ -187,6 +196,7 @@ export default function(kibana: any) {
           });
           return {
             globalStateValue: true,
+            groupInSeriesIndex: (state.groupInSeriesIndex || 0) + 1,
           };
         },
       };
