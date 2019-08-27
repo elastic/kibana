@@ -22,7 +22,6 @@
  * (the shape of the mappings and documents in the index).
  */
 
-import { once } from 'lodash';
 import { Logger } from 'src/core/server/logging';
 import { KibanaConfig } from 'src/core/server/kibana_config';
 import { MappingProperties, SavedObjectsMapping } from '../../mappings';
