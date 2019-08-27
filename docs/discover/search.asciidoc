@@ -90,9 +90,7 @@ used for the saved search will also be automatically selected.
 
 [[save-load-delete-query]]
 === Saving queries
-A saved query is a portable collection of query text and filters that you can reuse in <<discover, Discover>>, <<visualize, Visualize>> and <<dashboard, Dashboard>>. Saved queries always include the KQL or Lucene query text, and can also include filters and the time filter.
-
-Save a query when you want to:
+A saved query is a portable collection of query text and filters that you can reuse in <<discover, Discover>>, <<visualize, Visualize>> and <<dashboard, Dashboard>>. Save a query when you want to:
 
 * Retrieve results from the same query at a later time without having to reenter the query text, add the filters or set the time filter again
 * Share your query
