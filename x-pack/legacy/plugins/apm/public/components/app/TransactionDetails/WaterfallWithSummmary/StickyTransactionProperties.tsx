@@ -30,7 +30,7 @@ import { fontSize } from '../../../../style/variables';
 interface Props {
   transaction: Transaction;
   totalDuration?: number;
-  errorCount?: number;
+  errorCount: number;
 }
 
 const ErrorTitle = styled.span`

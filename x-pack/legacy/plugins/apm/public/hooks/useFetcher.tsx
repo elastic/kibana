@@ -18,34 +18,31 @@ export enum FETCH_STATUS {
   FAILURE = 'failure'
 }
 
-type Fetcher = (...args: any[]) => any;
-type GetReturn<TFetcher extends Fetcher> = Exclude<
-  ReturnType<TFetcher>,
-  undefined
-> extends Promise<infer TReturn>
-  ? TReturn
-  : ReturnType<TFetcher>;
+interface Result<Data> {
+  data?: Data;
+  status?: FETCH_STATUS;
+  error?: Error;
+}
 
-export function useFetcher<TFetcher extends Fetcher>(
-  fn: TFetcher,
+export function useFetcher<Data>(
+  fn: (prevResult: Result<Data>) => Promise<Data> | Data | undefined,
   fnDeps: any[],
-  options: { preservePreviousResponse?: boolean } = {}
+  options: { preservePreviousData?: boolean } = {}
 ) {
-  const { preservePreviousResponse = true } = options;
+  const { preservePreviousData = true } = options;
   const id = useComponentId();
   const { dispatchStatus } = useContext(LoadingIndicatorContext);
-  const [result, setResult] = useState<{
-    data?: GetReturn<TFetcher>;
-    status?: FETCH_STATUS;
-    error?: Error;
-  }>({});
+  const [result, setResult] = useState<Result<Data>>({});
   const [counter, setCounter] = useState(0);
 
   useEffect(() => {
     let didCancel = false;
 
     async function doFetch() {
-      const promise = fn();
+      const promise = fn(result);
+      // if `fn` doesn't return a promise it is a signal that data fetching was not initiated.
+      // This can happen if the data fetching is conditional (based on certain inputs).
+      // In these cases it is not desirable to invoke the global loading spinner, or change the status to success
       if (!promise) {
         return;
       }
@@ -53,7 +50,7 @@ export function useFetcher<TFetcher extends Fetcher>(
       dispatchStatus({ id, isLoading: true });
 
       setResult(prevResult => ({
-        data: preservePreviousResponse ? prevResult.data : undefined, // preserve data from previous state while loading next state
+        data: preservePreviousData ? prevResult.data : undefined, // preserve data from previous state while loading next state
         status: FETCH_STATUS.LOADING,
         error: undefined
       }));
@@ -113,7 +110,7 @@ export function useFetcher<TFetcher extends Fetcher>(
   }, [
     counter,
     id,
-    preservePreviousResponse,
+    preservePreviousData,
     dispatchStatus,
     ...fnDeps
     /* eslint-enable react-hooks/exhaustive-deps */
