@@ -11,9 +11,9 @@ import { uriEncode } from '../lib/uri_encode';
  * Remove support for parsing Saved Object details from objectType / savedObjectId
  * Including support for determining the Report title from objectType / savedObjectId
  *
- * - `objectType` must still be passed to differentiate the type of report in a job listing
+ * - `objectType` is optional, but helps differentiate the type of report in the job listing
  * - `title` must be explicitly passed
- *
+ * - `relativeUrls` array OR `relativeUrl` string must be passed
  */
 
 const getSavedObjectTitle = async (objectType, savedObjectId, savedObjectsClient) => {
