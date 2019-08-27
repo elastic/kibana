@@ -84,7 +84,7 @@ export const TableView = injectI18n(
         },
         ...options.groupBy.map((grouping, index) => ({
           field: `group_${index}`,
-          name: fieldToName((grouping && grouping.field) || '', intl),
+          name: fieldToName((grouping && grouping.field) || ''),
           sortable: true,
           truncateText: true,
           textOnly: true,

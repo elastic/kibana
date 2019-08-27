@@ -5,8 +5,8 @@
  */
 
 import { EuiButtonGroup } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   InfraSnapshotMetricInput,
   InfraSnapshotMetricType,
@@ -15,7 +15,6 @@ import {
 } from '../../graphql/types';
 
 interface Props {
-  intl: InjectedIntl;
   nodeType: InfraNodeType;
   changeNodeType: (nodeType: InfraNodeType) => void;
   changeGroupBy: (groupBy: InfraSnapshotGroupbyInput[]) => void;
@@ -24,13 +23,10 @@ interface Props {
 
 export class WaffleNodeTypeSwitcherClass extends React.PureComponent<Props> {
   public render() {
-    const { intl } = this.props;
-
     const nodeOptions = [
       {
         id: InfraNodeType.host,
-        label: intl.formatMessage({
-          id: 'xpack.infra.waffle.nodeTypeSwitcher.hostsLabel',
+        label: i18n.translate('xpack.infra.waffle.nodeTypeSwitcher.hostsLabel', {
           defaultMessage: 'Hosts',
         }),
       },
@@ -63,4 +59,4 @@ export class WaffleNodeTypeSwitcherClass extends React.PureComponent<Props> {
   };
 }
 
-export const WaffleNodeTypeSwitcher = injectI18n(WaffleNodeTypeSwitcherClass);
+export const WaffleNodeTypeSwitcher = WaffleNodeTypeSwitcherClass;
