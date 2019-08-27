@@ -59,7 +59,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
 
       setValue(axesName, array);
     },
-    [stateParams]
+    [stateParams, setValue]
   );
 
   const updateAxisTitle = useCallback(() => {
@@ -87,7 +87,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
     });
 
     setValue('valueAxes', axes);
-  }, [stateParams.valueAxes, stateParams.seriesParams]);
+  }, [stateParams.valueAxes, stateParams.seriesParams, setValue]);
 
   const getUpdatedAxisName = useCallback(
     (axisPosition: ValueAxis['position']) => {
@@ -175,7 +175,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
         setParamByIndex('seriesParams', chartIndex, 'valueAxis', newValueAxes[0].id);
       }
     },
-    [stateParams.seriesParams, stateParams.valueAxes, setParamByIndex]
+    [stateParams.seriesParams, stateParams.valueAxes, setParamByIndex, setValue]
   );
 
   const aggsLabel = aggs
@@ -184,11 +184,12 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
     })
     .join();
 
-  useEffect(() => {
+  const metrics = useMemo(() => {
     const schemaName = vis.type.schemas.metrics[0].name;
+    return aggs.bySchemaName[schemaName];
+  }, [vis.type.schemas.metrics[0].name, aggs]);
 
-    const metrics = aggs.bySchemaName[schemaName];
-
+  useEffect(() => {
     // update labels for existing params or create new one
     const updatedSeries = metrics.map(agg => {
       const params = stateParams.seriesParams.find(param => param.data.id === agg.id);
@@ -212,7 +213,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
     });
 
     setValue('seriesParams', updatedSeries);
-  }, [aggsLabel, stateParams.valueAxes]);
+  }, [aggsLabel, metrics, stateParams.valueAxes]);
 
   const visType = useMemo(() => {
     const types = uniq(stateParams.seriesParams.map(({ type }) => type));
