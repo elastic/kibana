@@ -145,7 +145,6 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
         savedQuery={savedQuery}
         isSelected={!!loadedSavedQuery && loadedSavedQuery.id === savedQuery.id}
         onSelect={savedQueryToSelect => {
-          onClearSavedQuery();
           onLoad(savedQueryToSelect);
           setIsOpen(false);
         }}
