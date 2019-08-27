@@ -16,12 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
+import { EuiIconTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import { uiModules } from 'ui/modules';
-const module = uiModules.get('apps/doc_views');
-
-// Simple filter to allow using ng-bind-html without explicitly calling $sce.trustAsHtml in a controller
-// (See http://goo.gl/mpj9o2)
-module.filter('trustAsHtml', function ($sce) {
-  return $sce.trustAsHtml;
-});
+export function DocViewTableRowIconNoMapping() {
+  const ariaLabel = i18n.translate('kbnDocViews.table.noCachedMappingForThisFieldAriaLabel', {
+    defaultMessage: 'Warning',
+  });
+  const tooltipContent = i18n.translate('kbnDocViews.table.noCachedMappingForThisFieldTooltip', {
+    defaultMessage:
+      'No cached mapping for this field. Refresh field list from the Management > Index Patterns page',
+  });
+  return (
+    <EuiIconTip
+      aria-label={ariaLabel}
+      color="warning"
+      content={tooltipContent}
+      iconProps={{
+        className: 'kbnDocViewer__warning',
+        'data-test-subj': 'noMappingWarning',
+      }}
+      size="s"
+      type="alert"
+    />
+  );
+}
