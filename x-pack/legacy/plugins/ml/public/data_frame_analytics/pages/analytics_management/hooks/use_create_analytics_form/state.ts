@@ -21,7 +21,7 @@ export interface FormMessage {
 
 export interface State {
   advancedEditorMessages: FormMessage[];
-  advancedEditorStr: string;
+  advancedEditorRawString: string;
   form: {
     createIndexPattern: boolean;
     destinationIndex: EsIndexName;
@@ -55,7 +55,7 @@ export interface State {
 
 export const getInitialState = (): State => ({
   advancedEditorMessages: [],
-  advancedEditorStr: '',
+  advancedEditorRawString: '',
   form: {
     createIndexPattern: false,
     destinationIndex: '',

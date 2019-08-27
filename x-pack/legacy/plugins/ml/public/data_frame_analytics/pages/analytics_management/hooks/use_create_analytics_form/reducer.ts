@@ -136,8 +136,8 @@ export function reducer(state: State, action: Action): State {
     case ACTION.RESET_FORM:
       return getInitialState();
 
-    case ACTION.SET_ADVANCED_EDITOR_STR:
-      return { ...state, advancedEditorStr: action.advancedEditorStr };
+    case ACTION.SET_ADVANCED_EDITOR_RAW_STRING:
+      return { ...state, advancedEditorRawString: action.advancedEditorRawString };
 
     case ACTION.SET_FORM_STATE:
       const newFormState = { ...state.form, ...action.payload };
@@ -219,7 +219,7 @@ export function reducer(state: State, action: Action): State {
       const jobConfig = getJobConfigFromFormState(state.form);
       return validateAdvancedEditor({
         ...state,
-        advancedEditorStr: JSON.stringify(jobConfig, null, 2),
+        advancedEditorRawString: JSON.stringify(jobConfig, null, 2),
         isAdvancedEditorEnabled: true,
         jobConfig,
       });

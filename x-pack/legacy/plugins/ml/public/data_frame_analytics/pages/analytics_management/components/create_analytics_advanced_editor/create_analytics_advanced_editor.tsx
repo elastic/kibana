@@ -21,9 +21,14 @@ import { i18n } from '@kbn/i18n';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 
 export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
-  const { resetAdvancedEditorMessages, setAdvancedEditorStr, setFormState, setJobConfig } = actions;
+  const {
+    resetAdvancedEditorMessages,
+    setAdvancedEditorRawString,
+    setFormState,
+    setJobConfig,
+  } = actions;
 
-  const { advancedEditorMessages, advancedEditorStr, isJobCreated, requestMessages } = state;
+  const { advancedEditorMessages, advancedEditorRawString, isJobCreated, requestMessages } = state;
 
   const {
     createIndexPattern,
@@ -116,7 +121,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
             <EuiCodeEditor
               mode="json"
               width="100%"
-              value={advancedEditorStr}
+              value={advancedEditorRawString}
               onChange={onChange}
               setOptions={{
                 fontSize: '12px',

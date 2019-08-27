@@ -13,7 +13,7 @@ export enum ACTION {
   OPEN_MODAL,
   RESET_ADVANCED_EDITOR_MESSAGES,
   RESET_FORM,
-  SET_ADVANCED_EDITOR_STR,
+  SET_ADVANCED_EDITOR_RAW_STRING,
   SET_FORM_STATE,
   SET_INDEX_NAMES,
   SET_INDEX_PATTERN_TITLES,
@@ -39,7 +39,10 @@ export type Action =
     }
   // Actions with custom payloads:
   | { type: ACTION.ADD_REQUEST_MESSAGE; requestMessage: FormMessage }
-  | { type: ACTION.SET_ADVANCED_EDITOR_STR; advancedEditorStr: State['advancedEditorStr'] }
+  | {
+      type: ACTION.SET_ADVANCED_EDITOR_RAW_STRING;
+      advancedEditorRawString: State['advancedEditorRawString'];
+    }
   | { type: ACTION.SET_FORM_STATE; payload: Partial<State['form']> }
   | { type: ACTION.SET_INDEX_NAMES; indexNames: State['indexNames'] }
   | {
@@ -65,7 +68,7 @@ export interface ActionDispatchers {
   createAnalyticsJob: () => void;
   openModal: () => void;
   resetAdvancedEditorMessages: () => void;
-  setAdvancedEditorStr: (payload: State['advancedEditorStr']) => void;
+  setAdvancedEditorRawString: (payload: State['advancedEditorRawString']) => void;
   setFormState: (payload: Partial<State['form']>) => void;
   setIsModalVisible: (payload: State['isModalVisible']) => void;
   setJobConfig: (payload: State['jobConfig']) => void;

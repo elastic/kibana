@@ -63,8 +63,8 @@ export const useCreateAnalyticsForm = () => {
   const setIndexNames = (indexNames: EsIndexName[]) =>
     dispatch({ type: ACTION.SET_INDEX_NAMES, indexNames });
 
-  const setAdvancedEditorStr = (advancedEditorStr: string) =>
-    dispatch({ type: ACTION.SET_ADVANCED_EDITOR_STR, advancedEditorStr });
+  const setAdvancedEditorRawString = (advancedEditorRawString: string) =>
+    dispatch({ type: ACTION.SET_ADVANCED_EDITOR_RAW_STRING, advancedEditorRawString });
 
   const setIndexPatternTitles = (payload: {
     indexPatternTitles: IndexPatternTitle[];
@@ -312,7 +312,7 @@ export const useCreateAnalyticsForm = () => {
     createAnalyticsJob,
     openModal,
     resetAdvancedEditorMessages,
-    setAdvancedEditorStr,
+    setAdvancedEditorRawString,
     setFormState,
     setIsModalVisible,
     setJobConfig,
