@@ -21,18 +21,18 @@ export const IndexPatternsMissingPrompt = React.memo(() => {
         <>
           <p>{i18n.ERROR_DESCRIPTION}</p>
 
-          <p>{i18n.ERROR_EXISTING_INDICES_DESCRIPTION}</p>
-
           <p>
-            {['auditbeat', 'filebeat', 'packetbeat', 'winlogbeat'].map(v => (
-              <EuiLink
-                key={v}
-                href={`https://www.elastic.co/guide/en/beats/${v}/current/load-kibana-dashboards.html`}
-                target="blank"
-              >
-                {`${v}-*`}
-              </EuiLink>
-            ))}
+            {['auditbeat', 'filebeat', 'packetbeat', 'winlogbeat']
+              .map<React.ReactNode>(v => (
+                <EuiLink
+                  key={v}
+                  href={`https://www.elastic.co/guide/en/beats/${v}/current/load-kibana-dashboards.html`}
+                  target="blank"
+                >
+                  {`${v}-*`}
+                </EuiLink>
+              ))
+              .reduce((acc, v) => [acc, ', ', v])}
           </p>
         </>
       }

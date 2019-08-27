@@ -5,7 +5,7 @@
  */
 
 import { Filter } from '@kbn/es-query';
-import { get } from 'lodash/fp';
+import { get, getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import {
   Action,
@@ -18,18 +18,14 @@ export const APPLY_SIEM_FILTER_ACTION_ID = 'APPLY_SIEM_FILTER_ACTION_ID';
 export class ApplySiemFilterAction extends Action {
   public readonly type = APPLY_SIEM_FILTER_ACTION_ID;
   private readonly applyFilterQueryFromKueryExpression: (expression: string) => void;
-  private readonly getFilterQueryDraft: () => string;
 
   constructor({
     applyFilterQueryFromKueryExpression,
-    getFilterQueryDraft,
   }: {
-    applyFilterQueryFromKueryExpression: (filterQueryDraft: string) => void;
-    getFilterQueryDraft: () => string;
+    applyFilterQueryFromKueryExpression: (filterQuery: string) => void;
   }) {
     super(APPLY_SIEM_FILTER_ACTION_ID);
     this.applyFilterQueryFromKueryExpression = applyFilterQueryFromKueryExpression;
-    this.getFilterQueryDraft = getFilterQueryDraft;
   }
 
   public getDisplayName() {
@@ -43,22 +39,16 @@ export class ApplySiemFilterAction extends Action {
     triggerContext,
   }: ActionContext<IEmbeddable, { filters: Filter[] }>) {
     const filterObject = get('filters[0].query.match', triggerContext);
+    const filterQuery = getOr('', 'query.query', embeddable.getInput());
     const filterKey = filterObject && Object.keys(filterObject)[0];
+
     if (filterKey != null) {
       const filterExpression = Array.isArray(filterObject[filterKey].query)
         ? getExpressionFromArray(filterKey, filterObject[filterKey].query)
         : `${filterKey}: "${filterObject[filterKey].query}"`;
 
-      const filterQueryDraft = this.getFilterQueryDraft();
-
-      // console.log('filterObject', filterObject);
-      // console.log('filterExpression', filterExpression);
-      // console.log('filterQueryDraft', filterQueryDraft);
-
       this.applyFilterQueryFromKueryExpression(
-        filterQueryDraft.length > 0
-          ? `${filterQueryDraft} and ${filterExpression}`
-          : filterExpression
+        filterQuery.length > 0 ? `${filterQuery} and ${filterExpression}` : filterExpression
       );
     }
   }

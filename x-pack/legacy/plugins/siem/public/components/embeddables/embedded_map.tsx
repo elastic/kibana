@@ -37,9 +37,13 @@ import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
 import {
   EmbeddableOutput,
   IEmbeddable,
-} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/embeddables/i_embeddable';
+} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/embeddables';
 import { IndexPatternMapping, MapEmbeddableInput } from './types';
 import * as i18n from './translations';
+import { inputsModel } from '../../store/inputs';
+
+// Used for setQuery to get a hook for when the user requests a refresh. Scope to page type if using map elsewhere
+const ID = 'embeddedMap';
 
 const EmbeddableWrapper = styled(EuiFlexGroup)`
   position: relative;
@@ -54,19 +58,18 @@ const EmbeddableWrapper = styled(EuiFlexGroup)`
 export interface EmbeddedMapProps {
   applyFilterQueryFromKueryExpression: (expression: string) => void;
   queryExpression: string;
-  filterQueryDraft: string;
   startDate: number;
   endDate: number;
+  setQuery: (params: {
+    id: string;
+    inspect: inputsModel.InspectQuery | null;
+    loading: boolean;
+    refetch: inputsModel.Refetch;
+  }) => void;
 }
 
 export const EmbeddedMap = React.memo<EmbeddedMapProps>(
-  ({
-    applyFilterQueryFromKueryExpression,
-    queryExpression,
-    filterQueryDraft,
-    startDate,
-    endDate,
-  }) => {
+  ({ applyFilterQueryFromKueryExpression, queryExpression, startDate, endDate, setQuery }) => {
     const [embeddable, setEmbeddable] = React.useState<IEmbeddable<
       MapEmbeddableInput,
       EmbeddableOutput
@@ -105,6 +108,14 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
         // @ts-ignore method added in https://github.com/elastic/kibana/pull/43878
         const embeddableObject = await factory.createFromState(state, input);
 
+        // Wire up to app refresh action
+        setQuery({
+          id: ID,
+          inspect: null,
+          loading: false,
+          refetch: () => embeddableObject.reload(),
+        });
+
         setEmbeddable(embeddableObject);
       } catch (e) {
         // TODO: Throw toast
@@ -121,12 +132,11 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
         const actionLoaded =
           actions.length > 0 && actions.some(a => a.id === APPLY_SIEM_FILTER_ACTION_ID);
         if (!actionLoaded) {
-          const updateGlobalFiltersAction = new ApplySiemFilterAction({
+          const siemFilterAction = new ApplySiemFilterAction({
             applyFilterQueryFromKueryExpression,
-            getFilterQueryDraft: () => filterQueryDraft,
           });
-          start.registerAction(updateGlobalFiltersAction);
-          start.attachAction(APPLY_FILTER_TRIGGER, updateGlobalFiltersAction.id);
+          start.registerAction(siemFilterAction);
+          start.attachAction(APPLY_FILTER_TRIGGER, siemFilterAction.id);
 
           start.detachAction(CONTEXT_MENU_TRIGGER, 'CUSTOM_TIME_RANGE');
           start.detachAction(PANEL_BADGE_TRIGGER, 'CUSTOM_TIME_RANGE_BADGE');
@@ -165,7 +175,7 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
       }
     }, [loadingKibanaIndexPatterns, kibanaIndexPatterns]);
 
-    // FilterQuery updated useEffect
+    // queryExpression updated useEffect
     useEffect(() => {
       if (embeddable != null && queryExpression != null) {
         const query = { query: queryExpression, language: 'kuery' };
@@ -183,6 +193,7 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
         embeddable.updateInput({ timeRange });
       }
     }, [startDate, endDate]);
+
     return (
       <>
         <EmbeddableWrapper>

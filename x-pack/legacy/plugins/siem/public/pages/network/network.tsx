@@ -75,15 +75,15 @@ const NetworkComponent = pure<NetworkComponentProps>(
                         indexPattern={indexPattern}
                         type={networkModel.NetworkType.page}
                       >
-                        {({ applyFilterQueryFromKueryExpression, filterQueryDraft }) => (
+                        {({ applyFilterQueryFromKueryExpression }) => (
                           <EmbeddedMap
                             applyFilterQueryFromKueryExpression={
                               applyFilterQueryFromKueryExpression
                             }
                             queryExpression={queryExpression}
-                            filterQueryDraft={filterQueryDraft ? filterQueryDraft.expression : ''}
                             startDate={from}
                             endDate={to}
+                            setQuery={setQuery}
                           />
                         )}
                       </NetworkFilter>
