@@ -32,6 +32,7 @@ import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { npStart } from 'ui/new_platform';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { capabilities } from 'ui/capabilities';
+import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 
@@ -41,6 +42,7 @@ import { getReadonlyBadge } from './badge';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { GraphListing } from './components/graph_listing';
+import { GraphSaveModal } from './components/graph_save_modal';
 
 import './angular/angular_venn_simple.js';
 import gws from './angular/graph_client_workspace.js';
@@ -879,11 +881,42 @@ app.controller('graphuiPlugin', function (
         return $scope.allSavingDisabled || $scope.selectedFields.length === 0;
       },
       run: () => {
-        $scope.$evalAsync(() => {
-          const curState = $scope.menus.showSave;
-          $scope.closeMenus();
-          $scope.menus.showSave = !curState;
-        });
+        const currentTitle = $scope.savedWorkspace.title;
+        const currentDescription = $scope.savedWorkspace.title;
+        const onSave = ({
+          newTitle,
+          newDescription,
+          newCopyOnSave,
+          newTimeRestore,
+          isTitleDuplicateConfirmed,
+          onTitleDuplicate,
+        }) => {
+          $scope.savedWorkspace.title = newTitle;
+          $scope.savedWorkspace.description = newDescription;
+          const saveOptions = {
+            confirmOverwrite: false,
+            isTitleDuplicateConfirmed,
+            onTitleDuplicate,
+          };
+          return $scope.saveWorkspace(saveOptions).then((response) => {
+            // If the save wasn't successful, put the original values back.
+            if (!(response.id)) {
+              $scope.savedWorkspace.title = currentTitle;
+              $scope.savedWorkspace.description = currentDescription;
+            }
+            return response;
+          });
+        };
+        const graphSaveModal = (
+          <GraphSaveModal
+            onSave={onSave}
+            onClose={() => {}}
+            title={$scope.savedWorkspace.title}
+            description={$scope.savedWorkspace.description}
+            showCopyOnSave={$scope.savedWorkspace.id}
+          />
+        );
+        showSaveModal(graphSaveModal);
       },
       testId: 'graphSaveButton',
     });
@@ -1171,7 +1204,7 @@ app.controller('graphuiPlugin', function (
     $scope.savedWorkspace.description = $scope.description;
 
 
-    $scope.savedWorkspace.save().then(function (id) {
+    return $scope.savedWorkspace.save().then(function (id) {
       $scope.closeMenus();
       $scope.userHasConfirmedSaveWorkspaceData = false; //reset flag
       if (id) {
@@ -1191,8 +1224,12 @@ app.controller('graphuiPlugin', function (
           text,
           'data-test-subj': 'saveGraphSuccess',
         });
-        if ($scope.savedWorkspace.id === $route.current.params.id) return;
-        kbnUrl.change(getEditPath($scope.savedWorkspace));
+        if ($scope.savedWorkspace.id !== $route.current.params.id) {
+          kbnUrl.change(getEditPath($scope.savedWorkspace));
+        }
+        return { id };
+      } else {
+        return { error: 'Save was not sucessfull' };
       }
     }, fatalError);
 
