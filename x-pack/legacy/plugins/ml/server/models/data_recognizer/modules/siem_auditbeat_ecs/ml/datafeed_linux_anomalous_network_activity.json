@@ -6,13 +6,7 @@
     "query": {
             "bool": {
               "filter": [
-                {
-                  "match": {
-                    "event.action": {
-                      "query": "connected-to"
-                    }
-                  }
-                }
+                {"term": {"event.action": "connected-to"}}
               ],
               "must_not": [
                 {

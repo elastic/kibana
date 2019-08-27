@@ -6,22 +6,9 @@
     "query": {
         "bool":{
           "filter": [
-            {
-              "exists": {
-                "field": "destination.ip"
-              }
-            }
+            {"exists": {"field": "destination.ip"}},
+            {"terms": {"process.name": ["curl", "wget"]}}
           ],
-          "must":[
-            {
-              "bool":{
-                "should":[
-                  {"term":{"process.name": "curl"}},
-                  {"term":{"process.name": "wget"}}
-                ]
-              }
-            }
-            ],
           "must_not":[
             {
               "bool":{

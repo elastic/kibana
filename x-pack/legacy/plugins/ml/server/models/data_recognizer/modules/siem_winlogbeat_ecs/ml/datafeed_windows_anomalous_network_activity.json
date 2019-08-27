@@ -6,7 +6,7 @@
     "query": {
         "bool": {
           "filter": [
-            {"match": {"event.action": "Network connection detected (rule: NetworkConnect)"}}
+            {"term": {"event.action": "Network connection detected (rule: NetworkConnect)"}}
           ],
           "must_not": [
             {
