@@ -30,6 +30,6 @@ module.exports = () => {
       ],
       require('./common_preset'),
     ],
-    plugins: [[require.resolve('@babel/plugin-syntax-dynamic-import')]],
+    plugins: [require.resolve('@babel/plugin-syntax-dynamic-import')],
   };
 };
