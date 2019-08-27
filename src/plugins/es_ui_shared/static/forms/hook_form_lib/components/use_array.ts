@@ -41,7 +41,7 @@ export const UseArray = ({ path, form, initialNumberOfItems, children }: Props) 
   const defaultValues = form.getFieldDefaultValue(path) as any[];
   const uniqueId = useRef(0);
 
-  const getInitialRowsFromValues = (values: any[]): ArrayItem[] =>
+  const getInitialItemsFromValues = (values: any[]): ArrayItem[] =>
     values.map((_, index) => ({
       id: uniqueId.current++,
       path: `${path}.${index}`,
@@ -55,7 +55,7 @@ export const UseArray = ({ path, form, initialNumberOfItems, children }: Props) 
   });
 
   const initialState = defaultValues
-    ? getInitialRowsFromValues(defaultValues)
+    ? getInitialItemsFromValues(defaultValues)
     : new Array(initialNumberOfItems).fill('').map((_, i) => getNewItemAtIndex(i));
 
   const [items, setItems] = useState<ArrayItem[]>(initialState);
