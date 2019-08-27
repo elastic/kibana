@@ -87,7 +87,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               ...(jobIdExists
                 ? [
                     i18n.translate('xpack.ml.dataframe.analytics.create.jobIdExistsError', {
-                      defaultMessage: 'An analytics job with this id already exists.',
+                      defaultMessage: 'An analytics job with this ID already exists.',
                     }),
                   ]
                 : []),

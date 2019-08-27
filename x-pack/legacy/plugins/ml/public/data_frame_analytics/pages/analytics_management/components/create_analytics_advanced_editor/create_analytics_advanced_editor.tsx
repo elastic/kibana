@@ -82,7 +82,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
                     i18n.translate(
                       'xpack.ml.dataframe.analytics.create.advancedEditor.jobIdExistsError',
                       {
-                        defaultMessage: 'An analytics job with this id already exists.',
+                        defaultMessage: 'An analytics job with this ID already exists.',
                       }
                     ),
                   ]
