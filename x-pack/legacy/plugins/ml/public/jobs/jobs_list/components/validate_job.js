@@ -5,8 +5,8 @@
  */
 
 
-import { newJobLimits } from '../../new_job/utils/new_job_defaults';
-import { populateValidationMessages } from '../../new_job/simple/components/utils/validate_job';
+import { newJobLimits } from '../../new_job/simple/common/util/new_job_defaults';
+import { populateValidationMessages } from '../../new_job/simple/common/job_validator/util';
 
 import {
   validateModelMemoryLimit as validateModelMemoryLimitUtils,

@@ -756,6 +756,22 @@ class JobService {
       };
     }
   }
+
+  loadFullJob(jobId) {
+    return new Promise((resolve, reject) => {
+      ml.jobs.jobs(jobId)
+        .then((loadedJobs) => {
+          if (loadedJobs.length) {
+            resolve(loadedJobs[0]);
+          } else {
+            throw new Error(`Could not find job ${jobId}`);
+          }
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    });
+  }
 }
 
 // private function used to check the job saving response

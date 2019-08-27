@@ -27,6 +27,33 @@ export interface GetTimeFieldRangeResponse {
   end: { epoch: number; string: string };
 }
 
+export interface MlLimits {
+  max_model_memory_limit?: string;
+}
+
+export interface MlDefaults {
+  anomaly_detectors: {
+    model_memory_limit?: string;
+    categorization_examples_limit?: number;
+    model_snapshot_retention_days?: number;
+  };
+  datafeeds: {
+    scroll_size?: number;
+  };
+}
+
+export interface NativeCode {
+  version: string;
+  build_hash: string;
+}
+
+export interface MlInfo {
+  defaults: MlDefaults;
+  upgrade_mode: boolean;
+  native_code: NativeCode;
+  limits: MlLimits;
+}
+
 declare interface Ml {
   annotations: {
     deleteAnnotation(id: string | undefined): Promise<any>;
@@ -131,6 +158,8 @@ declare interface Ml {
   estimateBucketSpan(
     data: object
   ): Promise<{ name: string; ms: number; error?: boolean; message?: { msg: string } | string }>;
+
+  mlInfo(): Promise<MlInfo>;
 }
 
 declare const ml: Ml;

@@ -7,7 +7,7 @@
 
 import { difference } from 'lodash';
 import chrome from 'ui/chrome';
-import { newJobLimits } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
+import { newJobLimits } from 'plugins/ml/jobs/new_job/simple/common/util/new_job_defaults';
 import { mlJobService } from 'plugins/ml/services/job_service';
 
 export function saveJob(job, newJobData, finish) {
