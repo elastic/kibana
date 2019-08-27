@@ -65,9 +65,12 @@ export async function importSavedObjects({
     overwrite,
     namespace,
   });
+
+  const soErrors=await extractErrors(bulkCreateResult.saved_objects, filteredObjects,savedObjectsClient);
+
   errorAccumulator = [
     ...errorAccumulator,
-    ...extractErrors(bulkCreateResult.saved_objects, filteredObjects),
+    ...soErrors,
   ];
 
   return {
