@@ -10,10 +10,12 @@ import { actionType as serverLogActionType } from './server_log';
 import { actionType as slackActionType } from './slack';
 import { actionType as emailActionType } from './email';
 import { actionType as indexActionType } from './es_index';
+import { actionType as pagerDutyActionType } from './pagerduty';
 
 export function registerBuiltInActionTypes(actionTypeRegistry: ActionTypeRegistry) {
   actionTypeRegistry.register(serverLogActionType);
   actionTypeRegistry.register(slackActionType);
   actionTypeRegistry.register(emailActionType);
   actionTypeRegistry.register(indexActionType);
+  actionTypeRegistry.register(pagerDutyActionType);
 }
