@@ -24,6 +24,8 @@ import {
   Position,
   ScaleType,
   Settings,
+  CustomSeriesColorsMap,
+  DataSeriesColorsValues,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { toElasticsearchQuery } from '@kbn/es-query';
@@ -33,7 +35,7 @@ import { Query } from 'src/plugins/data/common';
 import { fieldFormats } from '../../../../../../src/legacy/ui/public/registry/field_formats';
 import { IndexPattern, IndexPatternField, DraggedField } from './indexpattern';
 import { DragDrop } from '../drag_drop';
-import { FieldIcon } from './field_icon';
+import { FieldIcon, getColorForDataType } from './field_icon';
 import { DatasourceDataPanelProps } from '../types';
 import { DataType } from '..';
 
@@ -133,33 +135,6 @@ export function FieldItem({
 
     setState(s => ({ ...s, isLoading: true }));
 
-    // if (field.type !== 'number' && field.type !== 'string') {
-    // npStart.core.http
-    //   .post(`/api/ml/data_visualizer/get_field_stats/${indexPattern.title}`, {
-    //     body: JSON.stringify({
-    //       query: toElasticsearchQuery(query, indexPattern),
-    //       fields: [
-    //         {
-    //           fieldName: field.name,
-    //           type: field.type === 'string' && field.esTypes ? field.esTypes[0] : field.type,
-    //           cardinality,
-    //         },
-    //       ],
-    //       samplerShardSize: 5000,
-    //       timeFieldName: indexPattern.timeFieldName,
-    //       earliest: dateRange.fromDate,
-    //       latest: dateRange.toDate,
-    //       interval: '1d',
-    //       maxExamples: 5,
-    //     }),
-    //   })
-    //   .then((results: [DataVisResults]) => {
-    //     setState(s => ({ ...s, isLoading: false, fieldMetadata: results[0] }));
-    //   })
-    //   .catch(() => {
-    //     setState(s => ({ ...s, isLoading: false }));
-    //   });
-    // } else {
     npStart.core.http
       .post(`/api/lens/index_stats/${indexPattern.title}/field`, {
         body: JSON.stringify({
@@ -175,16 +150,14 @@ export function FieldItem({
           setState(s => ({
             ...s,
             isLoading: false,
-            doc_count: results.doc_count,
-            // fieldMetadata: {
+            doc_count: (results as TopValuesResult).doc_count,
             topValues: (results as TopValuesResult).top_values,
-            // },
           }));
         } else if (field.type === 'number') {
           setState(s => ({
             ...s,
             isLoading: false,
-            doc_count: results.histogram.doc_count,
+            doc_count: (results as NumberStatsResult).histogram.doc_count,
             histogram: (results as NumberStatsResult).histogram.histo,
             topValues: (results as NumberStatsResult).top_values,
           }));
@@ -192,8 +165,8 @@ export function FieldItem({
           setState(s => ({
             ...s,
             isLoading: false,
-            doc_count: results.doc_count,
-            histogram: (results as NumberStatsResult).histo,
+            doc_count: (results as NumberStatsResult).histogram.doc_count,
+            histogram: (results as NumberStatsResult).histogram.histo,
           }));
         } else {
           setState(s => ({
@@ -205,8 +178,19 @@ export function FieldItem({
       .catch(() => {
         setState(s => ({ ...s, isLoading: false }));
       });
-    // }
   }, [infoIsOpen, query, dateRange]);
+
+  const specId = getSpecId(
+    i18n.translate('xpack.lens.indexPattern.fieldStatsCountLabel', {
+      defaultMessage: 'Count',
+    })
+  );
+  const expectedColor = getColorForDataType(field.type);
+  const colors: DataSeriesColorsValues = {
+    colorValues: [],
+    specId,
+  };
+  const seriesColors = new Map([[colors, expectedColor]]);
 
   return (
     <DragDrop
@@ -260,15 +244,12 @@ export function FieldItem({
 
                   <BarSeries
                     data={state.histogram.buckets}
+                    id={specId}
                     xAccessor={'key'}
                     yAccessors={['doc_count']}
-                    id={getSpecId(
-                      i18n.translate('xpack.lens.indexPattern.fieldStatsCountLabel', {
-                        defaultMessage: 'Count',
-                      })
-                    )}
                     xScaleType={field.type === 'date' ? ScaleType.Time : ScaleType.Linear}
                     yScaleType={ScaleType.Linear}
+                    customSeriesColors={seriesColors}
                   />
                 </Chart>
               )}
@@ -296,6 +277,7 @@ export function FieldItem({
                                 value={topValue.doc_count / state.doc_count!}
                                 max={1}
                                 size="l"
+                                color={field.type === 'string' ? 'accent' : 'primary'}
                               />
                             </EuiFlexItem>
                             <EuiFlexItem

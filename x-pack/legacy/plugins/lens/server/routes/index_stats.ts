@@ -17,7 +17,7 @@ import { LensCoreSetup } from '..';
 
 type Document = Record<string, unknown>;
 
-type Fields = Array<{ name: string; type: string }>;
+type Fields = Array<{ name: string; type: string; esTypes?: string[] }>;
 
 export async function initStatsRoute(setup: LensCoreSetup) {
   const router = setup.http.createRouter('/api/lens/index_stats/{indexPatternTitle}');
@@ -113,6 +113,7 @@ export async function initStatsRoute(setup: LensCoreSetup) {
               {
                 name: schema.string(),
                 type: schema.string(),
+                esTypes: schema.maybe(schema.arrayOf(schema.string())),
               },
               { allowUnknowns: true }
             ),
@@ -442,5 +443,7 @@ export async function getDateHistogram(
     },
   });
 
-  return results.aggregations;
+  return {
+    histogram: results.aggregations,
+  };
 }

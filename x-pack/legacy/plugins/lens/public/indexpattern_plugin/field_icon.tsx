@@ -13,22 +13,30 @@ function stringToNum(s: string) {
   return Array.from(s).reduce((acc, ch) => acc + ch.charCodeAt(0), 1);
 }
 
-export type UnwrapArray<T> = T extends Array<infer P> ? P : T;
-
-export function FieldIcon({ type }: { type: DataType }) {
-  const icons: Partial<Record<DataType, UnwrapArray<typeof ICON_TYPES>>> = {
+function getIconForDataType(dataType: string) {
+  const icons: Partial<Record<string, UnwrapArray<typeof ICON_TYPES>>> = {
     boolean: 'invert',
     date: 'calendar',
   };
+  return icons[dataType] || ICON_TYPES.find(t => t === dataType) || 'empty';
+}
 
-  const iconType = icons[type] || ICON_TYPES.find(t => t === type) || 'empty';
+export function getColorForDataType(type: string) {
+  const iconType = getIconForDataType(type);
   const { colors } = palettes.euiPaletteColorBlind;
   const colorIndex = stringToNum(iconType) % colors.length;
+  return colors[colorIndex];
+}
+
+export type UnwrapArray<T> = T extends Array<infer P> ? P : T;
+
+export function FieldIcon({ type }: { type: DataType }) {
+  const iconType = getIconForDataType(type);
 
   const classes = classNames(
     'lnsFieldListPanel__fieldIcon',
     `lnsFieldListPanel__fieldIcon--${type}`
   );
 
-  return <EuiIcon type={iconType} color={colors[colorIndex]} className={classes} />;
+  return <EuiIcon type={iconType} color={getColorForDataType(type)} className={classes} />;
 }
