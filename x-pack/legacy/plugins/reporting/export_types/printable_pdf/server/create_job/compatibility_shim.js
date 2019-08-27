@@ -66,20 +66,12 @@ export function compatibilityShimFactory(server, logger) {
       } else if (relativeUrl) {
         kibanaRelativeUrls = [ relativeUrl ];
       } else {
-        if (objectType && savedObjectId) {
-          kibanaRelativeUrls = [getSavedObjectRelativeUrl(objectType, savedObjectId, queryString)];
-          logger.warning(
-            `The relativeUrls have been derived from saved object parameters. ` +
-              `This functionality will be removed with the next major version.`
-          );
-        } else {
-          logger.warning(
-            `Kibana Reporting will soon no longer work by parsing a Saved Object ` +
-              `type and ID into a Kibana URL. Please use Kibana to regenerate the ` +
-              `POST URL to get a report generation URL that will work with future ` +
-              `versions of Kibana.`
-          );
-        }}
+        kibanaRelativeUrls = [getSavedObjectRelativeUrl(objectType, savedObjectId, queryString)];
+        logger.warning(
+          `The relativeUrls have been derived from saved object parameters. ` +
+            `This functionality will be removed with the next major version.`
+        );
+      }
 
       let reportTitle;
       try {
