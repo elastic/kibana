@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import open from 'opn';
 import { parse as parseUrl } from 'url';
 import { Page, SerializableOrJSHandle, EvaluateFn } from 'puppeteer';
 import { ViewZoomWidthHeight } from '../../../../export_types/common/layouts/layout';
