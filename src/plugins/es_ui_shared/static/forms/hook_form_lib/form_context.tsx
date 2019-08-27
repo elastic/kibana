@@ -17,10 +17,25 @@
  * under the License.
  */
 
-// Only export the useForm hook. The "useField" hook is for internal use
-// as the consumer of the library must use the <UseField /> component
-export { useForm } from './hooks';
+import React, { createContext, useContext } from 'react';
 
-export * from './components';
-export * from './constants';
-export * from './types';
+import { Form } from './types';
+
+const FormContext = createContext<Form<any> | undefined>(undefined);
+
+interface Props<T = Record<string, unknown>> {
+  form: Form<T>;
+  children: React.ReactNode;
+}
+
+export const FormProvider = ({ children, form }: Props) => (
+  <FormContext.Provider value={form}>{children}</FormContext.Provider>
+);
+
+export const useFormState = function<T = Record<string, unknown>>() {
+  const context = useContext(FormContext) as Form<T>;
+  if (context === undefined) {
+    throw new Error('useFormState must be used within a <FormProvider />');
+  }
+  return context;
+};

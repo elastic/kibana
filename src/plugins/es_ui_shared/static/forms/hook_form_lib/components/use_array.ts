@@ -18,11 +18,11 @@
  */
 
 import { useState, useRef } from 'react';
-import { Form } from '../types';
+
+import { useFormState } from '../form_context';
 
 interface Props {
   path: string;
-  form: Form<any>;
   initialNumberOfItems?: number;
   children: (args: {
     items: ArrayItem[];
@@ -37,7 +37,8 @@ export interface ArrayItem {
   isNew: boolean;
 }
 
-export const UseArray = ({ path, form, initialNumberOfItems, children }: Props) => {
+export const UseArray = ({ path, initialNumberOfItems, children }: Props) => {
+  const form = useFormState();
   const defaultValues = form.getFieldDefaultValue(path) as any[];
   const uniqueId = useRef(0);
 

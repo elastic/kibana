@@ -19,14 +19,14 @@
 
 import React, { useEffect } from 'react';
 
-import { Form, Field as FieldType, FieldConfig } from '../types';
+import { Field as FieldType, FieldConfig } from '../types';
 import { useField } from '../hooks';
+import { useFormState } from '../form_context';
 
 interface Props {
   path: string;
   config?: FieldConfig<any>;
   defaultValue?: unknown;
-  form: Form<any>;
   component?: (({ field }: { field: FieldType } & any) => JSX.Element) | 'input';
   componentProps?: any;
   children?: (field: FieldType) => JSX.Element;
@@ -35,12 +35,17 @@ interface Props {
 export const UseField = ({
   path,
   config,
-  form,
-  defaultValue = form.getFieldDefaultValue(path),
+  defaultValue,
   component = 'input',
   componentProps = {},
   children,
 }: Props) => {
+  const form = useFormState();
+
+  if (typeof defaultValue === 'undefined') {
+    defaultValue = form.getFieldDefaultValue(path);
+  }
+
   if (!config) {
     config = form.__readFieldConfigFromSchema(path);
   }

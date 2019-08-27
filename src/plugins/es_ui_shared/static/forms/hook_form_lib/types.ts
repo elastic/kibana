@@ -74,7 +74,7 @@ export interface Field {
   readonly isPristine: boolean;
   readonly isValidating: boolean;
   readonly isChangingValue: boolean;
-  readonly form: Form;
+  readonly form: Form<any>;
   getErrorsMessages: (args?: {
     validationType?: 'field' | string;
     errorCode?: string;
@@ -91,7 +91,7 @@ export interface Field {
   __serializeOutput: (rawValue?: unknown) => unknown;
 }
 
-export interface FieldConfig<T = FormData> {
+export interface FieldConfig<T = any> {
   readonly path?: string;
   readonly label?: string;
   readonly helpText?: string;
