@@ -5,6 +5,7 @@
  */
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+// eslint-disable-next-line import/no-default-export
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
