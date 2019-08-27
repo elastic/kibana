@@ -82,6 +82,7 @@ describe('terms', () => {
         label: 'Top values of source',
         isBucketed: true,
         dataType: 'string',
+        isMetric: false,
         params: {
           size: 5,
           orderBy: {

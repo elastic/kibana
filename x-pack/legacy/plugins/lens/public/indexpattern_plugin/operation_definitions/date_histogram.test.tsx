@@ -96,6 +96,7 @@ describe('date_histogram', () => {
               label: 'Value of timestamp',
               dataType: 'date',
               isBucketed: true,
+              isMetric: false,
 
               // Private
               operationType: 'date_histogram',
@@ -195,6 +196,7 @@ describe('date_histogram', () => {
         sourceField: 'timestamp',
         label: 'Date over timestamp',
         isBucketed: true,
+        isMetric: false,
         dataType: 'date',
         params: {
           interval: 'd',
@@ -215,6 +217,7 @@ describe('date_histogram', () => {
         sourceField: 'timestamp',
         label: 'Date over timestamp',
         isBucketed: true,
+        isMetric: false,
         dataType: 'date',
         params: {
           interval: 'auto',

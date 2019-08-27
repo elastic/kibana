@@ -7,9 +7,10 @@
 import Boom from 'boom';
 import Joi from 'joi';
 import { RequestQuery } from 'hapi';
+import { GetSpacePurpose } from '../../../../common/model/types';
 import { Space } from '../../../../common/model/space';
 import { wrapError } from '../../../lib/errors';
-import { SpacesClient, GetSpacePurpose } from '../../../lib/spaces_client';
+import { SpacesClient } from '../../../lib/spaces_client';
 import { ExternalRouteDeps, ExternalRouteRequestFacade } from '.';
 
 export function initGetSpacesApi(deps: ExternalRouteDeps) {
