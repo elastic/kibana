@@ -36,7 +36,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import { EuiText } from '@elastic/eui';
 
-interface OnSaveProps {
+export interface OnSaveProps {
   newTitle: string;
   newCopyOnSave: boolean;
   isTitleDuplicateConfirmed: boolean;

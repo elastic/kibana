@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
+import { SavedObjectSaveModal, OnSaveProps } from 'ui/saved_objects/components/saved_object_save_modal';
 
 export function GraphSaveModal({
   onSave,
@@ -13,7 +13,7 @@ export function GraphSaveModal({
   title,
   showCopyOnSave,
 }: {
-  onSave: () => any;
+  onSave: (props: OnSaveProps) => void;
   onClose: () => void;
   title: string;
   showCopyOnSave: boolean;

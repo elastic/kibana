@@ -209,6 +209,20 @@ app.controller('graphuiPlugin', function (
       });
   }
 
+  function updateBreadcrumbs() {
+    setBreadcrumbs({
+      chrome,
+      savedWorkspace: $route.current.locals.savedWorkspace,
+      navigateTo: () => {
+        canWipeWorkspace(function () {
+          $scope.$evalAsync(() => {
+            kbnUrl.changePath('/home/');
+          });
+        });
+      }
+    });
+  }
+
   $scope.title = 'Graph';
   $scope.spymode = 'request';
 
@@ -887,12 +901,12 @@ app.controller('graphuiPlugin', function (
           newTitle,
           newDescription,
           newCopyOnSave,
-          newTimeRestore,
           isTitleDuplicateConfirmed,
           onTitleDuplicate,
         }) => {
           $scope.savedWorkspace.title = newTitle;
           $scope.savedWorkspace.description = newDescription;
+          $scope.savedWorkspace.copyOnSave = newCopyOnSave;
           const saveOptions = {
             confirmOverwrite: false,
             isTitleDuplicateConfirmed,
@@ -939,17 +953,7 @@ app.controller('graphuiPlugin', function (
     },
   });
 
-  setBreadcrumbs({
-    chrome,
-    savedWorkspace: $route.current.locals.savedWorkspace,
-    navigateTo: () => {
-      canWipeWorkspace(function () {
-        $scope.$evalAsync(() => {
-          kbnUrl.changePath('/home/');
-        });
-      });
-    }
-  });
+  updateBreadcrumbs();
 
   $scope.menus = {
     showSave: false,
@@ -1114,7 +1118,7 @@ app.controller('graphuiPlugin', function (
     });
   }
 
-  $scope.saveWorkspace = function () {
+  $scope.saveWorkspace = function (saveOptions) {
     if ($scope.allSavingDisabled) {
       // It should not be possible to navigate to this function if allSavingDisabled is set
       // but adding check here as a safeguard.
@@ -1204,7 +1208,7 @@ app.controller('graphuiPlugin', function (
     $scope.savedWorkspace.description = $scope.description;
 
 
-    return $scope.savedWorkspace.save().then(function (id) {
+    return $scope.savedWorkspace.save(saveOptions).then(function (id) {
       $scope.closeMenus();
       $scope.userHasConfirmedSaveWorkspaceData = false; //reset flag
       if (id) {
@@ -1227,10 +1231,9 @@ app.controller('graphuiPlugin', function (
         if ($scope.savedWorkspace.id !== $route.current.params.id) {
           kbnUrl.change(getEditPath($scope.savedWorkspace));
         }
-        return { id };
-      } else {
-        return { error: 'Save was not sucessfull' };
+        updateBreadcrumbs();
       }
+      return { id };
     }, fatalError);
 
   };
