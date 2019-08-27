@@ -179,6 +179,7 @@ function addFieldAsBucketOperation(
     suggestedPriority: undefined,
     field,
   });
+  const [buckets, metrics] = separateBucketColumns(layer);
   const newColumnId = generateId();
   const updatedColumns = {
     ...layer.columns,
@@ -186,7 +187,7 @@ function addFieldAsBucketOperation(
   };
   let updatedColumnOrder: string[] = [];
   if (applicableBucketOperation === 'terms') {
-    updatedColumnOrder = [newColumnId, ...layer.columnOrder];
+    updatedColumnOrder = [...buckets, newColumnId, ...metrics];
   } else {
     const oldDateHistogramColumn = layer.columnOrder.find(
       columnId => layer.columns[columnId].operationType === 'date_histogram'
@@ -197,13 +198,7 @@ function addFieldAsBucketOperation(
         columnId !== oldDateHistogramColumn ? columnId : newColumnId
       );
     } else {
-      const bucketedColumns = layer.columnOrder.filter(
-        columnId => layer.columns[columnId].isBucketed
-      );
-      const metricColumns = layer.columnOrder.filter(
-        columnId => !layer.columns[columnId].isBucketed
-      );
-      updatedColumnOrder = [...bucketedColumns, newColumnId, ...metricColumns];
+      updatedColumnOrder = [...buckets, newColumnId, ...metrics];
     }
   }
   return {
