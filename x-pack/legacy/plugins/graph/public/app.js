@@ -126,6 +126,7 @@ uiRoutes
   })
   .when('/workspace/:id?', {
     template: appTemplate,
+    badge: getReadonlyBadge,
     resolve: {
       savedWorkspace: function (savedGraphWorkspaces, courier, $route) {
         return $route.current.params.id && savedGraphWorkspaces.get($route.current.params.id)
