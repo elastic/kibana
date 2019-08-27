@@ -50,6 +50,7 @@ export function mockAuthenticationProviderOptionsWithJest() {
   basePath.get.mockReturnValue('/base-path');
 
   return {
+    getServerBaseURL: () => 'test-protocol://test-hostname:1234',
     client: elasticsearchServiceMock.createClusterClient(),
     logger: loggingServiceMock.create().get(),
     basePath,
