@@ -65,6 +65,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 createdBy: 'elastic',
                 scheduledTaskId: match.scheduledTaskId,
                 updatedBy: 'elastic',
+                apiKeyOwner: 'elastic',
               });
               break;
             default:
