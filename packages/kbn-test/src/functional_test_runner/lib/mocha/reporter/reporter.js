@@ -122,7 +122,7 @@ export function MochaReporterProvider({ getService }) {
 
     onSuiteEnd = () => {
       if (log.indent(-2) === 0) {
-        log.write();
+        log.write('');
       }
     };
 
