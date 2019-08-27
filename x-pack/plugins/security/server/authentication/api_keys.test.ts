@@ -43,7 +43,7 @@ describe('API Keys', () => {
       expect(mockScopedClusterClient.callAsCurrentUser).not.toHaveBeenCalled();
     });
 
-    it('calls callCluster with proper body arguments', async () => {
+    it('calls callCluster with proper parameters', async () => {
       mockIsSecurityFeatureDisabled.mockReturnValue(false);
       mockScopedClusterClient.callAsCurrentUser.mockResolvedValueOnce({
         id: '123',
@@ -85,7 +85,7 @@ describe('API Keys', () => {
       expect(mockScopedClusterClient.callAsCurrentUser).not.toHaveBeenCalled();
     });
 
-    it('calls callCluster with proper body arguments', async () => {
+    it('calls callCluster with proper parameters', async () => {
       mockIsSecurityFeatureDisabled.mockReturnValue(false);
       mockScopedClusterClient.callAsCurrentUser.mockResolvedValueOnce({
         invalidated_api_keys: ['api-key-id-1'],
@@ -95,6 +95,32 @@ describe('API Keys', () => {
       const result = await apiKeys.invalidate(httpServerMock.createKibanaRequest(), {
         id: '123',
       });
+      expect(result).toEqual({
+        invalidated_api_keys: ['api-key-id-1'],
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+      });
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(
+        'shield.invalidateAPIKey',
+        {
+          body: {
+            id: '123',
+          },
+        }
+      );
+    });
+
+    it(`Only passes id as a parameter`, async () => {
+      mockIsSecurityFeatureDisabled.mockReturnValue(false);
+      mockScopedClusterClient.callAsCurrentUser.mockResolvedValueOnce({
+        invalidated_api_keys: ['api-key-id-1'],
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+      });
+      const result = await apiKeys.invalidate(httpServerMock.createKibanaRequest(), {
+        id: '123',
+        name: 'abc',
+      } as any);
       expect(result).toEqual({
         invalidated_api_keys: ['api-key-id-1'],
         previously_invalidated_api_keys: [],

@@ -45,11 +45,11 @@ export interface PluginSetupContract {
     isAuthenticated: (request: KibanaRequest) => Promise<boolean>;
     createAPIKey: (
       request: KibanaRequest,
-      body: CreateAPIKeyParams
+      params: CreateAPIKeyParams
     ) => Promise<CreateAPIKeyResult | null>;
     invalidateAPIKey: (
       request: KibanaRequest,
-      body: InvalidateAPIKeyParams
+      params: InvalidateAPIKeyParams
     ) => Promise<InvalidateAPIKeyResult | null>;
   };
 

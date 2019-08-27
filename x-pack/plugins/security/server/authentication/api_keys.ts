@@ -102,11 +102,12 @@ export class APIKeys {
 
   /**
    * Tries to create an API key for the current user.
-   * @param param0 The options to create an API key
+   * @param request Request instance.
+   * @param params The params to create an API key
    */
   async create(
     request: KibanaRequest,
-    body: CreateAPIKeyParams
+    params: CreateAPIKeyParams
   ): Promise<CreateAPIKeyResult | null> {
     if (this.isSecurityFeatureDisabled()) {
       return null;
@@ -115,18 +116,24 @@ export class APIKeys {
     this.logger.debug('Trying to create an API key');
 
     // User needs `manage_api_key` privilege to use this API
-    const key = (await this.clusterClient
-      .asScoped(request)
-      .callAsCurrentUser('shield.createAPIKey', { body })) as CreateAPIKeyResult;
+    let result: CreateAPIKeyResult;
+    try {
+      result = (await this.clusterClient
+        .asScoped(request)
+        .callAsCurrentUser('shield.createAPIKey', { body: params })) as CreateAPIKeyResult;
+      this.logger.debug('API key was created successfully');
+    } catch (e) {
+      this.logger.error(`Failed to create API key: ${e.message}`);
+      throw e;
+    }
 
-    this.logger.debug('API key was created successfully');
-
-    return key;
+    return result;
   }
 
   /**
    * Tries to invalidate an API key.
-   * @param param0 The options to invalidate an API key.
+   * @param request Request instance.
+   * @param params The params to invalidate an API key.
    */
   async invalidate(
     request: KibanaRequest,

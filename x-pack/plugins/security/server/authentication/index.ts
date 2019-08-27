@@ -146,10 +146,10 @@ export async function setupAuthentication({
     login: authenticator.login.bind(authenticator),
     logout: authenticator.logout.bind(authenticator),
     getCurrentUser,
-    createAPIKey: (request: KibanaRequest, body: CreateAPIKeyParams) =>
-      apiKeys.create(request, body),
-    invalidateAPIKey: (request: KibanaRequest, body: InvalidateAPIKeyParams) =>
-      apiKeys.invalidate(request, body),
+    createAPIKey: (request: KibanaRequest, params: CreateAPIKeyParams) =>
+      apiKeys.create(request, params),
+    invalidateAPIKey: (request: KibanaRequest, params: InvalidateAPIKeyParams) =>
+      apiKeys.invalidate(request, params),
     isAuthenticated: async (request: KibanaRequest) => {
       try {
         await getCurrentUser(request);

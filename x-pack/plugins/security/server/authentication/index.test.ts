@@ -363,31 +363,32 @@ describe('setupAuthentication()', () => {
   describe('createAPIKey()', () => {
     let createAPIKey: (
       request: KibanaRequest,
-      body: CreateAPIKeyParams
+      params: CreateAPIKeyParams
     ) => Promise<CreateAPIKeyResult | null>;
     beforeEach(async () => {
       createAPIKey = (await setupAuthentication(mockSetupAuthenticationParams)).createAPIKey;
     });
 
     it('calls createAPIKey with given arguments', async () => {
+      const request = httpServerMock.createKibanaRequest();
       const apiKeysInstance = jest.requireMock('./api_keys').APIKeys.mock.instances[0];
-      const options = {
+      const params = {
         name: 'my-key',
         role_descriptors: {},
         expiration: '1d',
       };
       apiKeysInstance.create.mockResolvedValueOnce({ success: true });
-      await expect(createAPIKey(httpServerMock.createKibanaRequest(), options)).resolves.toEqual({
+      await expect(createAPIKey(request, params)).resolves.toEqual({
         success: true,
       });
-      expect(apiKeysInstance.create).toHaveBeenCalledWith(expect.anything(), options);
+      expect(apiKeysInstance.create).toHaveBeenCalledWith(request, params);
     });
   });
 
   describe('invalidateAPIKey()', () => {
     let invalidateAPIKey: (
       request: KibanaRequest,
-      body: InvalidateAPIKeyParams
+      params: InvalidateAPIKeyParams
     ) => Promise<InvalidateAPIKeyResult | null>;
     beforeEach(async () => {
       invalidateAPIKey = (await setupAuthentication(mockSetupAuthenticationParams))
@@ -395,17 +396,16 @@ describe('setupAuthentication()', () => {
     });
 
     it('calls invalidateAPIKey with given arguments', async () => {
+      const request = httpServerMock.createKibanaRequest();
       const apiKeysInstance = jest.requireMock('./api_keys').APIKeys.mock.instances[0];
-      const options = {
+      const params = {
         id: '123',
       };
       apiKeysInstance.invalidate.mockResolvedValueOnce({ success: true });
-      await expect(
-        invalidateAPIKey(httpServerMock.createKibanaRequest(), options)
-      ).resolves.toEqual({
+      await expect(invalidateAPIKey(request, params)).resolves.toEqual({
         success: true,
       });
-      expect(apiKeysInstance.invalidate).toHaveBeenCalledWith(expect.anything(), options);
+      expect(apiKeysInstance.invalidate).toHaveBeenCalledWith(request, params);
     });
   });
 });
