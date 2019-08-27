@@ -131,6 +131,7 @@ kibana_vars=(
     xpack.reporting.capture.loadDelay
     xpack.reporting.capture.settleTime
     xpack.reporting.capture.timeout
+    xpack.reporting.csv.enablePanelActionDownload
     xpack.reporting.csv.maxSizeBytes
     xpack.reporting.enabled
     xpack.reporting.encryptionKey
