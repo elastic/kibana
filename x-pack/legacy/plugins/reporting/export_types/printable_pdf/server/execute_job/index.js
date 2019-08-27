@@ -7,7 +7,8 @@
 import * as Rx from 'rxjs';
 import { mergeMap, catchError, map, takeUntil } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import { oncePerServer } from '../../../../server/lib';
+import { PLUGIN_ID, PDF_JOB_TYPE } from '../../../../common/constants';
+import { LevelLogger, oncePerServer } from '../../../../server/lib';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
 import { compatibilityShimFactory } from './compatibility_shim';
 import {
@@ -21,12 +22,16 @@ import {
 function executeJobFn(server) {
   const generatePdfObservable = generatePdfObservableFactory(server);
   const compatibilityShim = compatibilityShimFactory(server);
+  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, PDF_JOB_TYPE, 'execute']);
 
-  return compatibilityShim(function executeJob(jobToExecute, cancellationToken) {
+  return compatibilityShim(function executeJob(jobId, jobToExecute, cancellationToken) {
+    const jobLogger = logger.clone([jobId]);
+
     const process$ = Rx.of({ job: jobToExecute, server }).pipe(
       mergeMap(decryptJobHeaders),
-      catchError(err =>
-        Rx.throwError(
+      catchError(err => {
+        jobLogger.error(err);
+        return Rx.throwError(
           i18n.translate(
             'xpack.reporting.exportTypes.printablePdf.compShim.failedToDecryptReportJobDataErrorMessage',
             {
@@ -35,14 +40,15 @@ function executeJobFn(server) {
               values: { encryptionKey: 'xpack.reporting.encryptionKey', err: err.toString() },
             }
           )
-        )
-      ),
+        );
+      }),
       map(omitBlacklistedHeaders),
       map(getConditionalHeaders),
       mergeMap(getCustomLogo),
       mergeMap(addForceNowQuerystring),
       mergeMap(({ job, conditionalHeaders, logo, urls }) => {
         return generatePdfObservable(
+          jobLogger,
           job.title,
           urls,
           job.browserTimezone,
@@ -56,7 +62,10 @@ function executeJobFn(server) {
         content: buffer.toString('base64'),
         size: buffer.byteLength,
       })),
-      catchError(err => Rx.throwError(err))
+      catchError(err => {
+        jobLogger.error(err);
+        return Rx.throwError(err);
+      })
     );
 
     const stop$ = Rx.fromEventPattern(cancellationToken.on);
