@@ -42,7 +42,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('landing page shows "Create new Workspace" button', async () => {
-        await PageObjects.common.navigateToApp('home', {
+        await PageObjects.common.navigateToApp('graph', {
           basePath: '/s/custom_space',
         });
         await testSubjects.existOrFail('workspaceLandingPage', { timeout: 10000 });
@@ -50,7 +50,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('allows creating a new workspace', async () => {
-        await PageObjects.common.navigateToApp('home', {
+        await PageObjects.common.navigateToApp('graph', {
           basePath: '/s/custom_space',
         });
         await testSubjects.click('graphCreateWorkspacePromptButton');
