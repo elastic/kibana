@@ -6,12 +6,13 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import { Browser, Page, LaunchOptions } from 'puppeteer';
 import rimraf from 'rimraf';
 import * as Rx from 'rxjs';
 import { map, share, mergeMap, filter, partition, ignoreElements, tap } from 'rxjs/operators';
 import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 
-import { Browser, Page, launch, LaunchOptions } from '../puppeteer';
+import { launch } from '../puppeteer';
 import { LevelLogger as Logger } from '../../../lib/level_logger';
 import { HeadlessChromiumDriver } from '../driver';
 import { args, IArgOptions } from './args';

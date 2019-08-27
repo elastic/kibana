@@ -8,14 +8,6 @@ import puppeteer from 'puppeteer';
 // @ts-ignore lacking typedefs which this module fixes
 import puppeteerCore from 'puppeteer-core';
 
-// We export a set of types and other methods since we use puppeteer-core, which has an outdated @types package.
-// However, @types/puppeteer _is_ up-to-date, and this module merges them together.
-export type Browser = puppeteer.Browser;
-export type Page = puppeteer.Page;
-export type LaunchOptions = puppeteer.LaunchOptions;
-export type SerializableOrJSHandle = puppeteer.SerializableOrJSHandle;
-export type EvaluateFn = puppeteer.EvaluateFn;
-
 export const launch: (
   opts?: puppeteer.LaunchOptions
 ) => Promise<puppeteer.Browser> = puppeteerCore.launch.bind(puppeteerCore);

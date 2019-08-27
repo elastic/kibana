@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Browser } from '../../browsers/chromium/puppeteer';
+import { Browser } from 'puppeteer';
 import { KbnServer, Logger } from '../../../types';
 import { CHROMIUM } from '../../browsers/browser_types';
 
