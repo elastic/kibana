@@ -5,7 +5,6 @@
  */
 
 import React, { Fragment } from 'react';
-
 import {
   EuiFieldText,
   EuiFormRow,
@@ -84,7 +83,7 @@ export class XYZTMSSource extends AbstractTMSSource {
 }
 
 
-class XYZTMSEditor extends  React.Component {
+class XYZTMSEditor extends React.Component {
 
   state = {
     tmsInput: '',
@@ -127,31 +126,52 @@ class XYZTMSEditor extends  React.Component {
   }
 
   render() {
+    const {
+      attributionText,
+      attributionUrl,
+    } = this.state;
+
     return (
       <Fragment>
-        <EuiFormRow label="Url">
+        <EuiFormRow
+          label="Url"
+        >
           <EuiFieldText
             placeholder={'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'}
             onChange={e => this._handleTMSInputChange(e)}
           />
         </EuiFormRow>
-        <EuiFormRow label="Attribution text">
+        <EuiFormRow
+          label="Attribution text"
+          isInvalid={attributionUrl !== '' && attributionText === ''}
+          error={[
+            i18n.translate('xpack.maps.xyztmssource.attributionText', {
+              defaultMessage:
+                'Attribution url must have accompanying text',
+            })
+          ]}
+        >
           <EuiFieldText
             placeholder={'© OpenStreetMap contributors'}
-            onChange={e =>
-              this._handleTMSAttributionChange(
-                { attributionText: e.target.value }
-              )
+            onChange={({ target }) =>
+              this._handleTMSAttributionChange({ attributionText: target.value })
             }
           />
         </EuiFormRow>
-        <EuiFormRow label="Attribution link">
+        <EuiFormRow
+          label="Attribution link"
+          isInvalid={attributionText !== '' && attributionUrl === ''}
+          error={[
+            i18n.translate('xpack.maps.xyztmssource.attributionLink', {
+              defaultMessage:
+                'Attribution text must have an accompanying link',
+            })
+          ]}
+        >
           <EuiFieldText
             placeholder={'https://www.openstreetmap.org/copyright'}
-            onChange={e =>
-              this._handleTMSAttributionChange(
-                { attributionUrl: e.target.value }
-              )
+            onChange={({ target }) =>
+              this._handleTMSAttributionChange({ attributionUrl: target.value })
             }
           />
         </EuiFormRow>
