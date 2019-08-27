@@ -16,32 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// @ts-ignore
-import { EuiCodeEditor } from '@elastic/eui';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCodeBlock } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { DocViewRenderProps } from 'ui/registry/doc_views';
 
-export function JsonCodeEditor({ hit }: DocViewRenderProps) {
+export function JsonCodeBlock({ hit }: DocViewRenderProps) {
+  const label = i18n.translate('kbnDocViews.json.codeEditorAriaLabel', {
+    defaultMessage: 'Read only JSON view of an elasticsearch document',
+  });
   return (
-    <EuiCodeEditor
-      aria-label={
-        <FormattedMessage
-          id="kbnDocViews.json.codeEditorAriaLabel"
-          defaultMessage="Read only JSON view of an elasticsearch document"
-        />
-      }
-      isReadOnly
-      mode="json"
-      setOptions={{
-        showPrintMargin: false,
-        minLines: 20,
-        maxLines: Infinity,
-        highlightActiveLine: false,
-      }}
-      theme="textmate"
-      value={JSON.stringify(hit, null, 2)}
-      width="100%"
-    />
+    <EuiCodeBlock aria-label={label} language="json" isCopyable paddingSize="s">
+      {JSON.stringify(hit, null, 2)}
+    </EuiCodeBlock>
   );
 }

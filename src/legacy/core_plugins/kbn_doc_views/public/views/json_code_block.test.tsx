@@ -18,7 +18,7 @@
  */
 import React from 'react';
 import { shallow } from 'enzyme';
-import { JsonCodeEditor } from './json_code_editor';
+import { JsonCodeBlock } from './json_code_block';
 import { IndexPattern } from 'ui/index_patterns';
 
 it('returns the `JsonCodeEditor` component', () => {
@@ -30,5 +30,5 @@ it('returns the `JsonCodeEditor` component', () => {
     onAddColumn: jest.fn(),
     onRemoveColumn: jest.fn(),
   };
-  expect(shallow(<JsonCodeEditor {...props} />)).toMatchSnapshot();
+  expect(shallow(<JsonCodeBlock {...props} />)).toMatchSnapshot();
 });
