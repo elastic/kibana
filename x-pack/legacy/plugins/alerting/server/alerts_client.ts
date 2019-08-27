@@ -349,6 +349,7 @@ export class AlertsClient {
   }
 
   private validateActions(alertType: AlertType, actions: Alert['actions']) {
+    // TODO: Should also ensure user has access to each action
     const { actionGroups: alertTypeActionGroups } = alertType;
     const usedAlertActionGroups = actions.map(action => action.group);
     const invalidActionGroups = usedAlertActionGroups.filter(

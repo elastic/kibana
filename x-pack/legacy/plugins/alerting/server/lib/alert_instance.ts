@@ -40,7 +40,8 @@ export class AlertInstance {
     if (this.fireOptions === undefined) {
       return false;
     }
-    // Should be throttled and not fire
+    // Shouldn't fire if still within throttling window
+    // Reset if actionGroup changes
     const throttleMills = throttle ? parseDuration(throttle) : 0;
     const actionGroup = this.fireOptions.actionGroup;
     if (
