@@ -52,7 +52,12 @@ export class GisMap extends Component {
   }
 
   // Need to get the right element until https://github.com/elastic/eui/issues/2220
-  // is fixed, otherwise we can't use ref's to emit the custom event for reporting
+  // is fixed, otherwise we can't use ref's to emit the custom event for reporting.
+  // Reporting uses both the 'data-render-complete' attribute, as well as this event,
+  // to determine if the item is done loading. The former is there to indicate on
+  // pageload if the visualization is "done" -- and if not then it adds it to group
+  // of listeners to determine that it's done. If the attribute is missing it'll timeout. See:
+  // x-pack/legacy/plugins/reporting/export_types/common/lib/screenshots/wait_for_render.ts
   _onInitialLoadRenderComplete = () => {
     const el = document.querySelector(`[data-dom-id="${this.state.domId}"]`);
 
