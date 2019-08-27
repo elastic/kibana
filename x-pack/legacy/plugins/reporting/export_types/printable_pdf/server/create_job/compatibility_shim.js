@@ -53,7 +53,7 @@ export function compatibilityShimFactory(server, logger) {
       headers,
       request
     ) {
-      if (savedObjectId && relativeUrls) {
+      if (savedObjectId && (relativeUrl || relativeUrls)) {
         throw new Error(`savedObjectId should not be provided if relativeUrls are provided`);
       }
       if (!savedObjectId && !relativeUrl && !relativeUrls) {
