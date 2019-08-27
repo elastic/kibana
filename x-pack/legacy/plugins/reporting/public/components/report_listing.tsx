@@ -52,8 +52,8 @@ interface Job {
 
 interface Props {
   badLicenseMessage: string;
-  showLinks?: boolean;
-  enableLinks?: boolean;
+  showLinks: boolean;
+  enableLinks: boolean;
   redirect: (url: string) => void;
   intl: InjectedIntl;
 }
