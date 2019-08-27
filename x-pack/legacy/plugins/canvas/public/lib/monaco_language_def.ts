@@ -24,6 +24,7 @@ interface Language extends monaco.languages.IMonarchLanguage {
   escapes: RegExp;
   digits: RegExp;
   boolean: ['true', 'false'];
+  null: ['null'];
 }
 
 /**
