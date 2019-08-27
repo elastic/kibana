@@ -258,6 +258,10 @@ describe('QueryBarInput', () => {
         savedObjectsClient={startMock.savedObjects.client}
       />
     );
-    expect(mockFetchIndexPatterns).toHaveBeenCalledWith(['logstash-*'], startMock.uiSettings);
+    expect(mockFetchIndexPatterns).toHaveBeenCalledWith(
+      startMock.savedObjects.client,
+      ['logstash-*'],
+      startMock.uiSettings
+    );
   });
 });

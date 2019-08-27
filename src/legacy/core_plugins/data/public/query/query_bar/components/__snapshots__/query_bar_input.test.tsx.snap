@@ -133,6 +133,17 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
       "query": "response:200",
     }
   }
+  savedObjectsClient={
+    Object {
+      "bulkCreate": [MockFunction],
+      "bulkGet": [MockFunction],
+      "create": [MockFunction],
+      "delete": [MockFunction],
+      "find": [MockFunction],
+      "get": [MockFunction],
+      "update": [MockFunction],
+    }
+  }
   screenTitle="Another Screen"
   store={
     Object {
@@ -230,6 +241,17 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
             onKeyUp={[Function]}
             placeholder="Search"
             role="textbox"
+            savedObjectsClient={
+              Object {
+                "bulkCreate": [MockFunction],
+                "bulkGet": [MockFunction],
+                "create": [MockFunction],
+                "delete": [MockFunction],
+                "find": [MockFunction],
+                "get": [MockFunction],
+                "update": [MockFunction],
+              }
+            }
             spellCheck={false}
             type="text"
             value="response:200"
@@ -269,6 +291,17 @@ exports[`QueryBarInput Should disable autoFocus on EuiFieldText when disableAuto
                       onKeyUp={[Function]}
                       placeholder="Search"
                       role="textbox"
+                      savedObjectsClient={
+                        Object {
+                          "bulkCreate": [MockFunction],
+                          "bulkGet": [MockFunction],
+                          "create": [MockFunction],
+                          "delete": [MockFunction],
+                          "find": [MockFunction],
+                          "get": [MockFunction],
+                          "update": [MockFunction],
+                        }
+                      }
                       spellCheck={false}
                       type="text"
                       value="response:200"
@@ -511,6 +544,17 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
       "query": "response:200",
     }
   }
+  savedObjectsClient={
+    Object {
+      "bulkCreate": [MockFunction],
+      "bulkGet": [MockFunction],
+      "create": [MockFunction],
+      "delete": [MockFunction],
+      "find": [MockFunction],
+      "get": [MockFunction],
+      "update": [MockFunction],
+    }
+  }
   screenTitle="Another Screen"
   store={
     Object {
@@ -608,6 +652,17 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
             onKeyUp={[Function]}
             placeholder="Search"
             role="textbox"
+            savedObjectsClient={
+              Object {
+                "bulkCreate": [MockFunction],
+                "bulkGet": [MockFunction],
+                "create": [MockFunction],
+                "delete": [MockFunction],
+                "find": [MockFunction],
+                "get": [MockFunction],
+                "update": [MockFunction],
+              }
+            }
             spellCheck={false}
             type="text"
             value="response:200"
@@ -647,6 +702,17 @@ exports[`QueryBarInput Should pass the query language to the language switcher 1
                       onKeyUp={[Function]}
                       placeholder="Search"
                       role="textbox"
+                      savedObjectsClient={
+                        Object {
+                          "bulkCreate": [MockFunction],
+                          "bulkGet": [MockFunction],
+                          "create": [MockFunction],
+                          "delete": [MockFunction],
+                          "find": [MockFunction],
+                          "get": [MockFunction],
+                          "update": [MockFunction],
+                        }
+                      }
                       spellCheck={false}
                       type="text"
                       value="response:200"
@@ -889,6 +955,17 @@ exports[`QueryBarInput Should render the given query 1`] = `
       "query": "response:200",
     }
   }
+  savedObjectsClient={
+    Object {
+      "bulkCreate": [MockFunction],
+      "bulkGet": [MockFunction],
+      "create": [MockFunction],
+      "delete": [MockFunction],
+      "find": [MockFunction],
+      "get": [MockFunction],
+      "update": [MockFunction],
+    }
+  }
   screenTitle="Another Screen"
   store={
     Object {
@@ -986,6 +1063,17 @@ exports[`QueryBarInput Should render the given query 1`] = `
             onKeyUp={[Function]}
             placeholder="Search"
             role="textbox"
+            savedObjectsClient={
+              Object {
+                "bulkCreate": [MockFunction],
+                "bulkGet": [MockFunction],
+                "create": [MockFunction],
+                "delete": [MockFunction],
+                "find": [MockFunction],
+                "get": [MockFunction],
+                "update": [MockFunction],
+              }
+            }
             spellCheck={false}
             type="text"
             value="response:200"
@@ -1025,6 +1113,17 @@ exports[`QueryBarInput Should render the given query 1`] = `
                       onKeyUp={[Function]}
                       placeholder="Search"
                       role="textbox"
+                      savedObjectsClient={
+                        Object {
+                          "bulkCreate": [MockFunction],
+                          "bulkGet": [MockFunction],
+                          "create": [MockFunction],
+                          "delete": [MockFunction],
+                          "find": [MockFunction],
+                          "get": [MockFunction],
+                          "update": [MockFunction],
+                        }
+                      }
                       spellCheck={false}
                       type="text"
                       value="response:200"
