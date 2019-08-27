@@ -16,18 +16,16 @@ import { FormattedMessage } from '@kbn/i18n/react';
 /**
  * Handle clicks from the user on the opt-in banner.
  *
- * @param {String} bannerId Banner ID to close upon success.
  * @param {Object} telemetryOptInProvider the telemetry opt-in provider
  * @param {Boolean} optIn {@code true} to opt into telemetry.
  * @param {Object} _banners Singleton banners. Can be overridden for tests.
  * @param {Object} _toastNotifications Singleton toast notifications. Can be overridden for tests.
  */
 export async function clickBanner(
-  bannerId,
   telemetryOptInProvider,
   optIn,
   { _banners = banners, _toastNotifications = toastNotifications } = {}) {
-
+  const bannerId = telemetryOptInProvider.getBannerId();
   let set = false;
 
   try {
