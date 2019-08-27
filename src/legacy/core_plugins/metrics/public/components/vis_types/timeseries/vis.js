@@ -19,34 +19,84 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { toastNotifications } from 'ui/notify';
+import reactCSS from 'reactcss';
 
-import { tickFormatter } from '../../lib/tick_formatter';
-import _ from 'lodash';
-import { Timeseries } from '../../../visualizations/components/timeseries';
+import { startsWith, get, cloneDeep, map, isEqual } from 'lodash';
+import { toastNotifications } from 'ui/notify';
+import { htmlIdGenerator } from '@elastic/eui';
+import { ScaleType } from '@elastic/charts';
+
+import { createTickFormatter } from '../../lib/tick_formatter';
+import { TimeSeries } from '../../../visualizations/views/timeseries';
 import { MarkdownSimple } from '../../../../../kibana_react/public';
 import { replaceVars } from '../../lib/replace_vars';
 import { getAxisLabelString } from '../../lib/get_axis_label_string';
 import { getInterval } from '../../lib/get_interval';
+import { areFieldsDifferent } from '../../lib/charts';
 import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
-
-function hasSeparateAxis(row) {
-  return row.separate_axis;
-}
+import { isBackgroundDark } from '../../../../common/set_is_reversed';
+import { STACKED_OPTIONS } from '../../../visualizations/constants';
 
 export class TimeseriesVisualization extends Component {
-  getInterval = () => {
-    const { visData, model } = this.props;
-
-    return getInterval(visData, model);
+  static propTypes = {
+    model: PropTypes.object,
+    onBrush: PropTypes.func,
+    visData: PropTypes.object,
+    dateFormat: PropTypes.string,
+    getConfig: PropTypes.func,
   };
 
-  xaxisFormatter = val => {
+  xAxisFormatter = interval => val => {
     const { scaledDataFormat, dateFormat } = this.props.visData;
-    if (!scaledDataFormat || !dateFormat) return val;
-    const formatter = createXaxisFormatter(this.getInterval(), scaledDataFormat, dateFormat);
+
+    if (!scaledDataFormat || !dateFormat) {
+      return val;
+    }
+
+    const formatter = createXaxisFormatter(interval, scaledDataFormat, dateFormat);
+
     return formatter(val);
   };
+
+  yAxisStackedByPercentFormatter = val => {
+    const n = Number(val) * 100;
+
+    return `${(Number.isNaN(n) ? 0 : n).toFixed(0)}%`;
+  };
+
+  applyDocTo = template => doc => {
+    const vars = replaceVars(template, null, doc);
+
+    if (vars instanceof Error) {
+      this.showToastNotification = vars.error.caused_by;
+
+      return template;
+    }
+
+    return vars;
+  };
+
+  static getYAxisDomain = model => ({
+    min: get(model, 'axis_min'),
+    max: get(model, 'axis_max'),
+  });
+
+  static addYAxis = (yAxis, { id, groupId, position, tickFormatter, domain, hide }) => {
+    yAxis.push({
+      id,
+      groupId,
+      position,
+      tickFormatter,
+      domain,
+      hide,
+    });
+  };
+
+  static getAxisScaleType = model =>
+    get(model, 'axis_scale') === 'log' ? ScaleType.Log : ScaleType.Linear;
+
+  static getTickFormatter = (model, getConfig) =>
+    createTickFormatter(get(model, 'formatter'), get(model, 'value_template'), getConfig);
 
   componentDidUpdate() {
     if (
@@ -71,181 +121,123 @@ export class TimeseriesVisualization extends Component {
     }
   }
 
+  prepareAnnotations = () => {
+    const { model, visData } = this.props;
+
+    return map(model.annotations, ({ id, color, icon, template }) => {
+      const annotationData = get(visData, `${model.id}.annotations.${id}`, []);
+      const applyDocToTemplate = this.applyDocTo(template);
+
+      return {
+        id,
+        color,
+        icon,
+        data: annotationData.map(({ docs, ...rest }) => ({
+          ...rest,
+          docs: docs.map(applyDocToTemplate),
+        })),
+      };
+    });
+  };
+
   render() {
-    const { backgroundColor, model, visData } = this.props;
-    const series = _.get(visData, `${model.id}.series`, []);
-    let annotations;
+    const { model, visData, onBrush } = this.props;
+    const styles = reactCSS({
+      default: {
+        tvbVis: {
+          backgroundColor: get(model, 'background_color'),
+        },
+      },
+    });
+    const series = get(visData, `${model.id}.series`, []);
+    const interval = getInterval(visData, model);
+    const yAxisIdGenerator = htmlIdGenerator('yaxis');
+    const mainAxisGroupId = yAxisIdGenerator('main_group');
+
+    const seriesModel = model.series.filter(s => !s.hidden).map(s => cloneDeep(s));
+    const enableHistogramMode = areFieldsDifferent('chart_type')(seriesModel);
+    const firstSeries = seriesModel.find(s => s.formatter && !s.separate_axis);
+
+    const mainAxisScaleType = TimeseriesVisualization.getAxisScaleType(model);
+    const mainAxisDomain = TimeseriesVisualization.getYAxisDomain(model);
+    const tickFormatter = TimeseriesVisualization.getTickFormatter(
+      firstSeries,
+      this.props.getConfig
+    );
+    const yAxis = [];
 
     this.showToastNotification = null;
 
-    if (model.annotations && Array.isArray(model.annotations)) {
-      annotations = model.annotations.map(annotation => {
-        const data = _.get(visData, `${model.id}.annotations.${annotation.id}`, []).map(item => [
-          item.key,
-          item.docs,
-        ]);
-        return {
-          id: annotation.id,
-          color: annotation.color,
-          icon: annotation.icon,
-          series: data.map(s => {
-            return [
-              s[0],
-              s[1].map(doc => {
-                const vars = replaceVars(annotation.template, null, doc);
-
-                if (vars instanceof Error) {
-                  this.showToastNotification = vars.error.caused_by;
-
-                  return annotation.template;
-                }
-
-                return vars;
-              }),
-            ];
-          }),
-        };
-      });
-    }
-    const seriesModel = model.series.map(s => _.cloneDeep(s));
-    const firstSeries = seriesModel.find(s => s.formatter && !s.separate_axis);
-    const formatter = tickFormatter(
-      _.get(firstSeries, 'formatter'),
-      _.get(firstSeries, 'value_template'),
-      this.props.getConfig
-    );
-
-    const mainAxis = {
+    TimeseriesVisualization.addYAxis(yAxis, {
+      tickFormatter,
+      id: yAxisIdGenerator('main'),
+      groupId: mainAxisGroupId,
       position: model.axis_position,
-      tickFormatter: formatter,
-      axisFormatter: _.get(firstSeries, 'formatter', 'number'),
-      axisFormatterTemplate: _.get(firstSeries, 'value_template'),
-    };
+      domain: mainAxisDomain,
+    });
 
-    if (model.axis_min) mainAxis.min = model.axis_min;
-    if (model.axis_max) mainAxis.max = model.axis_max;
-    if (model.axis_scale === 'log') {
-      mainAxis.mode = 'log';
-      mainAxis.transform = value => (value > 0 ? Math.log(value) / Math.LN10 : null);
-      mainAxis.inverseTransform = value => Math.pow(10, value);
-    }
+    seriesModel.forEach(seriesGroup => {
+      const isStackedWithinSeries = seriesGroup.stacked === STACKED_OPTIONS.STACKED_WITHIN_SERIES;
+      const hasSeparateAxis = Boolean(seriesGroup.separate_axis);
+      const groupId = hasSeparateAxis || isStackedWithinSeries ? seriesGroup.id : mainAxisGroupId;
+      const domain = TimeseriesVisualization.getYAxisDomain(seriesGroup);
+      const isCustomDomain = !isEqual(domain, mainAxisDomain);
+      const seriesGroupTickFormatter = TimeseriesVisualization.getTickFormatter(
+        seriesGroup,
+        this.props.getConfig
+      );
+      const yScaleType = hasSeparateAxis
+        ? TimeseriesVisualization.getAxisScaleType(seriesGroup)
+        : mainAxisScaleType;
 
-    const yaxes = [mainAxis];
+      if (seriesGroup.stacked === STACKED_OPTIONS.PERCENT) {
+        seriesGroup.separate_axis = true;
+        seriesGroup.axisFormatter = 'percent';
+        seriesGroup.axis_min = 0;
+        seriesGroup.axis_max = 1;
+        seriesGroup.axis_position = model.axis_position;
+      }
 
-    seriesModel.forEach(s => {
       series
-        .filter(r => _.startsWith(r.id, s.id))
-        .forEach(
-          r =>
-            (r.tickFormatter = tickFormatter(s.formatter, s.value_template, this.props.getConfig))
-        );
+        .filter(r => startsWith(r.id, seriesGroup.id))
+        .forEach(seriesDataRow => {
+          seriesDataRow.tickFormatter = seriesGroupTickFormatter;
+          seriesDataRow.groupId = groupId;
+          seriesDataRow.yScaleType = yScaleType;
+          seriesDataRow.hideInLegend = Boolean(seriesGroup.hide_in_legend);
+          seriesDataRow.useDefaultGroupDomain = !isCustomDomain;
+        });
 
-      if (s.hide_in_legend) {
-        series.filter(r => _.startsWith(r.id, s.id)).forEach(r => delete r.label);
-      }
-      if (s.stacked !== 'none') {
-        series
-          .filter(r => _.startsWith(r.id, s.id))
-          .forEach(row => {
-            row.data = row.data.map(point => {
-              if (!point[1]) return [point[0], 0];
-              return point;
-            });
-          });
-      }
-      if (s.stacked === 'percent') {
-        s.separate_axis = true;
-        s.axisFormatter = 'percent';
-        s.axis_min = 0;
-        s.axis_max = 1;
-        s.axis_position = model.axis_position;
-        const seriesData = series.filter(r => _.startsWith(r.id, s.id));
-        const first = seriesData[0];
-        if (first) {
-          first.data.forEach((row, index) => {
-            const rowSum = seriesData.reduce((acc, item) => {
-              return item.data[index][1] + acc;
-            }, 0);
-            seriesData.forEach(item => {
-              item.data[index][1] = (rowSum && item.data[index][1] / rowSum) || 0;
-            });
-          });
-        }
+      if (isCustomDomain) {
+        TimeseriesVisualization.addYAxis(yAxis, {
+          domain,
+          groupId,
+          id: yAxisIdGenerator(seriesGroup.id),
+          position: seriesGroup.axis_position,
+          tickFormatter:
+            seriesGroup.stacked === STACKED_OPTIONS.PERCENT
+              ? this.yAxisStackedByPercentFormatter
+              : seriesGroupTickFormatter,
+        });
       }
     });
 
-    const interval = this.getInterval();
-
-    let axisCount = 1;
-    if (seriesModel.some(hasSeparateAxis)) {
-      seriesModel.forEach(row => {
-        if (row.separate_axis) {
-          axisCount++;
-
-          const formatter = tickFormatter(row.formatter, row.value_template, this.props.getConfig);
-
-          const yaxis = {
-            alignTicksWithAxis: 1,
-            position: row.axis_position,
-            tickFormatter: formatter,
-            axisFormatter: row.axis_formatter,
-            axisFormatterTemplate: row.value_template,
-          };
-
-          if (row.axis_min != null) yaxis.min = row.axis_min;
-          if (row.axis_max != null) yaxis.max = row.axis_max;
-
-          yaxes.push(yaxis);
-
-          // Assign axis and formatter to each series
-          series
-            .filter(r => _.startsWith(r.id, row.id))
-            .forEach(r => {
-              r.yaxis = axisCount;
-            });
-        }
-      });
-    }
-
-    const panelBackgroundColor = model.background_color || backgroundColor;
-    const style = { backgroundColor: panelBackgroundColor };
-
-    const params = {
-      dateFormat: this.props.dateFormat,
-      crosshair: true,
-      tickFormatter: formatter,
-      legendPosition: model.legend_position || 'right',
-      backgroundColor: panelBackgroundColor,
-      series,
-      annotations,
-      yaxes,
-      showGrid: Boolean(model.show_grid),
-      legend: Boolean(model.show_legend),
-      xAxisFormatter: this.xaxisFormatter,
-      onBrush: ranges => {
-        if (this.props.onBrush) this.props.onBrush(ranges);
-      },
-    };
-
-    if (interval) {
-      params.xaxisLabel = getAxisLabelString(interval);
-    }
-
     return (
-      <div className="tvbVis" style={style}>
-        <Timeseries {...params} />
+      <div className="tvbVis" style={styles.tvbVis}>
+        <TimeSeries
+          series={series}
+          yAxis={yAxis}
+          onBrush={onBrush}
+          enableHistogramMode={enableHistogramMode}
+          isDarkMode={isBackgroundDark(model.background_color)}
+          showGrid={Boolean(model.show_grid)}
+          legend={Boolean(model.show_legend)}
+          legendPosition={model.legend_position}
+          xAxisLabel={getAxisLabelString(interval)}
+          xAxisFormatter={this.xAxisFormatter(interval)}
+          annotations={this.prepareAnnotations()}
+        />
       </div>
     );
   }
 }
-
-TimeseriesVisualization.propTypes = {
-  backgroundColor: PropTypes.string,
-  className: PropTypes.string,
-  model: PropTypes.object,
-  onBrush: PropTypes.func,
-  onChange: PropTypes.func,
-  visData: PropTypes.object,
-  dateFormat: PropTypes.string,
-  getConfig: PropTypes.func,
-};

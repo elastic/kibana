@@ -19,7 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { assign } from 'lodash';
+import { assign, get } from 'lodash';
 
 import { TimeseriesSeries as timeseries } from './vis_types/timeseries/series';
 import { MetricSeries as metric } from './vis_types/metric/series';
@@ -79,30 +79,41 @@ export class Series extends Component {
 
     return Boolean(Component) ? (
       <VisDataContext.Consumer>
-        {visData => (
-          <Component
-            className={this.props.className}
-            disableAdd={this.props.disableAdd}
-            uiRestrictions={visData.uiRestrictions}
-            disableDelete={this.props.disableDelete}
-            fields={this.props.fields}
-            name={this.props.name}
-            onAdd={this.props.onAdd}
-            onChange={this.handleChange}
-            onClone={this.props.onClone}
-            onDelete={this.props.onDelete}
-            model={this.props.model}
-            panel={this.props.panel}
-            selectedTab={this.state.selectedTab}
-            style={this.props.style}
-            switchTab={this.switchTab}
-            toggleVisible={this.toggleVisible}
-            togglePanelActivation={this.togglePanelActivation}
-            visible={this.state.visible}
-            dragHandleProps={this.props.dragHandleProps}
-            indexPatternForQuery={panel.index_pattern || panel.default_index_pattern}
-          />
-        )}
+        {visData => {
+          const series = get(visData, `${panel.id}.series`, []);
+          const counter = {};
+          const seriesQuantity = series.reduce((acc, value) => {
+            counter[value.seriesId] = counter[value.seriesId] + 1 || 1;
+            acc[value.seriesId] = counter[value.seriesId];
+            return acc;
+          }, {});
+
+          return (
+            <Component
+              className={this.props.className}
+              disableAdd={this.props.disableAdd}
+              uiRestrictions={visData.uiRestrictions}
+              seriesQuantity={seriesQuantity}
+              disableDelete={this.props.disableDelete}
+              fields={this.props.fields}
+              name={this.props.name}
+              onAdd={this.props.onAdd}
+              onChange={this.handleChange}
+              onClone={this.props.onClone}
+              onDelete={this.props.onDelete}
+              model={this.props.model}
+              panel={this.props.panel}
+              selectedTab={this.state.selectedTab}
+              style={this.props.style}
+              switchTab={this.switchTab}
+              toggleVisible={this.toggleVisible}
+              togglePanelActivation={this.togglePanelActivation}
+              visible={this.state.visible}
+              dragHandleProps={this.props.dragHandleProps}
+              indexPatternForQuery={panel.index_pattern || panel.default_index_pattern}
+            />
+          );
+        }}
       </VisDataContext.Consumer>
     ) : (
       <FormattedMessage

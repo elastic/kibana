@@ -20,9 +20,9 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { visWithSplits } from '../../vis_with_splits';
-import { tickFormatter } from '../../lib/tick_formatter';
+import { createTickFormatter } from '../../lib/tick_formatter';
 import _, { get, isUndefined, assign, includes, pick } from 'lodash';
-import { Metric } from '../../../visualizations/components/metric';
+import { Metric } from '../../../visualizations/views/metric';
 import { getLastValue } from '../../../../common/get_last_value';
 import { isBackgroundInverted } from '../../../../common/set_is_reversed';
 
@@ -54,7 +54,7 @@ function MetricVisualization(props) {
       const seriesDef = model.series.find(s => includes(row.id, s.id));
       const newProps = {};
       if (seriesDef) {
-        newProps.formatter = tickFormatter(
+        newProps.formatter = createTickFormatter(
           seriesDef.formatter,
           seriesDef.value_template,
           props.getConfig

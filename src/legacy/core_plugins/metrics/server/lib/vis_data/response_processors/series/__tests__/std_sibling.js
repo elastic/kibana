@@ -98,6 +98,7 @@ describe('stdSibling(resp, panel, series)', () => {
       label: 'Overall Std. Deviation of Average of cpu',
       color: 'rgb(255, 0, 0)',
       stack: false,
+      seriesId: 'test',
       lines: { show: true, fill: 0, lineWidth: 1, steps: false },
       points: { show: true, radius: 1, lineWidth: 1 },
       bars: { fill: 0, lineWidth: 1, show: false },

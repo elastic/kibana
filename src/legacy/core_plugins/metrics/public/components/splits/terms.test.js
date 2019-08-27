@@ -40,7 +40,11 @@ describe('src/legacy/core_plugins/metrics/public/components/splits/terms.test.js
         formatMessage: jest.fn(),
       },
       model: {
+        id: 123,
         terms_field: 'OriginCityName',
+      },
+      seriesQuantity: {
+        id123: 123,
       },
       onChange: jest.fn(),
       indexPattern: 'kibana_sample_data_flights',

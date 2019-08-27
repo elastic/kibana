@@ -26,11 +26,10 @@ import { AddDeleteButtons } from './add_delete_buttons';
 import { ColorPicker } from './color_picker';
 import { FieldSelect } from './aggs/field_select';
 import uuid from 'uuid';
-import { IconSelect } from './icon_select';
+import { IconSelect } from './icon_select/icon_select';
 import { YesNo } from './yes_no';
 import { QueryBarWrapper } from './query_bar_wrapper';
 import { getDefaultQueryLanguage } from './lib/get_default_query_language';
-
 import {
   htmlIdGenerator,
   EuiFlexGroup,

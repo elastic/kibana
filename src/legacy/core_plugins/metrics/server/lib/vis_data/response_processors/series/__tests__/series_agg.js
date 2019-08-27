@@ -109,6 +109,7 @@ describe('seriesAgg(resp, panel, series)', () => {
       color: '#F00',
       label: 'Total CPU',
       stack: false,
+      seriesId: 'test',
       lines: { show: true, fill: 0, lineWidth: 1, steps: false },
       points: { show: true, radius: 1, lineWidth: 1 },
       bars: { fill: 0, lineWidth: 1, show: false },
