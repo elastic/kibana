@@ -310,6 +310,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     <Fragment>
       <ProgressBar isLoading={isLoading} />
       <AnalyticsTable
+        allowNeutralSort={false}
         className="mlAnalyticsTable"
         columns={columns}
         error={searchError}
@@ -319,7 +320,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
         items={filterActive ? filteredAnalytics : analytics}
         itemId={DataFrameAnalyticsListColumn.id}
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-        onChange={onTableChange}
+        onTableChange={onTableChange}
         pagination={pagination}
         sorting={sorting}
         search={search}

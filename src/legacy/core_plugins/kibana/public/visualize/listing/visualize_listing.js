@@ -26,12 +26,11 @@ import chrome from 'ui/chrome';
 import { wrapInI18nContext } from 'ui/i18n';
 import { toastNotifications } from 'ui/notify';
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
-
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { VisualizeListingTable } from './visualize_listing_table';
 import { NewVisModal } from '../wizard/new_vis_modal';
-import { createVisualizeEditUrl, VisualizeConstants } from '../visualize_constants';
+import { VisualizeConstants } from '../visualize_constants';
 import { visualizations } from 'plugins/visualizations';
-
 import { i18n } from '@kbn/i18n';
 
 const app = uiModules.get('app/visualize', ['ngRoute', 'react']);
@@ -42,6 +41,7 @@ export function VisualizeListingController($injector, createNewVis) {
   const Private = $injector.get('Private');
   const config = $injector.get('config');
   const kbnUrl = $injector.get('kbnUrl');
+  const savedObjectClient = Private(SavedObjectsClientProvider);
 
   this.visTypeRegistry = Private(VisTypesRegistryProvider);
   this.visTypeAliases = visualizations.types.visTypeAliasRegistry.get();
@@ -55,13 +55,13 @@ export function VisualizeListingController($injector, createNewVis) {
     this.showNewVisModal = true;
   };
 
-  this.editItem = ({ id }) => {
+  this.editItem = ({ editUrl }) => {
     // for visualizations the edit and view URLs are the same
-    kbnUrl.change(createVisualizeEditUrl(id));
+    window.location = chrome.addBasePath(editUrl);
   };
 
-  this.getViewUrl = ({ id }) => {
-    return chrome.addBasePath(`#${createVisualizeEditUrl(id)}`);
+  this.getViewUrl = ({ editUrl }) => {
+    return chrome.addBasePath(editUrl);
   };
 
   this.closeNewVisModal = () => {
@@ -83,7 +83,7 @@ export function VisualizeListingController($injector, createNewVis) {
 
   this.fetchItems = (filter) => {
     const isLabsEnabled = config.get('visualize:enableLabs');
-    return visualizationService.find(filter, config.get('savedObjects:listingLimit'))
+    return visualizationService.findListItems(filter, config.get('savedObjects:listingLimit'))
       .then(result => {
         this.totalItems = result.total;
 
@@ -94,15 +94,20 @@ export function VisualizeListingController($injector, createNewVis) {
       });
   };
 
-  this.deleteSelectedItems = function deleteSelectedItems(selectedIds) {
-    return visualizationService.delete(selectedIds)
-      .catch(error => {
-        toastNotifications.addError(error, {
-          title: i18n.translate('kbn.visualize.visualizeListingDeleteErrorTitle', {
-            defaultMessage: 'Error deleting visualization',
-          }),
-        });
+  this.deleteSelectedItems = function deleteSelectedItems(selectedItems) {
+    return Promise.all(
+      selectedItems.map(item => {
+        return savedObjectClient.delete(item.savedObjectType, item.id);
+      }),
+    ).then(() => {
+      chrome.untrackNavLinksForDeletedSavedObjects(selectedItems.map(item => item.id));
+    }).catch(error => {
+      toastNotifications.addError(error, {
+        title: i18n.translate('kbn.visualize.visualizeListingDeleteErrorTitle', {
+          defaultMessage: 'Error deleting visualization',
+        }),
       });
+    });
   };
 
   chrome.breadcrumbs.set([{

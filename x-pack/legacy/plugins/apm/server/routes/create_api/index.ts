@@ -16,6 +16,7 @@ import {
   Route,
   Params
 } from '../typings';
+import { jsonRt } from '../../../common/runtime_types/json_rt';
 
 export function createApi() {
   const factoryFns: Array<RouteFactoryFn<any, any, any, any>> = [];
@@ -39,9 +40,15 @@ export function createApi() {
           // add _debug query parameter to all routes
           query: params.query
             ? t.exact(
-                t.intersection([params.query, t.partial({ _debug: t.boolean })])
+                t.intersection([
+                  params.query,
+                  t.partial({ _debug: jsonRt.pipe(t.boolean) })
+                ])
               )
-            : t.union([t.strict({}), t.strict({ _debug: t.boolean })]),
+            : t.union([
+                t.strict({}),
+                t.strict({ _debug: jsonRt.pipe(t.boolean) })
+              ]),
           path: params.path || t.strict({}),
           body: params.body || t.null
         };

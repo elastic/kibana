@@ -12,8 +12,7 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { BucketSpan } from '../bucket_span';
 import { SparseDataSwitch } from '../sparse_data';
 
-import { CREATED_BY_LABEL } from '../../../../../common/job_creator/util/constants';
-import { mlJobService } from '../../../../../../../services/job_service';
+import { convertToMultiMetricJob } from '../../../../../common/job_creator/util/general';
 
 interface Props {
   isActive: boolean;
@@ -34,15 +33,8 @@ export const SingleMetricSettings: FC<Props> = ({ isActive, setIsValid }) => {
     setBucketSpan(jobCreator.bucketSpan);
   }, [jobCreatorUpdated]);
 
-  const convertToMultiMetricJob = () => {
-    jobCreator.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
-    mlJobService.tempJobCloningObjects.job = {
-      ...jobCreator.jobConfig,
-      datafeed_config: jobCreator.datafeedConfig,
-    };
-
-    mlJobService.tempJobCloningObjects.skipTimeRangeStep = true;
-    window.location.href = window.location.href.replace('single_metric', 'multi_metric');
+  const convertToMultiMetric = () => {
+    convertToMultiMetricJob(jobCreator);
   };
 
   return (
@@ -59,7 +51,7 @@ export const SingleMetricSettings: FC<Props> = ({ isActive, setIsValid }) => {
           </EuiFlexGroup>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={convertToMultiMetricJob}>
+              <EuiButtonEmpty onClick={convertToMultiMetric}>
                 <FormattedMessage
                   id="xpack.ml.newJob.wizard.pickFieldsStep.singleMetricView.convertToMultiMetricButton"
                   defaultMessage="Convert to multi metric job"

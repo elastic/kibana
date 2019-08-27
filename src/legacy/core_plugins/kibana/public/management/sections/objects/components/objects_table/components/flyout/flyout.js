@@ -50,9 +50,9 @@ import {
   importLegacyFile,
   resolveImportErrors,
   logLegacyImport,
-  processImportResponse,
   getDefaultTitle,
 } from '../../../../lib';
+import { processImportResponse } from '../../../../lib/process_import_response';
 import {
   resolveSavedObjects,
   resolveSavedSearches,
