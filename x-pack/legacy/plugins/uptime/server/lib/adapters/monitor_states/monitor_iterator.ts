@@ -131,8 +131,8 @@ export class MonitorIterator {
   private async queryNext(size: number): Promise<CheckGroupsPageResult> {
     const start = new Date();
 
-    const { monitorIds, filteredCheckGroups, searchAfter } = await this.getPotentialMatches(size);
-    const matching = await this.fullMatches(monitorIds, filteredCheckGroups);
+    const { monitorIds, filteredCheckGroups, searchAfter } = await this.queryPotentialMatches(size);
+    const matching = await this.refinePotentialMatches(monitorIds, filteredCheckGroups);
 
     const elapsed = new Date().getTime() - start.getTime();
     console.debug('Exec Query in', elapsed + 'ms', 'Len', matching.length);
@@ -142,7 +142,7 @@ export class MonitorIterator {
     };
   }
 
-  private async getPotentialMatches(size: number) {
+  private async queryPotentialMatches(size: number) {
     const filteredQueryResult = await filteredCheckGroupsQuery(
       this.queryContext,
       this.searchAfter,
@@ -169,7 +169,7 @@ export class MonitorIterator {
     };
   }
 
-  private async fullMatches(
+  private async refinePotentialMatches(
     monitorIds: string[],
     filteredCheckGroups: Set<string>
   ): Promise<MonitorIdWithGroups[]> {
