@@ -151,6 +151,9 @@ export class PinnedEvent {
       await this.deletePinnedEventOnTimeline(request, [pinnedEventId]);
       return null;
     } catch (err) {
+      if (getOr(null, 'output.statusCode', err) === 404) {
+        return null;
+      }
       if (getOr(null, 'output.statusCode', err) === 403) {
         return pinnedEventId != null
           ? {
