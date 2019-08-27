@@ -51,13 +51,13 @@ export class GisMap extends Component {
     this._clearRefreshTimer();
   }
 
-  // Need to get the right element until https://github.com/elastic/eui/issues/2220
-  // is fixed, otherwise we can't use ref's to emit the custom event for reporting.
-  // Reporting uses both the 'data-render-complete' attribute, as well as this event,
-  // to determine if the item is done loading. The former is there to indicate on
-  // pageload if the visualization is "done" -- and if not then it adds it to group
-  // of listeners to determine that it's done. If the attribute is missing it'll timeout. See:
-  // x-pack/legacy/plugins/reporting/export_types/common/lib/screenshots/wait_for_render.ts
+  // Reporting uses both a `data-render-complete` attribute and a DOM event listener to determine
+  // if a visualization is done loading. The process roughly is:
+  // - See if the `data-render-complete` attribute is "true". If so we're done!
+  // - If it's not, then reporting injects a listener into the browser for a custom "renderComplete" event.
+  // - When that event is fired, we snapshot the viz and move on.
+  // Failure to not have the dom attribute, or custom event, will timeout the job.
+  // See x-pack/legacy/plugins/reporting/export_types/common/lib/screenshots/wait_for_render.ts for more.
   _onInitialLoadRenderComplete = () => {
     const el = document.querySelector(`[data-dom-id="${this.state.domId}"]`);
 
