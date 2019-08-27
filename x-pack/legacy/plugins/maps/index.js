@@ -123,7 +123,7 @@ export function maps(kibana) {
               all: ['map', 'query'],
               read: ['index-pattern']
             },
-            ui: ['save', 'show'],
+            ui: ['save', 'show', 'saveQuery'],
           },
           read: {
             savedObject: {
