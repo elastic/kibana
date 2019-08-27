@@ -16,6 +16,7 @@ export default function exploreRepositoryFunctionalTests({
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
+  const exists = async (selector: string) => testSubjects.exists(selector, { allowHidden: true });
 
   // FLAKY: https://github.com/elastic/kibana/issues/43492
   describe.skip('File Tree', function() {
@@ -42,9 +43,8 @@ export default function exploreRepositoryFunctionalTests({
         );
       });
 
-      // Wait for the index to end.
       await retry.try(async () => {
-        expect(await testSubjects.exists('repositoryIndexDone')).to.be(true);
+        expect(await exists('repositoryIndexOngoing')).to.be(true);
       });
     });
 
@@ -66,7 +66,7 @@ export default function exploreRepositoryFunctionalTests({
       await PageObjects.code.clickDeleteRepositoryButton();
 
       await retry.try(async () => {
-        expect(await testSubjects.exists('confirmModalConfirmButton')).to.be(true);
+        expect(await exists('confirmModalConfirmButton')).to.be(true);
       });
 
       await testSubjects.click('confirmModalConfirmButton');
@@ -81,9 +81,9 @@ export default function exploreRepositoryFunctionalTests({
 
     it('tree should be loaded', async () => {
       await retry.tryForTime(5000, async () => {
-        expect(await testSubjects.exists('codeFileTreeNode-Directory-elastic/src/code')).ok();
-        expect(await testSubjects.exists('codeFileTreeNode-Directory-kibana/src/code')).ok();
-        expect(await testSubjects.exists('codeFileTreeNode-File-README.MD')).ok();
+        expect(await exists('codeFileTreeNode-Directory-elastic/src/code')).ok();
+        expect(await exists('codeFileTreeNode-Directory-kibana/src/code')).ok();
+        expect(await exists('codeFileTreeNode-File-README.MD')).ok();
       });
     });
 
@@ -92,48 +92,32 @@ export default function exploreRepositoryFunctionalTests({
 
       await retry.tryForTime(1000, async () => {
         // should only open one folder at this time
-        expect(
-          await testSubjects.exists('codeFileTreeNode-Directory-Icon-elastic/src/code-open')
-        ).ok();
-        expect(
-          await testSubjects.exists('codeFileTreeNode-Directory-Icon-kibana/src/code-closed')
-        ).ok();
+        expect(await exists('codeFileTreeNode-Directory-Icon-elastic/src/code-open')).ok();
+        expect(await exists('codeFileTreeNode-Directory-Icon-kibana/src/code-closed')).ok();
       });
 
       await browser.refresh();
 
       await retry.tryForTime(15000, async () => {
         // should only open one folder at this time
-        expect(
-          await testSubjects.exists('codeFileTreeNode-Directory-Icon-elastic/src/code-open')
-        ).ok();
-        expect(
-          await testSubjects.exists('codeFileTreeNode-Directory-Icon-kibana/src/code-closed')
-        ).ok();
+        expect(await exists('codeFileTreeNode-Directory-Icon-elastic/src/code-open')).ok();
+        expect(await exists('codeFileTreeNode-Directory-Icon-kibana/src/code-closed')).ok();
       });
 
       await testSubjects.click('codeFileTreeNode-Directory-kibana/src/code');
 
       await retry.tryForTime(1000, async () => {
         // should open two folders at this time
-        expect(
-          await testSubjects.exists('codeFileTreeNode-Directory-Icon-elastic/src/code-open')
-        ).ok();
-        expect(
-          await testSubjects.exists('codeFileTreeNode-Directory-Icon-kibana/src/code-open')
-        ).ok();
+        expect(await exists('codeFileTreeNode-Directory-Icon-elastic/src/code-open')).ok();
+        expect(await exists('codeFileTreeNode-Directory-Icon-kibana/src/code-open')).ok();
       });
 
       await testSubjects.click('codeFileTreeNode-Directory-elastic/src/code');
 
       await retry.tryForTime(1000, async () => {
         // should only open one folder at this time
-        expect(
-          await testSubjects.exists('codeFileTreeNode-Directory-Icon-elastic/src/code-closed')
-        ).ok();
-        expect(
-          await testSubjects.exists('codeFileTreeNode-Directory-Icon-kibana/src/code-open')
-        ).ok();
+        expect(await exists('codeFileTreeNode-Directory-Icon-elastic/src/code-closed')).ok();
+        expect(await exists('codeFileTreeNode-Directory-Icon-kibana/src/code-open')).ok();
       });
     });
   });
