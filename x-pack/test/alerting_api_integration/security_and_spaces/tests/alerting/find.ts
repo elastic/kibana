@@ -66,6 +66,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 scheduledTaskId: match.scheduledTaskId,
                 throttle: '1m',
                 updatedBy: 'elastic',
+                apiKeyOwner: 'elastic',
               });
               break;
             default:

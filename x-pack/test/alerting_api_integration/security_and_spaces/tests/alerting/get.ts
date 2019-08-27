@@ -60,6 +60,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
                 scheduledTaskId: response.body.scheduledTaskId,
                 throttle: '1m',
                 updatedBy: 'elastic',
+                apiKeyOwner: 'elastic',
               });
               break;
             default:

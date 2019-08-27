@@ -64,6 +64,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 scheduledTaskId: response.body.scheduledTaskId,
                 throttle: '1m',
                 updatedBy: user.username,
+                apiKeyOwner: user.username,
               });
               expect(typeof response.body.scheduledTaskId).to.be('string');
               const { _source: taskRecord } = await getScheduledTask(response.body.scheduledTaskId);

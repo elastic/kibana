@@ -73,6 +73,7 @@ export interface Alert {
   createdBy: string | null;
   updatedBy: string | null;
   apiKey?: string;
+  apiKeyOwner?: string;
   throttle?: string;
 }
 
@@ -86,6 +87,7 @@ export interface RawAlert extends SavedObjectAttributes {
   createdBy: string | null;
   updatedBy: string | null;
   apiKey?: string;
+  apiKeyOwner?: string;
   throttle?: string;
 }
 

@@ -79,8 +79,8 @@ describe('RangeFilterManager', function () {
         {
           range: {
             field1: {
-              gte: 1,
-              lte: 3
+              gt: 1,
+              lt: 3
             }
           }
         }
