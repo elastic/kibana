@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-// import chrome from 'ui/chrome';
+import chrome from 'ui/chrome';
 
 import '../../../mock/match_media';
 import { encodeIpv6 } from '../../../lib/helpers';
@@ -112,12 +112,13 @@ describe('Navigation Breadcrumbs', () => {
     });
   });
   /* Angela has to figure out why this does not pass
-  describe('setBreadcrumbs()', () => {
-    test('should call chrome breadcrumb service with correct breadcrumbs', () => {
-      const pathname = `/hosts/${hostName}`;
-      getBreadcrumbsForRoute(pathname, hostDetailsParams);
-      expect(chrome.breadcrumbs.set).toBeCalledWith(hostBreadcrumbs);
-    });
+
+describe('setBreadcrumbs()', () => {
+  test('should call chrome breadcrumb service with correct breadcrumbs', () => {
+    const pathname = `/hosts/${hostName}`;
+    getBreadcrumbsForRoute(pathname, hostDetailsParams);
+    expect(chrome.breadcrumbs.set).toBeCalledWith(hostBreadcrumbs);
   });
+});
   */
 });

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiTab, EuiTabs, EuiLink } from '@elastic/eui';
-import { get } from 'lodash/fp';
+import { get, getOr } from 'lodash/fp';
 import * as React from 'react';
 import styled from 'styled-components';
 
@@ -74,7 +74,7 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
     const myNavTab: NavTab = Object.keys(navTabs)
       .map(tab => get(tab, navTabs))
       .filter((item: NavTab) => pathname.includes(item.id))[0];
-    return myNavTab.id || '';
+    return getOr('', 'id', myNavTab);
   };
 
   private renderTabs = () => {
