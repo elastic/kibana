@@ -41,11 +41,11 @@ const aggSchemas = new Schemas([
 export class ESPewPewSource extends AbstractESSource {
 
   static type = 'ES_PEW_PEW';
-  static title = i18n.translate('xpack.maps.source.pewPew', {
-    defaultMessage: 'pew-pew'
+  static title = i18n.translate('xpack.maps.source.pewPewTitle', {
+    defaultMessage: 'Connections'
   });
-  static description = i18n.translate('xpack.maps.source.pewPew', {
-    defaultMessage: 'Graph connections between sources and destinations'
+  static description = i18n.translate('xpack.maps.source.pewPewDescription', {
+    defaultMessage: 'Graph source-destination connections. Destinations grouped in grids.'
   });
 
   static createDescriptor({ indexPatternId, sourceGeoField, destGeoField }) {
