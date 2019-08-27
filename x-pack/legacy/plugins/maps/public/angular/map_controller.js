@@ -152,12 +152,16 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
     });
   };
 
-  async function updateStateFromSavedQuery(savedQuery) {
+  function updateStateFromSavedQuery(savedQuery) {
     // use the items from the saved query as the arguments to onQueryChange
     // onQueryChange syncs the app with the global state, taking the args given and setting those to $scope and $state variables.
     // For the refresh config, we don't need an 'isPaused' because the app will take the global setting for us.
     // onQueryChange then also does the dispatching, so we don't need to worry about that either,
-    await onQueryChange({
+    if (savedQuery.attributes.timefilter && savedQuery.attributes.timefilter.refreshInterval) {
+      // I need to set the refreshInterval but don't know where to get isPaused from
+      $scope.refreshConfig.interval = savedQuery.attributes.timefilter.refreshInterval;
+    }
+    onQueryChange({
       filters: savedQuery.attributes.filters || [],
       query: savedQuery.attributes.query,
       time: savedQuery.attributes.timefilter ?
@@ -166,10 +170,6 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
           to: savedQuery.attributes.timefilter.timeTo
         } : undefined
     });
-    if (savedQuery.attributes.timefilter && savedQuery.attributes.timefilter.refreshInterval) {
-      // I need to set the refreshInterval but don't know where to get isPaused from
-      $scope.refreshConfig.interval = savedQuery.attributes.timefilter.refreshInterval;
-    }
   }
 
   $scope.$watch('savedQuery', (newSavedQuery, oldSavedQuery) => {
@@ -180,7 +180,7 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
       updateStateFromSavedQuery(newSavedQuery);
     }
   });
-  $scope.$watch('state.savedQuery', newSavedQueryId => {
+  $scope.$watch(() => $state.savedQuery, newSavedQueryId => {
     if (!newSavedQueryId) {
       $scope.savedQuery = undefined;
       return;
