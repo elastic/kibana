@@ -65,6 +65,7 @@ export class KibanaMigrator {
   private mappingProperties: MappingProperties;
   private readonly schema: SavedObjectsSchema;
   private serializer: SavedObjectsSerializer;
+  private migrationResult: Promise<Array<{ status: string }>> | undefined;
 
   /**
    * Creates an instance of KibanaMigrator.
@@ -104,42 +105,50 @@ export class KibanaMigrator {
    * @memberof KibanaMigrator
    */
   public awaitMigration(skipMigrations: boolean = false) {
-    return once(async () => {
-      if (skipMigrations) {
-        this.log.warn(
-          'Skipping Saved Object migrations on startup. Note: Individual documents will still be migrated when reading or writing documents.'
-        );
-        return Object.keys(this.mappingProperties).map(() => ({ status: 'skipped' }));
-      }
+    if (this.migrationResult == null) {
+      this.migrationResult = this.runMigrations(skipMigrations);
+    }
 
-      const kibanaIndexName = this.kibanaConfig.index;
-      const indexMap = createIndexMap({
-        config: this.config,
-        kibanaIndexName,
-        indexMap: this.mappingProperties,
-        schema: this.schema,
+    return this.migrationResult;
+  }
+
+  private runMigrations(skipMigrations: boolean) {
+    if (skipMigrations) {
+      this.log.warn(
+        'Skipping Saved Object migrations on startup. Note: Individual documents will still be migrated when read or written.'
+      );
+      return Promise.resolve(
+        Object.keys(this.mappingProperties).map(() => ({ status: 'skipped' }))
+      );
+    }
+
+    const kibanaIndexName = this.kibanaConfig.index;
+    const indexMap = createIndexMap({
+      config: this.config,
+      kibanaIndexName,
+      indexMap: this.mappingProperties,
+      schema: this.schema,
+    });
+
+    const migrators = Object.keys(indexMap).map(index => {
+      return new IndexMigrator({
+        batchSize: this.config.get('migrations.batchSize'),
+        callCluster: this.callCluster,
+        documentMigrator: this.documentMigrator,
+        index,
+        log: this.log,
+        mappingProperties: indexMap[index].typeMappings,
+        pollInterval: this.config.get('migrations.pollInterval'),
+        scrollDuration: this.config.get('migrations.scrollDuration'),
+        serializer: this.serializer,
+        // Only necessary for the migrator of the kibana index.
+        obsoleteIndexTemplatePattern:
+          index === kibanaIndexName ? 'kibana_index_template*' : undefined,
+        convertToAliasScript: indexMap[index].script,
       });
+    });
 
-      const migrators = Object.keys(indexMap).map(index => {
-        return new IndexMigrator({
-          batchSize: this.config.get('migrations.batchSize'),
-          callCluster: this.callCluster, // server.plugins.elasticsearch!.getCluster('admin').callWithInternalUser,
-          documentMigrator: this.documentMigrator,
-          index,
-          log: this.log,
-          mappingProperties: indexMap[index].typeMappings,
-          pollInterval: this.config.get('migrations.pollInterval'),
-          scrollDuration: this.config.get('migrations.scrollDuration'),
-          serializer: this.serializer,
-          // Only necessary for the migrator of the kibana index.
-          obsoleteIndexTemplatePattern:
-            index === kibanaIndexName ? 'kibana_index_template*' : undefined,
-          convertToAliasScript: indexMap[index].script,
-        });
-      });
-
-      return Promise.all(migrators.map(migrator => migrator.migrate()));
-    })();
+    return Promise.all(migrators.map(migrator => migrator.migrate()));
   }
 
   /**

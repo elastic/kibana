@@ -64,12 +64,14 @@ describe('KibanaMigrator', () => {
       expect(result).toEqual([{ status: 'skipped' }, { status: 'skipped' }]);
     });
 
-    it('only handles and deletes index templates once', async () => {
+    it('only runs migrations once if called multiple times', async () => {
       const options = mockOptions();
       const clusterStub = jest.fn<any, any>(() => ({ status: 404 }));
 
       options.callCluster = clusterStub;
-      await new KibanaMigrator(options).awaitMigration();
+      const migrator = new KibanaMigrator(options);
+      await migrator.awaitMigration();
+      await migrator.awaitMigration();
 
       // callCluster with "cat.templates" is called by "deleteIndexTemplates" function
       // and should only be done once
