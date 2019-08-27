@@ -25,6 +25,9 @@ export type UnionToIntersection<U> =
  */
 export type ValuesOf<T extends any[]> = T[number];
 
+type valueof<T> = T[keyof T];
+type ValuesOfUnion<T> = T extends any ? valueof<T> : never;
+
 /**
  * A `ExpressionFunctionFactory` is a powerful type used for any function that produces
  * an `ExpressionFunction`. If it does not meet the signature for such a function,
@@ -115,6 +118,13 @@ export type CanvasFunction = FunctionFactory<Functions>;
  * A union type of all Canvas Function names.
  */
 export type CanvasFunctionName = CanvasFunction['name'];
+
+/**
+ * A union type of all Canvas Function argument objects.
+ */
+export type CanvasArg = CanvasFunction['args'];
+
+export type CanvasArgValue = ValuesOfUnion<CanvasFunction['args']>;
 
 /**
  * Represents a function called by the `case` Function.

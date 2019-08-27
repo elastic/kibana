@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { TimeRange } from 'ui/timefilter/time_history';
+import { TimeRange } from 'ui/timefilter';
 import { Query } from 'src/legacy/core_plugins/data/public';
 import { Filter } from '@kbn/es-query';
 import { SearchSource } from '../../courier';

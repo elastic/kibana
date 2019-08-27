@@ -113,7 +113,7 @@ export const RENOVATE_PACKAGE_GROUPS: PackageGroup[] = [
 
   {
     name: 'graphql',
-    packageWords: ['graphql'],
+    packageWords: ['graphql', 'apollo'],
   },
 
   {

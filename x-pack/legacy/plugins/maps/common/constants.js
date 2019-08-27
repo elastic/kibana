@@ -32,6 +32,14 @@ export function createMapPath(id) {
   return `${MAP_BASE_URL}/${id}`;
 }
 
+export const LAYER_TYPE = {
+  TILE: 'TILE',
+  VECTOR: 'VECTOR',
+  VECTOR_TILE: 'VECTOR_TILE',
+  HEATMAP: 'HEATMAP'
+};
+
+export const EMS_TMS = 'EMS_TMS';
 export const EMS_FILE = 'EMS_FILE';
 export const ES_GEO_GRID = 'ES_GEO_GRID';
 export const ES_SEARCH = 'ES_SEARCH';

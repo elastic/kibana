@@ -370,6 +370,7 @@ export const DataFrameTransformList: SFC = () => {
     <Fragment>
       <ProgressBar isLoading={isLoading} />
       <TransformTable
+        allowNeutralSort={false}
         className="mlTransformTable"
         columns={columns}
         error={searchError}
@@ -379,7 +380,7 @@ export const DataFrameTransformList: SFC = () => {
         items={filterActive ? filteredTransforms : transforms}
         itemId={DataFrameTransformListColumn.id}
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-        onChange={onTableChange}
+        onTableChange={onTableChange}
         pagination={pagination}
         selection={selection}
         sorting={sorting}

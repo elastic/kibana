@@ -57,6 +57,7 @@ module.exports = function (grunt) {
   ]);
 
   grunt.registerTask('test:dev', ['checkPlugins', 'run:devBrowserTestServer', 'karma:dev']);
+  grunt.registerTask('test:mochaCoverage', ['run:mochaCoverage']);
 
   grunt.registerTask('test', subTask => {
     if (subTask) grunt.fail.fatal(`invalid task "test:${subTask}"`);
