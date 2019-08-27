@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
+import { mockInjectedMetadata } from '../../services/telemetry_opt_in.test.mocks';
+
 import sinon from 'sinon';
 
-import { CONFIG_TELEMETRY } from '../../../../common/constants';
-import { handleOldSettings } from '../handle_old_settings';
-import { TelemetryOptInProvider } from '../../../services/telemetry_opt_in';
+import { CONFIG_TELEMETRY } from '../../../common/constants';
+import { handleOldSettings } from './handle_old_settings';
+import { TelemetryOptInProvider } from '../../services/telemetry_opt_in';
 
 const getTelemetryOptInProvider = (enabled, { simulateFailure = false } = {}) => {
   const $http = {
@@ -24,14 +25,12 @@ const getTelemetryOptInProvider = (enabled, { simulateFailure = false } = {}) =>
   const chrome = {
     addBasePath: url => url
   };
+  mockInjectedMetadata({ telemetryOptedIn: enabled });
 
   const $injector = {
     get: (key) => {
       if (key === '$http') {
         return $http;
-      }
-      if (key === 'telemetryOptedIn') {
-        return enabled;
       }
       throw new Error(`unexpected mock injector usage for ${key}`);
     }
@@ -50,22 +49,22 @@ describe('handle_old_settings', () => {
     };
 
     const telemetryOptInProvider = getTelemetryOptInProvider(null);
-    expect(telemetryOptInProvider.getOptIn()).to.be(null);
+    expect(telemetryOptInProvider.getOptIn()).toBe(null);
 
     config.get.withArgs('xPackMonitoring:allowReport', null).returns(true);
     config.set.withArgs(CONFIG_TELEMETRY, true).returns(Promise.resolve(true));
 
-    expect(await handleOldSettings(config, telemetryOptInProvider)).to.be(false);
+    expect(await handleOldSettings(config, telemetryOptInProvider)).toBe(false);
 
-    expect(config.get.calledTwice).to.be(true);
-    expect(config.set.called).to.be(false);
+    expect(config.get.calledTwice).toBe(true);
+    expect(config.set.called).toBe(false);
 
-    expect(config.remove.calledThrice).to.be(true);
-    expect(config.remove.getCall(0).args[0]).to.be('xPackMonitoring:allowReport');
-    expect(config.remove.getCall(1).args[0]).to.be('xPackMonitoring:showBanner');
-    expect(config.remove.getCall(2).args[0]).to.be(CONFIG_TELEMETRY);
+    expect(config.remove.calledThrice).toBe(true);
+    expect(config.remove.getCall(0).args[0]).toBe('xPackMonitoring:allowReport');
+    expect(config.remove.getCall(1).args[0]).toBe('xPackMonitoring:showBanner');
+    expect(config.remove.getCall(2).args[0]).toBe(CONFIG_TELEMETRY);
 
-    expect(telemetryOptInProvider.getOptIn()).to.be(true);
+    expect(telemetryOptInProvider.getOptIn()).toBe(true);
   });
 
   it('re-uses old "telemetry:optIn" setting and stays opted in', async () => {
@@ -76,22 +75,22 @@ describe('handle_old_settings', () => {
     };
 
     const telemetryOptInProvider = getTelemetryOptInProvider(null);
-    expect(telemetryOptInProvider.getOptIn()).to.be(null);
+    expect(telemetryOptInProvider.getOptIn()).toBe(null);
 
     config.get.withArgs('xPackMonitoring:allowReport', null).returns(false);
     config.get.withArgs(CONFIG_TELEMETRY, null).returns(true);
 
-    expect(await handleOldSettings(config, telemetryOptInProvider)).to.be(false);
+    expect(await handleOldSettings(config, telemetryOptInProvider)).toBe(false);
 
-    expect(config.get.calledTwice).to.be(true);
-    expect(config.set.called).to.be(false);
+    expect(config.get.calledTwice).toBe(true);
+    expect(config.set.called).toBe(false);
 
-    expect(config.remove.calledThrice).to.be(true);
-    expect(config.remove.getCall(0).args[0]).to.be('xPackMonitoring:allowReport');
-    expect(config.remove.getCall(1).args[0]).to.be('xPackMonitoring:showBanner');
-    expect(config.remove.getCall(2).args[0]).to.be(CONFIG_TELEMETRY);
+    expect(config.remove.calledThrice).toBe(true);
+    expect(config.remove.getCall(0).args[0]).toBe('xPackMonitoring:allowReport');
+    expect(config.remove.getCall(1).args[0]).toBe('xPackMonitoring:showBanner');
+    expect(config.remove.getCall(2).args[0]).toBe(CONFIG_TELEMETRY);
 
-    expect(telemetryOptInProvider.getOptIn()).to.be(true);
+    expect(telemetryOptInProvider.getOptIn()).toBe(true);
   });
 
   it('re-uses old "allowReport" setting and stays opted out', async () => {
@@ -102,21 +101,21 @@ describe('handle_old_settings', () => {
     };
 
     const telemetryOptInProvider = getTelemetryOptInProvider(null);
-    expect(telemetryOptInProvider.getOptIn()).to.be(null);
+    expect(telemetryOptInProvider.getOptIn()).toBe(null);
 
     config.get.withArgs('xPackMonitoring:allowReport', null).returns(false);
     config.set.withArgs(CONFIG_TELEMETRY, false).returns(Promise.resolve(true));
 
-    expect(await handleOldSettings(config, telemetryOptInProvider)).to.be(false);
+    expect(await handleOldSettings(config, telemetryOptInProvider)).toBe(false);
 
-    expect(config.get.calledTwice).to.be(true);
-    expect(config.set.called).to.be(false);
-    expect(config.remove.calledThrice).to.be(true);
-    expect(config.remove.getCall(0).args[0]).to.be('xPackMonitoring:allowReport');
-    expect(config.remove.getCall(1).args[0]).to.be('xPackMonitoring:showBanner');
-    expect(config.remove.getCall(2).args[0]).to.be(CONFIG_TELEMETRY);
+    expect(config.get.calledTwice).toBe(true);
+    expect(config.set.called).toBe(false);
+    expect(config.remove.calledThrice).toBe(true);
+    expect(config.remove.getCall(0).args[0]).toBe('xPackMonitoring:allowReport');
+    expect(config.remove.getCall(1).args[0]).toBe('xPackMonitoring:showBanner');
+    expect(config.remove.getCall(2).args[0]).toBe(CONFIG_TELEMETRY);
 
-    expect(telemetryOptInProvider.getOptIn()).to.be(false);
+    expect(telemetryOptInProvider.getOptIn()).toBe(false);
   });
 
   it('re-uses old "telemetry:optIn" setting and stays opted out', async () => {
@@ -131,16 +130,16 @@ describe('handle_old_settings', () => {
     config.get.withArgs(CONFIG_TELEMETRY, null).returns(false);
     config.get.withArgs('xPackMonitoring:allowReport', null).returns(true);
 
-    expect(await handleOldSettings(config, telemetryOptInProvider)).to.be(false);
+    expect(await handleOldSettings(config, telemetryOptInProvider)).toBe(false);
 
-    expect(config.get.calledTwice).to.be(true);
-    expect(config.set.called).to.be(false);
-    expect(config.remove.calledThrice).to.be(true);
-    expect(config.remove.getCall(0).args[0]).to.be('xPackMonitoring:allowReport');
-    expect(config.remove.getCall(1).args[0]).to.be('xPackMonitoring:showBanner');
-    expect(config.remove.getCall(2).args[0]).to.be(CONFIG_TELEMETRY);
+    expect(config.get.calledTwice).toBe(true);
+    expect(config.set.called).toBe(false);
+    expect(config.remove.calledThrice).toBe(true);
+    expect(config.remove.getCall(0).args[0]).toBe('xPackMonitoring:allowReport');
+    expect(config.remove.getCall(1).args[0]).toBe('xPackMonitoring:showBanner');
+    expect(config.remove.getCall(2).args[0]).toBe(CONFIG_TELEMETRY);
 
-    expect(telemetryOptInProvider.getOptIn()).to.be(false);
+    expect(telemetryOptInProvider.getOptIn()).toBe(false);
   });
 
   it('acknowledges users old setting even if re-setting fails', async () => {
@@ -156,10 +155,10 @@ describe('handle_old_settings', () => {
     config.set.withArgs(CONFIG_TELEMETRY, false).returns(Promise.resolve(false));
 
     // note: because it doesn't remove the old settings _and_ returns false, there's no risk of suddenly being opted in
-    expect(await handleOldSettings(config, telemetryOptInProvider)).to.be(false);
+    expect(await handleOldSettings(config, telemetryOptInProvider)).toBe(false);
 
-    expect(config.get.calledTwice).to.be(true);
-    expect(config.set.called).to.be(false);
+    expect(config.get.calledTwice).toBe(true);
+    expect(config.set.called).toBe(false);
   });
 
   it('removes show banner setting and presents user with choice', async () => {
@@ -173,11 +172,11 @@ describe('handle_old_settings', () => {
     config.get.withArgs('xPackMonitoring:allowReport', null).returns(null);
     config.get.withArgs('xPackMonitoring:showBanner', null).returns(false);
 
-    expect(await handleOldSettings(config, telemetryOptInProvider)).to.be(true);
+    expect(await handleOldSettings(config, telemetryOptInProvider)).toBe(true);
 
-    expect(config.get.calledThrice).to.be(true);
-    expect(config.remove.calledOnce).to.be(true);
-    expect(config.remove.getCall(0).args[0]).to.be('xPackMonitoring:showBanner');
+    expect(config.get.calledThrice).toBe(true);
+    expect(config.remove.calledOnce).toBe(true);
+    expect(config.remove.getCall(0).args[0]).toBe('xPackMonitoring:showBanner');
   });
 
   it('is effectively ignored on fresh installs', async () => {
@@ -190,9 +189,9 @@ describe('handle_old_settings', () => {
     config.get.withArgs('xPackMonitoring:allowReport', null).returns(null);
     config.get.withArgs('xPackMonitoring:showBanner', null).returns(null);
 
-    expect(await handleOldSettings(config, telemetryOptInProvider)).to.be(true);
+    expect(await handleOldSettings(config, telemetryOptInProvider)).toBe(true);
 
-    expect(config.get.calledThrice).to.be(true);
+    expect(config.get.calledThrice).toBe(true);
   });
 
 });

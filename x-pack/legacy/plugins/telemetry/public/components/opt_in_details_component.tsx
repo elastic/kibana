@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import * as React from 'react';
 
 import {
   EuiCallOut,
@@ -24,39 +23,37 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
+interface Props {
+  fetchTelemetry: () => Promise<any>;
+  onClose: () => void;
+}
+
+interface State {
+  isLoading: boolean;
+  hasPrivilegeToRead: boolean;
+  data: any[] | null;
+}
+
 /**
  * React component for displaying the example data associated with the Telemetry opt-in banner.
  */
-export class OptInExampleFlyout extends Component {
-
-  static propTypes = {
-    /**
-     * Callback function with no parameters that returns a {@code Promise} containing the
-     * telemetry data (expected to be an array).
-     */
-    fetchTelemetry: PropTypes.func.isRequired,
-    /**
-     * Callback function with no parameters that closes this flyout.
-     */
-    onClose: PropTypes.func.isRequired,
-  }
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      data: null,
-      isLoading: true,
-      hasPrivilegeToRead: false,
-    };
-  }
+export class OptInExampleFlyout extends React.PureComponent<Props, State> {
+  public readonly state: State = {
+    data: null,
+    isLoading: true,
+    hasPrivilegeToRead: false,
+  };
 
   componentDidMount() {
-    this.props.fetchTelemetry()
-      .then(response => this.setState({
-        data: Array.isArray(response.data) ? response.data : null,
-        isLoading: false,
-        hasPrivilegeToRead: true,
-      }))
+    this.props
+      .fetchTelemetry()
+      .then(response =>
+        this.setState({
+          data: Array.isArray(response.data) ? response.data : null,
+          isLoading: false,
+          hasPrivilegeToRead: true,
+        })
+      )
       .catch(err => {
         this.setState({
           isLoading: false,
@@ -65,7 +62,7 @@ export class OptInExampleFlyout extends Component {
       });
   }
 
-  renderBody({ data, isLoading, hasPrivilegeToRead }) {
+  renderBody({ data, isLoading, hasPrivilegeToRead }: State) {
     if (isLoading) {
       return (
         <EuiFlexGroup justifyContent="spaceAround">
@@ -79,10 +76,12 @@ export class OptInExampleFlyout extends Component {
     if (!hasPrivilegeToRead) {
       return (
         <EuiCallOut
-          title={<FormattedMessage
-            id="xpack.telemetry.callout.errorUnprivilegedUserTitle"
-            defaultMessage="Error displaying cluster statistics"
-          />}
+          title={
+            <FormattedMessage
+              id="xpack.telemetry.callout.errorUnprivilegedUserTitle"
+              defaultMessage="Error displaying cluster statistics"
+            />
+          }
           color="danger"
           iconType="cross"
         >
@@ -97,10 +96,12 @@ export class OptInExampleFlyout extends Component {
     if (data === null) {
       return (
         <EuiCallOut
-          title={<FormattedMessage
-            id="xpack.telemetry.callout.errorLoadingClusterStatisticsTitle"
-            defaultMessage="Error loading cluster statistics"
-          />}
+          title={
+            <FormattedMessage
+              id="xpack.telemetry.callout.errorLoadingClusterStatisticsTitle"
+              defaultMessage="Error loading cluster statistics"
+            />
+          }
           color="danger"
           iconType="cross"
         >
@@ -114,21 +115,13 @@ export class OptInExampleFlyout extends Component {
       );
     }
 
-    return (
-      <EuiCodeBlock language="js">
-        {JSON.stringify(data, null, 2)}
-      </EuiCodeBlock>
-    );
+    return <EuiCodeBlock language="js">{JSON.stringify(data, null, 2)}</EuiCodeBlock>;
   }
 
   render() {
     return (
       <EuiPortal>
-        <EuiFlyout
-          ownFocus
-          onClose={this.props.onClose}
-          maxWidth={true}
-        >
+        <EuiFlyout ownFocus onClose={this.props.onClose} maxWidth={true}>
           <EuiFlyoutHeader>
             <EuiTitle>
               <h2>
@@ -149,12 +142,9 @@ export class OptInExampleFlyout extends Component {
               </EuiText>
             </EuiTextColor>
           </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            {this.renderBody(this.state)}
-          </EuiFlyoutBody>
+          <EuiFlyoutBody>{this.renderBody(this.state)}</EuiFlyoutBody>
         </EuiFlyout>
       </EuiPortal>
     );
   }
-
 }
