@@ -13,3 +13,9 @@ export interface Dictionary<TValue> {
 export function dictionaryToArray<TValue>(dict: Dictionary<TValue>): TValue[] {
   return Object.keys(dict).map(key => dict[key]);
 }
+
+// A recursive partial type to allow passing nested partial attributes.
+// Used for example for the optional `jobConfig.dest.results_field` property.
+export type DeepPartial<T> = {
+  [P in keyof T]?: DeepPartial<T[P]>;
+};

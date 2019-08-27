@@ -4,15 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DeepPartial } from '../../../../../../common/types/common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
 
 import { DataFrameAnalyticsId, DataFrameAnalyticsOutlierConfig } from '../../../../common';
 
-// A recursive partial type to allow passing nested partial attributes.
-// Used for example for the optional `jobConfig.dest.results_field` property.
-type DeepPartial<T> = {
-  [P in keyof T]?: DeepPartial<T[P]>;
-};
+const ANALYTICS_DETAULT_MODEL_MEMORY_LIMIT = '50mb';
 
 export type EsIndexName = string;
 export type IndexPatternTitle = string;
@@ -105,5 +102,6 @@ export const getJobConfigFromFormState = (
     analysis: {
       outlier_detection: {},
     },
+    model_memory_limit: ANALYTICS_DETAULT_MODEL_MEMORY_LIMIT,
   };
 };
