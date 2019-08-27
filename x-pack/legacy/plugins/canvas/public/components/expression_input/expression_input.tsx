@@ -287,6 +287,8 @@ export class ExpressionInput extends React.Component<Props> {
                   enabled: false,
                 },
                 wordBasedSuggestions: false,
+                wordWrap: 'on',
+                wrappingIndent: 'indent',
               }}
               editorDidMount={this.editorDidMount}
             />
