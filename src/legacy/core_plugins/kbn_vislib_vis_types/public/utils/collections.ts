@@ -26,7 +26,7 @@ export enum Positions {
   BOTTOM = 'bottom',
 }
 
-const getPositions = () => [
+const positions = [
   {
     text: i18n.translate('kbnVislibVisTypes.legendPositions.topText', {
       defaultMessage: 'Top',
@@ -59,7 +59,7 @@ export enum ChartTypes {
   HISTOGRAM = 'histogram',
 }
 
-const getChartTypes = () => [
+const chartTypes = [
   {
     text: i18n.translate('kbnVislibVisTypes.chartTypes.lineText', {
       defaultMessage: 'Line',
@@ -85,7 +85,7 @@ export enum ChartModes {
   STACKED = 'stacked',
 }
 
-const getChartModes = () => [
+const chartModes = [
   {
     text: i18n.translate('kbnVislibVisTypes.chartModes.normalText', {
       defaultMessage: 'Normal',
@@ -106,7 +106,7 @@ export enum InterpolationModes {
   STEP_AFTER = 'step-after',
 }
 
-const getInterpolationModes = () => [
+const interpolationModes = [
   {
     text: i18n.translate('kbnVislibVisTypes.interpolationModes.straightText', {
       defaultMessage: 'Straight',
@@ -138,7 +138,7 @@ export enum ScaleTypes {
   SQUARE_ROOT = 'square root',
 }
 
-const getScaleTypes = () => [
+const scaleTypes = [
   {
     text: i18n.translate('kbnVislibVisTypes.scaleTypes.linearText', {
       defaultMessage: 'Linear',
@@ -166,7 +166,7 @@ export enum AxisModes {
   SILHOUETTE = 'silhouette',
 }
 
-const getAxisModes = () => [
+const axisModes = [
   {
     text: i18n.translate('kbnVislibVisTypes.axisModes.normalText', {
       defaultMessage: 'Normal',
@@ -205,7 +205,7 @@ export enum ThresholdLineStyles {
   DOT_DASHED = 'dot-dashed',
 }
 
-const getThresholdLineStyles = () => [
+const thresholdLineStyles = [
   {
     value: ThresholdLineStyles.FULL,
     text: i18n.translate('kbnVislibVisTypes.thresholdLine.style.fullText', {
@@ -226,12 +226,15 @@ const getThresholdLineStyles = () => [
   },
 ];
 
-export {
-  getPositions,
-  getChartTypes,
-  getChartModes,
-  getInterpolationModes,
-  getScaleTypes,
-  getAxisModes,
-  getThresholdLineStyles,
-};
+const getConfigCollections = () => ({
+  legendPositions: positions,
+  positions,
+  chartTypes,
+  axisModes,
+  scaleTypes,
+  chartModes,
+  interpolationModes,
+  thresholdLineStyles,
+});
+
+export { getConfigCollections };

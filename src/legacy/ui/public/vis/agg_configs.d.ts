@@ -24,4 +24,7 @@ export interface AggConfigs extends IndexedArray<AggConfig> {
   bySchemaGroup: {
     [key: string]: AggConfig[];
   };
+  bySchemaName: {
+    [key: string]: AggConfig[];
+  };
 }

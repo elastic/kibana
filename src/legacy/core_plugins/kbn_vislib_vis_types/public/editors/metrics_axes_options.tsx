@@ -18,11 +18,10 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { cloneDeep, capitalize, get, uniq } from 'lodash';
+import { cloneDeep, capitalize, uniq } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 
 import { AggConfig } from 'ui/vis';
-import { AggGroupNames } from 'ui/vis/editors/default';
 import { safeMakeLabel } from 'ui/agg_types/agg_utils';
 import { BasicVislibParams, ValueAxis, SeriesParam, Axis } from '../types';
 import { ValidationVisOptionsProps } from '../controls/validation_wrapper';

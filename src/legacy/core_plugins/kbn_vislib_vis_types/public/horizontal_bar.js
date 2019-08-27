@@ -26,20 +26,14 @@ import { PointSeriesOptions } from './editors/point_series_options';
 import { MetricsAxisOptions } from './editors/metrics_axes_options';
 import { ValidationWrapper } from './controls/validation_wrapper';
 import {
-  getPositions,
   Positions,
-  getChartTypes,
   ChartTypes,
-  getChartModes,
   ChartModes,
-  getInterpolationModes,
   AxisTypes,
   ScaleTypes,
   AxisModes,
   Rotates,
-  getAxisModes,
-  getScaleTypes,
-  getThresholdLineStyles,
+  getConfigCollections,
 } from './utils/collections';
 
 export default function PointSeriesVisType(Private) {
@@ -123,16 +117,7 @@ export default function PointSeriesVisType(Private) {
       },
     },
     editorConfig: {
-      collections: {
-        legendPositions: getPositions(),
-        positions: getPositions(),
-        chartTypes: getChartTypes(),
-        axisModes: getAxisModes(),
-        scaleTypes: getScaleTypes(),
-        chartModes: getChartModes(),
-        interpolationModes: getInterpolationModes(),
-        thresholdLineStyles: getThresholdLineStyles(),
-      },
+      collections: getConfigCollections(),
       optionTabs: [
         {
           name: 'advanced',
