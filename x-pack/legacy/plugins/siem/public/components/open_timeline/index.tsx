@@ -418,7 +418,10 @@ export class StatefulOpenTimelineComponent extends React.PureComponent<
               ? {}
               : timelineModel.pinnedEventsSaveObject != null
               ? timelineModel.pinnedEventsSaveObject.reduce(
-                  (acc, pinnedEvent) => ({ ...acc, [pinnedEvent.pinnedEventId]: pinnedEvent }),
+                  (acc, pinnedEvent) => ({
+                    ...acc,
+                    ...(pinnedEvent.eventId != null ? { [pinnedEvent.eventId]: pinnedEvent } : {}),
+                  }),
                   {}
                 )
               : {},
