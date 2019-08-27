@@ -18,7 +18,7 @@ import { DateHistogramIndexPatternColumn } from './operations/definitions/date_h
 import { AvgIndexPatternColumn } from './operations/definitions/metrics';
 
 jest.mock('ui/new_platform');
-jest.mock('./operations/operations');
+jest.mock('./operations');
 
 describe('state_helpers', () => {
   describe('deleteColumn', () => {
@@ -152,7 +152,13 @@ describe('state_helpers', () => {
       };
 
       expect(
-        updateColumnParam(state, 'first', currentColumn, 'interval', 'M').layers.first.columns.col1
+        updateColumnParam({
+          state,
+          layerId: 'first',
+          currentColumn,
+          paramName: 'interval',
+          value: 'M',
+        }).layers.first.columns.col1
       ).toEqual({
         ...currentColumn,
         params: { interval: 'M' },

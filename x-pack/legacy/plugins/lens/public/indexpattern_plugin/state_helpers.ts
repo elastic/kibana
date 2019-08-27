@@ -6,19 +6,25 @@
 
 import _ from 'lodash';
 import { IndexPatternPrivateState, IndexPatternLayer, IndexPattern } from './indexpattern';
-import { isColumnTransferable } from './operations/operations';
+import { isColumnTransferable } from './operations';
 import { operationDefinitionMap, IndexPatternColumn } from './operations';
 
 export function updateColumnParam<
   C extends IndexPatternColumn & { params: object },
   K extends keyof C['params']
->(
-  state: IndexPatternPrivateState,
-  layerId: string,
-  currentColumn: C,
-  paramName: K,
-  value: C['params'][K]
-): IndexPatternPrivateState {
+>({
+  state,
+  layerId,
+  currentColumn,
+  paramName,
+  value,
+}: {
+  state: IndexPatternPrivateState;
+  layerId: string;
+  currentColumn: C;
+  paramName: K;
+  value: C['params'][K];
+}): IndexPatternPrivateState {
   const columnId = Object.entries(state.layers[layerId].columns).find(
     ([_columnId, column]) => column === currentColumn
   )![0];

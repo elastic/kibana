@@ -20,7 +20,7 @@ import { Storage } from 'ui/storage';
 jest.mock('ui/new_platform');
 jest.mock('../loader');
 jest.mock('../state_helpers');
-jest.mock('../operations/operations');
+jest.mock('../operations');
 
 // Used by indexpattern plugin, which is a dependency of a dependency
 jest.mock('ui/chrome');

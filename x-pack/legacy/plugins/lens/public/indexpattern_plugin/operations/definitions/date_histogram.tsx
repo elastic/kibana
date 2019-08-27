@@ -187,7 +187,9 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
 
     function onChangeAutoInterval(ev: React.ChangeEvent<HTMLInputElement>) {
       const interval = ev.target.checked ? defaultCustomInterval : autoInterval;
-      setState(updateColumnParam(state, layerId, currentColumn, 'interval', interval));
+      setState(
+        updateColumnParam({ state, layerId, currentColumn, paramName: 'interval', value: interval })
+      );
     }
 
     return (
@@ -230,13 +232,13 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
                 }))}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setState(
-                    updateColumnParam(
+                    updateColumnParam({
                       state,
                       layerId,
                       currentColumn,
-                      'interval',
-                      numericToInterval(Number(e.target.value))
-                    )
+                      paramName: 'interval',
+                      value: numericToInterval(Number(e.target.value)),
+                    })
                   )
                 }
                 aria-label={i18n.translate('xpack.lens.indexPattern.dateHistogram.interval', {

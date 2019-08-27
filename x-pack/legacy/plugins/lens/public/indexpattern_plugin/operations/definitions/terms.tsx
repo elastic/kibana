@@ -184,7 +184,13 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
             showInput
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setState(
-                updateColumnParam(state, layerId, currentColumn, 'size', Number(e.target.value))
+                updateColumnParam({
+                  state,
+                  layerId,
+                  currentColumn,
+                  paramName: 'size',
+                  value: Number(e.target.value),
+                })
               )
             }
             aria-label={i18n.translate('xpack.lens.indexPattern.terms.size', {
@@ -203,13 +209,13 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
             value={toValue(currentColumn.params.orderBy)}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
               setState(
-                updateColumnParam(
+                updateColumnParam({
                   state,
                   layerId,
                   currentColumn,
-                  'orderBy',
-                  fromValue(e.target.value)
-                )
+                  paramName: 'orderBy',
+                  value: fromValue(e.target.value),
+                })
               )
             }
             aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
@@ -241,8 +247,13 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
             value={currentColumn.params.orderDirection}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
               setState(
-                updateColumnParam(state, layerId, currentColumn, 'orderDirection', e.target
-                  .value as 'asc' | 'desc')
+                updateColumnParam({
+                  state,
+                  layerId,
+                  currentColumn,
+                  paramName: 'orderDirection',
+                  value: e.target.value as 'asc' | 'desc',
+                })
               )
             }
             aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {

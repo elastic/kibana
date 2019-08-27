@@ -96,7 +96,15 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
             store={storage}
             uiSettings={uiSettings}
             onChange={(newQuery: Query) => {
-              setState(updateColumnParam(state, layerId, currentColumn, 'numerator', newQuery));
+              setState(
+                updateColumnParam({
+                  state,
+                  layerId,
+                  currentColumn,
+                  paramName: 'numerator',
+                  value: newQuery,
+                })
+              );
             }}
           />
         </EuiFormRow>
@@ -115,7 +123,15 @@ export const filterRatioOperation: OperationDefinition<FilterRatioIndexPatternCo
               store={storage}
               uiSettings={uiSettings}
               onChange={(newQuery: Query) => {
-                setState(updateColumnParam(state, layerId, currentColumn, 'denominator', newQuery));
+                setState(
+                  updateColumnParam({
+                    state,
+                    layerId,
+                    currentColumn,
+                    paramName: 'denominator',
+                    value: newQuery,
+                  })
+                );
               }}
             />
           ) : (
