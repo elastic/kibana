@@ -114,13 +114,13 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
       partialRows: args.partialRows,
       inspectorAdapters,
       queryFilter,
-      abortSignal,
+      abortSignal: (abortSignal as unknown) as AbortSignal,
     });
 
     const table: KibanaDatatable = {
       type: 'kibana_datatable',
       rows: response.rows,
-      columns: response.columns.map(column => {
+      columns: response.columns.map((column: any) => {
         const cleanedColumn: KibanaDatatableColumn = {
           id: column.id,
           name: column.name,
