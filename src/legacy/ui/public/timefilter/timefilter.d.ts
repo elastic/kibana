@@ -18,6 +18,7 @@
  */
 
 import { Moment } from 'moment';
+import { Observable } from 'rxjs';
 import { TimeRange } from './time_history';
 import { RefreshInterval } from '../../../../plugins/data/public';
 
@@ -27,6 +28,11 @@ export { RefreshInterval, TimeRange };
 
 export interface Timefilter {
   time: TimeRange;
+  getEnabledUpdated$: () => Observable<any>;
+  getTimeUpdate$: () => Observable<any>;
+  getRefreshIntervalUpdate$: () => Observable<any>;
+  getAutoRefreshFetch$: () => Observable<any>;
+  getFetch$: () => Observable<any>;
   getTime: () => TimeRange;
   setTime: (timeRange: TimeRange) => void;
   setRefreshInterval: (refreshInterval: RefreshInterval) => void;
@@ -36,8 +42,6 @@ export interface Timefilter {
   disableTimeRangeSelector: () => void;
   enableAutoRefreshSelector: () => void;
   enableTimeRangeSelector: () => void;
-  off: (event: string, reload: () => void) => void;
-  on: (event: string, reload: () => void) => void;
   isAutoRefreshSelectorEnabled: boolean;
   isTimeRangeSelectorEnabled: boolean;
 }
