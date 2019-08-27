@@ -166,6 +166,8 @@ interface Props {
   navigateToApp: (appId: string) => void;
   intl: InjectedIntl;
   basePath: HttpStart['basePath'];
+  isLocked?: boolean;
+  onIsLockedUpdate?: (isLocked: boolean) => void;
 }
 
 interface State {
@@ -275,8 +277,10 @@ class HeaderUI extends Component<Props, State> {
       breadcrumbs$,
       helpExtension$,
       intl,
+      isLocked,
       kibanaDocLink,
       kibanaVersion,
+      onIsLockedUpdate,
       legacyMode,
       navigateToApp,
     } = this.props;
@@ -376,7 +380,12 @@ class HeaderUI extends Component<Props, State> {
           </EuiHeaderSection>
         </EuiHeader>
 
-        <EuiNavDrawer ref={this.navDrawerRef} data-test-subj="navDrawer">
+        <EuiNavDrawer
+          ref={this.navDrawerRef}
+          data-test-subj="navDrawer"
+          isLocked={isLocked}
+          onIsLockedUpdate={onIsLockedUpdate}
+        >
           <EuiNavDrawerGroup listItems={recentLinksArray} />
           <EuiHorizontalRule margin="none" />
           <EuiNavDrawerGroup data-test-subj="navDrawerAppsMenu" listItems={navLinksArray} />

@@ -33,7 +33,7 @@ import { HttpStart } from '../http';
 import { ChromeNavLinks, NavLinksService } from './nav_links';
 import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
 import { NavControlsService, ChromeNavControls } from './nav_controls';
-import { LoadingIndicator, Header } from './ui';
+import { LoadingIndicator, HeaderWrapper as Header } from './ui';
 import { DocLinksStart } from '../doc_links';
 
 export { ChromeNavControls, ChromeRecentlyAccessed };
@@ -128,30 +128,28 @@ export class ChromeService {
         <React.Fragment>
           <LoadingIndicator loadingCount$={http.getLoadingCount$()} />
 
-          <div className="header-global-wrapper hide-for-sharing" data-test-subj="headerGlobalNav">
-            <Header
-              appTitle$={appTitle$.pipe(takeUntil(this.stop$))}
-              badge$={badge$.pipe(takeUntil(this.stop$))}
-              basePath={http.basePath}
-              breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
-              currentAppId$={application.currentAppId$}
-              kibanaDocLink={docLinks.links.kibana}
-              forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
-              helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
-              homeHref={http.basePath.prepend('/app/kibana#/home')}
-              isVisible$={isVisible$.pipe(
-                map(visibility => (FORCE_HIDDEN ? false : visibility)),
-                takeUntil(this.stop$)
-              )}
-              kibanaVersion={injectedMetadata.getKibanaVersion()}
-              legacyMode={injectedMetadata.getLegacyMode()}
-              navLinks$={navLinks.getNavLinks$()}
-              navigateToApp={application.navigateToApp}
-              recentlyAccessed$={recentlyAccessed.get$()}
-              navControlsLeft$={navControls.getLeft$()}
-              navControlsRight$={navControls.getRight$()}
-            />
-          </div>
+          <Header
+            appTitle$={appTitle$.pipe(takeUntil(this.stop$))}
+            badge$={badge$.pipe(takeUntil(this.stop$))}
+            basePath={http.basePath}
+            breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
+            currentAppId$={application.currentAppId$}
+            kibanaDocLink={docLinks.links.kibana}
+            forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
+            helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
+            homeHref={http.basePath.prepend('/app/kibana#/home')}
+            isVisible$={isVisible$.pipe(
+              map(visibility => (FORCE_HIDDEN ? false : visibility)),
+              takeUntil(this.stop$)
+            )}
+            kibanaVersion={injectedMetadata.getKibanaVersion()}
+            legacyMode={injectedMetadata.getLegacyMode()}
+            navLinks$={navLinks.getNavLinks$()}
+            navigateToApp={application.navigateToApp}
+            recentlyAccessed$={recentlyAccessed.get$()}
+            navControlsLeft$={navControls.getLeft$()}
+            navControlsRight$={navControls.getRight$()}
+          />
         </React.Fragment>
       ),
 
