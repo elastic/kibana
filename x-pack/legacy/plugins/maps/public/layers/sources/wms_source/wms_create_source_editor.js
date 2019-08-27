@@ -38,8 +38,9 @@ export class WMSCreateSourceEditor extends Component {
     styleOptions: [],
     selectedLayerOptions: [],
     selectedStyleOptions: [],
+    attributionText: '',
+    attributionUrl: '',
   }
-
   componentDidMount() {
     this._isMounted = true;
   }
@@ -52,11 +53,19 @@ export class WMSCreateSourceEditor extends Component {
     const {
       serviceUrl,
       layers,
-      styles
+      styles,
+      attributionText,
+      attributionUrl,
     } = this.state;
 
     const sourceConfig = (serviceUrl && layers)
-      ? { serviceUrl, layers, styles }
+      ? {
+        serviceUrl,
+        layers,
+        styles,
+        attributionText,
+        attributionUrl,
+      }
       : null;
     this.props.onSourceConfigChange(sourceConfig);
   }
@@ -135,6 +144,18 @@ export class WMSCreateSourceEditor extends Component {
         return selectedOption.value;
       }).join(',')
     }, this._previewIfPossible);
+  }
+
+  _handleWMSAttributionChange(attributionUpdate) {
+    const {
+      attributionText,
+      attributionUrl,
+    } = this.state;
+    this.setState(attributionUpdate, () => {
+      if (attributionText && attributionUrl) {
+        this._previewIfPossible();
+      }
+    });
   }
 
   _renderLayerAndStyleInputs() {
@@ -226,6 +247,56 @@ export class WMSCreateSourceEditor extends Component {
     );
   }
 
+  _renderAttributionInputs() {
+    if (!this.state.layers) {
+      return;
+    }
+
+    const {
+      attributionText,
+      attributionUrl,
+    } = this.state;
+
+    return (
+      <Fragment>
+        <EuiFormRow
+          label="Attribution text"
+          isInvalid={attributionUrl !== '' && attributionText === ''}
+          error={[
+            i18n.translate('xpack.maps.source.wms.attributionText', {
+              defaultMessage:
+                'Attribution url must have accompanying text',
+            })
+          ]}
+        >
+          <EuiFieldText
+            placeholder={'© OpenStreetMap contributors'}
+            onChange={({ target }) =>
+              this._handleWMSAttributionChange({ attributionText: target.value })
+            }
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label="Attribution link"
+          isInvalid={attributionText !== '' && attributionUrl === ''}
+          error={[
+            i18n.translate('xpack.maps.source.wms.attributionLink', {
+              defaultMessage:
+                'Attribution text must have an accompanying link',
+            })
+          ]}
+        >
+          <EuiFieldText
+            placeholder={'https://www.openstreetmap.org/copyright'}
+            onChange={({ target }) =>
+              this._handleWMSAttributionChange({ attributionUrl: target.value })
+            }
+          />
+        </EuiFormRow>
+      </Fragment>
+    );
+  }
+
   render() {
     return (
       <EuiForm>
@@ -243,6 +314,8 @@ export class WMSCreateSourceEditor extends Component {
         {this._renderGetCapabilitiesButton()}
 
         {this._renderLayerAndStyleInputs()}
+
+        {this._renderAttributionInputs()}
 
       </EuiForm>
     );
