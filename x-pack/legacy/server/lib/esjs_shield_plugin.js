@@ -516,5 +516,25 @@
         fmt: '/_security/api_key',
       },
     });
+
+    /**
+     * Invalidates an API key in Elasticsearch.
+     *
+     * @param {string} [id] An API key id.
+     * @param {string} [name] An API key name.
+     * @param {string} [realm_name] The name of an authentication realm.
+     * @param {string} [username] The username of a user.
+     *
+     * NOTE: While all parameters are optional, at least one of them is required.
+     *
+     * @returns {{invalidated_api_keys: string[], previously_invalidated_api_keys: string[], error_count: number, error_details?: object[]}}
+     */
+    shield.invalidateAPIKey = ca({
+      method: 'DELETE',
+      needBody: true,
+      url: {
+        fmt: '/_security/api_key',
+      },
+    });
   };
 }));
