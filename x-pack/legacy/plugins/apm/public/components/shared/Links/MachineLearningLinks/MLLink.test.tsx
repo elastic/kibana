@@ -9,7 +9,7 @@ import React from 'react';
 import { getRenderedHref } from '../../../../utils/testHelpers';
 import { MLLink } from './MLLink';
 import * as savedObjects from '../../../../services/rest/savedObjects';
-import * as hooks from '../../../../hooks/useCore';
+import * as kibanaCore from '../../../../../../observability/public/context/kibana_core';
 import { InternalCoreStart } from 'src/core/public';
 
 jest.mock('ui/kfetch');
@@ -22,7 +22,7 @@ const coreMock = ({
   }
 } as unknown) as InternalCoreStart;
 
-jest.spyOn(hooks, 'useCore').mockReturnValue(coreMock);
+jest.spyOn(kibanaCore, 'useKibanaCore').mockReturnValue(coreMock);
 
 jest
   .spyOn(savedObjects, 'getAPMIndexPattern')
