@@ -102,7 +102,6 @@ export interface FieldConfig<T = FormData> {
   readonly deserializer?: SerializerFunc;
   readonly serializer?: SerializerFunc;
   readonly fieldsToValidateOnChange?: string[];
-  readonly isValidationAsync?: boolean;
   readonly errorDisplayDelay?: number;
 }
 
