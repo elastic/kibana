@@ -1,4 +1,4 @@
-.ml-chart-tooltip {
+.mlChartTooltip {
   position: absolute;
   border: 2px solid $euiColorDarkestShade;
   border-radius: 5px;
@@ -11,7 +11,7 @@
   display: none;
   white-space: nowrap;
   z-index: 1;
-  transition: opacity 0.2s ;
+  transition: opacity 0.2s;
   z-index: 20;
   max-width: 500px;
   overflow: hidden;
@@ -24,4 +24,8 @@
     height: 1px;
     background-color: $euiColorMediumShade;
   }
+}
+
+.mlChartTooltip--noTransition {
+  transition: opacity 0s;
 }

@@ -191,7 +191,7 @@
             }
             .sl-cell-inner.sl-cell-inner-selected,
             .sl-cell-inner-dragselect.sl-cell-inner-selected {
-              border: 2px solid $euiColorMediumShade;
+              border: 2px solid $euiColorDarkShade;
             }
 
             .sl-cell-inner.sl-cell-inner-selected.sl-cell-inner-masked,
@@ -209,7 +209,7 @@
           .sl-cell.ds-selected {
             .sl-cell-inner,
             .sl-cell-inner-dragselect {
-              border: 2px solid $euiColorMediumShade;
+              border: 2px solid $euiColorDarkShade;
               border-radius: 2px;
               opacity: 1;
             }
@@ -280,7 +280,7 @@
 .mlDragselectDragging {
   .sl-cell-inner,
   .sl-cell-inner-dragselect {
-    opacity: 0.2 !important;
+    opacity: 0.6 !important;
   }
 }
 
@@ -299,7 +299,7 @@
             border-width: $euiSizeXS / 2 !important;
           }
           .sl-cell-inner.sl-cell-inner-masked {
-            opacity: 0.2 !important;
+            opacity: 0.6 !important;
           }
         }
       }

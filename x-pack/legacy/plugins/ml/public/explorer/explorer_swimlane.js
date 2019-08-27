@@ -96,6 +96,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
         return;
       } else if (action === DRAG_SELECT_ACTION.DRAG_START) {
         this.cellMouseoverActive = false;
+        mlChartTooltipService.hide(true);
         return;
       }
 
@@ -235,7 +236,9 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
       element.classed(SCSS.mlHideRangeSelection, true);
     }
 
-    const cellMouseoverActive = this.cellMouseoverActive;
+    // This getter allows us to fetch the current value in `cellMouseover()`.
+    // Otherwise it will just refer to the value when `cellMouseover()` was instantiated.
+    const getCellMouseoverActive = () => this.cellMouseoverActive;
 
     const {
       chartWidth,
@@ -294,7 +297,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
     }
 
     function cellMouseover(target, laneLabel, bucketScore, index, time) {
-      if (bucketScore === undefined || cellMouseoverActive === false) {
+      if (bucketScore === undefined || getCellMouseoverActive() === false) {
         return;
       }
 
