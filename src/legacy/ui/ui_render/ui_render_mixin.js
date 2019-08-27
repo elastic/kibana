@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { AppBootstrap } from './bootstrap';
 import { mergeVariables } from './lib';
 import { fromRoot } from '../../utils';
-import { generateCSPNonce, createCSPRuleString } from '../../server/csp';
+import { createCSPRuleString } from '../../server/csp';
 
 export function uiRenderMixin(kbnServer, server, config) {
   function replaceInjectedVars(request, injectedVars) {
@@ -222,10 +222,7 @@ export function uiRenderMixin(kbnServer, server, config) {
       ...kbnServer.newPlatform.setup.core.plugins.uiPlugins.public.entries()
     ].map(([id, plugin]) => ({ id, plugin }));
 
-    const nonce = await generateCSPNonce();
-
     const response = h.view('ui_app', {
-      nonce,
       strictCsp: config.get('csp.strict'),
       uiPublicUrl: `${basePath}/ui`,
       bootstrapScriptUrl: `${basePath}/bundles/app/${app.getId()}/bootstrap.js`,
@@ -261,7 +258,7 @@ export function uiRenderMixin(kbnServer, server, config) {
       },
     });
 
-    const csp = createCSPRuleString(config.get('csp.rules'), nonce);
+    const csp = createCSPRuleString(config.get('csp.rules'));
     response.header('content-security-policy', csp);
 
     return response;

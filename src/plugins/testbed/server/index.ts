@@ -45,7 +45,7 @@ class Plugin {
     const router = core.http.createRouter();
     router.get({ path: '/ping', validate: false }, async (context, req, res) => {
       const response = await context.core.elasticsearch.adminClient.callAsInternalUser('ping');
-      return res.ok(`Pong: ${response}`);
+      return res.ok({ body: `Pong: ${response}` });
     });
 
     return {

@@ -8,6 +8,7 @@ import { SpacesClient } from './spaces_client';
 import { AuthorizationService } from '../../../../security/server/lib/authorization/service';
 import { actionsFactory } from '../../../../security/server/lib/authorization/actions';
 import { SpacesConfigType, config } from '../../new_platform/config';
+import { GetSpacePurpose } from '../../../common/model/types';
 
 const createMockAuditLogger = () => {
   return {
@@ -186,30 +187,37 @@ describe('#getAll', () => {
       expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
       expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
     });
+
+    test(`throws Boom.badRequest when an invalid purpose is provided'`, async () => {
+      const { mockAuthorization } = createMockAuthorization();
+      mockAuthorization.mode.useRbacForRequest.mockReturnValue(false);
+
+      const request = Symbol() as any;
+
+      const client = new SpacesClient(
+        null as any,
+        null as any,
+        mockAuthorization,
+        null as any,
+        null as any,
+        null,
+        request
+      );
+      await expect(
+        client.getAll('invalid_purpose' as GetSpacePurpose)
+      ).rejects.toThrowErrorMatchingSnapshot();
+
+      expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledTimes(0);
+    });
   });
 
   describe('useRbacForRequest is true', () => {
-    test(`throws Boom.forbidden when user isn't authorized for any spaces`, async () => {
-      const username = Symbol();
+    it('throws Boom.badRequest when an invalid purpose is provided', async () => {
       const mockAuditLogger = createMockAuditLogger();
-      const mockDebugLogger = createMockDebugLogger();
       const { mockAuthorization, mockCheckPrivilegesAtSpaces } = createMockAuthorization();
+
       mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
-      mockCheckPrivilegesAtSpaces.mockReturnValue({
-        username,
-        spacePrivileges: {
-          [savedObjects[0].id]: {
-            [mockAuthorization.actions.login]: false,
-          },
-          [savedObjects[1].id]: {
-            [mockAuthorization.actions.login]: false,
-          },
-        },
-      });
-      const maxSpaces = 1234;
-      const mockConfig = createMockConfig({
-        maxSpaces: 1234,
-      });
+
       const mockInternalRepository = {
         find: jest.fn().mockReturnValue({
           saved_objects: savedObjects,
@@ -219,87 +227,169 @@ describe('#getAll', () => {
 
       const client = new SpacesClient(
         mockAuditLogger as any,
-        mockDebugLogger,
+        null as any,
         mockAuthorization,
         null,
-        mockConfig,
+        null as any,
         mockInternalRepository,
         request
       );
-      await expect(client.getAll()).rejects.toThrowErrorMatchingSnapshot();
+      await expect(
+        client.getAll('invalid_purpose' as GetSpacePurpose)
+      ).rejects.toThrowErrorMatchingSnapshot();
 
-      expect(mockInternalRepository.find).toHaveBeenCalledWith({
-        type: 'space',
-        page: 1,
-        perPage: maxSpaces,
-        sortField: 'name.keyword',
-      });
-      expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
-      expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
-      expect(mockCheckPrivilegesAtSpaces).toHaveBeenCalledWith(
-        savedObjects.map(savedObject => savedObject.id),
-        mockAuthorization.actions.login
-      );
-      expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledWith(username, 'getAll');
-      expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
+      expect(mockInternalRepository.find).not.toHaveBeenCalled();
+      expect(mockAuthorization.mode.useRbacForRequest).not.toHaveBeenCalled();
+      expect(mockAuthorization.checkPrivilegesWithRequest).not.toHaveBeenCalled();
+      expect(mockCheckPrivilegesAtSpaces).not.toHaveBeenCalled();
+      expect(mockAuditLogger.spacesAuthorizationFailure).not.toHaveBeenCalled();
+      expect(mockAuditLogger.spacesAuthorizationSuccess).not.toHaveBeenCalled();
     });
 
-    test(`returns spaces that the user is authorized for`, async () => {
-      const username = Symbol();
-      const mockAuditLogger = createMockAuditLogger();
-      const mockDebugLogger = createMockDebugLogger();
-      const { mockAuthorization, mockCheckPrivilegesAtSpaces } = createMockAuthorization();
-      mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
-      mockCheckPrivilegesAtSpaces.mockReturnValue({
-        username,
-        spacePrivileges: {
-          [savedObjects[0].id]: {
-            [mockAuthorization.actions.login]: true,
-          },
-          [savedObjects[1].id]: {
-            [mockAuthorization.actions.login]: false,
-          },
-        },
-      });
-      const mockInternalRepository = {
-        find: jest.fn().mockReturnValue({
-          saved_objects: savedObjects,
-        }),
-      };
-      const maxSpaces = 1234;
-      const mockConfig = createMockConfig({
-        maxSpaces: 1234,
-      });
-      const request = Symbol() as any;
+    [
+      {
+        purpose: undefined,
+        expectedPrivilege: (mockAuthorization: MockedAuthorization) =>
+          mockAuthorization.actions.login,
+      },
+      {
+        purpose: 'any',
+        expectedPrivilege: (mockAuthorization: MockedAuthorization) =>
+          mockAuthorization.actions.login,
+      },
+      {
+        purpose: 'copySavedObjectsIntoSpace',
+        expectedPrivilege: (mockAuthorization: MockedAuthorization) =>
+          mockAuthorization.actions.ui.get('savedObjectsManagement', 'copyIntoSpace'),
+      },
+    ].forEach(scenario => {
+      describe(`with purpose='${scenario.purpose}'`, () => {
+        test(`throws Boom.forbidden when user isn't authorized for any spaces`, async () => {
+          const username = Symbol();
+          const mockAuditLogger = createMockAuditLogger();
+          const mockDebugLogger = createMockDebugLogger();
+          const { mockAuthorization, mockCheckPrivilegesAtSpaces } = createMockAuthorization();
 
-      const client = new SpacesClient(
-        mockAuditLogger as any,
-        mockDebugLogger,
-        mockAuthorization,
-        null,
-        mockConfig,
-        mockInternalRepository,
-        request
-      );
-      const actualSpaces = await client.getAll();
+          const privilege = scenario.expectedPrivilege(mockAuthorization);
 
-      expect(actualSpaces).toEqual([expectedSpaces[0]]);
-      expect(mockInternalRepository.find).toHaveBeenCalledWith({
-        type: 'space',
-        page: 1,
-        perPage: maxSpaces,
-        sortField: 'name.keyword',
+          mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
+          mockCheckPrivilegesAtSpaces.mockReturnValue({
+            username,
+            spacePrivileges: {
+              [savedObjects[0].id]: {
+                [privilege]: false,
+              },
+              [savedObjects[1].id]: {
+                [privilege]: false,
+              },
+            },
+          });
+          const maxSpaces = 1234;
+          const mockConfig = createMockConfig({
+            maxSpaces: 1234,
+          });
+          const mockInternalRepository = {
+            find: jest.fn().mockReturnValue({
+              saved_objects: savedObjects,
+            }),
+          };
+          const request = Symbol() as any;
+
+          const client = new SpacesClient(
+            mockAuditLogger as any,
+            mockDebugLogger,
+            mockAuthorization,
+            null,
+            mockConfig,
+            mockInternalRepository,
+            request
+          );
+          await expect(
+            client.getAll(scenario.purpose as GetSpacePurpose)
+          ).rejects.toThrowErrorMatchingSnapshot();
+
+          expect(mockInternalRepository.find).toHaveBeenCalledWith({
+            type: 'space',
+            page: 1,
+            perPage: maxSpaces,
+            sortField: 'name.keyword',
+          });
+          expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+          expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
+          expect(mockCheckPrivilegesAtSpaces).toHaveBeenCalledWith(
+            savedObjects.map(savedObject => savedObject.id),
+            privilege
+          );
+          expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledWith(
+            username,
+            'getAll'
+          );
+          expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(0);
+        });
+
+        test(`returns spaces that the user is authorized for`, async () => {
+          const username = Symbol();
+          const mockAuditLogger = createMockAuditLogger();
+          const mockDebugLogger = createMockDebugLogger();
+          const { mockAuthorization, mockCheckPrivilegesAtSpaces } = createMockAuthorization();
+
+          const privilege = scenario.expectedPrivilege(mockAuthorization);
+
+          mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
+          mockCheckPrivilegesAtSpaces.mockReturnValue({
+            username,
+            spacePrivileges: {
+              [savedObjects[0].id]: {
+                [privilege]: true,
+              },
+              [savedObjects[1].id]: {
+                [privilege]: false,
+              },
+            },
+          });
+          const mockInternalRepository = {
+            find: jest.fn().mockReturnValue({
+              saved_objects: savedObjects,
+            }),
+          };
+          const maxSpaces = 1234;
+          const mockConfig = createMockConfig({
+            maxSpaces: 1234,
+          });
+          const request = Symbol() as any;
+
+          const client = new SpacesClient(
+            mockAuditLogger as any,
+            mockDebugLogger,
+            mockAuthorization,
+            null,
+            mockConfig,
+            mockInternalRepository,
+            request
+          );
+          const actualSpaces = await client.getAll(scenario.purpose as GetSpacePurpose);
+
+          expect(actualSpaces).toEqual([expectedSpaces[0]]);
+          expect(mockInternalRepository.find).toHaveBeenCalledWith({
+            type: 'space',
+            page: 1,
+            perPage: maxSpaces,
+            sortField: 'name.keyword',
+          });
+          expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+          expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
+          expect(mockCheckPrivilegesAtSpaces).toHaveBeenCalledWith(
+            savedObjects.map(savedObject => savedObject.id),
+            privilege
+          );
+          expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
+          expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledWith(
+            username,
+            'getAll',
+            [savedObjects[0].id]
+          );
+        });
       });
-      expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
-      expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
-      expect(mockCheckPrivilegesAtSpaces).toHaveBeenCalledWith(
-        savedObjects.map(savedObject => savedObject.id),
-        mockAuthorization.actions.login
-      );
-      expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
-      expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledWith(username, 'getAll', [
-        savedObjects[0].id,
-      ]);
     });
   });
 });
