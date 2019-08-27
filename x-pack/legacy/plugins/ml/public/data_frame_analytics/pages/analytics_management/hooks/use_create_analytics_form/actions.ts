@@ -60,7 +60,7 @@ export type Action =
   | { type: ACTION.SET_JOB_IDS; jobIds: State['jobIds'] };
 
 // Actions wrapping the dispatcher exposed by the custom hook
-export interface Actions {
+export interface ActionDispatchers {
   closeModal: () => void;
   createAnalyticsJob: () => void;
   openModal: () => void;

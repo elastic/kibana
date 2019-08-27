@@ -17,7 +17,7 @@ import {
   DataFrameAnalyticsOutlierConfig,
 } from '../../../../common';
 
-import { Actions, ACTION } from './actions';
+import { ActionDispatchers, ACTION } from './actions';
 import { reducer } from './reducer';
 import {
   getInitialState,
@@ -29,7 +29,7 @@ import {
 } from './state';
 
 export interface CreateAnalyticsFormProps {
-  actions: Actions;
+  actions: ActionDispatchers;
   state: State;
 }
 
@@ -307,7 +307,7 @@ export const useCreateAnalyticsForm = () => {
     dispatch({ type: ACTION.SWITCH_TO_ADVANCED_EDITOR });
   };
 
-  const actions: Actions = {
+  const actions: ActionDispatchers = {
     closeModal,
     createAnalyticsJob,
     openModal,

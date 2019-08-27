@@ -29,7 +29,7 @@ import {
   Query,
   Clause,
 } from './common';
-import { Actions } from '../../hooks/use_create_analytics_form/actions';
+import { ActionDispatchers } from '../../hooks/use_create_analytics_form/actions';
 import { getAnalyticsFactory } from '../../services/analytics_service';
 import { getColumns } from './columns';
 import { ExpandedRow } from './expanded_row';
@@ -62,7 +62,7 @@ function stringMatch(str: string | undefined, substr: string) {
 interface Props {
   isManagementTable?: boolean;
   blockRefresh?: boolean;
-  openCreateJobModal?: Actions['openModal'];
+  openCreateJobModal?: ActionDispatchers['openModal'];
 }
 // isManagementTable - for use in Kibana managagement ML section
 export const DataFrameAnalyticsList: FC<Props> = ({
