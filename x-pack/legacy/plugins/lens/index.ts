@@ -10,7 +10,7 @@ import { LegacyPluginInitializer } from 'src/legacy/types';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
 import mappings from './mappings.json';
 import { PLUGIN_ID, getEditPath } from './common';
-import { lensServerPlugin, LensHttpServiceSetup, LensCoreSetup } from './server';
+import { lensServerPlugin, LensCoreSetup } from './server';
 
 const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
 
@@ -81,19 +81,11 @@ export const lens: LegacyPluginInitializer = kibana => {
         },
       });
 
-      const lensHttpService: LensHttpServiceSetup = {
-        ...kbnServer.newPlatform.setup.core.http,
-        route: server.route.bind(server),
-      };
-
-      const core: LensCoreSetup = {
-        http: lensHttpService,
-        elasticsearch: kbnServer.newPlatform.setup.core.elasticsearch,
-      };
-
       // Set up with the new platform plugin lifecycle API.
       const plugin = lensServerPlugin();
-      await plugin.setup(core);
+      await plugin.setup({
+        http: kbnServer.newPlatform.setup.core.http,
+      });
 
       server.events.on('stop', async () => {
         await plugin.stop();

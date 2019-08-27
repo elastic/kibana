@@ -6,9 +6,8 @@
 
 import Boom from 'boom';
 import { get, uniq } from 'lodash';
-import { first } from 'rxjs/operators';
 import DateMath from '@elastic/datemath';
-import { KibanaRequest } from 'src/core/server';
+import { schema } from '@kbn/config-schema';
 import { SearchResponse, AggregationSearchResponse } from 'elasticsearch';
 import {
   IndexPatternsService,
@@ -18,62 +17,37 @@ import { LensCoreSetup } from '..';
 
 type Document = Record<string, unknown>;
 
-interface RequestParams {
-  indexPatternTitle: string;
-}
-
-interface LensFieldExistenceBodyParams {
-  earliest: string;
-  latest: string;
-  timeFieldName: string;
-  size: number;
-  fields: Array<{
-    name: string;
-    type: string;
-  }>;
-}
-
-interface LensFieldStatsBodyParams {
-  query: object;
-  earliest: string;
-  latest: string;
-  timeFieldName: string;
-  field: {
-    name: string;
-    type: string;
-  };
-}
+type Fields = Array<{ name: string; type: string }>;
 
 export async function initStatsRoute(setup: LensCoreSetup) {
-  setup.http.route({
-    path: '/api/lens/index_stats/{indexPatternTitle}',
-    method: 'POST',
-    // TODO: This validation is defined in the new style but is not connected
-    // @ts-ignore
-    // validate: {
-    //   body: schema.object({
-    //     earliest: schema.string(),
-    //     latest: schema.string(),
-    //     timeFieldName: schema.string(),
-    //     size: schema.number(),
-    //     fields: schema.arrayOf(
-    //       schema.object({
-    //         name: schema.string(),
-    //         type: schema.string(),
-    //       })
-    //     ),
-    //   }),
-    // },
-    async handler(req: KibanaRequest<RequestParams, unknown, LensFieldExistenceBodyParams>) {
-      const client = await setup.elasticsearch.dataClient$.pipe(first()).toPromise();
-      const requestClient = client.asScoped(req);
+  const router = setup.http.createRouter('/api/lens/index_stats/{indexPatternTitle}');
+  router.post(
+    {
+      path: '',
+      validate: {
+        params: schema.object({
+          indexPatternTitle: schema.string(),
+        }),
+        body: schema.object({
+          earliest: schema.string(),
+          latest: schema.string(),
+          timeFieldName: schema.string(),
+          size: schema.number(),
+          fields: schema.arrayOf(
+            schema.object({
+              name: schema.string(),
+              type: schema.string(),
+            })
+          ),
+        }),
+      },
+    },
+    async (context, req, res) => {
+      const requestClient = context.core.elasticsearch.dataClient;
 
       const indexPatternsService = new IndexPatternsService(requestClient.callAsCurrentUser);
 
-      // TODO: Use validate schema to guarantee payload
-      // @ts-ignore
-      const bodyRef = req.payload as LensFieldExistenceBodyParams;
-      const { earliest, latest, timeFieldName, fields, size } = bodyRef;
+      const { earliest, latest, timeFieldName, fields, size } = req.body;
 
       try {
         const indexPattern = await indexPatternsService.getFieldsForWildcard({
@@ -104,46 +78,52 @@ export async function initStatsRoute(setup: LensCoreSetup) {
         });
 
         if (results.hits.hits.length) {
-          return recursiveFlatten(results.hits.hits, indexPattern, fields);
+          return res.ok({
+            body: recursiveFlatten(results.hits.hits, indexPattern, fields),
+          });
         }
-        return {};
+        return res.ok({ body: {} });
       } catch (e) {
         setup.http.server.log(['lens', 'info'], JSON.stringify(e));
         if (e.isBoom) {
-          return e;
+          return res.internalError(e);
         } else {
-          return Boom.internal(e.message || e.name);
+          return res.internalError({
+            body: Boom.internal(e.message || e.name),
+          });
         }
       }
+    }
+  );
+
+  router.post(
+    {
+      path: '/field',
+      validate: {
+        params: schema.object({
+          indexPatternTitle: schema.string(),
+        }),
+        body: schema.object(
+          {
+            // query: schema.object({}),
+            earliest: schema.string(),
+            latest: schema.string(),
+            timeFieldName: schema.string(),
+            field: schema.object(
+              {
+                name: schema.string(),
+                type: schema.string(),
+              },
+              { allowUnknowns: true }
+            ),
+          },
+          { allowUnknowns: true }
+        ),
+      },
     },
-  });
-
-  setup.http.route({
-    path: '/api/lens/index_stats/{indexPatternTitle}/field',
-    method: 'POST',
-    // TODO: This validation is defined in the new style but is not connected
-    // @ts-ignore
-    // validate: {
-    //   body: schema.object({
-    //     query: schema.object({}),
-    //     earliest: schema.string(),
-    //     latest: schema.string(),
-    //     timeFieldName: schema.string(),
-    //     fields: schema.arrayOf(
-    //       schema.object({
-    //         name: schema.string(),
-    //         type: schema.string(),
-    //       })
-    //     ),
-    //   }),
-    // },
-    async handler(req: KibanaRequest<RequestParams, unknown, LensFieldStatsBodyParams>) {
-      const client = await setup.elasticsearch.dataClient$.pipe(first()).toPromise();
-      const requestClient = client.asScoped(req);
-
-      // TODO: Use validate schema to guarantee payload
-      const bodyRef = req.payload as LensFieldExistenceBodyParams;
-      const { earliest, latest, timeFieldName, field } = bodyRef;
+    async (context, req, res) => {
+      const requestClient = context.core.elasticsearch.dataClient;
+      const { earliest, latest, timeFieldName, field } = req.body;
 
       try {
         const filters = {
@@ -162,59 +142,68 @@ export async function initStatsRoute(setup: LensCoreSetup) {
         };
 
         if (field.type === 'number') {
-          return await getNumberHistogram(
-            (aggBody: unknown) =>
-              requestClient.callAsCurrentUser('search', {
-                index: req.params.indexPatternTitle,
-                body: {
-                  query: filters,
-                  aggs: aggBody,
-                },
-                size: 0,
-              }),
-            field
-          );
+          return res.ok({
+            body: await getNumberHistogram(
+              (aggBody: unknown) =>
+                requestClient.callAsCurrentUser('search', {
+                  index: req.params.indexPatternTitle,
+                  body: {
+                    query: filters,
+                    aggs: aggBody,
+                  },
+                  size: 0,
+                }),
+              field
+            ),
+          });
         } else if (field.type === 'string') {
-          return await getStringSamples(
-            (aggBody: unknown) =>
-              requestClient.callAsCurrentUser('search', {
-                index: req.params.indexPatternTitle,
-                body: {
-                  query: filters,
-                  aggs: aggBody,
-                },
-                size: 0,
-              }),
-            field
-          );
+          return res.ok({
+            body: await getStringSamples(
+              (aggBody: unknown) =>
+                requestClient.callAsCurrentUser('search', {
+                  index: req.params.indexPatternTitle,
+                  body: {
+                    query: filters,
+                    aggs: aggBody,
+                  },
+                  size: 0,
+                }),
+              field
+            ),
+          });
         } else if (field.type === 'date') {
-          return await getDateHistogram(
-            (aggBody: unknown) =>
-              requestClient.callAsCurrentUser('search', {
-                index: req.params.indexPatternTitle,
-                body: {
-                  query: filters,
-                  aggs: aggBody,
-                },
-                size: 0,
-              }),
-            field,
-            {
-              earliest,
-              latest,
-            }
-          );
+          return res.ok({
+            body: await getDateHistogram(
+              (aggBody: unknown) =>
+                requestClient.callAsCurrentUser('search', {
+                  index: req.params.indexPatternTitle,
+                  body: {
+                    query: filters,
+                    aggs: aggBody,
+                  },
+                  size: 0,
+                }),
+              field,
+              {
+                earliest,
+                latest,
+              }
+            ),
+          });
         }
+        return res.ok();
       } catch (e) {
         setup.http.server.log(['lens', 'info'], JSON.stringify(e));
         if (e.isBoom) {
-          return e;
+          return res.internalError(e);
         } else {
-          return Boom.internal(e.message || e.name);
+          return res.internalError({
+            body: Boom.internal(e.message || e.name),
+          });
         }
       }
-    },
-  });
+    }
+  );
 }
 
 export function recursiveFlatten(
@@ -222,7 +211,7 @@ export function recursiveFlatten(
     _source: Document;
   }>,
   indexPattern: FieldDescriptor[],
-  fields: LensFieldExistenceBodyParams['fields']
+  fields: Fields
 ): Record<
   string,
   {
@@ -303,15 +292,17 @@ export async function getNumberHistogram(
   const minMaxResult: AggregationSearchResponse<
     unknown,
     {
-      aggs: {
-        sample: {
-          sampler: { shard_size: 5000 };
-          aggs: {
-            min_value: {
-              min: { field: string };
-            };
-            max_value: {
-              max: { field: string };
+      body: {
+        aggs: {
+          sample: {
+            sampler: { shard_size: 5000 };
+            aggs: {
+              min_value: {
+                min: { field: string };
+              };
+              max_value: {
+                max: { field: string };
+              };
             };
           };
         };
@@ -327,20 +318,44 @@ export async function getNumberHistogram(
         max_value: {
           max: { field: field.name },
         },
+        top_values: {
+          terms: { field: field.name, size: 10 },
+        },
       },
     },
   });
 
   const minValue = minMaxResult.aggregations.sample.min_value.value;
   const maxValue = minMaxResult.aggregations.sample.max_value.value;
+  const terms = minMaxResult.aggregations.sample.top_values;
 
   const histogramInterval = (maxValue - minValue) / 10;
 
   if (histogramInterval === 0) {
-    return { buckets: [] };
+    // return { buckets: [] };
+    return {
+      top_values: terms,
+      histogram: { buckets: [], doc_count: minMaxResult.aggregations.sample.doc_count },
+    };
   }
 
-  const histogramResult: AggregationSearchResponse<unknown, {}> = await aggSearchWithBody({
+  const histogramResult: AggregationSearchResponse<
+    unknown,
+    {
+      body: {
+        aggs: {
+          sample: {
+            sampler: {};
+            aggs: {
+              histo: {
+                histogram: { field: string; interval: number };
+              };
+            };
+          };
+        };
+      };
+    }
+  > = await aggSearchWithBody({
     sample: {
       sampler: { shard_size: 5000 },
       aggs: {
@@ -354,7 +369,10 @@ export async function getNumberHistogram(
     },
   });
 
-  return histogramResult.aggregations.sample;
+  return {
+    histogram: histogramResult.aggregations.sample,
+    top_values: terms,
+  };
 }
 
 export async function getStringSamples(
@@ -364,7 +382,7 @@ export async function getStringSamples(
   const topValuesResult: AggregationSearchResponse<
     unknown,
     {
-      aggs: {
+      aggregations: {
         sample: {
           sampler: { shard_size: 5000 };
           aggs: {
@@ -410,15 +428,17 @@ export async function getDateHistogram(
   const results: AggregationSearchResponse<
     unknown,
     {
-      aggs: {
-        histo: {
-          date_histogram: { field: string };
+      body: {
+        aggs: {
+          histo: {
+            date_histogram: { field: string };
+          };
         };
       };
     }
   > = await aggSearchWithBody({
     histo: {
-      date_histogram: { field: field.name, fixed_interval: fixedInterval },
+      date_histogram: { field: field.name, fixed_interval: fixedInterval, min_doc_count: 1 },
     },
   });
 

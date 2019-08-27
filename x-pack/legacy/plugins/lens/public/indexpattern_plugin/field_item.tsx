@@ -50,31 +50,31 @@ export interface FieldItemProps {
   dateRange: DatasourceDataPanelProps['dateRange'];
 }
 
-export interface HistogramResult {
-  doc_count: number;
-  histo: {
-    buckets: Array<{
-      key: number;
-      doc_count: number;
-    }>;
+export interface BucketedAggregation {
+  buckets: Array<{
+    key: number;
+    doc_count: number;
+  }>;
+}
+
+export interface NumberStatsResult {
+  histogram: {
+    doc_count: number;
+    histo: BucketedAggregation;
   };
+  top_values: BucketedAggregation;
 }
 
 export interface TopValuesResult {
   doc_count: number;
-  top_values: {
-    buckets: Array<{
-      key: number;
-      doc_count: number;
-    }>;
-  };
+  top_values: BucketedAggregation;
 }
 
 interface State {
   isLoading: boolean;
   doc_count?: number;
-  histogram?: HistogramResult['histo'];
-  topValues?: TopValuesResult['top_values'];
+  histogram?: BucketedAggregation;
+  topValues?: BucketedAggregation;
 }
 
 function wrapOnDot(str?: string) {
@@ -170,7 +170,7 @@ export function FieldItem({
           field,
         }),
       })
-      .then((results: HistogramResult | TopValuesResult) => {
+      .then((results: NumberStatsResult | TopValuesResult) => {
         if (field.type === 'string') {
           setState(s => ({
             ...s,
@@ -184,15 +184,16 @@ export function FieldItem({
           setState(s => ({
             ...s,
             isLoading: false,
-            doc_count: results.doc_count,
-            histogram: (results as HistogramResult).histo,
+            doc_count: results.histogram.doc_count,
+            histogram: (results as NumberStatsResult).histogram.histo,
+            topValues: (results as NumberStatsResult).top_values,
           }));
         } else if (field.type === 'date') {
           setState(s => ({
             ...s,
             isLoading: false,
             doc_count: results.doc_count,
-            histogram: (results as HistogramResult).histo,
+            histogram: (results as NumberStatsResult).histo,
           }));
         } else {
           setState(s => ({

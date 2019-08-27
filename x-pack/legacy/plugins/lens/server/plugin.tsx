@@ -4,17 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ServerRoute } from 'hapi';
-import { Plugin, HttpServiceSetup, ElasticsearchServiceSetup } from 'src/core/server';
+import { Plugin, HttpServiceSetup } from 'src/core/server';
 import { setupRoutes } from './routes';
 
-export interface LensHttpServiceSetup extends HttpServiceSetup {
-  route(route: ServerRoute | ServerRoute[]): void;
-}
-
 export interface LensCoreSetup {
-  http: LensHttpServiceSetup;
-  elasticsearch: ElasticsearchServiceSetup;
+  http: HttpServiceSetup;
 }
 
 export class LensServer implements Plugin<LensCoreSetup, {}, {}, {}> {
