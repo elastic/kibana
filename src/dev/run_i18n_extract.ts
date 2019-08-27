@@ -88,6 +88,7 @@ run(
         log.error(error);
       }
     }
+    process.exit();
   },
   {
     flags: {
