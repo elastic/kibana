@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import chrome from 'ui/chrome';
+// import chrome from 'ui/chrome';
 
 import '../../../mock/match_media';
 import { encodeIpv6 } from '../../../lib/helpers';

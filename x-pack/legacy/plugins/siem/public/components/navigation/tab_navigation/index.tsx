@@ -10,6 +10,7 @@ import styled from 'styled-components';
 
 import classnames from 'classnames';
 import { trackUiAction as track, METRIC_TYPE } from '../../../lib/track_usage';
+import { NavigationParams } from '../breadcrumbs';
 import { TabNavigationComponentProps } from '..';
 
 export interface NavTab {
@@ -18,9 +19,15 @@ export interface NavTab {
   href: string;
   disabled: boolean;
 }
+
+interface NavMatchParams {
+  params: NavigationParams;
+}
+
 interface TabNavigationRouteProps {
   location: string;
   search: string;
+  match: NavMatchParams;
 }
 
 type TabNavigationProps = TabNavigationRouteProps & TabNavigationComponentProps;
@@ -45,12 +52,14 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
   constructor(props: TabNavigationProps) {
     super(props);
     const pathname = props.location;
-    const selectedTabId = this.mapLocationToTab(pathname);
+    const match = props.match;
+    const selectedTabId = this.mapLocationToTab(pathname, match);
     this.state = { selectedTabId };
   }
   public componentWillReceiveProps(nextProps: TabNavigationProps): void {
     const pathname = nextProps.location;
-    const selectedTabId = this.mapLocationToTab(pathname);
+    const match = nextProps.match;
+    const selectedTabId = this.mapLocationToTab(pathname, match);
 
     if (this.state.selectedTabId !== selectedTabId) {
       this.setState(prevState => ({
@@ -69,11 +78,12 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
     );
   }
 
-  public mapLocationToTab = (pathname: string): string => {
+  public mapLocationToTab = (pathname: string, match: NavMatchParams): string => {
     const { navTabs } = this.props;
+    const tabName = get('params.tabName', match);
     const myNavTab: NavTab = Object.keys(navTabs)
       .map(tab => get(tab, navTabs))
-      .filter((item: NavTab) => pathname.includes(item.id))[0];
+      .filter((item: NavTab) => (tabName || pathname).includes(item.id))[0];
     return getOr('', 'id', myNavTab);
   };
 

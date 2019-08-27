@@ -8,12 +8,25 @@ import { shallow } from 'enzyme';
 import * as React from 'react';
 
 import { TabNavigation } from './';
-import { navTabs } from '../../../pages/home/home_navigations';
+import { navTabs, SiemPageName } from '../../../pages/home/home_navigations';
+import { HostsTableType } from '../../../store/hosts/model';
 
+const mockMatch = {
+  params: {
+    pageName: SiemPageName.hosts,
+    hostName: 'siem-window',
+    tabName: HostsTableType.authentications,
+  },
+};
 describe('Tab Navigation', () => {
   test('it mounts with correct tab highlighted', () => {
     const wrapper = shallow(
-      <TabNavigation location={'/hosts'} search={'?thisisareallycoolsearch'} navTabs={navTabs} />
+      <TabNavigation
+        location={'/hosts'}
+        search={'?thisisareallycoolsearch'}
+        navTabs={navTabs}
+        match={mockMatch}
+      />
     );
     const hostsTab = wrapper.find('[data-test-subj="navigation-hosts"]');
 
@@ -21,7 +34,12 @@ describe('Tab Navigation', () => {
   });
   test('it changes active tab when nav changes by props', () => {
     const wrapper = shallow(
-      <TabNavigation location={'/hosts'} search={'?thisisareallycoolsearch'} navTabs={navTabs} />
+      <TabNavigation
+        location={'/hosts'}
+        search={'?thisisareallycoolsearch'}
+        navTabs={navTabs}
+        match={mockMatch}
+      />
     );
     const networkTab = () => wrapper.find('[data-test-subj="navigation-network"]');
     expect(networkTab().prop('isSelected')).toBeFalsy();
@@ -31,7 +49,12 @@ describe('Tab Navigation', () => {
   });
   test('it carries the url state in the link', () => {
     const wrapper = shallow(
-      <TabNavigation location={'/hosts'} search={'?thisisareallycoolsearch'} navTabs={navTabs} />
+      <TabNavigation
+        location={'/hosts'}
+        search={'?thisisareallycoolsearch'}
+        navTabs={navTabs}
+        match={mockMatch}
+      />
     );
     const firstTab = wrapper.find('[data-test-subj="navigation-link-network"]');
     expect(firstTab.props().href).toBe('#/link-to/network?thisisareallycoolsearch');
