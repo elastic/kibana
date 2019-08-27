@@ -68,6 +68,12 @@ const termsAgg = ({ field, size, direction, query }) => {
 class ListControl extends Control {
 
   fetch = async (query) => {
+    // Abort any in-progress fetch
+    if (this.abortController) {
+      this.abortController.abort();
+    }
+    this.abortController = new AbortController();
+
     const indexPattern = this.filterManager.getIndexPattern();
     if (!indexPattern) {
       this.disable(noIndexPatternMsg(this.controlParams.indexPattern));
@@ -114,13 +120,18 @@ class ListControl extends Control {
       indexPattern,
       aggs,
       this.useTimeFilter,
-      ancestorFilters);
+      ancestorFilters
+    );
+    this.abortController.signal.addEventListener('abort', () => searchSource.cancelQueued());
 
     this.lastQuery = query;
     let resp;
     try {
       resp = await searchSource.fetch();
     } catch(error) {
+      // If the fetch was aborted then no need to surface this error in the UI
+      if (error.name === 'AbortError') return;
+
       this.disable(i18n.translate('inputControl.listControl.unableToFetchTooltip', {
         defaultMessage: 'Unable to fetch terms, error: {errorMessage}',
         values: { errorMessage: error.message }
@@ -146,6 +157,10 @@ class ListControl extends Control {
     this.selectOptions = selectOptions;
     this.enable = true;
     this.disabledReason = '';
+  }
+
+  destroy() {
+    if (this.abortController) this.abortController.abort();
   }
 
   hasValue() {
