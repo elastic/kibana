@@ -27,8 +27,8 @@ export class Plugin implements CorePlugin<LicensingPluginSetup> {
   constructor(private readonly context: PluginInitializerContext) {
     this.logger = this.context.logger.get();
     this.config$ = this.context.config
-      .create<LicensingConfigType>()
-      .pipe(map(rawConfig => new LicensingConfig(rawConfig, this.context.env)));
+      .create<{ config: LicensingConfigType }>()
+      .pipe(map(({ config }) => new LicensingConfig(config, this.context.env)));
   }
 
   private hasLicenseInfoChanged(newLicense: any) {
@@ -116,7 +116,7 @@ export class Plugin implements CorePlugin<LicensingPluginSetup> {
     const poller = this.create(config, core);
 
     return {
-      license$: poller.subject$,
+      license$: poller.subject$.asObservable(),
     };
   }
 

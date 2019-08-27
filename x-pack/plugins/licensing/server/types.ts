@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { TypeOf } from '@kbn/config-schema';
 import { schema } from './schema';
 import { LICENSE_TYPE, LICENSE_STATUS } from './constants';
@@ -110,7 +110,7 @@ export interface ILicense {
 
 /** @public */
 export interface LicensingPluginSetup {
-  license$: BehaviorSubject<ILicense>;
+  license$: Observable<ILicense>;
 }
 /** @public */
 export type LicensingConfigType = TypeOf<typeof schema>;
