@@ -153,7 +153,19 @@ export const SaveRule = (props: SaveRuleProps) => {
 
   const { dataSubmitted, loading, saveRuleData, saveSuccess, triggerCount } = state;
 
-  const startSaveRule = () => dispatch({ type: 'START_SAVE_RULE', query });
+  const startSaveRule = async () => {
+    try {
+      const newQuery = await convertQuery(query);
+      dispatch({ type: 'START_SAVE_RULE', query: newQuery });
+    } catch (err) {
+      console.error( // eslint-disable-line
+        `An error occurred converting the query: '${query}'`,
+        err
+      );
+      dispatch({ type: 'CANCEL_SAVE_RULE' });
+      return;
+    }
+  };
 
   const cancelSaveRule = () => {
     if (loading) {
