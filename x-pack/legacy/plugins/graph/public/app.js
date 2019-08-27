@@ -59,10 +59,8 @@ import {
 import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs } from './services/url';
 
 import saveTemplate from './angular/templates/save_workspace.html';
-import loadTemplate from './angular/templates/load_workspace.html';
 import settingsTemplate from './angular/templates/settings.html';
 
-import './angular/directives/graph_load';
 import './angular/directives/graph_save';
 import './angular/directives/graph_settings';
 
@@ -256,11 +254,6 @@ app.controller('graphuiPlugin', function (
   $scope.toggleDrillDownIcon = function (urlTemplate, icon) {
     urlTemplate.icon === icon ? urlTemplate.icon = null : urlTemplate.icon = icon;
   };
-
-  $scope.openSavedWorkspace = function (savedWorkspace) {
-    kbnUrl.change('/workspace/{{id}}', { id: savedWorkspace.id });
-  };
-
 
   $scope.nodeClick = function (n, $event) {
 
@@ -926,7 +919,6 @@ app.controller('graphuiPlugin', function (
 
   $scope.menus = {
     showSave: false,
-    showLoad: false,
     showSettings: false,
   };
 
@@ -1199,7 +1191,7 @@ app.controller('graphuiPlugin', function (
           'data-test-subj': 'saveGraphSuccess',
         });
         if ($scope.savedWorkspace.id === $route.current.params.id) return;
-        $scope.openSavedWorkspace($scope.savedWorkspace);
+        kbnUrl.change(getEditPath($scope.savedWorkspace));
       }
     }, fatalError);
 
