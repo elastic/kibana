@@ -453,6 +453,7 @@ export class QueryBarInputUI extends Component<Props, State> {
       'onChange',
       'onSubmit',
       'uiSettings',
+      'savedObjectsClient',
     ]);
 
     return (
