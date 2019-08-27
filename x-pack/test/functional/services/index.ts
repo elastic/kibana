@@ -49,6 +49,7 @@ import { InfraLogStreamProvider } from './infra_log_stream';
 import { MachineLearningProvider } from './ml';
 
 import { SecurityServiceProvider, SpacesServiceProvider } from '../../common/services';
+import { services as VisualPageService } from '../../../../test/visual_regression/services';
 
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
@@ -89,4 +90,5 @@ export const services = {
   infraSourceConfigurationForm: InfraSourceConfigurationFormProvider,
   infraLogStream: InfraLogStreamProvider,
   ml: MachineLearningProvider,
+  visualTesting: VisualPageService,
 };
