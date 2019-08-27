@@ -5,44 +5,24 @@
 }
 
 .kbnSavedQueryManagement__listWrapper {
-  max-height: $euiSizeXXL * 5;
+  // Addition height will ensure one item is "cutoff" to indicate more below the scroll
+  max-height: $euiFormMaxWidth + $euiSize;
   overflow-y: hidden;
 }
 
 .kbnSavedQueryManagement__pagination {
   justify-content: center;
-  padding: 0 $euiSizeM $euiSizeM;
+  padding: ($euiSizeM / 2) $euiSizeM $euiSizeM;
 }
 
 .kbnSavedQueryManagement__text {
-  padding: $euiSizeM $euiSizeM 0 $euiSizeM;
+  padding: $euiSizeM $euiSizeM ($euiSizeM / 2) $euiSizeM;
 }
 
 .kbnSavedQueryManagement__list {
   @include euiYScrollWithShadows;
+  max-height: inherit; // Fixes overflow for applied max-height
   // Left/Right padding is calculated to match the left alignment of the
   // popover text and buttons
-  padding: $euiSizeM $euiSizeXS !important; // Override flush
-}
-
-.kbnSavedQueryListItem {
-  margin-top: 0;
-  color: $euiLinkColor;
-}
-
-// Can't actually target the button with classes, but styles to override
-// are just user agent styles
-.kbnSavedQueryListItem-selected button {
-  font-weight: $euiFontWeightBold;
-}
-
-// This will ensure the info icon and tooltip shows even if the label gets truncated
-.kbnSavedQueryListItem__label {
-  display: flex;
-  align-items: center;
-}
-
-.kbnSavedQueryListItem__labelText {
-  @include euiTextTruncate;
-  margin-right: $euiSizeXS;
+  padding: ($euiSizeM / 2) $euiSizeXS !important; // Override flush
 }
