@@ -1,0 +1,38 @@
+{
+    "job_type": "anomaly_detector",
+    "groups": [
+      "siem"
+    ],
+    "description": "SIEM Auditbeat: Detect unusual URL request from a Linux instance. Curl and wget activity is very common but unusual URLs can sometimes be malware delivery.",
+    "analysis_config": {
+      "bucket_span": "15m",
+      "detectors": [
+        {
+          "detector_description": "rare by \"process.title\"",
+          "function": "rare",
+          "by_field_name": "process.title"
+        }
+      ],
+      "influencers": [
+        "host.name",
+        "destination.ip",
+        "destination.port"
+      ]
+    },
+    "analysis_limits": {
+      "model_memory_limit": "32mb"
+    },
+    "data_description": {
+      "time_field": "@timestamp",
+      "time_format": "epoch_ms"
+    },
+    "custom_settings": {
+      "created_by": "ml-module-siem-auditbeat",
+      "custom_urls": [
+        {
+          "url_name": "Host Details",
+          "url_value": "siem#/ml-hosts/$host.name$?_g=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+        }
+      ]
+    }
+  }
