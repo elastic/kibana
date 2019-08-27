@@ -10,5 +10,5 @@ export const getTitle = (name?: string) => {
   const appName = i18n.translate('xpack.uptime.title', {
     defaultMessage: 'Uptime',
   });
-  return `${appName} ${name ? '|' + name : ''} - Kibana`;
+  return `${appName} ${name ? '| ' + name : ''} - Kibana`;
 };
