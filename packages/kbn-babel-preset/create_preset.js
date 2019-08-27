@@ -117,8 +117,8 @@ module.exports = (options) => ({
       //
       // See https://babeljs.io/docs/en/options#matchpattern for matching/wildcard rules
       test: [
-        'x-pack/legacy/plugins/infra/**/graphql',
-        'x-pack/legacy/plugins/siem/**/graphql',
+        '**/x-pack/legacy/plugins/infra/**/graphql/**',
+        '**/x-pack/legacy/plugins/siem/**/graphql/**',
       ],
       plugins: [
         require.resolve('babel-plugin-typescript-strip-namespaces')
