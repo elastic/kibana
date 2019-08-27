@@ -18,6 +18,7 @@ import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/
 import { ViewSwitcher } from './view_switcher';
 import { ChartView } from './chart';
 import { TableView } from './table';
+import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 
 export enum ViewMode {
   chart = 'chart',
@@ -27,9 +28,11 @@ export enum ViewMode {
 export const LogRateResults = ({
   isLoading,
   results,
+  timeRange,
 }: {
   isLoading: boolean;
   results: GetLogEntryRateSuccessResponsePayload['data'] | null;
+  timeRange: TimeRange;
 }) => {
   const title = i18n.translate('xpack.infra.logs.analysis.logRateSectionTitle', {
     defaultMessage: 'Log entry anomalies',
@@ -81,7 +84,7 @@ export const LogRateResults = ({
           </EuiFlexGroup>
           <EuiSpacer size="l" />
           {viewMode === ViewMode.chart ? (
-            <ChartView data={results} />
+            <ChartView data={results} timeRange={timeRange} />
           ) : (
             <TableView data={results} />
           )}

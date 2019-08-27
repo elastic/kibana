@@ -19,6 +19,7 @@ import {
   EuiPanel,
   EuiBadge,
   EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
 import dateMath from '@elastic/datemath';
 import moment from 'moment';
@@ -188,25 +189,32 @@ export const AnalysisResultsContent = ({
               <EuiPageContent>
                 <EuiPageContentBody>
                   {isFirstUse ? (
-                    <EuiCallOut
-                      color="success"
-                      title={i18n.translate(
-                        'xpack.infra.logs.logsAnalysisResults.onboardingSuccessTitle',
-                        { defaultMessage: 'Success!' }
-                      )}
-                    >
-                      <p>
-                        {i18n.translate(
-                          'xpack.infra.logs.logsAnalysisResults.onboardingSuccessContent',
-                          {
-                            defaultMessage:
-                              'Please allow a few minutes for our machine learning robots to begin collecting data.',
-                          }
+                    <>
+                      <EuiCallOut
+                        color="success"
+                        title={i18n.translate(
+                          'xpack.infra.logs.logsAnalysisResults.onboardingSuccessTitle',
+                          { defaultMessage: 'Success!' }
                         )}
-                      </p>
-                    </EuiCallOut>
+                      >
+                        <p>
+                          {i18n.translate(
+                            'xpack.infra.logs.logsAnalysisResults.onboardingSuccessContent',
+                            {
+                              defaultMessage:
+                                'Please allow a few minutes for our machine learning robots to begin collecting data.',
+                            }
+                          )}
+                        </p>
+                      </EuiCallOut>
+                      <EuiSpacer />
+                    </>
                   ) : null}
-                  <LogRateResults isLoading={isLoading} results={logEntryRate} />
+                  <LogRateResults
+                    isLoading={isLoading}
+                    results={logEntryRate}
+                    timeRange={timeRange}
+                  />
                 </EuiPageContentBody>
               </EuiPageContent>
             </EuiPageBody>
