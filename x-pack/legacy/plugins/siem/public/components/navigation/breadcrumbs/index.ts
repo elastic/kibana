@@ -12,12 +12,13 @@ import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../pages/host
 import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../pages/network/ip_details';
 import { getNetworkUrl, getOverviewUrl, getTimelinesUrl } from '../../link_to';
 import * as i18n from '../translations';
-import { HostsTabName } from '../../../pages/hosts/hosts_navigations';
 import { getHostsUrl } from '../../link_to/redirect_to_hosts';
+import { HostsTableType } from '../../../store/hosts/model';
 
 export interface NavigationParams {
-  hostName?: string;
-  tabName?: HostsTabName;
+  pageName?: string | undefined;
+  hostName?: string | undefined;
+  tabName?: HostsTableType | undefined;
 }
 
 export const setBreadcrumbs = (pathname: string, params?: NavigationParams) => {
@@ -68,7 +69,7 @@ export const getBreadcrumbsForRoute = (
   const pageName = get('pageName', params);
 
   if (trailingPath !== null) {
-    if (pageName === 'hosts') {
+    if (pageName === 'hosts' && params != null) {
       return [...siemRootBreadcrumb, ...getHostDetailsBreadcrumbs(params)];
     }
     if (Object.keys(rootBreadcrumbs).includes(trailingPath[0])) {

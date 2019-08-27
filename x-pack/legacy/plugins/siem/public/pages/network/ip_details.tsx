@@ -332,6 +332,7 @@ export const getBreadcrumbs = (ip: string): Breadcrumb[] => {
       ...breadcrumbs,
       {
         text: decodeIpv6(ip),
+        href: '',
       },
     ];
   }

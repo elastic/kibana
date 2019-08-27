@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiTab, EuiTabs, EuiLink } from '@elastic/eui';
+import { get } from 'lodash/fp';
 import * as React from 'react';
 import styled from 'styled-components';
 
 import classnames from 'classnames';
 import { trackUiAction as track, METRIC_TYPE } from '../../../lib/track_usage';
-
 import { TabNavigationComponentProps } from '..';
 
 export interface NavTab {
@@ -69,21 +69,18 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
     );
   }
 
-  public mapLocationToTab = (pathname: string) => {
+  public mapLocationToTab = (pathname: string): string => {
     const { navTabs } = this.props;
-    return Object.keys(navTabs).reduce((res, tab) => {
-      tab = navTabs[tab];
-      if (pathname.includes(tab.id)) {
-        res = tab.id;
-      }
-      return res;
-    }, '');
+    const myNavTab: NavTab = Object.keys(navTabs)
+      .map(tab => get(tab, navTabs))
+      .filter((item: NavTab) => pathname.includes(item.id))[0];
+    return myNavTab.id || '';
   };
 
   private renderTabs = () => {
     const { navTabs } = this.props;
-    return Object.keys(navTabs).map(tabName => {
-      const tab = navTabs[tabName];
+    return Object.keys(navTabs).map<JSX.Element>(tabName => {
+      const tab: NavTab = get(tabName, navTabs);
       return (
         <TabContainer
           className={classnames({ euiTab: true, showBorder: this.props.showBorder })}

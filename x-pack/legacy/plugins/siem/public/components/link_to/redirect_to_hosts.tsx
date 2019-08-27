@@ -8,11 +8,11 @@ import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { RedirectWrapper } from './redirect_wrapper';
-import { HostsTabName } from '../../pages/hosts/hosts_navigations';
+import { HostsTableType } from '../../store/hosts/model';
 
 export type HostComponentProps = RouteComponentProps<{
   hostName: string;
-  tabName: HostsTabName;
+  tabName: HostsTableType;
   search: string;
 }>;
 
@@ -22,7 +22,7 @@ export const RedirectToHostsPage = ({
   },
   location: { search },
 }: HostComponentProps) => {
-  if (!tabName) tabName = HostsTabName.hosts;
+  if (!tabName) tabName = HostsTableType.hosts;
 
   let to = hostName || tabName ? `/hosts/${tabName}${search}` : `/hosts/${search}`;
   if (hostName && tabName) to = `/hosts/${tabName}${search}`;
@@ -35,17 +35,17 @@ export const RedirectToHostDetailsPage = ({
   },
   location: { search },
 }: HostComponentProps) => {
-  if (!tabName) tabName = HostsTabName.authentications;
+  if (!tabName) tabName = HostsTableType.authentications;
   const to = `/hosts/${hostName}/${tabName}${search}`;
   return <RedirectWrapper to={to} />;
 };
 
 export const getHostsUrl = () => '#/link-to/hosts';
 
-export const getTabsOnHostsUrl = (tabName: HostsTabName) => `#/link-to/hosts/${tabName}`;
+export const getTabsOnHostsUrl = (tabName: HostsTableType) => `#/link-to/hosts/${tabName}`;
 
 export const getHostDetailsUrl = (hostName: string) => `#/link-to/hosts/${hostName}`;
 
-export const getTabsOnHostDetailsUrl = (hostName: string, tabName: HostsTabName) => {
+export const getTabsOnHostDetailsUrl = (hostName: string, tabName: HostsTableType) => {
   return `#/link-to/hosts/${hostName}/${tabName}`;
 };

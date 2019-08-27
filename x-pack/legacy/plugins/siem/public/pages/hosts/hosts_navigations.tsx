@@ -23,84 +23,84 @@ import { hostsModel } from '../../store';
 import { manageQuery } from '../../components/page/manage_query';
 import { AuthenticationsQuery } from '../../containers/authentications';
 import { ESTermQuery } from '../../../common/typed_json';
+import { HostsTableType } from '../../store/hosts/model';
 
-const getTabsOnHostsUrl = (tabName: HostsTabName) => `#/hosts/${tabName}`;
-const getTabsOnHostDetailsUrl = (hostName: string, tabName: HostsTabName) => {
+const getTabsOnHostsUrl = (tabName: HostsTableType) => `#/hosts/${tabName}`;
+const getTabsOnHostDetailsUrl = (hostName: string, tabName: HostsTableType) => {
   return `#/hosts/${hostName}/${tabName}`;
 };
 
-export enum HostsTabName {
-  hosts = 'all_hosts',
-  authentications = 'authentications',
-  uncommonProcesses = 'uncommon_processes',
-  anomalies = 'anomalies',
-  events = 'events',
-}
+export type KeyHostsNavTab =
+  | HostsTableType.hosts
+  | HostsTableType.authentications
+  | HostsTableType.uncommonProcesses
+  | HostsTableType.anomalies
+  | HostsTableType.events;
 
-// export const HostsTabNameMappedToDisplayName = {
-//   [HostsTabName.hosts]: i18n.NAVIGATION_ALL_HOSTS_TITLE,
-//   [HostsTabName.authentications]: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
-//   [HostsTabName.uncommonProcesses]: i18n.NAVIGATION_UNCOMMON_PROCESSES_TITLE,
-//   [HostsTabName.anomalies]: i18n.NAVIGATION_ANOMALIES_TITLE,
-//   [HostsTabName.events]: i18n.NAVIGATION_EVENTS_TITLE,
-// };
+export type KeyHostDetailsNavTab =
+  | HostsTableType.authentications
+  | HostsTableType.uncommonProcesses
+  | HostsTableType.anomalies
+  | HostsTableType.events;
 
-export const navTabsHosts: NavTab = {
-  [HostsTabName.hosts]: {
-    id: HostsTabName.hosts,
+export type HostsNavTab = Record<KeyHostsNavTab, NavTab>;
+
+export const navTabsHosts: HostsNavTab = {
+  [HostsTableType.hosts]: {
+    id: HostsTableType.hosts,
     name: i18n.NAVIGATION_ALL_HOSTS_TITLE,
-    href: getTabsOnHostsUrl(HostsTabName.hosts),
+    href: getTabsOnHostsUrl(HostsTableType.hosts),
     disabled: false,
   },
-  [HostsTabName.authentications]: {
-    id: HostsTabName.authentications,
+  [HostsTableType.authentications]: {
+    id: HostsTableType.authentications,
     name: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
-    href: getTabsOnHostsUrl(HostsTabName.authentications),
+    href: getTabsOnHostsUrl(HostsTableType.authentications),
     disabled: false,
   },
-  [HostsTabName.uncommonProcesses]: {
-    id: HostsTabName.uncommonProcesses,
+  [HostsTableType.uncommonProcesses]: {
+    id: HostsTableType.uncommonProcesses,
     name: i18n.NAVIGATION_UNCOMMON_PROCESSES_TITLE,
-    href: getTabsOnHostsUrl(HostsTabName.uncommonProcesses),
+    href: getTabsOnHostsUrl(HostsTableType.uncommonProcesses),
     disabled: false,
   },
-  [HostsTabName.anomalies]: {
-    id: HostsTabName.anomalies,
+  [HostsTableType.anomalies]: {
+    id: HostsTableType.anomalies,
     name: i18n.NAVIGATION_ANOMALIES_TITLE,
-    href: getTabsOnHostsUrl(HostsTabName.anomalies),
+    href: getTabsOnHostsUrl(HostsTableType.anomalies),
     disabled: false,
   },
-  [HostsTabName.events]: {
-    id: HostsTabName.events,
+  [HostsTableType.events]: {
+    id: HostsTableType.events,
     name: i18n.NAVIGATION_EVENTS_TITLE,
-    href: getTabsOnHostsUrl(HostsTabName.events),
+    href: getTabsOnHostsUrl(HostsTableType.events),
     disabled: false,
   },
 };
 
-export const navTabsHostDatails = (hostName: string) => ({
-  [HostsTabName.authentications]: {
-    id: HostsTabName.authentications,
+export const navTabsHostDetails = (hostName: string): Record<KeyHostDetailsNavTab, NavTab> => ({
+  [HostsTableType.authentications]: {
+    id: HostsTableType.authentications,
     name: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
-    href: getTabsOnHostDetailsUrl(hostName, HostsTabName.authentications),
+    href: getTabsOnHostDetailsUrl(hostName, HostsTableType.authentications),
     disabled: false,
   },
-  [HostsTabName.uncommonProcesses]: {
-    id: HostsTabName.uncommonProcesses,
+  [HostsTableType.uncommonProcesses]: {
+    id: HostsTableType.uncommonProcesses,
     name: i18n.NAVIGATION_UNCOMMON_PROCESSES_TITLE,
-    href: getTabsOnHostDetailsUrl(hostName, HostsTabName.uncommonProcesses),
+    href: getTabsOnHostDetailsUrl(hostName, HostsTableType.uncommonProcesses),
     disabled: false,
   },
-  [HostsTabName.anomalies]: {
-    id: HostsTabName.anomalies,
+  [HostsTableType.anomalies]: {
+    id: HostsTableType.anomalies,
     name: i18n.NAVIGATION_ANOMALIES_TITLE,
-    href: getTabsOnHostDetailsUrl(hostName, HostsTabName.anomalies),
+    href: getTabsOnHostDetailsUrl(hostName, HostsTableType.anomalies),
     disabled: false,
   },
-  [HostsTabName.events]: {
-    id: HostsTabName.events,
+  [HostsTableType.events]: {
+    id: HostsTableType.events,
     name: i18n.NAVIGATION_EVENTS_TITLE,
-    href: getTabsOnHostDetailsUrl(hostName, HostsTabName.events),
+    href: getTabsOnHostDetailsUrl(hostName, HostsTableType.events),
     disabled: false,
   },
 });

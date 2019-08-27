@@ -11,7 +11,7 @@ import { setBreadcrumbs } from './breadcrumbs';
 import { TabNavigation, NavTab } from './tab_navigation';
 
 export interface TabNavigationComponentProps {
-  navTabs: NavTab[];
+  navTabs: Record<string, NavTab>;
   display?: 'default' | 'condensed' | undefined;
   showBorder?: boolean;
 }

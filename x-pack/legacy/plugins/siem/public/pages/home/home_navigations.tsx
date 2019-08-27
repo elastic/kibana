@@ -19,6 +19,13 @@ export enum SiemPageName {
   timelines = 'timelines',
 }
 
+export interface SiemNavTab {
+  [SiemPageName.overview]: NavTab;
+  [SiemPageName.hosts]: NavTab;
+  [SiemPageName.network]: NavTab;
+  [SiemPageName.timelines]: NavTab;
+}
+
 export const navTabs = {
   [SiemPageName.overview]: {
     id: SiemPageName.overview,

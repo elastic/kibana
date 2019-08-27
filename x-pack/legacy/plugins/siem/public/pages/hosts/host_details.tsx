@@ -44,9 +44,11 @@ import { InputsModelId } from '../../store/inputs/constants';
 import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 import { KpiHostDetailsQuery } from '../../containers/kpi_host_details';
 import { hostToCriteria } from '../../components/ml/criteria/host_to_criteria';
-import { navTabsHostDatails } from './hosts_navigations';
+import { navTabsHostDetails } from './hosts_navigations';
 import { SiemNavigation } from '../../components/navigation';
 import { Anomaly } from '../../components/ml/types';
+import { NavigationParams } from '../../components/navigation/breadcrumbs';
+import { HostsTableType } from '../../store/hosts/model';
 
 const type = hostsModel.HostsType.details;
 
@@ -167,7 +169,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
 
                         <EuiHorizontalRule />
                         <SiemNavigation
-                          navTabs={navTabsHostDatails(hostName)}
+                          navTabs={navTabsHostDetails(hostName)}
                           display="default"
                           showBorder={true}
                         />
@@ -268,7 +270,15 @@ export const HostDetailsBody = connect(
   }
 )(HostDetailsBodyComponent);
 
-export const getBreadcrumbs = (params): Breadcrumb[] => {
+const TabNameMappedToI18nKey = {
+  [HostsTableType.hosts]: i18n.NAVIGATION_ALL_HOSTS_TITLE,
+  [HostsTableType.authentications]: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
+  [HostsTableType.uncommonProcesses]: i18n.NAVIGATION_UNCOMMON_PROCESSES_TITLE,
+  [HostsTableType.anomalies]: i18n.NAVIGATION_ANOMALIES_TITLE,
+  [HostsTableType.events]: i18n.NAVIGATION_EVENTS_TITLE,
+};
+
+export const getBreadcrumbs = (params: NavigationParams): Breadcrumb[] => {
   const hostName = get('hostName', params);
   const tabName = get('tabName', params);
   let breadcrumb = [
@@ -290,7 +300,7 @@ export const getBreadcrumbs = (params): Breadcrumb[] => {
     breadcrumb = [
       ...breadcrumb,
       {
-        text: i18n[`NAVIGATION_${tabName.toUpperCase()}_TITLE`],
+        text: TabNameMappedToI18nKey[tabName],
         href: '',
       },
     ];
