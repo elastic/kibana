@@ -16,18 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React, { useRef, useEffect } from 'react';
+import { DocViewRenderFn, DocViewRenderProps } from 'ui/registry/doc_views';
 
-import _ from 'lodash';
-import { uiRegistry } from './_registry';
-
-export const DocViewsRegistryProvider = uiRegistry({
-  name: 'docViews',
-  index: ['name'],
-  order: ['order'],
-  constructor() {
-    this.forEach(docView => {
-      docView.shouldShow = docView.shouldShow || _.constant(true);
-      docView.name = docView.name || docView.title;
-    });
-  }
-});
+interface Props {
+  render: DocViewRenderFn;
+  renderProps: DocViewRenderProps;
+}
+/**
+ * Responsible for rendering a tab provided by a render function.
+ * So any other framework can be used (E.g. legacy Angular 3rd party plugin code)
+ * The provided `render` function is called with a reference to the
+ * component's `HTMLDivElement` as 1st arg and `renderProps` as 2nd arg
+ */
+export function DocViewRenderTab({ render, renderProps }: Props) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (ref && ref.current) {
+      return render(ref.current, renderProps);
+    }
+  }, [render, renderProps]);
+  return <div ref={ref} />;
+}

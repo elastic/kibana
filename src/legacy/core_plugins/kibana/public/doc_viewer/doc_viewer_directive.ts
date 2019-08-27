@@ -16,28 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// @ts-ignore
-import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
-import { i18n } from '@kbn/i18n';
-import { JsonCodeEditor } from './json_code_editor';
 
-/*
- * Registration of the the doc view: json
- * - used to display an ES hit as pretty printed JSON at Discover
- * - registered as angular directive to stay compatible with community plugins
- */
-DocViewsRegistryProvider.register(function(reactDirective: any) {
-  const reactDir = reactDirective(JsonCodeEditor, ['hit']);
-  // setting of reactDir.scope is required to assign $scope props
-  // to the react component via render-directive in doc_viewer.js
-  reactDir.scope = {
-    hit: '=',
-  };
-  return {
-    title: i18n.translate('kbnDocViews.json.jsonTitle', {
-      defaultMessage: 'JSON',
-    }),
-    order: 20,
-    directive: reactDir,
-  };
+// @ts-ignore
+import { uiModules } from 'ui/modules';
+import { DocViewer } from './doc_viewer';
+
+uiModules.get('apps/discover').directive('docViewer', (reactDirective: any) => {
+  return reactDirective(DocViewer, undefined, {
+    restrict: 'E',
+    scope: {
+      hit: '=',
+      indexPattern: '=',
+      filter: '=?',
+      columns: '=?',
+      onAddColumn: '=?',
+      onRemoveColumn: '=?',
+    },
+  });
 });
