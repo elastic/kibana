@@ -8,6 +8,6 @@ import { HeadlessChromiumDriverFactory } from './driver_factory';
 
 export { paths } from './paths';
 
-export async function createDriverFactory(binaryPath, logger, browserConfig, queueTimeout) {
-  return new HeadlessChromiumDriverFactory(binaryPath, logger, browserConfig, queueTimeout);
+export async function createDriverFactory(binaryPath, browserConfig, queueTimeout) {
+  return new HeadlessChromiumDriverFactory(binaryPath, browserConfig, queueTimeout);
 }

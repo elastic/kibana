@@ -6,8 +6,8 @@
 
 import * as Rx from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { mergeMap, catchError, map, takeUntil } from 'rxjs/operators';
 import { PLUGIN_ID, PNG_JOB_TYPE } from '../../../../common/constants';
+import { mergeMap, catchError, map, takeUntil } from 'rxjs/operators';
 import { LevelLogger, oncePerServer } from '../../../../server/lib';
 import { generatePngObservableFactory } from '../lib/generate_png';
 import {

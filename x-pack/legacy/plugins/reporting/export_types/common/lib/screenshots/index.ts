@@ -39,19 +39,13 @@ export function screenshotsObservableFactory(server: KbnServer) {
     layout,
     browserTimezone,
   }: ScreenshotObservableOpts): Rx.Observable<void> {
-    const create$ = browserDriverFactory.create({
-      viewport: layout.getBrowserViewport(),
-      browserTimezone,
-    });
+    const create$ = browserDriverFactory.create(
+      { viewport: layout.getBrowserViewport(), browserTimezone },
+      logger
+    );
 
     return create$.pipe(
-      mergeMap(({ driver$, exit$, message$, consoleMessage$ }) => {
-        message$.subscribe((line: string) => {
-          logger.debug(line, ['browser']);
-        });
-        consoleMessage$.subscribe((line: string) => {
-          logger.debug(line, ['browserConsole']);
-        });
+      mergeMap(({ driver$, exit$ }) => {
         const screenshot$ = driver$.pipe(
           mergeMap(
             (browser: HeadlessBrowser) => openUrl(browser, url, conditionalHeaders, logger),
