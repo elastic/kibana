@@ -14,7 +14,7 @@ import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import { VectorStyle } from '../../styles/vector_style';
 import { i18n } from '@kbn/i18n';
-import { SOURCE_DATA_ID_ORIGIN } from '../../../../common/constants';
+import { SOURCE_DATA_ID_ORIGIN, ES_PEW_PEW } from '../../../../common/constants';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { convertToLines } from './convert_to_lines';
 import { Schemas } from 'ui/vis/editors/default/schemas';
@@ -40,7 +40,7 @@ const aggSchemas = new Schemas([
 
 export class ESPewPewSource extends AbstractESSource {
 
-  static type = 'ES_PEW_PEW';
+  static type = ES_PEW_PEW;
   static title = i18n.translate('xpack.maps.source.pewPewTitle', {
     defaultMessage: 'Connections'
   });
