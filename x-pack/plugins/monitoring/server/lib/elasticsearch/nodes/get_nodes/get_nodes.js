@@ -72,7 +72,16 @@ export async function getNodes(req, esIndexPattern, clusterStats, shardStats) {
             field: `source_node.uuid`,
             size: config.get('xpack.monitoring.max_bucket_size')
           },
-          aggs: getMetricAggs(LISTING_METRICS_NAMES, bucketSize)
+          aggs: {
+            by_date: {
+              date_histogram: {
+                field: 'timestamp',
+                min_doc_count: 1,
+                fixed_interval: bucketSize + 's'
+              },
+              aggs: getMetricAggs(LISTING_METRICS_NAMES, bucketSize)
+            }
+          }
         }
       },
       sort: [ { timestamp: { order: 'desc' } } ]
