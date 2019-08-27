@@ -23,8 +23,10 @@ import { TopNavMenuData } from './top_nav_menu_data';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { coreMock } from '../../../../../core/public/mocks';
-const setupMock = coreMock.createSetup();
 const startMock = coreMock.createStart();
+
+import { timefilterServiceMock } from '../../../../core_plugins/data/public/timefilter/timefilter_service.mock';
+const timefilterSetupMock = timefilterServiceMock.createSetupContract();
 
 jest.mock('../../../../core_plugins/data/public', () => {
   return {
@@ -58,7 +60,8 @@ describe('TopNavMenu', () => {
     const component = shallowWithIntl(
       <TopNavMenu
         name="test"
-        uiSettings={setupMock.uiSettings}
+        history={timefilterSetupMock.history}
+        uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
       />
     );
@@ -70,7 +73,8 @@ describe('TopNavMenu', () => {
     const component = shallowWithIntl(
       <TopNavMenu
         name="test"
-        uiSettings={setupMock.uiSettings}
+        uiSettings={startMock.uiSettings}
+        history={timefilterSetupMock.history}
         savedObjectsClient={startMock.savedObjects.client}
         config={[menuItems[0]]}
       />
@@ -83,7 +87,8 @@ describe('TopNavMenu', () => {
     const component = shallowWithIntl(
       <TopNavMenu
         name="test"
-        uiSettings={setupMock.uiSettings}
+        history={timefilterSetupMock.history}
+        uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
         config={menuItems}
       />
@@ -96,7 +101,8 @@ describe('TopNavMenu', () => {
     const component = shallowWithIntl(
       <TopNavMenu
         name="test"
-        uiSettings={setupMock.uiSettings}
+        history={timefilterSetupMock.history}
+        uiSettings={startMock.uiSettings}
         savedObjectsClient={startMock.savedObjects.client}
         showSearchBar={true}
       />
