@@ -24,7 +24,8 @@ beforeAll(() => {
 
 afterAll(() => fakeTimer.restore());
 
-describe('taskIntervals', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/44086
+describe.skip('taskIntervals', () => {
   describe('assertValidInterval', () => {
     test('it accepts intervals in the form `Nm`', () => {
       expect(() => assertValidInterval(`${_.random(1000)}m`)).not.toThrow();
