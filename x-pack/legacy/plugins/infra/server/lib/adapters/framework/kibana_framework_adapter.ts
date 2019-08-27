@@ -54,7 +54,11 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
     });
   }
 
-  public registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void {
+  public registerGraphQLEndpoint(
+    routePath: string,
+    schema: GraphQLSchema,
+    pluginPrefix: string = 'infra'
+  ): void {
     this.server.register<HapiGraphQLPluginOptions>({
       options: {
         graphqlOptions: (req: Legacy.Request) => ({
@@ -66,7 +70,7 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
           tags: ['access:infra'],
         },
       },
-      plugin: graphqlHapi,
+      plugin: graphqlHapi(pluginPrefix),
     });
 
     this.server.register<HapiGraphiQLPluginOptions>({
@@ -80,7 +84,7 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
           tags: ['access:infra'],
         },
       },
-      plugin: graphiqlHapi,
+      plugin: graphiqlHapi(pluginPrefix),
     });
   }
 

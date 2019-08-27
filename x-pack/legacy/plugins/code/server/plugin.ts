@@ -6,13 +6,15 @@
 
 import { i18n } from '@kbn/i18n';
 import crypto from 'crypto';
+import gql from 'graphql-tag';
+import { IResolvers, makeExecutableSchema } from 'graphql-tools';
 import * as _ from 'lodash';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 
 import { XPackMainPlugin } from '../../xpack_main/xpack_main';
 import { GitOperations } from './git_operations';
 import { RepositoryIndexInitializerFactory, tryMigrateIndices } from './indexer';
-import { Esqueue } from './lib/esqueue';
+import { Esqueue, EsClient } from './lib/esqueue';
 import { Logger } from './log';
 import { JAVA } from './lsp/language_servers';
 import { LspService } from './lsp/lsp_service';
@@ -54,6 +56,9 @@ import { initLocalService } from './init_local';
 import { initQueue } from './init_queue';
 import { initWorkers } from './init_workers';
 import { ClusterNodeAdapter } from './distributed/cluster/cluster_node_adapter';
+import { InfraKibanaBackendFrameworkAdapter } from '../../infra/server/lib/adapters/framework/kibana_framework_adapter';
+import { ServerFacade } from '..';
+import { RepositoryObjectClient } from './search';
 
 export class CodePlugin {
   private isCodeNode = false;
@@ -147,7 +152,7 @@ export class CodePlugin {
     await this.codeServices.start();
   }
 
-  private async initClusterNode(server: any, codeServerRouter: CodeServerRouter) {
+  private async initClusterNode(server: ServerFacade, codeServerRouter: CodeServerRouter) {
     this.log.info('Initializing Code plugin as cluster-node');
     const { esClient, repoConfigController, repoIndexInitializerFactory } = await initEs(
       server,
@@ -185,12 +190,12 @@ export class CodePlugin {
     // Execute index version checking and try to migrate index data if necessary.
     await tryMigrateIndices(esClient, this.log);
 
-    this.initRoutes(server, codeServices, repoIndexInitializerFactory, repoConfigController);
+    this.initRoutes(server, codeServices, repoIndexInitializerFactory, repoConfigController, esClient);
 
     return codeServices;
   }
 
-  private async initCodeNode(server: any, codeServices: CodeServices) {
+  private async initCodeNode(server: ServerFacade, codeServices: CodeServices) {
     this.isCodeNode = true;
     const { esClient, repoConfigController, repoIndexInitializerFactory } = await initEs(
       server,
@@ -225,7 +230,7 @@ export class CodePlugin {
     // Execute index version checking and try to migrate index data if necessary.
     await tryMigrateIndices(esClient, this.log);
 
-    this.initRoutes(server, codeServices, repoIndexInitializerFactory, repoConfigController);
+    this.initRoutes(server, codeServices, repoIndexInitializerFactory, repoConfigController, esClient);
     return codeServices;
   }
 
@@ -254,17 +259,58 @@ export class CodePlugin {
     codeServices.registerHandler(WorkspaceDefinition, null);
     codeServices.registerHandler(SetupDefinition, null);
     const { repoConfigController, repoIndexInitializerFactory } = await initEs(server, this.log);
-    this.initRoutes(server, codeServices, repoIndexInitializerFactory, repoConfigController);
+    this.initRoutes(server, codeServices, repoIndexInitializerFactory, repoConfigController, undefined);
     return codeServices;
   }
 
   private async initRoutes(
-    server: any,
+    server: ServerFacade,
     codeServices: CodeServices,
     repoIndexInitializerFactory: RepositoryIndexInitializerFactory,
-    repoConfigController: RepositoryConfigController
+    repoConfigController: RepositoryConfigController,
+    esClient: EsClient | undefined
   ) {
     const codeServerRouter = new CodeServerRouter(server);
+
+    const testSchema = gql`
+      schema {
+        query: Query
+      }
+
+      type Query {
+        repos: [Repository]
+      }
+
+      type Repository {
+        uri: String
+        url: String
+        name: String
+        org: String
+        defaultBranch: String
+      }
+    `;
+
+    const testResolver = {
+      Query: {
+        repos: async () => {
+          if (esClient) {
+            const repoObjectClient = new RepositoryObjectClient(esClient);
+            return await repoObjectClient.getAllRepositories();
+          } else {
+            return [];
+          }
+        },
+      },
+    };
+
+    const schema = makeExecutableSchema({
+      resolvers: [testResolver],
+      typeDefs: [testSchema],
+    });
+
+    const adapter = new InfraKibanaBackendFrameworkAdapter(server);
+    adapter.registerGraphQLEndpoint('/api/code/graphql', schema, 'code');
+
     repositoryRoute(
       codeServerRouter,
       codeServices,

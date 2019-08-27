@@ -19,65 +19,69 @@ export interface HapiGraphQLPluginOptions {
   graphqlOptions: GraphQLOptions | HapiOptionsFunction;
 }
 
-export const graphqlHapi: Plugin<HapiGraphQLPluginOptions> = {
-  name: 'graphql',
-  register: (server: Server, options: HapiGraphQLPluginOptions) => {
-    if (!options || !options.graphqlOptions) {
-      throw new Error('Apollo Server requires options.');
-    }
+export const graphqlHapi: (prefix: string) => Plugin<HapiGraphQLPluginOptions> = (
+  prefix: string
+) => {
+  return {
+    name: `${prefix}-graphql`,
+    register: (server: Server, options: HapiGraphQLPluginOptions) => {
+      if (!options || !options.graphqlOptions) {
+        throw new Error('Apollo Server requires options.');
+      }
 
-    server.route({
-      options: options.route || {},
-      handler: async (request: Request, h: ResponseToolkit) => {
-        try {
-          const query =
-            request.method === 'post'
-              ? (request.payload as Record<string, any>)
-              : (request.query as Record<string, any>);
+      server.route({
+        options: options.route || {},
+        handler: async (request: Request, h: ResponseToolkit) => {
+          try {
+            const query =
+              request.method === 'post'
+                ? (request.payload as Record<string, any>)
+                : (request.query as Record<string, any>);
 
-          const gqlResponse = await runHttpQuery([request], {
-            method: request.method.toUpperCase(),
-            options: options.graphqlOptions,
-            query,
-          });
-
-          return h.response(gqlResponse).type('application/json');
-        } catch (error) {
-          if ('HttpQueryError' !== error.name) {
-            const queryError = Boom.boomify(error);
-
-            queryError.output.payload.message = error.message;
-
-            return queryError;
-          }
-
-          if (error.isGraphQLError === true) {
-            return h
-              .response(error.message)
-              .code(error.statusCode)
-              .type('application/json');
-          }
-
-          const genericError = new Boom(error.message, { statusCode: error.statusCode });
-
-          if (error.headers) {
-            Object.keys(error.headers).forEach(header => {
-              genericError.output.headers[header] = error.headers[header];
+            const gqlResponse = await runHttpQuery([request], {
+              method: request.method.toUpperCase(),
+              options: options.graphqlOptions,
+              query,
             });
+
+            return h.response(gqlResponse).type('application/json');
+          } catch (error) {
+            if ('HttpQueryError' !== error.name) {
+              const queryError = Boom.boomify(error);
+
+              queryError.output.payload.message = error.message;
+
+              return queryError;
+            }
+
+            if (error.isGraphQLError === true) {
+              return h
+                .response(error.message)
+                .code(error.statusCode)
+                .type('application/json');
+            }
+
+            const genericError = new Boom(error.message, { statusCode: error.statusCode });
+
+            if (error.headers) {
+              Object.keys(error.headers).forEach(header => {
+                genericError.output.headers[header] = error.headers[header];
+              });
+            }
+
+            // Boom hides the error when status code is 500
+
+            genericError.output.payload.message = error.message;
+
+            throw genericError;
           }
-
-          // Boom hides the error when status code is 500
-
-          genericError.output.payload.message = error.message;
-
-          throw genericError;
-        }
-      },
-      method: ['GET', 'POST'],
-      path: options.path || '/graphql',
-      vhost: options.vhost || undefined,
-    });
-  },
+        },
+        method: ['GET', 'POST'],
+        path: options.path || '/graphql',
+        vhost: options.vhost || undefined,
+      });
+    },
+  };
 };
 
 export type HapiGraphiQLOptionsFunction = (
@@ -92,26 +96,30 @@ export interface HapiGraphiQLPluginOptions {
   graphiqlOptions: GraphiQL.GraphiQLData | HapiGraphiQLOptionsFunction;
 }
 
-export const graphiqlHapi: Plugin<HapiGraphiQLPluginOptions> = {
-  name: 'graphiql',
-  register: (server: Server, options: HapiGraphiQLPluginOptions) => {
-    if (!options || !options.graphiqlOptions) {
-      throw new Error('Apollo Server GraphiQL requires options.');
-    }
+export const graphiqlHapi: (prefix: string) => Plugin<HapiGraphiQLPluginOptions> = (
+  prefix: string
+) => {
+  return {
+    name: `${prefix}-graphiql`,
+    register: (server: Server, options: HapiGraphiQLPluginOptions) => {
+      if (!options || !options.graphiqlOptions) {
+        throw new Error('Apollo Server GraphiQL requires options.');
+      }
 
-    server.route({
-      options: options.route || {},
-      handler: async (request: Request, h: ResponseToolkit) => {
-        const graphiqlString = await GraphiQL.resolveGraphiQLString(
-          request.query,
-          options.graphiqlOptions,
-          request
-        );
+      server.route({
+        options: options.route || {},
+        handler: async (request: Request, h: ResponseToolkit) => {
+          const graphiqlString = await GraphiQL.resolveGraphiQLString(
+            request.query,
+            options.graphiqlOptions,
+            request
+          );
 
-        return h.response(graphiqlString).type('text/html');
-      },
-      method: 'GET',
-      path: options.path || '/graphiql',
-    });
-  },
+          return h.response(graphiqlString).type('text/html');
+        },
+        method: 'GET',
+        path: options.path || '/graphiql',
+      });
+    },
+  };
 };
