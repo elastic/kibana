@@ -114,7 +114,6 @@ export default class KbnServer {
   public close(): Promise<void>;
   public afterPluginsInit(callback: () => void): void;
   public applyLoggingConfiguration(settings: any): void;
-  public addMemoizedFactoryToRequest(...args: any): void;
 }
 
 // Re-export commonly used hapi types.
