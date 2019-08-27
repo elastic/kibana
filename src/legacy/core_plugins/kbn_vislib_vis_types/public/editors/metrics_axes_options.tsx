@@ -130,12 +130,15 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
   const getUpdatedAxisName = useCallback(
     (axisPosition: ValueAxis['position']) => {
       const axisName = capitalize(axisPosition) + AXIS_PREFIX;
-      let lastAxisNameNumber = axesNumbers[axisPosition];
+      const lastAxisNameNumber = axesNumbers[axisPosition];
+      let nextAxisNameNumber;
 
       if (!lastAxisNameNumber) {
-        lastAxisNameNumber = stateParams.valueAxes.reduce(countNextAxisNumber(axisName, 'name'), 0);
+        nextAxisNameNumber = stateParams.valueAxes.reduce(countNextAxisNumber(axisName, 'name'), 1);
+      } else {
+        nextAxisNameNumber = lastAxisNameNumber + 1;
       }
-      const nextAxisNameNumber = lastAxisNameNumber + 1;
+
       setAxesNumbers({ ...axesNumbers, [axisPosition]: nextAxisNameNumber });
 
       return `${axisName}${nextAxisNameNumber}`;
@@ -175,14 +178,16 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
   );
 
   const addValueAxis = useCallback(() => {
-    let lastAxisIdNumber = axesNumbers[VALUE_AXIS_PREFIX];
+    const lastAxisIdNumber = axesNumbers[VALUE_AXIS_PREFIX];
+    let nextAxisIdNumber;
 
     if (!lastAxisIdNumber) {
-      lastAxisIdNumber = stateParams.valueAxes.reduce(countNextAxisNumber(VALUE_AXIS_PREFIX), 0);
+      nextAxisIdNumber = stateParams.valueAxes.reduce(countNextAxisNumber(VALUE_AXIS_PREFIX), 1);
+    } else {
+      nextAxisIdNumber = lastAxisIdNumber + 1;
     }
 
     const newAxis = cloneDeep(stateParams.valueAxes[0]);
-    const nextAxisIdNumber = lastAxisIdNumber + 1;
     newAxis.id = VALUE_AXIS_PREFIX + nextAxisIdNumber;
     newAxis.position = mapPositionOpposite(newAxis.position);
 
@@ -200,6 +205,15 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
     (axis: ValueAxis) => {
       const newValueAxes = stateParams.valueAxes.filter(valAxis => valAxis.id !== axis.id);
       setValue('valueAxes', newValueAxes);
+
+      const lastNumber = axesNumbers[VALUE_AXIS_PREFIX];
+
+      if (lastNumber === parseInt(axis.id.substr(VALUE_AXIS_PREFIX.length), 10)) {
+        setAxesNumbers({
+          ...axesNumbers,
+          [VALUE_AXIS_PREFIX]: lastNumber - 1,
+        });
+      }
 
       let chartIndex;
       stateParams.seriesParams.forEach(({ valueAxis }, index) => {
