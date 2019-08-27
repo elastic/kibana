@@ -239,6 +239,17 @@ export class ExpressionInput extends React.Component<Props> {
     };
   };
 
+  editorDidMount = (
+    editor: monacoEditor.editor.IStandaloneCodeEditor,
+    monaco: typeof monacoEditor
+  ) => {
+    // Updating tab size for the editor
+    const model = editor.getModel();
+    if (model) {
+      model.updateOptions({ tabSize: 2 });
+    }
+  };
+
   render() {
     const { value, error, isCompact } = this.props;
 
@@ -271,6 +282,7 @@ export class ExpressionInput extends React.Component<Props> {
                 },
                 wordBasedSuggestions: false,
               }}
+              editorDidMount={this.editorDidMount}
             />
           </div>
         </EuiFormRow>
