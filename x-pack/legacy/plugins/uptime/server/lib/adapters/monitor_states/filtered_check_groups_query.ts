@@ -72,10 +72,6 @@ const filteredCheckGroupsQueryBody = (
   };
 
   if (searchAfter) {
-    if (typeof searchAfter === 'string') {
-      // This is often passed through from the browser as string encoded JSON
-      searchAfter = JSON.parse(searchAfter);
-    }
     set(body, 'aggs.monitors.composite.after', searchAfter);
   }
   return body;

@@ -55,18 +55,18 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
 
     const enriched = await queryEnriched(queryContext);
 
-    const encodeJSONB64 = (p: any): string | null => {
+    const jsonify = (p: any): string | null => {
       if (!p) {
         return null;
       }
 
-      return encodeURIComponent(JSON.stringify(p));
+      return JSON.stringify(p);
     };
 
     return {
       summaries: enriched.items,
-      nextPagePagination: encodeJSONB64(enriched.nextPagePagination),
-      prevPagePagination: encodeJSONB64(enriched.prevPagePagination),
+      nextPagePagination: jsonify(enriched.nextPagePagination),
+      prevPagePagination: jsonify(enriched.prevPagePagination),
     };
   }
 

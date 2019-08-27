@@ -43,6 +43,9 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
         { dateRangeStart, dateRangeEnd, filters, pagination },
         { req }
       ): Promise<MonitorSummaryResult> {
+        const decodedPagination = pagination
+          ? JSON.parse(decodeURIComponent(pagination))
+          : CONTEXT_DEFAULTS.CURSOR_PAGINATION;
         const [
           totalSummaryCount,
           { summaries, nextPagePagination, prevPagePagination },
@@ -52,9 +55,7 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
             req,
             dateRangeStart,
             dateRangeEnd,
-            pagination
-              ? JSON.parse(decodeURIComponent(pagination))
-              : CONTEXT_DEFAULTS.CURSOR_PAGINATION,
+            decodedPagination,
             filters
           ),
         ]);

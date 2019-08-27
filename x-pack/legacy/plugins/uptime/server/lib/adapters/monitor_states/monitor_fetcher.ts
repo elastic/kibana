@@ -4,29 +4,30 @@ import { CursorPagination } from './adapter_types';
 import { QueryContext } from './elasticsearch_monitor_states_adapter';
 import { CursorDirection, SortOrder } from '../../../../common/graphql/types';
 
-export type FetchMonitorLocCheckGroupsResult = {
+export type MonitorPage = {
   items: MonitorIdWithGroups[];
   nextPagePagination: CursorPagination | null;
   prevPagePagination: CursorPagination | null;
 };
 
-export const fetchMonitorLocCheckGroups = async (
+export const fetchPaginatedMonitors = async (
   queryContext: QueryContext,
   size: number
-): Promise<FetchMonitorLocCheckGroupsResult> => {
+): Promise<MonitorPage> => {
   const items: MonitorIdWithGroups[] = [];
-  const fetcher = new MonitorIterator(queryContext);
+  console.log('INIT ITER', queryContext.pagination);
+  const iterator = new MonitorIterator(queryContext);
 
   let paginationBefore: CursorPagination | null = null;
   const start = new Date();
   while (items.length < size) {
-    const monitor = await fetcher.next();
+    const monitor = await iterator.next();
     if (!monitor) {
       break; // No more items to fetch
     }
     // On our first item set the previous pagination to be items before this if they exist
     if (items.length === 0) {
-      const reverseFetcher = await fetcher.reverse();
+      const reverseFetcher = await iterator.reverse();
       paginationBefore = reverseFetcher && (await reverseFetcher.paginationAfterCurrent());
     }
 
@@ -35,8 +36,8 @@ export const fetchMonitorLocCheckGroups = async (
   console.log('Fetching done', new Date().getTime() - start.getTime() + 'ms', items.length, size);
 
   // We have to create these objects before checking if we can navigate backward
-  const paginationAfter: CursorPagination | null = (await fetcher.peek())
-    ? await fetcher.paginationAfterCurrent()
+  const paginationAfter: CursorPagination | null = (await iterator.peek())
+    ? await iterator.paginationAfterCurrent()
     : null;
 
   const ssAligned = searchSortAligned(queryContext.pagination);

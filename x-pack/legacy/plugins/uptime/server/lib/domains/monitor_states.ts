@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UMMonitorStatesAdapter, GetMonitorStatesResult } from '../adapters/monitor_states';
-import { StatesIndexStatus, CursorPagination } from '../../../common/graphql/types';
+import {
+  UMMonitorStatesAdapter,
+  GetMonitorStatesResult,
+  CursorPagination,
+} from '../adapters/monitor_states';
+import { StatesIndexStatus } from '../../../common/graphql/types';
 
 export class UMMonitorStatesDomain {
   constructor(private readonly adapter: UMMonitorStatesAdapter, libs: {}) {
@@ -20,15 +24,15 @@ export class UMMonitorStatesDomain {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    pagination: string,
+    pagination?: CursorPagination,
     filters?: string | null
   ): Promise<GetMonitorStatesResult> {
-    const decodedPagination = pagination ? JSON.parse(decodeURIComponent(pagination)) : undefined;
+    console.log('MONITOR_STATES.TS', pagination);
     return this.adapter.getMonitorStates(
       request,
       dateRangeStart,
       dateRangeEnd,
-      decodedPagination,
+      pagination,
       filters
     );
   }

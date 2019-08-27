@@ -1,7 +1,7 @@
 import { QueryContext } from './elasticsearch_monitor_states_adapter';
 import { getHistogramInterval } from '../../helper';
 import { QUERY, INDEX_NAMES, STATES } from '../../../../common/constants';
-import { fetchMonitorLocCheckGroups } from './monitor_fetcher';
+import { fetchPaginatedMonitors } from './monitor_fetcher';
 import { get, flatten, sortBy } from 'lodash';
 import {
   MonitorSummary,
@@ -20,7 +20,7 @@ export type EnrichedQueryResult = {
 
 export const queryEnriched = async (queryContext: QueryContext): Promise<EnrichedQueryResult> => {
   const size = Math.min(queryContext.size, QUERY.DEFAULT_AGGS_CAP);
-  const mlcgsResult = await fetchMonitorLocCheckGroups(queryContext, size);
+  const mlcgsResult = await fetchPaginatedMonitors(queryContext, size);
 
   const checkGroups = flatten(mlcgsResult.items.map(mlcg => mlcg.groups.map(g => g.checkGroup)));
 
