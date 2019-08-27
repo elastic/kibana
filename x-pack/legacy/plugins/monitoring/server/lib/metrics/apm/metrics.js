@@ -118,7 +118,7 @@ export const metrics = {
   apm_requests: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.request.count',
     title: i18n.translate('xpack.monitoring.metrics.apm.requestsTitle', {
-      defaultMessage: 'Requests Intake API'
+      defaultMessage: 'Request Count Intake API'
     }),
     label: i18n.translate('xpack.monitoring.metrics.apm.requests.requestedLabel', {
       defaultMessage: 'Requested'

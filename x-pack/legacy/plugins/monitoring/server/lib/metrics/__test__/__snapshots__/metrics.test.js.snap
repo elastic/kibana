@@ -461,7 +461,7 @@ Object {
     "label": "Requested",
     "metricAgg": "max",
     "timestampField": "beats_stats.timestamp",
-    "title": "Requests Intake API",
+    "title": "Request Count Intake API",
     "units": "/m",
     "uuidField": "cluster_uuid",
   },
