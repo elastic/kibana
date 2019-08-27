@@ -24,17 +24,7 @@ const getStateChildComponent = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   wrapper: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>
 ): // eslint-disable-next-line @typescript-eslint/no-explicit-any
-React.Component<{}, {}, any> =>
-  wrapper
-    .childAt(0)
-    .childAt(0)
-    .childAt(0)
-    .childAt(0)
-    .childAt(0)
-    .childAt(0)
-    .childAt(0)
-    .childAt(0)
-    .instance();
+React.Component<{}, {}, any> => wrapper.find('[data-test-subj="state-child-component"]').instance();
 
 describe('OpenTimelineModalButton', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
@@ -66,7 +56,10 @@ describe('OpenTimelineModalButton', () => {
         <ThemeProvider theme={theme}>
           <TestProviderWithoutDragAndDrop>
             <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-              <OpenTimelineModalButton onToggle={jest.fn()} />
+              <OpenTimelineModalButton
+                data-test-subj="state-child-component"
+                onToggle={jest.fn()}
+              />
             </MockedProvider>
           </TestProviderWithoutDragAndDrop>
         </ThemeProvider>
@@ -158,7 +151,10 @@ describe('OpenTimelineModalButton', () => {
         <ThemeProvider theme={theme}>
           <TestProviderWithoutDragAndDrop>
             <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-              <OpenTimelineModalButton onToggle={jest.fn()} />
+              <OpenTimelineModalButton
+                data-test-subj="state-child-component"
+                onToggle={jest.fn()}
+              />
             </MockedProvider>
           </TestProviderWithoutDragAndDrop>
         </ThemeProvider>
