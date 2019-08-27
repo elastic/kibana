@@ -64,6 +64,8 @@ function clearNowTimeStub() {
 describe('setTime', () => {
   let update;
   let fetch;
+  let updateSub;
+  let fetchSub;
 
   beforeEach(() => {
     update = sinon.spy();
@@ -72,8 +74,13 @@ describe('setTime', () => {
       from: 0,
       to: 1,
     });
-    timefilter.on('timeUpdate', update);
-    timefilter.on('fetch', fetch);
+    updateSub = timefilter.getTimeUpdate$().subscribe(update);
+    fetchSub = timefilter.getFetch$().subscribe(fetch);
+  });
+
+  afterEach(() => {
+    updateSub.unsubscribe();
+    fetchSub.unsubscribe();
   });
 
   test('should update time', () => {
@@ -116,9 +123,10 @@ describe('setTime', () => {
 });
 
 describe('setRefreshInterval', () => {
-
   let update;
   let fetch;
+  let fetchSub;
+  let refreshSub;
 
   beforeEach(() => {
     update = sinon.spy();
@@ -127,8 +135,13 @@ describe('setRefreshInterval', () => {
       pause: false,
       value: 0
     });
-    timefilter.on('refreshIntervalUpdate', update);
-    timefilter.on('fetch', fetch);
+    refreshSub = timefilter.getRefreshIntervalUpdate$().subscribe(update);
+    fetchSub = timefilter.getFetch$().subscribe(fetch);
+  });
+
+  afterEach(() => {
+    refreshSub.unsubscribe();
+    fetchSub.unsubscribe();
   });
 
   test('should update refresh interval', () => {
@@ -203,10 +216,15 @@ describe('setRefreshInterval', () => {
 
 describe('isTimeRangeSelectorEnabled', () => {
   let update;
+  let updateSub;
 
   beforeEach(() => {
     update = sinon.spy();
-    timefilter.on('enabledUpdated', update);
+    updateSub = timefilter.getEnabledUpdated$().subscribe(update);
+  });
+
+  afterEach(() => {
+    updateSub.unsubscribe();
   });
 
   test('should emit updated when disabled', () => {
@@ -224,10 +242,15 @@ describe('isTimeRangeSelectorEnabled', () => {
 
 describe('isAutoRefreshSelectorEnabled', () => {
   let update;
+  let updateSub;
 
   beforeEach(() => {
     update = sinon.spy();
-    timefilter.on('enabledUpdated', update);
+    updateSub = timefilter.getEnabledUpdated$().subscribe(update);
+  });
+
+  afterEach(() => {
+    updateSub.unsubscribe();
   });
 
   test('should emit updated when disabled', () => {

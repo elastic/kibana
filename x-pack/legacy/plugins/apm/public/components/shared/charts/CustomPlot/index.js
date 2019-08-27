@@ -139,8 +139,10 @@ export class InnerCustomPlot extends PureComponent {
     });
     const options = this.getOptions(this.props);
 
-    const coordinates = flatten(enabledSeries.map(s => s.data));
-    const noHits = coordinates.every(coord => !isValidCoordinateValue(coord.y));
+    const hasValidCoordinates = flatten(series.map(s => s.data)).some(p =>
+      isValidCoordinateValue(p.y)
+    );
+    const noHits = !hasValidCoordinates;
 
     const plotValues = this.getPlotValues({
       visibleSeries,
