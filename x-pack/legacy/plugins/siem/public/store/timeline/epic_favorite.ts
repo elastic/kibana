@@ -26,12 +26,13 @@ import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persi
 import { refetchQueries } from './refetch_queries';
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import { TimelineById } from './types';
+import { ActionTimeline } from './epic';
 
 export const timelineFavoriteActionsType = [updateIsFavorite.type];
 
 export const epicPersistTimelineFavorite = (
   apolloClient: ApolloClient<NormalizedCacheObject>,
-  action: Action,
+  action: ActionTimeline,
   timeline: TimelineById,
   action$: Observable<Action>,
   timeline$: Observable<TimelineById>
@@ -52,14 +53,14 @@ export const epicPersistTimelineFavorite = (
   ).pipe(
     withLatestFrom(timeline$),
     mergeMap(([result, recentTimelines]) => {
-      const savedTimeline = recentTimelines[get('payload.id', action)];
+      const savedTimeline = recentTimelines[action.payload.id];
       const response: ResponseFavoriteTimeline = get('data.persistFavorite', result);
       const callOutMsg = response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
 
       return [
         ...callOutMsg,
         updateTimeline({
-          id: get('payload.id', action),
+          id: action.payload.id,
           timeline: {
             ...savedTimeline,
             isFavorite: response.favorite != null && response.favorite.length > 0,
@@ -68,11 +69,11 @@ export const epicPersistTimelineFavorite = (
           },
         }),
         endTimelineSaving({
-          id: get('payload.id', action),
+          id: action.payload.id,
         }),
       ];
     }),
-    startWith(startTimelineSaving({ id: get('payload.id', action) })),
+    startWith(startTimelineSaving({ id: action.payload.id })),
     takeUntil(
       action$.pipe(
         withLatestFrom(timeline$),
