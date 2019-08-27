@@ -5,7 +5,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { capabilities } from 'ui/capabilities';
 import { visualizations } from '../../../../../src/legacy/core_plugins/visualizations/public';
 
 const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
