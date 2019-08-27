@@ -14,7 +14,7 @@ import { getRenderedHref } from '../../../../../utils/testHelpers';
 import { DiscoverErrorLink } from '../DiscoverErrorLink';
 import { DiscoverSpanLink } from '../DiscoverSpanLink';
 import { DiscoverTransactionLink } from '../DiscoverTransactionLink';
-import * as hooks from '../../../../../hooks/useCore';
+import * as kibanaCore from '../../../../../../../observability/public/context/kibana_core';
 import { InternalCoreStart } from 'src/core/public';
 
 jest.mock('ui/kfetch');
@@ -34,7 +34,7 @@ beforeAll(() => {
     }
   } as unknown) as InternalCoreStart;
 
-  jest.spyOn(hooks, 'useCore').mockReturnValue(coreMock);
+  jest.spyOn(kibanaCore, 'useKibanaCore').mockReturnValue(coreMock);
 });
 
 afterAll(() => {
