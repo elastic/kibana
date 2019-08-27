@@ -236,6 +236,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                             restoreIndices && restoreIndices.length > 0 ? (
                               <EuiLink
                                 onClick={() => {
+                                  // TODO: Change this to setIndicesOptions() when https://github.com/elastic/eui/issues/2071 is fixed
                                   indicesOptions.forEach((option: Option) => {
                                     option.checked = undefined;
                                   });
@@ -254,6 +255,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                             ) : (
                               <EuiLink
                                 onClick={() => {
+                                  // TODO: Change this to setIndicesOptions() when https://github.com/elastic/eui/issues/2071 is fixed
                                   indicesOptions.forEach((option: Option) => {
                                     option.checked = 'on';
                                   });
