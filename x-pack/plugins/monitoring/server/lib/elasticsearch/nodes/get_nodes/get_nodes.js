@@ -77,7 +77,7 @@ export async function getNodes(req, esIndexPattern, clusterStats, shardStats) {
               date_histogram: {
                 field: 'timestamp',
                 min_doc_count: 1,
-                fixed_interval: bucketSize + 's'
+                interval: bucketSize + 's'
               },
               aggs: getMetricAggs(LISTING_METRICS_NAMES, bucketSize)
             }
