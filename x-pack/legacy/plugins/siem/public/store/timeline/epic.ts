@@ -75,7 +75,7 @@ interface TimelineEpicDependencies<State> {
   apolloClient$: Observable<AppApolloClient>;
 }
 
-export interface ActionTimeline {
+export interface ActionTimeline extends Action {
   type: string;
   payload: {
     id: string;
@@ -158,7 +158,7 @@ export const createTimelineEpic = <State>(): Epic<
       delay(500),
       withLatestFrom(timeline$, apolloClient$, notes$, timelineTimeRange$),
       concatMap(([objAction, timeline, apolloClient, notes, timelineTimeRange]) => {
-        const action: Action = get('action', objAction);
+        const action: ActionTimeline = get('action', objAction);
         const timelineId = myEpicTimelineId.getTimelineId();
         const version = myEpicTimelineId.getTimelineVersion();
 
