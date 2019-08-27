@@ -20,13 +20,13 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { MarkdownSimple } from 'ui/markdown';
 import { toastNotifications } from 'ui/notify';
 
 import { fetchAnchorProvider } from '../api/anchor';
 import { fetchContextProvider } from '../api/context';
 import { QueryParameterActionsProvider } from '../query_parameters';
 import { FAILURE_REASONS, LOADING_STATUS } from './constants';
+import { MarkdownSimple } from '../../../../kibana_react/public';
 
 export function QueryActionsProvider(Private, Promise) {
   const fetchAnchor = Private(fetchAnchorProvider);

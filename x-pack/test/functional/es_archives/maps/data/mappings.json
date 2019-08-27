@@ -9,6 +9,9 @@
         },
         "name": {
           "type": "keyword"
+        },
+        "prop1": {
+          "type": "byte"
         }
       }
     },

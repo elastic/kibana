@@ -14,7 +14,6 @@ import {
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { Note } from '../../../../lib/note';
@@ -66,6 +65,8 @@ const ActionLoading = styled(EuiLoadingSpinner)`
 ActionLoading.displayName = 'ActionLoading';
 
 const PinContainer = styled.div`
+  position: relative;
+  top: -1px;
   width: 27px;
 `;
 
@@ -79,13 +80,15 @@ SelectEventContainer.displayName = 'SelectEventContainer';
 
 const NotesButtonContainer = styled(EuiFlexItem)`
   margin-left: 5px;
+  position: relative;
+  top: -3px;
 `;
 
 NotesButtonContainer.displayName = 'NotesButtonContainer';
 
 const emptyNotes: string[] = [];
 
-export const Actions = pure<Props>(
+export const Actions = React.memo<Props>(
   ({
     actionsColumnWidth,
     associateNote,
@@ -176,7 +179,20 @@ export const Actions = pure<Props>(
         </NotesButtonContainer>
       </EuiFlexGroup>
     </ActionsContainer>
-  )
+  ),
+  (nextProps, prevProps) => {
+    return (
+      prevProps.actionsColumnWidth === nextProps.actionsColumnWidth &&
+      prevProps.checked === nextProps.checked &&
+      prevProps.expanded === nextProps.expanded &&
+      prevProps.eventId === nextProps.eventId &&
+      prevProps.eventIsPinned === nextProps.eventIsPinned &&
+      prevProps.loading === nextProps.loading &&
+      prevProps.noteIds === nextProps.noteIds &&
+      prevProps.showCheckboxes === nextProps.showCheckboxes &&
+      prevProps.showNotes === nextProps.showNotes
+    );
+  }
 );
 
 Actions.displayName = 'Actions';

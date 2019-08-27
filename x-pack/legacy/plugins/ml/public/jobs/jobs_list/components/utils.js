@@ -8,7 +8,7 @@ import { each } from 'lodash';
 import { toastNotifications } from 'ui/notify';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 import rison from 'rison-node';
-import chrome from 'ui/chrome'; // TODO: get from context once walter's PR is merged
+import chrome from 'ui/chrome';
 
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { ml } from 'plugins/ml/services/ml_api_service';

@@ -16,6 +16,7 @@ import { LoggerFactory } from '../utils/log_factory';
 import { AbstractLauncher } from './abstract_launcher';
 import { LanguageServerProxy } from './proxy';
 import { InitializeOptions, RequestExpander } from './request_expander';
+import { ExternalProgram } from './process/external_program';
 
 const GO_LANG_DETACH_PORT = 2091;
 
@@ -39,6 +40,9 @@ export class GoServerLauncher extends AbstractLauncher {
       maxWorkspace,
       this.options,
       {
+        initialOptions: {
+          installGoDependency: this.options.security.installGoDependency,
+        },
         clientCapabilities: {
           textDocument: {
             hover: {
@@ -94,6 +98,14 @@ export class GoServerLauncher extends AbstractLauncher {
     if (!fs.existsSync(goPath)) {
       fs.mkdirSync(goPath);
     }
+    let go111MODULE = 'off';
+    if (this.options.security.installGoDependency) {
+      // There are no proper approaches to disable downloading go dependencies except creating inconsistencies of the
+      // running environments of go-langserver. Given that go language server will do its best to convert the repos
+      // into modules, one of the doable approaches is setting 'GO111MODULE' to false to be incompatible with the
+      // moduled repos.
+      go111MODULE = 'on';
+    }
 
     const params: string[] = ['-port=' + port.toString()];
     const golsp = path.resolve(installationPath, launchersFound[0]);
@@ -107,7 +119,7 @@ export class GoServerLauncher extends AbstractLauncher {
         GOROOT: goRoot,
         GOPATH: goPath,
         PATH: envPath,
-        GO111MODULE: 'on',
+        GO111MODULE: go111MODULE,
         CGO_ENABLED: '0',
       },
     });
@@ -120,6 +132,6 @@ export class GoServerLauncher extends AbstractLauncher {
     log.info(
       `Launch Go Language Server at port ${port.toString()}, pid:${p.pid}, GOROOT:${goRoot}`
     );
-    return p;
+    return new ExternalProgram(p, this.options, log);
   }
 }

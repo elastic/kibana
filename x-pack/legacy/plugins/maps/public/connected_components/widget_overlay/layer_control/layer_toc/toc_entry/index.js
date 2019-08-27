@@ -22,7 +22,7 @@ import {
   cloneLayer,
 } from '../../../../../actions/map_actions';
 
-import { hasDirtyState, getSelectedLayer } from '../../../../../selectors/map_selectors';
+import { hasDirtyState, getSelectedLayer, isUsingSearch } from '../../../../../selectors/map_selectors';
 
 function mapStateToProps(state = {}, ownProps) {
   return {
@@ -31,6 +31,7 @@ function mapStateToProps(state = {}, ownProps) {
     selectedLayer: getSelectedLayer(state),
     hasDirtyStateSelector: hasDirtyState(state),
     isLegendDetailsOpen: getOpenTOCDetails(state).includes(ownProps.layer.getId()),
+    isUsingSearch: isUsingSearch(state),
   };
 }
 

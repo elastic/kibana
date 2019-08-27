@@ -6,18 +6,20 @@
 
 import { EuiComboBox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { Component } from 'react';
+import _ from 'lodash';
 import { Role } from '../../../../../../../common/model';
 import { isReadOnlyRole } from '../../../../../../lib/role_utils';
 
 interface Props {
   role: Role;
-  availableClusterPrivileges: string[];
+  builtinClusterPrivileges: string[];
   onChange: (privs: string[]) => void;
 }
 
 export class ClusterPrivileges extends Component<Props, {}> {
   public render() {
-    return <EuiFlexGroup>{this.buildComboBox(this.props.availableClusterPrivileges)}</EuiFlexGroup>;
+    const availableClusterPrivileges = this.getAvailableClusterPrivileges();
+    return <EuiFlexGroup>{this.buildComboBox(availableClusterPrivileges)}</EuiFlexGroup>;
   }
 
   public buildComboBox = (items: string[]) => {
@@ -32,9 +34,11 @@ export class ClusterPrivileges extends Component<Props, {}> {
     return (
       <EuiFlexItem key={'clusterPrivs'}>
         <EuiComboBox
+          data-test-subj={'cluster-privileges-combobox'}
           options={options}
           selectedOptions={selectedOptions}
           onChange={this.onClusterPrivilegesChange}
+          onCreateOption={this.onCreateCustomPrivilege}
           isDisabled={isReadOnlyRole(role)}
         />
       </EuiFlexItem>
@@ -43,5 +47,18 @@ export class ClusterPrivileges extends Component<Props, {}> {
 
   public onClusterPrivilegesChange = (selectedPrivileges: any) => {
     this.props.onChange(selectedPrivileges.map((priv: any) => priv.label));
+  };
+
+  private onCreateCustomPrivilege = (customPrivilege: string) => {
+    this.props.onChange([...this.props.role.elasticsearch.cluster, customPrivilege]);
+  };
+
+  private getAvailableClusterPrivileges = () => {
+    const availableClusterPrivileges = [
+      ...this.props.builtinClusterPrivileges,
+      ...this.props.role.elasticsearch.cluster,
+    ];
+
+    return _.uniq(availableClusterPrivileges);
   };
 }

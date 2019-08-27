@@ -27,7 +27,8 @@
         ],
         "type": "polygon"
       },
-      "name": "alpha"
+      "name": "alpha",
+      "prop1": 1
     }
   }
 }
@@ -61,7 +62,8 @@
         ],
         "type": "polygon"
       },
-      "name": "bravo"
+      "name": "bravo",
+      "prop1": 2
     }
   }
 }
@@ -95,7 +97,8 @@
         ],
         "type": "polygon"
       },
-      "name": "charlie"
+      "name": "charlie",
+      "prop1": 3
     }
   }
 }
@@ -127,7 +130,8 @@
           ],
         "type": "linestring"
       },
-      "name": "tango"
+      "name": "tango",
+      "prop1": 4
     }
   }
 }

@@ -6,10 +6,10 @@
 
 import { resolve } from 'path';
 
-// eslint-disable-next-line import/no-extraneous-dependencies
+/* eslint-disable-next-line import/no-extraneous-dependencies */
 import madge from 'madge';
-
-import { run, createFailError } from '../../../../../../src/dev/run';
+/* eslint-disable-next-line import/no-extraneous-dependencies */
+import { run, createFailError } from '@kbn/dev-utils';
 
 run(
   async ({ log }) => {

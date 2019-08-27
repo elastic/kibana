@@ -27,17 +27,13 @@ describe('Overview Page', () => {
     HOST_STATS.forEach(stat => {
       cy.get(stat.domId)
         .invoke('text')
-        .should(statValue => {
-          expect(statValue).to.eq(stat.value);
-        });
+        .should('eq', stat.value);
     });
 
     NETWORK_STATS.forEach(stat => {
       cy.get(stat.domId)
         .invoke('text')
-        .should(statValue => {
-          expect(statValue).to.eq(stat.value);
-        });
+        .should('eq', stat.value);
     });
   });
 });

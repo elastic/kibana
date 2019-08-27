@@ -31,3 +31,5 @@ for (const key in colormaps) {
     };
   }
 }
+
+export const colorSchemas = Object.values(truncatedColorMaps).map(({ id, label }) => ({ value: id, text: label }));

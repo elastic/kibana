@@ -24,6 +24,10 @@ export const unrestrictedFeaturePrivileges = {
       privileges: ['all'],
       canUnassign: true,
     },
+    feature4: {
+      privileges: ['all', 'read'],
+      canUnassign: true,
+    },
   },
 };
 
@@ -46,6 +50,10 @@ export const fullyRestrictedFeaturePrivileges = {
     },
     feature3: {
       privileges: ['all'],
+      canUnassign: false,
+    },
+    feature4: {
+      privileges: ['all', 'read'],
       canUnassign: false,
     },
   },

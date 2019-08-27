@@ -29,7 +29,7 @@ import {
 } from 'ui/visualize/loader/types';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
-import { TimeRange } from 'ui/timefilter/time_history';
+import { TimeRange } from 'ui/timefilter';
 import { Filter } from '@kbn/es-query';
 import {
   EmbeddableInput,
@@ -65,6 +65,7 @@ export interface VisualizeOutput extends EmbeddableOutput {
   editUrl: string;
   indexPatterns?: StaticIndexPattern[];
   savedObjectId: string;
+  visTypeName: string;
 }
 
 export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
@@ -99,6 +100,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         indexPatterns,
         editable,
         savedObjectId: savedVisualization.id!,
+        visTypeName: savedVisualization.vis.type.name,
       },
       parent
     );

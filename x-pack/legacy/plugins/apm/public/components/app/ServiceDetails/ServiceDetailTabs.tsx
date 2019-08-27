@@ -12,8 +12,8 @@ import { ErrorGroupOverview } from '../ErrorGroupOverview';
 import { TransactionOverview } from '../TransactionOverview';
 import { ServiceMetrics } from '../ServiceMetrics';
 import { useFetcher } from '../../../hooks/useFetcher';
-import { loadServiceAgentName } from '../../../services/rest/apm/services';
 import { isRumAgentName } from '../../../../common/agent_name';
+import { callApmApi } from '../../../services/rest/callApmApi';
 
 interface Props {
   urlParams: IUrlParams;
@@ -23,7 +23,13 @@ export function ServiceDetailTabs({ urlParams }: Props) {
   const { serviceName, start, end } = urlParams;
   const { data: agentName } = useFetcher(() => {
     if (serviceName && start && end) {
-      return loadServiceAgentName({ serviceName, start, end });
+      return callApmApi({
+        pathname: '/api/apm/services/{serviceName}/agent_name',
+        params: {
+          path: { serviceName },
+          query: { start, end }
+        }
+      }).then(res => res.agentName);
     }
   }, [serviceName, start, end]);
 
@@ -32,7 +38,7 @@ export function ServiceDetailTabs({ urlParams }: Props) {
       defaultMessage: 'Transactions'
     }),
     path: `/services/${serviceName}/transactions`,
-    render: () => <TransactionOverview urlParams={urlParams} />,
+    render: () => <TransactionOverview />,
     name: 'transactions'
   };
 

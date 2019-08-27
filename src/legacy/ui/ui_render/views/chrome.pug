@@ -300,6 +300,6 @@ html(lang=locale)
     block head
 
   body
-    kbn-csp(data=JSON.stringify({ nonce, strictCsp }))
+    kbn-csp(data=JSON.stringify({ strictCsp }))
     kbn-injected-metadata(data=JSON.stringify(injectedMetadata))
     block content

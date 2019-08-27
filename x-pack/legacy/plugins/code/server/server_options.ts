@@ -6,6 +6,7 @@
 
 import { resolve } from 'path';
 import { RepoConfig, RepoConfigs } from '../model';
+import { CodeNode } from './distributed/cluster/code_nodes';
 
 export interface LspOptions {
   requestTimeoutMs: number;
@@ -16,6 +17,7 @@ export interface LspOptions {
 export interface SecurityOptions {
   enableMavenImport: boolean;
   enableGradleImport: boolean;
+  installGoDependency: boolean;
   installNodeDependency: boolean;
   gitHostWhitelist: string[];
   gitProtocolWhitelist: string[];
@@ -52,6 +54,8 @@ export class ServerOptions {
 
   public readonly enableGlobalReference: boolean = this.options.enableGlobalReference;
 
+  public readonly enableCommitIndexing: boolean = this.options.enableCommitIndexing;
+
   public readonly lsp: LspOptions = this.options.lsp;
 
   public readonly security: SecurityOptions = this.options.security;
@@ -70,5 +74,23 @@ export class ServerOptions {
 
   public readonly codeNodeUrl: string = this.options.codeNodeUrl;
 
+  public readonly clusterEnabled: boolean = this.options.clustering.enabled;
+
+  public readonly codeNodes: CodeNode[] = this.options.clustering.codeNodes;
+
   constructor(private options: any, private config: any) {}
+
+  /**
+   * TODO 'server.uuid' is not guaranteed to be loaded when the object is constructed.
+   *
+   * See [[manageUuid()]], as it was called asynchronously without actions on the completion.
+   */
+  public get serverUUID(): string {
+    return this.config.get('server.uuid');
+  }
+
+  public get localAddress(): string {
+    const serverCfg = this.config.get('server');
+    return 'http://' + serverCfg.host + ':' + serverCfg.port + serverCfg.basePath;
+  }
 }

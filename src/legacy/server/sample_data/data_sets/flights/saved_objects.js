@@ -84,10 +84,10 @@ export const getSavedObjects = () => [
         "Cancelled",
         "FlightDelayType"
       ],
-      "sort": [
+      "sort": [[
         "timestamp",
         "desc"
-      ],
+      ]],
       "version": 1,
       "kibanaSavedObjectMeta": {
         "searchSourceJSON": "{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"

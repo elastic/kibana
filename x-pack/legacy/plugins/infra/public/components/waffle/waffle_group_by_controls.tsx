@@ -112,7 +112,7 @@ export const WaffleGroupByControls = injectI18n(
             {
               name: intl.formatMessage({
                 id: 'xpack.infra.waffle.customGroupByOptionName',
-                defaultMessage: 'Custom Field',
+                defaultMessage: 'Custom field',
               }),
               icon: 'empty',
               panel: 'customPanel',

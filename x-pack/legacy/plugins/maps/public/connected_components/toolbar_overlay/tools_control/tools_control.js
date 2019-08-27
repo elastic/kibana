@@ -12,9 +12,13 @@ import {
   EuiSelectable,
   EuiHighlight,
   EuiTextColor,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DRAW_TYPE } from '../../../actions/map_actions';
+import { DRAW_TYPE } from '../../../../common/constants';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const RESET_STATE = {
   isPopoverOpen: false,
@@ -64,7 +68,7 @@ export class ToolsControl extends Component {
 
   _getDrawPanels() {
 
-    const needsIndexPatternSelectionPanel = this.props.uniqueIndexPatternsAndGeoFields.length > 1;
+    const needsIndexPatternSelectionPanel = this.props.geoFields.length > 1;
 
     const drawPolygonAction = {
       name: i18n.translate('xpack.maps.toolbarOverlay.drawShapeLabel', {
@@ -73,7 +77,7 @@ export class ToolsControl extends Component {
       onClick: needsIndexPatternSelectionPanel
         ? this._selectPolygonDrawType
         : () => {
-          this._initiateDraw(DRAW_TYPE.POLYGON, this.props.uniqueIndexPatternsAndGeoFields[0]);
+          this._initiateDraw(DRAW_TYPE.POLYGON, this.props.geoFields[0]);
         },
       panel: needsIndexPatternSelectionPanel
         ? this._getIndexPatternSelectionPanel(1)
@@ -87,7 +91,7 @@ export class ToolsControl extends Component {
       onClick: needsIndexPatternSelectionPanel
         ? this._selectBoundsDrawType
         : () => {
-          this._initiateDraw(DRAW_TYPE.BOUNDS, this.props.uniqueIndexPatternsAndGeoFields[0]);
+          this._initiateDraw(DRAW_TYPE.BOUNDS, this.props.geoFields[0]);
         },
       panel: needsIndexPatternSelectionPanel
         ? this._getIndexPatternSelectionPanel(2)
@@ -104,10 +108,10 @@ export class ToolsControl extends Component {
   }
 
   _getIndexPatternSelectionPanel(id) {
-    const options = this.props.uniqueIndexPatternsAndGeoFields.map((indexPatternAndGeoField) => {
+    const options = this.props.geoFields.map((geoField) => {
       return {
-        label: `${indexPatternAndGeoField.indexPatternTitle} : ${indexPatternAndGeoField.geoField}`,
-        value: indexPatternAndGeoField
+        label: `${geoField.indexPatternTitle} : ${geoField.geoFieldName}`,
+        value: geoField
       };
     });
 
@@ -121,7 +125,7 @@ export class ToolsControl extends Component {
           </EuiTextColor>
           <br />
           <EuiHighlight search={searchValue}>
-            {option.value.geoField}
+            {option.value.geoFieldName}
           </EuiHighlight>
         </Fragment>
       );
@@ -181,7 +185,7 @@ export class ToolsControl extends Component {
   }
 
   render() {
-    return (
+    const toolsPopoverButton = (
       <EuiPopover
         id="contextMenu"
         button={this._renderToolsButton()}
@@ -196,6 +200,30 @@ export class ToolsControl extends Component {
           panels={this._getDrawPanels()}
         />
       </EuiPopover>
+    );
+
+    if (!this.props.isDrawingFilter) {
+      return toolsPopoverButton;
+    }
+
+    return (
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          {toolsPopoverButton}
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButton
+            size="s"
+            fill
+            onClick={this.props.cancelDraw}
+          >
+            <FormattedMessage
+              id="xpack.maps.tooltip.toolsControl.cancelDrawButtonLabel"
+              defaultMessage="Cancel"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 }

@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { indexPatternService } from '../../../kibana_services';
 import { Storage } from 'ui/storage';
 
-import { QueryBar } from 'plugins/data';
+import { SearchBar } from 'plugins/data';
 
 const settings = chrome.getUiSettingsClient();
 const localStorage = new Storage(window.localStorage);
@@ -91,12 +91,14 @@ export class FilterEditor extends Component {
         anchorPosition="leftCenter"
       >
         <div className="mapFilterEditor" data-test-subj="mapFilterEditor">
-          <QueryBar
+          <SearchBar
             uiSettings={settings}
-            query={layerQuery ? layerQuery : { language: settings.get('search:queryLanguage'), query: '' }}
-            onSubmit={this._onQueryChange}
-            appName="maps"
+            showFilterBar={false}
             showDatePicker={false}
+            showQueryInput={true}
+            query={layerQuery ? layerQuery : { language: settings.get('search:queryLanguage'), query: '' }}
+            onQuerySubmit={this._onQueryChange}
+            appName="maps"
             indexPatterns={this.state.indexPatterns}
             store={localStorage}
             customSubmitButton={

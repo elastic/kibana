@@ -93,7 +93,7 @@ export const filterBrowserFieldsByFieldName = ({
         fields: filter(
           f => f.name != null && f.name.includes(trimmedSubstring),
           browserFields[categoryId].fields
-        ),
+        ).reduce((filtered, field) => ({ ...filtered, [field.name!]: field }), {}),
       },
     }),
     {}

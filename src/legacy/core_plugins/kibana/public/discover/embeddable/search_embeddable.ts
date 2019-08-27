@@ -25,11 +25,10 @@ import { SearchSource } from 'ui/courier';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { RequestAdapter } from 'ui/inspector/adapters';
 import { Adapters } from 'ui/inspector/types';
-import { getTime } from 'ui/timefilter/get_time';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
 import { Filter, FilterStateStore } from '@kbn/es-query';
-import { TimeRange } from 'ui/timefilter/time_history';
+import { getTime, TimeRange } from 'ui/timefilter';
 import { Query, onlyDisabledFiltersChanged } from '../../../../data/public';
 import {
   APPLY_FILTER_TRIGGER,
@@ -45,11 +44,11 @@ import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 interface SearchScope extends ng.IScope {
   columns?: string[];
   description?: string;
-  sort?: string[] | string[][];
+  sort?: string[][];
   searchSource?: SearchSource;
   sharedItemTitle?: string;
   inspectorAdapters?: Adapters;
-  setSortOrder?: (sortPair: [string, string]) => void;
+  setSortOrder?: (sortPair: [[string, string]]) => void;
   removeColumn?: (column: string) => void;
   addColumn?: (column: string) => void;
   moveColumn?: (column: string, index: number) => void;
@@ -264,9 +263,6 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     // been overridden in a dashboard.
     searchScope.columns = this.input.columns || this.savedSearch.columns;
     searchScope.sort = this.input.sort || this.savedSearch.sort;
-    if (searchScope.sort.length && !Array.isArray(searchScope.sort[0])) {
-      searchScope.sort = [searchScope.sort];
-    }
     searchScope.sharedItemTitle = this.panelTitle;
 
     if (

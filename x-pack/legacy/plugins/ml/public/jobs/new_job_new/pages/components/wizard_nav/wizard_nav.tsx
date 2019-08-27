@@ -6,7 +6,7 @@
 
 import React, { FC } from 'react';
 
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
@@ -34,9 +34,10 @@ export const WizardNav: FC<StepsNavProps> = ({
           size="s"
           data-test-subj="mlJobWizardNavButtonPrevious"
         >
-          {i18n.translate('xpack.ml.newJob.wizard.previousStepButton', {
-            defaultMessage: 'Previous',
-          })}
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.previousStepButton"
+            defaultMessage="Previous"
+          />
         </EuiButton>
       </EuiFlexItem>
     )}
@@ -49,9 +50,7 @@ export const WizardNav: FC<StepsNavProps> = ({
           size="s"
           data-test-subj="mlJobWizardNavButtonNext"
         >
-          {i18n.translate('xpack.ml.newJob.wizard.nextStepButton', {
-            defaultMessage: 'Next',
-          })}
+          <FormattedMessage id="xpack.ml.newJob.wizard.nextStepButton" defaultMessage="Next" />
         </EuiButton>
       </EuiFlexItem>
     )}

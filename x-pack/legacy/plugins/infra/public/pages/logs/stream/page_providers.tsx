@@ -4,27 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 
 import { LogFlyout } from '../../../containers/logs/log_flyout';
 import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
 import { LogHighlightsState } from '../../../containers/logs/log_highlights/log_highlights';
-import { Source, useSource } from '../../../containers/source';
-import { useSourceId } from '../../../containers/source_id';
+import { Source } from '../../../containers/source';
 
 export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
-  const [sourceId] = useSourceId();
-  const source = useSource({ sourceId });
+  const { sourceId, version } = useContext(Source.Context);
 
   return (
-    <Source.Context.Provider value={source}>
-      <LogViewConfiguration.Provider>
-        <LogFlyout.Provider>
-          <LogHighlightsState.Provider sourceId={sourceId} sourceVersion={source.version}>
-            {children}
-          </LogHighlightsState.Provider>
-        </LogFlyout.Provider>
-      </LogViewConfiguration.Provider>
-    </Source.Context.Provider>
+    <LogViewConfiguration.Provider>
+      <LogFlyout.Provider>
+        <LogHighlightsState.Provider sourceId={sourceId} sourceVersion={version}>
+          {children}
+        </LogHighlightsState.Provider>
+      </LogFlyout.Provider>
+    </LogViewConfiguration.Provider>
   );
 };

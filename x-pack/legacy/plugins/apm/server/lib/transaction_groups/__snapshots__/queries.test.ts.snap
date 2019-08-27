@@ -1,0 +1,192 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`transaction group queries fetches top traces 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "transactions": Object {
+        "aggs": Object {
+          "avg": Object {
+            "avg": Object {
+              "field": "transaction.duration.us",
+            },
+          },
+          "p95": Object {
+            "percentiles": Object {
+              "field": "transaction.duration.us",
+              "percents": Array [
+                95,
+              ],
+            },
+          },
+          "sample": Object {
+            "top_hits": Object {
+              "size": 1,
+              "sort": Array [
+                Object {
+                  "_score": "desc",
+                },
+                Object {
+                  "@timestamp": Object {
+                    "order": "desc",
+                  },
+                },
+              ],
+            },
+          },
+          "sum": Object {
+            "sum": Object {
+              "field": "transaction.duration.us",
+            },
+          },
+        },
+        "terms": Object {
+          "field": "transaction.name",
+          "order": Object {
+            "sum": "desc",
+          },
+          "size": "myIndex",
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "processor.event": "transaction",
+            },
+          },
+          Object {
+            "term": Object {
+              "service.environment": "prod",
+            },
+          },
+        ],
+        "must_not": Array [
+          Object {
+            "exists": Object {
+              "field": "parent.id",
+            },
+          },
+        ],
+        "should": Array [
+          Object {
+            "term": Object {
+              "transaction.sampled": true,
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": "myIndex",
+}
+`;
+
+exports[`transaction group queries fetches top transactions 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "transactions": Object {
+        "aggs": Object {
+          "avg": Object {
+            "avg": Object {
+              "field": "transaction.duration.us",
+            },
+          },
+          "p95": Object {
+            "percentiles": Object {
+              "field": "transaction.duration.us",
+              "percents": Array [
+                95,
+              ],
+            },
+          },
+          "sample": Object {
+            "top_hits": Object {
+              "size": 1,
+              "sort": Array [
+                Object {
+                  "_score": "desc",
+                },
+                Object {
+                  "@timestamp": Object {
+                    "order": "desc",
+                  },
+                },
+              ],
+            },
+          },
+          "sum": Object {
+            "sum": Object {
+              "field": "transaction.duration.us",
+            },
+          },
+        },
+        "terms": Object {
+          "field": "transaction.name",
+          "order": Object {
+            "sum": "desc",
+          },
+          "size": "myIndex",
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "processor.event": "transaction",
+            },
+          },
+          Object {
+            "term": Object {
+              "transaction.type": "bar",
+            },
+          },
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "term": Object {
+              "service.environment": "prod",
+            },
+          },
+        ],
+        "should": Array [
+          Object {
+            "term": Object {
+              "transaction.sampled": true,
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": "myIndex",
+}
+`;

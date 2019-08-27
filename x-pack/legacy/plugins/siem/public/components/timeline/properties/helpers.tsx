@@ -9,6 +9,7 @@ import {
   EuiBadgeProps,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,6 +21,7 @@ import {
 import * as React from 'react';
 import { pure } from 'recompose';
 import uuid from 'uuid';
+import styled from 'styled-components';
 
 import { Note } from '../../../lib/note';
 import { Notes } from '../../notes';
@@ -154,12 +156,20 @@ interface NotesButtonProps {
 
 const getNewNoteId = (): string => uuid.v4();
 
+const NotesButtonIcon = styled(EuiButtonIcon)`
+  svg {
+    height: 24px;
+    width: 24px;
+  }
+`;
+
 const NotesIcon = pure<{ count: number }>(({ count }) => (
-  <EuiIcon
+  <NotesButtonIcon
+    aria-label={i18n.NOTES}
     color={count > 0 ? 'primary' : 'subdued'}
     data-test-subj="timeline-notes-icon"
     size="l"
-    type="editorComment"
+    iconType="editorComment"
   />
 ));
 

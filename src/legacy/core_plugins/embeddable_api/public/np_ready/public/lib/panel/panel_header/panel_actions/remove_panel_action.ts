@@ -29,9 +29,9 @@ interface ExpandedPanelInput extends ContainerInput {
 }
 
 function hasExpandedPanelInput(
-  container: IContainer | IContainer<ExpandedPanelInput>
-): container is IContainer<ExpandedPanelInput> {
-  return (container as IContainer<ExpandedPanelInput>).getInput().expandedPanelId !== undefined;
+  container: IContainer
+): container is IContainer<{}, ExpandedPanelInput> {
+  return (container as IContainer<{}, ExpandedPanelInput>).getInput().expandedPanelId !== undefined;
 }
 
 export class RemovePanelAction extends Action {

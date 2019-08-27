@@ -44,5 +44,12 @@ export function useMetadata(
     filteredLayouts: (response && getFilteredLayouts(layouts, response.features)) || [],
     error: (error && error.message) || null,
     loading,
+    cloudId:
+      (response &&
+        response.info &&
+        response.info.cloud &&
+        response.info.cloud.instance &&
+        response.info.cloud.instance.id) ||
+      '',
   };
 }

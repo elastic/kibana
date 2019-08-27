@@ -106,6 +106,8 @@ describe('QueryBar', () => {
         indexPatterns={[mockIndexPattern]}
         store={createMockStorage()}
         intl={null as any}
+        onChange={noop}
+        isDirty={false}
       />
     );
 
@@ -125,6 +127,8 @@ describe('QueryBar', () => {
         store={createMockStorage()}
         disableAutoFocus={true}
         intl={null as any}
+        onChange={noop}
+        isDirty={false}
       />
     );
 
@@ -136,6 +140,8 @@ describe('QueryBar', () => {
       <QueryBar.WrappedComponent
         uiSettings={setupMock.uiSettings}
         onSubmit={noop}
+        onChange={noop}
+        isDirty={false}
         appName={'discover'}
         store={createMockStorage()}
         intl={null as any}
@@ -151,6 +157,8 @@ describe('QueryBar', () => {
       <QueryBar.WrappedComponent
         uiSettings={setupMock.uiSettings}
         onSubmit={noop}
+        onChange={noop}
+        isDirty={false}
         appName={'discover'}
         store={createMockStorage()}
         intl={null as any}
@@ -167,6 +175,8 @@ describe('QueryBar', () => {
       <QueryBar.WrappedComponent
         uiSettings={setupMock.uiSettings}
         onSubmit={noop}
+        onChange={noop}
+        isDirty={false}
         appName={'discover'}
         screenTitle={'Another Screen'}
         store={createMockStorage()}
@@ -187,6 +197,8 @@ describe('QueryBar', () => {
         uiSettings={setupMock.uiSettings}
         query={kqlQuery}
         onSubmit={noop}
+        onChange={noop}
+        isDirty={false}
         appName={'discover'}
         screenTitle={'Another Screen'}
         indexPatterns={[mockIndexPattern]}
@@ -206,6 +218,8 @@ describe('QueryBar', () => {
         uiSettings={setupMock.uiSettings}
         query={kqlQuery}
         onSubmit={noop}
+        onChange={noop}
+        isDirty={false}
         appName={'discover'}
         screenTitle={'Another Screen'}
         indexPatterns={[mockIndexPattern]}
@@ -225,6 +239,8 @@ describe('QueryBar', () => {
       <QueryBar.WrappedComponent
         uiSettings={setupMock.uiSettings}
         onSubmit={noop}
+        onChange={noop}
+        isDirty={false}
         appName={'discover'}
         screenTitle={'Another Screen'}
         store={createMockStorage()}

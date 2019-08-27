@@ -37,3 +37,7 @@ export const PLACEHOLDER = i18n.translate('xpack.siem.eventDetails.filter.placeh
 export const COPY_TO_CLIPBOARD = i18n.translate('xpack.siem.eventDetails.copyToClipboard', {
   defaultMessage: 'Copy to Clipboard',
 });
+
+export const TOGGLE_COLUMN_TOOLTIP = i18n.translate('xpack.siem.eventDetails.toggleColumnTooltip', {
+  defaultMessage: 'Toggle column',
+});

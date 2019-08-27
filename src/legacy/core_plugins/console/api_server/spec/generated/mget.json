@@ -16,8 +16,9 @@
     ],
     "patterns": [
       "_mget",
-      "{indices}/_mget"
+      "{indices}/_mget",
+      "{indices}/{type}/_mget"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/docs-multi-get.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-multi-get.html"
   }
 }

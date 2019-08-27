@@ -22,9 +22,10 @@ import { resolve } from 'path';
 
 import stripAnsi from 'strip-ansi';
 import expect from '@kbn/expect';
+import { REPO_ROOT } from '@kbn/dev-utils';
 
-const SCRIPT = resolve(__dirname, '../../../../scripts/functional_test_runner.js');
-const FAILURE_HOOKS_CONFIG = resolve(__dirname, '../fixtures/failure_hooks/config.js');
+const SCRIPT = resolve(REPO_ROOT, 'scripts/functional_test_runner.js');
+const FAILURE_HOOKS_CONFIG = require.resolve('../fixtures/failure_hooks/config.js');
 
 describe('failure hooks', function() {
   this.timeout(60 * 1000);

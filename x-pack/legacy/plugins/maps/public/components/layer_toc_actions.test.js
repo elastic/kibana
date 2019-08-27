@@ -13,11 +13,14 @@ let supportsFitToBounds;
 const layerMock = {
   supportsFitToBounds: () => { return supportsFitToBounds; },
   isVisible: () => { return true; },
-  getIconAndTooltipContent: (zoom) => {
+  getIconAndTooltipContent: (zoom, isUsingSearch) => {
     return {
-      icon: (<span>mockIcon</span>),
+      icon: <span>mockIcon</span>,
       tooltipContent: `simulated tooltip content at zoom: ${zoom}`,
-      areResultsTrimmed: false
+      footnotes: [{
+        icon: <span>mockFootnoteIcon</span>,
+        message: `simulated footnote at isUsingSearch: ${isUsingSearch}`
+      }],
     };
   }
 };
@@ -27,6 +30,7 @@ const defaultProps = {
   escapedDisplayName: 'layer1',
   zoom: 0,
   layer: layerMock,
+  isUsingSearch: true,
 };
 
 describe('LayerTocActions', () => {

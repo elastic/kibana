@@ -9,6 +9,8 @@ import React from 'react';
 import { Home } from '../Home';
 
 jest.mock('ui/kfetch');
+jest.mock('ui/index_patterns');
+jest.mock('ui/new_platform');
 
 describe('Home component', () => {
   it('should render', () => {

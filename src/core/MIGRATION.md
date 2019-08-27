@@ -1072,6 +1072,7 @@ import { setup, start } from '../core_plugins/visualizations/public/legacy';
 | `ui/vis`                                               | `visualizations.types`                     | --                                                                                                                                 |
 | `ui/vis/vis_factory`                                   | `visualizations.types`                     | --                                                                                                                                 |
 | `ui/vis/vis_filters`                                   | `visualizations.filters`                   | --                                                                                                                                 |
+| `ui/utils/parse_es_interval`                           | `import { parseEsInterval } from '../data/public'`                  | `parseEsInterval`, `ParsedInterval`, `InvalidEsCalendarIntervalError`, `InvalidEsIntervalFormatError` items were moved to the `Data Plugin` as a static code    |
 
 
 #### Server-side
@@ -1092,7 +1093,18 @@ _See also: [Server's CoreSetup API Docs](/docs/development/core/server/kibana-pl
 
 ### Configure plugin
 Kibana provides ConfigService if a plugin developer may want to support adjustable runtime behavior for their plugins. Access to Kibana config in New platform has been subject to significant refactoring.
-In order to have access to a config, plugin *should*:
+
+Config service does not provide access to the whole config anymore. New platform plugin cannot read configuration parameters of the core services nor other plugins directly. Use plugin contract to provide data.
+
+```js
+// your-plugin.js
+// in Legacy platform
+const basePath = config.get('server.basePath');
+// in New platform
+const basePath = core.http.basePath.get(request);
+```
+
+In order to have access to your plugin config, you *should*:
 - Declare plugin specific "configPath" (will fallback to plugin "id" if not specified) in `kibana.json` file.
 - Export schema validation for config from plugin's main file. Schema is mandatory. If a plugin reads from the config without schema declaration, ConfigService will throw an error.
 ```typescript

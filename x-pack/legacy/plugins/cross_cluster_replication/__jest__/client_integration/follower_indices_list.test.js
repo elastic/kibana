@@ -8,16 +8,17 @@ import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './help
 
 import { getFollowerIndexMock } from '../../fixtures/follower_index';
 
+jest.mock('ui/new_platform');
+jest.mock('ui/index_patterns');
+
 jest.mock('ui/chrome', () => ({
   addBasePath: () => 'api/cross_cluster_replication',
   breadcrumbs: { set: () => {} },
+  getUiSettingsClient: () => ({
+    get: x => x,
+    getUpdate$: () => ({ subscribe: jest.fn() }),
+  }),
 }));
-
-jest.mock('ui/index_patterns', () => {
-  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } =
-    require.requireActual('../../../../../../src/legacy/ui/public/index_patterns/constants');
-  return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE };
-});
 
 const { setup } = pageHelpers.followerIndexList;
 

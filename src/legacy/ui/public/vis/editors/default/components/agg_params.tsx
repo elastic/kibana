@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useReducer, useEffect } from 'react';
+import React, { useReducer, useEffect, useMemo } from 'react';
 import { EuiForm, EuiAccordion, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -94,10 +94,9 @@ function DefaultEditorAggParams({
   const groupedAggTypeOptions = getAggTypeOptions(agg, indexPattern, groupName);
   const errors = getError(agg, aggIsTooLow);
 
-  const editorConfig = editorConfigProviders.getConfigForAgg(
-    aggTypes.byType[groupName],
-    indexPattern,
-    agg
+  const editorConfig = useMemo(
+    () => editorConfigProviders.getConfigForAgg(aggTypes.byType[groupName], indexPattern, agg),
+    [groupName, agg.type]
   );
   const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state });
   const allParams = [...params.basic, ...params.advanced];
@@ -147,7 +146,7 @@ function DefaultEditorAggParams({
         onAggParamsChange(agg.params, param, newValue);
       }
     });
-  }, [agg.type]);
+  }, [editorConfig]);
 
   useEffect(() => {
     setTouched(false);
