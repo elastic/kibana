@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import {
   EuiButtonIcon,
   EuiCheckbox,
@@ -12,7 +11,7 @@ import {
   EuiLoadingSpinner,
   EuiToolTip,
 } from '@elastic/eui';
-import { noop, debounce } from 'lodash/fp';
+import { noop } from 'lodash/fp';
 import * as React from 'react';
 import styled from 'styled-components';
 
@@ -157,7 +156,7 @@ export const Actions = React.memo<Props>(
                 allowUnpinning={!eventHasNotes(noteIds)}
                 pinned={eventIsPinned}
                 data-test-subj="pin-event"
-                onClick={debounce(300, onPinClicked)}
+                onClick={onPinClicked}
               />
             </PinContainer>
           </EuiToolTip>

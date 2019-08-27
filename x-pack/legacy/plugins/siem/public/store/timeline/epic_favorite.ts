@@ -25,8 +25,7 @@ import {
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
 import { refetchQueries } from './refetch_queries';
 import { myEpicTimelineId } from './my_epic_timeline_id';
-import { TimelineById } from './types';
-import { ActionTimeline } from './epic';
+import { ActionTimeline, TimelineById } from './types';
 
 export const timelineFavoriteActionsType = [updateIsFavorite.type];
 

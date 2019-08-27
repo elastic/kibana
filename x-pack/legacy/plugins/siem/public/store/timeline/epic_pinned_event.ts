@@ -26,8 +26,7 @@ import {
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import { refetchQueries } from './refetch_queries';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
-import { TimelineById } from './types';
-import { ActionTimeline } from './epic';
+import { ActionTimeline, TimelineById } from './types';
 
 export const timelinePinnedEventActionsType = [pinEvent.type, unPinEvent.type];
 
@@ -78,6 +77,10 @@ export const epicPersistPinnedEvent = (
                   savedTimeline.version == null && response.timelineVersion != null
                     ? response.timelineVersion
                     : savedTimeline.version,
+                pinnedEventIds: {
+                  ...savedTimeline.pinnedEventIds,
+                  [action.payload.eventId]: true,
+                },
                 pinnedEventsSaveObject: {
                   ...savedTimeline.pinnedEventsSaveObject,
                   [action.payload.eventId]: response,
@@ -88,6 +91,7 @@ export const epicPersistPinnedEvent = (
               id: action.payload.id,
               timeline: {
                 ...savedTimeline,
+                pinnedEventIds: omit(action.payload.eventId, savedTimeline.pinnedEventIds),
                 pinnedEventsSaveObject: omit(
                   action.payload.eventId,
                   savedTimeline.pinnedEventsSaveObject

@@ -66,22 +66,13 @@ import { isNotNull } from './helpers';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
 import { refetchQueries } from './refetch_queries';
 import { myEpicTimelineId } from './my_epic_timeline_id';
-import { TimelineById } from './types';
+import { ActionTimeline, TimelineById } from './types';
 
 interface TimelineEpicDependencies<State> {
   timelineByIdSelector: (state: State) => TimelineById;
   timelineTimeRangeSelector: (state: State) => TimeRange;
   selectNotesByIdSelector: (state: State) => NotesById;
   apolloClient$: Observable<AppApolloClient>;
-}
-
-export interface ActionTimeline extends Action<string> {
-  type: string;
-  payload: {
-    id: string;
-    eventId: string;
-    noteId: string;
-  };
 }
 
 const timelineActionsType = [
