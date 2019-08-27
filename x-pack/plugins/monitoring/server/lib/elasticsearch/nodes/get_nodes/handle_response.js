@@ -18,7 +18,7 @@ import { uncovertMetricNames } from '../../convert_metric_names';
  * @return {Array} node info combined with metrics for each node
  */
 export function handleResponse(response, clusterStats, shardStats, timeOptions = {}) {
-  if (!get(response, 'hits.total')) {
+  if (!get(response, 'hits.hits')) {
     return [];
   }
 
