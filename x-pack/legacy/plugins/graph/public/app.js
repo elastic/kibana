@@ -840,7 +840,7 @@ app.controller('graphuiPlugin', function (
       defaultMessage: 'New',
     }),
     description: i18n.translate('xpack.graph.topNavMenu.newWorkspaceAriaLabel', {
-      defaultMessage: 'New Workspace',
+      defaultMessage: 'New workspace',
     }),
     tooltip: i18n.translate('xpack.graph.topNavMenu.newWorkspaceTooltip', {
       defaultMessage: 'Create a new workspace',
@@ -862,7 +862,7 @@ app.controller('graphuiPlugin', function (
         defaultMessage: 'Save',
       }),
       description: i18n.translate('xpack.graph.topNavMenu.saveWorkspace.enabledAriaLabel', {
-        defaultMessage: 'Save Workspace',
+        defaultMessage: 'Save workspace',
       }),
       tooltip: () => {
         if ($scope.allSavingDisabled) {

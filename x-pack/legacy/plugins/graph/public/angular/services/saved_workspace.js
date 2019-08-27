@@ -34,7 +34,7 @@ export function SavedWorkspaceProvider(Private) {
         // default values that will get assigned if the doc is new
         defaults: {
           title: i18n.translate('xpack.graph.savedWorkspace.workspaceNameTitle', {
-            defaultMessage: 'New Graph Workspace'
+            defaultMessage: 'New graph workspace'
           }),
           numLinks: 0,
           numVertices: 0,
