@@ -27,11 +27,12 @@ export const ERROR_DESCRIPTION = i18n.translate(
       'An ECS compliant Kibana Index Pattern must be configured to view event data on the map. ',
   }
 );
+
 export const ERROR_EXISTING_INDICES_DESCRIPTION = i18n.translate(
   'xpack.siem.components.embeddables.indexPatternsMissingPrompt.errorExistingIndicesDescription',
   {
     defaultMessage:
-      'Please configure one of the following index patterns specified in Kibana Advanced Settings (siem:defaultIndex) and refresh the page.',
+      'When using beats, you can run the following setup commands to create the necessary Kibana Index Patterns, otherwise you can configure them manually within Kibana Settings.',
   }
 );
 

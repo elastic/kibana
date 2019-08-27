@@ -10,13 +10,8 @@ import * as React from 'react';
 import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
 
 describe('IndexPatternsMissingPrompt', () => {
-  test('renders correctly against snapshot when empty index pattern string is provided', () => {
-    const wrapper = shallow(<IndexPatternsMissingPrompt indexPatterns="" />);
-    expect(toJson(wrapper)).toMatchSnapshot();
-  });
-
-  test('renders correctly against snapshot when index patterns are provided', () => {
-    const wrapper = shallow(<IndexPatternsMissingPrompt indexPatterns="auditbeat-*" />);
+  test('renders correctly against snapshot', () => {
+    const wrapper = shallow(<IndexPatternsMissingPrompt />);
     expect(toJson(wrapper)).toMatchSnapshot();
   });
 });

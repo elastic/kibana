@@ -81,7 +81,7 @@ const NetworkComponent = pure<NetworkComponentProps>(
                               applyFilterQueryFromKueryExpression
                             }
                             queryExpression={queryExpression}
-                            getFilterQueryDraft={() => filterQueryDraft}
+                            filterQueryDraft={filterQueryDraft ? filterQueryDraft.expression : ''}
                             startDate={from}
                             endDate={to}
                           />

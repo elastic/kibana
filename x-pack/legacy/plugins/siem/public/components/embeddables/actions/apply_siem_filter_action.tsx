@@ -5,28 +5,27 @@
  */
 
 import { Filter } from '@kbn/es-query';
-import { get, isEmpty } from 'lodash/fp';
+import { get } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import {
   Action,
   ActionContext,
 } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/actions';
 import { IEmbeddable } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/embeddables';
-import { KueryFilterQuery } from '../../../store';
 
 export const APPLY_SIEM_FILTER_ACTION_ID = 'APPLY_SIEM_FILTER_ACTION_ID';
 
 export class ApplySiemFilterAction extends Action {
   public readonly type = APPLY_SIEM_FILTER_ACTION_ID;
   private readonly applyFilterQueryFromKueryExpression: (expression: string) => void;
-  private readonly getFilterQueryDraft: () => KueryFilterQuery;
+  private readonly getFilterQueryDraft: () => string;
 
   constructor({
     applyFilterQueryFromKueryExpression,
     getFilterQueryDraft,
   }: {
     applyFilterQueryFromKueryExpression: (filterQueryDraft: string) => void;
-    getFilterQueryDraft: () => KueryFilterQuery;
+    getFilterQueryDraft: () => string;
   }) {
     super(APPLY_SIEM_FILTER_ACTION_ID);
     this.applyFilterQueryFromKueryExpression = applyFilterQueryFromKueryExpression;
@@ -46,13 +45,29 @@ export class ApplySiemFilterAction extends Action {
     const filterObject = get('filters[0].query.match', triggerContext);
     const filterKey = filterObject && Object.keys(filterObject)[0];
     if (filterKey != null) {
-      const filterExpression = `${filterKey}: "${filterObject[filterKey].query}"`;
+      const filterExpression = Array.isArray(filterObject[filterKey].query)
+        ? getExpressionFromArray(filterKey, filterObject[filterKey].query)
+        : `${filterKey}: "${filterObject[filterKey].query}"`;
+
       const filterQueryDraft = this.getFilterQueryDraft();
+
+      // console.log('filterObject', filterObject);
+      // console.log('filterExpression', filterExpression);
+      // console.log('filterQueryDraft', filterQueryDraft);
+
       this.applyFilterQueryFromKueryExpression(
-        filterQueryDraft && !isEmpty(filterQueryDraft.expression)
-          ? `${filterQueryDraft.expression} and ${filterExpression}`
+        filterQueryDraft.length > 0
+          ? `${filterQueryDraft} and ${filterExpression}`
           : filterExpression
       );
     }
   }
 }
+
+export const getExpressionFromArray = (filterKey: string, filterValues: string[]) => {
+  const filterList = filterValues.reduce(
+    (acc: string[], filterValue: string) => [...acc, `${filterKey}: "${filterValue}"`],
+    []
+  );
+  return `(${filterList.join(' OR ')})`;
+};

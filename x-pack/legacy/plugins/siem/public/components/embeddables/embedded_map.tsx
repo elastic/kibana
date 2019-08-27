@@ -34,7 +34,6 @@ import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { getIndexPatternTitleIdMapping } from '../ml_popover/helpers';
 import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
-import { KueryFilterQuery } from '../../store';
 import {
   EmbeddableOutput,
   IEmbeddable,
@@ -46,12 +45,16 @@ const EmbeddableWrapper = styled(EuiFlexGroup)`
   position: relative;
   height: 400px;
   margin: 0;
+
+  .mapToolbarOverlay__button {
+    display: none;
+  }
 `;
 
 export interface EmbeddedMapProps {
   applyFilterQueryFromKueryExpression: (expression: string) => void;
   queryExpression: string;
-  getFilterQueryDraft: () => KueryFilterQuery;
+  filterQueryDraft: string;
   startDate: number;
   endDate: number;
 }
@@ -60,7 +63,7 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
   ({
     applyFilterQueryFromKueryExpression,
     queryExpression,
-    getFilterQueryDraft,
+    filterQueryDraft,
     startDate,
     endDate,
   }) => {
@@ -71,7 +74,7 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
     const [isLoading, setIsLoading] = useState(true);
     const [isError, setIsError] = useState(false);
 
-    const [, kibanaIndexPatterns] = useIndexPatterns();
+    const [loadingKibanaIndexPatterns, kibanaIndexPatterns] = useIndexPatterns();
     const [siemDefaultIndices] = useKibanaUiSetting(DEFAULT_INDEX_KEY);
 
     const loadEmbeddable = async (id: string, indexPatterns: IndexPatternMapping[]) => {
@@ -120,7 +123,7 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
         if (!actionLoaded) {
           const updateGlobalFiltersAction = new ApplySiemFilterAction({
             applyFilterQueryFromKueryExpression,
-            getFilterQueryDraft,
+            getFilterQueryDraft: () => filterQueryDraft,
           });
           start.registerAction(updateGlobalFiltersAction);
           start.attachAction(APPLY_FILTER_TRIGGER, updateGlobalFiltersAction.id);
@@ -157,10 +160,10 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
         setIsLoading(false);
       };
 
-      if (kibanaIndexPatterns.length > 0) {
+      if (!loadingKibanaIndexPatterns && kibanaIndexPatterns.length > 0) {
         importIfNotExists();
       }
-    }, [kibanaIndexPatterns]);
+    }, [loadingKibanaIndexPatterns, kibanaIndexPatterns]);
 
     // FilterQuery updated useEffect
     useEffect(() => {
@@ -195,11 +198,7 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
               SavedObjectFinder={SavedObjectFinder}
             />
           ) : !isLoading && isError ? (
-            <IndexPatternsMissingPrompt
-              indexPatterns={
-                siemDefaultIndices ? siemDefaultIndices.join(', ') : 'No indices specified'
-              }
-            />
+            <IndexPatternsMissingPrompt />
           ) : (
             <Loader data-test-subj="pewpew-loading-panel" overlay size="xl" />
           )}
