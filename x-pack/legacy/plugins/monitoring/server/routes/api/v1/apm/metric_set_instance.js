@@ -26,29 +26,41 @@ export const metricSet = [
     name: 'apm_output_events_rate_failure',
   },
   {
-    keys: ['apm_responses_count', 'apm_responses_valid_ok', 'apm_responses_valid_accepted'],
-    name: 'apm_responses_valid',
+    keys: [
+      'apm_server_responses_count',
+      'apm_server_responses_valid_ok',
+      'apm_server_responses_valid_accepted'
+    ],
+    name: 'apm_server_responses_valid'
   },
   {
     keys: [
       // 'apm_responses_count',
-      'apm_responses_errors_toolarge',
-      'apm_responses_errors_validate',
-      'apm_responses_errors_method',
-      'apm_responses_errors_unauthorized',
-      'apm_responses_errors_ratelimit',
-      'apm_responses_errors_queue',
-      'apm_responses_errors_decode',
-      'apm_responses_errors_forbidden',
-      'apm_responses_errors_concurrency',
-      'apm_responses_errors_closed',
-      'apm_responses_errors_internal',
+      'apm_server_responses_errors_toolarge',
+      'apm_server_responses_errors_validate',
+      'apm_server_responses_errors_method',
+      'apm_server_responses_errors_unauthorized',
+      'apm_server_responses_errors_ratelimit',
+      'apm_server_responses_errors_queue',
+      'apm_server_responses_errors_decode',
+      'apm_server_responses_errors_forbidden',
+      'apm_server_responses_errors_concurrency',
+      'apm_server_responses_errors_closed',
+      'apm_server_responses_errors_internal',
     ],
     name: 'apm_responses_errors',
   },
   {
-    keys: ['apm_requests'],
-    name: 'apm_requests',
+    keys: [
+      'apm_server_requests'
+    ],
+    name: 'apm_server_requests'
+  },
+  {
+    keys: [
+      'apm_acm_requests'
+    ],
+    name: 'apm_acm_requests'
   },
   {
     keys: [

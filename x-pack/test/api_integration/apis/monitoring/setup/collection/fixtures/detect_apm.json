@@ -15,7 +15,7 @@
     "totalUniquePartiallyMigratedCount": 0,
     "totalUniqueInternallyCollectedCount": 0,
     "detected": {
-      "mightExist": false
+      "mightExist": true
     },
     "byUuid": {}
   },
@@ -25,7 +25,7 @@
     "totalUniquePartiallyMigratedCount": 0,
     "totalUniqueInternallyCollectedCount": 0,
     "detected": {
-      "mightExist": false
+      "mightExist": true
     },
     "byUuid": {}
   },
