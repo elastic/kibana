@@ -22,10 +22,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
-import { BasicOptions } from '../controls/basic_options';
-import { SwitchOption } from '../controls/switch';
-import { TruncateLabelsOption } from '../controls/truncate_labels';
-import { PieVisParams } from '../pie';
+import { BasicOptions, SwitchOption, TruncateLabelsOption } from '../common';
+import { PieVisParams } from '../../pie';
 
 function PieOptions(props: VisOptionsProps<PieVisParams>) {
   const { stateParams, setValue } = props;

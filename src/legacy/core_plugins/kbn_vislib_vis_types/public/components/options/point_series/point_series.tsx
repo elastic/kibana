@@ -22,12 +22,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
-import { SwitchOption } from '../controls/switch';
-import { GridOptions } from '../controls/point_series/grid_options';
-import { BasicOptions } from '../controls/basic_options';
-import { BasicVislibParams } from '../types';
-import { NumberInputOption } from '../controls/number_input';
-import { SelectOption } from '../controls/select';
+import { BasicOptions, NumberInputOption, SelectOption, SwitchOption } from '../../common/';
+import { GridOptions } from './grid_options';
+import { BasicVislibParams } from '../../../types';
 
 function PointSeriesOptions(props: VisOptionsProps<BasicVislibParams>) {
   const { stateParams, setValue, vis } = props;
