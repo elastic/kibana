@@ -7,6 +7,8 @@
 import React from 'react';
 import { includes, isFunction } from 'lodash';
 import {
+  EuiFlexItem,
+  EuiFlexGroup,
   EuiIcon,
   EuiKeyboardAccessible,
 } from '@elastic/eui';
