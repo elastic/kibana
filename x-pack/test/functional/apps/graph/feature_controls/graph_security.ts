@@ -74,7 +74,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       it('landing page shows "Create new Workspace" button', async () => {
         await PageObjects.common.navigateToApp('graph');
         await testSubjects.existOrFail('workspaceLandingPage', { timeout: 10000 });
-        await testSubjects.existOrFail('newItemButton');
+        await testSubjects.existOrFail('graphCreateWorkspacePromptButton');
       });
 
       it(`doesn't show read-only badge`, async () => {
@@ -83,7 +83,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('allows creating a new workspace', async () => {
         await PageObjects.common.navigateToApp('graph');
-        await testSubjects.click('newItemButton');
+        await testSubjects.click('graphCreateWorkspacePromptButton');
         const breadcrumb = await testSubjects.find('graphCurrentWorkspaceBreadcrumb');
         expect(await breadcrumb.getVisibleText()).to.equal('Unsaved workspace');
       });

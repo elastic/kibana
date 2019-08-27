@@ -113,10 +113,10 @@ function getNoItemsMessage(hideWriteControls: boolean, createItem: () => void) {
             onClick={createItem}
             fill
             iconType="plusInCircle"
-            data-test-subj="createDashboardPromptButton"
+            data-test-subj="graphCreateWorkspacePromptButton"
           >
             <FormattedMessage
-              id="xpack.graph.listing.createNewDashboard.createButtonLabel"
+              id="xpack.graph.listing.createNewWorkspace.createButtonLabel"
               defaultMessage="Create new graph workspace"
             />
           </EuiButton>

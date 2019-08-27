@@ -46,14 +46,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           basePath: '/s/custom_space',
         });
         await testSubjects.existOrFail('workspaceLandingPage', { timeout: 10000 });
-        await testSubjects.existOrFail('newItemButton');
+        await testSubjects.existOrFail('graphCreateWorkspacePromptButton');
       });
 
       it('allows creating a new workspace', async () => {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        await testSubjects.click('newItemButton');
+        await testSubjects.click('graphCreateWorkspacePromptButton');
         const breadcrumb = await testSubjects.find('graphCurrentWorkspaceBreadcrumb');
         expect(await breadcrumb.getVisibleText()).to.equal('Unsaved workspace');
       });
