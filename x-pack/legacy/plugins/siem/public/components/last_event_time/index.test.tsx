@@ -92,6 +92,6 @@ describe('Last Event Time Stat', () => {
     );
     await wait();
 
-    expect(container.innerHTML).toBe('--');
+    expect(container.innerHTML).toContain('—');
   });
 });

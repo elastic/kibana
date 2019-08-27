@@ -123,13 +123,13 @@ describe('NetworkTopNFlow Table Component', () => {
           .find('.euiTable thead tr th button')
           .first()
           .text()
-      ).toEqual('Bytes InClick to sort in ascending order');
+      ).toEqual('Bytes inClick to sort in ascending order');
       expect(
         wrapper
           .find('.euiTable thead tr th button')
           .at(1)
           .text()
-      ).toEqual('Bytes OutClick to sort in descending order');
+      ).toEqual('Bytes outClick to sort in descending order');
       expect(
         wrapper
           .find('.euiTable thead tr th button')

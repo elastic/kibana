@@ -21,11 +21,11 @@ import * as i18n from './translations';
 describe('FormattedDurationHelpers', () => {
   describe('#getFormattedDurationString', () => {
     test('it returns a placeholder when the input is undefined', () => {
-      expect(getFormattedDurationString(undefined)).toEqual('--');
+      expect(getFormattedDurationString(undefined)).toEqual('—');
     });
 
     test('it returns a placeholder when the input is null', () => {
-      expect(getFormattedDurationString(null)).toEqual('--');
+      expect(getFormattedDurationString(null)).toEqual('—');
     });
 
     test('it echos back the input as a string when the input is not a number', () => {

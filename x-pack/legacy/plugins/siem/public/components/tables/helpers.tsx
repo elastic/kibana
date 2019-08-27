@@ -160,7 +160,7 @@ export const getRowItemOverflow = (
             </ul>
 
             {rowItems.length > overflowIndexStart + maxOverflowItems && (
-              <p>
+              <p data-test-subj="popover-additional-overflow">
                 <EuiTextColor color="subdued">
                   {rowItems.length - overflowIndexStart - maxOverflowItems}{' '}
                   <FormattedMessage
