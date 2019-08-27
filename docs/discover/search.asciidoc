@@ -55,8 +55,10 @@ query language you can also submit queries using the {ref}/query-dsl.html[Elasti
 
 
 [[save-open-search]]
-=== Saving and Opening Searches
-Saved searches persist your current Discover view for later retrieval and reuse. They can be reloaded into Discover, added to dashboards as panels, or used as the basis for <<visualize, visualizations>>. A saved search includes the query text, filters, and (optionally) the time filter. It also includes the selected columns in the document table, the sort order, and the current index pattern.
+=== Saving searches
+A Saved search persists your current view of Discover for later retrieval and reuse. You can reload a saved search into Discover, add it to a dashboard, and use it as the basis for a <<visualize, visualization>>. 
+
+A saved search includes the query text, filters, and optionally, the time filter. A saved search also includes the selected columns in the document table, the sort order, and the current index pattern.
 
 [role="xpack"]
 [[discover-read-only-access]]
