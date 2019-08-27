@@ -19,14 +19,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 
-import {
-  Form,
-  Field,
-  FieldConfig,
-  FieldValidateResponse,
-  ValidationConfig,
-  ValidationError,
-} from '../types';
+import { Form, Field, FieldConfig, FieldValidateResponse, ValidationError } from '../types';
 import { FIELD_TYPES, VALIDATION_TYPES } from '../constants';
 
 export const useField = (form: Form, path: string, config: FieldConfig = {}) => {
@@ -113,7 +106,11 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
 
     // Execute each validations for the field sequentially
     for (const validation of validations) {
-      const { validator, exitOnFail, type: validationType = VALIDATION_TYPES.FIELD } = validation;
+      const {
+        validator,
+        exitOnFail = true,
+        type: validationType = VALIDATION_TYPES.FIELD,
+      } = validation;
 
       if (
         typeof validationTypeToValidate !== 'undefined' &&
@@ -130,13 +127,15 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
         path,
       }) as ValidationError;
 
-      validationErrors.push({
-        ...validationResult,
-        validationType: validationType || VALIDATION_TYPES.FIELD,
-      });
+      if (validationResult) {
+        validationErrors.push({
+          ...validationResult,
+          validationType: validationType || VALIDATION_TYPES.FIELD,
+        });
 
-      if (validationResult && exitOnFail) {
-        break;
+        if (exitOnFail) {
+          break;
+        }
       }
     }
 
@@ -153,56 +152,43 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
     validationTypeToValidate?: string;
   }): Promise<ValidationError[]> => {
     const validationErrors: ValidationError[] = [];
-    let skip = false;
 
     // By default, for fields that have an asynchronous validation
     // we will clear the errors as soon as the field value changes.
     clearErrors([VALIDATION_TYPES.FIELD, VALIDATION_TYPES.ASYNC]);
 
-    const runValidation = async ({
-      validator,
-      exitOnFail,
-      type: validationType = VALIDATION_TYPES.FIELD,
-    }: ValidationConfig) => {
-      if (
-        skip ||
-        (typeof validationTypeToValidate !== 'undefined' &&
-          validationType !== validationTypeToValidate)
-      ) {
-        return;
-      }
-      let validationResult;
-
-      try {
-        validationResult = await validator({
-          value: (valueToValidate as unknown) as string,
-          errors: validationErrors,
-          form,
-          formData,
-          path,
-        });
-
-        if (validationResult && exitOnFail !== false) {
-          throw validationResult;
-        }
-      } catch (error) {
-        // If an error is thrown, skip the rest of the validations
-        skip = true;
-        validationResult = error;
-      }
-
-      return validationResult;
-    };
-
     // Sequencially execute all the validations for the field
     for (const validation of validations) {
-      const validationResult = await runValidation(validation);
+      const {
+        validator,
+        exitOnFail = true,
+        type: validationType = VALIDATION_TYPES.FIELD,
+      } = validation;
+
+      if (
+        typeof validationTypeToValidate !== 'undefined' &&
+        validationType !== validationTypeToValidate
+      ) {
+        continue;
+      }
+
+      const validationResult = await validator({
+        value: (valueToValidate as unknown) as string,
+        errors: validationErrors,
+        form,
+        formData,
+        path,
+      });
 
       if (validationResult) {
         validationErrors.push({
           ...validationResult,
-          validationType: validation.type || VALIDATION_TYPES.FIELD,
+          validationType: validationType || VALIDATION_TYPES.FIELD,
         });
+
+        if (exitOnFail) {
+          break;
+        }
       }
     }
 
