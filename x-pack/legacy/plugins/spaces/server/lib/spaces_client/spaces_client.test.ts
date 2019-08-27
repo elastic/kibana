@@ -46,6 +46,9 @@ const createMockAuthorization = () => {
         'checkSavedObjectsPrivilegesWithRequest should not be called from this test suite'
       );
     }),
+    getPrivilegesWithRequest: jest.fn().mockImplementation(() => {
+      throw new Error('getPrivilegesWithRequest should not be called from this test suite');
+    }),
     privileges: {
       get: jest.fn().mockImplementation(() => {
         throw new Error('privileges.get() should not be called from this test suite');
