@@ -127,15 +127,17 @@ export const ChoroplethMap: React.SFC<Props> = props => {
           layout: {},
           paint: {
             'fill-opacity': 0.75,
-            'fill-color': {
-              property: propsRef.current.geojsonKeyProperty,
-              stops: propsRef.current.data.map(({ key, value }) => [
-                key,
-                mapValueToColorRef.current(value)
-              ]),
-              type: 'categorical',
-              default: 'transparent'
-            }
+            'fill-color': propsRef.current.data.length
+              ? {
+                  property: propsRef.current.geojsonKeyProperty,
+                  stops: propsRef.current.data.map(({ key, value }) => [
+                    key,
+                    mapValueToColorRef.current(value)
+                  ]),
+                  type: 'categorical',
+                  default: 'transparent'
+                }
+              : 'transparent'
           }
         },
         symbolLayer ? symbolLayer.id : undefined

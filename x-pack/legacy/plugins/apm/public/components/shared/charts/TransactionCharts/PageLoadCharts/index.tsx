@@ -22,19 +22,18 @@ export const PageLoadCharts: React.SFC = () => {
     new MapEmbeddableFactory()
       .createFromSavedObject(
         'b9eaf720-c3a3-11e9-b3b7-590b5cc2c172',
-        // '01dfc7b0-c488-11e9-b3b7-590b5cc2c172',
         { viewMode: 'view', hidePanelTitles: false, isLayerTOCOpen: false },
         null
       )
       .then((embeddable: any) => {
         setEmbeddable(embeddable);
         const query = {
-          query: 'service.name:"client"  and transaction.type : "page-load"',
+          query: 'service.name:"client" and transaction.type : "page-load"',
           language: 'kuery'
         };
         const timeRange = {
           from: new Date('2019-08-14T16:44:22.021Z').toISOString(),
-          to: new Date('2019-08-21T16:44:22.021Z').toISOString()
+          to: new Date('2019-08-26T21:55:52.381Z').toISOString()
         };
         embeddable.updateInput({ timeRange, query });
       })
