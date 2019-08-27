@@ -34,11 +34,7 @@ export const FormDataProvider = ({ children, form, pathsToWatch }: Props) => {
   const subscription = useRef<Subscription | null>(null);
 
   useEffect(() => {
-    let didUnsubscribe = false;
     subscription.current = form.__formData$.current.subscribe(data => {
-      if (didUnsubscribe) {
-        return;
-      }
       // To avoid re-rendering the children for updates on the form data
       // that we are **not** interested in, we can specify one or multiple path(s)
       // to watch.
@@ -56,7 +52,6 @@ export const FormDataProvider = ({ children, form, pathsToWatch }: Props) => {
     });
 
     return () => {
-      didUnsubscribe = true;
       subscription.current!.unsubscribe();
     };
   }, [pathsToWatch]);
