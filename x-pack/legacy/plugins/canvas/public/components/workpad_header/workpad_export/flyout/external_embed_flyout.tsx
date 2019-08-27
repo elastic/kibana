@@ -152,7 +152,7 @@ const HTML = `<!-- Include Runtime -->
 </script>`;
 
 export const ExternalEmbedFlyout = ({ onCopy, onExport, onClose }: Props) => (
-  <EuiFlyout onClose={() => onClose('embed')} className="canvasWorkpadExport__embedFlyout" size="s">
+  <EuiFlyout onClose={() => onClose('embed')} maxWidth>
     <EuiFlyoutHeader hasBorder>
       <EuiTitle size="m">
         <h2 id="flyoutTitle">Embed on a website</h2>
@@ -170,14 +170,14 @@ export const ExternalEmbedFlyout = ({ onCopy, onExport, onClose }: Props) => (
         size="s"
         title={
           <div>
-            Alternatively, you can{' '}
+            To try embedding, you can{' '}
             <EuiLink
               style={{ textDecoration: 'underline' }}
               onClick={() => {
                 onExport('zip');
               }}
             >
-              download a ZIP file
+              download an example ZIP file
             </EuiLink>{' '}
             containing this workpad, the Canvas runtime, and a sample HTML file.
           </div>
