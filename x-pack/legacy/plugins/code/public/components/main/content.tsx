@@ -68,6 +68,7 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   currentTree: FileTree | null;
   commits: CommitInfo[];
   branches: ReferenceInfo[];
+  tags: ReferenceInfo[];
   hasMoreCommits: boolean;
   loadingCommits: boolean;
   onSearchScopeChanged: (s: SearchScope) => void;
@@ -330,6 +331,7 @@ class CodeContent extends React.PureComponent<Props, State> {
           buttons={this.renderButtons()}
           searchOptions={this.props.searchOptions}
           branches={this.props.branches}
+          tags={this.props.tags}
           query={this.props.query}
           currentRepository={this.props.currentRepository}
         />
@@ -526,6 +528,7 @@ const mapStateToProps = (state: RootState) => ({
   fileTreeLoadingPaths: state.fileTree.fileTreeLoadingPaths,
   currentTree: currentTreeSelector(state),
   branches: state.revision.branches,
+  tags: state.revision.tags,
   hasMoreCommits: hasMoreCommitsSelector(state),
   loadingCommits: state.revision.loadingCommits,
   repoStatus: repoStatusSelector(state, repoUriSelector(state)),

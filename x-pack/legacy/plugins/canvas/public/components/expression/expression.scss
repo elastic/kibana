@@ -43,5 +43,6 @@
 }
 
 .canvasExpression__settings {
-  padding: 0 $euiSize $euiSize;
+  padding: $euiSizeM $euiSize;
+  border-top: $euiBorderThin;
 }
