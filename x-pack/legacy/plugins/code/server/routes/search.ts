@@ -7,9 +7,19 @@
 import Boom from 'boom';
 
 import { RequestFacade, RequestQueryFacade } from '../../';
-import { DocumentSearchRequest, RepositorySearchRequest, SymbolSearchRequest } from '../../model';
+import {
+  CommitSearchRequest,
+  DocumentSearchRequest,
+  RepositorySearchRequest,
+  SymbolSearchRequest,
+} from '../../model';
 import { Logger } from '../log';
-import { DocumentSearchClient, RepositorySearchClient, SymbolSearchClient } from '../search';
+import {
+  CommitSearchClient,
+  DocumentSearchClient,
+  RepositorySearchClient,
+  SymbolSearchClient,
+} from '../search';
 import { EsClientWithRequest } from '../utils/esclient_with_request';
 import { CodeServerRouter } from '../security';
 
@@ -178,5 +188,40 @@ export function symbolSearchRoute(router: CodeServerRouter, log: Logger) {
     path: '/api/code/search/symbol',
     method: 'GET',
     handler: symbolSearchHandler,
+  });
+}
+
+export function commitSearchRoute(router: CodeServerRouter, log: Logger) {
+  router.route({
+    path: '/api/code/search/commit',
+    method: 'GET',
+    async handler(req: RequestFacade) {
+      let page = 1;
+      const { p, q, repos, repoScope } = req.query as RequestQueryFacade;
+      if (p) {
+        page = parseInt(p as string, 10);
+      }
+
+      let scope: string[] = [];
+      if (typeof repoScope === 'string') {
+        scope = [repoScope];
+      } else if (Array.isArray(repoScope)) {
+        scope = repoScope;
+      }
+
+      const searchReq: CommitSearchRequest = {
+        query: q as string,
+        page,
+        repoFilters: repos ? decodeURIComponent(repos as string).split(',') : [],
+        repoScope: scope,
+      };
+      try {
+        const commitSearchClient = new CommitSearchClient(new EsClientWithRequest(req), log);
+        const res = await commitSearchClient.search(searchReq);
+        return res;
+      } catch (error) {
+        return Boom.internal(`Search Exception`);
+      }
+    },
   });
 }
