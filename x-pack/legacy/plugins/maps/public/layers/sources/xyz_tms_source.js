@@ -71,10 +71,14 @@ export class XYZTMSSource extends AbstractTMSSource {
 
   getAttributions() {
     const { attributionText, attributionUrl } = this._descriptor;
-    return [{
-      url: attributionUrl,
-      label: attributionText
-    }];
+    const attributionComplete = !!attributionText && !!attributionUrl;
+
+    return attributionComplete
+      ? [{
+        url: attributionUrl,
+        label: attributionText
+      }]
+      : [];
   }
 
   getUrlTemplate() {
