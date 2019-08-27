@@ -6,14 +6,13 @@
 
 import React, { useContext, useEffect } from 'react';
 import chrome from 'ui/chrome';
-import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
-import { Redirect } from 'react-router-dom';
 import { ColumnarPage } from '../../../components/page';
 import { LoadingPage } from '../../../components/loading_page';
 import { AnalysisPageProviders } from './page_providers';
 import { AnalysisResultsContent } from './page_results_content';
 import { AnalysisSetupContent } from './page_setup_content';
+import { AnalysisSetupUnavailable } from './page_setup_unavailable';
 import { useLogAnalysisJobs } from '../../../containers/logs/log_analysis/log_analysis_jobs';
 import { useLogAnalysisCleanup } from '../../../containers/logs/log_analysis/log_analysis_cleanup';
 import { useLogAnalysisCapabilities } from '../../../containers/logs/log_analysis';
@@ -36,21 +35,7 @@ export const AnalysisPage = () => {
   });
   const { hasLogAnalysisCapabilites } = useLogAnalysisCapabilities();
   if (!hasLogAnalysisCapabilites) {
-    toastNotifications.addWarning({
-      title: i18n.translate('xpack.apm.fetcher.error.title', {
-        defaultMessage: `Analysis unavailable`,
-      }),
-      text: (
-        <div>
-          <h5>
-            {i18n.translate('xpack.apm.fetcher.error.status', {
-              defaultMessage: `Log analysis is only available with Machine Learning enabled.`,
-            })}
-          </h5>
-        </div>
-      ),
-    });
-    return <Redirect to={'/logs'} />;
+    return <AnalysisSetupUnavailable />;
   }
 
   const { cleanupMLResources, isCleaningUp } = useLogAnalysisCleanup({ sourceId, spaceId });
