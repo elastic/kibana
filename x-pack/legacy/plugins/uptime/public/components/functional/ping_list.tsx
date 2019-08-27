@@ -6,8 +6,10 @@
 import {
   EuiBadge,
   EuiBasicTable,
+  EuiCodeBlock,
   EuiComboBox,
   EuiComboBoxOptionProps,
+  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
@@ -17,18 +19,22 @@ import {
   EuiTitle,
   EuiToolTip,
   EuiFormRow,
+  EuiButtonIcon,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { get } from 'lodash';
+import { get, has } from 'lodash';
 import moment from 'moment';
-import React, { Fragment, useEffect } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { Ping, PingResults } from '../../../common/graphql/types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../lib/helper';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { pingsQuery } from '../../queries';
 import { LocationName } from './location_name';
 import { Criteria, Pagination } from './monitor_list';
+// @ts-ignore formatNumber
+import { formatNumber } from '@elastic/eui/lib/services/format';
 
 interface PingListQueryResult {
   allPings?: PingResults;
@@ -59,6 +65,63 @@ export const PingListComponent = ({
   selectedOption,
   selectedLocation,
 }: Props) => {
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<{ [key: string]: any }>({});
+
+  const toggleDetails = (item: Ping) => {
+    const newItemIdToExpandedRowMap = { ...itemIdToExpandedRowMap };
+    if (newItemIdToExpandedRowMap[item.id]) {
+      delete newItemIdToExpandedRowMap[item.id];
+    } else {
+      const listItems = [];
+      if (item.error) {
+        listItems.push({
+          title: 'Error',
+          description: <EuiText>{item.error.message}</EuiText>,
+        });
+      }
+      if (item.http && item.http.response && item.http.response.body) {
+        const body = item.http.response.body;
+        const contentBytes = body.content_bytes || 0;
+        const bodyBytes = body.bytes || 0;
+
+        const bodySizeStatement = body.bytes ? (
+          <EuiText>{`Body size: ${formatNumber(body.bytes, '0b')}.`}</EuiText>
+        ) : null;
+
+        const bodyTruncated =
+          contentBytes > 0 && contentBytes < bodyBytes ? (
+            // We intentionally don't round this number since it makes sense to be exact about byte counts.
+            // Seeing that we're showing the first megabyte of one megabyte is just irratating.
+            <EuiCallOut>
+              {`Displayed body content below is truncated. First ${formatNumber(
+                contentBytes
+              )} bytes shown.`}
+            </EuiCallOut>
+          ) : null;
+        const bodyExcerpt = body.content ? (
+          <EuiCodeBlock>{body.content}</EuiCodeBlock>
+        ) : (
+          <EuiText>No body</EuiText>
+        );
+
+        const contents = (
+          <Fragment>
+            {bodySizeStatement}
+            {bodyTruncated}
+            {bodyExcerpt}
+          </Fragment>
+        );
+
+        listItems.push({
+          title: 'Response Body',
+          description: contents,
+        });
+      }
+      newItemIdToExpandedRowMap[item.id] = <EuiDescriptionList listItems={listItems} />;
+    }
+    setItemIdToExpandedRowMap(newItemIdToExpandedRowMap);
+  };
+
   const statusOptions: EuiComboBoxOptionProps[] = [
     {
       label: i18n.translate('xpack.uptime.pingList.statusOptions.allStatusOptionLabel', {
@@ -88,7 +151,7 @@ export const PingListComponent = ({
         })
       );
 
-  const columns = [
+  const columns: any[] = [
     {
       field: 'monitor.status',
       name: i18n.translate('xpack.uptime.pingList.statusColumnLabel', {
@@ -201,6 +264,18 @@ export const PingListComponent = ({
       });
     }
   }
+  columns.push({
+    align: 'right',
+    width: '40px',
+    isExpander: true,
+    render: (item: Ping) => (
+      <EuiButtonIcon
+        onClick={() => toggleDetails(item)}
+        aria-label={itemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
+        iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+      />
+    ),
+  });
   const pagination: Pagination = {
     initialPageSize: 20,
     pageIndex: 0,
@@ -298,6 +373,8 @@ export const PingListComponent = ({
           loading={loading}
           columns={columns}
           items={pings}
+          itemId="id"
+          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           pagination={pagination}
           onChange={({ page: { size } }: Criteria) => onPageCountChange(size)}
         />
