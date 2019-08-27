@@ -133,17 +133,17 @@ export class ApplicationService {
       registerMountContext: this.mountContext.registerContext,
       currentAppId$,
 
-      navigateToApp: (appId, { path, state }: { path?: string; state?: any } = {}) => {
-        const appPath = path
-          ? `/app/${appId}/${path.replace(/^\//, '')}` // Remove preceding slash from path if present
-          : `/app/${appId}`;
+      urlForApp: (appId, options: { path?: string } = {}) => {
+        return http.basePath.prepend(appPath(appId, options));
+      },
 
+      navigateToApp: (appId, { path, state }: { path?: string; state?: any } = {}) => {
         if (legacyMode) {
           // If we're in legacy mode, do a full page refresh to load the NP app.
-          redirectTo(http.basePath.prepend(appPath));
+          redirectTo(http.basePath.prepend(appPath(appId, { path })));
         } else {
           // basePath not needed here because `history` is configured with basename
-          history!.push(appPath, state);
+          history!.push(appPath(appId, { path }), state);
         }
       },
 
@@ -175,3 +175,8 @@ export class ApplicationService {
 
   public stop() {}
 }
+
+const appPath = (appId: string, { path }: { path?: string } = {}): string =>
+  path
+    ? `/app/${appId}/${path.replace(/^\//, '')}` // Remove preceding slash from path if present
+    : `/app/${appId}`;

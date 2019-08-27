@@ -65,6 +65,7 @@ import {
 } from '../..';
 import { HttpStart } from '../../../http';
 import { ChromeHelpExtension } from '../../chrome_service';
+import { ApplicationStart, InternalApplicationStart } from '../../../application/types';
 
 // Providing a buffer between the limit and the cut off index
 // protects from truncating just the last couple (6) characters
@@ -115,11 +116,22 @@ function extendRecentlyAccessedHistoryItem(
   };
 }
 
-function extendNavLink(navLink: ChromeNavLink) {
+function extendNavLink(navLink: ChromeNavLink, urlForApp: ApplicationStart['urlForApp']) {
+  if (navLink.legacy) {
+    return {
+      ...navLink,
+      href: navLink.url && !navLink.active ? navLink.url : navLink.baseUrl,
+    };
+  }
+
   return {
     ...navLink,
-    href: navLink.url && !navLink.active ? navLink.url : navLink.baseUrl,
+    href: urlForApp(navLink.id),
   };
+}
+
+function isModifiedEvent(event: MouseEvent) {
+  return !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 }
 
 function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {
@@ -149,10 +161,10 @@ export type HeaderProps = Pick<Props, Exclude<keyof Props, 'intl'>>;
 
 interface Props {
   kibanaVersion: string;
+  application: InternalApplicationStart;
   appTitle$: Rx.Observable<string>;
   badge$: Rx.Observable<ChromeBadge | undefined>;
   breadcrumbs$: Rx.Observable<ChromeBreadcrumb[]>;
-  currentAppId$: Rx.Observable<string | undefined>;
   homeHref: string;
   isVisible$: Rx.Observable<boolean>;
   kibanaDocLink: string;
@@ -163,7 +175,6 @@ interface Props {
   legacyMode: boolean;
   navControlsLeft$: Rx.Observable<readonly ChromeNavControl[]>;
   navControlsRight$: Rx.Observable<readonly ChromeNavControl[]>;
-  navigateToApp: (appId: string) => void;
   intl: InjectedIntl;
   basePath: HttpStart['basePath'];
   isLocked?: boolean;
@@ -210,7 +221,7 @@ class HeaderUI extends Component<Props, State> {
       Rx.combineLatest(
         this.props.navControlsLeft$,
         this.props.navControlsRight$,
-        this.props.currentAppId$
+        this.props.application.currentAppId$
       )
     ).subscribe({
       next: ([
@@ -225,7 +236,9 @@ class HeaderUI extends Component<Props, State> {
           appTitle,
           isVisible,
           forceNavigation,
-          navLinks: navLinks.map(navLink => extendNavLink(navLink)),
+          navLinks: navLinks.map(navLink =>
+            extendNavLink(navLink, this.props.application.urlForApp)
+          ),
           recentlyAccessed: recentlyAccessed.map(ra =>
             extendRecentlyAccessedHistoryItem(navLinks, ra, this.props.basePath)
           ),
@@ -272,6 +285,7 @@ class HeaderUI extends Component<Props, State> {
 
   public render() {
     const {
+      application,
       badge$,
       basePath,
       breadcrumbs$,
@@ -282,7 +296,6 @@ class HeaderUI extends Component<Props, State> {
       kibanaVersion,
       onIsLockedUpdate,
       legacyMode,
-      navigateToApp,
     } = this.props;
     const {
       appTitle,
@@ -304,12 +317,20 @@ class HeaderUI extends Component<Props, State> {
         key: navLink.id,
         label: navLink.title,
 
-        // Legacy apps use href, NP apps use onClick
-        // This needs to work with both href and onClick to support "open in new tab" correctly, however EUI
-        // does not current support this.
-        // https://github.com/elastic/eui/pull/1933
-        href: legacyMode || navLink.legacy ? navLink.href : undefined,
-        onClick: !legacyMode && !navLink.legacy ? () => navigateToApp(navLink.id) : undefined,
+        // Use href and onClick to support "open in new tab" and SPA navigation in the same link
+        href: navLink.href,
+        onClick: (event: MouseEvent) => {
+          if (
+            !legacyMode && // ignore when in legacy mode
+            !navLink.legacy && // ignore links to legacy apps
+            !event.defaultPrevented && // onClick prevented default
+            event.button === 0 && // ignore everything but left clicks
+            !isModifiedEvent(event) // ignore clicks with modifier keys
+          ) {
+            event.preventDefault();
+            application.navigateToApp(navLink.id);
+          }
+        },
 
         // Legacy apps use `active` property, NP apps should match the current app
         isActive: navLink.active || currentAppId === navLink.id,

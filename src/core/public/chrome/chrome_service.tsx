@@ -129,11 +129,11 @@ export class ChromeService {
           <LoadingIndicator loadingCount$={http.getLoadingCount$()} />
 
           <Header
+            application={application}
             appTitle$={appTitle$.pipe(takeUntil(this.stop$))}
             badge$={badge$.pipe(takeUntil(this.stop$))}
             basePath={http.basePath}
             breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
-            currentAppId$={application.currentAppId$}
             kibanaDocLink={docLinks.links.kibana}
             forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
             helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
@@ -145,7 +145,6 @@ export class ChromeService {
             kibanaVersion={injectedMetadata.getKibanaVersion()}
             legacyMode={injectedMetadata.getLegacyMode()}
             navLinks$={navLinks.getNavLinks$()}
-            navigateToApp={application.navigateToApp}
             recentlyAccessed$={recentlyAccessed.get$()}
             navControlsLeft$={navControls.getLeft$()}
             navControlsRight$={navControls.getRight$()}
