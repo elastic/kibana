@@ -18,8 +18,9 @@
  */
 
 import { Observable, BehaviorSubject } from 'rxjs';
-import { CapabilitiesStart, CapabilitiesService, Capabilities } from './capabilities';
+import { CapabilitiesService, Capabilities } from './capabilities';
 import { InjectedMetadataStart } from '../injected_metadata';
+import { RecursiveReadonly } from '../../utils';
 
 interface BaseApp {
   id: string;
@@ -60,11 +61,6 @@ interface BaseApp {
 /** @public */
 export interface App extends BaseApp {
   /**
-   * The root route to mount this application at.
-   */
-  rootRoute: string;
-
-  /**
    * A mount function called when the user navigates to this app's `rootRoute`.
    * @param targetDomElement An HTMLElement to mount the application onto.
    * @returns An unmounting function that will be called to unmount the application.
@@ -98,10 +94,27 @@ export interface ApplicationSetup {
   registerLegacyApp(app: LegacyApp): void;
 }
 
+/**
+ * @public
+ */
 export interface ApplicationStart {
-  mount: (mountHandler: Function) => void;
-  availableApps: CapabilitiesStart['availableApps'];
-  capabilities: CapabilitiesStart['capabilities'];
+  /**
+   * Gets the read-only capabilities.
+   */
+  capabilities: RecursiveReadonly<Capabilities>;
+
+  /**
+   * Apps available based on the current capabilities. Should be used
+   * to show navigation links and make routing decisions.
+   */
+  availableApps: readonly App[];
+
+  /**
+   * Apps available based on the current capabilities. Should be used
+   * to show navigation links and make routing decisions.
+   * @internal
+   */
+  availableLegacyApps: readonly LegacyApp[];
 }
 
 interface StartDeps {
@@ -132,17 +145,11 @@ export class ApplicationService {
     this.apps$.complete();
     this.legacyApps$.complete();
 
-    const apps = [...this.apps$.value, ...this.legacyApps$.value];
-    const { capabilities, availableApps } = await this.capabilities.start({
-      apps,
+    return this.capabilities.start({
+      apps: this.apps$.value,
+      legacyApps: this.legacyApps$.value,
       injectedMetadata,
     });
-
-    return {
-      mount() {},
-      capabilities,
-      availableApps,
-    };
   }
 
   public stop() {}

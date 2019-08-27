@@ -10,10 +10,8 @@
 // data on forecasts that have been performed.
 import _ from 'lodash';
 
-import { ML_RESULTS_INDEX_PATTERN } from 'plugins/ml/../common/constants/index_patterns';
-import { ml } from 'plugins/ml/services/ml_api_service';
-
-
+import { ML_RESULTS_INDEX_PATTERN } from '../../common/constants/index_patterns';
+import { ml } from './ml_api_service';
 
 // Gets a basic summary of the most recently run forecasts for the specified
 // job, with results at or later than the supplied timestamp.
@@ -382,4 +380,3 @@ export const mlForecastService = {
   runForecast,
   getForecastRequestStats
 };
-

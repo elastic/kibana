@@ -81,7 +81,7 @@ export function getKqlQueryValues(inputValue, indexPattern) {
   }
 
   return {
-    influencersFilterQuery: query,
+    filterQuery: query,
     filteredFields,
     queryString: inputValue,
     isAndOperator,

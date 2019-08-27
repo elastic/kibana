@@ -4,4 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// custom edits or fixes for default kibana types which are incomplete
+
+export type IndexPatternTitle = string;
+
 export type callWithRequestType = (action: string, params?: any) => Promise<any>;
+
+export interface Route {
+  id: string;
+  k7Breadcrumbs: () => any;
+}

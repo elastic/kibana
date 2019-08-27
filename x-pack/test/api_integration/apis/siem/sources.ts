@@ -8,9 +8,9 @@ import expect from '@kbn/expect';
 import { sourceQuery } from '../../../../legacy/plugins/siem/public/containers/source/index.gql_query';
 import { SourceQuery } from '../../../../legacy/plugins/siem/public/graphql/types';
 
-import { KbnTestProvider } from './types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-const sourcesTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
 
@@ -35,7 +35,4 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
         });
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default sourcesTests;
+}

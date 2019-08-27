@@ -4,17 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, set, sortBy } from 'lodash';
+import { get, flatten, set, sortBy } from 'lodash';
 import { DatabaseAdapter } from '../database';
-import { UMMonitorStatesAdapter } from './adapter_types';
+import {
+  UMMonitorStatesAdapter,
+  LegacyMonitorStatesRecentCheckGroupsQueryResult,
+  LegacyMonitorStatesQueryResult,
+} from './adapter_types';
 import {
   MonitorSummary,
   SummaryHistogram,
   Check,
-  SnapshotCount,
   StatesIndexStatus,
 } from '../../../../common/graphql/types';
-import { INDEX_NAMES } from '../../../../common/constants';
+import { INDEX_NAMES, STATES, QUERY } from '../../../../common/constants';
 import { getHistogramInterval, getFilteredQueryAndStatusFilter } from '../../helper';
 
 type SortChecks = (check: Check) => string[];
@@ -23,15 +26,118 @@ const checksSortBy = (check: Check) => [
   get<string>(check, 'monitor.ip'),
 ];
 
-interface LegacyMonitorStatesQueryResult {
-  result: any;
-  statusFilter?: any;
-  afterKey: any | null;
-}
-
 export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter {
   constructor(private readonly database: DatabaseAdapter) {
     this.database = database;
+  }
+
+  // This query returns the most recent check groups for a given
+  // monitor ID.
+  private async runLegacyMonitorStatesRecentCheckGroupsQuery(
+    request: any,
+    query: any,
+    searchAfter?: any,
+    size: number = 50
+  ): Promise<LegacyMonitorStatesRecentCheckGroupsQueryResult> {
+    const checkGroupsById = new Map<string, string[]>();
+    let afterKey: any = searchAfter;
+
+    const body = {
+      query: {
+        bool: {
+          filter: [
+            {
+              // We check for summary.up to ensure that the check group
+              // is complete. Summary fields are only present on
+              // completed check groups.
+              exists: {
+                field: 'summary.up',
+              },
+            },
+            query,
+          ],
+        },
+      },
+      sort: [
+        {
+          '@timestamp': 'desc',
+        },
+      ],
+      size: 0,
+      aggs: {
+        monitors: {
+          composite: {
+            /**
+             * The goal here is to fetch more than enough check groups to reach the target
+             * amount in one query.
+             *
+             * For larger cardinalities, we can only count on being able to fetch max bucket
+             * size, so we will have to run this query multiple times.
+             *
+             * Multiplying `size` by 2 assumes that there will be less than three locations
+             * for the deployment, if needed the query will be run subsequently.
+             */
+            size: Math.min(size * 2, QUERY.DEFAULT_AGGS_CAP),
+            sources: [
+              {
+                monitor_id: {
+                  terms: {
+                    field: 'monitor.id',
+                  },
+                },
+              },
+              {
+                location: {
+                  terms: {
+                    field: 'observer.geo.name',
+                    missing_bucket: true,
+                  },
+                },
+              },
+            ],
+          },
+          aggs: {
+            top: {
+              top_hits: {
+                sort: [
+                  {
+                    '@timestamp': 'desc',
+                  },
+                ],
+                _source: {
+                  includes: ['monitor.check_group', '@timestamp'],
+                },
+                size: 1,
+              },
+            },
+          },
+        },
+      },
+    };
+    if (afterKey) {
+      set(body, 'aggs.monitors.composite.after', afterKey);
+    }
+    const params = {
+      index: INDEX_NAMES.HEARTBEAT,
+      body,
+    };
+
+    const result = await this.database.search(request, params);
+    afterKey = get<any | null>(result, 'aggregations.monitors.after_key', null);
+    get<any>(result, 'aggregations.monitors.buckets', []).forEach((bucket: any) => {
+      const id = get<string>(bucket, 'key.monitor_id');
+      const checkGroup = get<string>(bucket, 'top.hits.hits[0]._source.monitor.check_group');
+      const value = checkGroupsById.get(id);
+      if (!value) {
+        checkGroupsById.set(id, [checkGroup]);
+      } else if (value.indexOf(checkGroup) < 0) {
+        checkGroupsById.set(id, [...value, checkGroup]);
+      }
+    });
+    return {
+      checkGroups: flatten(Array.from(checkGroupsById.values())),
+      afterKey,
+    };
   }
 
   private async runLegacyMonitorStatesQuery(
@@ -39,22 +145,47 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     dateRangeStart: string,
     dateRangeEnd: string,
     filters?: string | null,
-    searchAfter?: any
+    searchAfter?: any,
+    size: number = 50
   ): Promise<LegacyMonitorStatesQueryResult> {
+    size = Math.min(size, QUERY.DEFAULT_AGGS_CAP);
     const { query, statusFilter } = getFilteredQueryAndStatusFilter(
       dateRangeStart,
       dateRangeEnd,
       filters
     );
+
+    // First we fetch the most recent check groups for this query
+    // This is a critical performance optimization.
+    // Without this the expensive scripted_metric agg below will run
+    // over large numbers of documents.
+    // It only really needs to run over the latest complete check group for each
+    // agent.
+    const { checkGroups, afterKey } = await this.runLegacyMonitorStatesRecentCheckGroupsQuery(
+      request,
+      query,
+      searchAfter,
+      size
+    );
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
-        query,
+        query: {
+          bool: {
+            filter: [
+              { terms: { 'monitor.check_group': checkGroups } },
+              // Even though this work is already done when calculating the groups
+              // this helps the planner
+              query,
+            ],
+          },
+        },
+        sort: [{ '@timestamp': 'desc' }],
         size: 0,
         aggs: {
           monitors: {
             composite: {
-              size: 100,
+              size,
               sources: [
                 {
                   monitor_id: {
@@ -234,11 +365,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       },
     };
 
-    if (searchAfter) {
-      set(params, 'body.aggs.monitors.composite.after', searchAfter);
-    }
     const result = await this.database.search(request, params);
-    const afterKey = get<any | null>(result, 'aggregations.monitors.after_key', null);
     return { afterKey, result, statusFilter };
   }
 
@@ -270,7 +397,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       );
       monitors.push(...this.getMonitorBuckets(result, statusFilter));
       searchAfter = afterKey;
-    } while (searchAfter !== null && monitors.length < 200);
+    } while (searchAfter !== null && monitors.length < STATES.LEGACY_STATES_QUERY_SIZE);
 
     const monitorIds: string[] = [];
     const summaries: MonitorSummary[] = monitors.map((monitor: any) => {
@@ -400,7 +527,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
           by_id: {
             terms: {
               field: 'monitor.id',
-              size: 200,
+              size: STATES.LEGACY_STATES_QUERY_SIZE,
             },
             aggs: {
               histogram: {
@@ -452,49 +579,6 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       };
       return map;
     }, {});
-  }
-
-  public async getSummaryCount(
-    request: any,
-    dateRangeStart: string,
-    dateRangeEnd: string,
-    filters?: string | null
-  ): Promise<SnapshotCount> {
-    // TODO: adapt this to the states index in future release
-    // const { count } = await this.database.count(request, { index: 'heartbeat-states-8.0.0' });
-    // return { count };
-
-    const count: SnapshotCount = {
-      up: 0,
-      down: 0,
-      mixed: 0,
-      total: 0,
-    };
-
-    let searchAfter: any | null = null;
-    do {
-      const { afterKey, result, statusFilter } = await this.runLegacyMonitorStatesQuery(
-        request,
-        dateRangeStart,
-        dateRangeEnd,
-        filters,
-        searchAfter
-      );
-      searchAfter = afterKey;
-      this.getMonitorBuckets(result, statusFilter).reduce((acc: SnapshotCount, monitor: any) => {
-        const status = get<string | undefined>(monitor, 'state.value.monitor.status', undefined);
-        if (status === 'up') {
-          acc.up++;
-        } else if (status === 'down') {
-          acc.down++;
-        } else if (status === 'mixed') {
-          acc.mixed++;
-        }
-        acc.total++;
-        return acc;
-      }, count);
-    } while (searchAfter !== null);
-    return count;
   }
 
   public async statesIndexExists(request: any): Promise<StatesIndexStatus> {

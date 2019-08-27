@@ -62,7 +62,7 @@ export function ConsolePageProvider({ getService }) {
       // while the settings form opens/loads this may fail, so retry for a while
       await retry.try(async () => {
         const fontSizeInput = await testSubjects.find('setting-font-size-input');
-        await fontSizeInput.clearValue();
+        await fontSizeInput.clearValue({ withJS: true });
         await fontSizeInput.click();
         await fontSizeInput.type(String(newSize));
       });

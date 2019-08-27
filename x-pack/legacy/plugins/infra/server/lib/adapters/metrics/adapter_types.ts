@@ -15,7 +15,10 @@ import { InfraSourceConfiguration } from '../../sources';
 import { InfraFrameworkRequest } from '../framework';
 
 export interface InfraMetricsRequestOptions {
-  nodeId: string;
+  nodeIds: {
+    nodeId: string;
+    cloudId?: string | null;
+  };
   nodeType: InfraNodeType;
   sourceConfiguration: InfraSourceConfiguration;
   timerange: InfraTimerangeInput;
@@ -29,6 +32,11 @@ export interface InfraMetricsAdapter {
   ): Promise<InfraMetricData[]>;
 }
 
+export enum InfraMetricModelQueryType {
+  lucene = 'lucene',
+  kuery = 'kuery',
+}
+
 export enum InfraMetricModelMetricType {
   avg = 'avg',
   max = 'max',
@@ -39,10 +47,12 @@ export enum InfraMetricModelMetricType {
   positive_only = 'positive_only', // eslint-disable-line @typescript-eslint/camelcase
   derivative = 'derivative',
   count = 'count',
+  sum = 'sum',
+  cumulative_sum = 'cumulative_sum', // eslint-disable-line @typescript-eslint/camelcase
 }
 
 export interface InfraMetricModel {
-  id: string;
+  id: InfraMetric;
   requires: string[];
   index_pattern: string | string[];
   interval: string;
@@ -51,6 +61,7 @@ export interface InfraMetricModel {
   series: InfraMetricModelSeries[];
   filter?: string;
   map_field_to?: string;
+  id_type?: 'cloud' | 'node';
 }
 
 export interface InfraMetricModelSeries {
@@ -60,6 +71,7 @@ export interface InfraMetricModelSeries {
   terms_field?: string;
   terms_size?: number;
   terms_order_by?: string;
+  filter?: { query: string; language: InfraMetricModelQueryType };
 }
 
 export interface InfraMetricModelBasicMetric {

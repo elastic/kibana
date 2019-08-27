@@ -7,19 +7,30 @@
 import { i18n } from '@kbn/i18n';
 import { columns } from '../../functions/common/columns';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
+import { DATATABLE } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof columns>> = {
   help: i18n.translate('xpack.canvas.functions.columnsHelpText', {
     defaultMessage:
-      'Include or exclude columns from a data table. If you specify both, this will exclude first',
+      'Includes or excludes columns from a {DATATABLE}. ' +
+      'When both arguments are specified, the excluded columns will be removed first.',
+    values: {
+      DATATABLE,
+    },
   }),
   args: {
     include: i18n.translate('xpack.canvas.functions.columns.args.includeHelpText', {
-      defaultMessage: 'A comma separated list of column names to keep in the table',
+      defaultMessage: 'A comma-separated list of column names to keep in the {DATATABLE}.',
+      values: {
+        DATATABLE,
+      },
     }),
     exclude: i18n.translate('xpack.canvas.functions.columns.args.excludeHelpText', {
-      defaultMessage: 'A comma separated list of column names to remove from the table',
+      defaultMessage: 'A comma-separated list of column names to remove from the {DATATABLE}.',
+      values: {
+        DATATABLE,
+      },
     }),
   },
 };

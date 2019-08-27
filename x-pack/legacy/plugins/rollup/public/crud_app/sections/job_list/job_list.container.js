@@ -17,6 +17,7 @@ import {
   refreshJobs,
   openDetailPanel,
   closeDetailPanel,
+  cloneJob,
 } from '../../store/actions';
 
 import { JobList as JobListView } from './job_list';
@@ -43,6 +44,9 @@ const mapDispatchToProps = (dispatch) => {
     closeDetailPanel: () => {
       dispatch(closeDetailPanel());
     },
+    cloneJob: (jobConfig) => {
+      dispatch(cloneJob(jobConfig));
+    }
   };
 };
 

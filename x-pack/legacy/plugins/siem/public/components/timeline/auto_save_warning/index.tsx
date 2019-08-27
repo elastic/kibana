@@ -96,6 +96,8 @@ const AutoSaveWarningMsgComponent = pure<OwnProps>(
   }
 );
 
+AutoSaveWarningMsgComponent.displayName = 'AutoSaveWarningMsgComponent';
+
 const mapStateToProps = (state: State) => {
   const autoSaveMessage: AutoSavedWarningMsg = timelineSelectors.autoSaveMsgSelector(state);
 

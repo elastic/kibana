@@ -34,9 +34,10 @@ describe('Toaster', () => {
               onClick={() => dispatch({ type: 'addToaster', toast: mockToast })}
             />
             {toasts.map(toast => (
-              <span data-test-subj={`add-toaster-${toast.id}`} key={`add-toaster-${toast.id}`}>{`${
-                toast.title
-              } ${toast.text}`}</span>
+              <span
+                data-test-subj={`add-toaster-${toast.id}`}
+                key={`add-toaster-${toast.id}`}
+              >{`${toast.title} ${toast.text}`}</span>
             ))}
           </>
         );

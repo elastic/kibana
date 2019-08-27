@@ -5,11 +5,15 @@
  */
 
 import { EuiDescriptionList, EuiFlexItem } from '@elastic/eui';
+import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
+import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import React, { useContext, useState } from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import { DEFAULT_DARK_MODE } from '../../../../../common/constants';
 import { DescriptionList } from '../../../../../common/utility_types';
+import { useKibanaUiSetting } from '../../../../lib/settings/use_kibana_ui_setting';
 import { FlowTarget, IpOverviewData, Overview } from '../../../../graphql/types';
 import { networkModel } from '../../../../store';
 import { getEmptyTagValue } from '../../../empty_value';
@@ -24,8 +28,8 @@ import {
   whoisRenderer,
 } from '../../../field_renderers/field_renderers';
 import * as i18n from './translations';
-import { LoadingOverlay, OverviewWrapper } from '../../index';
-import { LoadingPanel } from '../../../loading';
+import { OverviewWrapper } from '../../index';
+import { Loader } from '../../../loader';
 import { Anomalies, NarrowDateRange } from '../../../ml/types';
 import { AnomalyScores } from '../../../ml/score/anomaly_scores';
 import { MlCapabilitiesContext } from '../../../ml/permissions/ml_capabilities_provider';
@@ -56,6 +60,8 @@ const DescriptionListStyled = styled(EuiDescriptionList)`
   `}
 `;
 
+DescriptionListStyled.displayName = 'DescriptionListStyled';
+
 const getDescriptionList = (descriptionList: DescriptionList[], key: number) => {
   return (
     <EuiFlexItem key={key}>
@@ -80,6 +86,7 @@ export const IpOverview = pure<IpOverviewProps>(
     const [showInspect, setShowInspect] = useState(false);
     const capabilities = useContext(MlCapabilitiesContext);
     const userPermissions = hasMlUserPermissions(capabilities);
+    const [darkMode] = useKibanaUiSetting(DEFAULT_DARK_MODE);
     const typeData: Overview = data[flowTarget]!;
     const column: DescriptionList[] = [
       {
@@ -143,29 +150,29 @@ export const IpOverview = pure<IpOverviewProps>(
         onMouseEnter={() => setShowInspect(true)}
         onMouseLeave={() => setShowInspect(false)}
       >
-        {loading && (
-          <>
-            <LoadingOverlay />
-            <LoadingPanel
-              height="100%"
-              width="100%"
-              text=""
-              position="absolute"
-              zIndex={3}
-              data-test-subj="LoadingPanelLoadMoreTable"
-            />
-          </>
-        )}
         <InspectButton
           queryId={id}
           show={showInspect}
           title={i18n.INSPECT_TITLE}
           inspectIndex={0}
         />
+
         {descriptionLists.map((descriptionList, index) =>
           getDescriptionList(descriptionList, index)
+        )}
+
+        {loading && (
+          <Loader
+            overlay
+            overlayBackground={
+              darkMode ? darkTheme.euiPageBackgroundColor : lightTheme.euiPageBackgroundColor
+            }
+            size="xl"
+          />
         )}
       </OverviewWrapper>
     );
   }
 );
+
+IpOverview.displayName = 'IpOverview';

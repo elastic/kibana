@@ -54,6 +54,7 @@ class MultiJobActionsMenuUI extends Component {
   };
 
   render() {
+    const anyJobsDeleting = this.props.jobs.some(j => j.deleting);
     const button = (
       <EuiButtonIcon
         size="s"
@@ -64,7 +65,7 @@ class MultiJobActionsMenuUI extends Component {
           defaultMessage: 'Management actions'
         })}
         color="text"
-        disabled={(this.canDeleteJob === false && this.canStartStopDatafeed === false)}
+        disabled={(anyJobsDeleting || (this.canDeleteJob === false && this.canStartStopDatafeed === false))}
       />
     );
 

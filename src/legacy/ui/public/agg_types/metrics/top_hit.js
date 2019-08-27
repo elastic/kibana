@@ -34,16 +34,11 @@ const isNumericFieldSelected = function (agg) {
 };
 
 aggTypeFieldFilters.addFilter(
-  (
-    field,
-    fieldParamType,
-    aggConfig
-  ) => {
+  (field, aggConfig) => {
     if (aggConfig.type.name !== 'top_hits' || _.get(aggConfig.schema, 'aggSettings.top_hits.allowStrings', false)) {
       return true;
     }
     return field.type === 'number';
-
   });
 
 export const topHitMetricAgg = new MetricAggType({
@@ -99,7 +94,7 @@ export const topHitMetricAgg = new MetricAggType({
     },
     {
       name: 'aggregate',
-      type: 'select',
+      type: 'optioned',
       editorComponent: wrapWithInlineComp(TopAggregateParamEditor),
       options: [
         {
@@ -164,7 +159,7 @@ export const topHitMetricAgg = new MetricAggType({
     },
     {
       name: 'sortOrder',
-      type: 'select',
+      type: 'optioned',
       default: 'desc',
       editorComponent: OrderParamEditor,
       options: [

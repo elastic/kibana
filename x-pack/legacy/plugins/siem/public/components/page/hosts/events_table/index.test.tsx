@@ -11,16 +11,14 @@ import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { apolloClientObservable, mockGlobalState } from '../../../../mock';
-import { EcsEdges } from '../../../../graphql/types';
 import { createStore, hostsModel, State } from '../../../../store';
-import { Columns } from '../../../load_more_table';
 
 import { EventsTable, getEventsColumnsCurated } from '.';
 import { mockData } from './mock';
 import * as i18n from './translations';
 
 describe('Load More Events Table Component', () => {
-  const loadMore = jest.fn();
+  const loadPage = jest.fn();
   const state: State = mockGlobalState;
 
   let store = createStore(state, apolloClientObservable);
@@ -35,12 +33,15 @@ describe('Load More Events Table Component', () => {
         <ReduxStoreProvider store={store}>
           <EventsTable
             data={mockData.Events.edges.map(i => i.node)}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Events.pageInfo)}
             id="events"
             loading={false}
-            loadMore={loadMore}
-            nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)}
-            tiebreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(
+              false,
+              'showMorePagesIndicator',
+              mockData.Events.pageInfo
+            )}
             totalCount={mockData.Events.totalCount}
             type={hostsModel.HostsType.page}
           />
@@ -61,11 +62,14 @@ describe('Load More Events Table Component', () => {
       expect(columns.length).toEqual(7);
     });
 
+    test('on host page, we should have Host Name column', () => {
+      const columns = getEventsColumnsCurated(hostsModel.HostsType.page);
+      expect(columns.some(col => col.name === i18n.HOST_NAME)).toEqual(true);
+    });
+
     test('on host details page, we should not have Host Name column', () => {
       const columns = getEventsColumnsCurated(hostsModel.HostsType.details);
-      expect(columns.includes((col: Columns<EcsEdges>) => col.name === i18n.HOST_NAME)).toEqual(
-        false
-      );
+      expect(columns.some(col => col.name === i18n.HOST_NAME)).toEqual(false);
     });
   });
 });

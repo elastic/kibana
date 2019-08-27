@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Header renders correctly against snapshot 1`] = `
-<Styled(EuiFlexGroup)
+<HeaderContainer
   data-test-subj="header-container"
   gutterSize="none"
   key="@timestamp"
@@ -9,16 +9,16 @@ exports[`Header renders correctly against snapshot 1`] = `
 >
   <Resizeable
     handle={
-      <Styled(EuiFlexItem)
+      <FullHeightFlexItem
         grow={false}
       >
-        <Styled(styled.div) />
-      </Styled(EuiFlexItem)>
+        <ColumnHeaderResizeHandle />
+      </FullHeightFlexItem>
     }
     height="35px"
     id="@timestamp"
     onResize={[Function]}
     render={[Function]}
   />
-</Styled(EuiFlexGroup)>
+</HeaderContainer>
 `;

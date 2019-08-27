@@ -28,7 +28,6 @@ const createSetupContractMock = (): jest.Mocked<ApplicationSetup> => ({
 });
 
 const createStartContractMock = (): jest.Mocked<ApplicationStart> => ({
-  mount: jest.fn(),
   ...capabilitiesServiceMock.createStartContract(),
 });
 

@@ -461,7 +461,7 @@ export interface StatusData {
 /** The data used to enrich the filter bar. */
 export interface FilterBar {
   /** A series of monitor IDs in the heartbeat indices. */
-  ids?: MonitorKey[] | null;
+  ids?: string[] | null;
   /** The location values users have configured for the agents. */
   locations?: string[] | null;
   /** The names users have configured for the monitors. */
@@ -472,6 +472,8 @@ export interface FilterBar {
   schemes?: string[] | null;
   /** The possible status values contained in the indices. */
   statuses?: string[] | null;
+  /** The list of URLs */
+  urls?: string[] | null;
 }
 /** A representation of an error state for a monitor. */
 export interface ErrorListItem {

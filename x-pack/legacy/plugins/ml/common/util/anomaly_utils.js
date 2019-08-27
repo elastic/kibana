@@ -4,25 +4,45 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 /*
-* Contains functions for operations commonly performed on anomaly data
-* to extract information for display in dashboards.
-*/
+ * Contains functions for operations commonly performed on anomaly data
+ * to extract information for display in dashboards.
+ */
 
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from '../constants/detector_rule';
 import { MULTI_BUCKET_IMPACT } from '../constants/multi_bucket_impact';
+import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD } from '../constants/anomalies';
 
 // List of function descriptions for which actual values from record level results should be displayed.
-const DISPLAY_ACTUAL_FUNCTIONS = ['count', 'distinct_count', 'lat_long', 'mean', 'max', 'min', 'sum',
-  'median', 'varp', 'info_content', 'time'];
+const DISPLAY_ACTUAL_FUNCTIONS = [
+  'count',
+  'distinct_count',
+  'lat_long',
+  'mean',
+  'max',
+  'min',
+  'sum',
+  'median',
+  'varp',
+  'info_content',
+  'time',
+];
 
 // List of function descriptions for which typical values from record level results should be displayed.
-const DISPLAY_TYPICAL_FUNCTIONS = ['count', 'distinct_count', 'lat_long', 'mean', 'max', 'min', 'sum',
-  'median', 'varp', 'info_content', 'time'];
+const DISPLAY_TYPICAL_FUNCTIONS = [
+  'count',
+  'distinct_count',
+  'lat_long',
+  'mean',
+  'max',
+  'min',
+  'sum',
+  'median',
+  'varp',
+  'info_content',
+  'time',
+];
 
 let severityTypes;
 
@@ -31,26 +51,44 @@ function getSeverityTypes() {
     return severityTypes;
   }
 
-  return severityTypes = {
-    critical: { id: 'critical', label: i18n.translate('xpack.ml.anomalyUtils.severity.criticalLabel', {
-      defaultMessage: 'critical',
-    }) },
-    major: { id: 'major', label: i18n.translate('xpack.ml.anomalyUtils.severity.majorLabel', {
-      defaultMessage: 'major',
-    }) },
-    minor: { id: 'minor', label: i18n.translate('xpack.ml.anomalyUtils.severity.minorLabel', {
-      defaultMessage: 'minor',
-    }) },
-    warning: { id: 'warning', label: i18n.translate('xpack.ml.anomalyUtils.severity.warningLabel', {
-      defaultMessage: 'warning',
-    }) },
-    unknown: { id: 'unknown', label: i18n.translate('xpack.ml.anomalyUtils.severity.unknownLabel', {
-      defaultMessage: 'unknown',
-    }) },
-    low: { id: 'low', label: i18n.translate('xpack.ml.anomalyUtils.severityWithLow.lowLabel', {
-      defaultMessage: 'low',
-    }) },
-  };
+  return (severityTypes = {
+    critical: {
+      id: ANOMALY_SEVERITY.CRITICAL,
+      label: i18n.translate('xpack.ml.anomalyUtils.severity.criticalLabel', {
+        defaultMessage: 'critical',
+      }),
+    },
+    major: {
+      id: ANOMALY_SEVERITY.MAJOR,
+      label: i18n.translate('xpack.ml.anomalyUtils.severity.majorLabel', {
+        defaultMessage: 'major',
+      }),
+    },
+    minor: {
+      id: ANOMALY_SEVERITY.MINOR,
+      label: i18n.translate('xpack.ml.anomalyUtils.severity.minorLabel', {
+        defaultMessage: 'minor',
+      }),
+    },
+    warning: {
+      id: ANOMALY_SEVERITY.WARNING,
+      label: i18n.translate('xpack.ml.anomalyUtils.severity.warningLabel', {
+        defaultMessage: 'warning',
+      }),
+    },
+    unknown: {
+      id: ANOMALY_SEVERITY.UNKNOWN,
+      label: i18n.translate('xpack.ml.anomalyUtils.severity.unknownLabel', {
+        defaultMessage: 'unknown',
+      }),
+    },
+    low: {
+      id: ANOMALY_SEVERITY.LOW,
+      label: i18n.translate('xpack.ml.anomalyUtils.severityWithLow.lowLabel', {
+        defaultMessage: 'low',
+      }),
+    },
+  });
 }
 
 // Returns a severity label (one of critical, major, minor, warning or unknown)
@@ -58,16 +96,32 @@ function getSeverityTypes() {
 export function getSeverity(normalizedScore) {
   const severityTypesList = getSeverityTypes();
 
-  if (normalizedScore >= 75) {
+  if (normalizedScore >= ANOMALY_THRESHOLD.CRITICAL) {
     return severityTypesList.critical;
-  } else if (normalizedScore >= 50) {
+  } else if (normalizedScore >= ANOMALY_THRESHOLD.MAJOR) {
     return severityTypesList.major;
-  } else if (normalizedScore >= 25) {
+  } else if (normalizedScore >= ANOMALY_THRESHOLD.MINOR) {
     return severityTypesList.minor;
-  } else if (normalizedScore >= 0) {
+  } else if (normalizedScore >= ANOMALY_THRESHOLD.LOW) {
     return severityTypesList.warning;
   } else {
     return severityTypesList.unknown;
+  }
+}
+
+export function getSeverityType(normalizedScore) {
+  if (normalizedScore >= 75) {
+    return ANOMALY_SEVERITY.CRITICAL;
+  } else if (normalizedScore >= 50) {
+    return ANOMALY_SEVERITY.MAJOR;
+  } else if (normalizedScore >= 25) {
+    return ANOMALY_SEVERITY.MINOR;
+  } else if (normalizedScore >= 3) {
+    return ANOMALY_SEVERITY.WARNING;
+  } else if (normalizedScore >= 0) {
+    return ANOMALY_SEVERITY.LOW;
+  } else {
+    return ANOMALY_SEVERITY.UNKNOWN;
   }
 }
 
@@ -77,15 +131,15 @@ export function getSeverity(normalizedScore) {
 export function getSeverityWithLow(normalizedScore) {
   const severityTypesList = getSeverityTypes();
 
-  if (normalizedScore >= 75) {
+  if (normalizedScore >= ANOMALY_THRESHOLD.CRITICAL) {
     return severityTypesList.critical;
-  } else if (normalizedScore >= 50) {
+  } else if (normalizedScore >= ANOMALY_THRESHOLD.MAJOR) {
     return severityTypesList.major;
-  } else if (normalizedScore >= 25) {
+  } else if (normalizedScore >= ANOMALY_THRESHOLD.MINOR) {
     return severityTypesList.minor;
-  } else if (normalizedScore >= 3) {
+  } else if (normalizedScore >= ANOMALY_THRESHOLD.WARNING) {
     return severityTypesList.warning;
-  } else if (normalizedScore >= 0) {
+  } else if (normalizedScore >= ANOMALY_THRESHOLD.LOW) {
     return severityTypesList.low;
   } else {
     return severityTypesList.unknown;
@@ -95,15 +149,15 @@ export function getSeverityWithLow(normalizedScore) {
 // Returns a severity RGB color (one of critical, major, minor, warning, low_warning or unknown)
 // for the supplied normalized anomaly score (a value between 0 and 100).
 export function getSeverityColor(normalizedScore) {
-  if (normalizedScore >= 75) {
+  if (normalizedScore >= ANOMALY_THRESHOLD.CRITICAL) {
     return '#fe5050';
-  } else if (normalizedScore >= 50) {
+  } else if (normalizedScore >= ANOMALY_THRESHOLD.MAJOR) {
     return '#fba740';
-  } else if (normalizedScore >= 25) {
+  } else if (normalizedScore >= ANOMALY_THRESHOLD.MINOR) {
     return '#fdec25';
-  } else if (normalizedScore >= 3) {
+  } else if (normalizedScore >= ANOMALY_THRESHOLD.WARNING) {
     return '#8bc8fb';
-  } else if (normalizedScore >= 0) {
+  } else if (normalizedScore >= ANOMALY_THRESHOLD.LOW) {
     return '#d2e9f7';
   } else {
     return '#ffffff';
@@ -139,15 +193,15 @@ export function getMultiBucketImpactLabel(multiBucketImpact) {
 export function getEntityFieldName(record) {
   // Analyses with by and over fields, will have a top-level by_field_name, but
   // the by_field_value(s) will be in the nested causes array.
-  if (_.has(record, 'by_field_name') && _.has(record, 'by_field_value')) {
+  if (record.by_field_name !== undefined && record.by_field_value !== undefined) {
     return record.by_field_name;
   }
 
-  if (_.has(record, 'over_field_name')) {
+  if (record.over_field_name !== undefined) {
     return record.over_field_name;
   }
 
-  if (_.has(record, 'partition_field_name')) {
+  if (record.partition_field_name !== undefined) {
     return record.partition_field_name;
   }
 
@@ -158,15 +212,15 @@ export function getEntityFieldName(record) {
 // obtained from Elasticsearch. The function looks first for a by_field, then over_field,
 // then partition_field, returning undefined if none of these fields are present.
 export function getEntityFieldValue(record) {
-  if (_.has(record, 'by_field_value')) {
+  if (record.by_field_value !== undefined) {
     return record.by_field_value;
   }
 
-  if (_.has(record, 'over_field_value')) {
+  if (record.over_field_value !== undefined) {
     return record.over_field_value;
   }
 
-  if (_.has(record, 'partition_field_value')) {
+  if (record.partition_field_value !== undefined) {
     return record.partition_field_value;
   }
 
@@ -181,7 +235,7 @@ export function getEntityFieldList(record) {
     entityFields.push({
       fieldName: record.partition_field_name,
       fieldValue: record.partition_field_value,
-      fieldType: 'partition'
+      fieldType: 'partition',
     });
   }
 
@@ -189,7 +243,7 @@ export function getEntityFieldList(record) {
     entityFields.push({
       fieldName: record.over_field_name,
       fieldValue: record.over_field_value,
-      fieldType: 'over'
+      fieldType: 'over',
     });
   }
 
@@ -200,7 +254,7 @@ export function getEntityFieldList(record) {
     entityFields.push({
       fieldName: record.by_field_name,
       fieldValue: record.by_field_value,
-      fieldType: 'by'
+      fieldType: 'by',
     });
   }
 
@@ -211,22 +265,24 @@ export function getEntityFieldList(record) {
 // Note that the 'function' field in a record contains what the user entered e.g. 'high_count',
 // whereas the 'function_description' field holds a ML-built display hint for function e.g. 'count'.
 export function showActualForFunction(functionDescription) {
-  return _.indexOf(DISPLAY_ACTUAL_FUNCTIONS, functionDescription) > -1;
+  return DISPLAY_ACTUAL_FUNCTIONS.indexOf(functionDescription) > -1;
 }
 
 // Returns whether typical values should be displayed for a record with the specified function description.
 // Note that the 'function' field in a record contains what the user entered e.g. 'high_count',
 // whereas the 'function_description' field holds a ML-built display hint for function e.g. 'count'.
 export function showTypicalForFunction(functionDescription) {
-  return _.indexOf(DISPLAY_TYPICAL_FUNCTIONS, functionDescription) > -1;
+  return DISPLAY_TYPICAL_FUNCTIONS.indexOf(functionDescription) > -1;
 }
 
 // Returns whether a rule can be configured against the specified anomaly.
 export function isRuleSupported(record) {
   // A rule can be configured with a numeric condition if the function supports it,
   // and/or with scope if there is a partitioning fields.
-  return (CONDITIONS_NOT_SUPPORTED_FUNCTIONS.indexOf(record.function) === -1) ||
-    (getEntityFieldName(record) !== undefined);
+  return (
+    CONDITIONS_NOT_SUPPORTED_FUNCTIONS.indexOf(record.function) === -1 ||
+    getEntityFieldName(record) !== undefined
+  );
 }
 
 // Two functions for converting aggregation type names.
@@ -272,5 +328,5 @@ export const aggregationTypeTransform = {
     }
 
     return newAggType;
-  }
+  },
 };

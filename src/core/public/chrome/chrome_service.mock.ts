@@ -26,7 +26,7 @@ import {
 } from './chrome_service';
 
 const createStartContractMock = () => {
-  const startContract: jest.Mocked<InternalChromeStart> = {
+  const startContract: DeeplyMockedKeys<InternalChromeStart> = {
     getComponent: jest.fn(),
     navLinks: {
       getNavLinks$: jest.fn(),
@@ -66,6 +66,7 @@ const createStartContractMock = () => {
     getHelpExtension$: jest.fn(),
     setHelpExtension: jest.fn(),
   };
+  startContract.navLinks.getAll.mockReturnValue([]);
   startContract.getBrand$.mockReturnValue(new BehaviorSubject({} as ChromeBrand));
   startContract.getIsVisible$.mockReturnValue(new BehaviorSubject(false));
   startContract.getIsCollapsed$.mockReturnValue(new BehaviorSubject(false));

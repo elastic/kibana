@@ -31,7 +31,7 @@ import {
   KIBANA_FTR_SCRIPT,
 } from './lib';
 
-import { readConfigFile } from '../../../../src/functional_test_runner/lib';
+import { readConfigFile } from '../functional_test_runner/lib';
 
 const SUCCESS_MESSAGE = `
 

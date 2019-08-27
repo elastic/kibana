@@ -5,7 +5,7 @@
  */
 
 import { Action } from 'redux-actions';
-import { kfetch } from 'ui/kfetch';
+import { npStart } from 'ui/new_platform';
 import { call, put, takeEvery } from 'redux-saga/effects';
 import {
   loadLanguageServers,
@@ -17,16 +17,11 @@ import {
 } from '../actions/language_server';
 
 function fetchLangServers() {
-  return kfetch({
-    pathname: '/api/code/install',
-  });
+  return npStart.core.http.get('/api/code/install');
 }
 
 function installLanguageServer(languageServer: string) {
-  return kfetch({
-    pathname: `/api/code/install/${languageServer}`,
-    method: 'POST',
-  });
+  return npStart.core.http.post(`/api/code/install/${languageServer}`);
 }
 
 function* handleInstallLanguageServer(action: Action<string>) {

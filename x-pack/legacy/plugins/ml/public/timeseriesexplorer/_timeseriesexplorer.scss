@@ -60,22 +60,6 @@
     }
   }
 
-  .show-model-controls {
-    float: right;
-    position: relative;
-    top: 18px;
-
-    div {
-      display: inline;
-      padding-left: $euiSize;
-    }
-
-    .kuiCheckBoxLabel {
-      display: inline-block;
-      font-size: $euiFontSizeXS;
-    }
-  }
-
   .forecast-controls {
     float: right;
   }

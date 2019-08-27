@@ -37,6 +37,13 @@ import { nginxHits } from './nginx/nginx_hits';
 import { nginxRequestRate } from './nginx/nginx_request_rate';
 import { nginxRequestsPerConnection } from './nginx/nginx_requests_per_connection';
 
+import { awsOverview } from './aws/aws_overview';
+import { awsCpuUtilization } from './aws/aws_cpu_utilization';
+import { awsNetworkBytes } from './aws/aws_network_bytes';
+import { awsNetworkPackets } from './aws/aws_network_packets';
+import { awsDiskioBytes } from './aws/aws_diskio_bytes';
+import { awsDiskioOps } from './aws/aws_diskio_ops';
+
 interface InfraMetricModels {
   [key: string]: InfraMetricModelCreator;
 }
@@ -71,4 +78,11 @@ export const metricModels: InfraMetricModels = {
   [InfraMetric.nginxRequestRate]: nginxRequestRate,
   [InfraMetric.nginxActiveConnections]: nginxActiveConnections,
   [InfraMetric.nginxRequestsPerConnection]: nginxRequestsPerConnection,
+
+  [InfraMetric.awsOverview]: awsOverview,
+  [InfraMetric.awsCpuUtilization]: awsCpuUtilization,
+  [InfraMetric.awsNetworkBytes]: awsNetworkBytes,
+  [InfraMetric.awsNetworkPackets]: awsNetworkPackets,
+  [InfraMetric.awsDiskioBytes]: awsDiskioBytes,
+  [InfraMetric.awsDiskioOps]: awsDiskioOps,
 };

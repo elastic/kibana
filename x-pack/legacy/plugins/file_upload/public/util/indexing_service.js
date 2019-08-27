@@ -67,7 +67,6 @@ export async function indexData(parsedFile, transformDetails, indexName, dataTyp
   return indexWriteResults;
 }
 
-
 function transformDataByFormatForIndexing(transform, parsedFile, dataType) {
   let indexingDetails;
   if (!transform) {
@@ -237,21 +236,40 @@ async function getIndexPatternId(name) {
   }
 }
 
-export async function getExistingIndices() {
+export const getExistingIndexNames = async () => {
   const basePath = chrome.addBasePath('/api');
-  return await http({
+  const indexes = await http({
     url: `${basePath}/index_management/indices`,
     method: 'GET',
   });
-}
+  return indexes
+    ? indexes.map(({ name }) => name)
+    : [];
+};
 
-export async function getExistingIndexPatterns() {
+export const getExistingIndexPatternNames = async () => {
   const savedObjectsClient = chrome.getSavedObjectsClient();
-  return savedObjectsClient.find({
+  const indexPatterns = await savedObjectsClient.find({
     type: 'index-pattern',
     fields: ['id', 'title', 'type', 'fields'],
     perPage: 10000
-  }).then(({ savedObjects }) =>
-    savedObjects.map(savedObject => savedObject.get('title'))
+  }).then(
+    ({ savedObjects }) => savedObjects.map(savedObject => savedObject.get('title'))
   );
+  return indexPatterns
+    ? indexPatterns.map(({ name }) => name)
+    : [];
+};
+
+export function checkIndexPatternValid(name) {
+  const byteLength = encodeURI(name)
+    .split(/%(?:u[0-9A-F]{2})?[0-9A-F]{2}|./).length - 1;
+  const reg = new RegExp('[\\\\/\*\?\"\<\>\|\\s\,\#]+');
+  const indexPatternInvalid =
+    byteLength > 255 || // name can't be greater than 255 bytes
+    name !== name.toLowerCase() || // name should be lowercase
+    (name === '.' || name === '..')   || // name can't be . or ..
+    name.match(/^[-_+]/) !== null  || // name can't start with these chars
+    name.match(reg) !== null;  // name can't contain these chars
+  return !indexPatternInvalid;
 }

@@ -222,8 +222,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      // Skip until https://github.com/elastic/eui/issues/1318 is implemented
-      it.skip('should filter for specific indices', async () => {
+      it('should filter for specific indices', async () => {
         await nodesList.setFilter('01');
         const rows = await nodesList.getRows();
         expect(rows.length).to.be(1);

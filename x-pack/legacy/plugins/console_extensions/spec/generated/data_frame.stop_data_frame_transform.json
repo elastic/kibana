@@ -2,7 +2,8 @@
   "data_frame.stop_data_frame_transform": {
     "url_params": {
       "wait_for_completion": "__flag__",
-      "timeout": ""
+      "timeout": "",
+      "allow_no_match": "__flag__"
     },
     "methods": [
       "POST"

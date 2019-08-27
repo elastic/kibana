@@ -30,20 +30,20 @@ import { memoize, padLeft, range } from 'lodash';
 import moment from 'moment-timezone';
 import React, { Component } from 'react';
 import styled from 'styled-components';
-import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
+import { InternalCoreStart } from 'src/core/public';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { KibanaLink } from '../../../shared/Links/KibanaLink';
 import { createErrorGroupWatch, Schedule } from './createErrorGroupWatch';
 import { ElasticDocsLink } from '../../../shared/Links/ElasticDocsLink';
+import { CoreContext } from '../../../../context/CoreContext';
 
 type ScheduleKey = keyof Schedule;
 
-const getUserTimezone = memoize(() => {
-  const uiSettings = chrome.getUiSettingsClient();
-  return uiSettings.get('dateFormat:tz') === 'Browser'
+const getUserTimezone = memoize((core: InternalCoreStart): string => {
+  return core.uiSettings.get('dateFormat:tz') === 'Browser'
     ? moment.tz.guess()
-    : uiSettings.get('dateFormat:tz');
+    : core.uiSettings.get('dateFormat:tz');
 });
 
 const SmallInput = styled.div`
@@ -83,6 +83,7 @@ export class WatcherFlyout extends Component<
   WatcherFlyoutProps,
   WatcherFlyoutState
 > {
+  static contextType = CoreContext;
   public state: WatcherFlyoutState = {
     schedule: 'daily',
     threshold: 10,
@@ -155,6 +156,7 @@ export class WatcherFlyout extends Component<
   };
 
   public createWatch = () => {
+    const core: InternalCoreStart = this.context;
     const { serviceName } = this.props.urlParams;
 
     if (!serviceName) {
@@ -190,13 +192,18 @@ export class WatcherFlyout extends Component<
             unit: 'h'
           };
 
+    const apmIndexPatternTitle = core.injectedMetadata.getInjectedVar(
+      'apmIndexPatternTitle'
+    ) as string;
+
     return createErrorGroupWatch({
       emails,
       schedule,
       serviceName,
       slackUrl,
       threshold: this.state.threshold,
-      timeRange
+      timeRange,
+      apmIndexPatternTitle
     })
       .then((id: string) => {
         this.props.onClose();
@@ -271,7 +278,8 @@ export class WatcherFlyout extends Component<
       return null;
     }
 
-    const userTimezoneSetting = getUserTimezone();
+    const core: InternalCoreStart = this.context;
+    const userTimezoneSetting = getUserTimezone(core);
     const dailyTime = this.state.daily;
     const inputTime = `${dailyTime}Z`; // Add tz to make into UTC
     const inputFormat = 'HH:mmZ'; // Parse as 24 hour w. tz

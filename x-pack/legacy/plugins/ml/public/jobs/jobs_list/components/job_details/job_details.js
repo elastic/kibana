@@ -67,10 +67,11 @@ class JobDetailsUI extends Component {
         dataDescription,
         datafeed,
         counts,
-        modelSizeStats
+        modelSizeStats,
+        datafeedTimingStats
       } = extractJobDetails(job);
 
-      const { intl } = this.props;
+      const { intl, showFullDetails } = this.props;
 
       const tabs = [{
         id: 'job-settings',
@@ -87,13 +88,6 @@ class JobDetailsUI extends Component {
           defaultMessage: 'Job config'
         }),
         content: <JobDetailsPane sections={[detectors, influencers, analysisConfig, analysisLimits, dataDescription]} />,
-      }, {
-        id: 'datafeed',
-        name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.jobDetails.tabs.datafeedLabel',
-          defaultMessage: 'Datafeed'
-        }),
-        content: <JobDetailsPane sections={[datafeed]} />,
       }, {
         id: 'counts',
         name: intl.formatMessage({
@@ -115,24 +109,38 @@ class JobDetailsUI extends Component {
           defaultMessage: 'Job messages'
         }),
         content: <JobMessagesPane job={job} />,
-      }, {
-        id: 'datafeed-preview',
-        name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.jobDetails.tabs.datafeedPreviewLabel',
-          defaultMessage: 'Datafeed preview'
-        }),
-        content: <DatafeedPreviewPane job={job} />,
-      }, {
-        id: 'forecasts',
-        name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.jobDetails.tabs.forecastsLabel',
-          defaultMessage: 'Forecasts'
-        }),
-        content: <ForecastsTable job={job} />,
-      }
+      },
       ];
 
-      if (mlAnnotationsEnabled) {
+      if (showFullDetails) {
+        // Datafeed should be at index 2 in tabs array for full details
+        tabs.splice(2, 0,  {
+          id: 'datafeed',
+          name: intl.formatMessage({
+            id: 'xpack.ml.jobsList.jobDetails.tabs.datafeedLabel',
+            defaultMessage: 'Datafeed'
+          }),
+          content: <JobDetailsPane sections={[datafeed, datafeedTimingStats]} />,
+        });
+
+        tabs.push({
+          id: 'datafeed-preview',
+          name: intl.formatMessage({
+            id: 'xpack.ml.jobsList.jobDetails.tabs.datafeedPreviewLabel',
+            defaultMessage: 'Datafeed preview'
+          }),
+          content: <DatafeedPreviewPane job={job} />,
+        }, {
+          id: 'forecasts',
+          name: intl.formatMessage({
+            id: 'xpack.ml.jobsList.jobDetails.tabs.forecastsLabel',
+            defaultMessage: 'Forecasts'
+          }),
+          content: <ForecastsTable job={job} />,
+        });
+      }
+
+      if (mlAnnotationsEnabled && showFullDetails) {
         tabs.push({
           id: 'annotations',
           name: intl.formatMessage({
@@ -165,6 +173,7 @@ JobDetailsUI.propTypes = {
   job: PropTypes.object,
   addYourself: PropTypes.func.isRequired,
   removeYourself: PropTypes.func.isRequired,
+  showFullDetails: PropTypes.bool
 };
 
 export const JobDetails = injectI18n(JobDetailsUI);

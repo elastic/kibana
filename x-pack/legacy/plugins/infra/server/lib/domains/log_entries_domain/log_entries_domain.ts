@@ -14,8 +14,9 @@ import {
   InfraLogItem,
   InfraLogMessageSegment,
   InfraLogSummaryBucket,
+  InfraLogSummaryHighlightBucket,
 } from '../../../graphql/types';
-import { InfraDateRangeAggregationBucket, InfraFrameworkRequest } from '../../adapters/framework';
+import { InfraFrameworkRequest } from '../../adapters/framework';
 import {
   InfraSourceConfiguration,
   InfraSources,
@@ -133,7 +134,9 @@ export class InfraLogEntriesDomain {
     startKey: TimeKey,
     endKey: TimeKey,
     highlights: Array<{
-      query: JsonObject;
+      query: string;
+      countBefore: number;
+      countAfter: number;
     }>,
     filterQuery?: LogEntryQuery
   ): Promise<InfraLogEntry[][]> {
@@ -145,23 +148,46 @@ export class InfraLogEntriesDomain {
 
     const documentSets = await Promise.all(
       highlights.map(async highlight => {
+        const highlightQuery = createHighlightQueryDsl(highlight.query, requiredFields);
         const query = filterQuery
           ? {
               bool: {
-                must: [filterQuery, highlight.query],
+                filter: [filterQuery, highlightQuery],
               },
             }
-          : highlight.query;
-        const documents = await this.adapter.getContainedLogEntryDocuments(
-          request,
-          configuration,
-          requiredFields,
-          startKey,
-          endKey,
-          query,
-          highlight.query
-        );
-        const entries = documents.map(
+          : highlightQuery;
+        const [documentsBefore, documents, documentsAfter] = await Promise.all([
+          this.adapter.getAdjacentLogEntryDocuments(
+            request,
+            configuration,
+            requiredFields,
+            startKey,
+            'desc',
+            highlight.countBefore,
+            query,
+            highlightQuery
+          ),
+          this.adapter.getContainedLogEntryDocuments(
+            request,
+            configuration,
+            requiredFields,
+            startKey,
+            endKey,
+            query,
+            highlightQuery
+          ),
+          this.adapter.getAdjacentLogEntryDocuments(
+            request,
+            configuration,
+            requiredFields,
+            endKey,
+            'asc',
+            highlight.countAfter,
+            query,
+            highlightQuery
+          ),
+        ]);
+        const entries = [...documentsBefore, ...documents, ...documentsAfter].map(
           convertLogDocumentToEntry(
             sourceId,
             configuration.logColumns,
@@ -193,8 +219,50 @@ export class InfraLogEntriesDomain {
       bucketSize,
       filterQuery
     );
-    const buckets = dateRangeBuckets.map(convertDateRangeBucketToSummaryBucket);
-    return buckets;
+    return dateRangeBuckets;
+  }
+
+  public async getLogSummaryHighlightBucketsBetween(
+    request: InfraFrameworkRequest,
+    sourceId: string,
+    start: number,
+    end: number,
+    bucketSize: number,
+    highlightQueries: string[],
+    filterQuery?: LogEntryQuery
+  ): Promise<InfraLogSummaryHighlightBucket[][]> {
+    const { configuration } = await this.libs.sources.getSourceConfiguration(request, sourceId);
+    const messageFormattingRules = compileFormattingRules(
+      getBuiltinRules(configuration.fields.message)
+    );
+    const requiredFields = getRequiredFields(configuration, messageFormattingRules);
+
+    const summaries = await Promise.all(
+      highlightQueries.map(async highlightQueryPhrase => {
+        const highlightQuery = createHighlightQueryDsl(highlightQueryPhrase, requiredFields);
+        const query = filterQuery
+          ? {
+              bool: {
+                must: [filterQuery, highlightQuery],
+              },
+            }
+          : highlightQuery;
+        const summaryBuckets = await this.adapter.getContainedLogSummaryBuckets(
+          request,
+          configuration,
+          start,
+          end,
+          bucketSize,
+          query
+        );
+        const summaryHighlightBuckets = summaryBuckets
+          .filter(logSummaryBucketHasEntries)
+          .map(convertLogSummaryBucketToSummaryHighlightBucket);
+        return summaryHighlightBuckets;
+      })
+    );
+
+    return summaries;
   }
 
   public async getLogItem(
@@ -259,7 +327,7 @@ export interface LogEntriesAdapter {
     end: number,
     bucketSize: number,
     filterQuery?: LogEntryQuery
-  ): Promise<InfraDateRangeAggregationBucket[]>;
+  ): Promise<LogSummaryBucket[]>;
 
   getLogItem(
     request: InfraFrameworkRequest,
@@ -275,6 +343,13 @@ export interface LogEntryDocument {
   gid: string;
   highlights: Highlights;
   key: TimeKey;
+}
+
+export interface LogSummaryBucket {
+  entriesCount: number;
+  start: number;
+  end: number;
+  topEntryKeys: TimeKey[];
 }
 
 const convertLogDocumentToEntry = (
@@ -307,12 +382,16 @@ const convertLogDocumentToEntry = (
   }),
 });
 
-const convertDateRangeBucketToSummaryBucket = (
-  bucket: InfraDateRangeAggregationBucket
-): InfraLogSummaryBucket => ({
-  entriesCount: bucket.doc_count,
-  start: bucket.from || 0,
-  end: bucket.to || 0,
+const logSummaryBucketHasEntries = (bucket: LogSummaryBucket) =>
+  bucket.entriesCount > 0 && bucket.topEntryKeys.length > 0;
+
+const convertLogSummaryBucketToSummaryHighlightBucket = (
+  bucket: LogSummaryBucket
+): InfraLogSummaryHighlightBucket => ({
+  entriesCount: bucket.entriesCount,
+  start: bucket.start,
+  end: bucket.end,
+  representativeKey: bucket.topEntryKeys[0],
 });
 
 const getRequiredFields = (
@@ -332,3 +411,12 @@ const getRequiredFields = (
 
   return Array.from(new Set([...fieldsFromCustomColumns, ...fieldsFromFormattingRules]));
 };
+
+const createHighlightQueryDsl = (phrase: string, fields: string[]) => ({
+  multi_match: {
+    fields,
+    lenient: true,
+    query: phrase,
+    type: 'phrase',
+  },
+});

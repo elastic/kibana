@@ -36,6 +36,14 @@ describe('DefaultSearchCapabilities', () => {
     expect(defaultSearchCapabilities.defaultTimeInterval).toBe(null);
   });
 
+  test('should return default uiRestrictions', () => {
+    expect(defaultSearchCapabilities.uiRestrictions).toEqual({
+      whiteListedMetrics: { '*': true },
+      whiteListedGroupByFields: { '*': true },
+      whiteListedTimerangeModes: { '*': true },
+    });
+  });
+
   test('should return Search Timezone', () => {
     defaultSearchCapabilities.request = {
       payload: {

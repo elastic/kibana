@@ -60,7 +60,8 @@ export const replaceQueryStringInLocation = (location: Location, queryString: st
 };
 
 export const getCurrentLocation = (pathname: string): LocationTypes | null => {
-  const trailingPath = pathname.match(/([^\/]+$)/);
+  const removeSlash = pathname.replace(/\/$/, '');
+  const trailingPath = removeSlash.match(/([^\/]+$)/);
   if (trailingPath !== null) {
     if (trailingPath[0] === 'hosts') {
       return CONSTANTS.hostsPage;

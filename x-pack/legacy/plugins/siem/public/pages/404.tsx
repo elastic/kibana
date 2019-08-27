@@ -16,3 +16,5 @@ export const NotFoundPage = pure(() => (
     />
   </div>
 ));
+
+NotFoundPage.displayName = 'NotFoundPage';

@@ -22,17 +22,12 @@ import React, { useState } from 'react';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { transactionSampleRateRt } from '../../../../../common/runtime_types/transaction_sample_rate_rt';
 import { AddSettingFlyoutBody } from './AddSettingFlyoutBody';
 import { Config } from '../SettingsList';
 import { useFetcher } from '../../../../hooks/useFetcher';
-import {
-  loadCMServices,
-  loadCMEnvironments,
-  deleteCMConfiguration,
-  updateCMConfiguration,
-  createCMConfiguration
-} from '../../../../services/rest/apm/settings';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../../common/environment_filter_values';
+import { callApmApi } from '../../../../services/rest/callApmApi';
 
 interface Props {
   onClose: () => void;
@@ -47,10 +42,6 @@ export function AddSettingsFlyout({
   onSubmit,
   selectedConfig
 }: Props) {
-  if (!isOpen) {
-    return null;
-  }
-
   const [environment, setEnvironment] = useState<string | undefined>(
     selectedConfig
       ? selectedConfig.service.environment || ENVIRONMENT_NOT_DEFINED
@@ -59,30 +50,49 @@ export function AddSettingsFlyout({
   const [serviceName, setServiceName] = useState<string | undefined>(
     selectedConfig ? selectedConfig.service.name : undefined
   );
-  const [sampleRate, setSampleRate] = useState<number>(
-    selectedConfig ? parseFloat(selectedConfig.settings.sample_rate) : NaN
+  const [sampleRate, setSampleRate] = useState<string>(
+    selectedConfig
+      ? selectedConfig.settings.transaction_sample_rate.toString()
+      : ''
   );
-  const { data: serviceNames = [], status: serviceNamesStatus } = useFetcher<
-    string[]
-  >(async () => (await loadCMServices()).sort(), [], {
-    preservePreviousResponse: false
-  });
-  const { data: environments = [], status: environmentStatus } = useFetcher<
-    Array<{ name: string; available: boolean }>
-  >(
+  const { data: serviceNames = [], status: serviceNamesStatus } = useFetcher(
+    () =>
+      callApmApi({
+        pathname: '/api/apm/settings/agent-configuration/services'
+      }),
+    [],
+    {
+      preservePreviousResponse: false
+    }
+  );
+  const { data: environments = [], status: environmentStatus } = useFetcher(
     () => {
       if (serviceName) {
-        return loadCMEnvironments({ serviceName });
+        return callApmApi({
+          pathname:
+            '/api/apm/settings/agent-configuration/services/{serviceName}/environments',
+          params: {
+            path: { serviceName }
+          }
+        });
       }
     },
     [serviceName],
     { preservePreviousResponse: false }
   );
+
+  const isSampleRateValid = transactionSampleRateRt
+    .decode(sampleRate)
+    .isRight();
+
   const isSelectedEnvironmentValid = environments.some(
     env =>
       env.name === environment && (Boolean(selectedConfig) || env.available)
   );
-  const isSampleRateValid = sampleRate >= 0 && sampleRate <= 1;
+
+  if (!isOpen) {
+    return null;
+  }
 
   return (
     <EuiPortal>
@@ -92,7 +102,7 @@ export function AddSettingsFlyout({
             {selectedConfig ? (
               <h2>
                 {i18n.translate(
-                  'xpack.apm.settings.cm.flyOut.editConfigTitle',
+                  'xpack.apm.settings.agentConf.flyOut.editConfigTitle',
                   {
                     defaultMessage: 'Edit configuration'
                   }
@@ -101,7 +111,7 @@ export function AddSettingsFlyout({
             ) : (
               <h2>
                 {i18n.translate(
-                  'xpack.apm.settings.cm.flyOut.createConfigTitle',
+                  'xpack.apm.settings.agentConf.flyOut.createConfigTitle',
                   {
                     defaultMessage: 'Create configuration'
                   }
@@ -113,7 +123,7 @@ export function AddSettingsFlyout({
         <EuiFlyoutBody>
           <EuiCallOut
             title={i18n.translate(
-              'xpack.apm.settings.cm.flyOut.betaCallOutTitle',
+              'xpack.apm.settings.agentConf.flyOut.betaCallOutTitle',
               {
                 defaultMessage: 'APM Agent Configuration (BETA)'
               }
@@ -121,10 +131,13 @@ export function AddSettingsFlyout({
             iconType="iInCircle"
             color="warning"
           >
-            {i18n.translate('xpack.apm.settings.cm.flyOut.betaCallOutText', {
-              defaultMessage:
-                'Please note only sample rate configuration is supported in this first version. We will extend support for central configuration in future releases. Please be aware of bugs.'
-            })}
+            {i18n.translate(
+              'xpack.apm.settings.agentConf.flyOut.betaCallOutText',
+              {
+                defaultMessage:
+                  'Please note only sample rate configuration is supported in this first version. We will extend support for agent configuration in future releases. Please be aware of bugs.'
+              }
+            )}
           </EuiCallOut>
           <EuiHorizontalRule margin="m" />
           <AddSettingFlyoutBody
@@ -154,7 +167,7 @@ export function AddSettingsFlyout({
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty onClick={onClose}>
                 {i18n.translate(
-                  'xpack.apm.settings.cm.flyOut.cancelButtonLabel',
+                  'xpack.apm.settings.agentConf.flyOut.cancelButtonLabel',
                   {
                     defaultMessage: 'Cancel'
                   }
@@ -179,7 +192,7 @@ export function AddSettingsFlyout({
                   await saveConfig({
                     environment,
                     serviceName,
-                    sampleRate,
+                    sampleRate: parseFloat(sampleRate),
                     configurationId: selectedConfig
                       ? selectedConfig.id
                       : undefined
@@ -188,7 +201,7 @@ export function AddSettingsFlyout({
                 }}
               >
                 {i18n.translate(
-                  'xpack.apm.settings.cm.flyOut.saveConfigurationButtonLabel',
+                  'xpack.apm.settings.agentConf.flyOut.saveConfigurationButtonLabel',
                   {
                     defaultMessage: 'Save configuration'
                   }
@@ -203,17 +216,23 @@ export function AddSettingsFlyout({
 }
 async function deleteConfig(selectedConfig: Config) {
   try {
-    await deleteCMConfiguration(selectedConfig.id);
+    await callApmApi({
+      pathname: '/api/apm/settings/agent-configuration/{configurationId}',
+      method: 'DELETE',
+      params: {
+        path: { configurationId: selectedConfig.id }
+      }
+    });
     toastNotifications.addSuccess({
       title: i18n.translate(
-        'xpack.apm.settings.cm.deleteConfigSucceededTitle',
+        'xpack.apm.settings.agentConf.deleteConfigSucceededTitle',
         {
           defaultMessage: 'Configuration was deleted'
         }
       ),
       text: (
         <FormattedMessage
-          id="xpack.apm.settings.cm.deleteConfigSucceededText"
+          id="xpack.apm.settings.agentConf.deleteConfigSucceededText"
           defaultMessage="You have successfully deleted a configuration for {serviceName}. It will take some time to propagate to the agents."
           values={{
             serviceName: `"${selectedConfig.service.name}"`
@@ -223,12 +242,15 @@ async function deleteConfig(selectedConfig: Config) {
     });
   } catch (error) {
     toastNotifications.addDanger({
-      title: i18n.translate('xpack.apm.settings.cm.deleteConfigFailedTitle', {
-        defaultMessage: 'Configuration could not be deleted'
-      }),
+      title: i18n.translate(
+        'xpack.apm.settings.agentConf.deleteConfigFailedTitle',
+        {
+          defaultMessage: 'Configuration could not be deleted'
+        }
+      ),
       text: (
         <FormattedMessage
-          id="xpack.apm.settings.cm.deleteConfigFailedText"
+          id="xpack.apm.settings.agentConf.deleteConfigFailedText"
           defaultMessage="Something went wrong when deleting a configuration for {serviceName}. Error: {errorMessage}"
           values={{
             serviceName: `"${selectedConfig.service.name}"`,
@@ -258,7 +280,7 @@ async function saveConfig({
 
     const configuration = {
       settings: {
-        sample_rate: sampleRate.toString(10)
+        transaction_sample_rate: sampleRate
       },
       service: {
         name: serviceName,
@@ -268,17 +290,25 @@ async function saveConfig({
     };
 
     if (configurationId) {
-      await updateCMConfiguration(configurationId, configuration);
+      await callApmApi({
+        pathname: '/api/apm/settings/agent-configuration/{configurationId}',
+        method: 'PUT',
+        params: {
+          path: { configurationId },
+          body: configuration
+        }
+      });
+
       toastNotifications.addSuccess({
         title: i18n.translate(
-          'xpack.apm.settings.cm.editConfigSucceededTitle',
+          'xpack.apm.settings.agentConf.editConfigSucceededTitle',
           {
             defaultMessage: 'Configuration edited'
           }
         ),
         text: (
           <FormattedMessage
-            id="xpack.apm.settings.cm.editConfigSucceededText"
+            id="xpack.apm.settings.agentConf.editConfigSucceededText"
             defaultMessage="You have successfully edited the configuration for {serviceName}. It will take some time to propagate to the agents."
             values={{
               serviceName: `"${serviceName}"`
@@ -287,17 +317,23 @@ async function saveConfig({
         )
       });
     } else {
-      await createCMConfiguration(configuration);
+      await callApmApi({
+        pathname: '/api/apm/settings/agent-configuration/new',
+        method: 'POST',
+        params: {
+          body: configuration
+        }
+      });
       toastNotifications.addSuccess({
         title: i18n.translate(
-          'xpack.apm.settings.cm.createConfigSucceededTitle',
+          'xpack.apm.settings.agentConf.createConfigSucceededTitle',
           {
             defaultMessage: 'Configuration created!'
           }
         ),
         text: (
           <FormattedMessage
-            id="xpack.apm.settings.cm.createConfigSucceededText"
+            id="xpack.apm.settings.agentConf.createConfigSucceededText"
             defaultMessage="You have successfully created a configuration for {serviceName}. It will take some time to propagate to the agents."
             values={{
               serviceName: `"${serviceName}"`
@@ -309,12 +345,15 @@ async function saveConfig({
   } catch (error) {
     if (configurationId) {
       toastNotifications.addDanger({
-        title: i18n.translate('xpack.apm.settings.cm.editConfigFailedTitle', {
-          defaultMessage: 'Configuration could not be edited'
-        }),
+        title: i18n.translate(
+          'xpack.apm.settings.agentConf.editConfigFailedTitle',
+          {
+            defaultMessage: 'Configuration could not be edited'
+          }
+        ),
         text: (
           <FormattedMessage
-            id="xpack.apm.settings.cm.editConfigFailedText"
+            id="xpack.apm.settings.agentConf.editConfigFailedText"
             defaultMessage="Something went wrong when editing the configuration for {serviceName}. Error: {errorMessage}"
             values={{
               serviceName: `"${serviceName}"`,
@@ -325,12 +364,15 @@ async function saveConfig({
       });
     } else {
       toastNotifications.addDanger({
-        title: i18n.translate('xpack.apm.settings.cm.createConfigFailedTitle', {
-          defaultMessage: 'Configuration could not be created'
-        }),
+        title: i18n.translate(
+          'xpack.apm.settings.agentConf.createConfigFailedTitle',
+          {
+            defaultMessage: 'Configuration could not be created'
+          }
+        ),
         text: (
           <FormattedMessage
-            id="xpack.apm.settings.cm.createConfigFailedText"
+            id="xpack.apm.settings.agentConf.createConfigFailedText"
             defaultMessage="Something went wrong when creating a configuration for {serviceName}. Error: {errorMessage}"
             values={{
               serviceName: `"${serviceName}"`,

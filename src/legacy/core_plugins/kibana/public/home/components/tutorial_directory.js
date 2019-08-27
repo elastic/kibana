@@ -35,7 +35,6 @@ import {
   EuiPageBody,
 } from '@elastic/eui';
 
-
 import { getTutorials } from '../load_tutorials';
 
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
@@ -45,32 +44,59 @@ const ALL_TAB_ID = 'all';
 const SAMPLE_DATA_TAB_ID = 'sampleData';
 
 const homeTitle = i18n.translate('kbn.home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
-const addDataTitle = i18n.translate('kbn.home.breadcrumbs.addDataTitle', { defaultMessage: 'Add data' });
+const addDataTitle = i18n.translate('kbn.home.breadcrumbs.addDataTitle', {
+  defaultMessage: 'Add data',
+});
 
 class TutorialDirectoryUi extends React.Component {
-
   constructor(props) {
     super(props);
 
-    this.tabs = [{
-      id: ALL_TAB_ID,
-      name: this.props.intl.formatMessage({ id: 'kbn.home.tutorial.tabs.allTitle', defaultMessage: 'All' }),
-    }, {
-      id: 'logging',
-      name: this.props.intl.formatMessage({ id: 'kbn.home.tutorial.tabs.loggingTitle', defaultMessage: 'Logging' }),
-    }, {
-      id: 'metrics',
-      name: this.props.intl.formatMessage({ id: 'kbn.home.tutorial.tabs.metricsTitle', defaultMessage: 'Metrics' }),
-    }, {
-      id: 'security',
-      name: this.props.intl.formatMessage({ id: 'kbn.home.tutorial.tabs.securityAnalyticsTitle', defaultMessage: 'Security analytics' }),
-    }, {
-      id: SAMPLE_DATA_TAB_ID,
-      name: this.props.intl.formatMessage({ id: 'kbn.home.tutorial.tabs.sampleDataTitle', defaultMessage: 'Sample data' }),
-    }];
+    this.tabs = [
+      {
+        id: ALL_TAB_ID,
+        name: this.props.intl.formatMessage({
+          id: 'kbn.home.tutorial.tabs.allTitle',
+          defaultMessage: 'All',
+        }),
+      },
+      {
+        id: 'logging',
+        name: this.props.intl.formatMessage({
+          id: 'kbn.home.tutorial.tabs.loggingTitle',
+          defaultMessage: 'Logging',
+        }),
+      },
+      {
+        id: 'metrics',
+        name: this.props.intl.formatMessage({
+          id: 'kbn.home.tutorial.tabs.metricsTitle',
+          defaultMessage: 'Metrics',
+        }),
+      },
+      {
+        id: 'siem',
+        name: this.props.intl.formatMessage({
+          id: 'kbn.home.tutorial.tabs.siemTitle',
+          defaultMessage: 'SIEM',
+        }),
+      },
+      {
+        id: SAMPLE_DATA_TAB_ID,
+        name: this.props.intl.formatMessage({
+          id: 'kbn.home.tutorial.tabs.sampleDataTitle',
+          defaultMessage: 'Sample data',
+        }),
+      },
+    ];
 
     let openTab = ALL_TAB_ID;
-    if (props.openTab && this.tabs.some(tab => { return tab.id === props.openTab; })) {
+    if (
+      props.openTab &&
+      this.tabs.some(tab => {
+        return tab.id === props.openTab;
+      })
+    ) {
       openTab = props.openTab;
     }
     this.state = {
@@ -89,9 +115,9 @@ class TutorialDirectoryUi extends React.Component {
     chrome.breadcrumbs.set([
       {
         text: homeTitle,
-        href: '#/home'
+        href: '#/home',
       },
-      { text: addDataTitle }
+      { text: addDataTitle },
     ]);
 
     const tutorialConfigs = await getTutorials();
@@ -121,9 +147,13 @@ class TutorialDirectoryUi extends React.Component {
 
     // Add card for sample data that only gets show in "all" tab
     tutorialCards.push({
-      name: this.props.intl.formatMessage({ id: 'kbn.home.tutorial.card.sampleDataTitle', defaultMessage: 'Sample Data' }),
-      description: this.props.intl.formatMessage({ id: 'kbn.home.tutorial.card.sampleDataDescription',
-        defaultMessage: 'Get started exploring Kibana with these "one click" data sets.'
+      name: this.props.intl.formatMessage({
+        id: 'kbn.home.tutorial.card.sampleDataTitle',
+        defaultMessage: 'Sample Data',
+      }),
+      description: this.props.intl.formatMessage({
+        id: 'kbn.home.tutorial.card.sampleDataDescription',
+        defaultMessage: 'Get started exploring Kibana with these "one click" data sets.',
       }),
       url: this.props.addBasePath('#/home/tutorial_directory/sampleData'),
       elasticCloud: true,
@@ -140,7 +170,8 @@ class TutorialDirectoryUi extends React.Component {
       return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
     });
 
-    this.setState({ // eslint-disable-line react/no-did-mount-set-state
+    this.setState({
+      // eslint-disable-line react/no-did-mount-set-state
       tutorialCards: tutorialCards,
     });
   }
@@ -161,43 +192,40 @@ class TutorialDirectoryUi extends React.Component {
         {tab.name}
       </EuiTab>
     ));
-  }
+  };
 
   renderTabContent = () => {
     if (this.state.selectedTabId === SAMPLE_DATA_TAB_ID) {
-      return (
-        <SampleDataSetCards
-          addBasePath={this.props.addBasePath}
-        />
-      );
+      return <SampleDataSetCards addBasePath={this.props.addBasePath} />;
     }
 
     return (
       <EuiFlexGrid columns={4}>
-        {
-          this.state.tutorialCards
-            .filter((tutorial) => {
-              return this.state.selectedTabId === ALL_TAB_ID || this.state.selectedTabId === tutorial.category;
-            })
-            .map((tutorial) => {
-              return (
-                <EuiFlexItem key={tutorial.name}>
-                  <Synopsis
-                    iconType={tutorial.icon}
-                    description={tutorial.description}
-                    title={tutorial.name}
-                    wrapInPanel
-                    url={tutorial.url}
-                    onClick={tutorial.onClick}
-                    isBeta={tutorial.isBeta}
-                  />
-                </EuiFlexItem>
-              );
-            })
-        }
+        {this.state.tutorialCards
+          .filter(tutorial => {
+            return (
+              this.state.selectedTabId === ALL_TAB_ID ||
+              this.state.selectedTabId === tutorial.category
+            );
+          })
+          .map(tutorial => {
+            return (
+              <EuiFlexItem key={tutorial.name}>
+                <Synopsis
+                  iconType={tutorial.icon}
+                  description={tutorial.description}
+                  title={tutorial.name}
+                  wrapInPanel
+                  url={tutorial.url}
+                  onClick={tutorial.onClick}
+                  isBeta={tutorial.isBeta}
+                />
+              </EuiFlexItem>
+            );
+          })}
       </EuiFlexGrid>
     );
-  }
+  };
 
   render() {
     return (
@@ -214,12 +242,9 @@ class TutorialDirectoryUi extends React.Component {
 
           <EuiSpacer size="m" />
 
-          <EuiTabs>
-            {this.renderTabs()}
-          </EuiTabs>
+          <EuiTabs>{this.renderTabs()}</EuiTabs>
           <EuiSpacer />
           {this.renderTabContent()}
-
         </EuiPageBody>
       </EuiPage>
     );

@@ -19,8 +19,7 @@ export default function ({ loadTestFile, getService }) {
       await kibanaServer.uiSettings.replace({
         'defaultIndex': 'logstash-*'
       });
-      browser.setWindowSize(1600, 1000);
-
+      await browser.setWindowSize(1600, 1000);
     });
 
     after(async () => {
@@ -35,6 +34,7 @@ export default function ({ loadTestFile, getService }) {
       loadTestFile(require.resolve('./sample_data'));
       loadTestFile(require.resolve('./feature_controls/maps_security'));
       loadTestFile(require.resolve('./feature_controls/maps_spaces'));
+      loadTestFile(require.resolve('./full_screen_mode'));
     });
 
     describe('', function () {
@@ -42,6 +42,7 @@ export default function ({ loadTestFile, getService }) {
       loadTestFile(require.resolve('./es_geo_grid_source'));
       loadTestFile(require.resolve('./joins'));
       loadTestFile(require.resolve('./add_layer_panel'));
+      loadTestFile(require.resolve('./import_geojson'));
       loadTestFile(require.resolve('./layer_errors'));
       loadTestFile(require.resolve('./embeddable'));
     });

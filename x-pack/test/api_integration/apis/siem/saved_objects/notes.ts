@@ -7,11 +7,10 @@
 import expect from '@kbn/expect';
 import gql from 'graphql-tag';
 
+import { FtrProviderContext } from '../../../ftr_provider_context';
 import { persistTimelineNoteMutation } from '../../../../../legacy/plugins/siem/public/containers/timeline/notes/persist.gql_query';
 
-import { KbnTestProvider } from '../types';
-
-const notesPersistenceTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
 
@@ -94,10 +93,7 @@ const notesPersistenceTests: KbnTestProvider = ({ getService }) => {
       });
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default notesPersistenceTests;
+}
 
 const deleteNoteMutation = gql`
   mutation DeleteNoteMutation($id: [ID!]!) {

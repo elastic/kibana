@@ -7,7 +7,7 @@
 import { Server } from 'hapi';
 
 import { getClient } from '../../../../../server/lib/get_client_shield';
-import { SpacesPlugin } from '../../../../spaces/types';
+import { SpacesPlugin } from '../../../../spaces';
 import { XPackFeature, XPackMainPlugin } from '../../../../xpack_main/xpack_main';
 import { APPLICATION_PREFIX } from '../../../common/constants';
 import { OptionalPlugin } from '../../../../../server/lib/optional_plugin';
@@ -23,6 +23,10 @@ import {
   GetPrivilegesWithRequest,
   getPrivilegesWithRequestFactory,
 } from './get_privileges_with_request';
+import {
+  CheckSavedObjectsPrivilegesWithRequest,
+  checkSavedObjectsPrivilegesWithRequestFactory,
+} from './check_saved_objects_privileges';
 
 export interface AuthorizationService {
   actions: Actions;
@@ -30,6 +34,7 @@ export interface AuthorizationService {
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
   checkPrivilegesDynamicallyWithRequest: CheckPrivilegesDynamicallyWithRequest;
   getPrivilegesWithRequest: GetPrivilegesWithRequest;
+  checkSavedObjectsPrivilegesWithRequest: CheckSavedObjectsPrivilegesWithRequest;
   mode: AuthorizationMode;
   privileges: PrivilegesService;
 }
@@ -55,6 +60,12 @@ export function createAuthorizationService(
     spaces
   );
   const getPrivilegesWithRequest = getPrivilegesWithRequestFactory(application, shieldClient);
+
+  const checkSavedObjectsPrivilegesWithRequest = checkSavedObjectsPrivilegesWithRequestFactory(
+    checkPrivilegesWithRequest,
+    spaces
+  );
+
   const mode = authorizationModeFactory(securityXPackFeature);
   const privileges = privilegesFactory(actions, xpackMainPlugin);
 
@@ -64,6 +75,7 @@ export function createAuthorizationService(
     checkPrivilegesWithRequest,
     checkPrivilegesDynamicallyWithRequest,
     getPrivilegesWithRequest,
+    checkSavedObjectsPrivilegesWithRequest,
     mode,
     privileges,
   };

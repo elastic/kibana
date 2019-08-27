@@ -373,11 +373,13 @@ const mockAuthAggs = {
 
 const mockAuthFilter = {
   bool: {
-    should: [
-      { match: { 'event.type': 'authentication_success' } },
-      { match: { 'event.type': 'authentication_failure' } },
+    filter: [
+      {
+        term: {
+          'event.category': 'authentication',
+        },
+      },
     ],
-    minimum_should_match: 1,
   },
 };
 

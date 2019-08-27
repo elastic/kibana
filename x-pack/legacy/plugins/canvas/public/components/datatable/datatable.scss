@@ -12,7 +12,7 @@
     overflow: auto;
 
     // removes white square in the scrollbar corner
-    &::-webkit-scrollbar-corner {
+    &::-webkit-scrollbar-corner { // sass-lint:disable-line no-vendor-prefixes
       background: transparent;
     }
   }

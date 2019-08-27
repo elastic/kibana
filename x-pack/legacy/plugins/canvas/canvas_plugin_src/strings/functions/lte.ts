@@ -7,15 +7,22 @@
 import { i18n } from '@kbn/i18n';
 import { lte } from '../../functions/common/lte';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
+import { CONTEXT } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof lte>> = {
   help: i18n.translate('xpack.canvas.functions.lteHelpText', {
-    defaultMessage: 'Return if the context is less than or equal to the argument',
+    defaultMessage: 'Returns whether the {CONTEXT} is less than or equal to the argument.',
+    values: {
+      CONTEXT,
+    },
   }),
   args: {
     value: i18n.translate('xpack.canvas.functions.lte.args.valueHelpText', {
-      defaultMessage: 'The value to compare the context to',
+      defaultMessage: 'The value compared to the {CONTEXT}.',
+      values: {
+        CONTEXT,
+      },
     }),
   },
 };

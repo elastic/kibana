@@ -20,9 +20,7 @@
     "strict": true,
     // enables "core language features"
     "lib": [
-      // ES2018 includes previous versions all the way back to es5
-      // We are not using esnext because @babel/polyfill is on core-js 2, not 3
-      "es2018",
+      "esnext",
       // includes support for browser APIs
       "dom"
     ],

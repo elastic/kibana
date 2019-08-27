@@ -115,16 +115,13 @@ function TimeIntervalParamEditor({
     }
   };
 
-  useEffect(
-    () => {
-      setValidity(isValid);
-    },
-    [isValid]
-  );
+  useEffect(() => {
+    setValidity(isValid);
+  }, [isValid]);
 
   return (
     <EuiFormRow
-      className="visEditorSidebar__aggParamFormRow"
+      compressed
       error={errors}
       fullWidth={true}
       helpText={helpText}

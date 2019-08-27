@@ -24,6 +24,8 @@ const JsonEditor = styled.div`
   width: 100%;
 `;
 
+JsonEditor.displayName = 'JsonEditor';
+
 export const JsonView = pure<Props>(({ data }) => (
   <JsonEditor data-test-subj="jsonView">
     <EuiCodeEditor
@@ -39,6 +41,8 @@ export const JsonView = pure<Props>(({ data }) => (
     />
   </JsonEditor>
 ));
+
+JsonView.displayName = 'JsonView';
 
 export const buildJsonView = (data: DetailItem[]) =>
   data.reduce((accumulator, item) => set(item.field, item.originalValue, accumulator), {});

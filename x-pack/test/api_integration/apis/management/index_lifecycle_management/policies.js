@@ -37,7 +37,7 @@ export default function ({ getService }) {
     describe('list', () => {
       it('should have a default policy to manage the Watcher history indices', async () => {
         const { body } = await loadPolicies().expect(200);
-        const [policy = {}] = body;
+        const policy = body.find(policy => policy.name === DEFAULT_POLICY_NAME);
 
         // We manually set the date for deterministic test
         const modifiedDate = '2019-04-30T14:30:00.000Z';

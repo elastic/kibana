@@ -17,25 +17,17 @@
  * under the License.
  */
 
-import { randomBytes } from 'crypto';
-import { promisify } from 'util';
-
-const randomBytesAsync = promisify(randomBytes);
-
 export const DEFAULT_CSP_RULES = Object.freeze([
-  `script-src 'unsafe-eval' 'nonce-{nonce}'`,
+  `script-src 'unsafe-eval' 'self'`,
   'worker-src blob:',
   'child-src blob:',
+  `style-src 'unsafe-inline' 'self'`,
 ]);
 
-export async function generateCSPNonce() {
-  return (await randomBytesAsync(12)).toString('base64');
-}
+export const DEFAULT_CSP_STRICT = true;
 
-export function createCSPRuleString(rules: string[], nonce?: string) {
-  let ruleString = rules.join('; ');
-  if (nonce) {
-    ruleString = ruleString.replace(/\{nonce\}/g, nonce);
-  }
-  return ruleString;
+export const DEFAULT_CSP_WARN_LEGACY_BROWSERS = true;
+
+export function createCSPRuleString(rules: string[]) {
+  return rules.join('; ');
 }

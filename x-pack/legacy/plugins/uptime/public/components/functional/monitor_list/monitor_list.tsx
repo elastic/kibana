@@ -103,7 +103,8 @@ export const MonitorListComponent = (props: Props) => {
         <EuiBasicTable
           error={errors ? formatUptimeGraphQLErrorList(errors) : errors}
           loading={loading}
-          isExpandable
+          isExpandable={true}
+          hasActions={true}
           itemId="monitor_id"
           itemIdToExpandedRowMap={drawerIds.reduce((map: ExpandedRowMap, id: string) => {
             return {
@@ -134,10 +135,91 @@ export const MonitorListComponent = (props: Props) => {
           // sorting={sorting}
           columns={[
             {
+              align: 'left',
+              field: 'state.monitor.status',
+              name: i18n.translate('xpack.uptime.monitorList.statusColumnLabel', {
+                defaultMessage: 'Status',
+              }),
+              render: (status: string, { state: { timestamp } }: MonitorSummary) => {
+                return <MonitorListStatusColumn status={status} timestamp={timestamp} />;
+              },
+            },
+            {
+              align: 'left',
+              field: 'state.monitor.name',
+              name: i18n.translate('xpack.uptime.monitorList.nameColumnLabel', {
+                defaultMessage: 'Name',
+              }),
+              render: (name: string, summary: MonitorSummary) => (
+                <MonitorPageLink
+                  id={summary.monitor_id}
+                  linkParameters={linkParameters}
+                  location={undefined}
+                >
+                  {name ? name : `Unnamed - ${summary.monitor_id}`}
+                </MonitorPageLink>
+              ),
+              sortable: true,
+            },
+            {
+              align: 'left',
+              field: 'state.url.full',
+              name: i18n.translate('xpack.uptime.monitorList.urlColumnLabel', {
+                defaultMessage: 'URL',
+              }),
+              render: (url: string, summary: MonitorSummary) => (
+                <Fragment>
+                  <EuiLink href={url} target="_blank" color="text">
+                    {url} <EuiIcon size="s" type="popout" color="subbdued" />
+                  </EuiLink>
+                </Fragment>
+              ),
+              sortable: true,
+            },
+            {
+              field: 'histogram.points',
+              name: i18n.translate('xpack.uptime.monitorList.monitorHistoryColumnLabel', {
+                defaultMessage: 'Downtime history',
+              }),
+              mobileOptions: {
+                show: false,
+              },
+              render: (histogramSeries: SummaryHistogramPoint[] | null) => (
+                <MonitorBarSeries
+                  absoluteStartDate={absoluteStartDate}
+                  absoluteEndDate={absoluteEndDate}
+                  dangerColor={dangerColor}
+                  histogramSeries={histogramSeries}
+                />
+              ),
+            },
+            {
+              id: 'actions',
+              align: 'right',
+              field: 'state',
+              hasActions: true,
+              mobileOptions: {
+                header: false,
+              },
+              name: i18n.translate(
+                'xpack.uptime.monitorList.observabilityIntegrationsColumnLabel',
+                {
+                  defaultMessage: 'Integrations',
+                  description:
+                    'The heading column of some action buttons that will take users to other Obsevability apps',
+                }
+              ),
+              render: (state: any, summary: MonitorSummary) => (
+                <MonitorListActionsPopover summary={summary} />
+              ),
+            },
+            {
+              align: 'left',
               field: 'monitor_id',
               name: '',
               sortable: true,
               width: '40px',
+              isExpander: true,
               render: (id: string) => {
                 return (
                   <EuiButtonIcon
@@ -163,74 +245,6 @@ export const MonitorListComponent = (props: Props) => {
                   />
                 );
               },
-            },
-            {
-              field: 'state.monitor.status',
-              name: i18n.translate('xpack.uptime.monitorList.statusColumnLabel', {
-                defaultMessage: 'Status',
-              }),
-              render: (status: string, { state: { timestamp } }: MonitorSummary) => {
-                return <MonitorListStatusColumn status={status} timestamp={timestamp} />;
-              },
-            },
-            {
-              field: 'state.monitor.name',
-              name: i18n.translate('xpack.uptime.monitorList.nameColumnLabel', {
-                defaultMessage: 'Name',
-              }),
-              render: (name: string, summary: MonitorSummary) => (
-                <MonitorPageLink
-                  id={summary.monitor_id}
-                  linkParameters={linkParameters}
-                  location={undefined}
-                >
-                  {name ? name : `Unnamed - ${summary.monitor_id}`}
-                </MonitorPageLink>
-              ),
-              sortable: true,
-            },
-            {
-              field: 'state.url.full',
-              name: i18n.translate('xpack.uptime.monitorList.urlColumnLabel', {
-                defaultMessage: 'URL',
-              }),
-              render: (url: string, summary: MonitorSummary) => (
-                <Fragment>
-                  <EuiLink href={url} target="_blank" color="text">
-                    {url} <EuiIcon size="s" type="popout" color="subbdued" />
-                  </EuiLink>
-                </Fragment>
-              ),
-              sortable: true,
-            },
-            {
-              field: 'histogram.points',
-              name: i18n.translate('xpack.uptime.monitorList.monitorHistoryColumnLabel', {
-                defaultMessage: 'Downtime history',
-              }),
-              render: (histogramSeries: SummaryHistogramPoint[] | null) => (
-                <MonitorBarSeries
-                  absoluteStartDate={absoluteStartDate}
-                  absoluteEndDate={absoluteEndDate}
-                  dangerColor={dangerColor}
-                  histogramSeries={histogramSeries}
-                />
-              ),
-            },
-            {
-              align: 'right',
-              field: 'state',
-              name: i18n.translate(
-                'xpack.uptime.monitorList.observabilityIntegrationsColumnLabel',
-                {
-                  defaultMessage: 'Integrations',
-                  description:
-                    'The heading column of some action buttons that will take users to other Obsevability apps',
-                }
-              ),
-              render: (state: any, summary: MonitorSummary) => (
-                <MonitorListActionsPopover summary={summary} />
-              ),
             },
           ]}
         />

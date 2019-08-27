@@ -17,4 +17,11 @@
  * under the License.
  */
 
-export type AggConfigs = any;
+import { IndexedArray } from '../indexed_array';
+import { AggConfig } from './agg_config';
+
+export interface AggConfigs extends IndexedArray<AggConfig> {
+  bySchemaGroup: {
+    [key: string]: AggConfig[];
+  };
+}

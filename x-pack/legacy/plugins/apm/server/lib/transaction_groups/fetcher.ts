@@ -6,23 +6,48 @@
 
 import {
   TRANSACTION_DURATION,
-  TRANSACTION_NAME
+  TRANSACTION_SAMPLED
 } from '../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType, StringMap } from '../../../typings/common';
+import { PromiseReturnType } from '../../../typings/common';
 import { Setup } from '../helpers/setup_request';
+import { getTransactionGroupsProjection } from '../../../common/projections/transaction_groups';
+import { mergeProjection } from '../../../common/projections/util/merge_projection';
+
+interface TopTransactionOptions {
+  type: 'top_transactions';
+  serviceName: string;
+  transactionType: string;
+  transactionName?: string;
+}
+
+interface TopTraceOptions {
+  type: 'top_traces';
+  transactionName?: string;
+}
+
+export type Options = TopTransactionOptions | TopTraceOptions;
 
 export type ESResponse = PromiseReturnType<typeof transactionGroupsFetcher>;
-export function transactionGroupsFetcher(setup: Setup, bodyQuery: StringMap) {
+export function transactionGroupsFetcher(options: Options, setup: Setup) {
   const { client, config } = setup;
-  const params = {
-    index: config.get<string>('apm_oss.transactionIndices'),
+
+  const projection = getTransactionGroupsProjection({
+    setup,
+    options
+  });
+
+  const params = mergeProjection(projection, {
     body: {
       size: 0,
-      query: bodyQuery,
+      query: {
+        bool: {
+          // prefer sampled transactions
+          should: [{ term: { [TRANSACTION_SAMPLED]: true } }]
+        }
+      },
       aggs: {
         transactions: {
           terms: {
-            field: TRANSACTION_NAME,
             order: { sum: 'desc' },
             size: config.get<number>('xpack.apm.ui.transactionGroupBucketSize')
           },
@@ -45,7 +70,7 @@ export function transactionGroupsFetcher(setup: Setup, bodyQuery: StringMap) {
         }
       }
     }
-  };
+  });
 
   return client.search(params);
 }

@@ -7,7 +7,7 @@
 import moment from 'moment';
 import { Action } from 'redux-actions';
 import { delay } from 'redux-saga';
-import { kfetch } from 'ui/kfetch';
+import { npStart } from 'ui/new_platform';
 import {
   all,
   call,
@@ -54,9 +54,7 @@ import {
 const REPO_STATUS_POLLING_FREQ_MS = 1000;
 
 function fetchStatus(repoUri: string) {
-  return kfetch({
-    pathname: `/api/code/repo/status/${repoUri}`,
-  });
+  return npStart.core.http.get(`/api/code/repo/status/${repoUri}`);
 }
 
 function* loadRepoListStatus(repos: Repository[]) {

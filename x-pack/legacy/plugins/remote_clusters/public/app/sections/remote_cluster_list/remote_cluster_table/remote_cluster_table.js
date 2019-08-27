@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH, UIM_SHOW_DETAILS_CLICK } from '../../../constants';
-import { getRouterLinkProps, trackUiMetric } from '../../../services';
+import { getRouterLinkProps, trackUiMetric, METRIC_TYPE } from '../../../services';
 import { ConnectionStatus, RemoveClusterButtonProvider } from '../components';
 
 export class RemoteClusterTable extends Component {
@@ -91,7 +91,7 @@ export class RemoteClusterTable extends Component {
           <EuiLink
             data-test-subj="remoteClustersTableListClusterLink"
             onClick={() => {
-              trackUiMetric(UIM_SHOW_DETAILS_CLICK);
+              trackUiMetric(METRIC_TYPE.CLICK, UIM_SHOW_DETAILS_CLICK);
               openDetailPanel(name);
             }}
           >
@@ -154,6 +154,32 @@ export class RemoteClusterTable extends Component {
       actions: [{
         render: ({ name, isConfiguredByNode }) => {
           const label = isConfiguredByNode
+            ? i18n.translate('xpack.remoteClusters.remoteClusterList.table.actionBlockedEditDescription', {
+              defaultMessage: `Remote clusters defined in elasticsearch.yml can't be edited`,
+            }) : i18n.translate('xpack.remoteClusters.remoteClusterList.table.actionEditDescription', {
+              defaultMessage: 'Edit remote cluster',
+            });
+
+          return (
+            <EuiToolTip
+              content={label}
+              delay="long"
+            >
+              <EuiButtonIcon
+                data-test-subj="remoteClusterTableRowEditButton"
+                aria-label={label}
+                iconType="pencil"
+                color="primary"
+                isDisabled={isConfiguredByNode}
+                {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/edit/${name}`)}
+                disabled={isConfiguredByNode}
+              />
+            </EuiToolTip>
+          );
+        },
+      }, {
+        render: ({ name, isConfiguredByNode }) => {
+          const label = isConfiguredByNode
             ? i18n.translate('xpack.remoteClusters.remoteClusterList.table.actionBlockedDeleteDescription', {
               defaultMessage: `Remote clusters defined in elasticsearch.yml can't be deleted`,
             }) : i18n.translate('xpack.remoteClusters.remoteClusterList.table.actionDeleteDescription', {
@@ -177,32 +203,6 @@ export class RemoteClusterTable extends Component {
                   />
                 )}
               </RemoveClusterButtonProvider>
-            </EuiToolTip>
-          );
-        },
-      }, {
-        render: ({ name, isConfiguredByNode }) => {
-          const label = isConfiguredByNode
-            ? i18n.translate('xpack.remoteClusters.remoteClusterList.table.actionBlockedEditDescription', {
-              defaultMessage: `Remote clusters defined in elasticsearch.yml can't be edited`,
-            }) : i18n.translate('xpack.remoteClusters.remoteClusterList.table.actionEditDescription', {
-              defaultMessage: 'Edit remote cluster',
-            });
-
-          return (
-            <EuiToolTip
-              content={label}
-              delay="long"
-            >
-              <EuiButtonIcon
-                data-test-subj="remoteClusterTableRowEditButton"
-                aria-label={label}
-                iconType="pencil"
-                color="primary"
-                isDisabled={isConfiguredByNode}
-                {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/edit/${name}`)}
-                disabled={isConfiguredByNode}
-              />
             </EuiToolTip>
           );
         },

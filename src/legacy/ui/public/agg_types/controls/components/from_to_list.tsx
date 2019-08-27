@@ -49,12 +49,8 @@ function FromToList({ showValidation, onBlur, ...rest }: FromToListProps) {
       from: { value: '0.0.0.0', model: '0.0.0.0', isInvalid: false },
       to: { value: '255.255.255.255', model: '255.255.255.255', isInvalid: false },
     },
-    defaultEmptyValue: {
-      from: { value: EMPTY_STRING, model: EMPTY_STRING, isInvalid: false },
-      to: { value: EMPTY_STRING, model: EMPTY_STRING, isInvalid: false },
-    },
     validateClass: Ipv4Address,
-    getModelValue: (item: FromToObject) => ({
+    getModelValue: (item: FromToObject = {}) => ({
       from: {
         value: item.from || EMPTY_STRING,
         model: item.from || EMPTY_STRING,
@@ -117,10 +113,7 @@ function FromToList({ showValidation, onBlur, ...rest }: FromToListProps) {
         </EuiFlexItem>
       </>
     ),
-    validateModel: (validateFn, object: FromToObject, model: FromToModel) => {
-      validateFn(object.from, model.from);
-      validateFn(object.to, model.to);
-    },
+    modelNames: ['from', 'to'],
   };
 
   return <InputList config={fromToListConfig} {...rest} />;

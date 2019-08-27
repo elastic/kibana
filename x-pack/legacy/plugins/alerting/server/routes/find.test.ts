@@ -26,11 +26,18 @@ test('sends proper arguments to alert find function', async () => {
       'fields=description',
   };
 
-  alertsClient.find.mockResolvedValueOnce([]);
+  const expectedResult = {
+    page: 1,
+    perPage: 1,
+    total: 0,
+    data: [],
+  };
+
+  alertsClient.find.mockResolvedValueOnce(expectedResult);
   const { payload, statusCode } = await server.inject(request);
   expect(statusCode).toBe(200);
   const response = JSON.parse(payload);
-  expect(response).toEqual([]);
+  expect(response).toEqual(expectedResult);
   expect(alertsClient.find).toHaveBeenCalledTimes(1);
   expect(alertsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
 Array [

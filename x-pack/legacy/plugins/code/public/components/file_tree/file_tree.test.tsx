@@ -9,7 +9,7 @@ import React from 'react';
 import { match } from 'react-router-dom';
 import renderer from 'react-test-renderer';
 import { MainRouteParams, PathTypes } from '../../common/types';
-import { createHistory, createLocation, createMatch, mockFunction } from '../../utils/test_utils';
+import { createHistory, createLocation, createMatch } from '../../utils/test_utils';
 import props from './__fixtures__/props.json';
 import { CodeFileTree } from './file_tree';
 
@@ -38,12 +38,10 @@ test('render correctly', () => {
     .create(
       <CodeFileTree
         node={props.node}
-        openedPaths={props.openedPaths}
         history={history}
         match={m}
         location={location}
-        closeTreePath={mockFunction}
-        openTreePath={mockFunction}
+        isNotFound={false}
       />
     )
     .toJSON();

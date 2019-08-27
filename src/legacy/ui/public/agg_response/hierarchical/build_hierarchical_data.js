@@ -30,7 +30,6 @@ export const buildHierarchicalData = (table, { metric, buckets = [] }) => {
     slices = [{
       name: metricColumn.name,
       size: table.rows[0][metricColumn.id],
-      aggConfig: metricColumn.aggConfig
     }];
     names[metricColumn.name] = metricColumn.name;
   } else {
@@ -54,7 +53,6 @@ export const buildHierarchicalData = (table, { metric, buckets = [] }) => {
             size,
             parent,
             children: [],
-            aggConfig: bucketColumn.aggConfig,
             rawData: {
               table,
               row: rowIndex,

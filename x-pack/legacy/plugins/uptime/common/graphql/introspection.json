@@ -2427,7 +2427,7 @@
               "ofType": {
                 "kind": "NON_NULL",
                 "name": null,
-                "ofType": { "kind": "OBJECT", "name": "MonitorKey", "ofType": null }
+                "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
               }
             },
             "isDeprecated": false,
@@ -2500,6 +2500,22 @@
           {
             "name": "statuses",
             "description": "The possible status values contained in the indices.",
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "urls",
+            "description": "The list of URLs",
             "args": [],
             "type": {
               "kind": "LIST",

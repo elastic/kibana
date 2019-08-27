@@ -16,12 +16,13 @@ import { LoggerFactory } from '../utils/log_factory';
 import { AbstractLauncher } from './abstract_launcher';
 import { LanguageServerProxy } from './proxy';
 import { InitializeOptions, RequestExpander } from './request_expander';
+import { ExternalProgram } from './process/external_program';
 
 const JAVA_LANG_DETACH_PORT = 2090;
 
 export class JavaLauncher extends AbstractLauncher {
   private needModuleArguments: boolean = true;
-  public constructor(
+  constructor(
     readonly targetHost: string,
     readonly options: ServerOptions,
     readonly loggerFactory: LoggerFactory
@@ -41,6 +42,13 @@ export class JavaLauncher extends AbstractLauncher {
             'java.import.gradle.enabled': this.options.security.enableGradleImport,
             'java.import.maven.enabled': this.options.security.enableMavenImport,
             'java.autobuild.enabled': false,
+          },
+        },
+        clientCapabilities: {
+          textDocument: {
+            documentSymbol: {
+              hierarchicalDocumentSymbolSupport: true,
+            },
           },
         },
       } as InitializeOptions,
@@ -127,6 +135,11 @@ export class JavaLauncher extends AbstractLauncher {
       process.platform === 'win32' ? 'java.exe' : 'java'
     );
 
+    const configPath =
+      process.platform === 'win32'
+        ? path.resolve(installationPath, 'repository/config_win')
+        : this.options.jdtConfigPath;
+
     const params: string[] = [
       '-Declipse.application=org.elastic.jdt.ls.core.id1',
       '-Dosgi.bundles.defaultStartLevel=4',
@@ -138,7 +151,7 @@ export class JavaLauncher extends AbstractLauncher {
       '-jar',
       path.resolve(installationPath, launchersFound[0]),
       '-configuration',
-      this.options.jdtConfigPath,
+      configPath,
       '-data',
       this.options.jdtWorkspacePath,
     ];
@@ -174,7 +187,7 @@ export class JavaLauncher extends AbstractLauncher {
         p.pid
       }, JAVA_HOME:${javaHomePath}`
     );
-    return p;
+    return new ExternalProgram(p, this.options, log);
   }
 
   // TODO(pcxu): run /usr/libexec/java_home to get all java homes for macOS

@@ -10,3 +10,5 @@ export { findRoute } from './find';
 export { getRoute } from './get';
 export { listAlertTypesRoute } from './list_alert_types';
 export { updateAlertRoute } from './update';
+export { enableAlertRoute } from './enable';
+export { disableAlertRoute } from './disable';

@@ -10,7 +10,7 @@ import { createContext } from 'react';
 import { UptimeAppColors } from '../uptime_app';
 import { CONTEXT_DEFAULTS } from '../../common/constants';
 
-export interface UMSettingsContext {
+export interface UMSettingsContextValues {
   absoluteStartDate: number;
   absoluteEndDate: number;
   autorefreshIsPaused: boolean;
@@ -42,7 +42,7 @@ const DEFAULT_ABSOLUTE_END_DATE = parsedEnd ? parsedEnd.valueOf() : 1;
  * These are default values for the context. These defaults are typically
  * overwritten by the Uptime App upon its invocation.
  */
-const defaultContext: UMSettingsContext = {
+const defaultContext: UMSettingsContextValues = {
   absoluteStartDate: DEFAULT_ABSOLUTE_START_DATE,
   absoluteEndDate: DEFAULT_ABSOLUTE_END_DATE,
   autorefreshIsPaused: AUTOREFRESH_IS_PAUSED,

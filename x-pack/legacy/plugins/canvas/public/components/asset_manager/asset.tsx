@@ -18,15 +18,7 @@ import {
 import React, { FunctionComponent } from 'react';
 import { Clipboard } from '../clipboard';
 import { Download } from '../download';
-
-type ValidTypes = 'dataurl';
-
-export interface AssetType {
-  '@created': string;
-  id: string;
-  type: ValidTypes;
-  value: string;
-}
+import { AssetType } from '../../../types';
 
 interface Props {
   /** The asset to be rendered */

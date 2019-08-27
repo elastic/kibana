@@ -23,7 +23,7 @@ import { get } from 'lodash';
 import { Component } from 'react';
 import React from 'react';
 import { getDocLink } from 'ui/documentation_links';
-import { Field } from 'ui/index_patterns';
+import { Field } from '../../../index_patterns';
 import { ValueInputType } from './value_input_type';
 
 interface RangeParams {
@@ -41,7 +41,7 @@ interface Props {
 }
 
 class RangeValueInputUI extends Component<Props> {
-  public constructor(props: Props) {
+  constructor(props: Props) {
     super(props);
   }
 

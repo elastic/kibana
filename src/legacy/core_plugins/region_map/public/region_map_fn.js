@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import { functionsRegistry } from 'plugins/interpreter/registries';
 import { i18n } from '@kbn/i18n';
 
-export const regionmap = () => ({
+export const createRegionMapFn = () => ({
   name: 'regionmap',
   type: 'render',
   context: {
@@ -54,5 +53,3 @@ export const regionmap = () => ({
     };
   },
 });
-
-functionsRegistry.register(regionmap);

@@ -35,25 +35,6 @@ import { EuiText, EuiCodeBlock, EuiSpacer, EuiTitle, EuiCodeEditor } from '@elas
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export class MarkdownEditor extends Component {
-  state = {
-    visData: null,
-  };
-  subscription = null;
-
-  componentDidMount() {
-    if (this.props.visData$) {
-      this.subscription = this.props.visData$.subscribe(visData => {
-        this.setState({ visData });
-      });
-    }
-  }
-
-  componentWillUnmount() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
-  }
-
   handleChange = value => {
     this.props.onChange({ markdown: value });
   };
@@ -69,11 +50,12 @@ export class MarkdownEditor extends Component {
   }
 
   render() {
-    const { visData } = this.state;
+    const { visData, model, dateFormat } = this.props;
+
     if (!visData) {
       return null;
     }
-    const { model, dateFormat } = this.props;
+
     const series = _.get(visData, `${model.id}.series`, []);
     const variables = convertSeriesToVars(series, model, dateFormat, this.props.getConfig);
     const rows = [];
@@ -228,5 +210,5 @@ MarkdownEditor.propTypes = {
   onChange: PropTypes.func,
   model: PropTypes.object,
   dateFormat: PropTypes.string,
-  visData$: PropTypes.object,
+  visData: PropTypes.object,
 };

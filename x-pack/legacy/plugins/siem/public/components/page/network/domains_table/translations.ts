@@ -13,14 +13,14 @@ export const DOMAINS = i18n.translate('xpack.siem.network.ipDetails.domainsTable
 export const UNIT = (totalCount: number) =>
   i18n.translate('xpack.siem.network.ipDetails.domainsTable.unit', {
     values: { totalCount },
-    defaultMessage: `{totalCount, plural, =1 {Domain} other {Domains}}`,
+    defaultMessage: `{totalCount, plural, =1 {domain} other {domains}}`,
   });
 
 // Columns
 export const DOMAIN_NAME = i18n.translate(
   'xpack.siem.network.ipDetails.domainsTable.columns.domainNameTitle',
   {
-    defaultMessage: 'Domain Name',
+    defaultMessage: 'Domain name',
   }
 );
 
@@ -48,42 +48,35 @@ export const PACKETS = i18n.translate(
 export const UNIQUE_DESTINATIONS = i18n.translate(
   'xpack.siem.network.ipDetails.domainsTable.columns.uniqueDestinationsTitle',
   {
-    defaultMessage: 'Unique Destinations',
+    defaultMessage: 'Unique destinations',
   }
 );
 
 export const UNIQUE_SOURCES = i18n.translate(
   'xpack.siem.network.ipDetails.domainsTable.columns.uniqueSourcesTitle',
   {
-    defaultMessage: 'Unique Sources',
+    defaultMessage: 'Unique sources',
   }
 );
 
 export const UNIQUE_CLIENTS = i18n.translate(
   'xpack.siem.network.ipDetails.domainsTable.columns.uniqueClientsTitle',
   {
-    defaultMessage: 'Unique Servers',
+    defaultMessage: 'Unique servers',
   }
 );
 
 export const UNIQUE_SERVERS = i18n.translate(
   'xpack.siem.network.ipDetails.domainsTable.columns.uniqueServersTitle',
   {
-    defaultMessage: 'Unique Clients',
-  }
-);
-
-export const FIRST_SEEN = i18n.translate(
-  'xpack.siem.network.ipDetails.domainsTable.columns.firstSeenTitle',
-  {
-    defaultMessage: 'First Seen',
+    defaultMessage: 'Unique clients',
   }
 );
 
 export const LAST_SEEN = i18n.translate(
   'xpack.siem.network.ipDetails.domainsTable.columns.lastSeenTitle',
   {
-    defaultMessage: 'Last Seen',
+    defaultMessage: 'Last seen',
   }
 );
 
@@ -91,21 +84,6 @@ export const FIRST_LAST_SEEN_TOOLTIP = i18n.translate(
   'xpack.siem.network.ipDetails.domainsTable.columns.firstLastSeenToolTip',
   {
     defaultMessage: 'Relative to the selected date range',
-  }
-);
-
-// Direction Select
-export const UNIDIRECTIONAL = i18n.translate(
-  'xpack.siem.network.ipDetails.domainsTable.unidirectionalDropDownOptionLabel',
-  {
-    defaultMessage: 'Unidirectional',
-  }
-);
-
-export const BIDIRECTIONAL = i18n.translate(
-  'xpack.siem.network.ipDetails.domainsTable.bidirectionalDropDownOptionLabel',
-  {
-    defaultMessage: 'Bidirectional',
   }
 );
 
@@ -118,18 +96,4 @@ export const ROWS_5 = i18n.translate('xpack.siem.network.ipDetails.domainsTable.
 export const ROWS_10 = i18n.translate('xpack.siem.network.ipDetails.domainsTable.rows', {
   values: { numRows: 10 },
   defaultMessage: '{numRows} {numRows, plural, =0 {rows} =1 {row} other {rows}}',
-});
-
-export const ROWS_20 = i18n.translate('xpack.siem.network.ipDetails.domainsTable.rows', {
-  values: { numRows: 20 },
-  defaultMessage: '{numRows} {numRows, plural, =0 {rows} =1 {row} other {rows}}',
-});
-
-export const ROWS_50 = i18n.translate('xpack.siem.network.ipDetails.domainsTable.rows', {
-  values: { numRows: 50 },
-  defaultMessage: '{numRows} {numRows, plural, =0 {rows} =1 {row} other {rows}}',
-});
-
-export const MORE = i18n.translate('xpack.siem.network.ipDetails.domainsTable.moreDescription', {
-  defaultMessage: 'More ...',
 });

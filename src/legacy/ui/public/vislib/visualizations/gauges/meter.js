@@ -264,8 +264,8 @@ export class MeterGauge {
       .attr('y', -5)
       .text(d => {
         if (this.gaugeConfig.percentageMode) {
-          const percentage = Math.round(100 * (d.y - min) / (max - min));
-          return `${percentage}%`;
+          const percentage = (d.y - min) / (max - min);
+          return data.yAxisFormatter(percentage);
         }
         return data.yAxisFormatter(d.y);
       })

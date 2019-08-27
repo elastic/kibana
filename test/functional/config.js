@@ -35,7 +35,6 @@ export default async function ({ readConfigFile }) {
       require.resolve('./apps/status_page'),
       require.resolve('./apps/timelion'),
       require.resolve('./apps/visualize'),
-      require.resolve('./apps/xpack'),
     ],
     pageObjects,
     services,

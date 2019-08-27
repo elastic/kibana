@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`renders OptionsTab 1`] = `
+exports[`OptionsTab should renders OptionsTab 1`] = `
 <EuiForm>
   <EuiFormRow
     describedByIds={Array []}

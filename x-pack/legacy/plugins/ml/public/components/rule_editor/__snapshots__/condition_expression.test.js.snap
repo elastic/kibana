@@ -24,6 +24,7 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
         />
       }
       closePopover={[Function]}
+      display="inlineBlock"
       hasArrow={true}
       id="appliesToPopover"
       isOpen={false}
@@ -105,6 +106,7 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
         />
       }
       closePopover={[Function]}
+      display="inlineBlock"
       hasArrow={true}
       id="operatorValuePopover"
       isOpen={false}
@@ -234,6 +236,7 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
         />
       }
       closePopover={[Function]}
+      display="inlineBlock"
       hasArrow={true}
       id="appliesToPopover"
       isOpen={false}
@@ -314,6 +317,7 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
         />
       }
       closePopover={[Function]}
+      display="inlineBlock"
       hasArrow={true}
       id="operatorValuePopover"
       isOpen={false}

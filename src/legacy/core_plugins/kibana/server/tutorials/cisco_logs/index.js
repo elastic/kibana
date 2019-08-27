@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/filebeat_instructions';
 
 export function ciscoLogsSpecProvider(server, context) {
   const moduleName = 'cisco';
@@ -29,12 +33,13 @@ export function ciscoLogsSpecProvider(server, context) {
     name: i18n.translate('kbn.server.tutorials.ciscoLogs.nameTitle', {
       defaultMessage: 'Cisco',
     }),
-    category: TUTORIAL_CATEGORY.SECURITY,
+    category: TUTORIAL_CATEGORY.SIEM,
     shortDescription: i18n.translate('kbn.server.tutorials.ciscoLogs.shortDescription', {
       defaultMessage: 'Collect and parse logs received from Cisco ASA firewalls.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.ciscoLogs.longDescription', {
-      defaultMessage: 'This is a module for Cisco network device’s logs. Currently \
+      defaultMessage:
+        'This is a module for Cisco network device’s logs. Currently \
 supports the "asa" fileset for Cisco ASA firewall logs received over syslog or read from a file. \
 [Learn more]({learnMoreLink}).',
       values: {
@@ -46,21 +51,18 @@ supports the "asa" fileset for Cisco ASA firewall logs received over syslog or r
       dashboards: [],
       application: {
         path: '/app/siem',
-        label: i18n.translate(
-          'kbn.server.tutorials.ciscoLogs.artifacts.dashboards.linkLabel',
-          {
-            defaultMessage: 'SIEM App',
-          }
-        ),
+        label: i18n.translate('kbn.server.tutorials.ciscoLogs.artifacts.dashboards.linkLabel', {
+          defaultMessage: 'SIEM App',
+        }),
       },
       exportedFields: {
-        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-cisco.html'
-      }
+        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-cisco.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/cisco_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
   };
 }

@@ -21,6 +21,7 @@ import _ from 'lodash';
 import { VisProvider } from '../../vis';
 import { aggTypes } from '..';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { AggGroupNames } from '../../vis/editors/default/agg_groups';
 
 // eslint-disable-next-line import/no-default-export
 export default function AggParamWriterHelper(Private) {
@@ -75,7 +76,7 @@ export default function AggParamWriterHelper(Private) {
 
       if (this.aggType.params.byName.field && !paramValues.field) {
         // pick a field rather than force a field to be specified everywhere
-        if (this.aggType.type === 'metrics') {
+        if (this.aggType.type === AggGroupNames.Metrics) {
           paramValues.field = _.sample(this.indexPattern.fields.byType.number);
         } else {
           const type = this.aggType.params.byName.field.filterFieldTypes || 'string';

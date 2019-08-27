@@ -7,21 +7,30 @@
 import { i18n } from '@kbn/i18n';
 import { mapColumn } from '../../functions/common/mapColumn';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
+import { CANVAS, DATATABLE } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof mapColumn>> = {
   help: i18n.translate('xpack.canvas.functions.mapColumnHelpText', {
-    defaultMessage: 'Add a column calculated as the result of other columns, or not',
+    defaultMessage:
+      'Adds a column calculated as the result of other columns. ' +
+      'Changes are made only when you provide arguments.' +
+      'See also {mapColumnFn} and {staticColumnFn}.',
+    values: {
+      mapColumnFn: '`mapColumn`',
+      staticColumnFn: '`staticColumn`',
+    },
   }),
   args: {
     name: i18n.translate('xpack.canvas.functions.mapColumn.args.nameHelpText', {
-      defaultMessage: 'The name of the resulting column',
+      defaultMessage: 'The name of the resulting column.',
     }),
     expression: i18n.translate('xpack.canvas.functions.mapColumn.args.expressionHelpText', {
       defaultMessage:
-        'A canvas expression which will be passed each row as a single row {datatable}',
+        'A {CANVAS} expression that is passed to each row as a single row {DATATABLE}.',
       values: {
-        datatable: 'datatable',
+        CANVAS,
+        DATATABLE,
       },
     }),
   },

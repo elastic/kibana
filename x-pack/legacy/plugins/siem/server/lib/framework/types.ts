@@ -12,6 +12,7 @@ import { Legacy } from 'kibana';
 import { ESQuery } from '../../../common/typed_json';
 import {
   PaginationInput,
+  PaginationInputPaginated,
   SortField,
   SourceConfiguration,
   TimerangeInput,
@@ -117,12 +118,12 @@ export interface MappingResponse {
 }
 
 interface FrameworkIndexFieldDescriptor {
-  name: string;
-  type: string;
-  searchable: boolean;
   aggregatable: boolean;
-  readFromDocValues: boolean;
   esTypes: string[];
+  name: string;
+  readFromDocValues: boolean;
+  searchable: boolean;
+  type: string;
 }
 
 export interface FrameworkIndexPatternsService {
@@ -156,6 +157,12 @@ export interface RequestBasicOptions {
 
 export interface RequestOptions extends RequestBasicOptions {
   pagination: PaginationInput;
-  fields: ReadonlyArray<string>;
+  fields: readonly string[];
+  sortField?: SortField;
+}
+
+export interface RequestOptionsPaginated extends RequestBasicOptions {
+  pagination: PaginationInputPaginated;
+  fields: readonly string[];
   sortField?: SortField;
 }

@@ -13,7 +13,7 @@ getRoute(server);
 const mockedAlert = {
   id: '1',
   alertTypeId: '1',
-  interval: 10000,
+  interval: '10s',
   alertTypeParams: {
     bar: true,
   },

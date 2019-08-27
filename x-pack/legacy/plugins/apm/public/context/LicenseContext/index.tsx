@@ -5,15 +5,14 @@
  */
 import React from 'react';
 import { FETCH_STATUS, useFetcher } from '../../hooks/useFetcher';
-import { loadLicense } from '../../services/rest/xpack';
+import { loadLicense, LicenseApiResponse } from '../../services/rest/xpack';
 import { InvalidLicenseNotification } from './InvalidLicenseNotification';
 
-const initialLicense = {
-  features: {
-    watcher: { is_available: false },
-    ml: { is_available: false }
-  },
-  license: { is_active: false }
+const initialLicense: LicenseApiResponse = {
+  features: {},
+  license: {
+    is_active: false
+  }
 };
 export const LicenseContext = React.createContext(initialLicense);
 

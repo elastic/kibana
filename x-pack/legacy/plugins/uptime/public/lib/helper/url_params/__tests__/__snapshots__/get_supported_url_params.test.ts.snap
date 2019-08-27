@@ -1,5 +1,27 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`getSupportedUrlParams provides defaults for empty string array values 1`] = `
+Object {
+  "autorefreshInterval": 60000,
+  "autorefreshIsPaused": false,
+  "dateRangeEnd": "now",
+  "dateRangeStart": "now-15m",
+  "search": "",
+  "selectedPingStatus": "down",
+}
+`;
+
+exports[`getSupportedUrlParams provides defaults for undefined values 1`] = `
+Object {
+  "autorefreshInterval": 60000,
+  "autorefreshIsPaused": false,
+  "dateRangeEnd": "now",
+  "dateRangeStart": "now-15m",
+  "search": "",
+  "selectedPingStatus": "down",
+}
+`;
+
 exports[`getSupportedUrlParams returns custom values 1`] = `
 Object {
   "autorefreshInterval": 23,
@@ -17,6 +39,17 @@ Object {
   "autorefreshIsPaused": false,
   "dateRangeEnd": "now",
   "dateRangeStart": "now-15m",
+  "search": "",
+  "selectedPingStatus": "down",
+}
+`;
+
+exports[`getSupportedUrlParams returns the first item for string arrays 1`] = `
+Object {
+  "autorefreshInterval": 60000,
+  "autorefreshIsPaused": false,
+  "dateRangeEnd": "now",
+  "dateRangeStart": "now-18d",
   "search": "",
   "selectedPingStatus": "down",
 }

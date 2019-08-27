@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
-import './job_selector_react_wrapper_directive';
+export { JobSelector } from './job_selector';

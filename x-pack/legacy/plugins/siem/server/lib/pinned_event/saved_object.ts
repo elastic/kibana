@@ -18,7 +18,7 @@ import {
   PinnedEventSavedObjectRuntimeType,
   SavedPinnedEvent,
 } from './types';
-import { PageInfoNote, SortNote } from '../../graphql/types';
+import { PageInfoNote, SortNote, PinnedEvent as PinnedEventResponse } from '../../graphql/types';
 import { pinnedEventSavedObjectType, timelineSavedObjectType } from '../../saved_objects';
 import { pickSavedTimeline } from '../timeline/pick_saved_timeline';
 import { convertSavedObjectToSavedTimeline } from '../timeline/convert_saved_object_to_savedtimeline';
@@ -43,6 +43,7 @@ export class PinnedEvent {
 
   public async deleteAllPinnedEventsOnTimeline(request: FrameworkRequest, timelineId: string) {
     const options: SavedObjectsFindOptions = {
+      type: pinnedEventSavedObjectType,
       search: timelineId,
       searchFields: ['timelineId'],
     };
@@ -68,6 +69,7 @@ export class PinnedEvent {
     timelineId: string
   ): Promise<PinnedEventSavedObject[]> {
     const options: SavedObjectsFindOptions = {
+      type: pinnedEventSavedObjectType,
       search: timelineId,
       searchFields: ['timelineId'],
     };
@@ -81,6 +83,7 @@ export class PinnedEvent {
     sort: SortNote | null
   ): Promise<PinnedEventSavedObject[]> {
     const options: SavedObjectsFindOptions = {
+      type: pinnedEventSavedObjectType,
       perPage: pageInfo != null ? pageInfo.pageSize : undefined,
       page: pageInfo != null ? pageInfo.pageIndex : undefined,
       search: search != null ? search : undefined,
@@ -96,7 +99,7 @@ export class PinnedEvent {
     pinnedEventId: string | null,
     eventId: string,
     timelineId: string | null
-  ): Promise<PinnedEventSavedObject | null> {
+  ): Promise<PinnedEventResponse | null> {
     try {
       if (pinnedEventId == null) {
         const timelineVersionSavedObject =
@@ -148,6 +151,17 @@ export class PinnedEvent {
       await this.deletePinnedEventOnTimeline(request, [pinnedEventId]);
       return null;
     } catch (err) {
+      if (getOr(null, 'output.statusCode', err) === 403) {
+        return pinnedEventId != null
+          ? {
+              code: 403,
+              message: err.message,
+              pinnedEventId: eventId,
+              timelineId: '',
+              timelineVersion: '',
+            }
+          : null;
+      }
       throw err;
     }
   }
@@ -170,10 +184,7 @@ export class PinnedEvent {
       request[internalFrameworkRequest]
     );
 
-    const savedObjects = await savedObjectsClient.find({
-      type: pinnedEventSavedObjectType,
-      ...options,
-    });
+    const savedObjects = await savedObjectsClient.find(options);
 
     return savedObjects.saved_objects.map(savedObject =>
       convertSavedObjectToSavedPinnedEvent(savedObject)

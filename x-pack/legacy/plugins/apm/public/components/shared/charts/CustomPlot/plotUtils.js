@@ -46,19 +46,16 @@ function getFlattenedCoordinates(visibleSeries, enabledSeries) {
 export function getPlotValues(
   visibleSeries,
   enabledSeries,
-  { width, yMin = 0, yMax = 'max', start, end, height, stacked }
+  { width, yMin = 0, yMax = 'max', height, stackBy }
 ) {
   const flattenedCoordinates = getFlattenedCoordinates(
     visibleSeries,
     enabledSeries
   );
-  if (isEmpty(flattenedCoordinates)) {
-    return null;
-  }
 
-  const xMin = start ? start : d3.min(flattenedCoordinates, d => d.x);
+  const xMin = d3.min(flattenedCoordinates, d => d.x);
 
-  const xMax = end ? end : d3.max(flattenedCoordinates, d => d.x);
+  const xMax = d3.max(flattenedCoordinates, d => d.x);
 
   if (yMax === 'max') {
     yMax = d3.max(flattenedCoordinates, d => d.y);
@@ -80,7 +77,7 @@ export function getPlotValues(
     XY_MARGIN,
     XY_HEIGHT: height || XY_HEIGHT,
     XY_WIDTH: width,
-    ...(stacked ? { stackBy: 'y' } : {})
+    stackBy
   };
 }
 

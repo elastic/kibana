@@ -32,6 +32,7 @@ export default function ({ getService, loadTestFile }) {
       return esArchiver.unload('logstash_functional');
     });
 
+    loadTestFile(require.resolve('./_saved_queries'));
     loadTestFile(require.resolve('./_discover'));
     loadTestFile(require.resolve('./_errors'));
     loadTestFile(require.resolve('./_field_data'));

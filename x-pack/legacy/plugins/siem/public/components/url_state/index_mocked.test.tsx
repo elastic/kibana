@@ -162,9 +162,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
           expect(mockHistory.replace.mock.calls[2][0]).toEqual({
             hash: '',
             pathname: '/network',
-            search: `?_g=()&kqlQuery=(filterQuery:!n,queryLocation:${CONSTANTS.networkPage},type:${
-              networkModel.NetworkType.page
-            })`,
+            search: `?_g=()&kqlQuery=(filterQuery:!n,queryLocation:${CONSTANTS.networkPage},type:${networkModel.NetworkType.page})`,
             state: '',
           });
           // sets same timeline

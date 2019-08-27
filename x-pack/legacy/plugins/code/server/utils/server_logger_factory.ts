@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Hapi from 'hapi';
 import { Logger } from '../log';
 import { LoggerFactory } from './log_factory';
+import { ServerFacade } from '../..';
 
 export class ServerLoggerFactory implements LoggerFactory {
-  constructor(private readonly server: Hapi.Server) {}
+  constructor(private readonly server: ServerFacade) {}
 
   public getLogger(tags: string[]): Logger {
     return new Logger(this.server, tags);

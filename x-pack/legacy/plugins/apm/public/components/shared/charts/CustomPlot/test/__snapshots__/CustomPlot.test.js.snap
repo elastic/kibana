@@ -73,32 +73,6 @@ Array [
           width={800}
         >
           <g
-            className="rv-xy-plot__grid-lines"
-            transform="translate(80,16)"
-          >
-            <line
-              className="rv-xy-plot__grid-lines__line"
-              x1={0}
-              x2={720}
-              y1={208}
-              y2={208}
-            />
-            <line
-              className="rv-xy-plot__grid-lines__line"
-              x1={0}
-              x2={720}
-              y1={104}
-              y2={104}
-            />
-            <line
-              className="rv-xy-plot__grid-lines__line"
-              x1={0}
-              x2={720}
-              y1={0}
-              y2={0}
-            />
-          </g>
-          <g
             className="rv-xy-plot__axis rv-xy-plot__axis--horizontal "
             style={Object {}}
             transform="translate(80,224)"
@@ -254,6 +228,32 @@ Array [
                 </text>
               </g>
             </g>
+          </g>
+          <g
+            className="rv-xy-plot__grid-lines"
+            transform="translate(80,16)"
+          >
+            <line
+              className="rv-xy-plot__grid-lines__line"
+              x1={0}
+              x2={720}
+              y1={208}
+              y2={208}
+            />
+            <line
+              className="rv-xy-plot__grid-lines__line"
+              x1={0}
+              x2={720}
+              y1={104}
+              y2={104}
+            />
+            <line
+              className="rv-xy-plot__grid-lines__line"
+              x1={0}
+              x2={720}
+              y1={0}
+              y2={0}
+            />
           </g>
           <g
             className="rv-xy-plot__axis rv-xy-plot__axis--vertical "
@@ -2950,32 +2950,6 @@ Array [
           width={800}
         >
           <g
-            className="rv-xy-plot__grid-lines"
-            transform="translate(80,16)"
-          >
-            <line
-              className="rv-xy-plot__grid-lines__line"
-              x1={0}
-              x2={720}
-              y1={208}
-              y2={208}
-            />
-            <line
-              className="rv-xy-plot__grid-lines__line"
-              x1={0}
-              x2={720}
-              y1={104}
-              y2={104}
-            />
-            <line
-              className="rv-xy-plot__grid-lines__line"
-              x1={0}
-              x2={720}
-              y1={0}
-              y2={0}
-            />
-          </g>
-          <g
             className="rv-xy-plot__axis rv-xy-plot__axis--horizontal "
             style={Object {}}
             transform="translate(80,224)"
@@ -3131,6 +3105,32 @@ Array [
                 </text>
               </g>
             </g>
+          </g>
+          <g
+            className="rv-xy-plot__grid-lines"
+            transform="translate(80,16)"
+          >
+            <line
+              className="rv-xy-plot__grid-lines__line"
+              x1={0}
+              x2={720}
+              y1={208}
+              y2={208}
+            />
+            <line
+              className="rv-xy-plot__grid-lines__line"
+              x1={0}
+              x2={720}
+              y1={104}
+              y2={104}
+            />
+            <line
+              className="rv-xy-plot__grid-lines__line"
+              x1={0}
+              x2={720}
+              y1={0}
+              y2={0}
+            />
           </g>
           <g
             className="rv-xy-plot__axis rv-xy-plot__axis--vertical "
@@ -5853,32 +5853,6 @@ Array [
           width={100}
         >
           <g
-            className="rv-xy-plot__grid-lines"
-            transform="translate(80,16)"
-          >
-            <line
-              className="rv-xy-plot__grid-lines__line"
-              x1={0}
-              x2={20}
-              y1={208}
-              y2={208}
-            />
-            <line
-              className="rv-xy-plot__grid-lines__line"
-              x1={0}
-              x2={20}
-              y1={104}
-              y2={104}
-            />
-            <line
-              className="rv-xy-plot__grid-lines__line"
-              x1={0}
-              x2={20}
-              y1={0}
-              y2={0}
-            />
-          </g>
-          <g
             className="rv-xy-plot__axis rv-xy-plot__axis--horizontal "
             style={Object {}}
             transform="translate(80,224)"
@@ -6192,179 +6166,6 @@ Array [
                   transform="translate(0, 8)"
                 >
                   1451610000000
-                </text>
-              </g>
-            </g>
-          </g>
-          <g
-            className="rv-xy-plot__axis rv-xy-plot__axis--vertical "
-            style={
-              Object {
-                "line": Object {
-                  "fill": "none",
-                  "stroke": "none",
-                },
-              }
-            }
-            transform="translate(0,16)"
-          >
-            <line
-              className="rv-xy-plot__axis__line"
-              style={
-                Object {
-                  "fill": "none",
-                  "line": Object {
-                    "fill": "none",
-                    "stroke": "none",
-                  },
-                  "stroke": "none",
-                }
-              }
-              x1={80}
-              x2={80}
-              y1={0}
-              y2={208}
-            />
-            <g
-              className="rv-xy-plot__axis__ticks"
-              transform="translate(80, 0)"
-            >
-              <g
-                className="rv-xy-plot__axis__tick"
-                style={
-                  Object {
-                    "line": Object {
-                      "fill": "none",
-                      "stroke": "none",
-                    },
-                  }
-                }
-                transform="translate(0, 208)"
-              >
-                <line
-                  className="rv-xy-plot__axis__tick__line"
-                  style={
-                    Object {
-                      "fill": "none",
-                      "line": Object {
-                        "fill": "none",
-                        "stroke": "none",
-                      },
-                      "stroke": "none",
-                    }
-                  }
-                  x1={0}
-                  x2={-0}
-                  y1={0}
-                  y2={0}
-                />
-                <text
-                  className="rv-xy-plot__axis__tick__text"
-                  dy="0.32em"
-                  style={
-                    Object {
-                      "line": Object {
-                        "fill": "none",
-                        "stroke": "none",
-                      },
-                    }
-                  }
-                  textAnchor="end"
-                  transform="translate(-8, 0)"
-                >
-                  0
-                </text>
-              </g>
-              <g
-                className="rv-xy-plot__axis__tick"
-                style={
-                  Object {
-                    "line": Object {
-                      "fill": "none",
-                      "stroke": "none",
-                    },
-                  }
-                }
-                transform="translate(0, 104)"
-              >
-                <line
-                  className="rv-xy-plot__axis__tick__line"
-                  style={
-                    Object {
-                      "fill": "none",
-                      "line": Object {
-                        "fill": "none",
-                        "stroke": "none",
-                      },
-                      "stroke": "none",
-                    }
-                  }
-                  x1={0}
-                  x2={-0}
-                  y1={0}
-                  y2={0}
-                />
-                <text
-                  className="rv-xy-plot__axis__tick__text"
-                  dy="0.32em"
-                  style={
-                    Object {
-                      "line": Object {
-                        "fill": "none",
-                        "stroke": "none",
-                      },
-                    }
-                  }
-                  textAnchor="end"
-                  transform="translate(-8, 0)"
-                >
-                  0.5
-                </text>
-              </g>
-              <g
-                className="rv-xy-plot__axis__tick"
-                style={
-                  Object {
-                    "line": Object {
-                      "fill": "none",
-                      "stroke": "none",
-                    },
-                  }
-                }
-                transform="translate(0, 0)"
-              >
-                <line
-                  className="rv-xy-plot__axis__tick__line"
-                  style={
-                    Object {
-                      "fill": "none",
-                      "line": Object {
-                        "fill": "none",
-                        "stroke": "none",
-                      },
-                      "stroke": "none",
-                    }
-                  }
-                  x1={0}
-                  x2={-0}
-                  y1={0}
-                  y2={0}
-                />
-                <text
-                  className="rv-xy-plot__axis__tick__text"
-                  dy="0.32em"
-                  style={
-                    Object {
-                      "line": Object {
-                        "fill": "none",
-                        "stroke": "none",
-                      },
-                    }
-                  }
-                  textAnchor="end"
-                  transform="translate(-8, 0)"
-                >
-                  1
                 </text>
               </g>
             </g>

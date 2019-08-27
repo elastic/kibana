@@ -16,7 +16,7 @@
       ]
     },
     "analysis_limits": {
-      "model_memory_limit": "256mb"
+      "model_memory_limit": "15mb"
     },
     "data_description": {
       "time_field": "@timestamp",

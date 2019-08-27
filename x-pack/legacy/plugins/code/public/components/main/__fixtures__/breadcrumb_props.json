@@ -1,0 +1,10 @@
+{
+  "routeParams": {
+    "org": "elastic",
+    "path": "src/public/css/lib/bootstrap/mixins/_alerts.scss",
+    "pathType": "blob",
+    "repo": "TypeScript-Node-Starter",
+    "resource": "github.com",
+    "revision": "master"
+  }
+}

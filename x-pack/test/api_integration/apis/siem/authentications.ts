@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 
 import { authenticationsQuery } from '../../../../legacy/plugins/siem/public/containers/authentications/index.gql_query';
 import { GetAuthenticationsQuery } from '../../../../legacy/plugins/siem/public/graphql/types';
-import { KbnTestProvider } from './types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
 const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
@@ -18,7 +18,7 @@ const HOST_NAME = 'zeek-newyork-sha-aa8df15';
 const TOTAL_COUNT = 3;
 const EDGE_LENGTH = 1;
 
-const authenticationsTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
 
@@ -38,8 +38,10 @@ const authenticationsTests: KbnTestProvider = ({ getService }) => {
               from: FROM,
             },
             pagination: {
-              limit: 1,
-              cursor: null,
+              activePage: 0,
+              cursorStart: 0,
+              fakePossibleCount: 3,
+              querySize: 1,
             },
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
             inspect: false,
@@ -49,7 +51,7 @@ const authenticationsTests: KbnTestProvider = ({ getService }) => {
           const authentications = resp.data.source.Authentications;
           expect(authentications.edges.length).to.be(EDGE_LENGTH);
           expect(authentications.totalCount).to.be(TOTAL_COUNT);
-          expect(authentications.pageInfo.endCursor!.value).to.equal('1');
+          expect(authentications.pageInfo.fakeTotalCount).to.equal(3);
         });
     });
 
@@ -65,8 +67,10 @@ const authenticationsTests: KbnTestProvider = ({ getService }) => {
               from: FROM,
             },
             pagination: {
-              limit: 2,
-              cursor: '1',
+              activePage: 2,
+              cursorStart: 1,
+              fakePossibleCount: 5,
+              querySize: 2,
             },
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
             inspect: false,
@@ -80,7 +84,4 @@ const authenticationsTests: KbnTestProvider = ({ getService }) => {
         });
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default authenticationsTests;
+}

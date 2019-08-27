@@ -15,8 +15,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { get, has } from 'lodash';
 import React, { Component, Fragment } from 'react';
+import { get } from 'lodash';
 import { USES_HEADLESS_JOB_TYPES } from '../../common/constants';
 import { JobInfo, jobQueueClient } from '../lib/job_queue_client';
 
@@ -75,52 +75,51 @@ export class ReportInfoButton extends Component<Props, State> {
       return null;
     }
 
-    const jobType = get(info, 'jobtype', NA);
-    const processedBy =
-      has(info, 'kibana_name') && has(info, 'kibana_id')
-        ? `${info.kibana_name} (${info.kibana_id})`
-        : UNKNOWN;
+    const jobType = info.jobtype || NA;
 
     // TODO queue method (clicked UI, watcher, etc)
     const jobInfoParts = {
       datetimes: [
         {
           title: 'Created By',
-          description: get(info, 'created_by', NA),
+          description: info.created_by || NA,
         },
         {
           title: 'Created At',
-          description: get(info, 'created_at', NA),
+          description: info.created_at || NA,
         },
         {
           title: 'Started At',
-          description: get(info, 'started_at', NA),
+          description: info.started_at || NA,
         },
         {
           title: 'Completed At',
-          description: get(info, 'completed_at', NA),
+          description: info.completed_at || NA,
         },
         {
           title: 'Processed By',
-          description: processedBy,
+          description:
+            info.kibana_name && info.kibana_id
+              ? `${info.kibana_name} (${info.kibana_id})`
+              : UNKNOWN,
         },
         {
           title: 'Browser Timezone',
-          description: get(info, 'payload.browserTimezone', NA),
+          description: info.payload.browserTimezone || NA,
         },
       ],
       payload: [
         {
           title: 'Title',
-          description: get(info, 'payload.title', NA),
+          description: info.payload.title || NA,
         },
         {
           title: 'Type',
-          description: get(info, 'payload.type', NA),
+          description: info.payload.type || NA,
         },
         {
           title: 'Layout',
-          description: get(info, 'meta.layout', NA),
+          description: info.meta.layout || NA,
         },
         {
           title: 'Dimensions',
@@ -132,38 +131,38 @@ export class ReportInfoButton extends Component<Props, State> {
         },
         {
           title: 'Content Type',
-          description: get(info, 'output.content_type') || NA,
+          description: info.output.content_type || NA,
         },
         {
           title: 'Size in Bytes',
-          description: get(info, 'output.size') || NA,
+          description: info.output.size || NA,
         },
       ],
       status: [
         {
           title: 'Attempts',
-          description: get(info, 'attempts', NA),
+          description: info.attempts || NA,
         },
         {
           title: 'Max Attempts',
-          description: get(info, 'max_attempts', NA),
+          description: info.max_attempts || NA,
         },
         {
           title: 'Priority',
-          description: get(info, 'priority', NA),
+          description: info.priority || NA,
         },
         {
           title: 'Timeout',
-          description: get(info, 'timeout', NA),
+          description: info.timeout || NA,
         },
         {
           title: 'Status',
-          description: get(info, 'status', NA),
+          description: info.status || NA,
         },
         {
           title: 'Browser Type',
           description: USES_HEADLESS_JOB_TYPES.includes(jobType)
-            ? get(info, 'browser_type', UNKNOWN)
+            ? info.browser_type || UNKNOWN
             : NA,
         },
       ],

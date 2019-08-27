@@ -4,11 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React, { Fragment } from 'react';
+
+import { NavigationMenu } from '../../components/navigation_menu/navigation_menu';
 
 import { JobsListView } from './components/jobs_list_view';
-import React from 'react';
-
 
 export const JobsPage = (props) => (
-  <JobsListView {...props} />
+  <Fragment>
+    <NavigationMenu tabId="jobs" />
+    <JobsListView {...props} />
+  </Fragment>
 );

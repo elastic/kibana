@@ -21,26 +21,24 @@ import React from 'react';
 import { npStart } from 'ui/new_platform';
 
 import {
-  ContextMenuAction,
-  ContextMenuActionsRegistryProvider,
-  PanelActionAPI,
-} from 'ui/embeddable';
+  Action,
+  ActionContext,
+  CONTEXT_MENU_TRIGGER,
+} from '../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { setup } from '../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 
-class SamplePanelAction extends ContextMenuAction {
+class SamplePanelAction extends Action {
+  public readonly type = 'samplePanelAction';
+
   constructor() {
-    super(
-      {
-        id: 'samplePanelAction',
-        parentPanelId: 'mainMenu',
-      },
-      {
-        getDisplayName: () => {
-          return 'Sample Panel Action';
-        },
-      }
-    );
+    super('samplePanelAction');
   }
-  public onClick = ({ embeddable }: PanelActionAPI) => {
+
+  public getDisplayName() {
+    return 'Sample Panel Action';
+  }
+
+  public execute = ({ embeddable }: ActionContext) => {
     if (!embeddable) {
       return;
     }
@@ -48,7 +46,7 @@ class SamplePanelAction extends ContextMenuAction {
       <React.Fragment>
         <EuiFlyoutHeader>
           <EuiTitle size="m" data-test-subj="samplePanelActionTitle">
-            <h2>{embeddable.metadata.title}</h2>
+            <h1>{embeddable.getTitle()}</h1>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
@@ -62,4 +60,6 @@ class SamplePanelAction extends ContextMenuAction {
   };
 }
 
-ContextMenuActionsRegistryProvider.register(() => new SamplePanelAction());
+const action = new SamplePanelAction();
+setup.registerAction(action);
+setup.attachAction(CONTEXT_MENU_TRIGGER, action.id);

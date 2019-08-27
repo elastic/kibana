@@ -387,7 +387,7 @@ CustomSelectionTable.propTypes = {
   items: PropTypes.array.isRequired,
   onTableChange: PropTypes.func.isRequired,
   selectedId: PropTypes.array,
-  singleSelection: PropTypes.string,
+  singleSelection: PropTypes.bool,
   sortableProperties: PropTypes.object,
-  timeseriesOnly: PropTypes.string
+  timeseriesOnly: PropTypes.bool
 };

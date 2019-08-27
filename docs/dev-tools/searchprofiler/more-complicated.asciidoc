@@ -101,4 +101,4 @@ image::dev-tools/searchprofiler/images/gs10.png["Drilling into the first shard's
 
 For more information about how the {searchprofiler} works, how timings are calculated, and
 how to interpret various results, see 
-{ref}/search-profile-queries.html[Profiling queries].
+{ref}/search-profile.html#profiling-queries[Profiling queries].

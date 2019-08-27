@@ -70,12 +70,12 @@ exports[`Users Table Component Rendering it renders the default Users table 1`] 
       },
     ]
   }
+  fakeTotalCount={3}
   flowTarget="source"
-  hasNextPage={false}
   id="user"
-  loadMore={[MockFunction]}
+  loadPage={[MockFunction]}
   loading={false}
-  nextCursor="10"
+  showMorePagesIndicator={true}
   totalCount={1}
   type="details"
 />

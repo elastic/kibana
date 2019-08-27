@@ -7,48 +7,58 @@
 import { i18n } from '@kbn/i18n';
 import { plot } from '../../functions/common/plot';
 import { FunctionHelp } from '.';
-import { FunctionFactory, Position } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
+import { Position } from '../../../types';
+import { CSS, FONT_FAMILY, FONT_WEIGHT, BOOLEAN_FALSE } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof plot>> = {
   help: i18n.translate('xpack.canvas.functions.plotHelpText', {
-    defaultMessage: 'Configure a {plot} element',
-    values: {
-      plot: 'plot',
-    },
+    defaultMessage: 'Configure a chart element',
   }),
   args: {
+    defaultStyle: i18n.translate('xpack.canvas.functions.plot.args.defaultStyleHelpText', {
+      defaultMessage: 'The default style to use for every series.',
+    }),
+    font: i18n.translate('xpack.canvas.functions.plot.args.fontHelpText', {
+      defaultMessage:
+        'The {CSS} font properties for the labels. For example, {FONT_FAMILY} or {FONT_WEIGHT}.',
+      values: {
+        CSS,
+        FONT_FAMILY,
+        FONT_WEIGHT,
+      },
+    }),
+    legend: i18n.translate('xpack.canvas.functions.plot.args.legendHelpText', {
+      defaultMessage:
+        'The legend position. For example, {positions}, or {BOOLEAN_FALSE}. When {BOOLEAN_FALSE}, the legend is hidden.',
+      values: {
+        positions: Object.values(Position)
+          .map(position => `\`"${position}"\``)
+          .join(', '),
+        BOOLEAN_FALSE,
+      },
+    }),
+    palette: i18n.translate('xpack.canvas.functions.plot.args.paletteHelpText', {
+      defaultMessage:
+        'A {palette} object for describing the colors to use in this chart. See {paletteFn}.',
+      values: {
+        palette: '`palette`',
+        paletteFn: '`palette`',
+      },
+    }),
     seriesStyle: i18n.translate('xpack.canvas.functions.plot.args.seriesStyleHelpText', {
       defaultMessage: 'A style of a specific series',
     }),
-    defaultStyle: i18n.translate('xpack.canvas.functions.plot.args.defaultStyleHelpText', {
-      defaultMessage: 'The default style to use for every series',
-    }),
-    palette: i18n.translate('xpack.canvas.functions.plot.args.paletteHelpText', {
-      defaultMessage: 'A {palette} object for describing the colors to use on this plot',
+    xaxis: i18n.translate('xpack.canvas.functions.plot.args.xaxisHelpText', {
+      defaultMessage: 'The axis configuration. When {BOOLEAN_FALSE}, the axis is hidden.',
       values: {
-        palette: 'palette',
-      },
-    }),
-    font: i18n.translate('xpack.canvas.functions.plot.args.fontHelpText', {
-      defaultMessage: 'Legend and tick mark fonts',
-    }),
-    legend: i18n.translate('xpack.canvas.functions.plot.args.legendHelpText', {
-      defaultMessage: 'Legend position: {position} or {false}',
-      values: {
-        position: Object.values(Position).join(', '),
-        false: 'false',
+        BOOLEAN_FALSE,
       },
     }),
     yaxis: i18n.translate('xpack.canvas.functions.plot.args.yaxisHelpText', {
-      defaultMessage: 'Axis configuration, or {false} to disable',
+      defaultMessage: 'The axis configuration. When {BOOLEAN_FALSE}, the axis is hidden.',
       values: {
-        false: 'false',
-      },
-    }),
-    xaxis: i18n.translate('xpack.canvas.functions.plot.args.xaxisHelpText', {
-      defaultMessage: 'Axis configuration, or {false} to disable',
-      values: {
-        false: 'false',
+        BOOLEAN_FALSE,
       },
     }),
   },

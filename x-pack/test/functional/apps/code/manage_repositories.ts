@@ -5,20 +5,20 @@
  */
 
 import expect from '@kbn/expect';
-import { TestInvoker } from './lib/types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function manageRepositoriesFunctionalTests({
   getService,
   getPageObjects,
-}: TestInvoker) {
+}: FtrProviderContext) {
   // const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
-  describe('Manage Repositories', () => {
+  describe('Manage Repositories', function() {
+    this.tags('smoke');
     const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
 
     describe('Manage Repositories', () => {
@@ -50,10 +50,6 @@ export default function manageRepositoriesFunctionalTests({
           );
         });
 
-        // Wait for the index to start.
-        await retry.try(async () => {
-          expect(await testSubjects.exists('repositoryIndexOngoing')).to.be(true);
-        });
         // Wait for the index to end.
         await retry.try(async () => {
           expect(await testSubjects.exists('repositoryIndexDone')).to.be(true);
@@ -95,10 +91,6 @@ export default function manageRepositoriesFunctionalTests({
           );
         });
 
-        // Wait for the index to start.
-        await retry.try(async () => {
-          expect(await testSubjects.exists('repositoryIndexOngoing')).to.be(true);
-        });
         // Wait for the index to end.
         await retry.try(async () => {
           expect(await testSubjects.exists('repositoryIndexDone')).to.be(true);

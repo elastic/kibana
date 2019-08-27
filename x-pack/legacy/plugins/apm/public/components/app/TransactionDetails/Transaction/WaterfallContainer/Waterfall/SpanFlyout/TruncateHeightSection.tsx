@@ -29,16 +29,13 @@ export const TruncateHeightSection: React.SFC<Props> = ({
   const [showToggle, setShowToggle] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(
-    () => {
-      if (contentContainerEl.current) {
-        const shouldShow =
-          contentContainerEl.current.scrollHeight > previewHeight;
-        setShowToggle(shouldShow);
-      }
-    },
-    [children, previewHeight]
-  );
+  useEffect(() => {
+    if (contentContainerEl.current) {
+      const shouldShow =
+        contentContainerEl.current.scrollHeight > previewHeight;
+      setShowToggle(shouldShow);
+    }
+  }, [children, previewHeight]);
 
   return (
     <Fragment>
@@ -60,11 +57,11 @@ export const TruncateHeightSection: React.SFC<Props> = ({
           >
             <Ellipsis horizontal={!isOpen} />{' '}
             {isOpen
-              ? i18n.translate('xpack.apm.toggleHeight.showMoreButtonLabel', {
-                  defaultMessage: 'Show more lines'
-                })
-              : i18n.translate('xpack.apm.toggleHeight.showLessButtonLabel', {
+              ? i18n.translate('xpack.apm.toggleHeight.showLessButtonLabel', {
                   defaultMessage: 'Show fewer lines'
+                })
+              : i18n.translate('xpack.apm.toggleHeight.showMoreButtonLabel', {
+                  defaultMessage: 'Show more lines'
                 })}
           </EuiLink>
         </ToggleButtonContainer>

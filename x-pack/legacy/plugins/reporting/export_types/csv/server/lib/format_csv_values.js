@@ -10,7 +10,12 @@ export function createFormatCsvValues(escapeValue, separator, fields, formatsMap
   return function formatCsvValues(values) {
     return fields
       .map(field => {
-        const value = values[field];
+        let value;
+        if (field === '_source') {
+          value = values;
+        } else {
+          value = values[field];
+        }
         if (isNull(value) || isUndefined(value)) {
           return '';
         }

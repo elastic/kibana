@@ -27,6 +27,7 @@ describe('helpers', () => {
         { field: 'host.name', value: ['apache'] },
         { field: 'source.ip', value: ['192.168.0.1'] },
         { field: 'destination.ip', value: ['192.168.0.3'] },
+        { field: 'destination.bytes', value: ['123456'] },
         { field: 'user.name', value: ['john.dee'] },
       ];
       expect(deleted).toEqual(expected);
@@ -42,6 +43,7 @@ describe('helpers', () => {
         { field: 'host.name', value: ['apache'] },
         { field: 'source.ip', value: ['192.168.0.1'] },
         { field: 'destination.ip', value: ['192.168.0.3'] },
+        { field: 'destination.bytes', value: ['123456'] },
         { field: 'user.name', value: ['john.dee'] },
       ];
       expect(deleted).toEqual(expected);
@@ -85,6 +87,7 @@ describe('helpers', () => {
         { field: 'host.name', value: ['apache'] },
         { field: 'source.ip', value: ['192.168.0.1'] },
         { field: 'destination.ip', value: ['192.168.0.3'] },
+        { field: 'destination.bytes', value: ['123456'] },
         { field: 'user.name', value: null },
       ];
       expect(getValues('user.name', nullValue)).toBeUndefined();
@@ -99,6 +102,7 @@ describe('helpers', () => {
         { field: 'host.name', value: ['apache'] },
         { field: 'source.ip', value: ['192.168.0.1'] },
         { field: 'destination.ip', value: ['192.168.0.3'] },
+        { field: 'destination.bytes', value: ['123456'] },
         { field: 'user.name', value: undefined },
       ];
       expect(getValues('user.name', nullValue)).toBeUndefined();
@@ -113,6 +117,7 @@ describe('helpers', () => {
         { field: 'host.name', value: ['apache'] },
         { field: 'source.ip', value: ['192.168.0.1'] },
         { field: 'destination.ip', value: ['192.168.0.3'] },
+        { field: 'destination.bytes', value: ['123456'] },
         { field: 'user.name' },
       ];
       expect(getValues('user.name', nullValue)).toBeUndefined();

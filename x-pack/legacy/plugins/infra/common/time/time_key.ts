@@ -13,6 +13,10 @@ export interface TimeKey {
   gid?: string;
 }
 
+export interface UniqueTimeKey extends TimeKey {
+  gid: string;
+}
+
 export type Comparator = (firstValue: any, secondValue: any) => number;
 
 export const isTimeKey = (value: any): value is TimeKey =>

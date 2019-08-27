@@ -23,6 +23,7 @@ describe('LogEntryFieldColumn', () => {
       <LogEntryFieldColumn
         columnValue={column}
         highlights={[]}
+        isActiveHighlight={false}
         isHighlighted={false}
         isHovered={false}
         isWrapped={false}
@@ -50,6 +51,7 @@ describe('LogEntryFieldColumn', () => {
       <LogEntryFieldColumn
         columnValue={column}
         highlights={[]}
+        isActiveHighlight={false}
         isHighlighted={false}
         isHovered={false}
         isWrapped={false}

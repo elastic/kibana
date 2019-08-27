@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DatatableColumn } from '../../canvas_plugin_src/functions/types';
+import { DatatableColumn } from '../../types';
 import { unquoteString } from './unquote_string';
 
 /**

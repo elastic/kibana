@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { kfetch } from 'ui/kfetch';
+import { npStart } from 'ui/new_platform';
 
 import {
   AbstractSuggestionsProvider,
@@ -28,9 +28,7 @@ export class RepositorySuggestionsProvider extends AbstractSuggestionsProvider {
       if (repoScope && repoScope.length > 0) {
         queryParams.repoScope = repoScope.join(',');
       }
-      const res = await kfetch({
-        pathname: `/api/code/suggestions/repo`,
-        method: 'get',
+      const res = await npStart.core.http.get(`/api/code/suggestions/repo`, {
         query: queryParams,
       });
       const suggestions = Array.from(res.repositories as Repository[])

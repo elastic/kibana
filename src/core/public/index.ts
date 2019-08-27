@@ -50,7 +50,7 @@ import {
   ChromeRecentlyAccessedHistoryItem,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorInfo } from './fatal_errors';
-import { HttpServiceBase, HttpSetup, HttpStart, HttpInterceptor } from './http';
+import { HttpSetup, HttpStart } from './http';
 import { I18nStart } from './i18n';
 import { InjectedMetadataSetup, InjectedMetadataStart, LegacyNavLink } from './injected_metadata';
 import {
@@ -62,13 +62,47 @@ import {
   ToastsApi,
 } from './notifications';
 import { OverlayRef, OverlayStart } from './overlays';
-import { Plugin, PluginInitializer, PluginInitializerContext } from './plugins';
+import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
 import { UiSettingsClient, UiSettingsState, UiSettingsClientContract } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
+import { SavedObjectsStart } from './saved_objects';
+import { IContextContainer, IContextProvider, ContextSetup, IContextHandler } from './context';
 
 export { CoreContext, CoreSystem } from './core_system';
 export { RecursiveReadonly } from '../utils';
+export {
+  SavedObjectsBatchResponse,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsBulkCreateOptions,
+  SavedObjectsCreateOptions,
+  SavedObjectsFindResponsePublic,
+  SavedObjectsUpdateOptions,
+  SavedObject,
+  SavedObjectAttribute,
+  SavedObjectAttributes,
+  SavedObjectReference,
+  SavedObjectsBaseOptions,
+  SavedObjectsFindOptions,
+  SavedObjectsMigrationVersion,
+  SavedObjectsClientContract,
+  SavedObjectsClient,
+  SimpleSavedObject,
+} from './saved_objects';
+
+export {
+  HttpServiceBase,
+  HttpHeadersInit,
+  HttpRequestInit,
+  HttpFetchOptions,
+  HttpFetchQuery,
+  HttpErrorResponse,
+  HttpErrorRequest,
+  HttpInterceptor,
+  HttpResponse,
+  HttpHandler,
+  HttpBody,
+} from './http';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
@@ -80,6 +114,8 @@ export { RecursiveReadonly } from '../utils';
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
 export interface CoreSetup {
+  /** {@link ContextSetup} */
+  context: ContextSetup;
   /** {@link FatalErrorsSetup} */
   fatalErrors: FatalErrorsSetup;
   /** {@link HttpSetup} */
@@ -108,6 +144,8 @@ export interface CoreStart {
   docLinks: DocLinksStart;
   /** {@link HttpStart} */
   http: HttpStart;
+  /** {@link SavedObjectsStart} */
+  savedObjects: SavedObjectsStart;
   /** {@link I18nStart} */
   i18n: I18nStart;
   /** {@link NotificationsStart} */
@@ -146,12 +184,14 @@ export {
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
   ChromeStart,
+  IContextContainer,
+  IContextHandler,
+  IContextProvider,
+  ContextSetup,
   DocLinksStart,
   ErrorToastOptions,
   FatalErrorInfo,
   FatalErrorsSetup,
-  HttpInterceptor,
-  HttpServiceBase,
   HttpSetup,
   HttpStart,
   I18nStart,
@@ -163,6 +203,8 @@ export {
   Plugin,
   PluginInitializer,
   PluginInitializerContext,
+  SavedObjectsStart,
+  PluginOpaqueId,
   Toast,
   ToastInput,
   ToastsApi,

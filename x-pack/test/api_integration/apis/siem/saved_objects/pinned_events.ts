@@ -6,11 +6,10 @@
 
 import expect from '@kbn/expect';
 
+import { FtrProviderContext } from '../../../ftr_provider_context';
 import { persistTimelinePinnedEventMutation } from '../../../../../legacy/plugins/siem/public/containers/timeline/pinned_event/persist.gql_query';
 
-import { KbnTestProvider } from '../types';
-
-const pinnedEventsPersistenceTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
 
@@ -62,7 +61,4 @@ const pinnedEventsPersistenceTests: KbnTestProvider = ({ getService }) => {
       });
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default pinnedEventsPersistenceTests;
+}

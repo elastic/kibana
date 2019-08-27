@@ -24,24 +24,21 @@ import { AggConfig } from '../../vis';
 function SubAggParamEditor({
   agg,
   value,
-  responseValueAggs,
+  metricAggs,
   state,
   setValue,
   setValidity,
   setTouched,
   subAggParams,
 }: AggParamEditorProps<AggConfig>) {
-  useEffect(
-    () => {
-      // we aren't creating a custom aggConfig
-      if (agg.params.metricAgg !== 'custom') {
-        setValue(null);
-      } else if (!agg.params.customMetric) {
-        setValue(agg.type.params.byName.customMetric.makeAgg(agg));
-      }
-    },
-    [value, responseValueAggs]
-  );
+  useEffect(() => {
+    // we aren't creating a custom aggConfig
+    if (agg.params.metricAgg !== 'custom') {
+      setValue(null);
+    } else if (!agg.params.customMetric) {
+      setValue(agg.type.params.byName.customMetric.makeAgg(agg));
+    }
+  }, [value, metricAggs]);
 
   const [innerState, setInnerState] = useState(true);
 
@@ -56,7 +53,7 @@ function SubAggParamEditor({
       className="visEditorAgg__subAgg"
       formIsTouched={subAggParams.formIsTouched}
       indexPattern={agg.getIndexPattern()}
-      responseValueAggs={responseValueAggs}
+      metricAggs={metricAggs}
       state={state}
       onAggParamsChange={(...rest) => {
         // to force update when sub-agg params are changed
@@ -64,7 +61,6 @@ function SubAggParamEditor({
         subAggParams.onAggParamsChange(...rest);
       }}
       onAggTypeChange={subAggParams.onAggTypeChange}
-      onAggErrorChanged={subAggParams.onAggErrorChanged}
       setValidity={setValidity}
       setTouched={setTouched}
     />

@@ -5,11 +5,12 @@
  */
 
 import { uriEncode } from '../lib/uri_encode';
+import { PLUGIN_ID } from '../../../../common/constants';
 
 export function compatibilityShimFactory(server) {
 
   const logDeprecation = (msg) => {
-    server.log(['warning', 'reporting', 'deprecation'], msg + ' This functionality will be removed with the next major version.');
+    server.log(['warning', PLUGIN_ID, 'deprecation'], msg + ' This functionality will be removed with the next major version.');
   };
 
   const getSavedObjectTitle = async (objectType, savedObjectId, savedObjectsClient) => {

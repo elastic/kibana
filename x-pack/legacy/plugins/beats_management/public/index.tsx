@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
+import * as euiVars from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { HashRouter } from 'react-router-dom';

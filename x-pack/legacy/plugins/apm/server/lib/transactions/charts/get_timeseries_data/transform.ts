@@ -20,7 +20,8 @@ export function timeseriesTransformer({
   bucketSize: number;
 }) {
   const aggs = timeseriesResponse.aggregations;
-  const overallAvgDuration = idx(aggs, _ => _.overall_avg_duration.value);
+  const overallAvgDuration =
+    idx(aggs, _ => _.overall_avg_duration.value) || null;
   const responseTimeBuckets = idx(aggs, _ => _.response_times.buckets);
   const { avg, p95, p99 } = getResponseTime(responseTimeBuckets);
   const transactionResultBuckets = idx(
@@ -30,7 +31,6 @@ export function timeseriesTransformer({
   const tpmBuckets = getTpmBuckets(transactionResultBuckets, bucketSize);
 
   return {
-    totalHits: timeseriesResponse.hits.total,
     responseTimes: {
       avg,
       p95,
@@ -42,7 +42,9 @@ export function timeseriesTransformer({
 }
 
 export function getTpmBuckets(
-  transactionResultBuckets: ESResponse['aggregations']['transaction_results']['buckets'] = [],
+  transactionResultBuckets: Required<
+    ESResponse
+  >['aggregations']['transaction_results']['buckets'] = [],
   bucketSize: number
 ) {
   const buckets = transactionResultBuckets.map(
@@ -68,7 +70,9 @@ export function getTpmBuckets(
 }
 
 function getResponseTime(
-  responseTimeBuckets: ESResponse['aggregations']['response_times']['buckets'] = []
+  responseTimeBuckets: Required<
+    ESResponse
+  >['aggregations']['response_times']['buckets'] = []
 ) {
   return responseTimeBuckets.reduce(
     (acc, bucket) => {

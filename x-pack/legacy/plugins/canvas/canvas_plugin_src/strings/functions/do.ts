@@ -7,19 +7,26 @@
 import { i18n } from '@kbn/i18n';
 import { doFn } from '../../functions/common/do';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
+import { CONTEXT } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof doFn>> = {
   help: i18n.translate('xpack.canvas.functions.doHelpText', {
     defaultMessage:
-      'Runs multiple sub-expressions. Returns the passed in context. Nice for running ' +
-      'actions producing functions.',
+      'Executes multiple sub-expressions, then returns the original {CONTEXT}. ' +
+      'Use for running functions that produce an action or a side effect without changing the original {CONTEXT}.',
+    values: {
+      CONTEXT,
+    },
   }),
   args: {
     fn: i18n.translate('xpack.canvas.functions.do.args.fnHelpText', {
       defaultMessage:
-        'One or more sub-expressions. The value of these is not available in the root ' +
-        'pipeline as this function simply returns the passed in context',
+        'The sub-expressions to execute. The return values of these sub-expressions are not available in the root ' +
+        'pipeline as this function simply returns the original {CONTEXT}.',
+      values: {
+        CONTEXT,
+      },
     }),
   },
 };

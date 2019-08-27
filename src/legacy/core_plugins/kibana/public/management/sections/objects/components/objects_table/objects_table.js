@@ -369,7 +369,7 @@ class ObjectsTableUI extends Component {
       object => object.type === 'index-pattern'
     );
     if (indexPatterns.length) {
-      await this.props.indexPatterns.cache.clearAll();
+      await this.props.indexPatterns.clearCache();
     }
 
     const objects = await savedObjectsClient.bulkGet(selectedSavedObjects);

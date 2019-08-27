@@ -8,18 +8,16 @@ import produce from 'immer';
 import { Action, handleActions } from 'redux-actions';
 import { FileTree, FileTreeItemType, sortFileTree } from '../../model';
 import {
-  closeTreePath,
   fetchRepoTree,
   fetchRepoTreeFailed,
   fetchRepoTreeSuccess,
-  openTreePath,
   RepoTreePayload,
-  resetRepoTree,
   fetchRootRepoTreeSuccess,
   fetchRootRepoTreeFailed,
   dirNotFound,
   FetchRepoTreePayload,
 } from '../actions';
+import { routePathChange, repoChange, revisionChange } from '../actions/route';
 
 function mergeNode(a: FileTree, b: FileTree): FileTree {
   const childrenMap: { [name: string]: FileTree } = {};
@@ -59,10 +57,10 @@ export function getPathOfTree(tree: FileTree, paths: string[]) {
 
 export interface FileTreeState {
   tree: FileTree;
-  openedPaths: string[];
   fileTreeLoadingPaths: string[];
   // store not found directory as an array to calculate `notFound` flag by finding whether path is in this array
   notFoundDirs: string[];
+  revision: string;
 }
 
 const initialState: FileTreeState = {
@@ -71,10 +69,18 @@ const initialState: FileTreeState = {
     path: '',
     type: FileTreeItemType.Directory,
   },
-  openedPaths: [],
   fileTreeLoadingPaths: [''],
   notFoundDirs: [],
+  revision: '',
 };
+
+const clearState = (state: FileTreeState) =>
+  produce<FileTreeState>(state, draft => {
+    draft.tree = initialState.tree;
+    draft.fileTreeLoadingPaths = initialState.fileTreeLoadingPaths;
+    draft.notFoundDirs = initialState.notFoundDirs;
+    draft.revision = initialState.revision;
+  });
 
 type FileTreePayload = FetchRepoTreePayload & RepoTreePayload & FileTree & string;
 
@@ -86,6 +92,7 @@ export const fileTree = handleActions<FileTreeState, FileTreePayload>(
       }),
     [String(fetchRepoTreeSuccess)]: (state, action: Action<RepoTreePayload>) =>
       produce<FileTreeState>(state, draft => {
+        draft.revision = action.payload!.revision;
         draft.notFoundDirs = draft.notFoundDirs.filter(dir => dir !== action.payload!.path);
         draft.fileTreeLoadingPaths = draft.fileTreeLoadingPaths.filter(
           p => p !== action.payload!.path && p !== ''
@@ -108,10 +115,14 @@ export const fileTree = handleActions<FileTreeState, FileTreePayload>(
           }
         }
       }),
-    [String(fetchRootRepoTreeSuccess)]: (state, action: Action<FileTree>) =>
+    [String(fetchRootRepoTreeSuccess)]: (
+      state,
+      action: Action<{ revision: string; tree: FileTree }>
+    ) =>
       produce<FileTreeState>(state, draft => {
         draft.fileTreeLoadingPaths = draft.fileTreeLoadingPaths.filter(p => p !== '/' && p !== '');
-        draft.tree = mergeNode(draft.tree, action.payload!);
+        draft.tree = mergeNode(draft.tree, action.payload!.tree);
+        draft.revision = action.payload!.revision;
       }),
     [String(fetchRootRepoTreeFailed)]: state =>
       produce<FileTreeState>(state, draft => {
@@ -121,37 +132,15 @@ export const fileTree = handleActions<FileTreeState, FileTreePayload>(
       produce<FileTreeState>(state, draft => {
         draft.notFoundDirs.push(action.payload!);
       }),
-    [String(resetRepoTree)]: state =>
-      produce<FileTreeState>(state, draft => {
-        draft.tree = initialState.tree;
-        draft.openedPaths = initialState.openedPaths;
-      }),
     [String(fetchRepoTreeFailed)]: (state, action: Action<FileTree>) =>
       produce(state, draft => {
         draft.fileTreeLoadingPaths = draft.fileTreeLoadingPaths.filter(
           p => p !== action.payload!.path && p !== ''
         );
       }),
-    [String(openTreePath)]: (state, action: Action<string>) =>
-      produce<FileTreeState>(state, draft => {
-        let path = action.payload!;
-        const openedPaths = state.openedPaths;
-        const pathSegs = path.split('/');
-        while (!openedPaths.includes(path)) {
-          draft.openedPaths.push(path);
-          pathSegs.pop();
-          if (pathSegs.length <= 0) {
-            break;
-          }
-          path = pathSegs.join('/');
-        }
-      }),
-    [String(closeTreePath)]: (state, action: Action<string>) =>
-      produce<FileTreeState>(state, draft => {
-        const path = action.payload!;
-        const isSubFolder = (p: string) => p.startsWith(path + '/');
-        draft.openedPaths = state.openedPaths.filter(p => !(p === path || isSubFolder(p)));
-      }),
+    [String(routePathChange)]: clearState,
+    [String(repoChange)]: clearState,
+    [String(revisionChange)]: clearState,
   },
   initialState
 );

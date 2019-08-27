@@ -41,8 +41,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.navigateTo();
     });
 
-    describe('Security', async () => {
-      describe('navigation', async () => {
+    describe('Security', () => {
+      describe('navigation', () => {
         it('Can navigate to create user section', async () => {
           await PageObjects.security.clickElasticsearchUsers();
           await PageObjects.security.clickCreateNewUser();
@@ -77,10 +77,9 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.settings.clickLinkText('new-user');
           const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(EDIT_USERS_PATH);
-          const userNameInput = await testSubjects.find('userFormUserNameInput');
           // allow time for user to load
           await PageObjects.common.sleep(500);
-          const userName = await userNameInput.getProperty('value');
+          const userName = await testSubjects.getAttribute('userFormUserNameInput', 'value');
           expect(userName).to.equal('new-user');
         });
 
@@ -120,8 +119,7 @@ export default function ({ getService, getPageObjects }) {
           const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(EDIT_ROLES_PATH);
 
-          const userNameInput = await testSubjects.find('roleFormNameInput');
-          const userName = await userNameInput.getProperty('value');
+          const userName = await testSubjects.getAttribute('roleFormNameInput', 'value');
           expect(userName).to.equal('a-my-new-role');
         });
 

@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './explorer_no_influencers_found';
-export * from './explorer_no_jobs_found';
-export * from './explorer_no_results_found';
+export { ExplorerNoInfluencersFound } from './explorer_no_influencers_found';
+export { ExplorerNoJobsFound } from './explorer_no_jobs_found';
+export { ExplorerNoResultsFound } from './explorer_no_results_found';

@@ -16,6 +16,6 @@
     "patterns": [
       "_cat/nodes"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cat-nodes.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cat-nodes.html"
   }
 }

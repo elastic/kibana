@@ -73,6 +73,10 @@ export const CleanClientModulesOnDLLTask = {
     for (const relativeEntryPath of dllEntries) {
       const entryPath = `${baseDir}/${relativeEntryPath}`;
 
+      if (entryPath.endsWith('package.json')) {
+        continue;
+      }
+
       // Clean a module included into the dll
       // and then write a blank file for each
       // entry file present into the dll

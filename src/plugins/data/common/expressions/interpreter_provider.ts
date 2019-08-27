@@ -71,8 +71,16 @@ export function interpreterProvider(config: any) {
       // if something failed, just return the failure
       if (getType(newContext) === 'error') return newContext;
 
+      // if execution was aborted return error
+      if (handlers.abortSignal && handlers.abortSignal.aborted) {
+        return createError({
+          message: 'The expression was aborted.',
+          name: 'AbortError',
+        });
+      }
+
       // Continue re-invoking chain until it's empty
-      return await invokeChain(chain, newContext);
+      return invokeChain(chain, newContext);
     } catch (e) {
       // Everything that throws from a function will hit this
       // The interpreter should *never* fail. It should always return a `{type: error}` on failure

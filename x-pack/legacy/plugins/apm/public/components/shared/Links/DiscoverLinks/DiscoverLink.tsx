@@ -6,12 +6,12 @@
 
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
-import chrome from 'ui/chrome';
 import url from 'url';
 import rison, { RisonValue } from 'rison-node';
 import { useAPMIndexPattern } from '../../../../hooks/useAPMIndexPattern';
 import { useLocation } from '../../../../hooks/useLocation';
 import { getTimepickerRisonData } from '../rison_helpers';
+import { useCore } from '../../../../hooks/useCore';
 
 interface Props {
   query: {
@@ -31,6 +31,7 @@ interface Props {
 }
 
 export function DiscoverLink({ query = {}, ...rest }: Props) {
+  const core = useCore();
   const apmIndexPattern = useAPMIndexPattern();
   const location = useLocation();
 
@@ -47,7 +48,7 @@ export function DiscoverLink({ query = {}, ...rest }: Props) {
   };
 
   const href = url.format({
-    pathname: chrome.addBasePath('/app/kibana'),
+    pathname: core.http.basePath.prepend('/app/kibana'),
     hash: `/discover?_g=${rison.encode(risonQuery._g)}&_a=${rison.encode(
       risonQuery._a as RisonValue
     )}`

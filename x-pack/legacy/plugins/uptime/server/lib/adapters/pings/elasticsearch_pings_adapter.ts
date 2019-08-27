@@ -215,18 +215,12 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
                     'monitor.status': 'down',
                   },
                 },
-                aggs: {
-                  bucket_count: {
-                    cardinality: {
-                      field: 'monitor.id',
-                    },
-                  },
-                },
               },
-              bucket_total: {
-                cardinality: {
-                  field: 'monitor.id',
-                  precision_threshold: 20000,
+              up: {
+                filter: {
+                  term: {
+                    'monitor.status': 'up',
+                  },
                 },
               },
             },
@@ -239,12 +233,12 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     const buckets: HistogramQueryResult[] = get(result, 'aggregations.timeseries.buckets', []);
     const mappedBuckets = buckets.map(bucket => {
       const key: number = get(bucket, 'key');
-      const total: number = get(bucket, 'bucket_total.value');
-      const downCount: number = get(bucket, 'down.bucket_count.value');
+      const downCount: number = get(bucket, 'down.doc_count');
+      const upCount: number = get(bucket, 'up.doc_count');
       return {
         key,
         downCount: statusFilter && statusFilter !== 'down' ? 0 : downCount,
-        upCount: statusFilter && statusFilter !== 'up' ? 0 : total - downCount,
+        upCount: statusFilter && statusFilter !== 'up' ? 0 : upCount,
         y: 1,
       };
     });

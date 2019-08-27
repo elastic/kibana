@@ -18,13 +18,15 @@ interface Props {
   transaction: Transaction;
   location: Location;
   waterfall: IWaterfall;
+  exceedsMax: boolean;
 }
 
 export function WaterfallContainer({
   location,
   urlParams,
   transaction,
-  waterfall
+  waterfall,
+  exceedsMax
 }: Props) {
   const agentMarks = getAgentMarks(transaction);
   if (!waterfall) {
@@ -40,6 +42,7 @@ export function WaterfallContainer({
         serviceColors={waterfall.serviceColors}
         urlParams={urlParams}
         waterfall={waterfall}
+        exceedsMax={exceedsMax}
       />
     </div>
   );

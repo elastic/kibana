@@ -5,6 +5,7 @@
  */
 
 export { DataPlaceholder } from './data_placeholder';
+export { FormattedDateTime } from './formatted_date_time';
 export { RepositoryDeleteProvider } from './repository_delete_provider';
 export { RepositoryForm } from './repository_form';
 export { RepositoryVerificationBadge } from './repository_verification_badge';
@@ -13,3 +14,5 @@ export { SectionError } from './section_error';
 export { SectionLoading } from './section_loading';
 export { SnapshotDeleteProvider } from './snapshot_delete_provider';
 export { RestoreSnapshotForm } from './restore_snapshot_form';
+export { PolicyExecuteProvider } from './policy_execute_provider';
+export { PolicyDeleteProvider } from './policy_delete_provider';

@@ -74,7 +74,11 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source and Fl
           response: [JSON.stringify(mockNoDataResponse, null, 2)],
         },
         edges: [],
-        pageInfo: { endCursor: { tiebreaker: null, value: '10' }, hasNextPage: false },
+        pageInfo: {
+          activePage: 0,
+          fakeTotalCount: 0,
+          showMorePagesIndicator: false,
+        },
         totalCount: 0,
       });
     });
@@ -107,7 +111,7 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source and Fl
         mockRequest as FrameworkRequest,
         mockOptions
       );
-      expect(data.pageInfo.hasNextPage).toBeFalsy();
+      expect(data.pageInfo.showMorePagesIndicator).toBeFalsy();
     });
   });
 });

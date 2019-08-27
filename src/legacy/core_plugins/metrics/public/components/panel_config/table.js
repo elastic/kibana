@@ -43,11 +43,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Storage } from 'ui/storage';
-import { data } from 'plugins/data/setup';
+import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
-const { QueryBarInput } = data.query.ui;
-const localStorage = new Storage(window.localStorage);
 export class TablePanelConfig extends Component {
   constructor(props) {
     super(props);
@@ -173,7 +170,6 @@ export class TablePanelConfig extends Component {
             fields={this.props.fields}
             model={this.props.model}
             name={this.props.name}
-            visData$={this.props.visData$}
             onChange={this.props.onChange}
           />
         </div>
@@ -234,7 +230,7 @@ export class TablePanelConfig extends Component {
                   }
                   fullWidth
                 >
-                  <QueryBarInput
+                  <QueryBarWrapper
                     query={{
                       language: model.filter.language
                         ? model.filter.language
@@ -242,9 +238,7 @@ export class TablePanelConfig extends Component {
                       query: model.filter.query || '',
                     }}
                     onChange={filter => this.props.onChange({ filter })}
-                    appName={'VisEditor'}
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
-                    store={localStorage}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -291,5 +285,4 @@ TablePanelConfig.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
-  visData$: PropTypes.object,
 };

@@ -17,31 +17,28 @@
  * under the License.
  */
 
-import { cloneDeep } from 'lodash';
+import { cloneDeep, get } from 'lodash';
 // @ts-ignore
 import { setBounds } from 'ui/agg_types/buckets/date_histogram';
 import { SearchSource } from 'ui/courier';
 import { AggConfig, Vis, VisParams, VisState } from 'ui/vis';
 import moment from 'moment';
-
-interface SchemaFormat {
-  id: string;
-  params?: any;
-}
+import { SerializedFieldFormat } from 'src/plugins/data/common/expressions/types/common';
+import { createFormat } from './utilities';
 
 interface SchemaConfigParams {
   precision?: number;
   useGeocentroid?: boolean;
 }
 
-interface SchemaConfig {
+export interface SchemaConfig {
   accessor: number;
-  format: SchemaFormat | {};
+  format: SerializedFieldFormat;
   params: SchemaConfigParams;
   aggType: string;
 }
 
-interface Schemas {
+export interface Schemas {
   metric: SchemaConfig[];
   bucket?: any[];
   geo_centroid?: any[];
@@ -78,37 +75,6 @@ const vislibCharts: string[] = [
 ];
 
 export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
-  const createFormat = (agg: AggConfig): SchemaFormat => {
-    const format: SchemaFormat = agg.params.field ? agg.params.field.format.toJSON() : {};
-    const formats: any = {
-      date_range: () => ({ id: 'string' }),
-      percentile_ranks: () => ({ id: 'percent' }),
-      count: () => ({ id: 'number' }),
-      cardinality: () => ({ id: 'number' }),
-      date_histogram: () => ({
-        id: 'date',
-        params: {
-          pattern: agg.buckets.getScaledDateFormat(),
-        },
-      }),
-      terms: () => ({
-        id: 'terms',
-        params: {
-          id: format.id,
-          otherBucketLabel: agg.params.otherBucketLabel,
-          missingBucketLabel: agg.params.missingBucketLabel,
-          ...format.params,
-        },
-      }),
-      range: () => ({
-        id: 'range',
-        params: { id: format.id, ...format.params },
-      }),
-    };
-
-    return formats[agg.type.name] ? formats[agg.type.name]() : format;
-  };
-
   const createSchemaConfig = (accessor: number, agg: AggConfig): SchemaConfig => {
     if (agg.type.name === 'date_histogram') {
       agg.params.timeRange = timeRange;
@@ -153,10 +119,6 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
   const isHierarchical = vis.isHierarchical();
   const metrics = responseAggs.filter((agg: AggConfig) => agg.type.type === 'metrics');
   responseAggs.forEach((agg: AggConfig) => {
-    if (!agg.enabled) {
-      cnt++;
-      return;
-    }
     let skipMetrics = false;
     let schemaName = agg.schema ? agg.schema.name || agg.schema : null;
     if (typeof schemaName === 'object') {
@@ -192,7 +154,7 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
   return schemas;
 };
 
-export const prepareJson = (variable: string, data: object): string => {
+export const prepareJson = (variable: string, data?: object): string => {
   if (data === undefined) {
     return '';
   }
@@ -244,6 +206,30 @@ export const prepareDimension = (variable: string, data: any) => {
   return expr;
 };
 
+const adjustVislibDimensionFormmaters = (vis: Vis, dimensions: { y: any[] }): void => {
+  const visState = vis.getCurrentState();
+  const visConfig = visState.params;
+  const responseAggs = vis.aggs.getResponseAggs().filter((agg: AggConfig) => agg.enabled);
+
+  (dimensions.y || []).forEach(yDimension => {
+    const yAgg = responseAggs[yDimension.accessor];
+    const seriesParam = (visConfig.seriesParams || []).find(
+      (param: any) => param.data.id === yAgg.id
+    );
+    if (seriesParam) {
+      const usedValueAxis = (visConfig.valueAxes || []).find(
+        (valueAxis: any) => valueAxis.id === seriesParam.valueAxis
+      );
+      if (get(usedValueAxis, 'scale.mode') === 'percentage') {
+        yDimension.format = { id: 'percent' };
+      }
+    }
+    if (get(visConfig, 'gauge.percentageMode') === true) {
+      yDimension.format = { id: 'percent' };
+    }
+  });
+};
+
 export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   vega: visState => {
     return `vega ${prepareString('spec', visState.params.spec)}`;
@@ -292,6 +278,13 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
       style,
     } = visState.params.metric;
     const { metrics, bucket } = buildVisConfig.metric(schemas).dimensions;
+
+    // fix formatter for percentage mode
+    if (get(visState.params, 'metric.percentageMode') === true) {
+      metrics.forEach((metric: SchemaConfig) => {
+        metric.format = { id: 'percent' };
+      });
+    }
 
     let expr = `metricvis `;
     expr += prepareValue('percentage', percentageMode);
@@ -452,6 +445,7 @@ export const buildVislibDimensions = async (
     }
   }
 
+  adjustVislibDimensionFormmaters(vis, dimensions);
   return dimensions;
 };
 
@@ -514,7 +508,7 @@ export const buildPipeline = async (
     const visConfig = visState.params;
     visConfig.dimensions = await buildVislibDimensions(vis, params);
 
-    pipeline += `vislib ${prepareJson('visConfig', visState.params)}`;
+    pipeline += `vislib type='${vis.type.name}' ${prepareJson('visConfig', visState.params)}`;
   } else if (vis.type.toExpression) {
     pipeline += await vis.type.toExpression(vis, params);
   } else {

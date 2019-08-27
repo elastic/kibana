@@ -64,46 +64,13 @@ exports[`it renders without crashing 1`] = `
                     "label": "all",
                   },
                   Object {
-                    "label": "manage",
-                  },
-                  Object {
-                    "label": "monitor",
-                  },
-                  Object {
                     "label": "read",
-                  },
-                  Object {
-                    "label": "index",
-                  },
-                  Object {
-                    "label": "create",
-                  },
-                  Object {
-                    "label": "delete",
                   },
                   Object {
                     "label": "write",
                   },
                   Object {
-                    "label": "delete_index",
-                  },
-                  Object {
-                    "label": "create_index",
-                  },
-                  Object {
-                    "label": "view_index_metadata",
-                  },
-                  Object {
-                    "label": "read_cross_cluster",
-                  },
-                  Object {
-                    "label": "manage_follow_index",
-                  },
-                  Object {
-                    "label": "manage_ilm",
-                  },
-                  Object {
-                    "label": "manage_leader_index",
+                    "label": "index",
                   },
                 ]
               }

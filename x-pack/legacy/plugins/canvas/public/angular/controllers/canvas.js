@@ -5,6 +5,7 @@
  */
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { I18nProvider } from '@kbn/i18n/react';
 import { Provider } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
@@ -29,9 +30,11 @@ export function CanvasRootController(canvasStore, $scope, $element, uiCapabiliti
   );
 
   render(
-    <Provider store={canvasStore}>
-      <App />
-    </Provider>,
+    <I18nProvider>
+      <Provider store={canvasStore}>
+        <App />
+      </Provider>
+    </I18nProvider>,
     domNode
   );
 

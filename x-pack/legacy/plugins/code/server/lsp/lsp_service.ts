@@ -79,15 +79,21 @@ export class LspService {
   }
 
   public supportLanguage(lang: string) {
-    return this.controller.getLanguageServerDef(lang) !== null;
+    return this.controller.getLanguageServerDef(lang).length > 0;
   }
 
   public getLanguageSeverDef(lang: string) {
     return this.controller.getLanguageServerDef(lang);
   }
 
-  public languageServerStatus(lang: string): LanguageServerStatus {
-    return this.controller.status(lang);
+  public languageServerStatus(name: string): LanguageServerStatus {
+    const defs = this.controller.getLanguageServerDef(name);
+    if (defs.length > 0) {
+      const def = defs[0];
+      return this.controller.status(def);
+    } else {
+      return LanguageServerStatus.NOT_INSTALLED;
+    }
   }
 
   public async initializeState(repoUri: string, revision: string) {

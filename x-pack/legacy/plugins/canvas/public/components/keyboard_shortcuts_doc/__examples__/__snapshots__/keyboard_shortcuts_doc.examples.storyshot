@@ -1225,6 +1225,64 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                     </span>
                   </span>
                 </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Enter presentation mode
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span
+                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                      style={Object {}}
+                    >
+                      <code
+                        className="euiCodeBlock__code"
+                      >
+                        ALT
+                      </code>
+                    </span>
+                     
+                    <span
+                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                      style={Object {}}
+                    >
+                      <code
+                        className="euiCodeBlock__code"
+                      >
+                        F
+                      </code>
+                    </span>
+                  </span>
+                  <span>
+                     or 
+                  </span>
+                  <span>
+                    <span
+                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                      style={Object {}}
+                    >
+                      <code
+                        className="euiCodeBlock__code"
+                      >
+                        ALT
+                      </code>
+                    </span>
+                     
+                    <span
+                      className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+                      style={Object {}}
+                    >
+                      <code
+                        className="euiCodeBlock__code"
+                      >
+                        P
+                      </code>
+                    </span>
+                  </span>
+                </dd>
               </dl>
               <div
                 className="euiSpacer euiSpacer--l"

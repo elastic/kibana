@@ -5,4 +5,4 @@
  */
 
 
-import './anomalies_table_directive';
+export { AnomaliesTable } from './anomalies_table';

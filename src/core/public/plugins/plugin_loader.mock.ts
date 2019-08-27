@@ -26,7 +26,7 @@ import { LoadPluginBundle, UnknownPluginInitializer } from './plugin_loader';
 const createLoadPluginBundleMock = (
   initializerProvider: (name: PluginName) => UnknownPluginInitializer
 ): jest.Mock<ReturnType<LoadPluginBundle>, Parameters<LoadPluginBundle>> =>
-  jest.fn((addBasePath, pluginName) => {
+  jest.fn((addBasePath, pluginName, _ = {}) => {
     return Promise.resolve(initializerProvider(pluginName)) as any;
   });
 

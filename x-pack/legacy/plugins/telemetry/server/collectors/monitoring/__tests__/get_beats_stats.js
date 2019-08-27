@@ -139,7 +139,7 @@ describe('Get Beats Stats', () => {
           hosts: 1,
           module: {
             count: 1,
-            names: [ 'ferrari' ],
+            names: [ 'car.ferrari' ],
           },
           input: {
             count: 1,

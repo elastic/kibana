@@ -7,7 +7,7 @@
 // @ts-ignore untyped Elastic library
 import { getType } from '@kbn/interpreter/common';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Datatable } from '../types';
+import { Datatable } from '../../../types';
 import { getFunctionHelp } from '../../strings';
 
 interface Arguments {

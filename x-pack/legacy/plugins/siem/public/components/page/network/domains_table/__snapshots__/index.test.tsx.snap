@@ -63,8 +63,8 @@ exports[`Domains Table Component Rendering it renders the default Domains table 
       },
     ]
   }
+  fakeTotalCount={50}
   flowTarget="source"
-  hasNextPage={false}
   id="domains"
   indexPattern={
     Object {
@@ -152,9 +152,9 @@ exports[`Domains Table Component Rendering it renders the default Domains table 
     }
   }
   ip="10.10.10.10"
-  loadMore={[MockFunction]}
+  loadPage={[MockFunction]}
   loading={false}
-  nextCursor="10"
+  showMorePagesIndicator={true}
   totalCount={1}
   type="details"
 />

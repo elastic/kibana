@@ -12,7 +12,7 @@ import {
   FlowTarget,
   GetTlsQuery,
 } from '../../../../legacy/plugins/siem/public/graphql/types';
-import { KbnTestProvider } from './types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
 const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
@@ -29,7 +29,7 @@ const expectedResult = {
   notAfter: ['2019-05-22T12:00:00.000Z'],
 };
 
-const tlsTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
   describe('Tls Test', () => {
@@ -52,8 +52,10 @@ const tlsTests: KbnTestProvider = ({ getService }) => {
               flowTarget: FlowTarget.source,
               sort: { field: TlsFields._id, direction: Direction.desc },
               pagination: {
-                limit: 10,
-                cursor: null,
+                activePage: 0,
+                cursorStart: 0,
+                fakePossibleCount: 30,
+                querySize: 10,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               inspect: false,
@@ -82,8 +84,10 @@ const tlsTests: KbnTestProvider = ({ getService }) => {
               flowTarget: FlowTarget.destination,
               sort: { field: TlsFields._id, direction: Direction.desc },
               pagination: {
-                limit: 10,
-                cursor: null,
+                activePage: 0,
+                cursorStart: 0,
+                fakePossibleCount: 30,
+                querySize: 10,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
               inspect: false,
@@ -98,7 +102,4 @@ const tlsTests: KbnTestProvider = ({ getService }) => {
       });
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default tlsTests;
+}

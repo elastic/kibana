@@ -18,27 +18,36 @@
  */
 
 import React from 'react';
-
+import { Subscription } from 'rxjs';
+import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { CoreStart } from '../../../../../../src/core/public';
 import {
   EmbeddablePanel,
-  Container,
-  embeddableFactories,
-  EmbeddableFactory,
-} from 'plugins/embeddable_api';
-import {
-  HelloWorldContainer,
-  CONTACT_CARD_EMBEDDABLE,
-  HELLO_WORLD_EMBEDDABLE_TYPE,
-} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/test_samples';
+  GetEmbeddableFactory,
+  GetActionsCompatibleWithTrigger,
+  GetEmbeddableFactories,
+} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { HelloWorldContainer } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/test_samples/embeddables/hello_world_container';
+import { CONTACT_CARD_EMBEDDABLE } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
+import { HELLO_WORLD_EMBEDDABLE_TYPE } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/test_samples/embeddables/hello_world/hello_world_embeddable';
+import { Start as InspectorStartContract } from '../../../../../../src/plugins/inspector/public';
 
 interface Props {
-  embeddableFactories: Map<string, EmbeddableFactory>;
+  getActions: GetActionsCompatibleWithTrigger;
+  getEmbeddableFactory: GetEmbeddableFactory;
+  getAllEmbeddableFactories: GetEmbeddableFactories;
+  overlays: CoreStart['overlays'];
+  notifications: CoreStart['notifications'];
+  inspector: InspectorStartContract;
+  SavedObjectFinder: React.ComponentType<any>;
 }
 
-export class HelloWorldContainerExample extends React.Component<Props> {
-  private container: Container;
+export class HelloWorldContainerExample extends React.Component<Props, { lastName?: string }> {
+  private container: HelloWorldContainer;
+  private mounted: boolean = false;
+  private subscription?: Subscription;
 
-  public constructor(props: Props) {
+  constructor(props: Props) {
     super(props);
 
     this.container = new HelloWorldContainer(
@@ -62,20 +71,63 @@ export class HelloWorldContainerExample extends React.Component<Props> {
           },
         },
       },
-      embeddableFactories
+      {
+        getActions: this.props.getActions,
+        getEmbeddableFactory: this.props.getEmbeddableFactory,
+        getAllEmbeddableFactories: this.props.getAllEmbeddableFactories,
+        overlays: this.props.overlays,
+        notifications: this.props.notifications,
+        inspector: this.props.inspector,
+        SavedObjectFinder: this.props.SavedObjectFinder,
+      }
     );
+    this.state = {
+      lastName: this.container.getInput().lastName,
+    };
+  }
+
+  public componentDidMount() {
+    this.mounted = true;
+    this.subscription = this.container.getInput$().subscribe(() => {
+      const { lastName } = this.container.getInput();
+      if (this.mounted) {
+        this.setState({
+          lastName,
+        });
+      }
+    });
   }
 
   public componentWillUnmount() {
-    if (this.container) {
-      this.container.destroy();
+    this.mounted = false;
+    if (this.subscription) {
+      this.subscription.unsubscribe();
     }
+    this.container.destroy();
   }
+
   public render() {
     return (
       <div className="app-container dshAppContainer">
         <h1>Hello World Container</h1>
-        <EmbeddablePanel embeddable={this.container} />
+        <EuiFormRow label="Last name">
+          <EuiFieldText
+            name="popfirst"
+            value={this.state.lastName}
+            placeholder="optional"
+            onChange={e => this.container.updateInput({ lastName: e.target.value })}
+          />
+        </EuiFormRow>
+        <EmbeddablePanel
+          embeddable={this.container}
+          getActions={this.props.getActions}
+          getEmbeddableFactory={this.props.getEmbeddableFactory}
+          getAllEmbeddableFactories={this.props.getAllEmbeddableFactories}
+          overlays={this.props.overlays}
+          notifications={this.props.notifications}
+          inspector={this.props.inspector}
+          SavedObjectFinder={this.props.SavedObjectFinder}
+        />
       </div>
     );
   }

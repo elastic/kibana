@@ -21,19 +21,17 @@ import { OverviewHostStats } from '../overview_host_stats';
 export interface OwnProps {
   startDate: number;
   endDate: number;
-  setQuery: (
-    {
-      id,
-      inspect,
-      loading,
-      refetch,
-    }: {
-      id: string;
-      inspect: inputsModel.InspectQuery | null;
-      loading: boolean;
-      refetch: inputsModel.Refetch;
-    }
-  ) => void;
+  setQuery: ({
+    id,
+    inspect,
+    loading,
+    refetch,
+  }: {
+    id: string;
+    inspect: inputsModel.InspectQuery | null;
+    loading: boolean;
+    refetch: inputsModel.Refetch;
+  }) => void;
 }
 
 const OverviewHostStatsManage = manageQuery(OverviewHostStats);
@@ -50,15 +48,15 @@ export const OverviewHost = pure<OverviewHostProps>(({ endDate, startDate, setQu
           subtitle={
             <FormattedMessage
               id="xpack.siem.overview.hostsSubtitle"
-              defaultMessage="Showing: Last 24 Hours"
+              defaultMessage="Showing: Last 24 hours"
             />
           }
           title={
-            <FormattedMessage id="xpack.siem.overview.hostsTitle" defaultMessage="Host Events" />
+            <FormattedMessage id="xpack.siem.overview.hostsTitle" defaultMessage="Host events" />
           }
         >
           <EuiButton href="#/link-to/hosts">
-            <FormattedMessage id="xpack.siem.overview.hostsAction" defaultMessage="View Hosts" />
+            <FormattedMessage id="xpack.siem.overview.hostsAction" defaultMessage="View hosts" />
           </EuiButton>
         </HeaderPanel>
 
@@ -78,3 +76,5 @@ export const OverviewHost = pure<OverviewHostProps>(({ endDate, startDate, setQu
     </EuiFlexItem>
   );
 });
+
+OverviewHost.displayName = 'OverviewHost';

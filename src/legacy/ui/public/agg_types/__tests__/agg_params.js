@@ -22,7 +22,6 @@ import { AggParams } from '../agg_params';
 import { BaseParamType } from '../param_types/base';
 import { FieldParamType } from '../param_types/field';
 import { OptionedParamType } from '../param_types/optioned';
-import { SelectParamType } from '../param_types/select';
 
 describe('AggParams class', function () {
 
@@ -64,17 +63,17 @@ describe('AggParams class', function () {
       expect(aggParams[0]).to.be.a(OptionedParamType);
     });
 
-    it('Uses the SelectParamType class for params of type "select"', function () {
+    it('Uses the OptionedParamType class for params of type "optioned"', function () {
       const params = [
         {
           name: 'order',
-          type: 'select'
+          type: 'optioned'
         }
       ];
       const aggParams = new AggParams(params);
 
       expect(aggParams).to.have.length(params.length);
-      expect(aggParams[0]).to.be.a(SelectParamType);
+      expect(aggParams[0]).to.be.a(OptionedParamType);
     });
 
     it('Always converts the params to a BaseParamType', function () {

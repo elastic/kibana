@@ -16,15 +16,13 @@ import { BrowserFields } from '../../containers/source';
 const convertDateFieldToQuery = (field: string, value: string | number) =>
   `${field}: ${isNumber(value) ? value : new Date(value).valueOf()}`;
 
-const getBaseFields = memoizeOne(
-  (browserFields: BrowserFields): string[] => {
-    const baseFields = get('base', browserFields);
-    if (baseFields != null && baseFields.fields != null) {
-      return Object.keys(baseFields.fields);
-    }
-    return [];
+const getBaseFields = memoizeOne((browserFields: BrowserFields): string[] => {
+  const baseFields = get('base', browserFields);
+  if (baseFields != null && baseFields.fields != null) {
+    return Object.keys(baseFields.fields);
   }
-);
+  return [];
+});
 
 const getBrowserFieldPath = (field: string, browserFields: BrowserFields) => {
   const splitFields = field.split('.');
@@ -75,16 +73,17 @@ const buildQueryForAndProvider = (
 
 export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: BrowserFields) =>
   dataProviders
-    .reduce((query, dataProvider: DataProvider) => {
-      const prepend = (q: string) => `${q !== '' ? `${q} or ` : ''}`;
+    .reduce((query, dataProvider: DataProvider, i) => {
+      const prepend = (q: string) => `${q !== '' ? `(${q}) or ` : ''}`;
+      const openParen = i > 0 ? '(' : '';
+      const closeParen = i > 0 ? ')' : '';
       return dataProvider.enabled
-        ? `${prepend(query)}(
-        ${buildQueryMatch(dataProvider, browserFields)}
+        ? `${prepend(query)}${openParen}${buildQueryMatch(dataProvider, browserFields)}
         ${
           dataProvider.and.length > 0
             ? ` and ${buildQueryForAndProvider(dataProvider.and, browserFields)}`
             : ''
-        })`.trim()
+        }${closeParen}`.trim()
         : query;
     }, '')
     .trim();
@@ -98,33 +97,30 @@ export const combineQueries = (
   start: number,
   end: number
 ): { filterQuery: string } | null => {
+  let kuery: string;
   if (isEmpty(dataProviders) && isEmpty(kqlQuery)) {
     return null;
   } else if (isEmpty(dataProviders) && !isEmpty(kqlQuery)) {
+    kuery = `(${kqlQuery}) and @timestamp >= ${start} and @timestamp <= ${end}`;
     return {
-      filterQuery: convertKueryToElasticSearchQuery(
-        `(${kqlQuery}) and @timestamp >= ${start} and @timestamp <= ${end}`,
-        indexPattern
-      ),
+      filterQuery: convertKueryToElasticSearchQuery(kuery, indexPattern),
     };
   } else if (!isEmpty(dataProviders) && isEmpty(kqlQuery)) {
+    kuery = `(${buildGlobalQuery(
+      dataProviders,
+      browserFields
+    )}) and @timestamp >= ${start} and @timestamp <= ${end}`;
     return {
-      filterQuery: convertKueryToElasticSearchQuery(
-        `((${buildGlobalQuery(
-          dataProviders,
-          browserFields
-        )}) and @timestamp >= ${start} and @timestamp <= ${end})`,
-        indexPattern
-      ),
+      filterQuery: convertKueryToElasticSearchQuery(kuery, indexPattern),
     };
   }
   const operatorKqlQuery = kqlMode === 'filter' ? 'and' : 'or';
   const postpend = (q: string) => `${!isEmpty(q) ? ` ${operatorKqlQuery} (${q})` : ''}`;
-  const globalQuery = `((${buildGlobalQuery(dataProviders, browserFields)}${postpend(
+  kuery = `((${buildGlobalQuery(dataProviders, browserFields)})${postpend(
     kqlQuery
-  )}) and @timestamp >= ${start} and @timestamp <= ${end})`;
+  )}) and @timestamp >= ${start} and @timestamp <= ${end}`;
   return {
-    filterQuery: convertKueryToElasticSearchQuery(globalQuery, indexPattern),
+    filterQuery: convertKueryToElasticSearchQuery(kuery, indexPattern),
   };
 };
 

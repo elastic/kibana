@@ -23,19 +23,15 @@ module.exports = () => {
       [
         require.resolve('@babel/preset-env'),
         {
-          targets: {
-            browsers: [
-              'last 2 versions',
-              '> 5%',
-              'Safari 7', // for PhantomJS support: https://github.com/elastic/kibana/issues/27136
-            ],
-          },
           useBuiltIns: 'entry',
           modules: 'cjs',
           corejs: 2,
         },
       ],
       require('./common_preset'),
+    ],
+    plugins: [
+      '@babel/plugin-syntax-dynamic-import'
     ]
   };
 };

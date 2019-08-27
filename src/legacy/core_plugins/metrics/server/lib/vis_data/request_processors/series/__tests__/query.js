@@ -126,8 +126,7 @@ describe('query(req, panel, series)', () => {
       size: 0,
       query: {
         bool: {
-          filter: [],
-          must: [
+          filter: [
             {
               bool: {
                 must: [
@@ -139,6 +138,8 @@ describe('query(req, panel, series)', () => {
                 ],
               },
             },
+          ],
+          must: [
             {
               range: {
                 timestamp: {
@@ -218,8 +219,7 @@ describe('query(req, panel, series)', () => {
       size: 0,
       query: {
         bool: {
-          filter: [],
-          must: [
+          filter: [
             {
               bool: {
                 must: [
@@ -231,6 +231,8 @@ describe('query(req, panel, series)', () => {
                 ],
               },
             },
+          ],
+          must: [
             {
               range: {
                 timestamp: {

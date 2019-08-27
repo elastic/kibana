@@ -12,6 +12,7 @@ import { PageLoading } from 'plugins/monitoring/components';
 import { timefilter } from 'ui/timefilter';
 import { I18nContext } from 'ui/i18n';
 import { PromiseWithCancel } from '../../common/cancel_promise';
+import { updateSetupModeData, getSetupModeState } from '../lib/setup_mode';
 
 /**
  * Class to manage common instantiation behaviors in a view controller
@@ -73,12 +74,25 @@ export class MonitoringViewBaseController {
   }) {
     const titleService = $injector.get('title');
     const $executor = $injector.get('$executor');
+    const $window = $injector.get('$window');
 
     titleService($scope.cluster, title);
 
     $scope.pageData = this.data = { ...defaultData };
     this._isDataInitialized = false;
     this.reactNodeId = reactNodeId;
+
+    let deferTimer;
+    let zoomInLevel = 0;
+
+    const popstateHandler = () => (zoomInLevel > 0) && --zoomInLevel;
+    const removePopstateHandler = () => $window.removeEventListener('popstate', popstateHandler);
+    const addPopstateHandler = () => $window.addEventListener('popstate', popstateHandler);
+
+    this.zoomInfo = {
+      zoomOutHandler: () => $window.history.back(),
+      showZoomOutBtn: () => zoomInLevel > 0
+    };
 
     const {
       enableTimeFilter = true,
@@ -105,8 +119,13 @@ export class MonitoringViewBaseController {
         this.updateDataPromise = null;
       }
       const _api = apiUrlFn ? apiUrlFn() : api;
-      this.updateDataPromise = new PromiseWithCancel(_getPageData($injector, _api));
-      return this.updateDataPromise.promise().then((pageData) => {
+      const promises = [_getPageData($injector, _api)];
+      const setupMode = getSetupModeState();
+      if (setupMode.enabled) {
+        promises.push(updateSetupModeData());
+      }
+      this.updateDataPromise = new PromiseWithCancel(Promise.all(promises));
+      return this.updateDataPromise.promise().then(([pageData]) => {
         $scope.$apply(() => {
           this._isDataInitialized = true; // render will replace loading screen with the react component
           $scope.pageData = this.data = pageData; // update the view's data with the fetch result
@@ -120,6 +139,8 @@ export class MonitoringViewBaseController {
     });
     $executor.start($scope);
     $scope.$on('$destroy', () => {
+      clearTimeout(deferTimer);
+      removePopstateHandler();
       if (this.reactNodeId) { // WIP https://github.com/elastic/x-pack-kibana/issues/5198
         unmountComponentAtNode(document.getElementById(this.reactNodeId));
       }
@@ -128,12 +149,20 @@ export class MonitoringViewBaseController {
 
     // needed for chart pages
     this.onBrush = ({ xaxis }) => {
+      removePopstateHandler();
       const { to, from } = xaxis;
       timefilter.setTime({
         from: moment(from),
         to: moment(to),
         mode: 'absolute'
       });
+      ++zoomInLevel;
+      clearTimeout(deferTimer);
+      /*
+        Needed to defer 'popstate' event, so it does not fire immediately after it's added.
+        10ms is to make sure the event is not added with the same code digest
+      */
+      deferTimer = setTimeout(() => addPopstateHandler(), 10);
     };
 
     this.setTitle = title => titleService($scope.cluster, title);

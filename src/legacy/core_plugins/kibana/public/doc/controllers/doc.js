@@ -28,7 +28,6 @@ import 'plugins/kibana/doc_viewer';
 import { getRootBreadcrumbs } from 'plugins/kibana/discover/breadcrumbs';
 
 const app = uiModules.get('apps/doc', [
-  'kibana/notify',
   'kibana/courier',
   'kibana/index_patterns'
 ]);

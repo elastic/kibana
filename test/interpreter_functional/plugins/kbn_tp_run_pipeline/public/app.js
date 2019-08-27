@@ -23,8 +23,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
 
-import { RequestAdapter } from 'ui/inspector/adapters/request';
-import { DataAdapter } from 'ui/inspector/adapters/data';
+import { RequestAdapter, DataAdapter } from 'ui/inspector/adapters';
 import { runPipeline } from 'ui/visualize/loader/pipeline_helpers';
 import { visualizationLoader } from 'ui/visualize/loader/visualization_loader';
 

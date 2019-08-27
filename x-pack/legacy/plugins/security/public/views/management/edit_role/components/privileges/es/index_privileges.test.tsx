@@ -28,6 +28,7 @@ test('it renders without crashing', () => {
     allowFieldLevelSecurity: true,
     editable: true,
     validator: new RoleValidator(),
+    availableIndexPrivileges: ['all', 'read', 'write', 'index'],
   };
   const wrapper = shallowWithIntl(<IndexPrivileges {...props} />);
   expect(wrapper).toMatchSnapshot();
@@ -60,6 +61,7 @@ test('it renders a IndexPrivilegeForm for each privilege on the role', () => {
     allowDocumentLevelSecurity: true,
     allowFieldLevelSecurity: true,
     validator: new RoleValidator(),
+    availableIndexPrivileges: ['all', 'read', 'write', 'index'],
   };
   const wrapper = mountWithIntl(<IndexPrivileges {...props} />);
   expect(wrapper.find(IndexPrivilegeForm)).toHaveLength(1);

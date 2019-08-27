@@ -16,7 +16,7 @@ declare module 'lodash/internal/toPath' {
 }
 
 type MethodKeysOf<T> = {
-  [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never
+  [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never;
 }[keyof T];
 
 type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;
@@ -24,6 +24,13 @@ type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;
 declare module 'axios/lib/adapters/xhr';
 
 type MockedKeys<T> = { [P in keyof T]: jest.Mocked<T[P]> };
+
+type DeeplyMockedKeys<T> = {
+  [P in keyof T]: T[P] extends (...args: any[]) => any
+    ? jest.MockInstance<ReturnType<T[P]>, Parameters<T[P]>>
+    : DeeplyMockedKeys<T[P]>;
+} &
+  T;
 
 // allow JSON files to be imported directly without lint errors
 // see: https://github.com/palantir/tslint/issues/1264#issuecomment-228433367

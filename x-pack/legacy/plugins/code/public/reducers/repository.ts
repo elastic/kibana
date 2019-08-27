@@ -9,6 +9,7 @@ import { Action, handleActions } from 'redux-actions';
 import { Repository } from '../../model';
 
 import { loadRepo, loadRepoSuccess, loadRepoFailed } from '../actions';
+import { routePathChange, repoChange } from '../actions/route';
 
 export interface RepositoryState {
   repository?: Repository;
@@ -18,6 +19,12 @@ export interface RepositoryState {
 const initialState: RepositoryState = {
   repoNotFound: false,
 };
+
+const clearState = (state: RepositoryState) =>
+  produce<RepositoryState>(state, draft => {
+    draft.repository = undefined;
+    draft.repoNotFound = initialState.repoNotFound;
+  });
 
 export const repository = handleActions<RepositoryState, Repository>(
   {
@@ -36,6 +43,8 @@ export const repository = handleActions<RepositoryState, Repository>(
         draft.repository = undefined;
         draft.repoNotFound = true;
       }),
+    [String(routePathChange)]: clearState,
+    [String(repoChange)]: clearState,
   },
   initialState
 );

@@ -21,19 +21,17 @@ import { OverviewNetworkStats } from '../overview_network_stats';
 export interface OwnProps {
   startDate: number;
   endDate: number;
-  setQuery: (
-    {
-      id,
-      inspect,
-      loading,
-      refetch,
-    }: {
-      id: string;
-      inspect: inputsModel.InspectQuery | null;
-      loading: boolean;
-      refetch: inputsModel.Refetch;
-    }
-  ) => void;
+  setQuery: ({
+    id,
+    inspect,
+    loading,
+    refetch,
+  }: {
+    id: string;
+    inspect: inputsModel.InspectQuery | null;
+    loading: boolean;
+    refetch: inputsModel.Refetch;
+  }) => void;
 }
 
 const OverviewNetworkStatsManage = manageQuery(OverviewNetworkStats);
@@ -50,20 +48,20 @@ export const OverviewNetwork = pure<OwnProps>(({ endDate, startDate, setQuery })
           subtitle={
             <FormattedMessage
               id="xpack.siem.overview.networkSubtitle"
-              defaultMessage="Showing: Last 24 Hours"
+              defaultMessage="Showing: Last 24 hours"
             />
           }
           title={
             <FormattedMessage
               id="xpack.siem.overview.networkTitle"
-              defaultMessage="Network Events"
+              defaultMessage="Network events"
             />
           }
         >
           <EuiButton href="#/link-to/network/">
             <FormattedMessage
               id="xpack.siem.overview.networkAction"
-              defaultMessage="View Network"
+              defaultMessage="View network"
             />
           </EuiButton>
         </HeaderPanel>
@@ -84,3 +82,5 @@ export const OverviewNetwork = pure<OwnProps>(({ endDate, startDate, setQuery })
     </EuiFlexItem>
   );
 });
+
+OverviewNetwork.displayName = 'OverviewNetwork';

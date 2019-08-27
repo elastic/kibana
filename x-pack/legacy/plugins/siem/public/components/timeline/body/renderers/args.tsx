@@ -30,3 +30,5 @@ export const Args = pure<Props>(({ eventId, contextId, args, processTitle }) =>
     </TokensFlexItem>
   ) : null
 );
+
+Args.displayName = 'Args';

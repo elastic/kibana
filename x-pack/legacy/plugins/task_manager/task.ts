@@ -21,12 +21,6 @@ export type ElasticJs = (action: string, args: any) => Promise<any>;
  */
 export interface RunContext {
   /**
-   * The Kibana server object. This gives tasks full-access to the server object,
-   * including the various ES options client functions
-   */
-  kbnServer: object;
-
-  /**
    * The document describing the task instance, its params, state, id, etc.
    */
   taskInstance: ConcreteTaskInstance;
@@ -94,12 +88,27 @@ export interface TaskDefinition {
   description?: string;
 
   /**
-   * How long, in minutes, the system should wait for the task to complete
+   * How long, in minutes or seconds, the system should wait for the task to complete
    * before it is considered to be timed out. (e.g. '5m', the default). If
    * the task takes longer than this, Kibana will send it a kill command and
    * the task will be re-attempted.
    */
   timeout?: string;
+
+  /**
+   * Up to how many times the task should retry when it fails to run. This will
+   * default to the global variable.
+   */
+  maxAttempts?: number;
+
+  /**
+   * Function that customizes how the task should behave when the task fails. This
+   * function can return `true`, `false` or a Date. True will tell task manager
+   * to retry using default delay logic. False will tell task manager to stop retrying
+   * this task. Date will suggest when to the task manager the task should retry.
+   * This function isn't used for interval type tasks, those retry at the next interval.
+   */
+  getRetry?: (attempts: number, error: object) => boolean | Date;
 
   /**
    * The numer of workers / slots a running instance of this task occupies.
@@ -126,10 +135,14 @@ export const validateTaskDefinition = Joi.object({
   title: Joi.string().optional(),
   description: Joi.string().optional(),
   timeout: Joi.string().default('5m'),
+  maxAttempts: Joi.number()
+    .min(1)
+    .optional(),
   numWorkers: Joi.number()
     .min(1)
     .default(1),
   createTaskRunner: Joi.func().required(),
+  getRetry: Joi.func().optional(),
 }).default();
 
 /**
@@ -163,6 +176,19 @@ export interface TaskInstance {
    * for convenience to task run functions, and for troubleshooting.
    */
   scheduledAt?: Date;
+
+  /**
+   * The date and time that this task started execution. This is used to determine
+   * the "real" runAt that ended up running the task. This value is only set
+   * when status is set to "running".
+   */
+  startedAt?: Date | null;
+
+  /**
+   * The date and time that this task should re-execute if stuck in "running" / timeout
+   * status. This value is only set when status is set to "running".
+   */
+  retryAt?: Date | null;
 
   /**
    * The date and time that this task is scheduled to be run. It is not
@@ -212,14 +238,9 @@ export interface ConcreteTaskInstance extends TaskInstance {
   id: string;
 
   /**
-   * The sequence number from the Elaticsearch document.
+   * The saved object version from the Elaticsearch document.
    */
-  sequenceNumber: number;
-
-  /**
-   * The primary term from the Elaticsearch document.
-   */
-  primaryTerm: number;
+  version?: string;
 
   /**
    * The date and time that this task was originally scheduled. This is used
@@ -243,6 +264,19 @@ export interface ConcreteTaskInstance extends TaskInstance {
    * to run at this time, but it is guaranteed not to run earlier than this.
    */
   runAt: Date;
+
+  /**
+   * The date and time that this task started execution. This is used to determine
+   * the "real" runAt that ended up running the task. This value is only set
+   * when status is set to "running".
+   */
+  startedAt: Date | null;
+
+  /**
+   * The date and time that this task should re-execute if stuck in "running" / timeout
+   * status. This value is only set when status is set to "running".
+   */
+  retryAt: Date | null;
 
   /**
    * The state passed into the task's run function, and returned by the previous

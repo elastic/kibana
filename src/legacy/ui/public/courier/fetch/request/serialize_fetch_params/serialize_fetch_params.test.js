@@ -81,7 +81,7 @@ describe('headers', () => {
     return JSON.parse(requestParts[0]);
   };
 
-  describe('search request preference', async () => {
+  describe('search request preference', () => {
     test('should be set to sessionId when courier:setRequestPreference is "sessionId"', async () => {
       const config = {
         get: () => {
@@ -146,7 +146,7 @@ describe('body', () => {
 
     test('should not set a timeout when timeout is 0', async () => {
       const request = await getBody({ requestFetchParams, timeout: 0 });
-      expect(request).not.toHaveProperty('timeout');
+      expect(request.timeout).toBe(undefined);
     });
   });
 });

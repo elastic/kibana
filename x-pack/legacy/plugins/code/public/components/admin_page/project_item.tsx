@@ -18,10 +18,12 @@ import {
   EuiOverlayMask,
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { Repository, WorkerReservedProgress } from '../../../model';
 import { deleteRepo, indexRepo, initRepoCommand } from '../../actions';
 import { RepoState, RepoStatus } from '../../actions/status';
@@ -88,33 +90,70 @@ class CodeProjectItem extends React.PureComponent<
     let disableRepoLink = false;
     let hasError = false;
     if (!status) {
-      footer = <div className="codeFooter">INIT...</div>;
+      footer = (
+        <div className="codeFooter">
+          <FormattedMessage id="xpack.code.repoItem.initText" defaultMessage="INIT..." />
+        </div>
+      );
     } else if (status.state === RepoState.READY) {
       footer = (
         <div className="codeFooter" data-test-subj="repositoryIndexDone">
-          LAST UPDATED: {moment(status.timestamp).fromNow()}
+          <FormattedMessage
+            id="xpack.code.repoItem.lastUpdatedText"
+            defaultMessage="LAST UPDATED"
+          />
+          :{' '}
+          {moment(status.timestamp)
+            .locale(i18n.getLocale())
+            .fromNow()}
         </div>
       );
     } else if (status.state === RepoState.DELETING) {
-      footer = <div className="codeFooter">DELETING...</div>;
+      footer = (
+        <div className="codeFooter">
+          <FormattedMessage id="xpack.code.repoItem.deletingText" defaultMessage="DELETING..." />
+        </div>
+      );
     } else if (status.state === RepoState.INDEXING) {
       footer = (
         <div className="codeFooter" data-test-subj="repositoryIndexOngoing">
-          INDEXING...
+          <FormattedMessage id="xpack.code.repoItem.indexingText" defaultMessage="INDEXING..." />
         </div>
       );
     } else if (status.state === RepoState.CLONING) {
-      footer = <div className="codeFooter">CLONING...</div>;
+      footer = (
+        <div className="codeFooter">
+          <FormattedMessage id="xpack.code.repoItem.cloningText" defaultMessage="CLONING..." />
+        </div>
+      );
     } else if (status.state === RepoState.DELETE_ERROR) {
-      footer = <div className="codeFooter codeFooter--error">ERROR DELETE REPO</div>;
+      footer = (
+        <div className="codeFooter codeFooter--error">
+          <FormattedMessage
+            id="xpack.code.repoItem.deleteErrorText"
+            defaultMessage="ERROR DELETE REPO"
+          />
+        </div>
+      );
       hasError = true;
     } else if (status.state === RepoState.INDEX_ERROR) {
-      footer = <div className="codeFooter codeFooter--error">ERROR INDEX REPO</div>;
+      footer = (
+        <div className="codeFooter codeFooter--error">
+          <FormattedMessage
+            id="xpack.code.repoItem.indexErrorText"
+            defaultMessage="ERROR INDEX REPO"
+          />
+        </div>
+      );
       hasError = true;
     } else if (status.state === RepoState.CLONE_ERROR) {
       footer = (
         <div className="codeFooter codeFooter--error">
-          ERROR CLONING REPO&nbsp;
+          <FormattedMessage
+            id="xpack.code.repoItem.cloneErrorText"
+            defaultMessage="ERROR CLONING REPO"
+          />
+          &nbsp;
           <EuiToolTip position="top" content={status.errorMessage}>
             <EuiIcon type="iInCircle" />
           </EuiToolTip>
@@ -161,7 +200,10 @@ class CodeProjectItem extends React.PureComponent<
             >
               <EuiIcon type="gear" />
               <EuiText size="xs" color="subdued">
-                Settings
+                <FormattedMessage
+                  id="xpack.code.repoItem.settingsButtonLabel"
+                  defaultMessage="Settings"
+                />
               </EuiText>
             </div>
           </EuiFlexItem>
@@ -177,7 +219,10 @@ class CodeProjectItem extends React.PureComponent<
             >
               <EuiIcon type="indexSettings" />
               <EuiText size="xs" color="subdued">
-                Reindex
+                <FormattedMessage
+                  id="xpack.code.repoItem.reindexButtonLabel"
+                  defaultMessage="Reindex"
+                />
               </EuiText>
             </div>
           </EuiFlexItem>
@@ -193,7 +238,10 @@ class CodeProjectItem extends React.PureComponent<
             >
               <EuiIcon type="trash" color="danger" />
               <EuiText size="xs" color="subdued">
-                Delete
+                <FormattedMessage
+                  id="xpack.code.repoItem.deleteButtonLabel"
+                  defaultMessage="Delete"
+                />
               </EuiText>
             </div>
           </EuiFlexItem>
@@ -244,11 +292,17 @@ class CodeProjectItem extends React.PureComponent<
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title="Reindex this repository?"
+          title={i18n.translate('xpack.code.repoItem.reindexConfirmTitle', {
+            defaultMessage: 'Reindex this repository?',
+          })}
           onCancel={this.closeReindexModal}
           onConfirm={this.confirmReindex}
-          cancelButtonText="No, don't do it"
-          confirmButtonText="Yes, do it"
+          cancelButtonText={i18n.translate('xpack.code.repoItem.cancelButtonText', {
+            defaultMessage: "No, don't do it",
+          })}
+          confirmButtonText={i18n.translate('xpack.code.repoItem.confirmButtonText', {
+            defaultMessage: 'Yes, do it',
+          })}
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
         />
       </EuiOverlayMask>
@@ -259,11 +313,17 @@ class CodeProjectItem extends React.PureComponent<
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title="Delete this repository?"
+          title={i18n.translate('xpack.code.repoItem.deleteConfirmTitle', {
+            defaultMessage: 'Delete this repository?',
+          })}
           onCancel={this.closeDeleteModal}
           onConfirm={this.confirmDelete}
-          cancelButtonText="No, don't do it"
-          confirmButtonText="Yes, do it"
+          cancelButtonText={i18n.translate('xpack.code.repoItem.cancelButtonText', {
+            defaultMessage: "No, don't do it",
+          })}
+          confirmButtonText={i18n.translate('xpack.code.repoItem.confirmButtonText', {
+            defaultMessage: 'Yes, do it',
+          })}
           buttonColor="danger"
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
         />

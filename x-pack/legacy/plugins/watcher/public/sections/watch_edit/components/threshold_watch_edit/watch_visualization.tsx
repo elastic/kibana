@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useEffect } from 'react';
 import {
   AnnotationDomainTypes,
   Axis,
@@ -130,41 +130,38 @@ export const WatchVisualization = () => {
   // Fetching visualization data is independent of watch actions
   const watchWithoutActions = new ThresholdWatch({ ...watch, actions: [] });
 
-  const [isInitialRequest, setIsInitialRequest] = useState<boolean>(true);
-
   const {
+    isInitialRequest,
     isLoading,
     data: watchVisualizationData,
     error,
-    createRequest: reload,
+    sendRequest: reload,
   } = getWatchVisualizationData(watchWithoutActions, visualizeOptions);
 
-  useEffect(
-    () => {
-      // Prevents refetch on initial render
-      if (isInitialRequest) {
-        return setIsInitialRequest(false);
-      }
-      reload(false);
-    },
-    [
-      index,
-      timeField,
-      triggerIntervalSize,
-      triggerIntervalUnit,
-      aggType,
-      aggField,
-      termSize,
-      termField,
-      thresholdComparator,
-      timeWindowSize,
-      timeWindowUnit,
-      groupBy,
-      threshold,
-    ]
-  );
+  useEffect(() => {
+    // Prevent sending a second request on initial render.
+    if (isInitialRequest) {
+      return;
+    }
 
-  if (isLoading) {
+    reload();
+  }, [
+    index,
+    timeField,
+    triggerIntervalSize,
+    triggerIntervalUnit,
+    aggType,
+    aggField,
+    termSize,
+    termField,
+    thresholdComparator,
+    timeWindowSize,
+    timeWindowUnit,
+    groupBy,
+    threshold,
+  ]);
+
+  if (isInitialRequest && isLoading) {
     return (
       <EuiEmptyPrompt
         title={<EuiLoadingChart size="xl" />}
@@ -286,5 +283,6 @@ export const WatchVisualization = () => {
       </div>
     );
   }
+
   return null;
 };

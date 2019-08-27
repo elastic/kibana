@@ -10,11 +10,12 @@ import { Match, routeChange } from '../actions';
 
 interface Props extends RouteProps {
   routeChange: (match: Match) => void;
+  computedMatch?: any;
 }
 class CSRoute extends ReactRoute<Props> {
-  // eslint-disable-next-line @typescript-eslint/camelcase
-  public UNSAFE_componentWillMount() {
-    this.props.routeChange({ ...this.state.match, location: this.props.location });
+  constructor(props: Props, context: any) {
+    super(props, context);
+    props.routeChange({ ...props.computedMatch, location: props.location });
   }
 
   public componentDidUpdate() {

@@ -5,7 +5,11 @@
  */
 
 // @ts-ignore
-import { trackUiMetric } from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
+import {
+  createUiStatsReporter,
+  METRIC_TYPE,
+} from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
 import { APP_ID } from '../../../common/constants';
 
-export const trackUiAction = (metricType: string) => trackUiMetric(APP_ID, metricType);
+export const trackUiAction = createUiStatsReporter(APP_ID);
+export { METRIC_TYPE };

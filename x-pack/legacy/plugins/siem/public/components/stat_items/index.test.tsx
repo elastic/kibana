@@ -25,13 +25,12 @@ import {
   mockData,
   mockEnableChartsData,
   mockNoChartMappings,
+  mockNarrowDateRange,
 } from '../page/network/kpi_network/mock';
 import { mockGlobalState, apolloClientObservable } from '../../mock';
 import { State, createStore } from '../../store';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { KpiNetworkData, KpiHostsData } from '../../graphql/types';
-jest.mock('../charts/barchart');
-jest.mock('../charts/areachart');
 
 const from = new Date('2019-06-15T06:00:00.000Z').valueOf();
 const to = new Date('2019-06-18T06:00:00.000Z').valueOf();
@@ -52,6 +51,7 @@ describe('Stat Items Component', () => {
             index={0}
             key="mock-keys"
             to={to}
+            narrowDateRange={mockNarrowDateRange}
           />
         </ReduxStoreProvider>
       ),
@@ -69,6 +69,7 @@ describe('Stat Items Component', () => {
             index={0}
             key="mock-keys"
             to={to}
+            narrowDateRange={mockNarrowDateRange}
           />
         </ReduxStoreProvider>
       ),
@@ -153,6 +154,7 @@ describe('Stat Items Component', () => {
       index: 0,
       key: 'mock-keys',
       to,
+      narrowDateRange: mockNarrowDateRange,
     };
     let wrapper: ReactWrapper;
     beforeAll(() => {
@@ -231,7 +233,8 @@ describe('useKpiMatrixStatus', () => {
       data,
       'statItem',
       from,
-      to
+      to,
+      mockNarrowDateRange
     );
 
     return (

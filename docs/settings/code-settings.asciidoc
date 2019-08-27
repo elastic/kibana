@@ -35,11 +35,11 @@ Whitelist of protocols for git clone address. Defaults to `[ 'https', 'git', 'ss
 `xpack.code.security.enableGitCertCheck`::
 Whether enable HTTPS certificate check when clone from HTTPS URL.
 
-`xpack.code.disableIndexScheduler`::
-Whether automatic index update is disabled. Defaults to `true`.
-
 `xpack.code.maxWorkspace`::
 Maximal number of workspaces each language server allows to span. Defaults to `5`.
 
 `xpack.code.codeNodeUrl`::
 URL of the Code node. This config is only needed when multiple Kibana instances are set up as a cluster. Defaults to ``
+
+`xpack.code.verbose`::
+Set this config to `true` to log all events. Defaults to `false`

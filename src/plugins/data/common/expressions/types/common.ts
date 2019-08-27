@@ -58,3 +58,13 @@ export type UnmappedTypeStrings = 'date' | 'filter';
  * Utility type: extracts returned type from a Promise.
  */
 export type UnwrapPromise<T> = T extends Promise<infer P> ? P : T;
+
+/**
+ * JSON representation of a field formatter configuration.
+ * Is used to carry information about how to format data in
+ * a data table as part of the column definition.
+ */
+export interface SerializedFieldFormat<TParams = object> {
+  id?: string;
+  params?: TParams;
+}

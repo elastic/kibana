@@ -50,9 +50,9 @@ import {
   importLegacyFile,
   resolveImportErrors,
   logLegacyImport,
-  processImportResponse,
   getDefaultTitle,
 } from '../../../../lib';
+import { processImportResponse } from '../../../../lib/process_import_response';
 import {
   resolveSavedObjects,
   resolveSavedSearches,
@@ -488,9 +488,9 @@ class FlyoutUI extends Component {
         }),
         render: id => {
           const options = this.state.indexPatterns.map(indexPattern => ({
-            text: indexPattern.get('title'),
+            text: indexPattern.title,
             value: indexPattern.id,
-            ['data-test-subj']: `indexPatternOption-${indexPattern.get('title')}`,
+            ['data-test-subj']: `indexPatternOption-${indexPattern.title}`,
           }));
 
           options.unshift({

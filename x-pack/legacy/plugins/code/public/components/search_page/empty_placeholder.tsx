@@ -5,6 +5,7 @@
  */
 
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 export const EmptyPlaceholder = (props: any) => {
@@ -25,11 +26,17 @@ export const EmptyPlaceholder = (props: any) => {
       </EuiText>
       <EuiSpacer size="xl" />
       <EuiText textAlign="center" style={{ fontSize: '28px', color: '#1A1A1A' }}>
-        Hmmm... we looked for that, but couldn’t find anything.
+        <FormattedMessage
+          id="xpack.code.searchPage.emptyTitle"
+          defaultMessage="Hmmm... we looked for that, but couldn’t find anything."
+        />
       </EuiText>
       <EuiSpacer size="xl" />
       <EuiText textAlign="center" color="subdued">
-        You can search for something else or modify your search settings.
+        <FormattedMessage
+          id="xpack.code.searchPage.emptyText"
+          defaultMessage="You can search for something else or modify your search settings."
+        />
       </EuiText>
       <EuiSpacer size="l" />
       <EuiText textAlign="center">
@@ -41,7 +48,10 @@ export const EmptyPlaceholder = (props: any) => {
             }
           }}
         >
-          Modify your search settings
+          <FormattedMessage
+            id="xpack.code.searchPage.modifySearchSettingButtonLabel"
+            defaultMessage="Modify your search settings"
+          />
         </EuiButton>
       </EuiText>
     </div>

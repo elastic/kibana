@@ -18,6 +18,8 @@ const EmptyString = styled.span`
   }) => euiColorMediumShade};
 `;
 
+EmptyString.displayName = 'EmptyString';
+
 export const getEmptyValue = () => '--';
 export const getEmptyString = () => `(${i18n.EMPTY_STRING})`;
 

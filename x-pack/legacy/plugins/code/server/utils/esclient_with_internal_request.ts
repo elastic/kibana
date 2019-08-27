@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
+import { ServerFacade } from '../..';
 import { AnyObject, EsClient } from '../lib/esqueue';
 import { EsIndexClient } from './es_index_client';
 import { WithInternalRequest } from './with_internal_request';
@@ -12,7 +12,7 @@ import { WithInternalRequest } from './with_internal_request';
 export class EsClientWithInternalRequest extends WithInternalRequest implements EsClient {
   public readonly indices = new EsIndexClient(this);
 
-  constructor(server: Server) {
+  constructor(server: ServerFacade) {
     super(server);
   }
 

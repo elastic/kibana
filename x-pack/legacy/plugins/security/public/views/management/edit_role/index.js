@@ -10,13 +10,11 @@ import { capabilities } from 'ui/capabilities';
 import { kfetch } from 'ui/kfetch';
 import { fatalError, toastNotifications } from 'ui/notify';
 import template from 'plugins/security/views/management/edit_role/edit_role.html';
-import 'ui/angular_ui_select';
-import 'plugins/security/services/application_privilege';
 import 'plugins/security/services/shield_user';
 import 'plugins/security/services/shield_role';
 import 'plugins/security/services/shield_indices';
 
-import { IndexPatternsProvider } from 'ui/index_patterns/index_patterns';
+import { IndexPatternsProvider } from 'ui/index_patterns';
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { SpacesManager } from '../../../../../spaces/public/lib';
 import { ROLES_PATH, CLONE_ROLES_PATH, EDIT_ROLES_PATH } from '../management_urls';
@@ -87,8 +85,11 @@ const routeDefinition = (action) => ({
       }
       return [];
     },
-    privileges() {
+    kibanaPrivileges() {
       return kfetch({ method: 'get', pathname: '/api/security/privileges', query: { includeActions: true } });
+    },
+    builtinESPrivileges() {
+      return kfetch({ method: 'get', pathname: '/api/security/v1/esPrivileges/builtin' });
     },
     features() {
       return kfetch({ method: 'get', pathname: '/api/features/v1' }).catch(e => {
@@ -132,7 +133,8 @@ const routeDefinition = (action) => ({
       users,
       indexPatterns,
       spaces,
-      privileges,
+      kibanaPrivileges,
+      builtinESPrivileges,
       features,
     } = $route.current.locals;
 
@@ -153,7 +155,8 @@ const routeDefinition = (action) => ({
             spacesEnabled={enableSpaceAwarePrivileges}
             uiCapabilities={capabilities.get()}
             features={features}
-            privileges={privileges}
+            kibanaPrivileges={kibanaPrivileges}
+            builtinESPrivileges={builtinESPrivileges}
           />
         </I18nContext>, domNode);
 

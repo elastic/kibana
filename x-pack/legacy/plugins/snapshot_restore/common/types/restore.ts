@@ -5,23 +5,25 @@
  */
 
 export interface RestoreSettings {
-  indices?: string[];
+  indices?: string[] | string;
   renamePattern?: string;
   renameReplacement?: string;
   includeGlobalState?: boolean;
   partial?: boolean;
   indexSettings?: string;
   ignoreIndexSettings?: string[];
+  ignoreUnavailable?: boolean;
 }
 
 export interface RestoreSettingsEs {
-  indices?: string[];
+  indices?: string[] | string;
   rename_pattern?: string;
   rename_replacement?: string;
   include_global_state?: boolean;
   partial?: boolean;
   index_settings?: { [key: string]: any };
   ignore_index_settings?: string[];
+  ignore_unavailable?: boolean;
 }
 
 export interface SnapshotRestore {

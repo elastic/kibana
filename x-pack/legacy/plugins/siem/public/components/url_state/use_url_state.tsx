@@ -84,7 +84,7 @@ export const useUrlStateHooks = ({
         urlKey
       );
       if (newUrlStateString) {
-        setInitialStateFromUrl(urlKey, newUrlStateString, location);
+        setInitialStateFromUrl(urlKey, newUrlStateString);
       } else {
         if (urlKey === CONSTANTS.timerange) {
           replaceStateInLocation(urlState[urlKey], urlKey);
@@ -99,11 +99,7 @@ export const useUrlStateHooks = ({
     });
   };
 
-  const setInitialStateFromUrl = (
-    urlKey: KeyUrlState,
-    newUrlStateString: string,
-    newLocation: Location
-  ) => {
+  const setInitialStateFromUrl = (urlKey: KeyUrlState, newUrlStateString: string) => {
     if (urlKey === CONSTANTS.timerange) {
       const timerangeStateData: UrlInputsModel = decodeRisonUrlState(newUrlStateString);
       const globalId: InputsModelId = 'global';

@@ -28,3 +28,5 @@ export const LinkToPage = pure<LinkToPageProps>(({ match }) => (
     <Redirect to="/" />
   </Switch>
 ));
+
+LinkToPage.displayName = 'LinkToPage';

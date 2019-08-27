@@ -4,14 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiButtonGroup, EuiFlexGroup, EuiTitle, EuiLink } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonGroup,
+  EuiFlexGroup,
+  EuiTitle,
+  EuiLink,
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+  EuiPageContentHeader,
+  EuiPageContentHeaderSection,
+  EuiPageContentBody,
+  EuiProgress,
+  EuiButtonGroupOption,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import 'github-markdown-css/github-markdown.css';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import { connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router-dom';
 import { withRouter } from 'react-router-dom';
-import chrome from 'ui/chrome';
+import { npStart } from 'ui/new_platform';
 
 import { RepositoryUtils } from '../../../common/repository_utils';
 import {
@@ -20,6 +37,7 @@ import {
   SearchOptions,
   SearchScope,
   WorkerReservedProgress,
+  Repository,
 } from '../../../model';
 import { CommitInfo, ReferenceInfo } from '../../../model/commit';
 import { changeSearchScope, FetchFileResponse, RepoState, RepoStatus } from '../../actions';
@@ -29,7 +47,7 @@ import {
   currentTreeSelector,
   hasMoreCommitsSelector,
   repoUriSelector,
-  statusSelector,
+  repoStatusSelector,
 } from '../../selectors';
 import { encodeRevisionString } from '../../../common/uri_util';
 import { history } from '../../utils/url';
@@ -43,12 +61,14 @@ import { TopBar } from './top_bar';
 
 interface Props extends RouteComponentProps<MainRouteParams> {
   isNotFound: boolean;
+  fileLoading: boolean;
   repoStatus?: RepoStatus;
   tree: FileTree;
   file: FetchFileResponse | undefined;
-  currentTree: FileTree | undefined;
+  currentTree: FileTree | null;
   commits: CommitInfo[];
   branches: ReferenceInfo[];
+  tags: ReferenceInfo[];
   hasMoreCommits: boolean;
   loadingCommits: boolean;
   onSearchScopeChanged: (s: SearchScope) => void;
@@ -57,6 +77,7 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   fileTreeLoadingPaths: string[];
   searchOptions: SearchOptions;
   query: string;
+  currentRepository: Repository;
 }
 const LANG_MD = 'markdown';
 
@@ -67,14 +88,34 @@ enum ButtonOption {
   Folder = 'Directory',
 }
 
-enum ButtonLabel {
-  Code = 'Code',
-  Content = 'Content',
-  Download = 'Download',
-  Raw = 'Raw',
+interface State {
+  fileLoading: boolean;
 }
 
-class CodeContent extends React.PureComponent<Props> {
+class CodeContent extends React.PureComponent<Props, State> {
+  static getDerivedStateFromProps(props: Props, state: State) {
+    if (!props.fileLoading) {
+      return { fileLoading: props.fileLoading };
+    }
+  }
+  state = {
+    fileLoading: this.props.fileLoading,
+  };
+
+  componentDidUpdate(prevProps: Props) {
+    // after this amount of time, show file loading indicator if necessary
+    const TIME_DELAY_MS: number = 500;
+    if (!prevProps.fileLoading && this.props.fileLoading && !this.state.fileLoading) {
+      setTimeout(
+        () =>
+          this.setState({
+            fileLoading: this.props.fileLoading,
+          }),
+        TIME_DELAY_MS
+      );
+    }
+  }
+
   public findNode = (pathSegments: string[], node: FileTree): FileTree | undefined => {
     if (!node) {
       return undefined;
@@ -95,26 +136,31 @@ class CodeContent extends React.PureComponent<Props> {
 
   public switchButton = (id: string) => {
     const { path, resource, org, repo, revision } = this.props.match.params;
+    const queryString = this.props.location.search;
     const repoUri = `${resource}/${org}/${repo}`;
     switch (id) {
       case ButtonOption.Code:
         history.push(
-          `/${repoUri}/${PathTypes.blob}/${encodeRevisionString(revision)}/${path || ''}`
+          `/${repoUri}/${PathTypes.blob}/${encodeRevisionString(revision)}/${path ||
+            ''}${queryString}`
         );
         break;
       case ButtonOption.Folder:
         history.push(
-          `/${repoUri}/${PathTypes.tree}/${encodeRevisionString(revision)}/${path || ''}`
+          `/${repoUri}/${PathTypes.tree}/${encodeRevisionString(revision)}/${path ||
+            ''}${queryString}`
         );
         break;
       case ButtonOption.Blame:
         history.push(
-          `/${repoUri}/${PathTypes.blame}/${encodeRevisionString(revision)}/${path || ''}`
+          `/${repoUri}/${PathTypes.blame}/${encodeRevisionString(revision)}/${path ||
+            ''}${queryString}`
         );
         break;
       case ButtonOption.History:
         history.push(
-          `/${repoUri}/${PathTypes.commits}/${encodeRevisionString(revision)}/${path || ''}`
+          `/${repoUri}/${PathTypes.commits}/${encodeRevisionString(revision)}/${path ||
+            ''}${queryString}`
         );
         break;
     }
@@ -124,7 +170,29 @@ class CodeContent extends React.PureComponent<Props> {
     const { path, resource, org, repo, revision } = this.props.match.params;
     const repoUri = `${resource}/${org}/${repo}`;
     window.open(
-      chrome.addBasePath(`/app/code/repo/${repoUri}/raw/${encodeRevisionString(revision)}/${path}`)
+      npStart.core.http.basePath.prepend(
+        `/app/code/repo/${repoUri}/raw/${encodeRevisionString(revision)}/${path}`
+      )
+    );
+  };
+
+  renderFileLoadingIndicator = () => {
+    const fileName = (this.props.match.params.path || '').split('/').slice(-1)[0];
+    return (
+      <EuiPage restrictWidth>
+        <EuiPageBody>
+          <EuiPageContent verticalPosition="center" horizontalPosition="center">
+            <EuiPageContentHeader>
+              <EuiPageContentHeaderSection>
+                <h2>{fileName} is loading...</h2>
+              </EuiPageContentHeaderSection>
+            </EuiPageContentHeader>
+            <EuiPageContentBody>
+              <EuiProgress size="s" color="primary" />
+            </EuiPageContentBody>
+          </EuiPageContent>
+        </EuiPageBody>
+      </EuiPage>
     );
   };
 
@@ -148,31 +216,56 @@ class CodeContent extends React.PureComponent<Props> {
     }
     const currentTree = this.props.currentTree;
     if (
-      this.props.file &&
       currentTree &&
       (currentTree.type === FileTreeItemType.File || currentTree.type === FileTreeItemType.Link)
     ) {
-      const { isUnsupported, isOversize, isImage, lang } = this.props.file;
-      const isMarkdown = lang === LANG_MD;
-      const isText = !isUnsupported && !isOversize && !isImage;
+      let isText = true;
+      let isMarkdown = false;
+      let blameDisabled = false;
 
+      if (this.props.file) {
+        const { isUnsupported, isOversize, isImage, lang } = this.props.file;
+        isMarkdown = lang === LANG_MD;
+        isText = !isUnsupported && !isOversize && !isImage;
+        blameDisabled = !!(isUnsupported || isOversize || isImage);
+      }
+      const rawButtonOptions: EuiButtonGroupOption[] = [
+        {
+          id: 'Raw',
+          label: isText
+            ? i18n.translate('xpack.code.mainPage.content.buttons.rawButtonLabel', {
+                defaultMessage: 'Raw',
+              })
+            : i18n.translate('xpack.code.mainPage.content.buttons.downloadButtonLabel', {
+                defaultMessage: 'Download',
+              }),
+        },
+      ];
       const buttonOptions = [
         {
           id: ButtonOption.Code,
-          label: isText && !isMarkdown ? ButtonLabel.Code : ButtonLabel.Content,
+          label:
+            isText && !isMarkdown
+              ? i18n.translate('xpack.code.mainPage.content.buttons.codeButtonLabel', {
+                  defaultMessage: 'Code',
+                })
+              : i18n.translate('xpack.code.mainPage.content.buttons.contentButtonLabel', {
+                  defaultMessage: 'content',
+                }),
         },
         {
           id: ButtonOption.Blame,
-          label: ButtonOption.Blame,
-          isDisabled: isUnsupported || isImage || isOversize,
+          label: i18n.translate('xpack.code.mainPage.content.buttons.blameButtonLabel', {
+            defaultMessage: 'Blame',
+          }),
+          isDisabled: blameDisabled,
         },
         {
           id: ButtonOption.History,
-          label: ButtonOption.History,
+          label: i18n.translate('xpack.code.mainPage.content.buttons.historyButtonLabel', {
+            defaultMessage: 'History',
+          }),
         },
-      ];
-      const rawButtonOptions = [
-        { id: 'Raw', label: isText ? ButtonLabel.Raw : ButtonLabel.Download },
       ];
 
       return (
@@ -197,20 +290,27 @@ class CodeContent extends React.PureComponent<Props> {
           />
         </EuiFlexGroup>
       );
+    } else if (this.shouldRenderCloneProgress()) {
+      return null;
     } else {
       return (
         <EuiFlexGroup direction="row" alignItems="center" gutterSize="none">
           <EuiButtonGroup
+            className="codeButtonGroup"
             buttonSize="s"
             color="primary"
             options={[
               {
                 id: ButtonOption.Folder,
-                label: ButtonOption.Folder,
+                label: i18n.translate('xpack.code.mainPage.content.buttons.folderButtonLabel', {
+                  defaultMessage: 'Directory',
+                }),
               },
               {
                 id: ButtonOption.History,
-                label: ButtonOption.History,
+                label: i18n.translate('xpack.code.mainPage.content.buttons.historyButtonLabel', {
+                  defaultMessage: 'History',
+                }),
               },
             ]}
             type="single"
@@ -231,7 +331,9 @@ class CodeContent extends React.PureComponent<Props> {
           buttons={this.renderButtons()}
           searchOptions={this.props.searchOptions}
           branches={this.props.branches}
+          tags={this.props.tags}
           query={this.props.query}
+          currentRepository={this.props.currentRepository}
         />
         {this.renderContent()}
       </div>
@@ -291,7 +393,12 @@ class CodeContent extends React.PureComponent<Props> {
               header={
                 <React.Fragment>
                   <EuiTitle size="s" className="codeMargin__title">
-                    <h3>Recent Commits</h3>
+                    <h3>
+                      <FormattedMessage
+                        id="xpack.code.mainPage.directory.recentCommitsTitle"
+                        defaultMessage="Recent Commits"
+                      />
+                    </h3>
                   </EuiTitle>
                   <EuiButton
                     size="s"
@@ -299,76 +406,95 @@ class CodeContent extends React.PureComponent<Props> {
                       revision
                     )}/${path || ''}`}
                   >
-                    View All
+                    <FormattedMessage
+                      id="xpack.code.mainPage.directory.viewAllCommitsButtonLabel"
+                      defaultMessage="View All"
+                    />
                   </EuiButton>
                 </React.Fragment>
               }
             />
           </div>
         );
-      case PathTypes.blob:
+      case PathTypes.blob: {
+        const { fileLoading } = this.state;
         if (!file) {
-          return null;
-        }
-        const {
-          lang: fileLanguage,
-          content: fileContent,
-          isUnsupported,
-          isOversize,
-          isImage,
-        } = file;
-        if (isUnsupported) {
           return (
-            <ErrorPanel
-              title={<h2>Unsupported File</h2>}
-              content="Unfortunately that’s an unsupported file type and we’re unable to render it here."
-            />
+            fileLoading && (
+              <EuiFlexGroup direction="row" className="codeContainer__blame" gutterSize="none">
+                {fileLoading && this.renderFileLoadingIndicator()}
+                <Editor showBlame={false} hidden={fileLoading} />
+              </EuiFlexGroup>
+            )
           );
-        }
-        if (isOversize) {
-          return (
-            <ErrorPanel
-              title={<h2>File is too big</h2>}
-              content="Sorry about that, but we can’t show files that are this big right now."
-            />
-          );
-        }
-        if (fileLanguage === LANG_MD) {
-          const markdownRenderers = {
-            link: ({ children, href }: { children: React.ReactNode[]; href?: string }) => (
-              <EuiLink href={href} target="_blank">
-                {children}
-              </EuiLink>
-            ),
-          };
-
-          return (
-            <div className="markdown-body code-markdown-container kbnMarkdown__body">
-              <ReactMarkdown
-                source={fileContent}
-                escapeHtml={true}
-                skipHtml={true}
-                renderers={markdownRenderers}
+        } else {
+          const {
+            lang: fileLanguage,
+            content: fileContent,
+            isUnsupported,
+            isOversize,
+            isImage,
+          } = file;
+          if (isUnsupported) {
+            return (
+              <ErrorPanel
+                title={<h2>Unsupported File</h2>}
+                content="Unfortunately that’s an unsupported file type and we’re unable to render it here."
               />
-            </div>
-          );
-        } else if (isImage) {
-          const rawUrl = chrome.addBasePath(`/app/code/repo/${repoUri}/raw/${revision}/${path}`);
-          return (
-            <div className="code-auto-margin">
-              <img src={rawUrl} alt={rawUrl} />
-            </div>
-          );
+            );
+          }
+          if (isOversize) {
+            return (
+              <ErrorPanel
+                title={<h2>File is too big</h2>}
+                content="Sorry about that, but we can’t show files that are this big right now."
+              />
+            );
+          }
+          if (fileLanguage === LANG_MD) {
+            const markdownRenderers = {
+              link: ({ children, href }: { children: React.ReactNode[]; href?: string }) => (
+                <EuiLink href={href} target="_blank">
+                  {children}
+                </EuiLink>
+              ),
+            };
+
+            return (
+              <div className="markdown-body code-markdown-container kbnMarkdown__body">
+                <ReactMarkdown
+                  source={fileContent}
+                  escapeHtml={true}
+                  skipHtml={true}
+                  renderers={markdownRenderers}
+                />
+              </div>
+            );
+          } else if (isImage) {
+            const rawUrl = npStart.core.http.basePath.prepend(
+              `/app/code/repo/${repoUri}/raw/${revision}/${path}`
+            );
+            return (
+              <div className="code-auto-margin">
+                <img src={rawUrl} alt={rawUrl} />
+              </div>
+            );
+          } else {
+            return (
+              <EuiFlexGroup direction="row" className="codeContainer__blame" gutterSize="none">
+                {fileLoading && this.renderFileLoadingIndicator()}
+                <Editor showBlame={false} hidden={fileLoading} />
+              </EuiFlexGroup>
+            );
+          }
         }
-        return (
-          <EuiFlexGroup direction="row" className="codeContainer__blame" gutterSize="none">
-            <Editor showBlame={false} />
-          </EuiFlexGroup>
-        );
+      }
       case PathTypes.blame:
+        const { fileLoading } = this.state;
         return (
           <EuiFlexGroup direction="row" className="codeContainer__blame" gutterSize="none">
-            <Editor showBlame={true} />
+            {fileLoading && this.renderFileLoadingIndicator()}
+            <Editor showBlame={true} hidden={fileLoading} />
           </EuiFlexGroup>
         );
       case PathTypes.commits:
@@ -378,7 +504,12 @@ class CodeContent extends React.PureComponent<Props> {
               repoUri={repoUri}
               header={
                 <EuiTitle className="codeMargin__title">
-                  <h3>Commit History</h3>
+                  <h3>
+                    <FormattedMessage
+                      id="xpack.code.mainPage.history.commitHistoryTitle"
+                      defaultMessage="Commit History"
+                    />
+                  </h3>
                 </EuiTitle>
               }
               showPagination={true}
@@ -397,11 +528,14 @@ const mapStateToProps = (state: RootState) => ({
   fileTreeLoadingPaths: state.fileTree.fileTreeLoadingPaths,
   currentTree: currentTreeSelector(state),
   branches: state.revision.branches,
+  tags: state.revision.tags,
   hasMoreCommits: hasMoreCommitsSelector(state),
   loadingCommits: state.revision.loadingCommits,
-  repoStatus: statusSelector(state, repoUriSelector(state)),
+  repoStatus: repoStatusSelector(state, repoUriSelector(state)),
   searchOptions: state.search.searchOptions,
   query: state.search.query,
+  currentRepository: state.repository.repository,
+  fileLoading: state.file.loading,
 });
 
 const mapDispatchToProps = {

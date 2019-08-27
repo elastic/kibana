@@ -8,5 +8,5 @@
 <b>Signature:</b>
 
 ```typescript
-export declare type ChromeHelpExtension = (element: HTMLDivElement) => (() => void);
+export declare type ChromeHelpExtension = (element: HTMLDivElement) => () => void;
 ```

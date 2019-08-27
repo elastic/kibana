@@ -26,7 +26,8 @@ interface Response {
 export function privilegesProvider(
   callWithRequest: callWithRequestType,
   xpackMainPlugin: XPackMainPlugin,
-  isMlEnabled: () => Promise<boolean>
+  isMlEnabledInSpace: () => Promise<boolean>,
+  ignoreSpaces: boolean = false
 ) {
   const { isUpgradeInProgress } = upgradeCheckProvider(callWithRequest);
   async function getPrivileges(): Promise<Response> {
@@ -37,7 +38,7 @@ export function privilegesProvider(
     const securityDisabled = isSecurityDisabled(xpackMainPlugin);
     const license = checkLicense(xpackMainPlugin.info);
     const isPlatinumOrTrialLicense = license.licenseType === LICENSE_TYPE.FULL;
-    const mlFeatureEnabledInSpace = await isMlEnabled();
+    const mlFeatureEnabledInSpace = await isMlEnabledInSpace();
 
     const setGettingPrivileges = isPlatinumOrTrialLicense
       ? setFullGettingPrivileges
@@ -47,7 +48,7 @@ export function privilegesProvider(
       ? setFullActionPrivileges
       : setBasicActionPrivileges;
 
-    if (mlFeatureEnabledInSpace === false) {
+    if (mlFeatureEnabledInSpace === false && ignoreSpaces === false) {
       // if ML isn't enabled in the current space,
       // return with the default privileges (all false)
       return {
@@ -128,12 +129,21 @@ function setFullGettingPrivileges(
     privileges.canFindFileStructure = true;
   }
 
-  // Data Frames
+  // Data Frame Transforms
   if (
     forceTrue ||
     (cluster['cluster:monitor/data_frame/get'] && cluster['cluster:monitor/data_frame/stats/get'])
   ) {
-    privileges.canGetDataFrameJobs = true;
+    privileges.canGetDataFrame = true;
+  }
+
+  // Data Frame Analytics
+  if (
+    forceTrue ||
+    (cluster['cluster:monitor/xpack/ml/job/get'] &&
+      cluster['cluster:monitor/xpack/ml/job/stats/get'])
+  ) {
+    privileges.canGetDataFrameAnalytics = true;
   }
 }
 
@@ -224,17 +234,17 @@ function setFullActionPrivileges(
     privileges.canDeleteFilter = true;
   }
 
-  // Data Frames
+  // Data Frame Transforms
   if (forceTrue || cluster['cluster:admin/data_frame/put']) {
-    privileges.canCreateDataFrameJob = true;
+    privileges.canCreateDataFrame = true;
   }
 
   if (forceTrue || cluster['cluster:admin/data_frame/delete']) {
-    privileges.canDeleteDataFrameJob = true;
+    privileges.canDeleteDataFrame = true;
   }
 
   if (forceTrue || cluster['cluster:admin/data_frame/preview']) {
-    privileges.canPreviewDataFrameJob = true;
+    privileges.canPreviewDataFrame = true;
   }
 
   if (
@@ -243,7 +253,34 @@ function setFullActionPrivileges(
       cluster['cluster:admin/data_frame/start_task'] &&
       cluster['cluster:admin/data_frame/stop'])
   ) {
-    privileges.canStartStopDataFrameJob = true;
+    privileges.canStartStopDataFrame = true;
+  }
+
+  // Data Frame Analytics
+  if (
+    forceTrue ||
+    (cluster['cluster:admin/xpack/ml/job/put'] &&
+      cluster['cluster:admin/xpack/ml/job/open'] &&
+      cluster['cluster:admin/xpack/ml/datafeeds/put'])
+  ) {
+    privileges.canCreateDataFrameAnalytics = true;
+  }
+
+  if (
+    forceTrue ||
+    (cluster['cluster:admin/xpack/ml/job/delete'] &&
+      cluster['cluster:admin/xpack/ml/datafeeds/delete'])
+  ) {
+    privileges.canDeleteDataFrameAnalytics = true;
+  }
+
+  if (
+    forceTrue ||
+    (cluster['cluster:admin/xpack/ml/job/open'] &&
+      cluster['cluster:admin/xpack/ml/datafeeds/start'] &&
+      cluster['cluster:admin/xpack/ml/datafeeds/stop'])
+  ) {
+    privileges.canStartStopDataFrameAnalytics = true;
   }
 }
 
@@ -257,12 +294,12 @@ function setBasicGettingPrivileges(
     privileges.canFindFileStructure = true;
   }
 
-  // Data Frames
+  // Data Frame Transforms
   if (
     forceTrue ||
     (cluster['cluster:monitor/data_frame/get'] && cluster['cluster:monitor/data_frame/stats/get'])
   ) {
-    privileges.canGetDataFrameJobs = true;
+    privileges.canGetDataFrame = true;
   }
 }
 
@@ -271,17 +308,17 @@ function setBasicActionPrivileges(
   privileges: Privileges,
   forceTrue = false
 ) {
-  // Data Frames
+  // Data Frame Transforms
   if (forceTrue || cluster['cluster:admin/data_frame/put']) {
-    privileges.canCreateDataFrameJob = true;
+    privileges.canCreateDataFrame = true;
   }
 
   if (forceTrue || cluster['cluster:admin/data_frame/delete']) {
-    privileges.canDeleteDataFrameJob = true;
+    privileges.canDeleteDataFrame = true;
   }
 
   if (forceTrue || cluster['cluster:admin/data_frame/preview']) {
-    privileges.canPreviewDataFrameJob = true;
+    privileges.canPreviewDataFrame = true;
   }
 
   if (
@@ -290,6 +327,6 @@ function setBasicActionPrivileges(
       cluster['cluster:admin/data_frame/start_task'] &&
       cluster['cluster:admin/data_frame/stop'])
   ) {
-    privileges.canStartStopDataFrameJob = true;
+    privileges.canStartStopDataFrame = true;
   }
 }

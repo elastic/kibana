@@ -6,8 +6,9 @@
 import _ from 'lodash';
 import Boom from 'boom';
 import { RESERVED_PRIVILEGES_APPLICATION_WILDCARD } from '../../../../../common/constants';
-import { wrapError } from '../../../../lib/errors';
+import { wrapError } from '../../../../../../../../plugins/security/server';
 import { transformKibanaApplicationsFromEs } from '../../../../lib/authorization';
+
 
 export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn, application) {
 

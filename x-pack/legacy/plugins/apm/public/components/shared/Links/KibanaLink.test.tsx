@@ -8,16 +8,30 @@ import { Location } from 'history';
 import React from 'react';
 import { getRenderedHref } from '../../../utils/testHelpers';
 import { KibanaLink } from './KibanaLink';
-import chrome from 'ui/chrome';
+import * as hooks from '../../../hooks/useCore';
+import { InternalCoreStart } from 'src/core/public';
 
-jest
-  .spyOn(chrome, 'addBasePath')
-  .mockImplementation(path => `/basepath${path}`);
+describe('KibanaLink', () => {
+  beforeEach(() => {
+    const coreMock = ({
+      http: {
+        basePath: {
+          prepend: (path: string) => `/basepath${path}`
+        }
+      }
+    } as unknown) as InternalCoreStart;
 
-test('KibanaLink produces the correct URL', async () => {
-  const href = await getRenderedHref(() => <KibanaLink path="/some/path" />, {
-    search: '?rangeFrom=now-5h&rangeTo=now-2h'
-  } as Location);
+    jest.spyOn(hooks, 'useCore').mockReturnValue(coreMock);
+  });
 
-  expect(href).toMatchInlineSnapshot(`"/basepath/app/kibana#/some/path"`);
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it('produces the correct URL', async () => {
+    const href = await getRenderedHref(() => <KibanaLink path="/some/path" />, {
+      search: '?rangeFrom=now-5h&rangeTo=now-2h'
+    } as Location);
+    expect(href).toMatchInlineSnapshot(`"/basepath/app/kibana#/some/path"`);
+  });
 });

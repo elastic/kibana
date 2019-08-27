@@ -195,8 +195,19 @@ exports[`render full suggestions component 1`] = `
                   <div
                     className="codeSearch-suggestion__group-result"
                   >
-                    1
-                     Result
+                    <FormattedMessage
+                      defaultMessage="{total} {total, plural, one {Result} other {Results}}"
+                      id="xpack.code.searchBar.resultCountText"
+                      values={
+                        Object {
+                          "total": 1,
+                        }
+                      }
+                    >
+                      <span>
+                        1 Result
+                      </span>
+                    </FormattedMessage>
                   </div>
                 </div>
               </EuiFlexGroup>
@@ -347,8 +358,19 @@ exports[`render full suggestions component 1`] = `
                   <div
                     className="codeSearch-suggestion__group-result"
                   >
-                    1
-                     Result
+                    <FormattedMessage
+                      defaultMessage="{total} {total, plural, one {Result} other {Results}}"
+                      id="xpack.code.searchBar.resultCountText"
+                      values={
+                        Object {
+                          "total": 1,
+                        }
+                      }
+                    >
+                      <span>
+                        1 Result
+                      </span>
+                    </FormattedMessage>
                   </div>
                 </div>
               </EuiFlexGroup>
@@ -463,9 +485,19 @@ exports[`render full suggestions component 1`] = `
                   <div
                     className="codeSearch-suggestion__group-result"
                   >
-                    2
-                     Result
-                    s
+                    <FormattedMessage
+                      defaultMessage="{total} {total, plural, one {Result} other {Results}}"
+                      id="xpack.code.searchBar.resultCountText"
+                      values={
+                        Object {
+                          "total": 2,
+                        }
+                      }
+                    >
+                      <span>
+                        2 Results
+                      </span>
+                    </FormattedMessage>
                   </div>
                 </div>
               </EuiFlexGroup>
@@ -568,7 +600,16 @@ exports[`render full suggestions component 1`] = `
                     href="/search?q=string"
                     onClick={[Function]}
                   >
-                    View More
+                     
+                    <FormattedMessage
+                      defaultMessage="View More"
+                      id="xpack.code.searchBar.viewMoreLinkText"
+                      values={Object {}}
+                    >
+                      <span>
+                        View More
+                      </span>
+                    </FormattedMessage>
                   </a>
                 </Link>
               </div>
@@ -584,7 +625,15 @@ exports[`render full suggestions component 1`] = `
                 <div
                   className="codeSearch__full-text-button"
                 >
-                  Press ⮐ Return for Full Text Search
+                  <FormattedMessage
+                    defaultMessage="Press ⮐ Return for Full Text Search"
+                    id="xpack.code.searchBar.viewFullSearchLinkText"
+                    values={Object {}}
+                  >
+                    <span>
+                      Press ⮐ Return for Full Text Search
+                    </span>
+                  </FormattedMessage>
                 </div>
               </a>
             </Link>

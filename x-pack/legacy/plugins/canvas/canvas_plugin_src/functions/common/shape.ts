@@ -49,6 +49,13 @@ export function shape(): ExpressionFunction<'shape', null, Arguments, Return> {
       types: ['null'],
     },
     args: {
+      shape: {
+        types: ['string'],
+        help: argHelp.shape,
+        aliases: ['_'],
+        default: 'square',
+        options: Object.values(Shape),
+      },
       border: {
         types: ['string'],
         aliases: ['stroke'],
@@ -59,13 +66,6 @@ export function shape(): ExpressionFunction<'shape', null, Arguments, Return> {
         aliases: ['strokeWidth'],
         help: argHelp.borderWidth,
         default: 0,
-      },
-      shape: {
-        types: ['string'],
-        help: argHelp.shape,
-        aliases: ['_'],
-        default: 'square',
-        options: Object.values(Shape),
       },
       fill: {
         types: ['string'],

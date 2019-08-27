@@ -19,14 +19,10 @@
 
 // @ts-ignore
 import { functionWrapper } from '../../interpreter/test_helpers';
-import { kibanaMarkdown } from './markdown_fn';
-
-jest.mock('ui/new_platform', () =>
-  require('../../../ui/public/new_platform/index.test.mocks').mockNewPlatformBackdoor()
-);
+import { createMarkdownVisFn } from './markdown_fn';
 
 describe('interpreter/functions#markdown', () => {
-  const fn = functionWrapper(kibanaMarkdown);
+  const fn = functionWrapper(createMarkdownVisFn);
   const args = {
     font: { spec: { fontSize: 12 } },
     openLinksInNewTab: true,

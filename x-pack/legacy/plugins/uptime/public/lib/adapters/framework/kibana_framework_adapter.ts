@@ -7,6 +7,7 @@
 import ReactDOM from 'react-dom';
 import { unmountComponentAtNode } from 'react-dom';
 import chrome from 'ui/chrome';
+import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 import { PLUGIN, INTEGRATED_SOLUTIONS } from '../../../../common/constants';
 import { UMBreadcrumb } from '../../../breadcrumbs';
 import { BootstrapUptimeApp, UMFrameworkAdapter } from '../../lib';
@@ -83,7 +84,10 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
           const renderGlobalHelpControls = () =>
             // render Uptime feedback link in global help menu
             chrome.helpExtension.set((element: HTMLDivElement) => {
-              ReactDOM.render(renderUptimeKibanaGlobalHelp(), element);
+              ReactDOM.render(
+                renderUptimeKibanaGlobalHelp(ELASTIC_WEBSITE_URL, DOC_LINK_VERSION),
+                element
+              );
               return () => ReactDOM.unmountComponentAtNode(element);
             });
 

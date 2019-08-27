@@ -14,18 +14,7 @@ import { historyProvider } from './history_provider';
 // @ts-ignore untyped local
 import { routerProvider } from './router_provider';
 import { createTimeInterval, isValidTimeInterval } from './time_interval';
-
-export enum AppStateKeys {
-  FULLSCREEN = '__fullscreen',
-  REFRESH_INTERVAL = '__refreshInterval',
-  AUTOPLAY_INTERVAL = '__autoplayInterval',
-}
-
-export interface AppState {
-  [AppStateKeys.FULLSCREEN]?: boolean;
-  [AppStateKeys.REFRESH_INTERVAL]?: string;
-  [AppStateKeys.AUTOPLAY_INTERVAL]?: string;
-}
+import { AppState, AppStateKeys } from '../../types';
 
 export function getDefaultAppState(): AppState {
   const transientState = getInitialState('transient');

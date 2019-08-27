@@ -7,30 +7,34 @@
 import { i18n } from '@kbn/i18n';
 import { render } from '../../functions/common/render';
 import { FunctionHelp } from '.';
-import { FunctionFactory } from '../../functions/types';
+import { FunctionFactory } from '../../../types';
+import { CONTEXT, CSS } from '../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof render>> = {
   help: i18n.translate('xpack.canvas.functions.renderHelpText', {
     defaultMessage:
-      'Render an input as a specific element and set element level options such as styling',
+      'Render the {CONTEXT} as a specific element and sets element level options, such as background and border styling.',
+    values: {
+      CONTEXT,
+    },
   }),
   args: {
     as: i18n.translate('xpack.canvas.functions.render.args.asHelpText', {
       defaultMessage:
-        'The element type to use in rendering. You probably want a specialized function instead, such as `{plot}` or `{grid}`',
+        'The element type to render. You probably want a specialized function instead, such as {plotFn} or {shapeFn}.',
       values: {
-        plot: 'plot',
-        grid: 'grid',
+        plotFn: '`plot`',
+        shapeFn: '`shape`',
       },
     }),
     css: i18n.translate('xpack.canvas.functions.render.args.cssHelpText', {
-      defaultMessage: 'Any block of custom {css} to be scoped to this element.',
+      defaultMessage: 'Any block of custom {CSS} to be scoped to the element.',
       values: {
-        css: 'CSS',
+        CSS,
       },
     }),
     containerStyle: i18n.translate('xpack.canvas.functions.render.args.containerStyleHelpText', {
-      defaultMessage: 'Style for the container, including background, border, and opacity',
+      defaultMessage: 'The style for the container, including background, border, and opacity.',
     }),
   },
 };

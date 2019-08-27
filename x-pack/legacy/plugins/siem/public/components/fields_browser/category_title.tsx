@@ -20,6 +20,8 @@ const CountBadgeContainer = styled.div`
   top: -3px;
 `;
 
+CountBadgeContainer.displayName = 'CountBadgeContainer';
+
 interface Props {
   /** The title of the category */
   categoryId: string;
@@ -38,7 +40,7 @@ export const CategoryTitle = pure<Props>(({ filteredBrowserFields, categoryId, t
     <EuiFlexItem grow={false}>
       <EuiTitle
         className={getFieldBrowserCategoryTitleClassName({ categoryId, timelineId })}
-        data-test-subj="category-title"
+        data-test-subj="selected-category-title"
         size="xxs"
       >
         <h5>{categoryId}</h5>
@@ -47,8 +49,12 @@ export const CategoryTitle = pure<Props>(({ filteredBrowserFields, categoryId, t
 
     <EuiFlexItem grow={false}>
       <CountBadgeContainer>
-        <CountBadge color="hollow">{getFieldCount(filteredBrowserFields[categoryId])}</CountBadge>
+        <CountBadge data-test-subj="selected-category-count-badge" color="hollow">
+          {getFieldCount(filteredBrowserFields[categoryId])}
+        </CountBadge>
       </CountBadgeContainer>
     </EuiFlexItem>
   </EuiFlexGroup>
 ));
+
+CategoryTitle.displayName = 'CategoryTitle';

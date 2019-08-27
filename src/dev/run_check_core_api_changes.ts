@@ -39,7 +39,7 @@ const apiExtractorConfig = (folder: string): ExtractorConfig => {
       tsconfigFilePath: '<projectFolder>/tsconfig.json',
     },
     projectFolder: path.resolve('./'),
-    mainEntryPointFilePath: `target/types/${folder}/index.d.ts`,
+    mainEntryPointFilePath: `target/types/core/${folder}/index.d.ts`,
     apiReport: {
       enabled: true,
       reportFileName: `${folder}.api.md`,

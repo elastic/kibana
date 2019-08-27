@@ -30,8 +30,10 @@
     ],
     "patterns": [
       "{indices}/_doc/{id}",
-      "{indices}/_doc"
+      "{indices}/_doc",
+      "{indices}/{type}",
+      "{indices}/{type}/{id}"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/docs-index_.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-index_.html"
   }
 }

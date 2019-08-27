@@ -17,11 +17,12 @@
  * under the License.
  */
 
+import { IndexPattern } from 'ui/index_patterns';
 import { AggTypeFilters } from './agg_type_filters';
 
 describe('AggTypeFilters', () => {
   let registry: AggTypeFilters;
-  const indexPattern = { id: '1234', fields: [], title: 'foo' };
+  const indexPattern = ({ id: '1234', fields: [], title: 'foo' } as unknown) as IndexPattern;
   const aggConfig = {};
 
   beforeEach(() => {

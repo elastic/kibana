@@ -24,3 +24,5 @@ exports.findMostRecentlyChanged = require('./find_most_recently_changed').findMo
 exports.extractConfigFiles = require('./extract_config_files').extractConfigFiles;
 exports.decompress = require('./decompress').decompress;
 exports.NativeRealm = require('./native_realm').NativeRealm;
+exports.buildSnapshot = require('./build_snapshot').buildSnapshot;
+exports.archiveForPlatform = require('./build_snapshot').archiveForPlatform;

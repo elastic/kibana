@@ -46,6 +46,12 @@ describe('Navigation Breadcrumbs', () => {
       expect(breadcrumbs).toEqual(rootBreadcrumbs.hosts);
     });
 
+    test('should return Host breadcrumbs when supplied host pathname with trailing slash', () => {
+      const pathname = '/hosts/';
+      const breadcrumbs = getBreadcrumbsForRoute(pathname);
+      expect(breadcrumbs).toEqual(rootBreadcrumbs.hosts);
+    });
+
     test('should return Network breadcrumbs when supplied network pathname', () => {
       const pathname = '/network';
       const breadcrumbs = getBreadcrumbsForRoute(pathname);

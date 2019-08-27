@@ -9,10 +9,12 @@ import { registerAppRoutes } from './app';
 import { registerRepositoriesRoutes } from './repositories';
 import { registerSnapshotsRoutes } from './snapshots';
 import { registerRestoreRoutes } from './restore';
+import { registerPolicyRoutes } from './policy';
 
 export const registerRoutes = (router: Router, plugins: Plugins): void => {
   registerAppRoutes(router, plugins);
   registerRepositoriesRoutes(router, plugins);
   registerSnapshotsRoutes(router, plugins);
   registerRestoreRoutes(router);
+  registerPolicyRoutes(router);
 };

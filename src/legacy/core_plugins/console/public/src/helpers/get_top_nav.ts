@@ -28,7 +28,7 @@ import { showHelpPanel } from './help_show_panel';
 export function getTopNavConfig($scope: IScope, toggleHistory: () => {}) {
   return [
     {
-      key: 'history',
+      id: 'history',
       label: i18n.translate('console.topNav.historyTabLabel', {
         defaultMessage: 'History',
       }),
@@ -36,12 +36,12 @@ export function getTopNavConfig($scope: IScope, toggleHistory: () => {}) {
         defaultMessage: 'History',
       }),
       run: () => {
-        toggleHistory();
+        $scope.$evalAsync(toggleHistory);
       },
       testId: 'consoleHistoryButton',
     },
     {
-      key: 'settings',
+      id: 'settings',
       label: i18n.translate('console.topNav.settingsTabLabel', {
         defaultMessage: 'Settings',
       }),
@@ -54,7 +54,7 @@ export function getTopNavConfig($scope: IScope, toggleHistory: () => {}) {
       testId: 'consoleSettingsButton',
     },
     {
-      key: 'help',
+      id: 'help',
       label: i18n.translate('console.topNav.helpTabLabel', {
         defaultMessage: 'Help',
       }),

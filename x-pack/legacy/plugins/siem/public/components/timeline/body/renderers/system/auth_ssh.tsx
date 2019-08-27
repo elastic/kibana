@@ -43,3 +43,5 @@ export const AuthSsh = pure<Props>(({ contextId, eventId, sshSignature, sshMetho
     )}
   </>
 ));
+
+AuthSsh.displayName = 'AuthSsh';

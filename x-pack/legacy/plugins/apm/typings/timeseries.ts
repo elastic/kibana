@@ -6,7 +6,7 @@
 
 export interface Coordinate {
   x: number;
-  y: number | null;
+  y: number | null | undefined;
 }
 
 export interface RectCoordinate {

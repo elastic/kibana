@@ -17,41 +17,9 @@
  * under the License.
  */
 
-// @ts-ignore
-import { markdownVis } from './markdown_vis';
-// @ts-ignore
-import { kibanaMarkdown } from './markdown_fn';
+import { PluginInitializerContext } from '../../../../core/public';
+import { MarkdownPlugin as Plugin } from './plugin';
 
-// @ts-ignore
-import { functionsRegistry } from '../../interpreter/public/registries';
-import {
-  visualizations as visualizationsService,
-  VisualizationsSetup,
-} from '../../visualizations/public';
-
-export interface SetupDeps {
-  visualizations: VisualizationsSetup;
-  data: any;
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new Plugin(initializerContext);
 }
-
-class VisTypeMarkdownPlugin {
-  constructor() {}
-
-  public setup({ visualizations, data }: SetupDeps) {
-    visualizations.types.VisTypesRegistryProvider.register(() => markdownVis);
-    data.expressions.registerFunction(kibanaMarkdown);
-  }
-
-  public start() {}
-
-  public stop() {}
-}
-
-new VisTypeMarkdownPlugin().setup({
-  visualizations: visualizationsService,
-  data: {
-    expressions: {
-      registerFunction: (fn: any) => functionsRegistry.register(fn),
-    },
-  },
-});

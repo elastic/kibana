@@ -19,7 +19,6 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { CoordinateMapsVisualizationProvider } from '../coordinate_maps_visualization';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
 import * as visModule from 'ui/vis';
 import { ImageComparator } from 'test_utils/image_comparator';
@@ -34,6 +33,10 @@ import EMS_TILES from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_
 import EMS_STYLE_ROAD_MAP_BRIGHT from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_bright';
 import EMS_STYLE_ROAD_MAP_DESATURATED from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_desaturated';
 import EMS_STYLE_DARK_MAP from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_dark';
+import { visualizations } from '../../../visualizations/public';
+
+import { createTileMapVisualization } from '../tile_map_visualization';
+import { createTileMapTypeDefinition } from '../tile_map_type';
 
 function mockRawData() {
   const stack = [dummyESResponse];
@@ -65,6 +68,7 @@ describe('CoordinateMapsVisualizationTest', function () {
   let Vis;
   let indexPattern;
   let vis;
+  let dependencies;
 
   let imageComparator;
 
@@ -72,13 +76,23 @@ describe('CoordinateMapsVisualizationTest', function () {
   let getManifestStub;
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject((Private, $injector) => {
+    const serviceSettings = $injector.get('serviceSettings');
+    const uiSettings = $injector.get('config');
+
+    dependencies = {
+      serviceSettings,
+      uiSettings,
+      $injector
+    };
+
+    visualizations.types.VisTypesRegistryProvider.register(() =>
+      createTileMapTypeDefinition(dependencies)
+    );
 
     Vis = Private(visModule.VisProvider);
-    CoordinateMapsVisualization = Private(CoordinateMapsVisualizationProvider);
+    CoordinateMapsVisualization = createTileMapVisualization(dependencies);
     indexPattern = Private(LogstashIndexPatternStubProvider);
 
-
-    const serviceSettings = $injector.get('serviceSettings');
     getManifestStub = serviceSettings.__debugStubManifestCalls(async (url) => {
       //simulate network calls
       if (url.startsWith('https://foobar')) {
@@ -106,12 +120,11 @@ describe('CoordinateMapsVisualizationTest', function () {
   describe('CoordinateMapsVisualization - basics', function () {
 
     beforeEach(async function () {
-
       setupDOM('512px', '512px');
 
       imageComparator = new ImageComparator();
       vis = new Vis(indexPattern, {
-        type: 'region_map'
+        type: 'tile_map'
       });
       vis.params = {
         mapType: 'Scaled Circle Markers',
@@ -164,7 +177,6 @@ describe('CoordinateMapsVisualizationTest', function () {
       const mismatchedPixels = await compareImage(initial, 0);
       coordinateMapVisualization.destroy();
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
-
     });
 
 

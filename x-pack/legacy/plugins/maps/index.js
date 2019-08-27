@@ -43,7 +43,9 @@ export function maps(kibana) {
 
         return {
           showMapsInspectorAdapter: serverConfig.get('xpack.maps.showMapsInspectorAdapter'),
+          preserveDrawingBuffer: serverConfig.get('xpack.maps.preserveDrawingBuffer'),
           isEmsEnabled: mapConfig.includeElasticMapsService,
+          emsFontLibraryUrl: mapConfig.emsFontLibraryUrl,
           emsTileLayerId: mapConfig.emsTileLayerId,
           proxyElasticMapsServiceInMaps: mapConfig.proxyElasticMapsServiceInMaps,
           emsManifestServiceUrl: mapConfig.manifestServiceUrl,
@@ -54,7 +56,7 @@ export function maps(kibana) {
         };
       },
       embeddableFactories: [
-        'plugins/maps/embeddable/map_embeddable_factory_provider'
+        'plugins/maps/embeddable/map_embeddable_factory'
       ],
       inspectorViews: [
         'plugins/maps/inspector/views/register_views',
@@ -89,7 +91,8 @@ export function maps(kibana) {
     config(Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
-        showMapsInspectorAdapter: Joi.boolean().default(false),
+        showMapsInspectorAdapter: Joi.boolean().default(false), // flag used in functional testing
+        preserveDrawingBuffer: Joi.boolean().default(false), // flag used in functional testing
       }).default();
     },
 

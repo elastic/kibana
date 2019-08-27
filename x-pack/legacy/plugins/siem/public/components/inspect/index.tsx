@@ -26,6 +26,8 @@ const InspectContainer = styled.div<{ showInspect: boolean }>`
   }
 `;
 
+InspectContainer.displayName = 'InspectContainer';
+
 interface OwnProps {
   queryId: string;
   inputId?: InputsModelId;
@@ -134,6 +136,8 @@ const InspectButtonComponent = pure<InspectButtonProps>(
     </InspectContainer>
   )
 );
+
+InspectButtonComponent.displayName = 'InspectButtonComponent';
 
 const makeMapStateToProps = () => {
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();

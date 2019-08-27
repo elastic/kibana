@@ -19,7 +19,7 @@ import { UsersTable } from '.';
 import { mockUsersData } from './mock';
 
 describe('Users Table Component', () => {
-  const loadMore = jest.fn();
+  const loadPage = jest.fn();
   const state: State = mockGlobalState;
 
   let store = createStore(state, apolloClientObservable);
@@ -35,11 +35,11 @@ describe('Users Table Component', () => {
           <UsersTable
             data={mockUsersData.edges}
             flowTarget={FlowTarget.source}
-            hasNextPage={getOr(false, 'hasNextPage', mockUsersData.pageInfo)!}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockUsersData.pageInfo)}
             id="user"
             loading={false}
-            loadMore={loadMore}
-            nextCursor={getOr(null, 'endCursor.value', mockUsersData.pageInfo)!}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockUsersData.pageInfo)}
             totalCount={1}
             type={networkModel.NetworkType.details}
           />
@@ -58,11 +58,15 @@ describe('Users Table Component', () => {
             <UsersTable
               data={mockUsersData.edges}
               flowTarget={FlowTarget.source}
-              hasNextPage={getOr(false, 'hasNextPage', mockUsersData.pageInfo)!}
+              fakeTotalCount={getOr(50, 'fakeTotalCount', mockUsersData.pageInfo)}
               id="user"
               loading={false}
-              loadMore={loadMore}
-              nextCursor={getOr(null, 'endCursor.value', mockUsersData.pageInfo)!}
+              loadPage={loadPage}
+              showMorePagesIndicator={getOr(
+                false,
+                'showMorePagesIndicator',
+                mockUsersData.pageInfo
+              )}
               totalCount={1}
               type={networkModel.NetworkType.details}
             />

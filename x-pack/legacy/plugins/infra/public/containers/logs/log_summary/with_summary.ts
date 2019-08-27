@@ -22,15 +22,24 @@ export const WithSummary = connect((state: State) => ({
     filterQuery,
     visibleMidpointTime,
   }: {
-    children: RendererFunction<{ buckets: LogSummaryBuckets }>;
+    children: RendererFunction<{
+      buckets: LogSummaryBuckets;
+      start: number | null;
+      end: number | null;
+    }>;
     filterQuery: string | null;
     visibleMidpointTime: number | null;
   }) => {
     const { intervalSize } = useContext(LogViewConfiguration.Context);
     const { sourceId } = useContext(Source.Context);
 
-    const { buckets } = useLogSummary(sourceId, visibleMidpointTime, intervalSize, filterQuery);
+    const { buckets, start, end } = useLogSummary(
+      sourceId,
+      visibleMidpointTime,
+      intervalSize,
+      filterQuery
+    );
 
-    return children({ buckets });
+    return children({ buckets, start, end });
   }
 );

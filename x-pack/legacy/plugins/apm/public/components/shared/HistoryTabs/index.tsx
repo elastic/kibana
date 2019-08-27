@@ -7,8 +7,11 @@
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import React from 'react';
 import { matchPath, Route, RouteComponentProps } from 'react-router-dom';
+import { omit } from 'lodash';
+import { localUIFilterNames } from '../../../../server/lib/ui_filters/local_ui_filters/config';
 import { useLocation } from '../../../hooks/useLocation';
 import { history } from '../../../utils/history';
+import { toQuery, fromQuery } from '../Links/url_helpers';
 
 export interface IHistoryTab {
   path: string;
@@ -36,7 +39,21 @@ export function HistoryTabs({ tabs }: HistoryTabsProps) {
       <EuiTabs>
         {tabs.map((tab, i) => (
           <EuiTab
-            onClick={() => history.push({ ...location, pathname: tab.path })}
+            onClick={() => {
+              const persistedQueryParameters = omit(
+                toQuery(location.search),
+                'sortField',
+                'sortDirection',
+                'page',
+                'pageSize',
+                ...localUIFilterNames
+              );
+              history.push({
+                ...location,
+                pathname: tab.path,
+                search: fromQuery(persistedQueryParameters)
+              });
+            }}
             isSelected={isTabSelected(tab, location.pathname)}
             key={tab.name}
           >

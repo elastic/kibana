@@ -42,7 +42,7 @@ import { ml } from '../../../services/ml_api_service';
 import { mlJobService } from '../../../services/job_service';
 import { mlTableService } from '../../../services/table_service';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../../common/constants/search';
-import { isTimeSeriesViewJob } from '../../../../common/util/job_utils';
+import { getLatestDataOrBucketTimestamp, isTimeSeriesViewJob } from '../../../../common/util/job_utils';
 
 import { annotation$, annotationsRefresh$ } from '../../../services/annotations_service';
 
@@ -155,8 +155,9 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
     // Set the total time range from the start to the end of the annotation.
     const job = this.getJob(annotation.job_id);
     const dataCounts = job.data_counts;
+    const resultLatest = getLatestDataOrBucketTimestamp(dataCounts.latest_record_timestamp, dataCounts.latest_bucket_timestamp);
     const from = new Date(dataCounts.earliest_record_timestamp).toISOString();
-    const to = new Date(dataCounts.latest_record_timestamp).toISOString();
+    const to = new Date(resultLatest).toISOString();
 
     const globalSettings = {
       ml: {

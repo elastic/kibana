@@ -48,7 +48,7 @@ describe('OrderAggParamEditor component', () => {
   });
 
   it('defaults to the first metric agg after init', () => {
-    const responseValueAggs = [
+    const metricAggs = [
       {
         id: 'agg1',
         type: {
@@ -62,7 +62,7 @@ describe('OrderAggParamEditor component', () => {
         },
       },
     ];
-    const props = { ...defaultProps, responseValueAggs };
+    const props = { ...defaultProps, metricAggs };
 
     mount(<OrderByParamEditor {...props} />);
 
@@ -70,7 +70,7 @@ describe('OrderAggParamEditor component', () => {
   });
 
   it('defaults to the first metric agg that is compatible with the terms bucket', () => {
-    const responseValueAggs = [
+    const metricAggs = [
       {
         id: 'agg1',
         type: {
@@ -102,7 +102,7 @@ describe('OrderAggParamEditor component', () => {
         },
       },
     ];
-    const props = { ...defaultProps, responseValueAggs };
+    const props = { ...defaultProps, metricAggs };
 
     mount(<OrderByParamEditor {...props} />);
 
@@ -110,7 +110,7 @@ describe('OrderAggParamEditor component', () => {
   });
 
   it('defaults to the _key metric if no agg is compatible', () => {
-    const responseValueAggs = [
+    const metricAggs = [
       {
         id: 'agg1',
         type: {
@@ -118,7 +118,7 @@ describe('OrderAggParamEditor component', () => {
         },
       },
     ];
-    const props = { ...defaultProps, responseValueAggs };
+    const props = { ...defaultProps, metricAggs };
 
     mount(<OrderByParamEditor {...props} />);
 
@@ -126,7 +126,7 @@ describe('OrderAggParamEditor component', () => {
   });
 
   it('selects first metric if it is avg', () => {
-    const responseValueAggs = [
+    const metricAggs = [
       {
         id: 'agg1',
         type: {
@@ -135,7 +135,7 @@ describe('OrderAggParamEditor component', () => {
         },
       },
     ];
-    const props = { ...defaultProps, responseValueAggs };
+    const props = { ...defaultProps, metricAggs };
 
     mount(<OrderByParamEditor {...props} />);
 
@@ -143,7 +143,7 @@ describe('OrderAggParamEditor component', () => {
   });
 
   it('selects _key if the first metric is avg_bucket', () => {
-    const responseValueAggs = [
+    const metricAggs = [
       {
         id: 'agg1',
         type: {
@@ -152,7 +152,7 @@ describe('OrderAggParamEditor component', () => {
         },
       },
     ];
-    const props = { ...defaultProps, responseValueAggs };
+    const props = { ...defaultProps, metricAggs };
 
     mount(<OrderByParamEditor {...props} />);
 

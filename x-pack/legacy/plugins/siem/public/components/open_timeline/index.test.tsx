@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, ReactWrapper } from 'enzyme';
 import { get } from 'lodash/fp';
 import { MockedProvider } from 'react-apollo/test-utils';
 import * as React from 'react';
+import { ThemeProvider } from 'styled-components';
 
 import { wait } from '../../lib/helpers';
 import { TestProviderWithoutDragAndDrop, apolloClient } from '../../mock/test_providers';
@@ -18,37 +20,37 @@ import { StatefulOpenTimeline } from '.';
 import { NotePreviews } from './note_previews';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 
+jest.mock('../../lib/settings/use_kibana_ui_setting');
+
 const getStateChildComponent = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   wrapper: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>
 ): // eslint-disable-next-line @typescript-eslint/no-explicit-any
 React.Component<{}, {}, any> =>
   wrapper
-    .childAt(0)
-    .childAt(0)
-    .childAt(0)
-    .childAt(0)
-    .childAt(0)
-    .childAt(0)
-    .childAt(0)
-    .childAt(0)
+    .find('[data-test-subj="stateful-timeline"]')
+    .last()
     .instance();
 
 describe('StatefulOpenTimeline', () => {
+  const theme = () => ({ eui: euiDarkVars, darkMode: true });
   const title = 'All Timelines / Open Timelines';
 
   test('it has the expected initial state', async () => {
     const wrapper = mount(
-      <TestProviderWithoutDragAndDrop>
-        <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-          <StatefulOpenTimeline
-            apolloClient={apolloClient}
-            isModal={false}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            title={title}
-          />
-        </MockedProvider>
-      </TestProviderWithoutDragAndDrop>
+      <ThemeProvider theme={theme}>
+        <TestProviderWithoutDragAndDrop>
+          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+            <StatefulOpenTimeline
+              data-test-subj="stateful-timeline"
+              apolloClient={apolloClient}
+              isModal={false}
+              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+              title={title}
+            />
+          </MockedProvider>
+        </TestProviderWithoutDragAndDrop>
+      </ThemeProvider>
     );
 
     await wait();
@@ -69,16 +71,19 @@ describe('StatefulOpenTimeline', () => {
   describe('#onQueryChange', () => {
     test('it updates the query state with the expected trimmed value when the user enters a query', async () => {
       const wrapper = mount(
-        <TestProviderWithoutDragAndDrop>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <StatefulOpenTimeline
-              apolloClient={apolloClient}
-              isModal={false}
-              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
-            />
-          </MockedProvider>
-        </TestProviderWithoutDragAndDrop>
+        <ThemeProvider theme={theme}>
+          <TestProviderWithoutDragAndDrop>
+            <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+              <StatefulOpenTimeline
+                data-test-subj="stateful-timeline"
+                apolloClient={apolloClient}
+                isModal={false}
+                defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+                title={title}
+              />
+            </MockedProvider>
+          </TestProviderWithoutDragAndDrop>
+        </ThemeProvider>
       );
 
       await wait();
@@ -104,16 +109,18 @@ describe('StatefulOpenTimeline', () => {
 
     test('it appends the word "with" to the Showing in Timelines message when the user enters a query', async () => {
       const wrapper = mount(
-        <TestProviderWithoutDragAndDrop>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <StatefulOpenTimeline
-              apolloClient={apolloClient}
-              isModal={false}
-              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
-            />
-          </MockedProvider>
-        </TestProviderWithoutDragAndDrop>
+        <ThemeProvider theme={theme}>
+          <TestProviderWithoutDragAndDrop>
+            <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+              <StatefulOpenTimeline
+                apolloClient={apolloClient}
+                isModal={false}
+                defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+                title={title}
+              />
+            </MockedProvider>
+          </TestProviderWithoutDragAndDrop>
+        </ThemeProvider>
       );
 
       await wait();
@@ -129,21 +136,23 @@ describe('StatefulOpenTimeline', () => {
           .find('[data-test-subj="query-message"]')
           .first()
           .text()
-      ).toContain('Showing 11 Timelines with');
+      ).toContain('Showing: 11 timelines with');
     });
 
     test('echos (renders) the query when the user enters a query', async () => {
       const wrapper = mount(
-        <TestProviderWithoutDragAndDrop>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <StatefulOpenTimeline
-              apolloClient={apolloClient}
-              isModal={false}
-              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
-            />
-          </MockedProvider>
-        </TestProviderWithoutDragAndDrop>
+        <ThemeProvider theme={theme}>
+          <TestProviderWithoutDragAndDrop>
+            <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+              <StatefulOpenTimeline
+                apolloClient={apolloClient}
+                isModal={false}
+                defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+                title={title}
+              />
+            </MockedProvider>
+          </TestProviderWithoutDragAndDrop>
+        </ThemeProvider>
       );
 
       await wait();
@@ -159,23 +168,25 @@ describe('StatefulOpenTimeline', () => {
           .find('[data-test-subj="selectable-query-text"]')
           .first()
           .text()
-      ).toEqual('abcd');
+      ).toEqual('with "abcd"');
     });
   });
 
   describe('#focusInput', () => {
     test('focuses the input when the component mounts', async () => {
       const wrapper = mount(
-        <TestProviderWithoutDragAndDrop>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <StatefulOpenTimeline
-              apolloClient={apolloClient}
-              isModal={false}
-              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
-            />
-          </MockedProvider>
-        </TestProviderWithoutDragAndDrop>
+        <ThemeProvider theme={theme}>
+          <TestProviderWithoutDragAndDrop>
+            <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+              <StatefulOpenTimeline
+                apolloClient={apolloClient}
+                isModal={false}
+                defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+                title={title}
+              />
+            </MockedProvider>
+          </TestProviderWithoutDragAndDrop>
+        </ThemeProvider>
       );
 
       await wait();
@@ -195,16 +206,18 @@ describe('StatefulOpenTimeline', () => {
       const addTimelinesToFavorites = jest.fn();
 
       const wrapper = mount(
-        <TestProviderWithoutDragAndDrop>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <StatefulOpenTimeline
-              apolloClient={apolloClient}
-              isModal={false}
-              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
-            />
-          </MockedProvider>
-        </TestProviderWithoutDragAndDrop>
+        <ThemeProvider theme={theme}>
+          <TestProviderWithoutDragAndDrop>
+            <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+              <StatefulOpenTimeline
+                apolloClient={apolloClient}
+                isModal={false}
+                defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+                title={title}
+              />
+            </MockedProvider>
+          </TestProviderWithoutDragAndDrop>
+        </ThemeProvider>
       );
 
       await wait();
@@ -240,16 +253,18 @@ describe('StatefulOpenTimeline', () => {
       const deleteTimelines = jest.fn();
 
       const wrapper = mount(
-        <TestProviderWithoutDragAndDrop>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <StatefulOpenTimeline
-              apolloClient={apolloClient}
-              isModal={false}
-              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
-            />
-          </MockedProvider>
-        </TestProviderWithoutDragAndDrop>
+        <ThemeProvider theme={theme}>
+          <TestProviderWithoutDragAndDrop>
+            <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+              <StatefulOpenTimeline
+                apolloClient={apolloClient}
+                isModal={false}
+                defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+                title={title}
+              />
+            </MockedProvider>
+          </TestProviderWithoutDragAndDrop>
+        </ThemeProvider>
       );
 
       await wait();
@@ -282,16 +297,19 @@ describe('StatefulOpenTimeline', () => {
   describe('#onSelectionChange', () => {
     test('it updates the selection state when timelines are selected', async () => {
       const wrapper = mount(
-        <TestProviderWithoutDragAndDrop>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <StatefulOpenTimeline
-              apolloClient={apolloClient}
-              isModal={false}
-              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
-            />
-          </MockedProvider>
-        </TestProviderWithoutDragAndDrop>
+        <ThemeProvider theme={theme}>
+          <TestProviderWithoutDragAndDrop>
+            <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+              <StatefulOpenTimeline
+                data-test-subj="stateful-timeline"
+                apolloClient={apolloClient}
+                isModal={false}
+                defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+                title={title}
+              />
+            </MockedProvider>
+          </TestProviderWithoutDragAndDrop>
+        </ThemeProvider>
       );
 
       await wait();
@@ -310,16 +328,19 @@ describe('StatefulOpenTimeline', () => {
   describe('#onTableChange', () => {
     test('it updates the sort state when the user clicks on a column to sort it', async () => {
       const wrapper = mount(
-        <TestProviderWithoutDragAndDrop>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <StatefulOpenTimeline
-              apolloClient={apolloClient}
-              isModal={false}
-              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
-            />
-          </MockedProvider>
-        </TestProviderWithoutDragAndDrop>
+        <ThemeProvider theme={theme}>
+          <TestProviderWithoutDragAndDrop>
+            <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+              <StatefulOpenTimeline
+                data-test-subj="stateful-timeline"
+                apolloClient={apolloClient}
+                isModal={false}
+                defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+                title={title}
+              />
+            </MockedProvider>
+          </TestProviderWithoutDragAndDrop>
+        </ThemeProvider>
       );
 
       await wait();
@@ -349,16 +370,19 @@ describe('StatefulOpenTimeline', () => {
   describe('#onToggleOnlyFavorites', () => {
     test('it updates the onlyFavorites state when the user clicks the Only Favorites button', async () => {
       const wrapper = mount(
-        <TestProviderWithoutDragAndDrop>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <StatefulOpenTimeline
-              apolloClient={apolloClient}
-              isModal={false}
-              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
-            />
-          </MockedProvider>
-        </TestProviderWithoutDragAndDrop>
+        <ThemeProvider theme={theme}>
+          <TestProviderWithoutDragAndDrop>
+            <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+              <StatefulOpenTimeline
+                data-test-subj="stateful-timeline"
+                apolloClient={apolloClient}
+                isModal={false}
+                defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+                title={title}
+              />
+            </MockedProvider>
+          </TestProviderWithoutDragAndDrop>
+        </ThemeProvider>
       );
 
       await wait();
@@ -386,16 +410,19 @@ describe('StatefulOpenTimeline', () => {
   describe('#onToggleShowNotes', () => {
     test('it updates the itemIdToExpandedNotesRowMap state when the user clicks the expand notes button', async () => {
       const wrapper = mount(
-        <TestProviderWithoutDragAndDrop>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <StatefulOpenTimeline
-              apolloClient={apolloClient}
-              isModal={false}
-              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
-            />
-          </MockedProvider>
-        </TestProviderWithoutDragAndDrop>
+        <ThemeProvider theme={theme}>
+          <TestProviderWithoutDragAndDrop>
+            <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+              <StatefulOpenTimeline
+                data-test-subj="stateful-timeline"
+                apolloClient={apolloClient}
+                isModal={false}
+                defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+                title={title}
+              />
+            </MockedProvider>
+          </TestProviderWithoutDragAndDrop>
+        </ThemeProvider>
       );
 
       await wait();
@@ -436,16 +463,19 @@ describe('StatefulOpenTimeline', () => {
 
     test('it renders the expanded notes when the expand button is clicked', async () => {
       const wrapper = mount(
-        <TestProviderWithoutDragAndDrop>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <StatefulOpenTimeline
-              apolloClient={apolloClient}
-              isModal={false}
-              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
-            />
-          </MockedProvider>
-        </TestProviderWithoutDragAndDrop>
+        <ThemeProvider theme={theme}>
+          <TestProviderWithoutDragAndDrop>
+            <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+              <StatefulOpenTimeline
+                data-test-subj="stateful-timeline"
+                apolloClient={apolloClient}
+                isModal={false}
+                defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+                title={title}
+              />
+            </MockedProvider>
+          </TestProviderWithoutDragAndDrop>
+        </ThemeProvider>
       );
 
       await wait();
@@ -471,23 +501,26 @@ describe('StatefulOpenTimeline', () => {
 
   test('it renders the title', async () => {
     const wrapper = mount(
-      <TestProviderWithoutDragAndDrop>
-        <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-          <StatefulOpenTimeline
-            apolloClient={apolloClient}
-            isModal={false}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            title={title}
-          />
-        </MockedProvider>
-      </TestProviderWithoutDragAndDrop>
+      <ThemeProvider theme={theme}>
+        <TestProviderWithoutDragAndDrop>
+          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+            <StatefulOpenTimeline
+              data-test-subj="stateful-timeline"
+              apolloClient={apolloClient}
+              isModal={false}
+              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+              title={title}
+            />
+          </MockedProvider>
+        </TestProviderWithoutDragAndDrop>
+      </ThemeProvider>
     );
 
     await wait();
 
     expect(
       wrapper
-        .find('[data-test-subj="title"]')
+        .find('[data-test-subj="panel_headline_title"]')
         .first()
         .text()
     ).toEqual(title);
@@ -496,16 +529,19 @@ describe('StatefulOpenTimeline', () => {
   describe('#resetSelectionState', () => {
     test('when the user deletes selected timelines, resetSelectionState is invoked to clear the selection state', async () => {
       const wrapper = mount(
-        <TestProviderWithoutDragAndDrop>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <StatefulOpenTimeline
-              apolloClient={apolloClient}
-              isModal={false}
-              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
-            />
-          </MockedProvider>
-        </TestProviderWithoutDragAndDrop>
+        <ThemeProvider theme={theme}>
+          <TestProviderWithoutDragAndDrop>
+            <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+              <StatefulOpenTimeline
+                data-test-subj="stateful-timeline"
+                apolloClient={apolloClient}
+                isModal={false}
+                defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+                title={title}
+              />
+            </MockedProvider>
+          </TestProviderWithoutDragAndDrop>
+        </ThemeProvider>
       );
 
       await wait();
@@ -531,16 +567,19 @@ describe('StatefulOpenTimeline', () => {
 
   test('it renders the expected count of matching timelines when no query has been entered', async () => {
     const wrapper = mount(
-      <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-        <TestProviderWithoutDragAndDrop>
-          <StatefulOpenTimeline
-            apolloClient={apolloClient}
-            isModal={false}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            title={title}
-          />
-        </TestProviderWithoutDragAndDrop>
-      </MockedProvider>
+      <ThemeProvider theme={theme}>
+        <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+          <TestProviderWithoutDragAndDrop>
+            <StatefulOpenTimeline
+              data-test-subj="stateful-timeline"
+              apolloClient={apolloClient}
+              isModal={false}
+              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+              title={title}
+            />
+          </TestProviderWithoutDragAndDrop>
+        </MockedProvider>
+      </ThemeProvider>
     );
 
     await wait();
@@ -552,7 +591,7 @@ describe('StatefulOpenTimeline', () => {
         .find('[data-test-subj="query-message"]')
         .first()
         .text()
-    ).toContain('Showing 11 Timelines ');
+    ).toContain('Showing: 11 timelines ');
   });
 
   // TODO - Have been skip because we need to re-implement the test as the component changed
@@ -560,16 +599,19 @@ describe('StatefulOpenTimeline', () => {
     const onOpenTimeline = jest.fn();
 
     const wrapper = mount(
-      <TestProviderWithoutDragAndDrop>
-        <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-          <StatefulOpenTimeline
-            apolloClient={apolloClient}
-            isModal={false}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            title={title}
-          />
-        </MockedProvider>
-      </TestProviderWithoutDragAndDrop>
+      <ThemeProvider theme={theme}>
+        <TestProviderWithoutDragAndDrop>
+          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+            <StatefulOpenTimeline
+              data-test-subj="stateful-timeline"
+              apolloClient={apolloClient}
+              isModal={false}
+              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+              title={title}
+            />
+          </MockedProvider>
+        </TestProviderWithoutDragAndDrop>
+      </ThemeProvider>
     );
 
     await wait();
@@ -595,16 +637,19 @@ describe('StatefulOpenTimeline', () => {
     const onOpenTimeline = jest.fn();
 
     const wrapper = mount(
-      <TestProviderWithoutDragAndDrop>
-        <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-          <StatefulOpenTimeline
-            apolloClient={apolloClient}
-            isModal={false}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            title={title}
-          />
-        </MockedProvider>
-      </TestProviderWithoutDragAndDrop>
+      <ThemeProvider theme={theme}>
+        <TestProviderWithoutDragAndDrop>
+          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+            <StatefulOpenTimeline
+              data-test-subj="stateful-timeline"
+              apolloClient={apolloClient}
+              isModal={false}
+              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+              title={title}
+            />
+          </MockedProvider>
+        </TestProviderWithoutDragAndDrop>
+      </ThemeProvider>
     );
 
     await wait();

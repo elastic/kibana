@@ -8,15 +8,17 @@ import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import chrome from 'ui/chrome';
 import url from 'url';
 import { px, units } from '../../../style/variables';
+import { useCore } from '../../../hooks/useCore';
 
 const Container = styled.div`
   margin: ${px(units.minus)} 0;
 `;
 
 export const GlobalHelpExtension: React.SFC = () => {
+  const core = useCore();
+
   return (
     <Fragment>
       <Container>
@@ -33,7 +35,7 @@ export const GlobalHelpExtension: React.SFC = () => {
       <Container>
         <EuiLink
           href={url.format({
-            pathname: chrome.addBasePath('/app/kibana'),
+            pathname: core.http.basePath.prepend('/app/kibana'),
             hash: '/management/elasticsearch/upgrade_assistant'
           })}
         >

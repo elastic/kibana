@@ -8,7 +8,7 @@ import produce from 'immer';
 import _ from 'lodash';
 import { Action, handleActions } from 'redux-actions';
 
-import { SymbolInformation } from 'vscode-languageserver-types/lib/esm/main';
+import { DocumentSymbol } from 'vscode-languageserver-types';
 import {
   closeSymbolPath,
   loadStructure,
@@ -19,9 +19,10 @@ import {
   SymbolWithMembers,
 } from '../actions';
 import { languageServerInitializing } from '../actions/language_server';
+import { routePathChange, repoChange, revisionChange, filePathChange } from '../actions/route';
 
 export interface SymbolState {
-  symbols: { [key: string]: SymbolInformation[] };
+  symbols: { [key: string]: DocumentSymbol[] };
   structureTree: { [key: string]: SymbolWithMembers[] };
   error?: Error;
   loading: boolean;
@@ -37,6 +38,17 @@ const initialState: SymbolState = {
   closedPaths: [],
   languageServerInitializing: false,
 };
+
+const clearState = (state: SymbolState) =>
+  produce<SymbolState>(state, draft => {
+    draft.symbols = initialState.symbols;
+    draft.loading = initialState.loading;
+    draft.structureTree = initialState.structureTree;
+    draft.closedPaths = initialState.closedPaths;
+    draft.languageServerInitializing = initialState.languageServerInitializing;
+    draft.error = undefined;
+    draft.lastRequestPath = undefined;
+  });
 
 type SymbolPayload = string & SymbolsPayload & Error;
 
@@ -85,6 +97,10 @@ export const symbol = handleActions<SymbolState, SymbolPayload>(
       produce<SymbolState>(state, draft => {
         draft.languageServerInitializing = true;
       }),
+    [String(routePathChange)]: clearState,
+    [String(repoChange)]: clearState,
+    [String(revisionChange)]: clearState,
+    [String(filePathChange)]: clearState,
   },
   initialState
 );

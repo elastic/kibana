@@ -500,6 +500,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                   </EuiLink>
                 }
                 closePopover={[Function]}
+                display="inlineBlock"
                 hasArrow={true}
                 id="phaseExecutionPopover"
                 isOpen={false}

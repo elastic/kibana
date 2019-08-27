@@ -1,0 +1,33 @@
+
+.spcCopyToSpaceResult {
+  padding-bottom: $euiSizeS;
+  border-bottom: $euiBorderThin;
+}
+
+.spcCopyToSpaceResultDetails {
+  margin-top: $euiSizeS;
+  padding-left: $euiSizeL;
+}
+
+.spcCopyToSpaceResultDetails__row {
+  margin-bottom: $euiSizeXS;
+}
+
+.spcCopyToSpaceResultDetails__savedObjectName {
+  // Constrains name to the flex item, and allows for truncation when necessary
+  min-width: 0;
+}
+
+.spcCopyToSpace__spacesList {
+  margin-top: $euiSizeXS;
+}
+
+// make icon occupy the same space as an EuiSwitch
+// icon is size m, which is the native $euiSize value
+// see @elastic/eui/src/components/icon/_variables.scss
+.spcCopyToSpaceIncludeRelated .euiIcon {
+  margin-right: $euiSwitchWidth - $euiSize;
+}
+.spcCopyToSpaceIncludeRelated__label {
+  font-size: $euiFontSizeS;
+}

@@ -110,7 +110,7 @@ function createData(seriesData) {
 describe('Vislib yAxis Class Test Suite', function () {
   beforeEach(ngMock.module('kibana'));
 
-  beforeEach(ngMock.inject(function (Private, $injector) {
+  beforeEach(ngMock.inject(function ($injector) {
     persistedState = new ($injector.get('PersistedState'))();
 
     expect($('.y-axis-wrapper')).to.have.length(0);
@@ -340,16 +340,6 @@ describe('Vislib yAxis Class Test Suite', function () {
     afterEach(function () {
       yAxis.yMax = yMax;
       yAxis = buildYAxis();
-    });
-
-    it('should use percentage format for percentages', function () {
-      yAxis = buildYAxis({
-        scale: {
-          mode: 'percentage'
-        }
-      });
-      const tickFormat = yAxis.getAxis().tickFormat();
-      expect(tickFormat(1)).to.be('100%');
     });
 
     it('should use decimal format for small values', function () {

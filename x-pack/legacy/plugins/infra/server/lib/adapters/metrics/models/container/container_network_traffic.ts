@@ -5,13 +5,14 @@
  */
 
 import { InfraMetricModelCreator, InfraMetricModelMetricType } from '../../adapter_types';
+import { InfraMetric } from '../../../../../graphql/types';
 
 export const containerNetworkTraffic: InfraMetricModelCreator = (
   timeField,
   indexPattern,
   interval
 ) => ({
-  id: 'containerNetworkTraffic',
+  id: InfraMetric.containerNetworkTraffic,
   requires: ['docker.network'],
   index_pattern: indexPattern,
   interval,

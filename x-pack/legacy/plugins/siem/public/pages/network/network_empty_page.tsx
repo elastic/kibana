@@ -19,7 +19,7 @@ export const NetworkEmptyPage = pure(() => (
   <EmptyPage
     actionPrimaryIcon="gear"
     actionPrimaryLabel={i18n.EMPTY_ACTION_PRIMARY}
-    actionPrimaryUrl={`${basePath}/app/kibana#/home/tutorial_directory/security`}
+    actionPrimaryUrl={`${basePath}/app/kibana#/home/tutorial_directory/siem`}
     actionSecondaryIcon="popout"
     actionSecondaryLabel={i18n.EMPTY_ACTION_SECONDARY}
     actionSecondaryTarget="_blank"
@@ -28,3 +28,5 @@ export const NetworkEmptyPage = pure(() => (
     title={i18n.EMPTY_TITLE}
   />
 ));
+
+NetworkEmptyPage.displayName = 'NetworkEmptyPage';

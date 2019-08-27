@@ -8,8 +8,7 @@ import PropTypes from 'prop-types';
 import { map } from 'lodash';
 import { EuiFlexItem, EuiFlexGrid } from '@elastic/eui';
 import { ElementControls } from './element_controls';
-import { CustomElement } from '../../lib/custom_element';
-import { ElementSpec } from '../../../canvas_plugin_src/elements/types';
+import { CustomElement, ElementSpec } from '../../../types';
 import { ElementCard } from '../element_card';
 
 export interface Props {

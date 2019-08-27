@@ -14,7 +14,7 @@ import { filter, mergeMap, switchMap, withLatestFrom, startWith, takeUntil } fro
 
 import { persistTimelineNoteMutation } from '../../containers/timeline/notes/persist.gql_query';
 import { PersistTimelineNoteMutation, ResponseNote } from '../../graphql/types';
-import { updateNote } from '../app/actions';
+import { updateNote, addError } from '../app/actions';
 import { NotesById } from '../app/model';
 
 import {
@@ -23,6 +23,7 @@ import {
   endTimelineSaving,
   updateTimeline,
   startTimelineSaving,
+  showCallOutUnauthorizedMsg,
 } from './actions';
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import { refetchQueries } from './refetch_queries';
@@ -63,8 +64,10 @@ export const epicPersistNote = (
     mergeMap(([result, recentTimeline, recentNotes]) => {
       const noteIdRedux = get('payload.noteId', action);
       const response: ResponseNote = get('data.persistNote', result);
+      const callOutMsg = response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
 
       return [
+        ...callOutMsg,
         recentTimeline[get('payload.id', action)].savedObjectId == null
           ? updateTimeline({
               id: get('payload.id', action),
@@ -100,6 +103,9 @@ export const epicPersistNote = (
       action$.pipe(
         withLatestFrom(timeline$),
         filter(([checkAction, updatedTimeline]) => {
+          if (checkAction.type === addError.type) {
+            return true;
+          }
           if (
             checkAction.type === endTimelineSaving.type &&
             updatedTimeline[get('payload.id', checkAction)].savedObjectId != null

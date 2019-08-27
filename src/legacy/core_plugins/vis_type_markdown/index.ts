@@ -18,19 +18,27 @@
  */
 
 import { resolve } from 'path';
-import { Legacy } from '../../../../kibana';
-import { LegacyPluginApi } from '../../plugin_discovery/types';
+import { Legacy } from 'kibana';
 
-// eslint-disable-next-line import/no-default-export
-export default function MarkdownVisTypePlugin(kibana: LegacyPluginApi) {
-  const config: Legacy.PluginSpecOptions = {
-    id: 'vis_type_markdown',
-    require: ['data', 'visualizations'],
+import { LegacyPluginApi, LegacyPluginInitializer } from '../../../../src/legacy/types';
+
+const markdownPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
+  new Plugin({
+    id: 'markdown_vis',
+    require: ['kibana', 'elasticsearch', 'visualizations', 'interpreter', 'data'],
+    publicDir: resolve(__dirname, 'public'),
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      hacks: ['plugins/vis_type_markdown/index'],
+      hacks: [resolve(__dirname, 'public/legacy')],
+      injectDefaultVars: server => ({}),
     },
-  };
+    init: (server: Legacy.Server) => ({}),
+    config(Joi: any) {
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+      }).default();
+    },
+  } as Legacy.PluginSpecOptions);
 
-  return new kibana.Plugin(config);
-}
+// eslint-disable-next-line import/no-default-export
+export default markdownPluginInitializer;

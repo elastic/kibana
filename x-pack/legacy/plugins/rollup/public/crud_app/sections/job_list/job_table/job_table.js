@@ -30,7 +30,7 @@ import {
 } from '@elastic/eui';
 
 import { UIM_SHOW_DETAILS_CLICK } from '../../../../../common';
-import { trackUiMetric } from '../../../services';
+import { trackUiMetric, METRIC_TYPE } from '../../../services';
 import { JobActionMenu, JobStatus } from '../../components';
 
 const COLUMNS = [{
@@ -259,7 +259,7 @@ export class JobTableUi extends Component {
         content = (
           <EuiLink
             onClick={() => {
-              trackUiMetric(UIM_SHOW_DETAILS_CLICK);
+              trackUiMetric(METRIC_TYPE.CLICK, UIM_SHOW_DETAILS_CLICK);
               openDetailPanel(job.id);
             }}
           >

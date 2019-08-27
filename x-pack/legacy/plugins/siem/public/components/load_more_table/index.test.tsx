@@ -34,7 +34,6 @@ describe('Load More Table Component', () => {
             itemsPerRow={rowItems}
             limit={1}
             loading={false}
-            loadingTitle="Hosts"
             loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
             pageOfItems={mockData.Hosts.edges}
             updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
@@ -51,7 +50,7 @@ describe('Load More Table Component', () => {
           <LoadMoreTable
             columns={getHostsColumns()}
             hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
-            headerCount={1}
+            headerCount={-1}
             headerSupplement={<p>{'My test supplement.'}</p>}
             headerTitle="Hosts"
             headerTooltip="My test tooltip"
@@ -59,7 +58,6 @@ describe('Load More Table Component', () => {
             itemsPerRow={rowItems}
             limit={1}
             loading={true}
-            loadingTitle="Hosts"
             loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
             pageOfItems={[]}
             updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
@@ -68,7 +66,7 @@ describe('Load More Table Component', () => {
       );
 
       expect(
-        wrapper.find('[data-test-subj="InitialLoadingPanelLoadMoreTable"]').exists()
+        wrapper.find('[data-test-subj="initialLoadingPanelLoadMoreTable"]').exists()
       ).toBeTruthy();
     });
 
@@ -86,7 +84,6 @@ describe('Load More Table Component', () => {
             itemsPerRow={rowItems}
             limit={1}
             loading={true}
-            loadingTitle="Hosts"
             loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
             pageOfItems={mockData.Hosts.edges}
             updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
@@ -94,7 +91,7 @@ describe('Load More Table Component', () => {
         </ThemeProvider>
       );
 
-      expect(wrapper.find('[data-test-subj="LoadingPanelLoadMoreTable"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="loadingPanelLoadMoreTable"]').exists()).toBeTruthy();
     });
 
     test('it renders the loadMore button if need to fetch more', () => {
@@ -111,7 +108,6 @@ describe('Load More Table Component', () => {
             itemsPerRow={rowItems}
             limit={1}
             loading={false}
-            loadingTitle="Hosts"
             loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
             pageOfItems={mockData.Hosts.edges}
             updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
@@ -124,7 +120,7 @@ describe('Load More Table Component', () => {
           .find('[data-test-subj="loadingMoreButton"]')
           .first()
           .text()
-      ).toContain('Load More');
+      ).toContain('Load more');
     });
 
     test('it renders the Loading... in the more load button when fetching new data', () => {
@@ -141,7 +137,6 @@ describe('Load More Table Component', () => {
             itemsPerRow={rowItems}
             limit={1}
             loading={true}
-            loadingTitle="Hosts"
             loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
             pageOfItems={mockData.Hosts.edges}
             updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
@@ -150,7 +145,7 @@ describe('Load More Table Component', () => {
       );
 
       expect(
-        wrapper.find('[data-test-subj="InitialLoadingPanelLoadMoreTable"]').exists()
+        wrapper.find('[data-test-subj="initialLoadingPanelLoadMoreTable"]').exists()
       ).toBeFalsy();
       expect(
         wrapper
@@ -174,7 +169,6 @@ describe('Load More Table Component', () => {
             itemsPerRow={rowItems}
             limit={2}
             loading={false}
-            loadingTitle="Hosts"
             loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
             pageOfItems={mockData.Hosts.edges}
             updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
@@ -199,7 +193,6 @@ describe('Load More Table Component', () => {
             itemsPerRow={rowItems}
             limit={2}
             loading={false}
-            loadingTitle="Hosts"
             loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
             pageOfItems={mockData.Hosts.edges}
             updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
@@ -228,7 +221,6 @@ describe('Load More Table Component', () => {
             itemsPerRow={[]}
             limit={2}
             loading={false}
-            loadingTitle="Hosts"
             loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
             pageOfItems={mockData.Hosts.edges}
             updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
@@ -254,7 +246,6 @@ describe('Load More Table Component', () => {
             itemsPerRow={rowItems}
             limit={2}
             loading={false}
-            loadingTitle="Hosts"
             loadMore={jest.fn()}
             onChange={mockOnChange}
             pageOfItems={mockData.Hosts.edges}
@@ -283,7 +274,6 @@ describe('Load More Table Component', () => {
             itemsPerRow={rowItems}
             limit={1}
             loading={false}
-            loadingTitle="Hosts"
             loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
             pageOfItems={mockData.Hosts.edges}
             updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
@@ -313,7 +303,6 @@ describe('Load More Table Component', () => {
             itemsPerRow={rowItems}
             limit={2}
             loading={false}
-            loadingTitle="Hosts"
             loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
             pageOfItems={mockData.Hosts.edges}
             updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
@@ -348,7 +337,6 @@ describe('Load More Table Component', () => {
             itemsPerRow={rowItems}
             limit={2}
             loading={false}
-            loadingTitle="Hosts"
             loadMore={jest.fn()}
             onChange={mockOnChange}
             pageOfItems={mockData.Hosts.edges}

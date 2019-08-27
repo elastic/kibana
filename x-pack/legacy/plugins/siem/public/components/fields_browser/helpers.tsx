@@ -20,6 +20,8 @@ export const LoadingSpinner = styled(EuiLoadingSpinner)`
   top: 3px;
 `;
 
+LoadingSpinner.displayName = 'LoadingSpinner';
+
 export const CATEGORY_PANE_WIDTH = 200;
 export const DESCRIPTION_COLUMN_WIDTH = 300;
 export const FIELD_COLUMN_WIDTH = 200;
@@ -91,7 +93,7 @@ export const filterBrowserFieldsByFieldName = ({
         fields: filter(
           f => f.name != null && f.name.includes(trimmedSubstring),
           browserFields[categoryId].fields
-        ),
+        ).reduce((filtered, field) => ({ ...filtered, [field.name!]: field }), {}),
       },
     }),
     {}

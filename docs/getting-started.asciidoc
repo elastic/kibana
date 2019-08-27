@@ -4,46 +4,56 @@
 [partintro]
 --
 
-Ready to get some hands-on experience with {kib}? There are two ways to start:
+You’re new to Kibana and want to give it a try. {kib} has sample data sets and 
+tutorials to help you get started.
 
-* <<tutorial-sample-data, Explore {kib} using the Flights dashboard>>
-+
-Load the Flights sample data and dashboard with one click and start 
-interacting with {kib} visualizations in seconds.
+[float]
+=== Sample data
 
-* <<tutorial-build-dashboard, Build your own dashboard>> 
-+
-Manually load a data set and build your own visualizations and dashboard.
+You can use the <<add-sample-data, sample data 
+sets>> to take {kib} for a test ride without having 
+to go through the process of loading data yourself. With one click, 
+you can install a sample data set and start interacting with 
+{kib} visualizations in seconds. You can access the sample data 
+from the {kib} home page.
 
-Before you begin, make sure you've <<install, installed Kibana>> and established
-a {kibana-ref}/connect-to-elasticsearch.html[connection to Elasticsearch].
-You might also be interested in the
-https://www.elastic.co/webinars/getting-started-kibana[Getting Started with Kibana]
-video tutorial.
+[float]
+
+=== Add data tutorials
+{kib} has built-in *Add Data* tutorials to help you set up
+data flows in the Elastic Stack. These tutorials are available 
+from the Kibana home page. In *Add Data to Kibana*, find the data type 
+you’re interested in, and click its button to view a list of available tutorials. 
+
+[float]
+=== Hands-on experience 
+
+The following tutorials walk you through searching, analyzing, 
+and visualizing data.
+
+* <<tutorial-sample-data, Explore Kibana using sample data>>. You'll
+learn to filter and query data, edit visualizations, and interact with dashboards. 
+
+* <<tutorial-build-dashboard, Build your own dashboard>>.  You'll manually load a data set and build 
+your own visualizations and dashboard. 
+
+[float]
+=== Before you begin
+
+Make sure you've <<install, installed Kibana>> and established
+a <<connect-to-elasticsearch, connection to Elasticsearch>>.
 
 If you are running our https://cloud.elastic.co[hosted Elasticsearch Service] 
 on Elastic Cloud, you can access Kibana with a single click.
+
+
 --
 
 include::getting-started/add-sample-data.asciidoc[]
 
 include::getting-started/tutorial-sample-data.asciidoc[]
 
-include::getting-started/tutorial-sample-filter.asciidoc[]
-
-include::getting-started/tutorial-sample-query.asciidoc[]
-
-include::getting-started/tutorial-sample-discover.asciidoc[]
-
-include::getting-started/tutorial-sample-edit.asciidoc[]
-
-include::getting-started/tutorial-sample-inspect.asciidoc[]
-
-include::getting-started/tutorial-sample-remove.asciidoc[]
-
 include::getting-started/tutorial-full-experience.asciidoc[]
-
-include::getting-started/tutorial-load-dataset.asciidoc[]
 
 include::getting-started/tutorial-define-index.asciidoc[]
 
@@ -53,6 +63,3 @@ include::getting-started/tutorial-visualizing.asciidoc[]
 
 include::getting-started/tutorial-dashboard.asciidoc[]
 
-include::getting-started/tutorial-inspect.asciidoc[]
-
-include::getting-started/wrapping-up.asciidoc[]

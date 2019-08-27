@@ -159,8 +159,8 @@ interface Props {
   recentlyAccessed$: Rx.Observable<ChromeRecentlyAccessedHistoryItem[]>;
   forceAppSwitcherNavigation$: Rx.Observable<boolean>;
   helpExtension$: Rx.Observable<ChromeHelpExtension>;
-  navControlsLeft$: Rx.Observable<ReadonlyArray<ChromeNavControl>>;
-  navControlsRight$: Rx.Observable<ReadonlyArray<ChromeNavControl>>;
+  navControlsLeft$: Rx.Observable<readonly ChromeNavControl[]>;
+  navControlsRight$: Rx.Observable<readonly ChromeNavControl[]>;
   intl: InjectedIntl;
   basePath: HttpStart['basePath'];
 }
@@ -171,8 +171,8 @@ interface State {
   navLinks: ReadonlyArray<ReturnType<typeof extendNavLink>>;
   recentlyAccessed: ReadonlyArray<ReturnType<typeof extendRecentlyAccessedHistoryItem>>;
   forceNavigation: boolean;
-  navControlsLeft: ReadonlyArray<ChromeNavControl>;
-  navControlsRight: ReadonlyArray<ChromeNavControl>;
+  navControlsLeft: readonly ChromeNavControl[];
+  navControlsRight: readonly ChromeNavControl[];
 }
 
 class HeaderUI extends Component<Props, State> {

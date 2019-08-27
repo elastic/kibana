@@ -295,5 +295,79 @@ ruleTester.run('@kbn/eslint/no-restricted-paths', rule, {
         },
       ],
     },
+
+    {
+      // Does not allow to import deeply within Core, using "src/core/..." Webpack alias.
+      code: 'const d = require("src/core/server/saved_objects")',
+      filename: path.join(__dirname, './files/no_restricted_paths/client/a.js'),
+      options: [
+        {
+          basePath: __dirname,
+          zones: [
+            {
+              target: 'files/no_restricted_paths/**/*',
+              from: 'src/core/server/**/*',
+            },
+          ],
+        },
+      ],
+      errors: [
+        {
+          message: 'Unexpected path "src/core/server/saved_objects" imported in restricted zone.',
+          line: 1,
+          column: 19,
+        },
+      ],
+    },
+
+    {
+      // Does not allow to import "ui/kfetch".
+      code: 'const d = require("ui/kfetch")',
+      filename: path.join(__dirname, './files/no_restricted_paths/client/a.js'),
+      options: [
+        {
+          basePath: __dirname,
+          zones: [
+            {
+              from: ['src/legacy/ui/**/*', 'ui/**/*'],
+              target: 'files/no_restricted_paths/**/*',
+              allowSameFolder: true,
+            },
+          ],
+        },
+      ],
+      errors: [
+        {
+          message: 'Unexpected path "ui/kfetch" imported in restricted zone.',
+          line: 1,
+          column: 19,
+        },
+      ],
+    },
+
+    {
+      // Does not allow to import deeply "ui/kfetch/public/index".
+      code: 'const d = require("ui/kfetch/public/index")',
+      filename: path.join(__dirname, './files/no_restricted_paths/client/a.js'),
+      options: [
+        {
+          basePath: __dirname,
+          zones: [
+            {
+              from: ['src/legacy/ui/**/*', 'ui/**/*'],
+              target: 'files/no_restricted_paths/**/*',
+              allowSameFolder: true,
+            },
+          ],
+        },
+      ],
+      errors: [
+        {
+          message: 'Unexpected path "ui/kfetch/public/index" imported in restricted zone.',
+          line: 1,
+          column: 19,
+        },
+      ],
+    },
   ],
 });

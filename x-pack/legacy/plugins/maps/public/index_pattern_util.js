@@ -7,7 +7,6 @@
 import { indexPatternService } from './kibana_services';
 
 export async function getIndexPatternsFromIds(indexPatternIds = []) {
-
   const promises = [];
   indexPatternIds.forEach((id) => {
     const indexPatternPromise = indexPatternService.get(id);
@@ -17,5 +16,10 @@ export async function getIndexPatternsFromIds(indexPatternIds = []) {
   });
 
   return await Promise.all(promises);
+}
 
+export function getTermsFields(fields) {
+  return fields.filter(field => {
+    return field.aggregatable && ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type);
+  });
 }

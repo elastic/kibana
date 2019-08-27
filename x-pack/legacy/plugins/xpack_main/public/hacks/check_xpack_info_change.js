@@ -10,7 +10,7 @@ import { EuiCallOut } from '@elastic/eui';
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
 import { banners } from 'ui/notify';
-import { DebounceProvider } from 'ui/debounce';
+import { DebounceProvider } from 'ui/directives/debounce';
 import { Path } from 'plugins/xpack_main/services/path';
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { xpackInfoSignature } from 'plugins/xpack_main/services/xpack_info_signature';

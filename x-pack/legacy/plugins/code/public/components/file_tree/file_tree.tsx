@@ -11,25 +11,54 @@ import classes from 'classnames';
 import { connect } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { FileTree as Tree, FileTreeItemType } from '../../../model';
-import { closeTreePath, openTreePath } from '../../actions';
 import { EuiSideNavItem, MainRouteParams, PathTypes } from '../../common/types';
 import { RootState } from '../../reducers';
 import { encodeRevisionString } from '../../../common/uri_util';
 
 interface Props extends RouteComponentProps<MainRouteParams> {
   node?: Tree;
-  closeTreePath: (paths: string) => void;
-  openTreePath: (paths: string) => void;
-  openedPaths: string[];
+  isNotFound: boolean;
 }
 
-export class CodeFileTree extends React.Component<Props> {
-  public componentDidMount(): void {
-    const { path } = this.props.match.params;
+export class CodeFileTree extends React.Component<Props, { openPaths: string[] }> {
+  constructor(props: Props) {
+    super(props);
+    const { path } = props.match.params;
     if (path) {
-      this.props.openTreePath(path);
+      this.state = {
+        openPaths: CodeFileTree.getOpenPaths(path, []),
+      };
+    } else {
+      this.state = {
+        openPaths: [],
+      };
     }
   }
+
+  static getOpenPaths = (path: string, openPaths: string[]) => {
+    let p = path;
+    const newOpenPaths = [...openPaths];
+    const pathSegs = p.split('/');
+    while (!openPaths.includes(p)) {
+      newOpenPaths.push(p);
+      pathSegs.pop();
+      if (pathSegs.length <= 0) {
+        break;
+      }
+      p = pathSegs.join('/');
+    }
+    return newOpenPaths;
+  };
+
+  openTreePath = (path: string) => {
+    this.setState({ openPaths: CodeFileTree.getOpenPaths(path, this.state.openPaths) });
+  };
+
+  closeTreePath = (path: string) => {
+    const isSubFolder = (p: string) => p.startsWith(path + '/');
+    const newOpenPaths = this.state.openPaths.filter(p => !(p === path || isSubFolder(p)));
+    this.setState({ openPaths: newOpenPaths });
+  };
 
   public onClick = (node: Tree) => {
     const { resource, org, repo, revision, path } = this.props.match.params;
@@ -48,9 +77,9 @@ export class CodeFileTree extends React.Component<Props> {
 
   public toggleTree = (path: string) => {
     if (this.isPathOpen(path)) {
-      this.props.closeTreePath(path);
+      this.closeTreePath(path);
     } else {
-      this.props.openTreePath(path);
+      this.openTreePath(path);
     }
   };
 
@@ -76,21 +105,45 @@ export class CodeFileTree extends React.Component<Props> {
 
   public getItemRenderer = (node: Tree, forceOpen: boolean, flattenFrom?: Tree) => () => {
     const className = 'codeFileTree__item kbn-resetFocusState';
-    let bg = null;
-    if (this.props.match.params.path === node.path) {
-      bg = <div ref={el => this.scrollIntoView(el)} className="codeFileTree__node--fullWidth" />;
-    }
     const onClick = () => {
       const path = flattenFrom ? flattenFrom.path! : node.path!;
       this.toggleTree(path);
       this.onClick(node);
     };
+    const nodeTypeMap = {
+      [FileTreeItemType.Directory]: 'Directory',
+      [FileTreeItemType.File]: 'File',
+      [FileTreeItemType.Link]: 'Link',
+      [FileTreeItemType.Submodule]: 'Submodule',
+    };
+    let bg = (
+      <div
+        tabIndex={0}
+        className="codeFileTree__node--link"
+        data-test-subj={`codeFileTreeNode-${nodeTypeMap[node.type]}-${node.path}`}
+        onClick={onClick}
+        onKeyDown={onClick}
+        role="button"
+      />
+    );
+    if (this.props.match.params.path === node.path) {
+      bg = (
+        <div
+          ref={el => this.scrollIntoView(el)}
+          className="codeFileTree__node--fullWidth"
+          tabIndex={0}
+          data-test-subj={`codeFileTreeNode-${nodeTypeMap[node.type]}-${node.path}`}
+          onClick={onClick}
+          onKeyDown={onClick}
+          role="button"
+        />
+      );
+    }
     switch (node.type) {
       case FileTreeItemType.Directory: {
         return (
           <div className="codeFileTree__node">
             <div
-              data-test-subj={`codeFileTreeNode-Directory-${node.path}`}
               className={className}
               role="button"
               tabIndex={0}
@@ -122,7 +175,6 @@ export class CodeFileTree extends React.Component<Props> {
         return (
           <div className="codeFileTree__node">
             <div
-              data-test-subj={`codeFileTreeNode-Submodule-${node.path}`}
               tabIndex={0}
               onKeyDown={onClick}
               onClick={onClick}
@@ -144,7 +196,6 @@ export class CodeFileTree extends React.Component<Props> {
         return (
           <div className="codeFileTree__node">
             <div
-              data-test-subj={`codeFileTreeNode-Link-${node.path}`}
               tabIndex={0}
               onKeyDown={onClick}
               onClick={onClick}
@@ -166,7 +217,6 @@ export class CodeFileTree extends React.Component<Props> {
         return (
           <div className="codeFileTree__node">
             <div
-              data-test-subj={`codeFileTreeNode-File-${node.path}`}
               tabIndex={0}
               onKeyDown={onClick}
               onClick={onClick}
@@ -238,23 +288,14 @@ export class CodeFileTree extends React.Component<Props> {
   }
 
   private isPathOpen(path: string) {
-    return this.props.openedPaths.includes(path);
+    if (this.props.isNotFound) return false;
+    return this.state.openPaths.includes(path);
   }
 }
 
 const mapStateToProps = (state: RootState) => ({
   node: state.fileTree.tree,
-  openedPaths: state.fileTree.openedPaths,
+  isNotFound: state.file.isNotFound,
 });
 
-const mapDispatchToProps = {
-  closeTreePath,
-  openTreePath,
-};
-
-export const FileTree = withRouter(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  )(CodeFileTree)
-);
+export const FileTree = withRouter(connect(mapStateToProps)(CodeFileTree));

@@ -18,28 +18,23 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunction, KibanaDatatable, Render } from '../../interpreter/types';
-import { Style } from '../../interpreter/public/types';
+import { ExpressionFunction, Render } from '../../interpreter/types';
+import { Arguments, MarkdownVisParams } from './types';
 
 const name = 'markdownVis';
 
-export interface Arguments {
-  markdown: string;
-  font: Style;
-  openLinksInNewTab: boolean;
+type Context = undefined;
+
+interface RenderValue {
+  visType: 'markdown';
+  visConfig: MarkdownVisParams;
 }
 
-export interface MarkdownVisParams {
-  markdown: string;
-  fontSize: number;
-  openLinksInNewTab: boolean;
-}
+type Return = Promise<Render<RenderValue>>;
 
-type Return = Promise<Render<{ visType: 'markdown'; visConfig: MarkdownVisParams }>>;
-
-export const kibanaMarkdown = (): ExpressionFunction<
+export const createMarkdownVisFn = (): ExpressionFunction<
   typeof name,
-  KibanaDatatable,
+  Context,
   Arguments,
   Return
 > => ({

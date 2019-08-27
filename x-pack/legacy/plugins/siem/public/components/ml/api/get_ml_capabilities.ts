@@ -5,9 +5,11 @@
  */
 
 import chrome from 'ui/chrome';
+
+import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
+import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
 import { InfluencerInput, MlCapabilities } from '../types';
 import { throwIfNotOk } from './throw_if_not_ok';
-import { emptyMlCapabilities } from '../empty_ml_capabilities';
 
 export interface Body {
   jobIds: string[];
@@ -25,20 +27,17 @@ export interface Body {
 export const getMlCapabilities = async (
   headers: Record<string, string | undefined>
 ): Promise<MlCapabilities> => {
-  try {
-    const response = await fetch('/api/ml/ml_capabilities', {
-      method: 'GET',
-      headers: {
-        'kbn-system-api': 'true',
-        'content-Type': 'application/json',
-        'kbn-xsrf': chrome.getXsrfToken(),
-        ...headers,
-      },
-    });
-    await throwIfNotOk(response);
-    return await response.json();
-  } catch (error) {
-    // TODO: Toaster error when this happens instead of returning empty data
-    return emptyMlCapabilities;
-  }
+  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+  const response = await fetch(`${chrome.getBasePath()}/api/ml/ml_capabilities`, {
+    method: 'GET',
+    credentials: 'same-origin',
+    headers: {
+      'kbn-system-api': 'true',
+      'content-Type': 'application/json',
+      'kbn-xsrf': kbnVersion,
+      ...headers,
+    },
+  });
+  await throwIfNotOk(response);
+  return await response.json();
 };

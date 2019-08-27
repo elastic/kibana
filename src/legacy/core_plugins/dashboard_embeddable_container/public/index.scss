@@ -1,6 +1,6 @@
-
 @import 'src/legacy/ui/public/styles/styling_constants';
+@import 'src/legacy/core_plugins/embeddable_api/public/variables';
 
-// TODO: uncomment once the duplicate styles are removed from the dashboard app itself.
-// MUST STAY AT THE BOTTOM BECAUSE OF DARK THEME IMPORTS
-// @import './embeddable/index';
+@import './np_ready/public/lib/embeddable/grid/index';
+@import './np_ready/public/lib/embeddable/panel/index';
+@import './np_ready/public/lib/embeddable/viewport/index';

@@ -12,6 +12,6 @@
       "_tasks/_cancel",
       "_tasks/{task_id}/_cancel"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/tasks.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/tasks.html"
   }
 }

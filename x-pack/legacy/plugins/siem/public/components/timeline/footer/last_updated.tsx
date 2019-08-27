@@ -35,6 +35,8 @@ export const Updated = pure<{ date: number; prefix: string; updatedAt: number }>
   )
 );
 
+Updated.displayName = 'Updated';
+
 export class LastUpdatedAt extends React.PureComponent<LastUpdatedAtProps, LastUpdatedAtState> {
   public readonly state = {
     date: Date.now(),

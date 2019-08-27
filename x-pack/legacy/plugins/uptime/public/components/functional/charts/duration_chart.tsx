@@ -89,7 +89,7 @@ export const DurationChart = ({
           />
         </h4>
       </EuiTitle>
-      <EuiPanel>
+      <EuiPanel style={{ height: '170px' }}>
         <Chart>
           <Settings
             xDomain={{ min: absoluteStartDate, max: absoluteEndDate }}

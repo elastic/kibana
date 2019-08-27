@@ -10,8 +10,10 @@ import 'react-testing-library/cleanup-after-each';
 import { TransactionActionMenu } from '../TransactionActionMenu';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import * as Transactions from './mockData';
-import * as hooks from '../../../../hooks/useAPMIndexPattern';
+import * as apmIndexPatternHooks from '../../../../hooks/useAPMIndexPattern';
+import * as coreHoooks from '../../../../hooks/useCore';
 import { ISavedObject } from '../../../../services/rest/savedObjects';
+import { InternalCoreStart } from 'src/core/public';
 
 jest.mock('ui/kfetch');
 
@@ -27,9 +29,18 @@ const renderTransaction = async (transaction: Record<string, any>) => {
 
 describe('TransactionActionMenu component', () => {
   beforeEach(() => {
+    const coreMock = ({
+      http: {
+        basePath: {
+          prepend: (path: string) => `/basepath${path}`
+        }
+      }
+    } as unknown) as InternalCoreStart;
+
     jest
-      .spyOn(hooks, 'useAPMIndexPattern')
+      .spyOn(apmIndexPatternHooks, 'useAPMIndexPattern')
       .mockReturnValue({ id: 'foo' } as ISavedObject);
+    jest.spyOn(coreHoooks, 'useCore').mockReturnValue(coreMock);
   });
 
   afterEach(() => {

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// @ts-ignore
 import Git from '@elastic/nodegit';
 import assert from 'assert';
 import { execSync } from 'child_process';
@@ -34,8 +35,12 @@ describe('git_operations', () => {
 
     try {
       const g = new GitOperations(serverOptions.repoPath);
-      const defaultBranch = await g.getDefaultBranch(repoUri);
+      const uri = path.join(repoUri, '.git');
+      const defaultBranch = await g.getDefaultBranch(uri);
       assert.strictEqual(defaultBranch, 'trunk');
+      const headRevision = await g.getHeadRevision(uri);
+      const headCommit = await g.getCommitInfo(uri, 'HEAD');
+      assert.strictEqual(headRevision, headCommit!.id);
     } finally {
       rimraf.sync(repoDir);
     }
@@ -43,13 +48,14 @@ describe('git_operations', () => {
 
   async function prepareProject(repoPath: string) {
     mkdirp.sync(repoPath);
-    const repo = await Git.Repository.init(repoPath, 0);
+    const workDir = path.join(serverOptions.workspacePath, repoUri);
+    const repo = await Git.Repository.init(workDir, 0);
     const content = '';
-    fs.writeFileSync(path.join(repo.workdir(), '1'), content, 'utf8');
+    fs.writeFileSync(path.join(workDir, '1'), content, 'utf8');
     const subFolder = 'src';
-    fs.mkdirSync(path.join(repo.workdir(), subFolder));
-    fs.writeFileSync(path.join(repo.workdir(), 'src/2'), content, 'utf8');
-    fs.writeFileSync(path.join(repo.workdir(), 'src/3'), content, 'utf8');
+    fs.mkdirSync(path.join(workDir, subFolder));
+    fs.writeFileSync(path.join(workDir, 'src/2'), content, 'utf8');
+    fs.writeFileSync(path.join(workDir, 'src/3'), content, 'utf8');
 
     const index = await repo.refreshIndex();
     await index.addByPath('1');
@@ -68,12 +74,19 @@ describe('git_operations', () => {
     );
     // eslint-disable-next-line no-console
     console.log(`created commit ${commit.tostrS()}`);
-    return repo;
+    await Git.Clone.clone(workDir, repoPath, { bare: 1 });
+    return Git.Repository.openBare(repoPath);
   }
 
   // @ts-ignore
-  before(async () => {
+  before(async function() {
+    // @ts-ignore
+    this.timeout(200000);
     await prepareProject(path.join(serverOptions.repoPath, repoUri));
+    await cloneProject(
+      'https://github.com/elastic/TypeScript-Node-Starter.git',
+      path.join(serverOptions.repoPath, 'github.com/elastic/TypeScript-Node-Starter')
+    );
   });
   const repoUri = 'github.com/test/test_repo';
 
@@ -94,47 +107,47 @@ describe('git_operations', () => {
         assert.strictEqual('3', value.name);
         assert.strictEqual('src/3', value.path);
       } else {
-        assert.fail('this repo should contains exactly 2 files');
+        assert.fail('this repo should contains exactly 3 files');
       }
       count++;
     }
     const totalFiles = await g.countRepoFiles(repoUri, 'HEAD');
-    assert.strictEqual(count, 3, 'this repo should contains exactly 2 files');
-    assert.strictEqual(totalFiles, 3, 'this repo should contains exactly 2 files');
+    assert.strictEqual(count, 3, 'this repo should contains exactly 3 files');
+    assert.strictEqual(totalFiles, 3, 'this repo should contains exactly 3 files');
   });
+  function cloneProject(url: string, p: string) {
+    return new Promise(resolve => {
+      if (!fs.existsSync(p)) {
+        rimraf(p, error => {
+          Git.Clone.clone(url, p, {
+            bare: 1,
+            fetchOpts: {
+              callbacks: {
+                certificateCheck: () => 0,
+              },
+            },
+          }).then(repo => {
+            resolve(repo);
+          });
+        });
+      } else {
+        resolve();
+      }
+    });
+  }
+
+  it('can resolve branches', async () => {
+    const g = new GitOperations(serverOptions.repoPath);
+    const c = await g.getCommitOr404('github.com/elastic/TypeScript-Node-Starter', 'master');
+    assert.strictEqual(c.id, '261557d657fdfddf78119d15d38b1f6a7be005ed');
+    const c1 = await g.getCommitOr404('github.com/elastic/TypeScript-Node-Starter', 'VS');
+    assert.strictEqual(c1.id, 'ba73782df210e0a7744ac9b623d58081a1801738');
+    // @ts-ignore
+  }).timeout(100000);
 
   it('get diff between arbitrary 2 revisions', async () => {
-    function cloneProject(url: string, p: string) {
-      return new Promise(resolve => {
-        if (!fs.existsSync(p)) {
-          rimraf(p, error => {
-            Git.Clone.clone(url, p, {
-              fetchOpts: {
-                callbacks: {
-                  certificateCheck: () => 0,
-                },
-              },
-            }).then(repo => {
-              resolve(repo);
-            });
-          });
-        } else {
-          resolve();
-        }
-      });
-    }
-
-    await cloneProject(
-      'https://github.com/Microsoft/TypeScript-Node-Starter.git',
-      path.join(serverOptions.repoPath, 'github.com/Microsoft/TypeScript-Node-Starter')
-    );
-
     const g = new GitOperations(serverOptions.repoPath);
-    const d = await g.getDiff(
-      'github.com/Microsoft/TypeScript-Node-Starter',
-      '6206f643',
-      '4779cb7e'
-    );
+    const d = await g.getDiff('github.com/elastic/TypeScript-Node-Starter', '6206f643', '4779cb7e');
     assert.equal(d.additions, 2);
     assert.equal(d.deletions, 4);
     assert.equal(d.files.length, 3);

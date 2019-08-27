@@ -45,4 +45,25 @@ describe('getSupportedUrlParams', () => {
       selectedPingStatus: SELECTED_PING_LIST_STATUS,
     });
   });
+
+  it('returns the first item for string arrays', () => {
+    const result = getSupportedUrlParams({
+      dateRangeStart: ['now-18d', 'now-11d', 'now-5m'],
+    });
+    expect(result).toMatchSnapshot();
+  });
+
+  it('provides defaults for undefined values', () => {
+    const result = getSupportedUrlParams({
+      dateRangeStart: undefined,
+    });
+    expect(result).toMatchSnapshot();
+  });
+
+  it('provides defaults for empty string array values', () => {
+    const result = getSupportedUrlParams({
+      dateRangeStart: [],
+    });
+    expect(result).toMatchSnapshot();
+  });
 });

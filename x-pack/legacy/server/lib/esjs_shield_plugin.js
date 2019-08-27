@@ -495,5 +495,69 @@
         fmt: '/_security/user/_privileges'
       }
     });
+
+    shield.getBuiltinPrivileges = ca({
+      params: {},
+      urls: [
+        {
+          fmt: '/_security/privilege/_builtin'
+        }
+      ]
+    });
+
+    /**
+     * Creates an API key in Elasticsearch for the current user.
+     *
+     * @param {string} name A name for this API key
+     * @param {object} role_descriptors Role descriptors for this API key, if not
+     * provided then permissions of authenticated user are applied.
+     * @param {string} [expiration] Optional expiration for the API key being generated. If expiration
+     * is not provided then the API keys do not expire.
+     *
+     * @returns {{id: string, name: string, api_key: string, expiration?: number}}
+    */
+    shield.createAPIKey = ca({
+      method: 'POST',
+      needBody: true,
+      url: {
+        fmt: '/_security/api_key',
+      },
+    });
+
+    /**
+     * Invalidates an API key in Elasticsearch.
+     *
+     * @param {string} [id] An API key id.
+     * @param {string} [name] An API key name.
+     * @param {string} [realm_name] The name of an authentication realm.
+     * @param {string} [username] The username of a user.
+     *
+     * NOTE: While all parameters are optional, at least one of them is required.
+     *
+     * @returns {{invalidated_api_keys: string[], previously_invalidated_api_keys: string[], error_count: number, error_details?: object[]}}
+     */
+    shield.invalidateAPIKey = ca({
+      method: 'DELETE',
+      needBody: true,
+      url: {
+        fmt: '/_security/api_key',
+      },
+    });
+
+    /**
+     * Gets an access token in exchange to the certificate chain for the target subject distinguished name.
+     *
+     * @param {string[]} x509_certificate_chain An ordered array of base64-encoded (Section 4 of RFC4648 - not
+     * base64url-encoded) DER PKIX certificate values.
+     *
+     * @returns {{access_token: string, type: string, expires_in: number}}
+     */
+    shield.delegatePKI = ca({
+      method: 'POST',
+      needBody: true,
+      url: {
+        fmt: '/_security/delegate_pki',
+      },
+    });
   };
 }));

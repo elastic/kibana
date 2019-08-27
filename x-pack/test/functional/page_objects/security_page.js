@@ -75,7 +75,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       log.debug('SecurityPage:initTests');
       await esArchiver.load('empty_kibana');
       await esArchiver.loadIfNeeded('logstash_functional');
-      browser.setWindowSize(1600, 1000);
+      await browser.setWindowSize(1600, 1000);
     }
 
     async login(username, password, options = {}) {
@@ -222,7 +222,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
           fullname: await fullnameElement.getVisibleText(),
           email: await emailElement.getVisibleText(),
           roles: (await rolesElement.getVisibleText()).split(',').map(role => role.trim()),
-          reserved: (await isReservedElementVisible.getProperty('innerHTML')).includes('reservedUser')
+          reserved: (await isReservedElementVisible.getAttribute('innerHTML')).includes('reservedUser')
         };
       });
     }

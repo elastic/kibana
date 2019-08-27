@@ -30,7 +30,7 @@ export function MonitoringKibanaInstanceProvider({ getService }) {
         osFreeMemory: await testSubjects.getVisibleText(SUBJ_SUMMARY_OS_FREE_MEMORY),
         version: await testSubjects.getVisibleText(SUBJ_SUMMARY_VERSION),
         uptime: await testSubjects.getVisibleText(SUBJ_SUMMARY_UPTIME),
-        health: await testSubjects.getProperty(SUBJ_SUMMARY_HEALTH, 'alt'),
+        health: await testSubjects.getAttribute(SUBJ_SUMMARY_HEALTH, 'alt'),
       };
     }
 

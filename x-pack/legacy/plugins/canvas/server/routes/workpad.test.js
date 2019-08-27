@@ -252,7 +252,7 @@ Array [
     });
   });
 
-  describe(`GET ${routePrefix}/find`, async () => {
+  it(`GET ${routePrefix}/find`, async () => {
     const request = {
       method: 'GET',
       url: `${routePrefix}/find?name=abc&page=2&perPage=10`,

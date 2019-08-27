@@ -30,16 +30,16 @@ export default function ({ getService, getPageObjects }) {
     const expectDisabledGenerateReportButton = async () => {
       const generateReportButton = await PageObjects.reporting.getGenerateReportButton();
       await retry.try(async () => {
-        const isDisabled = await generateReportButton.getProperty('disabled');
-        expect(isDisabled).to.be(true);
+        const isDisabled = await generateReportButton.getAttribute('disabled');
+        expect(isDisabled).to.be('true');
       });
     };
 
     const expectEnabledGenerateReportButton = async () => {
       const generateReportButton = await PageObjects.reporting.getGenerateReportButton();
       await retry.try(async () => {
-        const isDisabled = await generateReportButton.getProperty('disabled');
-        expect(isDisabled).to.be(false);
+        const isDisabled = await generateReportButton.getAttribute('disabled');
+        expect(isDisabled).to.be(null);
       });
     };
 

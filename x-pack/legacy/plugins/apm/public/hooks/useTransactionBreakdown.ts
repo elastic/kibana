@@ -6,33 +6,37 @@
 
 import { useRef } from 'react';
 import { useFetcher } from './useFetcher';
-import { callApi } from '../services/rest/callApi';
-import { getUiFiltersES } from '../services/ui_filters/get_ui_filters_es';
-import { TransactionBreakdownAPIResponse } from '../../server/lib/transactions/breakdown';
 import { useUrlParams } from './useUrlParams';
+import { callApmApi } from '../services/rest/callApmApi';
 
 export function useTransactionBreakdown() {
   const {
-    urlParams: { serviceName, start, end, transactionName },
+    urlParams: { serviceName, start, end, transactionName, transactionType },
     uiFilters
   } = useUrlParams();
 
-  const { data, error, status } = useFetcher(
-    async () => {
-      if (serviceName && start && end) {
-        return callApi<TransactionBreakdownAPIResponse>({
-          pathname: `/api/apm/services/${serviceName}/transaction_groups/breakdown`,
+  const {
+    data = { kpis: [], timeseries: [] },
+    error,
+    status
+  } = useFetcher(() => {
+    if (serviceName && start && end && transactionType) {
+      return callApmApi({
+        pathname:
+          '/api/apm/services/{serviceName}/transaction_groups/breakdown',
+        params: {
+          path: { serviceName },
           query: {
             start,
             end,
             transactionName,
-            uiFiltersES: await getUiFiltersES(uiFilters)
+            transactionType,
+            uiFilters: JSON.stringify(uiFilters)
           }
-        });
-      }
-    },
-    [serviceName, start, end, uiFilters]
-  );
+        }
+      });
+    }
+  }, [serviceName, start, end, transactionType, transactionName, uiFilters]);
 
   const receivedDataDuringLifetime = useRef(false);
 

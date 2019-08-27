@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
+import { ServerFacade } from '../..';
 import { AnyObject } from '../lib/esqueue';
 
 export class WithInternalRequest {
   public readonly callCluster: (endpoint: string, clientOptions?: AnyObject) => Promise<any>;
 
-  constructor(server: Server) {
+  constructor(server: ServerFacade) {
     const cluster = server.plugins.elasticsearch.getCluster('admin');
     this.callCluster = cluster.callWithInternalUser;
   }

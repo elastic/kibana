@@ -35,24 +35,6 @@ const mockIndexPattern = {
   ],
 };
 
-const mockChromeFactory = jest.fn(() => {
-  return {
-    getBasePath: () => `foo`,
-    getUiSettingsClient: () => {
-      return {
-        get: (key: string) => {
-          switch (key) {
-            case 'history:limit':
-              return 10;
-            default:
-              throw new Error(`Unexpected config key: ${key}`);
-          }
-        },
-      };
-    },
-  };
-});
-
 export const mockPersistedLog = {
   add: jest.fn(),
   get: jest.fn(() => ['response:200']),
@@ -71,15 +53,8 @@ export const mockFetchIndexPatterns = jest
   .fn()
   .mockReturnValue(Promise.resolve([mockIndexPattern]));
 
-jest.mock('ui/chrome', () => mockChromeFactory());
-jest.mock('ui/kfetch', () => ({
-  kfetch: () => {},
-}));
 jest.mock('ui/persisted_log', () => ({
   PersistedLog: mockPersistedLogFactory,
-}));
-jest.mock('ui/autocomplete_providers', () => ({
-  getAutocompleteProvider: mockGetAutocompleteProvider,
 }));
 jest.mock('ui/kfetch', () => ({
   kfetch: mockKfetch,

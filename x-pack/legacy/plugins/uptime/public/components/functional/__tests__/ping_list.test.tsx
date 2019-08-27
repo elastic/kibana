@@ -8,7 +8,7 @@ import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { PingResults } from '../../../../common/graphql/types';
 import { PingListComponent, BaseLocationOptions } from '../ping_list';
-import { EuiComboBoxProps } from '@elastic/eui';
+import { EuiComboBoxOptionProps } from '@elastic/eui';
 
 describe('PingList component', () => {
   let pingList: { allPings: PingResults };
@@ -193,11 +193,13 @@ describe('PingList component', () => {
       <PingListComponent
         loading={false}
         data={{ allPings }}
+        onPageCountChange={jest.fn()}
+        onSelectedLocationChange={(loc: EuiComboBoxOptionProps[]) => {}}
+        onSelectedStatusChange={jest.fn()}
         onUpdateApp={jest.fn()}
-        onSelectedStatusUpdate={jest.fn()}
+        pageSize={30}
         selectedOption="down"
         selectedLocation={BaseLocationOptions}
-        setSelectedLocation={(loc: EuiComboBoxProps[]) => {}}
       />
     );
     expect(component).toMatchSnapshot();

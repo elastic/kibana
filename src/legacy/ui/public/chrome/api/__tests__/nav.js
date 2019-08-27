@@ -83,6 +83,7 @@ describe('chrome nav apis', function () {
         url: `${appUrl}?id=${deletedId}`,
         baseUrl: appUrl,
         linkToLastSubUrl: true,
+        legacy: true,
       }];
 
       const { chrome } = init({ appUrlStore });
@@ -98,7 +99,8 @@ describe('chrome nav apis', function () {
         title: 'Discover',
         url: lastUrl,
         baseUrl: appUrl,
-        linkToLastSubUrl: true
+        linkToLastSubUrl: true,
+        legacy: true,
       }];
 
       const { chrome } = init({ appUrlStore });
@@ -114,17 +116,20 @@ describe('chrome nav apis', function () {
         {
           id: 'kibana:discover',
           baseUrl: `${baseUrl}/app/kibana#discover`,
-          subUrlBase: '/app/kibana#discover'
+          subUrlBase: '/app/kibana#discover',
+          legacy: true,
         },
         {
           id: 'kibana:visualize',
           baseUrl: `${baseUrl}/app/kibana#visualize`,
-          subUrlBase: '/app/kibana#visualize'
+          subUrlBase: '/app/kibana#visualize',
+          legacy: true,
         },
         {
           id: 'kibana:dashboard',
           baseUrl: `${baseUrl}/app/kibana#dashboards`,
-          subUrlBase: '/app/kibana#dashboard'
+          subUrlBase: '/app/kibana#dashboard',
+          legacy: true,
         },
       ];
 
@@ -150,6 +155,7 @@ describe('chrome nav apis', function () {
         baseUrl: `${baseUrl}/app/kibana#visualize`,
         url: `${baseUrl}/app/kibana#visualize`,
         subUrlBase: '/app/kibana#visualize',
+        legacy: true,
       }];
 
       const { chrome } = init({ appUrlStore });

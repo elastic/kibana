@@ -10,7 +10,7 @@ export const monitorsSchema = gql`
   "The data used to enrich the filter bar."
   type FilterBar {
     "A series of monitor IDs in the heartbeat indices."
-    ids: [MonitorKey!]
+    ids: [String!]
     "The location values users have configured for the agents."
     locations: [String!]
     "The names users have configured for the monitors."
@@ -21,6 +21,8 @@ export const monitorsSchema = gql`
     schemes: [String!]
     "The possible status values contained in the indices."
     statuses: [String!]
+    "The list of URLs"
+    urls: [String!]
   }
 
   type HistogramDataPoint {

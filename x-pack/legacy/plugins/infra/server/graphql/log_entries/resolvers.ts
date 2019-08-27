@@ -6,11 +6,9 @@
 
 import { failure } from 'io-ts/lib/PathReporter';
 
-import { JsonObject } from '../../../common/typed_json';
 import {
   InfraLogEntryColumn,
   InfraLogEntryFieldColumn,
-  InfraLogEntryHighlightInput,
   InfraLogEntryMessageColumn,
   InfraLogEntryTimestampColumn,
   InfraLogMessageConstantSegment,
@@ -45,6 +43,11 @@ export type InfraSourceLogSummaryBetweenResolver = ChildResolverOf<
   QuerySourceResolver
 >;
 
+export type InfraSourceLogSummaryHighlightsBetweenResolver = ChildResolverOf<
+  InfraResolverOf<InfraSourceResolvers.LogSummaryHighlightsBetweenResolver>,
+  QuerySourceResolver
+>;
+
 export type InfraSourceLogItem = ChildResolverOf<
   InfraResolverOf<InfraSourceResolvers.LogItemResolver>,
   QuerySourceResolver
@@ -58,6 +61,7 @@ export const createLogEntriesResolvers = (libs: {
     logEntriesBetween: InfraSourceLogEntriesBetweenResolver;
     logEntryHighlights: InfraSourceLogEntryHighlightsResolver;
     logSummaryBetween: InfraSourceLogSummaryBetweenResolver;
+    logSummaryHighlightsBetween: InfraSourceLogSummaryHighlightsBetweenResolver;
     logItem: InfraSourceLogItem;
   };
   InfraLogEntryColumn: {
@@ -130,7 +134,7 @@ export const createLogEntriesResolvers = (libs: {
         source.id,
         args.startKey,
         args.endKey,
-        parseHighlightInputs(args.highlights),
+        args.highlights.filter(highlightInput => !!highlightInput.query),
         parseFilterQuery(args.filterQuery)
       );
 
@@ -159,6 +163,23 @@ export const createLogEntriesResolvers = (libs: {
         end: buckets.length > 0 ? buckets[buckets.length - 1].end : null,
         buckets,
       };
+    },
+    async logSummaryHighlightsBetween(source, args, { req }) {
+      const summaryHighlightSets = await libs.logEntries.getLogSummaryHighlightBucketsBetween(
+        req,
+        source.id,
+        args.start,
+        args.end,
+        args.bucketSize,
+        args.highlightQueries.filter(highlightQuery => !!highlightQuery),
+        parseFilterQuery(args.filterQuery)
+      );
+
+      return summaryHighlightSets.map(buckets => ({
+        start: buckets.length > 0 ? buckets[0].start : null,
+        end: buckets.length > 0 ? buckets[buckets.length - 1].end : null,
+        buckets,
+      }));
     },
     async logItem(source, args, { req }) {
       const sourceConfiguration = SourceConfigurationRuntimeType.decode(
@@ -217,24 +238,3 @@ const isConstantSegment = (
 
 const isFieldSegment = (segment: InfraLogMessageSegment): segment is InfraLogMessageFieldSegment =>
   'field' in segment && 'value' in segment && 'highlights' in segment;
-
-const parseHighlightInputs = (highlightInputs: InfraLogEntryHighlightInput[]) =>
-  highlightInputs
-    ? highlightInputs.reduce<Array<{ query: JsonObject }>>(
-        (parsedHighlightInputs, highlightInput) => {
-          const parsedQuery = parseFilterQuery(highlightInput.query);
-          if (parsedQuery) {
-            return [
-              ...parsedHighlightInputs,
-              {
-                ...highlightInput,
-                query: parsedQuery,
-              },
-            ];
-          } else {
-            return parsedHighlightInputs;
-          }
-        },
-        []
-      )
-    : [];

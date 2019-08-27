@@ -45,7 +45,7 @@ describe('license_pre_routing_factory', () => {
       });
     });
 
-    describe('isAvailable is true', async () => {
+    describe('isAvailable is true', () => {
       beforeEach(() => {
         mockLicenseCheckResults = {
           isAvailable: true

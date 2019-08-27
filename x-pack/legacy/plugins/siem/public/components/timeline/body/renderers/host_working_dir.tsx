@@ -47,3 +47,5 @@ export const HostWorkingDir = pure<Props>(({ contextId, eventId, hostName, worki
     </>
   );
 });
+
+HostWorkingDir.displayName = 'HostWorkingDir';

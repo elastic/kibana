@@ -33,38 +33,34 @@ const getBiDirectionalFilter = (flowDirection: FlowDirection, flowTarget: FlowTa
     flowDirection === FlowDirection.biDirectional &&
     [FlowTarget.source, FlowTarget.destination].includes(flowTarget)
   ) {
-    return {
-      must: [
-        {
-          exists: {
-            field: 'source.bytes',
-          },
+    return [
+      {
+        exists: {
+          field: 'source.bytes',
         },
-        {
-          exists: {
-            field: 'destination.bytes',
-          },
+      },
+      {
+        exists: {
+          field: 'destination.bytes',
         },
-      ],
-    };
+      },
+    ];
   } else if (
     flowDirection === FlowDirection.biDirectional &&
     [FlowTarget.client, FlowTarget.server].includes(flowTarget)
   ) {
-    return {
-      must: [
-        {
-          exists: {
-            field: 'client.bytes',
-          },
+    return [
+      {
+        exists: {
+          field: 'client.bytes',
         },
-        {
-          exists: {
-            field: 'server.bytes',
-          },
+      },
+      {
+        exists: {
+          field: 'server.bytes',
         },
-      ],
-    };
+      },
+    ];
   }
   return [];
 };
@@ -78,21 +74,21 @@ const getCountAgg = (flowTarget: FlowTarget) => ({
 });
 
 export const buildTopNFlowQuery = ({
-  fields,
+  defaultIndex,
   filterQuery,
   flowDirection,
-  networkTopNFlowSort,
   flowTarget,
-  timerange: { from, to },
-  pagination: { limit },
-  defaultIndex,
+  networkTopNFlowSort,
+  pagination: { querySize },
   sourceConfiguration: {
     fields: { timestamp },
   },
+  timerange: { from, to },
 }: NetworkTopNFlowRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     { range: { [timestamp]: { gte: from, lte: to } } },
+    ...getBiDirectionalFilter(flowDirection, flowTarget),
   ];
 
   const dslQuery = {
@@ -102,14 +98,13 @@ export const buildTopNFlowQuery = ({
     body: {
       aggregations: {
         ...getCountAgg(flowTarget),
-        ...getUniDirectionAggs(flowDirection, networkTopNFlowSort, flowTarget, limit),
-        ...getBiDirectionAggs(flowDirection, networkTopNFlowSort, flowTarget, limit),
+        ...getUniDirectionAggs(flowDirection, networkTopNFlowSort, flowTarget, querySize),
+        ...getBiDirectionAggs(flowDirection, networkTopNFlowSort, flowTarget, querySize),
       },
       query: {
         bool: {
           filter,
           ...getUniDirectionalFilter(flowDirection),
-          ...getBiDirectionalFilter(flowDirection, flowTarget),
         },
       },
     },
@@ -123,14 +118,14 @@ const getUniDirectionAggs = (
   flowDirection: FlowDirection,
   networkTopNFlowSortField: NetworkTopNFlowSortField,
   flowTarget: FlowTarget,
-  limit: number
+  querySize: number
 ) =>
   flowDirection === FlowDirection.uniDirectional
     ? {
         top_uni_flow: {
           terms: {
             field: `${flowTarget}.ip`,
-            size: limit + 1,
+            size: querySize,
             order: {
               ...getQueryOrder(networkTopNFlowSortField),
             },
@@ -173,11 +168,6 @@ const getUniDirectionAggs = (
                 field: 'network.packets',
               },
             },
-            timestamp: {
-              max: {
-                field: '@timestamp',
-              },
-            },
           },
         },
       }
@@ -187,14 +177,14 @@ const getBiDirectionAggs = (
   flowDirection: FlowDirection,
   networkTopNFlowSortField: NetworkTopNFlowSortField,
   flowTarget: FlowTarget,
-  limit: number
+  querySize: number
 ) =>
   flowDirection === FlowDirection.biDirectional
     ? {
         top_bi_flow: {
           terms: {
             field: `${flowTarget}.ip`,
-            size: limit + 1,
+            size: querySize,
             order: {
               ...getQueryOrder(networkTopNFlowSortField),
             },
@@ -233,11 +223,6 @@ const getBiDirectionAggs = (
             packets: {
               sum: {
                 field: `${flowTarget}.packets`,
-              },
-            },
-            timestamp: {
-              max: {
-                field: '@timestamp',
               },
             },
           },

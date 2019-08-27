@@ -17,7 +17,12 @@
  * under the License.
  */
 
-import { createCSPRuleString, DEFAULT_CSP_RULES, generateCSPNonce } from './';
+import {
+  createCSPRuleString,
+  DEFAULT_CSP_RULES,
+  DEFAULT_CSP_STRICT,
+  DEFAULT_CSP_WARN_LEGACY_BROWSERS,
+} from './';
 
 // CSP rules aren't strictly additive, so any change can potentially expand or
 // restrict the policy in a way we consider a breaking change. For that reason,
@@ -33,40 +38,25 @@ import { createCSPRuleString, DEFAULT_CSP_RULES, generateCSPNonce } from './';
 // the nature of a change in defaults during a PR review.
 test('default CSP rules', () => {
   expect(DEFAULT_CSP_RULES).toMatchInlineSnapshot(`
-Array [
-  "script-src 'unsafe-eval' 'nonce-{nonce}'",
-  "worker-src blob:",
-  "child-src blob:",
-]
-`);
+    Array [
+      "script-src 'unsafe-eval' 'self'",
+      "worker-src blob:",
+      "child-src blob:",
+      "style-src 'unsafe-inline' 'self'",
+    ]
+  `);
 });
 
-test('generateCSPNonce() creates a 16 character string', async () => {
-  const nonce = await generateCSPNonce();
-
-  expect(nonce).toHaveLength(16);
+test('CSP strict mode defaults to disabled', () => {
+  expect(DEFAULT_CSP_STRICT).toBe(true);
 });
 
-test('generateCSPNonce() creates a new string on each call', async () => {
-  const nonce1 = await generateCSPNonce();
-  const nonce2 = await generateCSPNonce();
-
-  expect(nonce1).not.toEqual(nonce2);
+test('CSP legacy browser warning defaults to enabled', () => {
+  expect(DEFAULT_CSP_WARN_LEGACY_BROWSERS).toBe(true);
 });
 
 test('createCSPRuleString() converts an array of rules into a CSP header string', () => {
   const csp = createCSPRuleString([`string-src 'self'`, 'worker-src blob:', 'img-src data: blob:']);
 
   expect(csp).toMatchInlineSnapshot(`"string-src 'self'; worker-src blob:; img-src data: blob:"`);
-});
-
-test('createCSPRuleString() replaces all occurrences of {nonce} if provided', () => {
-  const csp = createCSPRuleString(
-    [`string-src 'self' 'nonce-{nonce}'`, 'img-src data: blob:', `default-src  'nonce-{nonce}'`],
-    'foo'
-  );
-
-  expect(csp).toMatchInlineSnapshot(
-    `"string-src 'self' 'nonce-foo'; img-src data: blob:; default-src  'nonce-foo'"`
-  );
 });

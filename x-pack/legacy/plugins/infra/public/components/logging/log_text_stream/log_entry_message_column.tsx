@@ -16,26 +16,27 @@ import {
   LogEntryHighlightColumn,
   LogEntryMessageSegment,
 } from '../../../utils/log_entry';
-import { highlightFieldValue, HighlightMarker } from './highlighting';
+import { ActiveHighlightMarker, highlightFieldValue, HighlightMarker } from './highlighting';
 import { LogEntryColumnContent } from './log_entry_column';
 import { hoveredContentStyle } from './text_styles';
 
 interface LogEntryMessageColumnProps {
   columnValue: LogEntryColumn;
   highlights: LogEntryHighlightColumn[];
+  isActiveHighlight: boolean;
   isHighlighted: boolean;
   isHovered: boolean;
   isWrapped: boolean;
 }
 
 export const LogEntryMessageColumn = memo<LogEntryMessageColumnProps>(
-  ({ columnValue, highlights, isHighlighted, isHovered, isWrapped }) => {
+  ({ columnValue, highlights, isActiveHighlight, isHighlighted, isHovered, isWrapped }) => {
     const message = useMemo(
       () =>
         isMessageColumn(columnValue)
-          ? formatMessageSegments(columnValue.message, highlights)
+          ? formatMessageSegments(columnValue.message, highlights, isActiveHighlight)
           : null,
-      [columnValue, highlights]
+      [columnValue, highlights, isActiveHighlight]
     );
 
     return (
@@ -75,23 +76,30 @@ const MessageColumnContent = LogEntryColumnContent.extend.attrs<{
 
 const formatMessageSegments = (
   messageSegments: LogEntryMessageSegment[],
-  highlights: LogEntryHighlightColumn[]
+  highlights: LogEntryHighlightColumn[],
+  isActiveHighlight: boolean
 ) =>
   messageSegments.map((messageSegment, index) =>
     formatMessageSegment(
       messageSegment,
       highlights.map(highlight =>
         isHighlightMessageColumn(highlight) ? highlight.message[index].highlights : []
-      )
+      ),
+      isActiveHighlight
     )
   );
 
 const formatMessageSegment = (
   messageSegment: LogEntryMessageSegment,
-  [firstHighlight = []]: string[][] // we only support one highlight for now
+  [firstHighlight = []]: string[][], // we only support one highlight for now
+  isActiveHighlight: boolean
 ): React.ReactNode => {
   if (isFieldSegment(messageSegment)) {
-    return highlightFieldValue(messageSegment.value, firstHighlight, HighlightMarker);
+    return highlightFieldValue(
+      messageSegment.value,
+      firstHighlight,
+      isActiveHighlight ? ActiveHighlightMarker : HighlightMarker
+    );
   } else if (isConstantSegment(messageSegment)) {
     return messageSegment.constant;
   }

@@ -19,6 +19,11 @@ jest.mock('./get_privileges_with_request', () => ({
   getPrivilegesWithRequestFactory: mockGetPrivilegesWithRequestFactory,
 }));
 
+export const mockCheckSavedObjectsPrivilegesWithRequestFactory = jest.fn();
+jest.mock('./check_saved_objects_privileges', () => ({
+  checkSavedObjectsPrivilegesWithRequestFactory: mockCheckSavedObjectsPrivilegesWithRequestFactory,
+}));
+
 export const mockGetClient = jest.fn();
 jest.mock('../../../../../server/lib/get_client_shield', () => ({
   getClient: mockGetClient,

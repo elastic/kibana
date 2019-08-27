@@ -8,8 +8,25 @@ import { Location } from 'history';
 import React from 'react';
 import { getRenderedHref } from '../../../../utils/testHelpers';
 import { MLJobLink } from './MLJobLink';
+import * as hooks from '../../../../hooks/useCore';
+import { InternalCoreStart } from 'src/core/public';
 
 describe('MLJobLink', () => {
+  beforeEach(() => {
+    const coreMock = ({
+      http: {
+        basePath: {
+          prepend: (path: string) => `/basepath${path}`
+        }
+      }
+    } as unknown) as InternalCoreStart;
+
+    spyOn(hooks, 'useCore').and.returnValue(coreMock);
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
   it('should produce the correct URL', async () => {
     const href = await getRenderedHref(
       () => (
@@ -22,7 +39,7 @@ describe('MLJobLink', () => {
     );
 
     expect(href).toEqual(
-      `/app/ml#/timeseriesexplorer?_g=(ml:(jobIds:!(myservicename-mytransactiontype-high_mean_response_time)),refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now-4h))`
+      `/basepath/app/ml#/timeseriesexplorer?_g=(ml:(jobIds:!(myservicename-mytransactiontype-high_mean_response_time)),refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now-4h))`
     );
   });
 });

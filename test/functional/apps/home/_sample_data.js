@@ -22,7 +22,9 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const find = getService('find');
+  const log = getService('log');
   const pieChart = getService('pieChart');
+  const renderable = getService('renderable');
   const dashboardExpect = getService('dashboardExpect');
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard', 'timePicker']);
 
@@ -82,6 +84,7 @@ export default function ({ getService, getPageObjects }) {
       it('should launch sample flights data set dashboard', async ()=> {
         await PageObjects.home.launchSampleDataSet('flights');
         await PageObjects.header.waitUntilLoadingHasFinished();
+        await renderable.waitForRender();
         const today = new Date();
         const todayYearMonthDay = today.toISOString().substring(0, 10);
         const fromTime = `${todayYearMonthDay} 00:00:00.000`;
@@ -92,27 +95,22 @@ export default function ({ getService, getPageObjects }) {
       });
 
 
-      it.skip('pie charts rendered', async () => {
+      it('should render visualizations', async () => {
+        await PageObjects.home.launchSampleDataSet('flights');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await renderable.waitForRender();
+
+        log.debug('Checking pie charts rendered');
         await pieChart.expectPieSliceCount(4);
-      });
-
-      it.skip('area, bar and heatmap charts rendered', async () => {
+        log.debug('Checking area, bar and heatmap charts rendered');
         await dashboardExpect.seriesElementCount(15);
-      });
-
-      it.skip('saved searches render', async () => {
+        log.debug('Checking saved searches rendered');
         await dashboardExpect.savedSearchRowCount(50);
-      });
-
-      it.skip('input controls render', async () => {
+        log.debug('Checking input controls rendered');
         await dashboardExpect.inputControlItemCount(3);
-      });
-
-      it.skip('tag cloud renders', async () => {
+        log.debug('Checking tag cloud rendered');
         await dashboardExpect.tagCloudWithValuesFound(['Sunny', 'Rain', 'Clear', 'Cloudy', 'Hail']);
-      });
-
-      it.skip('vega chart renders', async () => {
+        log.debug('Checking vega chart rendered');
         const tsvb = await find.existsByCssSelector('.vgaVis__view');
         expect(tsvb).to.be(true);
       });
@@ -120,6 +118,7 @@ export default function ({ getService, getPageObjects }) {
       it('should launch sample logs data set dashboard', async ()=> {
         await PageObjects.home.launchSampleDataSet('logs');
         await PageObjects.header.waitUntilLoadingHasFinished();
+        await renderable.waitForRender();
         const today = new Date();
         const todayYearMonthDay = today.toISOString().substring(0, 10);
         const fromTime = `${todayYearMonthDay} 00:00:00.000`;
@@ -132,6 +131,7 @@ export default function ({ getService, getPageObjects }) {
       it('should launch sample ecommerce data set dashboard', async ()=> {
         await PageObjects.home.launchSampleDataSet('ecommerce');
         await PageObjects.header.waitUntilLoadingHasFinished();
+        await renderable.waitForRender();
         const today = new Date();
         const todayYearMonthDay = today.toISOString().substring(0, 10);
         const fromTime = `${todayYearMonthDay} 00:00:00.000`;

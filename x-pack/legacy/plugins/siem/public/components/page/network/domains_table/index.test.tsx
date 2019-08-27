@@ -23,8 +23,10 @@ import { createStore, networkModel, State } from '../../../../store';
 import { DomainsTable } from '.';
 import { mockDomainsData } from './mock';
 
+jest.mock('../../../../lib/settings/use_kibana_ui_setting');
+
 describe('Domains Table Component', () => {
-  const loadMore = jest.fn();
+  const loadPage = jest.fn();
   const ip = '10.10.10.10';
   const state: State = mockGlobalState;
 
@@ -40,14 +42,18 @@ describe('Domains Table Component', () => {
         <ReduxStoreProvider store={store}>
           <DomainsTable
             data={mockDomainsData.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockDomainsData.pageInfo)}
             flowTarget={FlowTarget.source}
-            hasNextPage={getOr(false, 'hasNextPage', mockDomainsData.pageInfo)!}
             id="domains"
             indexPattern={mockIndexPattern}
             ip={ip}
             loading={false}
-            loadMore={loadMore}
-            nextCursor={getOr(null, 'endCursor.value', mockDomainsData.pageInfo)}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(
+              false,
+              'showMorePagesIndicator',
+              mockDomainsData.pageInfo
+            )}
             totalCount={1}
             type={networkModel.NetworkType.details}
           />
@@ -65,14 +71,18 @@ describe('Domains Table Component', () => {
           <TestProviders store={store}>
             <DomainsTable
               data={mockDomainsData.edges}
+              fakeTotalCount={getOr(50, 'fakeTotalCount', mockDomainsData.pageInfo)}
               flowTarget={FlowTarget.source}
-              indexPattern={mockIndexPattern}
-              hasNextPage={getOr(false, 'hasNextPage', mockDomainsData.pageInfo)!}
               id="domains"
+              indexPattern={mockIndexPattern}
               ip={ip}
               loading={false}
-              loadMore={loadMore}
-              nextCursor={getOr(null, 'endCursor.value', mockDomainsData.pageInfo)}
+              loadPage={loadPage}
+              showMorePagesIndicator={getOr(
+                false,
+                'showMorePagesIndicator',
+                mockDomainsData.pageInfo
+              )}
               totalCount={1}
               type={networkModel.NetworkType.details}
             />
@@ -100,7 +110,7 @@ describe('Domains Table Component', () => {
           .find('.euiTable thead tr th button')
           .first()
           .text()
-      ).toEqual('Domain NameClick to sort in ascending order');
+      ).toEqual('Domain nameClick to sort in ascending order');
       expect(
         wrapper
           .find('.euiTable thead tr th button')

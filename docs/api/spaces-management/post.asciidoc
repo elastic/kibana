@@ -32,7 +32,7 @@ The following parameters can be specified in the body of a POST request to creat
 `initials`:: (string) Optionally specify the initials shown in the Space Avatar for this space. By default, the initials will be automatically generated from the space name.
 If specified, initials should be either 1 or 2 characters.
 
-`color`:: (string) Optioanlly specify the hex color code used in the Space Avatar for this space. By default, the color will be automatically generated from the space name.
+`color`:: (string) Optionally specify the hex color code used in the Space Avatar for this space. By default, the color will be automatically generated from the space name.
 
 ===== Example
 

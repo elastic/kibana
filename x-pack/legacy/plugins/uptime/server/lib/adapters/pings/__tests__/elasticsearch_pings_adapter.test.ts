@@ -15,6 +15,32 @@ describe('ElasticsearchPingsAdapter class', () => {
   let mockHits: any[];
   let mockEsSearchResult: any;
   let mockEsCountResult: any;
+  const standardMockResponse: any = {
+    aggregations: {
+      timeseries: {
+        buckets: [
+          {
+            key: 1,
+            up: {
+              doc_count: 2,
+            },
+            down: {
+              doc_count: 1,
+            },
+          },
+          {
+            key: 2,
+            up: {
+              doc_count: 2,
+            },
+            down: {
+              bucket_count: 1,
+            },
+          },
+        ],
+      },
+    },
+  };
 
   beforeEach(() => {
     mockHits = [
@@ -71,13 +97,11 @@ describe('ElasticsearchPingsAdapter class', () => {
             buckets: [
               {
                 key: 1,
-                bucket_total: {
-                  value: 2,
+                up: {
+                  doc_count: 2,
                 },
                 down: {
-                  bucket_count: {
-                    value: 1,
-                  },
+                  doc_count: 1,
                 },
               },
             ],
@@ -98,36 +122,9 @@ describe('ElasticsearchPingsAdapter class', () => {
     it('returns expected result for no status filter', async () => {
       expect.assertions(2);
       const search = jest.fn();
-      search.mockReturnValue({
-        aggregations: {
-          timeseries: {
-            buckets: [
-              {
-                key: 1,
-                bucket_total: {
-                  value: 3,
-                },
-                down: {
-                  bucket_count: {
-                    value: 1,
-                  },
-                },
-              },
-              {
-                key: 2,
-                bucket_total: {
-                  value: 3,
-                },
-                down: {
-                  bucket_count: {
-                    value: 1,
-                  },
-                },
-              },
-            ],
-          },
-        },
-      });
+
+      search.mockReturnValue(standardMockResponse);
+
       const pingDatabase = {
         search,
         count: jest.fn(),
@@ -149,35 +146,29 @@ describe('ElasticsearchPingsAdapter class', () => {
             buckets: [
               {
                 key: 1,
-                bucket_total: {
-                  value: 3,
+                up: {
+                  doc_count: 2,
                 },
                 down: {
-                  bucket_count: {
-                    value: 1,
-                  },
+                  doc_count: 1,
                 },
               },
               {
                 key: 2,
-                bucket_total: {
-                  value: 3,
+                up: {
+                  doc_count: 2,
                 },
                 down: {
-                  bucket_count: {
-                    value: 2,
-                  },
+                  doc_count: 2,
                 },
               },
               {
                 key: 3,
-                bucket_total: {
-                  value: 3,
+                up: {
+                  doc_count: 3,
                 },
                 down: {
-                  bucket_count: {
-                    value: 1,
-                  },
+                  doc_count: 1,
                 },
               },
             ],
@@ -219,35 +210,29 @@ describe('ElasticsearchPingsAdapter class', () => {
             buckets: [
               {
                 key: 1,
-                bucket_total: {
-                  value: 3,
+                up: {
+                  doc_count: 2,
                 },
                 down: {
-                  bucket_count: {
-                    value: 1,
-                  },
+                  doc_count: 1,
                 },
               },
               {
                 key: 2,
-                bucket_total: {
-                  value: 3,
+                up: {
+                  doc_count: 1,
                 },
                 down: {
-                  bucket_count: {
-                    value: 2,
-                  },
+                  doc_count: 2,
                 },
               },
               {
                 key: 3,
-                bucket_total: {
-                  value: 3,
+                up: {
+                  doc_count: 3,
                 },
                 down: {
-                  bucket_count: {
-                    value: 1,
-                  },
+                  doc_count: 1,
                 },
               },
             ],
@@ -275,36 +260,7 @@ describe('ElasticsearchPingsAdapter class', () => {
     it('returns a down-filtered array for when filtered by down status', async () => {
       expect.assertions(2);
       const search = jest.fn();
-      search.mockReturnValue({
-        aggregations: {
-          timeseries: {
-            buckets: [
-              {
-                key: 1,
-                bucket_total: {
-                  value: 3,
-                },
-                down: {
-                  bucket_count: {
-                    value: 1,
-                  },
-                },
-              },
-              {
-                key: 2,
-                bucket_total: {
-                  value: 3,
-                },
-                down: {
-                  bucket_count: {
-                    value: 1,
-                  },
-                },
-              },
-            ],
-          },
-        },
-      });
+      search.mockReturnValue(standardMockResponse);
       const searchFilter = `{"bool":{"must":[{"match":{"monitor.status":{"query":"down","operator":"and"}}}]}}`;
       const pingDatabase = {
         search,
@@ -326,36 +282,9 @@ describe('ElasticsearchPingsAdapter class', () => {
     it('returns a down-filtered array for when filtered by up status', async () => {
       expect.assertions(2);
       const search = jest.fn();
-      search.mockReturnValue({
-        aggregations: {
-          timeseries: {
-            buckets: [
-              {
-                key: 1,
-                bucket_total: {
-                  value: 3,
-                },
-                down: {
-                  bucket_count: {
-                    value: 1,
-                  },
-                },
-              },
-              {
-                key: 2,
-                bucket_total: {
-                  value: 3,
-                },
-                down: {
-                  bucket_count: {
-                    value: 1,
-                  },
-                },
-              },
-            ],
-          },
-        },
-      });
+
+      search.mockReturnValue(standardMockResponse);
+
       const searchFilter = `{"bool":{"must":[{"match":{"monitor.status":{"query":"up","operator":"and"}}}]}}`;
       const pingDatabase = {
         search,

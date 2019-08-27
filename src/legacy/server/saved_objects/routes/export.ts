@@ -58,13 +58,13 @@ export const createExportRoute = (
       payload: Joi.object()
         .keys({
           type: Joi.array()
-            .items(Joi.string().valid(supportedTypes))
+            .items(Joi.string().valid(supportedTypes.sort()))
             .single()
             .optional(),
           objects: Joi.array()
             .items({
               type: Joi.string()
-                .valid(supportedTypes)
+                .valid(supportedTypes.sort())
                 .required(),
               id: Joi.string().required(),
             })
