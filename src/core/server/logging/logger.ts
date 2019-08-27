@@ -82,6 +82,11 @@ export interface Logger {
    */
   fatal(errorOrMessage: string | Error, meta?: LogMeta): void;
 
+  /**
+   * Returns whether the current logger is in silent mode (level.value === 'off') or not.
+   */
+  isSilent(): boolean;
+
   /** @internal */
   log(record: LogRecord): void;
 }
@@ -120,6 +125,10 @@ export class BaseLogger implements Logger {
 
   public fatal(errorOrMessage: string | Error, meta?: LogMeta): void {
     this.log(this.createLogRecord(LogLevel.Fatal, errorOrMessage, meta));
+  }
+
+  public isSilent() {
+    return this.level.value === LogLevel.Off.value;
   }
 
   public log(record: LogRecord) {

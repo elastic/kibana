@@ -266,7 +266,14 @@ export class HttpServer {
         ? this.config.basePath
         : '';
 
-    this.log.info(`http server running at ${this.server.info.uri}${serverPath}`);
+    if (this.log.isSilent()) {
+      // The message below should be shown even if you started Kibana in silent mode
+      // That's why console.log() is used directly.
+      // eslint-disable-next-line no-console
+      console.log(`🚀 http server running at ${this.server.info.uri}${serverPath}`);
+    } else {
+      this.log.info(`http server running at ${this.server.info.uri}${serverPath}`);
+    }
   }
 
   public async stop() {

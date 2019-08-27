@@ -60,6 +60,10 @@ export class LoggerAdapter implements Logger {
     this.logger.fatal(errorOrMessage, meta);
   }
 
+  public isSilent() {
+    return this.logger.isSilent();
+  }
+
   public log(record: LogRecord) {
     this.logger.log(record);
   }
