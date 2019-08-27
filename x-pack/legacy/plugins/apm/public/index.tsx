@@ -23,7 +23,7 @@ import './style/global_overrides.css';
 import template from './templates/index.html';
 import { CoreProvider } from './context/CoreContext';
 
-const { core, plugins } = npStart;
+const { core } = npStart;
 
 // render APM feedback link in global help menu
 core.chrome.setHelpExtension(domElement => {
@@ -52,5 +52,5 @@ const checkForRoot = () => {
   });
 };
 checkForRoot().then(() => {
-  plugin().start({ core, plugins });
+  plugin().start({ core });
 });

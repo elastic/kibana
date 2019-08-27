@@ -8,11 +8,12 @@ import { InternalCoreSetup } from 'src/core/server';
 import { makeApmUsageCollector } from '../lib/apm_telemetry';
 import { CoreSetupWithUsageCollector } from '../lib/apm_telemetry/make_apm_usage_collector';
 import { createApmApi } from '../routes/create_apm_api';
+import { createSavedMaps } from '../lib/maps';
 
 export class Plugin {
   public setup(core: InternalCoreSetup) {
     createApmApi().init(core);
-
     makeApmUsageCollector(core as CoreSetupWithUsageCollector);
+    createSavedMaps(core);
   }
 }

@@ -55,9 +55,9 @@ function getDefaultMapValueToColor(
   return (value: number) => {
     const firstValue = data[0] ? data[0].value : 0;
     const { min, max } = data.reduce(
-      ({ min, max }, { value }) => ({
-        min: Math.min(min, value),
-        max: Math.max(max, value)
+      ({ min: currentMin, max: currentMax }, { value: currentValue }) => ({
+        min: Math.min(currentMin, currentValue),
+        max: Math.max(currentMax, currentValue)
       }),
       { min: firstValue, max: firstValue }
     );
@@ -67,12 +67,14 @@ function getDefaultMapValueToColor(
 }
 
 export const ChoroplethMap: React.SFC<Props> = props => {
+  const defaultMapValueToColor = useMemo(
+    () => getDefaultMapValueToColor(props.getProgressionColor, props.data),
+    [props.getProgressionColor, props.data]
+  );
+
   const {
     style,
-    mapValueToColor = useMemo(
-      () => getDefaultMapValueToColor(props.getProgressionColor, props.data),
-      [props.getProgressionColor, props.data]
-    ),
+    mapValueToColor = defaultMapValueToColor,
     getProgressionColor,
     mapboxStyle = 'https://tiles.maps.elastic.co/styles/osm-bright/style.json',
     geojsonSource,
@@ -213,7 +215,7 @@ export const ChoroplethMap: React.SFC<Props> = props => {
         updateChoroplethLayer.current();
       });
     }
-  }, []);
+  }, [onMouseMove, onMouseOut]);
 
   useEffect(() => {
     if (toolTipRef.current && mapboxMap.current && mapboxPopup.current) {

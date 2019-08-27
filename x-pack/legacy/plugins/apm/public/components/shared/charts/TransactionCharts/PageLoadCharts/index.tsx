@@ -6,53 +6,66 @@
 
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { RegionMapChart } from '../RegionMapChart';
-import { EmbeddablePanel } from '../../../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-//@ts-ignore
+// @ts-ignore
 import { MapEmbeddableFactory } from '../../../../../../../maps/public/embeddable/map_embeddable_factory';
-import { useEmbeddable } from '../../../../../hooks/useEmbeddable';
+import { APM_AVG_PAGE_LOAD_BY_COUNTRY_MAP_ID } from '../../../../../../server/lib/maps';
+import { useUrlParams } from '../../../../../hooks/useUrlParams';
 
 export const PageLoadCharts: React.SFC = () => {
   const [embeddable, setEmbeddable] = useState<any>(null);
-  const embeddableProps = useEmbeddable(embeddable);
   const embeddableContainerRef = useRef<HTMLDivElement>(null);
+  const {
+    urlParams: { serviceName, start, end }
+  } = useUrlParams();
+
+  const refreshMapEmbeddable = useCallback(
+    mapEmpeddable => {
+      const query = {
+        query: `service.name:"${serviceName}" and transaction.type : "page-load"`,
+        language: 'kuery'
+      };
+      const timeRange = {
+        from: start,
+        to: end
+      };
+      mapEmpeddable.updateInput({ timeRange, query });
+    },
+    [serviceName, start, end]
+  );
 
   useEffect(() => {
-    new MapEmbeddableFactory()
-      .createFromSavedObject(
-        'b9eaf720-c3a3-11e9-b3b7-590b5cc2c172',
-        { viewMode: 'view', hidePanelTitles: false, isLayerTOCOpen: false },
-        null
-      )
-      .then((embeddable: any) => {
-        setEmbeddable(embeddable);
-        const query = {
-          query: 'service.name:"client" and transaction.type : "page-load"',
-          language: 'kuery'
-        };
-        const timeRange = {
-          from: new Date('2019-08-14T16:44:22.021Z').toISOString(),
-          to: new Date('2019-08-26T21:55:52.381Z').toISOString()
-        };
-        embeddable.updateInput({ timeRange, query });
-      })
-      .catch((error: Error) => {
-        console.error(error.stack);
-      });
+    if (!embeddable) {
+      new MapEmbeddableFactory()
+        .createFromSavedObject(
+          APM_AVG_PAGE_LOAD_BY_COUNTRY_MAP_ID,
+          { viewMode: 'view', hidePanelTitles: false, isLayerTOCOpen: false },
+          null
+        )
+        .then((mapEmpeddable: any) => {
+          setEmbeddable(mapEmpeddable);
+        });
+    }
 
     return () => {
       if (embeddable) {
         embeddable.destroy();
       }
     };
-  }, []);
+  }, [embeddable, refreshMapEmbeddable]);
 
   useEffect(() => {
     if (embeddableContainerRef.current && embeddable) {
       embeddable.render(embeddableContainerRef.current);
     }
   }, [embeddable]);
+
+  useEffect(() => {
+    if (embeddable) {
+      refreshMapEmbeddable(embeddable);
+    }
+  }, [embeddable, refreshMapEmbeddable]);
 
   return (
     <EuiFlexGrid columns={2} gutterSize="s">
@@ -85,9 +98,6 @@ export const PageLoadCharts: React.SFC = () => {
               )}
             </span>
           </EuiTitle>
-          {/*embeddableProps.embeddable ? (
-            <EmbeddablePanel {...embeddableProps} />
-          ) : null*/}
           <div
             style={{
               height: 256,

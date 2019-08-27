@@ -45,10 +45,7 @@ export const RegionMapChart: React.SFC = () => {
         mapboxStyle="https://tiles.maps.elastic.co/styles/osm-bright-desaturated/style.json"
         initialMapboxOptions={{
           zoom: 1.41,
-          center: {
-            lng: 0,
-            lat: 45
-          }
+          center: { lng: 2.60108, lat: 41.67925 }
         }}
         geojsonSource="https://vector.maps.elastic.co/files/world_countries_v1.geo.json?elastic_tile_service_tos=agree&my_app_name=ems-landing&my_app_version=7.2.0"
         geojsonKeyProperty="iso2"
