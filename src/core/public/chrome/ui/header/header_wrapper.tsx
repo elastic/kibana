@@ -17,12 +17,19 @@
  * under the License.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import React, { FunctionComponent, useEffect, useState } from 'react';
 import classnames from 'classnames';
 import { Header, HeaderProps } from './';
 
+const IS_LOCKED_KEY = 'core.chrome.isLocked';
+
 export const HeaderWrapper: FunctionComponent<HeaderProps> = props => {
-  const [isLocked, setIsLocked] = useState(false);
+  const initialIsLocked = localStorage.getItem(IS_LOCKED_KEY);
+  const [isLocked, setIsLocked] = useState(initialIsLocked === 'true' ? true : false);
+  useEffect(() => {
+    if (initialIsLocked === `${isLocked}`) return;
+    localStorage.setItem(IS_LOCKED_KEY, `${isLocked}`);
+  }, [isLocked]);
   const className = classnames(
     'chrHeaderWrapper',
     {
@@ -32,7 +39,7 @@ export const HeaderWrapper: FunctionComponent<HeaderProps> = props => {
   );
   return (
     <div className={className} data-test-subj="headerGlobalNav">
-      <Header {...props} onIsLockedUpdate={setIsLocked} />
+      <Header {...props} onIsLockedUpdate={setIsLocked} isLocked={isLocked} />
     </div>
   );
 };
