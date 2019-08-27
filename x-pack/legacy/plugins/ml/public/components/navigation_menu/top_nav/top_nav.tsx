@@ -5,6 +5,7 @@
  */
 
 import React, { FC, Fragment, useState, useEffect } from 'react';
+import { Subscription } from 'rxjs';
 import { EuiSuperDatePicker } from '@elastic/eui';
 import { TimeRange } from 'src/plugins/data/public';
 import { TimeHistory } from '../../../../../../../../src/legacy/core_plugins/data/public';
@@ -45,18 +46,13 @@ export const TopNav: FC = () => {
   const dateFormat = chrome.getUiSettingsClient().get('dateFormat');
 
   useEffect(() => {
-    const refreshIntervalSubscription = timefilter
-      .getRefreshIntervalUpdate$()
-      .subscribe(timefilterUpdateListener);
-    const timeUpdateSubscription = timefilter.getTimeUpdate$().subscribe(timefilterUpdateListener);
-    const enabledUpdatedSubscription = timefilter
-      .getEnabledUpdated$()
-      .subscribe(timefilterUpdateListener);
+    const subscriptions = new Subscription();
+    subscriptions.add(timefilter.getRefreshIntervalUpdate$().subscribe(timefilterUpdateListener));
+    subscriptions.add(timefilter.getTimeUpdate$().subscribe(timefilterUpdateListener));
+    subscriptions.add(timefilter.getEnabledUpdated$().subscribe(timefilterUpdateListener));
 
     return function cleanup() {
-      enabledUpdatedSubscription.unsubscribe();
-      timeUpdateSubscription.unsubscribe();
-      refreshIntervalSubscription.unsubscribe();
+      subscriptions.unsubscribe();
     };
   }, []);
 

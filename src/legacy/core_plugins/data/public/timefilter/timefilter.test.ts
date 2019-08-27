@@ -18,7 +18,7 @@
  */
 
 jest.mock(
-  './lib/parse_querystring',
+  'ui/timefilter/lib/parse_querystring',
   () => ({
     parseQueryString: () => {
       return {
