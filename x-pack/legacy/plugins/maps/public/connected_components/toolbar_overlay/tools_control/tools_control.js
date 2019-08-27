@@ -81,7 +81,7 @@ export class ToolsControl extends Component {
         title: DRAW_SHAPE_LABEL,
         content: (
           <GeometryFilterForm
-            className="mapDrawControl_geometryFilterForm"
+            className="mapDrawControl__geometryFilterForm"
             buttonLabel={i18n.translate('xpack.maps.toolbarOverlay.drawShape.onSubmitButtonLabel', {
               defaultMessage: 'Draw shape',
             })}
@@ -98,7 +98,7 @@ export class ToolsControl extends Component {
         title: DRAW_BOUNDS_LABEL,
         content: (
           <GeometryFilterForm
-            className="mapDrawControl_geometryFilterForm"
+            className="mapDrawControl__geometryFilterForm"
             buttonLabel={i18n.translate('xpack.maps.toolbarOverlay.drawBounds.onSubmitButtonLabel', {
               defaultMessage: 'Draw bounds',
             })}

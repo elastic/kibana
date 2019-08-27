@@ -22,7 +22,7 @@ exports[`should not render relation select when geo field is geo_point 1`] = `
     />
   </EuiFormRow>
   <EuiFormRow
-    className="mapGeometryFilter_geoFieldSuperSelectWrapper"
+    className="mapGeometryFilter__geoFieldSuperSelectWrapper"
     compressed={true}
     describedByIds={Array []}
     fullWidth={false}
@@ -31,7 +31,7 @@ exports[`should not render relation select when geo field is geo_point 1`] = `
     labelType="label"
   >
     <EuiSuperSelect
-      className="mapGeometryFilter_geoFieldSuperSelect"
+      className="mapGeometryFilter__geoFieldSuperSelect"
       compressed={true}
       fullWidth={true}
       hasDividers={true}
@@ -95,7 +95,7 @@ exports[`should not show "within" relation when filter geometry is not closed 1`
     />
   </EuiFormRow>
   <EuiFormRow
-    className="mapGeometryFilter_geoFieldSuperSelectWrapper"
+    className="mapGeometryFilter__geoFieldSuperSelectWrapper"
     compressed={true}
     describedByIds={Array []}
     fullWidth={false}
@@ -104,7 +104,7 @@ exports[`should not show "within" relation when filter geometry is not closed 1`
     labelType="label"
   >
     <EuiSuperSelect
-      className="mapGeometryFilter_geoFieldSuperSelect"
+      className="mapGeometryFilter__geoFieldSuperSelect"
       compressed={true}
       fullWidth={true}
       hasDividers={true}
@@ -197,7 +197,7 @@ exports[`should render relation select when geo field is geo_shape 1`] = `
     />
   </EuiFormRow>
   <EuiFormRow
-    className="mapGeometryFilter_geoFieldSuperSelectWrapper"
+    className="mapGeometryFilter__geoFieldSuperSelectWrapper"
     compressed={true}
     describedByIds={Array []}
     fullWidth={false}
@@ -206,7 +206,7 @@ exports[`should render relation select when geo field is geo_shape 1`] = `
     labelType="label"
   >
     <EuiSuperSelect
-      className="mapGeometryFilter_geoFieldSuperSelect"
+      className="mapGeometryFilter__geoFieldSuperSelect"
       compressed={true}
       fullWidth={true}
       hasDividers={true}

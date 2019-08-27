@@ -176,14 +176,14 @@ export class GeometryFilterForm extends Component {
         </EuiFormRow>
 
         <EuiFormRow
-          className="mapGeometryFilter_geoFieldSuperSelectWrapper"
+          className="mapGeometryFilter__geoFieldSuperSelectWrapper"
           label={i18n.translate('xpack.maps.geometryFilterForm.geoFieldLabel', {
             defaultMessage: 'Filtered field'
           })}
           compressed
         >
           <EuiSuperSelect
-            className="mapGeometryFilter_geoFieldSuperSelect"
+            className="mapGeometryFilter__geoFieldSuperSelect"
             options={options}
             valueOfSelected={this.state.geoFieldTag}
             onChange={this._onGeoFieldChange}

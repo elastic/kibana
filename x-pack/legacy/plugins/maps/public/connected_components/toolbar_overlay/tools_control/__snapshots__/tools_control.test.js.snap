@@ -49,7 +49,7 @@ exports[`Should render cancel button when drawing 1`] = `
             Object {
               "content": <GeometryFilterForm
                 buttonLabel="Draw shape"
-                className="mapDrawControl_geometryFilterForm"
+                className="mapDrawControl__geometryFilterForm"
                 geoFields={
                   Array [
                     Object {
@@ -70,7 +70,7 @@ exports[`Should render cancel button when drawing 1`] = `
             Object {
               "content": <GeometryFilterForm
                 buttonLabel="Draw bounds"
-                className="mapDrawControl_geometryFilterForm"
+                className="mapDrawControl__geometryFilterForm"
                 geoFields={
                   Array [
                     Object {
@@ -157,7 +157,7 @@ exports[`renders 1`] = `
         Object {
           "content": <GeometryFilterForm
             buttonLabel="Draw shape"
-            className="mapDrawControl_geometryFilterForm"
+            className="mapDrawControl__geometryFilterForm"
             geoFields={
               Array [
                 Object {
@@ -178,7 +178,7 @@ exports[`renders 1`] = `
         Object {
           "content": <GeometryFilterForm
             buttonLabel="Draw bounds"
-            className="mapDrawControl_geometryFilterForm"
+            className="mapDrawControl__geometryFilterForm"
             geoFields={
               Array [
                 Object {
