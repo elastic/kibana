@@ -21,12 +21,14 @@ export default function codeIntelligenceFunctionalTests({
   const FIND_TIME = config.get('timeouts.find');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
+  const exists = async (selector: string) => testSubjects.exists(selector, { allowHidden: true });
+
   describe('Code Intelligence', () => {
     describe('Code intelligence in source view page', () => {
       const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
       const testGoToDefinition = async () => {
         await retry.try(async () => {
-          expect(await testSubjects.exists('codeSourceViewer')).to.be(true);
+          expect(await exists('codeSourceViewer')).to.be(true);
         });
 
         // Hover on the 'UserModel' reference on line 5.
@@ -37,7 +39,7 @@ export default function codeIntelligenceFunctionalTests({
           expect(await userModelSpan.getVisibleText()).to.equal('UserModel');
           await browser.moveMouseTo(userModelSpan);
           // Expect the go to definition button show up eventually.
-          expect(await testSubjects.exists('codeGoToDefinitionButton')).to.be(true);
+          expect(await exists('codeGoToDefinitionButton')).to.be(true);
 
           await testSubjects.click('codeGoToDefinitionButton');
           await retry.tryForTime(5000, async () => {
@@ -54,23 +56,19 @@ export default function codeIntelligenceFunctionalTests({
         // Visit the /src/controllers/user.ts file
         // Wait the file tree to be rendered and click the 'src' folder on the file tree.
         await retry.try(async () => {
-          expect(await testSubjects.exists('codeFileTreeNode-Directory-src')).to.be(true);
+          expect(await exists('codeFileTreeNode-Directory-src')).to.be(true);
         });
 
         await testSubjects.click('codeFileTreeNode-Directory-src');
 
         await retry.try(async () => {
-          expect(await testSubjects.exists('codeFileTreeNode-Directory-src/controllers')).to.be(
-            true
-          );
+          expect(await exists('codeFileTreeNode-Directory-src/controllers')).to.be(true);
         });
 
         await testSubjects.click('codeFileTreeNode-Directory-src/controllers');
         // Then the 'controllers' folder on the file tree.
         await retry.try(async () => {
-          expect(await testSubjects.exists('codeFileTreeNode-File-src/controllers/user.ts')).to.be(
-            true
-          );
+          expect(await exists('codeFileTreeNode-File-src/controllers/user.ts')).to.be(true);
         });
 
         await testSubjects.click('codeFileTreeNode-File-src/controllers/user.ts');
@@ -99,11 +97,11 @@ export default function codeIntelligenceFunctionalTests({
 
           // Wait for the index to start.
           await retry.try(async () => {
-            expect(await testSubjects.exists('repositoryIndexOngoing')).to.be(true);
+            expect(await exists('repositoryIndexOngoing')).to.be(true);
           });
           // Wait for the index to end.
           await retry.try(async () => {
-            expect(await testSubjects.exists('repositoryIndexDone')).to.be(true);
+            expect(await exists('repositoryIndexDone')).to.be(true);
           });
         });
       });
@@ -116,7 +114,7 @@ export default function codeIntelligenceFunctionalTests({
         // Clean up the imported repository
         await PageObjects.code.clickDeleteRepositoryButton();
         await retry.try(async () => {
-          expect(await testSubjects.exists('confirmModalConfirmButton')).to.be(true);
+          expect(await exists('confirmModalConfirmButton')).to.be(true);
         });
 
         await testSubjects.click('confirmModalConfirmButton');
@@ -156,24 +154,24 @@ export default function codeIntelligenceFunctionalTests({
         // Visit the /src/models/User.ts file
         // Wait the file tree to be rendered and click the 'src' folder on the file tree.
         await retry.try(async () => {
-          expect(await testSubjects.exists('codeFileTreeNode-Directory-src')).to.be(true);
+          expect(await exists('codeFileTreeNode-Directory-src')).to.be(true);
         });
 
         await testSubjects.click('codeFileTreeNode-Directory-src');
         await retry.try(async () => {
-          expect(await testSubjects.exists('codeFileTreeNode-Directory-src/models')).to.be(true);
+          expect(await exists('codeFileTreeNode-Directory-src/models')).to.be(true);
         });
 
         await testSubjects.click('codeFileTreeNode-Directory-src/models');
         // Then the 'models' folder on the file tree.
         await retry.try(async () => {
-          expect(await testSubjects.exists('codeFileTreeNode-File-src/models/User.ts')).to.be(true);
+          expect(await exists('codeFileTreeNode-File-src/models/User.ts')).to.be(true);
         });
 
         await testSubjects.click('codeFileTreeNode-File-src/models/User.ts');
         // Then the 'User.ts' file on the file tree.
         await retry.try(async () => {
-          expect(await testSubjects.exists('codeSourceViewer')).to.be(true);
+          expect(await exists('codeSourceViewer')).to.be(true);
         });
 
         // Hover on the 'UserModel' reference on line 5.
@@ -184,7 +182,7 @@ export default function codeIntelligenceFunctionalTests({
           expect(await userModelSpan.getVisibleText()).to.equal('UserModel');
           await browser.moveMouseTo(userModelSpan);
           // Expect the go to definition button show up eventually.
-          expect(await testSubjects.exists('codeFindReferenceButton')).to.be(true);
+          expect(await exists('codeFindReferenceButton')).to.be(true);
 
           await testSubjects.click('codeFindReferenceButton');
           await retry.tryForTime(5000, async () => {
@@ -207,28 +205,24 @@ export default function codeIntelligenceFunctionalTests({
         // Visit the /src/controllers/user.ts file
         // Wait the file tree to be rendered and click the 'src' folder on the file tree.
         await retry.try(async () => {
-          expect(await testSubjects.exists('codeFileTreeNode-Directory-src')).to.be(true);
+          expect(await exists('codeFileTreeNode-Directory-src')).to.be(true);
         });
 
         await testSubjects.click('codeFileTreeNode-Directory-src');
         await retry.try(async () => {
-          expect(await testSubjects.exists('codeFileTreeNode-Directory-src/controllers')).to.be(
-            true
-          );
+          expect(await exists('codeFileTreeNode-Directory-src/controllers')).to.be(true);
         });
 
         await testSubjects.click('codeFileTreeNode-Directory-src/controllers');
         // Then the 'controllers' folder on the file tree.
         await retry.try(async () => {
-          expect(await testSubjects.exists('codeFileTreeNode-File-src/controllers/user.ts')).to.be(
-            true
-          );
+          expect(await exists('codeFileTreeNode-File-src/controllers/user.ts')).to.be(true);
         });
 
         await testSubjects.click('codeFileTreeNode-File-src/controllers/user.ts');
         // Then the 'user.ts' file on the file tree.
         await retry.try(async () => {
-          expect(await testSubjects.exists('codeSourceViewer')).to.be(true);
+          expect(await exists('codeSourceViewer')).to.be(true);
         });
 
         // Hover on the 'async' reference on line 1.
@@ -239,7 +233,7 @@ export default function codeIntelligenceFunctionalTests({
           expect(await asyncSpan.getVisibleText()).to.equal('async');
           await browser.moveMouseTo(asyncSpan);
           // Expect the go to definition button show up eventually.
-          expect(await testSubjects.exists('codeGoToDefinitionButton')).to.be(true);
+          expect(await exists('codeGoToDefinitionButton')).to.be(true);
 
           await testSubjects.click('codeGoToDefinitionButton');
           // TODO: figure out why jenkins will fail the following test while locally it
