@@ -12,13 +12,55 @@ let clock: sinon.SinonFakeTimers;
 beforeAll(() => {
   clock = sinon.useFakeTimers();
 });
-
+beforeEach(() => clock.reset());
 afterAll(() => clock.restore());
 
 describe('shouldFire()', () => {
   test('defaults to false', () => {
     const alertInstance = new AlertInstance();
     expect(alertInstance.shouldFire()).toEqual(false);
+  });
+
+  test(`should throttle when group didn't change and throttle period is still active`, () => {
+    const alertInstance = new AlertInstance({
+      meta: {
+        lastFired: {
+          epocTime: Date.now(),
+          group: 'default',
+        },
+      },
+    });
+    clock.tick(30000);
+    alertInstance.fire('default');
+    expect(alertInstance.shouldFire('1m')).toEqual(false);
+  });
+
+  test(`shouldn't throttle when group didn't change and throttle period expired`, () => {
+    const alertInstance = new AlertInstance({
+      meta: {
+        lastFired: {
+          epocTime: Date.now(),
+          group: 'default',
+        },
+      },
+    });
+    clock.tick(30000);
+    alertInstance.fire('default');
+    expect(alertInstance.shouldFire('15s')).toEqual(true);
+  });
+
+  test(`shouldn't throttle when group changes`, () => {
+    const alertInstance = new AlertInstance({
+      meta: {
+        lastFired: {
+          epocTime: Date.now(),
+          group: 'default',
+        },
+      },
+    });
+    clock.tick(5000);
+    alertInstance.fire('other-group');
+    expect(alertInstance.shouldFire('1m')).toEqual(true);
   });
 });
 
@@ -61,7 +103,7 @@ describe('getState()', () => {
 
 describe('getMeta()', () => {
   test('returns meta passed to constructor', () => {
-    const meta = { groups: {} };
+    const meta = {};
     const alertInstance = new AlertInstance({ meta });
     expect(alertInstance.getMeta()).toEqual(meta);
   });
@@ -72,10 +114,9 @@ describe('fire()', () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
       meta: {
-        groups: {
-          default: {
-            lastFired: Date.now(),
-          },
+        lastFired: {
+          epocTime: Date.now(),
+          group: 'default',
         },
       },
     });
@@ -87,10 +128,9 @@ describe('fire()', () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
       meta: {
-        groups: {
-          default: {
-            lastFired: Date.now(),
-          },
+        lastFired: {
+          epocTime: Date.now(),
+          group: 'default',
         },
       },
     });
@@ -102,10 +142,9 @@ describe('fire()', () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
       meta: {
-        groups: {
-          default: {
-            lastFired: Date.now(),
-          },
+        lastFired: {
+          epocTime: Date.now(),
+          group: 'default',
         },
       },
     });
@@ -115,7 +154,7 @@ describe('fire()', () => {
   });
 
   test('makes getFireOptions() return given options', () => {
-    const alertInstance = new AlertInstance({ state: { foo: true }, meta: { groups: {} } });
+    const alertInstance = new AlertInstance({ state: { foo: true }, meta: {} });
     alertInstance.replaceState({ otherField: true }).fire('default', { field: true });
     expect(alertInstance.getFireOptions()).toEqual({
       actionGroup: 'default',
@@ -145,10 +184,20 @@ describe('replaceState()', () => {
 
 describe('replaceMeta()', () => {
   test('replaces previous meta', () => {
-    const alertInstance = new AlertInstance({ meta: { groups: {} } });
-    expect(alertInstance.getMeta()).toEqual({ groups: {} });
-    alertInstance.replaceMeta({ groups: { default: {} } });
-    expect(alertInstance.getMeta()).toEqual({ groups: { default: {} } });
+    const alertInstance = new AlertInstance({ meta: {} });
+    expect(alertInstance.getMeta()).toEqual({});
+    alertInstance.replaceMeta({
+      lastFired: {
+        epocTime: Date.now(),
+        group: 'default',
+      },
+    });
+    expect(alertInstance.getMeta()).toEqual({
+      lastFired: {
+        epocTime: Date.now(),
+        group: 'default',
+      },
+    });
   });
 });
 
@@ -156,56 +205,61 @@ describe('toJSON', () => {
   test('only serializes state and meta', () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
-      meta: { groups: {} },
+      meta: {
+        lastFired: {
+          epocTime: Date.now(),
+          group: 'default',
+        },
+      },
     });
-    expect(JSON.stringify(alertInstance)).toEqual('{"state":{"foo":true},"meta":{"groups":{}}}');
+    expect(JSON.stringify(alertInstance)).toEqual(
+      '{"state":{"foo":true},"meta":{"lastFired":{"epocTime":0,"group":"default"}}}'
+    );
   });
 });
 
-describe('isObsolete', () => {
+describe('isResolved', () => {
   test('returns true by default', () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
-      meta: { groups: {} },
+      meta: {},
     });
-    expect(alertInstance.isObsolete()).toEqual(true);
+    expect(alertInstance.isResolved()).toEqual(true);
   });
 
   test('returns false when fired', () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
-      meta: { groups: {} },
+      meta: {},
     });
     alertInstance.fire('default');
-    expect(alertInstance.isObsolete()).toEqual(false);
+    expect(alertInstance.isResolved()).toEqual(false);
   });
 
   test(`returns true when some groups are still throttled but didn't fire`, () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
       meta: {
-        groups: {
-          default: {
-            lastFired: Date.now(),
-          },
+        lastFired: {
+          epocTime: Date.now(),
+          group: 'default',
         },
       },
     });
-    expect(alertInstance.isObsolete('1m')).toEqual(true);
+    expect(alertInstance.isResolved('1m')).toEqual(true);
   });
 
   test(`returns true when throttle is expired and didn't fire`, () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
       meta: {
-        groups: {
-          default: {
-            lastFired: Date.now(),
-          },
+        lastFired: {
+          epocTime: Date.now(),
+          group: 'default',
         },
       },
     });
     clock.tick(120000);
-    expect(alertInstance.isObsolete('1m')).toEqual(true);
+    expect(alertInstance.isResolved('1m')).toEqual(true);
   });
 });

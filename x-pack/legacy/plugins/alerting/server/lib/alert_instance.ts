@@ -8,10 +8,9 @@ import { State, Context } from '../types';
 import { parseDuration } from './parse_duration';
 
 interface Meta {
-  groups?: {
-    [group: string]: {
-      lastFired?: number;
-    };
+  lastFired?: {
+    group: string;
+    epocTime: number;
   };
 }
 
@@ -42,20 +41,20 @@ export class AlertInstance {
       return false;
     }
     // Should be throttled and not fire
+    const throttleMills = throttle ? parseDuration(throttle) : 0;
+    const actionGroup = this.fireOptions.actionGroup;
     if (
-      throttle &&
-      this.meta.groups &&
-      this.meta.groups[this.fireOptions.actionGroup] &&
-      this.meta.groups[this.fireOptions.actionGroup].lastFired !== undefined &&
-      this.meta.groups[this.fireOptions.actionGroup].lastFired! + parseDuration(throttle) >
-        Date.now()
+      this.meta.lastFired &&
+      this.meta.lastFired.group === actionGroup &&
+      this.meta.lastFired.epocTime + throttleMills > Date.now()
     ) {
       return false;
     }
     return true;
   }
 
-  isObsolete(throttle?: string) {
+  isResolved(throttle?: string) {
+    // At this time we'll consider instances that didn't fire as resolved
     return !this.shouldFire(throttle);
   }
 

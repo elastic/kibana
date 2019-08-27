@@ -126,8 +126,8 @@ export function getCreateTaskRunnerFunction({
           Object.keys(alertInstances).map(alertInstanceId => {
             const alertInstance = alertInstances[alertInstanceId];
 
-            // Cleanup obsolete alert instances to avoid over populating the object
-            if (alertInstance.isObsolete(throttle)) {
+            // Cleanup resolved alert instances to avoid over populating the alertInstances object
+            if (alertInstance.isResolved(throttle)) {
               delete alertInstances[alertInstanceId];
               return;
             }
@@ -137,12 +137,9 @@ export function getCreateTaskRunnerFunction({
               const previousMeta = alertInstance.getMeta();
               alertInstance.replaceMeta({
                 ...previousMeta,
-                groups: {
-                  ...(previousMeta.groups || {}),
-                  [actionGroup]: {
-                    ...((previousMeta.groups && previousMeta.groups[actionGroup]) || {}),
-                    lastFired: Date.now(),
-                  },
+                lastFired: {
+                  group: actionGroup,
+                  epocTime: Date.now(),
                 },
               });
               alertInstance.resetFire();
