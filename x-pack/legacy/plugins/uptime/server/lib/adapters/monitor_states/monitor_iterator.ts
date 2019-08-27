@@ -33,9 +33,7 @@ export class MonitorIterator {
   // Get a CursorPaginator object that will resume after the current() value.
   async paginationAfterCurrent(): Promise<CursorPagination | null> {
     const peek = await this.peek();
-    console.log('CURP', this.current());
     if (!peek) {
-      console.log('PEEKED', peek);
       return null;
     }
 
@@ -43,7 +41,6 @@ export class MonitorIterator {
     if (!current) {
       return null;
     }
-    console.log('PAGINATION AFTER', current.id);
     const cursorKey = { monitor_id: current.id };
 
     return Object.assign({}, this.queryContext.pagination, { cursorKey });
@@ -93,24 +90,19 @@ export class MonitorIterator {
   async peek(): Promise<MonitorIdWithGroups | null> {
     let bufAheadPos = this.bufferPos + 1;
     while (true) {
-      console.log('PEEKITER', bufAheadPos);
       let bufAhead = this.buffer[bufAheadPos];
 
       if (!bufAhead) {
-        console.log('PEEKMORE');
         const fetchedMore = await this.queryNextAndBuffer(500, false);
         if (!fetchedMore) {
-          console.log('No more to fetch');
           return null;
         }
       }
 
       if (bufAhead) {
         if (bufAhead.matchesFilter) {
-          console.log('PM', bufAhead);
           return bufAhead;
         }
-        console.log('NOPM', bufAhead);
       }
 
       bufAheadPos++;
@@ -143,7 +135,7 @@ export class MonitorIterator {
     const matching = await this.fullMatches(monitorIds, filteredCheckGroups);
 
     const elapsed = new Date().getTime() - start.getTime();
-    console.log('Exec Query in', elapsed, 'Len', matching.length);
+    console.debug('Exec Query in', elapsed + 'ms', 'Len', matching.length);
     return {
       checkGroups: matching,
       searchAfter: searchAfter,
@@ -226,8 +218,6 @@ export class MonitorIterator {
           down: topSource.summary.down,
           status: topSource.summary.down > 0 ? 'down' : 'up',
         };
-
-        console.log('MLCG', this.queryContext.statusFilter, mlcg);
 
         // This monitor doesn't match, so just skip ahead and don't add it to the output
         if (this.queryContext.statusFilter && this.queryContext.statusFilter !== mlcg.status) {

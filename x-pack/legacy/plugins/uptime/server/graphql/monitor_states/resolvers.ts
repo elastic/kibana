@@ -12,6 +12,7 @@ import {
   MonitorSummaryResult,
   StatesIndexStatus,
 } from '../../../common/graphql/types';
+import { CONTEXT_DEFAULTS } from '../../../common/constants/context_defaults';
 
 export type UMGetMonitorStatesResolver = UMResolver<
   MonitorSummaryResult | Promise<MonitorSummaryResult>,
@@ -51,7 +52,9 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
             req,
             dateRangeStart,
             dateRangeEnd,
-            pagination ? JSON.parse(Buffer.from(pagination, 'base64').toString()) : pagination,
+            pagination
+              ? JSON.parse(decodeURIComponent(pagination))
+              : CONTEXT_DEFAULTS.CURSOR_PAGINATION,
             filters
           ),
         ]);

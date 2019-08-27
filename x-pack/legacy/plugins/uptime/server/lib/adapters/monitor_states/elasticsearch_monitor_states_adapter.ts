@@ -53,8 +53,6 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       statusFilter,
     };
 
-    console.log('getMonitorStates()', pagination);
-
     const enriched = await queryEnriched(queryContext);
 
     const encodeJSONB64 = (p: any): string | null => {
@@ -62,7 +60,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
         return null;
       }
 
-      return Buffer.from(JSON.stringify(p)).toString('base64');
+      return encodeURIComponent(JSON.stringify(p));
     };
 
     return {

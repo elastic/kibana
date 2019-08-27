@@ -1,4 +1,5 @@
-import { MonitorIdWithGroups, MonitorIterator } from './monitor_iterator';
+import { MonitorIterator } from './monitor_iterator';
+import { MonitorIdWithGroups } from './monitor_id_with_groups';
 import { CursorPagination } from './adapter_types';
 import { QueryContext } from './elasticsearch_monitor_states_adapter';
 import { CursorDirection, SortOrder } from '../../../../common/graphql/types';
@@ -17,7 +18,6 @@ export const fetchMonitorLocCheckGroups = async (
   const fetcher = new MonitorIterator(queryContext);
 
   let paginationBefore: CursorPagination | null = null;
-  console.log('Start fetching');
   const start = new Date();
   while (items.length < size) {
     const monitor = await fetcher.next();
@@ -28,20 +28,16 @@ export const fetchMonitorLocCheckGroups = async (
     if (items.length === 0) {
       const reverseFetcher = await fetcher.reverse();
       paginationBefore = reverseFetcher && (await reverseFetcher.paginationAfterCurrent());
-      console.log('END REVERSE', paginationBefore);
     }
 
     items.push(monitor);
   }
-  console.log('Fetching done', new Date().getTime() - start.getTime(), items.length, size);
+  console.log('Fetching done', new Date().getTime() - start.getTime() + 'ms', items.length, size);
 
-  console.log('CHECK NEXT');
   // We have to create these objects before checking if we can navigate backward
-  console.log('PEEKNEXT', await fetcher.peek());
   const paginationAfter: CursorPagination | null = (await fetcher.peek())
     ? await fetcher.paginationAfterCurrent()
     : null;
-  console.log('E CHECK NEXT', paginationAfter);
 
   const ssAligned = searchSortAligned(queryContext.pagination);
 

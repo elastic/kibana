@@ -23,9 +23,7 @@ export class UMMonitorStatesDomain {
     pagination: string,
     filters?: string | null
   ): Promise<GetMonitorStatesResult> {
-    const decodedPagination = pagination
-      ? JSON.parse(Buffer.from(pagination, 'base64').toString())
-      : undefined;
+    const decodedPagination = pagination ? JSON.parse(decodeURIComponent(pagination)) : undefined;
     return this.adapter.getMonitorStates(
       request,
       dateRangeStart,
