@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export * from './commit';
 export * from './document';
 export * from './reference';
 export * from './repository';

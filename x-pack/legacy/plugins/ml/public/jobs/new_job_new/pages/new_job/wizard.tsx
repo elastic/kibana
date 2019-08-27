@@ -248,7 +248,6 @@ export const Wizard: FC<Props> = ({
               id="xpack.ml.newJob.wizard.stepComponentWrapper.summaryTitle"
               defaultMessage="Summary"
             />
-            Summary
           </Title>
           <SummaryStep
             isCurrentStep={currentStep === WIZARD_STEPS.SUMMARY}

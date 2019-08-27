@@ -105,6 +105,7 @@ export const getColumns = (
       name: 'ID',
       sortable: true,
       truncateText: true,
+      width: isManagementTable === true ? '20%' : undefined,
     },
     // Description is not supported yet by API
     /*
@@ -124,6 +125,7 @@ export const getColumns = (
       }),
       sortable: true,
       truncateText: true,
+      width: isManagementTable === true ? '25%' : undefined,
     },
     {
       field: DataFrameAnalyticsListColumn.configDestIndex,
@@ -132,6 +134,7 @@ export const getColumns = (
       }),
       sortable: true,
       truncateText: true,
+      width: isManagementTable === true ? '20%' : undefined,
     },
     {
       name: i18n.translate('xpack.ml.dataframe.analyticsList.status', { defaultMessage: 'Status' }),
@@ -208,7 +211,14 @@ export const getColumns = (
     },
   ];
 
-  if (isManagementTable === false) {
+  if (isManagementTable === true) {
+    columns.push({
+      name: i18n.translate('xpack.ml.jobsList.analyticsSpacesLabel', {
+        defaultMessage: 'Spaces',
+      }),
+      render: () => <EuiBadge color={'hollow'}>{'all'}</EuiBadge>,
+    });
+  } else {
     columns.push({
       name: i18n.translate('xpack.ml.dataframe.analyticsList.tableActionLabel', {
         defaultMessage: 'Actions',

@@ -20,8 +20,9 @@
       "GET"
     ],
     "patterns": [
-      "{indices}/_source/{id}"
+      "{indices}/_source/{id}",
+      "{indices}/{type}/{id}/_source"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/docs-get.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-get.html"
   }
 }

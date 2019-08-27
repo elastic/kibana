@@ -17,6 +17,8 @@ import { getEmptyValue } from '../../../empty_value';
 import { plainColumnRenderer } from './plain_column_renderer';
 import { getValues, deleteItemIdx, findItem } from './helpers';
 
+jest.mock('../../../../lib/settings/use_kibana_ui_setting');
+
 const mockFramework = mockFrameworks.default_UTC;
 
 describe('plain_column_renderer', () => {
@@ -79,6 +81,21 @@ describe('plain_column_renderer', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual('192.168.0.3');
+    });
+
+    test('should return the value of destination.bytes if destination.bytes has a valid value', () => {
+      const column = plainColumnRenderer.renderColumn({
+        columnName: 'destination.bytes',
+        eventId: _id,
+        values: getValues('destination.bytes', mockDatum),
+        field: defaultHeaders.find(h => h.id === 'destination.bytes')!,
+      });
+      const wrapper = mount(
+        <TestProviders>
+          <span>{column}</span>
+        </TestProviders>
+      );
+      expect(wrapper.text()).toEqual('120.563KB');
     });
 
     test('should return the value of event.action if event has a valid value', () => {

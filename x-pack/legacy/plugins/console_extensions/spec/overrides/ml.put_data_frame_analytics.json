@@ -10,11 +10,30 @@
         "results_field": ""
       },
       "analysis": {
-        "outlier_detection": {
-          "n_neighbors": 1,
-          "method": {"__one_of": ["lof", "ldof", "distance_knn_nn", "distance_knn"]},
-          "feature_influence_threshold": 1.0
-        }
+        "__one_of": [{
+          "outlier_detection": {
+            "__template": {
+              "n_neighbors": ""
+            },
+            "n_neighbors": 1,
+            "method": {"__one_of": ["lof", "ldof", "distance_knn_nn", "distance_knn"]},
+            "feature_influence_threshold": 1.0
+          }
+        }, {
+          "regression": {
+            "__template": {
+              "dependent_variable": ""
+            },
+            "dependent_variable": "",
+            "lambda": 1.0,
+            "gamma": 1.0,
+            "eta": 1.0,
+            "maximum_number_trees": 1,
+            "feature_bag_fraction": 1.0,
+            "prediction_field_name": "",
+            "training_percent": 1.0
+          }
+        }]
       },
       "analyzed_fields": {
         "__one_of": [
@@ -30,6 +49,7 @@
           }
         ]
       },
+      "description": "",
       "model_memory_limit": ""
     }
   }

@@ -7,23 +7,24 @@
 import * as React from 'react';
 import styled from 'styled-components';
 
+import { useContext } from 'react';
 import { BrowserFields } from '../../../containers/source';
 import { ColumnHeader } from '../body/column_headers/column_header';
 import { DetailItem } from '../../../graphql/types';
 import { StatefulEventDetails } from '../../event_details/stateful_event_details';
 import { LazyAccordion } from '../../lazy_accordion';
 import { OnUpdateColumns } from '../events';
+import { TimelineWidthContext } from '../timeline_context';
 
-const ExpandableDetails = styled.div<{ hideExpandButton: boolean; width?: number }>`
-  width: ${({ width }) => (width != null ? `${width}px;` : '100%')}
-    ${({ hideExpandButton }) =>
-      hideExpandButton
-        ? `
+const ExpandableDetails = styled.div<{ hideExpandButton: boolean }>`
+  ${({ hideExpandButton }) =>
+    hideExpandButton
+      ? `
   .euiAccordion__button {
     display: none;
   }
   `
-        : ''};
+      : ''};
 `;
 
 ExpandableDetails.displayName = 'ExpandableDetails';
@@ -35,35 +36,30 @@ interface Props {
   event: DetailItem[];
   forceExpand?: boolean;
   hideExpandButton?: boolean;
-  isLoading: boolean;
   onUpdateColumns: OnUpdateColumns;
   timelineId: string;
   toggleColumn: (column: ColumnHeader) => void;
-  width?: number;
 }
 
-export class ExpandableEvent extends React.PureComponent<Props> {
-  public render() {
-    const {
-      browserFields,
-      columnHeaders,
-      event,
-      forceExpand = false,
-      id,
-      isLoading,
-      timelineId,
-      toggleColumn,
-      onUpdateColumns,
-      width,
-    } = this.props;
-
+export const ExpandableEvent = React.memo<Props>(
+  ({
+    browserFields,
+    columnHeaders,
+    event,
+    forceExpand = false,
+    id,
+    timelineId,
+    toggleColumn,
+    onUpdateColumns,
+  }) => {
+    const width = useContext(TimelineWidthContext);
+    // Passing the styles directly to the component of LazyAccordion because the width is
+    // being calculated and is recommended by Styled Components for performance
+    // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
     return (
-      <ExpandableDetails
-        data-test-subj="timeline-expandable-details"
-        hideExpandButton={true}
-        width={width}
-      >
+      <ExpandableDetails hideExpandButton={true}>
         <LazyAccordion
+          style={{ width: `${width}px` }}
           id={`timeline-${timelineId}-row-${id}`}
           renderExpandedContent={() => (
             <StatefulEventDetails
@@ -71,7 +67,6 @@ export class ExpandableEvent extends React.PureComponent<Props> {
               columnHeaders={columnHeaders}
               data={event}
               id={id}
-              isLoading={isLoading}
               onUpdateColumns={onUpdateColumns}
               timelineId={timelineId}
               toggleColumn={toggleColumn}
@@ -83,4 +78,6 @@ export class ExpandableEvent extends React.PureComponent<Props> {
       </ExpandableDetails>
     );
   }
-}
+);
+
+ExpandableEvent.displayName = 'ExpandableEvent';

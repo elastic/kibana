@@ -17,14 +17,21 @@
  * under the License.
  */
 
+import { SavedObjectsClientContract } from 'src/core/public';
+import { createSavedQueryService } from './search_bar/lib/saved_query_service';
+
 /**
  * Search Service
  * @internal
  */
 
 export class SearchService {
-  public setup() {
-    return {};
+  public setup(savedObjectsClient: SavedObjectsClientContract) {
+    return {
+      services: {
+        savedQueryService: createSavedQueryService(savedObjectsClient),
+      },
+    };
   }
 
   public stop() {}

@@ -6,13 +6,13 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-// @ts-ignore
-import puppeteer from 'puppeteer-core';
+import { Browser, Page, LaunchOptions } from 'puppeteer';
 import rimraf from 'rimraf';
 import * as Rx from 'rxjs';
 import { map, share, mergeMap, filter, partition, ignoreElements, tap } from 'rxjs/operators';
 import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 
+import { puppeteerLaunch } from '../puppeteer';
 import { LevelLogger as Logger } from '../../../lib/level_logger';
 import { HeadlessChromiumDriver } from '../driver';
 import { args, IArgOptions } from './args';
@@ -62,23 +62,21 @@ export class HeadlessChromiumDriverFactory {
       proxyConfig: this.browserConfig.proxy,
     });
 
-    return puppeteer
-      .launch({
-        userDataDir,
-        executablePath: this.binaryPath,
-        ignoreHTTPSErrors: true,
-        args: chromiumArgs,
-        env: {
-          TZ: browserTimezone,
-        },
-      })
-      .catch((error: Error) => {
-        logger.warning(
-          `The Reporting plugin encountered issues launching Chromium in a self-test. You may have trouble generating reports: [${error}]`
-        );
-        logger.warning(`See Chromium's log output at "${getChromeLogLocation(this.binaryPath)}"`);
-        return null;
-      });
+    return puppeteerLaunch({
+      userDataDir,
+      executablePath: this.binaryPath,
+      ignoreHTTPSErrors: true,
+      args: chromiumArgs,
+      env: {
+        TZ: browserTimezone,
+      },
+    } as LaunchOptions).catch((error: Error) => {
+      logger.warning(
+        `The Reporting plugin encountered issues launching Chromium in a self-test. You may have trouble generating reports: [${error}]`
+      );
+      logger.warning(`See Chromium's log output at "${getChromeLogLocation(this.binaryPath)}"`);
+      return null;
+    });
   }
 
   create({
@@ -105,11 +103,11 @@ export class HeadlessChromiumDriverFactory {
         proxyConfig: this.browserConfig.proxy,
       });
 
-      let browser: puppeteer.Browser;
-      let page: puppeteer.Page;
+      let browser: Browser;
+      let page: Page;
       try {
-        browser = await puppeteer.launch({
-          pipe: true,
+        browser = await puppeteerLaunch({
+          pipe: !this.browserConfig.inspect,
           userDataDir,
           executablePath: this.binaryPath,
           ignoreHTTPSErrors: true,
@@ -117,7 +115,7 @@ export class HeadlessChromiumDriverFactory {
           env: {
             TZ: browserTimezone,
           },
-        });
+        } as LaunchOptions);
 
         page = await browser.newPage();
 
@@ -125,7 +123,6 @@ export class HeadlessChromiumDriverFactory {
         // which can cause the job to fail even if we bump timeouts in
         // the config. Help alleviate errors like
         // "TimeoutError: waiting for selector ".application" failed: timeout 30000ms exceeded"
-        // @ts-ignore outdated typedefs for puppteer
         page.setDefaultTimeout(this.queueTimeout);
 
         this.logger.debug(`Browser driver factory created`);
@@ -175,10 +172,7 @@ export class HeadlessChromiumDriverFactory {
       )(stderr$);
 
       const driver$ = Rx.of(
-        new HeadlessChromiumDriver(page, {
-          logger: this.logger,
-          inspect: this.browserConfig.inspect,
-        })
+        new HeadlessChromiumDriver(page, { inspect: this.browserConfig.inspect })
       );
 
       const processError$ = Rx.fromEvent(page, 'error').pipe(

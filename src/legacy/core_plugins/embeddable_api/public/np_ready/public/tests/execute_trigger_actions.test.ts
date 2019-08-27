@@ -179,3 +179,30 @@ test('shows a context menu when more than one action is mapped to a trigger', as
   expect(executeFn).toBeCalledTimes(0);
   expect(openContextMenu).toHaveBeenCalledTimes(1);
 });
+
+test('passes whole action context to isCompatible()', async () => {
+  const { setup, doStart } = embeddables;
+  const trigger = {
+    id: 'MY-TRIGGER',
+    title: 'My trigger',
+    actionIds: ['test'],
+  };
+  const action = new TestAction('test', ({ triggerContext }) => {
+    expect(triggerContext).toEqual({
+      foo: 'bar',
+    });
+    return true;
+  });
+
+  setup.registerTrigger(trigger);
+  setup.registerAction(action);
+  const start = doStart();
+
+  const context = {
+    embeddable: {} as any,
+    triggerContext: {
+      foo: 'bar',
+    },
+  };
+  await start.executeTriggerActions('MY-TRIGGER', context);
+});

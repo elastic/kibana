@@ -20,6 +20,7 @@ import 'uiExports/visEditorTypes';
 import 'uiExports/savedObjectTypes';
 import 'uiExports/spyModes';
 import 'uiExports/fieldFormats';
+import 'uiExports/embeddableFactories';
 
 // load application code
 import './lib/load_expression_types';
