@@ -149,8 +149,8 @@ test(`logs deprecations when generating the title/relativeUrl using the savedObj
   const mockRequest = createMockRequest();
   mockRequest.getSavedObjectsClient().get.mockReturnValue({
     attributes: {
-      title: '',
-    },
+      title: ''
+    }
   });
 
   await compatibilityShim(createJobMock)({ objectType: 'search', savedObjectId: 'abc' }, null, mockRequest);
