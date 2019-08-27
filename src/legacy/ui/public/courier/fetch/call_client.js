@@ -25,7 +25,7 @@ import { SerializeFetchParamsProvider } from './request/serialize_fetch_params';
 import { i18n } from '@kbn/i18n';
 import { createDefer } from 'ui/promises';
 
-export function CallClientProvider(Private, Promise, es, config) {
+export function CallClientProvider(Private, Promise, es, config, sessionId, esShardTimeout) {
   const errorAllowExplicitIndex = Private(ErrorAllowExplicitIndexProvider);
   const isRequest = Private(IsRequestProvider);
   const serializeFetchParams = Private(SerializeFetchParamsProvider);
@@ -33,9 +33,6 @@ export function CallClientProvider(Private, Promise, es, config) {
   const ABORTED = RequestStatus.ABORTED;
 
   function callClient(searchRequests) {
-    const maxConcurrentShardRequests = config.get('courier:maxConcurrentShardRequests');
-    const includeFrozen = config.get('search:includeFrozen');
-
     // get the actual list of requests that we will be fetching
     const requestsToFetch = searchRequests.filter(isRequest);
     let requestsToFetchCount = requestsToFetch.length;
@@ -135,7 +132,7 @@ export function CallClientProvider(Private, Promise, es, config) {
           searching,
           abort,
           failedSearchRequests,
-        } = await searchStrategy.search({ searchRequests, es, Promise, serializeFetchParams, includeFrozen, maxConcurrentShardRequests });
+        } = await searchStrategy.search({ searchRequests, es, Promise, serializeFetchParams, config, sessionId, esShardTimeout });
 
         // Collect searchRequests which have successfully been sent.
         searchRequests.forEach(searchRequest => {

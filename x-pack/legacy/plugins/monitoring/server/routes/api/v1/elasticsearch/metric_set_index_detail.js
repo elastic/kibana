@@ -97,7 +97,7 @@ export const metricSet = {
     },
     'index_document_count',
     {
-      keys: ['index_segment_count_primaries', 'index_segment_count_total'],
+      keys: ['index_segment_count_total', 'index_segment_count_primaries'],
       name: 'index_segment_count'
     }
   ]
