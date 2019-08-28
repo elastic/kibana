@@ -52,15 +52,7 @@ uiRoutes
   // deprecated route, kept for compatibility
   // should be removed in the future
   .when('/context/:indexPatternId/:type/:id*', {
-    controller: ContextAppRouteController,
-    k7Breadcrumbs,
-    controllerAs: 'contextAppRoute',
-    resolve: {
-      indexPattern: function ($route, indexPatterns) {
-        return indexPatterns.get($route.current.params.indexPatternId);
-      },
-    },
-    template: contextAppRouteTemplate,
+    redirectTo: '/context/:indexPatternId/:id'
   })
   .when('/context/:indexPatternId/:id*', {
     controller: ContextAppRouteController,
