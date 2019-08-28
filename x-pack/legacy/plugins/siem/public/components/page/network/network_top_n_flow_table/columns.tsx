@@ -80,7 +80,7 @@ export const getNetworkTopNFlowColumns = (
 
             {geo && (
               <>
-                {` `}
+                {' '}
                 <CountryFlag countryCode={geo} /> {geo}
               </>
             )}
@@ -123,25 +123,18 @@ export const getNetworkTopNFlowColumns = (
         const id = escapeDataProviderId(`${tableId}-table-${flowTarget}-ip-${ipAddress}`);
         return (
           <>
-            {as.name && (
-              <div style={{ display: 'block' }}>
-                {getRowItemDraggable({
-                  rowItem: as.name,
-                  attrName: `${flowTarget}.as.organization.name`,
-                  idPrefix: `${id}-name`,
-                })}
-              </div>
-            )}
-            {as.number && (
-              <>
-                <div style={{ display: 'inline-block' }}>{` AS`}</div>
-                {getRowItemDraggable({
-                  rowItem: `${as.number}`,
-                  attrName: `${flowTarget}.as.number`,
-                  idPrefix: `${id}-number`,
-                })}
-              </>
-            )}
+            {as.name &&
+              getRowItemDraggable({
+                rowItem: as.name,
+                attrName: `${flowTarget}.as.organization.name`,
+                idPrefix: `${id}-name`,
+              })}
+            {as.number &&
+              getRowItemDraggable({
+                rowItem: `${as.number}`,
+                attrName: `${flowTarget}.as.number`,
+                idPrefix: `${id}-number`,
+              })}
           </>
         );
       } else {
