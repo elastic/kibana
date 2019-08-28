@@ -5,40 +5,30 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  FieldBasedIndexPatternColumn,
-  MinIndexPatternColumn,
-  SumIndexPatternColumn,
-  AvgIndexPatternColumn,
-  MaxIndexPatternColumn,
-} from '../indexpattern';
-import { OperationDefinition } from '../operations';
+import { OperationDefinition } from '.';
+import { ParameterlessIndexPatternColumn } from './column_types';
 
-function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
+function buildMetricOperation<T extends ParameterlessIndexPatternColumn<string>>(
   type: T['operationType'],
   displayName: string,
   ofName: (name: string) => string
 ) {
-  const operationDefinition: OperationDefinition<T> = {
+  return {
     type,
     displayName,
-    getPossibleOperationsForDocument: () => [],
-    getPossibleOperationsForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
+    getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
       if (
         fieldType === 'number' &&
         aggregatable &&
         (!aggregationRestrictions || aggregationRestrictions[type])
       ) {
-        return [
-          {
-            dataType: 'number',
-            isBucketed: false,
-            isMetric: true,
-            scale: 'ratio',
-          },
-        ];
+        return {
+          dataType: 'number',
+          isBucketed: false,
+          isMetric: true,
+          scale: 'ratio',
+        };
       }
-      return [];
     },
     isTransferable: (column, newIndexPattern) => {
       const newField = newIndexPattern.fields.find(field => field.name === column.sourceField);
@@ -50,21 +40,16 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
           (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
       );
     },
-    buildColumn({ suggestedPriority, field }): T {
-      if (!field) {
-        throw new Error(`Invariant: A ${type} operation can only be built with a field`);
-      }
-      return {
-        label: ofName(field ? field.name : ''),
-        dataType: 'number',
-        operationType: type,
-        suggestedPriority,
-        sourceField: field ? field.name : '',
-        isBucketed: false,
-        isMetric: true,
-        scale: 'ratio',
-      } as T;
-    },
+    buildColumn: ({ suggestedPriority, field }) => ({
+      label: ofName(field ? field.name : ''),
+      dataType: 'number',
+      operationType: type,
+      suggestedPriority,
+      sourceField: field ? field.name : '',
+      isBucketed: false,
+      isMetric: true,
+      scale: 'ratio',
+    }),
     onFieldChange: (oldColumn, indexPattern, field) => {
       return {
         ...oldColumn,
@@ -81,9 +66,13 @@ function buildMetricOperation<T extends FieldBasedIndexPatternColumn>(
         field: column.sourceField,
       },
     }),
-  };
-  return operationDefinition;
+  } as OperationDefinition<T>;
 }
+
+export type SumIndexPatternColumn = ParameterlessIndexPatternColumn<'sum'>;
+export type AvgIndexPatternColumn = ParameterlessIndexPatternColumn<'avg'>;
+export type MinIndexPatternColumn = ParameterlessIndexPatternColumn<'min'>;
+export type MaxIndexPatternColumn = ParameterlessIndexPatternColumn<'max'>;
 
 export const minOperation = buildMetricOperation<MinIndexPatternColumn>(
   'min',

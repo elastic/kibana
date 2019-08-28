@@ -32,7 +32,7 @@ import {
   operationDefinitionMap,
   getOperationDisplay,
   buildColumn,
-  OperationDefinition,
+  changeField,
 } from '../operations';
 import { deleteColumn, changeColumn } from '../state_helpers';
 import { FieldSelect } from './field_select';
@@ -284,14 +284,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
                 ) {
                   // If we just changed the field are not in an error state and the operation didn't change,
                   // we use the operations onFieldChange method to calculate the new column.
-                  const operation = operationDefinitionMap[
-                    choice.operationType
-                  ] as OperationDefinition<IndexPatternColumn>;
-                  column = operation.onFieldChange(
-                    selectedColumn,
-                    currentIndexPattern,
-                    fieldMap[choice.field]
-                  );
+                  column = changeField(selectedColumn, currentIndexPattern, fieldMap[choice.field]);
                 } else {
                   // Otherwise we'll use the buildColumn method to calculate a new column
                   column = buildColumn({
@@ -358,6 +351,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
                     state={state}
                     setState={setState}
                     columnId={columnId}
+                    currentColumn={state.layers[layerId].columns[columnId]}
                     storage={props.storage}
                     uiSettings={props.uiSettings}
                     layerId={layerId}
