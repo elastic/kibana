@@ -305,7 +305,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 savedObjectsClientSuccess: false,
                 callClusterError: {
                   ...alertTestRecord._source.state.callClusterError,
-                  msg: `[security_exception] action [indices:data/write/bulk[s]] is unauthorized for user [${user.username}]`,
                   statusCode: 403,
                 },
                 savedObjectsClientError: {
@@ -397,7 +396,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 savedObjectsClientSuccess: false,
                 callClusterError: {
                   ...actionTestRecord._source.state.callClusterError,
-                  msg: `[security_exception] action [indices:data/write/bulk[s]] is unauthorized for user [${user.username}]`,
                   statusCode: 403,
                 },
                 savedObjectsClientError: {
