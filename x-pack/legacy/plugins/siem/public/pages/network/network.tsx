@@ -51,21 +51,20 @@ type NetworkComponentProps = NetworkComponentReduxProps;
 const mediaMatch = window.matchMedia(
   'screen and (min-width: ' + euiLightVars.euiBreakpoints.xl + ')'
 );
-const getFlexDirectionByMediaMatch = () => {
+const getFlexDirectionByMediaMatch = (): 'row' | 'column' => {
   const { matches } = mediaMatch;
   return matches ? 'row' : 'column';
 };
 const NetworkComponent = React.memo<NetworkComponentProps>(
   ({ filterQuery, setAbsoluteRangeDatePicker }) => {
     const [flexDirectionMq, setDisplay] = useState(getFlexDirectionByMediaMatch());
-
+    const handler = useCallback(() => setDisplay(getFlexDirectionByMediaMatch()), [setDisplay]);
     useEffect(() => {
       window.addEventListener('resize', handler);
       return function cleanup() {
         window.removeEventListener('resize', handler);
       };
     });
-    const handler = useCallback(() => setDisplay(getFlexDirectionByMediaMatch()), [setDisplay]);
     return (
       <WithSource sourceId="default">
         {({ indicesExist, indexPattern }) =>
