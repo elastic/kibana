@@ -18,4 +18,4 @@
  */
 
 export { LoadingIndicator } from './loading_indicator';
-export { Header } from './header';
+export { Header, HeaderWrapper } from './header';

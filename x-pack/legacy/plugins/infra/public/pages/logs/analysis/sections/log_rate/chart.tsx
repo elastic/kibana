@@ -93,7 +93,7 @@ export const ChartView = ({ data }: Props) => {
           <Axis
             id={getAxisId('values')}
             title={i18n.translate('xpack.infra.logs.analysis.logRateSectionYaxisTitle', {
-              defaultMessage: 'Log entries',
+              defaultMessage: 'Log entries per minute',
             })}
             position="left"
             tickFormat={value => Number(value).toFixed(0)}

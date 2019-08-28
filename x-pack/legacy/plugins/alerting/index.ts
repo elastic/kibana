@@ -27,7 +27,7 @@ export function alerting(kibana: any) {
     config(Joi: Root) {
       return Joi.object()
         .keys({
-          enabled: Joi.boolean().default(true),
+          enabled: Joi.boolean().default(false),
         })
         .default();
     },
