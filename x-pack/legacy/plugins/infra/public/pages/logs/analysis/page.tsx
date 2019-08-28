@@ -27,6 +27,7 @@ export const AnalysisPage = () => {
     setupMlModule,
     isSettingUpMlModule,
     didSetupFail,
+    hasCompletedSetup,
   } = useLogAnalysisJobs({
     indexPattern: source ? source.configuration.logAlias : '',
     sourceId,
@@ -63,7 +64,7 @@ export const AnalysisPage = () => {
             indexPattern={source ? source.configuration.logAlias : ''}
           />
         ) : (
-          <AnalysisResultsContent sourceId={sourceId} />
+          <AnalysisResultsContent sourceId={sourceId} isFirstUse={hasCompletedSetup} />
         )}
       </ColumnarPage>
     </AnalysisPageProviders>
