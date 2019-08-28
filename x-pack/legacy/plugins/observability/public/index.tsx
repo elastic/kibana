@@ -3,5 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { KibanaCoreContext, KibanaCoreContextProvider, useKibanaCore } from './context/kibana_core';
+import { ExampleSharedComponent } from './components/example_shared_component';
 
-export { ExampleSharedComponent } from './components/example_shared_component';
+export { ExampleSharedComponent, KibanaCoreContext, KibanaCoreContextProvider, useKibanaCore };

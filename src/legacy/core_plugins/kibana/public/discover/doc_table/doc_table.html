@@ -1,7 +1,7 @@
 <div
   class="kbnDocTable__container"
   ng-if="hits.length"
-  ng-class="{ loading: searchSource.activeFetchCount > 0 }"
+  ng-class="{ loading: isLoading }"
 >
   <div ng-if="!infiniteScroll">
     <div class="kuiBar kbnDocTable__bar">
