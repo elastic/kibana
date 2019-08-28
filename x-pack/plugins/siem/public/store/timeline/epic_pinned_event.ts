@@ -80,6 +80,10 @@ export const epicPersistPinnedEvent = (
                   savedTimeline.version == null && response.timelineVersion != null
                     ? response.timelineVersion
                     : savedTimeline.version,
+                pinnedEventIds: {
+                  ...savedTimeline.pinnedEventIds,
+                  [get('payload.eventId', action)]: true,
+                },
                 pinnedEventsSaveObject: {
                   ...savedTimeline.pinnedEventsSaveObject,
                   [get('payload.eventId', action)]: response,
@@ -90,6 +94,7 @@ export const epicPersistPinnedEvent = (
               id: get('payload.id', action),
               timeline: {
                 ...savedTimeline,
+                pinnedEventIds: omit(get('payload.eventId', action), savedTimeline.pinnedEventIds),
                 pinnedEventsSaveObject: omit(
                   get('payload.eventId', action),
                   savedTimeline.pinnedEventsSaveObject
