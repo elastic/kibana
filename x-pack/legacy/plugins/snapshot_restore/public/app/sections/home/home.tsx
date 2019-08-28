@@ -22,7 +22,7 @@ import {
 
 import { BASE_PATH, Section } from '../../constants';
 import { useAppDependencies } from '../../index';
-import { breadcrumbService } from '../../services/navigation';
+import { breadcrumbService, docTitleService } from '../../services/navigation';
 
 import { RepositoryList } from './repository_list';
 import { SnapshotList } from './snapshot_list';
@@ -92,10 +92,11 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
     history.push(`${BASE_PATH}/${newSection}`);
   };
 
-  // Set breadcrumb
+  // Set breadcrumb and page title
   useEffect(() => {
-    breadcrumbService.setBreadcrumbs('home');
-  }, []);
+    breadcrumbService.setBreadcrumbs(section || 'home');
+    docTitleService.setTitle(section || 'home');
+  }, [section]);
 
   return (
     <EuiPageBody>
