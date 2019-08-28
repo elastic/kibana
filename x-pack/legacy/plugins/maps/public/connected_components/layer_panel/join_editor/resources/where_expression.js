@@ -14,7 +14,7 @@ import {
   EuiFormHelpText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { QueryBar } from 'plugins/data';
+import { SearchBar } from 'plugins/data';
 import { Storage } from 'ui/storage';
 
 const settings = chrome.getUiSettingsClient();
@@ -78,12 +78,14 @@ export class WhereExpression extends Component {
               defaultMessage="Use a query to narrow right source."
             />
           </EuiFormHelpText>
-          <QueryBar
+          <SearchBar
             uiSettings={settings}
-            query={whereQuery ? whereQuery : { language: settings.get('search:queryLanguage'), query: '' }}
-            onSubmit={this._onQueryChange}
-            appName="maps"
+            showFilterBar={false}
             showDatePicker={false}
+            showQueryInput={true}
+            query={whereQuery ? whereQuery : { language: settings.get('search:queryLanguage'), query: '' }}
+            onQuerySubmit={this._onQueryChange}
+            appName="maps"
             indexPatterns={[indexPattern]}
             store={localStorage}
             customSubmitButton={

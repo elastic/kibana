@@ -51,14 +51,14 @@ export const MetricsExplorerChartOptions = injectI18n(({ chartOptions, onChange,
       id: MetricsExplorerYAxisMode.auto,
       label: intl.formatMessage({
         id: 'xpack.infra.metricsExplorer.chartOptions.autoLabel',
-        defaultMessage: 'Automatic (Min to Max)',
+        defaultMessage: 'Automatic (min to max)',
       }),
     },
     {
       id: MetricsExplorerYAxisMode.fromZero,
       label: intl.formatMessage({
         id: 'xpack.infra.metricsExplorer.chartOptions.fromZeroLabel',
-        defaultMessage: 'From Zero (0 to Max)',
+        defaultMessage: 'From zero (0 to max)',
       }),
     },
   ];
@@ -122,7 +122,7 @@ export const MetricsExplorerChartOptions = injectI18n(({ chartOptions, onChange,
           compressed
           label={intl.formatMessage({
             id: 'xpack.infra.metricsExplorer.chartOptions.typeLabel',
-            defaultMessage: 'Chart Style',
+            defaultMessage: 'Chart style',
           })}
         >
           <EuiRadioGroup
@@ -135,7 +135,7 @@ export const MetricsExplorerChartOptions = injectI18n(({ chartOptions, onChange,
           compressed
           label={intl.formatMessage({
             id: 'xpack.infra.metricsExplorer.chartOptions.stackLabel',
-            defaultMessage: 'Stack Series',
+            defaultMessage: 'Stack series',
           })}
         >
           <EuiSwitch

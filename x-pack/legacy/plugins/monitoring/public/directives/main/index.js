@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { uiModules } from 'ui/modules';
 import template from './index.html';
+import { timefilter } from 'ui/timefilter';
 import { shortenPipelineHash } from '../../../common/formatting';
 import 'ui/directives/kbn_href';
 import { getSetupModeState } from '../../lib/setup_mode';
@@ -84,6 +85,8 @@ export class MonitoringMainController {
 
     Object.assign(this, options.attributes);
 
+    this.navName = `${this.name}-nav`;
+
     // set the section we're navigated in
     if (this.product) {
       this.inElasticsearch = this.product === 'elasticsearch';
@@ -108,6 +111,28 @@ export class MonitoringMainController {
         return this._kbnUrlService.changePath(`/logstash/pipelines/${this.pipelineId}/${this.pipelineHash}`);
       };
     }
+
+    this.datePicker = {
+      timeRange: timefilter.getTime(),
+      refreshInterval: timefilter.getRefreshInterval(),
+      onRefreshChange: ({ isPaused, refreshInterval }) => {
+        this.datePicker.refreshInterval = {
+          pause: isPaused,
+          value: refreshInterval,
+        };
+
+        timefilter.setRefreshInterval({
+          pause: isPaused,
+          value: refreshInterval ? refreshInterval : this.datePicker.refreshInterval.value
+        });
+      },
+      onTimeUpdate: ({ dateRange }) => {
+        this.datePicker.timeRange = {
+          ...dateRange
+        };
+        timefilter.setTime(dateRange);
+      }
+    };
   }
 
   // check whether to "highlight" a tab

@@ -6,6 +6,7 @@
 
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { EuiBetaBadge } from '@elastic/eui';
 import React from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { UICapabilities } from 'ui/capabilities';
@@ -43,11 +44,46 @@ export const LogsPage = injectUICapabilities(
       }),
       path: `${match.path}/stream`,
     };
+    const analysisBetaBadgeTitle = i18n.translate('xpack.infra.logs.index.analysisBetaBadgeTitle', {
+      defaultMessage: 'Analysis',
+    });
+    const analysisBetaBadgeLabel = i18n.translate('xpack.infra.logs.index.analysisBetaBadgeLabel', {
+      defaultMessage: 'Beta',
+    });
+    const analysisBetaBadgeTooltipContent = i18n.translate(
+      'xpack.infra.logs.index.analysisBetaBadgeTooltipContent',
+      {
+        defaultMessage:
+          'This feature is under active development. Extra functionality is coming, and some functionality may change.',
+      }
+    );
+    const analysisBetaBadge = (
+      <EuiBetaBadge
+        label={analysisBetaBadgeLabel}
+        aria-label={analysisBetaBadgeLabel}
+        title={analysisBetaBadgeTitle}
+        tooltipContent={analysisBetaBadgeTooltipContent}
+      />
+    );
     const analysisTab = {
-      title: intl.formatMessage({
-        id: 'xpack.infra.logs.index.analysisTabTitle',
-        defaultMessage: 'Analysis',
-      }),
+      title: (
+        <>
+          <span
+            style={{
+              display: 'inline-block',
+              position: 'relative',
+              top: '-4px',
+              marginRight: '5px',
+            }}
+          >
+            {intl.formatMessage({
+              id: 'xpack.infra.logs.index.analysisTabTitle',
+              defaultMessage: 'Analysis',
+            })}
+          </span>
+          {analysisBetaBadge}
+        </>
+      ),
       path: `${match.path}/analysis`,
     };
     const settingsTab = {

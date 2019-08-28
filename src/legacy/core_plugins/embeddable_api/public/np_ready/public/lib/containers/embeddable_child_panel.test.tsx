@@ -63,7 +63,7 @@ test('EmbeddableChildPanel renders an embeddable when it is done loading', async
       intl={null as any}
       container={container}
       embeddableId={newEmbeddable.id}
-      getActions={(() => undefined) as any}
+      getActions={() => Promise.resolve([])}
       getAllEmbeddableFactories={(() => []) as any}
       getEmbeddableFactory={(() => undefined) as any}
       notifications={{} as any}
@@ -102,7 +102,7 @@ test(`EmbeddableChildPanel renders an error message if the factory doesn't exist
       intl={null as any}
       container={container}
       embeddableId={'1'}
-      getActions={(() => undefined) as any}
+      getActions={() => Promise.resolve([])}
       getAllEmbeddableFactories={(() => []) as any}
       getEmbeddableFactory={(() => undefined) as any}
       notifications={{} as any}

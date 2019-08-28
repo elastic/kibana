@@ -11,17 +11,8 @@ jest.mock('../services/auto_follow_pattern_validators', () => ({
   validateLeaderIndexPattern: jest.fn(),
 }));
 
-jest.mock('../../../../../../../src/legacy/ui/public/index_patterns/_index_pattern', () => ({
-  IndexPattern: jest.fn(),
-}));
-
-jest.mock('../../../../../../../src/legacy/ui/public/index_patterns/index_patterns', () => ({
-  IndexPatterns: jest.fn(),
-}));
-
-jest.mock('../../../../../../../src/legacy/ui/public/index_patterns/index_patterns_api_client', () => ({
-  IndexPatternsApiClient: jest.fn(),
-}));
+jest.mock('ui/new_platform');
+jest.mock('ui/index_patterns');
 
 describe('<AutoFollowPatternForm state update', () => {
   describe('updateFormErrors()', () => {

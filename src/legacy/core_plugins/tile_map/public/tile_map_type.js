@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { supports } from 'ui/utils/supports';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { Status } from 'ui/vis/update_status';
-import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
+import { colorSchemas } from 'ui/vislib/components/color/truncated_colormaps';
 import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 
 import { createTileMapVisualization } from './tile_map_visualization';
@@ -63,7 +63,7 @@ export function createTileMapTypeDefinition(dependencies) {
     responseHandler: convertToGeoJson,
     editorConfig: {
       collections: {
-        colorSchemas: Object.values(truncatedColorMaps).map(({ id, label }) => ({ value: id, text: label })),
+        colorSchemas,
         legendPositions: [{
           value: 'bottomleft',
           text: i18n.translate('tileMap.vis.editorConfig.legendPositions.bottomLeftText', {

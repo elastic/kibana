@@ -45,7 +45,7 @@ export const FieldList = ({
         type: 'icon',
         color: 'danger',
         onClick: (field) => onRemoveField(field),
-      }]
+      }],
     });
   } else {
     extendedColumns = columns;

@@ -8,10 +8,10 @@ import * as Rx from 'rxjs';
 import { toArray, mergeMap } from 'rxjs/operators';
 import moment from 'moment-timezone';
 import { groupBy } from 'lodash';
+import { LevelLogger } from '../../../../server/lib';
 import { KbnServer, ConditionalHeaders } from '../../../../types';
-// @ts-ignore
+// @ts-ignore untyped module
 import { pdf } from './pdf';
-// @ts-ignore
 import { oncePerServer } from '../../../../server/lib/once_per_server';
 import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
 import { createLayout } from '../../../common/layouts';
@@ -48,6 +48,7 @@ function generatePdfObservableFn(server: KbnServer) {
   const captureConcurrency = 1;
 
   return function generatePdfObservable(
+    logger: LevelLogger,
     title: string,
     urls: string[],
     browserTimezone: string,
@@ -59,7 +60,7 @@ function generatePdfObservableFn(server: KbnServer) {
 
     const screenshots$ = Rx.from(urls).pipe(
       mergeMap(
-        url => screenshotsObservable({ url, conditionalHeaders, layout, browserTimezone }),
+        url => screenshotsObservable({ logger, url, conditionalHeaders, layout, browserTimezone }),
         captureConcurrency
       )
     );

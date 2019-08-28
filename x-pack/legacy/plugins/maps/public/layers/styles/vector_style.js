@@ -326,14 +326,22 @@ export class VectorStyle extends AbstractStyle {
 
         // "feature-state" data expressions are not supported with layout properties.
         // To work around this limitation, some styling values must fall back to geojson property values.
-        let supportsFeatureState = true;
-        let isScaled = true;
+        let supportsFeatureState;
+        let isScaled;
         if (styleName === 'iconSize'
           && this._descriptor.properties.symbol.options.symbolizeAs === SYMBOLIZE_AS_ICON) {
           supportsFeatureState = false;
+          isScaled = true;
         } else if (styleName === 'iconOrientation') {
           supportsFeatureState = false;
           isScaled = false;
+        } else if ((styleName === 'fillColor' || styleName === 'lineColor')
+          && options.useCustomColorRamp) {
+          supportsFeatureState = true;
+          isScaled = false;
+        } else {
+          supportsFeatureState = true;
+          isScaled = true;
         }
 
         return {
@@ -417,9 +425,20 @@ export class VectorStyle extends AbstractStyle {
     return hasGeoJsonProperties;
   }
 
-  _getMBDataDrivenColor({ fieldName, color }) {
-    const colorStops = getColorRampStops(color);
+  _getMBDataDrivenColor({ fieldName, colorStops, isSteps }) {
     const targetName = VectorStyle.getComputedFieldName(fieldName);
+
+    if (isSteps) {
+      const firstStopValue = colorStops[0];
+      const lessThenFirstStopValue = firstStopValue - 1;
+      return [
+        'step',
+        ['coalesce', ['feature-state', targetName], lessThenFirstStopValue],
+        'rgba(0,0,0,0)', // MB will assign the base value to any features that is below the first stop value
+        ...colorStops
+      ];
+    }
+
     return [
       'interpolate',
       ['linear'],
@@ -448,14 +467,31 @@ export class VectorStyle extends AbstractStyle {
 
     const isDynamicConfigComplete = _.has(styleDescriptor, 'options.field.name')
       && _.has(styleDescriptor, 'options.color');
-    if (isDynamicConfigComplete) {
-      return this._getMBDataDrivenColor({
-        fieldName: styleDescriptor.options.field.name,
-        color: styleDescriptor.options.color,
-      });
+    if (!isDynamicConfigComplete) {
+      return null;
     }
 
-    return null;
+    if (styleDescriptor.options.useCustomColorRamp &&
+      (!styleDescriptor.options.customColorRamp ||
+      !styleDescriptor.options.customColorRamp.length)) {
+      return null;
+    }
+
+    return this._getMBDataDrivenColor({
+      fieldName: styleDescriptor.options.field.name,
+      colorStops: this._getMBColorStops(styleDescriptor),
+      isSteps: styleDescriptor.options.useCustomColorRamp,
+    });
+  }
+
+  _getMBColorStops(styleDescriptor) {
+    if (styleDescriptor.options.useCustomColorRamp) {
+      return styleDescriptor.options.customColorRamp.reduce((accumulatedStops, nextStop) => {
+        return [...accumulatedStops, nextStop.stop, nextStop.color];
+      }, []);
+    }
+
+    return getColorRampStops(styleDescriptor.options.color);
   }
 
   _isSizeDynamicConfigComplete(styleDescriptor) {

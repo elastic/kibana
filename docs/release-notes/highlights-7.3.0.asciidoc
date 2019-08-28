@@ -135,7 +135,7 @@ element by 10 pixels.  To nudge an element by 1 pixel, use Shift + an arrow key.
 ==== Documentation
 
 Check out the 
-updated <<canvas-getting-started, Getting started guide>>, the new introduction to <<canvas-workpad, Canvas workpads>>, 
+updated <<canvas-tutorial, Getting started guide>>, the new introduction to <<create-canvas-workpad, Canvas workpads>>, 
 and the improved <<canvas-function-reference, Canvas function reference>>. 
 
 [float]

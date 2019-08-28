@@ -23,7 +23,7 @@ import { Subscription } from 'rxjs';
 import { CoreStart } from '../../../../../../../../core/public';
 import { buildContextMenuForActions } from '../context_menu_actions';
 
-import { CONTEXT_MENU_TRIGGER } from '../triggers';
+import { CONTEXT_MENU_TRIGGER, PANEL_BADGE_TRIGGER } from '../triggers';
 import { IEmbeddable } from '../embeddables/i_embeddable';
 import {
   ViewMode,
@@ -58,6 +58,7 @@ interface State {
   viewMode: ViewMode;
   hidePanelTitles: boolean;
   closeContextMenu: boolean;
+  badges: Action[];
 }
 
 export class EmbeddablePanel extends React.Component<Props, State> {
@@ -80,9 +81,22 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       viewMode,
       hidePanelTitles,
       closeContextMenu: false,
+      badges: [],
     };
 
     this.embeddableRoot = React.createRef();
+  }
+
+  private async refreshBadges() {
+    const badges = await this.props.getActions(PANEL_BADGE_TRIGGER, {
+      embeddable: this.props.embeddable,
+    });
+
+    if (this.mounted) {
+      this.setState({
+        badges,
+      });
+    }
   }
 
   public componentWillMount() {
@@ -95,6 +109,8 @@ export class EmbeddablePanel extends React.Component<Props, State> {
         this.setState({
           viewMode: embeddable.getInput().viewMode ? embeddable.getInput().viewMode : ViewMode.EDIT,
         });
+
+        this.refreshBadges();
       }
     });
 
@@ -104,6 +120,8 @@ export class EmbeddablePanel extends React.Component<Props, State> {
           this.setState({
             hidePanelTitles: Boolean(parent.getInput().hidePanelTitles),
           });
+
+          this.refreshBadges();
         }
       });
     }
@@ -144,6 +162,8 @@ export class EmbeddablePanel extends React.Component<Props, State> {
           isViewMode={viewOnlyMode}
           closeContextMenu={this.state.closeContextMenu}
           title={title}
+          badges={this.state.badges}
+          embeddable={this.props.embeddable}
         />
         <div className="embPanel__content" ref={this.embeddableRoot} />
       </EuiPanel>

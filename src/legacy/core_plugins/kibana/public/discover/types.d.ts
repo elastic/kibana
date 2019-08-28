@@ -18,6 +18,7 @@
  */
 
 import { SearchSource } from 'ui/courier';
+import { SortOrder } from './doc_table/components/table_header/helpers';
 
 export interface SavedSearch {
   readonly id: string;
@@ -25,7 +26,7 @@ export interface SavedSearch {
   searchSource: SearchSource;
   description?: string;
   columns: string[];
-  sort: string[];
+  sort: SortOrder[];
   destroy: () => void;
 }
 export interface SavedSearchLoader {

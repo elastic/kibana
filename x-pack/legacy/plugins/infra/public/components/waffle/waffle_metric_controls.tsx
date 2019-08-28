@@ -35,22 +35,32 @@ const getOptions = (
   if (!OPTIONS) {
     const CPUUsage = intl.formatMessage({
       id: 'xpack.infra.waffle.metricOptions.cpuUsageText',
-      defaultMessage: 'CPU Usage',
+      defaultMessage: 'CPU usage',
     });
 
     const MemoryUsage = intl.formatMessage({
       id: 'xpack.infra.waffle.metricOptions.memoryUsageText',
-      defaultMessage: 'Memory Usage',
+      defaultMessage: 'Memory usage',
     });
 
     const InboundTraffic = intl.formatMessage({
       id: 'xpack.infra.waffle.metricOptions.inboundTrafficText',
-      defaultMessage: 'Inbound Traffic',
+      defaultMessage: 'Inbound traffic',
     });
 
     const OutboundTraffic = intl.formatMessage({
       id: 'xpack.infra.waffle.metricOptions.outboundTrafficText',
-      defaultMessage: 'Outbound Traffic',
+      defaultMessage: 'Outbound traffic',
+    });
+
+    const LogRate = intl.formatMessage({
+      id: 'xpack.infra.waffle.metricOptions.hostLogRateText',
+      defaultMessage: 'Log rate',
+    });
+
+    const Load = intl.formatMessage({
+      id: 'xpack.infra.waffle.metricOptions.loadText',
+      defaultMessage: 'Load',
     });
 
     OPTIONS = {
@@ -100,10 +110,7 @@ const getOptions = (
           value: InfraSnapshotMetricType.memory,
         },
         {
-          text: intl.formatMessage({
-            id: 'xpack.infra.waffle.metricOptions.loadText',
-            defaultMessage: 'Load',
-          }),
+          text: Load,
           value: InfraSnapshotMetricType.load,
         },
         {
@@ -115,10 +122,7 @@ const getOptions = (
           value: InfraSnapshotMetricType.tx,
         },
         {
-          text: intl.formatMessage({
-            id: 'xpack.infra.waffle.metricOptions.hostLogRateText',
-            defaultMessage: 'Log Rate',
-          }),
+          text: LogRate,
           value: InfraSnapshotMetricType.logRate,
         },
       ],
