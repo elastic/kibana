@@ -54,7 +54,6 @@ export const lens: LegacyPluginInitializer = kibana => {
       server.plugins.xpack_main.registerFeature({
         id: PLUGIN_ID,
         name: NOT_INTERNATIONALIZED_PRODUCT_NAME,
-        navLinkId: PLUGIN_ID,
         app: [PLUGIN_ID, 'kibana'],
         catalogue: [PLUGIN_ID],
         privileges: {
@@ -65,7 +64,7 @@ export const lens: LegacyPluginInitializer = kibana => {
               all: [],
               read: [],
             },
-            ui: ['save', 'show', 'delete'],
+            ui: ['save', 'show'],
           },
           read: {
             api: [PLUGIN_ID],
