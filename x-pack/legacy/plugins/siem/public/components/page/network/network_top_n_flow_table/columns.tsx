@@ -80,7 +80,7 @@ export const getNetworkTopNFlowColumns = (
 
             {geo && (
               <>
-                {` `}
+                {' '}
                 <CountryFlag countryCode={geo} /> {geo}
               </>
             )}
