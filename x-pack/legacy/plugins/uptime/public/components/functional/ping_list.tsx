@@ -20,21 +20,20 @@ import {
   EuiToolTip,
   EuiFormRow,
   EuiButtonIcon,
-  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { get, has } from 'lodash';
+import { get } from 'lodash';
 import moment from 'moment';
 import React, { Fragment, useEffect, useState } from 'react';
+// @ts-ignore formatNumber
+import { formatNumber } from '@elastic/eui/lib/services/format';
 import { Ping, PingResults } from '../../../common/graphql/types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../lib/helper';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { pingsQuery } from '../../queries';
 import { LocationName } from './location_name';
 import { Criteria, Pagination } from './monitor_list';
-// @ts-ignore formatNumber
-import { formatNumber } from '@elastic/eui/lib/services/format';
 
 interface PingListQueryResult {
   allPings?: PingResults;
@@ -84,20 +83,14 @@ export const PingListComponent = ({
         const contentBytes = body.content_bytes || 0;
         const bodyBytes = body.bytes || 0;
 
-        const bodySizeStatement = body.bytes ? (
-          <EuiText>{`Body size: ${formatNumber(body.bytes, '0b')}.`}</EuiText>
-        ) : null;
+        const truncatedText =
+          contentBytes > 0 && contentBytes < bodyBytes
+            ? `Showing first ${contentBytes} bytes.`
+            : null;
+        const bodySizeText =
+          bodyBytes > 0 ? `Body size is ${formatNumber(bodyBytes, '0b')}.` : null;
+        const combinedText = [truncatedText, bodySizeText].filter(s => s).join(' ');
 
-        const bodyTruncated =
-          contentBytes > 0 && contentBytes < bodyBytes ? (
-            // We intentionally don't round this number since it makes sense to be exact about byte counts.
-            // Seeing that we're showing the first megabyte of one megabyte is just irratating.
-            <EuiCallOut>
-              {`Displayed body content below is truncated. First ${formatNumber(
-                contentBytes
-              )} bytes shown.`}
-            </EuiCallOut>
-          ) : null;
         const bodyExcerpt = body.content ? (
           <EuiCodeBlock>{body.content}</EuiCodeBlock>
         ) : (
@@ -106,8 +99,7 @@ export const PingListComponent = ({
 
         const contents = (
           <Fragment>
-            {bodySizeStatement}
-            {bodyTruncated}
+            <EuiText>{combinedText}</EuiText>
             {bodyExcerpt}
           </Fragment>
         );
