@@ -161,8 +161,8 @@ const timelionPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPl
             description:
               'The URL should be in the form of https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite',
           }),
-          value: (server: any) => {
-            const urls = server.config().get('timelion.graphiteUrls');
+          value: (server: Legacy.Server) => {
+            const urls = server.config().get('timelion.graphiteUrls') as string[];
             if (urls.length === 0) {
               return null;
             } else {
@@ -175,7 +175,7 @@ const timelionPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPl
             values: { experimentalLabel: `<em>[${experimentalLabel}]</em>` },
           }),
           type: 'select',
-          options: (server: any) => server.config().get('timelion.graphiteUrls'),
+          options: (server: Legacy.Server) => server.config().get('timelion.graphiteUrls'),
           category: ['timelion'],
         },
         'timelion:quandl.key': {
