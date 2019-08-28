@@ -16,12 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { SavedObjectsClientContract } from 'src/core/server';
 import { SavedObject } from '../types';
 import { SavedObjectsImportError } from './types';
 
-export function extractErrors(
+export async function extractErrors(
   savedObjectResults: SavedObject[],
-  savedObjectsToImport: SavedObject[]
+  savedObjectsToImport: SavedObject[],
+  savedObjectsClient?: SavedObjectsClientContract
 ) {
   const errors: SavedObjectsImportError[] = [];
   const originalSavedObjectsMap = new Map<string, SavedObject>();
@@ -37,11 +39,23 @@ export function extractErrors(
         originalSavedObject &&
         originalSavedObject.attributes &&
         originalSavedObject.attributes.title;
+
       if (savedObject.error.statusCode === 409) {
+        // find the correct title of the saved object that conflicts, in order to use it in the message box
+        let realTitle = title;
+
+        if (savedObjectsClient) {
+          try {
+            const resp = await savedObjectsClient.get(savedObject.type, savedObject.id);
+            realTitle = resp.attributes.title;
+          } catch (e) {
+            // if something goes wrong, just use the "title" (new title of the object that is going to be imported)
+          }
+        }
         errors.push({
           id: savedObject.id,
           type: savedObject.type,
-          title,
+          title: realTitle,
           error: {
             type: 'conflict',
           },

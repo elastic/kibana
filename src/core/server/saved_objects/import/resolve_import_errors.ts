@@ -89,20 +89,18 @@ export async function resolveImportErrors({
       overwrite: true,
       namespace,
     });
-    errorAccumulator = [
-      ...errorAccumulator,
-      ...extractErrors(bulkCreateResult.saved_objects, objectsToOverwrite),
-    ];
+
+    const extractErrs = await extractErrors(bulkCreateResult.saved_objects, objectsToOverwrite);
+    errorAccumulator = [...errorAccumulator, ...extractErrs];
     successCount += bulkCreateResult.saved_objects.filter(obj => !obj.error).length;
   }
   if (objectsToNotOverwrite.length) {
     const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToNotOverwrite, {
       namespace,
     });
-    errorAccumulator = [
-      ...errorAccumulator,
-      ...extractErrors(bulkCreateResult.saved_objects, objectsToNotOverwrite),
-    ];
+
+    const extractErrs = await extractErrors(bulkCreateResult.saved_objects, objectsToNotOverwrite);
+    errorAccumulator = [...errorAccumulator, ...extractErrs];
     successCount += bulkCreateResult.saved_objects.filter(obj => !obj.error).length;
   }
 
