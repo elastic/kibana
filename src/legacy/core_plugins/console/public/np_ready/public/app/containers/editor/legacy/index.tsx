@@ -27,9 +27,9 @@ import { initializeInput } from '../../../../../../quarantined/src/input';
 // @ts-ignore
 import { initializeOutput } from '../../../../../../quarantined/src/output';
 // @ts-ignore
-import { ConsoleMenu } from '../../../../../../quarantined/src/components/console_menu';
-// @ts-ignore
 import init from '../../../../../../quarantined/src/app';
+
+import { ConsoleMenu } from '../../../components/console_menu';
 
 import { autoIndent, getDocumentation } from './console_menu_actions';
 import { Panel, PanelContainer } from '../../../components/split_panel';

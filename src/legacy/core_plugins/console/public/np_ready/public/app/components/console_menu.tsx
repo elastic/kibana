@@ -17,16 +17,25 @@
  * under the License.
  */
 
-import PropTypes from 'prop-types';
-
 import React, { Component } from 'react';
 
 import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export class ConsoleMenu extends Component {
-  constructor(props) {
+interface Props {
+  getCurl: (cb: (text: string) => void) => void;
+  getDocumentation: () => Promise<string | null>;
+  autoIndent: (ev: React.MouseEvent) => void;
+}
+
+interface State {
+  isPopoverOpen: boolean;
+  curlCode: string;
+}
+
+export class ConsoleMenu extends Component<Props, State> {
+  constructor(props: Props) {
     super(props);
 
     this.state = {
@@ -46,7 +55,7 @@ export class ConsoleMenu extends Component {
     this.copyText(this.state.curlCode);
   }
 
-  copyText(text) {
+  copyText(text: string) {
     const textField = document.createElement('textarea');
     textField.innerText = text;
     document.body.appendChild(textField);
@@ -76,11 +85,18 @@ export class ConsoleMenu extends Component {
     window.open(documentation, '_blank');
   };
 
+  // Using `any` here per this issue: https://github.com/elastic/eui/issues/2265
+  autoIndent: any = (event: React.MouseEvent) => {
+    this.closePopover();
+    this.props.autoIndent(event);
+  };
+
   render() {
     const button = (
       <EuiButtonIcon
         iconType="wrench"
         onClick={this.onButtonClick}
+        // @ts-ignore
         aria-label={
           <FormattedMessage
             id="console.requestOptionsButtonAriaLabel"
@@ -116,13 +132,7 @@ export class ConsoleMenu extends Component {
           defaultMessage="Open documentation"
         />
       </EuiContextMenuItem>,
-      <EuiContextMenuItem
-        key="Auto indent"
-        onClick={event => {
-          this.closePopover();
-          this.props.autoIndent(event);
-        }}
-      >
+      <EuiContextMenuItem key="Auto indent" onClick={this.autoIndent}>
         <FormattedMessage
           id="console.requestOptions.autoIndentButtonLabel"
           defaultMessage="Auto indent"
@@ -146,9 +156,3 @@ export class ConsoleMenu extends Component {
     );
   }
 }
-
-ConsoleMenu.propTypes = {
-  getCurl: PropTypes.func.isRequired,
-  getDocumentation: PropTypes.func.isRequired,
-  autoIndent: PropTypes.func.isRequired,
-};
