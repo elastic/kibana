@@ -21,6 +21,7 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import angular from 'angular';
+import { Subscription } from 'rxjs';
 import moment from 'moment';
 import chrome from 'ui/chrome';
 import dateMath from '@elastic/datemath';
@@ -209,8 +210,7 @@ function discoverController(
     requests: new RequestAdapter()
   };
 
-  let filterUpdateSubscription;
-  let filterFetchSubscription;
+  const subscriptions = new Subscription();
 
   timefilter.disableTimeRangeSelector();
   timefilter.disableAutoRefreshSelector();
@@ -236,8 +236,7 @@ function discoverController(
   const savedSearch = $route.current.locals.savedSearch;
   $scope.$on('$destroy', () => {
     savedSearch.destroy();
-    if (filterFetchSubscription) filterFetchSubscription.unsubscribe();
-    if (filterUpdateSubscription) filterUpdateSubscription.unsubscribe();
+    subscriptions.unsubscribe();
   });
 
   const $appStatus = $scope.appStatus = this.appStatus = {
@@ -564,10 +563,19 @@ function discoverController(
 
     $scope.updateDataSource()
       .then(function () {
-        $scope.$listen(timefilter, 'autoRefreshFetch', $scope.fetch);
-        $scope.$listen(timefilter, 'refreshIntervalUpdate', $scope.updateRefreshInterval);
-        $scope.$listen(timefilter, 'timeUpdate', $scope.updateTime);
-        $scope.$listen(timefilter, 'fetch', $scope.fetch);
+        subscriptions.add(subscribeWithScope($scope, timefilter.getAutoRefreshFetch$(), {
+          next: $scope.fetch
+        }));
+
+        subscriptions.add(subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
+          next: $scope.updateRefreshInterval
+        }));
+        subscriptions.add(subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
+          next: $scope.updateTime
+        }));
+        subscriptions.add(subscribeWithScope($scope, timefilter.getFetch$(), {
+          next: $scope.fetch
+        }));
 
         $scope.$watchCollection('state.sort', function (sort) {
           if (!sort) return;
@@ -580,19 +588,19 @@ function discoverController(
         });
 
         // update data source when filters update
-        filterUpdateSubscription = subscribeWithScope($scope, queryFilter.getUpdates$(), {
+        subscriptions.add(subscribeWithScope($scope, queryFilter.getUpdates$(), {
           next: () => {
             $scope.filters = queryFilter.getFilters();
             $scope.updateDataSource().then(function () {
               $state.save();
             });
           }
-        });
+        }));
 
         // fetch data when filters fire fetch event
-        filterFetchSubscription = subscribeWithScope($scope, queryFilter.getUpdates$(), {
+        subscriptions.add(subscribeWithScope($scope, queryFilter.getUpdates$(), {
           next: $scope.fetch
-        });
+        }));
 
         // update data source when hitting forward/back and the query changes
         $scope.$listen($state, 'fetch_with_changes', function (diff) {
@@ -924,7 +932,7 @@ function discoverController(
   };
 
   $scope.onSavedQueryUpdated = savedQuery => {
-    $scope.savedQuery = savedQuery;
+    $scope.savedQuery = { ...savedQuery };
   };
 
   $scope.onClearSavedQuery = () => {

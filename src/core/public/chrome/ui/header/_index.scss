@@ -1,13 +1,14 @@
 @import '@elastic/eui/src/components/header/variables';
+@import '@elastic/eui/src/components/nav_drawer/variables';
 
-.header-global-wrapper {
+.chrHeaderWrapper {
   width: 100%;
   position: fixed;
   top: 0;
   z-index: 10;
 }
 
-.header-global-wrapper + .app-wrapper:not(.hidden-chrome) {
+.chrHeaderWrapper ~ .app-wrapper:not(.hidden-chrome) {
   top: $euiHeaderChildSize;
   left: $euiHeaderChildSize;
 
@@ -19,13 +20,6 @@
   }
 }
 
-// Mobile header is smaller
-@include euiBreakpoint('xs', 's') {
-  .header-global-wrapper + .app-wrapper:not(.hidden-chrome) {
-    left: 0;
-  }
-}
-
 .chrHeaderHelpMenu__version {
   text-transform: none;
 }
@@ -33,4 +27,21 @@
 .chrHeaderBadge__wrapper {
   align-self: center;
   margin-right: $euiSize;
+}
+
+// Mobile header is smaller
+@include euiBreakpoint('xs', 's') {
+  .chrHeaderWrapper ~ .app-wrapper:not(.hidden-chrome) {
+    left: 0;
+  }
+}
+
+@include euiBreakpoint('xl') {
+  .chrHeaderWrapper--navIsLocked {
+    ~ .app-wrapper:not(.hidden-chrome) {
+      // Shrink the content from the left so it's no longer overlapped by the nav drawer (ALWAYS)
+      left: $euiNavDrawerWidthExpanded !important; // sass-lint:disable-line no-important
+      transition: left $euiAnimSpeedFast $euiAnimSlightResistance;
+    }
+  }
 }
