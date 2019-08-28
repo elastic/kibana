@@ -116,3 +116,54 @@ Array [
   </div>,
 ]
 `;
+
+exports[`ExplainExportersCloud should explain about xpack.monitoring.exporters setting in a cloud environment 1`] = `
+Array [
+  <h2
+    class="euiTitle euiTitle--large"
+  >
+    Your monitoring data is not available here.
+  </h2>,
+  <span
+    class="euiTextColor euiTextColor--subdued"
+  >
+    <div
+      class="euiSpacer euiSpacer--l"
+    />
+    <div
+      class="euiText euiText--medium"
+    >
+      <p>
+        Please return to your 
+        <a
+          class="euiLink euiLink--primary"
+          href="https://cloud.elastic.co/deployments"
+          rel="noopener"
+          target="_blank"
+        >
+          cloud dashboard.
+        </a>
+         For more information on Monitoring in Elastic Cloud, please see 
+        <a
+          class="euiLink euiLink--primary"
+          href="https://www.elastic.co/guide/en/cloud/current/ec-enable-monitoring.html"
+          rel="noopener"
+          target="_blank"
+        >
+          the documentation.
+        </a>
+      </p>
+    </div>
+  </span>,
+  <hr
+    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
+  />,
+  <div
+    class="euiText euiText--medium eui-textLeft"
+  >
+    <p>
+      In Elastic Cloud, your monitoring data is stored in your dedicated monitoring cluster.
+    </p>
+  </div>,
+]
+`;
