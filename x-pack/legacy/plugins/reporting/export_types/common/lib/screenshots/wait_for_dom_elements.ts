@@ -5,14 +5,14 @@
  */
 
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers/chromium/driver';
-import { LevelLogger as Logger } from '../../../../server/lib';
+import { LevelLogger } from '../../../../server/lib';
 import { LayoutInstance } from '../../layouts/layout';
 
 export const waitForElementsToBeInDOM = async (
   browser: HeadlessBrowser,
   itemsCount: number,
   layout: LayoutInstance,
-  logger: Logger
+  logger: LevelLogger
 ): Promise<number> => {
   logger.debug(`waiting for ${itemsCount} rendered elements to be in the DOM`);
 
