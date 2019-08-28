@@ -16,7 +16,7 @@ import {
 } from '../../model';
 import {
   RepositoryGitStatusReservedField,
-  RepositoryLspIndexStatusReservedField,
+  RepositoryIndexStatusReservedField,
   RepositoryReservedField,
 } from '../indexer/schema';
 import { EsClient } from '../lib/esqueue';
@@ -100,7 +100,7 @@ const createGetStub = (
   stub.onSecondCall().returns(
     Promise.resolve({
       _source: {
-        [RepositoryLspIndexStatusReservedField]: lspIndexStatus,
+        [RepositoryIndexStatusReservedField]: lspIndexStatus,
       },
     })
   );

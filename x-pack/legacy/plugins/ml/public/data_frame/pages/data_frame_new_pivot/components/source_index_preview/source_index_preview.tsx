@@ -352,14 +352,14 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
         <EuiFlexItem grow={false}>
           <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem>
           <EuiFlexGroup alignItems="center" gutterSize="xs">
-            <EuiFlexItem>
+            <EuiFlexItem style={{ textAlign: 'right' }}>
               {docFieldsCount > MAX_COLUMNS && (
                 <EuiText size="s">
                   {i18n.translate('xpack.ml.dataframe.sourceIndexPreview.fieldSelection', {
                     defaultMessage:
-                      'showing {selectedFieldsLength, number} of {docFieldsCount, number} {docFieldsCount, plural, one {field} other {fields}}',
+                      '{selectedFieldsLength, number} of {docFieldsCount, number} {docFieldsCount, plural, one {field} other {fields}} selected',
                     values: { selectedFieldsLength: selectedFields.length, docFieldsCount },
                   })}
                 </EuiText>

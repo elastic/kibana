@@ -130,11 +130,13 @@ export default function({ getService }: FtrProviderContext) {
             'canvas',
             'code',
             'infrastructure',
+            'lens',
             'logs',
             'maps',
             'uptime',
             'siem',
-            'lens',
+            'alerting',
+            'actions',
           ].sort()
         );
       });

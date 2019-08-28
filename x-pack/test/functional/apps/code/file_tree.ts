@@ -17,7 +17,8 @@ export default function exploreRepositoryFunctionalTests({
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
-  describe('File Tree', function() {
+  // FLAKY: https://github.com/elastic/kibana/issues/43492
+  describe.skip('File Tree', function() {
     this.tags('smoke');
     const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
 
@@ -41,9 +42,9 @@ export default function exploreRepositoryFunctionalTests({
         );
       });
 
-      // Wait for the index to start.
+      // Wait for the index to end.
       await retry.try(async () => {
-        expect(await testSubjects.exists('repositoryIndexOngoing')).to.be(true);
+        expect(await testSubjects.exists('repositoryIndexDone')).to.be(true);
       });
     });
 

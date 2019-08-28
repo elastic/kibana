@@ -27,10 +27,6 @@
   flex: 1;
 }
 
-.kbnGlobalNav.kbnGlobalNav-isOpen + .app-wrapper .gphGraph__container {
-  width: calc(100% - #{$kbnGlobalNavOpenWidth}); /* 1 */
-}
-
 .gphGraph {
   // SASSTODO: Can't definitively change child class
   // because it's not easy to tell what's a class and what's

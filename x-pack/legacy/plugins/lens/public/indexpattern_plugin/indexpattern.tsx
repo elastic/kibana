@@ -12,11 +12,9 @@ import { Storage } from 'ui/storage';
 import {
   DatasourceDimensionPanelProps,
   DatasourceDataPanelProps,
-  DimensionPriority,
   Operation,
   DatasourceLayerPanelProps,
 } from '../types';
-import { Query } from '../../../../../../src/legacy/core_plugins/data/public/query';
 import { getIndexPatterns } from './loader';
 import { toExpression } from './to_expression';
 import { IndexPatternDimensionPanel } from './dimension_panel';
@@ -29,74 +27,10 @@ import {
 
 import { isDraggedField } from './utils';
 import { LayerPanel } from './layerpanel';
-import { Datasource, DataType } from '..';
+import { IndexPatternColumn } from './operations';
+import { Datasource } from '..';
 
-export type OperationType = IndexPatternColumn['operationType'];
-
-export type IndexPatternColumn =
-  | DateHistogramIndexPatternColumn
-  | TermsIndexPatternColumn
-  | SumIndexPatternColumn
-  | AvgIndexPatternColumn
-  | MinIndexPatternColumn
-  | MaxIndexPatternColumn
-  | CountIndexPatternColumn
-  | FilterRatioIndexPatternColumn;
-
-export interface BaseIndexPatternColumn {
-  label: string;
-  dataType: DataType;
-  isBucketed: boolean;
-
-  // Private
-  operationType: OperationType;
-  suggestedPriority?: DimensionPriority;
-}
-
-type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
-type ParameterlessIndexPatternColumn<
-  TOperationType extends OperationType,
-  TBase extends BaseIndexPatternColumn = FieldBasedIndexPatternColumn
-> = Omit<TBase, 'operationType'> & { operationType: TOperationType };
-
-export interface FieldBasedIndexPatternColumn extends BaseIndexPatternColumn {
-  sourceField: string;
-  suggestedPriority?: DimensionPriority;
-}
-
-export interface DateHistogramIndexPatternColumn extends FieldBasedIndexPatternColumn {
-  operationType: 'date_histogram';
-  params: {
-    interval: string;
-    timeZone?: string;
-  };
-}
-
-export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
-  operationType: 'terms';
-  params: {
-    size: number;
-    orderBy: { type: 'alphabetical' } | { type: 'column'; columnId: string };
-    orderDirection: 'asc' | 'desc';
-  };
-}
-
-export interface FilterRatioIndexPatternColumn extends BaseIndexPatternColumn {
-  operationType: 'filter_ratio';
-  params: {
-    numerator: Query;
-    denominator: Query;
-  };
-}
-
-export type CountIndexPatternColumn = ParameterlessIndexPatternColumn<
-  'count',
-  BaseIndexPatternColumn
->;
-export type SumIndexPatternColumn = ParameterlessIndexPatternColumn<'sum'>;
-export type AvgIndexPatternColumn = ParameterlessIndexPatternColumn<'avg'>;
-export type MinIndexPatternColumn = ParameterlessIndexPatternColumn<'min'>;
-export type MaxIndexPatternColumn = ParameterlessIndexPatternColumn<'max'>;
+export { OperationType, IndexPatternColumn } from './operations';
 
 export interface IndexPattern {
   id: string;
@@ -147,11 +81,13 @@ export type IndexPatternPrivateState = IndexPatternPersistedState & {
 };
 
 export function columnToOperation(column: IndexPatternColumn): Operation {
-  const { dataType, label, isBucketed } = column;
+  const { dataType, label, isBucketed, isMetric, scale } = column;
   return {
     label,
     dataType,
     isBucketed,
+    scale,
+    isMetric,
   };
 }
 
@@ -305,7 +241,7 @@ export function getIndexPatternDatasource({
             <I18nProvider>
               <IndexPatternDimensionPanel
                 state={state}
-                setState={newState => setState(newState)}
+                setState={setState}
                 uiSettings={uiSettings}
                 storage={storage}
                 layerId={props.layerId}
@@ -317,10 +253,7 @@ export function getIndexPatternDatasource({
         },
 
         renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps) => {
-          render(
-            <LayerPanel state={state} setState={newState => setState(newState)} {...props} />,
-            domElement
-          );
+          render(<LayerPanel state={state} setState={setState} {...props} />, domElement);
         },
 
         removeColumnInTableSpec: (columnId: string) => {

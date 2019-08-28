@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -21,7 +21,8 @@ import {
 import { BASE_PATH } from '../../../common/constants';
 import { idxMgmtDocumentationLink } from '../../lib/documentation_links';
 import { IndexList } from './index_list';
-import { TemplatesList } from './templates_list';
+import { TemplateList } from './template_list';
+import { setBreadcrumbs } from '../../services/set_breadcrumbs';
 
 type Section = 'indices' | 'templates';
 
@@ -54,6 +55,10 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
   const onSectionChange = (newSection: Section) => {
     history.push(`${BASE_PATH}${newSection}`);
   };
+
+  useEffect(() => {
+    setBreadcrumbs();
+  }, []);
 
   return (
     <EuiPageBody>
@@ -92,7 +97,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
               onClick={() => onSectionChange(tab.id)}
               isSelected={tab.id === section}
               key={tab.id}
-              data-test-subj="tab"
+              data-test-subj={`${tab.id}Tab`}
             >
               {tab.name}
             </EuiTab>
@@ -104,7 +109,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         <Switch>
           <Route exact path={`${BASE_PATH}indices`} component={IndexList} />
           <Route exact path={`${BASE_PATH}indices/filter/:filter?`} component={IndexList} />
-          <Route exact path={`${BASE_PATH}templates/:templateName*`} component={TemplatesList} />
+          <Route exact path={`${BASE_PATH}templates/:templateName*`} component={TemplateList} />
         </Switch>
       </EuiPageContent>
     </EuiPageBody>

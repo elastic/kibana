@@ -54,8 +54,10 @@ import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 import { npStart } from 'ui/new_platform';
+import { setup as data } from '../../../../../core_plugins/data/public/legacy';
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 
+const { savedQueryService } = data.search.services;
 
 uiRoutes
   .when(VisualizeConstants.CREATE_PATH, {
@@ -334,6 +336,12 @@ function VisEditor(
     }
   });
 
+  $scope.showSaveQuery = capabilities.get().visualize.saveQuery;
+
+  $scope.$watch(() => capabilities.get().visualize.saveQuery, (newCapability) => {
+    $scope.showSaveQuery = newCapability;
+  });
+
   function init() {
     // export some objects
     $scope.savedVis = savedVis;
@@ -463,6 +471,67 @@ function VisEditor(
       value: refreshInterval ? refreshInterval : $scope.refreshInterval.value
     });
   };
+
+  $scope.onQuerySaved = savedQuery => {
+    $scope.savedQuery = savedQuery;
+  };
+
+  $scope.onSavedQueryUpdated = savedQuery => {
+    $scope.savedQuery = savedQuery;
+  };
+
+  $scope.onClearSavedQuery = () => {
+    delete $scope.savedQuery;
+    delete $state.savedQuery;
+    $state.query = {
+      query: '',
+      language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
+    };
+    queryFilter.removeAll();
+    $state.save();
+    $scope.fetch();
+  };
+
+  const updateStateFromSavedQuery = (savedQuery) => {
+    $state.query = savedQuery.attributes.query;
+    queryFilter.setFilters(savedQuery.attributes.filters || []);
+
+    if (savedQuery.attributes.timefilter) {
+      timefilter.setTime({
+        from: savedQuery.attributes.timefilter.from,
+        to: savedQuery.attributes.timefilter.to,
+      });
+      if (savedQuery.attributes.timefilter.refreshInterval) {
+        timefilter.setRefreshInterval(savedQuery.attributes.timefilter.refreshInterval);
+      }
+    }
+
+    $scope.fetch();
+  };
+
+  $scope.$watch('savedQuery', (newSavedQuery, oldSavedQuery) => {
+    if (!newSavedQuery) return;
+    $state.savedQuery = newSavedQuery.id;
+    $state.save();
+
+    if (newSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
+      updateStateFromSavedQuery(newSavedQuery);
+    }
+  });
+
+  $scope.$watch('state.savedQuery', newSavedQueryId => {
+    if (!newSavedQueryId) {
+      $scope.savedQuery = undefined;
+      return;
+    }
+
+    savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
+      $scope.$evalAsync(() => {
+        $scope.savedQuery = savedQuery;
+        updateStateFromSavedQuery(savedQuery);
+      });
+    });
+  });
 
   /**
    * Called when the user clicks "Save" button.

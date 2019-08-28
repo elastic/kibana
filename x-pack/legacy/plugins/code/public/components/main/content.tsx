@@ -135,26 +135,31 @@ class CodeContent extends React.PureComponent<Props, State> {
 
   public switchButton = (id: string) => {
     const { path, resource, org, repo, revision } = this.props.match.params;
+    const queryString = this.props.location.search;
     const repoUri = `${resource}/${org}/${repo}`;
     switch (id) {
       case ButtonOption.Code:
         history.push(
-          `/${repoUri}/${PathTypes.blob}/${encodeRevisionString(revision)}/${path || ''}`
+          `/${repoUri}/${PathTypes.blob}/${encodeRevisionString(revision)}/${path ||
+            ''}${queryString}`
         );
         break;
       case ButtonOption.Folder:
         history.push(
-          `/${repoUri}/${PathTypes.tree}/${encodeRevisionString(revision)}/${path || ''}`
+          `/${repoUri}/${PathTypes.tree}/${encodeRevisionString(revision)}/${path ||
+            ''}${queryString}`
         );
         break;
       case ButtonOption.Blame:
         history.push(
-          `/${repoUri}/${PathTypes.blame}/${encodeRevisionString(revision)}/${path || ''}`
+          `/${repoUri}/${PathTypes.blame}/${encodeRevisionString(revision)}/${path ||
+            ''}${queryString}`
         );
         break;
       case ButtonOption.History:
         history.push(
-          `/${repoUri}/${PathTypes.commits}/${encodeRevisionString(revision)}/${path || ''}`
+          `/${repoUri}/${PathTypes.commits}/${encodeRevisionString(revision)}/${path ||
+            ''}${queryString}`
         );
         break;
     }

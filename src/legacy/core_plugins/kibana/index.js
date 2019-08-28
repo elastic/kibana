@@ -173,7 +173,7 @@ export default function (kibana) {
           },
         },
         search: {
-          icon: 'search',
+          icon: 'discoverApp',
           defaultSearchField: 'title',
           isImportableAndExportable: true,
           getTitle(obj) {
@@ -268,17 +268,20 @@ export default function (kibana) {
           show: true,
           createShortUrl: true,
           save: true,
+          saveQuery: true,
         },
         visualize: {
           show: true,
           createShortUrl: true,
           delete: true,
           save: true,
+          saveQuery: true,
         },
         dashboard: {
           createNew: true,
           show: true,
           showWriteControls: true,
+          saveQuery: true,
         },
         catalogue: {
           discover: true,

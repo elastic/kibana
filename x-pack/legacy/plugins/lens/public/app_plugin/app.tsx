@@ -27,6 +27,25 @@ interface State {
   query: Query;
   indexPatternTitles: string[];
   persistedDoc?: Document;
+  localQueryBarState: {
+    query?: Query;
+    dateRange?: {
+      from: string;
+      to: string;
+    };
+  };
+}
+
+function isLocalStateDirty(
+  localState: State['localQueryBarState'],
+  query: Query,
+  dateRange: State['dateRange']
+) {
+  return Boolean(
+    (localState.query && query && localState.query.query !== query.query) ||
+      (localState.dateRange && dateRange.fromDate !== localState.dateRange.from) ||
+      (localState.dateRange && dateRange.toDate !== localState.dateRange.to)
+  );
 }
 
 export function App({
@@ -57,6 +76,13 @@ export function App({
       toDate: timeDefaults.to,
     },
     indexPatternTitles: [],
+    localQueryBarState: {
+      query: { query: '', language },
+      dateRange: {
+        from: timeDefaults.from,
+        to: timeDefaults.to,
+      },
+    },
   });
 
   const lastKnownDocRef = useRef<Document | undefined>(undefined);
@@ -72,6 +98,10 @@ export function App({
             isLoading: false,
             persistedDoc: doc,
             query: doc.state.query,
+            localQueryBarState: {
+              ...state.localQueryBarState,
+              query: doc.state.query,
+            },
             indexPatternTitles: doc.state.datasourceMetaData.filterableIndexPatterns.map(
               ({ title }) => title
             ),
@@ -152,7 +182,8 @@ export function App({
           <QueryBar
             data-test-subj="lnsApp_queryBar"
             screenTitle={'lens'}
-            onSubmit={({ dateRange, query }) => {
+            onSubmit={payload => {
+              const { dateRange, query } = payload;
               setState({
                 ...state,
                 dateRange: {
@@ -160,16 +191,25 @@ export function App({
                   toDate: dateRange.to,
                 },
                 query: query || state.query,
+                localQueryBarState: payload,
               });
             }}
+            onChange={localQueryBarState => {
+              setState({ ...state, localQueryBarState });
+            }}
+            isDirty={isLocalStateDirty(state.localQueryBarState, state.query, state.dateRange)}
             appName={'lens'}
             indexPatterns={state.indexPatternTitles}
             store={store}
             showDatePicker={true}
             showQueryInput={true}
-            query={state.query}
-            dateRangeFrom={state.dateRange && state.dateRange.fromDate}
-            dateRangeTo={state.dateRange && state.dateRange.toDate}
+            query={state.localQueryBarState.query}
+            dateRangeFrom={
+              state.localQueryBarState.dateRange && state.localQueryBarState.dateRange.from
+            }
+            dateRangeTo={
+              state.localQueryBarState.dateRange && state.localQueryBarState.dateRange.to
+            }
             uiSettings={uiSettings}
           />
         </div>

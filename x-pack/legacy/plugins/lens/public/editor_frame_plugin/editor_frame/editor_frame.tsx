@@ -59,7 +59,7 @@ export function EditorFrame(props: EditorFrameProps) {
             .then(datasourceState => {
               dispatch({
                 type: 'UPDATE_DATASOURCE_STATE',
-                newState: datasourceState,
+                updater: datasourceState,
                 datasourceId,
               });
             })
@@ -84,7 +84,7 @@ export function EditorFrame(props: EditorFrameProps) {
             dispatch({
               type: 'UPDATE_DATASOURCE_STATE',
               datasourceId: id,
-              newState,
+              updater: newState,
             });
           },
           layer

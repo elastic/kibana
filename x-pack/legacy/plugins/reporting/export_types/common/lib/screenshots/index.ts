@@ -71,7 +71,7 @@ export function screenshotsObservableFactory(server: KbnServer) {
               const renderSuccess = browser.waitForSelector(
                 `${layout.selectors.renderComplete},[${layout.selectors.itemsCountAttribute}]`
               );
-              const renderError = checkForToastMessage(browser, layout);
+              const renderError = checkForToastMessage(browser, layout, logger);
               return Rx.race(Rx.from(renderSuccess), Rx.from(renderError));
             },
             browser => browser

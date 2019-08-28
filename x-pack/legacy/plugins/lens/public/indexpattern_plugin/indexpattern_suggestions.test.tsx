@@ -153,6 +153,7 @@ describe('IndexPattern Data Source suggestions', () => {
               label: 'My Op',
               dataType: 'string',
               isBucketed: true,
+              isMetric: false,
 
               // Private
               operationType: 'terms',
@@ -529,6 +530,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 col1: {
                   dataType: 'string',
                   isBucketed: true,
+                  isMetric: false,
                   sourceField: 'source',
                   label: 'values of source',
                   operationType: 'terms',
@@ -541,6 +543,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 col2: {
                   dataType: 'number',
                   isBucketed: false,
+                  isMetric: true,
                   sourceField: 'bytes',
                   label: 'Min of bytes',
                   operationType: 'min',
@@ -564,6 +567,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   col1: {
                     dataType: 'date',
                     isBucketed: true,
+                    isMetric: false,
                     sourceField: 'timestamp',
                     label: 'date histogram of timestamp',
                     operationType: 'date_histogram',
@@ -574,6 +578,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   col2: {
                     dataType: 'number',
                     isBucketed: false,
+                    isMetric: true,
                     sourceField: 'bytes',
                     label: 'Min of bytes',
                     operationType: 'min',
@@ -884,6 +889,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 label: 'My Op 2',
                 dataType: 'number',
                 isBucketed: true,
+                isMetric: false,
 
                 // Private
                 operationType: 'terms',
@@ -910,6 +916,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   label: 'My Op',
                   dataType: 'string',
                   isBucketed: true,
+                  isMetric: false,
                 },
               },
             ],
@@ -927,6 +934,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   label: 'My Op 2',
                   dataType: 'number',
                   isBucketed: true,
+                  isMetric: false,
                 },
               },
             ],
@@ -947,6 +955,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 label: 'My Op',
                 dataType: 'string',
                 isBucketed: true,
+                isMetric: false,
 
                 operationType: 'terms',
                 sourceField: 'field1',
@@ -960,6 +969,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 label: 'My Op',
                 dataType: 'string',
                 isBucketed: true,
+                isMetric: false,
 
                 operationType: 'terms',
                 sourceField: 'field2',
@@ -973,6 +983,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 label: 'My Op',
                 dataType: 'string',
                 isBucketed: true,
+                isMetric: false,
 
                 operationType: 'terms',
                 sourceField: 'field3',
@@ -986,6 +997,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 label: 'My Op',
                 dataType: 'number',
                 isBucketed: false,
+                isMetric: true,
 
                 operationType: 'avg',
                 sourceField: 'field4',
@@ -994,6 +1006,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 label: 'My Op',
                 dataType: 'number',
                 isBucketed: false,
+                isMetric: true,
 
                 operationType: 'min',
                 sourceField: 'field5',

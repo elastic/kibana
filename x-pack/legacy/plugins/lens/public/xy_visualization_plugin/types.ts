@@ -35,12 +35,16 @@ export const legendConfig: ExpressionFunction<
   args: {
     isVisible: {
       types: ['boolean'],
-      help: 'Specifies whether or not the legend is visible.',
+      help: i18n.translate('xpack.lens.xyChart.isVisible.help', {
+        defaultMessage: 'Specifies whether or not the legend is visible.',
+      }),
     },
     position: {
       types: ['string'],
       options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
-      help: 'Specifies the legend position.',
+      help: i18n.translate('xpack.lens.xyChart.position.help', {
+        defaultMessage: 'Specifies the legend position.',
+      }),
     },
   },
   fn: function fn(_context: unknown, args: LegendConfig) {
@@ -59,7 +63,9 @@ interface AxisConfig {
 const axisConfig: { [key in keyof AxisConfig]: ArgumentType<AxisConfig[key]> } = {
   title: {
     types: ['string'],
-    help: 'The axis title',
+    help: i18n.translate('xpack.lens.xyChart.title.help', {
+      defaultMessage: 'The axis title',
+    }),
   },
   hide: {
     types: ['boolean'],
@@ -131,6 +137,21 @@ export const layerConfig: ExpressionFunction<
       options: ['bar', 'line', 'area', 'bar_stacked', 'area_stacked'],
       help: 'The type of chart to display.',
     },
+    xScaleType: {
+      options: ['ordinal', 'linear', 'time'],
+      help: 'The scale type of the x axis',
+      default: 'ordinal',
+    },
+    isHistogram: {
+      types: ['boolean'],
+      default: false,
+      help: 'Whether to layout the chart as a histogram',
+    },
+    yScaleType: {
+      options: ['log', 'sqrt', 'linear', 'time'],
+      help: 'The scale type of the y axes',
+      default: 'linear',
+    },
     splitAccessor: {
       types: ['string'],
       help: 'The column to split by',
@@ -166,6 +187,9 @@ export type LayerConfig = AxisConfig & {
 
 export type LayerArgs = LayerConfig & {
   columnToLabel?: string; // Actually a JSON key-value pair
+  yScaleType: 'time' | 'linear' | 'log' | 'sqrt';
+  xScaleType: 'time' | 'linear' | 'ordinal';
+  isHistogram: boolean;
 };
 
 // Arguments to XY chart expression, with computed properties

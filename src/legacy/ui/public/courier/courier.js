@@ -23,7 +23,6 @@ import { timefilter } from 'ui/timefilter';
 
 import '../es';
 import '../directives/listen';
-import '../index_patterns';
 import { uiModules } from '../modules';
 import { addFatalErrorCallback } from '../notify';
 import '../promises';

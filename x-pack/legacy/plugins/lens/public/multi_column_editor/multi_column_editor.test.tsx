@@ -49,6 +49,7 @@ describe('MultiColumnEditor', () => {
               dataType: 'number',
               id,
               isBucketed: true,
+              isMetric: false,
               label: 'BaaaZZZ!',
             };
           },

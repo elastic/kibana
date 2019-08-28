@@ -10,7 +10,7 @@ import { xyChart, XYChart } from './xy_expression';
 import { LensMultiTable } from '../types';
 import React from 'react';
 import { shallow } from 'enzyme';
-import { XYArgs, LegendConfig, legendConfig, layerConfig, LayerConfig } from './types';
+import { XYArgs, LegendConfig, legendConfig, layerConfig, LayerArgs } from './types';
 
 function sampleArgs() {
   const data: LensMultiTable = {
@@ -49,6 +49,9 @@ function sampleArgs() {
         title: 'A and B',
         splitAccessor: 'd',
         columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+        xScaleType: 'ordinal',
+        yScaleType: 'linear',
+        isHistogram: false,
       },
     ],
   };
@@ -71,13 +74,16 @@ describe('xy_expression', () => {
     });
 
     test('layerConfig produces the correct arguments', () => {
-      const args: LayerConfig = {
+      const args: LayerArgs = {
         layerId: 'first',
         seriesType: 'line',
         xAccessor: 'c',
         accessors: ['a', 'b'],
         title: 'A and B',
         splitAccessor: 'd',
+        xScaleType: 'linear',
+        yScaleType: 'linear',
+        isHistogram: false,
       };
 
       expect(layerConfig.fn(null, args, {})).toEqual({
@@ -117,6 +123,7 @@ describe('xy_expression', () => {
           data={data}
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'line' }] }}
           formatFactory={getFormatSpy}
+          timeZone="UTC"
         />
       );
       expect(component).toMatchSnapshot();
@@ -130,6 +137,7 @@ describe('xy_expression', () => {
           data={data}
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'bar' }] }}
           formatFactory={getFormatSpy}
+          timeZone="UTC"
         />
       );
       expect(component).toMatchSnapshot();
@@ -143,6 +151,7 @@ describe('xy_expression', () => {
           data={data}
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'area' }] }}
           formatFactory={getFormatSpy}
+          timeZone="UTC"
         />
       );
       expect(component).toMatchSnapshot();
@@ -156,6 +165,7 @@ describe('xy_expression', () => {
           data={data}
           args={{ ...args, isHorizontal: true, layers: [{ ...args.layers[0], seriesType: 'bar' }] }}
           formatFactory={getFormatSpy}
+          timeZone="UTC"
         />
       );
       expect(component).toMatchSnapshot();
@@ -170,6 +180,7 @@ describe('xy_expression', () => {
           data={data}
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'bar_stacked' }] }}
           formatFactory={getFormatSpy}
+          timeZone="UTC"
         />
       );
       expect(component).toMatchSnapshot();
@@ -184,6 +195,7 @@ describe('xy_expression', () => {
           data={data}
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'area_stacked' }] }}
           formatFactory={getFormatSpy}
+          timeZone="UTC"
         />
       );
       expect(component).toMatchSnapshot();
@@ -202,6 +214,7 @@ describe('xy_expression', () => {
             layers: [{ ...args.layers[0], seriesType: 'bar_stacked' }],
           }}
           formatFactory={getFormatSpy}
+          timeZone="UTC"
         />
       );
       expect(component).toMatchSnapshot();
@@ -210,10 +223,73 @@ describe('xy_expression', () => {
       expect(component.find(Settings).prop('rotation')).toEqual(90);
     });
 
+    test('it passes time zone to the series', () => {
+      const { data, args } = sampleArgs();
+      const component = shallow(
+        <XYChart data={data} args={args} formatFactory={getFormatSpy} timeZone="CEST" />
+      );
+      expect(component.find(LineSeries).prop('timeZone')).toEqual('CEST');
+    });
+
+    test('it applies histogram mode to the series for single series', () => {
+      const { data, args } = sampleArgs();
+      const firstLayer: LayerArgs = { ...args.layers[0], seriesType: 'bar', isHistogram: true };
+      delete firstLayer.splitAccessor;
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={{ ...args, layers: [firstLayer] }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+        />
+      );
+      expect(component.find(BarSeries).prop('enableHistogramMode')).toEqual(true);
+    });
+
+    test('it applies histogram mode to the series for stacked series', () => {
+      const { data, args } = sampleArgs();
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={{
+            ...args,
+            layers: [
+              {
+                ...args.layers[0],
+                seriesType: 'bar_stacked',
+                isHistogram: true,
+              },
+            ],
+          }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+        />
+      );
+      expect(component.find(BarSeries).prop('enableHistogramMode')).toEqual(true);
+    });
+
+    test('it does not apply histogram mode for splitted series', () => {
+      const { data, args } = sampleArgs();
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={{
+            ...args,
+            layers: [{ ...args.layers[0], seriesType: 'bar', isHistogram: true }],
+          }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+        />
+      );
+      expect(component.find(BarSeries).prop('enableHistogramMode')).toEqual(false);
+    });
+
     test('it rewrites the rows based on provided labels', () => {
       const { data, args } = sampleArgs();
 
-      const component = shallow(<XYChart data={data} args={args} formatFactory={getFormatSpy} />);
+      const component = shallow(
+        <XYChart data={data} args={args} formatFactory={getFormatSpy} timeZone="UTC" />
+      );
       expect(component.find(LineSeries).prop('data')).toEqual([
         { 'Label A': 1, 'Label B': 2, c: 'I' },
         { 'Label A': 1, 'Label B': 5, c: 'J' },
@@ -223,39 +299,51 @@ describe('xy_expression', () => {
     test('it uses labels as Y accessors', () => {
       const { data, args } = sampleArgs();
 
-      const component = shallow(<XYChart data={data} args={args} formatFactory={getFormatSpy} />);
+      const component = shallow(
+        <XYChart data={data} args={args} formatFactory={getFormatSpy} timeZone="UTC" />
+      );
       expect(component.find(LineSeries).prop('yAccessors')).toEqual(['Label A', 'Label B']);
     });
 
-    test('it indicates an ordinal scale for a string X axis', () => {
+    test('it set the scale of the x axis according to the args prop', () => {
       const { data, args } = sampleArgs();
 
-      const component = shallow(<XYChart data={data} args={args} formatFactory={getFormatSpy} />);
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={{ ...args, layers: [{ ...args.layers[0], xScaleType: 'ordinal' }] }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+        />
+      );
       expect(component.find(LineSeries).prop('xScaleType')).toEqual(ScaleType.Ordinal);
     });
 
-    test('it indicates a linear scale for a numeric X axis', () => {
-      const { args } = sampleArgs();
+    test('it set the scale of the y axis according to the args prop', () => {
+      const { data, args } = sampleArgs();
 
-      const data: LensMultiTable = {
-        type: 'lens_multitable',
-        tables: {
-          first: {
-            type: 'kibana_datatable',
-            columns: [{ id: 'a', name: 'a' }, { id: 'b', name: 'b' }, { id: 'c', name: 'c' }],
-            rows: [{ a: 1, b: 2, c: 3 }, { a: 6, b: 5, c: 9 }],
-          },
-        },
-      };
-
-      const component = shallow(<XYChart data={data} args={args} formatFactory={getFormatSpy} />);
-      expect(component.find(LineSeries).prop('xScaleType')).toEqual(ScaleType.Linear);
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={{ ...args, layers: [{ ...args.layers[0], yScaleType: 'sqrt' }] }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+        />
+      );
+      expect(component.find(LineSeries).prop('yScaleType')).toEqual(ScaleType.Sqrt);
     });
 
     test('it gets the formatter for the x axis', () => {
       const { data, args } = sampleArgs();
 
-      shallow(<XYChart data={{ ...data }} args={{ ...args }} formatFactory={getFormatSpy} />);
+      shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{ ...args }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+        />
+      );
 
       expect(getFormatSpy).toHaveBeenCalledWith({ id: 'string' });
     });
@@ -263,7 +351,14 @@ describe('xy_expression', () => {
     test('it gets a default formatter for y if there are multiple y accessors', () => {
       const { data, args } = sampleArgs();
 
-      shallow(<XYChart data={{ ...data }} args={{ ...args }} formatFactory={getFormatSpy} />);
+      shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{ ...args }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+        />
+      );
 
       expect(getFormatSpy).toHaveBeenCalledTimes(2);
       expect(getFormatSpy).toHaveBeenCalledWith({ id: 'number' });
@@ -277,6 +372,7 @@ describe('xy_expression', () => {
           data={{ ...data }}
           args={{ ...args, layers: [{ ...args.layers[0], accessors: ['a'] }] }}
           formatFactory={getFormatSpy}
+          timeZone="UTC"
         />
       );
       expect(getFormatSpy).toHaveBeenCalledWith({
@@ -289,7 +385,12 @@ describe('xy_expression', () => {
       const { data, args } = sampleArgs();
 
       const instance = shallow(
-        <XYChart data={{ ...data }} args={{ ...args }} formatFactory={getFormatSpy} />
+        <XYChart
+          data={{ ...data }}
+          args={{ ...args }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+        />
       );
 
       const tickFormatter = instance

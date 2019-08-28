@@ -137,7 +137,7 @@ export class MapEmbeddable extends Embeddable {
     render(
       <Provider store={this._store}>
         <I18nContext>
-          <GisMap addFilters={this.addFilters}/>
+          <GisMap addFilters={this.input.hideFilterActions ? null : this.addFilters}/>
         </I18nContext>
       </Provider>,
       domNode

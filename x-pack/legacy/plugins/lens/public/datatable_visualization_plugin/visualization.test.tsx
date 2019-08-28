@@ -97,6 +97,7 @@ describe('Datatable Visualization', () => {
       const baseOperation: Operation = {
         dataType: 'string',
         isBucketed: true,
+        isMetric: false,
         label: '',
       };
       expect(filterOperations({ ...baseOperation })).toEqual(true);

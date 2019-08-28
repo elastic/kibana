@@ -6,7 +6,6 @@
 
 import { ConfigObject, KbnServer, Logger } from '../../../types';
 import { validateBrowser } from './validate_browser';
-// @ts-ignore
 import { validateConfig } from './validate_config';
 import { validateMaxContentLength } from './validate_max_content_length';
 

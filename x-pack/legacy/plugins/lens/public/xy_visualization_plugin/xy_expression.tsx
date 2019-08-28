@@ -16,12 +16,12 @@ import {
   AreaSeries,
   BarSeries,
   Position,
-  ScaleType,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, IconType } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { FormatFactory } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
 import { LensMultiTable } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
@@ -41,7 +41,9 @@ export interface XYRender {
 export const xyChart: ExpressionFunction<'lens_xy_chart', LensMultiTable, XYArgs, XYRender> = ({
   name: 'lens_xy_chart',
   type: 'render',
-  help: 'An X/Y chart',
+  help: i18n.translate('xpack.lens.xyChart.help', {
+    defaultMessage: 'An X/Y chart',
+  }),
   args: {
     xTitle: {
       types: ['string'],
@@ -53,7 +55,9 @@ export const xyChart: ExpressionFunction<'lens_xy_chart', LensMultiTable, XYArgs
     },
     legend: {
       types: ['lens_xy_legendConfig'],
-      help: 'Configure the chart legend.',
+      help: i18n.translate('xpack.lens.xyChart.legend.help', {
+        defaultMessage: 'Configure the chart legend.',
+      }),
     },
     layers: {
       types: ['lens_xy_layer'],
@@ -86,16 +90,21 @@ export interface XYChartProps {
   args: XYArgs;
 }
 
-export const getXyChartRenderer = (formatFactory: FormatFactory): RenderFunction<XYChartProps> => ({
+export const getXyChartRenderer = (dependencies: {
+  formatFactory: FormatFactory;
+  timeZone: string;
+}): RenderFunction<XYChartProps> => ({
   name: 'lens_xy_chart_renderer',
   displayName: 'XY Chart',
-  help: 'X/Y Chart Renderer',
+  help: i18n.translate('xpack.lens.xyChart.renderer.help', {
+    defaultMessage: 'X/Y Chart Renderer',
+  }),
   validate: () => {},
   reuseDomNode: true,
   render: async (domNode: Element, config: XYChartProps, _handlers: unknown) => {
     ReactDOM.render(
       <I18nProvider>
-        <XYChart {...config} formatFactory={formatFactory} />
+        <XYChart {...config} {...dependencies} />
       </I18nProvider>,
       domNode
     );
@@ -110,8 +119,10 @@ export function XYChart({
   data,
   args,
   formatFactory,
+  timeZone,
 }: XYChartProps & {
   formatFactory: FormatFactory;
+  timeZone: string;
 }) {
   const { legend, layers, isHorizontal } = args;
 
@@ -162,7 +173,7 @@ export function XYChart({
 
       <Axis
         id={getAxisId('x')}
-        position={Position.Bottom}
+        position={isHorizontal ? Position.Left : Position.Bottom}
         title={args.xTitle}
         showGridLines={false}
         hide={layers[0].hide}
@@ -171,7 +182,7 @@ export function XYChart({
 
       <Axis
         id={getAxisId('y')}
-        position={Position.Left}
+        position={isHorizontal ? Position.Bottom : Position.Left}
         title={args.yTitle}
         showGridLines={false}
         hide={layers[0].hide}
@@ -179,7 +190,20 @@ export function XYChart({
       />
 
       {layers.map(
-        ({ splitAccessor, seriesType, accessors, xAccessor, layerId, columnToLabel }, index) => {
+        (
+          {
+            splitAccessor,
+            seriesType,
+            accessors,
+            xAccessor,
+            layerId,
+            columnToLabel,
+            yScaleType,
+            xScaleType,
+            isHistogram,
+          },
+          index
+        ) => {
           if (!data.tables[layerId] || data.tables[layerId].rows.length === 0) {
             return;
           }
@@ -212,9 +236,10 @@ export function XYChart({
             xAccessor,
             yAccessors,
             data: rows,
-            xScaleType:
-              typeof rows[0][xAccessor] === 'number' ? ScaleType.Linear : ScaleType.Ordinal,
-            yScaleType: ScaleType.Linear,
+            xScaleType,
+            yScaleType,
+            enableHistogramMode: isHistogram && (seriesType.includes('stacked') || !splitAccessor),
+            timeZone,
           };
 
           return seriesType === 'line' ? (

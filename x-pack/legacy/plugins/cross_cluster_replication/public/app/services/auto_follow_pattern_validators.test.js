@@ -7,17 +7,8 @@
 
 import { validateAutoFollowPattern } from './auto_follow_pattern_validators';
 
-jest.mock('../../../../../../../src/legacy/ui/public/index_patterns/_index_pattern', () => ({
-  IndexPattern: jest.fn(),
-}));
-
-jest.mock('../../../../../../../src/legacy/ui/public/index_patterns/index_patterns', () => ({
-  IndexPatterns: jest.fn(),
-}));
-
-jest.mock('../../../../../../../src/legacy/ui/public/index_patterns/index_patterns_api_client', () => ({
-  IndexPatternsApiClient: jest.fn(),
-}));
+jest.mock('ui/new_platform');
+jest.mock('ui/index_patterns');
 
 describe('Auto-follow pattern validators', () => {
   describe('validateAutoFollowPattern()', () => {

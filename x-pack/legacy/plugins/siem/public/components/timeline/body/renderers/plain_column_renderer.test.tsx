@@ -17,6 +17,8 @@ import { getEmptyValue } from '../../../empty_value';
 import { plainColumnRenderer } from './plain_column_renderer';
 import { getValues, deleteItemIdx, findItem } from './helpers';
 
+jest.mock('../../../../lib/settings/use_kibana_ui_setting');
+
 const mockFramework = mockFrameworks.default_UTC;
 
 describe('plain_column_renderer', () => {

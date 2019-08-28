@@ -20,15 +20,47 @@ export interface Document {
   sha1?: string;
 }
 
+export interface Commit {
+  id: string;
+  message: string;
+  body: string;
+  date: Date;
+  parents: string[];
+  author: {
+    name: string;
+    email: string;
+  };
+  committer: {
+    name: string;
+    email: string;
+  };
+}
+
 // The base interface of indexer requests
 export interface IndexRequest {
   repoUri: RepositoryUri;
+}
+
+export enum IndexerType {
+  LSP = 'LSP',
+  LSP_INC = 'LSP_INCREMENTAL',
+  COMMIT = 'COMMIT',
+  COMMIT_INC = 'COMMIT_INCREMENTAL',
+  REPOSITORY = 'REPOSITORY',
+  UNKNOWN = 'UNKNOWN',
 }
 
 // The request for LspIndexer
 export interface LspIndexRequest extends IndexRequest {
   filePath: string; // The file path within the repository
   revision: string; // The revision of the current repository
+}
+
+// The request for CommitIndexer
+export interface CommitIndexRequest extends IndexRequest {
+  // The git ref as the starting point for the entire commit index job.
+  revision: string;
+  commit: Commit;
 }
 
 export interface LspIncIndexRequest extends LspIndexRequest {

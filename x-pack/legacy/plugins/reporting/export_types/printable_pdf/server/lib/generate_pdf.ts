@@ -9,9 +9,8 @@ import { toArray, mergeMap } from 'rxjs/operators';
 import moment from 'moment-timezone';
 import { groupBy } from 'lodash';
 import { KbnServer, ConditionalHeaders } from '../../../../types';
-// @ts-ignore
+// @ts-ignore untyped module
 import { pdf } from './pdf';
-// @ts-ignore
 import { oncePerServer } from '../../../../server/lib/once_per_server';
 import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
 import { createLayout } from '../../../common/layouts';

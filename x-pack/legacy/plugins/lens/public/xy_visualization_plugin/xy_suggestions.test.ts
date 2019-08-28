@@ -20,6 +20,7 @@ describe('xy_suggestions', () => {
         dataType: 'number',
         label: `Avg ${columnId}`,
         isBucketed: false,
+        isMetric: true,
       },
     };
   }
@@ -31,6 +32,7 @@ describe('xy_suggestions', () => {
         dataType: 'string',
         label: `Top 5 ${columnId}`,
         isBucketed: true,
+        isMetric: false,
       },
     };
   }
@@ -41,6 +43,7 @@ describe('xy_suggestions', () => {
       operation: {
         dataType: 'date',
         isBucketed: true,
+        isMetric: false,
         label: `${columnId} histogram`,
       },
     };
@@ -258,6 +261,7 @@ describe('xy_suggestions', () => {
               columnId: 'mybool',
               operation: {
                 dataType: 'boolean',
+                isMetric: false,
                 isBucketed: false,
                 label: 'Yes / No',
               },

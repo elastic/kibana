@@ -10,7 +10,7 @@ import { API_BASE_GENERATE_V1 } from '../../common/constants';
 import { createJobFactory, executeJobFactory } from '../../export_types/csv_from_savedobject';
 import { JobDocPayload, JobDocOutputExecuted, KbnServer, Logger } from '../../types';
 import { getRouteOptions } from './lib/route_config_factories';
-import { getJobParamsFromRequest } from './lib/get_job_params_from_request';
+import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
 
 interface KibanaResponse extends ResponseObject {
   isBoom: boolean;
@@ -44,9 +44,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
       const logger = parentLogger.clone(['savedobject-csv']);
       const jobParams = getJobParamsFromRequest(request, { isImmediate: true });
       const createJobFn = createJobFactory(server);
-      // By passing the request, we signal this as an "immediate" job.
-      // TODO: use a different executeFn for immediate, with a different call signature, to clean up messy types
-      const executeJobFn = executeJobFactory(server, request);
+      const executeJobFn = executeJobFactory(server);
       const jobDocPayload: JobDocPayload = await createJobFn(jobParams, request.headers, request);
       const {
         content_type: jobOutputContentType,

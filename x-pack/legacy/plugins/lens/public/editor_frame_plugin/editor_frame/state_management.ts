@@ -30,7 +30,7 @@ export type Action =
     }
   | {
       type: 'UPDATE_DATASOURCE_STATE';
-      newState: unknown;
+      updater: unknown | ((prevState: unknown) => unknown);
       datasourceId: string;
     }
   | {
@@ -183,7 +183,10 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
         datasourceStates: {
           ...state.datasourceStates,
           [action.datasourceId]: {
-            state: action.newState,
+            state:
+              typeof action.updater === 'function'
+                ? action.updater(state.datasourceStates[action.datasourceId].state)
+                : action.updater,
             isLoading: false,
           },
         },

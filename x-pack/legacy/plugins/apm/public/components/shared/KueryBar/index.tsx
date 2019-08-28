@@ -188,7 +188,7 @@ export function KueryBar() {
         return;
       }
 
-      history.replace({
+      history.push({
         ...location,
         search: fromQuery({
           ...toQuery(location.search),
