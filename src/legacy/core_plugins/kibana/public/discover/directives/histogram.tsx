@@ -21,6 +21,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import moment from 'moment-timezone';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import lightEuiTheme from '@elastic/eui/dist/eui_theme_light.json';
+import darkEuiTheme from '@elastic/eui/dist/eui_theme_dark.json';
 
 import {
   AnnotationDomainTypes,
@@ -166,12 +168,13 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps> {
         dataValue: lineAnnotationValue,
       },
     ];
+    const isDarkMode = uiSettings.get('theme:darkMode');
 
     const lineAnnotationStyle = {
       line: {
         strokeWidth: 2,
-        stroke: '#c80000',
-        opacity: 0.3,
+        stroke: isDarkMode ? darkEuiTheme.euiColorDanger : lightEuiTheme.euiColorDanger,
+        opacity: 0.7,
       },
     };
 
@@ -192,10 +195,10 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps> {
     }
 
     const rectAnnotationStyle = {
-      stroke: 'rgba(0, 0, 0, 0)',
-      strokeWidth: 1,
-      opacity: 1,
-      fill: 'rgba(0, 0, 0, 0.1)',
+      stroke: isDarkMode ? darkEuiTheme.euiColorLightShade : lightEuiTheme.euiColorDarkShade,
+      strokeWidth: 0,
+      opacity: isDarkMode ? 0.6 : 0.2,
+      fill: isDarkMode ? darkEuiTheme.euiColorLightShade : lightEuiTheme.euiColorDarkShade,
     };
 
     const tooltipProps = {
