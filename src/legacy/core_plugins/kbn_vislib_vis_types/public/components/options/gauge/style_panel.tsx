@@ -23,8 +23,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { AggGroupNames } from 'ui/vis/editors/default';
-import { SelectOption } from '../../controls/select';
-import { GaugeVisParams } from '../../gauge';
+import { SelectOption } from '../../common';
+import { GaugeVisParams } from '../../../gauge';
 import { GaugeOptionsInternalProps } from '.';
 
 function StylePanel({

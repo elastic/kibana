@@ -22,8 +22,7 @@ import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { SwitchOption } from '../../controls/switch';
-import { TextInputOption } from '../../controls/text_input';
+import { SwitchOption, TextInputOption } from '../../common';
 import { GaugeOptionsInternalProps } from '.';
 
 function LabelsPanel({ stateParams, setValue, setGaugeValue }: GaugeOptionsInternalProps) {
