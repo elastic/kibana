@@ -85,19 +85,15 @@ function MaybeViewTraceLink({
     const traceRoot = waterfall.traceRoot;
     return (
       <EuiFlexItem grow={false}>
-        {traceRoot && (
-          <TransactionDetailLink
-            serviceName={traceRoot.service.name}
-            transactionId={traceRoot.transaction.id}
-            traceId={traceRoot.trace.id}
-            transactionName={traceRoot.transaction.name}
-            transactionType={traceRoot.transaction.type}
-          >
-            <EuiButton iconType="apmTrace">
-              {viewFullTraceButtonLabel}
-            </EuiButton>
-          </TransactionDetailLink>
-        )}
+        <TransactionDetailLink
+          serviceName={traceRoot.service.name}
+          transactionId={traceRoot.transaction.id}
+          traceId={traceRoot.trace.id}
+          transactionName={traceRoot.transaction.name}
+          transactionType={traceRoot.transaction.type}
+        >
+          <EuiButton iconType="apmTrace">{viewFullTraceButtonLabel}</EuiButton>
+        </TransactionDetailLink>
       </EuiFlexItem>
     );
   }
