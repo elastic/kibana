@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect, createRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 
 import {
@@ -72,7 +72,7 @@ export const TimeSeries = ({
   annotations,
   enableHistogramMode,
 }) => {
-  const chartRef = createRef();
+  const chartRef = useRef();
   const updateCursor = (_, cursor) => {
     if (chartRef.current) {
       chartRef.current.dispatchExternalCursorEvent(cursor);
@@ -83,7 +83,7 @@ export const TimeSeries = ({
     eventBus.on(ACTIVE_CURSOR, updateCursor);
 
     return () => {
-      eventBus.off(ACTIVE_CURSOR);
+      eventBus.off(ACTIVE_CURSOR, undefined, updateCursor);
     };
   }, []); // eslint-disable-line
 
@@ -108,6 +108,7 @@ export const TimeSeries = ({
         }}
         baseTheme={isDarkMode ? DARK_THEME : LIGHT_THEME}
         tooltip={{
+          snap: true,
           type: TooltipType.VerticalCursor,
           headerFormatter: tooltipFormatter,
         }}
