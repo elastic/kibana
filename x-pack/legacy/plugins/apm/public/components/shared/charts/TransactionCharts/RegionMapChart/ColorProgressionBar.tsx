@@ -12,29 +12,50 @@ export const ColorProgressionBar: React.SFC<{
   showProgressiveHeight?: boolean;
   style?: React.CSSProperties;
   className?: string;
-}> = ({ slices, getColorStyle, showProgressiveHeight, style, className }) => (
-  <div
-    style={{
-      display: 'flex',
-      alignItems: showProgressiveHeight ? 'center' : 'stretch',
-      height: 6,
-      ...style
-    }}
-    className={className}
-  >
-    {Array(slices)
-      .fill(0)
-      .map((_, i) => (
-        <div
-          key={i}
-          style={{
-            flex: 1,
-            height: showProgressiveHeight
-              ? `${(i / (2 * slices - 2) + 0.5) * 100}%`
-              : undefined,
-            background: getColorStyle(i / (slices - 1))
-          }}
-        />
-      ))}
+  min: React.ReactNode;
+  max: React.ReactNode;
+}> = ({
+  slices,
+  getColorStyle,
+  showProgressiveHeight,
+  style,
+  className,
+  min,
+  max
+}) => (
+  <div>
+    <div
+      style={{
+        display: 'flex',
+        alignItems: showProgressiveHeight ? 'center' : 'stretch',
+        height: 6,
+        ...style
+      }}
+      className={className}
+    >
+      {Array(slices)
+        .fill(0)
+        .map((_, i) => (
+          <div
+            key={i}
+            style={{
+              flex: 1,
+              height: showProgressiveHeight
+                ? `${(i / (2 * slices - 2) + 0.5) * 100}%`
+                : undefined,
+              background: getColorStyle(i / (slices - 1))
+            }}
+          />
+        ))}
+    </div>
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'space-between'
+      }}
+    >
+      <div>{min}</div>
+      <div>{max}</div>
+    </div>
   </div>
 );

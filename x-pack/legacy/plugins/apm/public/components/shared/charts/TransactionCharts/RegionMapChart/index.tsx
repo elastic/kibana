@@ -5,7 +5,12 @@
  */
 
 import React from 'react';
-import { ChoroplethMap, getDefaultProgressionColor } from './ChoroplethMap';
+import { i18n } from '@kbn/i18n';
+import {
+  ChoroplethMap,
+  getProgressionColor,
+  getDataRange
+} from './ChoroplethMap';
 import { ColorProgressionBar } from './ColorProgressionBar';
 import { useAvgDurationByCountry } from '../../../../../hooks/useAvgDurationByCountry';
 
@@ -16,22 +21,37 @@ const RegionMapChartToolTip: React.SFC<{
   return (
     <div style={{ textAlign: 'center' }}>
       <div style={{ fontSize: 'larger' }}>{geojsonProperties.name}</div>
-      <div>Avg. page load duration:</div>
+      <div>
+        {i18n.translate(
+          'xpack.apm.metrics.pageLoadCharts.avgPageLoadByCountryLabel',
+          {
+            defaultMessage: 'Avg. page load duration:'
+          }
+        )}
+      </div>
       <div style={{ fontWeight: 'bold', fontSize: 'larger' }}>
         {data && data.value}ms
       </div>
-      <div>({data && data.doc_count} page loads)</div>
+      <div>
+        (
+        {i18n.translate('xpack.apm.servicesTable.environmentCount', {
+          values: { docCount: data && data.doc_count },
+          defaultMessage: '{docCount} page loads'
+        })}
+        )
+      </div>
+      >
     </div>
   );
 };
 
 export const RegionMapChart: React.SFC = () => {
   const { data } = useAvgDurationByCountry();
+  const [min, max] = getDataRange(data);
 
   return (
     <div>
       <ChoroplethMap
-        mapboxStyle="https://tiles.maps.elastic.co/styles/osm-bright-desaturated/style.json"
         initialMapboxOptions={{
           zoom: 0.85,
           center: { lng: 0, lat: 30 }
@@ -43,7 +63,9 @@ export const RegionMapChart: React.SFC = () => {
       />
       <ColorProgressionBar
         slices={10}
-        getColorStyle={getDefaultProgressionColor}
+        getColorStyle={getProgressionColor}
+        min={`${min}ms`}
+        max={`${max}ms`}
       />
     </div>
   );

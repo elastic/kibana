@@ -4,291 +4,250 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useMemo,
-  useCallback
-} from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { isEqual } from 'lodash';
 import {
   Map,
   MapboxOptions,
   NavigationControl,
   Popup,
-  PopupOptions,
   GeoJSONSourceOptions
 } from 'mapbox-gl';
+import { GeoJsonProperties } from 'geojson';
+
+interface ChoroplethDataElement {
+  key: string;
+  value: number;
+  [property: string]: any;
+}
 
 interface Props {
   style?: React.CSSProperties;
-  mapboxStyle: MapboxOptions['style'];
   geojsonSource: NonNullable<GeoJSONSourceOptions['data']>;
   geojsonKeyProperty: string;
-  data: Array<{ key: string; value: number; [property: string]: any }>;
+  data: ChoroplethDataElement[];
   renderTooltip: (props: {
     geojsonProperties: NonNullable<mapboxgl.MapboxGeoJSONFeature['properties']>;
-    data?: Props['data'][0];
+    data?: ChoroplethDataElement;
   }) => React.ReactElement | null;
   initialMapboxOptions?: Partial<MapboxOptions>;
-  mapValueToColor?: (value: number) => string;
-  getProgressionColor?: typeof getDefaultProgressionColor;
 }
+
+const CHOROPLETH_LAYER_ID = 'choropleth_layer';
+const CHOROPLETH_POLYGONS_SOURCE_ID = 'choropleth_polygons';
 
 const linearScale = (x: number, range = { min: 0, max: 1 }) =>
   (range.max - range.min) * x + range.min;
 const quadradicScale = (x: number, range = { min: 0, max: 1 }) =>
   4 * (range.max - range.min) * (x ** 2 - x) + range.max;
 
-export function getDefaultProgressionColor(scale: number) {
+export function getProgressionColor(scale: number) {
   const hue = quadradicScale(scale, { min: 200, max: 218 });
   const saturation = 55;
   const lightness = Math.round(linearScale(1 - scale, { min: 35, max: 98 }));
   return `hsl(${hue},${saturation}%,${lightness}%)`;
 }
 
-function getDefaultMapValueToColor(
-  getProgressionColor = getDefaultProgressionColor,
-  data: Props['data']
-) {
-  return (value: number) => {
-    const firstValue = data[0] ? data[0].value : 0;
-    const { min, max } = data.reduce(
-      ({ min: currentMin, max: currentMax }, { value: currentValue }) => ({
-        min: Math.min(currentMin, currentValue),
-        max: Math.max(currentMax, currentValue)
-      }),
-      { min: firstValue, max: firstValue }
-    );
-    const scale = (value - min) / (max - min);
-    return getProgressionColor(scale);
-  };
+export function getDataRange(data: Props['data']) {
+  const firstValue = data[0] ? data[0].value : 0;
+  return data.reduce(
+    ([min, max], { value }) => [Math.min(min, value), Math.max(max, value)],
+    [firstValue, firstValue]
+  );
 }
 
 export const ChoroplethMap: React.SFC<Props> = props => {
-  const defaultMapValueToColor = useMemo(
-    () => getDefaultMapValueToColor(props.getProgressionColor, props.data),
-    [props.getProgressionColor, props.data]
-  );
-
   const {
     style,
-    mapValueToColor = defaultMapValueToColor,
-    getProgressionColor,
-    mapboxStyle = 'https://tiles.maps.elastic.co/styles/osm-bright/style.json',
     geojsonSource,
     geojsonKeyProperty,
     data,
-    renderTooltip: ToolTip
+    renderTooltip: ToolTip,
+    initialMapboxOptions
   } = props;
 
-  const [hoveredData, setHoveredData] = useState<Props['data'][0] | undefined>(
-    undefined
-  );
-  const [hoveredFeatureProperties, setHoveredFeatureProperties] = useState<
-    mapboxgl.MapboxGeoJSONFeature['properties']
-  >(null);
-  const hoveredFeaturePropertiesRef = useRef<
-    mapboxgl.MapboxGeoJSONFeature['properties']
-  >(null);
-  const isMapReady = useRef<boolean>(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const toolTipRef = useRef<HTMLDivElement>(null);
-  const mapboxMap = useRef<Map | null>(null);
-  const mapboxPopup = useRef<Popup | null>(null);
-  const mapboxStyleRef = useRef(mapboxStyle);
-  const mapValueToColorRef = useRef(mapValueToColor);
-  const choroplethIncrementingId = useRef(0);
-  const choroplethLayerId = useRef('choropleth_regions_0');
-  const propsRef = useRef(props);
-  propsRef.current = props;
+  const [map, setMap] = useState<Map | null>(null);
+  const popupRef = useRef<Popup | null>(null);
+  const popupContainerRef = useRef<HTMLDivElement>(null);
+  const enableScrollZoom = useRef(false);
+  const [hoverState, setHoverState] = useState<{
+    geojsonProperties?: GeoJsonProperties;
+    data?: ChoroplethDataElement;
+  }>({});
 
-  const updateChoroplethLayer = useRef(() => {
-    if (mapboxMap.current && isMapReady.current) {
-      const map = mapboxMap.current;
-      const currentLayer: mapboxgl.Layer | undefined = map.getLayer(
-        choroplethLayerId.current
-      );
-      if (currentLayer) {
-        map.removeLayer(choroplethLayerId.current);
-      }
-      const symbolLayer = (map.getStyle().layers || []).find(
-        ({ type }) => type === 'symbol'
-      );
-      choroplethIncrementingId.current++;
-      choroplethLayerId.current = `choropleth_regions_${choroplethIncrementingId.current}`;
-      map.addLayer(
-        {
-          id: choroplethLayerId.current,
-          type: 'fill',
-          source: {
-            type: 'geojson',
-            data: propsRef.current.geojsonSource
-          },
-          layout: {},
-          paint: {
-            'fill-opacity': 0.75,
-            'fill-color': propsRef.current.data.length
-              ? {
-                  property: propsRef.current.geojsonKeyProperty,
-                  stops: propsRef.current.data.map(({ key, value }) => [
-                    key,
-                    mapValueToColorRef.current(value)
-                  ]),
-                  type: 'categorical',
-                  default: 'transparent'
-                }
-              : 'transparent'
-          }
-        },
-        symbolLayer ? symbolLayer.id : undefined
-      );
+  const getValueScale = useCallback(
+    (value: number) => {
+      const [min, max] = getDataRange(data);
+      return (value - min) / (max - min);
+    },
+    [data]
+  );
+
+  const controlScrollZoomOnWheel = useCallback((event: WheelEvent) => {
+    if (event.ctrlKey || event.metaKey) {
+      event.preventDefault();
+    } else {
+      event.stopPropagation();
     }
-  });
+  }, []);
 
-  const onMouseMove = useCallback(
+  const updateHoverStateOnMousemove = useCallback(
     (event: mapboxgl.MapMouseEvent & mapboxgl.EventData) => {
-      if (mapboxMap.current && isMapReady.current && mapboxPopup.current) {
-        mapboxPopup.current.setLngLat(event.lngLat);
-        const hoverFeatures = mapboxMap.current.queryRenderedFeatures(
-          event.point,
-          {
-            layers: [choroplethLayerId.current]
-          }
-        );
-        const geojsonProperties = hoverFeatures[0]
-          ? hoverFeatures[0].properties
-          : null;
-        if (geojsonProperties) {
-          if (
-            !isEqual(hoveredFeaturePropertiesRef.current, geojsonProperties)
-          ) {
-            hoveredFeaturePropertiesRef.current = geojsonProperties;
-            setHoveredFeatureProperties(geojsonProperties);
-            const matchedData = propsRef.current.data.find(
+      if (map && popupRef.current && data.length) {
+        popupRef.current.setLngLat(event.lngLat);
+        const hoverFeatures = map.queryRenderedFeatures(event.point, {
+          layers: [CHOROPLETH_LAYER_ID]
+        });
+        if (hoverFeatures[0]) {
+          const geojsonProperties = hoverFeatures[0].properties;
+          if (!isEqual(geojsonProperties, hoverState.geojsonProperties)) {
+            const matchedData = data.find(
               ({ key }) =>
-                key === geojsonProperties[propsRef.current.geojsonKeyProperty]
+                geojsonProperties &&
+                key === geojsonProperties[geojsonKeyProperty]
             );
-            setHoveredData(matchedData);
+            setHoverState({ geojsonProperties, data: matchedData });
           }
         } else {
-          if (hoveredFeaturePropertiesRef.current) {
-            hoveredFeaturePropertiesRef.current = null;
-            setHoveredFeatureProperties(null);
-            setHoveredData(undefined);
-          }
+          setHoverState({});
         }
       }
+    },
+    [map, data, hoverState.geojsonProperties, geojsonKeyProperty]
+  );
+
+  const updateHoverStateOnMousemoveRef = useRef<
+    ((event: mapboxgl.MapMouseEvent & mapboxgl.EventData) => void) | null
+  >(null);
+
+  const updateHoverStateOnMouseout = useCallback(
+    (event: mapboxgl.MapMouseEvent & mapboxgl.EventData) => {
+      enableScrollZoom.current = false;
+      setHoverState({});
     },
     []
   );
 
-  const onMouseOut = useCallback(() => {
-    hoveredFeaturePropertiesRef.current = null;
-    setHoveredFeatureProperties(null);
-    setHoveredData(undefined);
-    isScrollZoomMode.current = false;
-  }, []);
+  const updateHoverStateOnMouseoutRef = useRef<
+    ((event: mapboxgl.MapMouseEvent & mapboxgl.EventData) => void) | null
+  >(null);
 
   useEffect(() => {
     if (containerRef.current !== null) {
-      const options: MapboxOptions = {
+      // set up Map object
+      const mapboxMap = new Map({
         attributionControl: false,
         container: containerRef.current,
-        style: propsRef.current.mapboxStyle,
-        ...propsRef.current.initialMapboxOptions
-      };
-      mapboxMap.current = new Map(options);
-      const map = mapboxMap.current;
-      map.dragRotate.disable();
-      map.touchZoomRotate.disableRotation();
-      map.addControl(new NavigationControl({ showCompass: false }), 'top-left');
-      const popupOptions: PopupOptions = {
+        style:
+          'https://tiles.maps.elastic.co/styles/osm-bright-desaturated/style.json',
+        ...initialMapboxOptions
+      });
+      mapboxMap.dragRotate.disable();
+      mapboxMap.touchZoomRotate.disableRotation();
+      mapboxMap.addControl(
+        new NavigationControl({ showCompass: false }),
+        'top-left'
+      );
+
+      // set up Popup object
+      popupRef.current = new Popup({
         closeButton: false,
         closeOnClick: false
-      };
-      mapboxPopup.current = new Popup(popupOptions);
-      map.on('mousemove', onMouseMove);
-      map.on('mouseout', onMouseOut);
-      map.on('load', () => {
-        isMapReady.current = true;
-        updateChoroplethLayer.current();
       });
 
-      if (containerRef.current) {
-        const canvasElement = mapboxMap.current.getCanvas();
-        canvasElement.addEventListener('wheel', (event: WheelEvent) => {
-          if (!isScrollZoomMode.current) {
-            event.stopPropagation();
-          }
+      // only scroll zoom when key is pressed
+      const canvasElement = mapboxMap.getCanvas();
+      canvasElement.addEventListener('wheel', controlScrollZoomOnWheel);
+
+      mapboxMap.on('load', () => {
+        mapboxMap.addSource(CHOROPLETH_POLYGONS_SOURCE_ID, {
+          type: 'geojson',
+          data: geojsonSource
         });
+        setMap(mapboxMap);
+      });
+
+      // cleanup function called when component unmounts
+      return () => {
+        canvasElement.removeEventListener('wheel', controlScrollZoomOnWheel);
+      };
+    }
+  }, [controlScrollZoomOnWheel, geojsonSource, initialMapboxOptions]);
+
+  useEffect(() => {
+    if (map) {
+      if (
+        updateHoverStateOnMousemoveRef.current &&
+        updateHoverStateOnMouseoutRef.current
+      ) {
+        map.off('mousemove', updateHoverStateOnMousemoveRef.current);
+        map.off('mouseout', updateHoverStateOnMouseoutRef.current);
+      }
+      map.on('mousemove', updateHoverStateOnMousemove);
+      map.on('mouseout', updateHoverStateOnMouseout);
+      updateHoverStateOnMousemoveRef.current = updateHoverStateOnMousemove;
+      updateHoverStateOnMouseoutRef.current = updateHoverStateOnMouseout;
+    }
+  }, [map, updateHoverStateOnMousemove, updateHoverStateOnMouseout]);
+
+  useEffect(() => {
+    if (map) {
+      const symbolLayer = (map.getStyle().layers || []).find(
+        ({ type }) => type === 'symbol'
+      );
+      if (map.getLayer(CHOROPLETH_LAYER_ID)) {
+        map.removeLayer(CHOROPLETH_LAYER_ID);
+      }
+      if (data.length) {
+        map.addLayer(
+          {
+            id: CHOROPLETH_LAYER_ID,
+            type: 'fill',
+            source: CHOROPLETH_POLYGONS_SOURCE_ID,
+            layout: {},
+            paint: {
+              'fill-opacity': 0.75,
+              'fill-color': data.length
+                ? {
+                    property: geojsonKeyProperty,
+                    stops: data.map(({ key, value }) => [
+                      key,
+                      getProgressionColor(getValueScale(value))
+                    ]),
+                    type: 'categorical',
+                    default: 'transparent'
+                  }
+                : 'transparent'
+            }
+          },
+          symbolLayer ? symbolLayer.id : undefined
+        );
       }
     }
-  }, [onMouseMove, onMouseOut]);
-
-  const isScrollZoomMode = useRef(false);
-  useEffect(() => {
-    window.addEventListener('keydown', (e: KeyboardEvent) => {
-      if (e.keyCode === 17 || e.keyCode === 224) {
-        isScrollZoomMode.current = true;
-      }
-    });
-    window.addEventListener('keyup', (e: KeyboardEvent) => {
-      if (e.keyCode === 17 || e.keyCode === 224) {
-        isScrollZoomMode.current = false;
-      }
-    });
-  }, []);
+  }, [map, data, getValueScale, geojsonKeyProperty]);
 
   useEffect(() => {
-    if (toolTipRef.current && mapboxMap.current && mapboxPopup.current) {
-      if (hoveredFeatureProperties && hoveredData) {
-        mapboxPopup.current
-          .setDOMContent(toolTipRef.current)
-          .addTo(mapboxMap.current);
-        if (toolTipRef.current.parentElement) {
-          toolTipRef.current.parentElement.style.pointerEvents = 'none';
+    if (popupContainerRef.current && map && popupRef.current) {
+      if (hoverState.geojsonProperties && hoverState.data) {
+        popupRef.current.setDOMContent(popupContainerRef.current).addTo(map);
+        if (popupContainerRef.current.parentElement) {
+          popupContainerRef.current.parentElement.style.pointerEvents = 'none';
         }
       } else {
-        mapboxPopup.current.remove();
+        popupRef.current.remove();
       }
     }
-  }, [hoveredFeatureProperties, hoveredData]);
-
-  useEffect(() => {
-    const map = mapboxMap.current;
-    mapValueToColorRef.current = mapValueToColor;
-    if (map && isMapReady.current) {
-      if (isEqual(mapboxStyleRef.current, mapboxStyle)) {
-        updateChoroplethLayer.current();
-      } else {
-        mapboxStyleRef.current = mapboxStyle;
-        isMapReady.current = false;
-        map.setStyle(mapboxStyle);
-        map.once('styledata', () => {
-          isMapReady.current = true;
-          updateChoroplethLayer.current();
-        });
-      }
-    }
-  }, [
-    mapboxStyle,
-    geojsonSource,
-    geojsonKeyProperty,
-    data,
-    mapValueToColor,
-    getProgressionColor
-  ]);
+  }, [map, hoverState]);
 
   return (
     <>
       <div ref={containerRef} style={{ height: 256, ...style }} />
       <div style={{ display: 'none' }}>
-        <div ref={toolTipRef}>
+        <div ref={popupContainerRef}>
           <ToolTip
-            geojsonProperties={hoveredFeatureProperties || {}}
-            data={hoveredData}
+            geojsonProperties={hoverState.geojsonProperties || {}}
+            data={hoverState.data}
           />
         </div>
       </div>
