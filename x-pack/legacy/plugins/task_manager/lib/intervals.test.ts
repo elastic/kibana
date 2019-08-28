@@ -27,11 +27,11 @@ afterAll(() => fakeTimer.restore());
 describe('taskIntervals', () => {
   describe('assertValidInterval', () => {
     test('it accepts intervals in the form `Nm`', () => {
-      expect(() => assertValidInterval(`${_.random(1000)}m`)).not.toThrow();
+      expect(() => assertValidInterval(`${_.random(1, 1000)}m`)).not.toThrow();
     });
 
     test('it accepts intervals in the form `Ns`', () => {
-      expect(() => assertValidInterval(`${_.random(1000)}s`)).not.toThrow();
+      expect(() => assertValidInterval(`${_.random(1, 1000)}s`)).not.toThrow();
     });
 
     test('it rejects 0 based intervals', () => {

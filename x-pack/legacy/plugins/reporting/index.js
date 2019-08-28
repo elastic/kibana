@@ -134,7 +134,7 @@ export const reporting = (kibana) => {
         }).default(),
         csv: Joi.object({
           checkForFormulas: Joi.boolean().default(true),
-          enablePanelActionDownload: Joi.boolean().default(false),
+          enablePanelActionDownload: Joi.boolean().default(true),
           maxSizeBytes: Joi.number().integer().default(1024 * 1024 * 10), // bytes in a kB * kB in a mB * 10
           scroll: Joi.object({
             duration: Joi.string().regex(/^[0-9]+(d|h|m|s|ms|micros|nanos)$/, { name: 'DurationString' }).default('30s'),
