@@ -9,10 +9,9 @@ import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import { idx } from '@kbn/elastic-idx';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { fontSize } from '../../../../style/variables';
-import { APMLink } from '../../../shared/Links/apm/APMLink';
+import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
 
 const LinkLabel = styled.span`
   font-size: ${fontSize};
@@ -49,10 +48,11 @@ export const ErrorCountBadge: React.SFC<Props> = ({
       {errorCount}
     </EuiBadge>
   );
+  const serviceName = transaction.service.name;
 
   return (
-    <APMLink
-      path={`/services/${idx(transaction, _ => _.service.name)}/errors`}
+    <ErrorOverviewLink
+      serviceName={serviceName}
       query={{
         kuery: encodeURIComponent(
           `trace.id : "${transaction.trace.id}" and transaction.id : "${transaction.transaction.id}"`
@@ -76,6 +76,6 @@ export const ErrorCountBadge: React.SFC<Props> = ({
       ) : (
         <EuiToolTip content={toolTipContent}>{errorCountBadge}</EuiToolTip>
       )}
-    </APMLink>
+    </ErrorOverviewLink>
   );
 };

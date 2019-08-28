@@ -212,7 +212,7 @@ export default class BaseOptimizer {
     /**
      * Adds a cache loader if we're running in dev mode. The reason we're not adding
      * the cache-loader when running in production mode is that it creates cache
-     * files in optimize/.cache that are not necessary for distributable versions
+     * files in data/optimize/.cache that are not necessary for distributable versions
      * of Kibana and just make compressing and extracting it more difficult.
      */
     const maybeAddCacheLoader = (cacheName, loaders) => {
