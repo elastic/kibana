@@ -23,14 +23,15 @@ export class AgentLib {
   public async enroll(
     token: any,
     type: AgentType,
-    config: { id: string; sharedId: string },
     metadata?: { local: any; userProvided: any },
     sharedId?: string
   ): Promise<Agent> {
     const verifyResponse = await this.tokens.verify(token);
+
     if (!verifyResponse.valid) {
       throw new Error(`Enrollment token is not valid: ${verifyResponse.reason}`);
     }
+    const config = verifyResponse.token.config;
 
     const existingAgent = sharedId ? await this.agentAdater.getBySharedId(sharedId) : null;
 
@@ -38,7 +39,6 @@ export class AgentLib {
       throw new Error('Impossible to enroll an already active agent');
     }
 
-    const accessToken = await this.tokens.generateAccessToken(token);
     const enrolledAt = moment().toISOString();
 
     const parentId =
@@ -52,23 +52,30 @@ export class AgentLib {
       config_id: config.id,
       config_shared_id: config.sharedId,
       type,
-      access_token: accessToken,
       enrolled_at: enrolledAt,
       parent_id: parentId,
       user_provided_metadata: metadata && metadata.userProvided,
       local_metadata: metadata && metadata.local,
     };
 
+    let agent;
     if (existingAgent) {
       await this.agentAdater.update(existingAgent.id, agentData);
 
-      return {
+      agent = {
         ...existingAgent,
         ...agentData,
       };
+    } else {
+      agent = await this.agentAdater.create(agentData);
     }
 
-    return await this.agentAdater.create(agentData);
+    const accessToken = await this.tokens.generateAccessToken(agent.id, config);
+    await this.agentAdater.update(agent.id, {
+      access_token: accessToken,
+    });
+
+    return { ...agent, access_token: accessToken };
   }
 
   /**
@@ -80,6 +87,13 @@ export class AgentLib {
     }
 
     return this.agentAdater.update(agent.id, { active: false });
+  }
+
+  /**
+   * Get an agent by id
+   */
+  public async getById(id: string): Promise<Agent | null> {
+    return await this.agentAdater.getById(id);
   }
 
   /**

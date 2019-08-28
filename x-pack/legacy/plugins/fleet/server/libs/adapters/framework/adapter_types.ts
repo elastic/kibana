@@ -5,9 +5,22 @@
  */
 
 import { Legacy } from 'kibana';
+import { ResponseToolkit, ResponseObject } from 'hapi';
+import { Request } from 'src/legacy/server/kbn_server';
 
 export type KibanaLegacyServer = Legacy.Server;
 
 export interface FrameworkAdapter {
   getSetting(settingPath: string): string;
 }
+
+export interface FrameworkRequest<KibanaServerRequestGenaric extends Partial<Request> = any> {
+  query: KibanaServerRequestGenaric['query'];
+  params: KibanaServerRequestGenaric['params'];
+  payload: KibanaServerRequestGenaric['payload'];
+  headers: KibanaServerRequestGenaric['headers'];
+}
+
+export type FrameworkResponseToolkit = ResponseToolkit;
+
+export type FrameworkResponseObject = ResponseObject;
