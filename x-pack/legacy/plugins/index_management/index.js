@@ -32,7 +32,7 @@ export function indexManagement(kibana)  {
       server.expose('addIndexManagementDataEnricher', addIndexManagementDataEnricher);
       registerLicenseChecker(server, PLUGIN.ID, PLUGIN.NAME, PLUGIN.MINIMUM_LICENSE_REQUIRED);
       registerIndicesRoutes(router);
-      registerTemplateRoutes(router);
+      registerTemplateRoutes(router, server);
       registerSettingsRoutes(router);
       registerStatsRoute(router);
       registerMappingRoute(router);

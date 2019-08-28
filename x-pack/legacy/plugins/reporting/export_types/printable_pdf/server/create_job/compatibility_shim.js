@@ -5,78 +5,110 @@
  */
 
 import { uriEncode } from '../lib/uri_encode';
-import { PLUGIN_ID } from '../../../../common/constants';
 
-export function compatibilityShimFactory(server) {
+/*
+ * TODO: Kibana 8.0:
+ * Remove support for parsing Saved Object details from objectType / savedObjectId
+ * Including support for determining the Report title from objectType / savedObjectId
+ *
+ * - `objectType` is optional, but helps differentiate the type of report in the job listing
+ * - `title` must be explicitly passed
+ * - `relativeUrls` array OR `relativeUrl` string must be passed
+ */
 
-  const logDeprecation = (msg) => {
-    server.log(['warning', PLUGIN_ID, 'deprecation'], msg + ' This functionality will be removed with the next major version.');
+const getSavedObjectTitle = async (objectType, savedObjectId, savedObjectsClient) => {
+  const savedObject = await savedObjectsClient.get(objectType, savedObjectId);
+  return savedObject.attributes.title;
+};
+
+const getSavedObjectRelativeUrl = (objectType, savedObjectId, queryString) => {
+  const appPrefixes = {
+    dashboard: '/dashboard/',
+    visualization: '/visualize/edit/',
+    search: '/discover/',
   };
 
-  const getSavedObjectTitle = async (objectType, savedObjectId, savedObjectsClient) => {
-    if (!objectType) {
-      throw new Error('objectType is required to determine the title from the saved object');
-    }
+  const appPrefix = appPrefixes[objectType];
+  if (!appPrefix) throw new Error('Unexpected app type: ' + objectType);
 
-    if (!savedObjectId) {
-      throw new Error('savedObjectId is required to determine the title from the saved object');
-    }
+  const hash = appPrefix + uriEncode.string(savedObjectId, true);
 
-    logDeprecation('The title should be provided with the job generation request. Please use Kibana to regenerate your URLs.');
-    const savedObject = await savedObjectsClient.get(objectType, savedObjectId);
+  return `/app/kibana#${hash}?${queryString || ''}`;
+};
 
-    return savedObject.attributes.title;
-  };
+export function compatibilityShimFactory(server, logger) {
+  return function compatibilityShimFactory(createJobFn) {
+    return async function (
+      {
+        savedObjectId, // deprecating
+        queryString, // deprecating
+        browserTimezone,
+        objectType,
+        title,
+        relativeUrl, // not deprecating
+        relativeUrls,
+        layout
+      },
+      headers,
+      request
+    ) {
+      if (savedObjectId && (relativeUrl || relativeUrls)) {
+        throw new Error(`savedObjectId should not be provided if relativeUrls are provided`);
+      }
+      if (!savedObjectId && !relativeUrl && !relativeUrls) {
+        throw new Error(`either relativeUrls or savedObjectId must be provided`);
+      }
 
+      let kibanaRelativeUrls;
+      if (relativeUrls) {
+        kibanaRelativeUrls = relativeUrls;
+      } else if (relativeUrl) {
+        kibanaRelativeUrls = [ relativeUrl ];
+      } else {
+        kibanaRelativeUrls = [getSavedObjectRelativeUrl(objectType, savedObjectId, queryString)];
+        logger.warning(
+          `The relativeUrls have been derived from saved object parameters. ` +
+            `This functionality will be removed with the next major version.`
+        );
+      }
 
-  const getSavedObjectRelativeUrl = (objectType, savedObjectId, queryString) => {
-    if (!objectType) {
-      throw new Error('objectType is required to determine the savedObject urlHash');
-    }
-
-    if (!savedObjectId) {
-      throw new Error('id is required to determine the savedObject relativeUrl');
-    }
-
-    logDeprecation('The relativeUrl should be provided with the job generation request. Please use Kibana to regenerate your URLs.');
-    const appPrefixes = {
-      dashboard: '/dashboard/',
-      visualization: '/visualize/edit/',
-      search: '/discover/'
-    };
-
-    const appPrefix = appPrefixes[objectType];
-    if (!appPrefix) throw new Error('Unexpected app type: ' + objectType);
-
-    const hash = appPrefix + uriEncode.string(savedObjectId, true);
-
-    return `/app/kibana#${hash}?${queryString || ''}`;
-  };
-
-  return function compatibilityShimFactory(createJob) {
-    return async function ({
-      objectType,
-      savedObjectId,
-      title,
-      relativeUrls,
-      queryString,
-      browserTimezone,
-      layout
-    }, headers, request) {
-
-      if (objectType && savedObjectId && relativeUrls) {
-        throw new Error('objectType and savedObjectId should not be provided in addition to the relativeUrls');
+      let reportTitle;
+      try {
+        if (title) {
+          reportTitle = title;
+        } else {
+          if (objectType && savedObjectId) {
+            reportTitle = await getSavedObjectTitle(
+              objectType,
+              savedObjectId,
+              request.getSavedObjectsClient()
+            );
+            logger.warning(
+              `The title has been derived from saved object parameters. This ` +
+                `functionality will be removed with the next major version.`
+            );
+          } else {
+            logger.warning(
+              `A title parameter should be provided with the job generation ` +
+              `request. Please use Kibana to regenerate your POST URL to have a ` +
+              `title included in the PDF.`
+            );
+          }
+        }
+      } catch (err) {
+        logger.error(err); // 404 for the savedObjectId, etc
+        throw err;
       }
 
       const transformedJobParams = {
         objectType,
-        title: title || await getSavedObjectTitle(objectType, savedObjectId, request.getSavedObjectsClient()),
-        relativeUrls: objectType && savedObjectId ? [ getSavedObjectRelativeUrl(objectType, savedObjectId, queryString) ] : relativeUrls,
+        title: reportTitle,
+        relativeUrls: kibanaRelativeUrls,
         browserTimezone,
-        layout
+        layout,
       };
 
-      return await createJob(transformedJobParams, headers, request);
+      return await createJobFn(transformedJobParams, headers, request);
     };
   };
 }

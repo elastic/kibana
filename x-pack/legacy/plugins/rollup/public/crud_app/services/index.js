@@ -24,17 +24,6 @@ export {
 } from './breadcrumbs';
 
 export {
-  cronExpressionToParts,
-  cronPartsToExpression,
-  MINUTE,
-  HOUR,
-  DAY,
-  WEEK,
-  MONTH,
-  YEAR,
-} from './cron';
-
-export {
   logisticalDetailsUrl,
   dateHistogramDetailsUrl,
   dateHistogramAggregationUrl,
@@ -60,12 +49,6 @@ export {
   setHttp,
   getHttp,
 } from './http_provider';
-
-export {
-  getOrdinalValue,
-  getDayName,
-  getMonthName,
-} from './humanized_numbers';
 
 export {
   serializeJob,
