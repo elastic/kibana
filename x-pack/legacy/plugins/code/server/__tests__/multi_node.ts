@@ -63,7 +63,8 @@ const xpackOption = {
   },
 };
 
-describe('code in multiple nodes', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/43960
+describe.skip('code in multiple nodes', () => {
   const codeNodeUuid = 'c4add484-0cba-4e05-86fe-4baa112d9e53';
   const nonodeNodeUuid = '22b75e04-0e50-4647-9643-6b1b1d88beaf';
   let codePort: number;
