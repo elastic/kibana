@@ -11,6 +11,8 @@ import { notify } from './notify';
 
 const basePath = chrome.getBasePath();
 const apiPath = basePath + API_ROUTE;
+const savedObjectsClient = chrome.getSavedObjectsClient();
+const AdvancedSettings = chrome.getUiSettingsClient();
 
 export const getFields = (index = '_all') => {
   return fetch
@@ -25,9 +27,8 @@ export const getFields = (index = '_all') => {
     );
 };
 
-export const getIndices = () => {
-  const savedObjectsClient = chrome.getSavedObjectsClient();
-  return savedObjectsClient
+export const getIndices = () =>
+  savedObjectsClient
     .find({
       type: 'index-pattern',
       fields: ['title'],
@@ -40,4 +41,9 @@ export const getIndices = () => {
       });
     })
     .catch(err => notify.error(err, { title: `Couldn't fetch Elasticsearch indices` }));
-};
+
+export const getDefaultIndex = () =>
+  savedObjectsClient
+    .get('index-pattern', AdvancedSettings.get('defaultIndex'))
+    .then(defaultIndex => defaultIndex.attributes.title)
+    .catch(err => notify.error(err, { title: `Couldn't fetch default index` }));

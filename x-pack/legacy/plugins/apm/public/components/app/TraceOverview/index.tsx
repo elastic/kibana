@@ -7,19 +7,28 @@
 import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
-import { loadTraceList } from '../../../services/rest/apm/traces';
 import { TraceList } from './TraceList';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useTrackPageview } from '../../../../../infra/public';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { PROJECTION } from '../../../../common/projections/typings';
+import { callApmApi } from '../../../services/rest/callApmApi';
 
 export function TraceOverview() {
   const { urlParams, uiFilters } = useUrlParams();
   const { start, end } = urlParams;
   const { status, data = [] } = useFetcher(() => {
     if (start && end) {
-      return loadTraceList({ start, end, uiFilters });
+      return callApmApi({
+        pathname: '/api/apm/traces',
+        params: {
+          query: {
+            start,
+            end,
+            uiFilters: JSON.stringify(uiFilters)
+          }
+        }
+      });
     }
   }, [start, end, uiFilters]);
 

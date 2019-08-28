@@ -39,14 +39,13 @@ interface OwnProps {
   height: number;
   sort: Sort;
   toggleColumn: (column: ColumnHeader) => void;
-  width: number;
 }
 
 interface ReduxProps {
   columnHeaders: ColumnHeader[];
-  eventIdToNoteIds?: Readonly<Record<string, string[]>>;
+  eventIdToNoteIds: Readonly<Record<string, string[]>>;
   getNotesByIds: (noteIds: string[]) => Note[];
-  pinnedEventIds?: Readonly<Record<string, boolean>>;
+  pinnedEventIds: Readonly<Record<string, boolean>>;
   range?: string;
 }
 
@@ -82,6 +81,8 @@ interface DispatchProps {
 
 type StatefulBodyComponentProps = OwnProps & ReduxProps & DispatchProps;
 
+export const emptyColumnHeaders: ColumnHeader[] = [];
+
 class StatefulBodyComponent extends React.PureComponent<StatefulBodyComponentProps> {
   public render() {
     const {
@@ -96,7 +97,6 @@ class StatefulBodyComponent extends React.PureComponent<StatefulBodyComponentPro
       range,
       sort,
       toggleColumn,
-      width,
     } = this.props;
 
     return (
@@ -104,10 +104,10 @@ class StatefulBodyComponent extends React.PureComponent<StatefulBodyComponentPro
         addNoteToEvent={this.onAddNoteToEvent}
         browserFields={browserFields}
         id={id}
-        columnHeaders={columnHeaders || []}
+        columnHeaders={columnHeaders || emptyColumnHeaders}
         columnRenderers={columnRenderers}
         data={data}
-        eventIdToNoteIds={eventIdToNoteIds!}
+        eventIdToNoteIds={eventIdToNoteIds}
         getNotesByIds={getNotesByIds}
         height={height}
         onColumnResized={this.onColumnResized}
@@ -117,13 +117,12 @@ class StatefulBodyComponent extends React.PureComponent<StatefulBodyComponentPro
         onPinEvent={this.onPinEvent}
         onUpdateColumns={this.onUpdateColumns}
         onUnPinEvent={this.onUnPinEvent}
-        pinnedEventIds={pinnedEventIds!}
+        pinnedEventIds={pinnedEventIds}
         range={range!}
         rowRenderers={rowRenderers}
         sort={sort}
         toggleColumn={toggleColumn}
         updateNote={this.onUpdateNote}
-        width={width}
       />
     );
   }

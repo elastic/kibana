@@ -4,163 +4,113 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import {
   EuiButtonIcon,
   EuiPopover,
   EuiContextMenu,
-  EuiSelectable,
-  EuiHighlight,
-  EuiTextColor,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DRAW_TYPE } from '../../../actions/map_actions';
+import { DRAW_TYPE } from '../../../../common/constants';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { GeometryFilterForm } from '../../../components/geometry_filter_form';
 
-const RESET_STATE = {
-  isPopoverOpen: false,
-  drawType: null
-};
+const DRAW_SHAPE_LABEL = i18n.translate('xpack.maps.toolbarOverlay.drawShapeLabel', {
+  defaultMessage: 'Draw shape to filter data',
+});
+
+const DRAW_BOUNDS_LABEL = i18n.translate('xpack.maps.toolbarOverlay.drawBoundsLabel', {
+  defaultMessage: 'Draw bounds to filter data',
+});
 
 export class ToolsControl extends Component {
 
   state = {
-    ...RESET_STATE
+    isPopoverOpen: false
   };
 
   _togglePopover = () => {
     this.setState(prevState => ({
-      ...RESET_STATE,
       isPopoverOpen: !prevState.isPopoverOpen,
     }));
   };
 
   _closePopover = () => {
-    this.setState(RESET_STATE);
+    this.setState({ isPopoverOpen: false });
   };
 
-  _onIndexPatternSelection = (options) => {
-    const selection = options.find((option) => option.checked);
-    this._initiateDraw(
-      this.state.drawType,
-      selection.value
-    );
-  };
-
-  _initiateDraw = (drawType, indexContext) => {
+  _initiateShapeDraw = (options) => {
     this.props.initiateDraw({
-      drawType,
-      ...indexContext
+      drawType: DRAW_TYPE.POLYGON,
+      ...options
+    });
+    this._closePopover();
+  }
+
+  _initiateBoundsDraw = (options) => {
+    this.props.initiateDraw({
+      drawType: DRAW_TYPE.BOUNDS,
+      ...options
     });
     this._closePopover();
   };
 
-  _selectPolygonDrawType = () => {
-    this.setState({ drawType: DRAW_TYPE.POLYGON });
-  }
-
-  _selectBoundsDrawType = () => {
-    this.setState({ drawType: DRAW_TYPE.BOUNDS });
-  }
-
   _getDrawPanels() {
-
-    const needsIndexPatternSelectionPanel = this.props.geoFields.length > 1;
-
-    const drawPolygonAction = {
-      name: i18n.translate('xpack.maps.toolbarOverlay.drawShapeLabel', {
-        defaultMessage: 'Draw shape to filter data',
-      }),
-      onClick: needsIndexPatternSelectionPanel
-        ? this._selectPolygonDrawType
-        : () => {
-          this._initiateDraw(DRAW_TYPE.POLYGON, this.props.geoFields[0]);
-        },
-      panel: needsIndexPatternSelectionPanel
-        ? this._getIndexPatternSelectionPanel(1)
-        : undefined
-    };
-
-    const drawBoundsAction = {
-      name: i18n.translate('xpack.maps.toolbarOverlay.drawBoundsLabel', {
-        defaultMessage: 'Draw bounds to filter data',
-      }),
-      onClick: needsIndexPatternSelectionPanel
-        ? this._selectBoundsDrawType
-        : () => {
-          this._initiateDraw(DRAW_TYPE.BOUNDS, this.props.geoFields[0]);
-        },
-      panel: needsIndexPatternSelectionPanel
-        ? this._getIndexPatternSelectionPanel(2)
-        : undefined
-    };
-
-    return flattenPanelTree({
-      id: 0,
-      title: i18n.translate('xpack.maps.toolbarOverlay.tools.toolbarTitle', {
-        defaultMessage: 'Tools',
-      }),
-      items: [drawPolygonAction, drawBoundsAction]
-    });
-  }
-
-  _getIndexPatternSelectionPanel(id) {
-    const options = this.props.geoFields.map((geoField) => {
-      return {
-        label: `${geoField.indexPatternTitle} : ${geoField.geoFieldName}`,
-        value: geoField
-      };
-    });
-
-    const renderGeoField = (option, searchValue) => {
-      return (
-        <Fragment>
-          <EuiTextColor color="subdued">
-            <small>
-              <EuiHighlight search={searchValue}>{option.value.indexPatternTitle}</EuiHighlight>
-            </small>
-          </EuiTextColor>
-          <br />
-          <EuiHighlight search={searchValue}>
-            {option.value.geoFieldName}
-          </EuiHighlight>
-        </Fragment>
-      );
-    };
-
-    const indexPatternSelection = (
-      <EuiSelectable
-        searchable
-        searchProps={{
-          placeholder: i18n.translate('xpack.maps.toolbarOverlay.indexPattern.filterListTitle', {
-            defaultMessage: 'Filter list',
-          }),
-          compressed: true,
-        }}
-        options={options}
-
-        onChange={this._onIndexPatternSelection}
-        renderOption={renderGeoField}
-        listProps={{
-          rowHeight: 50,
-          showIcons: false,
-        }}
-      >
-        {(list, search) => (
-          <div>
-            {search}
-            {list}
-          </div>
-        )}
-      </EuiSelectable>
-    );
-
-    return {
-      id: id,
-      title: i18n.translate('xpack.maps.toolbarOverlay.geofield.toolbarTitle', {
-        defaultMessage: 'Select geo field',
-      }),
-      content: indexPatternSelection
-    };
+    return [
+      {
+        id: 0,
+        title: i18n.translate('xpack.maps.toolbarOverlay.tools.toolbarTitle', {
+          defaultMessage: 'Tools',
+        }),
+        items: [
+          {
+            name: DRAW_SHAPE_LABEL,
+            panel: 1
+          },
+          {
+            name: DRAW_BOUNDS_LABEL,
+            panel: 2
+          }
+        ]
+      },
+      {
+        id: 1,
+        title: DRAW_SHAPE_LABEL,
+        content: (
+          <GeometryFilterForm
+            className="mapDrawControl__geometryFilterForm"
+            buttonLabel={i18n.translate('xpack.maps.toolbarOverlay.drawShape.onSubmitButtonLabel', {
+              defaultMessage: 'Draw shape',
+            })}
+            geoFields={this.props.geoFields}
+            intitialGeometryLabel={i18n.translate('xpack.maps.toolbarOverlay.drawShape.initialGeometryLabel', {
+              defaultMessage: 'shape',
+            })}
+            onSubmit={this._initiateShapeDraw}
+          />
+        )
+      },
+      {
+        id: 2,
+        title: DRAW_BOUNDS_LABEL,
+        content: (
+          <GeometryFilterForm
+            className="mapDrawControl__geometryFilterForm"
+            buttonLabel={i18n.translate('xpack.maps.toolbarOverlay.drawBounds.onSubmitButtonLabel', {
+              defaultMessage: 'Draw bounds',
+            })}
+            geoFields={this.props.geoFields}
+            intitialGeometryLabel={i18n.translate('xpack.maps.toolbarOverlay.drawBounds.initialGeometryLabel', {
+              defaultMessage: 'bounds',
+            })}
+            onSubmit={this._initiateBoundsDraw}
+          />
+        )
+      }
+    ];
   }
 
   _renderToolsButton() {
@@ -181,7 +131,7 @@ export class ToolsControl extends Component {
   }
 
   render() {
-    return (
+    const toolsPopoverButton = (
       <EuiPopover
         id="contextMenu"
         button={this._renderToolsButton()}
@@ -197,20 +147,29 @@ export class ToolsControl extends Component {
         />
       </EuiPopover>
     );
+
+    if (!this.props.isDrawingFilter) {
+      return toolsPopoverButton;
+    }
+
+    return (
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          {toolsPopoverButton}
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButton
+            size="s"
+            fill
+            onClick={this.props.cancelDraw}
+          >
+            <FormattedMessage
+              id="xpack.maps.tooltip.toolsControl.cancelDrawButtonLabel"
+              defaultMessage="Cancel"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
-}
-
-function flattenPanelTree(tree, array = []) {
-  array.push(tree);
-
-  if (tree.items) {
-    tree.items.forEach(item => {
-      if (item.panel) {
-        flattenPanelTree(item.panel, array);
-        item.panel = item.panel.id;
-      }
-    });
-  }
-
-  return array;
 }

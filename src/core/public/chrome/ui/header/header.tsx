@@ -163,6 +163,8 @@ interface Props {
   navControlsRight$: Rx.Observable<readonly ChromeNavControl[]>;
   intl: InjectedIntl;
   basePath: HttpStart['basePath'];
+  isLocked?: boolean;
+  onIsLockedUpdate?: (isLocked: boolean) => void;
 }
 
 interface State {
@@ -266,8 +268,10 @@ class HeaderUI extends Component<Props, State> {
       breadcrumbs$,
       helpExtension$,
       intl,
+      isLocked,
       kibanaDocLink,
       kibanaVersion,
+      onIsLockedUpdate,
     } = this.props;
     const {
       appTitle,
@@ -355,7 +359,12 @@ class HeaderUI extends Component<Props, State> {
           </EuiHeaderSection>
         </EuiHeader>
 
-        <EuiNavDrawer ref={this.navDrawerRef} data-test-subj="navDrawer">
+        <EuiNavDrawer
+          ref={this.navDrawerRef}
+          data-test-subj="navDrawer"
+          isLocked={isLocked}
+          onIsLockedUpdate={onIsLockedUpdate}
+        >
           <EuiNavDrawerGroup listItems={recentLinksArray} />
           <EuiHorizontalRule margin="none" />
           <EuiNavDrawerGroup data-test-subj="navDrawerAppsMenu" listItems={navLinksArray} />

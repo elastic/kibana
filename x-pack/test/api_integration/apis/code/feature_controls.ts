@@ -118,22 +118,33 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   }
 
   describe('feature controls', () => {
-    const kibanaUsername = 'kibana_user';
-    const kibanaUserRoleName = 'kibana_user';
-
-    const kibanaUserPassword = `${kibanaUsername}-password`;
+    const codeAdminUsername = 'code_admin_user';
+    const codeAdminRoleName = 'code_admin_role';
+    const codeAdminUserPassword = `${codeAdminUsername}-password`;
 
     before(async () => {
+      await security.role.create(codeAdminRoleName, {
+        kibana: [
+          {
+            feature: {
+              // Grant all permission to Code app as an admin user.
+              code: ['all'],
+            },
+            spaces: ['*'],
+          },
+        ],
+      });
+
       // Import a repository first
-      await security.user.create(kibanaUsername, {
-        password: kibanaUserPassword,
-        roles: [kibanaUserRoleName],
-        full_name: 'a kibana user',
+      await security.user.create(codeAdminUsername, {
+        password: codeAdminUserPassword,
+        roles: [codeAdminRoleName],
+        full_name: 'Code admin user',
       });
 
       await supertest
         .post(`/api/code/repo`)
-        .auth(kibanaUsername, kibanaUserPassword)
+        .auth(codeAdminUsername, codeAdminUserPassword)
         .set('kbn-xsrf', 'foo')
         .send({ url: 'https://github.com/elastic/code-examples_empty-file.git' })
         .expect(200);
@@ -143,11 +154,12 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       // Delete the repository
       await supertest
         .delete(`/api/code/repo/github.com/elastic/code-examples_empty-file`)
-        .auth(kibanaUsername, kibanaUserPassword)
+        .auth(codeAdminUsername, codeAdminUserPassword)
         .set('kbn-xsrf', 'foo')
         .expect(200);
 
-      await security.user.delete(kibanaUsername);
+      await security.role.delete(codeAdminRoleName);
+      await security.user.delete(codeAdminUsername);
     });
 
     it(`Non admin Code user cannot execute delete without all permission`, async () => {
@@ -185,8 +197,8 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     });
 
     it(`Admin Code user can execute clone/delete with all permission`, async () => {
-      const username = 'logstash_read';
-      const roleName = 'logstash_read';
+      const username = 'another_code_admin_user';
+      const roleName = 'another_code_admin_role';
       const password = `${username}-password`;
       try {
         await security.role.create(roleName, {
@@ -204,7 +216,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         await security.user.create(username, {
           password,
           roles: [roleName],
-          full_name: 'a kibana user',
+          full_name: 'Code admin user',
         });
 
         // Clone repository

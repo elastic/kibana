@@ -146,9 +146,9 @@ describe('Cookie based SessionStorage', () => {
         const sessionValue = await sessionStorage.get();
         if (!sessionValue) {
           sessionStorage.set({ value: userData, expires: Date.now() + sessionDurationMs });
-          return res.ok({});
+          return res.ok();
         }
-        return res.ok({ value: sessionValue.value });
+        return res.ok({ body: { value: sessionValue.value } });
       });
 
       const factory = await createCookieSessionStorageFactory(
@@ -180,7 +180,7 @@ describe('Cookie based SessionStorage', () => {
       router.get({ path: '/', validate: false }, async (context, req, res) => {
         const sessionStorage = factory.asScoped(req);
         const sessionValue = await sessionStorage.get();
-        return res.ok({ value: sessionValue });
+        return res.ok({ body: { value: sessionValue } });
       });
 
       const factory = await createCookieSessionStorageFactory(
@@ -209,10 +209,10 @@ describe('Cookie based SessionStorage', () => {
         if (!setOnce) {
           setOnce = true;
           sessionStorage.set({ value: userData, expires: Date.now() + sessionDurationMs });
-          return res.ok({ value: userData });
+          return res.ok({ body: { value: userData } });
         }
         const sessionValue = await sessionStorage.get();
-        return res.ok({ value: sessionValue });
+        return res.ok({ body: { value: sessionValue } });
       });
 
       const factory = await createCookieSessionStorageFactory(

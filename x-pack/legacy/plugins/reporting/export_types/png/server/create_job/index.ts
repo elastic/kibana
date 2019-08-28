@@ -5,16 +5,16 @@
  */
 
 import { Request } from 'hapi';
-import { KbnServer, ConditionalHeaders } from '../../../../types';
+import { KbnServer, ConditionalHeaders, CreateJobFactory } from '../../../../types';
 import { cryptoFactory } from '../../../../server/lib/crypto';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
-import { JobParamsPNG as JobParams, CreateJobFactoryPNG as CreateJobFactory } from '../../types';
+import { JobParamsPNG, ESQueueCreateJobFnPNG } from '../../types';
 
 function createJobFn(server: KbnServer) {
   const crypto = cryptoFactory(server);
 
   return async function createJob(
-    { objectType, title, relativeUrl, browserTimezone, layout }: JobParams,
+    { objectType, title, relativeUrl, browserTimezone, layout }: JobParamsPNG,
     headers: ConditionalHeaders,
     request: Request
   ) {
@@ -33,4 +33,6 @@ function createJobFn(server: KbnServer) {
   };
 }
 
-export const createJobFactory: CreateJobFactory = oncePerServer(createJobFn as CreateJobFactory);
+export const createJobFactory: CreateJobFactory = oncePerServer(createJobFn as (
+  server: KbnServer
+) => ESQueueCreateJobFnPNG);
