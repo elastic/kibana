@@ -24,7 +24,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { AggGroupNames } from 'ui/vis/editors/default';
 import { SelectOption } from '../../common';
-import { GaugeVisParams } from '../../../gauge';
 import { GaugeOptionsInternalProps } from '.';
 
 function StylePanel({ aggs, setGaugeValue, stateParams, vis }: GaugeOptionsInternalProps) {
