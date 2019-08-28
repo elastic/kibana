@@ -28,3 +28,5 @@ export const HostsEmptyPage = pure(() => (
     title={i18n.EMPTY_TITLE}
   />
 ));
+
+HostsEmptyPage.displayName = 'HostsEmptyPage';

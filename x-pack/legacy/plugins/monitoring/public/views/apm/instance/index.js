@@ -19,13 +19,14 @@ import template from './index.html';
 import { MonitoringViewBaseController } from '../../base_controller';
 import { ApmServerInstance } from '../../../components/apm/instance';
 import { I18nContext } from 'ui/i18n';
+import { CODE_PATH_APM } from '../../../../common/constants';
 
 uiRoutes.when('/apm/instances/:uuid', {
   template,
   resolve: {
     clusters: function (Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: [CODE_PATH_APM] });
     },
   },
 

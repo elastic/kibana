@@ -21,13 +21,11 @@ import React from 'react';
 import { MetricSeries } from './series';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
-jest.mock('plugins/data/setup', () => ({
-  data: {
-    query: {
-      ui: jest.fn(),
-    },
-  },
-}));
+jest.mock('plugins/data', () => {
+  return {
+    QueryBarInput: () => <div className="queryBarInput" />,
+  };
+});
 
 const defaultProps = {
   disableAdd: false,

@@ -22,6 +22,7 @@ export const FlyoutFooter = ({
   const nextButton = showNextButton
     ? (
       <EuiButton
+        data-test-subj="importFileButton"
         disabled={!hasLayerSelected || disableNextButton || isLoading}
         isLoading={hasLayerSelected && isLoading}
         iconSide="right"

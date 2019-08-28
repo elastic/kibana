@@ -43,3 +43,5 @@ export const NetworkContainer = pure<NetworkComponentProps>(({ match }) => (
     </Switch>
   </>
 ));
+
+NetworkContainer.displayName = 'NetworkContainer';

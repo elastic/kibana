@@ -16,14 +16,19 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { NoData } from 'plugins/monitoring/components';
 import { timefilter } from 'ui/timefilter';
 import { I18nContext } from 'ui/i18n';
-import 'ui/directives/listen';
+import { CODE_PATH_LICENSE } from '../../../common/constants';
 
 const REACT_NODE_ID_NO_DATA = 'noDataReact';
 
+// NoDataController watches all this attributes.
+// After consulting with @Chris Roberson, decided to move this out of the class for now.
+let timeUpdateSubscription;
+
 export class NoDataController {
+
   constructor($injector, $scope) {
     const $executor = $injector.get('$executor');
-    this.enableTimefilter($executor, $scope);
+    this.enableTimefilter($executor);
     this.registerCleanup($scope, $executor);
 
     Object.assign(this, this.getDefaultModel());
@@ -91,7 +96,7 @@ export class NoDataController {
 
     // register the monitoringClusters service.
     $executor.register({
-      execute: () => monitoringClusters(),
+      execute: () => monitoringClusters(undefined, undefined, [CODE_PATH_LICENSE]),
       handleResponse: clusters => {
         if (clusters.length) {
           model.hasData = true; // use the control flag because we can't redirect from inside here
@@ -102,10 +107,12 @@ export class NoDataController {
     $executor.start($scope); // start the executor to keep refreshing the search for data
   }
 
-  enableTimefilter($executor, $scope) {
+  enableTimefilter($executor) {
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
-    $scope.$listen(timefilter, 'timeUpdate', () => $executor.run()); // re-fetch if they change the time filter
+
+    // re-fetch if they change the time filter
+    timeUpdateSubscription = timefilter.getTimeUpdate$().subscribe(() => $executor.run());
   }
 
   registerCleanup($scope, $executor) {
@@ -113,6 +120,7 @@ export class NoDataController {
     $scope.$on('$destroy', () => {
       $executor.destroy();
       unmountComponentAtNode(document.getElementById(REACT_NODE_ID_NO_DATA));
+      if (timeUpdateSubscription) { timeUpdateSubscription.unsubscribe(); }
     });
   }
 }

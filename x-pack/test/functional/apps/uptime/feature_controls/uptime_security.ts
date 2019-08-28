@@ -5,10 +5,9 @@
  */
 import expect from '@kbn/expect';
 import { SecurityService } from '../../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security: SecurityService = getService('security');
   const PageObjects = getPageObjects(['common', 'error', 'timePicker', 'security']);
@@ -74,7 +73,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
       it('can navigate to Uptime app', async () => {
         await PageObjects.common.navigateToApp('uptime');
-        await testSubjects.existOrFail('uptimeApp', 10000);
+        await testSubjects.existOrFail('uptimeApp', { timeout: 10000 });
       });
 
       it(`doesn't show read-only badge`, async () => {
@@ -127,7 +126,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
       it('can navigate to Uptime app', async () => {
         await PageObjects.common.navigateToApp('uptime');
-        await testSubjects.existOrFail('uptimeApp', 10000);
+        await testSubjects.existOrFail('uptimeApp', { timeout: 10000 });
       });
 
       it(`shows read-only badge`, async () => {

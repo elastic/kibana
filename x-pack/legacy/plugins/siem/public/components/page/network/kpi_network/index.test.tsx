@@ -19,6 +19,7 @@ describe('KpiNetwork Component', () => {
   const state: State = mockGlobalState;
   const from = new Date('2019-06-15T06:00:00.000Z').valueOf();
   const to = new Date('2019-06-18T06:00:00.000Z').valueOf();
+  const narrowDateRange = jest.fn();
 
   let store = createStore(state, apolloClientObservable);
 
@@ -36,6 +37,7 @@ describe('KpiNetwork Component', () => {
             id="kpiNetwork"
             loading={true}
             to={to}
+            narrowDateRange={narrowDateRange}
           />
         </ReduxStoreProvider>
       );
@@ -52,6 +54,7 @@ describe('KpiNetwork Component', () => {
             id="kpiNetwork"
             loading={false}
             to={to}
+            narrowDateRange={narrowDateRange}
           />
         </ReduxStoreProvider>
       );

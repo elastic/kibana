@@ -70,6 +70,8 @@ const KpiHostDetailsComponentQuery = pure<QueryKpiHostDetailsProps & KpiHostDeta
   )
 );
 
+KpiHostDetailsComponentQuery.displayName = 'KpiHostDetailsComponentQuery';
+
 const makeMapStateToProps = () => {
   const getQuery = inputsSelectors.globalQueryByIdSelector();
   const mapStateToProps = (state: State, { id = ID }: QueryKpiHostDetailsProps) => {

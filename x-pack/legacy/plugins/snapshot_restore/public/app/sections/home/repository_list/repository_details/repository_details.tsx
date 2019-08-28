@@ -390,7 +390,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
       data-test-subj="repositoryDetail"
       aria-labelledby="srRepositoryDetailsFlyoutTitle"
       size="m"
-      maxWidth={400}
+      maxWidth={550}
     >
       <EuiFlyoutHeader>
         <EuiTitle size="m">

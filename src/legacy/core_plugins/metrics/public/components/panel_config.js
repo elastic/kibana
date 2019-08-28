@@ -25,6 +25,7 @@ import { TablePanelConfig as table } from './panel_config/table';
 import { GaugePanelConfig as gauge } from './panel_config/gauge';
 import { MarkdownPanelConfig as markdown } from './panel_config/markdown';
 import { FormattedMessage } from '@kbn/i18n/react';
+
 import { FormValidationContext } from '../contexts/form_validation_context';
 import { VisDataContext } from '../contexts/vis_data_context';
 

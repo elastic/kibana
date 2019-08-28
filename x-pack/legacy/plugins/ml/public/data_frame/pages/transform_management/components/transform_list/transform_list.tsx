@@ -8,30 +8,36 @@ import React, { Fragment, SFC, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiBadge, EuiButtonEmpty, EuiCallOut, EuiEmptyPrompt, SortDirection } from '@elastic/eui';
-
 import {
-  DataFrameTransformId,
-  moveToDataFrameWizard,
-  useRefreshTransformList,
-} from '../../../../common';
+  EuiBadge,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiEmptyPrompt,
+  EuiPopover,
+  EuiTitle,
+  SortDirection,
+} from '@elastic/eui';
+
+import { DataFrameTransformId, moveToDataFrameWizard } from '../../../../common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
 import { getTaskStateBadge } from './columns';
+import { DeleteAction } from './action_delete';
+import { StartAction } from './action_start';
+import { StopAction } from './action_stop';
 
 import {
   DataFrameTransformListColumn,
   DataFrameTransformListRow,
   ItemIdToExpandedRowMap,
-  DATA_FRAME_TASK_STATE,
+  DATA_FRAME_TRANSFORM_STATE,
   DATA_FRAME_MODE,
   Query,
   Clause,
 } from './common';
-import { getTransformsFactory } from '../../services/transform_service';
 import { getColumns } from './columns';
 import { ExpandedRow } from './expanded_row';
 import { ProgressBar, TransformTable } from './transform_table';
-import { useRefreshInterval } from './use_refresh_interval';
 
 function getItemIdToExpandedRowMap(
   itemIds: DataFrameTransformId[],
@@ -57,17 +63,28 @@ function stringMatch(str: string | undefined, substr: string) {
   );
 }
 
-export const DataFrameTransformList: SFC = () => {
-  const [isInitialized, setIsInitialized] = useState(false);
+interface Props {
+  isInitialized: boolean;
+  transforms: DataFrameTransformListRow[];
+  errorMessage: any;
+  transformsLoading: boolean;
+}
+
+export const DataFrameTransformList: SFC<Props> = ({
+  isInitialized,
+  transforms,
+  errorMessage,
+  transformsLoading,
+}) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [blockRefresh, setBlockRefresh] = useState(false);
   const [filterActive, setFilterActive] = useState(false);
 
-  const [transforms, setTransforms] = useState<DataFrameTransformListRow[]>([]);
   const [filteredTransforms, setFilteredTransforms] = useState<DataFrameTransformListRow[]>([]);
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<DataFrameTransformId[]>([]);
 
-  const [errorMessage, setErrorMessage] = useState<any>(undefined);
+  const [transformSelection, setTransformSelection] = useState<DataFrameTransformListRow[]>([]);
+  const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
+
   const [searchError, setSearchError] = useState<any>(undefined);
 
   const [pageIndex, setPageIndex] = useState(0);
@@ -80,20 +97,6 @@ export const DataFrameTransformList: SFC = () => {
     !checkPermission('canCreateDataFrame') ||
     !checkPermission('canPreviewDataFrame') ||
     !checkPermission('canStartStopDataFrame');
-
-  const getTransforms = getTransformsFactory(
-    setTransforms,
-    setErrorMessage,
-    setIsInitialized,
-    blockRefresh
-  );
-  // Subscribe to the refresh observable to trigger reloading the transform list.
-  useRefreshTransformList({
-    isLoading: setIsLoading,
-    onRefresh: () => getTransforms(true),
-  });
-  // Call useRefreshInterval() after the subscription above is set up.
-  useRefreshInterval(setBlockRefresh);
 
   const onQueryChange = ({ query, error }: { query: Query; error: any }) => {
     if (error) {
@@ -152,9 +155,9 @@ export const DataFrameTransformList: SFC = () => {
         // filter other clauses, i.e. the mode and status filters
         if (Array.isArray(c.value)) {
           // the status value is an array of string(s) e.g. ['failed', 'stopped']
-          ts = transforms.filter(transform => c.value.includes(transform.stats.task_state));
+          ts = transforms.filter(transform => c.value.includes(transform.stats.state));
         } else {
-          ts = transforms.filter(transform => transform.config.mode === c.value);
+          ts = transforms.filter(transform => transform.mode === c.value);
         }
       }
 
@@ -173,13 +176,13 @@ export const DataFrameTransformList: SFC = () => {
   // Before the transforms have been loaded for the first time, display the loading indicator only.
   // Otherwise a user would see 'No data frame transforms found' during the initial loading.
   if (!isInitialized) {
-    return <ProgressBar isLoading={isLoading} />;
+    return <ProgressBar isLoading={isLoading || transformsLoading} />;
   }
 
   if (typeof errorMessage !== 'undefined') {
     return (
       <Fragment>
-        <ProgressBar isLoading={isLoading} />
+        <ProgressBar isLoading={isLoading || transformsLoading} />
         <EuiCallOut
           title={i18n.translate('xpack.ml.dataFrame.list.errorPromptTitle', {
             defaultMessage: 'An error occurred getting the data frame transform list.',
@@ -196,7 +199,7 @@ export const DataFrameTransformList: SFC = () => {
   if (transforms.length === 0) {
     return (
       <Fragment>
-        <ProgressBar isLoading={isLoading} />
+        <ProgressBar isLoading={isLoading || transformsLoading} />
         <EuiEmptyPrompt
           title={
             <h2>
@@ -218,7 +221,7 @@ export const DataFrameTransformList: SFC = () => {
     );
   }
 
-  const columns = getColumns(expandedRowItemIds, setExpandedRowItemIds);
+  const columns = getColumns(expandedRowItemIds, setExpandedRowItemIds, transformSelection);
 
   const sorting = {
     sort: {
@@ -237,7 +240,66 @@ export const DataFrameTransformList: SFC = () => {
     hidePerPageOptions: false,
   };
 
+  const bulkActionMenuItems = [
+    <div key="startAction" className="mlTransformBulkActionItem">
+      <StartAction items={transformSelection} />
+    </div>,
+    <div key="stopAction" className="mlTransformBulkActionItem">
+      <StopAction items={transformSelection} />
+    </div>,
+    <div key="deleteAction" className="mlTransformBulkActionItem">
+      <DeleteAction items={transformSelection} />
+    </div>,
+  ];
+
+  const renderToolsLeft = () => {
+    const buttonIcon = (
+      <EuiButtonIcon
+        size="s"
+        iconType="gear"
+        color="text"
+        onClick={() => {
+          setIsActionsMenuOpen(true);
+        }}
+        aria-label={i18n.translate(
+          'xpack.ml.dataframe.multiTransformActionsMenu.managementActionsAriaLabel',
+          {
+            defaultMessage: 'Management actions',
+          }
+        )}
+      />
+    );
+
+    const bulkActionIcon = (
+      <EuiPopover
+        key="bulkActionIcon"
+        id="transformBulkActionsMenu"
+        button={buttonIcon}
+        isOpen={isActionsMenuOpen}
+        closePopover={() => setIsActionsMenuOpen(false)}
+        panelPaddingSize="none"
+        anchorPosition="rightUp"
+      >
+        {bulkActionMenuItems}
+      </EuiPopover>
+    );
+
+    return [
+      <EuiTitle key="selectedText" size="s">
+        <h3>
+          {i18n.translate('xpack.ml.dataframe.multiTransformActionsMenu.transformsCount', {
+            defaultMessage: '{count} {count, plural, one {transform} other {transforms}} selected',
+            values: { count: transformSelection.length },
+          })}
+        </h3>
+      </EuiTitle>,
+      <div key="bulkActionsBorder" className="mlTransformBulkActionsBorder" />,
+      bulkActionIcon,
+    ];
+  };
+
   const search = {
+    toolsLeft: transformSelection.length > 0 ? renderToolsLeft() : undefined,
     onChange: onQueryChange,
     box: {
       incremental: true,
@@ -245,10 +307,10 @@ export const DataFrameTransformList: SFC = () => {
     filters: [
       {
         type: 'field_value_selection',
-        field: 'state.task_state',
+        field: 'state.state',
         name: i18n.translate('xpack.ml.dataframe.statusFilter', { defaultMessage: 'Status' }),
         multiSelect: 'or',
-        options: Object.values(DATA_FRAME_TASK_STATE).map(val => ({
+        options: Object.values(DATA_FRAME_TRANSFORM_STATE).map(val => ({
           value: val,
           name: val,
           view: getTaskStateBadge(val),
@@ -256,7 +318,7 @@ export const DataFrameTransformList: SFC = () => {
       },
       {
         type: 'field_value_selection',
-        field: 'config.mode',
+        field: 'mode',
         name: i18n.translate('xpack.ml.dataframe.modeFilter', { defaultMessage: 'Mode' }),
         multiSelect: false,
         options: Object.values(DATA_FRAME_MODE).map(val => ({
@@ -288,10 +350,15 @@ export const DataFrameTransformList: SFC = () => {
     setSortDirection(direction);
   };
 
+  const selection = {
+    onSelectionChange: (selected: DataFrameTransformListRow[]) => setTransformSelection(selected),
+  };
+
   return (
     <Fragment>
-      <ProgressBar isLoading={isLoading} />
+      <ProgressBar isLoading={isLoading || transformsLoading} />
       <TransformTable
+        allowNeutralSort={false}
         className="mlTransformTable"
         columns={columns}
         error={searchError}
@@ -301,8 +368,9 @@ export const DataFrameTransformList: SFC = () => {
         items={filterActive ? filteredTransforms : transforms}
         itemId={DataFrameTransformListColumn.id}
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-        onChange={onTableChange}
+        onTableChange={onTableChange}
         pagination={pagination}
+        selection={selection}
         sorting={sorting}
         search={search}
         data-test-subj="mlDataFramesTableTransforms"

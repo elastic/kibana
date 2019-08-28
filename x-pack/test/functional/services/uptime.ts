@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export const UptimeProvider = ({ getService }: KibanaFunctionalTestDefaultProviders) => {
+export function UptimeProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+
   return {
     async assertExists(key: string) {
       if (!(await testSubjects.exists(key))) {
@@ -30,4 +31,4 @@ export const UptimeProvider = ({ getService }: KibanaFunctionalTestDefaultProvid
       await browser.pressKeys(browser.keys.ENTER);
     },
   };
-};
+}

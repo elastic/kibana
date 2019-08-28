@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export const RemoteClustersPageProvider = ({
-  getService,
-}: KibanaFunctionalTestDefaultProviders) => {
+export function RemoteClustersPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   return {
@@ -16,4 +14,4 @@ export const RemoteClustersPageProvider = ({
       return await testSubjects.find('remoteClusterEmptyPromptCreateButton');
     },
   };
-};
+}

@@ -96,11 +96,12 @@ import 'monaco-editor/esm/vs/basic-languages/powershell/powershell.contribution.
 import 'monaco-editor/esm/vs/basic-languages/python/python.contribution.js';
 import 'monaco-editor/esm/vs/basic-languages/typescript/typescript.contribution';
 import chrome from 'ui/chrome';
+import { npStart } from 'ui/new_platform';
 
 import { CTAGS_SUPPORT_LANGS } from '../../common/language_server';
 import { definitionProvider } from './definition/definition_provider';
 
-const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
+const IS_DARK_THEME = npStart.core.uiSettings.get('theme:darkMode');
 
 const themeName = IS_DARK_THEME ? darkTheme : lightTheme;
 

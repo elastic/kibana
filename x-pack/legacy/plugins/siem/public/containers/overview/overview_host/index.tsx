@@ -72,6 +72,8 @@ const OverviewHostComponentQuery = pure<OverviewHostProps & OverviewHostReducer>
   )
 );
 
+OverviewHostComponentQuery.displayName = 'OverviewHostComponentQuery';
+
 const makeMapStateToProps = () => {
   const getQuery = inputsSelectors.globalQueryByIdSelector();
   const mapStateToProps = (state: State, { id = ID }: OverviewHostProps) => {

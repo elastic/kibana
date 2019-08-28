@@ -11,6 +11,8 @@ import {
   DataSeriesColorsValues,
   CustomSeriesColorsMap,
   AreaSeries,
+  RecursivePartial,
+  AreaSeriesStyle,
 } from '@elastic/charts';
 import { MetricsExplorerSeries } from '../../../server/routes/metrics_explorer/types';
 import { colorTransformer, MetricsExplorerColor } from '../../../common/color_palette';
@@ -43,26 +45,18 @@ export const MetricExplorerSeriesChart = ({ metric, id, series, type, stack }: P
   customColors.set(colors, color);
   const chartId = `series-${series.id}-${yAccessor}`;
 
-  const seriesAreaStyle = {
+  const seriesAreaStyle: RecursivePartial<AreaSeriesStyle> = {
     line: {
-      stroke: color,
       strokeWidth: 2,
       visible: true,
     },
     area: {
-      fill: color,
       opacity: 0.5,
       visible: type === MetricsExplorerChartType.area,
-    },
-    border: {
-      visible: false,
-      strokeWidth: 2,
-      stroke: color,
     },
     point: {
       visible: false,
       radius: 0.2,
-      stroke: color,
       strokeWidth: 2,
       opacity: 1,
     },

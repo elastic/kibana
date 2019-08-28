@@ -5,23 +5,29 @@
  */
 
 import { EuiFilterButtonProps } from '@elastic/eui';
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import * as React from 'react';
+import { ThemeProvider } from 'styled-components';
 
 import { SearchRow } from '.';
 
 import * as i18n from '../translations';
 
 describe('SearchRow', () => {
+  const theme = () => ({ eui: euiDarkVars, darkMode: true });
+
   test('it renders a search input with the expected placeholder when the query is empty', () => {
     const wrapper = mountWithIntl(
-      <SearchRow
-        onlyFavorites={false}
-        onQueryChange={jest.fn()}
-        onToggleOnlyFavorites={jest.fn()}
-        query=""
-        totalSearchResultsCount={0}
-      />
+      <ThemeProvider theme={theme}>
+        <SearchRow
+          onlyFavorites={false}
+          onQueryChange={jest.fn()}
+          onToggleOnlyFavorites={jest.fn()}
+          query=""
+          totalSearchResultsCount={0}
+        />
+      </ThemeProvider>
     );
 
     expect(
@@ -35,13 +41,15 @@ describe('SearchRow', () => {
   describe('Only Favorites Button', () => {
     test('it renders the expected button text', () => {
       const wrapper = mountWithIntl(
-        <SearchRow
-          onlyFavorites={false}
-          onQueryChange={jest.fn()}
-          onToggleOnlyFavorites={jest.fn()}
-          query=""
-          totalSearchResultsCount={0}
-        />
+        <ThemeProvider theme={theme}>
+          <SearchRow
+            onlyFavorites={false}
+            onQueryChange={jest.fn()}
+            onToggleOnlyFavorites={jest.fn()}
+            query=""
+            totalSearchResultsCount={0}
+          />
+        </ThemeProvider>
       );
 
       expect(
@@ -56,13 +64,15 @@ describe('SearchRow', () => {
       const onToggleOnlyFavorites = jest.fn();
 
       const wrapper = mountWithIntl(
-        <SearchRow
-          onlyFavorites={false}
-          onQueryChange={jest.fn()}
-          onToggleOnlyFavorites={onToggleOnlyFavorites}
-          query=""
-          totalSearchResultsCount={0}
-        />
+        <ThemeProvider theme={theme}>
+          <SearchRow
+            onlyFavorites={false}
+            onQueryChange={jest.fn()}
+            onToggleOnlyFavorites={onToggleOnlyFavorites}
+            query=""
+            totalSearchResultsCount={0}
+          />
+        </ThemeProvider>
       );
 
       wrapper
@@ -75,13 +85,15 @@ describe('SearchRow', () => {
 
     test('it sets the button to the toggled state when onlyFavorites is true', () => {
       const wrapper = mountWithIntl(
-        <SearchRow
-          onlyFavorites={true}
-          onQueryChange={jest.fn()}
-          onToggleOnlyFavorites={jest.fn()}
-          query=""
-          totalSearchResultsCount={0}
-        />
+        <ThemeProvider theme={theme}>
+          <SearchRow
+            onlyFavorites={true}
+            onQueryChange={jest.fn()}
+            onToggleOnlyFavorites={jest.fn()}
+            query=""
+            totalSearchResultsCount={0}
+          />
+        </ThemeProvider>
       );
 
       const props = wrapper
@@ -94,13 +106,15 @@ describe('SearchRow', () => {
 
     test('it sets the button to the NON-toggled state when onlyFavorites is false', () => {
       const wrapper = mountWithIntl(
-        <SearchRow
-          onlyFavorites={false}
-          onQueryChange={jest.fn()}
-          onToggleOnlyFavorites={jest.fn()}
-          query=""
-          totalSearchResultsCount={0}
-        />
+        <ThemeProvider theme={theme}>
+          <SearchRow
+            onlyFavorites={false}
+            onQueryChange={jest.fn()}
+            onToggleOnlyFavorites={jest.fn()}
+            query=""
+            totalSearchResultsCount={0}
+          />
+        </ThemeProvider>
       );
 
       const props = wrapper
@@ -117,13 +131,15 @@ describe('SearchRow', () => {
 
     test('it invokes onQueryChange when the user enters a query', () => {
       const wrapper = mountWithIntl(
-        <SearchRow
-          onlyFavorites={false}
-          onQueryChange={onQueryChange}
-          onToggleOnlyFavorites={jest.fn()}
-          query=""
-          totalSearchResultsCount={32}
-        />
+        <ThemeProvider theme={theme}>
+          <SearchRow
+            onlyFavorites={false}
+            onQueryChange={onQueryChange}
+            onToggleOnlyFavorites={jest.fn()}
+            query=""
+            totalSearchResultsCount={32}
+          />
+        </ThemeProvider>
       );
 
       wrapper
@@ -137,13 +153,15 @@ describe('SearchRow', () => {
   describe('Showing message', () => {
     test('it renders the expected message when the query is an empty string', () => {
       const wrapper = mountWithIntl(
-        <SearchRow
-          onlyFavorites={false}
-          onQueryChange={jest.fn()}
-          onToggleOnlyFavorites={jest.fn()}
-          query=""
-          totalSearchResultsCount={32}
-        />
+        <ThemeProvider theme={theme}>
+          <SearchRow
+            onlyFavorites={false}
+            onQueryChange={jest.fn()}
+            onToggleOnlyFavorites={jest.fn()}
+            query=""
+            totalSearchResultsCount={32}
+          />
+        </ThemeProvider>
       );
 
       expect(
@@ -151,18 +169,20 @@ describe('SearchRow', () => {
           .find('[data-test-subj="query-message"]')
           .first()
           .text()
-      ).toContain('Showing 32 Timelines');
+      ).toContain('Showing: 32 timelines ');
     });
 
     test('it renders the expected message when the query just has whitespace', () => {
       const wrapper = mountWithIntl(
-        <SearchRow
-          onlyFavorites={false}
-          onQueryChange={jest.fn()}
-          onToggleOnlyFavorites={jest.fn()}
-          query="   "
-          totalSearchResultsCount={32}
-        />
+        <ThemeProvider theme={theme}>
+          <SearchRow
+            onlyFavorites={false}
+            onQueryChange={jest.fn()}
+            onToggleOnlyFavorites={jest.fn()}
+            query="   "
+            totalSearchResultsCount={32}
+          />
+        </ThemeProvider>
       );
 
       expect(
@@ -170,18 +190,20 @@ describe('SearchRow', () => {
           .find('[data-test-subj="query-message"]')
           .first()
           .text()
-      ).toContain('Showing 32 Timelines');
+      ).toContain('Showing: 32 timelines ');
     });
 
     test('it includes the word "with" when the query has non-whitespace characters', () => {
       const wrapper = mountWithIntl(
-        <SearchRow
-          onlyFavorites={false}
-          onQueryChange={jest.fn()}
-          onToggleOnlyFavorites={jest.fn()}
-          query="How was your day?"
-          totalSearchResultsCount={32}
-        />
+        <ThemeProvider theme={theme}>
+          <SearchRow
+            onlyFavorites={false}
+            onQueryChange={jest.fn()}
+            onToggleOnlyFavorites={jest.fn()}
+            query="How was your day?"
+            totalSearchResultsCount={32}
+          />
+        </ThemeProvider>
       );
 
       expect(
@@ -189,20 +211,22 @@ describe('SearchRow', () => {
           .find('[data-test-subj="query-message"]')
           .first()
           .text()
-      ).toContain('Showing 32 Timelines with');
+      ).toContain('Showing: 32 timelines with');
     });
   });
 
   describe('selectable query text', () => {
     test('it renders an empty string when the query is an empty string', () => {
       const wrapper = mountWithIntl(
-        <SearchRow
-          onlyFavorites={false}
-          onQueryChange={jest.fn()}
-          onToggleOnlyFavorites={jest.fn()}
-          query=""
-          totalSearchResultsCount={32}
-        />
+        <ThemeProvider theme={theme}>
+          <SearchRow
+            onlyFavorites={false}
+            onQueryChange={jest.fn()}
+            onToggleOnlyFavorites={jest.fn()}
+            query=""
+            totalSearchResultsCount={32}
+          />
+        </ThemeProvider>
       );
 
       expect(
@@ -215,13 +239,15 @@ describe('SearchRow', () => {
 
     test('it renders the expected message when the query just has spaces', () => {
       const wrapper = mountWithIntl(
-        <SearchRow
-          onlyFavorites={false}
-          onQueryChange={jest.fn()}
-          onToggleOnlyFavorites={jest.fn()}
-          query="   "
-          totalSearchResultsCount={32}
-        />
+        <ThemeProvider theme={theme}>
+          <SearchRow
+            onlyFavorites={false}
+            onQueryChange={jest.fn()}
+            onToggleOnlyFavorites={jest.fn()}
+            query="   "
+            totalSearchResultsCount={32}
+          />
+        </ThemeProvider>
       );
 
       expect(
@@ -234,13 +260,15 @@ describe('SearchRow', () => {
 
     test('it echos the query when the query has non-whitespace characters', () => {
       const wrapper = mountWithIntl(
-        <SearchRow
-          onlyFavorites={false}
-          onQueryChange={jest.fn()}
-          onToggleOnlyFavorites={jest.fn()}
-          query="Would you like to go to Denver?"
-          totalSearchResultsCount={32}
-        />
+        <ThemeProvider theme={theme}>
+          <SearchRow
+            onlyFavorites={false}
+            onQueryChange={jest.fn()}
+            onToggleOnlyFavorites={jest.fn()}
+            query="Would you like to go to Denver?"
+            totalSearchResultsCount={32}
+          />
+        </ThemeProvider>
       );
 
       expect(
@@ -253,13 +281,15 @@ describe('SearchRow', () => {
 
     test('trims whitespace from the ends of the query', () => {
       const wrapper = mountWithIntl(
-        <SearchRow
-          onlyFavorites={false}
-          onQueryChange={jest.fn()}
-          onToggleOnlyFavorites={jest.fn()}
-          query="   Is it starting to feel cramped in here?   "
-          totalSearchResultsCount={32}
-        />
+        <ThemeProvider theme={theme}>
+          <SearchRow
+            onlyFavorites={false}
+            onQueryChange={jest.fn()}
+            onToggleOnlyFavorites={jest.fn()}
+            query="   Is it starting to feel cramped in here?   "
+            totalSearchResultsCount={32}
+          />
+        </ThemeProvider>
       );
 
       expect(

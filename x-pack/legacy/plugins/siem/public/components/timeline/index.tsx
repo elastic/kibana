@@ -80,6 +80,10 @@ interface DispatchProps {
     id: string;
     providers: DataProvider[];
   }>;
+  removeColumn?: ActionCreator<{
+    id: string;
+    columnId: string;
+  }>;
   removeProvider?: ActionCreator<{
     id: string;
     providerId: string;
@@ -117,6 +121,11 @@ interface DispatchProps {
   updateHighlightedDropAndProviderId?: ActionCreator<{
     id: string;
     providerId: string;
+  }>;
+  upsertColumn?: ActionCreator<{
+    column: ColumnHeader;
+    id: string;
+    index: number;
   }>;
 }
 
@@ -215,6 +224,7 @@ class StatefulTimelineComponent extends React.Component<Props> {
             showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
             start={start}
             sort={sort!}
+            toggleColumn={this.toggleColumn}
           />
         )}
       </WithSource>
@@ -276,6 +286,26 @@ class StatefulTimelineComponent extends React.Component<Props> {
 
   private onChangeDroppableAndProvider: OnChangeDroppableAndProvider = providerId =>
     this.props.updateHighlightedDropAndProviderId!({ id: this.props.id, providerId });
+
+  private toggleColumn = (column: ColumnHeader) => {
+    const { columns, removeColumn, id, upsertColumn } = this.props;
+    const exists = columns.findIndex(c => c.id === column.id) !== -1;
+
+    if (!exists && upsertColumn != null) {
+      upsertColumn({
+        column,
+        id,
+        index: 1,
+      });
+    }
+
+    if (exists && removeColumn != null) {
+      removeColumn({
+        columnId: column.id,
+        id,
+      });
+    }
+  };
 }
 
 const makeMapStateToProps = () => {
@@ -331,5 +361,7 @@ export const StatefulTimeline = connect(
     updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,
     updateSort: timelineActions.updateSort,
     removeProvider: timelineActions.removeProvider,
+    removeColumn: timelineActions.removeColumn,
+    upsertColumn: timelineActions.upsertColumn,
   }
 )(StatefulTimelineComponent);

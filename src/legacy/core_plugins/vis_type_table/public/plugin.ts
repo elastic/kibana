@@ -29,12 +29,10 @@ import {
 
 import { LegacyDependenciesPluginSetup, LegacyDependenciesPlugin } from './shim';
 
-// @ts-ignore
 import { createTableVisFn } from './table_vis_fn';
-// @ts-ignore
 import { createTableVisTypeDefinition } from './table_vis_type';
 
-/** @private */
+/** @internal */
 export interface TableVisualizationDependencies extends LegacyDependenciesPluginSetup {
   uiSettings: UiSettingsClientContract;
 }
@@ -63,7 +61,7 @@ export class TableVisPlugin implements Plugin<Promise<void>, void> {
       ...(await __LEGACY.setup()),
     };
 
-    data.expressions.registerFunction(() => createTableVisFn(visualizationDependencies));
+    data.expressions.registerFunction(createTableVisFn);
 
     visualizations.types.VisTypesRegistryProvider.register(() =>
       createTableVisTypeDefinition(visualizationDependencies)

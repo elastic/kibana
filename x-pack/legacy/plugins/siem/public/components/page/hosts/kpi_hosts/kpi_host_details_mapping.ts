@@ -19,14 +19,16 @@ export const kpiHostDetailsMapping: Readonly<StatItems[]> = [
     fields: [
       {
         key: 'authSuccess',
-        description: i18n.AUTHENTICATION_SUCCESS,
+        name: i18n.SUCCESS_CHART_LABEL,
+        description: i18n.SUCCESS_UNIT_LABEL,
         value: null,
         color: euiColorVis0,
         icon: 'check',
       },
       {
         key: 'authFailure',
-        description: i18n.AUTHENTICATION_FAILURE,
+        name: i18n.FAIL_CHART_LABEL,
+        description: i18n.FAIL_UNIT_LABEL,
         value: null,
         color: euiColorVis9,
         icon: 'cross',
@@ -35,7 +37,7 @@ export const kpiHostDetailsMapping: Readonly<StatItems[]> = [
     enableAreaChart: true,
     enableBarChart: true,
     grow: 1,
-    description: i18n.AUTHENTICATION,
+    description: i18n.USER_AUTHENTICATIONS,
   },
   {
     key: 'uniqueIps',
@@ -43,15 +45,16 @@ export const kpiHostDetailsMapping: Readonly<StatItems[]> = [
     fields: [
       {
         key: 'uniqueSourceIps',
-        name: i18n.UNIQUE_SOURCE_IPS_ABBREVIATION,
-        description: i18n.UNIQUE_SOURCE_IPS,
+        name: i18n.SOURCE_CHART_LABEL,
+        description: i18n.SOURCE_UNIT_LABEL,
         value: null,
         color: euiColorVis2,
         icon: 'visMapCoordinate',
       },
       {
         key: 'uniqueDestinationIps',
-        description: i18n.UNIQUE_DESTINATION_IPS,
+        name: i18n.DESTINATION_CHART_LABEL,
+        description: i18n.DESTINATION_UNIT_LABEL,
         value: null,
         color: euiColorVis3,
         icon: 'visMapCoordinate',

@@ -24,8 +24,8 @@ import { Ast } from '@kbn/interpreter/common';
 // the interpreter plugin itself once they are ready
 import { Registry } from '@kbn/interpreter/common';
 import { Adapters } from 'ui/inspector';
-import { TimeRange } from 'ui/timefilter/time_history';
 import { Filter } from '@kbn/es-query';
+import { TimeRange } from '../../../../../plugins/data/public';
 import { createRenderer } from './expression_renderer';
 import { createRunFn } from './expression_runner';
 import { Query } from '../query';

@@ -6,7 +6,6 @@
 
 import { EuiBadge, EuiBadgeProps, EuiPanel, EuiText } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { DroppableWrapper } from '../../drag_and_drop/droppable_wrapper';
@@ -28,11 +27,15 @@ const Container = styled.div`
   max-height: 240px;
 `;
 
+Container.displayName = 'Container';
+
 const BadgeButtonContainer = styled.div`
   align-items: center;
   display: flex;
   flex-direction: column;
 `;
+
+BadgeButtonContainer.displayName = 'BadgeButtonContainer';
 
 export const Button = styled(EuiPanel)`
   display: flex;
@@ -49,11 +52,15 @@ export const Button = styled(EuiPanel)`
   cursor: pointer;
 `;
 
+Button.displayName = 'Button';
+
 export const Text = styled(EuiText)`
   width: 12px;
   z-index: 10;
   user-select: none;
 `;
+
+Text.displayName = 'Text';
 
 // Ref: https://github.com/elastic/eui/issues/1655
 // export const Badge = styled(EuiBadge)`
@@ -75,6 +82,9 @@ export const Badge = (props: EuiBadgeProps) => (
     }}
   />
 );
+
+Badge.displayName = 'Badge';
+
 interface FlyoutButtonProps {
   dataProviders: DataProvider[];
   onOpen: () => void;
@@ -82,29 +92,36 @@ interface FlyoutButtonProps {
   timelineId: string;
 }
 
-export const FlyoutButton = pure<FlyoutButtonProps>(({ onOpen, show, dataProviders, timelineId }) =>
-  show ? (
-    <Container>
-      <DroppableWrapper droppableId={`${droppableTimelineFlyoutButtonPrefix}${timelineId}`}>
-        <BadgeButtonContainer
-          className="flyout-overlay"
-          data-test-subj="flyoutOverlay"
-          onClick={onOpen}
-        >
-          {dataProviders.length !== 0 && (
-            <Badge data-test-subj="badge" color="primary">
-              {dataProviders.length}
-            </Badge>
-          )}
-          <Button>
-            <Text data-test-subj="flyoutButton" size="s">
-              {i18n.TIMELINE.toLocaleUpperCase()
-                .split('')
-                .join(' ')}
-            </Text>
-          </Button>
-        </BadgeButtonContainer>
-      </DroppableWrapper>
-    </Container>
-  ) : null
+export const FlyoutButton = React.memo<FlyoutButtonProps>(
+  ({ onOpen, show, dataProviders, timelineId }) =>
+    show ? (
+      <Container>
+        <DroppableWrapper droppableId={`${droppableTimelineFlyoutButtonPrefix}${timelineId}`}>
+          <BadgeButtonContainer
+            className="flyout-overlay"
+            data-test-subj="flyoutOverlay"
+            onClick={onOpen}
+          >
+            {dataProviders.length !== 0 && (
+              <Badge data-test-subj="badge" color="primary">
+                {dataProviders.length}
+              </Badge>
+            )}
+            <Button>
+              <Text data-test-subj="flyoutButton" size="s">
+                {i18n.TIMELINE.toLocaleUpperCase()
+                  .split('')
+                  .join(' ')}
+              </Text>
+            </Button>
+          </BadgeButtonContainer>
+        </DroppableWrapper>
+      </Container>
+    ) : null,
+  (prevProps, nextProps) =>
+    prevProps.show === nextProps.show &&
+    prevProps.dataProviders === nextProps.dataProviders &&
+    prevProps.timelineId === nextProps.timelineId
 );
+
+FlyoutButton.displayName = 'FlyoutButton';

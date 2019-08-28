@@ -15,36 +15,52 @@ const Heading = styled.span`
   margin-right: 5px;
 `;
 
+Heading.displayName = 'Heading';
+
 const Bold = styled.span`
   font-weight: bold;
   margin-right: 5px;
 `;
 
+Bold.displayName = 'Bold';
+
 const MarkdownHintContainer = styled(EuiText)<{ visibility: string }>`
   visibility: ${({ visibility }) => visibility};
 `;
 
+MarkdownHintContainer.displayName = 'MarkdownHintContainer';
+
 const ImageUrl = styled.span`
   margin-left: 5px;
 `;
+
+ImageUrl.displayName = 'ImageUrl';
 
 const Italic = styled.span`
   font-style: italic;
   margin-right: 5px;
 `;
 
+Italic.displayName = 'Italic';
+
 const Strikethrough = styled.span`
   text-decoration: line-through;
 `;
+
+Strikethrough.displayName = 'Strikethrough';
 
 const Code = styled.span`
   font-family: monospace;
   margin-right: 5px;
 `;
 
+Code.displayName = 'Code';
+
 const TrailingWhitespace = styled.span`
   margin-right: 5px;
 `;
+
+TrailingWhitespace.displayName = 'TrailingWhitespace';
 
 export const MarkdownHint = pure<{ show: boolean }>(({ show }) => (
   <MarkdownHintContainer
@@ -69,3 +85,5 @@ export const MarkdownHint = pure<{ show: boolean }>(({ show }) => (
     <ImageUrl>{i18n.MARKDOWN_HINT_IMAGE_URL}</ImageUrl>
   </MarkdownHintContainer>
 ));
+
+MarkdownHint.displayName = 'MarkdownHint';

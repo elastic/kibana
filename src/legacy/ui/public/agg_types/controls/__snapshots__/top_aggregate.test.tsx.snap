@@ -26,6 +26,7 @@ exports[`TopAggregateParamEditor should init with the default set of props 1`] =
 >
   <EuiSelect
     compressed={false}
+    data-test-subj="visDefaultEditorAggregateWith"
     disabled={false}
     fullWidth={true}
     hasNoInitialSelection={false}

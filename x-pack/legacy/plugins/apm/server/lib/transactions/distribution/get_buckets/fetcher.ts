@@ -23,11 +23,11 @@ export function bucketFetcher(
   transactionType: string,
   transactionId: string,
   traceId: string,
+  distributionMax: number,
   bucketSize: number,
   setup: Setup
 ) {
   const { start, end, uiFiltersES, client, config } = setup;
-  const bucketTargetCount = config.get<number>('xpack.apm.bucketTargetCount');
 
   const params = {
     index: config.get<string>('apm_oss.transactionIndices'),
@@ -58,7 +58,7 @@ export function bucketFetcher(
             min_doc_count: 0,
             extended_bounds: {
               min: 0,
-              max: bucketSize * bucketTargetCount
+              max: distributionMax
             }
           },
           aggs: {

@@ -17,9 +17,9 @@
  * under the License.
  */
 
+import { PluginOpaqueId } from '../../server';
 import { MockContextConstructor } from './context_service.test.mocks';
 import { ContextService } from './context_service';
-import { PluginOpaqueId } from '../plugins';
 
 const pluginDependencies = new Map<PluginOpaqueId, PluginOpaqueId[]>();
 

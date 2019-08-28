@@ -211,7 +211,7 @@ describe('lsp_service tests', () => {
       assert.ok(workspaceFolderExists);
       const controller = lspservice.controller;
       // @ts-ignore
-      const languageServer = controller.languageServerMap.typescript;
+      const languageServer = controller.languageServerMap.typescript[0];
       const realWorkspacePath = fs.realpathSync(workspacePath);
 
       // @ts-ignore
@@ -268,7 +268,7 @@ describe('lsp_service tests', () => {
       await lspservice.shutdown();
     }
     // @ts-ignore
-  }).timeout(10000);
+  }).timeout(20000);
 
   it('should update if a worktree is not the newest', async () => {
     const lspservice = mockLspService();

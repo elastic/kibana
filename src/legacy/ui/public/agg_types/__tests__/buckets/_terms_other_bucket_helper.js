@@ -182,8 +182,8 @@ describe('Terms Agg Other bucket helper', () => {
           filters: {
             '': {
               bool: {
-                must: [{ exists: { field: 'machine.os.raw' } }],
-                filter: [],
+                must: [],
+                filter: [{ exists: { field: 'machine.os.raw' } }],
                 should: [],
                 must_not: [
                   { match_phrase: { 'machine.os.raw': { query: 'ios' } } },
@@ -208,11 +208,11 @@ describe('Terms Agg Other bucket helper', () => {
             filters: {
               '-IN': {
                 bool: {
-                  must: [
+                  must: [],
+                  filter: [
                     { match_phrase: { 'geo.src': { query: 'IN' } } },
                     { exists: { field: 'machine.os.raw' } }
                   ],
-                  filter: [],
                   should: [],
                   must_not: [
                     { match_phrase: { 'machine.os.raw': { query: 'ios' } } },
@@ -222,11 +222,11 @@ describe('Terms Agg Other bucket helper', () => {
               },
               '-US': {
                 bool: {
-                  must: [
+                  must: [],
+                  filter: [
                     { match_phrase: { 'geo.src': { query: 'US' } } },
                     { exists: { field: 'machine.os.raw' } }
                   ],
-                  filter: [],
                   should: [],
                   must_not: [
                     { match_phrase: { 'machine.os.raw': { query: 'ios' } } },

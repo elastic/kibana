@@ -58,6 +58,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
       render: (name: Repository['name']) => {
         return (
           <Fragment>
+            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
             <EuiLink
               onClick={() => trackUiMetric(UIM_REPOSITORY_SHOW_DETAILS_CLICK)}
               href={openRepositoryDetailsUrl(name)}

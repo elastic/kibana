@@ -36,6 +36,7 @@ export class Worker extends events.EventEmitter {
     this.id = puid.generate();
     this.queue = queue;
     this.client = opts.client || this.queue.client;
+    this.codeServices = opts.codeServices;
     this.jobtype = type;
     this.workerFn = workerFn;
     this.checkSize = opts.size || 10;
@@ -460,12 +461,21 @@ export class Worker extends events.EventEmitter {
       version: true,
       body: query
     })
-      .then((results) => {
+      .then(async (results) => {
         const jobs = results.hits.hits;
         if (jobs.length > 0) {
           this.debug(`${jobs.length} outstanding jobs returned`);
         }
-        return jobs;
+        const filtered = [];
+        for (const job of jobs) {
+          const payload = job._source.payload.payload;
+          const repoUrl = payload.uri || payload.url;
+          const isLocal = await this.codeServices.isResourceLocal(repoUrl);
+          if (isLocal) {
+            filtered.push(job);
+          }
+        }
+        return filtered;
       })
       .catch((err) => {
       // ignore missing indices errors

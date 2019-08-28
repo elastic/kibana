@@ -7,7 +7,6 @@
 import { EuiFlexGroup } from '@elastic/eui';
 import { getOr, isEmpty } from 'lodash/fp';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
@@ -35,11 +34,13 @@ import { Footer, footerHeight } from './footer';
 import { TimelineHeader } from './header';
 import { calculateBodyHeight, combineQueries } from './helpers';
 import { TimelineRefetch } from './refetch_timeline';
-import { TimelineContext } from './timeline_context';
+import { TimelineContext, TimelineWidthContext } from './timeline_context';
 
 const WrappedByAutoSizer = styled.div`
   width: 100%;
 `; // required by AutoSizer
+
+WrappedByAutoSizer.displayName = 'WrappedByAutoSizer';
 
 const TimelineContainer = styled(EuiFlexGroup)`
   min-height: 500px;
@@ -48,6 +49,10 @@ const TimelineContainer = styled(EuiFlexGroup)`
   user-select: none;
   width: 100%;
 `;
+
+TimelineContainer.displayName = 'TimelineContainer';
+
+export const isCompactFooter = (width: number): boolean => width < 600;
 
 interface Props {
   browserFields: BrowserFields;
@@ -74,10 +79,11 @@ interface Props {
   showCallOutUnauthorizedMsg: boolean;
   start: number;
   sort: Sort;
+  toggleColumn: (column: ColumnHeader) => void;
 }
 
 /** The parent Timeline component */
-export const Timeline = pure<Props>(
+export const Timeline = React.memo<Props>(
   ({
     browserFields,
     columns,
@@ -103,6 +109,7 @@ export const Timeline = pure<Props>(
     showCallOutUnauthorizedMsg,
     start,
     sort,
+    toggleColumn,
   }) => {
     const combinedQueries = combineQueries(
       dataProviders,
@@ -164,37 +171,39 @@ export const Timeline = pure<Props>(
                   refetch,
                 }) => (
                   <TimelineRefetch loading={loading} id={id} inspect={inspect} refetch={refetch}>
-                    <TimelineContext.Provider value={{ isLoading: loading }} />
-                    <StatefulBody
-                      browserFields={browserFields}
-                      data={events}
-                      id={id}
-                      isLoading={loading}
-                      height={calculateBodyHeight({
-                        flyoutHeight,
-                        flyoutHeaderHeight,
-                        timelineHeaderHeight,
-                        timelineFooterHeight: footerHeight,
-                      })}
-                      sort={sort}
-                      width={width}
-                    />
-                    <Footer
-                      serverSideEventCount={totalCount}
-                      hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                      height={footerHeight}
-                      isLive={isLive}
-                      isLoading={loading}
-                      itemsCount={events.length}
-                      itemsPerPage={itemsPerPage}
-                      itemsPerPageOptions={itemsPerPageOptions}
-                      onChangeItemsPerPage={onChangeItemsPerPage}
-                      onLoadMore={loadMore}
-                      nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                      tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
-                      getUpdatedAt={getUpdatedAt}
-                      width={width}
-                    />
+                    <TimelineContext.Provider value={loading}>
+                      <TimelineWidthContext.Provider value={width}>
+                        <StatefulBody
+                          browserFields={browserFields}
+                          data={events}
+                          id={id}
+                          height={calculateBodyHeight({
+                            flyoutHeight,
+                            flyoutHeaderHeight,
+                            timelineHeaderHeight,
+                            timelineFooterHeight: footerHeight,
+                          })}
+                          sort={sort}
+                          toggleColumn={toggleColumn}
+                        />
+                        <Footer
+                          serverSideEventCount={totalCount}
+                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                          height={footerHeight}
+                          isLive={isLive}
+                          isLoading={loading}
+                          itemsCount={events.length}
+                          itemsPerPage={itemsPerPage}
+                          itemsPerPageOptions={itemsPerPageOptions}
+                          onChangeItemsPerPage={onChangeItemsPerPage}
+                          onLoadMore={loadMore}
+                          nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                          tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
+                          getUpdatedAt={getUpdatedAt}
+                          compact={isCompactFooter(width)}
+                        />
+                      </TimelineWidthContext.Provider>
+                    </TimelineContext.Provider>
                   </TimelineRefetch>
                 )}
               </TimelineQuery>
@@ -205,3 +214,5 @@ export const Timeline = pure<Props>(
     );
   }
 );
+
+Timeline.displayName = 'Timeline';

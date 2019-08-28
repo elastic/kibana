@@ -18,10 +18,9 @@
  */
 import { Client } from 'elasticsearch';
 import { get } from 'lodash';
-import { Request } from 'hapi';
 
 import { ElasticsearchErrorHelpers } from './errors';
-import { GetAuthHeaders, isRealRequest } from '../http';
+import { GetAuthHeaders, isRealRequest, LegacyRequest } from '../http';
 import { filterHeaders, Headers, KibanaRequest, ensureRawRequest } from '../http/router';
 import { Logger } from '../logging';
 import {
@@ -35,8 +34,6 @@ import { ScopedClusterClient } from './scoped_cluster_client';
  *
  * @public
  */
-
-export type LegacyRequest = Request;
 
 const noop = () => undefined;
 /**

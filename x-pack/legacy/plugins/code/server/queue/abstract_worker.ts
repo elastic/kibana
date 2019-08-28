@@ -16,6 +16,7 @@ import {
 import { Logger } from '../log';
 import { Job } from './job';
 import { Worker } from './worker';
+import { CodeServices } from '../distributed/code_services';
 
 export abstract class AbstractWorker implements Worker {
   // The id of the worker. Also serves as the id of the job this worker consumes.
@@ -69,7 +70,7 @@ export abstract class AbstractWorker implements Worker {
     });
   }
 
-  public bind() {
+  public bind(codeServices: CodeServices) {
     const workerFn = (payload: any, cancellationToken: CancellationToken) => {
       const job: Job = {
         ...payload,
@@ -82,6 +83,7 @@ export abstract class AbstractWorker implements Worker {
       interval: 5000,
       capacity: 5,
       intervalErrorMultiplier: 1,
+      codeServices,
     };
 
     const queueWorker = this.queue.registerWorker(this.id, workerFn as any, workerOptions);

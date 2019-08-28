@@ -121,7 +121,7 @@ export const getGitServiceHandler = (
           lang,
           content: lines,
         };
-      } else if (blob.content()!.length <= TEXT_FILE_LIMIT) {
+      } else if (blob.rawsize() <= TEXT_FILE_LIMIT) {
         const lang = await detectLanguage(path, blob.content());
         return {
           isBinary,

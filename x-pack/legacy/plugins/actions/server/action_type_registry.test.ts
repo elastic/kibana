@@ -26,8 +26,11 @@ function getServices() {
 }
 const actionTypeRegistryParams = {
   getServices,
+  isSecurityEnabled: true,
   taskManager: mockTaskManager,
   encryptedSavedObjectsPlugin: encryptedSavedObjectsMock.create(),
+  spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
+  getBasePath: jest.fn().mockReturnValue(undefined),
 };
 
 beforeEach(() => jest.resetAllMocks());
@@ -45,7 +48,6 @@ describe('register()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
-      unencryptedAttributes: [],
       executor,
     });
     expect(actionTypeRegistry.has('my-action-type')).toEqual(true);
@@ -63,11 +65,14 @@ describe('register()', () => {
         },
       ]
     `);
-    expect(getCreateTaskRunnerFunction).toHaveBeenCalledTimes(1);
-    const call = getCreateTaskRunnerFunction.mock.calls[0][0];
-    expect(call.actionTypeRegistry).toBeTruthy();
-    expect(call.encryptedSavedObjectsPlugin).toBeTruthy();
-    expect(call.getServices).toBeTruthy();
+    expect(getCreateTaskRunnerFunction).toHaveBeenCalledWith({
+      actionTypeRegistry,
+      isSecurityEnabled: true,
+      encryptedSavedObjectsPlugin: actionTypeRegistryParams.encryptedSavedObjectsPlugin,
+      getServices: actionTypeRegistryParams.getServices,
+      getBasePath: actionTypeRegistryParams.getBasePath,
+      spaceIdToNamespace: actionTypeRegistryParams.spaceIdToNamespace,
+    });
   });
 
   test('throws error if action type already registered', () => {
@@ -75,14 +80,12 @@ describe('register()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
-      unencryptedAttributes: [],
       executor,
     });
     expect(() =>
       actionTypeRegistry.register({
         id: 'my-action-type',
         name: 'My action type',
-        unencryptedAttributes: [],
         executor,
       })
     ).toThrowErrorMatchingInlineSnapshot(
@@ -95,7 +98,6 @@ describe('register()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
-      unencryptedAttributes: [],
       executor,
     });
     expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
@@ -106,7 +108,6 @@ describe('register()', () => {
     expect(getRetry(0, new Error())).toEqual(false);
     expect(getRetry(0, new ExecutorError('my message', {}, true))).toEqual(true);
     expect(getRetry(0, new ExecutorError('my message', {}, false))).toEqual(false);
-    expect(getRetry(0, new ExecutorError('my message', {}, null))).toEqual(false);
     expect(getRetry(0, new ExecutorError('my message', {}, undefined))).toEqual(false);
     expect(getRetry(0, new ExecutorError('my message', {}, retryTime))).toEqual(retryTime);
   });
@@ -118,7 +119,6 @@ describe('get()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
-      unencryptedAttributes: [],
       executor,
     });
     const actionType = actionTypeRegistry.get('my-action-type');
@@ -127,7 +127,6 @@ describe('get()', () => {
         "executor": [Function],
         "id": "my-action-type",
         "name": "My action type",
-        "unencryptedAttributes": Array [],
       }
     `);
   });
@@ -146,7 +145,6 @@ describe('list()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
-      unencryptedAttributes: [],
       executor,
     });
     const actionTypes = actionTypeRegistry.list();
@@ -170,7 +168,6 @@ describe('has()', () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
-      unencryptedAttributes: [],
       executor,
     });
     expect(actionTypeRegistry.has('my-action-type'));

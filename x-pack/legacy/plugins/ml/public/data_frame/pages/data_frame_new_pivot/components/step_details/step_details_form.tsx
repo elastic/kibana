@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, SFC, useContext, useEffect, useState } from 'react';
+import React, { Fragment, SFC, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { metadata } from 'ui/metadata';
@@ -12,17 +12,16 @@ import { toastNotifications } from 'ui/notify';
 
 import { EuiLink, EuiSwitch, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
 
+import { useKibanaContext } from '../../../../../contexts/kibana';
 import { isValidIndexName } from '../../../../../../common/util/es_utils';
 
 import { ml } from '../../../../../services/ml_api_service';
 
 import {
   delayFormatRegex,
-  isKibanaContext,
   isTransformIdValid,
   DataFrameTransformId,
   DataFrameTransformPivotConfig,
-  KibanaContext,
 } from '../../../../common';
 import { EsIndexName, IndexPatternTitle } from './common';
 
@@ -58,11 +57,7 @@ interface Props {
 }
 
 export const StepDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange }) => {
-  const kibanaContext = useContext(KibanaContext);
-
-  if (!isKibanaContext(kibanaContext)) {
-    return null;
-  }
+  const kibanaContext = useKibanaContext();
 
   const defaults = { ...getDefaultStepDetailsState(), ...overrides };
 

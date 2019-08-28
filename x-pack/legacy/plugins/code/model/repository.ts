@@ -5,6 +5,7 @@
  */
 
 import { IndexRequest } from './search';
+import { CancellationReason } from '../server/queue/cancellation_service';
 
 export type RepositoryUri = string;
 
@@ -86,12 +87,13 @@ export enum FileTreeItemType {
 export interface WorkerResult {
   uri: string;
   cancelled?: boolean;
+  cancelledReason?: CancellationReason;
 }
 
 // TODO(mengwei): create a AbstractGitWorkerResult since we now have an
 // AbstractGitWorker now.
 export interface CloneWorkerResult extends WorkerResult {
-  repo: Repository;
+  repo?: Repository;
 }
 
 export interface DeleteWorkerResult extends WorkerResult {
@@ -104,6 +106,8 @@ export interface UpdateWorkerResult extends WorkerResult {
 }
 
 export enum IndexStatsKey {
+  Commit = 'commit-added-count',
+  CommitDeleted = 'commit-deleted-count',
   File = 'file-added-count',
   FileDeleted = 'file-deleted-count',
   Symbol = 'symbol-added-count',
@@ -159,5 +163,8 @@ export interface IndexProgress {
 }
 
 export interface IndexWorkerProgress extends WorkerProgress {
+  // Index progress for LSP indexing.
   indexProgress?: IndexProgress;
+  // Index progress for commit indexing.
+  commitIndexProgress?: IndexProgress;
 }

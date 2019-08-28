@@ -5,15 +5,14 @@
  */
 
 import { get, uniq } from 'lodash';
-import { METRICBEAT_INDEX_NAME_UNIQUE_TOKEN, ELASTICSEARCH_CUSTOM_ID } from '../../../../common/constants';
+import { METRICBEAT_INDEX_NAME_UNIQUE_TOKEN, ELASTICSEARCH_CUSTOM_ID, APM_CUSTOM_ID } from '../../../../common/constants';
 import { KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID, LOGSTASH_SYSTEM_ID } from '../../../../../telemetry/common/constants';
 import { getLivesNodes } from '../../elasticsearch/nodes/get_nodes/get_live_nodes';
 import { KIBANA_STATS_TYPE } from '../../../../../../../../src/legacy/server/status/constants';
 
 const NUMBER_OF_SECONDS_AGO_TO_LOOK = 30;
-const APM_CUSTOM_ID = 'apm';
 
-const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid) => {
+const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nodeUuid) => {
   const start = get(req.payload, 'timeRange.min', `now-${NUMBER_OF_SECONDS_AGO_TO_LOOK}s`);
   const end = get(req.payload, 'timeRange.max', 'now');
 
@@ -32,6 +31,20 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid) => 
     filters.push({ term: { 'cluster_uuid': clusterUuid } });
   }
 
+  const nodesClause = [];
+  if (nodeUuid) {
+    nodesClause.push({
+      bool: {
+        should: [
+          { term: { 'node_stats.node_id': nodeUuid } },
+          { term: { 'kibana_stats.kibana.uuid': nodeUuid } },
+          { term: { 'beats_stats.beat.uuid': nodeUuid } },
+          { term: { 'logstash_stats.logstash.uuid': nodeUuid } }
+        ]
+      }
+    });
+  }
+
   const params = {
     index: Object.values(indexPatterns),
     size: 0,
@@ -43,6 +56,7 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid) => 
       query: {
         bool: {
           filter: filters,
+          must: nodesClause,
         }
       },
       aggs: {
@@ -90,6 +104,11 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid) => 
                   terms: {
                     field: 'beats_stats.beat.type'
                   }
+                },
+                cluster_uuid: {
+                  terms: {
+                    field: 'cluster_uuid'
+                  }
                 }
               }
             },
@@ -101,6 +120,11 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid) => 
                 by_timestamp: {
                   max: {
                     field: 'timestamp'
+                  }
+                },
+                cluster_uuid: {
+                  terms: {
+                    field: 'cluster_uuid'
                   }
                 }
               }
@@ -134,46 +158,35 @@ async function detectProducts(req) {
     }
   };
 
-  const msearch = [
-    { index: '*beat-*' },
-    { size: 0, terminate_after: 0 },
-
-    { index: '.management-beats*' },
-    { size: 0, terminate_after: 0 },
-
-    { index: 'logstash-*' },
-    { size: 0, terminate_after: 0 },
-
-    { index: '.logstash*' },
-    { size: 0, terminate_after: 0 },
-
-    { index: 'apm*' },
-    { size: 0, terminate_after: 0 },
+  const detectionSearch = [
+    {
+      id: BEATS_SYSTEM_ID,
+      indices: [
+        '*beat-*',
+        '.management-beats*',
+      ]
+    },
+    {
+      id: LOGSTASH_SYSTEM_ID,
+      indices: [
+        'logstash-*',
+        '.logstash*',
+      ]
+    },
+    {
+      id: APM_CUSTOM_ID,
+      indices: [
+        'apm-*'
+      ]
+    }
   ];
 
-  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  const {
-    responses: [
-      beatsDataDetectionResponse,
-      beatsManagementDetectionResponse,
-      logstashDataDetectionResponse,
-      logstashManagementDetectionResponse,
-      apmDetectionResponse
-    ]
-  } = await callWithRequest(req, 'msearch', { body: msearch });
-
-  if (get(beatsDataDetectionResponse, 'hits.total.value', 0) > 0
-    || get(beatsManagementDetectionResponse, 'hits.total.value', 0) > 0) {
-    result[BEATS_SYSTEM_ID].mightExist = true;
-  }
-
-  if (get(logstashDataDetectionResponse, 'hits.total.value', 0) > 0
-    || get(logstashManagementDetectionResponse, 'hits.total.value', 0) > 0) {
-    result[LOGSTASH_SYSTEM_ID].mightExist = true;
-  }
-
-  if (get(apmDetectionResponse, 'hits.total.value', 0) > 0) {
-    result[APM_CUSTOM_ID].mightExist = true;
+  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
+  for (const { id, indices } of detectionSearch) {
+    const response = await callWithRequest(req, 'cat.indices', { index: indices, format: 'json' });
+    if (response.length) {
+      result[id].mightExist = true;
+    }
   }
 
   return result;
@@ -245,6 +258,27 @@ async function getLiveElasticsearchClusterUuid(req) {
   return clusterUuid;
 }
 
+async function getLiveElasticsearchCollectionEnabled(req) {
+  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
+  const response = await callWithRequest(req, 'transport.request', {
+    method: 'GET',
+    path: '/_cluster/settings?include_defaults',
+    filter_path: [
+      'persistent.xpack.monitoring',
+      'transient.xpack.monitoring',
+      'defaults.xpack.monitoring'
+    ]
+  });
+  const sources = ['persistent', 'transient', 'defaults'];
+  for (const source of sources) {
+    const collectionSettings = get(response[source], 'xpack.monitoring.collection');
+    if (collectionSettings && collectionSettings.enabled === 'true') {
+      return true;
+    }
+  }
+  return false;
+}
+
 /**
  * This function will scan all monitoring documents within the past 30s (or a custom time range is supported too)
  * and determine which products fall into one of four states:
@@ -268,8 +302,10 @@ async function getLiveElasticsearchClusterUuid(req) {
  * @param {*} req Standard request object. Can contain a timeRange to use for the query
  * @param {*} indexPatterns Map of index patterns to search against (will be all .monitoring-* indices)
  * @param {*} clusterUuid Optional and will be used to filter down the query if used
+ * @param {*} nodeUuid Optional and will be used to filter down the query if used
+ * @param {*} skipLiveData Optional and will not make any live api calls if set to true
  */
-export const getCollectionStatus = async (req, indexPatterns, clusterUuid, skipLiveData) => {
+export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeUuid, skipLiveData) => {
   const config = req.server.config();
   const kibanaUuid = config.get('server.uuid');
 
@@ -285,14 +321,15 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, skipL
     recentDocuments,
     detectedProducts
   ] = await Promise.all([
-    await getRecentMonitoringDocuments(req, indexPatterns, clusterUuid),
+    await getRecentMonitoringDocuments(req, indexPatterns, clusterUuid, nodeUuid),
     await detectProducts(req)
   ]);
 
   const liveClusterUuid = skipLiveData ? null : await getLiveElasticsearchClusterUuid(req);
-  const liveEsNodes = skipLiveData ? [] : await getLivesNodes(req);
-  const liveKibanaInstance = skipLiveData ? {} : await getLiveKibanaInstance(req);
+  const liveEsNodes = skipLiveData || (clusterUuid && liveClusterUuid !== clusterUuid) ? [] : await getLivesNodes(req);
+  const liveKibanaInstance = skipLiveData || (clusterUuid && liveClusterUuid !== clusterUuid) ? {} : await getLiveKibanaInstance(req);
   const indicesBuckets = get(recentDocuments, 'aggregations.indices.buckets', []);
+  const liveClusterInternalCollectionEnabled = await getLiveElasticsearchCollectionEnabled(req);
 
   const status = PRODUCTS.reduce((products, product) => {
     const token = product.token || product.name;
@@ -336,7 +373,6 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, skipL
     // If there is no data, then they are a net new user
     if (!indexBuckets || indexBuckets.length === 0) {
       productStatus.totalUniqueInstanceCount = 0;
-      productStatus.detected = detectedProducts[product.name];
     }
     // If there is a single bucket, then they are fully migrated or fully on the internal collector
     else if (indexBuckets.length === 1) {
@@ -354,6 +390,12 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, skipL
           map[key] = { lastTimestamp: get(byTimestamp, 'value') };
           if (product.name === KIBANA_SYSTEM_ID && key === kibanaUuid) {
             map[key].isPrimary = true;
+          }
+          if (product.name === BEATS_SYSTEM_ID) {
+            map[key].beatType = get(bucket.beat_type, 'buckets[0].key');
+          }
+          if (bucket.cluster_uuid) {
+            map[key].clusterUuid = get(bucket.cluster_uuid, 'buckets[0].key', '') || null;
           }
         }
       }
@@ -393,9 +435,11 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, skipL
     }
     // If there are multiple buckets, they are partially upgraded assuming a single mb index exists
     else {
+      const considerAllInstancesMigrated = product.name === ELASTICSEARCH_CUSTOM_ID &&
+        clusterUuid === liveClusterUuid && !liveClusterInternalCollectionEnabled;
       const internalTimestamps = [];
       for (const indexBucket of indexBuckets) {
-        const isFullyMigrated = indexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN);
+        const isFullyMigrated = considerAllInstancesMigrated || indexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN);
         const map = isFullyMigrated ? fullyMigratedUuidsMap : internalCollectorsUuidsMap;
         const otherMap = !isFullyMigrated ? fullyMigratedUuidsMap : internalCollectorsUuidsMap;
 
@@ -415,6 +459,12 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, skipL
               map[key] = {};
               if (product.name === KIBANA_SYSTEM_ID && key === kibanaUuid) {
                 map[key].isPrimary = true;
+              }
+              if (product.name === BEATS_SYSTEM_ID) {
+                map[key].beatType = get(bucket.beat_type, 'buckets[0].key');
+              }
+              if (bucket.cluster_uuid) {
+                map[key].clusterUuid = get(bucket.cluster_uuid, 'buckets[0].key', '') || null;
               }
             }
           }
@@ -464,6 +514,10 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, skipL
       };
     }
 
+    if (productStatus.totalUniqueInstanceCount === 0) {
+      productStatus.detected = detectedProducts[product.name];
+    }
+
     return {
       ...products,
       [product.name]: productStatus,
@@ -472,7 +526,8 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, skipL
 
   status._meta = {
     secondsAgo: NUMBER_OF_SECONDS_AGO_TO_LOOK,
-    clusterUuid: liveClusterUuid,
+    liveClusterUuid,
+    isOnCloud: get(req.server.plugins, 'cloud.config.isCloudEnabled', false)
   };
 
   return status;

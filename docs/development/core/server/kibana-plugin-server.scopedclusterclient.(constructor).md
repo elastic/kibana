@@ -9,7 +9,7 @@ Constructs a new instance of the `ScopedClusterClient` class
 <b>Signature:</b>
 
 ```typescript
-constructor(internalAPICaller: APICaller, scopedAPICaller: APICaller, headers?: Record<string, string | string[] | undefined> | undefined);
+constructor(internalAPICaller: APICaller, scopedAPICaller: APICaller, headers?: Headers | undefined);
 ```
 
 ## Parameters
@@ -18,5 +18,5 @@ constructor(internalAPICaller: APICaller, scopedAPICaller: APICaller, headers?: 
 |  --- | --- | --- |
 |  internalAPICaller | <code>APICaller</code> |  |
 |  scopedAPICaller | <code>APICaller</code> |  |
-|  headers | <code>Record&lt;string, string &#124; string[] &#124; undefined&gt; &#124; undefined</code> |  |
+|  headers | <code>Headers &#124; undefined</code> |  |
 

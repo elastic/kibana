@@ -19,10 +19,10 @@ export const LspServiceDefinition = {
   },
   languageSeverDef: {
     request: {} as { lang: string },
-    response: {} as LanguageServerDefinition | null,
+    response: {} as LanguageServerDefinition[],
   },
   languageServerStatus: {
-    request: {} as { lang: string },
+    request: {} as { langName: string },
     response: {} as LanguageServerStatus,
   },
   initializeState: {
@@ -40,8 +40,8 @@ export const getLspServiceHandler = (
   async languageSeverDef({ lang }) {
     return lspService.getLanguageSeverDef(lang);
   },
-  async languageServerStatus({ lang }) {
-    return await lspService.languageServerStatus(lang);
+  async languageServerStatus({ langName }) {
+    return lspService.languageServerStatus(langName);
   },
   async initializeState({ repoUri, revision }) {
     return await lspService.initializeState(repoUri, revision);

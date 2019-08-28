@@ -6,6 +6,9 @@
   // where the inner content would result in the DOM changing the height.
   .euiTableRow-isExpandedRow .euiTableCellContent {
     animation: none !important;
+    .euiTableCellContent__text {
+      width: 100%;
+    }
   }
   // Another override: Because an update to the table replaces the DOM, the same
   // icon would still again fade in with an animation. If the table refreshes with
@@ -14,6 +17,24 @@
     animation: none !important;
   }
 }
+.mlTransformBulkActionItem {
+  display: block;
+  padding: $euiSizeS;
+  width: 100%;
+  text-align: left;
+}
+
+.mlTransformBulkActionsBorder {
+    height: 20px;
+    border-right: $euiBorderThin;
+    width: 1px;
+    display: inline-block;
+    vertical-align: middle;
+    height: 35px;
+    margin: 0px 5px;
+    margin-top: -5px;
+}
+
 .mlTransformProgressBar {
   margin-bottom: $euiSizeM;
 }

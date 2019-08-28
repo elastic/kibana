@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { mockInjectedMetadata } from './telemetry_opt_in.test.mocks';
 import { TelemetryOptInProvider } from './telemetry_opt_in';
 
 describe('TelemetryOptInProvider', () => {
@@ -19,12 +20,11 @@ describe('TelemetryOptInProvider', () => {
       addBasePath: (url) => url
     };
 
+    mockInjectedMetadata({ telemetryOptedIn: optedIn });
+
     const mockInjector = {
       get: (key) => {
         switch (key) {
-          case 'telemetryOptedIn': {
-            return optedIn;
-          }
           case '$http': {
             return mockHttp;
           }
@@ -76,5 +76,12 @@ describe('TelemetryOptInProvider', () => {
 
     // opt-in change should not be reflected
     expect(provider.getOptIn()).toEqual(false);
+  });
+
+  it('should return the current bannerId', () => {
+    const { provider } = setup({});
+    const bannerId = 'bruce-banner';
+    provider.setBannerId(bannerId);
+    expect(provider.getBannerId()).toEqual(bannerId);
   });
 });

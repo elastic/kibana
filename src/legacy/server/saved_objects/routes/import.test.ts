@@ -301,6 +301,9 @@ describe('POST /api/saved_objects/_import', () => {
           "type": "index-pattern",
         },
       ],
+      Object {
+        "namespace": undefined,
+      },
     ],
   ],
   "results": Array [

@@ -108,6 +108,106 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   // Currently the endpoint uses a default size of 100 unless a size is supplied.
   // So until paging is supported in the UI, explicitly supply a size of 1000
   // to match the max number of docs that the endpoint can return.
+  ml.getDataFrameAnalytics = ca({
+    urls: [
+      {
+        fmt: '/_ml/data_frame/analytics/<%=analyticsId%>',
+        req: {
+          analyticsId: {
+            type: 'string'
+          }
+        }
+      },
+      {
+        fmt: '/_ml/data_frame/analytics/_all?size=1000',
+      }
+    ],
+    method: 'GET'
+  });
+
+  ml.getDataFrameAnalyticsStats = ca({
+    urls: [
+      {
+        fmt: '/_ml/data_frame/analytics/<%=analyticsId%>/_stats',
+        req: {
+          analyticsId: {
+            type: 'string'
+          }
+        }
+      },
+      {
+        // Currently the endpoint uses a default size of 100 unless a size is supplied.
+        // So until paging is supported in the UI, explicitly supply a size of 1000
+        // to match the max number of docs that the endpoint can return.
+        fmt: '/_ml/data_frame/analytics/_all/_stats?size=1000',
+      }
+    ],
+    method: 'GET'
+  });
+
+  ml.createDataFrameAnalytics = ca({
+    urls: [
+      {
+        fmt: '/_ml/data_frame/analytics/<%=analyticsId%>',
+        req: {
+          analyticsId: {
+            type: 'string'
+          }
+        }
+      }
+    ],
+    needBody: true,
+    method: 'PUT'
+  });
+
+  ml.deleteDataFrameAnalytics = ca({
+    urls: [
+      {
+        fmt: '/_ml/data_frame/analytics/<%=analyticsId%>',
+        req: {
+          analyticsId: {
+            type: 'string'
+          }
+        }
+      }
+    ],
+    method: 'DELETE'
+  });
+
+  ml.startDataFrameAnalytics = ca({
+    urls: [
+      {
+        fmt: '/_ml/data_frame/analytics/<%=analyticsId%>/_start',
+        req: {
+          analyticsId: {
+            type: 'string'
+          }
+        }
+      }
+    ],
+    method: 'POST'
+  });
+
+  ml.stopDataFrameAnalytics = ca({
+    urls: [
+      {
+        fmt: '/_ml/data_frame/analytics/<%=analyticsId%>/_stop?&force=<%=force%>',
+        req: {
+          analyticsId: {
+            type: 'string'
+          },
+          force: {
+            type: 'boolean'
+          },
+        }
+      }
+    ],
+    method: 'POST'
+  });
+
+  // Currently the endpoint uses a default size of 100 unless a size is supplied.
+  // So until paging is supported in the UI, explicitly supply a size of 1000
+  // to match the max number of docs that the endpoint can return.
   ml.getDataFrameTransforms = ca({
     urls: [
       {
@@ -735,6 +835,20 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     ],
     needBody: true,
     method: 'POST'
+  });
+
+  ml.rollupIndexCapabilities = ca({
+    urls: [
+      {
+        fmt: '/<%=indexPattern%>/_rollup/data',
+        req: {
+          indexPattern: {
+            type: 'string'
+          }
+        }
+      }
+    ],
+    method: 'GET'
   });
 
 };

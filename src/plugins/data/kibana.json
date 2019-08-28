@@ -1,6 +1,6 @@
 {
   "id": "data",
-  "version": "8",
+  "version": "kibana",
   "server": true,
   "ui": true
 }

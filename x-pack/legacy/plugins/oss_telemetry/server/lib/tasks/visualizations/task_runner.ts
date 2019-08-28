@@ -72,11 +72,7 @@ async function getStats(callCluster: (method: string, params: any) => Promise<an
   });
 }
 
-export function visualizationsTaskRunner(
-  taskInstance: TaskInstance,
-  kbnServer: { server: HapiServer }
-) {
-  const { server } = kbnServer;
+export function visualizationsTaskRunner(taskInstance: TaskInstance, server: HapiServer) {
   const { callWithInternalUser: callCluster } = server.plugins.elasticsearch.getCluster('data');
   const config = server.config();
   const index = config.get('kibana.index').toString(); // cast to string for TypeScript

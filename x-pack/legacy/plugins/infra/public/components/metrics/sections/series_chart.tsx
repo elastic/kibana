@@ -12,6 +12,9 @@ import {
   getSpecId,
   DataSeriesColorsValues,
   CustomSeriesColorsMap,
+  RecursivePartial,
+  BarSeriesStyle,
+  AreaSeriesStyle,
 } from '@elastic/charts';
 import { InfraMetricLayoutVisualizationType } from '../../../pages/metrics/layouts/types';
 import { InfraDataSeries } from '../../../graphql/types';
@@ -33,26 +36,18 @@ export const SeriesChart = (props: Props) => {
 };
 
 export const AreaChart = ({ id, color, series, name, type, stack }: Props) => {
-  const style = {
+  const style: RecursivePartial<AreaSeriesStyle> = {
     area: {
-      fill: color,
       opacity: 1,
       visible: InfraMetricLayoutVisualizationType.area === type,
     },
     line: {
-      stroke: color,
       strokeWidth: InfraMetricLayoutVisualizationType.area === type ? 1 : 2,
       visible: true,
-    },
-    border: {
-      visible: false,
-      strokeWidth: 2,
-      stroke: color,
     },
     point: {
       visible: false,
       radius: 0.2,
-      stroke: color,
       strokeWidth: 2,
       opacity: 1,
     },
@@ -80,19 +75,13 @@ export const AreaChart = ({ id, color, series, name, type, stack }: Props) => {
 };
 
 export const BarChart = ({ id, color, series, name, type, stack }: Props) => {
-  const style = {
+  const style: RecursivePartial<BarSeriesStyle> = {
     rectBorder: {
       stroke: color,
       strokeWidth: 1,
       visible: true,
     },
-    border: {
-      visible: false,
-      strokeWidth: 2,
-      stroke: color,
-    },
     rect: {
-      fill: color,
       opacity: 1,
     },
   };

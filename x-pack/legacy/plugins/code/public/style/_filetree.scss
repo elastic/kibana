@@ -28,7 +28,17 @@
   vertical-align: middle;
 }
 
+.codeFileTree__node--link {
+  position: absolute;
+  width: 100%;
+  left: 0;
+  height: 1.665rem;
+  opacity: 0;
+  z-index: $euiZLevel1;
+}
+
 .codeFileTree__node--fullWidth {
+  cursor: pointer;
   position: absolute;
   width: 100%;
   background: $euiColorLightShade;

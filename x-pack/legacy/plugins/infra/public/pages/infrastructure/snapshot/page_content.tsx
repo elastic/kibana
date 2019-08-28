@@ -19,10 +19,10 @@ import { WithSource } from '../../../containers/with_source';
 export const SnapshotPageContent: React.SFC = () => (
   <PageContent>
     <WithSource>
-      {({ configuration, derivedIndexPattern, sourceId }) => (
+      {({ configuration, createDerivedIndexPattern, sourceId }) => (
         <WithOptions>
           {({ wafflemap }) => (
-            <WithWaffleFilter indexPattern={derivedIndexPattern}>
+            <WithWaffleFilter indexPattern={createDerivedIndexPattern('metrics')}>
               {({ filterQueryAsJson, applyFilterQuery }) => (
                 <WithWaffleTime>
                   {({ currentTimeRange, isAutoReloading }) => (

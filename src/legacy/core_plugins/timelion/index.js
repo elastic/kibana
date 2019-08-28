@@ -19,9 +19,10 @@
 
 import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
+import { plugin } from './server';
 
 const experimentalLabel = i18n.translate('timelion.uiSettings.experimentalLabel', {
-  defaultMessage: 'experimental'
+  defaultMessage: 'experimental',
 });
 
 export default function (kibana) {
@@ -44,7 +45,7 @@ export default function (kibana) {
       return {
         timelion: {
           save: true,
-        }
+        },
       };
     },
 
@@ -60,109 +61,112 @@ export default function (kibana) {
       hacks: [
         'plugins/timelion/hacks/toggle_app_link_in_nav',
         'plugins/timelion/lib/panel_registry',
-        'plugins/timelion/panels/timechart/timechart'
+        'plugins/timelion/panels/timechart/timechart',
       ],
       injectDefaultVars(server) {
+        const config = server.config();
+
         return {
-          timelionUiEnabled: server.config().get('timelion.ui.enabled'),
+          timelionUiEnabled: config.get('timelion.ui.enabled'),
+          kbnIndex: config.get('kibana.index'),
         };
       },
       visTypes: [
-        'plugins/timelion/vis'
+        'plugins/timelion/vis',
       ],
       interpreter: ['plugins/timelion/timelion_vis_fn'],
       home: [
-        'plugins/timelion/register_feature'
+        'plugins/timelion/register_feature',
       ],
       mappings: require('./mappings.json'),
       uiSettingDefaults: {
         'timelion:showTutorial': {
           name: i18n.translate('timelion.uiSettings.showTutorialLabel', {
-            defaultMessage: 'Show tutorial'
+            defaultMessage: 'Show tutorial',
           }),
           value: false,
           description: i18n.translate('timelion.uiSettings.showTutorialDescription', {
-            defaultMessage: 'Should I show the tutorial by default when entering the timelion app?'
+            defaultMessage: 'Should I show the tutorial by default when entering the timelion app?',
           }),
           category: ['timelion'],
         },
         'timelion:es.timefield': {
           name: i18n.translate('timelion.uiSettings.timeFieldLabel', {
-            defaultMessage: 'Time field'
+            defaultMessage: 'Time field',
           }),
           value: '@timestamp',
           description: i18n.translate('timelion.uiSettings.timeFieldDescription', {
             defaultMessage: 'Default field containing a timestamp when using {esParam}',
-            values: { esParam: '.es()' }
+            values: { esParam: '.es()' },
           }),
           category: ['timelion'],
         },
         'timelion:es.default_index': {
           name: i18n.translate('timelion.uiSettings.defaultIndexLabel', {
-            defaultMessage: 'Default index'
+            defaultMessage: 'Default index',
           }),
           value: '_all',
           description: i18n.translate('timelion.uiSettings.defaultIndexDescription', {
             defaultMessage: 'Default elasticsearch index to search with {esParam}',
-            values: { esParam: '.es()' }
+            values: { esParam: '.es()' },
           }),
           category: ['timelion'],
         },
         'timelion:target_buckets': {
           name: i18n.translate('timelion.uiSettings.targetBucketsLabel', {
-            defaultMessage: 'Target buckets'
+            defaultMessage: 'Target buckets',
           }),
           value: 200,
           description: i18n.translate('timelion.uiSettings.targetBucketsDescription', {
-            defaultMessage: 'The number of buckets to shoot for when using auto intervals'
+            defaultMessage: 'The number of buckets to shoot for when using auto intervals',
           }),
           category: ['timelion'],
         },
         'timelion:max_buckets': {
           name: i18n.translate('timelion.uiSettings.maximumBucketsLabel', {
-            defaultMessage: 'Maximum buckets'
+            defaultMessage: 'Maximum buckets',
           }),
           value: 2000,
           description: i18n.translate('timelion.uiSettings.maximumBucketsDescription', {
-            defaultMessage: 'The maximum number of buckets a single datasource can return'
+            defaultMessage: 'The maximum number of buckets a single datasource can return',
           }),
           category: ['timelion'],
         },
         'timelion:default_columns': {
           name: i18n.translate('timelion.uiSettings.defaultColumnsLabel', {
-            defaultMessage: 'Default columns'
+            defaultMessage: 'Default columns',
           }),
           value: 2,
           description: i18n.translate('timelion.uiSettings.defaultColumnsDescription', {
-            defaultMessage: 'Number of columns on a timelion sheet by default'
+            defaultMessage: 'Number of columns on a timelion sheet by default',
           }),
           category: ['timelion'],
         },
         'timelion:default_rows': {
           name: i18n.translate('timelion.uiSettings.defaultRowsLabel', {
-            defaultMessage: 'Default rows'
+            defaultMessage: 'Default rows',
           }),
           value: 2,
           description: i18n.translate('timelion.uiSettings.defaultRowsDescription', {
-            defaultMessage: 'Number of rows on a timelion sheet by default'
+            defaultMessage: 'Number of rows on a timelion sheet by default',
           }),
           category: ['timelion'],
         },
         'timelion:min_interval': {
           name: i18n.translate('timelion.uiSettings.minimumIntervalLabel', {
-            defaultMessage: 'Minimum interval'
+            defaultMessage: 'Minimum interval',
           }),
           value: '1ms',
           description: i18n.translate('timelion.uiSettings.minimumIntervalDescription', {
             defaultMessage: 'The smallest interval that will be calculated when using "auto"',
-            description: '"auto" is a technical value in that context, that should not be translated.'
+            description: '"auto" is a technical value in that context, that should not be translated.',
           }),
           category: ['timelion'],
         },
         'timelion:graphite.url': {
           name: i18n.translate('timelion.uiSettings.graphiteURLLabel', {
             defaultMessage: 'Graphite URL',
-            description: 'The URL should be in the form of https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'
+            description: 'The URL should be in the form of https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite',
           }),
           value: (server) => {
             const urls = server.config().get('timelion.graphiteUrls');
@@ -174,7 +178,7 @@ export default function (kibana) {
           },
           description: i18n.translate('timelion.uiSettings.graphiteURLDescription', {
             defaultMessage: '{experimentalLabel} The <a href="https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite" target="_blank" rel="noopener">URL</a> of your graphite host',
-            values: { experimentalLabel: `<em>[${experimentalLabel}]</em>` }
+            values: { experimentalLabel: `<em>[${experimentalLabel}]</em>` },
           }),
           type: 'select',
           options: (server) => (server.config().get('timelion.graphiteUrls')),
@@ -182,17 +186,22 @@ export default function (kibana) {
         },
         'timelion:quandl.key': {
           name: i18n.translate('timelion.uiSettings.quandlKeyLabel', {
-            defaultMessage: 'Quandl key'
+            defaultMessage: 'Quandl key',
           }),
           value: 'someKeyHere',
           description: i18n.translate('timelion.uiSettings.quandlKeyDescription', {
             defaultMessage: '{experimentalLabel} Your API key from www.quandl.com',
-            values: { experimentalLabel: `<em>[${experimentalLabel}]</em>` }
+            values: { experimentalLabel: `<em>[${experimentalLabel}]</em>` },
           }),
           category: ['timelion'],
-        }
+        },
       },
     },
-    init: require('./init.js'),
+    init: (server) => {
+      const initializerContext = {};
+      const core = { http: { server } };
+
+      plugin(initializerContext).setup(core);
+    },
   });
 }

@@ -3,8 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import Boom from 'boom';
 import {
   ClusterClient,
   CoreSetup,
@@ -13,15 +11,17 @@ import {
 } from '../../../../../src/core/server';
 import { AuthenticatedUser } from '../../common/model';
 import { ConfigType } from '../config';
-import { getErrorStatusCode, wrapError } from '../errors';
+import { getErrorStatusCode } from '../errors';
 import { Authenticator, ProviderSession } from './authenticator';
 import { LegacyAPI } from '../plugin';
+import { APIKeys, CreateAPIKeyParams, InvalidateAPIKeyParams } from './api_keys';
 
 export { canRedirectRequest } from './can_redirect_request';
 export { Authenticator, ProviderLoginAttempt } from './authenticator';
 export { AuthenticationResult } from './authentication_result';
 export { DeauthenticationResult } from './deauthentication_result';
-export { BasicCredentials } from './providers';
+export { OIDCAuthenticationFlow } from './providers';
+export { CreateAPIKeyResult } from './api_keys';
 
 interface SetupAuthenticationParams {
   core: CoreSetup;
@@ -76,7 +76,7 @@ export async function setupAuthentication({
 
   authLogger.debug('Successfully initialized authenticator.');
 
-  core.http.registerAuth(async (request, t) => {
+  core.http.registerAuth(async (request, response, t) => {
     // If security is disabled continue with no user credentials and delete the client cookie as well.
     if (isSecurityFeatureDisabled()) {
       return t.authenticated();
@@ -87,7 +87,7 @@ export async function setupAuthentication({
       authenticationResult = await authenticator.authenticate(request);
     } catch (err) {
       authLogger.error(err);
-      return t.rejected(wrapError(err));
+      return response.internalError();
     }
 
     if (authenticationResult.succeeded()) {
@@ -104,36 +104,52 @@ export async function setupAuthentication({
       // authentication (username and password) or arbitrary external page managed by 3rd party
       // Identity Provider for SSO authentication mechanisms. Authentication provider is the one who
       // decides what location user should be redirected to.
-      return t.redirected(authenticationResult.redirectURL!);
+      return response.redirected({
+        headers: {
+          location: authenticationResult.redirectURL!,
+        },
+      });
     }
 
-    let error;
     if (authenticationResult.failed()) {
       authLogger.info(`Authentication attempt failed: ${authenticationResult.error!.message}`);
-      error = wrapError(authenticationResult.error);
-
-      const authResponseHeaders = authenticationResult.authResponseHeaders;
-      for (const [headerName, headerValue] of Object.entries(authResponseHeaders || {})) {
-        if (error.output.headers[headerName] !== undefined) {
-          authLogger.warn(`Server rewrites a error response header [${headerName}].`);
-        }
-        // Hapi typings don't support headers that are `string[]`.
-        error.output.headers[headerName] = headerValue as any;
+      const error = authenticationResult.error!;
+      // proxy Elasticsearch "native" errors
+      const statusCode = getErrorStatusCode(error);
+      if (typeof statusCode === 'number') {
+        return response.customError({
+          body: error,
+          statusCode,
+          headers: authenticationResult.authResponseHeaders,
+        });
       }
-    } else {
-      authLogger.info('Could not handle authentication attempt');
-      error = Boom.unauthorized();
+
+      return response.unauthorized({
+        headers: authenticationResult.authResponseHeaders,
+      });
     }
 
-    return t.rejected(error);
+    authLogger.info('Could not handle authentication attempt');
+    return response.unauthorized({
+      headers: authenticationResult.authResponseHeaders,
+    });
   });
 
   authLogger.debug('Successfully registered core authentication handler.');
 
+  const apiKeys = new APIKeys({
+    clusterClient,
+    logger: loggers.get('api-key'),
+    isSecurityFeatureDisabled,
+  });
   return {
     login: authenticator.login.bind(authenticator),
     logout: authenticator.logout.bind(authenticator),
     getCurrentUser,
+    createAPIKey: (request: KibanaRequest, params: CreateAPIKeyParams) =>
+      apiKeys.create(request, params),
+    invalidateAPIKey: (request: KibanaRequest, params: InvalidateAPIKeyParams) =>
+      apiKeys.invalidate(request, params),
     isAuthenticated: async (request: KibanaRequest) => {
       try {
         await getCurrentUser(request);

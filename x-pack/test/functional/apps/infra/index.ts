@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default ({ loadTestFile }: KibanaFunctionalTestDefaultProviders) => {
+export default ({ loadTestFile }: FtrProviderContext) => {
   describe('InfraOps app', function() {
     this.tags('ciGroup7');
 
@@ -15,5 +14,6 @@ export default ({ loadTestFile }: KibanaFunctionalTestDefaultProviders) => {
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./logs_source_configuration'));
     loadTestFile(require.resolve('./metrics_source_configuration'));
+    loadTestFile(require.resolve('./link_to'));
   });
 };

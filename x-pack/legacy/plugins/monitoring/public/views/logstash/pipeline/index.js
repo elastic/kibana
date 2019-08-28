@@ -12,7 +12,7 @@ import uiRoutes from'ui/routes';
 import moment from 'moment';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
-import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
+import { CALCULATE_DURATION_SINCE, CODE_PATH_LOGSTASH } from '../../../../common/constants';
 import { formatTimestampToDuration } from '../../../../common/format_timestamp_to_duration';
 import template from './index.html';
 import { i18n } from '@kbn/i18n';
@@ -94,7 +94,7 @@ uiRoutes.when('/logstash/pipelines/:id/:hash?', {
   resolve: {
     clusters(Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: [CODE_PATH_LOGSTASH] });
     },
     pageData: getPageData
   },

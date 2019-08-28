@@ -348,7 +348,7 @@ var apm = initApm({curlyOpen}
 {curlyClose})`.split('\n'),
     textPost: i18n.translate('kbn.server.tutorials.apm.jsClient.configure.textPost', {
       defaultMessage: 'See the [documentation]({documentationLink}) for advanced usage.',
-      values: { documentationLink: '{config.docs.base_url}guide/en/apm/agent/js-base/current/index.html' },
+      values: { documentationLink: '{config.docs.base_url}guide/en/apm/agent/rum-js/current/index.html' },
     }),
   },
 ];

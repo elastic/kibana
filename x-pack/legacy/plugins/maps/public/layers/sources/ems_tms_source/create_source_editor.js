@@ -11,7 +11,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 
-import { getEmsTMSServices } from '../../../meta';
+import { getEMSClient } from '../../../meta';
 import { getEmsUnavailableMessage } from '../ems_unavailable_message';
 import { i18n } from '@kbn/i18n';
 
@@ -24,7 +24,14 @@ export class EMSTMSCreateSourceEditor extends React.Component {
   };
 
   _loadTmsOptions = async () => {
-    const options = await getEmsTMSServices();
+    const emsClient = getEMSClient();
+    const emsTMSServices =  await emsClient.getTMSServices();
+    const options = emsTMSServices.map(tmsService => {
+      return {
+        id: tmsService.getId(),
+        name: tmsService.getDisplayName()
+      };
+    });
     options.unshift({
       id: AUTO_SELECT,
       name: i18n.translate('xpack.maps.source.emsTile.autoLabel', {

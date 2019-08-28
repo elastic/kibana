@@ -125,6 +125,8 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
   )
 );
 
+UncommonProcessTableComponent.displayName = 'UncommonProcessTableComponent';
+
 const makeMapStateToProps = () => {
   const getUncommonProcessesSelector = hostsSelectors.uncommonProcessesSelector();
   return (state: State, { type }: OwnProps) => getUncommonProcessesSelector(state, type);

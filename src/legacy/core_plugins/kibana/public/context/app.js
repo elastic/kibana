@@ -38,8 +38,8 @@ import {
 } from './query';
 import { timefilter } from 'ui/timefilter';
 
-import { data } from 'plugins/data/setup';
-data.filter.loadLegacyDirectives();
+// load directives
+import '../../../data/public/legacy';
 
 const module = uiModules.get('apps/context', [
   'elasticsearch',

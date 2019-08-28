@@ -9,16 +9,16 @@ import { PLUGIN_ID, VIS_TELEMETRY_TASK, VIS_TELEMETRY_TASK_NUM_WORKERS } from '.
 import { visualizationsTaskRunner } from './visualizations/task_runner';
 
 export function registerTasks(server: HapiServer) {
-  const { taskManager } = server;
+  const taskManager = server.plugins.task_manager;
 
   taskManager.registerTaskDefinitions({
     [VIS_TELEMETRY_TASK]: {
       title: 'X-Pack telemetry calculator for Visualizations',
       type: VIS_TELEMETRY_TASK,
       numWorkers: VIS_TELEMETRY_TASK_NUM_WORKERS, // by default it's 100% their workers
-      createTaskRunner({ taskInstance, kbnServer }: { kbnServer: any; taskInstance: any }) {
+      createTaskRunner({ taskInstance }: { taskInstance: any }) {
         return {
-          run: visualizationsTaskRunner(taskInstance, kbnServer),
+          run: visualizationsTaskRunner(taskInstance, server),
         };
       },
     },
@@ -26,7 +26,7 @@ export function registerTasks(server: HapiServer) {
 }
 
 export function scheduleTasks(server: HapiServer) {
-  const { taskManager } = server;
+  const taskManager = server.plugins.task_manager;
   const { kbnServer } = server.plugins.xpack_main.status.plugin;
 
   kbnServer.afterPluginsInit(() => {

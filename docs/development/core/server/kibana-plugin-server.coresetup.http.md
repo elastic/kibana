@@ -13,7 +13,8 @@ http: {
         registerAuth: HttpServiceSetup['registerAuth'];
         registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
         basePath: HttpServiceSetup['basePath'];
-        createNewServer: HttpServiceSetup['createNewServer'];
         isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
+        registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(name: T, provider: RequestHandlerContextProvider<RequestHandlerContext>) => RequestHandlerContextContainer<RequestHandlerContext>;
+        createRouter: () => IRouter;
     };
 ```

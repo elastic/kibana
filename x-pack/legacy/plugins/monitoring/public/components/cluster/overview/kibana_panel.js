@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { formatNumber } from 'plugins/monitoring/lib/format_number';
-import { ClusterItemContainer, HealthStatusIndicator, BytesPercentageUsage } from './helpers';
+import { ClusterItemContainer, HealthStatusIndicator, BytesPercentageUsage, DisabledIfNoDataAndInSetupModeLink } from './helpers';
 import { get } from 'lodash';
 import {
   EuiFlexGrid,
@@ -19,7 +19,7 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiHorizontalRule,
-  EuiBadge,
+  EuiIcon,
   EuiToolTip
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -39,32 +39,46 @@ export function KibanaPanel(props) {
   const goToKibana = () => props.changeUrl('kibana');
   const goToInstances = () => props.changeUrl('kibana/instances');
 
+  const setupModeKibanaData = get(setupMode.data, 'kibana');
   let setupModeInstancesData = null;
   if (setupMode.enabled && setupMode.data) {
-    const kibanaData = get(setupMode.data, 'kibana.byUuid');
-    const migratedNodesCount = Object.values(kibanaData).filter(node => node.isFullyMigrated).length;
-    const totalNodesCount = Object.values(kibanaData).length;
+    const {
+      totalUniqueInstanceCount,
+      totalUniqueFullyMigratedCount,
+      totalUniquePartiallyMigratedCount
+    } = setupModeKibanaData;
+    const allMonitoredByMetricbeat = totalUniqueInstanceCount > 0 &&
+      (totalUniqueFullyMigratedCount === totalUniqueInstanceCount || totalUniquePartiallyMigratedCount === totalUniqueInstanceCount);
+    const internalCollectionOn = totalUniquePartiallyMigratedCount > 0;
+    if (!allMonitoredByMetricbeat || internalCollectionOn) {
+      let tooltipText = null;
 
-    const badgeColor = migratedNodesCount === totalNodesCount
-      ? 'secondary'
-      : 'danger';
+      if (!allMonitoredByMetricbeat) {
+        tooltipText = i18n.translate('xpack.monitoring.cluster.overview.kibanaPanel.setupModeNodesTooltip.oneInternal', {
+          defaultMessage: `There's at least one instance that isn't being monitored using Metricbeat. Click the flag
+          icon to visit the instances listing page and find out more information about the status of each instance.`
+        });
+      }
+      else if (internalCollectionOn) {
+        tooltipText = i18n.translate('xpack.monitoring.cluster.overview.kibanaPanel.setupModeNodesTooltip.disableInternal', {
+          defaultMessage: `All instances are being monitored using Metricbeat but internal collection still needs to be turned
+          off. Click the flag icon to visit the instances listing page and disable internal collection.`
+        });
+      }
 
-    setupModeInstancesData = (
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          position="top"
-          content={i18n.translate('xpack.monitoring.cluster.overview.kibanaPanel.setupModeNodesTooltip', {
-            defaultMessage: `These numbers indicate how many detected monitored instances versus how many
-            detected total instances. If there are more detected instances than monitored instances, click
-            the instances link and you will be guided in how to setup monitoring for the missing node.`
-          })}
-        >
-          <EuiBadge color={badgeColor}>
-            {formatNumber(migratedNodesCount, 'int_commas')}/{formatNumber(totalNodesCount, 'int_commas')}
-          </EuiBadge>
-        </EuiToolTip>
-      </EuiFlexItem>
-    );
+      setupModeInstancesData = (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            position="top"
+            content={tooltipText}
+          >
+            <EuiLink onClick={goToInstances}>
+              <EuiIcon type="flag" color="warning"/>
+            </EuiLink>
+          </EuiToolTip>
+        </EuiFlexItem>
+      );
+    }
   }
 
   return (
@@ -81,7 +95,9 @@ export function KibanaPanel(props) {
           <EuiPanel paddingSize="m">
             <EuiTitle size="s">
               <h3>
-                <EuiLink
+                <DisabledIfNoDataAndInSetupModeLink
+                  setupModeEnabled={setupMode.enabled}
+                  setupModeData={setupModeKibanaData}
                   onClick={goToKibana}
                   aria-label={i18n.translate('xpack.monitoring.cluster.overview.kibanaPanel.overviewLinkAriaLabel', {
                     defaultMessage: 'Kibana Overview'
@@ -92,7 +108,7 @@ export function KibanaPanel(props) {
                     id="xpack.monitoring.cluster.overview.kibanaPanel.overviewLinkLabel"
                     defaultMessage="Overview"
                   />
-                </EuiLink>
+                </DisabledIfNoDataAndInSetupModeLink>
               </h3>
             </EuiTitle>
             <EuiHorizontalRule margin="m" />

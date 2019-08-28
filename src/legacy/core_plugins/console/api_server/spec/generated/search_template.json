@@ -33,6 +33,6 @@
       "_search/template",
       "{indices}/_search/template"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current/search-template.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/search-template.html"
   }
 }

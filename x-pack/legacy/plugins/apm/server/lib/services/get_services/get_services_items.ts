@@ -5,44 +5,29 @@
  */
 
 import { idx } from '@kbn/elastic-idx';
+import { mergeProjection } from '../../../../common/projections/util/merge_projection';
 import {
   PROCESSOR_EVENT,
   SERVICE_AGENT_NAME,
   SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
   TRANSACTION_DURATION
 } from '../../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../../typings/common';
-import { rangeFilter } from '../../helpers/range_filter';
 import { Setup } from '../../helpers/setup_request';
+import { getServicesProjection } from '../../../../common/projections/services';
 
 export type ServiceListAPIResponse = PromiseReturnType<typeof getServicesItems>;
 export async function getServicesItems(setup: Setup) {
-  const { start, end, uiFiltersES, client, config } = setup;
+  const { start, end, client } = setup;
 
-  const params = {
-    index: [
-      config.get<string>('apm_oss.metricsIndices'),
-      config.get<string>('apm_oss.errorIndices'),
-      config.get<string>('apm_oss.transactionIndices')
-    ],
+  const projection = getServicesProjection({ setup });
+
+  const params = mergeProjection(projection, {
     body: {
       size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              terms: { [PROCESSOR_EVENT]: ['transaction', 'error', 'metric'] }
-            },
-            { range: rangeFilter(start, end) },
-            ...uiFiltersES
-          ]
-        }
-      },
       aggs: {
         services: {
           terms: {
-            field: SERVICE_NAME,
             size: 500
           },
           aggs: {
@@ -62,7 +47,7 @@ export async function getServicesItems(setup: Setup) {
         }
       }
     }
-  };
+  });
 
   const resp = await client.search(params);
   const aggs = resp.aggregations;

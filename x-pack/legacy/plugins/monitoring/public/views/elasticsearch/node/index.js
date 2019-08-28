@@ -19,13 +19,14 @@ import { I18nContext } from 'ui/i18n';
 import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
 import { nodesByIndices } from '../../../components/elasticsearch/shard_allocation/transformers/nodes_by_indices';
 import { MonitoringViewBaseController } from '../../base_controller';
+import { CODE_PATH_ELASTICSEARCH } from '../../../../common/constants';
 
 uiRoutes.when('/elasticsearch/nodes/:node', {
   template,
   resolve: {
     clusters: function (Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: [CODE_PATH_ELASTICSEARCH] });
     },
     pageData: getPageData
   },

@@ -115,11 +115,13 @@ function createPlugin$(path: string, log: Logger, coreContext: CoreContext) {
   return from(parseManifest(path, coreContext.env.packageInfo)).pipe(
     map(manifest => {
       log.debug(`Successfully discovered plugin "${manifest.id}" at "${path}"`);
-      return new PluginWrapper(
+      const opaqueId = Symbol(manifest.id);
+      return new PluginWrapper({
         path,
         manifest,
-        createPluginInitializerContext(coreContext, manifest)
-      );
+        opaqueId,
+        initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
+      });
     }),
     catchError(err => [err])
   );

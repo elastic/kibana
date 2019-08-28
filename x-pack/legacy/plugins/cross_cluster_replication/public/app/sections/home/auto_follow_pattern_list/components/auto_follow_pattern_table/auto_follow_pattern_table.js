@@ -133,6 +133,28 @@ export class AutoFollowPatternTable extends PureComponent {
       actions: [
         {
           render: ({ name }) => {
+            const label = i18n.translate('xpack.crossClusterReplication.autoFollowPatternList.table.actionEditDescription', {
+              defaultMessage: 'Edit auto-follow pattern',
+            });
+
+            return (
+              <EuiToolTip
+                content={label}
+                delay="long"
+              >
+                <EuiButtonIcon
+                  aria-label={label}
+                  iconType="pencil"
+                  color="primary"
+                  href={routing.getAutoFollowPatternPath(name)}
+                  data-test-subj="editButton"
+                />
+              </EuiToolTip>
+            );
+          },
+        },
+        {
+          render: ({ name }) => {
             const label = i18n.translate(
               'xpack.crossClusterReplication.autoFollowPatternList.table.actionDeleteDescription',
               {
@@ -156,28 +178,6 @@ export class AutoFollowPatternTable extends PureComponent {
                     />
                   )}
                 </AutoFollowPatternDeleteProvider>
-              </EuiToolTip>
-            );
-          },
-        },
-        {
-          render: ({ name }) => {
-            const label = i18n.translate('xpack.crossClusterReplication.autoFollowPatternList.table.actionEditDescription', {
-              defaultMessage: 'Edit auto-follow pattern',
-            });
-
-            return (
-              <EuiToolTip
-                content={label}
-                delay="long"
-              >
-                <EuiButtonIcon
-                  aria-label={label}
-                  iconType="pencil"
-                  color="primary"
-                  href={routing.getAutoFollowPatternPath(name)}
-                  data-test-subj="editButton"
-                />
               </EuiToolTip>
             );
           },

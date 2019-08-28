@@ -79,7 +79,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       log.debug('SecurityPage:initTests');
       await esArchiver.load('empty_kibana');
       await esArchiver.loadIfNeeded('logstash_functional');
-      browser.setWindowSize(1600, 1000);
+      await browser.setWindowSize(1600, 1000);
     }
 
     async login(username, password, options = {}) {

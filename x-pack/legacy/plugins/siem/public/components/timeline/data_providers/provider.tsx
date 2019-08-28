@@ -29,3 +29,5 @@ export const Provider = pure<OwnProps>(({ dataProvider }) => (
     operator={dataProvider.queryMatch.operator || IS_OPERATOR}
   />
 ));
+
+Provider.displayName = 'Provider';

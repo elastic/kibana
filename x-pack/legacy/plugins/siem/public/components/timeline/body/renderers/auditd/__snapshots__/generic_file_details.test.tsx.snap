@@ -2,7 +2,7 @@
 
 exports[`GenericFileDetails rendering it renders the default GenericFileDetails 1`] = `
 <Component>
-  <pure(Component)
+  <AuditdGenericFileDetails
     browserFields={Object {}}
     contextId="contextid-123"
     data={

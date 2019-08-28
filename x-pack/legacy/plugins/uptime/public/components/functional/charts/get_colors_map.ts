@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DataSeriesColorsValues } from '@elastic/charts';
-import { SpecId } from '@elastic/charts/dist/lib/utils/ids';
+import { DataSeriesColorsValues, SpecId } from '@elastic/charts';
 
 /**
  * This is a helper function used to more easily define a basic map

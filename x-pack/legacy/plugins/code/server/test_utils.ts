@@ -37,6 +37,14 @@ const TEST_OPTIONS = {
     enableGitCertCheck: true,
     gitProtocolWhitelist: ['ssh', 'https', 'git'],
   },
+  disk: {
+    thresholdEnabled: true,
+    watermarkLow: '80%',
+  },
+  clustering: {
+    enabled: false,
+    codeNodes: [],
+  },
   repos: [],
   maxWorkspace: 5, // max workspace folder for each language server
 };

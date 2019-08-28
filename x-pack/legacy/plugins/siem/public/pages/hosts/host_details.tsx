@@ -151,6 +151,11 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                             refetch={refetch}
                             setQuery={setQuery}
                             to={to}
+                            narrowDateRange={(min: number, max: number) => {
+                              setTimeout(() => {
+                                setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+                              }, 500);
+                            }}
                           />
                         )}
                       </KpiHostDetailsQuery>
@@ -309,6 +314,8 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
     </WithSource>
   )
 );
+
+HostDetailsComponent.displayName = 'HostDetailsComponent';
 
 const makeMapStateToProps = () => {
   const getHostsFilterQuery = hostsSelectors.hostsFilterQueryExpression();

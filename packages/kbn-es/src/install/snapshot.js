@@ -73,6 +73,7 @@ exports.installSnapshot = async function installSnapshot({
   installPath = path.resolve(basePath, version),
   log = defaultLog,
   bundledJDK = true,
+  esArgs,
 }) {
   const { downloadPath } = await exports.downloadSnapshot({
     license,
@@ -89,5 +90,6 @@ exports.installSnapshot = async function installSnapshot({
     installPath,
     log,
     bundledJDK,
+    esArgs,
   });
 };

@@ -76,8 +76,8 @@ export const getHostsColumns = (
     name: (
       <EuiToolTip content={i18n.FIRST_LAST_SEEN_TOOLTIP}>
         <>
-          {i18n.LAST_SEEN}
-          <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          {i18n.LAST_SEEN}{' '}
+          <EuiIcon size="s" color="subdued" type="iInCircle" className="eui-alignTop" />
         </>
       </EuiToolTip>
     ),

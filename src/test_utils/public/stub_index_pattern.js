@@ -18,21 +18,27 @@
  */
 
 import sinon from 'sinon';
-import { IndexPattern } from 'ui/index_patterns/_index_pattern';
-import { getRoutes } from 'ui/index_patterns/get_routes';
-import { formatHitProvider } from 'ui/index_patterns/_format_hit';
+// TODO: We should not be importing from the data plugin directly here; this is only necessary
+// because it is one of the few places that we need to access the IndexPattern class itself, rather
+// than just the type. Doing this as a temporary measure; it will be left behind when migrating to NP.
+import { IndexPattern } from '../../legacy/core_plugins/data/public/index_patterns/index_patterns';
+import {
+  FieldList,
+  getRoutes,
+  formatHitProvider,
+  flattenHitWrapper,
+} from 'ui/index_patterns';
 import { fieldFormats } from 'ui/registry/field_formats';
-import { flattenHitWrapper } from 'ui/index_patterns/_flatten_hit';
-import { FieldList } from 'ui/index_patterns/_field_list';
 
 export default function () {
 
-  function StubIndexPattern(pattern, timeField, fields) {
+  function StubIndexPattern(pattern, getConfig, timeField, fields) {
     this.id = pattern;
     this.title = pattern;
     this.popularizeField = sinon.stub();
     this.timeFieldName = timeField;
     this.isTimeBased = () => Boolean(this.timeFieldName);
+    this.getConfig = getConfig;
     this.getNonScriptedFields = sinon.spy(IndexPattern.prototype.getNonScriptedFields);
     this.getScriptedFields = sinon.spy(IndexPattern.prototype.getScriptedFields);
     this.getFieldByName = sinon.spy(IndexPattern.prototype.getFieldByName);

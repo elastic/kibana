@@ -48,3 +48,5 @@ export const EntityDraggable = React.memo<Props>(
     );
   }
 );
+
+EntityDraggable.displayName = 'EntityDraggable';

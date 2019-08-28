@@ -14,9 +14,8 @@ import {
   AutocompleteSuggestion,
   getAutocompleteProvider
 } from 'ui/autocomplete_providers';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { StaticIndexPattern, getFromSavedObject } from 'ui/index_patterns';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { getFromSavedObject } from 'ui/index_patterns/static_utils';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 import { KibanaLink } from '../Links/KibanaLink';
 // @ts-ignore
@@ -28,7 +27,7 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 import { history } from '../../../utils/history';
 import { useMatchedRoutes } from '../../../hooks/useMatchedRoutes';
 import { RouteName } from '../../app/Main/route_config/route_names';
-import { useCore } from '../../../hooks/useCore';
+import { useKibanaCore } from '../../../../../observability/public';
 import { getAPMIndexPattern } from '../../../services/rest/savedObjects';
 
 const Container = styled.div`
@@ -87,7 +86,7 @@ function getSuggestions(
 }
 
 export function KueryBar() {
-  const core = useCore();
+  const core = useKibanaCore();
   const [state, setState] = useState<State>({
     indexPattern: null,
     suggestions: [],
@@ -189,7 +188,7 @@ export function KueryBar() {
         return;
       }
 
-      history.replace({
+      history.push({
         ...location,
         search: fromQuery({
           ...toQuery(location.search),

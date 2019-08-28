@@ -12,15 +12,12 @@ import styled from 'styled-components';
 import { NotePreview } from './note_preview';
 import { TimelineResultNote } from '../types';
 
-const NotePreviewsContainer = styled.div<{ paddingLeft: number }>`
-  padding-left: ${({ paddingLeft }) => `${paddingLeft}px`};
+const NotePreviewsContainer = styled.section`
+  padding: ${props =>
+    `${props.theme.eui.euiSizeS} 0 ${props.theme.eui.euiSizeS} ${props.theme.eui.euiSizeXXL}`};
 `;
 
-/** The default left-padding of a notes preview */
-const DEFAULT_NOTES_PREVIEW_LEFT_PADDING = 28; // px
-
-/** The left padding of a notes preview in a modal */
-const MODAL_NOTES_PREVIEW_LEFT_PADDING = 31; // px
+NotePreviewsContainer.displayName = 'NotePreviewsContainer';
 
 /**
  * Renders a preview of a note in the All / Open Timelines table
@@ -36,10 +33,7 @@ export const NotePreviews = pure<{
   const uniqueNotes = uniqBy('savedObjectId', notes);
 
   return (
-    <NotePreviewsContainer
-      data-test-subj="note-previews-container"
-      paddingLeft={isModal ? MODAL_NOTES_PREVIEW_LEFT_PADDING : DEFAULT_NOTES_PREVIEW_LEFT_PADDING}
-    >
+    <NotePreviewsContainer data-test-subj="note-previews-container">
       {uniqueNotes.map(({ note, savedObjectId, updated, updatedBy }) =>
         savedObjectId != null ? (
           <NotePreview
@@ -54,3 +48,5 @@ export const NotePreviews = pure<{
     </NotePreviewsContainer>
   );
 });
+
+NotePreviews.displayName = 'NotePreviews';

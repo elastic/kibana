@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { kfetch } from 'ui/kfetch';
+import { npStart } from 'ui/new_platform';
 
 import { Action } from 'redux-actions';
 import { call, put, takeEvery, takeLatest, take } from 'redux-saga/effects';
@@ -37,7 +37,7 @@ import { history } from '../utils/url';
 import { adminRoutePattern } from './patterns';
 
 function requestRepos(): any {
-  return kfetch({ pathname: '/api/code/repos' });
+  return npStart.core.http.get('/api/code/repos');
 }
 
 function* handleFetchRepos() {
@@ -50,13 +50,11 @@ function* handleFetchRepos() {
 }
 
 function requestDeleteRepo(uri: string) {
-  return kfetch({ pathname: `/api/code/repo/${uri}`, method: 'delete' });
+  return npStart.core.http.delete(`/api/code/repo/${uri}`);
 }
 
 function requestIndexRepo(uri: string) {
-  return kfetch({
-    pathname: `/api/code/repo/index/${uri}`,
-    method: 'post',
+  return npStart.core.http.post(`/api/code/repo/index/${uri}`, {
     body: JSON.stringify({ reindex: true }),
   });
 }
@@ -92,9 +90,7 @@ function* handleIndexRepo(action: Action<string>) {
 }
 
 function requestImportRepo(uri: string) {
-  return kfetch({
-    pathname: '/api/code/repo',
-    method: 'post',
+  return npStart.core.http.post('/api/code/repo', {
     body: JSON.stringify({ url: uri }),
   });
 }
@@ -117,7 +113,7 @@ function* handleFetchRepoConfigs() {
 }
 
 function requestRepoConfigs() {
-  return kfetch({ pathname: '/api/code/workspace', method: 'get' });
+  return npStart.core.http.get('/api/code/workspace');
 }
 
 function* handleInitCmd(action: Action<string>) {
@@ -126,10 +122,8 @@ function* handleInitCmd(action: Action<string>) {
 }
 
 function requestRepoInitCmd(repoUri: string) {
-  return kfetch({
-    pathname: `/api/code/workspace/${repoUri}/master`,
+  return npStart.core.http.post(`/api/code/workspace/${repoUri}/master`, {
     query: { force: true },
-    method: 'post',
   });
 }
 function* handleGotoRepo(action: Action<string>) {

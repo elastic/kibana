@@ -17,4 +17,4 @@
  * under the License.
  */
 
-import './doc_viewer';
+import './doc_viewer_directive';

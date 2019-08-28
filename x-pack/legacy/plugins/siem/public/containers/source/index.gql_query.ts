@@ -21,6 +21,7 @@ export const sourceQuery = gql`
           searchable
           type
           aggregatable
+          format
         }
       }
     }

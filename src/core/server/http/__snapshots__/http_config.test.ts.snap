@@ -45,6 +45,7 @@ Object {
       "!SRP",
       "!CAMELLIA",
     ],
+    "clientAuthentication": "none",
     "enabled": false,
     "supportedProtocols": Array [
       "TLSv1.1",

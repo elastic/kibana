@@ -298,6 +298,19 @@ export function getUiSettingDefaults() {
       }),
       category: ['discover'],
     },
+    'discover:searchOnPageLoad': {
+      name: i18n.translate('kbn.advancedSettings.discover.searchOnPageLoadTitle', {
+        defaultMessage: 'Search on page load',
+      }),
+      value: true,
+      type: 'boolean',
+      description: i18n.translate('kbn.advancedSettings.discover.searchOnPageLoadText', {
+        defaultMessage:
+          'Controls whether a search is executed when Discover first loads. This setting does not ' +
+          'have an effect when loading a saved search.',
+      }),
+      category: ['discover'],
+    },
     'doc_table:highlight': {
       name: i18n.translate('kbn.advancedSettings.docTableHighlightTitle', {
         defaultMessage: 'Highlight results',
@@ -693,7 +706,7 @@ export function getUiSettingDefaults() {
       name: i18n.translate('kbn.advancedSettings.format.bytesFormatTitle', {
         defaultMessage: 'Bytes format',
       }),
-      value: '0,0.[000]b',
+      value: '0,0.[0]b',
       type: 'string',
       description: i18n.translate('kbn.advancedSettings.format.bytesFormatText', {
         defaultMessage: 'Default {numeralFormatLink} for the "bytes" format',

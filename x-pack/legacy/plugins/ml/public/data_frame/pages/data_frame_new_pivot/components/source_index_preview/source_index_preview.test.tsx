@@ -7,8 +7,10 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { IndexPattern } from 'ui/index_patterns';
-import { getPivotQuery, KibanaContext } from '../../../../common';
+import { KibanaContext } from '../../../../../contexts/kibana';
+import { kibanaContextValueMock } from '../../../../../contexts/kibana/__mocks__/kibana_context_value';
+
+import { getPivotQuery } from '../../../../common';
 
 import { SourceIndexPreview } from './source_index_preview';
 
@@ -20,12 +22,6 @@ jest.mock('react', () => {
 
 describe('Data Frame: <SourceIndexPreview />', () => {
   test('Minimal initialization', () => {
-    const currentIndexPattern = ({
-      id: 'the-index-pattern-id',
-      title: 'the-index-pattern-title',
-      fields: [],
-    } as unknown) as IndexPattern;
-
     const props = {
       query: getPivotQuery('the-query'),
     };
@@ -34,16 +30,7 @@ describe('Data Frame: <SourceIndexPreview />', () => {
     // with the Provider being the outer most component.
     const wrapper = shallow(
       <div>
-        <KibanaContext.Provider
-          value={{
-            combinedQuery: {},
-            currentIndexPattern,
-            currentSavedSearch: {},
-            indexPatterns: {},
-            kbnBaseUrl: 'url',
-            kibanaConfig: {},
-          }}
-        >
+        <KibanaContext.Provider value={kibanaContextValueMock}>
           <SourceIndexPreview {...props} />
         </KibanaContext.Provider>
       </div>

@@ -46,6 +46,12 @@ export interface RegionMapPluginSetupDependencies {
 }
 
 /** @internal */
+export interface RegionMapsConfig {
+  includeElasticMapsService: boolean;
+  layers: any[];
+}
+
+/** @internal */
 export class RegionMapPlugin implements Plugin<Promise<void>, void> {
   initializerContext: PluginInitializerContext;
 

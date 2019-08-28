@@ -20,7 +20,7 @@
 import 'ngreact';
 import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from '../../../modules';
-import { DefaultEditorAggGroup } from './components/default_editor_agg_group';
+import { DefaultEditorAggGroup } from './components/agg_group';
 
 uiModules
   .get('app/visualize')

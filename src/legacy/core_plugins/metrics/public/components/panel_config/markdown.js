@@ -44,12 +44,9 @@ import {
 } from '@elastic/eui';
 const lessC = less(window, { env: 'production' });
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import { Storage } from 'ui/storage';
-import { data } from 'plugins/data/setup';
+import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { VisDataContext } from './../../contexts/vis_data_context';
-const { QueryBarInput } = data.query.ui;
-const localStorage = new Storage(window.localStorage);
 
 class MarkdownPanelConfigUi extends Component {
   constructor(props) {
@@ -159,7 +156,7 @@ class MarkdownPanelConfigUi extends Component {
                   }
                   fullWidth
                 >
-                  <QueryBarInput
+                  <QueryBarWrapper
                     query={{
                       language: model.filter.language
                         ? model.filter.language
@@ -167,9 +164,7 @@ class MarkdownPanelConfigUi extends Component {
                       query: model.filter.query || '',
                     }}
                     onChange={filter => this.props.onChange({ filter })}
-                    appName={'VisEditor'}
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
-                    store={localStorage}
                   />
                 </EuiFormRow>
               </EuiFlexItem>

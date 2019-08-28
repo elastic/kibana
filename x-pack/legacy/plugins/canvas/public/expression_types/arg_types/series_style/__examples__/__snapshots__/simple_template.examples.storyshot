@@ -185,7 +185,6 @@ exports[`Storyshots arguments/SeriesStyle/components simple: no series 1`] = `
         onMouseOver={[Function]}
       >
         <svg
-          aria-describedby="generated-id"
           aria-label="Info"
           className="euiIcon euiIcon--medium euiIcon--warning euiIcon-isLoading"
           focusable="true"

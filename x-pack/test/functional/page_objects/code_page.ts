@@ -8,9 +8,9 @@
 // import Keys from 'leadfoot/keys';
 // import moment from 'moment';
 
-import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export function CodeHomePageProvider({ getService }: KibanaFunctionalTestDefaultProviders) {
+export function CodeHomePageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
   const queryBar = getService('queryBar');

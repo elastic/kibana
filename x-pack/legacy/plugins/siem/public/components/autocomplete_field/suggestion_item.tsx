@@ -25,7 +25,6 @@ export class SuggestionItem extends React.PureComponent<SuggestionItemProps> {
 
   public render() {
     const { isSelected, onClick, onMouseEnter, suggestion } = this.props;
-
     return (
       <SuggestionItemContainer
         isSelected={isSelected}
@@ -55,6 +54,8 @@ const SuggestionItemContainer = euiStyled.div<{
     props.isSelected ? props.theme.eui.euiColorLightestShade : 'transparent'};
 `;
 
+SuggestionItemContainer.displayName = 'SuggestionItemContainer';
+
 const SuggestionItemField = euiStyled.div`
   align-items: center;
   cursor: pointer;
@@ -63,6 +64,8 @@ const SuggestionItemField = euiStyled.div`
   height: ${props => props.theme.eui.euiSizeXL};
   padding: ${props => props.theme.eui.euiSizeXS};
 `;
+
+SuggestionItemField.displayName = 'SuggestionItemField';
 
 const SuggestionItemIconField = styled(SuggestionItemField)<{ suggestionType: string }>`
   background-color: ${props =>
@@ -73,10 +76,14 @@ const SuggestionItemIconField = styled(SuggestionItemField)<{ suggestionType: st
   width: ${props => props.theme.eui.euiSizeXL};
 `;
 
+SuggestionItemIconField.displayName = 'SuggestionItemIconField';
+
 const SuggestionItemTextField = styled(SuggestionItemField)`
   flex: 2 0 0;
   font-family: ${props => props.theme.eui.euiCodeFontFamily};
 `;
+
+SuggestionItemTextField.displayName = 'SuggestionItemTextField';
 
 const SuggestionItemDescriptionField = styled(SuggestionItemField)`
   flex: 3 0 0;
@@ -89,6 +96,8 @@ const SuggestionItemDescriptionField = styled(SuggestionItemField)`
     }
   }
 `;
+
+SuggestionItemDescriptionField.displayName = 'SuggestionItemDescriptionField';
 
 const getEuiIconType = (suggestionType: string) => {
   switch (suggestionType) {

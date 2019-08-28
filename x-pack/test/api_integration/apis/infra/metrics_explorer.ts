@@ -9,11 +9,11 @@ import { first } from 'lodash';
 import moment from 'moment';
 import { DATES } from './constants';
 import { MetricsExplorerResponse } from '../../../../legacy/plugins/infra/server/routes/metrics_explorer/types';
-import { KbnTestProvider } from './types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 const { min, max } = DATES['7.0.0'].hosts;
 
-const metricsExplorerTest: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -259,7 +259,4 @@ const metricsExplorerTest: KbnTestProvider = ({ getService }) => {
       });
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default metricsExplorerTest;
+}

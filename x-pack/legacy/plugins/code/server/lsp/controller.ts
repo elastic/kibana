@@ -46,7 +46,7 @@ export class LanguageServerController implements ILanguageServerHandler {
   // a list of support language servers
   private readonly languageServers: LanguageServerData[];
   // a { lang -> server } map from above list
-  private readonly languageServerMap: { [lang: string]: LanguageServerData };
+  private readonly languageServerMap: { [lang: string]: LanguageServerData[] };
   private log: Logger;
 
   constructor(
@@ -64,13 +64,22 @@ export class LanguageServerController implements ILanguageServerHandler {
       maxWorkspace: options.maxWorkspace,
       launcher: new def.launcher(this.targetHost, options, loggerFactory),
     }));
+    const add2map = (
+      map: { [lang: string]: LanguageServerData[] },
+      lang: string,
+      ls: LanguageServerData
+    ) => {
+      const arr = map[lang] || [];
+      arr.push(ls);
+      map[lang] = arr.sort((a, b) => b.definition.priority - a.definition.priority);
+    };
     this.languageServerMap = this.languageServers.reduce(
       (map, ls) => {
-        ls.languages.forEach(lang => (map[lang] = ls));
-        map[ls.definition.name] = ls;
+        ls.languages.forEach(lang => add2map(map, lang, ls));
+        map[ls.definition.name] = [ls];
         return map;
       },
-      {} as { [lang: string]: LanguageServerData }
+      {} as { [lang: string]: LanguageServerData[] }
     );
   }
 
@@ -183,28 +192,24 @@ export class LanguageServerController implements ILanguageServerHandler {
     }
   }
 
-  public status(lang: string): LanguageServerStatus {
-    const ls = this.languageServerMap[lang];
-    if (ls) {
-      const status = this.installManager.status(ls.definition);
-      // installed, but is it running?
-      if (status === LanguageServerStatus.READY) {
-        if (ls.launcher.running) {
-          return LanguageServerStatus.RUNNING;
-        }
+  public status(def: LanguageServerDefinition): LanguageServerStatus {
+    const status = this.installManager.status(def);
+    // installed, but is it running?
+    if (status === LanguageServerStatus.READY) {
+      const ls = this.languageServers.find(d => d.definition === def);
+      if (ls && ls.launcher.running) {
+        return LanguageServerStatus.RUNNING;
       }
-      return status;
-    } else {
-      return LanguageServerStatus.NOT_INSTALLED;
     }
+    return status;
   }
 
-  public getLanguageServerDef(lang: string): LanguageServerDefinition | null {
+  public getLanguageServerDef(lang: string): LanguageServerDefinition[] {
     const data = this.languageServerMap[lang];
     if (data) {
-      return data.definition;
+      return data.map(d => d.definition);
     }
-    return null;
+    return [];
   }
 
   private async findOrCreateHandler(
@@ -254,18 +259,18 @@ export class LanguageServerController implements ILanguageServerHandler {
   }
 
   private findLanguageServer(lang: string) {
-    const ls = this.languageServerMap[lang];
-    if (ls) {
-      if (
-        !this.options.lsp.detach &&
-        this.installManager.status(ls.definition) !== LanguageServerStatus.READY
-      ) {
+    const lsArr = this.languageServerMap[lang];
+    if (lsArr) {
+      const ls = lsArr.find(
+        d => this.installManager.status(d.definition) !== LanguageServerStatus.NOT_INSTALLED
+      );
+      if (!this.options.lsp.detach && ls === undefined) {
         throw new ResponseError(
           LanguageServerNotInstalled,
           `language server ${lang} not installed`
         );
       } else {
-        return ls;
+        return ls!;
       }
     } else {
       throw new ResponseError(UnknownFileLanguage, `unsupported language ${lang}`);

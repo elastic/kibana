@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Error CONTAINER_ID 1`] = `undefined`;
+
 exports[`Error ERROR_CULPRIT 1`] = `"handleOopsie"`;
 
 exports[`Error ERROR_EXC_HANDLED 1`] = `undefined`;
@@ -9,6 +11,10 @@ exports[`Error ERROR_EXC_MESSAGE 1`] = `undefined`;
 exports[`Error ERROR_GROUP_ID 1`] = `"grouping key"`;
 
 exports[`Error ERROR_LOG_MESSAGE 1`] = `undefined`;
+
+exports[`Error ERROR_PAGE_URL 1`] = `undefined`;
+
+exports[`Error HOST_NAME 1`] = `"my hostname"`;
 
 exports[`Error HTTP_REQUEST_METHOD 1`] = `undefined`;
 
@@ -39,6 +45,8 @@ exports[`Error OBSERVER_LISTENING 1`] = `undefined`;
 exports[`Error OBSERVER_VERSION_MAJOR 1`] = `undefined`;
 
 exports[`Error PARENT_ID 1`] = `"parentId"`;
+
+exports[`Error POD_NAME 1`] = `undefined`;
 
 exports[`Error PROCESSOR_EVENT 1`] = `"error"`;
 
@@ -72,6 +80,8 @@ exports[`Error TRANSACTION_ID 1`] = `"transaction id"`;
 
 exports[`Error TRANSACTION_NAME 1`] = `undefined`;
 
+exports[`Error TRANSACTION_PAGE_URL 1`] = `undefined`;
+
 exports[`Error TRANSACTION_RESULT 1`] = `undefined`;
 
 exports[`Error TRANSACTION_SAMPLED 1`] = `undefined`;
@@ -82,6 +92,8 @@ exports[`Error URL_FULL 1`] = `undefined`;
 
 exports[`Error USER_ID 1`] = `undefined`;
 
+exports[`Span CONTAINER_ID 1`] = `undefined`;
+
 exports[`Span ERROR_CULPRIT 1`] = `undefined`;
 
 exports[`Span ERROR_EXC_HANDLED 1`] = `undefined`;
@@ -91,6 +103,10 @@ exports[`Span ERROR_EXC_MESSAGE 1`] = `undefined`;
 exports[`Span ERROR_GROUP_ID 1`] = `undefined`;
 
 exports[`Span ERROR_LOG_MESSAGE 1`] = `undefined`;
+
+exports[`Span ERROR_PAGE_URL 1`] = `undefined`;
+
+exports[`Span HOST_NAME 1`] = `undefined`;
 
 exports[`Span HTTP_REQUEST_METHOD 1`] = `undefined`;
 
@@ -121,6 +137,8 @@ exports[`Span OBSERVER_LISTENING 1`] = `undefined`;
 exports[`Span OBSERVER_VERSION_MAJOR 1`] = `undefined`;
 
 exports[`Span PARENT_ID 1`] = `"parentId"`;
+
+exports[`Span POD_NAME 1`] = `undefined`;
 
 exports[`Span PROCESSOR_EVENT 1`] = `"span"`;
 
@@ -154,6 +172,8 @@ exports[`Span TRANSACTION_ID 1`] = `"transaction id"`;
 
 exports[`Span TRANSACTION_NAME 1`] = `undefined`;
 
+exports[`Span TRANSACTION_PAGE_URL 1`] = `undefined`;
+
 exports[`Span TRANSACTION_RESULT 1`] = `undefined`;
 
 exports[`Span TRANSACTION_SAMPLED 1`] = `undefined`;
@@ -164,6 +184,8 @@ exports[`Span URL_FULL 1`] = `undefined`;
 
 exports[`Span USER_ID 1`] = `undefined`;
 
+exports[`Transaction CONTAINER_ID 1`] = `"container1234567890abcdef"`;
+
 exports[`Transaction ERROR_CULPRIT 1`] = `undefined`;
 
 exports[`Transaction ERROR_EXC_HANDLED 1`] = `undefined`;
@@ -173,6 +195,10 @@ exports[`Transaction ERROR_EXC_MESSAGE 1`] = `undefined`;
 exports[`Transaction ERROR_GROUP_ID 1`] = `undefined`;
 
 exports[`Transaction ERROR_LOG_MESSAGE 1`] = `undefined`;
+
+exports[`Transaction ERROR_PAGE_URL 1`] = `undefined`;
+
+exports[`Transaction HOST_NAME 1`] = `"my hostname"`;
 
 exports[`Transaction HTTP_REQUEST_METHOD 1`] = `"GET"`;
 
@@ -203,6 +229,8 @@ exports[`Transaction OBSERVER_LISTENING 1`] = `undefined`;
 exports[`Transaction OBSERVER_VERSION_MAJOR 1`] = `undefined`;
 
 exports[`Transaction PARENT_ID 1`] = `"parentId"`;
+
+exports[`Transaction POD_NAME 1`] = `undefined`;
 
 exports[`Transaction PROCESSOR_EVENT 1`] = `"transaction"`;
 
@@ -235,6 +263,8 @@ exports[`Transaction TRANSACTION_DURATION 1`] = `1337`;
 exports[`Transaction TRANSACTION_ID 1`] = `"transaction id"`;
 
 exports[`Transaction TRANSACTION_NAME 1`] = `"transaction name"`;
+
+exports[`Transaction TRANSACTION_PAGE_URL 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_RESULT 1`] = `"transaction result"`;
 

@@ -45,6 +45,7 @@ exports.installSource = async function installSource({
   basePath = BASE_PATH,
   installPath = path.resolve(basePath, 'source'),
   log = defaultLog,
+  esArgs,
 }) {
   log.info('source path: %s', chalk.bold(sourcePath));
   log.info('install path: %s', chalk.bold(installPath));
@@ -70,6 +71,7 @@ exports.installSource = async function installSource({
     basePath,
     installPath,
     log,
+    esArgs,
   });
 };
 

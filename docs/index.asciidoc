@@ -70,8 +70,6 @@ include::management/watcher-ui/index.asciidoc[]
 
 include::management/upgrade-assistant/index.asciidoc[]
 
-include::management/dashboard_only_mode/index.asciidoc[]
-
 include::reporting/index.asciidoc[]
 
 include::api.asciidoc[]

@@ -42,7 +42,7 @@ describe('ValidateJob', () => {
   });
 
   test('renders the button and modal with a success message', () => {
-    test1.wrapper.instance().openModal();
+    test1.wrapper.instance().validate();
     test1.p.then(() => {
       test1.wrapper.update();
       expect(test1.wrapper).toMatchSnapshot();
@@ -63,7 +63,7 @@ describe('ValidateJob', () => {
   });
 
   test('renders button and modal with a message', () => {
-    test2.wrapper.instance().openModal();
+    test2.wrapper.instance().validate();
     test2.p.then(() => {
       test2.wrapper.update();
       expect(test2.wrapper).toMatchSnapshot();

@@ -9,36 +9,31 @@ import { EMSFileSource } from './ems_file_source';
 jest.mock('../../../kibana_services', () => {});
 jest.mock('../../vector_layer', () => {});
 
-class MockEMSFileSource {
-
-  constructor(emsFileSource) {
-    this._emsFileSource = emsFileSource;
-    this._emsFileSource._getEmsVectorFileMeta = () => {
-      return {
-        fields: [{
+function makeEMSFileSource(tooltipProperties) {
+  const emsFileSource = new EMSFileSource({
+    tooltipProperties: tooltipProperties
+  });
+  emsFileSource._getEMSFileLayer = () => {
+    return {
+      getFieldsInLanguage() {
+        return [{
           name: 'iso2',
           description: 'ISO 2 CODE'
-        }]
-      };
+        }];
+      }
     };
-  }
-
-  async filterAndFormatPropertiesToHtml(props) {
-    return await this._emsFileSource.filterAndFormatPropertiesToHtml(props);
-  }
-
+  };
+  return emsFileSource;
 }
+
 
 
 describe('EMS file source', () => {
 
   it('should create tooltip-properties with human readable label', async () => {
 
-    const emsFileSource = new EMSFileSource({
-      tooltipProperties: ['iso2']
-    });
-    const mockEMSFileSource = new MockEMSFileSource(emsFileSource);
 
+    const mockEMSFileSource = makeEMSFileSource(['iso2']);
     const tooltipProperties = await mockEMSFileSource.filterAndFormatPropertiesToHtml({
       'iso2': 'US'
     });

@@ -12,7 +12,7 @@
 
 import Joi from 'joi';
 import { intervalFromDate, intervalFromNow } from './lib/intervals';
-import { Logger } from './lib/logger';
+import { Logger } from './types';
 import { BeforeRunFunction } from './lib/middleware';
 import {
   CancelFunction,
@@ -47,7 +47,6 @@ interface Opts {
   definitions: TaskDictionary<SanitizedTaskDefinition>;
   instance: ConcreteTaskInstance;
   store: Updatable;
-  kbnServer: any;
   beforeRun: BeforeRunFunction;
 }
 
@@ -65,7 +64,6 @@ export class TaskManagerRunner implements TaskRunner {
   private definitions: TaskDictionary<SanitizedTaskDefinition>;
   private logger: Logger;
   private store: Updatable;
-  private kbnServer: any;
   private beforeRun: BeforeRunFunction;
 
   /**
@@ -75,7 +73,6 @@ export class TaskManagerRunner implements TaskRunner {
    * @prop {TaskDefinition} definition - The definition of the task being run
    * @prop {ConcreteTaskInstance} instance - The record describing this particular task instance
    * @prop {Updatable} store - The store used to read / write tasks instance info
-   * @prop {kbnServer} kbnServer - An async function that provides the task's run context
    * @prop {BeforeRunFunction} beforeRun - A function that adjusts the run context prior to running the task
    * @memberof TaskManagerRunner
    */
@@ -84,7 +81,6 @@ export class TaskManagerRunner implements TaskRunner {
     this.definitions = opts.definitions;
     this.logger = opts.logger;
     this.store = opts.store;
-    this.kbnServer = opts.kbnServer;
     this.beforeRun = opts.beforeRun;
   }
 
@@ -142,7 +138,6 @@ export class TaskManagerRunner implements TaskRunner {
   public async run(): Promise<RunResult> {
     this.logger.debug(`Running task ${this}`);
     const modifiedContext = await this.beforeRun({
-      kbnServer: this.kbnServer,
       taskInstance: this.instance,
     });
 
@@ -210,14 +205,14 @@ export class TaskManagerRunner implements TaskRunner {
       return task.cancel();
     }
 
-    this.logger.warning(`The task ${this} is not cancellable.`);
+    this.logger.warn(`The task ${this} is not cancellable.`);
   }
 
   private validateResult(result?: RunResult | void): RunResult {
     const { error } = Joi.validate(result, validateRunResult);
 
     if (error) {
-      this.logger.warning(`Invalid task result for ${this}: ${error.message}`);
+      this.logger.warn(`Invalid task result for ${this}: ${error.message}`);
     }
 
     return result || { state: {} };
@@ -272,9 +267,7 @@ export class TaskManagerRunner implements TaskRunner {
       await this.store.remove(this.instance.id);
     } catch (err) {
       if (err.statusCode === 404) {
-        this.logger.warning(
-          `Task cleanup of ${this} failed in processing. Was remove called twice?`
-        );
+        this.logger.warn(`Task cleanup of ${this} failed in processing. Was remove called twice?`);
       } else {
         throw err;
       }

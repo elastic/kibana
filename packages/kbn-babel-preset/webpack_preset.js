@@ -25,10 +25,11 @@ module.exports = () => {
         {
           useBuiltIns: 'entry',
           modules: 'cjs',
-          corejs: 2,
+          corejs: 3,
         },
       ],
       require('./common_preset'),
-    ]
+    ],
+    plugins: [require.resolve('@babel/plugin-syntax-dynamic-import')],
   };
 };

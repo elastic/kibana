@@ -31,12 +31,9 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
       const appMenu = await testSubjects.find('navDrawer');
       const $ = await appMenu.parseDomContent();
 
-      const links: Array<{
-        text: string;
-        href: string;
-      }> = $.findTestSubjects('navDrawerAppsMenuLink')
+      const links = $.findTestSubjects('navDrawerAppsMenuLink')
         .toArray()
-        .map((link: any) => {
+        .map(link => {
           return {
             text: $(link).text(),
             href: $(link).attr('href'),

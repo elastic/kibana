@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export const CrossClusterReplicationPageProvider = ({
-  getService,
-}: KibanaFunctionalTestDefaultProviders) => {
+export function CrossClusterReplicationPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   return {
@@ -19,4 +17,4 @@ export const CrossClusterReplicationPageProvider = ({
       return await testSubjects.find('createFollowerIndexButton');
     },
   };
-};
+}

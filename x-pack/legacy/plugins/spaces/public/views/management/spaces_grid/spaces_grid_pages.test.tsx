@@ -11,6 +11,7 @@ import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { SpaceAvatar } from '../../../components';
 import { spacesManagerMock } from '../../../lib/mocks';
+import { SpacesManager } from '../../../lib';
 import { SpacesNavState } from '../../nav_control';
 import { SpacesGridPage } from './spaces_grid_page';
 
@@ -49,7 +50,7 @@ describe('SpacesGridPage', () => {
     expect(
       shallowWithIntl(
         <SpacesGridPage.WrappedComponent
-          spacesManager={spacesManager}
+          spacesManager={(spacesManager as unknown) as SpacesManager}
           spacesNavState={spacesNavState}
           intl={null as any}
         />
@@ -60,7 +61,7 @@ describe('SpacesGridPage', () => {
   it('renders the list of spaces', async () => {
     const wrapper = mountWithIntl(
       <SpacesGridPage.WrappedComponent
-        spacesManager={spacesManager}
+        spacesManager={(spacesManager as unknown) as SpacesManager}
         spacesNavState={spacesNavState}
         intl={null as any}
       />

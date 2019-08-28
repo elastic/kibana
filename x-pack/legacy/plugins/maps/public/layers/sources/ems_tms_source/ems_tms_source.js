@@ -8,16 +8,17 @@ import _ from 'lodash';
 import chrome from 'ui/chrome';
 import React from 'react';
 import { AbstractTMSSource } from '../tms_source';
-import { TileLayer } from '../../tile_layer';
+import { VectorTileLayer } from '../../vector_tile_layer';
 
-import { getEmsTMSServices } from '../../../meta';
+import { getEMSClient } from '../../../meta';
 import { EMSTMSCreateSourceEditor } from './create_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
+import { EMS_TMS } from '../../../../common/constants';
 
 export class EMSTMSSource extends AbstractTMSSource {
 
-  static type = 'EMS_TMS';
+  static type = EMS_TMS;
   static title = i18n.translate('xpack.maps.source.emsTileTitle', {
     defaultMessage: 'Tiles'
   });
@@ -74,30 +75,29 @@ export class EMSTMSSource extends AbstractTMSSource {
     ];
   }
 
-  async _getEmsTmsMeta() {
-    const emsTileServices = await getEmsTMSServices();
+  async _getEMSTMSService() {
+    const emsClient = getEMSClient();
+    const emsTMSServices = await emsClient.getTMSServices();
     const emsTileLayerId = this._getEmsTileLayerId();
-    const meta = emsTileServices.find(service => {
-      return service.id === emsTileLayerId;
-    });
-    if (!meta) {
+    const tmsService = emsTMSServices.find(tmsService => tmsService.getId() === emsTileLayerId);
+    if (!tmsService) {
       throw new Error(i18n.translate('xpack.maps.source.emsTile.errorMessage', {
         defaultMessage: `Unable to find EMS tile configuration for id: {id}`,
         values: { id: emsTileLayerId }
       }));
     }
-    return meta;
+    return tmsService;
   }
 
   _createDefaultLayerDescriptor(options) {
-    return TileLayer.createDescriptor({
+    return VectorTileLayer.createDescriptor({
       sourceDescriptor: this._descriptor,
       ...options
     });
   }
 
   createDefaultLayer(options) {
-    return new TileLayer({
+    return new VectorTileLayer({
       layerDescriptor: this._createDefaultLayerDescriptor(options),
       source: this
     });
@@ -105,20 +105,21 @@ export class EMSTMSSource extends AbstractTMSSource {
 
   async getDisplayName() {
     try {
-      const emsTmsMeta = await this._getEmsTmsMeta();
-      return emsTmsMeta.name;
+      const emsTMSService = await this._getEMSTMSService();
+      return emsTMSService.getDisplayName();
     } catch (error) {
       return this._getEmsTileLayerId();
     }
   }
 
   async getAttributions() {
-    const emsTmsMeta = await this._getEmsTmsMeta();
-    if (!emsTmsMeta.attributionMarkdown) {
+    const emsTMSService = await this._getEMSTMSService();
+    const markdown = emsTMSService.getMarkdownAttribution();
+    if (!markdown) {
       return [];
     }
 
-    return emsTmsMeta.attributionMarkdown.split('|').map((attribution) => {
+    return markdown.split('|').map((attribution) => {
       attribution = attribution.trim();
       //this assumes attribution is plain markdown link
       const extractLink = /\[(.*)\]\((.*)\)/;
@@ -131,8 +132,22 @@ export class EMSTMSSource extends AbstractTMSSource {
   }
 
   async getUrlTemplate() {
-    const emsTmsMeta = await this._getEmsTmsMeta();
-    return emsTmsMeta.url;
+    const emsTMSService = await this._getEMSTMSService();
+    return await emsTMSService.getUrlTemplate();
+  }
+
+  getSpriteNamespacePrefix() {
+    return 'ems/' + this._getEmsTileLayerId();
+  }
+
+  async getVectorStyleSheetAndSpriteMeta(isRetina) {
+    const emsTMSService = await this._getEMSTMSService();
+    const styleSheet = await emsTMSService.getVectorStyleSheet();
+    const spriteMeta = await emsTMSService.getSpriteSheetMeta(isRetina);
+    return {
+      vectorStyleSheet: styleSheet,
+      spriteMeta: spriteMeta
+    };
   }
 
   _getEmsTileLayerId() {

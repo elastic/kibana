@@ -24,13 +24,10 @@ import { collectionActions } from '../lib/collection_actions';
 import { AddDeleteButtons } from '../add_delete_buttons';
 import { ColorPicker } from '../color_picker';
 import uuid from 'uuid';
-import { data } from 'plugins/data/setup';
-const { QueryBarInput } = data.query.ui;
-import { Storage } from 'ui/storage';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
-const localStorage = new Storage(window.localStorage);
+import { QueryBarWrapper } from '../query_bar_wrapper';
 class FilterItemsUi extends Component {
   constructor(props) {
     super(props);
@@ -80,15 +77,13 @@ class FilterItemsUi extends Component {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <QueryBarInput
+          <QueryBarWrapper
             query={{
               language: model.filter.language || getDefaultQueryLanguage(),
               query: model.filter.query || '',
             }}
             onChange={query => this.handleQueryChange(model, query)}
-            appName={'VisEditor'}
             indexPatterns={[indexPatterns]}
-            store={localStorage}
           />
         </EuiFlexItem>
         <EuiFlexItem>

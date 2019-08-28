@@ -5,14 +5,13 @@
  */
 
 import expect from '@kbn/expect';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   RepoFileStatus,
   StatusReport,
 } from '../../../../legacy/plugins/code/common/repo_file_status';
 
-// eslint-disable-next-line import/no-default-export
-export default function repoStatusTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function repoStatusTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
   const log = getService('log');

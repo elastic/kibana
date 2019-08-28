@@ -24,13 +24,14 @@
 
 export type LogFn = (path: string[], message: string) => void;
 
-export interface Logger {
+/** @public */
+export interface SavedObjectsMigrationLogger {
   debug: (msg: string) => void;
   info: (msg: string) => void;
   warning: (msg: string) => void;
 }
 
-export class MigrationLogger implements Logger {
+export class MigrationLogger implements SavedObjectsMigrationLogger {
   private log: LogFn;
 
   constructor(log: LogFn) {

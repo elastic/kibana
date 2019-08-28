@@ -19,6 +19,7 @@ import { labels } from '../../../components/elasticsearch/shard_allocation/lib/l
 import { indicesByNodes } from '../../../components/elasticsearch/shard_allocation/transformers/indices_by_nodes';
 import { Index } from '../../../components/elasticsearch/index/index';
 import { MonitoringViewBaseController } from '../../base_controller';
+import { CODE_PATH_ELASTICSEARCH } from '../../../../common/constants';
 
 function getPageData($injector) {
   const $http = $injector.get('$http');
@@ -48,7 +49,7 @@ uiRoutes.when('/elasticsearch/indices/:index', {
   resolve: {
     clusters(Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: [CODE_PATH_ELASTICSEARCH] });
     },
     pageData: getPageData
   },

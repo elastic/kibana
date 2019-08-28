@@ -54,7 +54,7 @@ const logger = loggingServiceMock.create();
 beforeEach(() => {
   env = Env.createDefault(getEnvOptions());
 
-  coreContext = { env, logger, configService: configService as any };
+  coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
   elasticsearchService = new ElasticsearchService(coreContext);
 });
 

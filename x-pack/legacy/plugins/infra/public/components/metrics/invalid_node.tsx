@@ -6,19 +6,20 @@
 
 import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useContext } from 'react';
+import React from 'react';
 
 import euiStyled from '../../../../../common/eui_styled_components';
-import { SourceConfigurationFlyoutState } from '../../components/source_configuration';
 import { WithKibanaChrome } from '../../containers/with_kibana_chrome';
+import {
+  ViewSourceConfigurationButton,
+  ViewSourceConfigurationButtonHrefBase,
+} from '../../components/source_configuration';
 
 interface InvalidNodeErrorProps {
   nodeName: string;
 }
 
 export const InvalidNodeError: React.FunctionComponent<InvalidNodeErrorProps> = ({ nodeName }) => {
-  const { showIndicesConfiguration } = useContext(SourceConfigurationFlyoutState.Context);
-
   return (
     <WithKibanaChrome>
       {({ basePath }) => (
@@ -57,12 +58,15 @@ export const InvalidNodeError: React.FunctionComponent<InvalidNodeErrorProps> = 
                 </EuiButton>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiButton color="primary" onClick={showIndicesConfiguration}>
+                <ViewSourceConfigurationButton
+                  data-test-subj="configureSourceButton"
+                  hrefBase={ViewSourceConfigurationButtonHrefBase.infrastructure}
+                >
                   <FormattedMessage
                     id="xpack.infra.configureSourceActionLabel"
                     defaultMessage="Change source configuration"
                   />
-                </EuiButton>
+                </ViewSourceConfigurationButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           }

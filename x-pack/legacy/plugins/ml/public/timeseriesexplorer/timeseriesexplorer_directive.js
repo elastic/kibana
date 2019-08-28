@@ -14,9 +14,7 @@ import ReactDOM from 'react-dom';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-import chrome from 'ui/chrome';
 import { timefilter } from 'ui/timefilter';
-import { timeHistory } from 'ui/timefilter/time_history';
 import { I18nContext } from 'ui/i18n';
 
 import '../components/controls';
@@ -24,7 +22,6 @@ import '../components/controls';
 import { severity$ } from '../components/controls/select_severity/select_severity';
 import { interval$ } from '../components/controls/select_interval/select_interval';
 import { subscribeAppStateToObservable } from '../util/app_state_utils';
-import { NavigationMenuContext } from '../util/context_utils';
 
 import { TimeSeriesExplorer } from './timeseriesexplorer';
 import { APP_STATE_ACTION } from './timeseriesexplorer_constants';
@@ -88,15 +85,13 @@ module.directive('mlTimeSeriesExplorer', function ($injector) {
 
       ReactDOM.render(
         <I18nContext>
-          <NavigationMenuContext.Provider value={{ chrome, timefilter, timeHistory }}>
-            <TimeSeriesExplorer {...{
-              appStateHandler,
-              dateFormatTz,
-              globalState,
-              timefilter,
-            }}
-            />
-          </NavigationMenuContext.Provider>
+          <TimeSeriesExplorer {...{
+            appStateHandler,
+            dateFormatTz,
+            globalState,
+            timefilter,
+          }}
+          />
         </I18nContext>,
         $element[0]
       );

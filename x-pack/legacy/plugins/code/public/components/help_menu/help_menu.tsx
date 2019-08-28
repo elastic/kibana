@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import chrome from 'ui/chrome';
+import { npStart } from 'ui/new_platform';
 import { EuiButton, EuiHorizontalRule, EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { documentationLinks } from '../../lib/documentation_links';
@@ -25,7 +25,11 @@ export class HelpMenu extends React.PureComponent {
           </p>
         </EuiText>
         <EuiSpacer />
-        <EuiButton fill iconType="popout" href={chrome.addBasePath('/app/code#/setup-guide')}>
+        <EuiButton
+          fill
+          iconType="popout"
+          href={npStart.core.http.basePath.prepend('/app/code#/setup-guide')}
+        >
           <FormattedMessage
             id="xpack.code.helpMenu.setupGuideButtonLabel"
             defaultMessage="Setup Guide"

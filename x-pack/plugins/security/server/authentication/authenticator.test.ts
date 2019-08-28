@@ -210,6 +210,75 @@ describe('Authenticator', () => {
       expect(mockSessionStorage.set).not.toHaveBeenCalled();
       expect(mockSessionStorage.clear).toHaveBeenCalled();
     });
+
+    describe('stateless login', () => {
+      it('does not create session even if authentication provider returns state', async () => {
+        const user = mockAuthenticatedUser();
+        const request = httpServerMock.createKibanaRequest();
+        const authorization = `Basic ${Buffer.from('foo:bar').toString('base64')}`;
+
+        mockBasicAuthenticationProvider.login.mockResolvedValue(
+          AuthenticationResult.succeeded(user, { state: { authorization } })
+        );
+
+        const authenticationResult = await authenticator.login(request, {
+          provider: 'basic',
+          value: {},
+          stateless: true,
+        });
+        expect(authenticationResult.succeeded()).toBe(true);
+        expect(authenticationResult.user).toEqual(user);
+
+        expect(mockBasicAuthenticationProvider.login).toHaveBeenCalledWith(request, {}, null);
+        expect(mockSessionStorage.get).not.toHaveBeenCalled();
+        expect(mockSessionStorage.set).not.toHaveBeenCalled();
+        expect(mockSessionStorage.clear).not.toHaveBeenCalled();
+      });
+
+      it('does not clear session even if provider asked to do so.', async () => {
+        const user = mockAuthenticatedUser();
+        const request = httpServerMock.createKibanaRequest();
+
+        mockBasicAuthenticationProvider.login.mockResolvedValue(
+          AuthenticationResult.succeeded(user, { state: null })
+        );
+
+        const authenticationResult = await authenticator.login(request, {
+          provider: 'basic',
+          value: {},
+          stateless: true,
+        });
+        expect(authenticationResult.succeeded()).toBe(true);
+        expect(authenticationResult.user).toEqual(user);
+
+        expect(mockBasicAuthenticationProvider.login).toHaveBeenCalledWith(request, {}, null);
+        expect(mockSessionStorage.get).not.toHaveBeenCalled();
+        expect(mockSessionStorage.set).not.toHaveBeenCalled();
+        expect(mockSessionStorage.clear).not.toHaveBeenCalled();
+      });
+
+      it('does not clear session even if provider failed with 401.', async () => {
+        const request = httpServerMock.createKibanaRequest();
+
+        const failureReason = Boom.unauthorized();
+        mockBasicAuthenticationProvider.login.mockResolvedValue(
+          AuthenticationResult.failed(failureReason)
+        );
+
+        const authenticationResult = await authenticator.login(request, {
+          provider: 'basic',
+          value: {},
+          stateless: true,
+        });
+        expect(authenticationResult.failed()).toBe(true);
+        expect(authenticationResult.error).toBe(failureReason);
+
+        expect(mockBasicAuthenticationProvider.login).toHaveBeenCalledWith(request, {}, null);
+        expect(mockSessionStorage.get).not.toHaveBeenCalled();
+        expect(mockSessionStorage.set).not.toHaveBeenCalled();
+        expect(mockSessionStorage.clear).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe('`authenticate` method', () => {

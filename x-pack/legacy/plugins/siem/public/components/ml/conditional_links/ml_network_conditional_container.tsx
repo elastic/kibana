@@ -87,3 +87,5 @@ export const MlNetworkConditionalContainer = pure<MlNetworkConditionalProps>(({ 
     <Redirect from="/ml-network/" to="/ml-network" />
   </Switch>
 ));
+
+MlNetworkConditionalContainer.displayName = 'MlNetworkConditionalContainer';

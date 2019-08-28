@@ -64,7 +64,6 @@ export class StatusIndicatorComponent extends React.Component<Props, State> {
     const { statusReport } = this.props;
     let severity = Severity.NONE;
     const children: any[] = [];
-
     const addError = (error: RepoFileStatus | LangServerType) => {
       // @ts-ignore
       const s: any = REPO_FILE_STATUS_SEVERITY[error];
