@@ -118,7 +118,7 @@ export const metrics = {
   apm_requests: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.request.count',
     title: i18n.translate('xpack.monitoring.metrics.apm.requestsTitle', {
-      defaultMessage: 'Requests'
+      defaultMessage: 'Request Count Intake API'
     }),
     label: i18n.translate('xpack.monitoring.metrics.apm.requests.requestedLabel', {
       defaultMessage: 'Requested'
@@ -131,7 +131,7 @@ export const metrics = {
   apm_responses_count: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.count',
     title: i18n.translate('xpack.monitoring.metrics.apm.responseCountTitle', {
-      defaultMessage: 'Response Count'
+      defaultMessage: 'Response Count Intake API'
     }),
     label: i18n.translate('xpack.monitoring.metrics.apm.responseCount.totalLabel', {
       defaultMessage: 'Total'
@@ -167,7 +167,7 @@ export const metrics = {
   apm_responses_errors_toolarge: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.server.response.errors.toolarge',
     title: i18n.translate('xpack.monitoring.metrics.apm.responseErrorsTitle', {
-      defaultMessage: 'Response Errors'
+      defaultMessage: 'Response Errors Intake API'
     }),
     label: i18n.translate('xpack.monitoring.metrics.apm.responseErrors.tooLargeLabelTitle', {
       defaultMessage: 'Too large'
