@@ -1,6 +1,6 @@
 {
   "job_type": "anomaly_detector",
-  "description": "SIEM Auditbeat: Detect unusual destination port activity that could indicate C2, persistence mechanisms or data exfiltration.",
+  "description": "SIEM Auditbeat: Looks for unusual destination port activity that could indicate command-and-control, persistence mechanism, or data exfiltration activity.",
   "groups": [
     "siem"
   ],

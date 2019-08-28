@@ -3,7 +3,7 @@
   "groups": [
     "siem"
   ],
-  "description": "SIEM Winlogbeat: Detect unusual Windows parent-child process activity",
+  "description": "SIEM Winlogbeat: Looks for unusual powershell scripts which may indicate execution of malware, or persistence mechanisms.",
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [

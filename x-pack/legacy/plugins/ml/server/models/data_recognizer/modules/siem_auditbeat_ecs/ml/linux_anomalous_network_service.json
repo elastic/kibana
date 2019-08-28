@@ -3,7 +3,7 @@
   "groups": [
     "siem"
   ],
-  "description": "SIEM Auditbeat: Detect unusual listening ports that could indicate unauthorized services, backdoors or persistence mechanisms.",
+  "description": "SIEM Auditbeat: Looks for unusual listening ports that could indicate execution of unauthorized services, backdoors, or persistence mechanisms.",
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [

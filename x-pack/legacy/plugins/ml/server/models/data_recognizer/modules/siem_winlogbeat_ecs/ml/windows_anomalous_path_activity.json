@@ -3,7 +3,7 @@
   "groups": [
       "siem"
   ],
-  "description": "SIEM Winlogbeat: Detect activity in unusual paths that may indicate malware or persistence mechanisms.",
+  "description": "SIEM Winlogbeat:  Looks for activity in unusual paths that may indicate execution of malware or persistence mechanisms. Windows payloads often execute from user profile paths.",
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [

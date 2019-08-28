@@ -1,6 +1,6 @@
 {
   "job_type": "anomaly_detector",
-  "description": "SIEM Winlogbeat: Detect high entropy in the script block field on Windows",
+  "description": "SIEM Winlogbeat: Looks for unusual powershell scripts that may indicate execution of malware, or persistence mechanisms.",
   "groups": [
     "siem"
   ],
