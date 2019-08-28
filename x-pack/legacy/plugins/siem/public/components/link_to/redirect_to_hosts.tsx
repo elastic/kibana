@@ -18,14 +18,14 @@ export type HostComponentProps = RouteComponentProps<{
 
 export const RedirectToHostsPage = ({
   match: {
-    params: { hostName, tabName },
+    params: { tabName },
   },
   location: { search },
 }: HostComponentProps) => {
-  if (!tabName) tabName = HostsTableType.hosts;
+  let selectedTab = tabName;
+  if (!tabName) selectedTab = HostsTableType.hosts;
+  const to = `/hosts/${selectedTab}${search}`;
 
-  let to = hostName || tabName ? `/hosts/${tabName}${search}` : `/hosts/${search}`;
-  if (hostName && tabName) to = `/hosts/${tabName}${search}`;
   return <RedirectWrapper to={to} />;
 };
 
@@ -35,8 +35,9 @@ export const RedirectToHostDetailsPage = ({
   },
   location: { search },
 }: HostComponentProps) => {
-  if (!tabName) tabName = HostsTableType.authentications;
-  const to = `/hosts/${hostName}/${tabName}${search}`;
+  let selectedTab = tabName;
+  if (!tabName) selectedTab = HostsTableType.authentications;
+  const to = `/hosts/${hostName}/${selectedTab}${search}`;
   return <RedirectWrapper to={to} />;
 };
 

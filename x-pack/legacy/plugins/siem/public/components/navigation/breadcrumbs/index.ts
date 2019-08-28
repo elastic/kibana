@@ -6,7 +6,6 @@
 
 import chrome, { Breadcrumb } from 'ui/chrome';
 
-import { get } from 'lodash/fp';
 import { APP_NAME } from '../../../../common/constants';
 import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../pages/hosts/host_details';
 import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../pages/network/ip_details';
@@ -67,10 +66,9 @@ export const getBreadcrumbsForRoute = (
 ): Breadcrumb[] | null => {
   const removeSlash = pathname.replace(/\/$/, '');
   const trailingPath = removeSlash.match(/([^\/]+$)/);
-  const pageName = get('pageName', params);
 
   if (trailingPath !== null) {
-    if (pageName === 'hosts' && params != null) {
+    if (params != null && params.pageName === SiemPageName.hosts) {
       return [...siemRootBreadcrumb, ...getHostDetailsBreadcrumbs(params)];
     }
     if (Object.keys(rootBreadcrumbs).includes(trailingPath[0])) {

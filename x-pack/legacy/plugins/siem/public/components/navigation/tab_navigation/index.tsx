@@ -11,6 +11,7 @@ import styled from 'styled-components';
 import classnames from 'classnames';
 import { trackUiAction as track, METRIC_TYPE } from '../../../lib/track_usage';
 import { NavigationParams } from '../breadcrumbs';
+import { HostsTableType } from '../../../store/hosts/model';
 import { TabNavigationComponentProps } from '..';
 
 export interface NavTab {
@@ -79,17 +80,17 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
 
   public mapLocationToTab = (pathname: string, match?: NavMatchParams): string => {
     const { navTabs } = this.props;
-    const tabName = get('params.tabName', match);
-    const myNavTab: NavTab = Object.keys(navTabs)
+    const tabName: HostsTableType | undefined = get('params.tabName', match);
+    const myNavTab = Object.keys(navTabs)
       .map(tab => get(tab, navTabs))
       .filter((item: NavTab) => (tabName || pathname).includes(item.id))[0];
     return getOr('', 'id', myNavTab);
   };
 
-  private renderTabs = () => {
+  private renderTabs = (): JSX.Element[] => {
     const { navTabs } = this.props;
-    return Object.keys(navTabs).map<JSX.Element>(tabName => {
-      const tab: NavTab = get(tabName, navTabs);
+    return Object.keys(navTabs).map(tabName => {
+      const tab = get(tabName, navTabs);
       return (
         <TabContainer
           className={classnames({ euiTab: true, showBorder: this.props.showBorder })}
