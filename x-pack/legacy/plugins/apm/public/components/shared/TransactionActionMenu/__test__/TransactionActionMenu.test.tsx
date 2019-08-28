@@ -11,7 +11,7 @@ import { TransactionActionMenu } from '../TransactionActionMenu';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import * as Transactions from './mockData';
 import * as apmIndexPatternHooks from '../../../../hooks/useAPMIndexPattern';
-import * as coreHoooks from '../../../../hooks/useCore';
+import * as kibanaCore from '../../../../../../observability/public/context/kibana_core';
 import { ISavedObject } from '../../../../services/rest/savedObjects';
 import { InternalCoreStart } from 'src/core/public';
 
@@ -40,7 +40,7 @@ describe('TransactionActionMenu component', () => {
     jest
       .spyOn(apmIndexPatternHooks, 'useAPMIndexPattern')
       .mockReturnValue({ id: 'foo' } as ISavedObject);
-    jest.spyOn(coreHoooks, 'useCore').mockReturnValue(coreMock);
+    jest.spyOn(kibanaCore, 'useKibanaCore').mockReturnValue(coreMock);
   });
 
   afterEach(() => {
