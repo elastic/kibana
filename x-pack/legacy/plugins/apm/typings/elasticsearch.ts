@@ -138,7 +138,7 @@ declare module 'elasticsearch' {
   > &
     (SearchParams extends { body: Required<AggregationOptionMap> }
       ? {
-          aggregations: AggregationResultMap<SearchParams['body']['aggs']>;
+          aggregations?: AggregationResultMap<SearchParams['body']['aggs']>;
         }
       : {});
 

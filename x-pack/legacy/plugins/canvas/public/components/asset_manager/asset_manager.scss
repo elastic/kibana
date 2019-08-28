@@ -11,13 +11,12 @@
   }
 
   .canvasAssetManager__meterWrapper {
-    flex-grow: 0;
-    min-width: 40%;
-    align-items: center;
-
     @include euiBreakpoint('xs', 's') {
       flex-grow: 1;
     }
+    flex-grow: 0;
+    min-width: 40%;
+    align-items: center;
   }
 
   .canvasAssetManager__meterLabel {

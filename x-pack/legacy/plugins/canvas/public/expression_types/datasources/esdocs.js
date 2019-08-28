@@ -13,7 +13,7 @@ import { ESFieldSelect } from '../../components/es_field_select';
 import { ESIndexSelect } from '../../components/es_index_select';
 import { templateFromReactComponent } from '../../lib/template_from_react_component';
 
-const EsdocsDatasource = ({ args, updateArgs }) => {
+const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
   const setArg = (name, value) => {
     updateArgs &&
       updateArgs({
@@ -35,7 +35,7 @@ const EsdocsDatasource = ({ args, updateArgs }) => {
   };
 
   const getIndex = () => {
-    return getSimpleArg('index', args)[0] || '';
+    return getSimpleArg('index', args)[0] || defaultIndex;
   };
 
   const getQuery = () => {
@@ -117,6 +117,7 @@ const EsdocsDatasource = ({ args, updateArgs }) => {
 EsdocsDatasource.propTypes = {
   args: PropTypes.object.isRequired,
   updateArgs: PropTypes.func,
+  defaultIndex: PropTypes.string,
 };
 
 export const esdocs = () => ({

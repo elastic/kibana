@@ -29,8 +29,8 @@ export async function getErrorGroups({
   setup
 }: {
   serviceName: string;
-  sortField: string;
-  sortDirection: string;
+  sortField?: string;
+  sortDirection?: string;
   setup: Setup;
 }) {
   const { client } = setup;

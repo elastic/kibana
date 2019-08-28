@@ -65,7 +65,6 @@ export const getColumns = ({
   browserFields,
   columnHeaders,
   eventId,
-  isLoading,
   onUpdateColumns,
   timelineId,
   toggleColumn,
@@ -73,7 +72,6 @@ export const getColumns = ({
   browserFields: BrowserFields;
   columnHeaders: ColumnHeader[];
   eventId: string;
-  isLoading: boolean;
   onUpdateColumns: OnUpdateColumns;
   timelineId: string;
   toggleColumn: (column: ColumnHeader) => void;
@@ -146,7 +144,6 @@ export const getColumns = ({
                       })}
                       data-test-subj="field-name"
                       fieldId={field}
-                      isLoading={isLoading}
                       onUpdateColumns={onUpdateColumns}
                     />
                   ) : (

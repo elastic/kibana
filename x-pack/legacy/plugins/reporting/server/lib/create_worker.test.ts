@@ -24,12 +24,14 @@ const executeJobFactoryStub = sinon.stub();
 
 const getMockServer = (
   exportTypes: any[] = [{ executeJobFactory: executeJobFactoryStub }]
-): Partial<KbnServer> => ({
-  log: sinon.stub(),
-  expose: sinon.stub(),
-  config: () => ({ get: configGetStub }),
-  plugins: { reporting: { exportTypesRegistry: { getAll: () => exportTypes } } },
-});
+): KbnServer => {
+  return ({
+    log: sinon.stub(),
+    expose: sinon.stub(),
+    config: () => ({ get: configGetStub }),
+    plugins: { reporting: { exportTypesRegistry: { getAll: () => exportTypes } } },
+  } as unknown) as KbnServer;
+};
 
 describe('Create Worker', () => {
   let queue: Esqueue;

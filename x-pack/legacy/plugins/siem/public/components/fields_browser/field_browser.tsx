@@ -51,13 +51,7 @@ PanesFlexGroup.displayName = 'PanesFlexGroup';
 
 type Props = Pick<
   FieldBrowserProps,
-  | 'browserFields'
-  | 'height'
-  | 'isLoading'
-  | 'onFieldSelected'
-  | 'onUpdateColumns'
-  | 'timelineId'
-  | 'width'
+  'browserFields' | 'height' | 'onFieldSelected' | 'onUpdateColumns' | 'timelineId' | 'width'
 > & {
   /**
    * The current timeline column headers
@@ -124,7 +118,6 @@ export class FieldsBrowser extends React.PureComponent<Props> {
       browserFields,
       filteredBrowserFields,
       searchInput,
-      isLoading,
       isSearching,
       onCategorySelected,
       onFieldSelected,
@@ -165,7 +158,6 @@ export class FieldsBrowser extends React.PureComponent<Props> {
                 data-test-subj="left-categories-pane"
                 filteredBrowserFields={filteredBrowserFields}
                 width={CATEGORY_PANE_WIDTH}
-                isLoading={isLoading}
                 onCategorySelected={onCategorySelected}
                 onUpdateColumns={onUpdateColumns}
                 selectedCategoryId={selectedCategoryId}
@@ -178,7 +170,6 @@ export class FieldsBrowser extends React.PureComponent<Props> {
                 columnHeaders={columnHeaders}
                 data-test-subj="fields-pane"
                 filteredBrowserFields={filteredBrowserFields}
-                isLoading={isLoading}
                 onCategorySelected={onCategorySelected}
                 onFieldSelected={this.selectFieldAndHide}
                 onUpdateColumns={onUpdateColumns}

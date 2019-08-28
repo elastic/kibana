@@ -10,5 +10,6 @@ export default function({ loadTestFile }: FtrProviderContext) {
     this.tags('ciGroup6');
 
     loadTestFile(require.resolve('./saved_objects'));
+    loadTestFile(require.resolve('./space_attributes'));
   });
 }

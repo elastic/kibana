@@ -12,9 +12,9 @@ export const getTemplate = ({
   version = getRandomNumber(),
   order = getRandomNumber(),
   indexPatterns = [],
-  settings = {},
-  aliases = {},
-  mappings = {},
+  settings,
+  aliases,
+  mappings,
 }: Partial<Template> = {}): Template => ({
   name,
   version,

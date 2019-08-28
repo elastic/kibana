@@ -18,17 +18,13 @@ import { Store } from 'redux';
 import { BehaviorSubject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
 
-import { KibanaConfigContext } from '../lib/adapters/framework/kibana_framework_adapter';
-import { AppTestingFrameworkAdapter } from '../lib/adapters/framework/testing_framework_adapter';
 import { createStore, State } from '../store';
 import { mockGlobalState } from './global_state';
-import { mockFrameworks } from './kibana_config';
 
 const state: State = mockGlobalState;
 
 interface Props {
   children: React.ReactNode;
-  mockFramework?: Partial<AppTestingFrameworkAdapter>;
   store?: Store;
   onDragEnd?: (result: DropResult, provided: ResponderProvided) => void;
 }
@@ -42,19 +38,12 @@ export const apolloClientObservable = new BehaviorSubject(apolloClient);
 
 /** A utility for wrapping children in the providers required to run most tests */
 export const TestProviders = pure<Props>(
-  ({
-    children,
-    store = createStore(state, apolloClientObservable),
-    mockFramework = mockFrameworks.default_UTC,
-    onDragEnd = jest.fn(),
-  }) => (
+  ({ children, store = createStore(state, apolloClientObservable), onDragEnd = jest.fn() }) => (
     <I18nProvider>
       <ApolloProvider client={apolloClient}>
         <ReduxStoreProvider store={store}>
           <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-            <KibanaConfigContext.Provider value={mockFramework}>
-              <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
-            </KibanaConfigContext.Provider>
+            <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
           </ThemeProvider>
         </ReduxStoreProvider>
       </ApolloProvider>
