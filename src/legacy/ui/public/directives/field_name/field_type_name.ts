@@ -18,7 +18,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
-export function fieldTypeName(type: string) {
+export function getFieldTypeName(type: string) {
   switch (type) {
     case 'boolean':
       return i18n.translate('common.ui.directives.fieldNameIcons.booleanAriaLabel', {

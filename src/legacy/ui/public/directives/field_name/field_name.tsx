@@ -21,7 +21,7 @@ import classNames from 'classnames';
 // @ts-ignore
 import { shortenDottedString } from '../../../../core_plugins/kibana/common/utils/shorten_dotted_string';
 import { FieldNameIcon } from './field_name_icon';
-import { fieldTypeName } from './field_type_name';
+import { getFieldTypeName } from './field_type_name';
 
 // property field is provided at discover's field chooser
 // properties fieldType and fieldName are provided in kbn_doc_view
@@ -40,7 +40,7 @@ interface Props {
 
 export function FieldName({ field, fieldName, fieldType, useShortDots }: Props) {
   const type = field ? String(field.type) : String(fieldType);
-  const typeName = fieldTypeName(type);
+  const typeName = getFieldTypeName(type);
 
   const name = field ? String(field.name) : String(fieldName);
   const displayName = useShortDots ? shortenDottedString(name) : name;
