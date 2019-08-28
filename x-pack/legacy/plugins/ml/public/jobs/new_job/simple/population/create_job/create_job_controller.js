@@ -45,7 +45,7 @@ import template from './create_job.html';
 import { timefilter } from 'ui/timefilter';
 
 uiRoutes
-  .when('/jobs/new_job/simple/population', {
+  .when('/jobs/new_job_old/population', {
     template,
     k7Breadcrumbs: getCreatePopulationJobBreadcrumbs,
     resolve: {
