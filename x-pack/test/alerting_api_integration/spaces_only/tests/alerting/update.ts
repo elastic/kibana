@@ -41,6 +41,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           ...updatedData,
           id: createdAlert.id,
           updatedBy: null,
+          apiKeyOwner: null,
         });
     });
   });

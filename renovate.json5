@@ -135,6 +135,7 @@
         groupName: 'graphql related packages',
         packagePatterns: [
           '(\\b|_)graphql(\\b|_)',
+          '(\\b|_)apollo(\\b|_)',
         ],
       },
       {
@@ -574,6 +575,14 @@
         packageNames: [
           'zen-observable',
           '@types/zen-observable',
+        ],
+      },
+      {
+        groupSlug: 'archiver',
+        groupName: 'archiver related packages',
+        packageNames: [
+          'archiver',
+          '@types/archiver',
         ],
       },
       {

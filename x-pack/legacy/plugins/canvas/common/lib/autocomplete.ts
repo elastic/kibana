@@ -12,9 +12,47 @@ import {
   ExpressionFunctionAST,
   ExpressionArgAST,
   CanvasFunction,
+  CanvasArg,
+  CanvasArgValue,
 } from '../../types';
 
 const MARKER = 'CANVAS_SUGGESTION_MARKER';
+
+interface BaseSuggestion {
+  text: string;
+  start: number;
+  end: number;
+}
+
+interface FunctionSuggestion extends BaseSuggestion {
+  type: 'function';
+  fnDef: CanvasFunction;
+}
+
+type ArgSuggestionValue = CanvasArgValue & {
+  name: string;
+};
+
+interface ArgSuggestion extends BaseSuggestion {
+  type: 'argument';
+  argDef: ArgSuggestionValue;
+}
+
+interface ValueSuggestion extends BaseSuggestion {
+  type: 'value';
+}
+
+export type AutocompleteSuggestion = FunctionSuggestion | ArgSuggestion | ValueSuggestion;
+
+interface FnArgAtPosition {
+  ast: ExpressionASTWithMeta;
+  fnIndex: number;
+
+  argName?: string;
+  argIndex?: number;
+  argStart?: number;
+  argEnd?: number;
+}
 
 // If you parse an expression with the "addMeta" option it completely
 // changes the type of returned object.  The following types
@@ -62,19 +100,14 @@ function isExpression(
   return typeof maybeExpression.node === 'object';
 }
 
-type valueof<T> = T[keyof T];
-type ValuesOfUnion<T> = T extends any ? valueof<T> : never;
-
-// All of the possible Arg Values
-type ArgValue = ValuesOfUnion<CanvasFunction['args']>;
-// All of the argument objects
-type CanvasArg = CanvasFunction['args'];
-
 // Overloads to change return type based on specs
 function getByAlias(specs: CanvasFunction[], name: string): CanvasFunction;
 // eslint-disable-next-line @typescript-eslint/unified-signatures
-function getByAlias(specs: CanvasArg, name: string): ArgValue;
-function getByAlias(specs: CanvasFunction[] | CanvasArg, name: string): CanvasFunction | ArgValue {
+function getByAlias(specs: CanvasArg, name: string): CanvasArgValue;
+function getByAlias(
+  specs: CanvasFunction[] | CanvasArg,
+  name: string
+): CanvasFunction | CanvasArgValue {
   return untypedGetByAlias(specs, name);
 }
 
@@ -87,23 +120,24 @@ export function getFnArgDefAtPosition(
   expression: string,
   position: number
 ) {
-  const text = expression.substr(0, position) + MARKER + expression.substr(position);
   try {
-    const ast: ExpressionASTWithMeta = parse(text, { addMeta: true }) as ExpressionASTWithMeta;
+    const ast: ExpressionASTWithMeta = parse(expression, {
+      addMeta: true,
+    }) as ExpressionASTWithMeta;
 
-    const { ast: newAst, fnIndex, argName } = getFnArgAtPosition(ast, position);
+    const { ast: newAst, fnIndex, argName, argStart, argEnd } = getFnArgAtPosition(ast, position);
     const fn = newAst.node.chain[fnIndex].node;
 
-    const fnDef = getByAlias(specs, fn.function.replace(MARKER, ''));
+    const fnDef = getByAlias(specs, fn.function);
     if (fnDef && argName) {
       const argDef = getByAlias(fnDef.args, argName);
-      return { fnDef, argDef };
+      return { fnDef, argDef, argStart, argEnd };
     }
     return { fnDef };
   } catch (e) {
     // Fail silently
   }
-  return [];
+  return {};
 }
 
 /**
@@ -117,7 +151,7 @@ export function getAutocompleteSuggestions(
   specs: CanvasFunction[],
   expression: string,
   position: number
-) {
+): AutocompleteSuggestion[] {
   const text = expression.substr(0, position) + MARKER + expression.substr(position);
   try {
     const ast = parse(text, { addMeta: true }) as ExpressionASTWithMeta;
@@ -151,20 +185,39 @@ export function getAutocompleteSuggestions(
     It returns which function the cursor is in, as well as which argument for that function the cursor is in
     if any.
 */
-function getFnArgAtPosition(
-  ast: ExpressionASTWithMeta,
-  position: number
-): { ast: ExpressionASTWithMeta; fnIndex: number; argName?: string; argIndex?: number } {
+function getFnArgAtPosition(ast: ExpressionASTWithMeta, position: number): FnArgAtPosition {
   const fnIndex = ast.node.chain.findIndex(fn => fn.start <= position && position <= fn.end);
   const fn = ast.node.chain[fnIndex];
   for (const [argName, argValues] of Object.entries(fn.node.arguments)) {
     for (let argIndex = 0; argIndex < argValues.length; argIndex++) {
       const value = argValues[argIndex];
-      if (value.start <= position && position <= value.end) {
+
+      let argStart = value.start;
+      let argEnd = value.end;
+      if (argName !== '_') {
+        // If an arg name is specified, expand our start position to include
+        // the arg name plus the `=` character
+        argStart = argStart - (argName.length + 1);
+
+        // If the arg value is an expression, expand our start and end position
+        // to include the opening and closing braces
         if (value.node !== null && isExpression(value)) {
+          argStart--;
+          argEnd++;
+        }
+      }
+
+      if (argStart <= position && position <= argEnd) {
+        // If the current position is on an expression and NOT on the expression's
+        // argument name (`font=` for example), recurse within the expression
+        if (
+          value.node !== null &&
+          isExpression(value) &&
+          (argName === '_' || !(argStart <= position && position <= argStart + argName.length + 1))
+        ) {
           return getFnArgAtPosition(value, position);
         }
-        return { ast, fnIndex, argName, argIndex };
+        return { ast, fnIndex, argName, argIndex, argStart, argEnd };
       }
     }
   }
@@ -175,7 +228,7 @@ function getFnNameSuggestions(
   specs: CanvasFunction[],
   ast: ExpressionASTWithMeta,
   fnIndex: number
-) {
+): FunctionSuggestion[] {
   // Filter the list of functions by the text at the marker
   const { start, end, node: fn } = ast.node.chain[fnIndex];
   const query = fn.function.replace(MARKER, '');
@@ -205,7 +258,7 @@ function getArgNameSuggestions(
   fnIndex: number,
   argName: string,
   argIndex: number
-) {
+): ArgSuggestion[] {
   // Get the list of args from the function definition
   const fn = ast.node.chain[fnIndex].node;
   const fnDef = getByAlias(specs, fn.function);
@@ -218,7 +271,7 @@ function getArgNameSuggestions(
 
   // Filter the list of args by the text at the marker
   const query = text.replace(MARKER, '');
-  const matchingArgDefs = Object.entries<ArgValue>(fnDef.args).filter(([name]) =>
+  const matchingArgDefs = Object.entries<CanvasArgValue>(fnDef.args).filter(([name]) =>
     textMatches(name, query)
   );
 
@@ -245,11 +298,11 @@ function getArgNameSuggestions(
   // with the text at the marker, then alphabetically
   const comparator = combinedComparator(
     unnamedArgComparator,
-    invokeWithProp<string, 'name', ArgValue & { name: string }, number>(
+    invokeWithProp<string, 'name', CanvasArgValue & { name: string }, number>(
       startsWithComparator(query),
       'name'
     ),
-    invokeWithProp<string, 'name', ArgValue & { name: string }, number>(
+    invokeWithProp<string, 'name', CanvasArgValue & { name: string }, number>(
       alphanumericalComparator,
       'name'
     )
@@ -267,7 +320,7 @@ function getArgValueSuggestions(
   fnIndex: number,
   argName: string,
   argIndex: number
-) {
+): ValueSuggestion[] {
   // Get the list of values from the argument definition
   const fn = ast.node.chain[fnIndex].node;
   const fnDef = getByAlias(specs, fn.function);
@@ -331,7 +384,7 @@ function prevFnTypeComparator(prevFnType: any) {
   };
 }
 
-function unnamedArgComparator(a: ArgValue, b: ArgValue): number {
+function unnamedArgComparator(a: CanvasArgValue, b: CanvasArgValue): number {
   return (
     (b.aliases && b.aliases.includes('_') ? 1 : 0) - (a.aliases && a.aliases.includes('_') ? 1 : 0)
   );

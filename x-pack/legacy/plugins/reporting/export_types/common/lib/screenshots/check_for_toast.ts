@@ -7,16 +7,16 @@
 import { i18n } from '@kbn/i18n';
 import { ElementHandle } from 'puppeteer';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers/chromium/driver';
-import { LevelLogger as Logger } from '../../../../server/lib/level_logger';
+import { LevelLogger } from '../../../../server/lib';
 import { LayoutInstance } from '../../layouts/layout';
 
 export const checkForToastMessage = async (
   browser: HeadlessBrowser,
   layout: LayoutInstance,
-  logger: Logger
+  logger: LevelLogger
 ): Promise<ElementHandle<Element>> => {
   return await browser
-    .waitForSelector(layout.selectors.toastHeader, { silent: true })
+    .waitForSelector(layout.selectors.toastHeader, { silent: true }, logger)
     .then(async () => {
       // Check for a toast message on the page. If there is one, capture the
       // message and throw an error, to fail the screenshot.
