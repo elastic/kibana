@@ -139,7 +139,8 @@ const CourierRequestHandlerProvider = function () {
             aggs,
             agg,
             requestSearchSource,
-            inspectorAdapters
+            inspectorAdapters,
+            abortSignal,
           );
         }
       }
