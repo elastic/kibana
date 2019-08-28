@@ -22,6 +22,9 @@ import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { uiModules } from 'ui/modules';
 import { SavedObjectLoader, SavedObjectsClientProvider } from 'ui/saved_objects';
 import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
+import { visualizations } from 'plugins/visualizations';
+import { createVisualizeEditUrl } from '../visualize_constants';
+import { findListItems } from './find_list_items';
 
 const app = uiModules.get('app/visualize');
 
@@ -34,7 +37,6 @@ savedObjectManagementRegistry.register({
 
 app.service('savedVisualizations', function (SavedVis, Private, kbnUrl, chrome) {
   const visTypes = Private(VisTypesRegistryProvider);
-
   const savedObjectClient = Private(SavedObjectsClientProvider);
   const saveVisualizationLoader = new SavedObjectLoader(SavedVis, kbnUrl, chrome, savedObjectClient);
 
@@ -54,12 +56,31 @@ app.service('savedVisualizations', function (SavedVis, Private, kbnUrl, chrome) 
     }
 
     source.type = visTypes.byName[typeName];
+    source.savedObjectType = 'visualization';
     source.icon = source.type.icon;
+    source.image = source.type.image;
+    source.typeTitle = source.type.title;
+    source.isExperimental = source.type.shouldMarkAsExperimentalInUI();
+    source.editUrl = `#${createVisualizeEditUrl(id)}`;
+
     return source;
   };
 
   saveVisualizationLoader.urlFor = function (id) {
     return kbnUrl.eval('#/visualize/edit/{{id}}', { id: id });
   };
+
+  // This behaves similarly to find, except it returns visualizations that are
+  // defined as appExtensions and which may not conform to type: visualization
+  saveVisualizationLoader.findListItems = function (search = '', size = 100) {
+    return findListItems({
+      search,
+      size,
+      mapSavedObjectApiHits: this.mapSavedObjectApiHits.bind(this),
+      savedObjectsClient: this.savedObjectsClient,
+      visTypes: visualizations.types.visTypeAliasRegistry.get(),
+    });
+  };
+
   return saveVisualizationLoader;
 });
