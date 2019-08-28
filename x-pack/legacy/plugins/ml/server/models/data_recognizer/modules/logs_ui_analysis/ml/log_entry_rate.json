@@ -4,7 +4,6 @@
   "groups": ["logs-ui"],
   "analysis_config": {
     "bucket_span": "15m",
-    "summary_count_field_name": "doc_count_per_minute",
     "detectors": [
       {
         "detector_description": "count",
