@@ -95,6 +95,11 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
                             setQuery={setQuery}
                             to={to}
                             narrowDateRange={(min: number, max: number) => {
+                              /**
+                               * Using setTimeout here because of this issue:
+                               * https://github.com/elastic/elastic-charts/issues/360
+                               * Need to remove the setTimeout here after this issue is fixed.
+                               * */
                               setTimeout(() => {
                                 setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
                               }, 500);
