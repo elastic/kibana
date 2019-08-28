@@ -46,6 +46,7 @@ describe('Editor', () => {
       $('#ConAppEditor'),
       $('#ConAppEditorActions'),
       $('#ConCopyAsCurl'),
+      {},
       null
     );
     input.$el.show();

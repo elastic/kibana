@@ -39,7 +39,8 @@ describe('Integration', () => {
       $('#ConAppEditor'),
       $('#ConAppEditorActions'),
       $('#ConCopyAsCurl'),
-      null
+      {},
+      null,
     );
     input.$el.show();
     input.autocomplete._test.removeChangeListener();

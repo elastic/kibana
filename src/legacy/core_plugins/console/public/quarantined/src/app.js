@@ -18,11 +18,9 @@
  */
 
 const $ = require('jquery');
-
-const history = require('./history');
 const mappings = require('./mappings');
 
-export default function init(input, output, sourceLocation = 'stored') {
+export default function init(input, output, history, sourceLocation = 'stored') {
   $(document.body).removeClass('fouc');
 
   // set the value of the input and clear the output
@@ -49,8 +47,7 @@ export default function init(input, output, sourceLocation = 'stored') {
     try {
       const content = input.getValue();
       history.updateCurrentState(content);
-    }
-    catch (e) {
+    } catch (e) {
       console.log('Ignoring saving error: ' + e);
     }
   }
@@ -60,75 +57,34 @@ export default function init(input, output, sourceLocation = 'stored') {
     if (sourceLocation === 'stored') {
       if (previousSaveState) {
         resetToValues(previousSaveState.content);
-      }
-      else {
+      } else {
         resetToValues();
         input.autoIndent();
       }
-    }
-    else if (/^https?:\/\//.test(sourceLocation)) {
+    } else if (/^https?:\/\//.test(sourceLocation)) {
       const loadFrom = {
         url: sourceLocation,
         // Having dataType here is required as it doesn't allow jQuery to `eval` content
         // coming from the external source thereby preventing XSS attack.
         dataType: 'text',
-        kbnXsrfToken: false
+        kbnXsrfToken: false,
       };
 
       if (/https?:\/\/api.github.com/.test(sourceLocation)) {
         loadFrom.headers = { Accept: 'application/vnd.github.v3.raw' };
       }
 
-      $.ajax(loadFrom).done((data) => {
+      $.ajax(loadFrom).done(data => {
         resetToValues(data);
         input.moveToNextRequestEdge(true);
         input.highlightCurrentRequestsAndUpdateActionBar();
         input.updateActionsBar();
       });
-    }
-    else {
+    } else {
       resetToValues();
     }
     input.moveToNextRequestEdge(true);
   }
-
-  // stupid simple restore function, called when the user
-  // chooses to restore a request from the history
-  // PREVENTS history from needing to know about the input
-  history.restoreFromHistory = function applyHistoryElem(req) {
-    const session = input.getSession();
-    let pos = input.getCursorPosition();
-    let prefix = '';
-    let suffix = '\n';
-    if (input.parser.isStartRequestRow(pos.row)) {
-      pos.column = 0;
-      suffix += '\n';
-    }
-    else if (input.parser.isEndRequestRow(pos.row)) {
-      const line = session.getLine(pos.row);
-      pos.column = line.length;
-      prefix = '\n\n';
-    }
-    else if (input.parser.isInBetweenRequestsRow(pos.row)) {
-      pos.column = 0;
-    }
-    else {
-      pos = input.nextRequestEnd(pos);
-      prefix = '\n\n';
-    }
-
-    let s = prefix + req.method + ' ' + req.endpoint;
-    if (req.data) {
-      s += '\n' + req.data;
-    }
-
-    s += suffix;
-
-    session.insert(pos, s);
-    input.clearSelection();
-    input.moveCursorTo(pos.row + prefix.length, 0);
-    input.focus();
-  };
 
   setupAutosave();
   loadSavedState();

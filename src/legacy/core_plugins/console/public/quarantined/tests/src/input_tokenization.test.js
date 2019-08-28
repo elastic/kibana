@@ -40,9 +40,17 @@ describe('Input Tokenization', () => {
       $('#ConAppEditor'),
       $('#ConAppEditorActions'),
       $('#ConCopyAsCurl'),
+      {},
       null
     );
-    input = initializeInput($('#ConAppEditor'), $('#ConAppEditorActions'), $('#ConCopyAsCurl'), null);
+
+    input = initializeInput(
+      $('#ConAppEditor'),
+      $('#ConAppEditorActions'),
+      $('#ConCopyAsCurl'),
+      {},
+      null
+    );
     input.$el.show();
     input.autocomplete._test.removeChangeListener();
   });

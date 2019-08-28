@@ -17,18 +17,20 @@
  * under the License.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { debounce } from 'lodash';
 
 import { ConsoleEditor } from './editor';
+import { HistoryList } from './history_viewer';
 
 import { useAppContext } from '../context';
-import { StorageKeys } from '../storage';
+import { StorageKeys } from '../services/storage';
 
 const INITIAL_PANEL_WIDTH = 50;
 
 export function Main() {
   const { storage, docLinkVersion } = useAppContext();
+  const [, setShowingHistory] = useState(false);
   const [firstPanelWidth, secondPanelWidth] = storage.get(StorageKeys.WIDTH, [
     INITIAL_PANEL_WIDTH,
     INITIAL_PANEL_WIDTH,
@@ -45,11 +47,14 @@ export function Main() {
     []
   );
   return (
-    <ConsoleEditor
-      docLinkVersion={docLinkVersion}
-      onPanelWidthChange={onPanelWidthChange}
-      initialInputPanelWidth={firstPanelWidth}
-      initialOutputPanelWidth={secondPanelWidth}
-    />
+    <>
+      <HistoryList close={() => setShowingHistory(false)} />
+      <ConsoleEditor
+        docLinkVersion={docLinkVersion}
+        onPanelWidthChange={onPanelWidthChange}
+        initialInputPanelWidth={firstPanelWidth}
+        initialOutputPanelWidth={secondPanelWidth}
+      />
+    </>
   );
 }

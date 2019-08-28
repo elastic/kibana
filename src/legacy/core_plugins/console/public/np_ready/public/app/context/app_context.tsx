@@ -18,9 +18,10 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { Storage } from '../storage';
+import { History, Storage } from '../services';
 
 interface ContextValue {
+  history: History;
   storage: Storage;
   docLinkVersion: string;
 }

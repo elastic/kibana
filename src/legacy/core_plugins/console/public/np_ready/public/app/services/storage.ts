@@ -61,7 +61,7 @@ export class Storage {
     return this.engine.getItem(this.encodeKey(key)) != null;
   }
 
-  get<T>(key: string, _default: T) {
+  get<T>(key: string, _default?: T) {
     if (this.has(key)) {
       return this.decode(this.engine.getItem(this.encodeKey(key)));
     } else {
@@ -73,7 +73,7 @@ export class Storage {
     return this.engine.removeItem(this.encodeKey(key));
   }
 
-  keys() {
+  keys(): string[] {
     return transform(keys(this.engine), (ours, key) => {
       const ourKey = this.decodeKey(key);
       if (ourKey != null) ours.push(ourKey);
@@ -81,6 +81,6 @@ export class Storage {
   }
 }
 
-export function create({ engine, prefix }: { engine: IStorageEngine; prefix: string }) {
-  return new Storage(engine, prefix);
+export function createStorage(deps: { engine: IStorageEngine; prefix: string }) {
+  return new Storage(deps.engine, deps.prefix);
 }

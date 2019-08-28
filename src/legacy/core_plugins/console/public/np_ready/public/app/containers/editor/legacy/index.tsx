@@ -35,6 +35,7 @@ import { autoIndent, getDocumentation } from './console_menu_actions';
 import { Panel, PanelContainer } from '../../../components/split_panel';
 
 import { useUIAceKeyboardMode } from './use_ui_ace_keyboard_mode';
+import { useAppContext } from '../../../context';
 
 const PANEL_MIN_WIDTH = '100px';
 
@@ -59,6 +60,8 @@ export function ConsoleEditor({
   initialInputPanelWidth,
   initialOutputPanelWidth,
 }: EditorProps) {
+  const { history } = useAppContext();
+
   const editorRef = useRef<HTMLDivElement | null>(null);
   const outputRef = useRef<HTMLDivElement | null>(null);
   const actionsRef = useRef<HTMLDivElement | null>(null);
@@ -84,8 +87,8 @@ export function ConsoleEditor({
     const actions$ = $(actionsRef.current!);
 
     const outputEditor = initializeOutput(output$);
-    const inputEditor = initializeInput(editor$, actions$, outputEditor);
-    init(inputEditor, outputEditor);
+    const inputEditor = initializeInput(editor$, actions$, outputEditor, history);
+    init(inputEditor, outputEditor, history);
 
     const session = inputEditor.getSession();
     session.getSelection().on('changeCursor', () => {

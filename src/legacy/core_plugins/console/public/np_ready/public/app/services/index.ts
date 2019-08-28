@@ -17,24 +17,5 @@
  * under the License.
  */
 
-import React from 'react';
-import { AppContextProvider } from './context';
-import { Main } from './containers';
-import { createStorage, createHistory } from './services';
-
-export function boot(I18nContext: any, deps: { docLinkVersion: string }) {
-  const storage = createStorage({
-    engine: window.localStorage,
-    prefix: 'console_editor:',
-  });
-
-  const history = createHistory({ storage });
-
-  return (
-    <I18nContext>
-      <AppContextProvider value={{ ...deps, storage, history }}>
-        <Main />
-      </AppContextProvider>
-    </I18nContext>
-  );
-}
+export { createHistory, History } from './history';
+export { createStorage, Storage } from './storage';

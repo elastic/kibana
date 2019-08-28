@@ -20,9 +20,10 @@
 import sinon from 'sinon';
 import $ from 'jquery';
 
-import history from '../history';
 import mappings from '../mappings';
 import init from '../app';
+
+const history = {};
 
 describe('console app initialization', () => {
   const sandbox = sinon.createSandbox();
@@ -41,11 +42,11 @@ describe('console app initialization', () => {
       moveToNextRequestEdge: sinon.stub(),
       highlightCurrentRequestsAndUpdateActionBar: sinon.stub(),
       updateActionsBar: sinon.stub(),
-      getSession: sinon.stub().returns({ on() {} })
+      getSession: sinon.stub().returns({ on() {} }),
     };
 
     outputMock = {
-      update: sinon.stub()
+      update: sinon.stub(),
     };
   });
 
@@ -57,13 +58,13 @@ describe('console app initialization', () => {
     const mockContent = {};
     ajaxDoneStub.yields(mockContent);
 
-    init(inputMock, outputMock, 'https://state.link.com/content');
+    init(inputMock, outputMock, history, 'https://state.link.com/content');
 
     sinon.assert.calledOnce($.ajax);
     sinon.assert.calledWithExactly($.ajax, {
       url: 'https://state.link.com/content',
       dataType: 'text',
-      kbnXsrfToken: false
+      kbnXsrfToken: false,
     });
 
     sinon.assert.calledTwice(inputMock.moveToNextRequestEdge);
@@ -81,14 +82,14 @@ describe('console app initialization', () => {
     const mockContent = {};
     ajaxDoneStub.yields(mockContent);
 
-    init(inputMock, outputMock, 'https://api.github.com/content');
+    init(inputMock, outputMock, history, 'https://api.github.com/content');
 
     sinon.assert.calledOnce($.ajax);
     sinon.assert.calledWithExactly($.ajax, {
       url: 'https://api.github.com/content',
       dataType: 'text',
       kbnXsrfToken: false,
-      headers: { Accept: 'application/vnd.github.v3.raw' }
+      headers: { Accept: 'application/vnd.github.v3.raw' },
     });
 
     sinon.assert.calledTwice(inputMock.moveToNextRequestEdge);

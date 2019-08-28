@@ -25,11 +25,10 @@ const SenseEditor = require('./sense_editor/editor');
 const settings = require('./settings');
 const utils = require('./utils');
 const es = require('./es');
-const history = require('./history');
 import { uiModules } from 'ui/modules';
 
 let input;
-export function initializeInput($el, $actionsEl, output, openDocumentation = () => {}) {
+export function initializeInput($el, $actionsEl, output, history, openDocumentation = () => {}) {
   input = new SenseEditor($el);
 
   // this may not exist if running from tests
