@@ -6,3 +6,4 @@
 
 export { ObjectRemover } from './object_remover';
 export { getUrlPrefix } from './space_test_utils';
+export { destroyEsTestIndex, getTestAlertData, setupEsTestIndex } from './alert_test_utils';
