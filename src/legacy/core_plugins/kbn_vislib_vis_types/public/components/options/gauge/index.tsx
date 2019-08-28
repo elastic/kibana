@@ -21,7 +21,7 @@ import React, { useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
-import { GaugeVisParams } from '../../gauge';
+import { GaugeVisParams } from '../../../gauge';
 import { RangesPanel } from './ranges_panel';
 import { StylePanel } from './style_panel';
 import { LabelsPanel } from './labels_panel';
