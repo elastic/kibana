@@ -40,4 +40,8 @@ export class UMTestBackendFrameworkAdapter implements UMBackendFrameworkAdapter 
       path: routePath,
     });
   }
+
+  public getSavedObjectsClient() {
+    return {};
+  }
 }

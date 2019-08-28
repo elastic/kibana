@@ -47,15 +47,6 @@ export class UMMemoryMonitorsAdapter implements UMMonitorsAdapter {
     throw new Error('Method not implemented.');
   }
 
-  public async getErrorsList(
-    request: any,
-    dateRangeStart: string,
-    dateRangeEnd: string,
-    filters?: string | null
-  ): Promise<any> {
-    throw new Error('Method not implemented.');
-  }
-
   public async getMonitorPageTitle(
     request: any,
     monitorId: string
