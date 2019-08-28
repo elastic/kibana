@@ -34,11 +34,11 @@ export function getFieldTypeName(type: string) {
       });
     case 'geo_point':
       return i18n.translate('common.ui.directives.fieldNameIcons.geoPointFieldAriaLabel', {
-        defaultMessage: 'Geo Point',
+        defaultMessage: 'Geo point field',
       });
     case 'geo_shape':
       return i18n.translate('common.ui.directives.fieldNameIcons.geoShapeFieldAriaLabel', {
-        defaultMessage: 'Geo Shape',
+        defaultMessage: 'Geo shape field',
       });
     case 'ip':
       return i18n.translate('common.ui.directives.fieldNameIcons.ipAddressFieldAriaLabel', {
