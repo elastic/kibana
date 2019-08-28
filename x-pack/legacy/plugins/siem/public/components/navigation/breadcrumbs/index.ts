@@ -14,11 +14,12 @@ import { getNetworkUrl, getOverviewUrl, getTimelinesUrl } from '../../link_to';
 import * as i18n from '../translations';
 import { getHostsUrl } from '../../link_to/redirect_to_hosts';
 import { HostsTableType } from '../../../store/hosts/model';
+import { SiemPageName } from '../../../pages/home/home_navigations';
 
 export interface NavigationParams {
-  pageName?: string | undefined;
-  hostName?: string | undefined;
-  tabName?: HostsTableType | undefined;
+  pageName?: SiemPageName;
+  hostName?: string;
+  tabName?: HostsTableType;
 }
 
 export const setBreadcrumbs = (pathname: string, params?: NavigationParams) => {

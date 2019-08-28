@@ -12,6 +12,7 @@ import { RedirectToHostsPage, RedirectToHostDetailsPage } from './redirect_to_ho
 import { RedirectToNetworkPage } from './redirect_to_network';
 import { RedirectToOverviewPage } from './redirect_to_overview';
 import { RedirectToTimelinesPage } from './redirect_to_timelines';
+import { HostsTableType } from '../../store/hosts/model';
 
 interface LinkToPageProps {
   match: RouteMatch<{}>;
@@ -22,11 +23,11 @@ export const LinkToPage = pure<LinkToPageProps>(({ match }) => (
     <Route path={`${match.url}/overview`} component={RedirectToOverviewPage} />
     <Route exact path={`${match.url}/hosts`} component={RedirectToHostsPage} />
     <Route
-      path={`${match.url}/hosts/:tabName(authentications|uncommon_processes|anomalies|events)`}
+      path={`${match.url}/hosts/:tabName(${HostsTableType.hosts}|${HostsTableType.authentications}|${HostsTableType.uncommonProcesses}|${HostsTableType.anomalies}|${HostsTableType.events})`}
       component={RedirectToHostsPage}
     />
     <Route
-      path={`${match.url}/hosts/:hostName/:tabName(authentications|uncommon_processes|anomalies|events)`}
+      path={`${match.url}/hosts/:hostName/:tabName(${HostsTableType.authentications}|${HostsTableType.uncommonProcesses}|${HostsTableType.anomalies}|${HostsTableType.events})`}
       component={RedirectToHostDetailsPage}
     />
     <Route path={`${match.url}/hosts/:hostName`} component={RedirectToHostDetailsPage} />

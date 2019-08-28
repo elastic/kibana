@@ -27,7 +27,7 @@ interface NavMatchParams {
 interface TabNavigationRouteProps {
   location: string;
   search: string;
-  match: NavMatchParams;
+  match?: NavMatchParams;
 }
 
 type TabNavigationProps = TabNavigationRouteProps & TabNavigationComponentProps;
@@ -78,7 +78,7 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
     );
   }
 
-  public mapLocationToTab = (pathname: string, match: NavMatchParams): string => {
+  public mapLocationToTab = (pathname: string, match?: NavMatchParams): string => {
     const { navTabs } = this.props;
     const tabName = get('params.tabName', match);
     const myNavTab: NavTab = Object.keys(navTabs)

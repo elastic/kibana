@@ -3,16 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-// import chrome from 'ui/chrome';
-
+import chrome from 'ui/chrome';
 import '../../../mock/match_media';
 import { encodeIpv6 } from '../../../lib/helpers';
 import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../pages/hosts/host_details';
 import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../pages/network/ip_details';
 import { TIMELINES_PAGE_NAME } from '../../link_to/redirect_to_timelines';
 
-import { getBreadcrumbsForRoute, rootBreadcrumbs } from '.';
+import { getBreadcrumbsForRoute, rootBreadcrumbs, setBreadcrumbs } from '.';
 import { HostsTableType } from '../../../store/hosts/model';
+import { SiemPageName } from '../../../pages/home/home_navigations';
 
 jest.mock('ui/chrome', () => ({
   getBasePath: () => {
@@ -29,7 +29,7 @@ jest.mock('ui/chrome', () => ({
 describe('Navigation Breadcrumbs', () => {
   const hostName = 'siem-kibana';
   const hostDetailsParams = {
-    pageName: 'hosts',
+    pageName: SiemPageName.hosts,
     hostName,
     tabName: HostsTableType.authentications,
   };
@@ -111,14 +111,11 @@ describe('Navigation Breadcrumbs', () => {
       expect(breadcrumbs).toEqual(ipv6Breadcrumbs);
     });
   });
-  /* Angela has to figure out why this does not pass
-
-describe('setBreadcrumbs()', () => {
-  test('should call chrome breadcrumb service with correct breadcrumbs', () => {
-    const pathname = `/hosts/${hostName}`;
-    getBreadcrumbsForRoute(pathname, hostDetailsParams);
-    expect(chrome.breadcrumbs.set).toBeCalledWith(hostBreadcrumbs);
+  describe('setBreadcrumbs()', () => {
+    test('should call chrome breadcrumb service with correct breadcrumbs', () => {
+      const pathname = `/hosts/${hostName}`;
+      setBreadcrumbs(pathname, hostDetailsParams);
+      expect(chrome.breadcrumbs.set).toBeCalledWith(hostBreadcrumbs);
+    });
   });
-});
-  */
 });
