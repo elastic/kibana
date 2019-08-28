@@ -9,7 +9,7 @@ import React from 'react';
 import { banners } from 'ui/notify';
 
 import { clickBanner } from './click_banner';
-import { OptInBanner } from './opt_in_banner_component';
+import { OptInBanner } from '../../components/opt_in_banner_component';
 
 /**
  * Render the Telemetry Opt-in banner.
@@ -22,10 +22,12 @@ export function renderBanner(telemetryOptInProvider, fetchTelemetry, { _banners 
   const bannerId = _banners.add({
     component: (
       <OptInBanner
-        optInClick={optIn => clickBanner(bannerId, telemetryOptInProvider, optIn)}
+        optInClick={optIn => clickBanner(telemetryOptInProvider, optIn)}
         fetchTelemetry={fetchTelemetry}
       />
     ),
     priority: 10000
   });
+
+  telemetryOptInProvider.setBannerId(bannerId);
 }

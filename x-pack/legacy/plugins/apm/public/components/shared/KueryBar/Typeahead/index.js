@@ -30,8 +30,8 @@ export class Typeahead extends Component {
   };
 
   static getDerivedStateFromProps(props, state) {
-    const { initialValue } = props;
-    if (initialValue && initialValue !== state.initialValue) {
+    const initialValue = props.initialValue ? props.initialValue : '';
+    if (initialValue !== state.initialValue) {
       return {
         value: initialValue,
         initialValue
