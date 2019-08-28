@@ -25,6 +25,15 @@
   transition: height $euiAnimSpeedNormal $euiAnimSlightResistance;
 }
 
+.globalFilterGroup__filterFlexItem {
+  overflow: hidden;
+  padding-bottom: 2px; // Allow the shadows of the pills to show
+}
+
+.globalFilterBar__flexItem {
+  max-width: calc(100% - #{$euiSizeXS}); // Width minus margin around each flex itm
+}
+
 @include euiBreakpoint('xs', 's') {
   .globalFilterGroup__wrapper-isVisible {
     // EUI Flexbox adds too much margin between responded items, this just moves it up
