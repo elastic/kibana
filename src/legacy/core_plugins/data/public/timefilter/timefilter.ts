@@ -47,6 +47,11 @@ export interface Timefilter {
   enableTimeRangeSelector: () => void;
 }
 
+export interface TimefilterConfig {
+  timeDefaults: TimeRange;
+  refreshIntervalDefaults: RefreshInterval;
+}
+
 // Timefilter accepts moment input but always returns string output
 export type InputTimeRange =
   | TimeRange
@@ -73,10 +78,10 @@ export class TimefilterManager implements Timefilter {
   public isTimeRangeSelectorEnabled: boolean = false;
   public isAutoRefreshSelectorEnabled: boolean = false;
 
-  constructor(uiSettings: UiSettingsClientContract, timeHistory: TimeHistory) {
+  constructor(config: TimefilterConfig, timeHistory: TimeHistory) {
     this._timeHistory = timeHistory;
-    this._time = uiSettings.get('timepicker:timeDefaults');
-    this.setRefreshInterval(uiSettings.get('timepicker:refreshIntervalDefaults'));
+    this._time = config.timeDefaults;
+    this.setRefreshInterval(config.refreshIntervalDefaults);
   }
 
   getEnabledUpdated$ = () => {
