@@ -169,7 +169,7 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
       />
 
       <EuiAccordion
-        id="visEditorValueAxisAccordion"
+        id={`yAxisOptionsAccordion${axis.id}`}
         className="visEditorSidebar__section visEditorSidebar__collapsible"
         initialIsOpen={false}
         buttonContentClassName="euiText euiText--small"

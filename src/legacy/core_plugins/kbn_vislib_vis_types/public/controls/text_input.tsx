@@ -40,9 +40,8 @@ function TextInputOption<ParamName extends string>({
   setValue,
 }: TextInputOptionProps<ParamName>) {
   return (
-    <EuiFormRow helpText={helpText} label={label} fullWidth compressed>
+    <EuiFormRow id={id} helpText={helpText} label={label} fullWidth compressed>
       <EuiFieldText
-        id={id}
         fullWidth
         disabled={disabled}
         value={value}

@@ -132,7 +132,7 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
 
       {stateParams.valueAxes.map((axis, index) => (
         <EuiAccordion
-          id={`yAxisOptionsAccordion${axis.id}`}
+          id={`yAxisAccordion${axis.id}`}
           key={axis.id}
           data-test-subj={`toggleYAxisOptions-${axis.id}`}
           className="visEditorSidebar__section visEditorSidebar__collapsible"

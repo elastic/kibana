@@ -77,6 +77,7 @@ function YExtents({ scale, setScale, setMultipleValidity }: YExtentsProps) {
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem>
             <NumberInputOption
+              dataTestSubj="yAxisYExtentsMin"
               isInvalid={!!errors.length}
               label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.minLabel', {
                 defaultMessage: 'Min',
@@ -89,6 +90,7 @@ function YExtents({ scale, setScale, setMultipleValidity }: YExtentsProps) {
           </EuiFlexItem>
           <EuiFlexItem>
             <NumberInputOption
+              dataTestSubj="yAxisYExtentsMax"
               label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.maxLabel', {
                 defaultMessage: 'Max',
               })}

@@ -126,6 +126,7 @@ function CustomExtentsOptions({
       )}
 
       <SwitchOption
+        dataTestSubj="yAxisSetYExtents"
         label={i18n.translate(
           'kbnVislibVisTypes.controls.pointSeries.valueAxes.setAxisExtentsLabel',
           {
