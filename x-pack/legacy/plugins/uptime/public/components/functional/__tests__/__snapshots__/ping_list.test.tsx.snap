@@ -194,8 +194,16 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "name": "Response code",
             "render": [Function],
           },
+          Object {
+            "align": "right",
+            "isExpander": true,
+            "render": [Function],
+            "width": "40px",
+          },
         ]
       }
+      itemId="id"
+      itemIdToExpandedRowMap={Object {}}
       items={
         Array [
           Object {
