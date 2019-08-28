@@ -8,14 +8,15 @@
 import { timefilter } from 'ui/timefilter';
 
 import { ml } from 'plugins/ml/services/ml_api_service';
-import { loadFullJob, filterJobs, checkForAutoStartDatafeed } from '../utils';
+import { filterJobs, checkForAutoStartDatafeed } from '../utils';
+import { mlJobService } from '../../../../services/job_service';
 import { JobsList } from '../jobs_list';
 import { JobDetails } from '../job_details';
 import { JobFilterBar } from '../job_filter_bar';
 import { EditJobFlyout } from '../edit_job_flyout';
 import { DeleteJobModal } from '../delete_job_modal';
 import { StartDatafeedModal } from '../start_datafeed_modal';
-import { CreateWatchFlyout } from '../create_watch_flyout';
+import { CreateWatchFlyout } from '../../../../components/watcher/create_watch_flyout';
 import { MultiJobActions } from '../multi_job_actions';
 import { NewJobButton } from '../new_job_button';
 import { JobStatsBar } from '../jobs_stats_bar';
@@ -190,7 +191,7 @@ export class JobsListView extends Component {
       }
 
       this.setState({ itemIdToExpandedRowMap }, () => {
-        loadFullJob(jobId)
+        mlJobService.loadFullJob(jobId)
           .then((job) => {
             const fullJobsList = { ...this.state.fullJobsList };
             fullJobsList[jobId] = job;

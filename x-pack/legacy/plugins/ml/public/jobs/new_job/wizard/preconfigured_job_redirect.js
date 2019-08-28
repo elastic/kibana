@@ -7,7 +7,7 @@
 
 import chrome from 'ui/chrome';
 import { get } from  'lodash';
-import { WIZARD_TYPE } from 'plugins/ml/jobs/new_job/simple/components/constants/general';
+import { WIZARD_TYPE } from 'plugins/ml/jobs/new_job/simple_old/components/constants/general';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { loadIndexPatterns, getIndexPatternIdFromName } from 'plugins/ml/util/index_utils';
 
@@ -76,7 +76,7 @@ function getWizardUrlFromAppState(appState) {
         page = 'single_metric';
       }
     }
-    return `jobs/new_job/simple/${page}`;
+    return `jobs/new_job/simple_old/${page}`;
   } else {
     return null;
   }
@@ -98,7 +98,7 @@ function getWizardUrlFromCloningJob(job) {
     }
     const indexPatternId = getIndexPatternIdFromName(job.datafeed_config.indices[0]);
 
-    return `jobs/new_job/new_new_job/${page}?index=${indexPatternId}&_g=()`;
+    return `jobs/new_job/${page}?index=${indexPatternId}&_g=()`;
   } else {
     return null;
   }

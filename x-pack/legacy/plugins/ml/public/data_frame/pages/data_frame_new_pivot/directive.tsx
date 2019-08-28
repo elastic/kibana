@@ -18,7 +18,7 @@ import { timefilter } from 'ui/timefilter';
 
 import { InjectorService } from '../../../../common/types/angular';
 
-import { SearchItemsProvider } from '../../../jobs/new_job/utils/new_job_utils';
+import { SearchItemsProvider } from '../../../jobs/new_job/simple/common/util/new_job_utils';
 import { KibanaConfigTypeFix, KibanaContext } from '../../../contexts/kibana';
 import { Page } from './page';
 

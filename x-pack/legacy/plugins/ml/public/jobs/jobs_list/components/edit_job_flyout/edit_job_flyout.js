@@ -25,7 +25,7 @@ import {
 
 import { JobDetails, Detectors, Datafeed, CustomUrls } from './tabs';
 import { saveJob } from './edit_utils';
-import { loadFullJob } from '../utils';
+import { mlJobService } from '../../../../services/job_service';
 import {
   validateModelMemoryLimit,
   validateGroupNames,
@@ -79,7 +79,7 @@ class EditJobFlyoutUI extends Component {
 
   showFlyout = (jobLite) => {
     const hasDatafeed = jobLite.hasDatafeed;
-    loadFullJob(jobLite.id)
+    mlJobService.loadFullJob(jobLite.id)
     	.then((job) => {
         this.extractJob(job, hasDatafeed);
         this.setState({

@@ -11,25 +11,8 @@ import rison from 'rison-node';
 import chrome from 'ui/chrome';
 
 import { mlJobService } from 'plugins/ml/services/job_service';
-import { ml } from 'plugins/ml/services/ml_api_service';
 import { JOB_STATE, DATAFEED_STATE } from 'plugins/ml/../common/constants/states';
 import { i18n } from '@kbn/i18n';
-
-export function loadFullJob(jobId) {
-  return new Promise((resolve, reject) => {
-    ml.jobs.jobs(jobId)
-      .then((jobs) => {
-        if (jobs.length) {
-          resolve(jobs[0]);
-        } else {
-          throw new Error(`Could not find job ${jobId}`);
-        }
-      })
-      .catch((error) => {
-        reject(error);
-      });
-  });
-}
 
 export function isStartable(jobs) {
   return jobs.some(j => j.datafeedState === DATAFEED_STATE.STOPPED);
@@ -147,7 +130,7 @@ function showResults(resp, action) {
 }
 
 export function cloneJob(jobId) {
-  loadFullJob(jobId)
+  mlJobService.loadFullJob(jobId)
     .then((job) => {
       if(job.custom_settings && job.custom_settings.created_by) {
         // if the job is from a wizards, i.e. contains a created_by property
