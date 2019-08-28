@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { App } from './app';
+import { App, setBreadcrumbs } from './app';
 import { EditorFrameInstance } from '../types';
 
 import { Chrome } from 'ui/chrome';
@@ -44,6 +44,8 @@ function makeDefaultArgs(): jest.Mocked<{
   return ({
     editorFrame: createMockFrame(),
     chrome: {
+      addBasePath: (s: string) => `/testbasepath/${s}`,
+      breadcrumbs: { set: jest.fn() },
       getUiSettingsClient() {
         return {
           get: jest.fn(type => {
@@ -112,6 +114,38 @@ describe('Lens App', () => {
         ],
       ]
     `);
+  });
+
+  describe('setBreadcrumbs', () => {
+    it('contains only Visualize if no document is passed', () => {
+      const mockSet = jest.fn();
+      setBreadcrumbs({
+        addBasePath: (s: string) => `/testbasepath${s}`,
+        breadcrumbs: { set: mockSet },
+      });
+
+      expect(mockSet).toHaveBeenCalledWith([
+        { text: 'Visualize', href: '/testbasepath/app/kibana#/visualize' },
+      ]);
+    });
+
+    it('shows the document title if a document is passed', () => {
+      const mockSet = jest.fn();
+      setBreadcrumbs(
+        {
+          addBasePath: (s: string) => `/testbasepath${s}`,
+          breadcrumbs: { set: mockSet },
+        },
+        {
+          title: 'If you want it done, go. If not, send.',
+        }
+      );
+
+      expect(mockSet).toHaveBeenCalledWith([
+        { text: 'Visualize', href: '/testbasepath/app/kibana#/visualize' },
+        { text: 'If you want it done, go. If not, send.' },
+      ]);
+    });
   });
 
   describe('persistence', () => {
