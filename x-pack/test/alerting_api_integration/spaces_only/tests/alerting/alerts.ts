@@ -37,38 +37,41 @@ export default function alertTests({ getService }: FtrProviderContext) {
       await es.indices.delete({ index: authorizationIndex });
     });
 
-    async function waitForTestIndexDoc(source: string, reference: string) {
-      return await retry.try(async () => {
-        const searchResult = await es.search({
-          index: esTestIndexName,
-          body: {
-            query: {
-              bool: {
-                must: [
-                  {
-                    term: {
-                      source,
-                    },
+    async function searchTestIndexDocs(source: string, reference: string) {
+      return await es.search({
+        index: esTestIndexName,
+        body: {
+          query: {
+            bool: {
+              must: [
+                {
+                  term: {
+                    source,
                   },
-                  {
-                    term: {
-                      reference,
-                    },
+                },
+                {
+                  term: {
+                    reference,
                   },
-                ],
-              },
+                },
+              ],
             },
           },
-        });
-        expect(searchResult.hits.total.value).to.eql(1);
-        return searchResult.hits.hits[0];
+        },
       });
     }
 
-    it('should schedule task, run alert and fire actions', async () => {
-      const reference = `create-test-1:${Spaces.space1.id}`;
+    async function waitForTestIndexDocs(source: string, reference: string, numDocs: number = 1) {
+      return await retry.try(async () => {
+        const searchResult = await searchTestIndexDocs(source, reference);
+        expect(searchResult.hits.total.value).to.eql(numDocs);
+        return searchResult.hits.hits;
+      });
+    }
+
+    async function createIndexRecordAction(spaceId: string) {
       const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
+        .post(`${getUrlPrefix(spaceId)}/api/action`)
         .set('kbn-xsrf', 'foo')
         .send({
           description: 'My action',
@@ -81,7 +84,13 @@ export default function alertTests({ getService }: FtrProviderContext) {
           },
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAction.id, 'action');
+      objectRemover.add(spaceId, createdAction.id, 'action');
+      return createdAction;
+    }
+
+    it('should schedule task, run alert and fire actions', async () => {
+      const reference = `create-test-1:${Spaces.space1.id}`;
+      const createdAction = await createIndexRecordAction(Spaces.space1.id);
 
       const response = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
@@ -111,7 +120,10 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
       expect(response.statusCode).to.eql(200);
       objectRemover.add(Spaces.space1.id, response.body.id, 'alert');
-      const alertTestRecord = await waitForTestIndexDoc('alert:test.always-firing', reference);
+      const alertTestRecord = (await waitForTestIndexDocs(
+        'alert:test.always-firing',
+        reference
+      ))[0];
       expect(alertTestRecord._source).to.eql({
         source: 'alert:test.always-firing',
         reference,
@@ -121,7 +133,10 @@ export default function alertTests({ getService }: FtrProviderContext) {
           reference,
         },
       });
-      const actionTestRecord = await waitForTestIndexDoc('action:test.index-record', reference);
+      const actionTestRecord = (await waitForTestIndexDocs(
+        'action:test.index-record',
+        reference
+      ))[0];
       expect(actionTestRecord._source).to.eql({
         config: {
           unencrypted: `This value shouldn't get encrypted`,
@@ -244,7 +259,10 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
       expect(response.statusCode).to.eql(200);
       objectRemover.add(Spaces.space1.id, response.body.id, 'alert');
-      const alertTestRecord = await waitForTestIndexDoc('alert:test.authorization', reference);
+      const alertTestRecord = (await waitForTestIndexDocs(
+        'alert:test.authorization',
+        reference
+      ))[0];
       expect(alertTestRecord._source.state).to.eql({
         callClusterSuccess: true,
         savedObjectsClientSuccess: false,
@@ -297,7 +315,10 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
       expect(response.statusCode).to.eql(200);
       objectRemover.add(Spaces.space1.id, response.body.id, 'alert');
-      const actionTestRecord = await waitForTestIndexDoc('action:test.authorization', reference);
+      const actionTestRecord = (await waitForTestIndexDocs(
+        'action:test.authorization',
+        reference
+      ))[0];
       expect(actionTestRecord._source.state).to.eql({
         callClusterSuccess: true,
         savedObjectsClientSuccess: false,

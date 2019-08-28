@@ -171,9 +171,9 @@ export default function(kibana: any) {
         async executor({ services, params, state }: AlertExecutorOptions) {
           let group = 'default';
 
-          if (params.groupsInSeriesToFire) {
+          if (params.groupsToFireInSeries) {
             const index = state.groupInSeriesIndex || 0;
-            group = params.groupsInSeriesToFire[index];
+            group = params.groupsToFireInSeries[index];
           }
 
           if (group) {

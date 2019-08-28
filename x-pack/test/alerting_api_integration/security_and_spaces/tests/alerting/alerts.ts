@@ -38,32 +38,55 @@ export default function alertTests({ getService }: FtrProviderContext) {
       await es.indices.delete({ index: authorizationIndex });
     });
 
-    async function waitForTestIndexDocs(source: string, reference: string, numDocs: number = 1) {
-      return await retry.try(async () => {
-        const searchResult = await es.search({
-          index: esTestIndexName,
-          body: {
-            query: {
-              bool: {
-                must: [
-                  {
-                    term: {
-                      source,
-                    },
+    async function searchTestIndexDocs(source: string, reference: string) {
+      return await es.search({
+        index: esTestIndexName,
+        body: {
+          query: {
+            bool: {
+              must: [
+                {
+                  term: {
+                    source,
                   },
-                  {
-                    term: {
-                      reference,
-                    },
+                },
+                {
+                  term: {
+                    reference,
                   },
-                ],
-              },
+                },
+              ],
             },
           },
-        });
+        },
+      });
+    }
+
+    async function waitForTestIndexDocs(source: string, reference: string, numDocs: number = 1) {
+      return await retry.try(async () => {
+        const searchResult = await searchTestIndexDocs(source, reference);
         expect(searchResult.hits.total.value).to.eql(numDocs);
         return searchResult.hits.hits;
       });
+    }
+
+    async function createIndexRecordAction(spaceId: string) {
+      const { body: createdAction } = await supertest
+        .post(`${getUrlPrefix(spaceId)}/api/action`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          description: 'My action',
+          actionTypeId: 'test.index-record',
+          config: {
+            unencrypted: `This value shouldn't get encrypted`,
+          },
+          secrets: {
+            encrypted: 'This value should be encrypted',
+          },
+        })
+        .expect(200);
+      objectRemover.add(spaceId, createdAction.id, 'action');
+      return createdAction;
     }
 
     for (const scenario of UserAtSpaceScenarios) {
@@ -71,22 +94,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
       describe(scenario.id, () => {
         it('should schedule task, run alert and fire actions when appropriate', async () => {
           const reference = `create-test-1:${user.username}`;
-          const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/action`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              description: 'My action',
-              actionTypeId: 'test.index-record',
-              config: {
-                unencrypted: `This value shouldn't get encrypted`,
-              },
-              secrets: {
-                encrypted: 'This value should be encrypted',
-              },
-            })
-            .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action');
-
+          const createdAction = await createIndexRecordAction(space.id);
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')
@@ -449,22 +457,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
         it('should throttle alerts when appropriate', async () => {
           const reference = `create-test-5:${user.username}`;
-          const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/action`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              description: 'My action',
-              actionTypeId: 'test.index-record',
-              config: {
-                unencrypted: `This value shouldn't get encrypted`,
-              },
-              secrets: {
-                encrypted: 'This value should be encrypted',
-              },
-            })
-            .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action');
-
+          const createdAction = await createIndexRecordAction(space.id);
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')
@@ -507,27 +500,10 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
               // Wait until alerts fired 3 times to ensure actions had a chance to fire twice
               await waitForTestIndexDocs('alert:test.always-firing', reference, 3);
-              const firedActionsResult = await es.search({
-                index: esTestIndexName,
-                body: {
-                  query: {
-                    bool: {
-                      must: [
-                        {
-                          term: {
-                            source: 'action:test.index-record',
-                          },
-                        },
-                        {
-                          term: {
-                            reference,
-                          },
-                        },
-                      ],
-                    },
-                  },
-                },
-              });
+              const firedActionsResult = await searchTestIndexDocs(
+                'action:test.index-record',
+                reference
+              );
               expect(firedActionsResult.hits.total.value).to.eql(1);
               break;
             default:
@@ -537,22 +513,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
         it('should not throttle when changing groups', async () => {
           const reference = `create-test-6:${user.username}`;
-          const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/action`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              description: 'My action',
-              actionTypeId: 'test.index-record',
-              config: {
-                unencrypted: `This value shouldn't get encrypted`,
-              },
-              secrets: {
-                encrypted: 'This value should be encrypted',
-              },
-            })
-            .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action');
-
+          const createdAction = await createIndexRecordAction(space.id);
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')
@@ -565,7 +526,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 alertTypeParams: {
                   index: esTestIndexName,
                   reference,
-                  groupsInSeriesToFire: ['default', 'other'],
+                  groupsToFireInSeries: ['default', 'other'],
                 },
                 actions: [
                   {
@@ -605,27 +566,10 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
               // Wait until alerts fired 3 times to ensure actions had a chance to fire twice
               await waitForTestIndexDocs('alert:test.always-firing', reference, 3);
-              const firedActionsResult = await es.search({
-                index: esTestIndexName,
-                body: {
-                  query: {
-                    bool: {
-                      must: [
-                        {
-                          term: {
-                            source: 'action:test.index-record',
-                          },
-                        },
-                        {
-                          term: {
-                            reference,
-                          },
-                        },
-                      ],
-                    },
-                  },
-                },
-              });
+              const firedActionsResult = await searchTestIndexDocs(
+                'action:test.index-record',
+                reference
+              );
               expect(firedActionsResult.hits.total.value).to.eql(2);
               const messages: string[] = firedActionsResult.hits.hits.map(
                 (hit: { _source: { params: { message: string } } }) => hit._source.params.message
@@ -639,22 +583,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
         it('should reset throttle window when not firing', async () => {
           const reference = `create-test-7:${user.username}`;
-          const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/action`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              description: 'My action',
-              actionTypeId: 'test.index-record',
-              config: {
-                unencrypted: `This value shouldn't get encrypted`,
-              },
-              secrets: {
-                encrypted: 'This value should be encrypted',
-              },
-            })
-            .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action');
-
+          const createdAction = await createIndexRecordAction(space.id);
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')
@@ -667,7 +596,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 alertTypeParams: {
                   index: esTestIndexName,
                   reference,
-                  groupsInSeriesToFire: ['default', null, 'default'],
+                  groupsToFireInSeries: ['default', null, 'default'],
                 },
                 actions: [
                   {
@@ -698,27 +627,10 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
               // Wait until alerts executed 4 times to ensure actions had a chance to fire twice
               await waitForTestIndexDocs('alert:test.always-firing', reference, 4);
-              const firedActionsResult = await es.search({
-                index: esTestIndexName,
-                body: {
-                  query: {
-                    bool: {
-                      must: [
-                        {
-                          term: {
-                            source: 'action:test.index-record',
-                          },
-                        },
-                        {
-                          term: {
-                            reference,
-                          },
-                        },
-                      ],
-                    },
-                  },
-                },
-              });
+              const firedActionsResult = await searchTestIndexDocs(
+                'action:test.index-record',
+                reference
+              );
               expect(firedActionsResult.hits.total.value).to.eql(2);
               break;
             default:
