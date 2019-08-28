@@ -15,19 +15,11 @@ import {
   renderComponent,
 } from 'recompose';
 import { fromExpression } from '@kbn/interpreter/common';
-import { Storage } from 'ui/storage';
 import { getSelectedPage, getSelectedElement } from '../../state/selectors/workpad';
 import { setExpression, flushContext } from '../../state/actions/elements';
 import { getFunctionDefinitions } from '../../lib/function_definitions';
-import { getWindow } from '../../lib/get_window';
-import {
-  LOCALSTORAGE_AUTOCOMPLETE_ENABLED,
-  LOCALSTORAGE_EXPRESSION_EDITOR_FONT_SIZE,
-} from '../../../common/lib/constants';
 import { ElementNotSelected } from './element_not_selected';
 import { Expression as Component } from './expression';
-
-const storage = new Storage(getWindow().localStorage);
 
 const mapStateToProps = state => ({
   pageId: getSelectedPage(state),
@@ -88,20 +80,8 @@ export const Expression = compose(
     expression,
     dirty: false,
   })),
-  withState('isAutocompleteEnabled', 'setIsAutocompleteEnabled', () => {
-    const setting = storage.get(LOCALSTORAGE_AUTOCOMPLETE_ENABLED);
-    return setting === null ? true : setting;
-  }),
-  withState('fontSize', 'setFontSize', () => {
-    const fontSize = storage.get(LOCALSTORAGE_EXPRESSION_EDITOR_FONT_SIZE);
-    return fontSize === null ? 16 : fontSize;
-  }),
   withState('isCompact', 'setCompact', true),
   withHandlers({
-    toggleAutocompleteEnabled: ({ isAutocompleteEnabled, setIsAutocompleteEnabled }) => () => {
-      storage.set(LOCALSTORAGE_AUTOCOMPLETE_ENABLED, !isAutocompleteEnabled);
-      setIsAutocompleteEnabled(!isAutocompleteEnabled);
-    },
     toggleCompactView: ({ isCompact, setCompact }) => () => {
       setCompact(!isCompact);
     },
@@ -117,10 +97,6 @@ export const Expression = compose(
         dirty: false,
       }));
       setExpression(exp);
-    },
-    setFontSize: ({ setFontSize }) => size => {
-      storage.set(LOCALSTORAGE_EXPRESSION_EDITOR_FONT_SIZE, size);
-      setFontSize(size);
     },
   }),
   expressionLifecycle,

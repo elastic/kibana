@@ -6,7 +6,6 @@
 
 import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
@@ -25,7 +24,6 @@ interface Props {
   columnHeaders: ColumnHeader[];
   data: DetailItem[];
   id: string;
-  isLoading: boolean;
   view: View;
   onUpdateColumns: OnUpdateColumns;
   onViewSelected: (selected: View) => void;
@@ -40,13 +38,12 @@ const Details = styled.div`
 
 Details.displayName = 'Details';
 
-export const EventDetails = pure<Props>(
+export const EventDetails = React.memo<Props>(
   ({
     browserFields,
     columnHeaders,
     data,
     id,
-    isLoading,
     view,
     onUpdateColumns,
     onViewSelected,
@@ -63,7 +60,6 @@ export const EventDetails = pure<Props>(
             columnHeaders={columnHeaders}
             data={data}
             eventId={id}
-            isLoading={isLoading}
             onUpdateColumns={onUpdateColumns}
             timelineId={timelineId}
             toggleColumn={toggleColumn}

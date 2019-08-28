@@ -19,7 +19,7 @@
 
 import { CLIEngine } from 'eslint';
 
-import { createFailError } from '../run';
+import { createFailError } from '@kbn/dev-utils';
 import { REPO_ROOT } from '../constants';
 
 /**

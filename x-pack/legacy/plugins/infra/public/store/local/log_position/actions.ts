@@ -24,6 +24,7 @@ export interface ReportVisiblePositionsPayload {
   endKey: TimeKey | null;
   middleKey: TimeKey | null;
   startKey: TimeKey | null;
+  fromScroll: boolean;
 }
 
 export const reportVisiblePositions = actionCreator<ReportVisiblePositionsPayload>(

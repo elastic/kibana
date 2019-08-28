@@ -35,9 +35,7 @@ const executeSingleAction = async (action: Action, actionContext: ActionContext)
 export const executeTriggerActions: EmbeddableApiPure['executeTriggerActions'] = ({
   api,
 }) => async (triggerId, actionContext) => {
-  const actions = await api.getTriggerCompatibleActions!(triggerId, {
-    embeddable: actionContext.embeddable,
-  });
+  const actions = await api.getTriggerCompatibleActions!(triggerId, actionContext);
 
   if (!actions.length) {
     throw new Error(

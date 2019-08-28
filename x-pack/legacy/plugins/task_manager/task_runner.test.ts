@@ -9,6 +9,7 @@ import sinon from 'sinon';
 import { minutesFromNow } from './lib/intervals';
 import { ConcreteTaskInstance } from './task';
 import { TaskManagerRunner } from './task_runner';
+import { mockLogger } from './test_utils';
 
 let fakeTimer: sinon.SinonFakeTimers;
 
@@ -201,7 +202,7 @@ describe('TaskManagerRunner', () => {
     await promise;
 
     expect(wasCancelled).toBeTruthy();
-    sinon.assert.neverCalledWithMatch(logger.warning, /not cancellable/);
+    sinon.assert.neverCalledWithMatch(logger.warn, /not cancellable/);
   });
 
   test('warns if cancel is called on a non-cancellable task', async () => {
@@ -219,7 +220,7 @@ describe('TaskManagerRunner', () => {
     await runner.cancel();
     await promise;
 
-    sinon.assert.calledWithMatch(logger.warning, /not cancellable/);
+    sinon.assert.calledWithMatch(logger.warn, /not cancellable/);
   });
 
   test('sets startedAt, status, attempts and retryAt when claiming a task', async () => {
@@ -592,12 +593,7 @@ describe('TaskManagerRunner', () => {
   function testOpts(opts: TestOpts) {
     const callCluster = sinon.stub();
     const createTaskRunner = sinon.stub();
-    const logger = {
-      error: sinon.stub(),
-      debug: sinon.stub(),
-      info: sinon.stub(),
-      warning: sinon.stub(),
-    };
+    const logger = mockLogger();
     const store = {
       update: sinon.stub(),
       remove: sinon.stub(),
@@ -658,9 +654,9 @@ describe('TaskManagerRunner', () => {
     await runner.run();
 
     if (shouldBeValid) {
-      sinon.assert.notCalled(logger.warning);
+      sinon.assert.notCalled(logger.warn);
     } else {
-      sinon.assert.calledWith(logger.warning, sinon.match(/invalid task result/i));
+      sinon.assert.calledWith(logger.warn, sinon.match(/invalid task result/i));
     }
   }
 

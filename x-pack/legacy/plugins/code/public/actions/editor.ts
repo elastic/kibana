@@ -8,17 +8,17 @@ import { Range } from 'monaco-editor';
 import { createAction } from 'redux-actions';
 import { Hover, Position, TextDocumentPositionParams } from 'vscode-languageserver';
 
-export interface ReferenceResults {
-  repos: GroupedRepoReferences[];
+export interface PanelResults {
+  repos: GroupedRepoResults[];
   title: string;
 }
 
-export interface GroupedRepoReferences {
+export interface GroupedRepoResults {
   repo: string;
-  files: GroupedFileReferences[];
+  files: GroupedFileResults[];
 }
 
-export interface GroupedFileReferences {
+export interface GroupedFileResults {
   uri: string;
   file: string;
   language: string;
@@ -30,8 +30,12 @@ export interface GroupedFileReferences {
 }
 
 export const findReferences = createAction<TextDocumentPositionParams>('FIND REFERENCES');
-export const findReferencesSuccess = createAction<ReferenceResults>('FIND REFERENCES SUCCESS');
+export const findReferencesSuccess = createAction<PanelResults>('FIND REFERENCES SUCCESS');
 export const findReferencesFailed = createAction<Error>('FIND REFERENCES ERROR');
-export const closeReferences = createAction<boolean>('CLOSE REFERENCES');
+export const closePanel = createAction<boolean>('CLOSE PANEL');
 export const hoverResult = createAction<Hover>('HOVER RESULT');
 export const revealPosition = createAction<Position | undefined>('REVEAL POSITION');
+
+export const findDefinitions = createAction<TextDocumentPositionParams>('FIND DEFINITIONS');
+export const findDefinitionsSuccess = createAction<PanelResults>('FIND DEFINITIONS SUCCESS');
+export const findDefinitionsFailed = createAction<Error>('FIND DEFINITIONS ERROR');

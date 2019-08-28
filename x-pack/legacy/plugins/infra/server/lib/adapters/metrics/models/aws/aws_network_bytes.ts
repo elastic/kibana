@@ -11,6 +11,8 @@ import {
 } from '../../adapter_types';
 import { InfraMetric } from '../../../../../graphql/types';
 
+// see discussion in: https://github.com/elastic/kibana/issues/42687
+
 export const awsNetworkBytes: InfraMetricModelCreator = (
   timeField,
   indexPattern,
@@ -30,14 +32,24 @@ export const awsNetworkBytes: InfraMetricModelCreator = (
       metrics: [
         {
           field: 'aws.ec2.network.out.bytes',
-          id: 'max-net-out',
-          type: InfraMetricModelMetricType.max,
+          id: 'sum-net-out',
+          type: InfraMetricModelMetricType.sum,
         },
         {
-          id: 'by-second-max-net-out',
-          type: InfraMetricModelMetricType.calculation,
-          variables: [{ id: 'var-max', name: 'max', field: 'max-net-out' }],
-          script: 'params.max / 300', // TODO: https://github.com/elastic/kibana/issues/42687
+          id: 'csum-sum-net-out',
+          field: 'sum-net-out',
+          type: InfraMetricModelMetricType.cumulative_sum,
+        },
+        {
+          id: 'deriv-csum-sum-net-out',
+          unit: '1s',
+          type: InfraMetricModelMetricType.derivative,
+          field: 'csum-sum-net-out',
+        },
+        {
+          id: 'posonly-deriv-csum-sum-net-out',
+          field: 'deriv-csum-sum-net-out',
+          type: InfraMetricModelMetricType.positive_only,
         },
       ],
       split_mode: 'everything',
@@ -47,14 +59,30 @@ export const awsNetworkBytes: InfraMetricModelCreator = (
       metrics: [
         {
           field: 'aws.ec2.network.in.bytes',
-          id: 'max-net-in',
-          type: InfraMetricModelMetricType.max,
+          id: 'sum-net-in',
+          type: InfraMetricModelMetricType.sum,
         },
         {
-          id: 'inverted-by-second-max-net-in',
+          id: 'csum-sum-net-in',
+          field: 'sum-net-in',
+          type: InfraMetricModelMetricType.cumulative_sum,
+        },
+        {
+          id: 'deriv-csum-sum-net-in',
+          unit: '1s',
+          type: InfraMetricModelMetricType.derivative,
+          field: 'csum-sum-net-in',
+        },
+        {
+          id: 'posonly-deriv-csum-sum-net-in',
+          field: 'deriv-csum-sum-net-in',
+          type: InfraMetricModelMetricType.positive_only,
+        },
+        {
+          id: 'inverted-posonly-deriv-csum-sum-net-in',
           type: InfraMetricModelMetricType.calculation,
-          variables: [{ id: 'var-max', name: 'max', field: 'max-net-in' }],
-          script: 'params.max / -300', // TODO: https://github.com/elastic/kibana/issues/42687
+          variables: [{ id: 'var-rate', name: 'rate', field: 'posonly-deriv-csum-sum-net-in' }],
+          script: 'params.rate * -1',
         },
       ],
       split_mode: 'everything',

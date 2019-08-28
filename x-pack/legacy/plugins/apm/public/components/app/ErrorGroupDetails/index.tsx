@@ -20,10 +20,6 @@ import styled from 'styled-components';
 import { idx } from '@kbn/elastic-idx';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useFetcher } from '../../../hooks/useFetcher';
-import {
-  loadErrorDistribution,
-  loadErrorGroupDetails
-} from '../../../services/rest/apm/error_groups';
 import { fontFamilyCode, fontSizes, px, units } from '../../../style/variables';
 import { ApmHeader } from '../../shared/ApmHeader';
 import { DetailView } from './DetailView';
@@ -31,6 +27,7 @@ import { ErrorDistribution } from './Distribution';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useTrackPageview } from '../../../../../infra/public';
+import { callApmApi } from '../../../services/rest/callApmApi';
 
 const Titles = styled.div`
   margin-bottom: ${px(units.plus)};
@@ -68,24 +65,38 @@ export function ErrorGroupDetails() {
 
   const { data: errorGroupData } = useFetcher(() => {
     if (serviceName && start && end && errorGroupId) {
-      return loadErrorGroupDetails({
-        serviceName,
-        start,
-        end,
-        errorGroupId,
-        uiFilters
+      return callApmApi({
+        pathname: '/api/apm/services/{serviceName}/errors/{groupId}',
+        params: {
+          path: {
+            serviceName,
+            groupId: errorGroupId
+          },
+          query: {
+            start,
+            end,
+            uiFilters: JSON.stringify(uiFilters)
+          }
+        }
       });
     }
   }, [serviceName, start, end, errorGroupId, uiFilters]);
 
   const { data: errorDistributionData } = useFetcher(() => {
     if (serviceName && start && end && errorGroupId) {
-      return loadErrorDistribution({
-        serviceName,
-        start,
-        end,
-        errorGroupId,
-        uiFilters
+      return callApmApi({
+        pathname: '/api/apm/services/{serviceName}/errors/distribution',
+        params: {
+          path: {
+            serviceName
+          },
+          query: {
+            start,
+            end,
+            groupId: errorGroupId,
+            uiFilters: JSON.stringify(uiFilters)
+          }
+        }
       });
     }
   }, [serviceName, start, end, errorGroupId, uiFilters]);

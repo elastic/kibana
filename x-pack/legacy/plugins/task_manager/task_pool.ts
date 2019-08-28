@@ -9,7 +9,7 @@
  * tasks at once in a given Kibana instance.
  */
 
-import { Logger } from './lib/logger';
+import { Logger } from './types';
 import { TaskRunner } from './task_runner';
 
 interface Opts {
@@ -66,6 +66,13 @@ export class TaskPool {
     return this.attemptToRun(tasks);
   };
 
+  public cancelRunningTasks() {
+    this.logger.debug(`Cancelling running tasks.`);
+    for (const task of this.running) {
+      this.cancelTask(task);
+    }
+  }
+
   private async attemptToRun(tasks: TaskRunner[]) {
     for (const task of tasks) {
       if (this.availableWorkers < task.numWorkers) {
@@ -77,7 +84,7 @@ export class TaskPool {
         task
           .run()
           .catch(err => {
-            this.logger.warning(`Task ${task} failed in attempt to run: ${err.message}`);
+            this.logger.warn(`Task ${task} failed in attempt to run: ${err.message}`);
           })
           .then(() => this.running.delete(task));
       }
@@ -89,6 +96,7 @@ export class TaskPool {
   private cancelExpiredTasks() {
     for (const task of this.running) {
       if (task.isExpired) {
+        this.logger.debug(`Cancelling expired task ${task}.`);
         this.cancelTask(task);
       }
     }
@@ -96,7 +104,7 @@ export class TaskPool {
 
   private async cancelTask(task: TaskRunner) {
     try {
-      this.logger.debug(`Cancelling expired task ${task}.`);
+      this.logger.debug(`Cancelling task ${task}.`);
       this.running.delete(task);
       await task.cancel();
     } catch (err) {

@@ -14,7 +14,7 @@ import {
   areLayersLoaded,
   getRefreshConfig,
   getMapInitError,
-  getUniqueIndexPatternIds
+  getQueryableUniqueIndexPatternIds
 } from '../../selectors/map_selectors';
 
 function mapStateToProps(state = {}) {
@@ -27,7 +27,7 @@ function mapStateToProps(state = {}) {
     isFullScreen: getIsFullScreen(state),
     refreshConfig: getRefreshConfig(state),
     mapInitError: getMapInitError(state),
-    uniqueIndexPatternIds: getUniqueIndexPatternIds(state),
+    indexPatternIds: getQueryableUniqueIndexPatternIds(state),
   };
 }
 

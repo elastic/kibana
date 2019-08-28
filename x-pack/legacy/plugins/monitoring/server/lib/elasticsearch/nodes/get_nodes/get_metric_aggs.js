@@ -6,6 +6,7 @@
 
 import { metrics } from '../../../metrics';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../../common/constants';
+import { convertMetricNames } from '../../convert_metric_names';
 
 /*
  * Create the DSL for date histogram aggregations based on an array of metric names
@@ -16,8 +17,8 @@ import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../../common/constants';
  * @param {Number} bucketSize: Bucket size in seconds for date histogram interval
  * @return {Object} Aggregation DSL
  */
-export function getMetricAggs(listingMetrics, bucketSize) {
-  const aggItems = {};
+export function getMetricAggs(listingMetrics) {
+  let aggItems = {};
 
   listingMetrics.forEach(metricName => {
     const metric = metrics[metricName];
@@ -43,13 +44,9 @@ export function getMetricAggs(listingMetrics, bucketSize) {
       };
     }
 
-    aggItems[metricName] = {
-      date_histogram: {
-        field: 'timestamp',
-        min_doc_count: 1,
-        fixed_interval: bucketSize + 's'
-      },
-      aggs: metric.aggs || metricAgg
+    aggItems = {
+      ...aggItems,
+      ...convertMetricNames(metricName, metric.aggs || metricAgg)
     };
   });
 

@@ -95,7 +95,7 @@ export const MlPopover = React.memo(() => {
   const [filterQuery, setFilterQuery] = useState('');
   const [, dispatchToaster] = useStateToaster();
 
-  const [, configuredIndexPattern] = useIndexPatterns(refreshToggle);
+  const [, configuredIndexPatterns] = useIndexPatterns(refreshToggle);
   const config = useContext(KibanaConfigContext);
   const capabilities = useContext(MlCapabilitiesContext);
   const headers = { 'kbn-version': config.kbnVersion };
@@ -136,7 +136,7 @@ export const MlPopover = React.memo(() => {
   const configTemplatesToInstall = getConfigTemplatesToInstall(
     configTemplates,
     installedJobIds,
-    configuredIndexPattern || ''
+    configuredIndexPatterns || []
   );
 
   // Filter installed job to show all 'siem' group jobs or just embedded
@@ -152,7 +152,7 @@ export const MlPopover = React.memo(() => {
   useEffect(() => {
     if (
       jobSummaryData != null &&
-      configuredIndexPattern !== '' &&
+      configuredIndexPatterns.length > 0 &&
       configTemplatesToInstall.length > 0
     ) {
       const setupJobs = async () => {
@@ -178,7 +178,7 @@ export const MlPopover = React.memo(() => {
       };
       setupJobs();
     }
-  }, [jobSummaryData, configuredIndexPattern]);
+  }, [jobSummaryData, configuredIndexPatterns]);
 
   if (!capabilities.isPlatinumOrTrialLicense) {
     // If the user does not have platinum show upgrade UI

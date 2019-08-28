@@ -56,6 +56,7 @@ const createSetupContractMock = () => {
     registerOnPreAuth: jest.fn(),
     registerAuth: jest.fn(),
     registerOnPostAuth: jest.fn(),
+    registerRouteHandlerContext: jest.fn(),
     createRouter: jest.fn(),
     basePath: createBasePathMock(),
     auth: {

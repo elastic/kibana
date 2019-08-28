@@ -24,7 +24,7 @@ export const IntegrationLink = ({
   tooltipContent,
 }: IntegrationLinkProps) =>
   typeof href === 'undefined' ? (
-    <EuiFlexGroup>
+    <EuiFlexGroup responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiToolTip
           content={i18n.translate('xpack.uptime.integrationLink.missingDataMessage', {
@@ -40,7 +40,7 @@ export const IntegrationLink = ({
     </EuiFlexGroup>
   ) : (
     <EuiLink aria-label={ariaLabel} href={href}>
-      <EuiFlexGroup>
+      <EuiFlexGroup responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiToolTip content={tooltipContent} position="top">
             <EuiIcon type={iconType} />

@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LevelLogger as Logger } from '../../../../server/lib/level_logger';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers/chromium/driver';
+import { LevelLogger } from '../../../../server/lib';
 import { Screenshot, ElementsPositionAndAttribute } from './types';
 
-const getAsyncDurationLogger = (logger: Logger) => {
+const getAsyncDurationLogger = (logger: LevelLogger) => {
   return async (description: string, promise: Promise<any>) => {
     const start = Date.now();
     const result = await promise;
@@ -22,11 +22,11 @@ export const getScreenshots = async ({
   elementsPositionAndAttributes,
   logger,
 }: {
-  logger: Logger;
+  logger: LevelLogger;
   browser: HeadlessBrowser;
   elementsPositionAndAttributes: ElementsPositionAndAttribute[];
 }): Promise<Screenshot[]> => {
-  logger.debug(`taking screenshots`);
+  logger.info(`taking screenshots`);
 
   const asyncDurationLogger = getAsyncDurationLogger(logger);
   const screenshots: Screenshot[] = [];
@@ -45,7 +45,7 @@ export const getScreenshots = async ({
     });
   }
 
-  logger.debug(`screenshots taken: ${screenshots.length}`);
+  logger.info(`screenshots taken: ${screenshots.length}`);
 
   return screenshots;
 };

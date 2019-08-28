@@ -16,6 +16,6 @@
       "_cat/aliases",
       "_cat/aliases/{name}"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cat-alias.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cat-alias.html"
   }
 }

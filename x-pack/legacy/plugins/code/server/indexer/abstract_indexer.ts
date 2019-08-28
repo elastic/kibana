@@ -7,7 +7,14 @@
 import moment from 'moment';
 
 import { Indexer, ProgressReporter } from '.';
-import { IndexProgress, IndexRequest, IndexStats, IndexStatsKey, RepositoryUri } from '../../model';
+import {
+  IndexProgress,
+  IndexRequest,
+  IndexStats,
+  IndexStatsKey,
+  IndexerType,
+  RepositoryUri,
+} from '../../model';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
 import { aggregateIndexStats } from '../utils/index_stats_aggregator';
@@ -15,7 +22,7 @@ import { IndexCreationRequest } from './index_creation_request';
 import { IndexCreator } from './index_creator';
 
 export abstract class AbstractIndexer implements Indexer {
-  protected type: string = 'abstract';
+  public type: IndexerType = IndexerType.UNKNOWN;
   protected cancelled: boolean = false;
   protected indexCreator: IndexCreator;
   protected INDEXER_PROGRESS_UPDATE_INTERVAL_MS = 1000;
@@ -24,8 +31,9 @@ export abstract class AbstractIndexer implements Indexer {
     protected readonly repoUri: RepositoryUri,
     protected readonly revision: string,
     protected readonly client: EsClient,
-    protected readonly log: Logger
+    protected log: Logger
   ) {
+    this.log = log.addTags(['indexer', this.type]);
     this.indexCreator = new IndexCreator(client);
   }
 
@@ -49,7 +57,7 @@ export abstract class AbstractIndexer implements Indexer {
 
     // Prepare all the index requests
     let totalCount = 0;
-    let prevTimestamp = moment();
+    let prevTimestamp = moment(0);
     let successCount = 0;
     let failCount = 0;
     const statsBuffer: IndexStats[] = [];
@@ -105,7 +113,11 @@ export abstract class AbstractIndexer implements Indexer {
           percentage: Math.floor((100 * (successCount + failCount)) / totalCount),
           checkpoint: req,
         };
-        if (moment().diff(prevTimestamp) > this.INDEXER_PROGRESS_UPDATE_INTERVAL_MS) {
+        if (
+          moment().diff(prevTimestamp) > this.INDEXER_PROGRESS_UPDATE_INTERVAL_MS ||
+          // Ensure that the progress reporter always executed at the end of the job.
+          successCount + failCount === totalCount
+        ) {
           progressReporter(progress);
           prevTimestamp = moment();
         }
