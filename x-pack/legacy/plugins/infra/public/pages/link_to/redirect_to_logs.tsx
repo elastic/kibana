@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { injectI18n } from '@kbn/i18n/react';
 import compose from 'lodash/fp/compose';
 import React from 'react';
 import { match as RouteMatch, Redirect, RouteComponentProps } from 'react-router-dom';
@@ -20,17 +20,16 @@ interface RedirectToLogsProps extends RedirectToLogsType {
   match: RouteMatch<{
     sourceId?: string;
   }>;
-  intl: InjectedIntl;
 }
 
 export const RedirectToLogs = injectI18n(({ location, match }: RedirectToLogsProps) => {
   const sourceId = match.params.sourceId || 'default';
-
   const filter = getFilterFromLocation(location);
   const searchString = compose(
     replaceLogFilterInQueryString(filter),
     replaceLogPositionInQueryString(getTimeFromLocation(location)),
     replaceSourceIdInQueryString(sourceId)
   )('');
-  return <Redirect to={`/logs?${searchString}`} />;
+
+  return <Redirect to={`/logs/stream?${searchString}`} />;
 });
