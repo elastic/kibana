@@ -1,0 +1,10 @@
+{
+  "ml.put_filter": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_ml/filters/{filter_id}"
+    ]
+  }
+}

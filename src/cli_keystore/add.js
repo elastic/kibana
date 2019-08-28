@@ -18,8 +18,8 @@
  */
 
 import Logger from '../cli_plugin/lib/logger';
-import { confirm, question } from '../server/utils';
-import { createPromiseFromStreams, createConcatStream } from '../utils';
+import { confirm, question } from '../legacy/server/utils';
+import { createPromiseFromStreams, createConcatStream } from '../legacy/utils';
 
 /**
  * @param {Keystore} keystore

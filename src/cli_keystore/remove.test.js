@@ -17,30 +17,26 @@
  * under the License.
  */
 
-import sinon from 'sinon';
-import mockFs from 'mock-fs';
+const mockKeystoreData = '1:IxR0geiUTMJp8ueHDkqeUJ0I9eEw4NJPXIJi22UDyfGfJSy4mH'
+  + 'BBuGPkkAix/x/YFfIxo4tiKGdJ2oVTtU8LgKDkVoGdL+z7ylY4n3myatt6osqhI4lzJ9M'
+  + 'Ry21UcAJki2qFUTj4TYuvhta3LId+RM5UX/dJ2468hQ==';
 
-import { Keystore } from '../server/keystore';
+jest.mock('fs', () => ({
+  readFileSync: jest.fn().mockImplementation(() => JSON.stringify(mockKeystoreData)),
+  existsSync: jest.fn().mockImplementation(() => true),
+  writeFileSync: jest.fn()
+}));
+
+import sinon from 'sinon';
+
+import { Keystore } from '../legacy/server/keystore';
 import { remove } from './remove';
 
 describe('Kibana keystore', () => {
   describe('remove', () => {
     const sandbox = sinon.createSandbox();
 
-    const keystoreData = '1:IxR0geiUTMJp8ueHDkqeUJ0I9eEw4NJPXIJi22UDyfGfJSy4mH'
-      + 'BBuGPkkAix/x/YFfIxo4tiKGdJ2oVTtU8LgKDkVoGdL+z7ylY4n3myatt6osqhI4lzJ9M'
-      + 'Ry21UcAJki2qFUTj4TYuvhta3LId+RM5UX/dJ2468hQ==';
-
-    beforeEach(() => {
-      mockFs({
-        '/data': {
-          'test.keystore': JSON.stringify(keystoreData),
-        }
-      });
-    });
-
     afterEach(() => {
-      mockFs.restore();
       sandbox.restore();
     });
 
@@ -60,5 +56,9 @@ describe('Kibana keystore', () => {
 
       sinon.assert.calledOnce(keystore.save);
     });
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
   });
 });

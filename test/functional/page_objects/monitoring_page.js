@@ -18,35 +18,17 @@
  */
 
 export function MonitoringPageProvider({ getService }) {
-  const testSubjects = getService('testSubjects');
-
-  const getRemote = (timeout) =>
-    getService('remote')
-      .setFindTimeout(
-        timeout || getService('config').get('timeouts.find')
-      );
+  const find = getService('find');
 
   class MonitoringPage {
-    getWelcome() {
-      return getRemote()
-        .findDisplayedByCssSelector('render-directive')
-        .getVisibleText();
+    async getWelcome() {
+      const el = await find.displayedByCssSelector('render-directive');
+      return await el.getVisibleText();
     }
 
-    dismissWelcome() {
-      return testSubjects.click('notifierDismissButton');
+    async clickOptOut() {
+      return find.clickByLinkText('Opt out here');
     }
-
-    getToasterContents() {
-      return getRemote()
-        .findByCssSelector('div.toaster-container')
-        .getVisibleText();
-    }
-
-    clickOptOut() {
-      return getRemote().findByLinkText('Opt out here').click();
-    }
-
   }
 
   return new MonitoringPage();

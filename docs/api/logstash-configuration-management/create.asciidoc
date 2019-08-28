@@ -7,6 +7,8 @@ experimental[This functionality is *experimental* and may be changed or removed 
 The Create Pipeline API enables you to create a centrally-managed Logstash pipeline. You can also use
 it to update an existing pipeline.
 
+Note: You cannot access this endpoint via the Console in Kibana.
+
 [float]
 ==== Request
 
@@ -41,7 +43,7 @@ PUT api/logstash/pipeline/hello-world
 {
   "pipeline": "input { stdin {} } output { stdout {} }",
   "settings": {
-    "queue.type": "persistent"
+    "queue.type": "persisted"
   }
 }
 --------------------------------------------------

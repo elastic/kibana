@@ -1,0 +1,38 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StatementList renders nested elements as expected 1`] = `
+<ul
+  className="monPipelineViewer__list"
+>
+  <Statement
+    collapse={[Function]}
+    element={
+      Object {
+        "depth": 0,
+        "id": "mutateIf",
+        "parentId": null,
+        "statement": Object {},
+      }
+    }
+    expand={[Function]}
+    isCollapsed={false}
+    key="mutateIf"
+    onShowVertexDetails={[MockFunction]}
+  />
+  <Statement
+    collapse={[Function]}
+    element={
+      Object {
+        "depth": 1,
+        "id": "mutate",
+        "parentId": "mutateIf",
+        "statement": Object {},
+      }
+    }
+    expand={[Function]}
+    isCollapsed={false}
+    key="mutate"
+    onShowVertexDetails={[MockFunction]}
+  />
+</ul>
+`;

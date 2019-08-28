@@ -1,0 +1,10 @@
+{
+  "ml.info": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_ml/info"
+    ]
+  }
+}

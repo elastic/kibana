@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import os from 'os';
+
 import { ToolingLog } from '@kbn/dev-utils';
 import chalk from 'chalk';
 import execa from 'execa';
@@ -38,7 +40,9 @@ export function execInProjects(
     projects.map(project => ({
       task: () =>
         execa(cmd, getArgs(project), {
-          cwd: project.directory,
+          // execute in the current working directory so that relative paths in errors
+          // are relative from the right location
+          cwd: process.cwd(),
           env: chalk.enabled ? { FORCE_COLOR: 'true' } : {},
           stdio: ['ignore', 'pipe', 'pipe'],
         }).catch(error => {
@@ -47,7 +51,7 @@ export function execInProjects(
       title: project.name,
     })),
     {
-      concurrent: true,
+      concurrent: Math.min(4, Math.round((os.cpus() || []).length / 2) || 1) || false,
       exitOnError: false,
     }
   );
@@ -64,7 +68,9 @@ export function execInProjects(
     for (const e of error.errors) {
       if (e instanceof ProjectFailure) {
         log.write('');
-        log.error(`${e.project.name} failed\n${e.error.stdout}`);
+        // stdout contains errors from tsc
+        // stderr conatins tsc crash report
+        log.error(`${e.project.name} failed\n${e.error.stdout || e.error.stderr}`);
       } else {
         log.error(e);
       }

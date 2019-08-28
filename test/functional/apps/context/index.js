@@ -18,15 +18,19 @@
  */
 
 export default function ({ getService, getPageObjects, loadTestFile }) {
-  const remote = getService('remote');
+  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common']);
+  const kibanaServer = getService('kibanaServer');
 
   describe('context app', function () {
+    this.tags('ciGroup1');
+
     before(async function () {
-      await remote.setWindowSize(1200, 800);
+      await browser.setWindowSize(1200, 800);
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('visualize');
+      await kibanaServer.uiSettings.replace({ 'defaultIndex': 'logstash-*' });
       await PageObjects.common.navigateToApp('discover');
     });
 
@@ -37,6 +41,7 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
     loadTestFile(require.resolve('./_discover_navigation'));
     loadTestFile(require.resolve('./_filters'));
     loadTestFile(require.resolve('./_size'));
+    loadTestFile(require.resolve('./_date_nanos'));
   });
 
 }

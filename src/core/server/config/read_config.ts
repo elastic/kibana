@@ -37,7 +37,7 @@ function replaceEnvVarRefs(val: string) {
 }
 
 function merge(target: Record<string, any>, value: any, key?: string) {
-  if (isPlainObject(value) || Array.isArray(value)) {
+  if ((isPlainObject(value) || Array.isArray(value)) && Object.keys(value).length > 0) {
     for (const [subKey, subVal] of Object.entries(value)) {
       merge(target, subVal, key ? `${key}.${subKey}` : subKey);
     }
@@ -48,7 +48,8 @@ function merge(target: Record<string, any>, value: any, key?: string) {
   return target;
 }
 
-export const getConfigFromFiles = (configFiles: ReadonlyArray<string>) => {
+/** @internal */
+export const getConfigFromFiles = (configFiles: readonly string[]) => {
   let mergedYaml = {};
 
   for (const configFile of configFiles) {

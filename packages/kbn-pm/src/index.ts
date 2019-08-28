@@ -19,4 +19,7 @@
 
 export { run } from './cli';
 export { buildProductionProjects, prepareExternalProjectDependencies } from './production';
-export { transformDependencies } from './utils/package_json';
+export { getProjects } from './utils/projects';
+export { Project } from './utils/project';
+export { copyWorkspacePackages } from './utils/workspaces';
+export { getProjectPaths } from './config';

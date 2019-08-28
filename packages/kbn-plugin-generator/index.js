@@ -42,7 +42,7 @@ exports.run = function run(argv) {
       dedent(chalk`
         {dim usage:} node scripts/generate-plugin {bold [name]}
 
-        generate a fresh Kibana plugin in the ../kibana-extra/ directory
+        generate a fresh Kibana plugin in the plugins/ directory
       `) + '\n'
     );
     process.exit(1);
@@ -50,8 +50,8 @@ exports.run = function run(argv) {
 
   const name = options._[0];
   const template = resolve(__dirname, './sao_template');
-  const kibanaExtra = resolve(__dirname, '../../../kibana-extra');
-  const targetPath = resolve(kibanaExtra, snakeCase(name));
+  const kibanaPlugins = resolve(__dirname, '../../plugins');
+  const targetPath = resolve(kibanaPlugins, snakeCase(name));
 
   sao({
     template: template,

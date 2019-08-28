@@ -1,21 +1,29 @@
 [role="xpack"]
 [[apm-settings-kb]]
-=== APM Settings in Kibana
+=== APM settings in Kibana
 ++++
-<titleabbrev>APM Settings</titleabbrev>
+<titleabbrev>APM settings</titleabbrev>
 ++++
 
 You do not need to configure any settings to use APM. It is enabled by default.
+If you'd like to change any of the default values,
+copy and paste the relevant settings below into your `kibana.yml` configuration file.
 
 [float]
 [[general-apm-settings-kb]]
-==== General APM Settings
+==== General APM settings
 
 xpack.apm.enabled:: Set to `false` to disabled the APM plugin {kib}. Defaults to
 `true`.
 
 xpack.apm.ui.enabled:: Set to `false` to hide the APM plugin {kib} from the menu. Defaults to
 `true`.
+
+xpack.apm.ui.transactionGroupBucketSize:: Number of top transaction groups displayed in APM plugin in Kibana. Defaults to `100`.
+
+xpack.apm.ui.maxTraceItems:: Max number of child items displayed when viewing trace details. Defaults to `1000`.
+
+apm_oss.apmAgentConfigurationIndex:: Index containing agent configuration settings. Defaults to `.apm-agent-configuration`.
 
 apm_oss.indexPattern:: Index pattern is used for integrations with Machine Learning and Kuery Bar. It must match all apm indices. Defaults to `apm-*`.
 

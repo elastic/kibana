@@ -1,0 +1,26 @@
+.canvasToolbar {
+  position: relative;
+}
+
+.canvasTray__toggle {
+  position: absolute;
+  top: $euiSize * -1.25;
+  left: 50%;
+  background-color: $euiColorLightestShade;
+  margin: 0;
+  border-radius: $euiBorderRadius $euiBorderRadius 0 0;
+
+  > .euiFlexItem {
+    margin: 0;
+  }
+
+  button {
+    padding: $euiSizeXS $euiSizeM;
+    box-shadow: 0 -2px 1px transparentize($euiColorFullShade, .9);
+  }
+}
+
+.canvasToolbar__controls {
+  padding: $euiSizeM;
+  height: 100%;
+}

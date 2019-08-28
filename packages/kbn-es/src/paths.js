@@ -33,8 +33,3 @@ exports.ES_BIN = useBat('bin/elasticsearch');
 exports.ES_CONFIG = 'config/elasticsearch.yml';
 
 exports.ES_KEYSTORE_BIN = useBat('./bin/elasticsearch-keystore');
-
-exports.ES_ARCHIVE_PATTERN =
-  'distribution/archives/tar/build/distributions/elasticsearch-*-SNAPSHOT.tar.gz';
-exports.ES_OSS_ARCHIVE_PATTERN =
-  'distribution/archives/oss-tar/build/distributions/elasticsearch-*-SNAPSHOT.tar.gz';

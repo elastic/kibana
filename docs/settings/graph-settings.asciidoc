@@ -1,14 +1,14 @@
 [role="xpack"]
 [[graph-settings-kb]]
-=== Graph Settings in Kibana
+=== Graph settings in Kibana
 ++++
-<titleabbrev>Graph Settings</titleabbrev>
+<titleabbrev>Graph settings</titleabbrev>
 ++++
 
-You do not need to configure any settings to use {graph}.
+You do not need to configure any settings to use the {graph-features}.
 
 [float]
 [[general-graph-settings]]
-==== General Graph Settings
+==== General graph settings
 `xpack.graph.enabled`::
-Set to `false` to disable {graph}.
+Set to `false` to disable the {graph-features}.

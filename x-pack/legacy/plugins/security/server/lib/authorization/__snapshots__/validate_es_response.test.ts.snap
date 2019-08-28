@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`validateEsPrivilegeResponse fails validation when an action is malformed in the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child \\"application\\" fails because [child \\"foo-application\\" fails because [child \\"foo-resource\\" fails because [child \\"action3\\" fails because [\\"action3\\" must be a boolean]]]]"`;
+
+exports[`validateEsPrivilegeResponse fails validation when an action is missing in the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child \\"application\\" fails because [child \\"foo-application\\" fails because [child \\"foo-resource\\" fails because [child \\"action2\\" fails because [\\"action2\\" is required]]]]"`;
+
+exports[`validateEsPrivilegeResponse fails validation when an expected resource property is missing from the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child \\"application\\" fails because [child \\"foo-application\\" fails because [child \\"bar-resource\\" fails because [\\"bar-resource\\" is required]]]"`;
+
+exports[`validateEsPrivilegeResponse fails validation when an extra action is present in the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child \\"application\\" fails because [child \\"foo-application\\" fails because [child \\"foo-resource\\" fails because [\\"action4\\" is not allowed]]]"`;
+
+exports[`validateEsPrivilegeResponse fails validation when an extra application is present in the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child \\"application\\" fails because [\\"otherApplication\\" is not allowed]"`;
+
+exports[`validateEsPrivilegeResponse fails validation when an unexpected resource property is present in the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child \\"application\\" fails because [child \\"foo-application\\" fails because [child \\"bar-resource\\" fails because [\\"bar-resource\\" is required]]]"`;
+
+exports[`validateEsPrivilegeResponse fails validation when the "application" property is missing from the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child \\"application\\" fails because [\\"application\\" is required]"`;
+
+exports[`validateEsPrivilegeResponse fails validation when the requested application is missing from the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child \\"application\\" fails because [child \\"foo-application\\" fails because [\\"foo-application\\" is required]]"`;
+
+exports[`validateEsPrivilegeResponse fails validation when the resource propertry is malformed in the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child \\"application\\" fails because [child \\"foo-application\\" fails because [child \\"foo-resource\\" fails because [\\"foo-resource\\" must be an object]]]"`;
+
+exports[`validateEsPrivilegeResponse fails validation when there are no resource properties in the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child \\"application\\" fails because [child \\"foo-application\\" fails because [child \\"foo-resource\\" fails because [\\"foo-resource\\" is required]]]"`;

@@ -1,0 +1,45 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`correctly handles missing references 1`] = `"[value]: expected value of type [string] but got [number]"`;
+
+exports[`includes namespace into failures 1`] = `"[mega-namespace.value]: expected value of type [string] but got [number]"`;
+
+exports[`includes namespace into failures 2`] = `"[mega-namespace.value]: expected value of type [number] but got [string]"`;
+
+exports[`properly handles conditionals within objects 1`] = `"[value]: expected value of type [string] but got [number]"`;
+
+exports[`properly handles conditionals within objects 2`] = `"[value]: expected value of type [number] but got [string]"`;
+
+exports[`properly handles schemas with incompatible types 1`] = `"expected value of type [string] but got [boolean]"`;
+
+exports[`properly handles schemas with incompatible types 2`] = `"expected value of type [boolean] but got [string]"`;
+
+exports[`properly validates types according chosen schema 1`] = `"value is [a] but it must have a minimum length of [2]."`;
+
+exports[`properly validates types according chosen schema 2`] = `"value is [ab] but it must have a maximum length of [1]."`;
+
+exports[`properly validates when compares with "null" literal Schema 1`] = `"value is [a] but it must have a minimum length of [2]."`;
+
+exports[`properly validates when compares with "null" literal Schema 2`] = `"value is [ab] but it must have a minimum length of [3]."`;
+
+exports[`properly validates when compares with Schema 1`] = `"value is [a] but it must have a minimum length of [2]."`;
+
+exports[`properly validates when compares with Schema 2`] = `"value is [ab] but it must have a minimum length of [3]."`;
+
+exports[`required by default 1`] = `"expected value of type [string] but got [undefined]"`;
+
+exports[`works with both context and sibling references 1`] = `"[value]: expected value of type [string] but got [number]"`;
+
+exports[`works with both context and sibling references 2`] = `"[value]: expected value of type [number] but got [string]"`;
+
+exports[`works within \`oneOf\` 1`] = `
+"types that failed validation:
+- [0]: expected value of type [string] but got [number]
+- [1]: expected value of type [array] but got [number]"
+`;
+
+exports[`works within \`oneOf\` 2`] = `
+"types that failed validation:
+- [0]: expected value of type [string] but got [boolean]
+- [1]: expected value of type [array] but got [boolean]"
+`;

@@ -1,0 +1,11 @@
+{
+  "security.put_user": {
+    "data_autocomplete_rules": {
+      "metadata": {},
+      "password": "",
+      "full_name": "",
+      "roles": []
+    },
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-put-user.html"
+  }
+}

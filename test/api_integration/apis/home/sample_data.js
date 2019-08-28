@@ -17,10 +17,12 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
+
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
+  const es = getService('es');
 
   const MILLISECOND_IN_WEEK = 1000 * 60 * 60 * 24 * 7;
 
@@ -53,16 +55,15 @@ export default function ({ getService }) {
           .set('kbn-xsrf', 'kibana')
           .expect(200);
 
-        expect(resp.body).to.eql({ elasticsearchIndicesCreated: { kibana_sample_data_flights: 13059 }, kibanaSavedObjectsLoaded: 21 });
+        expect(resp.body).to.eql({ elasticsearchIndicesCreated: { kibana_sample_data_flights: 13059 }, kibanaSavedObjectsLoaded: 20 });
       });
 
       it('should load elasticsearch index containing sample data with dates relative to current time', async () => {
-        const resp = await supertest
-          .post('/elasticsearch/kibana_sample_data_flights/_search')
-          .set('kbn-xsrf', 'kibana')
-          .expect(200);
+        const resp = await es.search({
+          index: 'kibana_sample_data_flights'
+        });
 
-        const doc = resp.body.hits.hits[0];
+        const doc = resp.hits.hits[0];
         const docMilliseconds = Date.parse(doc._source.timestamp);
         const nowMilliseconds = Date.now();
         const delta = Math.abs(nowMilliseconds - docMilliseconds);
@@ -76,11 +77,11 @@ export default function ({ getService }) {
             .post(`/api/sample_data/flights?now=${nowString}`)
             .set('kbn-xsrf', 'kibana');
 
-          const resp = await supertest
-            .post('/elasticsearch/kibana_sample_data_flights/_search')
-            .set('kbn-xsrf', 'kibana');
+          const resp = await es.search({
+            index: 'kibana_sample_data_flights'
+          });
 
-          const doc = resp.body.hits.hits[0];
+          const doc = resp.hits.hits[0];
           const docMilliseconds = Date.parse(doc._source.timestamp);
           const nowMilliseconds = Date.parse(nowString);
           const delta = Math.abs(nowMilliseconds - docMilliseconds);
@@ -98,10 +99,10 @@ export default function ({ getService }) {
       });
 
       it('should remove elasticsearch index containing sample data', async () => {
-        await supertest
-          .post('/elasticsearch/kibana_sample_data_flights/_search')
-          .set('kbn-xsrf', 'kibana')
-          .expect(404);
+        const resp = await es.indices.exists({
+          index: 'kibana_sample_data_flights'
+        });
+        expect(resp).to.be(false);
       });
     });
   });

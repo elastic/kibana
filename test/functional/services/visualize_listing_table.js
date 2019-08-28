@@ -40,8 +40,7 @@ export function VisualizeListingTableProvider({ getService, getPageObjects }) {
       let visualizationNames = [];
       while (morePages) {
         visualizationNames = visualizationNames.concat(await this.getAllVisualizationNamesOnCurrentPage());
-        const pagerNextButton = await testSubjects.find('pagerNextButton');
-        morePages = !(await pagerNextButton.getProperty('disabled'));
+        morePages = !(await testSubjects.getAttribute('pagerNextButton', 'disabled') === 'true');
         if (morePages) {
           await testSubjects.click('pagerNextButton');
           await PageObjects.header.waitUntilLoadingHasFinished();

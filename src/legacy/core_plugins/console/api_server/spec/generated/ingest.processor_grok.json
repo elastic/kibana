@@ -1,0 +1,11 @@
+{
+  "ingest.processor_grok": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_ingest/processor/grok"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/grok-processor.html#grok-processor-rest-get"
+  }
+}

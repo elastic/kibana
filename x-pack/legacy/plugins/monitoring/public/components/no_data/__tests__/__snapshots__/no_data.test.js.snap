@@ -1,0 +1,127 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NoData should show a default message if reason is unknown 1`] = `
+<div
+  class="euiPage"
+>
+  <div
+    class="euiPageBody euiPageBody--restrictWidth-custom"
+    style="max-width:600px"
+  >
+    <div
+      class="euiPanel euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter eui-textCenter"
+    >
+      <svg
+        class="euiIcon euiIcon--xxLarge euiIcon--app euiIcon-isLoading"
+        focusable="false"
+        height="16"
+        viewBox="0 0 16 16"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      />
+      <div
+        class="euiSpacer euiSpacer--m"
+      />
+      <div
+        class="euiText euiText--medium"
+      >
+        <p>
+          There is a 
+          <span
+            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+          >
+            <code
+              class="euiCodeBlock__code"
+            >
+              food
+            </code>
+          </span>
+           setting that has 
+          <span
+            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+          >
+            <code
+              class="euiCodeBlock__code"
+            >
+              xpack.monitoring.foo.bar
+            </code>
+          </span>
+           set to 
+          <span
+            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+          >
+            <code
+              class="euiCodeBlock__code"
+            >
+              taco
+            </code>
+          </span>
+          .
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`NoData should show text next to the spinner while checking a setting 1`] = `
+<div
+  class="euiPage"
+>
+  <div
+    class="euiPageBody euiPageBody--restrictWidth-custom"
+    style="max-width:600px"
+  >
+    <div
+      class="euiPanel euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter eui-textCenter"
+    >
+      <svg
+        class="euiIcon euiIcon--xxLarge euiIcon--app euiIcon-isLoading"
+        focusable="false"
+        height="16"
+        viewBox="0 0 16 16"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      />
+      <div
+        class="euiSpacer euiSpacer--m"
+      />
+      <h2
+        class="euiTitle euiTitle--large"
+      >
+        We're looking for your monitoring data
+      </h2>
+      <span
+        class="euiTextColor euiTextColor--subdued"
+      >
+        <div
+          class="euiText euiText--medium"
+        >
+          <p>
+            Monitoring provides insight to your hardware performance and load.
+          </p>
+        </div>
+      </span>
+      <hr
+        class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
+      />
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <span
+            class="euiLoadingSpinner euiLoadingSpinner--medium"
+          />
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          checking something to test...
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

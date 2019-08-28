@@ -1,0 +1,23 @@
+[role="xpack"]
+[[xpack-logs]]
+= Logs
+
+[partintro]
+--
+Use the Logs UI to explore logs for common servers, containers, and services.  
+{kib} provides a compact, console-like display that you can customize.
+
+* <<xpack-logs-getting-started>>
+* <<xpack-logs-using>>
+* <<xpack-logs-configuring>>
+
+[role="screenshot"]
+image::logs/images/logs-console.png[Log Console in Kibana]
+
+--
+
+include::getting-started.asciidoc[]
+
+include::using.asciidoc[]
+
+include::configuring.asciidoc[]

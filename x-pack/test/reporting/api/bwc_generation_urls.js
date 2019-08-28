@@ -11,6 +11,21 @@ export default function ({ getService }) {
   const usageAPI = getService('usageAPI');
 
   describe('BWC report generation urls', () => {
+    describe('Pre 6_2', () => {
+      before(async () => {
+        await reportingAPI.deleteAllReportingIndexes();
+      });
+
+      // The URL being tested was captured from release 6.4 and then the layout section was removed to test structure before
+      // preserve_layout was introduced. See https://github.com/elastic/kibana/issues/23414
+      it('job posted successfully', async () => {
+        const path = await reportingAPI.postJob(GenerationUrls.PDF_PRINT_DASHBOARD_PRE_6_2);
+        await reportingAPI.waitForJobToFinish(path);
+        const stats = await usageAPI.getUsageStats();
+        reportingAPI.expectCompletedReportCount(stats, 1);
+      }).timeout(500000);
+    });
+
     describe('6_2', () => {
       before(async () => {
         await reportingAPI.deleteAllReportingIndexes();

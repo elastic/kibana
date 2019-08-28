@@ -8,7 +8,10 @@ import yargs from 'yargs';
 import semver from 'semver';
 
 yargs
-  .alias('r', 'release').describe('r', 'Create a release build, not a snapshot');
+  .alias('r', 'release').describe('r', 'Create a release build, not a snapshot')
+  .option('build-qualifier', {
+    default: null
+  });
 const argv = yargs.argv;
 
 export default function getVersion(pkg) {
@@ -21,5 +24,6 @@ export default function getVersion(pkg) {
   }
 
   const snapshotText = (argv.release) ? '' : '-SNAPSHOT';
-  return `${version}${snapshotText}`;
+  const qualifierText = argv.buildQualifier ? '-' + argv.buildQualifier : '';
+  return `${version}${qualifierText}${snapshotText}`;
 }

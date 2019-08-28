@@ -1,0 +1,99 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": "kibana_sample_data_flights",
+    "mappings": {
+      "properties": {
+        "AvgTicketPrice": {
+          "type": "float"
+        },
+        "Cancelled": {
+          "type": "boolean"
+        },
+        "Carrier": {
+          "type": "keyword"
+        },
+        "Dest": {
+          "type": "keyword"
+        },
+        "DestAirportID": {
+          "type": "keyword"
+        },
+        "DestCityName": {
+          "type": "keyword"
+        },
+        "DestCountry": {
+          "type": "keyword"
+        },
+        "DestLocation": {
+          "type": "geo_point"
+        },
+        "DestRegion": {
+          "type": "keyword"
+        },
+        "DestWeather": {
+          "type": "keyword"
+        },
+        "DistanceKilometers": {
+          "type": "float"
+        },
+        "DistanceMiles": {
+          "type": "float"
+        },
+        "FlightDelay": {
+          "type": "boolean"
+        },
+        "FlightDelayMin": {
+          "type": "integer"
+        },
+        "FlightDelayType": {
+          "type": "keyword"
+        },
+        "FlightNum": {
+          "type": "keyword"
+        },
+        "FlightTimeHour": {
+          "type": "keyword"
+        },
+        "FlightTimeMin": {
+          "type": "float"
+        },
+        "Origin": {
+          "type": "keyword"
+        },
+        "OriginAirportID": {
+          "type": "keyword"
+        },
+        "OriginCityName": {
+          "type": "keyword"
+        },
+        "OriginCountry": {
+          "type": "keyword"
+        },
+        "OriginLocation": {
+          "type": "geo_point"
+        },
+        "OriginRegion": {
+          "type": "keyword"
+        },
+        "OriginWeather": {
+          "type": "keyword"
+        },
+        "dayOfWeek": {
+          "type": "integer"
+        },
+        "timestamp": {
+          "type": "date"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

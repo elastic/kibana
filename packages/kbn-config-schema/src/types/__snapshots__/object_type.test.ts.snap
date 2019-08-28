@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`allowUnknowns = true affects only own keys 1`] = `"[foo.baz]: definition for this key is missing"`;
+
+exports[`called with wrong type 1`] = `"expected a plain object value, but found [string] instead."`;
+
+exports[`called with wrong type 2`] = `"expected a plain object value, but found [number] instead."`;
+
+exports[`does not allow unknown keys when allowUnknowns = false 1`] = `"[bar]: definition for this key is missing"`;
+
+exports[`fails if key does not exist in schema 1`] = `"[bar]: definition for this key is missing"`;
+
+exports[`fails if missing required value 1`] = `"[name]: expected value of type [string] but got [undefined]"`;
+
+exports[`handles oneOf 1`] = `
+"[key]: types that failed validation:
+- [key.0]: expected value of type [string] but got [number]"
+`;
+
+exports[`includes namespace in failure when wrong top-level type 1`] = `"[foo-namespace]: expected a plain object value, but found [Array] instead."`;
+
+exports[`includes namespace in failure when wrong value type 1`] = `"[foo-namespace.foo]: expected value of type [string] but got [number]"`;
+
+exports[`object within object with required 1`] = `"[foo.bar]: expected value of type [string] but got [undefined]"`;

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { schema } from '../../config/schema';
+import { schema } from '@kbn/config-schema';
 
 import { assertNever } from '../../../utils';
 import { LogRecord } from '../log_record';

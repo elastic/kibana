@@ -1,4 +1,6 @@
 {
-  "a.b.c": "foo",
-  "d.e.f": "bar"
+  "messages": {
+    "a.b.c": "foo",
+    "d.e.f": "bar"
+  }
 }

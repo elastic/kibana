@@ -13,13 +13,14 @@ export default async function ({ readConfigFile }) {
   return {
     ...functionalConfig,
     junit: {
-      reportName: 'X-Pack Chromium API Reporting Tests',
+      reportName: 'X-Pack Chromium Functional Reporting Tests',
     },
     testFiles: [require.resolve('../functional')],
     kbnTestServer: {
       ...functionalConfig.kbnTestServer,
       serverArgs: [
         ...functionalConfig.kbnTestServer.serverArgs,
+        '--xpack.reporting.csv.enablePanelActionDownload=true',
         `--xpack.reporting.capture.browser.type=chromium`,
       ],
     },

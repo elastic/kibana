@@ -8,7 +8,7 @@ import { resolve } from 'path';
 import yargs from 'yargs';
 import glob from 'glob';
 import { toArray } from 'rxjs/operators';
-import { findPluginSpecs } from '../../../src/plugin_discovery';
+import { findPluginSpecs } from '../../../src/legacy/plugin_discovery';
 
 /*
   Usage:
@@ -22,7 +22,7 @@ import { findPluginSpecs } from '../../../src/plugin_discovery';
 const argv = yargs
   .describe('plugins', 'Comma-separated list of plugins')
   .argv;
-const allPlugins = glob.sync('*', { cwd: resolve(__dirname, '..', '..', 'plugins') });
+const allPlugins = glob.sync('*', { cwd: resolve(__dirname, '..', '..', 'legacy', 'plugins') });
 
 export function getPlugins() {
   const plugins = argv.plugins && argv.plugins.split(',');

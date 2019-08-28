@@ -1,0 +1,16 @@
+{
+  "ml.stop_datafeed": {
+    "url_params": {
+      "allow_no_datafeeds": "__flag__",
+      "force": "__flag__",
+      "timeout": ""
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_ml/datafeeds/{datafeed_id}/_stop"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current/ml-stop-datafeed.html"
+  }
+}

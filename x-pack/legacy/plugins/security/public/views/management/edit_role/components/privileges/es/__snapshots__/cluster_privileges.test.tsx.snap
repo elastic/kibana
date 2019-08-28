@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`it renders without crashing 1`] = `
+<EuiFlexGroup>
+  <EuiFlexItem
+    key="clusterPrivs"
+  >
+    <EuiComboBox
+      compressed={false}
+      data-test-subj="cluster-privileges-combobox"
+      fullWidth={false}
+      isClearable={true}
+      isDisabled={false}
+      onChange={[Function]}
+      onCreateOption={[Function]}
+      options={
+        Array [
+          Object {
+            "label": "all",
+          },
+          Object {
+            "label": "manage",
+          },
+          Object {
+            "label": "monitor",
+          },
+        ]
+      }
+      selectedOptions={Array []}
+      singleSelection={false}
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

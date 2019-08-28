@@ -1,0 +1,64 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`anomalyAggsFetcher when ES returns valid response should call client with correct query 1`] = `
+Array [
+  Array [
+    Object {
+      "body": Object {
+        "aggs": Object {
+          "ml_avg_response_times": Object {
+            "aggs": Object {
+              "anomaly_score": Object {
+                "max": Object {
+                  "field": "anomaly_score",
+                },
+              },
+              "lower": Object {
+                "min": Object {
+                  "field": "model_lower",
+                },
+              },
+              "upper": Object {
+                "max": Object {
+                  "field": "model_upper",
+                },
+              },
+            },
+            "date_histogram": Object {
+              "extended_bounds": Object {
+                "max": 200000,
+                "min": 90000,
+              },
+              "field": "timestamp",
+              "fixed_interval": "myInterval",
+              "min_doc_count": 0,
+            },
+          },
+        },
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "exists": Object {
+                  "field": "bucket_span",
+                },
+              },
+              Object {
+                "range": Object {
+                  "timestamp": Object {
+                    "format": "epoch_millis",
+                    "gte": 90000,
+                    "lte": 200000,
+                  },
+                },
+              },
+            ],
+          },
+        },
+        "size": 0,
+      },
+      "index": ".ml-anomalies-myservicename-mytransactiontype-high_mean_response_time",
+    },
+  ],
+]
+`;

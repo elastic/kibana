@@ -17,13 +17,14 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default ({ getService, getPageObjects }) => {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'visualize']);
 
-  describe('visualize app', () => {
+  describe('visualize app', function () {
+    this.tags('smoke');
 
     describe('experimental visualizations', () => {
 
@@ -43,23 +44,6 @@ export default ({ getService, getPageObjects }) => {
 
         // Create a new visualization
         await experimentalTypes[0].click();
-        // Select a index-pattern/search if this vis requires it
-        await PageObjects.visualize.selectVisSourceIfRequired();
-        // Check that the experimental banner is there and state that this is experimental
-        const info = await PageObjects.visualize.getExperimentalInfo();
-        expect(await info.getVisibleText()).to.contain('experimental');
-      });
-
-      it('should show an notification when creating lab visualizations', async () => {
-        // Try to find a lab visualization.
-        const labTypes = await PageObjects.visualize.getLabTypeLinks();
-        if (labTypes.length === 0) {
-          log.info('No lab visualization found. Skipping this test.');
-          return;
-        }
-
-        // Create a new visualization
-        await labTypes[0].click();
         // Select a index-pattern/search if this vis requires it
         await PageObjects.visualize.selectVisSourceIfRequired();
         // Check that the experimental banner is there and state that this is experimental

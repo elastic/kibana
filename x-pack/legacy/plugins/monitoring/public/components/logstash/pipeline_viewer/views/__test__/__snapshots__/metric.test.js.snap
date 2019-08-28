@@ -1,0 +1,32 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Metric component does not render warning badge when no warning present 1`] = `
+<EuiFlexItem
+  className="monPipelineViewer__metricFlexItem"
+  grow={false}
+>
+  <EuiText
+    className="monPipelineViewer__metric metricClass"
+    color="subdued"
+    size="s"
+  >
+    <span>
+      220
+    </span>
+  </EuiText>
+</EuiFlexItem>
+`;
+
+exports[`Metric component renders warning badge 1`] = `
+<EuiFlexItem
+  className="monPipelineViewer__metricFlexItem"
+  grow={false}
+>
+  <EuiBadge
+    className="metricClass"
+    color="warning"
+  >
+    220
+  </EuiBadge>
+</EuiFlexItem>
+`;

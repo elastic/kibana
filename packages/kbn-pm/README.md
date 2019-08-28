@@ -52,36 +52,52 @@ scripts, while still having a nice developer experience.
 
 ## How it works
 
-The approach we went for to handle multiple packages in Kibana is relying on
+### Internal usage
+
+For packages that are referenced within the Kibana repo itself (for example,
+using the `@kbn/i18n` package from an `x-pack` plugin), we are leveraging
+Yarn's workspaces feature. This allows yarn to optimize node_modules within
+the entire repo to avoid duplicate modules by hoisting common packages as high
+in the dependency tree as possible.
+
+To reference a package from within the Kibana repo, simply use the current
+version number from that package's package.json file. Then, running `yarn kbn
+bootstrap` will symlink that package into your dependency tree. That means
+you can make changes to `@kbn/i18n` and immediately have them available
+in Kibana itself. No `npm publish` needed anymore — Kibana will always rely
+directly on the code that's in the local packages.
+
+### External Plugins
+
+For external plugins, referencing packages in Kibana relies on
 `link:` style dependencies in Yarn. With `link:` dependencies you specify the
 relative location to a package instead of a version when adding it to
 `package.json`. For example:
 
 ```
-"@kbn/datemath": "link:packages/kbn-datemath"
+"@kbn/i18n": "link:packages/kbn-i18n"
 ```
 
 Now when you run `yarn` it will set up a symlink to this folder instead of
-downloading code from the npm registry. That means you can make changes to
-`@kbn/datematch` and immediately have them available in Kibana itself. No
-`npm publish` needed anymore — Kibana will always rely directly on the code
-that's in the local packages. And we can also do the same in x-pack-kibana or
-any other Kibana plugin, e.g.
+downloading code from the npm registry. This allows external plugins to always
+use the versions of the package that is bundled with the Kibana version they
+are running inside of.
 
 ```
-"@kbn/datemath": "link:../../kibana/packages/kbn-date-math"
+"@kbn/i18n": "link:../../kibana/packages/kbn-date-math"
 ```
 
 This works because we moved to a strict location of Kibana plugins,
-`../kibana-extra/{pluginName}` relative to Kibana. This is one of the reasons we
-wanted to move towards a setup that looks like this:
+`./plugins/{pluginName}` inside of Kibana, or `../kibana-extra/{pluginName}`
+relative to Kibana. This is one of the reasons we wanted to move towards a setup
+that looks like this:
 
 ```
 elastic
-├── kibana
-└── kibana-extra
-    ├── kibana-canvas
-    └── x-pack-kibana
+└── kibana
+    └── plugins
+        ├── kibana-canvas
+        └── x-pack-kibana
 ```
 
 Relying on `link:` style dependencies means we no longer need to `npm publish`
@@ -104,17 +120,18 @@ yarn kbn bootstrap
 ```
 
 By default, `@kbn/pm` will bootstrap all packages within Kibana, plus all
-Kibana plugins located in `../kibana-extra`. There are several options for
-skipping parts of this, e.g. to skip bootstrapping of Kibana plugins:
+Kibana plugins located in `./plugins` or `../kibana-extra`. There are several
+options for skipping parts of this, e.g. to skip bootstrapping of Kibana
+plugins:
 
 ```
-yarn kbn bootstrap --skip-kibana-extra
+yarn kbn bootstrap --skip-kibana-plugins
 ```
 
 Or just skip few selected packages:
 
 ```
-yarn kbn bootstrap --exclude @kbn/pm --exclude @kbn/datemath
+yarn kbn bootstrap --exclude @kbn/pm --exclude @kbn/i18n
 ```
 
 For more details, run:
@@ -137,7 +154,7 @@ yarn kbn run build
 ```
 
 And if needed, you can skip packages in the same way as for bootstrapping, e.g.
-with `--exclude` and `--skip-kibana-extra`:
+with `--exclude` and `--skip-kibana-plugins`:
 
 ```
 yarn kbn run build --exclude kibana
@@ -191,10 +208,10 @@ While exploring the approach to static dependencies we built PoCs using npm 5
 workspaces][yarn-workspaces], Yarn (using `link:` dependencies), and
 [Lerna][lerna].
 
-In the end we decided to build our own tool, based on Yarn and `link:`
-dependencies. This gave us the control we wanted, and it fits nicely into our
-context (e.g. where publishing to npm isn't necessarily something we want to
-do).
+In the end we decided to build our own tool, based on Yarn, and `link:`
+dependencies, and workspaces. This gave us the control we wanted, and it fits
+nicely into our context (e.g. where publishing to npm isn't necessarily
+something we want to do).
 
 ### Some notes from this exploration
 
@@ -242,10 +259,6 @@ _libraries_, so it's focused on publishing packages and other use-cases that are
 not necessarily optimized for our use-cases. It's also not ideal for the setup
 we currently have, with one app that "owns everything" and the rest being
 packages for that app.
-
-### Why a local version of Yarn?
-
-See the [vendor readme](./vendor/README.md).
 
 [npm-link]: https://docs.npmjs.com/cli/link
 [npm5-file]: https://github.com/npm/npm/pull/15900

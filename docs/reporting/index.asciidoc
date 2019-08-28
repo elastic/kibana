@@ -4,19 +4,15 @@
 
 [partintro]
 --
-{xpack} enables you to generate reports that contain {kib} dashboards,
+You can generate reports that contain {kib} dashboards,
 visualizations, and saved searches. Dashboards and visualizations are
 exported as PDF documents, while saved searches in Discover
 are exported to CSV.
 
-NOTE: On Linux, the `libfontconfig` and `libfreetype6` packages and system
-fonts are required to generate PDF reports. If no system fonts are available,
-labels are not rendered correctly in the reports.
-
-The following Reporting button is found in the {kib} toolbar:
+Reporting is located in the share menu from the {kib} toolbar:
 
 [role="screenshot"]
-image::reporting/images/reporting-button.png["Reporting"]
+image::reporting/images/share-button.png["Share"]
 
 You can also <<automating-report-generation, generate reports automatically>>.
 

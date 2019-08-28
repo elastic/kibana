@@ -1,0 +1,102 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`timeseriesFetcher should call client with correct query 1`] = `
+Array [
+  Array [
+    Object {
+      "body": Object {
+        "aggs": Object {
+          "overall_avg_duration": Object {
+            "avg": Object {
+              "field": "transaction.duration.us",
+            },
+          },
+          "response_times": Object {
+            "aggs": Object {
+              "avg": Object {
+                "avg": Object {
+                  "field": "transaction.duration.us",
+                },
+              },
+              "pct": Object {
+                "percentiles": Object {
+                  "field": "transaction.duration.us",
+                  "percents": Array [
+                    95,
+                    99,
+                  ],
+                },
+              },
+            },
+            "date_histogram": Object {
+              "extended_bounds": Object {
+                "max": 1528977600000,
+                "min": 1528113600000,
+              },
+              "field": "@timestamp",
+              "fixed_interval": "10800s",
+              "min_doc_count": 0,
+            },
+          },
+          "transaction_results": Object {
+            "aggs": Object {
+              "timeseries": Object {
+                "date_histogram": Object {
+                  "extended_bounds": Object {
+                    "max": 1528977600000,
+                    "min": 1528113600000,
+                  },
+                  "field": "@timestamp",
+                  "fixed_interval": "10800s",
+                  "min_doc_count": 0,
+                },
+              },
+            },
+            "terms": Object {
+              "field": "transaction.result",
+              "missing": "",
+            },
+          },
+        },
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "term": Object {
+                  "processor.event": "transaction",
+                },
+              },
+              Object {
+                "term": Object {
+                  "service.name": "myServiceName",
+                },
+              },
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "format": "epoch_millis",
+                    "gte": 1528113600000,
+                    "lte": 1528977600000,
+                  },
+                },
+              },
+              Object {
+                "term": Object {
+                  "service.environment": "test",
+                },
+              },
+              Object {
+                "term": Object {
+                  "transaction.type": "myTransactionType",
+                },
+              },
+            ],
+          },
+        },
+        "size": 0,
+      },
+      "index": "myIndex",
+    },
+  ],
+]
+`;

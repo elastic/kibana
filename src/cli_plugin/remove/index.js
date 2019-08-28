@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { fromRoot } from '../../utils';
+import { fromRoot } from '../../legacy/utils';
 import remove from './remove';
 import Logger from '../lib/logger';
 import { parse } from './settings';
-import { getConfig } from '../../server/path';
+import { getConfig } from '../../legacy/server/path';
 import logWarnings from '../lib/log_warnings';
 import { warnIfUsingPluginDirOption } from '../lib/warn_if_plugin_dir_option';
 

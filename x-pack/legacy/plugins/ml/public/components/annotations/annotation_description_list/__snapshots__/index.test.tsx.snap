@@ -1,0 +1,40 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AnnotationDescriptionList Initialization with annotation. 1`] = `
+<EuiDescriptionList
+  className="ml-annotation-description-list"
+  listItems={
+    Array [
+      Object {
+        "description": "farequote",
+        "title": "Job ID",
+      },
+      Object {
+        "description": "February 9th 2016, 13:56:17",
+        "title": "Start",
+      },
+      Object {
+        "description": "February 9th 2016, 18:19:28",
+        "title": "End",
+      },
+      Object {
+        "description": "January 2nd 2019, 08:18:17",
+        "title": "Created",
+      },
+      Object {
+        "description": "<user unknown>",
+        "title": "Created by",
+      },
+      Object {
+        "description": "January 2nd 2019, 08:18:17",
+        "title": "Last modified",
+      },
+      Object {
+        "description": "<user unknown>",
+        "title": "Modified by",
+      },
+    ]
+  }
+  type="column"
+/>
+`;

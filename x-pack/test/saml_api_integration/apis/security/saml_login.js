@@ -8,7 +8,7 @@ import querystring from 'querystring';
 import url from 'url';
 import { delay } from 'bluebird';
 import { getLogoutRequest, getSAMLRequestId, getSAMLResponse } from '../../fixtures/saml_tools';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import request from 'request';
 
 export default function ({ getService }) {
@@ -39,6 +39,27 @@ export default function ({ getService }) {
         .get('/api/security/v1/me')
         .set('kbn-xsrf', 'xxx')
         .expect(401);
+    });
+
+    it('does not prevent basic login', async () => {
+      const [username, password] = config.get('servers.elasticsearch.auth').split(':');
+      const response = await supertest
+        .post('/api/security/v1/login')
+        .set('kbn-xsrf', 'xxx')
+        .send({ username, password })
+        .expect(204);
+
+      const cookies = response.headers['set-cookie'];
+      expect(cookies).to.have.length(1);
+
+      const { body: user } = await supertest
+        .get('/api/security/v1/me')
+        .set('kbn-xsrf', 'xxx')
+        .set('Cookie', request.cookie(cookies[0]).cookieString())
+        .expect(200);
+
+      expect(user.username).to.eql(username);
+      expect(user.authentication_realm).to.eql({ name: 'reserved', type: 'reserved' });
     });
 
     describe('initiating handshake', () => {
@@ -130,9 +151,10 @@ export default function ({ getService }) {
           'full_name',
           'email',
           'roles',
-          'scope',
           'metadata',
-          'enabled'
+          'enabled',
+          'authentication_realm',
+          'lookup_realm',
         ]);
 
         expect(apiResponse.body.username).to.be('a@b.c');
@@ -169,35 +191,13 @@ export default function ({ getService }) {
           'full_name',
           'email',
           'roles',
-          'scope',
           'metadata',
-          'enabled'
+          'enabled',
+          'authentication_realm',
+          'lookup_realm',
         ]);
 
         expect(apiResponse.body.username).to.be('a@b.c');
-      });
-
-      it('should fail if there is an active authenticated session already', async () => {
-        const samlAuthenticationResponse = await supertest.post('/api/security/v1/saml')
-          .set('kbn-xsrf', 'xxx')
-          .set('Cookie', handshakeCookie.cookieString())
-          .send({ SAMLResponse: await createSAMLResponse({ inResponseTo: samlRequestId }) }, {})
-          .expect(302);
-
-        const sessionCookie = request.cookie(samlAuthenticationResponse.headers['set-cookie'][0]);
-
-        const secondSAMLAuthenticationResponse = await supertest.post('/api/security/v1/saml')
-          .set('kbn-xsrf', 'xxx')
-          .set('Cookie', sessionCookie.cookieString())
-          .send({ SAMLResponse: await createSAMLResponse() }, {})
-          .expect(403);
-
-        expect(secondSAMLAuthenticationResponse.body).to.eql({
-          error: 'Forbidden',
-          message: 'Sorry, you already have an active Kibana session. ' +
-          'If you want to start a new one, please logout from the existing session first.',
-          statusCode: 403
-        });
       });
 
       it('should fail if SAML response is not valid', async () => {
@@ -271,7 +271,7 @@ export default function ({ getService }) {
           .set('kbn-xsrf', 'xxx')
           .set('Authorization', 'Basic AbCdEf')
           .set('Cookie', sessionCookie.cookieString())
-          .expect(400);
+          .expect(401);
 
         expect(apiResponse.headers['set-cookie']).to.be(undefined);
       });
@@ -329,7 +329,7 @@ export default function ({ getService }) {
 
         expect(apiResponse.body).to.eql({
           error: 'Bad Request',
-          message: 'invalid_grant',
+          message: 'Both access and refresh tokens are expired.',
           statusCode: 400
         });
       });
@@ -386,7 +386,7 @@ export default function ({ getService }) {
 
         expect(apiResponse.body).to.eql({
           error: 'Bad Request',
-          message: 'invalid_grant',
+          message: 'Both access and refresh tokens are expired.',
           statusCode: 400
         });
       });
@@ -413,7 +413,7 @@ export default function ({ getService }) {
 
         expect(apiResponse.body).to.eql({
           error: 'Bad Request',
-          message: 'invalid_grant',
+          message: 'Both access and refresh tokens are expired.',
           statusCode: 400
         });
       });
@@ -438,6 +438,14 @@ export default function ({ getService }) {
         sessionCookie = request.cookie(samlAuthenticationResponse.headers['set-cookie'][0]);
       });
 
+      const expectNewSessionCookie = (cookie) => {
+        expect(cookie.key).to.be('sid');
+        expect(cookie.value).to.not.be.empty();
+        expect(cookie.path).to.be('/');
+        expect(cookie.httpOnly).to.be(true);
+        expect(cookie.value).to.not.be(sessionCookie.value);
+      };
+
       it('expired access token should be automatically refreshed', async function () {
         this.timeout(40000);
 
@@ -447,104 +455,176 @@ export default function ({ getService }) {
 
         // This api call should succeed and automatically refresh token. Returned cookie will contain
         // the new access and refresh token pair.
-        const apiResponse = await supertest
+        const firstResponse = await supertest
           .get('/api/security/v1/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
 
-        const cookies = apiResponse.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
+        const firstResponseCookies = firstResponse.headers['set-cookie'];
+        expect(firstResponseCookies).to.have.length(1);
 
-        const newSessionCookie = request.cookie(cookies[0]);
-        expect(newSessionCookie.key).to.be('sid');
-        expect(newSessionCookie.value).to.not.be.empty();
-        expect(newSessionCookie.path).to.be('/');
-        expect(newSessionCookie.httpOnly).to.be(true);
-        expect(newSessionCookie.value).to.not.be(sessionCookie.value);
+        const firstNewCookie = request.cookie(firstResponseCookies[0]);
+        expectNewSessionCookie(firstNewCookie);
 
-        // Request with old cookie should fail with `400` since it contains expired access token and
-        // already used refresh tokens.
-        const apiResponseWithExpiredToken = await supertest
+        // Request with old cookie should reuse the same refresh token if within 60 seconds.
+        // Returned cookie will contain the same new access and refresh token pairs as the first request
+        const secondResponse = await supertest
           .get('/api/security/v1/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
-          .expect(400);
-        expect(apiResponseWithExpiredToken.headers['set-cookie']).to.be(undefined);
-        expect(apiResponseWithExpiredToken.body).to.eql({
-          error: 'Bad Request',
-          message: 'Both access and refresh tokens are expired.',
-          statusCode: 400
-        });
+          .expect(200);
 
-        // The new cookie with fresh pair of access and refresh tokens should work.
+        const secondResponseCookies = secondResponse.headers['set-cookie'];
+        expect(secondResponseCookies).to.have.length(1);
+
+        const secondNewCookie = request.cookie(secondResponseCookies[0]);
+        expectNewSessionCookie(secondNewCookie);
+
+        expect(firstNewCookie.value).not.to.eql(secondNewCookie.value);
+
+        // The first new cookie with fresh pair of access and refresh tokens should work.
         await supertest
           .get('/api/security/v1/me')
           .set('kbn-xsrf', 'xxx')
-          .set('Cookie', newSessionCookie.cookieString())
+          .set('Cookie', firstNewCookie.cookieString())
+          .expect(200);
+
+        // The second new cookie with fresh pair of access and refresh tokens should work.
+        await supertest
+          .get('/api/security/v1/me')
+          .set('kbn-xsrf', 'xxx')
+          .set('Cookie', secondNewCookie.cookieString())
           .expect(200);
       });
+    });
 
-      it('expired access token should be automatically refreshed with two concurrent requests', async function () {
-        this.timeout(40000);
+    describe('API access with missing access token document.', () => {
+      let sessionCookie;
 
-        // Access token expiration is set to 15s for API integration tests.
-        // Let's wait for 20s to make sure token expires.
-        await delay(20000);
+      beforeEach(async () => {
+        const handshakeResponse = await supertest.get('/abc/xyz')
+          .expect(302);
 
-        // Issue two concurrent requests with the same cookie that contains expired access token.
-        // First request that uses refresh token should succeed, the second should fail since refresh
-        // token is one-time use only token.
-        const apiResponseOnePromise = supertest
-          .get('/api/security/v1/me')
+        const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0]);
+        const samlRequestId = await getSAMLRequestId(handshakeResponse.headers.location);
+
+        const samlAuthenticationResponse = await supertest.post('/api/security/v1/saml')
           .set('kbn-xsrf', 'xxx')
-          .set('Cookie', sessionCookie.cookieString())
-          .expect(200);
+          .set('Cookie', handshakeCookie.cookieString())
+          .send({ SAMLResponse: await createSAMLResponse({ inResponseTo: samlRequestId }) }, {})
+          .expect(302);
 
-        const apiResponseTwoPromise = supertest
-          .get('/api/security/v1/me')
-          .set('kbn-xsrf', 'xxx')
-          .set('Cookie', sessionCookie.cookieString())
-          .expect(400);
+        sessionCookie = request.cookie(samlAuthenticationResponse.headers['set-cookie'][0]);
+      });
 
-        const apiResponseOne = await apiResponseOnePromise;
-        const cookies = apiResponseOne.headers['set-cookie'];
+      it('should properly set cookie and start new SAML handshake', async function () {
+        // Let's delete tokens from `.security` index directly to simulate the case when
+        // Elasticsearch automatically removes access/refresh token document from the index
+        // after some period of time.
+        const esResponse = await getService('es').deleteByQuery({
+          index: '.security-tokens',
+          q: 'doc_type:token',
+          refresh: true,
+        });
+        expect(esResponse).to.have.property('deleted').greaterThan(0);
+
+        const handshakeResponse = await supertest.get('/abc/xyz/handshake?one=two three')
+          .set('Cookie', sessionCookie.cookieString())
+          .expect(302);
+
+        const cookies = handshakeResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const newSessionCookie = request.cookie(cookies[0]);
-        expect(newSessionCookie.key).to.be('sid');
+        const handshakeCookie = request.cookie(cookies[0]);
+        expect(handshakeCookie.key).to.be('sid');
+        expect(handshakeCookie.value).to.not.be.empty();
+        expect(handshakeCookie.path).to.be('/');
+        expect(handshakeCookie.httpOnly).to.be(true);
+
+        const redirectURL = url.parse(handshakeResponse.headers.location, true /* parseQueryString */);
+        expect(redirectURL.href.startsWith(`https://elastic.co/sso/saml`)).to.be(true);
+        expect(redirectURL.query.SAMLRequest).to.not.be.empty();
+      });
+    });
+
+    describe('IdP initiated login with active session', () => {
+      const existingUsername = 'a@b.c';
+      let existingSessionCookie;
+
+      beforeEach(async () => {
+        const handshakeResponse = await supertest.get('/abc/xyz')
+          .expect(302);
+
+        const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0]);
+        const samlRequestId = await getSAMLRequestId(handshakeResponse.headers.location);
+
+        const samlAuthenticationResponse = await supertest.post('/api/security/v1/saml')
+          .set('kbn-xsrf', 'xxx')
+          .set('Cookie', handshakeCookie.cookieString())
+          .send({ SAMLResponse: await createSAMLResponse({ inResponseTo: samlRequestId, username: existingUsername }) }, {})
+          .expect(302);
+
+        existingSessionCookie = request.cookie(samlAuthenticationResponse.headers['set-cookie'][0]);
+      });
+
+      it('should renew session and redirect to the home page if login is for the same user', async () => {
+        const samlAuthenticationResponse = await supertest.post('/api/security/v1/saml')
+          .set('kbn-xsrf', 'xxx')
+          .set('Cookie', existingSessionCookie.cookieString())
+          .send({ SAMLResponse: await createSAMLResponse({ username: existingUsername }) }, {})
+          .expect('location', '/')
+          .expect(302);
+
+        const newSessionCookie = request.cookie(samlAuthenticationResponse.headers['set-cookie'][0]);
         expect(newSessionCookie.value).to.not.be.empty();
-        expect(newSessionCookie.path).to.be('/');
-        expect(newSessionCookie.httpOnly).to.be(true);
-        expect(newSessionCookie.value).to.not.be(sessionCookie.value);
+        expect(newSessionCookie.value).to.not.equal(existingSessionCookie.value);
 
-        const apiResponseTwo = await apiResponseTwoPromise;
-        expect(apiResponseTwo.headers['set-cookie']).to.be(undefined);
-        expect(apiResponseTwo.body).to.eql({
-          error: 'Bad Request',
-          message: 'Both access and refresh tokens are expired.',
-          statusCode: 400
-        });
-
-        // Request with old cookie should fail with `400` since it contains expired access token and
-        // already used refresh tokens.
-        const apiResponseWithExpiredToken = await supertest
+        // Tokens from old cookie are invalidated.
+        const rejectedResponse = await supertest
           .get('/api/security/v1/me')
           .set('kbn-xsrf', 'xxx')
-          .set('Cookie', sessionCookie.cookieString())
+          .set('Cookie', existingSessionCookie.cookieString())
           .expect(400);
-        expect(apiResponseWithExpiredToken.body).to.eql({
-          error: 'Bad Request',
-          message: 'Both access and refresh tokens are expired.',
-          statusCode: 400
-        });
+        expect(rejectedResponse.body).to.have.property('message', 'Both access and refresh tokens are expired.');
 
-        // The new cookie with fresh pair of access and refresh tokens should work.
-        await supertest
+        // Only tokens from new session are valid.
+        const acceptedResponse = await supertest
           .get('/api/security/v1/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', newSessionCookie.cookieString())
           .expect(200);
+        expect(acceptedResponse.body).to.have.property('username', existingUsername);
+      });
+
+      it('should create a new session and redirect to the `overwritten_session` if login is for another user', async () => {
+        const newUsername = 'c@d.e';
+        const samlAuthenticationResponse = await supertest.post('/api/security/v1/saml')
+          .set('kbn-xsrf', 'xxx')
+          .set('Cookie', existingSessionCookie.cookieString())
+          .send({ SAMLResponse: await createSAMLResponse({ username: newUsername }) }, {})
+          .expect('location', '/overwritten_session')
+          .expect(302);
+
+        const newSessionCookie = request.cookie(samlAuthenticationResponse.headers['set-cookie'][0]);
+        expect(newSessionCookie.value).to.not.be.empty();
+        expect(newSessionCookie.value).to.not.equal(existingSessionCookie.value);
+
+        // Tokens from old cookie are invalidated.
+        const rejectedResponse = await supertest
+          .get('/api/security/v1/me')
+          .set('kbn-xsrf', 'xxx')
+          .set('Cookie', existingSessionCookie.cookieString())
+          .expect(400);
+        expect(rejectedResponse.body).to.have.property('message', 'Both access and refresh tokens are expired.');
+
+        // Only tokens from new session are valid.
+        const acceptedResponse = await supertest
+          .get('/api/security/v1/me')
+          .set('kbn-xsrf', 'xxx')
+          .set('Cookie', newSessionCookie.cookieString())
+          .expect(200);
+        expect(acceptedResponse.body).to.have.property('username', newUsername);
       });
     });
   });

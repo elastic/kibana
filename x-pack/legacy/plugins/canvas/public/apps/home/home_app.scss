@@ -1,0 +1,35 @@
+.canvasHomeApp {
+  width: 100%;
+
+  .canvasHomeApp__content {
+    width: 100%;
+  }
+
+  .canvasHomeApp__modalHeader {
+    padding-right: $euiSizeL;
+  }
+
+  .canvasHomeApp__modalHeader,
+  .canvasHomeApp__modalBody {
+    width: auto;
+  }
+
+  // This is a temporary hack to make the workpad list scrollable on smaller
+  // screen sizes as part of https://github.com/elastic/kibana/pull/37345.
+  // Without this hack you cannot reach workpads further down the list.
+  //
+  // The real underlying issue here is that we're re-using the workpad loader
+  // EuiModal as home page content, thus ending up with style overrides as this
+  // is not the intended modal usage. Once the home page is redesigned to a
+  // card-style layout, we can clean up these overrides.
+  //
+  // A hack solution feels commensurate with the current level of Canvas
+  // support on smaller devices. In other words, there are much more limiting
+  // factors, at present, beyond choosing a workpad.
+
+  .euiModalBody__overflow {
+    @include euiBreakpoint('xs', 's') {
+      max-height: 80vh;
+    }
+  }
+}

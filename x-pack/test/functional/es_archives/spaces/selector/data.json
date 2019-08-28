@@ -1,0 +1,44 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "config:6.0.0-alpha1",
+    "index": ".kibana",
+    "source": {
+      "config": {
+        "buildNum": 8467,
+        "dateFormat:tz": "UTC"
+      },
+      "type": "config"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "space:default",
+    "index": ".kibana",
+    "source": {
+      "space": {
+        "description": "This is the default space!",
+        "name": "Default"
+      },
+      "type": "space"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "space:another-space",
+    "index": ".kibana",
+    "source": {
+      "space": {
+        "description": "This is another space",
+        "name": "Another Space"
+      },
+      "type": "space"
+    }
+  }
+}

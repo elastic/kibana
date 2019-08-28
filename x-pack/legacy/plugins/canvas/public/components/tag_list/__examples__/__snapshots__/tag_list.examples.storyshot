@@ -1,0 +1,355 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/Tags/TagList empty list 1`] = `null`;
+
+exports[`Storyshots components/Tags/TagList with badge tags 1`] = `
+Array [
+  <span
+    className="euiBadge euiBadge--iconLeft"
+    style={
+      Object {
+        "backgroundColor": "#cc3b54",
+        "color": "#FFFFFF",
+      }
+    }
+  >
+    <span
+      className="euiBadge__content"
+    >
+      <span
+        className="euiBadge__text"
+      >
+        tag1
+      </span>
+    </span>
+  </span>,
+  <span
+    className="euiBadge euiBadge--iconLeft"
+    style={
+      Object {
+        "backgroundColor": "#5bc149",
+        "color": "#000000",
+      }
+    }
+  >
+    <span
+      className="euiBadge__content"
+    >
+      <span
+        className="euiBadge__text"
+      >
+        tag2
+      </span>
+    </span>
+  </span>,
+  <span
+    className="euiBadge euiBadge--iconLeft"
+    style={
+      Object {
+        "backgroundColor": "#fbc545",
+        "color": "#000000",
+      }
+    }
+  >
+    <span
+      className="euiBadge__content"
+    >
+      <span
+        className="euiBadge__text"
+      >
+        tag3
+      </span>
+    </span>
+  </span>,
+]
+`;
+
+exports[`Storyshots components/Tags/TagList with health tags 1`] = `
+Array [
+  <div
+    className="euiHealth"
+  >
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+    >
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <svg
+          className="euiIcon euiIcon--medium euiIcon-isLoading"
+          focusable="false"
+          height={16}
+          style={
+            Object {
+              "fill": "#cc3b54",
+            }
+          }
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        />
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        tag1
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiHealth"
+  >
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+    >
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <svg
+          className="euiIcon euiIcon--medium euiIcon-isLoading"
+          focusable="false"
+          height={16}
+          style={
+            Object {
+              "fill": "#9b3067",
+            }
+          }
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        />
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        tag4
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiHealth"
+  >
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+    >
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <svg
+          className="euiIcon euiIcon--medium euiIcon-isLoading"
+          focusable="false"
+          height={16}
+          style={
+            Object {
+              "fill": "#d41e93",
+            }
+          }
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        />
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        tag6
+      </div>
+    </div>
+  </div>,
+]
+`;
+
+exports[`Storyshots components/Tags/TagList with lots of tags 1`] = `
+Array [
+  <span
+    className="euiBadge euiBadge--iconLeft"
+    style={
+      Object {
+        "backgroundColor": "#cc3b54",
+        "color": "#FFFFFF",
+      }
+    }
+  >
+    <span
+      className="euiBadge__content"
+    >
+      <span
+        className="euiBadge__text"
+      >
+        tag1
+      </span>
+    </span>
+  </span>,
+  <span
+    className="euiBadge euiBadge--iconLeft"
+    style={
+      Object {
+        "backgroundColor": "#5bc149",
+        "color": "#000000",
+      }
+    }
+  >
+    <span
+      className="euiBadge__content"
+    >
+      <span
+        className="euiBadge__text"
+      >
+        tag2
+      </span>
+    </span>
+  </span>,
+  <span
+    className="euiBadge euiBadge--iconLeft"
+    style={
+      Object {
+        "backgroundColor": "#fbc545",
+        "color": "#000000",
+      }
+    }
+  >
+    <span
+      className="euiBadge__content"
+    >
+      <span
+        className="euiBadge__text"
+      >
+        tag3
+      </span>
+    </span>
+  </span>,
+  <span
+    className="euiBadge euiBadge--iconLeft"
+    style={
+      Object {
+        "backgroundColor": "#9b3067",
+        "color": "#FFFFFF",
+      }
+    }
+  >
+    <span
+      className="euiBadge__content"
+    >
+      <span
+        className="euiBadge__text"
+      >
+        tag4
+      </span>
+    </span>
+  </span>,
+  <span
+    className="euiBadge euiBadge--iconLeft"
+    style={
+      Object {
+        "backgroundColor": "#1819bd",
+        "color": "#FFFFFF",
+      }
+    }
+  >
+    <span
+      className="euiBadge__content"
+    >
+      <span
+        className="euiBadge__text"
+      >
+        tag5
+      </span>
+    </span>
+  </span>,
+  <span
+    className="euiBadge euiBadge--iconLeft"
+    style={
+      Object {
+        "backgroundColor": "#d41e93",
+        "color": "#FFFFFF",
+      }
+    }
+  >
+    <span
+      className="euiBadge__content"
+    >
+      <span
+        className="euiBadge__text"
+      >
+        tag6
+      </span>
+    </span>
+  </span>,
+  <span
+    className="euiBadge euiBadge--iconLeft"
+    style={
+      Object {
+        "backgroundColor": "#3486d2",
+        "color": "#000000",
+      }
+    }
+  >
+    <span
+      className="euiBadge__content"
+    >
+      <span
+        className="euiBadge__text"
+      >
+        tag7
+      </span>
+    </span>
+  </span>,
+  <span
+    className="euiBadge euiBadge--iconLeft"
+    style={
+      Object {
+        "backgroundColor": "#b870d8",
+        "color": "#000000",
+      }
+    }
+  >
+    <span
+      className="euiBadge__content"
+    >
+      <span
+        className="euiBadge__text"
+      >
+        tag8
+      </span>
+    </span>
+  </span>,
+  <span
+    className="euiBadge euiBadge--iconLeft"
+    style={
+      Object {
+        "backgroundColor": "#f4a4a7",
+        "color": "#000000",
+      }
+    }
+  >
+    <span
+      className="euiBadge__content"
+    >
+      <span
+        className="euiBadge__text"
+      >
+        tag9
+      </span>
+    </span>
+  </span>,
+  <span
+    className="euiBadge euiBadge--iconLeft"
+    style={
+      Object {
+        "backgroundColor": "#072d6d",
+        "color": "#FFFFFF",
+      }
+    }
+  >
+    <span
+      className="euiBadge__content"
+    >
+      <span
+        className="euiBadge__text"
+      >
+        tag10
+      </span>
+    </span>
+  </span>,
+]
+`;

@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`includes namespace in failure 1`] = `"[foo-namespace]: expected value to equal [test] but got [foo]"`;
+
+exports[`returns error when not correct 1`] = `"expected value to equal [test] but got [foo]"`;
+
+exports[`returns error when not correct 2`] = `"expected value to equal [true] but got [false]"`;
+
+exports[`returns error when not correct 3`] = `"expected value to equal [test] but got [1,2,3]"`;
+
+exports[`returns error when not correct 4`] = `"expected value to equal [123] but got [abc]"`;
+
+exports[`returns error when not correct 5`] = `"expected value to equal [null] but got [42]"`;

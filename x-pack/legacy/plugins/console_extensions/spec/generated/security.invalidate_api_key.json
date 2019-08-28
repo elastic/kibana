@@ -1,0 +1,11 @@
+{
+  "security.invalidate_api_key": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_security/api_key"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-invalidate-api-key.html"
+  }
+}

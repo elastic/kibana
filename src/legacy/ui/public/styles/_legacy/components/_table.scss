@@ -1,0 +1,46 @@
+@import '../../../../../core_plugins/kibana/public/discover/mixins';
+
+.table {
+  // Nesting
+  .table {
+    background-color: $euiColorEmptyShade;
+  }
+}
+
+kbn-table, .kbn-table, tbody[kbn-rows] {
+  @include dscDocSourceStyle;
+  // sub tables should not have a leading border
+  .table .table {
+    margin-bottom: 0;
+
+    tr:first-child > td {
+      border-top: none;
+    }
+
+    td.field-name {
+      font-weight: $euiFontWeightBold;
+    }
+  }
+}
+
+table {
+  th {
+    i.fa-sort {
+      color: $euiColorLightShade;
+    }
+
+    button.fa-sort-asc,
+    button.fa-sort-down,
+    i.fa-sort-asc,
+    i.fa-sort-down {
+      color: $euiColorPrimary;
+    }
+
+    button.fa-sort-desc,
+    button.fa-sort-up,
+    i.fa-sort-desc,
+    i.fa-sort-up {
+      color: $euiColorPrimary;
+    }
+  }
+}

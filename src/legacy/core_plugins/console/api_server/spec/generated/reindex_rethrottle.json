@@ -1,0 +1,14 @@
+{
+  "reindex_rethrottle": {
+    "url_params": {
+      "requests_per_second": ""
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_reindex/{task_id}/_rethrottle"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-reindex.html"
+  }
+}

@@ -26,7 +26,7 @@ import {
   GuideSectionTypes,
 } from '../../components';
 
-const linkHtml = require('./link.html');
+import linkHtml from './link.html';
 
 export default props => (
   <GuidePage title={props.route.name}>
@@ -39,11 +39,6 @@ export default props => (
     >
       <GuideDemo
         html={linkHtml}
-      />
-
-      <GuideDemo
-        html={linkHtml}
-        isDarkTheme={true}
       />
     </GuideSection>
   </GuidePage>

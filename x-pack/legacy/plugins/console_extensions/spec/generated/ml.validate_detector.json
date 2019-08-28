@@ -1,0 +1,10 @@
+{
+  "ml.validate_detector": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_ml/anomaly_detectors/_validate/detector"
+    ]
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "id": "apm_transaction",
+  "title": "APM",
+  "description": "Detect anomalies in high mean of transaction duration (ECS)",
+  "type": "Transaction data",
+  "logoFile": "logo.json",
+  "defaultIndexPattern": "apm-*",
+  "query": {
+    "bool": {
+      "filter": [
+        { "term": { "processor.event": "transaction" } },
+        { "term": { "transaction.type": "request" } }
+      ]
+    }
+  },
+  "jobs": [
+    {
+      "id": "high_mean_response_time",
+      "file": "high_mean_response_time.json"
+    }
+  ],
+  "datafeeds": [
+    {
+      "id": "datafeed-high_mean_response_time",
+      "file": "datafeed_high_mean_response_time.json",
+      "job_id": "high_mean_response_time"
+    }
+  ]
+}

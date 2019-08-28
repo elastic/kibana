@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`fails if null 1`] = `"expected value of type [string] but got [null]"`;
+
+exports[`includes namespace in failure 1`] = `"[foo-namespace]: expected value of type [string] but got [null]"`;
+
+exports[`validates basic type 1`] = `"expected value of type [string] but got [number]"`;
+
+exports[`validates contained type 1`] = `"value is [foo] but it must have a maximum length of [1]."`;

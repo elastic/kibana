@@ -1,0 +1,14 @@
+{
+  "name": "fixture",
+  "jest": {
+    "testMatch": [
+      "**/test.js"
+    ],
+    "transform": {
+      "^.+\\.js$": "<rootDir>/../../babel_transform.js"
+    },
+    "reporters": [
+      ["<rootDir>/../../junit_reporter.js", {"rootDirectory": "."}]
+    ]
+  }
+}

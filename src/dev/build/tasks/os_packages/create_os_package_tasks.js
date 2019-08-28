@@ -18,6 +18,7 @@
  */
 
 import { runFpm } from './run_fpm';
+import { runDockerGenerator } from './docker_generator';
 
 export const CreateDebPackageTask = {
   description: 'Creating deb package',
@@ -38,5 +39,13 @@ export const CreateRpmPackageTask = {
       '--architecture', 'x86_64',
       '--rpm-os', 'linux'
     ]);
+  }
+};
+
+export const CreateDockerPackageTask = {
+  description: 'Creating docker package',
+
+  async run(config, log, build) {
+    await runDockerGenerator(config, log, build);
   }
 };

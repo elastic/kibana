@@ -1,0 +1,13 @@
+.file-datavisualizer-file-picker {
+  max-width: inherit;
+
+  .euiFilePicker__prompt {
+    background-color: $euiColorEmptyShade;
+    box-shadow: none;
+
+    .euiFilePicker__icon {
+      width: $euiSizeXXL;
+      height: $euiSizeXXL;
+    }
+  }
+}

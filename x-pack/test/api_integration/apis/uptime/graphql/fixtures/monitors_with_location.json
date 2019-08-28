@@ -1,0 +1,720 @@
+{
+  "monitorStatus": {
+    "monitors": [
+      {
+        "id": {
+          "key": "auto-http-0X21EE76EAC459873F",
+          "url": "http://localhost:12349/test-page"
+        },
+        "ping": {
+          "timestamp": "2019-06-03T14:14:27.737Z",
+          "container": null,
+          "kubernetes": null,
+          "monitor": {
+            "duration": {
+              "us": 1621
+            },
+            "id": "auto-http-0X21EE76EAC459873F",
+            "ip": "127.0.0.1",
+            "name": "test-page",
+            "status": "down"
+          },
+          "observer": {
+            "geo": {
+              "location": "39.9526, 75.1652",
+              "name": "europe-west-1"
+            }
+          },
+          "url": {
+            "domain": "localhost",
+            "full": "http://localhost:12349/test-page"
+          }
+        },
+        "upSeries": [
+          {
+            "x": 1559571053760,
+            "y": null
+          }
+        ],
+        "downSeries": [
+          {
+            "x": 1559571053760,
+            "y": 47
+          }
+        ]
+      },
+      {
+        "id": {
+          "key": "auto-http-0X2AF1D7DB9C490053",
+          "url": "http://35.245.22.113:12349/"
+        },
+        "ping": {
+          "timestamp": "2019-06-03T14:14:06.733Z",
+          "container": null,
+          "kubernetes": null,
+          "monitor": {
+            "duration": {
+              "us": 16003323
+            },
+            "id": "auto-http-0X2AF1D7DB9C490053",
+            "ip": "35.245.22.113",
+            "name": "prod-site",
+            "status": "down"
+          },
+          "observer": {
+            "geo": {
+              "location": "39.9526, 75.1652",
+              "name": "europe-west-1"
+            }
+          },
+          "url": {
+            "domain": "35.245.22.113",
+            "full": "http://35.245.22.113:12349/"
+          }
+        },
+        "upSeries": [
+          {
+            "x": 1559571053760,
+            "y": null
+          }
+        ],
+        "downSeries": [
+          {
+            "x": 1559571053760,
+            "y": 2
+          }
+        ]
+      },
+      {
+        "id": {
+          "key": "auto-http-0X3F1F767F45156CB3",
+          "url": "http://localhost:9200"
+        },
+        "ping": {
+          "timestamp": "2019-06-03T14:14:20.727Z",
+          "container": null,
+          "kubernetes": null,
+          "monitor": {
+            "duration": {
+              "us": 2965
+            },
+            "id": "auto-http-0X3F1F767F45156CB3",
+            "ip": "127.0.0.1",
+            "name": "",
+            "status": "up"
+          },
+          "observer": {
+            "geo": {
+              "location": "39.9526, 75.1652",
+              "name": "europe-west-1"
+            }
+          },
+          "url": {
+            "domain": "localhost",
+            "full": "http://localhost:9200"
+          }
+        },
+        "upSeries": [
+          {
+            "x": 1559571053760,
+            "y": 4
+          }
+        ],
+        "downSeries": [
+          {
+            "x": 1559571053760,
+            "y": null
+          }
+        ]
+      },
+      {
+        "id": {
+          "key": "auto-http-0X3F1F767F45156CB3",
+          "url": "http://localhost:9200"
+        },
+        "ping": {
+          "timestamp": "2019-06-03T14:14:25.054Z",
+          "container": null,
+          "kubernetes": null,
+          "monitor": {
+            "duration": {
+              "us": 3010
+            },
+            "id": "auto-http-0X3F1F767F45156CB3",
+            "ip": "127.0.0.1",
+            "name": "",
+            "status": "up"
+          },
+          "observer": {
+            "geo": {
+              "location": "39.9526, 75.1652",
+              "name": "us-east-1"
+            }
+          },
+          "url": {
+            "domain": "localhost",
+            "full": "http://localhost:9200"
+          }
+        },
+        "upSeries": [
+          {
+            "x": 1559571053760,
+            "y": 4
+          }
+        ],
+        "downSeries": [
+          {
+            "x": 1559571053760,
+            "y": null
+          }
+        ]
+      },
+      {
+        "id": {
+          "key": "auto-http-0X55511C5F7D2442BF",
+          "url": "http://35.245.22.113:12349/test-page"
+        },
+        "ping": {
+          "timestamp": "2019-06-03T14:14:06.733Z",
+          "container": null,
+          "kubernetes": null,
+          "monitor": {
+            "duration": {
+              "us": 16003395
+            },
+            "id": "auto-http-0X55511C5F7D2442BF",
+            "ip": "35.245.22.113",
+            "name": "prod-site-page",
+            "status": "down"
+          },
+          "observer": {
+            "geo": {
+              "location": "39.9526, 75.1652",
+              "name": "europe-west-1"
+            }
+          },
+          "url": {
+            "domain": "35.245.22.113",
+            "full": "http://35.245.22.113:12349/test-page"
+          }
+        },
+        "upSeries": [
+          {
+            "x": 1559571053760,
+            "y": null
+          }
+        ],
+        "downSeries": [
+          {
+            "x": 1559571053760,
+            "y": 2
+          }
+        ]
+      },
+      {
+        "id": {
+          "key": "auto-http-0X7BD0BBBE9FCA62B3",
+          "url": "https://www.elastic.co/"
+        },
+        "ping": {
+          "timestamp": "2019-06-03T14:14:21.734Z",
+          "container": null,
+          "kubernetes": null,
+          "monitor": {
+            "duration": {
+              "us": 1166542
+            },
+            "id": "auto-http-0X7BD0BBBE9FCA62B3",
+            "ip": "151.101.202.217",
+            "name": "elastic-website",
+            "status": "up"
+          },
+          "observer": {
+            "geo": {
+              "location": "39.9526, 75.1652",
+              "name": "europe-west-1"
+            }
+          },
+          "url": {
+            "domain": "www.elastic.co",
+            "full": "https://www.elastic.co/"
+          }
+        },
+        "upSeries": [
+          {
+            "x": 1559571053760,
+            "y": 4
+          }
+        ],
+        "downSeries": [
+          {
+            "x": 1559571053760,
+            "y": null
+          }
+        ]
+      },
+      {
+        "id": {
+          "key": "auto-http-0X89BB0F9A6C81D178",
+          "url": "http://localhost:12349/"
+        },
+        "ping": {
+          "timestamp": "2019-06-03T14:14:27.737Z",
+          "container": null,
+          "kubernetes": null,
+          "monitor": {
+            "duration": {
+              "us": 1668
+            },
+            "id": "auto-http-0X89BB0F9A6C81D178",
+            "ip": "127.0.0.1",
+            "name": "my-new-test-site-name",
+            "status": "down"
+          },
+          "observer": {
+            "geo": {
+              "location": "39.9526, 75.1652",
+              "name": "europe-west-1"
+            }
+          },
+          "url": {
+            "domain": "localhost",
+            "full": "http://localhost:12349/"
+          }
+        },
+        "upSeries": [
+          {
+            "x": 1559571053760,
+            "y": null
+          }
+        ],
+        "downSeries": [
+          {
+            "x": 1559571053760,
+            "y": 46
+          }
+        ]
+      },
+      {
+        "id": {
+          "key": "auto-icmp-0X5E0870F7B7178EFD",
+          "url": "icmp://0.0.0.0"
+        },
+        "ping": {
+          "timestamp": "2019-06-03T14:14:25.003Z",
+          "container": null,
+          "kubernetes": null,
+          "monitor": {
+            "duration": {
+              "us": 83
+            },
+            "id": "auto-icmp-0X5E0870F7B7178EFD",
+            "ip": "0.0.0.0",
+            "name": "anothericmp",
+            "status": "down"
+          },
+          "observer": {
+            "geo": {
+              "location": "39.9526, 75.1652",
+              "name": "europe-west-1"
+            }
+          },
+          "url": {
+            "domain": "0.0.0.0",
+            "full": "icmp://0.0.0.0"
+          }
+        },
+        "upSeries": [
+          {
+            "x": 1559571053760,
+            "y": null
+          }
+        ],
+        "downSeries": [
+          {
+            "x": 1559571053760,
+            "y": 9
+          }
+        ]
+      },
+      {
+        "id": {
+          "key": "auto-icmp-0XC841A2D2853DF259",
+          "url": "icmp://8.8.8.8"
+        },
+        "ping": {
+          "timestamp": "2019-06-03T14:14:25.003Z",
+          "container": null,
+          "kubernetes": null,
+          "monitor": {
+            "duration": {
+              "us": 14216
+            },
+            "id": "auto-icmp-0XC841A2D2853DF259",
+            "ip": "8.8.8.8",
+            "name": "icmptest",
+            "status": "up"
+          },
+          "observer": {
+            "geo": {
+              "location": "39.9526, 75.1652",
+              "name": "europe-west-1"
+            }
+          },
+          "url": {
+            "domain": "8.8.8.8",
+            "full": "icmp://8.8.8.8"
+          }
+        },
+        "upSeries": [
+          {
+            "x": 1559571053760,
+            "y": 9
+          }
+        ],
+        "downSeries": [
+          {
+            "x": 1559571053760,
+            "y": null
+          }
+        ]
+      },
+      {
+        "id": {
+          "key": "auto-tcp-0X43965CDA26D0025F",
+          "url": "tcp://news.google.com:80"
+        },
+        "ping": {
+          "timestamp": "2019-06-03T14:14:26.734Z",
+          "container": null,
+          "kubernetes": null,
+          "monitor": {
+            "duration": {
+              "us": 15977
+            },
+            "id": "auto-tcp-0X43965CDA26D0025F",
+            "ip": "172.217.7.174",
+            "name": "",
+            "status": "up"
+          },
+          "observer": {
+            "geo": {
+              "location": "39.9526, 75.1652",
+              "name": "europe-west-1"
+            }
+          },
+          "url": {
+            "domain": "news.google.com",
+            "full": "tcp://news.google.com:80"
+          }
+        },
+        "upSeries": [
+          {
+            "x": 1559571053760,
+            "y": 9
+          }
+        ],
+        "downSeries": [
+          {
+            "x": 1559571053760,
+            "y": null
+          }
+        ]
+      },
+      {
+        "id": {
+          "key": "auto-tcp-0X709158D957AE02A5",
+          "url": "tcp://www.google.com:80"
+        },
+        "ping": {
+          "timestamp": "2019-06-03T14:14:26.737Z",
+          "container": null,
+          "kubernetes": null,
+          "monitor": {
+            "duration": {
+              "us": 17621
+            },
+            "id": "auto-tcp-0X709158D957AE02A5",
+            "ip": "172.217.7.228",
+            "name": "",
+            "status": "up"
+          },
+          "observer": {
+            "geo": {
+              "location": "39.9526, 75.1652",
+              "name": "europe-west-1"
+            }
+          },
+          "url": {
+            "domain": "www.google.com",
+            "full": "tcp://www.google.com:80"
+          }
+        },
+        "upSeries": [
+          {
+            "x": 1559571053760,
+            "y": 9
+          }
+        ],
+        "downSeries": [
+          {
+            "x": 1559571053760,
+            "y": null
+          }
+        ]
+      },
+      {
+        "id": {
+          "key": "auto-tcp-0X7BAA5C23EED7A602",
+          "url": "tcp://localhost:9200"
+        },
+        "ping": {
+          "timestamp": "2019-06-03T14:14:26.737Z",
+          "container": null,
+          "kubernetes": null,
+          "monitor": {
+            "duration": {
+              "us": 3086
+            },
+            "id": "auto-tcp-0X7BAA5C23EED7A602",
+            "ip": "127.0.0.1",
+            "name": "",
+            "status": "up"
+          },
+          "observer": {
+            "geo": {
+              "location": "39.9526, 75.1652",
+              "name": "europe-west-1"
+            }
+          },
+          "url": {
+            "domain": "localhost",
+            "full": "tcp://localhost:9200"
+          }
+        },
+        "upSeries": [
+          {
+            "x": 1559571053760,
+            "y": 10
+          }
+        ],
+        "downSeries": [
+          {
+            "x": 1559571053760,
+            "y": null
+          }
+        ]
+      },
+      {
+        "id": {
+          "key": "auto-tcp-0X7D120A181386F6FF",
+          "url": "tcp://www.reddit.com:80"
+        },
+        "ping": {
+          "timestamp": "2019-06-03T14:14:26.736Z",
+          "container": null,
+          "kubernetes": null,
+          "monitor": {
+            "duration": {
+              "us": 42310
+            },
+            "id": "auto-tcp-0X7D120A181386F6FF",
+            "ip": "151.101.201.140",
+            "name": "",
+            "status": "up"
+          },
+          "observer": {
+            "geo": {
+              "location": "39.9526, 75.1652",
+              "name": "europe-west-1"
+            }
+          },
+          "url": {
+            "domain": "www.reddit.com",
+            "full": "tcp://www.reddit.com:80"
+          }
+        },
+        "upSeries": [
+          {
+            "x": 1559571053760,
+            "y": 9
+          }
+        ],
+        "downSeries": [
+          {
+            "x": 1559571053760,
+            "y": null
+          }
+        ]
+      },
+      {
+        "id": {
+          "key": "auto-tcp-0X9B871DF976CE3FF6",
+          "url": "tcp://www.twitter.com:80"
+        },
+        "ping": {
+          "timestamp": "2019-06-03T14:14:26.736Z",
+          "container": null,
+          "kubernetes": null,
+          "monitor": {
+            "duration": {
+              "us": 26996
+            },
+            "id": "auto-tcp-0X9B871DF976CE3FF6",
+            "ip": "104.244.42.65",
+            "name": "",
+            "status": "up"
+          },
+          "observer": {
+            "geo": {
+              "location": "39.9526, 75.1652",
+              "name": "europe-west-1"
+            }
+          },
+          "url": {
+            "domain": "www.twitter.com",
+            "full": "tcp://www.twitter.com:80"
+          }
+        },
+        "upSeries": [
+          {
+            "x": 1559571053760,
+            "y": 9
+          }
+        ],
+        "downSeries": [
+          {
+            "x": 1559571053760,
+            "y": null
+          }
+        ]
+      },
+      {
+        "id": {
+          "key": "auto-tcp-0XB5135CCF01B9181",
+          "url": "tcp://www.amazon.com:80"
+        },
+        "ping": {
+          "timestamp": "2019-06-03T14:14:26.736Z",
+          "container": null,
+          "kubernetes": null,
+          "monitor": {
+            "duration": {
+              "us": 22589
+            },
+            "id": "auto-tcp-0XB5135CCF01B9181",
+            "ip": "184.24.104.59",
+            "name": "",
+            "status": "up"
+          },
+          "observer": {
+            "geo": {
+              "location": "39.9526, 75.1652",
+              "name": "europe-west-1"
+            }
+          },
+          "url": {
+            "domain": "www.amazon.com",
+            "full": "tcp://www.amazon.com:80"
+          }
+        },
+        "upSeries": [
+          {
+            "x": 1559571053760,
+            "y": 9
+          }
+        ],
+        "downSeries": [
+          {
+            "x": 1559571053760,
+            "y": null
+          }
+        ]
+      },
+      {
+        "id": {
+          "key": "auto-tcp-0XCEFD11A886FD7BFB",
+          "url": "tcp://www.facebook.com:80"
+        },
+        "ping": {
+          "timestamp": "2019-06-03T14:14:26.734Z",
+          "container": null,
+          "kubernetes": null,
+          "monitor": {
+            "duration": {
+              "us": 15957
+            },
+            "id": "auto-tcp-0XCEFD11A886FD7BFB",
+            "ip": "31.13.66.35",
+            "name": "",
+            "status": "up"
+          },
+          "observer": {
+            "geo": {
+              "location": "39.9526, 75.1652",
+              "name": "europe-west-1"
+            }
+          },
+          "url": {
+            "domain": "www.facebook.com",
+            "full": "tcp://www.facebook.com:80"
+          }
+        },
+        "upSeries": [
+          {
+            "x": 1559571053760,
+            "y": 9
+          }
+        ],
+        "downSeries": [
+          {
+            "x": 1559571053760,
+            "y": null
+          }
+        ]
+      },
+      {
+        "id": {
+          "key": "auto-tcp-0XD9E69ACFD41A759C",
+          "url": "tcp://www.netflix.com:80"
+        },
+        "ping": {
+          "timestamp": "2019-06-03T14:14:26.734Z",
+          "container": null,
+          "kubernetes": null,
+          "monitor": {
+            "duration": {
+              "us": 20475
+            },
+            "id": "auto-tcp-0XD9E69ACFD41A759C",
+            "ip": "34.194.103.209",
+            "name": "",
+            "status": "up"
+          },
+          "observer": {
+            "geo": {
+              "location": "39.9526, 75.1652",
+              "name": "europe-west-1"
+            }
+          },
+          "url": {
+            "domain": "www.netflix.com",
+            "full": "tcp://www.netflix.com:80"
+          }
+        },
+        "upSeries": [
+          {
+            "x": 1559571053760,
+            "y": 9
+          }
+        ],
+        "downSeries": [
+          {
+            "x": 1559571053760,
+            "y": null
+          }
+        ]
+      }
+    ]
+  }
+}

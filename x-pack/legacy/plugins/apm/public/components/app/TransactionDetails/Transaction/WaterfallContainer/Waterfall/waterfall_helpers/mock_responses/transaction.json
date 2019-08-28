@@ -1,0 +1,91 @@
+{
+  "@timestamp": "2018-09-12T15:16:05.341Z",
+  "processor": {
+    "name": "transaction",
+    "event": "transaction"
+  },
+  "transaction": {
+    "duration": {
+      "us": 9069543
+    },
+    "type": "request",
+    "result": "HTTP 2xx",
+    "trace_id": "7d4d29bea37e48ac8ba1f962d5eb8a41",
+    "sampled": true,
+    "span_count": {
+      "started": 1,
+      "dropped": 0
+    },
+    "id": "e070bc3c732087f8",
+    "name": "APIRestController#orders"
+  },
+  "service": {
+    "language": {
+      "version": "10.0.2",
+      "name": "Java"
+    },
+    "runtime": {
+      "name": "Java",
+      "version": "10.0.2"
+    },
+    "name": "opbeans-java",
+    "agent": {
+      "name": "java",
+      "version": "0.7.0-SNAPSHOT"
+    }
+  },
+  "process": {
+    "ppid": 10060,
+    "title": "/Library/Java/JavaVirtualMachines/jdk-10.0.2.jdk/Contents/Home/bin/java",
+    "pid": 10069
+  },
+  "context": {
+    "request": {
+      "url": {
+        "full": "http://localhost:8080/api/orders",
+        "hostname": "localhost",
+        "port": "8080",
+        "pathname": "/api/orders",
+        "protocol": "http"
+      },
+      "socket": {
+        "encrypted": false,
+        "remote_address": "0:0:0:0:0:0:0:1"
+      },
+      "http_version": "1.1",
+      "method": "GET",
+      "headers": {
+        "accept-encoding": "gzip, deflate",
+        "host": "localhost:8080",
+        "connection": "keep-alive",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/70.0.3508.0 Safari/537.36",
+        "accept": "*/*",
+        "referer": "http://localhost:8080/orders"
+      }
+    },
+    "response": {
+      "finished": true,
+      "headers_sent": true,
+      "status_code": 200,
+      "headers": {
+        "Transfer-Encoding": "chunked",
+        "Date": "Wed, 12 Sep 2018 15:16:07 GMT",
+        "Content-Type": "application/json;charset=UTF-8"
+      }
+    },
+    "system": {
+      "architecture": "x86_64",
+      "platform": "Srens-MacBook-Pro.local",
+      "ip": "172.18.0.1",
+      "hostname": "Mac OS X"
+    }
+  },
+  "beat": {
+    "version": "7.0.0-alpha1",
+    "name": "361022bff072",
+    "hostname": "361022bff072"
+  },
+  "host": {
+    "hostname": "361022bff072"
+  }
+}

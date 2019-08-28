@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HeaderToolTipContent it renders the expected table content 1`] = `
+<Component
+  header={
+    Object {
+      "aggregatable": true,
+      "category": "base",
+      "columnHeaderType": "not-filtered",
+      "description": "Date/time when the event originated.
+For log events this is the date/time when the event was generated, and not when it was read.
+Required field for all events.",
+      "example": "2016-05-23T08:05:34.853Z",
+      "id": "@timestamp",
+      "type": "date",
+      "width": 240,
+    }
+  }
+/>
+`;

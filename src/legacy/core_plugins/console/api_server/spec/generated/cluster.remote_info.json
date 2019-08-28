@@ -1,0 +1,11 @@
+{
+  "cluster.remote_info": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_remote/info"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-remote-info.html"
+  }
+}

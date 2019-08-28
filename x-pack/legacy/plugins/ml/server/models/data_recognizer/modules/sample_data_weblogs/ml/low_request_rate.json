@@ -1,0 +1,37 @@
+{
+  "groups": ["kibana_sample_data", "kibana_sample_web_logs"],
+  "description": "Find unusually low request rates",
+  "analysis_config": {
+    "bucket_span": "1h",
+    "summary_count_field_name": "doc_count",
+    "detectors": [
+      {
+        "detector_description": "Low request rates",
+        "function": "low_count"
+      }
+    ],
+    "influencers": []
+  },
+  "analysis_limits": {
+    "model_memory_limit": "10mb"
+  },
+  "data_description": {
+    "time_field": "timestamp"
+  },
+  "model_plot_config": {
+    "enabled": true
+  },
+  "custom_settings": {
+    "created_by": "ml-module-sample",
+    "custom_urls": [
+      {
+        "url_name": "Raw data",
+        "url_value": "kibana#/discover?_g=(time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(index:\u002790943e30-9a47-11e8-b64d-95841ca0b247\u0027)"
+      },
+      {
+        "url_name": "Data dashboard",
+        "url_value": "kibana#/dashboard/edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b?_g=(time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(filters:!(),query:(language:kuery,query:\u0027\u0027))"
+      }
+    ]
+  }
+}

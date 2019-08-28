@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`I18n engine addMessages should throw error if locale is not specified or empty 1`] = `"[I18n] A \`locale\` must be a non-empty string to add messages."`;
+
+exports[`I18n engine addMessages should throw error if locale is not specified or empty 2`] = `"[I18n] A \`locale\` must be a non-empty string to add messages."`;
+
+exports[`I18n engine addMessages should throw error if locale specified in messages is different from one provided as second argument 1`] = `"[I18n] A \`locale\` in the translation object is different from the one provided as a second argument."`;
+
+exports[`I18n engine translate should throw error if id is not a non-empty string 1`] = `"[I18n] An \`id\` must be a non-empty string to translate a message."`;
+
+exports[`I18n engine translate should throw error if id is not a non-empty string 2`] = `"[I18n] An \`id\` must be a non-empty string to translate a message."`;
+
+exports[`I18n engine translate should throw error if id is not a non-empty string 3`] = `"[I18n] An \`id\` must be a non-empty string to translate a message."`;
+
+exports[`I18n engine translate should throw error if id is not a non-empty string 4`] = `"[I18n] An \`id\` must be a non-empty string to translate a message."`;
+
+exports[`I18n engine translate should throw error if id is not a non-empty string 5`] = `"[I18n] An \`id\` must be a non-empty string to translate a message."`;
+
+exports[`I18n engine translate should throw error if id is not a non-empty string 6`] = `"[I18n] An \`id\` must be a non-empty string to translate a message."`;
+
+exports[`I18n engine translate should throw error if translation message and defaultMessage are not provided 1`] = `"[I18n] Cannot format message: \\"foo\\". Default message must be provided."`;
+
+exports[`I18n engine translate should throw error if used format is not specified 1`] = `
+"[I18n] Error formatting message: \\"a.b.c\\" for locale: \\"en\\".
+SyntaxError: Expected \\"date\\", \\"number\\", \\"plural\\", \\"select\\", \\"selectordinal\\" or \\"time\\" but \\"f\\" found."
+`;
+
+exports[`I18n engine translate should throw error if used format is not specified 2`] = `
+"[I18n] Error formatting the default message for: \\"d.e.f\\".
+SyntaxError: Expected \\"date\\", \\"number\\", \\"plural\\", \\"select\\", \\"selectordinal\\" or \\"time\\" but \\"b\\" found."
+`;
+
+exports[`I18n engine translate should throw error if wrong context is provided to the translation string 1`] = `
+"[I18n] Error formatting message: \\"a.b.c\\" for locale: \\"en\\".
+Error: The intl string context variable 'numPhotos' was not provided to the string 'You have {numPhotos, plural,
+                      =0 {no photos.}
+                      =1 {one photo.}
+                      other {# photos.}
+                   }'"
+`;
+
+exports[`I18n engine translate should throw error if wrong context is provided to the translation string 2`] = `
+"[I18n] Error formatting the default message for: \\"d.e.f\\".
+Error: The intl string context variable 'numPhotos' was not provided to the string 'You have {numPhotos, plural,
+                             =0 {no photos.}
+                             =1 {one photo.}
+                             other {# photos.}
+                          }'"
+`;
+
+exports[`I18n engine translateUsingPseudoLocale should translate message using pseudo-locale 1`] = `"Ṁéšššàĝĝé ŵîîţĥ àà [ɱàŕŕķðôôŵñ ļļîñķķ](http://localhost:5601/url) àñðð àñ <strong>ĥĥţɱļļ éļééɱéññţ</strong>"`;

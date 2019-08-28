@@ -1,0 +1,183 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/ToolTipShortcut with alt 1`] = `
+<div
+  style={
+    Object {
+      "backgroundColor": "#343741",
+      "padding": "5px",
+      "width": "100px",
+    }
+  }
+>
+  <div
+    className="euiText euiText--extraSmall"
+  >
+    <div
+      className="euiTextAlign euiTextAlign--center"
+    >
+      <div
+        className="euiTextColor euiTextColor--ghost"
+      >
+        ⌥  +  P
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/ToolTipShortcut with cmd 1`] = `
+<div
+  style={
+    Object {
+      "backgroundColor": "#343741",
+      "padding": "5px",
+      "width": "100px",
+    }
+  }
+>
+  <div
+    className="euiText euiText--extraSmall"
+  >
+    <div
+      className="euiTextAlign euiTextAlign--center"
+    >
+      <div
+        className="euiTextColor euiTextColor--ghost"
+      >
+        ⌘  +  D
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/ToolTipShortcut with down arrow 1`] = `
+<div
+  style={
+    Object {
+      "backgroundColor": "#343741",
+      "padding": "5px",
+      "width": "100px",
+    }
+  }
+>
+  <div
+    className="euiText euiText--extraSmall"
+  >
+    <div
+      className="euiTextAlign euiTextAlign--center"
+    >
+      <div
+        className="euiTextColor euiTextColor--ghost"
+      >
+        ⌘  +  SHIFT  +  ↓
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/ToolTipShortcut with left arrow 1`] = `
+<div
+  style={
+    Object {
+      "backgroundColor": "#343741",
+      "padding": "5px",
+      "width": "100px",
+    }
+  }
+>
+  <div
+    className="euiText euiText--extraSmall"
+  >
+    <div
+      className="euiTextAlign euiTextAlign--center"
+    >
+      <div
+        className="euiTextColor euiTextColor--ghost"
+      >
+        ←
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/ToolTipShortcut with right arrow 1`] = `
+<div
+  style={
+    Object {
+      "backgroundColor": "#343741",
+      "padding": "5px",
+      "width": "100px",
+    }
+  }
+>
+  <div
+    className="euiText euiText--extraSmall"
+  >
+    <div
+      className="euiTextAlign euiTextAlign--center"
+    >
+      <div
+        className="euiTextColor euiTextColor--ghost"
+      >
+        →
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/ToolTipShortcut with shortcut 1`] = `
+<div
+  style={
+    Object {
+      "backgroundColor": "#343741",
+      "padding": "5px",
+      "width": "100px",
+    }
+  }
+>
+  <div
+    className="euiText euiText--extraSmall"
+  >
+    <div
+      className="euiTextAlign euiTextAlign--center"
+    >
+      <div
+        className="euiTextColor euiTextColor--ghost"
+      >
+        G
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/ToolTipShortcut with up arrow 1`] = `
+<div
+  style={
+    Object {
+      "backgroundColor": "#343741",
+      "padding": "5px",
+      "width": "100px",
+    }
+  }
+>
+  <div
+    className="euiText euiText--extraSmall"
+  >
+    <div
+      className="euiTextAlign euiTextAlign--center"
+    >
+      <div
+        className="euiTextColor euiTextColor--ghost"
+      >
+        ⌘  +  SHIFT  +  ↑
+      </div>
+    </div>
+  </div>
+</div>
+`;

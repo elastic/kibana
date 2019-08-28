@@ -37,7 +37,7 @@ shasum -a 512 kibana-{version}-linux-x86_64.tar.gz <1>
 tar -xzf kibana-{version}-linux-x86_64.tar.gz
 cd kibana-{version}-linux-x86_64/ <2>
 --------------------------------------------
-<1> Compare the SHA produced by or `shasum` with the
+<1> Compare the SHA produced by `shasum` with the
     https://artifacts.elastic.co/downloads/kibana/kibana-{version}-linux-x86_64.tar.gz.sha512[published SHA].
 <2> This directory is known as `$KIBANA_HOME`.
 
@@ -64,7 +64,7 @@ shasum -a 512 kibana-{version}-darwin-x86_64.tar.gz <1>
 tar -xzf kibana-{version}-darwin-x86_64.tar.gz
 cd kibana-{version}-darwin-x86_64/ <2>
 --------------------------------------------
-<1> Compare the SHA produced by or `shasum` with the
+<1> Compare the SHA produced by `shasum` with the
     https://artifacts.elastic.co/downloads/kibana/kibana-{version}-darwin-x86_64.tar.gz.sha512[published SHA].
 <2> This directory is known as `$KIBANA_HOME`.
 

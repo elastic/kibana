@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ExplorerChartTooltip Render tooltip based on infoTooltip data. 1`] = `
+<div
+  className="ml-explorer-chart-info-tooltip"
+>
+  <TooltipDefinitionList
+    toolTipData={
+      Array [
+        Object {
+          "description": "mock-job-id",
+          "title": "job ID",
+        },
+        Object {
+          "description": "15m",
+          "title": "aggregation interval",
+        },
+        Object {
+          "description": "avg responsetime",
+          "title": "chart function",
+        },
+        Object {
+          "description": "JAL",
+          "title": "airline",
+        },
+      ]
+    }
+  />
+</div>
+`;

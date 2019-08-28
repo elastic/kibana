@@ -20,6 +20,7 @@ export default {
     }
   ],
   'hits': 171500,
+  'xAxisOrderedValues': ['0.0-1000.0', '1000.0-2000.0'],
   'xAxisFormatter': function (val) {
     if (_.isObject(val)) {
       return JSON.stringify(val);

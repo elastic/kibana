@@ -1,0 +1,12 @@
+<monitoring-main
+  product="logstash"
+  name="node"
+  instance="{{ pageData.nodeSummary.name }}"
+  resolver="{{ pageData.nodeSummary.uuid }}"
+  page="pipeline"
+  pipeline-id="{{ pageData.pipeline.id }}"
+  pipeline-hash="{{ pageData.pipeline.hash }}"
+  pipeline-versions="pageData.versions"
+>
+  <div id="monitoringLogstashPipelineApp"></div>
+</monitoring-main>

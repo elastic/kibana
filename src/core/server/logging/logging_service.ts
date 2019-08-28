@@ -22,10 +22,11 @@ import { LogLevel } from './log_level';
 import { BaseLogger, Logger } from './logger';
 import { LoggerAdapter } from './logger_adapter';
 import { LoggerFactory } from './logger_factory';
-import { LoggerConfigType, LoggingConfig } from './logging_config';
+import { LoggingConfigType, LoggerConfigType, LoggingConfig } from './logging_config';
 
 /**
  * Service that is responsible for maintaining loggers and logger appenders.
+ * @internal
  */
 export class LoggingService implements LoggerFactory {
   private config?: LoggingConfig;
@@ -55,7 +56,8 @@ export class LoggingService implements LoggerFactory {
    * Updates all current active loggers with the new config values.
    * @param config New config instance.
    */
-  public upgrade(config: LoggingConfig) {
+  public upgrade(rawConfig: LoggingConfigType) {
+    const config = new LoggingConfig(rawConfig);
     // Config update is asynchronous and may require some time to complete, so we should invalidate
     // config so that new loggers will be using BufferAppender until newly configured appenders are ready.
     this.config = undefined;

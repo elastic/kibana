@@ -1,0 +1,9 @@
+@import './collapsible_panel/collapsible_panel';
+@import './privileges/kibana/space_aware_privilege_section/index';
+@import './privileges/kibana/feature_table/index';
+@import './spaces_popover_list/spaces_popover_list';
+
+.secPrivilegeFeatureIcon {
+  flex-shrink: 0;
+  margin-right: $euiSizeS;
+}

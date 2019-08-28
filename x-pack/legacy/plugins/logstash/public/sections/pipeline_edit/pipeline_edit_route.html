@@ -1,0 +1,5 @@
+<kbn-management-app section="logstash/pipelines" omit-breadcrumb-pages="['pipeline']">
+  <pipeline-edit ng-if="pipelineEditRoute.isUpgraded" pipeline="pipelineEditRoute.pipeline"></pipeline-edit>
+
+  <upgrade-failure ng-if="!pipelineEditRoute.isUpgraded" pipeline="pipelineEditRoute.pipeline"></upgrade-failure>
+</kbn-management-app>

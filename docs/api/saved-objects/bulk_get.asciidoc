@@ -6,6 +6,8 @@ experimental[This functionality is *experimental* and may be changed or removed 
 The bulk-get saved object API enables you to retrieve multiple Kibana saved
 objects by id.
 
+Note: You cannot access this endpoint via the Console in Kibana.
+
 ==== Request
 
 `POST /api/saved_objects/_bulk_get`
@@ -20,6 +22,9 @@ contains the following properties:
 
 `id` (required)::
   (string) ID of object to retrieve
+
+`fields` (optional)::
+  (array) The fields to return in the object's response
 
 ==== Response body
 

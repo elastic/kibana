@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EmptyValue it renders against snapshot 1`] = `
+<p>
+  (Empty String)
+</p>
+`;

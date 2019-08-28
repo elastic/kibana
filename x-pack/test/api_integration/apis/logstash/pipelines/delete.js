@@ -30,8 +30,8 @@ export default function ({ getService }) {
 
     it('should delete the specified pipelines', async () => {
       await supertest
-        .delete(
-          '/api/logstash/pipelines'
+        .post(
+          '/api/logstash/pipelines/delete'
         )
         .set('kbn-xsrf', 'xxx')
         .send({

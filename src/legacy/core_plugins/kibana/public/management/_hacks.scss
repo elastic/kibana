@@ -1,0 +1,29 @@
+// SASSTODO: figure out why this is needed
+kbn-management-app,
+kbn-management-landing,
+kbn-management-indices,
+kbn-management-indices-edit,
+kbn-management-indices-create,
+kbn-management-advanced,
+kbn-management-objects,
+kbn-management-objects-view {
+  display: block;
+}
+
+#management-landing {
+  display: flex;
+}
+
+.kbn-management-tab:first-letter {
+  text-transform: capitalize;
+}
+
+// SASSTODO: Remove when this is replaced with EuiCode
+kbn-management-objects-view {
+  .ace_editor { height: 300px; }
+}
+
+// Hack because the management wrapper is flat HTML and needs a class
+.mgtPage__body {
+  max-width: map-get($euiBreakpoints, 'xl');
+}

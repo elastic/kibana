@@ -6,6 +6,9 @@
 
 export default function ({ loadTestFile }) {
   describe('graph app', function () {
+    this.tags('ciGroup1');
+
+    loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./graph'));
   });
 }

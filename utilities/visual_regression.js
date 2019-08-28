@@ -54,7 +54,7 @@ async function buildGallery(comparisons) {
 
   const template = Handlebars.compile(await readFileAsync(
     path.resolve('./utilities/templates/visual_regression_gallery.handlebars')
-    , 'utf8'));
+    , 'utf8'), { knownHelpersOnly: true });
 
   const html = template({
     date: moment().format('MMMM Do YYYY, h:mm:ss a'),

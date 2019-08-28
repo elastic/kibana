@@ -20,3 +20,4 @@
 exports.snapshot = require('./snapshot');
 exports.source = require('./source');
 exports.archive = require('./archive');
+exports.build_snapshots = require('./build_snapshots');

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { schema } from '../../../config/schema';
+import { schema } from '@kbn/config-schema';
 
 import { Layout, Layouts } from '../../layouts/layouts';
 import { LogRecord } from '../../log_record';
@@ -46,7 +46,7 @@ export class ConsoleAppender implements DisposableAppender {
    * @param record `LogRecord` instance to be logged.
    */
   public append(record: LogRecord) {
-    // tslint:disable no-console
+    // eslint-disable-next-line no-console
     console.log(this.layout.format(record));
   }
 

@@ -1,0 +1,15 @@
+{
+  "ingest.put_pipeline": {
+    "url_params": {
+      "master_timeout": "",
+      "timeout": ""
+    },
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_ingest/pipeline/{id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/put-pipeline-api.html"
+  }
+}

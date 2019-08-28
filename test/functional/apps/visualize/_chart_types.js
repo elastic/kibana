@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -32,23 +32,23 @@ export default function ({ getService, getPageObjects }) {
     it('should show the correct chart types', async function () {
       const expectedChartTypes = [
         'Area',
-        'Heat Map',
-        'Horizontal Bar',
-        'Line',
-        'Pie',
-        'Vertical Bar',
+        'Controls',
+        'Coordinate Map',
         'Data Table',
         'Gauge',
         'Goal',
-        'Metric',
-        'Coordinate Map',
-        'Region Map',
-        'Timelion',
-        'Visual Builder',
-        'Controls',
+        'Heat Map',
+        'Horizontal Bar',
+        'Line',
         'Markdown',
+        'Metric',
+        'Pie',
+        'Region Map',
+        'TSVB',
         'Tag Cloud',
+        'Timelion',
         'Vega',
+        'Vertical Bar',
       ];
 
       // find all the chart types and make sure there all there

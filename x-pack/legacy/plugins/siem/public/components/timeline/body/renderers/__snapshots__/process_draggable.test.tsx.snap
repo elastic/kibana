@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ProcessDraggable rendering it renders against shallow snapshot 1`] = `
+<Component
+  contextId="context-123"
+  eventId="event-123"
+  processExecutable="process-executable-1"
+  processName="process-name-1"
+  processPid={123}
+/>
+`;

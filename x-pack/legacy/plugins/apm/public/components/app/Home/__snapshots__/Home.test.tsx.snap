@@ -1,0 +1,63 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Home component should render 1`] = `
+<div>
+  <ApmHeader>
+    <EuiFlexGroup
+      alignItems="center"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiTitle
+          size="l"
+        >
+          <h1>
+            APM
+          </h1>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <APMLink
+          path="/settings"
+        >
+          <EuiButtonEmpty
+            color="primary"
+            iconSide="left"
+            iconType="gear"
+            size="s"
+            type="button"
+          >
+            Settings
+          </EuiButtonEmpty>
+        </APMLink>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <SetupInstructionsLink />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </ApmHeader>
+  <HistoryTabs
+    tabs={
+      Array [
+        Object {
+          "name": "services",
+          "path": "/services",
+          "render": [Function],
+          "title": "Services",
+        },
+        Object {
+          "name": "traces",
+          "path": "/traces",
+          "render": [Function],
+          "title": "Traces",
+        },
+      ]
+    }
+  />
+</div>
+`;

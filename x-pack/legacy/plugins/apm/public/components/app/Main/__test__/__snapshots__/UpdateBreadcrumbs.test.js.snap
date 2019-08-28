@@ -1,0 +1,128 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Breadcrumbs /:serviceName 1`] = `
+Array [
+  Object {
+    "href": "#/?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "APM",
+  },
+]
+`;
+
+exports[`Breadcrumbs /services/:serviceName/errors 1`] = `
+Array [
+  Object {
+    "href": "#/?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "APM",
+  },
+  Object {
+    "href": "#/services?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "Services",
+  },
+  Object {
+    "href": "#/services/opbeans-node?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "opbeans-node",
+  },
+  Object {
+    "href": "#/services/opbeans-node/errors?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "Errors",
+  },
+]
+`;
+
+exports[`Breadcrumbs /services/:serviceName/errors/:groupId 1`] = `
+Array [
+  Object {
+    "href": "#/?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "APM",
+  },
+  Object {
+    "href": "#/services?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "Services",
+  },
+  Object {
+    "href": "#/services/opbeans-node?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "opbeans-node",
+  },
+  Object {
+    "href": "#/services/opbeans-node/errors?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "Errors",
+  },
+  Object {
+    "href": "#/services/opbeans-node/errors/myGroupId?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "myGroupId",
+  },
+]
+`;
+
+exports[`Breadcrumbs /services/:serviceName/transactions 1`] = `
+Array [
+  Object {
+    "href": "#/?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "APM",
+  },
+  Object {
+    "href": "#/services?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "Services",
+  },
+  Object {
+    "href": "#/services/opbeans-node?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "opbeans-node",
+  },
+  Object {
+    "href": "#/services/opbeans-node/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "Transactions",
+  },
+]
+`;
+
+exports[`Breadcrumbs /services/:serviceName/transactions/:transactionType 1`] = `
+Array [
+  Object {
+    "href": "#/?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "APM",
+  },
+  Object {
+    "href": "#/services?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "Services",
+  },
+  Object {
+    "href": "#/services/opbeans-node?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "opbeans-node",
+  },
+  Object {
+    "href": "#/services/opbeans-node/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "Transactions",
+  },
+]
+`;
+
+exports[`Breadcrumbs /services/:serviceName/transactions/:transactionType/:transactionName 1`] = `
+Array [
+  Object {
+    "href": "#/?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "APM",
+  },
+  Object {
+    "href": "#/services?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "Services",
+  },
+  Object {
+    "href": "#/services/opbeans-node?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "opbeans-node",
+  },
+  Object {
+    "href": "#/services/opbeans-node/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "Transactions",
+  },
+]
+`;
+
+exports[`Breadcrumbs Homepage 1`] = `
+Array [
+  Object {
+    "href": "#/?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
+    "text": "APM",
+  },
+]
+`;

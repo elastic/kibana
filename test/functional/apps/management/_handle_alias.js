@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover', 'header']);
+  const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover', 'timePicker']);
 
   describe('Index patterns on aliases', function () {
     before(async function () {
@@ -47,7 +47,6 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should be able to create index pattern without time field', async function () {
-      await PageObjects.settings.navigateTo();
       await PageObjects.settings.createIndexPattern('alias1', null);
       const indexPageHeading = await PageObjects.settings.getIndexPageHeading();
       const patternName = await indexPageHeading.getVisibleText();
@@ -64,7 +63,6 @@ export default function ({ getService, getPageObjects }) {
 
 
     it('should be able to create index pattern with timefield', async function () {
-      await PageObjects.settings.navigateTo();
       await PageObjects.settings.createIndexPattern('alias2', 'date');
       const indexPageHeading = await PageObjects.settings.getIndexPageHeading();
       const patternName = await indexPageHeading.getVisibleText();
@@ -79,7 +77,7 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.selectIndexPattern('alias2');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
       await retry.try(async function () {
         expect(await PageObjects.discover.getHitCount()).to.be(expectedHitCount);

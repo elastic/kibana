@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { schema, TypeOf } from '../../config/schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 import { assertNever } from '../../../utils';
-import { LegacyAppender } from '../../legacy_compat/logging/appenders/legacy_appender';
+import { LegacyAppender } from '../../legacy/logging/appenders/legacy_appender';
 import { Layouts } from '../layouts/layouts';
 import { LogRecord } from '../log_record';
 import { ConsoleAppender } from './console/console_appender';

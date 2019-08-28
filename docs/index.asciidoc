@@ -24,11 +24,9 @@ include::introduction.asciidoc[]
 
 include::setup.asciidoc[]
 
-include::monitoring/monitoring-xkib.asciidoc[]
+include::monitoring/configuring-monitoring.asciidoc[]
 
 include::security/securing-kibana.asciidoc[]
-
-include::settings/settings-xkb.asciidoc[]
 
 include::getting-started.asciidoc[]
 
@@ -38,11 +36,23 @@ include::visualize.asciidoc[]
 
 include::dashboard.asciidoc[]
 
-include::timelion.asciidoc[]
+include::canvas.asciidoc[]
 
 include::ml/index.asciidoc[]
 
+include::maps/index.asciidoc[]
+
+include::code/index.asciidoc[]
+
+include::infrastructure/index.asciidoc[]
+
+include::logs/index.asciidoc[]
+
 include::apm/index.asciidoc[]
+
+include::uptime/index.asciidoc[]
+
+include::siem/index.asciidoc[]
 
 include::graph/index.asciidoc[]
 
@@ -52,13 +62,13 @@ include::monitoring/index.asciidoc[]
 
 include::management.asciidoc[]
 
+include::spaces/index.asciidoc[]
+
 include::security/index.asciidoc[]
 
 include::management/watcher-ui/index.asciidoc[]
 
 include::management/upgrade-assistant/index.asciidoc[]
-
-include::management/dashboard_only_mode/index.asciidoc[]
 
 include::reporting/index.asciidoc[]
 
@@ -75,3 +85,5 @@ include::release-notes/highlights.asciidoc[]
 include::migration.asciidoc[]
 
 include::CHANGELOG.asciidoc[]
+
+include::redirects.asciidoc[]

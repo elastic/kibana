@@ -19,6 +19,7 @@ use_alsa = false
 use_cups = false
 use_dbus = false
 use_gio = false
+# Please, consult @elastic/kibana-security before changing/removing this option.
 use_kerberos = false
 use_libpci = false
 use_pulseaudio = false

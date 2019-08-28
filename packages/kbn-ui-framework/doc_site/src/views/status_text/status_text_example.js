@@ -26,11 +26,11 @@ import {
   GuideSectionTypes,
 } from '../../components';
 
-const html = require('./status_text.html');
-const infoHtml = require('./status_text_info.html');
-const successHtml = require('./status_text_success.html');
-const warningHtml = require('./status_text_warning.html');
-const errorHtml = require('./status_text_error.html');
+import html from './status_text.html';
+import infoHtml from './status_text_info.html';
+import successHtml from './status_text_success.html';
+import warningHtml from './status_text_warning.html';
+import errorHtml from './status_text_error.html';
 
 export default props => (
   <GuidePage title={props.route.name}>

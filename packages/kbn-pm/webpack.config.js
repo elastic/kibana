@@ -20,6 +20,7 @@
 const path = require('path');
 
 module.exports = {
+  mode: 'none',
   entry: {
     index: './src/index.ts',
   },
@@ -43,15 +44,6 @@ module.exports = {
           {
             loader: 'babel-loader',
           },
-          {
-            loader: 'ts-loader',
-            options: {
-              compilerOptions: {
-                // enable esnext modules so webpack can do its thing better
-                module: 'esnext',
-              },
-            },
-          },
         ],
         exclude: /node_modules/,
       },
@@ -71,6 +63,21 @@ module.exports = {
           },
         },
       },
+      // In order to make it work with Node 10 we had the need to upgrade
+      // the package cpy to a version >= 7.0.0. In this version cpy is
+      // using the new globby that relies in the fast-glob which relies
+      // in the new micromatch. The micromatch (use and class-utils) dependencies having a require
+      // that uses the lazy-cache which cannot be correctly extracted by webpack.
+      // According to the documentation we should use the unlazy-loader to solve
+      // this situation: https://github.com/jonschlinkert/lazy-cache#heads-up
+      // We can also found some issues arround this who also used unlazy-loader
+      // to solve this: https://github.com/micromatch/micromatch/issues/55
+      {
+        test: /node_modules\/(use|class-utils)\/utils\.js$/,
+        use: {
+          loader: 'unlazy-loader',
+        },
+      },
     ],
   },
 
@@ -78,6 +85,12 @@ module.exports = {
     // Don't replace built-in globals
     __filename: false,
     __dirname: false,
+  },
+
+  externals: {
+    worker_threads: {
+      commonjs: 'worker_threads',
+    },
   },
 
   watchOptions: {

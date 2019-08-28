@@ -17,27 +17,20 @@
  * under the License.
  */
 
-const REMOVE_PANEL_DATA_TEST_SUBJ = 'dashboardPanelAction-deletePanel';
-const EDIT_PANEL_DATA_TEST_SUBJ = 'dashboardPanelAction-editPanel';
-const TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ = 'dashboardPanelAction-togglePanel';
-const CUSTOMIZE_PANEL_DATA_TEST_SUBJ = 'dashboardPanelAction-customizePanel';
-const OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ = 'dashboardPanelToggleMenuIcon';
-const OPEN_INSPECTOR_TEST_SUBJ = 'dashboardPanelAction-openInspector';
+const REMOVE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-deletePanel';
+const EDIT_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-editPanel';
+const TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-togglePanel';
+const CUSTOMIZE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-CUSTOMIZE_PANEL_ACTION_ID';
+const OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ = 'embeddablePanelToggleMenuIcon';
+const OPEN_INSPECTOR_TEST_SUBJ = 'embeddablePanelAction-openInspector';
 
 export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
   const log = getService('log');
-  const retry = getService('retry');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['header', 'common']);
 
   return new class DashboardPanelActions {
-
-    async isContextMenuOpen(parent) {
-      log.debug('isContextMenuOpen');
-      // Full screen toggle was chosen because it's available in both view and edit mode.
-      return this.toggleExpandActionExists(parent);
-    }
 
     async findContextMenu(parent) {
       return parent ?
@@ -50,52 +43,31 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
       return await testSubjects.exists(OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ);
     }
 
-    async openContextMenu(parent) {
-      log.debug(`openContextMenu(${parent}`);
-      const panelOpen = await this.isContextMenuOpen(parent);
-      if (!panelOpen) {
-        await retry.try(async () => {
-          await (parent ? remote.moveMouseTo(parent) : testSubjects.moveMouseTo('dashboardPanelTitle'));
-          const toggleMenuItem = await this.findContextMenu(parent);
-          await toggleMenuItem.click();
-          const panelOpen = await this.isContextMenuOpen(parent);
-          if (!panelOpen) { throw new Error('Context menu still not open'); }
-        });
-      }
+    async toggleContextMenu(parent) {
+      log.debug('toggleContextMenu');
+      await (parent ? browser.moveMouseTo(parent) : testSubjects.moveMouseTo('dashboardPanelTitle'));
+      const toggleMenuItem = await this.findContextMenu(parent);
+      await toggleMenuItem.click();
     }
 
-    async toggleExpandPanel(parent) {
-      log.debug('toggleExpandPanel');
-      await (parent ? remote.moveMouseTo(parent) : testSubjects.moveMouseTo('dashboardPanelTitle'));
-      const expandShown = await this.toggleExpandActionExists();
-      if (!expandShown) {
-        await this.openContextMenu(parent);
-      }
-      await this.toggleExpandPanel();
+    async expectContextMenuToBeOpen() {
+      await testSubjects.existOrFail('embeddablePanelContextMenuOpen');
+    }
+
+    async openContextMenu(parent) {
+      log.debug(`openContextMenu(${parent}`);
+      await this.toggleContextMenu(parent);
+      await this.expectContextMenuToBeOpen();
     }
 
     async clickEdit() {
       log.debug('clickEdit');
-      await this.openContextMenu();
-
-      // Edit link may sometimes be disabled if the embeddable isn't rendered yet.
-      await retry.try(async () => {
-        const editExists = await this.editPanelActionExists();
-        if (editExists) {
-          await testSubjects.click(EDIT_PANEL_DATA_TEST_SUBJ);
-        }
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.common.waitForTopNavToBeVisible();
-        const current = await remote.getCurrentUrl();
-        if (current.indexOf('dashboard') >= 0) {
-          throw new Error('Still on dashboard');
-        }
-      });
+      await testSubjects.clickWhenNotDisabled(EDIT_PANEL_DATA_TEST_SUBJ);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.common.waitForTopNavToBeVisible();
     }
 
-    async toggleExpandPanel() {
-      log.debug('toggleExpandPanel');
-      await this.openContextMenu();
+    async clickExpandPanelToggle() {
       await testSubjects.click(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
     }
 
@@ -116,34 +88,58 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
       await testSubjects.click(CUSTOMIZE_PANEL_DATA_TEST_SUBJ);
     }
 
+    async openInspectorByTitle(title) {
+      const header = await this.getPanelHeading(title);
+      await this.openInspector(header);
+    }
+
     async openInspector(parent) {
       await this.openContextMenu(parent);
       await testSubjects.click(OPEN_INSPECTOR_TEST_SUBJ);
     }
 
-    async removePanelActionExists() {
-      log.debug('removePanelActionExists');
-      return await testSubjects.exists(REMOVE_PANEL_DATA_TEST_SUBJ);
+    async expectExistsRemovePanelAction() {
+      log.debug('expectExistsRemovePanelAction');
+      await testSubjects.existOrFail(REMOVE_PANEL_DATA_TEST_SUBJ);
     }
 
-    async editPanelActionExists() {
-      log.debug('editPanelActionExists');
-      return await testSubjects.exists(EDIT_PANEL_DATA_TEST_SUBJ);
+    async expectMissingRemovePanelAction() {
+      log.debug('expectMissingRemovePanelAction');
+      await testSubjects.missingOrFail(REMOVE_PANEL_DATA_TEST_SUBJ);
     }
 
-    async toggleExpandActionExists() {
-      log.debug('toggleExpandActionExists');
-      return await testSubjects.exists(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
+    async expectExistsEditPanelAction() {
+      log.debug('expectExistsEditPanelAction');
+      await testSubjects.existOrFail(EDIT_PANEL_DATA_TEST_SUBJ);
     }
 
-    async customizePanelActionExists(parent) {
-      return parent ?
-        await testSubjects.descendantExists(CUSTOMIZE_PANEL_DATA_TEST_SUBJ, parent) :
-        await testSubjects.exists(CUSTOMIZE_PANEL_DATA_TEST_SUBJ);
+    async expectMissingEditPanelAction() {
+      log.debug('expectMissingEditPanelAction');
+      await testSubjects.missingOrFail(EDIT_PANEL_DATA_TEST_SUBJ);
+    }
+
+    async expectExistsToggleExpandAction() {
+      log.debug('expectExistsToggleExpandAction');
+      await testSubjects.existOrFail(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
     }
 
     async getPanelHeading(title) {
-      return await testSubjects.find(`dashboardPanelHeading-${title.replace(/\s/g, '')}`);
+      return await testSubjects.find(`embeddablePanelHeading-${title.replace(/\s/g, '')}`);
+    }
+
+    async clickHidePanelTitleToggle() {
+      await testSubjects.click('customizePanelHideTitle');
+    }
+
+    async toggleHidePanelTitle(originalTitle) {
+      log.debug(`hidePanelTitle(${originalTitle})`);
+      let panelOptions = null;
+      if (originalTitle) {
+        panelOptions = await this.getPanelHeading(originalTitle);
+      }
+      await this.customizePanel(panelOptions);
+      await this.clickHidePanelTitleToggle();
+      await testSubjects.click('saveNewTitleButton');
     }
 
     /**
@@ -159,13 +155,16 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
         panelOptions = await this.getPanelHeading(originalTitle);
       }
       await this.customizePanel(panelOptions);
-      await testSubjects.setValue('customDashboardPanelTitleInput', customTitle);
+      await testSubjects.setValue('customEmbeddablePanelTitleInput', customTitle);
+      await testSubjects.click('saveNewTitleButton');
     }
 
     async resetCustomPanelTitle(panel) {
       log.debug('resetCustomPanelTitle');
       await this.customizePanel(panel);
-      await testSubjects.click('resetCustomDashboardPanelTitle');
+      await testSubjects.click('resetCustomEmbeddablePanelTitle');
+      await testSubjects.click('saveNewTitleButton');
+      await this.toggleContextMenu(panel);
     }
   };
 }

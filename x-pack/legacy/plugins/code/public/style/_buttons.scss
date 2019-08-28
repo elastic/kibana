@@ -1,0 +1,27 @@
+.codeButton__project {
+  border-radius: $euiBorderRadius;
+  height: 4rem;
+  padding: $euiSizeS;
+  width: 4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: background-color $euiAnimSpeedFast $euiAnimSlightResistance;
+  padding: $euiSizeM 0;
+  &:hover {
+    background-color: $euiColorLightestShade;
+  }
+}
+
+.codeButton__projectImport {
+  margin-top: $euiSizeL;
+}
+
+.codeButtonGroup {
+  margin-left: $euiSizeS;
+  .euiButton {
+    font-size: $euiFontSizeS;
+  }
+}

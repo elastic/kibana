@@ -1,0 +1,16 @@
+{
+  "ml.get_calendars": {
+    "url_params": {
+      "from": 0,
+      "size": 0
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_ml/calendars",
+      "_ml/calendars/{calendar_id}"
+    ]
+  }
+}

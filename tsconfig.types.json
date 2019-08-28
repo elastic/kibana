@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig",
+  "compilerOptions": {
+    "declaration": true,
+    "declarationDir": "./target/types",
+    "stripInternal": false,
+    "emitDeclarationOnly": true,
+    "declarationMap": true
+  },
+  "include": [
+    "src/core/server/index.ts",
+    "src/core/public/index.ts",
+    "typings"
+  ]
+}

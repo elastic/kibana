@@ -1,0 +1,14 @@
+/**
+ * 1. Hide increment and decrement buttons for type="number" input.
+ */
+.cxtSizePicker {
+  appearance: textfield;
+  text-align: center;
+  width: $euiSize * 5;
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    appearance: none; /* 1 */
+    margin: 0; /* 1 */
+  }
+}

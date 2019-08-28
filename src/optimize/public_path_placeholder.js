@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createReplaceStream } from '../utils';
+import { createReplaceStream } from '../legacy/utils';
 
 import * as Rx from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
@@ -41,7 +41,10 @@ export function replacePlaceholder(read, replacement) {
 
   replace.close = () => {
     read.unpipe();
-    read.close();
+
+    if (read.close) {
+      read.close();
+    }
   };
 
   return read.pipe(replace);

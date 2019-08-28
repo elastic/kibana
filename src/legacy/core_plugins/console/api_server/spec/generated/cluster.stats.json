@@ -1,0 +1,16 @@
+{
+  "cluster.stats": {
+    "url_params": {
+      "flat_settings": "__flag__",
+      "timeout": ""
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_cluster/stats",
+      "_cluster/stats/nodes/{nodes}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-stats.html"
+  }
+}

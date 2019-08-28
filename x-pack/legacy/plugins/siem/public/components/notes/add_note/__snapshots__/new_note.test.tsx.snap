@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NewNote renders correctly 1`] = `
+<Component
+  note="The contents of a new note"
+  noteInputHeight={200}
+  updateNewNote={[MockFunction]}
+/>
+`;

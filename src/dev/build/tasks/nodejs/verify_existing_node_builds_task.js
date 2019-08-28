@@ -25,11 +25,10 @@ export const VerifyExistingNodeBuildsTask = {
   global: true,
   description: 'Verifying previously downloaded node.js build for all platforms',
   async run(config, log) {
-    const platforms = config.getPlatforms();
     const shasums = await getNodeShasums(config.getNodeVersion());
 
     await Promise.all(
-      platforms.map(async (platform) => {
+      config.getNodePlatforms().map(async (platform) => {
         const { downloadPath, downloadName } = getNodeDownloadInfo(config, platform);
 
         const sha256 = await getFileHash(downloadPath, 'sha256');

@@ -1,0 +1,69 @@
+<div class="app-container kbnError--auto-create-index euiText">
+  <h3><icon aria-hidden="true" type="'alert'" color="'danger'"></icon>
+    <span
+      i18n-id="common.ui.errorAutoCreateIndex.errorTitle"
+      i18n-default-message="Oh no!">
+    </span>
+  </h3>
+
+  <p
+    i18n-id="common.ui.errorAutoCreateIndex.errorDescription"
+    i18n-default-message="It looks like your Elasticsearch cluster's {autoCreateIndexActionConfig} setting is
+    preventing Kibana from automatically creating an index to store saved objects. Kibana uses this
+    Elasticsearch feature because it is the best way to make sure that the saved object index uses
+    the correct mappings/schema, and it allows Kibana to poll Elasticsearch less often."
+    i18n-values="{ html_autoCreateIndexActionConfig: '<code>action.auto_create_index</code>' }"
+  ></p>
+
+  <p
+    i18n-id="common.ui.errorAutoCreateIndex.errorDisclaimer"
+    i18n-default-message="Unfortunately, until this issue is fixed you won't be able to save anything in Kibana."
+  ></p>
+
+  <h3
+    i18n-id="common.ui.errorAutoCreateIndex.howToFixErrorTitle"
+    i18n-default-message="Ok, how do I fix this?"
+  ></h3>
+  <ol>
+    <li
+      i18n-id="common.ui.errorAutoCreateIndex.howToFixError.removeConfigText"
+      i18n-default-message="Remove {autoCreateIndexActionConfig} from your Elasticsearch configuration file"
+      i18n-values="{ html_autoCreateIndexActionConfig: '<code>action.auto_create_index: false</code>' }"
+    ></li>
+    <li
+      i18n-id="common.ui.errorAutoCreateIndex.howToFixError.restartText"
+      i18n-default-message="Restart elasticsearch."
+    ></li>
+    <li 
+      i18n-id="common.ui.errorAutoCreateIndex.howToFixError.goBackText"
+      i18n-default-message="Use the browser's back button to return to what you were doing."
+    ></li>
+  </ol>
+
+  <div class="kuiInfoPanel kuiInfoPanel--info kuiVerticalRhythm">
+    <div class="kuiInfoPanelHeader">
+      <span
+        class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--info fa-info"
+        aria-label="{{ ::'common.ui.errorAutoCreateIndex.noteImageAriaLabel' | i18n: {defaultMessage: 'Info'} }}"
+        role="img"
+      ></span>
+      <span
+        class="kuiInfoPanelHeader__title"
+        i18n-id="common.ui.errorAutoCreateIndex.noteTitle"
+        i18n-default-message="Note:"
+      ></span>
+    </div>
+
+    <div class="kuiInfoPanelBody">
+      <div
+        class="kuiInfoPanelBody__message"
+        i18n-id="common.ui.errorAutoCreateIndex.noteMessage"
+        i18n-default-message="The {autoCreateIndexActionConfig} can also define a whitelist of patterns where this
+        feature should be enabled. We don't discuss how to use the setting that way here because it
+        requires knowing all of the other plugins/interactions that rely on the feature for the same
+        reasons that Kibana does."
+        i18n-values="{ html_autoCreateIndexActionConfig: '<code>action.auto_create_index</code>' }"
+      ></div>
+    </div>
+  </div>
+</div>

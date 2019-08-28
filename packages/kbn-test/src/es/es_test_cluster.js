@@ -23,9 +23,10 @@ import { get } from 'lodash';
 import toPath from 'lodash/internal/toPath';
 import { Cluster } from '@kbn/es';
 import { esTestConfig } from './es_test_config';
-import { rmrfSync } from './rmrf_sync';
 import { KIBANA_ROOT } from '../';
 import elasticsearch from 'elasticsearch';
+const path = require('path');
+const del = require('del');
 
 export function createEsTestCluster(options = {}) {
   const {
@@ -35,6 +36,9 @@ export function createEsTestCluster(options = {}) {
     log,
     basePath = resolve(KIBANA_ROOT, '.es'),
     esFrom = esTestConfig.getBuildFrom(),
+    dataArchive,
+    esArgs,
+    ssl,
   } = options;
 
   const randomHash = Math.random()
@@ -48,31 +52,45 @@ export function createEsTestCluster(options = {}) {
     password,
     license,
     basePath,
+    esArgs,
   };
 
-  const cluster = new Cluster(log);
+  const cluster = new Cluster({ log, ssl });
 
-  return new class EsTestCluster {
+  return new (class EsTestCluster {
     getStartTimeout() {
       const second = 1000;
       const minute = second * 60;
 
-      return esFrom === 'snapshot' ? minute : minute * 6;
+      return esFrom === 'snapshot' ? 3 * minute : 6 * minute;
     }
 
-    async start(esArgs = []) {
-      const { installPath } =
-        esFrom === 'source'
-          ? await cluster.installSource(config)
-          : await cluster.installSnapshot(config);
+    async start(esArgs = [], esEnvVars) {
+      let installPath;
+
+      if (esFrom === 'source') {
+        installPath = (await cluster.installSource(config)).installPath;
+      } else if (esFrom === 'snapshot') {
+        installPath = (await cluster.installSnapshot(config)).installPath;
+      } else if (path.isAbsolute(esFrom)) {
+        installPath = esFrom;
+      } else {
+        throw new Error(`unknown option esFrom "${esFrom}"`);
+      }
+
+      if (dataArchive) {
+        await cluster.extractDataDirectory(installPath, dataArchive);
+      }
 
       await cluster.start(installPath, {
+        password: config.password,
         esArgs: [
           `cluster.name=${clusterName}`,
           `http.port=${port}`,
-          `discovery.zen.ping.unicast.hosts=localhost:${port}`,
+          'discovery.type=single-node',
           ...esArgs,
         ],
+        esEnvVars,
       });
     }
 
@@ -83,7 +101,7 @@ export function createEsTestCluster(options = {}) {
 
     async cleanup() {
       await this.stop();
-      rmrfSync(config.installPath);
+      await del(config.installPath, { force: true });
       log.info('[es] cleanup complete');
     }
 
@@ -106,7 +124,7 @@ export function createEsTestCluster(options = {}) {
 
       return format(parts);
     }
-  }();
+  })();
 }
 
 /**

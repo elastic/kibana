@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1170" height="880" viewBox="0 0 1170 880">
+  <defs>
+    <radialGradient id="bg_bottom_branded-b" cx="44.645%" cy="43.259%" r="93.821%" fx="44.645%" fy="43.259%" gradientTransform="matrix(.54075 .76504 -.6424 .64398 .483 -.188)">
+      <stop offset="0%" stop-color="#D9D9D9"/>
+      <stop offset="100%"/>
+    </radialGradient>
+    <polygon id="bg_bottom_branded-a" points="0 0 1048 880 0 880"/>
+    <linearGradient id="bg_bottom_branded-c" x1="98.924%" x2="7.157%" y1="48.924%" y2="48.924%">
+      <stop offset="0%" stop-color="#DFDDDD" stop-opacity=".25"/>
+      <stop offset="100%" stop-color="#FFF" stop-opacity=".2"/>
+    </linearGradient>
+    <linearGradient id="bg_bottom_branded-e" x1="0%" y1="47.421%" y2="47.421%">
+      <stop offset="0%" stop-color="#FFF" stop-opacity=".6"/>
+      <stop offset="100%" stop-opacity=".25"/>
+    </linearGradient>
+    <polygon id="bg_bottom_branded-d" points="561 364 1170 880 561 880"/>
+    <linearGradient id="bg_bottom_branded-g" x1="0%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFF" stop-opacity=".2"/>
+      <stop offset="100%" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="bg_bottom_branded-h" cx="0%" cy="0%" r="127.62%" fx="0%" fy="0%" gradientTransform="scale(.9322 1) rotate(42.99)">
+      <stop offset="0%" stop-color="#BBB" stop-opacity=".1"/>
+      <stop offset="100%" stop-opacity=".5"/>
+    </radialGradient>
+    <polygon id="bg_bottom_branded-f" points="-12 538 342 868 -12 868"/>
+    <linearGradient id="bg_bottom_branded-j" x1="0%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFF" stop-opacity=".4"/>
+      <stop offset="100%" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="bg_bottom_branded-k" cx="0%" cy="0%" r="148.368%" fx="0%" fy="0%" gradientTransform="matrix(.674 .674 -.73874 .61493 0 0)">
+      <stop offset="0%" stop-color="#FFF" stop-opacity=".101"/>
+      <stop offset="100%" stop-opacity=".15"/>
+    </radialGradient>
+    <path id="bg_bottom_branded-i" d="M197,880 L374,880 C365.385564,795.927984 296.005151,723.868711 197,686 L197,880 Z"/>
+    <radialGradient id="bg_bottom_branded-m" cx="0%" cy="0%" r="127.62%" fx="0%" fy="0%" gradientTransform="scale(1 .9322) rotate(47.01)">
+      <stop offset="0%" stop-color="#BBB" stop-opacity=".1"/>
+      <stop offset="100%" stop-opacity=".5"/>
+    </radialGradient>
+    <polygon id="bg_bottom_branded-l" points="165 703 330 880 165 880"/>
+  </defs>
+  <g fill="none" fill-rule="evenodd">
+    <g opacity=".1">
+      <use fill="#E4E4E4" xlink:href="#bg_bottom_branded-a"/>
+      <use fill="url(#bg_bottom_branded-b)" xlink:href="#bg_bottom_branded-a" style="mix-blend-mode:overlay"/>
+    </g>
+    <g opacity=".05">
+      <use fill="url(#bg_bottom_branded-c)" xlink:href="#bg_bottom_branded-d"/>
+      <use fill="url(#bg_bottom_branded-e)" xlink:href="#bg_bottom_branded-d" style="mix-blend-mode:overlay"/>
+    </g>
+    <g opacity=".65" transform="matrix(0 -1 -1 0 868 868)">
+      <use fill="#DD0A73" xlink:href="#bg_bottom_branded-f"/>
+      <use fill="url(#bg_bottom_branded-g)" xlink:href="#bg_bottom_branded-f" style="mix-blend-mode:overlay"/>
+      <use fill="url(#bg_bottom_branded-h)" xlink:href="#bg_bottom_branded-f" style="mix-blend-mode:overlay"/>
+    </g>
+    <g opacity=".65">
+      <use fill="#017F75" xlink:href="#bg_bottom_branded-i"/>
+      <use fill="url(#bg_bottom_branded-j)" xlink:href="#bg_bottom_branded-i" style="mix-blend-mode:overlay"/>
+      <use fill="url(#bg_bottom_branded-k)" xlink:href="#bg_bottom_branded-i" style="mix-blend-mode:overlay"/>
+    </g>
+    <g opacity=".15">
+      <use fill="#353535" xlink:href="#bg_bottom_branded-l"/>
+      <use fill="url(#bg_bottom_branded-g)" xlink:href="#bg_bottom_branded-l" style="mix-blend-mode:overlay"/>
+      <use fill="url(#bg_bottom_branded-m)" xlink:href="#bg_bottom_branded-l" style="mix-blend-mode:overlay"/>
+    </g>
+  </g>
+</svg>

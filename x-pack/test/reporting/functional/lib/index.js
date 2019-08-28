@@ -5,3 +5,4 @@
  */
 
 export { checkIfPdfsMatch } from './compare_pdfs';
+export { checkIfPngsMatch } from './compare_pngs';

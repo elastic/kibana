@@ -1,0 +1,44 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`render 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  justifyContent="spaceBetween"
+  style={
+    Object {
+      "flexGrow": 0,
+    }
+  }
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiTitle>
+      <h2>
+        <FormattedMessage
+          defaultMessage="Kibana status is {kibanaStatus}"
+          id="statusPage.serverStatus.statusTitle"
+          values={
+            Object {
+              "kibanaStatus": <EuiBadge
+                color="secondary"
+              >
+                Green
+              </EuiBadge>,
+            }
+          }
+        />
+      </h2>
+    </EuiTitle>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiText>
+      <p>
+        My Computer
+      </p>
+    </EuiText>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

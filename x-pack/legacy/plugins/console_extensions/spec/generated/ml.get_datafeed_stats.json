@@ -1,0 +1,15 @@
+{
+  "ml.get_datafeed_stats": {
+    "url_params": {
+      "allow_no_datafeeds": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_ml/datafeeds/{datafeed_id}/_stats",
+      "_ml/datafeeds/_stats"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-datafeed-stats.html"
+  }
+}

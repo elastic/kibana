@@ -1,0 +1,17 @@
+// EUITODO: Convert to EuiCallout
+.tvbNoData {
+  padding: $euiSize;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  // Calculate colors similar to EuiCallout
+  $tempBackgroundColor: tintOrShade($euiColorPrimary, 90%, 70%);
+  background-color: $tempBackgroundColor;
+
+  .tvbNoData__title {
+    @include euiTitle('xs');
+    color: makeHighContrastColor($euiColorPrimary, $tempBackgroundColor);
+  }
+}

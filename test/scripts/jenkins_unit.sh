@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 
 set -e
-source "$(dirname $0)/../../src/dev/ci_setup/setup.sh"
-source "$(dirname $0)/../../src/dev/ci_setup/git_setup.sh"
-source "$(dirname $0)/../../src/dev/ci_setup/java_setup.sh"
+trap 'node "$KIBANA_DIR/src/dev/failed_tests/cli"' EXIT
 
-export TEST_ES_FROM=${TEST_ES_FROM:-source}
-xvfb-run "$(FORCE_COLOR=0 yarn bin)/grunt" jenkins:unit --from=source;
+export TEST_BROWSER_HEADLESS=1
+
+"$(FORCE_COLOR=0 yarn bin)/grunt" jenkins:unit --dev;

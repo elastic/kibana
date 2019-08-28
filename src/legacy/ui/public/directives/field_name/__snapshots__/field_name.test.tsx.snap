@@ -1,0 +1,64 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FieldName renders a geo field, useShortDots is set to true 1`] = `
+<span
+  class="dscField--noResults"
+  title="test.test.test"
+>
+  <span
+    aria-label="Geo Point"
+    class="dscField__icon kuiIcon fa-globe"
+  />
+  <span
+    class="dscFieldName"
+  >
+    t.t.test
+  </span>
+</span>
+`;
+
+exports[`FieldName renders a number field by providing a field record, useShortDots is set to false 1`] = `
+<span
+  class=""
+  title="test.test.test"
+>
+  <span
+    aria-label="Number field"
+    class="dscField__icon"
+  >
+    <strong
+      aria-hidden="true"
+    >
+      #
+    </strong>
+  </span>
+  <span
+    class="dscFieldName"
+  >
+    test.test.test
+  </span>
+</span>
+`;
+
+exports[`FieldName renders a string field by providing fieldType and fieldName 1`] = `
+<span
+  class=""
+  title="test"
+>
+  <span
+    aria-label="String field"
+    class="dscField__icon"
+  >
+    <strong
+      aria-hidden="true"
+    >
+      t
+    </strong>
+  </span>
+  <span
+    class="dscFieldName"
+  >
+    test
+  </span>
+</span>
+`;

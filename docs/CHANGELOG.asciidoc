@@ -1,8 +1,5 @@
 [[release-notes]]
-= {kib} Release Notes
-++++
-<titleabbrev>Release Notes</titleabbrev>
-++++
+= Release Notes
 
 [partintro]
 --
@@ -13,34 +10,12 @@
 
 This section summarizes the changes in each release.
 
-* <<release-notes-7.0.0>>
+* <<release-notes-8.0.0-alpha1>>
 
 --
 
-[[release-notes-7.0.0]]
-== {kib} 7.0.0
 
-//[float]
-//[[breaking-7.0.0]]
-//=== Breaking Changes
+[[release-notes-8.0.0-alpha1]]
+== {kib} 8.0.0-alpha1
 
-//[float]
-//=== Breaking Java Changes
-
-//[float]
-//=== Deprecations
-
-//[float]
-//=== New Features
-
-//[float]
-//=== Enhancements
-
-//[float]
-//=== Bug Fixes
-
-//[float]
-//=== Regressions
-
-//[float]
-//=== Known Issues
+coming[8.0.0]

@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders matching snapshot 1`] = `
+<Fragment>
+  <p
+    data-test-subj="errorToastMessage"
+  >
+    This is the toast message
+  </p>
+  <div
+    className="eui-textRight"
+  >
+    <EuiButton
+      color="danger"
+      fill={false}
+      iconSide="left"
+      onClick={[Function]}
+      size="s"
+      type="button"
+    >
+      <FormattedMessage
+        defaultMessage="See the full error"
+        id="core.toasts.errorToast.seeFullError"
+        values={Object {}}
+      />
+    </EuiButton>
+  </div>
+</Fragment>
+`;

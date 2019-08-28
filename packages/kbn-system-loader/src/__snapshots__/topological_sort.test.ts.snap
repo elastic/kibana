@@ -1,3 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`throws if ordering does not succeed 1`] = `"Topological ordering did not complete, these edges could not be ordered: [[\\"a\\",[\\"b\\"]],[\\"b\\",[\\"c\\"]],[\\"c\\",[\\"a\\"]],[\\"f\\",[\\"g\\"]]]"`;

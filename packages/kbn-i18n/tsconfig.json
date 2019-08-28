@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.json",
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "types/intl_format_cache.d.ts",
+    "types/intl_relativeformat.d.ts"
+  ],
+  "exclude": [
+    "target"
+  ],
+  "compilerOptions": {
+    "declaration": true,
+    "declarationDir": "./target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  }
+}

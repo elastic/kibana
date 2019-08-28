@@ -1,0 +1,378 @@
+{
+  "type": "_doc",
+  "value": {
+    "id": "space:default",
+    "index": ".kibana",
+    "source": {
+      "space": {
+        "_reserved": true,
+        "description": "This is the default space",
+        "disabledFeatures": [],
+        "name": "Default Space"
+      },
+      "type": "space",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "space:space_1",
+    "index": ".kibana",
+    "source": {
+      "space": {
+        "description": "This is the first test space",
+        "disabledFeatures": [],
+        "name": "Space 1"
+      },
+      "type": "space",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "space:space_2",
+    "index": ".kibana",
+    "source": {
+      "space": {
+        "description": "This is the second test space",
+        "disabledFeatures": [],
+        "name": "Space 2"
+      },
+      "type": "space",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "space_2:dashboard:my_dashboard",
+    "index": ".kibana",
+    "source": {
+      "dashboard": {
+        "description": "Space 2",
+        "title": "This is the second test space"
+      },
+      "namespace": "space_2",
+      "type": "dashboard",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "space_1:dashboard:my_dashboard",
+    "index": ".kibana",
+    "source": {
+      "dashboard": {
+        "description": "Space 1",
+        "title": "This is the second test space"
+      },
+      "namespace": "space_1",
+      "type": "dashboard",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "dashboard:my_dashboard",
+    "index": ".kibana",
+    "source": {
+      "dashboard": {
+        "description": "Default Space",
+        "title": "This is the default test space"
+      },
+      "type": "dashboard",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "dashboard:cts_dashboard",
+    "index": ".kibana",
+    "source": {
+      "dashboard": {
+        "description": "Copy to Space Dashboard from the default space",
+        "title": "This is the default test space CTS dashboard"
+      },
+      "references": [{
+        "type": "visualization",
+        "id": "cts_vis_1_default",
+        "name": "CTS Vis 1"
+      }, {
+        "type": "visualization",
+        "id": "cts_vis_2_default",
+        "name": "CTS Vis 2"
+      }, {
+        "type": "visualization",
+        "id": "cts_vis_3",
+        "name": "CTS Vis 3"
+      }],
+      "type": "dashboard",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "visualization:cts_vis_1_default",
+    "index": ".kibana",
+    "source": {
+      "visualization": {
+        "title": "CTS vis 1 from default space",
+        "description": "AreaChart",
+        "kibanaSavedObjectMeta": {"searchSourceJSON": "{}"},
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{}},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
+      },
+      "references": [
+        {
+          "type": "index-pattern",
+          "id": "cts_ip_1",
+          "name": "CTS IP 1"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "visualization:cts_vis_2_default",
+    "index": ".kibana",
+    "source": {
+      "visualization": {
+        "title": "CTS vis 2 from default space",
+        "description": "AreaChart",
+        "kibanaSavedObjectMeta": {"searchSourceJSON": "{}"},
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{}},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
+      },
+      "references": [
+        {
+          "type": "index-pattern",
+          "id": "cts_ip_1",
+          "name": "CTS IP 1"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "visualization:cts_vis_3",
+    "index": ".kibana",
+    "source": {
+      "visualization": {
+        "title": "CTS vis 3 from default space",
+        "description": "AreaChart",
+        "kibanaSavedObjectMeta": {"searchSourceJSON": "{}"},
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{}},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
+      },
+      "references": [
+        {
+          "type": "index-pattern",
+          "id": "cts_ip_1",
+          "name": "CTS IP 1"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "space_1:dashboard:cts_dashboard",
+    "index": ".kibana",
+    "source": {
+      "dashboard": {
+        "description": "Copy to Space Dashboard from space_1 space",
+        "title": "This is the space_1 test space CTS dashboard"
+      },
+      "references": [
+        {
+          "type": "visualization",
+          "id": "cts_vis_1_space_1",
+          "name": "CTS Vis 1"
+        },
+        {
+          "type": "visualization",
+          "id": "cts_vis_2_space_1",
+          "name": "CTS Vis 2"
+        },
+        {
+          "type": "visualization",
+          "id": "cts_vis_3",
+          "name": "CTS Vis 3"
+        }
+      ],
+      "type": "dashboard",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "namespace": "space_1"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "space_1:visualization:cts_vis_1_space_1",
+    "index": ".kibana",
+    "source": {
+      "visualization": {
+        "title": "CTS vis 1 from space_1 space",
+        "description": "AreaChart",
+        "kibanaSavedObjectMeta": {"searchSourceJSON": "{}"},
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{}},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
+      },
+      "references": [
+        {
+          "type": "index-pattern",
+          "id": "cts_ip_1",
+          "name": "CTS IP 1"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "namespace": "space_1"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "space_1:visualization:cts_vis_2_space_1",
+    "index": ".kibana",
+    "source": {
+      "visualization": {
+        "title": "CTS vis 2 from space_1 space",
+        "description": "AreaChart",
+        "kibanaSavedObjectMeta": {"searchSourceJSON": "{}"},
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{}},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
+      },
+      "references": [
+        {
+          "type": "index-pattern",
+          "id": "cts_ip_1",
+          "name": "CTS IP 1"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "namespace": "space_1"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "space_1:visualization:cts_vis_3",
+    "index": ".kibana",
+    "source": {
+      "visualization": {
+        "title": "CTS vis 3 from space_1 space",
+        "description": "AreaChart",
+        "kibanaSavedObjectMeta": {"searchSourceJSON": "{}"},
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{}},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
+      },
+      "references": [
+        {
+          "type": "index-pattern",
+          "id": "cts_ip_1",
+          "name": "CTS IP 1"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "namespace": "space_1"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "index-pattern:cts_ip_1",
+    "index": ".kibana",
+    "source": {
+      "index-pattern": {
+        "title": "Copy to Space index pattern 1 from default space"
+      },
+      "references": [],
+      "type": "index-pattern",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "space_1:index-pattern:cts_ip_1",
+    "index": ".kibana",
+    "source": {
+      "index-pattern": {
+        "title": "Copy to Space index pattern 1 from space_1 space"
+      },
+      "references": [],
+      "type": "index-pattern",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "namespace": "space_1"
+    },
+    "type": "_doc"
+  }
+}

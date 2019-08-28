@@ -4,24 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { indexBy } from 'lodash';
 
-const watchID = "watchID";
-const watchName = "watch Name";
-const updatedName = "updatedName";
+const watchID = 'watchID';
+const watchName = 'watch Name';
+const updatedName = 'updatedName';
 export default function ({ getService, getPageObjects }) {
-  const remote = getService('remote');
+  const browser = getService('browser');
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const log = getService('log');
+  const esSupertest = getService('esSupertest');
   const PageObjects = getPageObjects(['security', 'common', 'header', 'settings', 'watcher']);
 
   describe('watcher_test', function () {
     before('initialize tests', async () => {
-      await remote.setWindowSize(1600, 1000);
-      await PageObjects.common.navigateToApp('settings');
-      await PageObjects.settings.clickLinkText('Watcher');
-      await PageObjects.watcher.clearAllWatches();
+      // There may be system watches if monitoring was previously enabled
+      // These cannot be deleted via the UI, so we need to delete via the API
+      const watches = await esSupertest.get('/.watches/_search');
+
+      if (watches.status === 200) {
+        for (const hit of watches.body.hits.hits) {
+          if (hit._id) {
+            await esSupertest.delete(`/_watcher/watch/${hit._id}`);
+          }
+        }
+      }
+
+      await browser.setWindowSize(1600, 1000);
+      await PageObjects.common.navigateToApp('watcher');
     });
 
     it('create and save a new watch', async () => {
@@ -31,32 +43,28 @@ export default function ({ getService, getPageObjects }) {
       expect(watch.name).to.be(watchName);
     });
 
-    it('should prompt user to check to see if you can override a watch with a sameID', async () => {
+    it('should not allow a user to save a watch with the same ID', async () => {
       await PageObjects.watcher.createWatch(watchID, updatedName);
-      const modal = await testSubjects.find("confirmModalBodyText");
-      const modalText =  await modal.getVisibleText();
-      expect(modalText).to.be(`Watch with ID "${watchID}" (name: "${watchName}") already exists. Do you want to overwrite it?`);
-      await testSubjects.click('confirmModalConfirmButton');
-      const watch = await PageObjects.watcher.getWatch(watchID);
-      expect(watch.id).to.be(watchID);
-      expect(watch.name).to.be(updatedName);
+      const errorCallout = await testSubjects.find('sectionErrorMessage');
+      const errorCalloutText = await errorCallout.getVisibleText();
+      expect(errorCalloutText).to.be(`There is already a watch with ID '${watchID}'.`);
     });
 
     //delete the watch
     it('should delete the watch', async () => {
+      // Navigate to the main list page
+      await PageObjects.common.navigateToApp('watcher');
       const watchList = indexBy(await PageObjects.watcher.getWatches(), 'id');
       log.debug(watchList);
-      expect(watchList.watchID.name).to.eql([updatedName]);
+      expect(watchList.watchID.name).to.eql([watchName]);
       await PageObjects.watcher.deleteWatch(watchID);
-      const modal = await testSubjects.find("confirmModalBodyText");
-      const modalText =  await modal.getVisibleText();
-      expect(modalText).to.be('This will permanently delete 1 Watch. Are you sure?');
       await testSubjects.click('confirmModalConfirmButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      const watchList1 = indexBy(await PageObjects.watcher.getWatches(), 'id');
-      log.debug(watchList1);
-      expect(watchList1).to.not.have.key(watchID);
+      await retry.try(async () => {
+        const emptyPrompt = await testSubjects.find('emptyPrompt');
+        const emptyPromptText = await emptyPrompt.getVisibleText();
+        expect(emptyPromptText).to.contain('You don’t have any watches yet\n');
+      });
     });
-
   });
 }

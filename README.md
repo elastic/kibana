@@ -1,11 +1,10 @@
-# Kibana 7.0.0-alpha1
+# Kibana
 
 Kibana is your window into the [Elastic Stack](https://www.elastic.co/products). Specifically, it's a browser-based analytics and search dashboard for Elasticsearch.
 
 - [Getting Started](#getting-started)
   - [Using a Kibana Release](#using-a-kibana-release)
   - [Building and Running Kibana, and/or Contributing Code](#building-and-running-kibana-andor-contributing-code)
-  - [Snapshot Builds](#snapshot-builds)
 - [Documentation](#documentation)
 - [Version Compatibility with Elasticsearch](#version-compatibility-with-elasticsearch)
 - [Questions? Problems? Suggestions?](#questions-problems-suggestions)
@@ -33,19 +32,9 @@ out an open PR:
 
 - [CONTRIBUTING.md](CONTRIBUTING.md) will help you get Kibana up and running.
 - If you would like to contribute code, please follow our [STYLEGUIDE.md](STYLEGUIDE.md).
-- Learn more about our UI code with [UI_SYSTEMS.md](src/ui/public/UI_SYSTEMS.md).
+- Learn more about our UI code with [UI_SYSTEMS.md](src/legacy/ui/public/UI_SYSTEMS.md).
 - For all other questions, check out the [FAQ.md](FAQ.md) and
 [wiki](https://github.com/elastic/kibana/wiki).
-
-### Snapshot Builds
-
-For the daring, snapshot builds are available. These builds are created nightly and have undergone no formal QA, so they should never be run in production. All builds are 64 bit.
-
-| platform | default | OSS |
-| --- | --- | --- |
-| OSX | [tar](https://snapshots.elastic.co/downloads/kibana/kibana-7.0.0-alpha1-SNAPSHOT-darwin-x86_64.tar.gz) | [tar](https://snapshots.elastic.co/downloads/kibana/kibana-oss-7.0.0-alpha1-SNAPSHOT-darwin-x86_64.tar.gz) |
-| Linux | [tar](https://snapshots.elastic.co/downloads/kibana/kibana-7.0.0-alpha1-SNAPSHOT-linux-x86_64.tar.gz) [deb](https://snapshots.elastic.co/downloads/kibana/kibana-7.0.0-alpha1-SNAPSHOT-amd64.deb) [rpm](https://snapshots.elastic.co/downloads/kibana/kibana-7.0.0-alpha1-SNAPSHOT-x86_64.rpm) | [tar](https://snapshots.elastic.co/downloads/kibana/kibana-oss-7.0.0-alpha1-SNAPSHOT-linux-x86_64.tar.gz) [deb](https://snapshots.elastic.co/downloads/kibana/kibana-oss-7.0.0-alpha1-SNAPSHOT-amd64.deb) [rpm](https://snapshots.elastic.co/downloads/kibana/kibana-oss-7.0.0-alpha1-SNAPSHOT-x86_64.rpm) |
-| Windows | [zip](https://snapshots.elastic.co/downloads/kibana/kibana-7.0.0-alpha1-SNAPSHOT-windows-x86_64.zip) | [zip](https://snapshots.elastic.co/downloads/kibana/kibana-oss-7.0.0-alpha1-SNAPSHOT-windows-x86_64.zip) |
 
 ## Documentation
 

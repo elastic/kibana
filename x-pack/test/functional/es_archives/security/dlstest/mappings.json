@@ -2,34 +2,32 @@
   "type": "index",
   "value": {
     "index": "dlstest",
-    "settings": {
-      "index": {
-        "number_of_shards": "5",
-        "number_of_replicas": "1"
-      }
-    },
     "mappings": {
-      "dls": {
-        "properties": {
-          "name": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
+      "properties": {
+        "name": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
             }
           },
-          "region": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
+          "type": "text"
+        },
+        "region": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
             }
-          }
+          },
+          "type": "text"
         }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "5"
       }
     }
   }

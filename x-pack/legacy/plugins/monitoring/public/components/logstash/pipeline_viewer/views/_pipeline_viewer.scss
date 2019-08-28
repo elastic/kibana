@@ -1,0 +1,103 @@
+.monPipelineViewer {
+  max-width: 1000px;
+}
+
+.monPipelineViewer__statement {
+  padding-left: $euiSizeM;
+}
+
+.monPipelineViewer__plugin {
+  margin-left: $euiSizeXS;
+}
+
+.monPipelineViewer__spaceContainer {
+  background-color: $euiColorEmptyShade;
+  align-self: stretch;
+  display: flex;
+  // Separates the left border spaces properly
+  border-bottom: solid 2px $euiColorEmptyShade;
+}
+
+.monPipelineViewer__spacer {
+  width: $euiSizeM;
+  align-self: stretch;
+  margin-left: $euiSizeM;
+  border-left: 1px $euiBorderColor dashed;
+
+  // This allows the border to be flush
+  &:last-child {
+    width: 0px;
+  }
+
+  &:first-child {
+    // Odd number is because of the single pixel border.
+    margin-left: $euiSizeL - 1px;
+  }
+}
+
+.monPipelineViewer__metric {
+  text-align: right;
+
+  &--cpuTime {
+    width: $euiSizeXXL;
+  }
+
+  &--events, &--eventsEmitted {
+    width: $euiSizeXXL * 4;
+  }
+
+  &--eventMillis {
+    width: $euiSizeXXL * 2;
+  }
+}
+
+.monPipelineViewer__queueMessage {
+  margin-left: $euiSizeL;
+  color: $euiColorDarkShade;
+}
+
+.monPipelineViewer__list {
+  .monPipelineViewer__listItem {
+    display: flex;
+    min-height: $euiSizeXL;
+    align-items: center;
+    padding-right: $euiSizeM;
+
+    &:nth-child(2n+1) {
+      background: tintOrShade($euiColorLightestShade, 2%, 2%);
+    }
+  }
+}
+
+.monPipelineViewer__conditional {
+  font-weight: bold;
+}
+
+img.lspvDetailDrawerIcon {
+  display: inline;
+  margin: 0 $euiSizeXS 0 0;
+  width: auto;
+  vertical-align: middle;
+}
+
+// SASSTODO: Why is this width here?
+.lspvDetailDrawerSparklineContainer {
+  width: 7vw;
+}
+
+@include euiBreakpoint('m') {
+  .monPipelineViewer {
+    .monPipelineViewer__spacer {
+      border: none;
+    }
+
+    .monPipelineViewer__metricFlexItem {
+      margin-bottom: $euiSizeXS !important;
+    }
+
+    .monPipelineViewer__metric {
+      text-align: left;
+      padding-left: $euiSizeXL;
+    }
+  }
+}

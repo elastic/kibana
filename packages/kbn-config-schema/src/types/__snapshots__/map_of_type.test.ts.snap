@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`fails when not receiving expected key type 1`] = `"[key(\\"name\\")]: expected value of type [number] but got [string]"`;
+
+exports[`fails when not receiving expected value type 1`] = `"[name]: expected value of type [string] but got [number]"`;
+
+exports[`includes namespace in failure when wrong key type 1`] = `"[foo-namespace.key(\\"name\\")]: expected value of type [number] but got [string]"`;
+
+exports[`includes namespace in failure when wrong top-level type 1`] = `"[foo-namespace]: expected value of type [Map] or [object] but got [Array]"`;
+
+exports[`includes namespace in failure when wrong value type 1`] = `"[foo-namespace.name]: expected value of type [string] but got [number]"`;

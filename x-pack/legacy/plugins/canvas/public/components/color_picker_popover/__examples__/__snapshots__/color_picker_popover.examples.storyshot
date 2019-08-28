@@ -1,0 +1,195 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/Color/ColorPickerPopover interactive 1`] = `
+<div>
+  <div
+    className="euiPopover euiPopover--anchorDownCenter"
+    container={null}
+    id="color-picker-popover"
+    onKeyDown={[Function]}
+    onMouseDown={[Function]}
+    onMouseUp={[Function]}
+    onTouchEnd={[Function]}
+    onTouchStart={[Function]}
+  >
+    <div
+      className="euiPopover__anchor"
+    >
+      <button
+        className="euiLink euiLink--primary"
+        onClick={[Function]}
+        style={
+          Object {
+            "fontSize": 0,
+          }
+        }
+        type="button"
+      >
+        <div
+          className="canvasColorDot"
+        >
+          <div
+            className="canvasColorDot__background canvasCheckered"
+          />
+          <div
+            className="canvasColorDot__foreground"
+            style={Object {}}
+          />
+        </div>
+      </button>
+    </div>
+  </div>
+  <p
+    style={
+      Object {
+        "marginTop": 20,
+      }
+    }
+  >
+    <label>
+      <input
+        aria-checked={true}
+        checked={true}
+        onChange={[Function]}
+        type="checkbox"
+      />
+        
+      <span>
+        Show Buttons?
+      </span>
+    </label>
+  </p>
+</div>
+`;
+
+exports[`Storyshots components/Color/ColorPickerPopover six colors 1`] = `
+<div
+  className="euiPopover euiPopover--anchorDownCenter"
+  container={null}
+  id="color-picker-popover"
+  onKeyDown={[Function]}
+  onMouseDown={[Function]}
+  onMouseUp={[Function]}
+  onTouchEnd={[Function]}
+  onTouchStart={[Function]}
+>
+  <div
+    className="euiPopover__anchor"
+  >
+    <button
+      className="euiLink euiLink--primary"
+      onClick={[Function]}
+      style={
+        Object {
+          "fontSize": 0,
+        }
+      }
+      type="button"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={
+            Object {
+              "background": "#fff",
+            }
+          }
+        />
+      </div>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/Color/ColorPickerPopover six colors, value missing 1`] = `
+<div
+  className="euiPopover euiPopover--anchorDownCenter"
+  container={null}
+  id="color-picker-popover"
+  onKeyDown={[Function]}
+  onMouseDown={[Function]}
+  onMouseUp={[Function]}
+  onTouchEnd={[Function]}
+  onTouchStart={[Function]}
+>
+  <div
+    className="euiPopover__anchor"
+  >
+    <button
+      className="euiLink euiLink--primary"
+      onClick={[Function]}
+      style={
+        Object {
+          "fontSize": 0,
+        }
+      }
+      type="button"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={
+            Object {
+              "background": "#a1b2c3",
+            }
+          }
+        />
+      </div>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/Color/ColorPickerPopover three colors 1`] = `
+<div
+  className="euiPopover euiPopover--anchorDownCenter"
+  container={null}
+  id="color-picker-popover"
+  onKeyDown={[Function]}
+  onMouseDown={[Function]}
+  onMouseUp={[Function]}
+  onTouchEnd={[Function]}
+  onTouchStart={[Function]}
+>
+  <div
+    className="euiPopover__anchor"
+  >
+    <button
+      className="euiLink euiLink--primary"
+      onClick={[Function]}
+      style={
+        Object {
+          "fontSize": 0,
+        }
+      }
+      type="button"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={
+            Object {
+              "background": "#fff",
+            }
+          }
+        />
+      </div>
+    </button>
+  </div>
+</div>
+`;
