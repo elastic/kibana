@@ -19,12 +19,18 @@
 
 function selectorToTerms(selector) {
   return selector
-    .replace(/\s*&\s*/g, '&') // remove all whitespace around joins
-    .split(/\s+/);
+    .replace(/\s*>\s*/g, '>') // remove all whitespace around joins
+    .split(/>+/);
 }
 
 function termToCssSelector(term) {
-  return term ? '[data-test-subj~="' + term + '"]' : '';
+  if (term) {
+    return term.startsWith('~')
+      ? '[data-test-subj~="' + term.substring(1) + '"]'
+      : '[data-test-subj="' + term + '"]';
+  } else {
+    return '';
+  }
 }
 
 module.exports = function testSubjSelector(selector) {
@@ -36,6 +42,7 @@ module.exports = function testSubjSelector(selector) {
     // split each term by joins/& and map to css selectors
     cssSelectors.push(
       term
+        .replace(/\s*&\s*/g, '&') // remove all whitespace around joins
         .split('&')
         .map(termToCssSelector)
         .join('')
