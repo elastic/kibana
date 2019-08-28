@@ -30,8 +30,8 @@ export class LevelLogger {
     this.warn = this.warning.bind(this);
   }
 
-  public error(msg: string, tags: string[] = []) {
-    this._logger([...this._tags, ...tags, 'error'], msg);
+  public error(err: string | Error, tags: string[] = []) {
+    this._logger([...this._tags, ...tags, 'error'], err);
   }
 
   public warning(msg: string, tags: string[] = []) {
