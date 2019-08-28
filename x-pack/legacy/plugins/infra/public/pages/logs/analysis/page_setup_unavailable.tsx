@@ -15,7 +15,7 @@ export const AnalysisSetupUnavailable: React.FunctionComponent<{}> = () => (
       <h2>
         <FormattedMessage
           id="xpack.infra.logs.analysisPage.unavailable.mLDisabledTitle"
-          defaultMessage="Analysis requires Machine Learning to be available"
+          defaultMessage="The Analysis feature requires Machine Learning"
         />
       </h2>
     }
