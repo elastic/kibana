@@ -86,7 +86,7 @@ const ExplorationTitle: React.SFC<{ jobId: string }> = ({ jobId }) => (
   <EuiTitle size="xs">
     <span>
       {i18n.translate('xpack.ml.dataframe.analytics.exploration.jobIdTitle', {
-        defaultMessage: 'Job id {jobId}',
+        defaultMessage: 'Job ID {jobId}',
         values: { jobId },
       })}
     </span>
