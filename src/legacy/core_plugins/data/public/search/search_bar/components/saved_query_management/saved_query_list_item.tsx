@@ -97,24 +97,31 @@ export const SavedQueryListItem = ({
         aria-label={selectButtonAriaLabelText}
         label={label}
         iconType={isSelected ? 'check' : undefined}
-        extraAction={{
-          color: 'danger',
-          onClick: () => setShowDeletionConfirmationModal(true),
-          iconType: 'trash',
-          iconSize: 's',
-          'aria-label': i18n.translate(
-            'data.search.searchBar.savedQueryPopoverDeleteButtonAriaLabel',
-            {
-              defaultMessage: 'Delete saved query {savedQueryName}',
-              values: { savedQueryName: savedQuery.attributes.title },
-            }
-          ),
-          title: i18n.translate('data.search.searchBar.savedQueryPopoverDeleteButtonAriaLabel', {
-            defaultMessage: 'Delete saved query {savedQueryName}',
-            values: { savedQueryName: savedQuery.attributes.title },
-          }),
-          'data-test-subj': `delete-saved-query-${savedQuery.attributes.title}-button`,
-        }}
+        extraAction={
+          showWriteOperations
+            ? {
+                color: 'danger',
+                onClick: () => setShowDeletionConfirmationModal(true),
+                iconType: 'trash',
+                iconSize: 's',
+                'aria-label': i18n.translate(
+                  'data.search.searchBar.savedQueryPopoverDeleteButtonAriaLabel',
+                  {
+                    defaultMessage: 'Delete saved query {savedQueryName}',
+                    values: { savedQueryName: savedQuery.attributes.title },
+                  }
+                ),
+                title: i18n.translate(
+                  'data.search.searchBar.savedQueryPopoverDeleteButtonAriaLabel',
+                  {
+                    defaultMessage: 'Delete saved query {savedQueryName}',
+                    values: { savedQueryName: savedQuery.attributes.title },
+                  }
+                ),
+                'data-test-subj': `delete-saved-query-${savedQuery.attributes.title}-button`,
+              }
+            : undefined
+        }
       />
 
       {showDeletionConfirmationModal && (
