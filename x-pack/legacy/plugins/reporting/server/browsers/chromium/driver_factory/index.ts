@@ -171,9 +171,7 @@ export class HeadlessChromiumDriverFactory {
         (msg: string) => !!msg.match(/\[\d+\/\d+.\d+:\w+:CONSOLE\(\d+\)\]/)
       )(stderr$);
 
-      const driver$ = Rx.of(
-        new HeadlessChromiumDriver(page)
-      );
+      const driver$ = Rx.of(new HeadlessChromiumDriver(page));
 
       const processError$ = Rx.fromEvent(page, 'error').pipe(
         mergeMap(err => Rx.throwError(new Error(`Unable to spawn Chromium: [${err}]`)))
