@@ -7,39 +7,47 @@
 import { EuiButtonGroup, EuiButtonGroupProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ViewMode } from './index';
 
-interface Props {
-  selectedView: string;
+export type LogRateView = 'chart' | 'table';
+
+export const isValidLogRateView = (maybeView: string): maybeView is LogRateView =>
+  ['chart', 'table'].includes(maybeView);
+
+interface LogRateViewSwitcherProps {
+  selectedView: LogRateView;
   onChange: EuiButtonGroupProps['onChange'];
 }
 
 const chartLabel = i18n.translate(
   'xpack.infra.logs.analysis.logRateSection.viewSwitcher.chartLabel',
-  { defaultMessage: 'Chart view' }
+  { defaultMessage: 'Rate chart' }
 );
 const tableLabel = i18n.translate(
   'xpack.infra.logs.analysis.logRateSection.viewSwitcher.tableLabel',
-  { defaultMessage: 'Table view' }
+  { defaultMessage: 'Anomaly table' }
 );
 const legendLabel = i18n.translate(
   'xpack.infra.logs.analysis.logRateSection.viewSwitcher.legendLabel',
-  { defaultMessage: 'Switch between chart and table view' }
+  { defaultMessage: 'Switch between the log rate chart and the anomalies table view' }
 );
 
-export const ViewSwitcher = ({ selectedView, onChange }: Props) => {
-  const buttons = [
-    {
-      id: ViewMode.chart,
-      label: chartLabel,
-      iconType: 'apps',
-    },
-    {
-      id: ViewMode.table,
-      label: tableLabel,
-      iconType: 'editorUnorderedList',
-    },
-  ];
+const buttons = [
+  {
+    id: 'chart',
+    label: chartLabel,
+    iconType: 'apps',
+  },
+  {
+    id: 'table',
+    label: tableLabel,
+    iconType: 'editorUnorderedList',
+  },
+];
+
+export const LogRateViewSwitcher: React.FunctionComponent<LogRateViewSwitcherProps> = ({
+  selectedView,
+  onChange,
+}) => {
   return (
     <EuiButtonGroup
       legend={legendLabel}
