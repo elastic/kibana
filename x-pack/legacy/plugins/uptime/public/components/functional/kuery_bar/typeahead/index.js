@@ -170,7 +170,7 @@ export class Typeahead extends Component {
               backgroundImage: 'none'
             }}
             placeholder={i18n.translate(
-              'xpack.apm.kueryBar.searchPlaceholder',
+              'xpack.uptime.kueryBar.searchPlaceholder',
               {
                 defaultMessage:
                   'Search monitor IDs, names, and protocol types...',
