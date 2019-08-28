@@ -20,7 +20,7 @@
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { PointSeriesOptions } from './editors/point_series';
+import { PointSeriesOptions } from './components/options';
 import { getLegendPositions, LegendPositions } from './utils/legend_positions';
 import { palettes } from '@elastic/eui/lib/services';
 

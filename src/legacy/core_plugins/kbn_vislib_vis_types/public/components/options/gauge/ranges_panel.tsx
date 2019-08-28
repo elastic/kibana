@@ -24,8 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { RangesParamEditor } from 'ui/agg_types/controls/ranges';
-import { SelectOption } from '../../controls/select';
-import { SwitchOption } from '../../controls/switch';
+import { SelectOption, SwitchOption } from '../../common';
 import { GaugeOptionsInternalProps } from '.';
 
 function RangesPanel({
