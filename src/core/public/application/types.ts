@@ -245,11 +245,11 @@ export interface ApplicationStart {
   navigateToApp(appId: string, options?: { path?: string; state?: any }): void;
 
   /**
-   * Returns a relative URL to a given app
+   * Returns a relative URL to a given app, including the global base path.
    * @param appId
    * @param options.path - optional path inside application to deep link to
    */
-  urlForApp(appId: string, options?: { path?: string }): string;
+  getUrlForApp(appId: string, options?: { path?: string }): string;
 
   /**
    * Register a context provider for application mounting. Will only be available to applications that depend on the
@@ -267,7 +267,7 @@ export interface ApplicationStart {
 
 /** @internal */
 export interface InternalApplicationStart
-  extends Pick<ApplicationStart, 'capabilities' | 'navigateToApp' | 'urlForApp'> {
+  extends Pick<ApplicationStart, 'capabilities' | 'navigateToApp' | 'getUrlForApp'> {
   /**
    * Apps available based on the current capabilities. Should be used
    * to show navigation links and make routing decisions.

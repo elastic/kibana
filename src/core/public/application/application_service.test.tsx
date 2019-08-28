@@ -167,7 +167,7 @@ describe('#start()', () => {
     injectedMetadata.getLegacyMode.mockReturnValue(false);
     const start = await service.start({ http, injectedMetadata });
 
-    expect(shallow(React.createElement(() => start.getComponent()))).toMatchSnapshot();
+    expect(() => shallow(React.createElement(() => start.getComponent()))).not.toThrow();
   });
 
   describe('navigateToApp', () => {

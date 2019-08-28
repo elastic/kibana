@@ -18,7 +18,6 @@
  */
 
 import { Plugin, CoreSetup } from 'kibana/public';
-import { renderApp } from './application';
 
 export class CorePluginAPlugin implements Plugin<CorePluginAPluginSetup, CorePluginAPluginStart> {
   public setup(core: CoreSetup, deps: {}) {
@@ -26,7 +25,7 @@ export class CorePluginAPlugin implements Plugin<CorePluginAPluginSetup, CorePlu
       id: 'foo',
       title: 'Foo',
       async mount(context, params) {
-        // Once dynamic imports are supported, replace with `await import()`
+        const { renderApp } = await import('./application');
         return renderApp(context, params);
       },
     });

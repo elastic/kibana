@@ -44,6 +44,7 @@ const createInternalSetupContractMock = (): jest.Mocked<InternalApplicationSetup
 const createStartContractMock = (legacyMode = false): jest.Mocked<ApplicationStart> => ({
   capabilities: capabilitiesServiceMock.createStartContract().capabilities,
   navigateToApp: jest.fn(),
+  getUrlForApp: jest.fn(),
   registerMountContext: jest.fn(),
 });
 
@@ -52,6 +53,7 @@ const createInternalStartContractMock = (): jest.Mocked<InternalApplicationStart
   availableLegacyApps: new Map(),
   capabilities: capabilitiesServiceMock.createStartContract().capabilities,
   navigateToApp: jest.fn(),
+  getUrlForApp: jest.fn(),
   registerMountContext: jest.fn(),
   currentAppId$: new Subject<string | undefined>(),
   getComponent: jest.fn(),

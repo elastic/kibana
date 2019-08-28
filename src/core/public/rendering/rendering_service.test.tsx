@@ -81,14 +81,7 @@ describe('RenderingService#start', () => {
         start: { legacyTargetDomElement },
         targetDomElement,
       } = getService({ legacyMode: true });
-      legacyTargetDomElement!.innerHTML = '<span id="legacy">Hello legacy!</span>';
-      expect(targetDomElement.querySelector('#legacy')).toMatchInlineSnapshot(`
-          <span
-            id="legacy"
-          >
-            Hello legacy!
-          </span>
-      `);
+      expect(targetDomElement.contains(legacyTargetDomElement!)).toBe(true);
     });
   });
 });

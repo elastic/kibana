@@ -133,7 +133,7 @@ export class ApplicationService {
       registerMountContext: this.mountContext.registerContext,
       currentAppId$,
 
-      urlForApp: (appId, options: { path?: string } = {}) => {
+      getUrlForApp: (appId, options: { path?: string } = {}) => {
         return http.basePath.prepend(appPath(appId, options));
       },
 

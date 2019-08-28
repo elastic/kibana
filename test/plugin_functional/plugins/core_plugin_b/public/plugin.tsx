@@ -19,7 +19,6 @@
 
 import { Plugin, CoreSetup } from 'kibana/public';
 import { CorePluginAPluginSetup } from '../../core_plugin_a/public/plugin';
-import { renderApp } from './application';
 
 declare global {
   interface Window {
@@ -40,7 +39,7 @@ export class CorePluginBPlugin
       id: 'bar',
       title: 'Bar',
       async mount(context, params) {
-        // Once dynamic imports are supported, replace with `await import()`
+        const { renderApp } = await import('./application');
         return renderApp(context, params);
       },
     });

@@ -116,7 +116,7 @@ function extendRecentlyAccessedHistoryItem(
   };
 }
 
-function extendNavLink(navLink: ChromeNavLink, urlForApp: ApplicationStart['urlForApp']) {
+function extendNavLink(navLink: ChromeNavLink, urlForApp: ApplicationStart['getUrlForApp']) {
   if (navLink.legacy) {
     return {
       ...navLink,
@@ -237,7 +237,7 @@ class HeaderUI extends Component<Props, State> {
           isVisible,
           forceNavigation,
           navLinks: navLinks.map(navLink =>
-            extendNavLink(navLink, this.props.application.urlForApp)
+            extendNavLink(navLink, this.props.application.getUrlForApp)
           ),
           recentlyAccessed: recentlyAccessed.map(ra =>
             extendRecentlyAccessedHistoryItem(navLinks, ra, this.props.basePath)

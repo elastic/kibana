@@ -68,7 +68,7 @@ describe('AppContainer', () => {
     history = createMemoryHistory();
     currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
     // Use 'asdf' as the basepath
-    const http = httpServiceMock.createStartContract('/asdf');
+    const http = httpServiceMock.createStartContract({ basePath: '/asdf' });
     router = mount(
       <I18nProvider>
         <AppRouter

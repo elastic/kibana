@@ -162,7 +162,8 @@ export function CommonPageProvider({ getService, getPageObjects }) {
         });
       } else {
         appUrl = getUrl.noAuth(config.get('servers.kibana'), {
-          pathname: `${basePath}/app/${appName}`
+          pathname: `${basePath}/app/${appName}`,
+          hash
         });
       }
 
