@@ -11,13 +11,15 @@ import { cloneDeep } from 'lodash';
 
 const fixturesDir = join(__dirname, 'fixtures');
 
-const excludeFieldsFrom = (from: any, excluder: (d: any) => any): any => {
+const excludeFieldsFrom = (from: any, excluder?: (d: any) => any): any => {
   const clone = cloneDeep(from);
-  excluder(clone);
+  if (excluder) {
+    excluder(clone);
+  }
   return clone;
 };
 
-export const expectFixtureEql = (data: any, fixtureName: string, excluder: (d: any) => any) => {
+export const expectFixtureEql = (data: any, fixtureName: string, excluder?: (d: any) => any) => {
   const fixturePath = join(fixturesDir, `${fixtureName}.json`);
   if (process.env.UPDATE_UPTIME_FIXTURES) {
     fs.writeFileSync(fixturePath, JSON.stringify(data, null, 2));

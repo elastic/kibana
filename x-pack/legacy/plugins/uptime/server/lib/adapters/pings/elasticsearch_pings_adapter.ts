@@ -91,7 +91,6 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
 
     const pings: Ping[] = hits.map(({ _id, _source }: any) => {
       const timestamp = _source['@timestamp'];
-      const res = { id: _id, timestamp, ..._source };
 
       // Calculate here the length of the content string in bytes, this is easier than in client JS, where
       // we don't have access to Buffer.byteLength. There are some hacky ways to do this in the
@@ -101,7 +100,7 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
         httpBody.content_bytes = Buffer.byteLength(httpBody.content);
       }
 
-      return res;
+      return { id: _id, timestamp, ..._source };
     });
 
     const results: PingResults = {
