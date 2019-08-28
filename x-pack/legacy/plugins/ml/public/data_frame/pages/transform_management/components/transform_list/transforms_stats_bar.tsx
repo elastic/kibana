@@ -20,28 +20,28 @@ function createTranformStats(transformsList: DataFrameTransformListRow[]) {
     },
     batch: {
       label: i18n.translate('xpack.ml.dataFrame.statsBar.batchTransformsLabel', {
-        defaultMessage: 'Batch transforms',
+        defaultMessage: 'Batch',
       }),
       value: 0,
       show: true,
     },
     continuous: {
       label: i18n.translate('xpack.ml.dataFrame.statsBar.continuousTransformsLabel', {
-        defaultMessage: 'Continuous transforms',
+        defaultMessage: 'Continuous',
       }),
       value: 0,
       show: true,
     },
     failed: {
       label: i18n.translate('xpack.ml.dataFrame.statsBar.failedTransformsLabel', {
-        defaultMessage: 'Failed transforms',
+        defaultMessage: 'Failed',
       }),
       value: 0,
       show: false,
     },
     started: {
       label: i18n.translate('xpack.ml.dataFrame.statsBar.startedTransformsLabel', {
-        defaultMessage: 'Started transforms',
+        defaultMessage: 'Started',
       }),
       value: 0,
       show: true,
@@ -60,7 +60,9 @@ function createTranformStats(transformsList: DataFrameTransformListRow[]) {
       transformStats.continuous.value++;
     } else if (transform.mode === DATA_FRAME_MODE.BATCH) {
       transformStats.batch.value++;
-    } else if (transform.stats.state === DATA_FRAME_TRANSFORM_STATE.FAILED) {
+    }
+
+    if (transform.stats.state === DATA_FRAME_TRANSFORM_STATE.FAILED) {
       failedTransforms++;
     } else if (transform.stats.state === DATA_FRAME_TRANSFORM_STATE.STARTED) {
       startedTransforms++;
