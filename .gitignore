@@ -8,6 +8,7 @@ node_modules
 !/src/dev/npm/integration_tests/__fixtures__/fixture1/node_modules
 !/src/dev/notice/__fixtures__/node_modules
 trash
+/optimize
 /built_assets
 target
 /build
