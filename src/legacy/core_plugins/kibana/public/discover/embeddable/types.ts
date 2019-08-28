@@ -27,6 +27,7 @@ import {
   EmbeddableOutput,
   IEmbeddable,
 } from '../../../../embeddable_api/public/np_ready/public';
+import { SortOrder } from '../doc_table/components/table_header/helpers';
 
 export interface SearchInput extends EmbeddableInput {
   timeRange: TimeRange;
@@ -34,7 +35,7 @@ export interface SearchInput extends EmbeddableInput {
   filters?: Filter[];
   hidePanelTitles?: boolean;
   columns?: string[];
-  sort?: string[][];
+  sort?: SortOrder[];
 }
 
 export interface SearchOutput extends EmbeddableOutput {

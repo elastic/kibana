@@ -481,7 +481,7 @@ function VisEditor(
   };
 
   $scope.onSavedQueryUpdated = savedQuery => {
-    $scope.savedQuery = savedQuery;
+    $scope.savedQuery = { ...savedQuery };
   };
 
   $scope.onClearSavedQuery = () => {

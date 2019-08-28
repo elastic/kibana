@@ -9,7 +9,6 @@ export {
   moveToAnalyticsWizard,
   refreshAnalyticsList$,
   useRefreshAnalyticsList,
-  CreateRequestBody,
   DataFrameAnalyticsId,
   DataFrameAnalyticsOutlierConfig,
   IndexName,

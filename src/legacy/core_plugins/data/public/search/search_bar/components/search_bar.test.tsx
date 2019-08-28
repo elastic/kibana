@@ -23,7 +23,7 @@ import { SearchBar } from './search_bar';
 import { IndexPattern } from 'ui/index_patterns';
 
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
-const setupMock = coreMock.createSetup();
+const startMock = coreMock.createStart();
 
 import { timefilterServiceMock } from '../../../timefilter/timefilter_service.mock';
 const timefilterSetupMock = timefilterServiceMock.createSetupContract();
@@ -76,14 +76,6 @@ const mockIndexPattern = {
   ],
 } as IndexPattern;
 
-const mockSavedQueryService = {
-  saveQuery: jest.fn(),
-  getAllSavedQueries: jest.fn(),
-  findSavedQueries: jest.fn(),
-  getSavedQuery: jest.fn(),
-  deleteSavedQuery: jest.fn(),
-};
-
 const kqlQuery = {
   query: 'response:200',
   language: 'kuery',
@@ -102,8 +94,8 @@ describe('SearchBar', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
         history={timefilterSetupMock.history}
-        uiSettings={setupMock.uiSettings}
-        savedQueryService={mockSavedQueryService}
+        savedObjectsClient={startMock.savedObjects.client}
+        uiSettings={startMock.uiSettings}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
@@ -119,8 +111,8 @@ describe('SearchBar', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
         history={timefilterSetupMock.history}
-        uiSettings={setupMock.uiSettings}
-        savedQueryService={mockSavedQueryService}
+        savedObjectsClient={startMock.savedObjects.client}
+        uiSettings={startMock.uiSettings}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
@@ -137,8 +129,8 @@ describe('SearchBar', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
         history={timefilterSetupMock.history}
-        uiSettings={setupMock.uiSettings}
-        savedQueryService={mockSavedQueryService}
+        savedObjectsClient={startMock.savedObjects.client}
+        uiSettings={startMock.uiSettings}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
@@ -157,8 +149,8 @@ describe('SearchBar', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
         history={timefilterSetupMock.history}
-        uiSettings={setupMock.uiSettings}
-        savedQueryService={mockSavedQueryService}
+        savedObjectsClient={startMock.savedObjects.client}
+        uiSettings={startMock.uiSettings}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
@@ -178,8 +170,8 @@ describe('SearchBar', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
         history={timefilterSetupMock.history}
-        uiSettings={setupMock.uiSettings}
-        savedQueryService={mockSavedQueryService}
+        savedObjectsClient={startMock.savedObjects.client}
+        uiSettings={startMock.uiSettings}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
@@ -199,8 +191,8 @@ describe('SearchBar', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
         history={timefilterSetupMock.history}
-        uiSettings={setupMock.uiSettings}
-        savedQueryService={mockSavedQueryService}
+        uiSettings={startMock.uiSettings}
+        savedObjectsClient={startMock.savedObjects.client}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}
@@ -221,8 +213,8 @@ describe('SearchBar', () => {
     const component = mountWithIntl(
       <SearchBar.WrappedComponent
         history={timefilterSetupMock.history}
-        uiSettings={setupMock.uiSettings}
-        savedQueryService={mockSavedQueryService}
+        uiSettings={startMock.uiSettings}
+        savedObjectsClient={startMock.savedObjects.client}
         appName={'test'}
         indexPatterns={[mockIndexPattern]}
         intl={null as any}

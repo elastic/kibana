@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { Action } from 'redux';
 import { TimelineModel } from './model';
 
 export interface AutoSavedWarningMsg {
@@ -23,4 +23,12 @@ export interface TimelineState {
   timelineById: TimelineById;
   autoSavedWarningMsg: AutoSavedWarningMsg;
   showCallOutUnauthorizedMsg: boolean;
+}
+
+export interface ActionTimeline extends Action<string> {
+  payload: {
+    id: string;
+    eventId: string;
+    noteId: string;
+  };
 }

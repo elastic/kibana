@@ -77,7 +77,6 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
 
     const $compile = $injector.get<ng.ICompileService>('$compile');
     const $rootScope = $injector.get<ng.IRootScopeService>('$rootScope');
-    const courier = $injector.get<unknown>('courier');
     const searchLoader = $injector.get<SavedSearchLoader>('savedSearches');
     const editUrl = chrome.addBasePath(`/app/kibana${searchLoader.urlFor(savedObjectId)}`);
 
@@ -88,7 +87,6 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
       const savedObject = await searchLoader.get(savedObjectId);
       return new SearchEmbeddable(
         {
-          courier,
           savedSearch: savedObject,
           $rootScope,
           $compile,
