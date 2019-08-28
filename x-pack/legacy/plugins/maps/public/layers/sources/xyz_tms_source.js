@@ -14,6 +14,7 @@ import { AbstractTMSSource } from './tms_source';
 import { TileLayer } from '../tile_layer';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel, getUrlLabel } from '../../../common/i18n_getters';
+import _ from 'lodash';
 
 export class XYZTMSSource extends AbstractTMSSource {
 
@@ -96,6 +97,12 @@ class XYZTMSEditor extends React.Component {
     attributionUrl: '',
   }
 
+  _sourceConfigChange = _.debounce(updatedSourceConfig => {
+    if (this.state.tmsCanPreview) {
+      this.props.onSourceConfigChange(updatedSourceConfig);
+    }
+  }, 2000);
+
   _handleTMSInputChange(e) {
     const url = e.target.value;
 
@@ -103,11 +110,7 @@ class XYZTMSEditor extends React.Component {
     this.setState({
       tmsInput: url,
       tmsCanPreview: canPreview
-    });
-
-    if (canPreview) {
-      this.props.onSourceConfigChange({ urlTemplate: url });
-    }
+    }, () => this._sourceConfigChange({ urlTemplate: url }));
   }
 
   _handleTMSAttributionChange(attributionUpdate) {
@@ -116,11 +119,10 @@ class XYZTMSEditor extends React.Component {
         attributionText,
         attributionUrl,
         tmsInput,
-        tmsCanPreview
       } = this.state;
 
-      if (tmsCanPreview && tmsInput && attributionText && attributionUrl) {
-        this.props.onSourceConfigChange({
+      if (tmsInput && attributionText && attributionUrl) {
+        this._sourceConfigChange({
           urlTemplate: tmsInput,
           attributionText,
           attributionUrl

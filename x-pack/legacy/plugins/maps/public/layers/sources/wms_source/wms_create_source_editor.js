@@ -17,6 +17,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { WmsClient } from './wms_client';
+import _ from 'lodash';
 
 const LAYERS_LABEL = i18n.translate('xpack.maps.source.wms.layersLabel', {
   defaultMessage: 'Layers'
@@ -49,7 +50,7 @@ export class WMSCreateSourceEditor extends Component {
     this._isMounted = false;
   }
 
-  _previewIfPossible() {
+  _previewIfPossible = _.debounce(() => {
     const {
       serviceUrl,
       layers,
@@ -68,7 +69,7 @@ export class WMSCreateSourceEditor extends Component {
       }
       : null;
     this.props.onSourceConfigChange(sourceConfig);
-  }
+  }, 2000);
 
   _loadCapabilities = async () => {
     if (!this.state.serviceUrl) {
