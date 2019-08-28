@@ -113,7 +113,7 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
           id: ID,
           inspect: null,
           loading: false,
-          refetch: () => embeddableObject.reload(),
+          refetch: embeddableObject.reload,
         });
 
         setEmbeddable(embeddableObject);
@@ -126,11 +126,10 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
      * Temporary Embeddables API configuration override until ability to edit actions is addressed:
      * https://github.com/elastic/kibana/issues/43643
      */
-    const setupEmbeddablesAPI = () => {
+    const setupEmbeddablesAPI = (): boolean => {
       try {
         const actions = start.getTriggerActions(APPLY_FILTER_TRIGGER);
-        const actionLoaded =
-          actions.length > 0 && actions.some(a => a.id === APPLY_SIEM_FILTER_ACTION_ID);
+        const actionLoaded = actions.some(a => a.id === APPLY_SIEM_FILTER_ACTION_ID);
         if (!actionLoaded) {
           const siemFilterAction = new ApplySiemFilterAction({
             applyFilterQueryFromKueryExpression,
@@ -142,10 +141,10 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
           start.detachAction(PANEL_BADGE_TRIGGER, 'CUSTOM_TIME_RANGE_BADGE');
           start.detachAction(APPLY_FILTER_TRIGGER, APPLY_FILTER_ACTION);
         }
+        return true;
       } catch (e) {
-        throw Error(
-          'Unable to get TriggerActions to perform initial Embeddables API configuration'
-        );
+        // TODO: Throw toast
+        return false;
       }
     };
 
@@ -158,14 +157,15 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
           siemDefaultIndices.includes(ip.attributes.title)
         );
 
+        const failedToSetup = setupEmbeddablesAPI();
+
         // Ensure at least one `siem:defaultIndex` index pattern exists before trying to import
-        if (matchingIndexPatterns.length === 0) {
+        if (matchingIndexPatterns.length === 0 || failedToSetup) {
           setIsLoading(false);
           setIsError(true);
           return;
         }
 
-        setupEmbeddablesAPI();
         await loadEmbeddable(uuid.v4(), getIndexPatternTitleIdMapping(matchingIndexPatterns));
         setIsLoading(false);
       };

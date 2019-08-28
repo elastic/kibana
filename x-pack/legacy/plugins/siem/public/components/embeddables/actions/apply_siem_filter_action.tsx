@@ -14,7 +14,6 @@ import {
   ActionContext,
 } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/actions';
 import { IEmbeddable } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/embeddables';
-import { IncompatibleActionError } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib';
 
 export const APPLY_SIEM_FILTER_ACTION_ID = 'APPLY_SIEM_FILTER_ACTION_ID';
 
@@ -37,11 +36,13 @@ export class ApplySiemFilterAction extends Action {
     });
   }
 
-  public async isCompatible(context: ActionContext<IEmbeddable, { filters: Filter[] }>) {
-    return Boolean(
+  public async isCompatible(
+    context: ActionContext<IEmbeddable, { filters: Filter[] }>
+  ): Promise<boolean> {
+    return (
       context.embeddable.type === MAP_SAVED_OBJECT_TYPE &&
-        context.triggerContext &&
-        context.triggerContext.filters !== undefined
+      context.triggerContext != null &&
+      context.triggerContext.filters !== undefined
     );
   }
 
@@ -53,16 +54,13 @@ export class ApplySiemFilterAction extends Action {
       throw new Error('Applying a filter requires a filter as context');
     }
 
-    if (!this.isCompatible({ triggerContext, embeddable })) {
-      throw new IncompatibleActionError();
-    }
-
     // Parse queryExpression from queryDSL and apply to SIEM global KQL Bar via redux
-    const filterObject = getOr({}, 'filters[0].query.match', triggerContext);
-    const filterQuery = getOr('', 'query.query', embeddable.getInput());
-    const filterKey = filterObject && Object.keys(filterObject)[0];
+    const filterObject = getOr(null, 'filters[0].query.match', triggerContext);
 
-    if (filterKey != null) {
+    if (filterObject != null) {
+      const filterQuery = getOr('', 'query.query', embeddable.getInput());
+      const filterKey = Object.keys(filterObject)[0];
+
       const filterExpression = Array.isArray(filterObject[filterKey].query)
         ? getExpressionFromArray(filterKey, filterObject[filterKey].query)
         : `${filterKey}: "${filterObject[filterKey].query}"`;
@@ -74,10 +72,7 @@ export class ApplySiemFilterAction extends Action {
   }
 }
 
-export const getExpressionFromArray = (filterKey: string, filterValues: string[]) => {
-  const filterList = filterValues.reduce(
-    (acc: string[], filterValue: string) => [...acc, `${filterKey}: "${filterValue}"`],
-    []
-  );
-  return filterList.length > 0 ? `(${filterList.join(' OR ')})` : '';
-};
+export const getExpressionFromArray = (filterKey: string, filterValues: string[]) =>
+  filterValues.length > 0
+    ? `(${filterValues.map(filterValue => `${filterKey}: "${filterValue}"`).join(' OR ')})`
+    : '';
