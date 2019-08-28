@@ -6,7 +6,6 @@
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
-import { DEFAULT_TIMELINE_WIDTH } from '../../components/timeline/body/helpers';
 import {
   addTimeline,
   addHistory,
@@ -50,6 +49,7 @@ import {
 } from './actions';
 import {
   addNewTimeline,
+  addTimelineToStore,
   addTimelineHistory,
   addTimelineNote,
   addTimelineNoteToEvent,
@@ -116,28 +116,7 @@ export const initialTimelineState: TimelineState = {
 export const timelineReducer = reducerWithInitialState(initialTimelineState)
   .case(addTimeline, (state, { id, timeline }) => ({
     ...state,
-    timelineById: {
-      // As right now, We are not managing multiple timeline
-      // for now simplification, we do not need the line below
-      // ...state.timelineById,
-      [id]: {
-        ...timeline,
-        highlightedDropAndProviderId: '',
-        historyIds: [],
-        isLive: false,
-        isLoading: true,
-        itemsPerPage: 25,
-        itemsPerPageOptions: [10, 25, 50, 100],
-        id: timeline.savedObjectId || '',
-        dateRange: {
-          start: 0,
-          end: 0,
-        },
-        show: true,
-        width: DEFAULT_TIMELINE_WIDTH,
-        isSaving: false,
-      },
-    },
+    timelineById: addTimelineToStore({ id, timeline }),
   }))
   .case(createTimeline, (state, { id, show, columns }) => ({
     ...state,
