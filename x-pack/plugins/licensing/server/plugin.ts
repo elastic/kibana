@@ -27,8 +27,14 @@ export class Plugin implements CorePlugin<LicensingPluginSetup> {
   constructor(private readonly context: PluginInitializerContext) {
     this.logger = this.context.logger.get();
     this.config$ = this.context.config
-      .create<{ config: LicensingConfigType }>()
-      .pipe(map(({ config }) => new LicensingConfig(config, this.context.env)));
+      .create<LicensingConfigType | { config: LicensingConfigType }>()
+      .pipe(
+        map(config =>
+          'config' in config
+            ? new LicensingConfig(config.config, this.context.env)
+            : new LicensingConfig(config, this.context.env)
+        )
+      );
   }
 
   private hasLicenseInfoChanged(newLicense: any) {
