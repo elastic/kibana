@@ -12,7 +12,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const inspector = getService('inspector');
   const kibanaServer = getService('kibanaServer');
 
-  describe.only('hybrid index pattern', () => {
+  describe('hybrid index pattern', () => {
     before(async () => {
       await esArchiver.load('hybrid/kibana');
       await esArchiver.load('hybrid/logstash');
