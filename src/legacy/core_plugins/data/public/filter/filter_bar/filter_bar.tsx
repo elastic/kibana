@@ -77,7 +77,7 @@ class FilterBarUI extends Component<Props, State> {
           />
         </EuiFlexItem>
 
-        <EuiFlexItem>
+        <EuiFlexItem className="globalFilterGroup__filterFlexItem">
           <EuiFlexGroup
             className={classes}
             wrap={true}
@@ -95,7 +95,7 @@ class FilterBarUI extends Component<Props, State> {
 
   private renderItems() {
     return this.props.filters.map((filter, i) => (
-      <EuiFlexItem key={i} grow={false}>
+      <EuiFlexItem key={i} grow={false} className="globalFilterBar__flexItem">
         <FilterItem
           id={`${i}`}
           filter={filter}

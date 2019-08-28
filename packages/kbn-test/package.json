@@ -15,7 +15,7 @@
     "@kbn/dev-utils": "1.0.0"
   },
   "dependencies": {
-    "chalk": "^2.4.1",
+    "chalk": "^2.4.2",
     "dedent": "^0.7.0",
     "del": "^4.0.0",
     "getopts": "^2.2.4",

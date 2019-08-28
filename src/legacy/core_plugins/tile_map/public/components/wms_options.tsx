@@ -24,8 +24,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { toastNotifications } from 'ui/notify';
 import { TmsLayer } from 'ui/vis/map/service_settings';
-import { SelectOption } from '../../../kbn_vislib_vis_types/public/controls/select';
-import { SwitchOption } from '../../../kbn_vislib_vis_types/public/controls/switch';
+import { SelectOption, SwitchOption } from '../../../kbn_vislib_vis_types/public/components';
 import { RegionMapOptionsProps } from '../../../region_map/public/components/region_map_options';
 import { WmsInternalOptions } from './wms_internal_options';
 import { TileMapOptionsProps } from './tile_map_options';

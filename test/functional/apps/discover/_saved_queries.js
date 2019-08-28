@@ -123,6 +123,13 @@ export default function ({ getService, getPageObjects }) {
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
         expect(await queryBar.getQueryString()).to.eql('');
       });
+
+      it('resets any changes to a loaded query on reloading the same saved query', async () => {
+        await savedQueryManagementComponent.loadSavedQuery('OkResponse');
+        await queryBar.setQuery('response:503');
+        await savedQueryManagementComponent.loadSavedQuery('OkResponse');
+        expect(await queryBar.getQueryString()).to.eql('response:404');
+      });
     });
   });
 }
