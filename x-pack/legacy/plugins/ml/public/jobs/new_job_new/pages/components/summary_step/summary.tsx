@@ -142,13 +142,19 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
               <Fragment>
                 <EuiFlexItem grow={false}>
                   <EuiButton onClick={viewResults} data-test-subj="mlJobWizardButtonViewResults">
-                    View results
+                    <FormattedMessage
+                      id="xpack.ml.newJob.wizard.summaryStep.viewResultsButton"
+                      defaultMessage="View results"
+                    />
                   </EuiButton>
                 </EuiFlexItem>
 
                 <EuiFlexItem grow={false}>
                   <EuiButton onClick={clickResetJob} data-test-subj="mlJobWizardButtonResetJob">
-                    Reset job
+                    <FormattedMessage
+                      id="xpack.ml.newJob.wizard.summaryStep.resetJobButton"
+                      defaultMessage="Reset job"
+                    />
                   </EuiButton>
                 </EuiFlexItem>
               </Fragment>
