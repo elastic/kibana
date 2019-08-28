@@ -6,15 +6,18 @@
 
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
+import { Option, none } from 'fp-ts/lib/Option';
 import { TaskManager, TaskRunCreatorFunction } from '../../task_manager';
 import { getCreateTaskRunnerFunction, ExecutorError } from './lib';
 import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
 import {
   ActionType,
+  ConfigureableActionType,
   GetBasePathFunction,
   GetServicesFunction,
   SpaceIdToNamespaceFunction,
 } from './types';
+import { ActionKibanaConfig } from './actions_config';
 
 interface ConstructorOptions {
   isSecurityEnabled: boolean;
@@ -23,12 +26,30 @@ interface ConstructorOptions {
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   getBasePath: GetBasePathFunction;
+  actionKibanaConfigurations: Option<Record<string, ActionKibanaConfig>>;
+}
+
+function getKibanaConfigurationByActionType(
+  actionType: string,
+  configs: Option<Record<string, ActionKibanaConfig>>
+): Option<ActionKibanaConfig> {
+  return configs.mapNullable(allConfigs => allConfigs[actionType]);
+}
+
+function isConfigurable(
+  actionType: ActionType | ConfigureableActionType
+): actionType is ConfigureableActionType {
+  return (
+    actionType.hasOwnProperty('configure') &&
+    typeof (actionType as ConfigureableActionType).configure === 'function'
+  );
 }
 
 export class ActionTypeRegistry {
   private readonly taskRunCreatorFunction: TaskRunCreatorFunction;
   private readonly taskManager: TaskManager;
   private readonly actionTypes: Map<string, ActionType> = new Map();
+  private readonly actionKibanaConfigurations: Option<Record<string, ActionKibanaConfig>> = none;
 
   constructor({
     getServices,
@@ -36,9 +57,11 @@ export class ActionTypeRegistry {
     encryptedSavedObjectsPlugin,
     spaceIdToNamespace,
     getBasePath,
+    actionKibanaConfigurations,
     isSecurityEnabled,
   }: ConstructorOptions) {
     this.taskManager = taskManager;
+    this.actionKibanaConfigurations = actionKibanaConfigurations;
     this.taskRunCreatorFunction = getCreateTaskRunnerFunction({
       isSecurityEnabled,
       getServices,
@@ -59,7 +82,16 @@ export class ActionTypeRegistry {
   /**
    * Registers an action type to the action type registry
    */
-  public register(actionType: ActionType) {
+  public register(providedActionType: ActionType | ConfigureableActionType) {
+    const actionType = isConfigurable(providedActionType)
+      ? providedActionType.configure(
+          getKibanaConfigurationByActionType(
+            providedActionType.name,
+            this.actionKibanaConfigurations
+          )
+        )
+      : providedActionType;
+
     if (this.has(actionType.id)) {
       throw new Error(
         i18n.translate(
@@ -73,6 +105,7 @@ export class ActionTypeRegistry {
         )
       );
     }
+
     this.actionTypes.set(actionType.id, actionType);
     this.taskManager.registerTaskDefinitions({
       [`actions:${actionType.id}`]: {

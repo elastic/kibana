@@ -6,6 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { none } from 'fp-ts/lib/Option';
 import { ActionTypeRegistry } from './action_type_registry';
 import { ActionsClient } from './actions_client';
 import { ExecutorType } from './types';
@@ -33,6 +34,7 @@ const actionTypeRegistryParams = {
   taskManager: mockTaskManager,
   encryptedSavedObjectsPlugin: mockEncryptedSavedObjectsPlugin,
   spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
+  actionKibanaConfigurations: none,
   getBasePath: jest.fn().mockReturnValue(undefined),
 };
 

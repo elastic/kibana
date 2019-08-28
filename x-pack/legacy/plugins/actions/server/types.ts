@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Option } from 'fp-ts/lib/Option';
 import { SavedObjectsClientContract, SavedObjectAttributes } from 'src/core/server';
 import { ActionTypeRegistry } from './action_type_registry';
 import { ExecuteOptions } from './create_execute_function';
+import { ActionKibanaConfig } from './actions_config';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: any) => Services;
@@ -55,20 +57,41 @@ export type ExecutorType = (
   options: ActionTypeExecutorOptions
 ) => Promise<ActionTypeExecutorResult>;
 
+export interface ActionUpdate extends SavedObjectAttributes {
+  description: string;
+  config: SavedObjectAttributes;
+  secrets: SavedObjectAttributes;
+}
+
+export interface Action extends ActionUpdate {
+  actionTypeId: string;
+}
+
 interface ValidatorType {
   validate<T>(value: any): any;
 }
 
-export interface ActionType {
+export interface ActionValidation {
+  params?: ValidatorType;
+  config?: ValidatorType;
+  secrets?: ValidatorType;
+}
+
+export interface ActionTypeIdentifiers {
   id: string;
   name: string;
+}
+
+export interface ActionTypeBehavior {
   maxAttempts?: number;
-  validate?: {
-    params?: ValidatorType;
-    config?: ValidatorType;
-    secrets?: ValidatorType;
-  };
+  validate?: ActionValidation;
   executor: ExecutorType;
+}
+
+export interface ActionType extends ActionTypeBehavior, ActionTypeIdentifiers {}
+
+export interface ConfigureableActionType extends ActionTypeIdentifiers {
+  configure: (config: Option<ActionKibanaConfig>) => ActionType;
 }
 
 export interface RawAction extends SavedObjectAttributes {

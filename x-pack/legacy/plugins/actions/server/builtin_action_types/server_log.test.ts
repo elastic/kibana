@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { none } from 'fp-ts/lib/Option';
 import { ActionType, Services } from '../types';
 import { ActionTypeRegistry } from '../action_type_registry';
 import { taskManagerMock } from '../../../task_manager/task_manager.mock';
@@ -37,6 +38,7 @@ beforeAll(() => {
     taskManager: taskManagerMock.create(),
     encryptedSavedObjectsPlugin: mockEncryptedSavedObjectsPlugin,
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
+    actionKibanaConfigurations: none,
     getBasePath: jest.fn().mockReturnValue(undefined),
   });
   registerBuiltInActionTypes(actionTypeRegistry);

@@ -8,6 +8,7 @@ jest.mock('./lib/post_pagerduty', () => ({
   postPagerduty: jest.fn(),
 }));
 
+import { none } from 'fp-ts/lib/Option';
 import { ActionType, Services, ActionTypeExecutorOptions } from '../types';
 import { ActionTypeRegistry } from '../action_type_registry';
 import { taskManagerMock } from '../../../task_manager/task_manager.mock';
@@ -44,6 +45,7 @@ beforeAll(() => {
     taskManager: taskManagerMock.create(),
     encryptedSavedObjectsPlugin: mockEncryptedSavedObjectsPlugin,
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
+    actionKibanaConfigurations: none,
     getBasePath: jest.fn().mockReturnValue(undefined),
   });
   registerBuiltInActionTypes(actionTypeRegistry);

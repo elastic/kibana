@@ -28,6 +28,9 @@ export function actions(kibana: any) {
         .keys({
           enabled: Joi.boolean().default(true),
         })
+        .options({
+          allowUnknown: true,
+        })
         .default();
     },
     init,

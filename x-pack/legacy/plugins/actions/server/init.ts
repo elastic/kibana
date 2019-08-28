@@ -6,6 +6,7 @@
 
 import Hapi from 'hapi';
 import { Legacy } from 'kibana';
+import { fromNullable } from 'fp-ts/lib/Option';
 import { TaskManager } from '../../task_manager';
 import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
@@ -107,6 +108,7 @@ export function init(server: Server) {
     encryptedSavedObjectsPlugin: server.plugins.encrypted_saved_objects,
     getBasePath,
     spaceIdToNamespace,
+    actionKibanaConfigurations: fromNullable(config.get('xpack.actions')),
     isSecurityEnabled: config.get('xpack.security.enabled'),
   });
 

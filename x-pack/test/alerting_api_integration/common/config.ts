@@ -57,6 +57,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'actions')}`,
           `--server.xsrf.whitelist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
+          `--xpack.actions.webhook.whitelistedEndpoints=${JSON.stringify([
+            'http://localhost/',
+            'some.non.existent.com',
+          ])}`,
           ...(ssl
             ? [
                 `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,

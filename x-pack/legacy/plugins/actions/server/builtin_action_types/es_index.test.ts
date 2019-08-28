@@ -8,6 +8,7 @@ jest.mock('./lib/send_email', () => ({
   sendEmail: jest.fn(),
 }));
 
+import { none } from 'fp-ts/lib/Option';
 import { ActionType, ActionTypeExecutorOptions } from '../types';
 import { ActionTypeRegistry } from '../action_type_registry';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
@@ -42,6 +43,7 @@ beforeAll(() => {
     taskManager: taskManagerMock.create(),
     encryptedSavedObjectsPlugin: mockEncryptedSavedObjectsPlugin,
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
+    actionKibanaConfigurations: none,
     getBasePath: jest.fn().mockReturnValue(undefined),
   });
 

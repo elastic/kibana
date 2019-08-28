@@ -4,12 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
+import { URL } from 'url';
+import { Option, fromNullable } from 'fp-ts/lib/Option';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
 import { nullableType } from './lib/nullable';
 import { isOk, promiseResult, Result } from './lib/result_type';
-import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
+import {
+  ConfigureableActionType,
+  ActionTypeExecutorOptions,
+  ActionTypeExecutorResult,
+  ActionType,
+} from '../types';
+import { ActionKibanaConfig } from '../actions_config';
 
 // config definition
 enum WebhookMethods {
@@ -17,17 +25,67 @@ enum WebhookMethods {
   PUT = 'put',
 }
 
-export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
-
 const HeadersSchema = schema.recordOf(schema.string(), schema.string());
-
-const ConfigSchema = schema.object({
+export type ActionTypeConfigType = TypeOf<typeof UnvalidatedConfigSchema>;
+const configSchemaProps = {
   url: schema.string(),
   method: schema.oneOf([schema.literal(WebhookMethods.POST), schema.literal(WebhookMethods.PUT)], {
     defaultValue: WebhookMethods.POST,
   }),
   headers: nullableType(HeadersSchema),
-});
+};
+const UnvalidatedConfigSchema = schema.object(configSchemaProps);
+
+function asArray(list: string | string[]): string[] {
+  return Array.isArray(list) ? list : [list];
+}
+
+export function validateConfig(
+  kibanaConfig: Option<ActionKibanaConfig>
+): (configObject: any) => string | void {
+  return configObject => {
+    const { url }: ActionTypeConfigType = configObject;
+
+    const anyUrlAllowed = kibanaConfig
+      .map(({ whitelistedEndpoints }) => whitelistedEndpoints === 'any')
+      .getOrElse(false);
+
+    if (!anyUrlAllowed) {
+      const urlHostname = new URL(url).hostname;
+      const isWhitelisted = kibanaConfig
+        .map(({ whitelistedEndpoints }) => {
+          return fromNullable(
+            asArray(whitelistedEndpoints).find(
+              whitelistedUrl => parseWhitelistURL(whitelistedUrl) === urlHostname
+            )
+          ).isSome();
+        })
+        .getOrElse(false);
+
+      if (!isWhitelisted) {
+        return i18n.translate(
+          'xpack.actions.builtin.webhook.unwhitelistedWebhookConfigurationError',
+          {
+            defaultMessage:
+              'an error occurred configuring webhook with unwhitelisted target url "{url}"',
+            values: {
+              url,
+            },
+          }
+        );
+      }
+    }
+  };
+}
+
+function parseWhitelistURL(whitelistedUrl: string): string {
+  try {
+    return new URL(whitelistedUrl).hostname;
+  } catch (e) {
+    // if we can't parse the URL assume that it is specifying the hostname itself
+    return whitelistedUrl;
+  }
+}
 
 // secrets definition
 export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
@@ -43,16 +101,26 @@ const ParamsSchema = schema.object({
 });
 
 // action type definition
-export const actionType: ActionType = {
+export const actionType: ConfigureableActionType = {
   id: '.webhook',
   name: 'webhook',
-  validate: {
-    config: ConfigSchema,
-    secrets: SecretsSchema,
-    params: ParamsSchema,
-  },
-  executor,
+  configure: configureActionType,
 };
+
+function configureActionType(kibanaConfig: Option<ActionKibanaConfig>): ActionType {
+  const ConfigSchema = schema.object(configSchemaProps, {
+    validate: validateConfig(kibanaConfig),
+  });
+  return {
+    ...actionType,
+    validate: {
+      config: ConfigSchema,
+      secrets: SecretsSchema,
+      params: ParamsSchema,
+    },
+    executor,
+  };
+}
 
 // action executor
 async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionTypeExecutorResult> {

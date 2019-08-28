@@ -7,17 +7,7 @@
 import { SavedObjectsClientContract, SavedObjectAttributes, SavedObject } from 'src/core/server';
 import { ActionTypeRegistry } from './action_type_registry';
 import { validateConfig, validateSecrets } from './lib';
-import { ActionResult } from './types';
-
-interface ActionUpdate extends SavedObjectAttributes {
-  description: string;
-  config: SavedObjectAttributes;
-  secrets: SavedObjectAttributes;
-}
-
-interface Action extends ActionUpdate {
-  actionTypeId: string;
-}
+import { ActionResult, ActionUpdate, Action } from './types';
 
 interface CreateOptions {
   action: Action;

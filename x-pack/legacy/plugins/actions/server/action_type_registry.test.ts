@@ -8,6 +8,7 @@ jest.mock('./lib/get_create_task_runner_function', () => ({
   getCreateTaskRunnerFunction: jest.fn(),
 }));
 
+import { none } from 'fp-ts/lib/Option';
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/plugin.mock';
 import { ActionTypeRegistry } from './action_type_registry';
@@ -30,6 +31,7 @@ const actionTypeRegistryParams = {
   taskManager: mockTaskManager,
   encryptedSavedObjectsPlugin: encryptedSavedObjectsMock.create(),
   spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
+  actionKibanaConfigurations: none,
   getBasePath: jest.fn().mockReturnValue(undefined),
 };
 
