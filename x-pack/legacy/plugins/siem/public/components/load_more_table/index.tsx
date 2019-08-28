@@ -104,6 +104,7 @@ type Func<T> = (arg: T) => string | number;
 
 export interface Columns<T, U = T> {
   field?: string;
+  align?: string;
   name: string | React.ReactNode;
   isMobileHeader?: boolean;
   sortable?: boolean | Func<T>;

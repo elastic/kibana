@@ -1236,6 +1236,7 @@ export interface NetworkDnsEdges {
 }
 
 export interface NetworkDnsItem {
+  _id?: string | null;
 
   dnsBytesIn?: number | null;
 

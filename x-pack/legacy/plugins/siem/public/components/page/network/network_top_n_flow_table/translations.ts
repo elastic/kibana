@@ -31,11 +31,11 @@ export const DOMAIN = i18n.translate('xpack.siem.networkTopNFlowTable.column.dom
   defaultMessage: 'Domain',
 });
 
-export const BYTES_IN = i18n.translate('xpack.siem.networkTopNFlowTable.column.bytesTitle', {
+export const BYTES_IN = i18n.translate('xpack.siem.networkTopNFlowTable.column.bytesInTitle', {
   defaultMessage: 'Bytes in',
 });
 
-export const BYTES_OUT = i18n.translate('xpack.siem.networkTopNFlowTable.column.bytesTitle', {
+export const BYTES_OUT = i18n.translate('xpack.siem.networkTopNFlowTable.column.bytesOutTitle', {
   defaultMessage: 'Bytes out',
 });
 
