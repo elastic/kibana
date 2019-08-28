@@ -16,11 +16,15 @@ import { ExitFullScreenButton } from 'ui/exit_full_screen';
 import { getIndexPatternsFromIds } from '../../index_pattern_util';
 import { ES_GEO_FIELD_TYPE } from '../../../common/constants';
 import { i18n } from '@kbn/i18n';
+import uuid from 'uuid/v4';
+
+const RENDER_COMPLETE_EVENT = 'renderComplete';
 
 export class GisMap extends Component {
 
   state = {
     isInitialLoadRenderTimeoutComplete: false,
+    domId: uuid(),
     geoFields: [],
   }
 
@@ -45,6 +49,21 @@ export class GisMap extends Component {
   componentWillUnmount() {
     this._isMounted = false;
     this._clearRefreshTimer();
+  }
+
+  // Reporting uses both a `data-render-complete` attribute and a DOM event listener to determine
+  // if a visualization is done loading. The process roughly is:
+  // - See if the `data-render-complete` attribute is "true". If so we're done!
+  // - If it's not, then reporting injects a listener into the browser for a custom "renderComplete" event.
+  // - When that event is fired, we snapshot the viz and move on.
+  // Failure to not have the dom attribute, or custom event, will timeout the job.
+  // See x-pack/legacy/plugins/reporting/export_types/common/lib/screenshots/wait_for_render.ts for more.
+  _onInitialLoadRenderComplete = () => {
+    const el = document.querySelector(`[data-dom-id="${this.state.domId}"]`);
+
+    if (el) {
+      el.dispatchEvent(new CustomEvent(RENDER_COMPLETE_EVENT, { bubbles: true }));
+    }
   }
 
   _loadGeoFields = async (nextIndexPatternIds) => {
@@ -118,9 +137,10 @@ export class GisMap extends Component {
       () => {
         if (this._isMounted) {
           this.setState({ isInitialLoadRenderTimeoutComplete: true });
+          this._onInitialLoadRenderComplete();
         }
       },
-      1000
+      5000
     );
   }
 
@@ -134,6 +154,8 @@ export class GisMap extends Component {
       exitFullScreen,
       mapInitError,
     } = this.props;
+
+    const { domId } = this.state;
 
     if (mapInitError) {
       return (
@@ -179,6 +201,7 @@ export class GisMap extends Component {
       <EuiFlexGroup
         gutterSize="none"
         responsive={false}
+        data-dom-id={domId}
         data-render-complete={this.state.isInitialLoadRenderTimeoutComplete}
         data-shared-item
       >

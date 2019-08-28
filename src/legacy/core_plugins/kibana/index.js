@@ -35,7 +35,6 @@ import { registerKqlTelemetryApi } from './server/routes/api/kql_telemetry';
 import { registerFieldFormats } from './server/field_formats/register';
 import { registerTutorials } from './server/tutorials/register';
 import * as systemApi from './server/lib/system_api';
-import handleEsError from './server/lib/handle_es_error';
 import mappings from './mappings.json';
 import { getUiSettingDefaults } from './ui_setting_defaults';
 import { makeKQLUsageCollector } from './server/lib/kql_usage_collector';
@@ -346,7 +345,6 @@ export default function (kibana) {
       registerTutorials(server);
       makeKQLUsageCollector(server);
       server.expose('systemApi', systemApi);
-      server.expose('handleEsError', handleEsError);
       server.injectUiAppVars('kibana', () => injectVars(server));
     },
   });
