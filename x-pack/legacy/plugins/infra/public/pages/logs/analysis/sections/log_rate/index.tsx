@@ -4,26 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiTitle,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingChart,
   EuiSpacer,
-  EuiEmptyPrompt,
+  EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
+
 import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/http_api/log_analysis/results/log_entry_rate';
-import { ViewSwitcher } from './view_switcher';
 import { ChartView } from './chart';
+import { isValidLogRateView, LogRateView, LogRateViewSwitcher } from './log_rate_view_switcher';
 import { TableView } from './table';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
-
-export enum ViewMode {
-  chart = 'chart',
-  table = 'table',
-}
 
 export const LogRateResults = ({
   isLoading,
@@ -35,7 +31,7 @@ export const LogRateResults = ({
   timeRange: TimeRange;
 }) => {
   const title = i18n.translate('xpack.infra.logs.analysis.logRateSectionTitle', {
-    defaultMessage: 'Log entry anomalies',
+    defaultMessage: 'Log rate',
   });
 
   const loadingAriaLabel = i18n.translate(
@@ -43,7 +39,7 @@ export const LogRateResults = ({
     { defaultMessage: 'Loading log rate results' }
   );
 
-  const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.chart);
+  const [viewMode, setViewMode] = useState<LogRateView>('chart');
 
   return (
     <>
@@ -79,11 +75,14 @@ export const LogRateResults = ({
         <>
           <EuiFlexGroup>
             <EuiFlexItem grow={true}>
-              <ViewSwitcher selectedView={viewMode} onChange={id => setViewMode(id as ViewMode)} />
+              <LogRateViewSwitcher
+                selectedView={viewMode}
+                onChange={id => (isValidLogRateView(id) ? setViewMode(id) : undefined)}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="l" />
-          {viewMode === ViewMode.chart ? (
+          {viewMode === 'chart' ? (
             <ChartView data={results} timeRange={timeRange} />
           ) : (
             <TableView data={results} />
