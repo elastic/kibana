@@ -225,7 +225,7 @@
     "classnames": "2.2.6",
     "concat-stream": "1.6.2",
     "constate": "^0.9.0",
-    "constate-latest": "npm:constate@^1.0.0",
+    "constate-latest": "npm:constate@^1.2.0",
     "content-disposition": "0.5.3",
     "copy-to-clipboard": "^3.0.8",
     "cronstrue": "^1.51.0",
