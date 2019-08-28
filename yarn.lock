@@ -1129,10 +1129,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@13.3.0":
-  version "13.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-13.3.0.tgz#05c78ffcb2041ebafd807e23dd3d32553e8c1812"
-  integrity sha512-Z/1KGaqKY2PCJXdJ3XTSTcnZZxjFysafvIWNRs+O0C+IQsyy0cz5Sj8BaM9pUgYVjL2SaO04Hs9Yb09MDJwFGQ==
+"@elastic/eui@13.6.1":
+  version "13.6.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-13.6.1.tgz#4bcef855c9e5bb368436e18d79443b2f1fbeffef"
+  integrity sha512-i2f9J+Cf8/2fydIAT8MapvAtP//XZxybH0cU3UYASvc5P8DBt6rU/jdWLcHJhTHYZFDP+PjMMGzxWQNUS40IGg==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
@@ -3813,12 +3813,19 @@
   resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.5.9.tgz#f2d14df87b0739041bc53a7d75e3d77d726a3ec0"
   integrity sha512-Nha5b+jmBI271jdTMwrHiNXM+DvThjHOfyZtMX9kj/c/LUj2xiLHsG/1L3tJ8DjAoQN48cHwUwtqBotjyXaSdQ==
 
-"@types/proper-lockfile@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@types/proper-lockfile/-/proper-lockfile-3.0.0.tgz#dcc7cc3714857a4ae6583331d2687e89dc5c94d2"
-  integrity sha512-+tfnsA3KNPDm7Sj9x5omRgvS6ALc+edjTZXYeR3kVEm+qmsrF+59yJUWZDreV/O0+EQ6t0YSWlzxfdV58UOEVg==
+"@types/proper-lockfile@^3.0.1":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@types/proper-lockfile/-/proper-lockfile-3.0.1.tgz#dd770a2abce3adbcce3bd1ed892ce2f5f17fbc86"
+  integrity sha512-ODOjqxmaNs0Zkij+BJovsNJRSX7BJrr681o8ZnNTNIcTermvVFzLpz/XFtfg3vNrlPVTJY1l4e9h2LvHoxC1lg==
 
-"@types/puppeteer@^1.12.4", "@types/puppeteer@^1.6.0":
+"@types/puppeteer@^1.19.0":
+  version "1.19.0"
+  resolved "https://registry.yarnpkg.com/@types/puppeteer/-/puppeteer-1.19.0.tgz#59f0050bae019cee7c3af2bb840a25892a3078b6"
+  integrity sha512-Db9LWOuTm2bR/qgPE7PQCmnsCQ6flHdULuIDWTks8YdQ/SGHKg5WGWG54gl0734NDKCTF5MbqAp2qWuvBiyQ3Q==
+  dependencies:
+    "@types/node" "*"
+
+"@types/puppeteer@^1.6.0":
   version "1.12.4"
   resolved "https://registry.yarnpkg.com/@types/puppeteer/-/puppeteer-1.12.4.tgz#8388efdb0b30a54a7e7c4831ca0d709191d77ff1"
   integrity sha512-aaGbJaJ9TuF9vZfTeoh876sBa+rYJWPwtsmHmYr28pGr42ewJnkDTq2aeSKEmS39SqUdkwLj73y/d7rBSp7mDQ==
@@ -22552,10 +22559,10 @@ punycode@^1.2.4, punycode@^1.4.1:
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-1.4.1.tgz#c0d5a63b2718800ad8e1eb0fa5269c84dd41845e"
   integrity sha1-wNWmOycYgArY4esPpSachN1BhF4=
 
-puppeteer-core@^1.13.0:
-  version "1.13.0"
-  resolved "https://registry.yarnpkg.com/puppeteer-core/-/puppeteer-core-1.13.0.tgz#f8001851e924e6e9ef6e9fae1778c3ab87c3f307"
-  integrity sha512-8MypjWVHu2EEdtN2HxhCsTtIYdJgiCcbGpHoosv265fzanfOICC2/DadLZq6/Qc/OKsovQmjkO+2vKMrV3BRfA==
+puppeteer-core@^1.19.0:
+  version "1.19.0"
+  resolved "https://registry.yarnpkg.com/puppeteer-core/-/puppeteer-core-1.19.0.tgz#3c3f98edb5862583e3a9c19cbc0da57ccc63ba5c"
+  integrity sha512-ZPbbjUymorIJomHBvdZX5+2gciUmQtAdepCrkweHH6rMJr96xd/dXzHgmYEOBMatH44SmJrcMtWkgsLHJqT89g==
   dependencies:
     debug "^4.1.0"
     extract-zip "^1.6.6"
@@ -28206,6 +28213,11 @@ type-fest@^0.3.1:
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-0.3.1.tgz#63d00d204e059474fe5e1b7c011112bbd1dc29e1"
   integrity sha512-cUGJnCdr4STbePCgqNFbpVNCepa+kAVohJs1sLhxzdH+gnEoOd8VhbYa7pD3zZYGiURWM2xzEII3fQcRizDkYQ==
 
+type-fest@^0.4.1:
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-0.4.1.tgz#8bdf77743385d8a4f13ba95f610f5ccd68c728f8"
+  integrity sha512-IwzA/LSfD2vC1/YDYMv/zHP4rDF1usCwllsDpbolT3D4fUepIO7f9K70jjmUewU/LmGUKJcwcVtDCpnKk4BPMw==
+
 type-fest@^0.5.2:
   version "0.5.2"
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-0.5.2.tgz#d6ef42a0356c6cd45f49485c3b6281fc148e48a2"
@@ -30038,25 +30050,26 @@ write-file-atomic@^2.4.2:
     imurmurhash "^0.1.4"
     signal-exit "^3.0.2"
 
-write-json-file@^2.2.0:
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/write-json-file/-/write-json-file-2.3.0.tgz#2b64c8a33004d54b8698c76d585a77ceb61da32f"
-  integrity sha1-K2TIozAE1UuGmMdtWFp3zrYdoy8=
+write-json-file@^3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/write-json-file/-/write-json-file-3.2.0.tgz#65bbdc9ecd8a1458e15952770ccbadfcff5fe62a"
+  integrity sha512-3xZqT7Byc2uORAatYiP3DHUUAVEkNOswEWNs9H5KXiicRTvzYzYqKjYc4G7p+8pltvAw641lVByKVtMpf+4sYQ==
   dependencies:
     detect-indent "^5.0.0"
-    graceful-fs "^4.1.2"
-    make-dir "^1.0.0"
-    pify "^3.0.0"
+    graceful-fs "^4.1.15"
+    make-dir "^2.1.0"
+    pify "^4.0.1"
     sort-keys "^2.0.0"
-    write-file-atomic "^2.0.0"
+    write-file-atomic "^2.4.2"
 
-write-pkg@^3.1.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/write-pkg/-/write-pkg-3.1.0.tgz#030a9994cc9993d25b4e75a9f1a1923607291ce9"
-  integrity sha1-AwqZlMyZk9JbTnWp8aGSNgcpHOk=
+write-pkg@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/write-pkg/-/write-pkg-4.0.0.tgz#675cc04ef6c11faacbbc7771b24c0abbf2a20039"
+  integrity sha512-v2UQ+50TNf2rNHJ8NyWttfm/EJUBWMJcx6ZTYZr6Qp52uuegWw/lBkCtCbnYZEmPRNL61m+u67dAmGxo+HTULA==
   dependencies:
     sort-keys "^2.0.0"
-    write-json-file "^2.2.0"
+    type-fest "^0.4.1"
+    write-json-file "^3.2.0"
 
 write@1.0.3:
   version "1.0.3"

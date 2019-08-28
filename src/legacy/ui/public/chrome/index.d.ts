@@ -26,6 +26,12 @@ import { ChromeNavLinks } from './api/nav';
 
 export interface IInjector {
   get<T>(injectable: string): T;
+  invoke<T, T2>(
+    injectable: (this: T2, ...args: any[]) => T,
+    self?: T2,
+    locals?: { [key: string]: any }
+  ): T;
+  instantiate(constructor: Function, locals?: { [key: string]: any }): any;
 }
 
 declare interface Chrome extends ChromeNavLinks {
