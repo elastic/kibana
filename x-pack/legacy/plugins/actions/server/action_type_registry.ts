@@ -17,7 +17,7 @@ import {
   GetServicesFunction,
   SpaceIdToNamespaceFunction,
 } from './types';
-import { ActionKibanaConfig } from './actions_config';
+import { ActionsConfigType } from './actions_config';
 
 interface ConstructorOptions {
   isSecurityEnabled: boolean;
@@ -26,22 +26,22 @@ interface ConstructorOptions {
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   getBasePath: GetBasePathFunction;
-  actionKibanaConfigurations: Option<Record<string, ActionKibanaConfig>>;
+  actionKibanaConfigurations: Option<ActionsConfigType>;
 }
 
 function getKibanaConfigurationByActionType(
   actionType: string,
-  configs: Option<Record<string, ActionKibanaConfig>>
-): Option<ActionKibanaConfig> {
+  configs: Option<Record<string, any>>
+): Option<any> {
   return configs.mapNullable(allConfigs => allConfigs[actionType]);
 }
 
 function isConfigurable(
-  actionType: ActionType | ConfigureableActionType
-): actionType is ConfigureableActionType {
+  actionType: ActionType | ConfigureableActionType<any>
+): actionType is ConfigureableActionType<any> {
   return (
     actionType.hasOwnProperty('configure') &&
-    typeof (actionType as ConfigureableActionType).configure === 'function'
+    typeof (actionType as ConfigureableActionType<any>).configure === 'function'
   );
 }
 
@@ -49,7 +49,7 @@ export class ActionTypeRegistry {
   private readonly taskRunCreatorFunction: TaskRunCreatorFunction;
   private readonly taskManager: TaskManager;
   private readonly actionTypes: Map<string, ActionType> = new Map();
-  private readonly actionKibanaConfigurations: Option<Record<string, ActionKibanaConfig>> = none;
+  private readonly actionKibanaConfigurations: Option<ActionsConfigType> = none;
 
   constructor({
     getServices,
@@ -82,7 +82,7 @@ export class ActionTypeRegistry {
   /**
    * Registers an action type to the action type registry
    */
-  public register(providedActionType: ActionType | ConfigureableActionType) {
+  public register(providedActionType: ActionType | ConfigureableActionType<any>) {
     const actionType = isConfigurable(providedActionType)
       ? providedActionType.configure(
           getKibanaConfigurationByActionType(

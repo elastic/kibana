@@ -7,11 +7,4 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 
 export type ActionsConfigType = TypeOf<typeof config>;
-
-export type ActionKibanaConfig = TypeOf<typeof actionConfig>;
-
-export const actionConfig = schema.object({
-  whitelistedEndpoints: schema.oneOf([schema.arrayOf(schema.string()), schema.literal('any')]),
-});
-
-export const config = schema.mapOf(schema.string(), actionConfig);
+export const config = schema.mapOf(schema.string(), schema.object({}, { allowUnknowns: true }));

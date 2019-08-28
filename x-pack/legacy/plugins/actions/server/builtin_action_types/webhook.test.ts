@@ -5,9 +5,12 @@
  */
 
 import { Option, none, some } from 'fp-ts/lib/Option';
-import { actionType, validateConfig as validateWebhookConfig } from './webhook';
+import {
+  actionType,
+  validateConfig as validateWebhookConfig,
+  WebhookActionKibanaConfig,
+} from './webhook';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
-import { ActionKibanaConfig } from '../actions_config';
 
 function actionTypeWithDefaults() {
   return actionType.configure(
@@ -140,7 +143,7 @@ describe('config validation', () => {
     };
 
     expect(
-      validateWebhookConfig(kiabanaActionConfig as Option<ActionKibanaConfig>)(config)
+      validateWebhookConfig(kiabanaActionConfig as Option<WebhookActionKibanaConfig>)(config)
     ).toMatchInlineSnapshot(
       `"an error occurred configuring webhook with unwhitelisted target url \\"http://mylisteningserver:9200/endpoint\\""`
     );
@@ -158,7 +161,7 @@ describe('config validation', () => {
     };
 
     expect(
-      validateWebhookConfig(kiabanaActionConfig as Option<ActionKibanaConfig>)(config)
+      validateWebhookConfig(kiabanaActionConfig as Option<WebhookActionKibanaConfig>)(config)
     ).toBeUndefined();
   });
 
@@ -174,7 +177,7 @@ describe('config validation', () => {
     };
 
     expect(
-      validateWebhookConfig(kiabanaActionConfig as Option<ActionKibanaConfig>)(config)
+      validateWebhookConfig(kiabanaActionConfig as Option<WebhookActionKibanaConfig>)(config)
     ).toBeUndefined();
   });
 
@@ -190,7 +193,7 @@ describe('config validation', () => {
     };
 
     expect(
-      validateWebhookConfig(kiabanaActionConfig as Option<ActionKibanaConfig>)(config)
+      validateWebhookConfig(kiabanaActionConfig as Option<WebhookActionKibanaConfig>)(config)
     ).toBeUndefined();
   });
 
@@ -206,7 +209,7 @@ describe('config validation', () => {
     };
 
     expect(
-      validateWebhookConfig(kiabanaActionConfig as Option<ActionKibanaConfig>)(config)
+      validateWebhookConfig(kiabanaActionConfig as Option<WebhookActionKibanaConfig>)(config)
     ).toBeUndefined();
   });
 
@@ -222,7 +225,7 @@ describe('config validation', () => {
     };
 
     expect(
-      validateWebhookConfig(kiabanaActionConfig as Option<ActionKibanaConfig>)(config)
+      validateWebhookConfig(kiabanaActionConfig as Option<WebhookActionKibanaConfig>)(config)
     ).toMatchInlineSnapshot(
       `"an error occurred configuring webhook with unwhitelisted target url \\"http://mylisteningserver:9200/endpoint\\""`
     );

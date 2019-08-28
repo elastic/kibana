@@ -5,6 +5,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { URL } from 'url';
+import Boom from 'boom';
 import { Option, fromNullable } from 'fp-ts/lib/Option';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { schema, TypeOf } from '@kbn/config-schema';
@@ -17,7 +18,6 @@ import {
   ActionTypeExecutorResult,
   ActionType,
 } from '../types';
-import { ActionKibanaConfig } from '../actions_config';
 
 // config definition
 enum WebhookMethods {
@@ -26,7 +26,6 @@ enum WebhookMethods {
 }
 
 const HeadersSchema = schema.recordOf(schema.string(), schema.string());
-export type ActionTypeConfigType = TypeOf<typeof UnvalidatedConfigSchema>;
 const configSchemaProps = {
   url: schema.string(),
   method: schema.oneOf([schema.literal(WebhookMethods.POST), schema.literal(WebhookMethods.PUT)], {
@@ -34,15 +33,30 @@ const configSchemaProps = {
   }),
   headers: nullableType(HeadersSchema),
 };
+export type ActionTypeConfigType = TypeOf<typeof UnvalidatedConfigSchema>;
 const UnvalidatedConfigSchema = schema.object(configSchemaProps);
+
+export type WebhookActionKibanaConfig = TypeOf<typeof ActionTypeConfigSchema>;
+const ActionTypeConfigSchema = schema.object({
+  whitelistedEndpoints: schema.oneOf([schema.arrayOf(schema.string()), schema.literal('any')]),
+});
 
 function asArray(list: string | string[]): string[] {
   return Array.isArray(list) ? list : [list];
 }
 
 export function validateConfig(
-  kibanaConfig: Option<ActionKibanaConfig>
+  kibanaConfig: Option<WebhookActionKibanaConfig>
 ): (configObject: any) => string | void {
+  try {
+    kibanaConfig.map(config => ActionTypeConfigSchema.validate(config));
+  } catch (err) {
+    throw Boom.badRequest(
+      `error validating the Webhook Action Kiaban configuration: ${err.message} ${JSON.stringify(
+        kibanaConfig
+      )}`
+    );
+  }
   return configObject => {
     const { url }: ActionTypeConfigType = configObject;
 
@@ -101,13 +115,13 @@ const ParamsSchema = schema.object({
 });
 
 // action type definition
-export const actionType: ConfigureableActionType = {
+export const actionType: ConfigureableActionType<WebhookActionKibanaConfig> = {
   id: '.webhook',
   name: 'webhook',
   configure: configureActionType,
 };
 
-function configureActionType(kibanaConfig: Option<ActionKibanaConfig>): ActionType {
+function configureActionType(kibanaConfig: Option<WebhookActionKibanaConfig>): ActionType {
   const ConfigSchema = schema.object(configSchemaProps, {
     validate: validateConfig(kibanaConfig),
   });

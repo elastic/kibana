@@ -8,7 +8,6 @@ import { Option } from 'fp-ts/lib/Option';
 import { SavedObjectsClientContract, SavedObjectAttributes } from 'src/core/server';
 import { ActionTypeRegistry } from './action_type_registry';
 import { ExecuteOptions } from './create_execute_function';
-import { ActionKibanaConfig } from './actions_config';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: any) => Services;
@@ -90,8 +89,8 @@ export interface ActionTypeBehavior {
 
 export interface ActionType extends ActionTypeBehavior, ActionTypeIdentifiers {}
 
-export interface ConfigureableActionType extends ActionTypeIdentifiers {
-  configure: (config: Option<ActionKibanaConfig>) => ActionType;
+export interface ConfigureableActionType<T> extends ActionTypeIdentifiers {
+  configure: (config: Option<T>) => ActionType;
 }
 
 export interface RawAction extends SavedObjectAttributes {
