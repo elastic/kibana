@@ -8,6 +8,7 @@ import React, { Fragment, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiCallOut,
   EuiFlyout,
   EuiFlyoutHeader,
   EuiTitle,
@@ -101,6 +102,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
 }) => {
   const decodedTemplateName = decodePath(templateName);
   const { error, data: templateDetails, isLoading } = loadIndexTemplate(decodedTemplateName);
+  const { isManaged } = templateDetails || {};
   const [templateToDelete, setTemplateToDelete] = useState<Array<Template['name']>>([]);
   const [activeTab, setActiveTab] = useState<string>(SUMMARY_TAB_ID);
   const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);
@@ -131,9 +133,31 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
     );
   } else if (templateDetails) {
     const Content = tabToComponentMap[activeTab];
+    const managedTemplateCallout = isManaged ? (
+      <Fragment>
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.idxMgmt.templateDetails.managedTemplateInfoTitle"
+              defaultMessage="Editing a managed template is not permitted"
+            />
+          }
+          color="primary"
+          size="s"
+        >
+          <FormattedMessage
+            id="xpack.idxMgmt.templateDetails.managedTemplateInfoDescription"
+            defaultMessage="Managed templates are critical for internal operations."
+          />
+        </EuiCallOut>
+        <EuiSpacer size="m" />
+      </Fragment>
+    ) : null;
 
     content = (
       <Fragment>
+        {managedTemplateCallout}
+
         <EuiTabs>
           {TABS.map(tab => (
             <EuiTab
@@ -249,7 +273,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
                             }),
                             icon: 'pencil',
                             onClick: () => editTemplate(decodedTemplateName),
-                            disabled: templateDetails.isManaged,
+                            disabled: isManaged,
                           },
                           {
                             name: i18n.translate('xpack.idxMgmt.templateDetails.cloneButtonLabel', {
@@ -267,7 +291,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
                             ),
                             icon: 'trash',
                             onClick: () => setTemplateToDelete([decodedTemplateName]),
-                            disabled: templateDetails.isManaged,
+                            disabled: isManaged,
                           },
                         ],
                       },
