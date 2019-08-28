@@ -7,7 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { getOr } from 'lodash/fp';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 
