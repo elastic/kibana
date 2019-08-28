@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { pingsQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
 import { expectFixtureEql } from './expect_fixture_eql';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   describe('pingList query', () => {
     const supertest = getService('supertest');
 
@@ -100,7 +100,7 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getPingsQuery });
-      expectFixtureEql(data, 'ping_list_sort');
+      expectFixtureEql(data, 'ping_list_sort', d => d.allPings.pings.forEach(p => delete p.id));
     });
   });
 }
