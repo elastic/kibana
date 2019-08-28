@@ -3,7 +3,7 @@
   "groups": [
     "siem"
   ],
-  "description": "SIEM Winlogbeat: Looks for unusual process relationships which may indicate execution of malware or persistence mechanisms.",
+  "description": "SIEM Winlogbeat: Looks for unusual process relationships which may indicate execution of malware or persistence mechanisms (beta)",
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [

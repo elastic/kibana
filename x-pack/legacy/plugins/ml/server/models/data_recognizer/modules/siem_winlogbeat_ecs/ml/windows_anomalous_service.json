@@ -3,7 +3,7 @@
   "groups": [
       "siem"
   ],
-  "description": "SIEM Winlogbeat:  Looks for rare and unusual Windows services which may indicate execution of unauthorized services, malware, or persistence mechanisms.",
+  "description": "SIEM Winlogbeat:  Looks for rare and unusual Windows services which may indicate execution of unauthorized services, malware, or persistence mechanisms (beta)",
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
