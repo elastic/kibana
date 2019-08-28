@@ -17,6 +17,13 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
+import {
+  ActionsColumnType,
+  ComputedColumnType,
+  ExpanderColumnType,
+  FieldDataColumnType,
+} from '../../../../../../common/types/eui/in_memory_table';
+
 import { DataFrameTransformId } from '../../../../common';
 import {
   getTransformProgress,
@@ -79,7 +86,17 @@ export const getColumns = (
     setExpandedRowItemIds([...expandedRowItemIds]);
   }
 
-  return [
+  const columns: [
+    ExpanderColumnType,
+    FieldDataColumnType,
+    FieldDataColumnType,
+    FieldDataColumnType,
+    FieldDataColumnType,
+    ComputedColumnType,
+    ComputedColumnType,
+    ComputedColumnType,
+    ActionsColumnType
+  ] = [
     {
       align: RIGHT_ALIGNMENT,
       width: '40px',
@@ -205,4 +222,6 @@ export const getColumns = (
       width: '200px',
     },
   ];
+
+  return columns;
 };
