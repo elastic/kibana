@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { keyCodes } from '@elastic/eui';
 
@@ -48,7 +48,7 @@ const Overlay = ({
 export function useUIAceKeyboardMode(aceTextAreaElement: HTMLTextAreaElement | null) {
   const textArea = useRef<HTMLTextAreaElement | null>(null);
   const mountNode = useRef<HTMLDivElement | null>(null);
-  const [isAutoCompleteOpen, setAutoCompleteOpen] = useState<boolean>(false);
+  const autoCompleteVisibleRef = useRef<boolean>(false);
 
   function onDismissOverlay(ev: React.KeyboardEvent) {
     if (ev.keyCode === keyCodes.ENTER) {
@@ -65,27 +65,24 @@ export function useUIAceKeyboardMode(aceTextAreaElement: HTMLTextAreaElement | n
     );
   }
 
-  const autoCompleteOpenListener = () => {
+  const isAutoCompleteVisible = () => {
     const autoCompleter = document.querySelector<HTMLDivElement>('.ace_autocomplete');
-
     if (!autoCompleter) {
-      setAutoCompleteOpen(false);
-      return;
+      return false;
     }
-
     // The autoComplete is just hidden when it's closed, not removed from the DOM.
-    setAutoCompleteOpen(autoCompleter.style.display !== 'none');
+    return autoCompleter.style.display !== 'none';
   };
 
-  const aceTextBoxListener = (ev: KeyboardEvent) => {
-    if (ev.keyCode === keyCodes.ESCAPE) {
-      // If the autocompletion context menu is open then we want to let ESC close it but
-      // **not** exit out of editing mode.
-      if (!isAutoCompleteOpen) {
-        ev.preventDefault();
-        ev.stopPropagation();
-        enableOverlay();
-      }
+  const documentKeyDownListener = () => {
+    autoCompleteVisibleRef.current = isAutoCompleteVisible();
+  };
+
+  const aceKeydownListener = (ev: KeyboardEvent) => {
+    if (ev.keyCode === keyCodes.ESCAPE && !autoCompleteVisibleRef.current) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      enableOverlay();
     }
   };
 
@@ -97,13 +94,14 @@ export function useUIAceKeyboardMode(aceTextAreaElement: HTMLTextAreaElement | n
       mountNode.current = container;
       textArea.current = aceTextAreaElement;
 
-      document.addEventListener('keydown', autoCompleteOpenListener, { capture: true });
-      textArea.current.addEventListener('keydown', aceTextBoxListener);
+      // This listener fires on capture phase so that we get a look at the world before ace changes it.
+      document.addEventListener('keydown', documentKeyDownListener, { capture: true });
+      textArea.current.addEventListener('keydown', aceKeydownListener);
     }
     return () => {
-      if (aceTextAreaElement) {
-        aceTextAreaElement.removeEventListener('keydown', aceTextBoxListener);
-        document.removeEventListener('keydown', autoCompleteOpenListener);
+      if (textArea.current) {
+        document.removeEventListener('keydown', documentKeyDownListener);
+        textArea.current.removeEventListener('keydown', aceKeydownListener);
         document.removeChild(mountNode.current!);
       }
     };
