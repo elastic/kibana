@@ -166,9 +166,11 @@ fi
 export CHECKS_REPORTER_ACTIVE=true
 
 ### only run on pr jobs
-if [[ "$JOB_NAME" != "elastic+kibana+pull-request"* ]] ; then
+if [[ -z "$ghprbPullId" ]] ; then
   export CHECKS_REPORTER_ACTIVE=false
 fi
+
+export CHECKS_REPORTER_ACTIVE=false # TODO
 
 ###
 ### Implements github-checks-reporter kill switch when scripts are called from the command line
