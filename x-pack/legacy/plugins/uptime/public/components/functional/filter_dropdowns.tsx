@@ -28,7 +28,6 @@ export const FilterDropdownsComponent = ({
   loading: isLoading,
   currentKuery,
   data,
-  errors,
   onFilterKueryUpdate,
 }: Props) => {
   const ids = get<string[]>(data, 'filterBar.ids', []);
