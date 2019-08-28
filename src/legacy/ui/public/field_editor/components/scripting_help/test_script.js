@@ -190,7 +190,7 @@ export class TestScript extends Component {
 
           <EuiFieldText
             placeholder={i18n.translate('common.ui.savedObjects.finder.searchPlaceholder', {
-              defaultMessage: 'Search query…',
+              defaultMessage: 'Search…',
             })}
             value={this.state.searchQuery}
             onChange={e => {
