@@ -6,7 +6,8 @@
     "legacy/server/**/*",
     "legacy/plugins/**/*",
     "plugins/**/*",
-    "test_utils/**/*"
+    "test_utils/**/*",
+    "../test/common/ftr_provider_context"
   ],
   "exclude": [
     "test/**/*",
