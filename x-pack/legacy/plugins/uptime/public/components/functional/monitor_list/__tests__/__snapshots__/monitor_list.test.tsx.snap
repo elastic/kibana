@@ -7,9 +7,6 @@ exports[`MonitorList component renders a no items message when no data is provid
     hasShadow={false}
     paddingSize="m"
   >
-    <EuiSpacer
-      size="s"
-    />
     <EuiTitle
       size="xs"
     >
@@ -97,9 +94,6 @@ exports[`MonitorList component renders the monitor list 1`] = `
     hasShadow={false}
     paddingSize="m"
   >
-    <EuiSpacer
-      size="s"
-    />
     <EuiTitle
       size="xs"
     >
