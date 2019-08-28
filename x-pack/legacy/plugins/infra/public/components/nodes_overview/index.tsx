@@ -143,7 +143,7 @@ export const NodesOverview = injectI18n(
                   <p>
                     <FormattedMessage
                       id="xpack.infra.homePage.toolbar.showingLastOneMinuteDataText"
-                      defaultMessage="Showing the last 1 minute of data from the time period"
+                      defaultMessage="Showing the last 1 minute of data at the selected time"
                     />
                   </p>
                 </EuiText>

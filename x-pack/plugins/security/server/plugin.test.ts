@@ -38,6 +38,7 @@ describe('Security Plugin', () => {
                 "authc": Object {
                   "createAPIKey": [Function],
                   "getCurrentUser": [Function],
+                  "invalidateAPIKey": [Function],
                   "isAuthenticated": [Function],
                   "login": [Function],
                   "logout": [Function],
