@@ -232,8 +232,8 @@ export class ESPewPewSource extends AbstractESSource {
       }
     });
 
-    const esResponse = await this._runEsQuery(layerName, searchSource, i18n.translate('xpack.maps.source.esGrid.inspectorDescription', {
-      defaultMessage: 'Elasticsearch geo grid aggregation request'
+    const esResponse = await this._runEsQuery(layerName, searchSource, i18n.translate('xpack.maps.source.pewPew.inspectorDescription', {
+      defaultMessage: 'Source-destination connections request'
     }));
 
     const { featureCollection } = convertToLines(esResponse);
