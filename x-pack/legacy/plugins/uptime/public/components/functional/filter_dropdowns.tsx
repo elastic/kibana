@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFilterGroup, EuiFilterButton } from '@elastic/eui';
+import { EuiFilterGroup } from '@elastic/eui';
 import React from 'react';
 import { get } from 'lodash';
 import { FilterBar as FilterBarType } from '../../../common/graphql/types';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { filterBarQuery } from '../../queries';
 import { FilterPopoverProps, FilterPopover } from './filter_popout';
+import { FilterStatusButton } from '../filter_status_button';
 
 interface FilterBarQueryResult {
   filters?: FilterBarType;
@@ -112,37 +113,10 @@ export const FilterDropdownsComponent = ({
     },
   ];
 
-  const status = getSelectedItems('monitor.status');
-  const statusFilterButtonIsActive = (value: string) => status.length !== 0 && status[0] === value;
-
   return (
     <EuiFilterGroup>
-      {/* TODO: extract these buttons into a separate component */}
-      <EuiFilterButton
-        hasActiveFilters={statusFilterButtonIsActive('up')}
-        onClick={() => {
-          if (statusFilterButtonIsActive('up')) {
-            onKueryUpdate([], 'monitor.status');
-          } else {
-            onKueryUpdate(['up'], 'monitor.status');
-          }
-        }}
-        withNext
-      >
-        Up
-      </EuiFilterButton>
-      <EuiFilterButton
-        hasActiveFilters={statusFilterButtonIsActive('down')}
-        onClick={() => {
-          if (statusFilterButtonIsActive('down')) {
-            onKueryUpdate([], 'monitor.status');
-          } else {
-            onKueryUpdate(['down'], 'monitor.status');
-          }
-        }}
-      >
-        Down
-      </EuiFilterButton>
+      <FilterStatusButton content="Up" value="up" withNext={true} />
+      <FilterStatusButton content="Down" value="down" withNext={false} />
       {filterPopoverProps.map(item => (
         <FilterPopover key={item.id} {...item} />
       ))}

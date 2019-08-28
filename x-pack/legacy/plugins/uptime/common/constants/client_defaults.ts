@@ -29,4 +29,5 @@ export const CLIENT_DEFAULTS = {
   MONITOR_LIST_SORT_FIELD: 'monitor_id',
   SEARCH: '',
   SELECTED_PING_LIST_STATUS: 'down',
+  STATUS_FILTER: '',
 };
