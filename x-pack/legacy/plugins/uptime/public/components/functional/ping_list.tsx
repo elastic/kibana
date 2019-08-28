@@ -6,10 +6,8 @@
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiCodeBlock,
   EuiComboBox,
   EuiComboBoxOptionProps,
-  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
@@ -17,7 +15,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
   EuiFormRow,
   EuiButtonIcon,
 } from '@elastic/eui';
@@ -34,6 +31,7 @@ import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { pingsQuery } from '../../queries';
 import { LocationName } from './location_name';
 import { Criteria, Pagination } from './monitor_list';
+import { PingListExpandedRowComponent } from './ping_list/expanded_row';
 
 interface PingListQueryResult {
   allPings?: PingResults;
@@ -50,8 +48,28 @@ interface PingListProps {
 }
 
 type Props = UptimeGraphQLQueryProps<PingListQueryResult> & PingListProps;
+interface ExpandedRowMap {
+  [key: string]: JSX.Element;
+}
 
 export const BaseLocationOptions = [{ label: 'All', value: 'All' }];
+
+const toggleDetails = (
+  ping: Ping,
+  itemIdToExpandedRowMap: ExpandedRowMap,
+  setItemIdToExpandedRowMap: (update: ExpandedRowMap) => any
+) => {
+  // If the user has clicked on the expanded map, close all expanded rows.
+  if (itemIdToExpandedRowMap[ping.id]) {
+    setItemIdToExpandedRowMap({});
+    return;
+  }
+
+  // Otherwise expand this row
+  const newItemIdToExpandedRowMap: ExpandedRowMap = {};
+  newItemIdToExpandedRowMap[ping.id] = <PingListExpandedRowComponent ping={ping} />;
+  setItemIdToExpandedRowMap(newItemIdToExpandedRowMap);
+};
 
 export const PingListComponent = ({
   data,
@@ -64,55 +82,7 @@ export const PingListComponent = ({
   selectedOption,
   selectedLocation,
 }: Props) => {
-  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<{ [key: string]: any }>({});
-
-  const toggleDetails = (item: Ping) => {
-    const newItemIdToExpandedRowMap = { ...itemIdToExpandedRowMap };
-    if (newItemIdToExpandedRowMap[item.id]) {
-      delete newItemIdToExpandedRowMap[item.id];
-    } else {
-      const listItems = [];
-      if (item.error) {
-        listItems.push({
-          title: 'Error',
-          description: <EuiText>{item.error.message}</EuiText>,
-        });
-      }
-      if (item.http && item.http.response && item.http.response.body) {
-        const body = item.http.response.body;
-        const contentBytes = body.content_bytes || 0;
-        const bodyBytes = body.bytes || 0;
-
-        const truncatedText =
-          contentBytes > 0 && contentBytes < bodyBytes
-            ? `Showing first ${contentBytes} bytes.`
-            : null;
-        const bodySizeText =
-          bodyBytes > 0 ? `Body size is ${formatNumber(bodyBytes, '0b')}.` : null;
-        const combinedText = [truncatedText, bodySizeText].filter(s => s).join(' ');
-
-        const bodyExcerpt = body.content ? (
-          <EuiCodeBlock>{body.content}</EuiCodeBlock>
-        ) : (
-          <EuiText>No body</EuiText>
-        );
-
-        const contents = (
-          <Fragment>
-            <EuiText>{combinedText}</EuiText>
-            {bodyExcerpt}
-          </Fragment>
-        );
-
-        listItems.push({
-          title: 'Response Body',
-          description: contents,
-        });
-      }
-      newItemIdToExpandedRowMap[item.id] = <EuiDescriptionList listItems={listItems} />;
-    }
-    setItemIdToExpandedRowMap(newItemIdToExpandedRowMap);
-  };
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<ExpandedRowMap>({});
 
   const statusOptions: EuiComboBoxOptionProps[] = [
     {
@@ -207,29 +177,6 @@ export const PingListComponent = ({
         defaultMessage: 'Error type',
       }),
     },
-    {
-      align: 'left',
-      field: 'error.message',
-      name: i18n.translate('xpack.uptime.pingList.errorMessageColumnLabel', {
-        defaultMessage: 'Error message',
-      }),
-      render: (message: string) =>
-        message && message.length > 25 ? (
-          <EuiToolTip
-            position="top"
-            title={i18n.translate('xpack.uptime.pingList.columns.errorMessageTooltipTitle', {
-              defaultMessage: 'Error message',
-            })}
-            content={<p>{message}</p>}
-          >
-            <code>{message.slice(0, 24)}…</code>
-          </EuiToolTip>
-        ) : (
-          <EuiText size="s">
-            <code>{message}</code>
-          </EuiText>
-        ),
-    },
   ];
   useEffect(() => {
     onUpdateApp();
@@ -262,7 +209,7 @@ export const PingListComponent = ({
     isExpander: true,
     render: (item: Ping) => (
       <EuiButtonIcon
-        onClick={() => toggleDetails(item)}
+        onClick={() => toggleDetails(item, itemIdToExpandedRowMap, setItemIdToExpandedRowMap)}
         aria-label={itemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
         iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
       />

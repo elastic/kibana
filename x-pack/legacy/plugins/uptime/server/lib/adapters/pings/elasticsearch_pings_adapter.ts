@@ -18,7 +18,6 @@ import { formatEsBucketsForHistogram, getFilteredQueryAndStatusFilter } from '..
 import { DatabaseAdapter, HistogramQueryResult } from '../database';
 import { UMPingsAdapter } from './adapter_types';
 import { getHistogramInterval } from '../../helper/get_histogram_interval';
-import { has } from 'mobx';
 
 export class ElasticsearchPingsAdapter implements UMPingsAdapter {
   private database: DatabaseAdapter;

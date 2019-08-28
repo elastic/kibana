@@ -183,12 +183,6 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "name": "Error type",
           },
           Object {
-            "align": "left",
-            "field": "error.message",
-            "name": "Error message",
-            "render": [Function],
-          },
-          Object {
             "align": "right",
             "field": "http.response.status_code",
             "name": "Response code",
