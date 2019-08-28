@@ -19,10 +19,10 @@ import { ApmHeader } from '../../shared/ApmHeader';
 import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
 import { ServiceOverview } from '../ServiceOverview';
 import { TraceOverview } from '../TraceOverview';
-import { APMLink } from '../../shared/Links/apm/APMLink';
 import { ServiceOverviewLink } from '../../shared/Links/apm/ServiceOverviewLink';
 import { TraceOverviewLink } from '../../shared/Links/apm/TraceOverviewLink';
 import { EuiTabLink } from '../../shared/EuiTabLink';
+import { SettingsLink } from '../../shared/Links/apm/SettingsLink';
 
 const homeTabs = [
   {
@@ -72,11 +72,11 @@ export function Home({ tab }: Props) {
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <APMLink path="/settings">
+            <SettingsLink>
               <EuiButtonEmpty size="s" color="primary" iconType="gear">
                 {SETTINGS_LINK_LABEL}
               </EuiButtonEmpty>
-            </APMLink>
+            </SettingsLink>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <SetupInstructionsLink />

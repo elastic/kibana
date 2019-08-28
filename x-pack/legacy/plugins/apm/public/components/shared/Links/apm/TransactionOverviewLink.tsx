@@ -4,16 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { APMLink } from './APMLink';
+import { APMLink, APMLinkExtendProps } from './APMLink';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { pickKeys } from '../../../../utils/pickKeys';
 
-interface Props {
+interface Props extends APMLinkExtendProps {
   serviceName: string;
-  children: React.ReactNode;
 }
 
-const TransactionOverviewLink = ({ serviceName, children }: Props) => {
+const TransactionOverviewLink = ({ serviceName, ...rest }: Props) => {
   const { urlParams } = useUrlParams();
 
   const persistedFilters = pickKeys(
@@ -28,9 +27,8 @@ const TransactionOverviewLink = ({ serviceName, children }: Props) => {
     <APMLink
       path={`/services/${serviceName}/transactions`}
       query={persistedFilters}
-    >
-      {children}
-    </APMLink>
+      {...rest}
+    />
   );
 };
 

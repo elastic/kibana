@@ -20,9 +20,7 @@ exports[`Home component should render services 1`] = `
       <EuiFlexItem
         grow={false}
       >
-        <APMLink
-          path="/settings"
-        >
+        <SettingsLink>
           <EuiButtonEmpty
             color="primary"
             iconSide="left"
@@ -32,7 +30,7 @@ exports[`Home component should render services 1`] = `
           >
             Settings
           </EuiButtonEmpty>
-        </APMLink>
+        </SettingsLink>
       </EuiFlexItem>
       <EuiFlexItem
         grow={false}
@@ -90,9 +88,7 @@ exports[`Home component should render traces 1`] = `
       <EuiFlexItem
         grow={false}
       >
-        <APMLink
-          path="/settings"
-        >
+        <SettingsLink>
           <EuiButtonEmpty
             color="primary"
             iconSide="left"
@@ -102,7 +98,7 @@ exports[`Home component should render traces 1`] = `
           >
             Settings
           </EuiButtonEmpty>
-        </APMLink>
+        </SettingsLink>
       </EuiFlexItem>
       <EuiFlexItem
         grow={false}

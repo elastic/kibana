@@ -5,30 +5,19 @@
  */
 import React from 'react';
 import { APMLink, APMLinkExtendProps } from './APMLink';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { pickKeys } from '../../../../utils/pickKeys';
 
 interface Props extends APMLinkExtendProps {
   serviceName: string;
+  errorGroupId: string;
 }
 
-const MetricOverviewLink = ({ serviceName, ...rest }: Props) => {
-  const { urlParams } = useUrlParams();
-
-  const persistedFilters = pickKeys(
-    urlParams,
-    'host',
-    'containerId',
-    'podName'
-  );
-
+const ErrorDetailLink = ({ serviceName, errorGroupId, ...rest }: Props) => {
   return (
     <APMLink
-      path={`/services/${serviceName}/metrics`}
-      query={persistedFilters}
+      path={`/services/${serviceName}/errors/${errorGroupId}`}
       {...rest}
     />
   );
 };
 
-export { MetricOverviewLink };
+export { ErrorDetailLink };

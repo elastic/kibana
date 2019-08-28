@@ -5,30 +5,27 @@
  */
 
 import React from 'react';
-import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
-import { APMLink } from './APMLink';
+import { APMLink, APMLinkExtendProps } from './APMLink';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { pickKeys } from '../../../../utils/pickKeys';
 
-interface TransactionLinkProps {
-  transaction: Transaction | undefined;
+interface Props extends APMLinkExtendProps {
+  serviceName: string;
+  traceId: string;
+  transactionId: string;
+  transactionName: string;
+  transactionType: string;
 }
 
-export const TransactionLink: React.SFC<TransactionLinkProps> = ({
-  transaction,
-  children
-}) => {
+export const TransactionDetailLink = ({
+  serviceName,
+  traceId,
+  transactionId,
+  transactionName,
+  transactionType,
+  ...rest
+}: Props) => {
   const { urlParams } = useUrlParams();
-
-  if (!transaction) {
-    return null;
-  }
-
-  const serviceName = transaction.service.name;
-  const traceId = transaction.trace.id;
-  const transactionId = transaction.transaction.id;
-  const transactionName = transaction.transaction.name;
-  const transactionType = transaction.transaction.type;
 
   const persistedFilters = pickKeys(urlParams, 'transactionResult');
 
@@ -42,8 +39,7 @@ export const TransactionLink: React.SFC<TransactionLinkProps> = ({
         transactionType,
         ...persistedFilters
       }}
-    >
-      {children}
-    </APMLink>
+      {...rest}
+    />
   );
 };

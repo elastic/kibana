@@ -4,16 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { APMLink } from './APMLink';
+import { APMLink, APMLinkExtendProps } from './APMLink';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { pickKeys } from '../../../../utils/pickKeys';
+import { APMQueryParams } from '../url_helpers';
 
-interface Props {
+interface Props extends APMLinkExtendProps {
   serviceName: string;
-  children: React.ReactNode;
+  query?: APMQueryParams;
 }
 
-const ErrorOverviewLink = ({ serviceName, children }: Props) => {
+const ErrorOverviewLink = ({ serviceName, query, ...rest }: Props) => {
   const { urlParams } = useUrlParams();
 
   const persistedFilters = pickKeys(
@@ -25,9 +26,14 @@ const ErrorOverviewLink = ({ serviceName, children }: Props) => {
   );
 
   return (
-    <APMLink path={`/services/${serviceName}/errors`} query={persistedFilters}>
-      {children}
-    </APMLink>
+    <APMLink
+      path={`/services/${serviceName}/errors`}
+      query={{
+        ...persistedFilters,
+        ...query
+      }}
+      {...rest}
+    />
   );
 };
 

@@ -10,15 +10,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { APMLink } from './APMLink';
+import { APMLink, APMLinkExtendProps } from './APMLink';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { pickKeys } from '../../../../utils/pickKeys';
 
-interface Props {
-  children: React.ReactNode;
-}
-
-const TraceOverviewLink = ({ children }: Props) => {
+const TraceOverviewLink = (props: APMLinkExtendProps) => {
   const { urlParams } = useUrlParams();
 
   const persistedFilters = pickKeys(
@@ -29,11 +25,7 @@ const TraceOverviewLink = ({ children }: Props) => {
     'podName'
   );
 
-  return (
-    <APMLink path="/traces" query={persistedFilters}>
-      {children}
-    </APMLink>
-  );
+  return <APMLink path="/traces" query={persistedFilters} {...props} />;
 };
 
 export { TraceOverviewLink };

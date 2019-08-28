@@ -10,24 +10,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { APMLink } from './APMLink';
+import { APMLink, APMLinkExtendProps } from './APMLink';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { pickKeys } from '../../../../utils/pickKeys';
 
-interface Props {
-  children: React.ReactNode;
-}
-
-const ServiceOverviewLink = ({ children }: Props) => {
+const ServiceOverviewLink = (props: APMLinkExtendProps) => {
   const { urlParams } = useUrlParams();
 
   const persistedFilters = pickKeys(urlParams, 'host', 'agentName');
 
-  return (
-    <APMLink path="/services" query={persistedFilters}>
-      {children}
-    </APMLink>
-  );
+  return <APMLink path="/services" query={persistedFilters} {...props} />;
 };
 
 export { ServiceOverviewLink };
