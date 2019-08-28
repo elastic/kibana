@@ -34,6 +34,7 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
       props.dispatch({
         type: 'UPDATE_VISUALIZATION_STATE',
         newState,
+        clearStagedPreview: false,
       });
     },
     [props.dispatch]

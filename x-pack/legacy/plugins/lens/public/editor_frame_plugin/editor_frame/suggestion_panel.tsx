@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiIcon, EuiTitle, EuiPanel, EuiIconTip, EuiToolTip } from '@elastic/eui';
 import { toExpression } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
-import { Action } from './state_management';
+import { Action, PreviewState } from './state_management';
 import { Datasource, Visualization, FramePublicAPI } from '../../types';
 import { getSuggestions, Suggestion, switchToSuggestion } from './suggestion_helpers';
 import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/data/public';
@@ -34,6 +34,7 @@ export interface SuggestionPanelProps {
   dispatch: (action: Action) => void;
   ExpressionRenderer: ExpressionRenderer;
   frame: FramePublicAPI;
+  stagedPreview?: PreviewState;
 }
 
 const SuggestionPreview = ({
@@ -111,18 +112,32 @@ function InnerSuggestionPanel({
   dispatch,
   frame,
   ExpressionRenderer: ExpressionRendererComponent,
+  stagedPreview,
 }: SuggestionPanelProps) {
   if (!activeDatasourceId) {
     return null;
   }
+  const stagedSuggestions = useMemo(() => {
+    if (!stagedPreview) return;
+    return getSuggestions({
+      datasourceMap,
+      datasourceStates: stagedPreview.datasourceStates,
+      visualizationMap,
+      activeVisualizationId: stagedPreview.visualization.activeId,
+      visualizationState: stagedPreview.visualization.state,
+    });
+  }, [stagedPreview, datasourceMap, visualizationMap]);
 
-  const suggestions = getSuggestions({
-    datasourceMap,
-    datasourceStates,
-    visualizationMap,
-    activeVisualizationId,
-    visualizationState,
-  })
+  const suggestions = (
+    stagedSuggestions ||
+    getSuggestions({
+      datasourceMap,
+      datasourceStates,
+      visualizationMap,
+      activeVisualizationId,
+      visualizationState,
+    })
+  )
     .filter(suggestion => !suggestion.hide)
     .slice(0, MAX_SUGGESTIONS_DISPLAYED);
 
@@ -138,9 +153,23 @@ function InnerSuggestionPanel({
             id="xpack.lens.editorFrame.suggestionPanelTitle"
             defaultMessage="Suggestions"
           />
+          {stagedPreview &&
+            '(Previewing a suggestion currently, you can go back to your previous state)'}
         </h3>
       </EuiTitle>
       <div className="lnsSuggestionsPanel__suggestions">
+        <EuiPanel
+          className="lnsSuggestionPanel__button"
+          paddingSize="none"
+          data-test-subj="lnsSuggestion"
+          onClick={() => {
+            dispatch({
+              type: 'ROLLBACK_SUGGESTION',
+            });
+          }}
+        >
+          Current visualization
+        </EuiPanel>
         {suggestions.map((suggestion: Suggestion) => {
           const previewExpression = preparePreviewExpression(
             suggestion,

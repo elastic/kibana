@@ -76,7 +76,12 @@ export function InnerWorkspacePanel({
 
   function onDrop() {
     if (suggestionForDraggedField) {
-      switchToSuggestion(framePublicAPI, dispatch, suggestionForDraggedField);
+      switchToSuggestion(
+        framePublicAPI,
+        dispatch,
+        suggestionForDraggedField,
+        'SWITCH_VISUALIZATION'
+      );
     }
   }
 
