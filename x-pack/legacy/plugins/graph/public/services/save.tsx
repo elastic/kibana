@@ -8,15 +8,26 @@ import React from 'react';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedGraphWorkspace } from '../types/persistence';
 import { GraphSaveModal, OnSaveGraphProps } from '../components/graph_save_modal';
+import { GraphSavePolicy } from '../types/config';
 
-export function save(
-  workspace: SavedGraphWorkspace,
-  saveWorkspace: (saveOptions: {
-    confirmOverwrite: boolean;
-    isTitleDuplicateConfirmed: boolean;
-    onTitleDuplicate: () => void;
-  }) => Promise<{ id?: string } | { error: string }>
-) {
+export function save({
+  savePolicy,
+  hasData,
+  workspace,
+  saveWorkspace,
+}: {
+  savePolicy: GraphSavePolicy;
+  hasData: boolean;
+  workspace: SavedGraphWorkspace;
+  saveWorkspace: (
+    saveOptions: {
+      confirmOverwrite: boolean;
+      isTitleDuplicateConfirmed: boolean;
+      onTitleDuplicate: () => void;
+    },
+    dataConsent: boolean
+  ) => Promise<{ id?: string } | { error: string }>;
+}) {
   const currentTitle = workspace.title;
   const currentDescription = workspace.title;
   const onSave = ({
@@ -25,6 +36,7 @@ export function save(
     newCopyOnSave,
     isTitleDuplicateConfirmed,
     onTitleDuplicate,
+    dataConsent,
   }: OnSaveGraphProps) => {
     workspace.title = newTitle;
     workspace.description = newDescription;
@@ -34,7 +46,7 @@ export function save(
       isTitleDuplicateConfirmed,
       onTitleDuplicate,
     };
-    return saveWorkspace(saveOptions).then(response => {
+    return saveWorkspace(saveOptions, dataConsent).then(response => {
       // If the save wasn't successful, put the original values back.
       if (!('id' in response) || !Boolean(response.id)) {
         workspace.title = currentTitle;
@@ -45,6 +57,8 @@ export function save(
   };
   showSaveModal(
     <GraphSaveModal
+      savePolicy={savePolicy}
+      hasData={hasData}
       onSave={onSave}
       onClose={() => {}}
       title={workspace.title}

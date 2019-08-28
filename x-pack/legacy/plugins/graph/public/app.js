@@ -60,10 +60,8 @@ import {
   getOutlinkEncoders,
 } from './angular/services/outlink_encoders';
 
-import saveTemplate from './angular/templates/save_workspace.html';
 import settingsTemplate from './angular/templates/settings.html';
 
-import './angular/directives/graph_save';
 import './angular/directives/graph_settings';
 
 const app = uiModules.get('app/graph');
@@ -671,7 +669,6 @@ app.controller('graphuiPlugin', function (
 
   $scope.resetWorkspace = function () {
     $scope.clearWorkspace();
-    $scope.userHasConfirmedSaveWorkspaceData = false;
     $scope.selectedIndex = null;
     $scope.proposedIndex = null;
     $scope.detail = null;
@@ -895,7 +892,12 @@ app.controller('graphuiPlugin', function (
         return $scope.allSavingDisabled || $scope.selectedFields.length === 0;
       },
       run: () => {
-        save($scope.savedWorkspace, $scope.saveWorkspace);
+        save({
+          savePolicy: $scope.graphSavePolicy,
+          hasData: $scope.workspace && ($scope.workspace.nodes.length > 0 || $scope.workspace.blacklistedNodes.length > 0),
+          workspace: $scope.savedWorkspace,
+          saveWorkspace: $scope.saveWorkspace
+        });
       },
       testId: 'graphSaveButton',
     });
@@ -921,7 +923,6 @@ app.controller('graphuiPlugin', function (
   updateBreadcrumbs();
 
   $scope.menus = {
-    showSave: false,
     showSettings: false,
   };
 
@@ -1083,7 +1084,7 @@ app.controller('graphuiPlugin', function (
     });
   }
 
-  $scope.saveWorkspace = function (saveOptions) {
+  $scope.saveWorkspace = function (saveOptions, userHasConfirmedSaveWorkspaceData) {
     if ($scope.allSavingDisabled) {
       // It should not be possible to navigate to this function if allSavingDisabled is set
       // but adding check here as a safeguard.
@@ -1094,7 +1095,7 @@ app.controller('graphuiPlugin', function (
     }
     initWorkspaceIfRequired();
     const canSaveData = $scope.graphSavePolicy === 'configAndData' ||
-      ($scope.graphSavePolicy === 'configAndDataWithConsent' && $scope.userHasConfirmedSaveWorkspaceData);
+      ($scope.graphSavePolicy === 'configAndDataWithConsent' && userHasConfirmedSaveWorkspaceData);
 
 
     let blacklist = [];
@@ -1173,7 +1174,6 @@ app.controller('graphuiPlugin', function (
 
     return $scope.savedWorkspace.save(saveOptions).then(function (id) {
       $scope.closeMenus();
-      $scope.userHasConfirmedSaveWorkspaceData = false; //reset flag
       if (id) {
         const title = i18n.translate('xpack.graph.saveWorkspace.successNotificationTitle', {
           defaultMessage: 'Saved "{workspaceTitle}"',

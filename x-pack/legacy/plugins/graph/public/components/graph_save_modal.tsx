@@ -9,11 +9,14 @@ import {
   SavedObjectSaveModal,
   OnSaveProps,
 } from 'ui/saved_objects/components/saved_object_save_modal';
-import { EuiFormRow, EuiTextArea } from '@elastic/eui';
+import { EuiFormRow, EuiTextArea, EuiCallOut, EuiCheckbox, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+import { GraphSavePolicy } from '../types/config';
 
 export interface OnSaveGraphProps extends OnSaveProps {
   newDescription: string;
+  dataConsent: boolean;
 }
 
 export function GraphSaveModal({
@@ -22,37 +25,76 @@ export function GraphSaveModal({
   title,
   description,
   showCopyOnSave,
+  savePolicy,
+  hasData,
 }: {
   onSave: (props: OnSaveGraphProps) => void;
   onClose: () => void;
   title: string;
   description: string;
   showCopyOnSave: boolean;
+  savePolicy: GraphSavePolicy;
+  hasData: boolean;
 }) {
   const [newDescription, setDescription] = useState(description);
+  const [dataConsent, setDataConsent] = useState(false);
   return (
     <SavedObjectSaveModal
       onSave={props => {
-        onSave({ ...props, newDescription });
+        onSave({ ...props, newDescription, dataConsent });
       }}
       onClose={onClose}
       title={title}
       showCopyOnSave={showCopyOnSave}
       objectType="graph-workspace"
       options={
-        <EuiFormRow
-          label={i18n.translate('xpack.graph.saveModal.descriptionFormRowLabel', {
-            defaultMessage: 'Description',
-          })}
-        >
-          <EuiTextArea
-            data-test-subj="dashboardDescription"
-            value={newDescription}
-            onChange={e => {
-              setDescription(e.target.value);
-            }}
-          />
-        </EuiFormRow>
+        <>
+          <EuiFormRow
+            fullWidth
+            label={i18n.translate('xpack.graph.saveModal.descriptionFormRowLabel', {
+              defaultMessage: 'Description',
+            })}
+          >
+            <EuiTextArea
+              data-test-subj="dashboardDescription"
+              value={newDescription}
+              onChange={e => {
+                setDescription(e.target.value);
+              }}
+              fullWidth
+              rows={5}
+            />
+          </EuiFormRow>
+          {savePolicy === 'configAndDataWithConsent' && hasData && !dataConsent && (
+            <>
+              <EuiCallOut
+                color="warning"
+                data-test-subj="graphNoDataSavedMsg"
+                className="gphSaveModal__warning"
+              >
+                <p>
+                  {i18n.translate('xpack.graph.topNavMenu.save.saveConfigurationOnlyWarning', {
+                    defaultMessage:
+                      'The data in this workspace will be cleared and only the configuration will be saved.',
+                  })}
+                </p>
+              </EuiCallOut>
+              <EuiSpacer />
+            </>
+          )}
+          {savePolicy === 'configAndDataWithConsent' && hasData && (
+            <EuiCheckbox
+              id="graphDataConsent"
+              label={i18n.translate('xpack.graph.topNavMenu.save.saveGraphContentCheckboxLabel', {
+                defaultMessage: 'Save graph content',
+              })}
+              checked={dataConsent}
+              onChange={e => {
+                setDataConsent(e.target.checked);
+              }}
+            />
+          )}
+        </>
       }
     />
   );
