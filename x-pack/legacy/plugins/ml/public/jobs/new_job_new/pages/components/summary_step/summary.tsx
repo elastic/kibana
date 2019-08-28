@@ -27,7 +27,7 @@ import { JobDetails } from './job_details';
 import { DetectorChart } from './detector_chart';
 import { JobProgress } from './components/job_progress';
 import { PostSaveOptions } from './components/post_save_options';
-import { convertToAdvancedJob } from '../../../common/job_creator/util/general';
+import { convertToAdvancedJob, resetJob } from '../../../common/job_creator/util/general';
 
 export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const { jobCreator, jobValidator, jobValidatorUpdated, resultsLoader } = useContext(
@@ -73,6 +73,10 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
 
   function toggleJsonFlyout() {
     setShowJsonFlyout(!showJsonFlyout);
+  }
+
+  function clickResetJob() {
+    resetJob(jobCreator);
   }
 
   const convertToAdvanced = () => {
@@ -135,11 +139,19 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
               </Fragment>
             )}
             {progress > 0 && (
-              <EuiFlexItem grow={false}>
-                <EuiButton onClick={viewResults} data-test-subj="mlJobWizardButtonViewResults">
-                  View results
-                </EuiButton>
-              </EuiFlexItem>
+              <Fragment>
+                <EuiFlexItem grow={false}>
+                  <EuiButton onClick={viewResults} data-test-subj="mlJobWizardButtonViewResults">
+                    View results
+                  </EuiButton>
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <EuiButton onClick={clickResetJob} data-test-subj="mlJobWizardButtonResetJob">
+                    Reset job
+                  </EuiButton>
+                </EuiFlexItem>
+              </Fragment>
             )}
             {progress === 100 && <PostSaveOptions jobRunner={jobRunner} />}
           </EuiFlexGroup>
