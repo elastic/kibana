@@ -50,7 +50,8 @@ export interface ContainerInput<PanelExplicitInput = {}> extends EmbeddableInput
 }
 
 export interface IContainer<
-  I extends ContainerInput = ContainerInput,
+  Inherited extends {} = {},
+  I extends ContainerInput<Inherited> = ContainerInput<Inherited>,
   O extends ContainerOutput = ContainerOutput
 > extends IEmbeddable<I, O> {
   /**

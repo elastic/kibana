@@ -18,7 +18,6 @@ interface Props {
   columnHeaders: ColumnHeader[];
   data: DetailItem[];
   id: string;
-  isLoading: boolean;
   onUpdateColumns: OnUpdateColumns;
   timelineId: string;
   toggleColumn: (column: ColumnHeader) => void;
@@ -45,19 +44,16 @@ export class StatefulEventDetails extends React.PureComponent<Props, State> {
       columnHeaders,
       data,
       id,
-      isLoading,
       onUpdateColumns,
       timelineId,
       toggleColumn,
     } = this.props;
-
     return (
       <EventDetails
         browserFields={browserFields}
         columnHeaders={columnHeaders}
         data={data}
         id={id}
-        isLoading={isLoading}
         view={this.state.view}
         onUpdateColumns={onUpdateColumns}
         onViewSelected={this.onViewSelected}

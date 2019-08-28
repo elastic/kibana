@@ -31,7 +31,6 @@ export type UnknownPluginInitializer = PluginInitializer<unknown, Record<string,
  * @internal
  */
 export interface CoreWindow {
-  __kbnNonce__: string;
   __kbnBundles__: {
     [pluginBundleName: string]: UnknownPluginInitializer | undefined;
   };
@@ -79,9 +78,6 @@ export const loadPluginBundle: LoadPluginBundle = <
       script.setAttribute('src', bundlePath);
       script.setAttribute('id', `kbn-plugin-${pluginName}`);
       script.setAttribute('async', '');
-
-      // Add kbnNonce for CSP
-      script.setAttribute('nonce', coreWindow.__kbnNonce__);
 
       const cleanupTag = () => {
         clearTimeout(timeout);

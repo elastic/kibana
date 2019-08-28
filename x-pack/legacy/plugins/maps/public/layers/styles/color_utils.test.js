@@ -17,7 +17,6 @@ describe('COLOR_GRADIENTS', () => {
   it('Should contain EuiSuperSelect options list of color ramps', () => {
     expect(COLOR_GRADIENTS.length).toBe(6);
     const colorGradientOption = COLOR_GRADIENTS[0];
-    expect(colorGradientOption.text).toBe('Blues');
     expect(colorGradientOption.value).toBe('Blues');
   });
 });

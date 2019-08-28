@@ -5,9 +5,7 @@
  */
 
 import { CSV_JOB_TYPE, PLUGIN_ID } from '../../../common/constants';
-import { cryptoFactory } from '../../../server/lib/crypto';
-import { oncePerServer } from '../../../server/lib/once_per_server';
-import { LevelLogger } from '../../../server/lib/level_logger';
+import { cryptoFactory, oncePerServer, LevelLogger } from '../../../server/lib';
 import { createGenerateCsv } from './lib/generate_csv';
 import { fieldFormatMapFactory } from './lib/field_format_map';
 import { i18n } from '@kbn/i18n';
@@ -16,11 +14,12 @@ function executeJobFn(server) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   const crypto = cryptoFactory(server);
   const config = server.config();
-  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, CSV_JOB_TYPE]);
-  const generateCsv = createGenerateCsv(logger);
+  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, CSV_JOB_TYPE, 'execute-job']);
   const serverBasePath = config.get('server.basePath');
 
-  return async function executeJob(job, cancellationToken) {
+  return async function executeJob(jobId, job, cancellationToken) {
+    const jobLogger = logger.clone([jobId]);
+
     const {
       searchRequest,
       fields,
@@ -35,6 +34,7 @@ function executeJobFn(server) {
     try {
       decryptedHeaders = await crypto.decrypt(serializedEncryptedHeaders);
     } catch (err) {
+      jobLogger.error(err);
       throw new Error(
         i18n.translate(
           'xpack.reporting.exportTypes.csv.executeJob.failedToDecryptReportJobDataErrorMessage',
@@ -77,7 +77,7 @@ function executeJobFn(server) {
         ]);
 
         if (timezone === 'Browser') {
-          logger.warn(
+          jobLogger.warn(
             `Kibana Advanced Setting "dateFormat:tz" is set to "Browser". Dates will be formatted as UTC to avoid ambiguity.`
           );
         }
@@ -90,6 +90,7 @@ function executeJobFn(server) {
       })(),
     ]);
 
+    const generateCsv = createGenerateCsv(jobLogger);
     const { content, maxSizeReached, size, csvContainsFormulas } = await generateCsv({
       searchRequest,
       fields,

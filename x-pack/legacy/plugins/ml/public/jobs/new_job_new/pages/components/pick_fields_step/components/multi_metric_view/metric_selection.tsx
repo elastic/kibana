@@ -16,6 +16,7 @@ import { AggFieldPair } from '../../../../../../../../common/types/fields';
 import { defaultChartSettings, ChartSettings } from '../../../charts/common/settings';
 import { MetricSelector } from './metric_selector';
 import { ChartGrid } from './chart_grid';
+import { mlMessageBarService } from '../../../../../../../components/messagebar/messagebar_service';
 
 interface Props {
   isActive: boolean;
@@ -43,6 +44,7 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     jobCreator.aggFieldPairs
   );
   const [lineChartsData, setLineChartsData] = useState<LineChartData>({});
+  const [loadingData, setLoadingData] = useState(false);
   const [modelData, setModelData] = useState<Record<number, ModelItem[]>>([]);
   const [anomalyData, setAnomalyData] = useState<Record<number, Anomaly[]>>([]);
   const [start, setStart] = useState(jobCreator.start);
@@ -117,7 +119,9 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
       chartLoader
         .loadFieldExampleValues(splitField)
         .then(setFieldValues)
-        .catch(() => {});
+        .catch(error => {
+          mlMessageBarService.notify.error(error);
+        });
     } else {
       setFieldValues([]);
     }
@@ -152,34 +156,40 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     setChartSettings(cs);
 
     if (aggFieldPairList.length > 0) {
-      const resp: LineChartData = await chartLoader.loadLineCharts(
-        jobCreator.start,
-        jobCreator.end,
-        aggFieldPairList,
-        jobCreator.splitField,
-        fieldValues.length > 0 ? fieldValues[0] : null,
-        cs.intervalMs
-      );
-
-      setLineChartsData(resp);
+      setLoadingData(true);
+      try {
+        const resp: LineChartData = await chartLoader.loadLineCharts(
+          jobCreator.start,
+          jobCreator.end,
+          aggFieldPairList,
+          jobCreator.splitField,
+          fieldValues.length > 0 ? fieldValues[0] : null,
+          cs.intervalMs
+        );
+        setLineChartsData(resp);
+      } catch (error) {
+        mlMessageBarService.notify.error(error);
+        setLineChartsData([]);
+      }
+      setLoadingData(false);
     }
   }
 
   return (
     <Fragment>
-      {lineChartsData && (
-        <ChartGrid
-          aggFieldPairList={aggFieldPairList}
-          chartSettings={chartSettings}
-          splitField={splitField}
-          fieldValues={fieldValues}
-          lineChartsData={lineChartsData}
-          modelData={modelData}
-          anomalyData={anomalyData}
-          deleteDetector={isActive ? deleteDetector : undefined}
-          jobType={jobCreator.type}
-        />
-      )}
+      <ChartGrid
+        aggFieldPairList={aggFieldPairList}
+        chartSettings={chartSettings}
+        splitField={splitField}
+        fieldValues={fieldValues}
+        lineChartsData={lineChartsData}
+        modelData={modelData}
+        anomalyData={anomalyData}
+        deleteDetector={isActive ? deleteDetector : undefined}
+        jobType={jobCreator.type}
+        loading={loadingData}
+      />
+
       {isActive && (
         <MetricSelector
           fields={fields}

@@ -29,8 +29,8 @@ interface Props {
   field?: {
     type: string;
     name: string;
-    rowCount: number;
-    scripted: boolean;
+    rowCount?: number;
+    scripted?: boolean;
   };
   fieldName?: string;
   fieldType?: string;

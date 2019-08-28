@@ -6,48 +6,82 @@
 
 import createContainer from 'constate-latest';
 import { useMemo, useEffect, useState } from 'react';
-import { values } from 'lodash';
-import { getJobId } from '../../../../common/log_analysis';
+import { bucketSpan, getJobId } from '../../../../common/log_analysis';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
+import { callSetupMlModuleAPI, SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
 import { callJobsSummaryAPI } from './api/ml_get_jobs_summary_api';
 
-type JobStatus = 'unknown' | 'closed' | 'closing' | 'failed' | 'opened' | 'opening' | 'deleted';
-// type DatafeedStatus = 'unknown' | 'started' | 'starting' | 'stopped' | 'stopping' | 'deleted';
+// combines and abstracts job and datafeed status
+type JobStatus =
+  | 'unknown'
+  | 'missing'
+  | 'inconsistent'
+  | 'created'
+  | 'started'
+  | 'opening'
+  | 'opened'
+  | 'failed';
+
+interface AllJobStatuses {
+  [key: string]: JobStatus;
+}
+
+const getInitialJobStatuses = (): AllJobStatuses => {
+  return {
+    logEntryRate: 'unknown',
+  };
+};
 
 export const useLogAnalysisJobs = ({
   indexPattern,
   sourceId,
   spaceId,
+  timeField,
 }: {
   indexPattern: string;
   sourceId: string;
   spaceId: string;
+  timeField: string;
 }) => {
-  const [jobStatus, setJobStatus] = useState<{
-    logEntryRate: JobStatus;
-  }>({
-    logEntryRate: 'unknown',
-  });
+  const [jobStatus, setJobStatus] = useState<AllJobStatuses>(getInitialJobStatuses());
 
-  // const [setupMlModuleRequest, setupMlModule] = useTrackedPromise(
-  //   {
-  //     cancelPreviousOn: 'resolution',
-  //     createPromise: async () => {
-  //       kfetch({
-  //         method: 'POST',
-  //         pathname: '/api/ml/modules/setup',
-  //         body: JSON.stringify(
-  //           setupMlModuleRequestPayloadRT.encode({
-  //             indexPatternName: indexPattern,
-  //             prefix: getJobIdPrefix(spaceId, sourceId),
-  //             startDatafeed: true,
-  //           })
-  //         ),
-  //       });
-  //     },
-  //   },
-  //   [indexPattern, spaceId, sourceId]
-  // );
+  const [setupMlModuleRequest, setupMlModule] = useTrackedPromise(
+    {
+      cancelPreviousOn: 'resolution',
+      createPromise: async (start, end) => {
+        setJobStatus(getInitialJobStatuses());
+        return await callSetupMlModuleAPI(
+          start,
+          end,
+          spaceId,
+          sourceId,
+          indexPattern,
+          timeField,
+          bucketSpan
+        );
+      },
+      onResolve: ({ datafeeds, jobs }: SetupMlModuleResponsePayload) => {
+        const hasSuccessfullyCreatedJobs = jobs.every(job => job.success);
+        const hasSuccessfullyStartedDatafeeds = datafeeds.every(
+          datafeed => datafeed.success && datafeed.started
+        );
+        const hasAnyErrors =
+          jobs.some(job => !!job.error) || datafeeds.some(datafeed => !!datafeed.error);
+
+        setJobStatus(currentJobStatus => ({
+          ...currentJobStatus,
+          logEntryRate: hasAnyErrors
+            ? 'failed'
+            : hasSuccessfullyCreatedJobs
+            ? hasSuccessfullyStartedDatafeeds
+              ? 'started'
+              : 'failed'
+            : 'failed',
+        }));
+      },
+    },
+    [indexPattern, spaceId, sourceId]
+  );
 
   const [fetchJobStatusRequest, fetchJobStatus] = useTrackedPromise(
     {
@@ -77,9 +111,10 @@ export const useLogAnalysisJobs = ({
   }, []);
 
   const isSetupRequired = useMemo(() => {
-    const jobStates = values(jobStatus);
+    const jobStates = Object.values(jobStatus);
     return (
-      jobStates.filter(state => state === 'opened' || state === 'opening').length < jobStates.length
+      jobStates.filter(state => ['opened', 'opening', 'created', 'started'].includes(state))
+        .length < jobStates.length
     );
   }, [jobStatus]);
 
@@ -87,10 +122,23 @@ export const useLogAnalysisJobs = ({
     fetchJobStatusRequest.state,
   ]);
 
+  const isSettingUpMlModule = useMemo(() => setupMlModuleRequest.state === 'pending', [
+    setupMlModuleRequest.state,
+  ]);
+
+  const didSetupFail = useMemo(() => {
+    const jobStates = Object.values(jobStatus);
+    return jobStates.filter(state => state === 'failed').length > 0;
+  }, [jobStatus]);
+
   return {
     jobStatus,
     isSetupRequired,
     isLoadingSetupStatus,
+    setupMlModule,
+    setupMlModuleRequest,
+    isSettingUpMlModule,
+    didSetupFail,
   };
 };
 

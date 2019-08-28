@@ -24,14 +24,15 @@ import {
 } from '@elastic/eui';
 
 import { NavigationMenu } from '../../../components/navigation_menu/navigation_menu';
-import { useRefreshAnalyticsList } from '../../common';
 import { CreateAnalyticsButton } from './components/create_analytics_button';
 import { DataFrameAnalyticsList } from './components/analytics_list';
 import { RefreshAnalyticsListButton } from './components/refresh_analytics_list_button';
+import { useRefreshInterval } from './components/analytics_list/use_refresh_interval';
 
 export const Page: FC = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const { refresh } = useRefreshAnalyticsList({ isLoading: setIsLoading });
+  const [blockRefresh, setBlockRefresh] = useState(false);
+
+  useRefreshInterval(setBlockRefresh);
 
   return (
     <Fragment>
@@ -68,7 +69,7 @@ export const Page: FC = () => {
               <EuiFlexGroup alignItems="center">
                 {/* grow={false} fixes IE11 issue with nested flex */}
                 <EuiFlexItem grow={false}>
-                  {<RefreshAnalyticsListButton onClick={refresh} isLoading={isLoading} />}
+                  <RefreshAnalyticsListButton />
                 </EuiFlexItem>
                 {/* grow={false} fixes IE11 issue with nested flex */}
                 <EuiFlexItem grow={false}>
@@ -80,7 +81,7 @@ export const Page: FC = () => {
           <EuiPageContentBody>
             <EuiSpacer size="l" />
             <EuiPanel>
-              <DataFrameAnalyticsList />
+              <DataFrameAnalyticsList blockRefresh={blockRefresh} />
             </EuiPanel>
           </EuiPageContentBody>
         </EuiPageBody>

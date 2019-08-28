@@ -21,7 +21,7 @@ import {
   throwIfErrorAttachedToSetup,
 } from '../ml/api/throw_if_not_ok';
 
-const emptyIndexPattern: string = '';
+const emptyIndexPattern: string[] = [];
 
 /**
  * Fetches ML Groups Data
@@ -196,7 +196,7 @@ export const jobsSummary = async (
  */
 export const getIndexPatterns = async (
   headers: Record<string, string | undefined>
-): Promise<string> => {
+): Promise<string[]> => {
   const response = await fetch(
     `${chrome.getBasePath()}/api/saved_objects/_find?type=index-pattern&fields=title&fields=type&per_page=10000`,
     {
@@ -214,15 +214,13 @@ export const getIndexPatterns = async (
   const results: IndexPatternResponse = await response.json();
 
   if (results.saved_objects && Array.isArray(results.saved_objects)) {
-    return results.saved_objects
-      .reduce(
-        (acc: string[], v) => [
-          ...acc,
-          ...(v.attributes && v.attributes.title ? [v.attributes.title] : []),
-        ],
-        []
-      )
-      .join(', ');
+    return results.saved_objects.reduce(
+      (acc: string[], v) => [
+        ...acc,
+        ...(v.attributes && v.attributes.title ? [v.attributes.title] : []),
+      ],
+      []
+    );
   } else {
     return emptyIndexPattern;
   }

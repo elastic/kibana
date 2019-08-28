@@ -226,6 +226,8 @@ export interface IndexField {
   aggregatable: boolean;
   /** Description of the field */
   description?: string | null;
+
+  format?: string | null;
 }
 
 export interface AuthenticationsData {
@@ -3005,6 +3007,8 @@ export namespace IndexFieldResolvers {
     aggregatable?: AggregatableResolver<boolean, TypeParent, Context>;
     /** Description of the field */
     description?: DescriptionResolver<string | null, TypeParent, Context>;
+
+    format?: FormatResolver<string | null, TypeParent, Context>;
   }
 
   export type CategoryResolver<R = string, Parent = IndexField, Context = SiemContext> = Resolver<
@@ -3043,6 +3047,11 @@ export namespace IndexFieldResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type DescriptionResolver<
+    R = string | null,
+    Parent = IndexField,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type FormatResolver<
     R = string | null,
     Parent = IndexField,
     Context = SiemContext

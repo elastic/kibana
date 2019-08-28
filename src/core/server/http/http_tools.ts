@@ -71,6 +71,7 @@ export function getServerOptions(config: HttpConfig, { configureTLS = true } = {
       passphrase: ssl.keyPassphrase,
       secureOptions: ssl.getSecureOptions(),
       requestCert: ssl.requestCert,
+      rejectUnauthorized: ssl.rejectUnauthorized,
     };
 
     options.tls = tlsOptions;

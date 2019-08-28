@@ -6,8 +6,9 @@
 import { Router, RouterRouteHandler } from '../../../../../server/lib/create_router';
 import { wrapEsError } from '../../../../../server/lib/create_router/error_wrappers';
 import { SnapshotDetails, SnapshotDetailsEs } from '../../../common/types';
+import { deserializeSnapshotDetails } from '../../../common/lib';
 import { Plugins } from '../../../shim';
-import { deserializeSnapshotDetails, getManagedRepositoryName } from '../../lib';
+import { getManagedRepositoryName } from '../../lib';
 
 let callWithInternalUser: any;
 
@@ -24,10 +25,22 @@ export const getAllHandler: RouterRouteHandler = async (
 ): Promise<{
   snapshots: SnapshotDetails[];
   errors: any[];
+  policies: string[];
   repositories: string[];
   managedRepository?: string;
 }> => {
   const managedRepository = await getManagedRepositoryName(callWithInternalUser);
+  let policies: string[] = [];
+
+  // Attempt to retrieve policies
+  // This could fail if user doesn't have access to read SLM policies
+  try {
+    const policiesByName = await callWithRequest('slm.policies');
+    policies = Object.keys(policiesByName);
+  } catch (e) {
+    // Silently swallow error as policy names aren't required in UI
+  }
+
   const repositoriesByName = await callWithRequest('snapshot.getRepository', {
     repository: '_all',
   });
@@ -35,7 +48,7 @@ export const getAllHandler: RouterRouteHandler = async (
   const repositoryNames = Object.keys(repositoriesByName);
 
   if (repositoryNames.length === 0) {
-    return { snapshots: [], errors: [], repositories: [] };
+    return { snapshots: [], errors: [], repositories: [], policies };
   }
 
   const snapshots: SnapshotDetails[] = [];
@@ -70,6 +83,7 @@ export const getAllHandler: RouterRouteHandler = async (
 
   return {
     snapshots,
+    policies,
     repositories,
     errors,
   };

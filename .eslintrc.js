@@ -31,7 +31,7 @@ const ELASTIC_LICENSE_HEADER = `
 `;
 
 module.exports = {
-  extends: ['@elastic/eslint-config-kibana'],
+  extends: ['@elastic/eslint-config-kibana', 'plugin:@elastic/eui/recommended'],
 
   overrides: [
     /**

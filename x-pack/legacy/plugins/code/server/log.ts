@@ -17,6 +17,11 @@ export class Logger implements VsLogger {
     }
   }
 
+  // Return a new logger with new tags
+  public addTags(tags: string[]): Logger {
+    return new Logger(this.server, this.baseTags.concat(tags));
+  }
+
   public info(msg: string | any) {
     if (typeof msg !== 'string') {
       msg = inspect(msg, {

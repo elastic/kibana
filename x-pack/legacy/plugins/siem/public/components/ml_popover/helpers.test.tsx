@@ -34,7 +34,7 @@ describe('helpers', () => {
       const configTemplatesToInstall = getConfigTemplatesToInstall(
         mockConfigTemplates,
         [],
-        'auditbeat-*, winlogbeat-*'
+        ['auditbeat-*', 'winlogbeat-*']
       );
       expect(configTemplatesToInstall.length).toEqual(2);
     });
@@ -43,7 +43,7 @@ describe('helpers', () => {
       const configTemplatesToInstall = getConfigTemplatesToInstall(
         mockConfigTemplates,
         [],
-        'auditbeat-*, spongbeat-*'
+        ['auditbeat-*', 'spongbeat-*']
       );
       expect(configTemplatesToInstall.length).toEqual(1);
     });
@@ -52,9 +52,18 @@ describe('helpers', () => {
       const configTemplatesToInstall = getConfigTemplatesToInstall(
         mockConfigTemplates,
         mockInstalledJobIds,
-        'auditbeat-*, winlogbeat-*'
+        ['auditbeat-*', 'winlogbeat-*']
       );
       expect(configTemplatesToInstall.length).toEqual(2);
+    });
+
+    test('returns no configTemplates if index is substring of indexPatterns', () => {
+      const configTemplatesToInstall = getConfigTemplatesToInstall(
+        mockConfigTemplates,
+        mockInstalledJobIds,
+        ['winlogbeat-**']
+      );
+      expect(configTemplatesToInstall.length).toEqual(0);
     });
   });
 

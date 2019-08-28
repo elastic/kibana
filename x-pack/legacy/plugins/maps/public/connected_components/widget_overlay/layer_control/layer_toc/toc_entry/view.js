@@ -183,7 +183,8 @@ export class TOCEntry extends React.Component {
       layer,
       zoom,
       toggleVisible,
-      fitToBounds
+      fitToBounds,
+      isUsingSearch
     } = this.props;
 
     return (
@@ -195,6 +196,7 @@ export class TOCEntry extends React.Component {
       >
         <LayerTocActions
           layer={layer}
+          isUsingSearch={isUsingSearch}
           fitToBounds={() => {
             fitToBounds(layer.getId());
           }}

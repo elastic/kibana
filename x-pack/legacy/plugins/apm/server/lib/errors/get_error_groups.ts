@@ -10,14 +10,13 @@ import {
   ERROR_EXC_HANDLED,
   ERROR_EXC_MESSAGE,
   ERROR_GROUP_ID,
-  ERROR_LOG_MESSAGE,
-  PROCESSOR_EVENT,
-  SERVICE_NAME
+  ERROR_LOG_MESSAGE
 } from '../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../typings/common';
 import { APMError } from '../../../typings/es_schemas/ui/APMError';
-import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
+import { getErrorGroupsProjection } from '../../../common/projections/errors';
+import { mergeProjection } from '../../../common/projections/util/merge_projection';
 
 export type ErrorGroupListAPIResponse = PromiseReturnType<
   typeof getErrorGroups
@@ -30,33 +29,23 @@ export async function getErrorGroups({
   setup
 }: {
   serviceName: string;
-  sortField: string;
-  sortDirection: string;
+  sortField?: string;
+  sortDirection?: string;
   setup: Setup;
 }) {
-  const { start, end, uiFiltersES, client, config } = setup;
+  const { client } = setup;
 
   // sort buckets by last occurrence of error
   const sortByLatestOccurrence = sortField === 'latestOccurrenceAt';
 
-  const params = {
-    index: config.get<string>('apm_oss.errorIndices'),
+  const projection = getErrorGroupsProjection({ setup, serviceName });
+
+  const params = mergeProjection(projection, {
     body: {
       size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [PROCESSOR_EVENT]: 'error' } },
-            { range: rangeFilter(start, end) },
-            ...uiFiltersES
-          ]
-        }
-      },
       aggs: {
         error_groups: {
           terms: {
-            field: ERROR_GROUP_ID,
             size: 500,
             order: sortByLatestOccurrence
               ? {
@@ -92,7 +81,7 @@ export async function getErrorGroups({
         }
       }
     }
-  };
+  });
 
   interface SampleError {
     '@timestamp': APMError['@timestamp'];
@@ -123,8 +112,8 @@ export async function getErrorGroups({
       return {
         message,
         occurrenceCount: bucket.doc_count,
-        culprit: idx(source, _ => _.error.culprit),
-        groupId: idx(source, _ => _.error.grouping_key),
+        culprit: source.error.culprit,
+        groupId: source.error.grouping_key,
         latestOccurrenceAt: source['@timestamp'],
         handled: idx(source, _ => _.error.exception[0].handled)
       };

@@ -10,6 +10,7 @@ import {
   XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING,
   XPACK_INFO_API_DEFAULT_POLL_FREQUENCY_IN_MILLIS
 } from '../../server/lib/constants';
+import { getXpackConfigWithDeprecated } from '../telemetry/common/get_xpack_config_with_deprecated';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { replaceInjectedVars } from './server/lib/replace_injected_vars';
 import { setupXPackMain } from './server/lib/setup_xpack_main';
@@ -75,6 +76,15 @@ export const xpackMain = (kibana) => {
         'plugins/xpack_main/hacks/check_xpack_info_change',
       ],
       replaceInjectedVars,
+      injectDefaultVars(server) {
+        const config = server.config();
+
+        return {
+          telemetryEnabled: getXpackConfigWithDeprecated(config, 'telemetry.enabled'),
+          activeSpace: null,
+          spacesEnabled: config.get('xpack.spaces.enabled'),
+        };
+      },
       __webpackPluginProvider__(webpack) {
         return new webpack.BannerPlugin({
           banner: dedent`

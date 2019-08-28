@@ -17,7 +17,8 @@ export default function manageRepositoriesFunctionalTests({
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
-  describe('Manage Repositories', () => {
+  describe('Manage Repositories', function() {
+    this.tags('smoke');
     const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
 
     describe('Manage Repositories', () => {
@@ -49,10 +50,6 @@ export default function manageRepositoriesFunctionalTests({
           );
         });
 
-        // Wait for the index to start.
-        await retry.try(async () => {
-          expect(await testSubjects.exists('repositoryIndexOngoing')).to.be(true);
-        });
         // Wait for the index to end.
         await retry.try(async () => {
           expect(await testSubjects.exists('repositoryIndexDone')).to.be(true);
@@ -94,10 +91,6 @@ export default function manageRepositoriesFunctionalTests({
           );
         });
 
-        // Wait for the index to start.
-        await retry.try(async () => {
-          expect(await testSubjects.exists('repositoryIndexOngoing')).to.be(true);
-        });
         // Wait for the index to end.
         await retry.try(async () => {
           expect(await testSubjects.exists('repositoryIndexDone')).to.be(true);

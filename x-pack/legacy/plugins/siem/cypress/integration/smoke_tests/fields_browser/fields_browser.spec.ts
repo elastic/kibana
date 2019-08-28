@@ -21,7 +21,7 @@ import {
 } from '../../lib/fields_browser/selectors';
 import { logout } from '../../lib/logout';
 import { HOSTS_PAGE } from '../../lib/urls';
-import { loginAndWaitForPage } from '../../lib/util/helpers';
+import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../../lib/util/helpers';
 
 const defaultHeaders = [
   { id: '@timestamp' },
@@ -200,9 +200,9 @@ describe('Fields Browser', () => {
 
     cy.get(`[data-test-subj="headers-group"]`).then(headersDropArea => drop(headersDropArea));
 
-    clickOutsideFieldsBrowser();
-
-    cy.get(`[data-test-subj="header-text-${toggleField}"]`).should('exist');
+    cy.get(`[data-test-subj="header-text-${toggleField}"]`, { timeout: DEFAULT_TIMEOUT }).should(
+      'exist'
+    );
   });
 
   it('resets all fields in the timeline when `Reset Fields` is clicked', () => {

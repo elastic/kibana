@@ -9,23 +9,10 @@ import { sum as arraySum, min as arrayMin, max as arrayMax, get } from 'lodash';
 import { fromExpression } from '@kbn/interpreter/common';
 import { CANVAS_TYPE } from '../../common/lib/constants';
 import { collectFns } from './collector_helpers';
-import { AST, TelemetryCollector } from '../../types';
-
-interface Element {
-  expression: string;
-}
-
-interface Page {
-  elements: Element[];
-}
-
-interface Workpad {
-  pages: Page[];
-  [s: string]: any; // Only concerned with the pages here, but allow workpads to have any values
-}
+import { ExpressionAST, TelemetryCollector, CanvasWorkpad } from '../../types';
 
 interface WorkpadSearch {
-  [CANVAS_TYPE]: Workpad;
+  [CANVAS_TYPE]: CanvasWorkpad;
 }
 
 interface WorkpadTelemetry {
@@ -61,11 +48,10 @@ interface WorkpadTelemetry {
 
 /**
   Gather statistic about the given workpads
-
   @param workpadDocs a collection of workpad documents
   @returns Workpad Telemetry Data
 */
-export function summarizeWorkpads(workpadDocs: Workpad[]): WorkpadTelemetry {
+export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetry {
   const functionSet = new Set<string>();
 
   if (workpadDocs.length === 0) {
@@ -87,7 +73,7 @@ export function summarizeWorkpads(workpadDocs: Workpad[]): WorkpadTelemetry {
     );
     const functionCounts = workpad.pages.reduce<number[]>((accum, page) => {
       return page.elements.map(element => {
-        const ast: AST = fromExpression(element.expression) as AST; // TODO: Remove once fromExpression is properly typed
+        const ast: ExpressionAST = fromExpression(element.expression) as ExpressionAST; // TODO: Remove once fromExpression is properly typed
         collectFns(ast, cFunction => {
           functionSet.add(cFunction);
         });

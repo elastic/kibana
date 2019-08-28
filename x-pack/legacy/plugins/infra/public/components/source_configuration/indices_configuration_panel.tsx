@@ -46,7 +46,7 @@ export const IndicesConfigurationPanel = ({
       title={
         <FormattedMessage
           id="xpack.infra.sourceConfiguration.metricIndicesTitle"
-          defaultMessage="Metric Indices"
+          defaultMessage="Metric indices"
         />
       }
       description={
@@ -92,7 +92,7 @@ export const IndicesConfigurationPanel = ({
       title={
         <FormattedMessage
           id="xpack.infra.sourceConfiguration.logIndicesTitle"
-          defaultMessage="Log Indices"
+          defaultMessage="Log indices"
         />
       }
       description={

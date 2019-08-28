@@ -59,7 +59,8 @@ export const getTaskStateBadge = (
 
 export const getColumns = (
   expandedRowItemIds: DataFrameAnalyticsId[],
-  setExpandedRowItemIds: React.Dispatch<React.SetStateAction<DataFrameAnalyticsId[]>>
+  setExpandedRowItemIds: React.Dispatch<React.SetStateAction<DataFrameAnalyticsId[]>>,
+  isManagementTable: boolean = false
 ) => {
   const actions = getActions();
 
@@ -75,8 +76,8 @@ export const getColumns = (
     // spread to a new array otherwise the component wouldn't re-render
     setExpandedRowItemIds([...expandedRowItemIds]);
   }
-
-  return [
+  // update possible column types to something like (FieldDataColumn | ComputedColumn | ActionsColumn)[] when they have been added to EUI
+  const columns: any[] = [
     {
       align: RIGHT_ALIGNMENT,
       width: '40px',
@@ -104,6 +105,7 @@ export const getColumns = (
       name: 'ID',
       sortable: true,
       truncateText: true,
+      width: isManagementTable === true ? '20%' : undefined,
     },
     // Description is not supported yet by API
     /*
@@ -123,6 +125,7 @@ export const getColumns = (
       }),
       sortable: true,
       truncateText: true,
+      width: isManagementTable === true ? '25%' : undefined,
     },
     {
       field: DataFrameAnalyticsListColumn.configDestIndex,
@@ -131,6 +134,7 @@ export const getColumns = (
       }),
       sortable: true,
       truncateText: true,
+      width: isManagementTable === true ? '20%' : undefined,
     },
     {
       name: i18n.translate('xpack.ml.dataframe.analyticsList.status', { defaultMessage: 'Status' }),
@@ -205,12 +209,24 @@ export const getColumns = (
       },
       width: '100px',
     },
-    {
+  ];
+
+  if (isManagementTable === true) {
+    columns.push({
+      name: i18n.translate('xpack.ml.jobsList.analyticsSpacesLabel', {
+        defaultMessage: 'Spaces',
+      }),
+      render: () => <EuiBadge color={'hollow'}>{'all'}</EuiBadge>,
+    });
+  } else {
+    columns.push({
       name: i18n.translate('xpack.ml.dataframe.analyticsList.tableActionLabel', {
         defaultMessage: 'Actions',
       }),
       actions,
       width: '200px',
-    },
-  ];
+    });
+  }
+
+  return columns;
 };

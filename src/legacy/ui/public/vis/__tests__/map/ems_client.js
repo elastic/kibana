@@ -20,6 +20,7 @@
 import expect from '@kbn/expect';
 import { getEMSClient } from './ems_client_util';
 import EMS_STYLE_BRIGHT_PROXIED  from './ems_mocks/sample_style_bright_proxied.json';
+import EMS_STYLE_BRIGHT_VECTOR_PROXIED  from './ems_mocks/sample_style_bright_vector_proxied.json';
 
 describe('ems_client', () => {
 
@@ -188,7 +189,6 @@ describe('ems_client', () => {
 
   it('should prepend proxypath', async () => {
 
-
     const emsClient = getEMSClient({
       proxyPath: 'http://proxy.com/foobar',
       manifestServiceUrl: 'http://proxy.com/foobar/manifest'
@@ -208,6 +208,47 @@ describe('ems_client', () => {
     expect(fileLayers.length).to.be(1);
     const fileLayer = fileLayers[0];
     expect(fileLayer.getDefaultFormatUrl()).to.be('http://proxy.com/foobar/files/world_countries.json?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=7.x.x');
+
+  });
+
+  it('should retrieve vectorstylesheet with all sources inlined)', async () => {
+
+    const emsClient = getEMSClient({});
+
+    const tmsServices = await emsClient.getTMSServices();
+    expect(tmsServices.length).to.be(3);
+    const tmsService = tmsServices[0];
+
+    const styleSheet = await tmsService.getVectorStyleSheet();
+
+    expect(styleSheet.layers.length).to.be(111);
+    expect(styleSheet.sprite).to.be('https://tiles.maps.elastic.co/styles/osm-bright/sprite');
+    expect(styleSheet.sources.openmaptiles.tiles.length).to.be(1);
+    expect(styleSheet.sources.openmaptiles.tiles[0]).to.be('https://tiles.maps.elastic.co/data/v3/{z}/{x}/{y}.pbf?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=7.x.x');
+
+  });
+
+  it('should retrieve vectorstylesheet with all sources inlined) (proxy)', async () => {
+
+    const emsClient = getEMSClient({
+      proxyPath: 'http://proxy.com/foobar',
+      manifestServiceUrl: 'http://proxy.com/foobar/manifest'
+    });
+
+    const tmsServices = await emsClient.getTMSServices();
+    expect(tmsServices.length).to.be(1);
+    const tmsService = tmsServices[0];
+
+    tmsService._getVectorStyleJsonRaw = () => {
+      return EMS_STYLE_BRIGHT_VECTOR_PROXIED;
+    };
+
+    const styleSheet = await tmsService.getVectorStyleSheet();
+
+    expect(styleSheet.layers.length).to.be(111);
+    expect(styleSheet.sprite).to.be('http://proxy.com/foobar/styles/osm-bright/sprite');
+    expect(styleSheet.sources.openmaptiles.tiles.length).to.be(1);
+    expect(styleSheet.sources.openmaptiles.tiles[0]).to.be('http://proxy.com/foobar/data/v3/{z}/{x}/{y}.pbf?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=7.x.x');
 
   });
 

@@ -224,6 +224,10 @@ export class LineChart extends PointSeries {
         const circles = self.addCircles(svg, self.chartData);
         self.addCircleEvents(circles);
 
+        if (self.thresholdLineOptions.show) {
+          self.addThresholdLine(self.chartEl);
+        }
+
         self.events.emit('rendered', {
           chart: self.chartData
         });
