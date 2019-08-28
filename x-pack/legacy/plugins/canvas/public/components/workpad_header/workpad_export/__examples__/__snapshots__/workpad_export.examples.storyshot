@@ -1,89 +1,85 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Storyshots components/Export/WorkpadExport disabled 1`] = `
-<div>
+<div
+  className="euiPopover euiPopover--anchorDownCenter"
+  container={null}
+  onKeyDown={[Function]}
+  onMouseDown={[Function]}
+  onMouseUp={[Function]}
+  onTouchEnd={[Function]}
+  onTouchStart={[Function]}
+>
   <div
-    className="euiPopover euiPopover--anchorDownCenter"
-    container={null}
-    onKeyDown={[Function]}
-    onMouseDown={[Function]}
-    onMouseUp={[Function]}
-    onTouchEnd={[Function]}
-    onTouchStart={[Function]}
+    className="euiPopover__anchor"
   >
-    <div
-      className="euiPopover__anchor"
+    <span
+      className="euiToolTipAnchor"
+      onMouseOut={[Function]}
+      onMouseOver={[Function]}
     >
-      <span
-        className="euiToolTipAnchor"
-        onMouseOut={[Function]}
-        onMouseOver={[Function]}
+      <button
+        aria-label="Share this workpad"
+        className="euiButtonIcon euiButtonIcon--primary"
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        type="button"
       >
-        <button
-          aria-label="Share this workpad"
-          className="euiButtonIcon euiButtonIcon--primary"
-          onBlur={[Function]}
-          onClick={[Function]}
-          onFocus={[Function]}
-          type="button"
-        >
-          <svg
-            aria-hidden="true"
-            className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-            focusable="false"
-            height={16}
-            style={null}
-            viewBox="0 0 16 16"
-            width={16}
-            xmlns="http://www.w3.org/2000/svg"
-          />
-        </button>
-      </span>
-    </div>
+        <svg
+          aria-hidden="true"
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+          focusable="false"
+          height={16}
+          style={null}
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        />
+      </button>
+    </span>
   </div>
 </div>
 `;
 
 exports[`Storyshots components/Export/WorkpadExport enabled 1`] = `
-<div>
+<div
+  className="euiPopover euiPopover--anchorDownCenter"
+  container={null}
+  onKeyDown={[Function]}
+  onMouseDown={[Function]}
+  onMouseUp={[Function]}
+  onTouchEnd={[Function]}
+  onTouchStart={[Function]}
+>
   <div
-    className="euiPopover euiPopover--anchorDownCenter"
-    container={null}
-    onKeyDown={[Function]}
-    onMouseDown={[Function]}
-    onMouseUp={[Function]}
-    onTouchEnd={[Function]}
-    onTouchStart={[Function]}
+    className="euiPopover__anchor"
   >
-    <div
-      className="euiPopover__anchor"
+    <span
+      className="euiToolTipAnchor"
+      onMouseOut={[Function]}
+      onMouseOver={[Function]}
     >
-      <span
-        className="euiToolTipAnchor"
-        onMouseOut={[Function]}
-        onMouseOver={[Function]}
+      <button
+        aria-label="Share this workpad"
+        className="euiButtonIcon euiButtonIcon--primary"
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        type="button"
       >
-        <button
-          aria-label="Share this workpad"
-          className="euiButtonIcon euiButtonIcon--primary"
-          onBlur={[Function]}
-          onClick={[Function]}
-          onFocus={[Function]}
-          type="button"
-        >
-          <svg
-            aria-hidden="true"
-            className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-            focusable="false"
-            height={16}
-            style={null}
-            viewBox="0 0 16 16"
-            width={16}
-            xmlns="http://www.w3.org/2000/svg"
-          />
-        </button>
-      </span>
-    </div>
+        <svg
+          aria-hidden="true"
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+          focusable="false"
+          height={16}
+          style={null}
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        />
+      </button>
+    </span>
   </div>
 </div>
 `;
