@@ -26,7 +26,6 @@ export interface TimelineState {
 }
 
 export interface ActionTimeline extends Action<string> {
-  type: string;
   payload: {
     id: string;
     eventId: string;
