@@ -17,14 +17,10 @@
  * under the License.
  */
 
-import {
-  FeatureCatalogueRegistryProvider,
-  FeatureCatalogueCategory,
-} from 'ui/registry/feature_catalogue';
-
+import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { i18n } from '@kbn/i18n';
 
-FeatureCatalogueRegistryProvider.register(() => {
+export const registerFeature = () => {
   return {
     id: 'timelion',
     title: 'Timelion',
@@ -37,4 +33,4 @@ FeatureCatalogueRegistryProvider.register(() => {
     showOnHomePage: false,
     category: FeatureCatalogueCategory.DATA,
   };
-});
+};

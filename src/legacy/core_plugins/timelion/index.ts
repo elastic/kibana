@@ -32,7 +32,6 @@ const experimentalLabel = i18n.translate('timelion.uiSettings.experimentalLabel'
 const timelionPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
   new Plugin({
     require: ['kibana', 'elasticsearch'],
-
     config(Joi: any) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
@@ -44,7 +43,6 @@ const timelionPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPl
           .default([]),
       }).default();
     },
-
     uiCapabilities() {
       return {
         timelion: {
@@ -52,7 +50,7 @@ const timelionPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPl
         },
       };
     },
-
+    publicDir: resolve(__dirname, 'public'),
     uiExports: {
       app: {
         title: 'Timelion',
@@ -62,11 +60,7 @@ const timelionPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPl
         main: 'plugins/timelion/app',
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      hacks: [
-        'plugins/timelion/hacks/toggle_app_link_in_nav',
-        'plugins/timelion/lib/panel_registry',
-        'plugins/timelion/panels/timechart/timechart',
-      ],
+      hacks: [resolve(__dirname, 'public/legacy')],
       injectDefaultVars(server) {
         const config = server.config();
 
@@ -75,9 +69,6 @@ const timelionPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPl
           kbnIndex: config.get('kibana.index'),
         };
       },
-      visTypes: ['plugins/timelion/vis'],
-      interpreter: ['plugins/timelion/timelion_vis_fn'],
-      home: ['plugins/timelion/register_feature'],
       mappings: require('./mappings.json'),
       uiSettingDefaults: {
         'timelion:showTutorial': {

@@ -19,21 +19,15 @@
 
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { TimelionRequestHandlerProvider } from './timelion_request_handler';
 import { DefaultEditorSize } from 'ui/vis/editor_size';
-
 // we also need to load the controller and directive used by the template
 import './timelion_vis_controller';
 import '../directives/timelion_expression_input';
-
 import visConfigTemplate from './timelion_vis.html';
 import editorConfigTemplate from './timelion_vis_params.html';
 
-// register the provider with the visTypes registry so that other know it exists
-VisTypesRegistryProvider.register(TimelionVisProvider);
-
-export default function TimelionVisProvider(Private) {
+export function TimelionVisProvider(Private) {
   const VisFactory = Private(VisFactoryProvider);
   const timelionRequestHandler = Private(TimelionRequestHandlerProvider);
 

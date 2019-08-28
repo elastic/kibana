@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { npStart } from 'ui/new_platform';
+import { PluginInitializerContext } from 'kibana/public';
+import { TimelionPlugin as Plugin } from './plugin';
 
-const timelionUiEnabled = npStart.core.injectedMetadata.getInjectedVar('timelionUiEnabled');
-if (timelionUiEnabled === false) {
-  npStart.core.chrome.navLinks.update('timelion', { hidden: true });
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new Plugin(initializerContext);
 }

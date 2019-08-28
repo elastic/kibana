@@ -17,12 +17,9 @@
  * under the License.
  */
 
-import { functionsRegistry } from 'plugins/interpreter/registries';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { TimelionRequestHandlerProvider } from './vis/timelion_request_handler';
-
-
 import chrome from 'ui/chrome';
 
 export const timelionVis = () => ({
@@ -76,5 +73,3 @@ export const timelionVis = () => ({
     };
   },
 });
-
-functionsRegistry.register(timelionVis);
