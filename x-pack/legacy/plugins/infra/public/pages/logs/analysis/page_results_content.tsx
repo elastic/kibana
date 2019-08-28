@@ -94,6 +94,9 @@ export const AnalysisResultsContent = ({
     endTime: timeRange.endTime,
     bucketDuration,
   });
+  const hasResults = useMemo(() => logEntryRate && logEntryRate.histogramBuckets.length > 0, [
+    logEntryRate,
+  ]);
   const handleTimeRangeChange = useCallback(
     ({ start, end }: { start: string; end: string }) => {
       const parsedStart = dateMath.parse(start);
@@ -187,7 +190,7 @@ export const AnalysisResultsContent = ({
             <EuiPageBody>
               <EuiPageContent>
                 <EuiPageContentBody>
-                  {isFirstUse ? <FirstUseCallout /> : null}
+                  {isFirstUse && !hasResults ? <FirstUseCallout /> : null}
                   <LogRateResults
                     isLoading={isLoading}
                     results={logEntryRate}
