@@ -22,7 +22,6 @@ import { cloneDeep, capitalize, uniq, get } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 
 import { AggConfig } from 'ui/vis';
-import { safeMakeLabel } from 'ui/agg_types/agg_utils';
 import { BasicVislibParams, ValueAxis, SeriesParam, Axis } from '../types';
 import { ValidationVisOptionsProps } from '../controls/validation_wrapper';
 import { SeriesPanel } from '../controls/point_series/series_panel';
@@ -38,11 +37,17 @@ export type SetParamByIndex = <P extends keyof ValueAxis, O extends keyof Series
   value: ValueAxis[P] | SeriesParam[O]
 ) => void;
 
+export type ChangeValueAxis = (
+  index: number,
+  paramName: 'valueAxis',
+  selectedValueAxis: string
+) => void;
+
 const VALUE_AXIS_PREFIX = 'ValueAxis-';
 const AXIS_PREFIX = 'Axis-';
 
 function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>) {
-  const { stateParams, setValue, aggs, setVisType, vis } = props;
+  const { stateParams, setValue, aggs, aggsLabels, setVisType, vis } = props;
 
   const [isCategoryAxisHorizontal, setIsCategoryAxisHorizontal] = useState(true);
   const [axesNumbers, setAxesNumbers] = useState({} as { [key: string]: number });
@@ -69,7 +74,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
     [key: string]: { type: string; field: string };
   });
 
-  const updateAxisTitle = useCallback(() => {
+  const updateAxisTitle = () => {
     const axes = cloneDeep(stateParams.valueAxes);
     let isAxesChanged = false;
     const lastLabels = { ...lastCustomLabels };
@@ -125,7 +130,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
 
     setLastSeriesAgg(lastMatchingSeriesAgg);
     setLastCustomLabels(lastLabels);
-  }, [stateParams.valueAxes, stateParams.seriesParams, setValue]);
+  };
 
   const getUpdatedAxisName = useCallback(
     (axisPosition: ValueAxis['position']) => {
@@ -155,9 +160,10 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
         name: getUpdatedAxisName(value),
         position: value,
       };
+
       setValue('valueAxes', valueAxes);
     },
-    [stateParams.valueAxes, getUpdatedAxisName]
+    [stateParams.valueAxes, getUpdatedAxisName, setValue]
   );
 
   const onCategoryAxisPositionChanged = useCallback(
@@ -197,13 +203,15 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
       ...axesNumbers,
       [VALUE_AXIS_PREFIX]: nextAxisIdNumber,
     });
+
     setValue('valueAxes', [...stateParams.valueAxes, newAxis]);
     return newAxis;
-  }, [stateParams.valueAxes, axesNumbers]);
+  }, [stateParams.valueAxes, axesNumbers, setValue]);
 
   const removeValueAxis = useCallback(
     (axis: ValueAxis) => {
       const newValueAxes = stateParams.valueAxes.filter(valAxis => valAxis.id !== axis.id);
+
       setValue('valueAxes', newValueAxes);
 
       const lastNumber = axesNumbers[VALUE_AXIS_PREFIX];
@@ -230,19 +238,29 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
     [stateParams.seriesParams, stateParams.valueAxes, setParamByIndex, setValue]
   );
 
-  const aggsLabel = aggs
-    .map(agg => {
-      return safeMakeLabel(agg);
-    })
-    .join();
+  const changeValueAxis: ChangeValueAxis = useCallback(
+    (index, paramName, selectedValueAxis) => {
+      let newValueAxis = selectedValueAxis;
+      if (selectedValueAxis === 'new') {
+        const axis = addValueAxis();
+        newValueAxis = axis.id;
+      }
+
+      setParamByIndex('seriesParams', index, paramName, newValueAxis);
+
+      updateAxisTitle();
+    },
+    [addValueAxis, setParamByIndex]
+  );
 
   const metrics = useMemo(() => {
     const schemaName = vis.type.schemas.metrics[0].name;
     return aggs.bySchemaName[schemaName];
-  }, [vis.type.schemas.metrics[0].name, aggs, aggsLabel]);
+  }, [vis.type.schemas.metrics[0].name, aggs, aggsLabels]);
+
+  const firstValueAxesId = stateParams.valueAxes[0].id;
 
   useEffect(() => {
-    // update labels for existing params or create new one
     const updatedSeries = metrics.map(agg => {
       const params = stateParams.seriesParams.find(param => param.data.id === agg.id);
       const label = agg.makeLabel();
@@ -259,15 +277,15 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
         const series = makeSerie(
           agg.id,
           label,
-          stateParams.seriesParams,
-          stateParams.valueAxes[0].id
+          stateParams.seriesParams[stateParams.seriesParams.length - 1],
+          firstValueAxesId
         );
         return series;
       }
     });
 
     setValue('seriesParams', updatedSeries);
-  }, [aggsLabel, metrics, stateParams.valueAxes]);
+  }, [aggsLabels, metrics, firstValueAxesId]);
 
   const visType = useMemo(() => {
     const types = uniq(stateParams.seriesParams.map(({ type }) => type));
@@ -276,20 +294,15 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
 
   useEffect(() => {
     setVisType(visType);
-  }, [visType, setVisType]);
+  }, [visType]);
 
   useEffect(() => {
     updateAxisTitle();
-  }, [aggsLabel]);
+  }, [aggsLabels]);
 
   return (
     <>
-      <SeriesPanel
-        addValueAxis={addValueAxis}
-        updateAxisTitle={updateAxisTitle}
-        setParamByIndex={setParamByIndex}
-        {...props}
-      />
+      <SeriesPanel setParamByIndex={setParamByIndex} changeValueAxis={changeValueAxis} {...props} />
       <EuiSpacer size="s" />
       <ValueAxesPanel
         addValueAxis={addValueAxis}

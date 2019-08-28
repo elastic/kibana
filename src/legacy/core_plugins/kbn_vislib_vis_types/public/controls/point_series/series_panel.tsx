@@ -17,39 +17,23 @@
  * under the License.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { EuiPanel, EuiTitle, EuiSpacer, EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
-import { BasicVislibParams, ValueAxis } from '../../types';
+import { BasicVislibParams } from '../../types';
 import { ChartOptions } from './components/chart_options';
-import { SetParamByIndex } from '../../editors/metrics_axes_options';
+import { SetParamByIndex, ChangeValueAxis } from '../../editors/metrics_axes_options';
 
 interface SeriesPanelProps extends VisOptionsProps<BasicVislibParams> {
-  addValueAxis: () => ValueAxis;
-  updateAxisTitle: () => void;
+  changeValueAxis: ChangeValueAxis;
   setParamByIndex: SetParamByIndex;
 }
 
 function SeriesPanel(props: SeriesPanelProps) {
-  const { stateParams, setParamByIndex, addValueAxis, updateAxisTitle } = props;
-
-  const changeValueAxis = useCallback(
-    (index: number, paramName: 'valueAxis', selectedValueAxis: string) => {
-      let newValueAxis = selectedValueAxis;
-      if (selectedValueAxis === 'new') {
-        const axis = addValueAxis();
-        newValueAxis = axis.id;
-      }
-
-      setParamByIndex('seriesParams', index, paramName, newValueAxis);
-
-      updateAxisTitle();
-    },
-    [addValueAxis, setParamByIndex, updateAxisTitle]
-  );
+  const { stateParams } = props;
 
   return (
     <EuiPanel paddingSize="s">
@@ -82,13 +66,7 @@ function SeriesPanel(props: SeriesPanelProps) {
           <>
             <EuiSpacer size="m" />
 
-            <ChartOptions
-              index={index}
-              chart={chart}
-              changeValueAxis={changeValueAxis}
-              setParamByIndex={setParamByIndex}
-              {...props}
-            />
+            <ChartOptions index={index} chart={chart} {...props} />
           </>
         </EuiAccordion>
       ))}

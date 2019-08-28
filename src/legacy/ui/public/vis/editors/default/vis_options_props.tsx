@@ -23,6 +23,7 @@ import { Vis } from './../..';
 
 export interface VisOptionsProps<VisParamType = unknown> {
   aggs: AggConfigs;
+  aggsLabels: string;
   hasHistogramAgg: boolean;
   stateParams: VisParamType;
   vis: Vis;

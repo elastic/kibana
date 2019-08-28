@@ -49,7 +49,7 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
 
   const getSeries = useCallback(
     (axis: ValueAxis) => {
-      const isFirst = stateParams.valueAxes[0] === axis;
+      const isFirst = stateParams.valueAxes[0].id === axis.id;
       const series = stateParams.seriesParams.filter(
         serie => serie.valueAxis === axis.id || (isFirst && !serie.valueAxis)
       );
@@ -132,7 +132,7 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
 
       {stateParams.valueAxes.map((axis, index) => (
         <EuiAccordion
-          id="yAxisOptionsAccordion"
+          id={`yAxisOptionsAccordion${axis.id}`}
           key={axis.id}
           data-test-subj={`toggleYAxisOptions-${axis.id}`}
           className="visEditorSidebar__section visEditorSidebar__collapsible"

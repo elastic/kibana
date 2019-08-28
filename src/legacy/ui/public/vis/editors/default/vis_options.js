@@ -20,6 +20,7 @@
 import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from '../../../modules';
 import { VisOptionsReactWrapper } from './vis_options_react_wrapper';
+import { safeMakeLabel } from 'ui/agg_types/agg_utils';
 
 /**
  * This directive sort of "transcludes" in whatever template you pass in via the `editor` attribute.
@@ -41,6 +42,7 @@ uiModules
     ['setTouched', { watchDepth: 'reference' }],
     'hasHistogramAgg',
     'currentTab',
+    'aggsLabels',
   ]))
   .directive('visEditorVisOptions', function ($compile) {
     return {
@@ -76,11 +78,23 @@ uiModules
           $scope.vis.type.type = type;
         };
 
+        // since aggs reference isn't changed when an agg is updated, we need somehow to let React component know about it
+        $scope.aggsLabels = '';
+
+        $scope.$watch(() => {
+          return $scope.editorState.aggs.map(agg => {
+            return safeMakeLabel(agg);
+          }).join();
+        }, value => {
+          $scope.aggsLabels = value;
+        });
+
         const comp = typeof $scope.editor === 'string' ?
           $scope.editor :
           `<vis-options-react-wrapper
             component="editor"
             aggs="editorState.aggs"
+            aggs-labels="aggsLabels"
             has-histogram-agg="hasHistogramAgg"
             current-tab="$parent.$parent.sidebar.section"
             state-params="editorState.params"

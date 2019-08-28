@@ -53,7 +53,6 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
     stateParams,
     vis,
     onValueAxisPositionChanged,
-    setValue,
     setParamByIndex,
   } = props;
 
@@ -65,34 +64,26 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
 
   const setValueAxisTitle = useCallback(
     <T extends keyof ValueAxis['title']>(paramName: T, value: ValueAxis['title'][T]) => {
-      const valueAxes = [...stateParams.valueAxes];
-
-      valueAxes[index] = {
-        ...valueAxes[index],
-        title: {
-          ...valueAxes[index].title,
-          [paramName]: value,
-        },
+      const title = {
+        ...stateParams.valueAxes[index].title,
+        [paramName]: value,
       };
-      setValue('valueAxes', valueAxes);
+
+      setParamByIndex('valueAxes', index, 'title', title);
     },
-    [setValue, index, stateParams.valueAxes]
+    [setParamByIndex, index, stateParams.valueAxes]
   );
 
   const setValueAxisScale: SetScale = useCallback(
     (paramName, value) => {
-      const valueAxes = [...stateParams.valueAxes];
-
-      valueAxes[index] = {
-        ...valueAxes[index],
-        scale: {
-          ...valueAxes[index].scale,
-          [paramName]: value,
-        },
+      const scale = {
+        ...stateParams.valueAxes[index].scale,
+        [paramName]: value,
       };
-      setValue('valueAxes', valueAxes);
+
+      setParamByIndex('valueAxes', index, 'scale', scale);
     },
-    [setValue, index, stateParams.valueAxes]
+    [setParamByIndex, index, stateParams.valueAxes]
   );
 
   const onPositionChanged = useCallback(

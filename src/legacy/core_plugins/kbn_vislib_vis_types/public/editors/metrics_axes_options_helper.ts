@@ -24,23 +24,22 @@ import { Positions } from '../utils/collections';
 const makeSerie = (
   id: string,
   label: string,
-  seriesParams: SeriesParam[],
+  lastSerie: SeriesParam,
   defaultValueAxis: ValueAxis['id']
 ): SeriesParam => {
-  const last = seriesParams[seriesParams.length - 1];
   return {
     show: true,
-    mode: last ? last.mode : ChartModes.NORMAL,
-    type: last ? last.type : ChartTypes.LINE,
-    drawLinesBetweenPoints: last ? last.drawLinesBetweenPoints : true,
-    showCircles: last ? last.showCircles : true,
-    interpolate: last ? last.interpolate : InterpolationModes.LINEAR,
-    lineWidth: last ? last.lineWidth : 2,
+    mode: lastSerie ? lastSerie.mode : ChartModes.NORMAL,
+    type: lastSerie ? lastSerie.type : ChartTypes.LINE,
+    drawLinesBetweenPoints: lastSerie ? lastSerie.drawLinesBetweenPoints : true,
+    showCircles: lastSerie ? lastSerie.showCircles : true,
+    interpolate: lastSerie ? lastSerie.interpolate : InterpolationModes.LINEAR,
+    lineWidth: lastSerie ? lastSerie.lineWidth : 2,
     data: {
       id,
       label,
     },
-    valueAxis: last ? last.valueAxis : defaultValueAxis,
+    valueAxis: lastSerie ? lastSerie.valueAxis : defaultValueAxis,
   };
 };
 

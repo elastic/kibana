@@ -48,7 +48,7 @@ function ValidationWrapper({ component: Component, ...rest }: ValidationWrapperP
 
   useEffect(() => {
     setValidity(isPanelValid);
-  }, [isPanelValid, setValidity]);
+  }, [isPanelValid]);
 
   return <Component {...rest} setMultipleValidity={setValidityHandler} />;
 }
