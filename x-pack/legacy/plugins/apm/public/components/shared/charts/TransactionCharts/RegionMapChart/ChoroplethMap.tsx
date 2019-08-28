@@ -80,7 +80,6 @@ export const ChoroplethMap: React.SFC<Props> = props => {
   const initialMapboxOptionsRef = useRef(initialMapboxOptions);
 
   // converts input data to a scaled value between 0 and 1
-
   const getValueScale = useCallback(
     (value: number) => {
       const [min, max] = getDataRange(data);

@@ -23,7 +23,7 @@ const RegionMapChartToolTip: React.SFC<{
       <div style={{ fontSize: 'larger' }}>{geojsonProperties.name}</div>
       <div>
         {i18n.translate(
-          'xpack.apm.metrics.pageLoadCharts.avgPageLoadByCountryLabel',
+          'xpack.apm.metrics.pageLoadCharts.RegionMapChart.ToolTip.avgPageLoadDuration',
           {
             defaultMessage: 'Avg. page load duration:'
           }
@@ -34,10 +34,13 @@ const RegionMapChartToolTip: React.SFC<{
       </div>
       <div>
         (
-        {i18n.translate('xpack.apm.servicesTable.environmentCount', {
-          values: { docCount: data && data.doc_count },
-          defaultMessage: '{docCount} page loads'
-        })}
+        {i18n.translate(
+          'xpack.apm.metrics.pageLoadCharts.RegionMapChart.ToolTip.countPageLoads',
+          {
+            values: { docCount: data && data.doc_count },
+            defaultMessage: '{docCount} page loads'
+          }
+        )}
         )
       </div>
     </div>
