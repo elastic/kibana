@@ -34,6 +34,8 @@ import init from '../../../../../../quarantined/src/app';
 import { autoIndent, getDocumentation } from './console_menu_actions';
 import { Panel, PanelContainer } from '../../../components/split_panel';
 
+import { useUIAceKeyboardMode } from './use_ui_ace_keyboard_mode';
+
 const PANEL_MIN_WIDTH = '100px';
 
 const abs: CSSProperties = {
@@ -64,6 +66,7 @@ export function ConsoleEditor({
   const [, setLastRequestTimestamp] = useState<number>(null as any);
   const [editor, setEditor] = useState<any>(null as any);
   const [, setOutput] = useState<any>(null as any);
+  const [maybeTextArea, setTextArea] = useState<HTMLTextAreaElement | null>(null);
 
   const sendCurrentRequest = () => {
     editor.focus();
@@ -90,9 +93,12 @@ export function ConsoleEditor({
       getDocumentation(inputEditor, docLinkVersion);
     });
 
+    setTextArea(editorRef.current!.querySelector('textarea'));
     setOutput(outputEditor);
     setEditor(inputEditor);
   }, []);
+
+  useUIAceKeyboardMode(maybeTextArea);
 
   return (
     <PanelContainer onPanelWidthChange={onPanelWidthChange}>
