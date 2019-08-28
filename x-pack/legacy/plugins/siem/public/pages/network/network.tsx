@@ -60,10 +60,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     const [flexDirectionMq, setDisplay] = useState(getFlexDirectionByMediaMatch());
 
     useEffect(() => {
-      // initiate the event handler
       window.addEventListener('resize', handler);
-
-      // this will clean up the 'resize' event every time the component is re-rendered
       return function cleanup() {
         window.removeEventListener('resize', handler);
       };
