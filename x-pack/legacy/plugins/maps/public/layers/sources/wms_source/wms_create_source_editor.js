@@ -271,7 +271,6 @@ export class WMSCreateSourceEditor extends Component {
           ]}
         >
           <EuiFieldText
-            placeholder={'© OpenStreetMap contributors'}
             onChange={({ target }) =>
               this._handleWMSAttributionChange({ attributionText: target.value })
             }
@@ -288,7 +287,6 @@ export class WMSCreateSourceEditor extends Component {
           ]}
         >
           <EuiFieldText
-            placeholder={'https://www.openstreetmap.org/copyright'}
             onChange={({ target }) =>
               this._handleWMSAttributionChange({ attributionUrl: target.value })
             }
