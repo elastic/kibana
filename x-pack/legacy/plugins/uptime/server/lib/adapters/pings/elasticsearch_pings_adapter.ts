@@ -190,6 +190,7 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
    * @param dateRangeStart timestamp bounds
    * @param dateRangeEnd timestamp bounds
    * @param filters user-defined filters
+   * @param statusFilter special filter targeting the latest status of each monitor
    */
   public async getPingHistogram(
     request: any,
