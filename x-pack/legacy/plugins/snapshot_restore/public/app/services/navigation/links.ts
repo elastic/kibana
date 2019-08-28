@@ -6,6 +6,10 @@
 
 import { BASE_PATH } from '../../constants';
 
+export function linkToHome() {
+  return `#${BASE_PATH}`;
+}
+
 export function linkToRepositories() {
   return `#${BASE_PATH}/repositories`;
 }
@@ -18,8 +22,10 @@ export function linkToEditRepository(repositoryName: string) {
   return `#${BASE_PATH}/edit_repository/${encodeURIComponent(repositoryName)}`;
 }
 
-export function linkToAddRepository() {
-  return `#${BASE_PATH}/add_repository`;
+export function linkToAddRepository(redirect?: string) {
+  return `#${BASE_PATH}/add_repository${
+    redirect ? `?redirect=${encodeURIComponent(redirect)}` : ''
+  }`;
 }
 
 export function linkToSnapshots(repositoryName?: string, policyName?: string) {
@@ -44,6 +50,22 @@ export function linkToRestoreSnapshot(repositoryName: string, snapshotName: stri
   )}`;
 }
 
+export function linkToPolicies() {
+  return `#${BASE_PATH}/policies`;
+}
+
 export function linkToPolicy(policyName: string) {
   return `#${BASE_PATH}/policies/${encodeURIComponent(policyName)}`;
+}
+
+export function linkToEditPolicy(policyName: string) {
+  return `#${BASE_PATH}/edit_policy/${encodeURIComponent(policyName)}`;
+}
+
+export function linkToAddPolicy() {
+  return `#${BASE_PATH}/add_policy`;
+}
+
+export function linkToRestoreStatus() {
+  return `#${BASE_PATH}/restore_status`;
 }

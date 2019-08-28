@@ -56,6 +56,8 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
         label: index,
         checked:
           isAllIndices ||
+          // If indices is a string, we default to custom input mode, so we mark individual indices
+          // as selected if user goes back to list mode
           typeof restoreIndices === 'string' ||
           (Array.isArray(restoreIndices) && restoreIndices.includes(index))
             ? 'on'
@@ -97,7 +99,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             <h3>
               <FormattedMessage
                 id="xpack.snapshotRestore.restoreForm.stepLogisticsTitle"
-                defaultMessage="Logistics"
+                defaultMessage="Restore details"
               />
             </h3>
           </EuiTitle>
@@ -113,7 +115,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
           >
             <FormattedMessage
               id="xpack.snapshotRestore.restoreForm.stepLogistics.docsButtonLabel"
-              defaultMessage="Logistics docs"
+              defaultMessage="Snapshot and Restore docs"
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -234,6 +236,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                             restoreIndices && restoreIndices.length > 0 ? (
                               <EuiLink
                                 onClick={() => {
+                                  // TODO: Change this to setIndicesOptions() when https://github.com/elastic/eui/issues/2071 is fixed
                                   indicesOptions.forEach((option: Option) => {
                                     option.checked = undefined;
                                   });
@@ -252,6 +255,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                             ) : (
                               <EuiLink
                                 onClick={() => {
+                                  // TODO: Change this to setIndicesOptions() when https://github.com/elastic/eui/issues/2071 is fixed
                                   indicesOptions.forEach((option: Option) => {
                                     option.checked = 'on';
                                   });

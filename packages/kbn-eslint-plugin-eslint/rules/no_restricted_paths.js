@@ -77,6 +77,7 @@ module.exports = {
                   anyOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }],
                 },
                 allowSameFolder: { type: 'boolean' },
+                errorMessage: { type: 'string' },
               },
               additionalProperties: false,
             },
