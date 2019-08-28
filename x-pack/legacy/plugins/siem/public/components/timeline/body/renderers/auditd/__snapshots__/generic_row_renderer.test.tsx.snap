@@ -6,9 +6,7 @@ exports[`GenericRowRenderer #createGenericAuditRowRenderer renders correctly aga
     <span>
       some children
     </span>
-    <RowRendererContainer
-      width={100}
-    >
+    <RowRendererContainer>
       <AuditdGenericDetails
         browserFields={Object {}}
         contextId="connected-to"
@@ -132,9 +130,7 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
     <span>
       some children
     </span>
-    <RowRendererContainer
-      width={100}
-    >
+    <RowRendererContainer>
       <AuditdGenericFileDetails
         browserFields={Object {}}
         contextId="opened-file"

@@ -30,6 +30,8 @@ interface AnalysisSetupContentProps {
   setupMlModule: (startTime?: number | undefined, endTime?: number | undefined) => Promise<any>;
   isSettingUp: boolean;
   didSetupFail: boolean;
+  isCleaningUpAFailedSetup: boolean;
+  indexPattern: string;
 }
 
 const errorTitle = i18n.translate('xpack.infra.analysisSetup.errorTitle', {
@@ -40,12 +42,13 @@ export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentP
   setupMlModule,
   isSettingUp,
   didSetupFail,
+  isCleaningUpAFailedSetup,
+  indexPattern,
 }) => {
   useTrackPageview({ app: 'infra_logs', path: 'analysis_setup' });
   useTrackPageview({ app: 'infra_logs', path: 'analysis_setup', delay: 15000 });
 
   const [showTimeRangeForm, setShowTimeRangeForm] = useState(false);
-
   return (
     <AnalysisSetupPage>
       <EuiPageBody>
@@ -97,18 +100,27 @@ export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentP
                   </EuiButtonEmpty>
                 </ByDefaultText>
                 <EuiSpacer size="l" />
-                <CreateMLJobsButton isLoading={isSettingUp} onClick={() => setupMlModule()} />
+                <CreateMLJobsButton
+                  isLoading={isSettingUp || isCleaningUpAFailedSetup}
+                  onClick={() => setupMlModule()}
+                />
               </>
             )}
             {didSetupFail && (
-              <EuiCallOut color="danger" iconType="alert" title={errorTitle}>
-                <EuiText>
-                  <FormattedMessage
-                    id="xpack.infra.analysisSetup.errorText"
-                    defaultMessage="Please try again"
-                  />
-                </EuiText>
-              </EuiCallOut>
+              <>
+                <EuiSpacer />
+                <EuiCallOut color="danger" iconType="alert" title={errorTitle}>
+                  <EuiText>
+                    <FormattedMessage
+                      id="xpack.infra.analysisSetup.errorText"
+                      defaultMessage="Please ensure your configured logs indices ({indexPattern}) exist. If your indices do exist, please try again."
+                      values={{
+                        indexPattern,
+                      }}
+                    />
+                  </EuiText>
+                </EuiCallOut>
+              </>
             )}
           </EuiPageContentBody>
         </AnalysisPageContent>
