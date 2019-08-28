@@ -11,11 +11,13 @@ query Snapshot(
   $dateRangeStart: String!
   $dateRangeEnd: String!
   $filters: String
+  $statusFilter: String
 ) {
   snapshot: getSnapshot(
     dateRangeStart: $dateRangeStart
     dateRangeEnd: $dateRangeEnd
     filters: $filters
+    statusFilter: $statusFilter
   ) {
     counts {
       down
