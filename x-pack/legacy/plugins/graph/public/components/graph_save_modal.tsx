@@ -58,6 +58,10 @@ export function GraphSaveModal({
             <EuiTextArea
               data-test-subj="dashboardDescription"
               value={newDescription}
+              placeholder={i18n.translate(
+                'xpack.graph.topNavMenu.save.descriptionInputPlaceholder',
+                { defaultMessage: 'Any notes..' }
+              )}
               onChange={e => {
                 setDescription(e.target.value);
               }}
