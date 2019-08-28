@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import '../services/telemetry_opt_in.test.mocks';
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { TelemetryForm } from './telemetry_form';
