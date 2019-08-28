@@ -19,6 +19,7 @@
 
 import Joi from 'joi';
 import { abortableRequestHandler } from './abortable_request_handler';
+import { handleESError } from './handle_es_error';
 
 export function createProxy(server) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
@@ -52,14 +53,18 @@ export function createProxy(server) {
         })
       }
     },
-    handler: abortableRequestHandler((signal, req, h) => {
+    handler: abortableRequestHandler(async (signal, req) => {
       const { query, payload: body } = req;
-      return callWithRequest(req, 'transport.request', {
-        path: `/${encodeURIComponent(req.params.index)}/_search`,
-        method: 'POST',
-        query,
-        body
-      }, { signal }).finally(r => h.response(r));
+      try {
+        return await callWithRequest(req, 'transport.request', {
+          path: `/${encodeURIComponent(req.params.index)}/_search`,
+          method: 'POST',
+          query,
+          body
+        }, { signal });
+      } catch (error) {
+        throw handleESError(error);
+      }
     })
   });
 }

@@ -141,12 +141,8 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
                 </EuiButton>
               </EuiFlexItem>
             )}
+            {progress === 100 && <PostSaveOptions jobRunner={jobRunner} />}
           </EuiFlexGroup>
-          {progress === 100 && (
-            <Fragment>
-              <PostSaveOptions jobRunner={jobRunner} />
-            </Fragment>
-          )}
           {showJsonFlyout && (
             <JsonFlyout closeFlyout={() => setShowJsonFlyout(false)} jobCreator={jobCreator} />
           )}

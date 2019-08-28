@@ -34,6 +34,5 @@ case $1 in
   ;;
 esac
 
-chown -R <%= user %>:<%= group %> <%= optimizeDir %>
-chown <%= user %>:<%= group %> <%= dataDir %>
+chown -R <%= user %>:<%= group %> <%= dataDir %>
 chown <%= user %>:<%= group %> <%= pluginsDir %>

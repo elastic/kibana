@@ -5,7 +5,6 @@ bower_components
 /target
 /.es
 /plugins
-/optimize
 /built_assets
 /html_docs
 /src/fixtures/vislib/mock_data
