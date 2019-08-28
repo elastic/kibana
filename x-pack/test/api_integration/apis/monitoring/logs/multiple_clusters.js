@@ -27,7 +27,7 @@ export default function ({ getService }) {
       return esArchiver.unload(archive);
     });
 
-    it('should get log types at the cluster level', async () => {
+    it('should not find any logs for cluster B when the logs were sent to cluster A', async () => {
       const { body } = await supertest
         .post('/api/monitoring/v1/clusters/yrpCVAZcSYW68_pAYTeKuw')
         .set('kbn-xsrf', 'xxx')

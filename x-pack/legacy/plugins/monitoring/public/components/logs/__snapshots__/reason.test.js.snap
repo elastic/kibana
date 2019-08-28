@@ -9,7 +9,7 @@ exports[`Logs should render a default message 1`] = `
 >
   <p>
     <FormattedMessage
-      defaultMessage="We did not find any log data and unable to diagnose why. {link}"
+      defaultMessage="We did not find any log data and we are unable to diagnose why. {link}"
       id="xpack.monitoring.logs.reason.defaultMessage"
       values={
         Object {

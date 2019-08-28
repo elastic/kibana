@@ -20,7 +20,7 @@ export const Reason = ({ reason }) => {
   let message = (
     <FormattedMessage
       id="xpack.monitoring.logs.reason.defaultMessage"
-      defaultMessage="We did not find any log data and unable to diagnose why. {link}"
+      defaultMessage="We did not find any log data and we are unable to diagnose why. {link}"
       values={{
         link: (
           <EuiLink href={`${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation.html`}>
