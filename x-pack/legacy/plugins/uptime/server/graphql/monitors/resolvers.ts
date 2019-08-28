@@ -12,7 +12,6 @@ import {
   GetLatestMonitorsQueryArgs,
   GetMonitorChartsDataQueryArgs,
   GetMonitorPageTitleQueryArgs,
-  GetMonitorsQueryArgs,
   GetSnapshotQueryArgs,
   MonitorChart,
   MonitorPageTitle,
@@ -32,13 +31,6 @@ export type UMSnapshotResolver = UMResolver<
 >;
 
 export type UMMonitorsResolver = UMResolver<any | Promise<any>, any, UMGqlRange, UMContext>;
-
-export type UMGetMonitorsResolver = UMResolver<
-  any | Promise<any>,
-  any,
-  GetMonitorsQueryArgs,
-  UMContext
->;
 
 export type UMLatestMonitorsResolver = UMResolver<
   Ping[] | Promise<Ping[]>,
@@ -79,7 +71,6 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
   libs: UMServerLibs
 ): {
   Query: {
-    getMonitors: UMGetMonitorsResolver;
     getSnapshot: UMSnapshotResolver;
     getSnapshotHistogram: UMGetSnapshotHistogram;
     getMonitorChartsData: UMGetMonitorChartsResolver;
@@ -89,22 +80,6 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
   };
 } => ({
   Query: {
-    async getMonitors(
-      resolver,
-      { dateRangeStart, dateRangeEnd, filters, statusFilter },
-      { req }
-    ): Promise<any> {
-      const result = await libs.monitors.getMonitors(
-        req,
-        dateRangeStart,
-        dateRangeEnd,
-        filters,
-        statusFilter
-      );
-      return {
-        monitors: result,
-      };
-    },
     async getSnapshot(
       resolver,
       { dateRangeStart, dateRangeEnd, filters, statusFilter },

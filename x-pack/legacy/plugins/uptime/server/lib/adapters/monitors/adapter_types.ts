@@ -14,13 +14,6 @@ export interface UMMonitorsAdapter {
     dateRangeEnd: string,
     location?: string | null
   ): Promise<MonitorChart>;
-  getMonitors(
-    request: any,
-    dateRangeStart: string,
-    dateRangeEnd: string,
-    filters?: string | null,
-    statusFilter?: string | null
-  ): Promise<any>;
   getSnapshotCount(
     request: any,
     dateRangeStart: string,

@@ -8,10 +8,8 @@ import { get, set, reduce } from 'lodash';
 import { INDEX_NAMES, QUERY } from '../../../../common/constants';
 import {
   FilterBar,
-  LatestMonitor,
   MonitorChart,
   MonitorPageTitle,
-  MonitorSeriesPoint,
   Ping,
   LocationDurationLine,
 } from '../../../../common/graphql/types';
@@ -292,132 +290,6 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     }
 
     return result;
-  }
-
-  /**
-   * Fetch the latest status for a monitors list
-   * @param request Kibana request
-   * @param dateRangeStart timestamp bounds
-   * @param dateRangeEnd timestamp bounds
-   * @param filters filters defined by client
-   */
-  public async getMonitors(
-    request: any,
-    dateRangeStart: string,
-    dateRangeEnd: string,
-    filters?: string | null,
-    statusFilter?: string | null
-  ): Promise<LatestMonitor[]> {
-    const query = parseFilterQuery(filters);
-    const params = {
-      index: INDEX_NAMES.HEARTBEAT,
-      body: {
-        query,
-        size: 0,
-        aggs: {
-          hosts: {
-            composite: {
-              sources: [
-                {
-                  id: {
-                    terms: {
-                      field: 'monitor.id',
-                    },
-                  },
-                },
-                {
-                  url: {
-                    terms: {
-                      field: 'url.full',
-                    },
-                  },
-                },
-                {
-                  location: {
-                    terms: {
-                      field: 'observer.geo.name',
-                      missing_bucket: true,
-                    },
-                  },
-                },
-              ],
-              size: 40,
-            },
-            aggs: {
-              latest: {
-                top_hits: {
-                  sort: [
-                    {
-                      '@timestamp': { order: 'desc' },
-                    },
-                  ],
-                  size: 1,
-                },
-              },
-              histogram: {
-                date_histogram: {
-                  field: '@timestamp',
-                  fixed_interval: getHistogramInterval(dateRangeStart, dateRangeEnd),
-                  missing: 0,
-                },
-                aggs: {
-                  status: {
-                    terms: {
-                      field: 'monitor.status',
-                      size: 2,
-                      shard_size: 2,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    };
-    const queryResult = await this.database.search(request, params);
-    const aggBuckets: any[] = get(queryResult, 'aggregations.hosts.buckets', []);
-    const latestMonitors: LatestMonitor[] = aggBuckets
-      .filter(
-        bucket =>
-          (statusFilter &&
-            get(bucket, 'latest.hits.hits[0]._source.monitor.status', undefined) ===
-              statusFilter) ||
-          !statusFilter
-      )
-      .map(
-        (bucket): LatestMonitor => {
-          const key: string = get(bucket, 'key.id');
-          const url: string | null = get(bucket, 'key.url', null);
-          const upSeries: MonitorSeriesPoint[] = [];
-          const downSeries: MonitorSeriesPoint[] = [];
-          const histogramBuckets: any[] = get(bucket, 'histogram.buckets', []);
-          const ping: Ping = get(bucket, 'latest.hits.hits[0]._source');
-          const timestamp: string = get(bucket, 'latest.hits.hits[0]._source.@timestamp');
-          histogramBuckets.forEach(histogramBucket => {
-            const status = get(histogramBucket, 'status.buckets', []);
-            // @ts-ignore TODO update typings and remove this comment
-            const up = status.find(f => f.key === 'up');
-            // @ts-ignore TODO update typings and remove this comment
-            const down = status.find(f => f.key === 'down');
-            // @ts-ignore TODO update typings and remove this comment
-            upSeries.push({ x: histogramBucket.key, y: up ? up.doc_count : null });
-            // @ts-ignore TODO update typings and remove this comment
-            downSeries.push({ x: histogramBucket.key, y: down ? down.doc_count : null });
-          });
-          return {
-            id: { key, url },
-            ping: {
-              ...ping,
-              timestamp,
-            },
-            upSeries,
-            downSeries,
-          };
-        }
-      );
-
-    return latestMonitors;
   }
 
   /**

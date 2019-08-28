@@ -19,10 +19,7 @@ export function compose(server: any): UMServerLibs {
 
   const pingsDomain = new UMPingsDomain(new MemoryPingsAdapter(server.pingsDB || []), framework);
   const authDomain = new UMAuthDomain(new UMMemoryAuthAdapter(server.xpack), framework);
-  const monitorsDomain = new UMMonitorsDomain(
-    new UMMemoryMonitorsAdapter(server.pingsDB || []),
-    framework
-  );
+  const monitorsDomain = new UMMonitorsDomain(new UMMemoryMonitorsAdapter(), framework);
   const monitorStatesDomain = new UMMonitorStatesDomain(
     new UMMemoryMonitorStatesAdapter(),
     framework

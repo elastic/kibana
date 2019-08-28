@@ -28,16 +28,6 @@ export class UMMonitorsDomain {
     );
   }
 
-  public async getMonitors(
-    request: any,
-    dateRangeStart: string,
-    dateRangeEnd: string,
-    filters?: string | null,
-    statusFilter?: string | null
-  ): Promise<any> {
-    return this.adapter.getMonitors(request, dateRangeStart, dateRangeEnd, filters, statusFilter);
-  }
-
   public async getSnapshotCount(
     request: any,
     dateRangeStart: string,
