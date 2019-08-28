@@ -99,7 +99,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
             <ClusterPrivileges
               role={this.props.role}
               onChange={this.onClusterPrivilegesChange}
-              availableClusterPrivileges={builtinESPrivileges.cluster}
+              builtinClusterPrivileges={builtinESPrivileges.cluster}
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
