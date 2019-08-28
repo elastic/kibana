@@ -23,7 +23,7 @@ interface ChoroplethDataElement {
 
 interface Props {
   style?: React.CSSProperties;
-  geojsonSource: NonNullable<GeoJSONSourceOptions['data']>;
+  initialGeojsonSource: NonNullable<GeoJSONSourceOptions['data']>;
   geojsonKeyProperty: string;
   data: ChoroplethDataElement[];
   renderTooltip: (props: {
@@ -59,7 +59,7 @@ export function getDataRange(data: Props['data']) {
 export const ChoroplethMap: React.SFC<Props> = props => {
   const {
     style,
-    geojsonSource,
+    initialGeojsonSource,
     geojsonKeyProperty,
     data,
     renderTooltip: ToolTip,
@@ -75,6 +75,11 @@ export const ChoroplethMap: React.SFC<Props> = props => {
     geojsonProperties?: GeoJsonProperties;
     data?: ChoroplethDataElement;
   }>({});
+  // props stored in useRefs, used in the initialization side effect
+  const initialGeojsonSourceRef = useRef(initialGeojsonSource);
+  const initialMapboxOptionsRef = useRef(initialMapboxOptions);
+
+  // converts input data to a scaled value between 0 and 1
 
   const getValueScale = useCallback(
     (value: number) => {
@@ -101,6 +106,7 @@ export const ChoroplethMap: React.SFC<Props> = props => {
         });
         if (hoverFeatures[0]) {
           const geojsonProperties = hoverFeatures[0].properties;
+          // only set state when necessary since event fires so often
           if (!isEqual(geojsonProperties, hoverState.geojsonProperties)) {
             const matchedData = data.find(
               ({ key }) =>
@@ -117,10 +123,6 @@ export const ChoroplethMap: React.SFC<Props> = props => {
     [map, data, hoverState.geojsonProperties, geojsonKeyProperty]
   );
 
-  const updateHoverStateOnMousemoveRef = useRef<
-    ((event: mapboxgl.MapMouseEvent & mapboxgl.EventData) => void) | null
-  >(null);
-
   const updateHoverStateOnMouseout = useCallback(
     (event: mapboxgl.MapMouseEvent & mapboxgl.EventData) => {
       enableScrollZoom.current = false;
@@ -129,10 +131,17 @@ export const ChoroplethMap: React.SFC<Props> = props => {
     []
   );
 
+  // When new, memoized handlers are created with useCallback,
+  // these references allow the old handlers to be removed
+  const updateHoverStateOnMousemoveRef = useRef<
+    ((event: mapboxgl.MapMouseEvent & mapboxgl.EventData) => void) | null
+  >(null);
+
   const updateHoverStateOnMouseoutRef = useRef<
     ((event: mapboxgl.MapMouseEvent & mapboxgl.EventData) => void) | null
   >(null);
 
+  // initialization side effect, only runs once
   useEffect(() => {
     if (containerRef.current !== null) {
       // set up Map object
@@ -141,7 +150,7 @@ export const ChoroplethMap: React.SFC<Props> = props => {
         container: containerRef.current,
         style:
           'https://tiles.maps.elastic.co/styles/osm-bright-desaturated/style.json',
-        ...initialMapboxOptions
+        ...initialMapboxOptionsRef.current
       });
       mapboxMap.dragRotate.disable();
       mapboxMap.touchZoomRotate.disableRotation();
@@ -163,7 +172,7 @@ export const ChoroplethMap: React.SFC<Props> = props => {
       mapboxMap.on('load', () => {
         mapboxMap.addSource(CHOROPLETH_POLYGONS_SOURCE_ID, {
           type: 'geojson',
-          data: geojsonSource
+          data: initialGeojsonSourceRef.current
         });
         setMap(mapboxMap);
       });
@@ -173,8 +182,9 @@ export const ChoroplethMap: React.SFC<Props> = props => {
         canvasElement.removeEventListener('wheel', controlScrollZoomOnWheel);
       };
     }
-  }, [controlScrollZoomOnWheel, geojsonSource, initialMapboxOptions]);
+  }, [controlScrollZoomOnWheel]);
 
+  // side effect swaps the old handlers with new ones when they update
   useEffect(() => {
     if (map) {
       if (
@@ -191,8 +201,10 @@ export const ChoroplethMap: React.SFC<Props> = props => {
     }
   }, [map, updateHoverStateOnMousemove, updateHoverStateOnMouseout]);
 
+  // side effect replaces choropleth layer with new one on data changes
   useEffect(() => {
     if (map) {
+      // find first symbol layer to place new layer in correct order
       const symbolLayer = (map.getStyle().layers || []).find(
         ({ type }) => type === 'symbol'
       );
@@ -227,6 +239,7 @@ export const ChoroplethMap: React.SFC<Props> = props => {
     }
   }, [map, data, getValueScale, geojsonKeyProperty]);
 
+  // side effect to only render the Popup when hovering a region with data
   useEffect(() => {
     if (popupContainerRef.current && map && popupRef.current) {
       if (hoverState.geojsonProperties && hoverState.data) {
@@ -240,6 +253,7 @@ export const ChoroplethMap: React.SFC<Props> = props => {
     }
   }, [map, hoverState]);
 
+  // render map container and tooltip in a hidden container
   return (
     <>
       <div ref={containerRef} style={{ height: 256, ...style }} />

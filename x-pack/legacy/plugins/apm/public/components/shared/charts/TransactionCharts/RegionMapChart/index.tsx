@@ -40,7 +40,6 @@ const RegionMapChartToolTip: React.SFC<{
         })}
         )
       </div>
-      >
     </div>
   );
 };
@@ -56,13 +55,12 @@ export const RegionMapChart: React.SFC = () => {
           zoom: 0.85,
           center: { lng: 0, lat: 30 }
         }}
-        geojsonSource="https://vector.maps.elastic.co/files/world_countries_v1.geo.json?elastic_tile_service_tos=agree&my_app_name=ems-landing&my_app_version=7.2.0"
+        initialGeojsonSource="https://vector.maps.elastic.co/files/world_countries_v1.geo.json?elastic_tile_service_tos=agree&my_app_name=ems-landing&my_app_version=7.2.0"
         geojsonKeyProperty="iso2"
         data={data}
         renderTooltip={RegionMapChartToolTip}
       />
       <ColorProgressionBar
-        slices={10}
         getColorStyle={getProgressionColor}
         min={`${min}ms`}
         max={`${max}ms`}
