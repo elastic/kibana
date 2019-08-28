@@ -18,10 +18,8 @@ export interface FilterPopoverProps {
   title: string;
 }
 
-const isItemSelected = (selectedItems: string[], item: string): 'on' | undefined => {
-  const findResult = selectedItems.find(selected => selected === item);
-  return findResult === undefined ? findResult : 'on';
-};
+const isItemSelected = (selectedItems: string[], item: string): 'on' | undefined =>
+  selectedItems.find(selected => selected === item) ? 'on' : undefined;
 
 export const FilterPopover = ({
   fieldName,
