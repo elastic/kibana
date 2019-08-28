@@ -10,3 +10,4 @@ export * from './observability_integration';
 export { seriesHasDownValues } from './series_has_down_values';
 export { UptimeUrlParams, getSupportedUrlParams } from './url_params';
 export { getApiPath } from './get_api_path';
+export { toStaticIndexPattern } from './to_static_index_pattern';
