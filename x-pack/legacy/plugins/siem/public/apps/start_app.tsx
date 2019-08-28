@@ -5,7 +5,7 @@
  */
 
 import { createHashHistory } from 'history';
-import React, { memo } from 'react';
+import React, { memo, FC } from 'react';
 import { ApolloProvider } from 'react-apollo';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider as ReduxStoreProvider } from 'react-redux';
@@ -29,7 +29,7 @@ import { MlCapabilitiesProvider } from '../components/ml/permissions/ml_capabili
 import { useKibanaUiSetting } from '../lib/settings/use_kibana_ui_setting';
 import { ApolloClientContext } from '../utils/apollo_context';
 
-const startApp = (libs: AppFrontendLibs) => {
+const StartApp: FC<AppFrontendLibs> = memo(libs => {
   const history = createHashHistory();
 
   const libs$ = new BehaviorSubject(libs);
@@ -66,14 +66,15 @@ const startApp = (libs: AppFrontendLibs) => {
     );
   });
   return <AppPluginRoot />;
-};
+});
 
 const ROOT_ELEMENT_ID = 'react-siem-root';
 
-const App = memo(() => {
-  const libs: AppFrontendLibs = compose();
-  return <div id={ROOT_ELEMENT_ID}>{startApp(libs)}</div>;
-});
+const App = memo(() => (
+  <div id={ROOT_ELEMENT_ID}>
+    <StartApp {...compose()} />
+  </div>
+));
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const SiemRootController = ($scope: any, $element: any) => {

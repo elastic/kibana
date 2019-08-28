@@ -8,6 +8,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPage, EuiPageBody } from '@ela
 import { FormattedMessage } from '@kbn/i18n/react';
 import * as React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
+import { pure } from 'recompose';
 import styled from 'styled-components';
 import chrome from 'ui/chrome';
 
@@ -76,7 +77,7 @@ const calculateFlyoutHeight = ({
   windowHeight: number;
 }): number => Math.max(0, windowHeight - globalHeaderSize);
 
-export const HomePage = React.memo(() => {
+export const HomePage = pure(() => {
   const isGlobalInitializing = useGlobalLoading();
   return (
     <AutoSizer detectAnyWindowResize={true} content>
