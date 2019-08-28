@@ -6,6 +6,7 @@
 
 import Boom from 'boom';
 import { omit } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { SavedObjectsClientContract, SavedObjectReference } from 'src/core/server';
 import { Alert, RawAlert, AlertTypeRegistry, AlertAction, Log, AlertType } from './types';
 import { TaskManager } from '../../task_manager';
@@ -356,7 +357,14 @@ export class AlertsClient {
       group => !alertTypeActionGroups.includes(group)
     );
     if (invalidActionGroups.length) {
-      throw Boom.badRequest(`Invalid action groups: ${invalidActionGroups.join(', ')}`);
+      throw Boom.badRequest(
+        i18n.translate('xpack.alerting.alertsClient.validateActions.invalidGroups', {
+          defaultMessage: 'Invalid action groups: {groups}',
+          values: {
+            groups: invalidActionGroups.join(', '),
+          },
+        })
+      );
     }
   }
 }
