@@ -10,9 +10,9 @@ import { registerDeleteRoute } from './register_delete_route';
 import { registerCreateRoute } from './register_create_route';
 import { registerUpdateRoute } from './register_update_route';
 
-export function registerTemplateRoutes(router: Router) {
-  registerGetAllRoute(router);
-  registerGetOneRoute(router);
+export function registerTemplateRoutes(router: Router, server: any) {
+  registerGetAllRoute(router, server);
+  registerGetOneRoute(router, server);
   registerDeleteRoute(router);
   registerCreateRoute(router);
   registerUpdateRoute(router);

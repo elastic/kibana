@@ -15,7 +15,7 @@ import { NoServicesMessage } from './NoServicesMessage';
 import { ServiceList } from './ServiceList';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useTrackPageview } from '../../../../../infra/public';
-import { useCore } from '../../../hooks/useCore';
+import { useKibanaCore } from '../../../../../observability/public';
 import { PROJECTION } from '../../../../common/projections/typings';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { callApmApi } from '../../../services/rest/callApmApi';
@@ -29,7 +29,7 @@ const initalData = {
 let hasDisplayedToast = false;
 
 export function ServiceOverview() {
-  const core = useCore();
+  const core = useKibanaCore();
   const {
     urlParams: { start, end },
     uiFilters

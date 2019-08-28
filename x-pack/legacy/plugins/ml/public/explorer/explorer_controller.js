@@ -203,11 +203,11 @@ module.controller('MlExplorerController', function (
   }));
 
   // Refresh all the data when the time range is altered.
-  $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {
+  subscriptions.add(timefilter.getFetch$().subscribe(() => {
     if ($scope.jobSelectionUpdateInProgress === false) {
       explorer$.next({ action: EXPLORER_ACTION.RELOAD });
     }
-  });
+  }));
 
   subscriptions.add(subscribeAppStateToObservable(AppState, 'mlShowCharts', showCharts$, () => $rootScope.$applyAsync()));
   subscriptions.add(subscribeAppStateToObservable(AppState, 'mlSelectInterval', interval$, () => $rootScope.$applyAsync()));
