@@ -25,6 +25,7 @@ import {
 } from 'kibana/public';
 import { VisualizationsSetup } from 'src/legacy/core_plugins/visualizations/public';
 import { Plugin as DataPublicPlugin } from 'src/plugins/data/public';
+import { IFeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
 // @ts-ignore
 import { timelionVis } from './timelion_vis_fn';
 // @ts-ignore
@@ -38,7 +39,7 @@ import { timeChartProvider } from './panels/timechart/timechart';
 export interface TimelionPluginSetupDependencies {
   data: ReturnType<DataPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
-  featureCatalogue: any;
+  featureCatalogueRegistryProvider: IFeatureCatalogueRegistryProvider;
 }
 
 /** @internal */
@@ -55,7 +56,7 @@ export class TimelionPlugin implements Plugin<Promise<void>, void> {
   }
 
   public async setup(core: CoreSetup, plugins: TimelionPluginSetupDependencies) {
-    plugins.featureCatalogue.register(registerFeature);
+    plugins.featureCatalogueRegistryProvider.register(registerFeature);
     plugins.data.expressions.registerFunction(timelionVis);
     plugins.visualizations.types.VisTypesRegistryProvider.register(TimelionVisProvider);
   }

@@ -19,7 +19,7 @@
 
 import { PluginInitializerContext } from 'kibana/public';
 import { npSetup, npStart } from 'ui/new_platform';
-import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
+import { FeatureCatalogueRegistryProvider as featureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
 import { plugin } from '.';
 import { visualizations } from '../../visualizations/public';
 import { TimelionPluginSetupDependencies, TimelionPluginStartDependencies } from './plugin';
@@ -29,7 +29,7 @@ import panelRegistry from './lib/panel_registry';
 const setupPlugins: Readonly<TimelionPluginSetupDependencies> = {
   visualizations,
   data: npSetup.plugins.data,
-  featureCatalogue: FeatureCatalogueRegistryProvider,
+  featureCatalogueRegistryProvider,
 };
 
 const startPlugins: Readonly<TimelionPluginStartDependencies> = {

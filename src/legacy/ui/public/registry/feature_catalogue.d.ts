@@ -37,6 +37,8 @@ interface FeatureCatalogueObject {
 
 type FeatureCatalogueRegistryFunction = (i18n: I18nServiceType) => FeatureCatalogueObject;
 
-export const FeatureCatalogueRegistryProvider: {
+export interface IFeatureCatalogueRegistryProvider {
   register: (fn: FeatureCatalogueRegistryFunction) => void;
-};
+}
+
+export const FeatureCatalogueRegistryProvider: IFeatureCatalogueRegistryProvider;
