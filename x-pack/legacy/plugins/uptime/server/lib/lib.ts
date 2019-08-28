@@ -10,11 +10,9 @@ import { UMMonitorsDomain, UMPingsDomain } from './domains';
 import { UMAuthDomain } from './domains/auth';
 import { UMMonitorStatesAdapter } from './adapters/monitor_states';
 import { UMSavedObjectsDomain } from './domains/saved_objects';
-import { UMKueryAdapter } from './adapters/kuery';
 
 export interface UMDomainLibs {
   auth: UMAuthDomain;
-  kuery: UMKueryAdapter;
   monitors: UMMonitorsDomain;
   monitorStates: UMMonitorStatesAdapter;
   pings: UMPingsDomain;
