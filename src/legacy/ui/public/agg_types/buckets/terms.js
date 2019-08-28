@@ -76,12 +76,15 @@ export const termsBucketAgg = new BucketAggType({
     };
   },
   createFilter: createFilterTerms,
-  postFlightRequest: async (resp, aggConfigs, aggConfig, searchSource, inspectorAdapters) => {
+  postFlightRequest: async (resp, aggConfigs, aggConfig, searchSource, inspectorAdapters, abortSignal) => {
     if (!resp.aggregations) return resp;
     const nestedSearchSource = searchSource.createChild();
     if (aggConfig.params.otherBucket) {
       const filterAgg = buildOtherBucketAgg(aggConfigs, aggConfig, resp);
       if (!filterAgg) return resp;
+      if (abortSignal) {
+        abortSignal.addEventListener('abort', () => nestedSearchSource.cancelQueued());
+      }
 
       nestedSearchSource.setField('aggs', filterAgg);
 
