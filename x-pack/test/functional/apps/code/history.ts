@@ -22,7 +22,8 @@ export default function manageRepositoriesFunctionalTests({
   const find = getService('find');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
 
-  describe('History', function() {
+  // FLAKY: https://github.com/elastic/kibana/issues/37859
+  describe.skip('History', function() {
     this.tags('smoke');
     const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
 
