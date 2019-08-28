@@ -55,16 +55,23 @@ const getFlexDirectionByMediaMatch = (): 'row' | 'column' => {
   const { matches } = mediaMatch;
   return matches ? 'row' : 'column';
 };
+export const getFlexDirection = () => {
+  const [display, setDisplay] = useState(getFlexDirectionByMediaMatch());
+
+  useEffect(() => {
+    const setFromEvent = () => setDisplay(getFlexDirectionByMediaMatch());
+    window.addEventListener('resize', setFromEvent);
+
+    return () => {
+      window.removeEventListener('resize', setFromEvent);
+    };
+  }, []);
+
+  return display;
+};
+
 const NetworkComponent = React.memo<NetworkComponentProps>(
   ({ filterQuery, setAbsoluteRangeDatePicker }) => {
-    const [flexDirectionMq, setDisplay] = useState(getFlexDirectionByMediaMatch());
-    const handler = useCallback(() => setDisplay(getFlexDirectionByMediaMatch()), [setDisplay]);
-    useEffect(() => {
-      window.addEventListener('resize', handler);
-      return function cleanup() {
-        window.removeEventListener('resize', handler);
-      };
-    });
     return (
       <WithSource sourceId="default">
         {({ indicesExist, indexPattern }) =>
@@ -112,7 +119,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
 
                         <EuiSpacer />
 
-                        <EuiFlexGroup direction={flexDirectionMq}>
+                        <EuiFlexGroup direction={getFlexDirection()}>
                           <EuiFlexItem>
                             <NetworkTopNFlowQuery
                               endDate={to}
