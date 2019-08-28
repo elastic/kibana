@@ -127,7 +127,6 @@ export function ConsoleEditor({
                 getCurl={(cb: any) => {
                   editor.getRequestsAsCURL(cb);
                 }}
-                openDocumentation={() => {}}
                 getDocumentation={() => {
                   return getDocumentation(editor, docLinkVersion);
                 }}

@@ -149,7 +149,6 @@ export class ConsoleMenu extends Component {
 
 ConsoleMenu.propTypes = {
   getCurl: PropTypes.func.isRequired,
-  openDocumentation: PropTypes.func.isRequired,
   getDocumentation: PropTypes.func.isRequired,
   autoIndent: PropTypes.func.isRequired,
 };
