@@ -143,5 +143,5 @@ export function convertToAdvancedJob(jobCreator: JobCreator) {
     datafeed_config: jobCreator.datafeedConfig,
   };
 
-  window.location.href = window.location.href.replace('new_new_job/multi_metric', 'advanced');
+  window.location.href = window.location.href.replace('multi_metric', 'advanced');
 }

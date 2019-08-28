@@ -22,6 +22,7 @@ import { first, map } from 'rxjs/operators';
 import healthCheck from './lib/health_check';
 import { Cluster } from './lib/cluster';
 import { createProxy } from './lib/create_proxy';
+import { handleESError } from './lib/handle_es_error';
 
 export default function (kibana) {
   let defaultVars;
@@ -91,6 +92,8 @@ export default function (kibana) {
 
         clusters.clear();
       });
+
+      server.expose('handleESError', handleESError);
 
       createProxy(server);
 

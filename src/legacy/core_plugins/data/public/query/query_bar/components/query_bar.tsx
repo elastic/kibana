@@ -22,7 +22,7 @@ import { doesKueryExpressionHaveLuceneSyntaxError } from '@kbn/es-query';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import { Storage } from 'ui/storage';
-import { timeHistory } from 'ui/timefilter/time_history';
+import { timeHistory } from 'ui/timefilter';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSuperDatePicker } from '@elastic/eui';
 
@@ -33,7 +33,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { documentationLinks } from 'ui/documentation_links';
 import { Toast, toastNotifications } from 'ui/notify';
 import { PersistedLog } from 'ui/persisted_log';
-import { UiSettingsClientContract } from 'src/core/public';
+import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
 import { IndexPattern } from '../../../index_patterns';
 import { QueryBarInput } from './query_bar_input';
 
@@ -67,6 +67,7 @@ interface Props {
   customSubmitButton?: any;
   isDirty: boolean;
   uiSettings: UiSettingsClientContract;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 interface State {
@@ -212,6 +213,7 @@ export class QueryBarUI extends Component<Props, State> {
           onSubmit={this.onInputSubmit}
           persistedLog={this.persistedLog}
           uiSettings={this.props.uiSettings}
+          savedObjectsClient={this.props.savedObjectsClient}
         />
       </EuiFlexItem>
     );

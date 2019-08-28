@@ -293,3 +293,27 @@
   border-left: $euiBorderThin;
   width: 300px !important;
 }
+
+.codeBranchSelectorTabs {
+  @include euiScrollBar;
+  max-height: calc(100vh - 19rem);
+  overflow: auto;
+}
+
+.codeBranchSelectorTabContentContainer {
+  padding-top: $euiSizeS;
+}
+
+.codeBranchSelectorPopover {
+  margin-top: $euiSizeXS;
+  padding-top: $euiSizeS !important;
+}
+
+.codeBranchSelectorRevisionItem:hover *,
+.codeBranchSelectorRevisionItem:focus * {
+  text-decoration: none !important;
+  &:focus,
+  &:hover {
+    text-decoration: none !important;
+  }
+}

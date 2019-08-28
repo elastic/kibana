@@ -12,11 +12,9 @@ import { validateMaxContentLength } from './validate_max_content_length';
 export async function runValidations(
   server: KbnServer,
   config: ConfigObject,
-  parentLogger: Logger,
+  logger: Logger,
   browserFactory: any
 ) {
-  const logger = parentLogger.clone(['self_check']);
-
   try {
     await Promise.all([
       validateBrowser(server, browserFactory, logger),
