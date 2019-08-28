@@ -19,7 +19,6 @@
 
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
-import { intlShape } from 'react-intl';
 import { injectI18n } from './inject';
 import { I18nProvider } from './provider';
 
@@ -46,7 +45,7 @@ describe('I18nProvider', () => {
       </I18nProvider>,
       {
         childContextTypes: {
-          intl: intlShape,
+          intl: { formatMessage: jest.fn() },
         },
       }
     );

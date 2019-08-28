@@ -10,7 +10,7 @@ import { Route } from 'react-router-dom';
 import euiStyled from '../../../../../common/eui_styled_components';
 
 interface TabConfiguration {
-  title: string;
+  title: string | React.ReactNode;
   path: string;
 }
 

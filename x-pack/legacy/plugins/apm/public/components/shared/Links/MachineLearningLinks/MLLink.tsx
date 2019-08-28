@@ -10,7 +10,7 @@ import url from 'url';
 import rison, { RisonValue } from 'rison-node';
 import { useLocation } from '../../../../hooks/useLocation';
 import { getTimepickerRisonData, TimepickerRisonData } from '../rison_helpers';
-import { useCore } from '../../../../hooks/useCore';
+import { useKibanaCore } from '../../../../../../observability/public';
 
 interface MlRisonData {
   ml?: {
@@ -25,7 +25,7 @@ interface Props {
 }
 
 export function MLLink({ children, path = '', query = {} }: Props) {
-  const core = useCore();
+  const core = useKibanaCore();
   const location = useLocation();
 
   const risonQuery: MlRisonData & TimepickerRisonData = getTimepickerRisonData(

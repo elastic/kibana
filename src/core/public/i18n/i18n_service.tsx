@@ -285,6 +285,13 @@ export class I18nService {
         description:
           'Used as the title attribute on an image or svg icon to indicate a given process step is complete',
       }),
+      'euiSuperDatePicker.showDatesButtonLabel': i18n.translate(
+        'core.euiSuperDatePicker.showDatesButtonLabel',
+        {
+          defaultMessage: 'Show dates',
+          description: 'Displayed in a button that shows date picker',
+        }
+      ),
       'euiSuperSelect.screenReaderAnnouncement': ({ optionsCount }: EuiValues) =>
         i18n.translate('core.euiSuperSelect.screenReaderAnnouncement', {
           defaultMessage:
@@ -296,6 +303,41 @@ export class I18nService {
           defaultMessage: 'Select an option: {selectedValue}, is selected',
           values: { selectedValue },
         }),
+      'euiSuperUpdateButton.cannotUpdateTooltip': i18n.translate(
+        'core.euiSuperUpdateButton.cannotUpdateTooltip',
+        {
+          defaultMessage: 'Cannot update',
+          description: "Displayed in a tooltip when updates can't happen",
+        }
+      ),
+      'euiSuperUpdateButton.clickToApplyTooltip': i18n.translate(
+        'core.euiSuperUpdateButton.clickToApplyTooltip',
+        {
+          defaultMessage: 'Click to apply',
+          description: "Displayed in a tooltip when there are changes that haven't been applied",
+        }
+      ),
+      'euiSuperUpdateButton.refreshButtonLabel': i18n.translate(
+        'core.euiSuperUpdateButton.refreshButtonLabel',
+        {
+          defaultMessage: 'Refresh',
+          description: 'Displayed in a button that refreshes based on date picked',
+        }
+      ),
+      'euiSuperUpdateButton.updatingButtonLabel': i18n.translate(
+        'core.euiSuperUpdateButton.updatingButtonLabel',
+        {
+          defaultMessage: 'Updating',
+          description: 'Displayed in a button that refreshes when updates are happening',
+        }
+      ),
+      'euiSuperUpdateButton.updateButtonLabel': i18n.translate(
+        'core.euiSuperUpdateButton.updateButtonLabel',
+        {
+          defaultMessage: 'Update',
+          description: 'Displayed in a button that updates based on date picked',
+        }
+      ),
       'euiTablePagination.rowsPerPage': i18n.translate('core.euiTablePagination.rowsPerPage', {
         defaultMessage: 'Rows per page',
         description: 'Displayed in a button that toggles a table pagination menu',

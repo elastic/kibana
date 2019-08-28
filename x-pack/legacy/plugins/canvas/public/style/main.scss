@@ -19,15 +19,17 @@ $canvasElementCardWidth: 210px;
 
 .canvasCheckered {
   background-color: $euiColorGhost;
+
+  // sass-lint:disable-block indentation
   background-image: linear-gradient(45deg, $euiColorLightShade 25%, transparent 25%),
-  linear-gradient(-45deg, $euiColorLightShade 25%, transparent 25%),
-  linear-gradient(45deg, transparent 75%, $euiColorLightShade 75%),
-  linear-gradient(-45deg, transparent 75%, $euiColorLightShade 75%);
+    linear-gradient(-45deg, $euiColorLightShade 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, $euiColorLightShade 75%),
+    linear-gradient(-45deg, transparent 75%, $euiColorLightShade 75%);
   background-size: $euiSizeS $euiSizeS;
   position: relative;
 }
 
-.canvasTextArea--code {
+.canvasTextArea__code {
   @include euiScrollBar;
   font-size: $euiFontSize;
   font-family: $euiCodeFontFamily;
@@ -39,7 +41,8 @@ $canvasElementCardWidth: 210px;
   border-top: $euiBorderThin;
 }
 
-#canvas-app { // sass-lint:disable-line no-ids
+// sass-lint:disable-block no-ids
+#canvas-app {
   overflow-y: hidden;
 
   .window-error {

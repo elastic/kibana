@@ -42,12 +42,15 @@ describe('DashboardState', function() {
     getRefreshInterval: jest.fn(),
     disableTimeRangeSelector: jest.fn(),
     enableAutoRefreshSelector: jest.fn(),
-    off: jest.fn(),
-    on: jest.fn(),
     getActiveBounds: () => {},
     enableTimeRangeSelector: () => {},
     isAutoRefreshSelectorEnabled: true,
     isTimeRangeSelectorEnabled: true,
+    getAutoRefreshFetch$: jest.fn(),
+    getEnabledUpdated$: jest.fn(),
+    getRefreshIntervalUpdate$: jest.fn(),
+    getFetch$: jest.fn(),
+    getTimeUpdate$: jest.fn(),
   };
 
   function initDashboardState() {

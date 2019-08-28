@@ -23,7 +23,6 @@ import { timefilter } from 'ui/timefilter';
 
 import '../es';
 import '../directives/listen';
-import '../index_patterns';
 import { uiModules } from '../modules';
 import { addFatalErrorCallback } from '../notify';
 import '../promises';
@@ -55,7 +54,7 @@ uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
         }
       };
 
-      $rootScope.$listen(timefilter, 'refreshIntervalUpdate', updateRefreshInterval);
+      const refreshIntervalSubscription = timefilter.getRefreshIntervalUpdate$().subscribe(updateRefreshInterval);
 
       const closeOnFatal = _.once(() => {
         // If there was a fatal error, then stop future searches. We want to use pause instead of
@@ -69,6 +68,8 @@ uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
         if (searchRequestQueue.getCount()) {
           throw new Error('Aborting all pending requests failed.');
         }
+
+        refreshIntervalSubscription.unsubscribe();
       });
 
       addFatalErrorCallback(closeOnFatal);

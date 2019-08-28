@@ -9,6 +9,7 @@ import sinon from 'sinon';
 import { TaskManager } from './task_manager';
 import { SavedObjectsClientMock } from 'src/core/server/mocks';
 import { SavedObjectsSerializer, SavedObjectsSchema } from 'src/core/server';
+import { mockLogger } from './test_utils';
 
 const savedObjectsClient = SavedObjectsClientMock.create();
 const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
@@ -16,13 +17,25 @@ const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
 describe('TaskManager', () => {
   let clock: sinon.SinonFakeTimers;
   const defaultConfig = {
-    task_manager: {
-      max_workers: 10,
-      override_num_workers: {},
-      index: 'foo',
-      max_attempts: 9,
-      poll_interval: 6000000,
+    xpack: {
+      task_manager: {
+        max_workers: 10,
+        override_num_workers: {},
+        index: 'foo',
+        max_attempts: 9,
+        poll_interval: 6000000,
+      },
     },
+  };
+  const config = {
+    get: (path: string) => _.get(defaultConfig, path),
+  };
+  const taskManagerOpts = {
+    config,
+    savedObjectsRepository: savedObjectsClient,
+    serializer,
+    callWithInternalUser: jest.fn(),
+    logger: mockLogger(),
   };
 
   beforeEach(() => {
@@ -31,52 +44,107 @@ describe('TaskManager', () => {
 
   afterEach(() => clock.restore());
 
-  test('disallows schedule before init', async () => {
-    const { opts } = testOpts();
-    const client = new TaskManager({
-      kbnServer: opts.kbnServer,
-      config: opts.config,
-      savedObjectsRepository: savedObjectsClient,
-      serializer,
+  test('allows and queues scheduling tasks before starting', async () => {
+    const client = new TaskManager(taskManagerOpts);
+    client.registerTaskDefinitions({
+      foo: {
+        type: 'foo',
+        title: 'Foo',
+        createTaskRunner: jest.fn(),
+      },
     });
     const task = {
       taskType: 'foo',
       params: {},
       state: {},
     };
-    await expect(client.schedule(task)).rejects.toThrow(/^NotInitialized: .*/i);
+    savedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'task',
+      attributes: {},
+      references: [],
+    });
+    const promise = client.schedule(task);
+    client.start();
+    await promise;
+    expect(savedObjectsClient.create).toHaveBeenCalled();
   });
 
-  test('disallows fetch before init', async () => {
-    const { opts } = testOpts();
-    const client = new TaskManager({
-      kbnServer: opts.kbnServer,
-      config: opts.config,
-      savedObjectsRepository: savedObjectsClient,
-      serializer,
+  test('allows scheduling tasks after starting', async () => {
+    const client = new TaskManager(taskManagerOpts);
+    client.registerTaskDefinitions({
+      foo: {
+        type: 'foo',
+        title: 'Foo',
+        createTaskRunner: jest.fn(),
+      },
     });
-    await expect(client.fetch({})).rejects.toThrow(/^NotInitialized: .*/i);
+    client.start();
+    const task = {
+      taskType: 'foo',
+      params: {},
+      state: {},
+    };
+    savedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'task',
+      attributes: {},
+      references: [],
+    });
+    await client.schedule(task);
+    expect(savedObjectsClient.create).toHaveBeenCalled();
   });
 
-  test('disallows remove before init', async () => {
-    const { opts } = testOpts();
-    const client = new TaskManager({
-      kbnServer: opts.kbnServer,
-      config: opts.config,
-      savedObjectsRepository: savedObjectsClient,
-      serializer,
-    });
-    await expect(client.remove('23')).rejects.toThrow(/^NotInitialized: .*/i);
+  test('allows and queues removing tasks before starting', async () => {
+    const client = new TaskManager(taskManagerOpts);
+    savedObjectsClient.delete.mockResolvedValueOnce({});
+    const promise = client.remove('1');
+    client.start();
+    await promise;
+    expect(savedObjectsClient.delete).toHaveBeenCalled();
   });
 
-  test('allows middleware registration before init', () => {
-    const { opts } = testOpts();
-    const client = new TaskManager({
-      kbnServer: opts.kbnServer,
-      config: opts.config,
-      savedObjectsRepository: savedObjectsClient,
-      serializer,
+  test('allows removing tasks after starting', async () => {
+    const client = new TaskManager(taskManagerOpts);
+    client.start();
+    savedObjectsClient.delete.mockResolvedValueOnce({});
+    await client.remove('1');
+    expect(savedObjectsClient.delete).toHaveBeenCalled();
+  });
+
+  test('allows and queues fetching tasks before starting', async () => {
+    const client = new TaskManager(taskManagerOpts);
+    taskManagerOpts.callWithInternalUser.mockResolvedValue({
+      hits: {
+        total: {
+          value: 0,
+        },
+        hits: [],
+      },
     });
+    const promise = client.fetch({});
+    client.start();
+    await promise;
+    expect(taskManagerOpts.callWithInternalUser).toHaveBeenCalled();
+  });
+
+  test('allows fetching tasks after starting', async () => {
+    const client = new TaskManager(taskManagerOpts);
+    client.start();
+    taskManagerOpts.callWithInternalUser.mockResolvedValue({
+      hits: {
+        total: {
+          value: 0,
+        },
+        hits: [],
+      },
+    });
+    await client.fetch({});
+    expect(taskManagerOpts.callWithInternalUser).toHaveBeenCalled();
+  });
+
+  test('allows middleware registration before starting', () => {
+    const client = new TaskManager(taskManagerOpts);
     const middleware = {
       beforeSave: async (saveOpts: any) => saveOpts,
       beforeRun: async (runOpts: any) => runOpts,
@@ -84,73 +152,17 @@ describe('TaskManager', () => {
     expect(() => client.addMiddleware(middleware)).not.toThrow();
   });
 
-  test('disallows middleware registration after init', async () => {
-    const { $test, opts } = testOpts();
-    const client = new TaskManager({
-      kbnServer: opts.kbnServer,
-      config: opts.config,
-      savedObjectsRepository: savedObjectsClient,
-      serializer,
-    });
+  test('disallows middleware registration after starting', async () => {
+    const client = new TaskManager(taskManagerOpts);
     const middleware = {
       beforeSave: async (saveOpts: any) => saveOpts,
       beforeRun: async (runOpts: any) => runOpts,
     };
 
-    await $test.afterPluginsInit();
+    client.start();
 
     expect(() => client.addMiddleware(middleware)).toThrow(
       /Cannot add middleware after the task manager is initialized/i
     );
   });
-
-  function testOpts() {
-    const callCluster = sinon.stub();
-    callCluster.withArgs('indices.getTemplate').returns(Promise.resolve({ tasky: {} }));
-
-    const $test = {
-      events: {} as any,
-      afterPluginsInit: _.noop,
-    };
-
-    const opts = {
-      config: {
-        get: (path: string) => _.get(defaultConfig, path),
-      },
-      kbnServer: {
-        uiExports: {
-          taskDefinitions: {},
-        },
-        afterPluginsInit(callback: any) {
-          $test.afterPluginsInit = callback;
-        },
-        server: {
-          log: sinon.spy(),
-          decorate(...args: any[]) {
-            _.set(opts, args.slice(0, -1), _.last(args));
-          },
-          kibanaMigrator: {
-            awaitMigration: jest.fn(),
-          },
-          plugins: {
-            elasticsearch: {
-              getCluster() {
-                return { callWithInternalUser: callCluster };
-              },
-              status: {
-                on(eventName: string, callback: () => any) {
-                  $test.events[eventName] = callback;
-                },
-              },
-            },
-          },
-        },
-      },
-    };
-
-    return {
-      $test,
-      opts,
-    };
-  }
 });

@@ -20,13 +20,14 @@ import React from 'react';
 import { IContainer } from '../../../../containers';
 import { AddPanelFlyout } from './add_panel_flyout';
 import { GetEmbeddableFactory, GetEmbeddableFactories } from '../../../../types';
-import { OverlayStart, NotificationsStart } from '../../../../../../../../../../../core/public';
+import { NotificationsStart } from '../../../../../../../../../../../core/public';
+import { KibanaReactOverlays } from '../../../../../../../../../../../plugins/kibana_react/public';
 
 export async function openAddPanelFlyout(options: {
   embeddable: IContainer;
   getFactory: GetEmbeddableFactory;
   getAllFactories: GetEmbeddableFactories;
-  overlays: OverlayStart;
+  overlays: KibanaReactOverlays;
   notifications: NotificationsStart;
   SavedObjectFinder: React.ComponentType<any>;
 }) {

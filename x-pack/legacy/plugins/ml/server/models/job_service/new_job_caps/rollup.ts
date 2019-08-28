@@ -6,9 +6,10 @@
 
 import { Request } from 'src/legacy/server/kbn_server';
 import { SavedObject } from 'src/core/server';
-import { FieldId, AggId } from '../../../../common/types/fields';
+import { FieldId } from '../../../../common/types/fields';
+import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
 
-export type RollupFields = Record<FieldId, [Record<'agg', AggId>]>;
+export type RollupFields = Record<FieldId, [Record<'agg', ES_AGGREGATION>]>;
 
 export interface RollupJob {
   job_id: string;

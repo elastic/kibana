@@ -18,7 +18,7 @@
  */
 
 import { FilterStateStore, toggleFilterNegated } from '@kbn/es-query';
-import { fixtures } from '../../../../index_patterns';
+import { mockFields, mockIndexPattern } from '../../../../index_patterns';
 import { IndexPattern, Field } from '../../../../index';
 import {
   buildFilter,
@@ -57,7 +57,6 @@ jest.mock(
   { virtual: true }
 );
 
-const { mockFields, mockIndexPattern } = fixtures;
 const mockedFields = mockFields as Field[];
 const mockedIndexPattern = mockIndexPattern as IndexPattern;
 

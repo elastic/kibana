@@ -54,7 +54,6 @@ interface Props {
   sort: Sort;
   toggleColumn: (column: ColumnHeader) => void;
   updateNote: UpdateNote;
-  width: number;
 }
 
 const HorizontalScroll = styled.div<{
@@ -106,7 +105,6 @@ export const Body = React.memo<Props>(
     sort,
     toggleColumn,
     updateNote,
-    width,
   }) => {
     const columnWidths = columnHeaders.reduce(
       (totalWidth, header) => totalWidth + header.width,
@@ -156,7 +154,6 @@ export const Body = React.memo<Props>(
               toggleColumn={toggleColumn}
               updateNote={updateNote}
               minWidth={columnWidths}
-              width={width}
             />
           </VerticalScrollContainer>
         </EuiText>

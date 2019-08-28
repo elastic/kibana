@@ -12,13 +12,12 @@ const fadeInEffect = keyframes`
   to { opacity: 1; }
 `;
 
-export const TimelineProperties = styled.div<{ width: number }>`
+export const TimelineProperties = styled.div`
   align-items: center;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   user-select: none;
-  width: ${({ width }) => `${width}px`};
 `;
 
 TimelineProperties.displayName = 'TimelineProperties';
