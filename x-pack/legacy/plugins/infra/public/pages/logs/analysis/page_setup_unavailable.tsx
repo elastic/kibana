@@ -8,9 +8,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
+import euiStyled from '../../../../../../common/eui_styled_components';
 
 export const AnalysisSetupUnavailable: React.FunctionComponent<{}> = () => (
-  <EuiEmptyPrompt
+  <EmptyPrompt
     title={
       <h2>
         <FormattedMessage
@@ -46,3 +47,7 @@ export const AnalysisSetupUnavailable: React.FunctionComponent<{}> = () => (
     }
   />
 );
+
+const EmptyPrompt = euiStyled(EuiEmptyPrompt)`
+  max-width: 50vw;
+`;
