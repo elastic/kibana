@@ -6,13 +6,6 @@
 
 import { ElementPosition } from './elements';
 
-export interface CanvasAsset {
-  '@created': string;
-  id: string;
-  type: 'dataurl';
-  value: string;
-}
-
 export interface CanvasElement {
   id: string;
   position: ElementPosition;
@@ -32,16 +25,13 @@ export interface CanvasPage {
 }
 
 export interface CanvasWorkpad {
-  '@created': string;
-  '@timestamp': string;
-  assets: { [id: string]: CanvasAsset };
-  colors: string[];
-  css: string;
-  height: number;
-  id: string;
-  isWriteable: boolean;
   name: string;
+  id: string;
+  width: number;
+  height: number;
+  css: string;
   page: number;
   pages: CanvasPage[];
-  width: number;
+  colors: string[];
+  isWriteable: boolean;
 }
