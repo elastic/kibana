@@ -7,6 +7,7 @@
 import { EuiFilterGroup } from '@elastic/eui';
 import React from 'react';
 import { get } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { FilterBar as FilterBarType } from '../../../common/graphql/types';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { filterBarQuery } from '../../queries';
@@ -74,7 +75,9 @@ export const FilterDropdownsComponent = ({
       items: locations,
       onFilterFieldChange,
       selectedItems: getSelectedItems('observer.geo.name'),
-      title: 'Location',
+      title: i18n.translate('xpack.uptime.filterPopover.title.location', {
+        defaultMessage: 'Location',
+      }),
     },
     {
       fieldName: 'monitor.id',
@@ -83,7 +86,7 @@ export const FilterDropdownsComponent = ({
       items: ids,
       onFilterFieldChange,
       selectedItems: getSelectedItems('monitor.id'),
-      title: 'ID',
+      title: i18n.translate('xpack.uptime.filterPopover.title.id', { defaultMessage: 'ID' }),
     },
     {
       fieldName: 'url.full',
@@ -92,7 +95,7 @@ export const FilterDropdownsComponent = ({
       items: urls,
       onFilterFieldChange,
       selectedItems: getSelectedItems('url.full'),
-      title: 'URL',
+      title: i18n.translate('xpack.uptime.filterPopover.title.url', { defaultMessage: 'URL' }),
     },
     {
       fieldName: 'url.port',
@@ -101,7 +104,7 @@ export const FilterDropdownsComponent = ({
       items: ports,
       onFilterFieldChange,
       selectedItems: getSelectedItems('url.port'),
-      title: 'Port',
+      title: i18n.translate('xpack.uptime.filterPopover.title.port', { defaultMessage: 'Port' }),
     },
     {
       fieldName: 'monitor.type',
@@ -110,14 +113,28 @@ export const FilterDropdownsComponent = ({
       items: schemes,
       onFilterFieldChange,
       selectedItems: getSelectedItems('monitor.type'),
-      title: 'Scheme',
+      title: i18n.translate('xpack.uptime.filterPopover.title.scheme', {
+        defaultMessage: 'Scheme',
+      }),
     },
   ];
 
   return (
     <EuiFilterGroup>
-      <FilterStatusButton content="Up" value="up" withNext={true} />
-      <FilterStatusButton content="Down" value="down" withNext={false} />
+      <FilterStatusButton
+        content={i18n.translate('xpack.uptime.filterStatusButton.up.content', {
+          defaultMessage: 'Up',
+        })}
+        value="up"
+        withNext={true}
+      />
+      <FilterStatusButton
+        content={i18n.translate('xpack.uptime.filterStatusButton.down.content', {
+          defaultMessage: 'Down',
+        })}
+        value="down"
+        withNext={false}
+      />
       {filterPopoverProps.map(item => (
         <FilterPopover key={item.id} {...item} />
       ))}

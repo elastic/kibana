@@ -6,6 +6,7 @@
 
 import { EuiFieldSearch, EuiFilterSelectItem, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import { UptimeFilterButton } from './uptime_filter_button';
 
 export interface FilterPopoverProps {
@@ -68,7 +69,18 @@ export const FilterPopover = ({
       <EuiPopoverTitle>
         <EuiFieldSearch
           onSearch={query => setSearchQuery(query)}
-          placeholder={isLoading ? 'Loading...' : `Search ${title}`}
+          placeholder={
+            isLoading
+              ? i18n.translate('xpack.uptime.filterPopout.loadingMessage', {
+                  defaultMessage: 'Loading...',
+                })
+              : i18n.translate('xpack.uptime.filterPopout.searchMessage', {
+                  defaultMessage: 'Search {title}',
+                  values: {
+                    title,
+                  },
+                })
+          }
         />
       </EuiPopoverTitle>
       {!isLoading &&
