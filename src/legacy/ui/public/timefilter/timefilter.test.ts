@@ -314,7 +314,7 @@ describe('calculateBounds', () => {
     expect(result.max && result.max.valueOf()).to.eql(clockNowTicks);
   });
 
-  test('uses forceNow string', () => {
+  test.skip('uses forceNow string', () => {
     const timeRange = {
       from: 'now-15m',
       to: 'now',
@@ -329,7 +329,7 @@ describe('calculateBounds', () => {
     expect(result.max && result.max.valueOf()).to.eql(forceNowTicks);
   });
 
-  test(`throws Error if forceNow can't be parsed`, () => {
+  test.skip(`throws Error if forceNow can't be parsed`, () => {
     const timeRange = {
       from: 'now-15m',
       to: 'now',
