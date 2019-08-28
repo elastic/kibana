@@ -46,7 +46,7 @@ import { timefilter } from 'ui/timefilter';
 import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 
 uiRoutes
-  .when('/jobs/new_job/simple/population', {
+  .when('/jobs/new_job_old/population', {
     template,
     k7Breadcrumbs: getCreatePopulationJobBreadcrumbs,
     resolve: {
