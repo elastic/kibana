@@ -91,9 +91,9 @@ export class TopN extends Component {
     };
   };
 
-  static calcIntervalLength = (renderMode, min, max) => {
+  static calcDomain = (renderMode, min, max) => {
     if (renderMode === RENDER_MODES.MIXED) {
-      return max - min;
+      return Math.max(max, Math.abs(min));
     } else if (renderMode === RENDER_MODES.NEGATIVE) {
       return Math.abs(min);
     }
@@ -109,7 +109,7 @@ export class TopN extends Component {
       const formatter = item.tickFormatter || this.props.tickFormatter;
       const isPositiveValue = lastValue >= 0;
 
-      const intervalLength = TopN.calcIntervalLength(renderMode, min, max);
+      const intervalLength = TopN.calcDomain(renderMode, min, max);
       const width = 100 * (Math.abs(lastValue) / intervalLength);
 
       const styles = reactcss(
