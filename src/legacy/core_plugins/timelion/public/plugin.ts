@@ -31,6 +31,8 @@ import { timelionVis } from './timelion_vis_fn';
 import { TimelionVisProvider } from './vis';
 // @ts-ignore
 import { registerFeature } from './register_feature';
+// @ts-ignore
+import { timeChartProvider } from './panels/timechart/timechart';
 
 /** @internal */
 export interface TimelionPluginSetupDependencies {
@@ -64,6 +66,8 @@ export class TimelionPlugin implements Plugin<Promise<void>, void> {
     if (timelionUiEnabled === false) {
       core.chrome.navLinks.update('timelion', { hidden: true });
     }
+
+    plugins.panelRegistry.register(timeChartProvider);
   }
 
   public stop(): void {}

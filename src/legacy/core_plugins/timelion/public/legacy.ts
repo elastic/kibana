@@ -24,7 +24,7 @@ import { plugin } from '.';
 import { visualizations } from '../../visualizations/public';
 import { TimelionPluginSetupDependencies, TimelionPluginStartDependencies } from './plugin';
 // @ts-ignore
-import { panelRegistry } from './lib/panel_registry';
+import panelRegistry from './lib/panel_registry';
 
 const setupPlugins: Readonly<TimelionPluginSetupDependencies> = {
   visualizations,
