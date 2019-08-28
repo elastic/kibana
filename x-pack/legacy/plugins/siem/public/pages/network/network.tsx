@@ -7,10 +7,9 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { getOr } from 'lodash/fp';
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
-import { pure } from 'recompose';
 
 import { ActionCreator } from 'typescript-fsa';
 import { FiltersGlobal } from '../../components/filters_global';
@@ -48,224 +47,236 @@ interface NetworkComponentReduxProps {
   }>;
 }
 
-const flexDirectionMq = window.matchMedia(
+type NetworkComponentProps = NetworkComponentReduxProps;
+const mediaMatch = window.matchMedia(
   'screen and (min-width: ' + euiLightVars.euiBreakpoints.xl + ')'
 );
-const widthChange = e => {
-  // console.log(e.matches);
-  return e.matches;
+const getFlexDirectionByMediaMatch = () => {
+  const { matches } = mediaMatch;
+  return matches ? 'row' : 'column';
 };
-flexDirectionMq.addListener(widthChange);
+const NetworkComponent = React.memo<NetworkComponentProps>(
+  ({ filterQuery, setAbsoluteRangeDatePicker }) => {
+    const [flexDirectionMq, setDisplay] = useState(getFlexDirectionByMediaMatch());
 
-type NetworkComponentProps = NetworkComponentReduxProps;
-const NetworkComponent = pure<NetworkComponentProps>(
-  ({ filterQuery, setAbsoluteRangeDatePicker }) => (
-    <WithSource sourceId="default">
-      {({ indicesExist, indexPattern }) =>
-        indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
-          <StickyContainer>
-            <FiltersGlobal>
-              <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.page} />
-            </FiltersGlobal>
+    useEffect(() => {
+      // initiate the event handler
+      window.addEventListener('resize', handler);
 
-            <HeaderPage
-              subtitle={<LastEventTime indexKey={LastEventIndexKey.network} />}
-              title={i18n.PAGE_TITLE}
-            />
+      // this will clean up the 'resize' event every time the component is re-rendered
+      return function cleanup() {
+        window.removeEventListener('resize', handler);
+      };
+    });
+    const handler = useCallback(() => setDisplay(getFlexDirectionByMediaMatch()), [setDisplay]);
+    return (
+      <WithSource sourceId="default">
+        {({ indicesExist, indexPattern }) =>
+          indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
+            <StickyContainer>
+              <FiltersGlobal>
+                <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.page} />
+              </FiltersGlobal>
 
-            <GlobalTime>
-              {({ to, from, setQuery }) => (
-                <UseUrlState indexPattern={indexPattern}>
-                  {({ isInitializing }) => (
-                    <>
-                      <KpiNetworkQuery
-                        endDate={to}
-                        filterQuery={filterQuery}
-                        skip={isInitializing}
-                        sourceId="default"
-                        startDate={from}
-                      >
-                        {({ kpiNetwork, loading, id, inspect, refetch }) => (
-                          <KpiNetworkComponentManage
-                            id={id}
-                            inspect={inspect}
-                            setQuery={setQuery}
-                            refetch={refetch}
-                            data={kpiNetwork}
-                            loading={loading}
-                            from={from}
-                            to={to}
-                            narrowDateRange={(min: number, max: number) => {
-                              setTimeout(() => {
-                                setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
-                              }, 500);
-                            }}
-                          />
-                        )}
-                      </KpiNetworkQuery>
+              <HeaderPage
+                subtitle={<LastEventTime indexKey={LastEventIndexKey.network} />}
+                title={i18n.PAGE_TITLE}
+              />
 
-                      <EuiSpacer />
+              <GlobalTime>
+                {({ to, from, setQuery }) => (
+                  <UseUrlState indexPattern={indexPattern}>
+                    {({ isInitializing }) => (
+                      <>
+                        <KpiNetworkQuery
+                          endDate={to}
+                          filterQuery={filterQuery}
+                          skip={isInitializing}
+                          sourceId="default"
+                          startDate={from}
+                        >
+                          {({ kpiNetwork, loading, id, inspect, refetch }) => (
+                            <KpiNetworkComponentManage
+                              id={id}
+                              inspect={inspect}
+                              setQuery={setQuery}
+                              refetch={refetch}
+                              data={kpiNetwork}
+                              loading={loading}
+                              from={from}
+                              to={to}
+                              narrowDateRange={(min: number, max: number) => {
+                                setTimeout(() => {
+                                  setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+                                }, 500);
+                              }}
+                            />
+                          )}
+                        </KpiNetworkQuery>
 
-                      <EuiFlexGroup direction={widthChange(flexDirectionMq) ? 'row' : 'column'}>
-                        <EuiFlexItem>
-                          <NetworkTopNFlowQuery
-                            endDate={to}
-                            flowTarget={FlowTargetNew.source}
-                            filterQuery={filterQuery}
-                            skip={isInitializing}
-                            sourceId="default"
-                            startDate={from}
-                            type={networkModel.NetworkType.page}
-                          >
-                            {({
-                              id,
-                              inspect,
-                              loading,
-                              loadPage,
-                              networkTopNFlow,
-                              pageInfo,
-                              refetch,
-                              totalCount,
-                            }) => (
-                              <NetworkTopNFlowTableManage
-                                data={networkTopNFlow}
-                                fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-                                flowTargeted={FlowTargetNew.source}
-                                id={id}
-                                indexPattern={indexPattern}
-                                inspect={inspect}
-                                loading={loading}
-                                loadPage={loadPage}
-                                refetch={refetch}
-                                setQuery={setQuery}
-                                showMorePagesIndicator={getOr(
-                                  false,
-                                  'showMorePagesIndicator',
-                                  pageInfo
-                                )}
-                                totalCount={totalCount}
-                                type={networkModel.NetworkType.page}
-                              />
-                            )}
-                          </NetworkTopNFlowQuery>
-                        </EuiFlexItem>
+                        <EuiSpacer />
 
-                        <EuiFlexItem>
-                          <NetworkTopNFlowQuery
-                            endDate={to}
-                            flowTarget={FlowTargetNew.destination}
-                            filterQuery={filterQuery}
-                            skip={isInitializing}
-                            sourceId="default"
-                            startDate={from}
-                            type={networkModel.NetworkType.page}
-                          >
-                            {({
-                              id,
-                              inspect,
-                              loading,
-                              loadPage,
-                              networkTopNFlow,
-                              pageInfo,
-                              refetch,
-                              totalCount,
-                            }) => (
-                              <NetworkTopNFlowTableManage
-                                data={networkTopNFlow}
-                                fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-                                flowTargeted={FlowTargetNew.destination}
-                                id={id}
-                                indexPattern={indexPattern}
-                                inspect={inspect}
-                                loading={loading}
-                                loadPage={loadPage}
-                                refetch={refetch}
-                                setQuery={setQuery}
-                                showMorePagesIndicator={getOr(
-                                  false,
-                                  'showMorePagesIndicator',
-                                  pageInfo
-                                )}
-                                totalCount={totalCount}
-                                type={networkModel.NetworkType.page}
-                              />
-                            )}
-                          </NetworkTopNFlowQuery>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
+                        <EuiFlexGroup direction={flexDirectionMq}>
+                          <EuiFlexItem>
+                            <NetworkTopNFlowQuery
+                              endDate={to}
+                              flowTarget={FlowTargetNew.source}
+                              filterQuery={filterQuery}
+                              skip={isInitializing}
+                              sourceId="default"
+                              startDate={from}
+                              type={networkModel.NetworkType.page}
+                            >
+                              {({
+                                id,
+                                inspect,
+                                loading,
+                                loadPage,
+                                networkTopNFlow,
+                                pageInfo,
+                                refetch,
+                                totalCount,
+                              }) => (
+                                <NetworkTopNFlowTableManage
+                                  data={networkTopNFlow}
+                                  fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                                  flowTargeted={FlowTargetNew.source}
+                                  id={id}
+                                  indexPattern={indexPattern}
+                                  inspect={inspect}
+                                  loading={loading}
+                                  loadPage={loadPage}
+                                  refetch={refetch}
+                                  setQuery={setQuery}
+                                  showMorePagesIndicator={getOr(
+                                    false,
+                                    'showMorePagesIndicator',
+                                    pageInfo
+                                  )}
+                                  totalCount={totalCount}
+                                  type={networkModel.NetworkType.page}
+                                />
+                              )}
+                            </NetworkTopNFlowQuery>
+                          </EuiFlexItem>
 
-                      <EuiSpacer />
+                          <EuiFlexItem>
+                            <NetworkTopNFlowQuery
+                              endDate={to}
+                              flowTarget={FlowTargetNew.destination}
+                              filterQuery={filterQuery}
+                              skip={isInitializing}
+                              sourceId="default"
+                              startDate={from}
+                              type={networkModel.NetworkType.page}
+                            >
+                              {({
+                                id,
+                                inspect,
+                                loading,
+                                loadPage,
+                                networkTopNFlow,
+                                pageInfo,
+                                refetch,
+                                totalCount,
+                              }) => (
+                                <NetworkTopNFlowTableManage
+                                  data={networkTopNFlow}
+                                  fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                                  flowTargeted={FlowTargetNew.destination}
+                                  id={id}
+                                  indexPattern={indexPattern}
+                                  inspect={inspect}
+                                  loading={loading}
+                                  loadPage={loadPage}
+                                  refetch={refetch}
+                                  setQuery={setQuery}
+                                  showMorePagesIndicator={getOr(
+                                    false,
+                                    'showMorePagesIndicator',
+                                    pageInfo
+                                  )}
+                                  totalCount={totalCount}
+                                  type={networkModel.NetworkType.page}
+                                />
+                              )}
+                            </NetworkTopNFlowQuery>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
 
-                      <NetworkDnsQuery
-                        endDate={to}
-                        filterQuery={filterQuery}
-                        skip={isInitializing}
-                        sourceId="default"
-                        startDate={from}
-                        type={networkModel.NetworkType.page}
-                      >
-                        {({
-                          totalCount,
-                          loading,
-                          networkDns,
-                          pageInfo,
-                          loadPage,
-                          id,
-                          inspect,
-                          refetch,
-                        }) => (
-                          <NetworkDnsTableManage
-                            data={networkDns}
-                            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-                            id={id}
-                            inspect={inspect}
-                            loading={loading}
-                            loadPage={loadPage}
-                            refetch={refetch}
-                            setQuery={setQuery}
-                            showMorePagesIndicator={getOr(
-                              false,
-                              'showMorePagesIndicator',
-                              pageInfo
-                            )}
-                            totalCount={totalCount}
-                            type={networkModel.NetworkType.page}
-                          />
-                        )}
-                      </NetworkDnsQuery>
+                        <EuiSpacer />
 
-                      <EuiSpacer />
+                        <NetworkDnsQuery
+                          endDate={to}
+                          filterQuery={filterQuery}
+                          skip={isInitializing}
+                          sourceId="default"
+                          startDate={from}
+                          type={networkModel.NetworkType.page}
+                        >
+                          {({
+                            totalCount,
+                            loading,
+                            networkDns,
+                            pageInfo,
+                            loadPage,
+                            id,
+                            inspect,
+                            refetch,
+                          }) => (
+                            <NetworkDnsTableManage
+                              data={networkDns}
+                              fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+                              id={id}
+                              inspect={inspect}
+                              loading={loading}
+                              loadPage={loadPage}
+                              refetch={refetch}
+                              setQuery={setQuery}
+                              showMorePagesIndicator={getOr(
+                                false,
+                                'showMorePagesIndicator',
+                                pageInfo
+                              )}
+                              totalCount={totalCount}
+                              type={networkModel.NetworkType.page}
+                            />
+                          )}
+                        </NetworkDnsQuery>
 
-                      <AnomaliesNetworkTable
-                        startDate={from}
-                        endDate={to}
-                        skip={isInitializing}
-                        type={networkModel.NetworkType.page}
-                        narrowDateRange={(score, interval) => {
-                          const fromTo = scoreIntervalToDateTime(score, interval);
-                          setAbsoluteRangeDatePicker({
-                            id: 'global',
-                            from: fromTo.from,
-                            to: fromTo.to,
-                          });
-                        }}
-                      />
-                    </>
-                  )}
-                </UseUrlState>
-              )}
-            </GlobalTime>
-          </StickyContainer>
-        ) : (
-          <>
-            <HeaderPage title={i18n.PAGE_TITLE} />
+                        <EuiSpacer />
 
-            <NetworkEmptyPage />
-          </>
-        )
-      }
-    </WithSource>
-  )
+                        <AnomaliesNetworkTable
+                          startDate={from}
+                          endDate={to}
+                          skip={isInitializing}
+                          type={networkModel.NetworkType.page}
+                          narrowDateRange={(score, interval) => {
+                            const fromTo = scoreIntervalToDateTime(score, interval);
+                            setAbsoluteRangeDatePicker({
+                              id: 'global',
+                              from: fromTo.from,
+                              to: fromTo.to,
+                            });
+                          }}
+                        />
+                      </>
+                    )}
+                  </UseUrlState>
+                )}
+              </GlobalTime>
+            </StickyContainer>
+          ) : (
+            <>
+              <HeaderPage title={i18n.PAGE_TITLE} />
+
+              <NetworkEmptyPage />
+            </>
+          )
+        }
+      </WithSource>
+    );
+  }
 );
 
 NetworkComponent.displayName = 'NetworkComponent';
