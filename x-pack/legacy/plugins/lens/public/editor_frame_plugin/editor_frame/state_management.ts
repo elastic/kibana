@@ -76,6 +76,9 @@ export type Action =
       type: 'ROLLBACK_SUGGESTION';
     }
   | {
+      type: 'SUBMIT_SUGGESTION';
+    }
+  | {
       type: 'SWITCH_DATASOURCE';
       newDatasourceId: string;
     };
@@ -221,6 +224,11 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
       return {
         ...state,
         ...(state.stagedPreview || {}),
+        stagedPreview: undefined,
+      };
+    case 'SUBMIT_SUGGESTION':
+      return {
+        ...state,
         stagedPreview: undefined,
       };
     case 'UPDATE_DATASOURCE_STATE':

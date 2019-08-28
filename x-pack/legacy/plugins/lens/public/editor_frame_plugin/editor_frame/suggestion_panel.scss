@@ -43,6 +43,10 @@ $lnsSuggestionWidth: 150px;
   margin-bottom: $euiSize;
 }
 
+.lnsSuggestionPanel__button--selected {
+  background-color: gray;
+}
+
 .lnsSidebar__suggestionIcon {
   color: $euiColorDarkShade;
   width: 100%;

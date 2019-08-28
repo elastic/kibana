@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import React, { useState, useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiIcon, EuiTitle, EuiPanel, EuiIconTip, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiTitle, EuiPanel, EuiIconTip, EuiToolTip, EuiButton } from '@elastic/eui';
 import { toExpression } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
+import classNames from 'classnames';
 import { Action, PreviewState } from './state_management';
 import { Datasource, Visualization, FramePublicAPI } from '../../types';
 import { getSuggestions, Suggestion, switchToSuggestion } from './suggestion_helpers';
@@ -39,16 +41,16 @@ export interface SuggestionPanelProps {
 
 const SuggestionPreview = ({
   suggestion,
-  dispatch,
-  frame,
   previewExpression,
   ExpressionRenderer: ExpressionRendererComponent,
+  selected,
+  onSelect,
 }: {
+  onSelect: () => void;
   suggestion: Suggestion;
-  dispatch: (action: Action) => void;
-  frame: FramePublicAPI;
   ExpressionRenderer: ExpressionRenderer;
   previewExpression?: string;
+  selected: boolean;
 }) => {
   const [expressionError, setExpressionError] = useState<boolean>(false);
 
@@ -59,12 +61,12 @@ const SuggestionPreview = ({
   return (
     <EuiToolTip content={suggestion.title}>
       <EuiPanel
-        className="lnsSuggestionPanel__button"
+        className={classNames('lnsSuggestionPanel__button', {
+          'lnsSuggestionPanel__button--selected': selected,
+        })}
         paddingSize="none"
         data-test-subj="lnsSuggestion"
-        onClick={() => {
-          switchToSuggestion(frame, dispatch, suggestion);
-        }}
+        onClick={onSelect}
       >
         {expressionError ? (
           <div className="lnsSidebar__suggestionIcon">
@@ -100,7 +102,9 @@ const SuggestionPreview = ({
   );
 };
 
-export const SuggestionPanel = debouncedComponent(InnerSuggestionPanel, 2000);
+// TODO this little debounce value is just here to showcase the feature better,
+// will be fixed in suggestion performance PR
+export const SuggestionPanel = debouncedComponent(InnerSuggestionPanel, 200);
 
 function InnerSuggestionPanel({
   activeDatasourceId,
@@ -114,9 +118,6 @@ function InnerSuggestionPanel({
   ExpressionRenderer: ExpressionRendererComponent,
   stagedPreview,
 }: SuggestionPanelProps) {
-  if (!activeDatasourceId) {
-    return null;
-  }
   const stagedSuggestions = useMemo(() => {
     if (!stagedPreview) return;
     return getSuggestions({
@@ -127,6 +128,21 @@ function InnerSuggestionPanel({
       visualizationState: stagedPreview.visualization.state,
     });
   }, [stagedPreview, datasourceMap, visualizationMap]);
+
+  const [lastSelectedSuggestion, setLastSelectedSuggestion] = useState<number>(-1);
+
+  useEffect(() => {
+    // if the staged preview is overwritten by a suggestion,
+    // reset the selected index to "current visualization" because
+    // we are not in transient suggestion state anymore
+    if (!stagedPreview && lastSelectedSuggestion !== -1) {
+      setLastSelectedSuggestion(-1);
+    }
+  }, [stagedPreview]);
+
+  if (!activeDatasourceId) {
+    return null;
+  }
 
   const suggestions = (
     stagedSuggestions ||
@@ -159,10 +175,13 @@ function InnerSuggestionPanel({
       </EuiTitle>
       <div className="lnsSuggestionsPanel__suggestions">
         <EuiPanel
-          className="lnsSuggestionPanel__button"
+          className={classNames('lnsSuggestionPanel__button', {
+            'lnsSuggestionPanel__button--selected': lastSelectedSuggestion === -1,
+          })}
           paddingSize="none"
           data-test-subj="lnsSuggestion"
           onClick={() => {
+            setLastSelectedSuggestion(-1);
             dispatch({
               type: 'ROLLBACK_SUGGESTION',
             });
@@ -170,7 +189,7 @@ function InnerSuggestionPanel({
         >
           Current visualization
         </EuiPanel>
-        {suggestions.map((suggestion: Suggestion) => {
+        {suggestions.map((suggestion, index) => {
           const previewExpression = preparePreviewExpression(
             suggestion,
             datasourceMap,
@@ -180,14 +199,28 @@ function InnerSuggestionPanel({
           return (
             <SuggestionPreview
               suggestion={suggestion}
-              dispatch={dispatch}
-              frame={frame}
+              onSelect={() => {
+                setLastSelectedSuggestion(index);
+                switchToSuggestion(frame, dispatch, suggestion);
+              }}
               ExpressionRenderer={ExpressionRendererComponent}
               previewExpression={previewExpression ? toExpression(previewExpression) : undefined}
               key={`${suggestion.visualizationId}-${suggestion.title}`}
+              selected={index === lastSelectedSuggestion}
             />
           );
         })}
+        {stagedPreview && (
+          <EuiButton
+            onClick={() => {
+              dispatch({
+                type: 'SUBMIT_SUGGESTION',
+              });
+            }}
+          >
+            Show more suggestions
+          </EuiButton>
+        )}
       </div>
     </div>
   );
