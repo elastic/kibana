@@ -13,7 +13,7 @@
 
 import { Subject } from 'rxjs';
 
-export const ALLOW_CELL_RANGE_SELECTION = false;
+export const ALLOW_CELL_RANGE_SELECTION = true;
 
 export const dragSelect$ = new Subject();
 export const explorer$ = new Subject();
