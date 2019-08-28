@@ -19,20 +19,42 @@ export enum FETCH_STATUS {
 }
 
 interface Result<Data> {
-  data?: Data;
+  data: Data;
   status?: FETCH_STATUS;
   error?: Error;
 }
 
-export function useFetcher<Data>(
-  fn: (prevResult: Result<Data>) => Promise<Data> | Data | undefined,
+export function useFetcher<TState>(
+  fn: () => Promise<TState> | TState | undefined,
   fnDeps: any[],
-  options: { preservePreviousData?: boolean } = {}
+  options?: {
+    preservePreviousData?: boolean;
+  }
+): Result<TState> & { refresh: () => void };
+
+export function useFetcher<TState>(
+  fn: (prevResult: Result<TState>) => Promise<TState> | TState | undefined,
+  fnDeps: any[],
+  options: {
+    preservePreviousData?: boolean;
+    initialState: TState;
+  }
+): Result<TState> & { refresh: () => void };
+
+export function useFetcher(
+  fn: Function,
+  fnDeps: any[],
+  options: {
+    preservePreviousData?: boolean;
+    initialState?: unknown;
+  } = {}
 ) {
   const { preservePreviousData = true } = options;
   const id = useComponentId();
   const { dispatchStatus } = useContext(LoadingIndicatorContext);
-  const [result, setResult] = useState<Result<Data>>({});
+  const [result, setResult] = useState<Result<unknown>>({
+    data: options.initialState
+  });
   const [counter, setCounter] = useState(0);
 
   useEffect(() => {

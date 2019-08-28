@@ -28,19 +28,17 @@ export function useTransactionDistribution(urlParams: IUrlParams) {
   } = urlParams;
   const uiFilters = useUiFilters(urlParams);
 
-  const { data = INITIAL_DATA, status, error } = useFetcher(
+  const { data, status, error } = useFetcher(
     prevResult => {
       // if a previous transaction distribution has been loaded and includes the sample
       // there is no reason to loading it again
-      const alreadyHasSample =
-        prevResult.data &&
-        prevResult.data.buckets.some(bucket => {
-          return (
-            bucket.sample &&
-            bucket.sample.traceId === traceId &&
-            bucket.sample.transactionId === transactionId
-          );
-        });
+      const alreadyHasSample = prevResult.data.buckets.some(bucket => {
+        return (
+          bucket.sample &&
+          bucket.sample.traceId === traceId &&
+          bucket.sample.transactionId === transactionId
+        );
+      });
 
       if (
         !alreadyHasSample &&
@@ -79,7 +77,8 @@ export function useTransactionDistribution(urlParams: IUrlParams) {
       transactionId,
       traceId,
       uiFilters
-    ]
+    ],
+    { initialState: INITIAL_DATA }
   );
 
   return { data, status, error };
