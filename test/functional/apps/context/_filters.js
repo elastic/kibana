@@ -43,18 +43,18 @@ export default function ({ getService, getPageObjects }) {
     it('should be addable via expanded doc table rows', async function () {
       await docTable.toggleRowExpanded({ isAnchorRow: true });
 
-      const anchorDetailsRow = await docTable.getAnchorDetailsRow();
-      await docTable.addInclusiveFilter(anchorDetailsRow, TEST_ANCHOR_FILTER_FIELD);
-      await PageObjects.context.waitUntilContextLoadingHasFinished();
-
-      await docTable.toggleRowExpanded({ isAnchorRow: true });
-
       await retry.try(async () => {
-        expect(await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, TEST_ANCHOR_FILTER_VALUE, true)).to.be(true);
+        const anchorDetailsRow = await docTable.getAnchorDetailsRow();
+        await docTable.addInclusiveFilter(anchorDetailsRow, TEST_ANCHOR_FILTER_FIELD);
+        await PageObjects.context.waitUntilContextLoadingHasFinished();
+        // await docTable.toggleRowExpanded({ isAnchorRow: true });
+        expect(
+          await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, TEST_ANCHOR_FILTER_VALUE, true)
+        ).to.be(true);
         const fields = await docTable.getFields();
         const hasOnlyFilteredRows = fields
           .map(row => row[2])
-          .every((fieldContent) => fieldContent === TEST_ANCHOR_FILTER_VALUE);
+          .every(fieldContent => fieldContent === TEST_ANCHOR_FILTER_VALUE);
         expect(hasOnlyFilteredRows).to.be(true);
       });
     });
@@ -67,11 +67,13 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.context.waitUntilContextLoadingHasFinished();
 
       retry.try(async () => {
-        expect(await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, TEST_ANCHOR_FILTER_VALUE, false)).to.be(true);
+        expect(
+          await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, TEST_ANCHOR_FILTER_VALUE, false)
+        ).to.be(true);
         const fields = await docTable.getFields();
         const hasOnlyFilteredRows = fields
           .map(row => row[2])
-          .every((fieldContent) => fieldContent === TEST_ANCHOR_FILTER_VALUE);
+          .every(fieldContent => fieldContent === TEST_ANCHOR_FILTER_VALUE);
         expect(hasOnlyFilteredRows).to.be(false);
       });
     });
