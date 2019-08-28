@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, Component } from 'react';
+import React, { Component } from 'react';
 
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { indexPatternService } from '../../../kibana_services';
@@ -55,7 +55,7 @@ export class UpdateSourceEditor extends Component {
     this.props.onChange({ propName: 'metrics', value: metrics });
   };
 
-  _renderMetricsEditor() {
+  render() {
     return (
       <EuiFormRow
         label={i18n.translate('xpack.maps.source.pewPew.metricsLabel', {
@@ -71,14 +71,6 @@ export class UpdateSourceEditor extends Component {
           />
         </div>
       </EuiFormRow>
-    );
-  }
-
-  render() {
-    return (
-      <Fragment>
-        {this._renderMetricsEditor()}
-      </Fragment>
     );
   }
 }

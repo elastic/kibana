@@ -16,11 +16,11 @@ function parsePointFromKey(key) {
   return [lon, lat];
 }
 
-export function convertToLines(esResonse) {
+export function convertToLines(esResponse) {
 
   const lineFeatures = [];
 
-  const destBuckets = _.get(esResonse, 'aggregations.destSplit.buckets', []);
+  const destBuckets = _.get(esResponse, 'aggregations.destSplit.buckets', []);
   for (let i = 0; i < destBuckets.length; i++) {
     const destBucket = destBuckets[i];
     const dest = parsePointFromKey(destBucket.key);

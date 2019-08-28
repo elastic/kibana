@@ -14,7 +14,7 @@ import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import { VectorStyle } from '../../styles/vector_style';
 import { i18n } from '@kbn/i18n';
-import { SOURCE_DATA_ID_ORIGIN } from '../../../../common/constants';
+import { SOURCE_DATA_ID_ORIGIN, ES_PEW_PEW } from '../../../../common/constants';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { convertToLines } from './convert_to_lines';
 import { Schemas } from 'ui/vis/editors/default/schemas';
@@ -40,12 +40,12 @@ const aggSchemas = new Schemas([
 
 export class ESPewPewSource extends AbstractESSource {
 
-  static type = 'ES_PEW_PEW';
-  static title = i18n.translate('xpack.maps.source.esPewPewTitle', {
-    defaultMessage: 'pew-pew'
+  static type = ES_PEW_PEW;
+  static title = i18n.translate('xpack.maps.source.pewPewTitle', {
+    defaultMessage: 'Source-destination connections'
   });
-  static description = i18n.translate('xpack.maps.source.esPewPewDescription', {
-    defaultMessage: 'Graph connections between sources and destinations'
+  static description = i18n.translate('xpack.maps.source.pewPewDescription', {
+    defaultMessage: 'Aggregated data paths between the origin and destinations.'
   });
 
   static createDescriptor({ indexPatternId, sourceGeoField, destGeoField }) {
@@ -232,8 +232,8 @@ export class ESPewPewSource extends AbstractESSource {
       }
     });
 
-    const esResponse = await this._runEsQuery(layerName, searchSource, i18n.translate('xpack.maps.source.esGrid.inspectorDescription', {
-      defaultMessage: 'Elasticsearch geo grid aggregation request'
+    const esResponse = await this._runEsQuery(layerName, searchSource, i18n.translate('xpack.maps.source.pewPew.inspectorDescription', {
+      defaultMessage: 'Source-destination connections request'
     }));
 
     const { featureCollection } = convertToLines(esResponse);

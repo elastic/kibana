@@ -39,7 +39,7 @@ export default function({ getService }: FtrProviderContext) {
       await ml.jobSourceSelection.selectSourceIndexPattern('farequote');
     });
 
-    it('loads the single metric job wizard page', async () => {
+    it.skip('loads the single metric job wizard page', async () => {
       await ml.jobTypeSelection.selectSingleMetricJob();
     });
 
