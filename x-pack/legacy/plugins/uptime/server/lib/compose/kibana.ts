@@ -21,13 +21,13 @@ export function compose(hapiServer: any): UMServerLibs {
   const database = new UMKibanaDatabaseAdapter(hapiServer.plugins.elasticsearch);
   const savedObjects = new UMKibanaSavedObjectsAdapter(hapiServer);
 
-  const pingsDomain = new UMPingsDomain(new ElasticsearchPingsAdapter(database), {});
   const authDomain = new UMAuthDomain(new UMXPackAuthAdapter(hapiServer.plugins.xpack_main), {});
   const monitorsDomain = new UMMonitorsDomain(new ElasticsearchMonitorsAdapter(database), {});
   const monitorStatesDomain = new UMMonitorStatesDomain(
     new ElasticsearchMonitorStatesAdapter(database),
     {}
   );
+  const pingsDomain = new UMPingsDomain(new ElasticsearchPingsAdapter(database), {});
   const savedObjectsDomain = new UMSavedObjectsDomain(savedObjects, {});
 
   const domainLibs: UMDomainLibs = {
