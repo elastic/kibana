@@ -14,7 +14,7 @@
                 "should": [
                   {"term": {"destination.ip": "127.0.0.1"}},
                   {"term": {"destination.ip": "127.0.0.53"}},
-                  {"match": {"destination.ip": "::1"}}
+                  {"term": {"destination.ip": "::1"}}
                 ]
               }
             }
