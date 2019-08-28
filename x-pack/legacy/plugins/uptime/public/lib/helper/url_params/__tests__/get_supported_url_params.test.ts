@@ -31,8 +31,10 @@ describe('getSupportedUrlParams', () => {
       AUTOREFRESH_IS_PAUSED,
       DATE_RANGE_START,
       DATE_RANGE_END,
+      FILTERS,
       SEARCH,
       SELECTED_PING_LIST_STATUS,
+      STATUS_FILTER,
     } = CLIENT_DEFAULTS;
     const result = getSupportedUrlParams({});
     expect(result).toMatchSnapshot();
@@ -41,8 +43,10 @@ describe('getSupportedUrlParams', () => {
       autorefreshIsPaused: AUTOREFRESH_IS_PAUSED,
       dateRangeStart: DATE_RANGE_START,
       dateRangeEnd: DATE_RANGE_END,
+      filters: FILTERS,
       search: SEARCH,
       selectedPingStatus: SELECTED_PING_LIST_STATUS,
+      statusFilter: STATUS_FILTER,
     });
   });
 
