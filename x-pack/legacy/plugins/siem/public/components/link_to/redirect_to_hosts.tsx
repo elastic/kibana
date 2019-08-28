@@ -22,8 +22,8 @@ export const RedirectToHostsPage = ({
   },
   location: { search },
 }: HostComponentProps) => {
-  let selectedTab = tabName;
-  if (!tabName) selectedTab = HostsTableType.hosts;
+  const defaultSelectedTab = HostsTableType.hosts;
+  const selectedTab = tabName ? tabName : defaultSelectedTab;
   const to = `/hosts/${selectedTab}${search}`;
 
   return <RedirectWrapper to={to} />;
@@ -35,8 +35,8 @@ export const RedirectToHostDetailsPage = ({
   },
   location: { search },
 }: HostComponentProps) => {
-  let selectedTab = tabName;
-  if (!tabName) selectedTab = HostsTableType.authentications;
+  const defaultSelectedTab = HostsTableType.authentications;
+  const selectedTab = tabName ? tabName : defaultSelectedTab;
   const to = `/hosts/${hostName}/${selectedTab}${search}`;
   return <RedirectWrapper to={to} />;
 };
