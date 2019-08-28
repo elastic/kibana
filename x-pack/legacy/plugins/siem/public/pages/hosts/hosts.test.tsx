@@ -6,17 +6,18 @@
 
 import { mount } from 'enzyme';
 import * as React from 'react';
-import { Router, RouteComponentProps } from 'react-router-dom';
+import { Router } from 'react-router-dom';
 
 import '../../mock/match_media';
 import '../../mock/ui_settings';
-import { Hosts } from './hosts';
+import { Hosts, AnonamaliesChildren, HostsComponentProps } from './hosts';
 
 import { mocksSource } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { cloneDeep } from 'lodash/fp';
 import { SiemNavigation } from '../../components/navigation';
+import { wait } from '../../lib/helpers';
 
 jest.mock('../../lib/settings/use_kibana_ui_setting');
 
@@ -66,6 +67,7 @@ const mockMatch = {
   url: '/',
   path: '/',
 };
+const mockChildren: AnonamaliesChildren = () => <div></div>;
 
 // Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
 /* eslint-disable no-console */
@@ -74,7 +76,8 @@ const originalError = console.error;
 describe('Hosts - rendering', () => {
   const hostProps = {
     match: mockMatch,
-  } as RouteComponentProps;
+    children: mockChildren,
+  } as HostsComponentProps;
 
   beforeAll(() => {
     console.error = jest.fn();
@@ -132,7 +135,7 @@ describe('Hosts - rendering', () => {
         </MockedProvider>
       </TestProviders>
     );
-    await new Promise(resolve => setTimeout(resolve));
+    await wait();
     wrapper.update();
     expect(wrapper.find(SiemNavigation).exists()).toBe(true);
   });

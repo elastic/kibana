@@ -321,21 +321,21 @@ export const IPDetails = connect(
 )(IPDetailsComponent);
 
 export const getBreadcrumbs = (ip: string): Breadcrumb[] => {
-  let breadcrumbs = [
+  const breadcrumbs = [
     {
       text: i18n.PAGE_TITLE,
       href: getNetworkUrl(),
     },
   ];
   if (ip) {
-    breadcrumbs = [
+    return [
       ...breadcrumbs,
       {
         text: decodeIpv6(ip),
         href: '',
       },
     ];
+  } else {
+    return breadcrumbs;
   }
-
-  return breadcrumbs;
 };

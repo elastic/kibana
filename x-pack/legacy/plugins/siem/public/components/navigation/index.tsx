@@ -12,7 +12,7 @@ import { TabNavigation, NavTab } from './tab_navigation';
 
 export interface TabNavigationComponentProps {
   navTabs: Record<string, NavTab>;
-  display?: 'default' | 'condensed' | undefined;
+  display?: 'default' | 'condensed';
   showBorder?: boolean;
 }
 

@@ -31,24 +31,23 @@ const HostsBodyComponent = pure<HostsComponentProps>(
                 <UseUrlState indexPattern={indexPattern}>
                   {({ isInitializing }) => (
                     <>
-                      {typeof children === 'function' &&
-                        children({
-                          endDate: to,
-                          filterQuery,
-                          skip: isInitializing,
-                          setQuery,
-                          startDate: from,
-                          type: hostsModel.HostsType.page,
-                          indexPattern,
-                          narrowDateRange: (score: Anomaly, interval: string) => {
-                            const fromTo = scoreIntervalToDateTime(score, interval);
-                            setAbsoluteRangeDatePicker({
-                              id: 'global',
-                              from: fromTo.from,
-                              to: fromTo.to,
-                            });
-                          },
-                        })}
+                      {children({
+                        endDate: to,
+                        filterQuery,
+                        skip: isInitializing,
+                        setQuery,
+                        startDate: from,
+                        type: hostsModel.HostsType.page,
+                        indexPattern,
+                        narrowDateRange: (score: Anomaly, interval: string) => {
+                          const fromTo = scoreIntervalToDateTime(score, interval);
+                          setAbsoluteRangeDatePicker({
+                            id: 'global',
+                            from: fromTo.from,
+                            to: fromTo.to,
+                          });
+                        },
+                      })}
                     </>
                   )}
                 </UseUrlState>

@@ -9,7 +9,6 @@ import { isEmpty, get } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
-import { pure } from 'recompose';
 import { Breadcrumb } from 'ui/chrome';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
@@ -49,6 +48,7 @@ import { SiemNavigation } from '../../components/navigation';
 import { Anomaly } from '../../components/ml/types';
 import { NavigationParams } from '../../components/navigation/breadcrumbs';
 import { HostsTableType } from '../../store/hosts/model';
+import { HostsQueryProps } from './hosts';
 
 const type = hostsModel.HostsType.details;
 
@@ -64,9 +64,11 @@ interface HostDetailsComponentReduxProps {
   }>;
 }
 
-type HostDetailsComponentProps = HostDetailsComponentReduxProps & HostComponentProps;
+type HostDetailsComponentProps = HostDetailsComponentReduxProps &
+  HostComponentProps &
+  HostsQueryProps;
 
-const HostDetailsComponent = pure<HostDetailsComponentProps>(
+const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
   ({
     match: {
       params: { hostName, tabName },
@@ -195,7 +197,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
 
 HostDetailsComponent.displayName = 'HostDetailsComponent';
 
-const HostDetailsBodyComponent = pure<HostDetailsComponentProps>(
+const HostDetailsBodyComponent = React.memo<HostDetailsComponentProps>(
   ({
     match: {
       params: { hostName, tabName },
@@ -213,28 +215,23 @@ const HostDetailsBodyComponent = pure<HostDetailsComponentProps>(
                 <UseUrlState indexPattern={indexPattern}>
                   {({ isInitializing }) => (
                     <>
-                      {typeof children === 'function' &&
-                        children({
-                          endDate: to,
-                          filterQuery: getFilterQuery(
-                            hostName,
-                            filterQueryExpression,
-                            indexPattern
-                          ),
-                          skip: isInitializing,
-                          setQuery,
-                          startDate: from,
-                          type,
-                          indexPattern,
-                          narrowDateRange: (score: Anomaly, interval: string) => {
-                            const fromTo = scoreIntervalToDateTime(score, interval);
-                            setAbsoluteRangeDatePicker({
-                              id: 'global',
-                              from: fromTo.from,
-                              to: fromTo.to,
-                            });
-                          },
-                        })}
+                      {children({
+                        endDate: to,
+                        filterQuery: getFilterQuery(hostName, filterQueryExpression, indexPattern),
+                        skip: isInitializing,
+                        setQuery,
+                        startDate: from,
+                        type,
+                        indexPattern,
+                        narrowDateRange: (score: Anomaly, interval: string) => {
+                          const fromTo = scoreIntervalToDateTime(score, interval);
+                          setAbsoluteRangeDatePicker({
+                            id: 'global',
+                            from: fromTo.from,
+                            to: fromTo.to,
+                          });
+                        },
+                      })}
                     </>
                   )}
                 </UseUrlState>

@@ -24,7 +24,22 @@ import {
 import { HostsBody } from './hosts_body';
 import { HostsTableType } from '../../store/hosts/model';
 
-const hostsPath = `/:pageName(hosts)`;
+const hostsPagePath = `/:pageName(hosts)`;
+
+const getHostsTabPath = (pagePath: string) =>
+  `${pagePath}/:tabName(` +
+  `${HostsTableType.hosts}|` +
+  `${HostsTableType.authentications}|` +
+  `${HostsTableType.uncommonProcesses}|` +
+  `${HostsTableType.anomalies}|` +
+  `${HostsTableType.events})`;
+
+const getHostDetailsTabPath = (pagePath: string) =>
+  `${pagePath}/:hostName/:tabName(` +
+  `${HostsTableType.authentications}|` +
+  `${HostsTableType.uncommonProcesses}|` +
+  `${HostsTableType.anomalies}|` +
+  `${HostsTableType.events})`;
 
 export const HostsContainer = pure<HostComponentProps>(({ match }) => (
   <>
@@ -32,7 +47,7 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
       <Route
         strict
         exact
-        path={hostsPath}
+        path={hostsPagePath}
         render={props => (
           <>
             <PageRoute
@@ -43,7 +58,7 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
               })}
             />
             <Route
-              path={hostsPath}
+              path={hostsPagePath}
               render={() => <HostsBody {...props} children={HostsQueryTabBody} />}
             />
           </>
@@ -52,7 +67,7 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
       <Route
         strict
         exact
-        path={`${hostsPath}/:tabName(${HostsTableType.hosts}|${HostsTableType.authentications}|${HostsTableType.uncommonProcesses}|${HostsTableType.anomalies}|${HostsTableType.events})`}
+        path={getHostsTabPath(hostsPagePath)}
         render={props => (
           <>
             <PageRoute
@@ -63,23 +78,23 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
               })}
             />
             <Route
-              path={`${hostsPath}/:tabName(${HostsTableType.hosts})`}
+              path={`${hostsPagePath}/:tabName(${HostsTableType.hosts})`}
               render={() => <HostsBody {...props} children={HostsQueryTabBody} />}
             />
             <Route
-              path={`${hostsPath}/:tabName(${HostsTableType.authentications})`}
+              path={`${hostsPagePath}/:tabName(${HostsTableType.authentications})`}
               render={() => <HostsBody {...props} children={AuthenticationsQueryTabBody} />}
             />
             <Route
-              path={`${hostsPath}/:tabName(${HostsTableType.uncommonProcesses})`}
+              path={`${hostsPagePath}/:tabName(${HostsTableType.uncommonProcesses})`}
               render={() => <HostsBody {...props} children={UncommonProcessTabBody} />}
             />
             <Route
-              path={`${hostsPath}/:tabName(${HostsTableType.anomalies})`}
+              path={`${hostsPagePath}/:tabName(${HostsTableType.anomalies})`}
               render={() => <HostsBody {...props} children={AnomaliesTabBody} />}
             />
             <Route
-              path={`${hostsPath}/:tabName(${HostsTableType.events})`}
+              path={`${hostsPagePath}/:tabName(${HostsTableType.events})`}
               render={() => <HostsBody {...props} children={EventsTabBody} />}
             />
           </>
@@ -88,7 +103,7 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
       <Route
         strict
         exact
-        path={`${hostsPath}/:hostName/:tabName(${HostsTableType.authentications}|${HostsTableType.uncommonProcesses}|${HostsTableType.anomalies}|${HostsTableType.events})`}
+        path={getHostDetailsTabPath(hostsPagePath)}
         render={props => (
           <>
             <PageRoute
@@ -99,23 +114,23 @@ export const HostsContainer = pure<HostComponentProps>(({ match }) => (
               })}
             />
             <Route
-              path={`${hostsPath}/:hostName/:tabName(${HostsTableType.hosts})`}
+              path={`${hostsPagePath}/:hostName/:tabName(${HostsTableType.hosts})`}
               render={() => <HostDetailsBody {...props} children={HostsQueryTabBody} />}
             />
             <Route
-              path={`${hostsPath}/:hostName/:tabName(${HostsTableType.authentications})`}
+              path={`${hostsPagePath}/:hostName/:tabName(${HostsTableType.authentications})`}
               render={() => <HostDetailsBody {...props} children={AuthenticationsQueryTabBody} />}
             />
             <Route
-              path={`${hostsPath}/:hostName/:tabName(${HostsTableType.uncommonProcesses})`}
+              path={`${hostsPagePath}/:hostName/:tabName(${HostsTableType.uncommonProcesses})`}
               render={() => <HostDetailsBody {...props} children={UncommonProcessTabBody} />}
             />
             <Route
-              path={`${hostsPath}/:hostName/:tabName(${HostsTableType.anomalies})`}
+              path={`${hostsPagePath}/:hostName/:tabName(${HostsTableType.anomalies})`}
               render={() => <HostDetailsBody {...props} children={AnomaliesTabBody} />}
             />
             <Route
-              path={`${hostsPath}/:hostName/:tabName(${HostsTableType.events})`}
+              path={`${hostsPagePath}/:hostName/:tabName(${HostsTableType.events})`}
               render={() => <HostDetailsBody {...props} children={EventsTabBody} />}
             />
           </>

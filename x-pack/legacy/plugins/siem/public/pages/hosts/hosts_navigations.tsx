@@ -111,7 +111,7 @@ interface OwnProps {
   endDate: number;
   filterQuery?: string | ESTermQuery;
 }
-type QueryTabBodyProps = OwnProps & {
+export type HostsComponentsQueryProps = OwnProps & {
   indexPattern: StaticIndexPattern;
   skip: boolean;
   setQuery: ({
@@ -128,7 +128,7 @@ type QueryTabBodyProps = OwnProps & {
   narrowDateRange?: NarrowDateRange;
 };
 
-type AnomaliesQueryTabBodyProps = OwnProps & {
+export type AnomaliesQueryTabBodyProps = OwnProps & {
   skip: boolean;
   narrowDateRange: NarrowDateRange;
   hostName?: string;
@@ -147,7 +147,7 @@ export const HostsQueryTabBody = ({
   setQuery,
   startDate,
   type,
-}: QueryTabBodyProps) => {
+}: HostsComponentsQueryProps) => {
   return (
     <HostsQuery
       endDate={endDate}
@@ -184,7 +184,7 @@ export const AuthenticationsQueryTabBody = ({
   setQuery,
   startDate,
   type,
-}: QueryTabBodyProps) => {
+}: HostsComponentsQueryProps) => {
   return (
     <AuthenticationsQuery
       endDate={endDate}
@@ -220,7 +220,7 @@ export const UncommonProcessTabBody = ({
   setQuery,
   startDate,
   type,
-}: QueryTabBodyProps) => {
+}: HostsComponentsQueryProps) => {
   return (
     <UncommonProcessesQuery
       endDate={endDate}
@@ -276,7 +276,7 @@ export const EventsTabBody = ({
   setQuery,
   startDate,
   type,
-}: QueryTabBodyProps) => {
+}: HostsComponentsQueryProps) => {
   return (
     <EventsQuery
       endDate={endDate}

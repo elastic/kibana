@@ -31,7 +31,11 @@ import { InputsModelId } from '../../store/inputs/constants';
 import { SiemNavigation } from '../../components/navigation';
 
 import * as i18n from './translations';
-import { navTabsHosts } from './hosts_navigations';
+import {
+  navTabsHosts,
+  AnomaliesQueryTabBodyProps,
+  HostsComponentsQueryProps,
+} from './hosts_navigations';
 
 const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
 
@@ -44,7 +48,14 @@ interface HostsComponentReduxProps {
   }>;
 }
 
-export type HostsComponentProps = RouteComponentProps & HostsComponentReduxProps;
+type CommonChildren = (args: HostsComponentsQueryProps) => JSX.Element;
+export type AnonamaliesChildren = (args: AnomaliesQueryTabBodyProps) => JSX.Element;
+
+export interface HostsQueryProps {
+  children: CommonChildren | AnonamaliesChildren;
+}
+
+export type HostsComponentProps = RouteComponentProps & HostsComponentReduxProps & HostsQueryProps;
 
 const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRangeDatePicker }) => {
   return (
