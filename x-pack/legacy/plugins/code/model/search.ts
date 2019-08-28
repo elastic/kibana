@@ -21,6 +21,7 @@ export interface Document {
 }
 
 export interface Commit {
+  repoUri: RepositoryUri;
   id: string;
   message: string;
   body: string;
@@ -87,7 +88,6 @@ export interface RepositorySearchRequest extends SearchRequest {
 }
 
 export interface DocumentSearchRequest extends SearchRequest {
-  query: string;
   // repoFilters is used for search within these repos but return
   // search stats across all repositories.
   repoFilters?: string[];
@@ -95,6 +95,15 @@ export interface DocumentSearchRequest extends SearchRequest {
   repoScope?: RepositoryUri[];
   langFilters?: string[];
 }
+
+export interface CommitSearchRequest extends SearchRequest {
+  // repoFilters is used for search within these repos but return
+  // search stats across all repositories.
+  repoFilters?: string[];
+  // repoScope hard limit the search coverage only to these repositories.
+  repoScope?: RepositoryUri[];
+}
+
 export interface SymbolSearchRequest extends SearchRequest {
   query: string;
   repoScope?: RepositoryUri[];
@@ -159,6 +168,12 @@ export interface DocumentSearchResult extends SearchResult {
   results?: SearchResultItem[];
   repoAggregations?: any[];
   langAggregations?: any[];
+}
+
+export type CommitSearchResultItem = Commit;
+
+export interface CommitSearchResult extends DocumentSearchResult {
+  commits: CommitSearchResultItem[];
 }
 
 export interface SourceLocation {
