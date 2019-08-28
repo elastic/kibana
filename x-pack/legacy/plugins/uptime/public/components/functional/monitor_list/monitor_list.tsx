@@ -93,7 +93,6 @@ export const MonitorListComponent = (props: Props) => {
   return (
     <Fragment>
       <EuiPanel>
-        <EuiSpacer size="s" />
         <EuiTitle size="xs">
           <h5>
             <FormattedMessage

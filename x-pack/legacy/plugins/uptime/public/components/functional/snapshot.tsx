@@ -27,8 +27,7 @@ export const SnapshotComponent = ({ data }: UptimeGraphQLQueryProps<SnapshotQuer
   data && data.snapshot ? (
     <React.Fragment>
       <EuiPanel>
-        <EuiSpacer size="s" />
-        <EuiTitle size="s">
+        <EuiTitle size="xs">
           <h5>
             <FormattedMessage
               id="xpack.uptime.snapshot.endpointStatusTitle"
