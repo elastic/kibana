@@ -277,7 +277,13 @@ export function FieldItem({
                                 value={topValue.doc_count / state.doc_count!}
                                 max={1}
                                 size="l"
-                                color={field.type === 'string' ? 'accent' : 'primary'}
+                                color={
+                                  field.type === 'string'
+                                    ? 'accent'
+                                    : field.type === 'number'
+                                    ? 'secondary'
+                                    : 'primary'
+                                }
                               />
                             </EuiFlexItem>
                             <EuiFlexItem
