@@ -23,10 +23,12 @@ import { i18n } from '@kbn/i18n';
 
 import { ServiceSettings } from 'ui/vis/map/service_settings';
 import { VisOptionsProps } from 'ui/vis/editors/default';
-import { SelectOption } from '../../../kbn_vislib_vis_types/public/controls/select';
-import { RangeOption } from '../../../kbn_vislib_vis_types/public/controls/range';
-import { BasicOptions } from '../../../kbn_vislib_vis_types/public/controls/basic_options';
-import { SwitchOption } from '../../../kbn_vislib_vis_types/public/controls/switch';
+import {
+  BasicOptions,
+  RangeOption,
+  SelectOption,
+  SwitchOption,
+} from '../../../kbn_vislib_vis_types/public/components';
 import { WmsOptions } from './wms_options';
 import { TileMapVisParams } from '../types';
 
