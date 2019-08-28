@@ -5,25 +5,26 @@
  */
 
 import _ from 'lodash';
-import {
-  IndexPatternPrivateState,
-  IndexPatternColumn,
-  BaseIndexPatternColumn,
-  IndexPatternLayer,
-  IndexPattern,
-} from './indexpattern';
-import { operationDefinitionMap, OperationDefinition, isColumnTransferable } from './operations';
+import { IndexPatternPrivateState, IndexPatternLayer, IndexPattern } from './indexpattern';
+import { isColumnTransferable } from './operations';
+import { operationDefinitionMap, IndexPatternColumn } from './operations';
 
 export function updateColumnParam<
-  C extends BaseIndexPatternColumn & { params: object },
+  C extends IndexPatternColumn & { params: object },
   K extends keyof C['params']
->(
-  state: IndexPatternPrivateState,
-  layerId: string,
-  currentColumn: C,
-  paramName: K,
-  value: C['params'][K]
-): IndexPatternPrivateState {
+>({
+  state,
+  layerId,
+  currentColumn,
+  paramName,
+  value,
+}: {
+  state: IndexPatternPrivateState;
+  layerId: string;
+  currentColumn: C;
+  paramName: K;
+  value: C['params'][K];
+}): IndexPatternPrivateState {
   const columnId = Object.entries(state.layers[layerId].columns).find(
     ([_columnId, column]) => column === currentColumn
   )![0];
@@ -40,13 +41,13 @@ export function updateColumnParam<
         ...state.layers[layerId],
         columns: {
           ...state.layers[layerId].columns,
-          [columnId]: ({
+          [columnId]: {
             ...currentColumn,
             params: {
               ...currentColumn.params,
               [paramName]: value,
             },
-          } as unknown) as IndexPatternColumn,
+          },
         },
       },
     },
@@ -60,19 +61,17 @@ function adjustColumnReferencesForChangedColumn(
   const newColumns = { ...columns };
   Object.keys(newColumns).forEach(currentColumnId => {
     if (currentColumnId !== columnId) {
-      const currentColumn = newColumns[currentColumnId] as BaseIndexPatternColumn;
-      const operationDefinition = operationDefinitionMap[
-        currentColumn.operationType
-      ] as OperationDefinition<BaseIndexPatternColumn>;
-      newColumns[currentColumnId] = (operationDefinition.onOtherColumnChanged
+      const currentColumn = newColumns[currentColumnId];
+      const operationDefinition = operationDefinitionMap[currentColumn.operationType];
+      newColumns[currentColumnId] = operationDefinition.onOtherColumnChanged
         ? operationDefinition.onOtherColumnChanged(currentColumn, newColumns)
-        : currentColumn) as IndexPatternColumn;
+        : currentColumn;
     }
   });
   return newColumns;
 }
 
-export function changeColumn({
+export function changeColumn<C extends IndexPatternColumn>({
   state,
   layerId,
   columnId,
@@ -82,7 +81,7 @@ export function changeColumn({
   state: IndexPatternPrivateState;
   layerId: string;
   columnId: string;
-  newColumn: IndexPatternColumn;
+  newColumn: C;
   keepParams?: boolean;
 }): IndexPatternPrivateState {
   const oldColumn = state.layers[layerId].columns[columnId];
@@ -92,7 +91,7 @@ export function changeColumn({
     oldColumn &&
     oldColumn.operationType === newColumn.operationType &&
     'params' in oldColumn
-      ? ({ ...newColumn, params: oldColumn.params } as IndexPatternColumn)
+      ? { ...newColumn, params: oldColumn.params }
       : newColumn;
 
   const newColumns = adjustColumnReferencesForChangedColumn(
@@ -175,9 +174,7 @@ export function updateLayerIndexPattern(
     isColumnTransferable(column, newIndexPattern)
   );
   const newColumns: IndexPatternLayer['columns'] = _.mapValues(keptColumns, column => {
-    const operationDefinition = operationDefinitionMap[column.operationType] as OperationDefinition<
-      IndexPatternColumn
-    >;
+    const operationDefinition = operationDefinitionMap[column.operationType];
     return operationDefinition.transfer
       ? operationDefinition.transfer(column, newIndexPattern)
       : column;

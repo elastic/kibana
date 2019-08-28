@@ -5,13 +5,14 @@
  */
 
 import React from 'react';
-import { termsOperation } from './terms';
 import { shallow } from 'enzyme';
-import { IndexPatternPrivateState, TermsIndexPatternColumn } from '../indexpattern';
+import { IndexPatternPrivateState } from '../../indexpattern';
 import { EuiRange, EuiSelect } from '@elastic/eui';
 import { UiSettingsClientContract } from 'src/core/public';
 import { Storage } from 'ui/storage';
-import { createMockedIndexPattern } from '../mocks';
+import { createMockedIndexPattern } from '../../mocks';
+import { TermsIndexPatternColumn } from './terms';
+import { termsOperation } from '.';
 
 jest.mock('ui/new_platform');
 
@@ -102,10 +103,10 @@ describe('terms', () => {
     });
   });
 
-  describe('getPossibleOperationsForField', () => {
+  describe('getPossibleOperationForField', () => {
     it('should return operation with the right type', () => {
       expect(
-        termsOperation.getPossibleOperationsForField({
+        termsOperation.getPossibleOperationForField({
           aggregatable: true,
           searchable: true,
           name: 'test',
@@ -116,49 +117,45 @@ describe('terms', () => {
             },
           },
         })
-      ).toEqual([
-        {
-          dataType: 'string',
-          isBucketed: true,
-          scale: 'ordinal',
-        },
-      ]);
+      ).toEqual({
+        dataType: 'string',
+        isBucketed: true,
+        scale: 'ordinal',
+      });
 
       expect(
-        termsOperation.getPossibleOperationsForField({
+        termsOperation.getPossibleOperationForField({
           aggregatable: true,
           searchable: true,
           name: 'test',
           type: 'boolean',
         })
-      ).toEqual([
-        {
-          dataType: 'boolean',
-          isBucketed: true,
-          scale: 'ordinal',
-        },
-      ]);
+      ).toEqual({
+        dataType: 'boolean',
+        isBucketed: true,
+        scale: 'ordinal',
+      });
     });
 
     it('should not return an operation if restrictions prevent terms', () => {
       expect(
-        termsOperation.getPossibleOperationsForField({
+        termsOperation.getPossibleOperationForField({
           aggregatable: false,
           searchable: true,
           name: 'test',
           type: 'string',
         })
-      ).toEqual([]);
+      ).toEqual(undefined);
 
       expect(
-        termsOperation.getPossibleOperationsForField({
+        termsOperation.getPossibleOperationForField({
           aggregatable: true,
           aggregationRestrictions: {},
           searchable: true,
           name: 'test',
           type: 'string',
         })
-      ).toEqual([]);
+      ).toEqual(undefined);
     });
   });
 
@@ -310,6 +307,7 @@ describe('terms', () => {
           state={state}
           setState={setStateSpy}
           columnId="col1"
+          currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
           layerId="first"
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
@@ -356,6 +354,7 @@ describe('terms', () => {
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
+          currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
         />
@@ -373,6 +372,7 @@ describe('terms', () => {
           state={state}
           setState={setStateSpy}
           columnId="col1"
+          currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
           layerId="first"
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
@@ -419,6 +419,7 @@ describe('terms', () => {
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
+          currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
         />
@@ -440,6 +441,7 @@ describe('terms', () => {
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
+          currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
         />
@@ -482,6 +484,7 @@ describe('terms', () => {
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
+          currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
         />
@@ -498,6 +501,7 @@ describe('terms', () => {
           setState={setStateSpy}
           columnId="col1"
           layerId="first"
+          currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
           storage={{} as Storage}
           uiSettings={{} as UiSettingsClientContract}
         />

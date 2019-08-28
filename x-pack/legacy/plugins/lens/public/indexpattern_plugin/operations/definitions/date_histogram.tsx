@@ -8,9 +8,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiForm, EuiFormRow, EuiRange, EuiSwitch } from '@elastic/eui';
-import { DateHistogramIndexPatternColumn, IndexPattern } from '../indexpattern';
-import { OperationDefinition } from '../operations';
-import { updateColumnParam } from '../state_helpers';
+import { IndexPattern } from '../../indexpattern';
+import { updateColumnParam } from '../../state_helpers';
+import { OperationDefinition } from '.';
+import { FieldBasedIndexPatternColumn } from './column_types';
 
 type PropType<C> = C extends React.ComponentType<infer P> ? P : unknown;
 
@@ -39,32 +40,33 @@ function supportsAutoInterval(fieldName: string, indexPattern: IndexPattern): bo
   return indexPattern.timeFieldName ? indexPattern.timeFieldName === fieldName : false;
 }
 
+export interface DateHistogramIndexPatternColumn extends FieldBasedIndexPatternColumn {
+  operationType: 'date_histogram';
+  params: {
+    interval: string;
+    timeZone?: string;
+  };
+}
+
 export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatternColumn> = {
   type: 'date_histogram',
   displayName: i18n.translate('xpack.lens.indexPattern.dateHistogram', {
     defaultMessage: 'Date Histogram',
   }),
-  getPossibleOperationsForDocument: () => [],
-  getPossibleOperationsForField: ({ aggregationRestrictions, aggregatable, type }) => {
+  getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       type === 'date' &&
       aggregatable &&
       (!aggregationRestrictions || aggregationRestrictions.date_histogram)
     ) {
-      return [
-        {
-          dataType: 'date',
-          isBucketed: true,
-          scale: 'interval',
-        },
-      ];
+      return {
+        dataType: 'date',
+        isBucketed: true,
+        scale: 'interval',
+      };
     }
-    return [];
   },
-  buildColumn({ suggestedPriority, field, indexPattern }): DateHistogramIndexPatternColumn {
-    if (!field) {
-      throw new Error('Invariant error: date histogram buildColumn requires field');
-    }
+  buildColumn({ suggestedPriority, field, indexPattern }) {
     let interval = indexPattern.timeFieldName === field.name ? autoInterval : defaultCustomInterval;
     let timeZone: string | undefined;
     if (field.aggregationRestrictions && field.aggregationRestrictions.date_histogram) {
@@ -162,13 +164,11 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       extended_bounds: {},
     },
   }),
-  paramEditor: ({ state, setState, columnId, layerId }) => {
-    const column = state.layers[layerId].columns[columnId] as DateHistogramIndexPatternColumn;
-
+  paramEditor: ({ state, setState, currentColumn: currentColumn, layerId }) => {
     const field =
-      column &&
+      currentColumn &&
       state.indexPatterns[state.layers[layerId].indexPatternId].fields.find(
-        currentField => currentField.name === column.sourceField
+        currentField => currentField.name === currentColumn.sourceField
       );
     const intervalIsRestricted =
       field!.aggregationRestrictions && field!.aggregationRestrictions.date_histogram;
@@ -185,7 +185,9 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
 
     function onChangeAutoInterval(ev: React.ChangeEvent<HTMLInputElement>) {
       const interval = ev.target.checked ? defaultCustomInterval : autoInterval;
-      setState(updateColumnParam(state, layerId, column, 'interval', interval));
+      setState(
+        updateColumnParam({ state, layerId, currentColumn, paramName: 'interval', value: interval })
+      );
     }
 
     return (
@@ -196,12 +198,12 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
               label={i18n.translate('xpack.lens.indexPattern.dateHistogram.autoInterval', {
                 defaultMessage: 'Customize level of detail',
               })}
-              checked={column.params.interval !== autoInterval}
+              checked={currentColumn.params.interval !== autoInterval}
               onChange={onChangeAutoInterval}
             />
           </EuiFormRow>
         )}
-        {column.params.interval !== autoInterval && (
+        {currentColumn.params.interval !== autoInterval && (
           <EuiFormRow
             label={i18n.translate('xpack.lens.indexPattern.dateHistogram.interval', {
               defaultMessage: 'Level of detail',
@@ -212,7 +214,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
                 id="xpack.lens.indexPattern.dateHistogram.restrictedInterval"
                 defaultMessage="Interval fixed to {intervalValue} due to aggregation restrictions."
                 values={{
-                  intervalValue: column.params.interval,
+                  intervalValue: currentColumn.params.interval,
                 }}
               />
             ) : (
@@ -220,7 +222,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
                 min={0}
                 max={supportedIntervals.length - 1}
                 step={1}
-                value={intervalToNumeric(column.params.interval)}
+                value={intervalToNumeric(currentColumn.params.interval)}
                 showTicks
                 ticks={supportedIntervals.map((interval, index) => ({
                   label: interval,
@@ -228,13 +230,13 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
                 }))}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setState(
-                    updateColumnParam(
+                    updateColumnParam({
                       state,
                       layerId,
-                      column,
-                      'interval',
-                      numericToInterval(Number(e.target.value))
-                    )
+                      currentColumn,
+                      paramName: 'interval',
+                      value: numericToInterval(Number(e.target.value)),
+                    })
                   )
                 }
                 aria-label={i18n.translate('xpack.lens.indexPattern.dateHistogram.interval', {

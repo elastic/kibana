@@ -4,20 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  getOperationTypesForField,
-  getAvailableOperationsByMetadata,
-  buildColumn,
-} from './operations';
-import {
-  IndexPatternPrivateState,
-  AvgIndexPatternColumn,
-  MinIndexPatternColumn,
-  CountIndexPatternColumn,
-} from './indexpattern';
+import { getOperationTypesForField, getAvailableOperationsByMetadata, buildColumn } from '.';
+import { IndexPatternPrivateState } from '../indexpattern';
+import { AvgIndexPatternColumn, MinIndexPatternColumn } from './definitions/metrics';
+import { CountIndexPatternColumn } from './definitions/count';
 
 jest.mock('ui/new_platform');
-jest.mock('./loader');
+jest.mock('../loader');
 
 const expectedIndexPatterns = {
   1: {
