@@ -99,7 +99,14 @@ export const TimeSeries = ({
         onBrushEnd={onBrush}
         animateData={false}
         onCursorUpdate={handleCursorUpdate}
-        theme={isDarkMode ? DARK_THEME : LIGHT_THEME}
+        theme={{
+          crosshair: {
+            band: {
+              fill: '#F00',
+            },
+          },
+        }}
+        baseTheme={isDarkMode ? DARK_THEME : LIGHT_THEME}
         tooltip={{
           type: TooltipType.VerticalCursor,
           headerFormatter: tooltipFormatter,
