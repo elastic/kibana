@@ -23,7 +23,7 @@ import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 const GEO_FIELD_TYPES = [ES_GEO_FIELD_TYPE.GEO_POINT];
 
 function filterGeoField({ type }) {
-  return [ES_GEO_FIELD_TYPE.GEO_POINT].includes(type);
+  return GEO_FIELD_TYPES.includes(type);
 }
 
 export class CreateSourceEditor extends Component {
