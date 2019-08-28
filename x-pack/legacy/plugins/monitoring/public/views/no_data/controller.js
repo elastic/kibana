@@ -96,7 +96,19 @@ export class NoDataController {
 
     // register the monitoringClusters service.
     $executor.register({
-      execute: () => monitoringClusters(undefined, undefined, [CODE_PATH_LICENSE]),
+      execute: async () => {
+        try {
+          return await monitoringClusters(undefined, undefined, [CODE_PATH_LICENSE]);
+        }
+        catch (err) {
+          if (err && err.status === 503) {
+            model.reason = {
+              property: 'custom',
+              message: err.data.message,
+            };
+          }
+        }
+      },
       handleResponse: clusters => {
         if (clusters.length) {
           model.hasData = true; // use the control flag because we can't redirect from inside here
@@ -105,6 +117,7 @@ export class NoDataController {
     });
 
     $executor.start($scope); // start the executor to keep refreshing the search for data
+    $executor.run();
   }
 
   enableTimefilter($executor) {

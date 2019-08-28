@@ -32,6 +32,14 @@ const ExplainWhyNoData = ({ reason, ...props }) => {
       return <ExplainExportersCloud {...reason} {...props}/>;
     case 'xpack.monitoring.enabled':
       return <ExplainPluginEnabled {...reason} {...props} />;
+    case 'custom':
+      return (
+        <EuiText>
+          <p>
+            {reason.message}
+          </p>
+        </EuiText>
+      );
     default:
       return (
         <EuiText>
