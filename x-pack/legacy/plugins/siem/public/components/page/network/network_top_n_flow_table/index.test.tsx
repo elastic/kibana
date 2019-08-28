@@ -22,25 +22,7 @@ import { createStore, networkModel, State } from '../../../../store';
 
 import { NetworkTopNFlowTable } from '.';
 import { mockData } from './mock';
-
-jest.mock('ui/new_platform', () => ({
-  npStart: {
-    core: {
-      injectedMetadata: {
-        getKibanaVersion: () => '8.0.0',
-      },
-    },
-  },
-  npSetup: {
-    core: {
-      uiSettings: {
-        get$: () => ({
-          subscribe: jest.fn(),
-        }),
-      },
-    },
-  },
-}));
+jest.mock('../../../../lib/settings/use_kibana_ui_setting');
 describe('NetworkTopNFlow Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
@@ -102,7 +84,7 @@ describe('NetworkTopNFlow Table Component', () => {
           </TestProviders>
         </MockedProvider>
       );
-      expect(store.getState().network.page.queries!.topNFlowSource.topNFlowSort).toEqual({
+      expect(store.getState().network.page.queries.topNFlowSource.topNFlowSort).toEqual({
         direction: 'desc',
         field: 'bytes_out',
       });
@@ -114,7 +96,7 @@ describe('NetworkTopNFlow Table Component', () => {
 
       wrapper.update();
 
-      expect(store.getState().network.page.queries!.topNFlowSource.topNFlowSort).toEqual({
+      expect(store.getState().network.page.queries.topNFlowSource.topNFlowSort).toEqual({
         direction: 'asc',
         field: 'bytes_out',
       });

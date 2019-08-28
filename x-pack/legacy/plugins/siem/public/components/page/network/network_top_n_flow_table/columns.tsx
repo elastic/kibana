@@ -25,7 +25,7 @@ import { Columns } from '../../../load_more_table';
 import { IS_OPERATOR } from '../../../timeline/data_providers/data_provider';
 import { Provider } from '../../../timeline/data_providers/provider';
 import * as i18n from './translations';
-import { getRowItemDraggables } from '../../../tables/helpers';
+import { getRowItemDraggable, getRowItemDraggables } from '../../../tables/helpers';
 import { PreferenceFormattedBytes } from '../../../formatted_bytes';
 
 export type NetworkTopNFlowColumns = [
@@ -123,18 +123,20 @@ export const getNetworkTopNFlowColumns = (
         const id = escapeDataProviderId(`${tableId}-table-${flowTarget}-ip-${ipAddress}`);
         return (
           <>
-            {as.name &&
-              getRowItemDraggables({
-                rowItems: [as.name],
-                attrName: `${flowTarget}.as.organization.name`,
-                idPrefix: `${id}-name`,
-              })}
-
+            {as.name && (
+              <div style={{ display: 'block' }}>
+                {getRowItemDraggable({
+                  rowItem: as.name,
+                  attrName: `${flowTarget}.as.organization.name`,
+                  idPrefix: `${id}-name`,
+                })}
+              </div>
+            )}
             {as.number && (
               <>
-                {` AS`}
-                {getRowItemDraggables({
-                  rowItems: [`${as.number}`],
+                <div style={{ display: 'inline-block' }}>{` AS`}</div>
+                {getRowItemDraggable({
+                  rowItem: `${as.number}`,
                   attrName: `${flowTarget}.as.number`,
                   idPrefix: `${id}-number`,
                 })}
