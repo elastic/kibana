@@ -30,8 +30,15 @@ export class UMMonitorStatesDomain {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    filters?: string | null
+    filters?: string | null,
+    statusFilter?: string | null
   ): Promise<MonitorSummary[]> {
-    return this.adapter.legacyGetMonitorStates(request, dateRangeStart, dateRangeEnd, filters);
+    return this.adapter.legacyGetMonitorStates(
+      request,
+      dateRangeStart,
+      dateRangeEnd,
+      filters,
+      statusFilter
+    );
   }
 }
