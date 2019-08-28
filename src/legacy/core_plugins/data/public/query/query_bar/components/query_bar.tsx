@@ -22,7 +22,7 @@ import { doesKueryExpressionHaveLuceneSyntaxError } from '@kbn/es-query';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import { Storage } from 'ui/storage';
-import { timeHistory } from 'ui/timefilter/time_history';
+import { timeHistory } from 'ui/timefilter';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSuperDatePicker } from '@elastic/eui';
 

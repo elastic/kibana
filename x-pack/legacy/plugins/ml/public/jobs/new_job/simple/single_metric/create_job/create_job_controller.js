@@ -18,6 +18,7 @@ import dateMath from '@elastic/datemath';
 import angular from 'angular';
 
 import uiRoutes from 'ui/routes';
+import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import { getSafeAggregationName } from 'plugins/ml/../common/util/job_utils';
 import { checkLicenseExpired } from 'plugins/ml/license/check_license';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
@@ -621,10 +622,13 @@ module
       moveToAdvancedJobCreation(job);
     };
 
-    $scope.$listenAndDigestAsync(timefilter, 'fetch', $scope.loadVis);
+    const fetchSub = subscribeWithScope($scope, timefilter.getFetch$(), {
+      next: $scope.loadVis
+    });
 
     $scope.$on('$destroy', () => {
       globalForceStop = true;
+      fetchSub.unsubscribe();
     });
 
     $scope.$evalAsync(() => {
