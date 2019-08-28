@@ -132,6 +132,7 @@ export const getNetworkTopNFlowColumns = (
 
             {as.number && (
               <>
+                {' '}
                 {getRowItemDraggables({
                   rowItems: [`${as.number}`],
                   attrName: `${flowTarget}.as.number`,
