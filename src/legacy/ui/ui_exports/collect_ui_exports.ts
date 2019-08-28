@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { SavedObjectsLegacyUiExports } from 'src/core/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { SavedObjectsLegacyUiExports } from 'src/core/server/types';
 // @ts-ignore
 import { UI_EXPORT_DEFAULTS } from './ui_export_defaults';
 // @ts-ignore

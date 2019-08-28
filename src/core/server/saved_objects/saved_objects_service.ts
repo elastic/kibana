@@ -30,25 +30,25 @@ import { Logger } from '..';
 /**
  * @public
  */
-export interface SavedObjectsServiceStart {
-  migrator: Pick<KibanaMigrator, keyof KibanaMigrator>;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SavedObjectsServiceSetup {}
 
 /**
  * @public
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SavedObjectsServiceSetup {}
-
-/** @internal */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SavedObjectsStartDeps {}
+export interface SavedObjectsServiceStart {
+  migrator: Pick<KibanaMigrator, keyof KibanaMigrator>;
+}
 
 /** @internal */
 export interface SavedObjectsSetupDeps {
   legacy: LegacyServiceSetup;
   elasticsearch: ElasticsearchServiceSetup;
 }
+
+/** @internal */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SavedObjectsStartDeps {}
 
 export class SavedObjectsService
   implements CoreService<SavedObjectsServiceSetup, SavedObjectsServiceStart> {

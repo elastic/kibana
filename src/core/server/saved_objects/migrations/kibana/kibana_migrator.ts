@@ -64,7 +64,7 @@ export class KibanaMigrator {
   private mappingProperties: MappingProperties;
   private readonly schema: SavedObjectsSchema;
   private serializer: SavedObjectsSerializer;
-  private migrationResult: Promise<Array<{ status: string }>> | undefined;
+  private migrationResult?: Promise<Array<{ status: string }>>;
 
   /**
    * Creates an instance of KibanaMigrator.
@@ -104,7 +104,7 @@ export class KibanaMigrator {
    * @memberof KibanaMigrator
    */
   public awaitMigration(skipMigrations: boolean = false) {
-    if (this.migrationResult == null) {
+    if (this.migrationResult === undefined) {
       this.migrationResult = this.runMigrations(skipMigrations);
     }
 

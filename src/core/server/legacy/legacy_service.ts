@@ -20,7 +20,8 @@
 import { combineLatest, ConnectableObservable, EMPTY, Observable, Subscription } from 'rxjs';
 import { first, map, mergeMap, publishReplay, tap } from 'rxjs/operators';
 import { CoreService } from '../../types';
-import { InternalCoreSetup, InternalCoreStart, SavedObjectsLegacyUiExports } from '../../server';
+import { InternalCoreSetup, InternalCoreStart } from '../';
+import { SavedObjectsLegacyUiExports } from '../types';
 import { Config } from '../config';
 import { CoreContext } from '../core_context';
 import { DevConfig, DevConfigType } from '../dev';

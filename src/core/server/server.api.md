@@ -977,26 +977,6 @@ export interface SavedObjectsLegacyService<Request = any> {
     types: string[];
 }
 
-// @internal (undocumented)
-export interface SavedObjectsLegacyUiExports {
-    // Warning: (ae-forgotten-export) The symbol "SavedObjectsMapping" needs to be exported by the entry point index.d.ts
-    // 
-    // (undocumented)
-    savedObjectMappings: SavedObjectsMapping[];
-    // Warning: (ae-forgotten-export) The symbol "MigrationDefinition" needs to be exported by the entry point index.d.ts
-    // 
-    // (undocumented)
-    savedObjectMigrations: MigrationDefinition;
-    // Warning: (ae-forgotten-export) The symbol "SavedObjectsSchemaDefinition" needs to be exported by the entry point index.d.ts
-    // 
-    // (undocumented)
-    savedObjectSchemas: SavedObjectsSchemaDefinition;
-    // Warning: (ae-forgotten-export) The symbol "PropertyValidators" needs to be exported by the entry point index.d.ts
-    // 
-    // (undocumented)
-    savedObjectValidations: PropertyValidators;
-}
-
 // @public (undocumented)
 export interface SavedObjectsMigrationLogger {
     // (undocumented)
@@ -1045,10 +1025,9 @@ export interface SavedObjectsResolveImportErrorsOptions {
     supportedTypes: string[];
 }
 
-// Warning: (ae-missing-release-tag) "SavedObjectsSchema" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
+// @internal (undocumented)
 export class SavedObjectsSchema {
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectsSchemaDefinition" needs to be exported by the entry point index.d.ts
     constructor(schemaDefinition?: SavedObjectsSchemaDefinition);
     // (undocumented)
     getConvertToAliasScript(type: string): string | undefined;
@@ -1060,9 +1039,7 @@ export class SavedObjectsSchema {
     isNamespaceAgnostic(type: string): boolean;
 }
 
-// Warning: (ae-missing-release-tag) "SavedObjectsSerializer" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
-// @public (undocumented)
+// @internal (undocumented)
 export class SavedObjectsSerializer {
     constructor(schema: SavedObjectsSchema);
     generateRawId(namespace: string | undefined, type: string, id?: string): string;

@@ -206,7 +206,10 @@ export interface SavedObjectsBaseOptions {
  */
 export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
 
-/** @internal */
+/**
+ * @internal
+ * @deprecated
+ */
 export interface SavedObjectsLegacyUiExports {
   savedObjectMappings: SavedObjectsMapping[];
   savedObjectMigrations: MigrationDefinition;

@@ -17,14 +17,14 @@
  * under the License.
  */
 
+jest.mock('./migrations/kibana/kibana_migrator');
+
 import { SavedObjectsService, SavedObjectsSetupDeps } from './saved_objects_service';
 import { CoreContext } from '../core_context';
 import { mockCoreContext } from '../core_context.mock';
 import { KibanaMigrator } from './migrations/kibana/kibana_migrator';
 import { of } from 'rxjs';
 import elasticsearch from 'elasticsearch';
-
-jest.mock('./migrations/kibana/kibana_migrator');
 
 let coreContext: CoreContext;
 beforeEach(() => {
