@@ -48,7 +48,7 @@ import template from './create_job.html';
 import { timefilter } from 'ui/timefilter';
 
 uiRoutes
-  .when('/jobs/new_job/simple/single_metric', {
+  .when('/jobs/new_job_old/single_metric', {
     template,
     k7Breadcrumbs: getCreateSingleMetricJobBreadcrumbs,
     resolve: {
