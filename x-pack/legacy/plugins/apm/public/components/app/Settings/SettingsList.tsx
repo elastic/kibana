@@ -26,9 +26,9 @@ import { useFetcher } from '../../../hooks/useFetcher';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
 import { AgentConfigurationListAPIResponse } from '../../../../server/lib/settings/agent_configuration/list_configurations';
 import { AddSettingsFlyout } from './AddSettings/AddSettingFlyout';
-import { APMLink } from '../../shared/Links/apm/APMLink';
 import { LoadingStatePrompt } from '../../shared/LoadingStatePrompt';
 import { callApmApi } from '../../../services/rest/callApmApi';
+import { HomeLink } from '../../shared/Links/apm/HomeLink';
 
 export type Config = AgentConfigurationListAPIResponse[0];
 
@@ -200,11 +200,11 @@ export function SettingsList() {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <APMLink path="/">
+          <HomeLink>
             <EuiButtonEmpty size="s" color="primary" iconType="arrowLeft">
               {RETURN_TO_OVERVIEW_LINK_LABEL}
             </EuiButtonEmpty>
-          </APMLink>
+          </HomeLink>
         </EuiFlexItem>
       </EuiFlexGroup>
 
