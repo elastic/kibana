@@ -24,12 +24,12 @@ type ESServer = {
 let ESServer: ESServer;
 
 function _parseESConnectionString(connectionString: string) {
-  const { username, password } = (url.parse(connectionString) as unknown) as url.URL;
+  const uri = (url.parse(connectionString) as unknown) as url.URL;
 
   return {
     hosts: [connectionString],
-    username,
-    password,
+    username: uri.username || (uri as any).auth.split(':')[0],
+    password: uri.password || (uri as any).auth.split(':')[1],
   };
 }
 

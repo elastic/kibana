@@ -7,6 +7,7 @@
 import elasticsearch from 'elasticsearch';
 import { ToolingLog } from '@kbn/dev-utils';
 import { resolve } from 'path';
+import * as fs from 'fs';
 import { EsArchiver } from '../../../../../src/es_archiver/es_archiver';
 
 interface ESServerConfig {
@@ -40,17 +41,25 @@ export const getEsArchiver = (options: {
 
   const client = new elasticsearch.Client({
     hosts: esConfig.hosts,
-    httpAuth: `${esConfig.username}:${esConfig.password}`,
+    httpAuth: esConfig.username ? `${esConfig.username}:${esConfig.password}` : undefined,
     log: options.logLevel,
   });
+
+  if (!fs.existsSync(resolve(options.dir))) {
+    throw new Error(
+      `getEsArchiver expects the dir option to be a path that exists on the local file system, ${resolve(
+        options.dir
+      )} does not exist`
+    );
+  }
 
   const esArchiver = new EsArchiver({
     log,
     client,
     dataDir: resolve(options.dir),
-    kibanaUrl: `http://${esConfig.username}:${esConfig.password}@${
-      options.kibanaUrl.split('://')[1]
-    }`,
+    kibanaUrl: esConfig.username
+      ? `http://${esConfig.username}:${esConfig.password}@${options.kibanaUrl.split('://')[1]}`
+      : options.kibanaUrl,
   });
 
   return esArchiver;
