@@ -8,6 +8,7 @@ import Joi from 'joi';
 import { getClustersFromRequest } from '../../../../lib/cluster/get_clusters_from_request';
 import { handleError } from '../../../../lib/errors';
 import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
+import { verifyCcsAvailability } from '../../../../lib/elasticsearch/verify_ccs_availability';
 import {
   INDEX_PATTERN_FILEBEAT
 } from '../../../../../common/constants';
@@ -34,7 +35,9 @@ export function clusterRoute(server) {
         })
       }
     },
-    handler: (req) => {
+    handler: async (req) => {
+      await verifyCcsAvailability(req);
+
       const indexPatterns = getIndexPatterns(server, { filebeatIndexPattern: INDEX_PATTERN_FILEBEAT });
       const options = {
         clusterUuid: req.params.clusterUuid,
