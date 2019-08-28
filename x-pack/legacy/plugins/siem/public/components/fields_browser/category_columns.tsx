@@ -65,7 +65,7 @@ interface ToolTipProps {
 }
 
 const ToolTip = React.memo<ToolTipProps>(({ categoryId, browserFields, onUpdateColumns }) => {
-  const { isLoading } = useContext(TimelineContext);
+  const isLoading = useContext(TimelineContext);
   return (
     <EuiToolTip content={i18n.VIEW_CATEGORY(categoryId)}>
       {!isLoading ? (

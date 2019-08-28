@@ -46,7 +46,7 @@ const routes: Route[] = [
 ];
 
 routes.forEach((route: Route) => {
-  uiRoutes.when(`/jobs/new_job/new_new_job/${route.id}`, {
+  uiRoutes.when(`/jobs/new_job/${route.id}`, {
     template,
     k7Breadcrumbs: route.k7Breadcrumbs,
     resolve: {

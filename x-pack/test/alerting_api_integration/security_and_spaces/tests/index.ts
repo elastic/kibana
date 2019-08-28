@@ -18,7 +18,7 @@ export default function alertingApiIntegrationTests({
   const spacesService: SpacesService = getService('spaces');
   const esArchiver = getService('esArchiver');
 
-  describe('alerting api integration', function() {
+  describe('alerting api integration security and spaces enabled', function() {
     this.tags('ciGroup8');
 
     before(async () => {

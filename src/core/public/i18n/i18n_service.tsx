@@ -334,7 +334,7 @@ export class I18nService {
       'euiSuperUpdateButton.updateButtonLabel': i18n.translate(
         'core.euiSuperUpdateButton.updateButtonLabel',
         {
-          defaultMessage: 'Uodate',
+          defaultMessage: 'Update',
           description: 'Displayed in a button that updates based on date picked',
         }
       ),

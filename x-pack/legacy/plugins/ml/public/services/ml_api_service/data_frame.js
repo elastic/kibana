@@ -40,10 +40,13 @@ export const dataFrame = {
       data: transformConfig
     });
   },
-  deleteDataFrameTransform(transformId) {
+  deleteDataFrameTransforms(transformsInfo) {
     return http({
-      url: `${basePath}/_data_frame/transforms/${transformId}`,
-      method: 'DELETE',
+      url: `${basePath}/_data_frame/transforms/delete_transforms`,
+      method: 'POST',
+      data: {
+        transformsInfo
+      }
     });
   },
   getDataFrameTransformsPreview(obj) {
@@ -53,16 +56,22 @@ export const dataFrame = {
       data: obj
     });
   },
-  startDataFrameTransform(transformId, force = false) {
+  startDataFrameTransforms(transformsInfo) {
     return http({
-      url: `${basePath}/_data_frame/transforms/${transformId}/_start?force=${force}`,
+      url: `${basePath}/_data_frame/transforms/start_transforms`,
       method: 'POST',
+      data: {
+        transformsInfo,
+      }
     });
   },
-  stopDataFrameTransform(transformId, force = false, waitForCompletion = false) {
+  stopDataFrameTransforms(transformsInfo) {
     return http({
-      url: `${basePath}/_data_frame/transforms/${transformId}/_stop?force=${force}&wait_for_completion=${waitForCompletion}`,
+      url: `${basePath}/_data_frame/transforms/stop_transforms`,
       method: 'POST',
+      data: {
+        transformsInfo,
+      }
     });
   },
   getTransformAuditMessages(transformId) {

@@ -26,13 +26,15 @@ export class Typeahead extends Component {
     isSuggestionsVisible: false,
     index: null,
     value: '',
-    inputIsPristine: true
+    initialValue: ''
   };
 
   static getDerivedStateFromProps(props, state) {
-    if (state.inputIsPristine && props.initialValue) {
+    const initialValue = props.initialValue ? props.initialValue : '';
+    if (initialValue !== state.initialValue) {
       return {
-        value: props.initialValue
+        value: initialValue,
+        initialValue
       };
     }
 
@@ -125,7 +127,6 @@ export class Typeahead extends Component {
     const hasValue = Boolean(value.trim());
     this.setState({
       value,
-      inputIsPristine: false,
       isSuggestionsVisible: hasValue,
       index: null
     });
