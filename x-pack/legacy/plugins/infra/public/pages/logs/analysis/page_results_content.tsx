@@ -18,8 +18,6 @@ import {
   EuiPageContentBody,
   EuiPanel,
   EuiBadge,
-  EuiCallOut,
-  EuiSpacer,
 } from '@elastic/eui';
 import dateMath from '@elastic/datemath';
 import moment from 'moment';
@@ -29,6 +27,7 @@ import { useLogAnalysisResults } from '../../../containers/logs/log_analysis';
 import { useLogAnalysisResultsUrlState } from '../../../containers/logs/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import { LogRateResults } from './sections/log_rate';
+import { FirstUseCallout } from './first_use';
 
 const DATE_PICKER_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
 
@@ -188,28 +187,7 @@ export const AnalysisResultsContent = ({
             <EuiPageBody>
               <EuiPageContent>
                 <EuiPageContentBody>
-                  {isFirstUse ? (
-                    <>
-                      <EuiCallOut
-                        color="success"
-                        title={i18n.translate(
-                          'xpack.infra.logs.logsAnalysisResults.onboardingSuccessTitle',
-                          { defaultMessage: 'Success!' }
-                        )}
-                      >
-                        <p>
-                          {i18n.translate(
-                            'xpack.infra.logs.logsAnalysisResults.onboardingSuccessContent',
-                            {
-                              defaultMessage:
-                                'Please allow a few minutes for our machine learning robots to begin collecting data.',
-                            }
-                          )}
-                        </p>
-                      </EuiCallOut>
-                      <EuiSpacer />
-                    </>
-                  ) : null}
+                  {isFirstUse ? <FirstUseCallout /> : null}
                   <LogRateResults
                     isLoading={isLoading}
                     results={logEntryRate}
