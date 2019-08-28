@@ -11,13 +11,14 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
 import { getPageData } from './get_page_data';
 import template from './index.html';
+import { CODE_PATH_ELASTICSEARCH, CODE_PATH_ML } from '../../../../common/constants';
 
 uiRoutes.when('/elasticsearch/ml_jobs', {
   template,
   resolve: {
     clusters: function (Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: [CODE_PATH_ELASTICSEARCH, CODE_PATH_ML] });
     },
     pageData: getPageData
   },

@@ -114,7 +114,6 @@ const INITIAL_STATE = {
 };
 
 
-
 export function map(state = INITIAL_STATE, action) {
   switch (action.type) {
     case UPDATE_DRAW_STATE:

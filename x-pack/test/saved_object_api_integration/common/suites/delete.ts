@@ -18,6 +18,7 @@ interface DeleteTest {
 interface DeleteTests {
   spaceAware: DeleteTest;
   notSpaceAware: DeleteTest;
+  hiddenType: DeleteTest;
   invalidId: DeleteTest;
 }
 
@@ -47,6 +48,14 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     });
   };
 
+  const expectGenericNotFound = (resp: { [key: string]: any }) => {
+    expect(resp.body).to.eql({
+      statusCode: 404,
+      error: 'Not Found',
+      message: `Not Found`,
+    });
+  };
+
   const createExpectSpaceAwareNotFound = (spaceId: string = DEFAULT_SPACE_ID) => (resp: {
     [key: string]: any;
   }) => {
@@ -68,6 +77,8 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   const expectRbacNotSpaceAwareForbidden = createExpectRbacForbidden('globaltype');
 
   const expectRbacSpaceAwareForbidden = createExpectRbacForbidden('dashboard');
+
+  const expectRbacHiddenTypeForbidden = createExpectRbacForbidden('hiddentype');
 
   const makeDeleteTest = (describeFn: DescribeFn) => (
     description: string,
@@ -101,6 +112,13 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
           .expect(tests.notSpaceAware.statusCode)
           .then(tests.notSpaceAware.response));
 
+      it(`should return ${tests.hiddenType.statusCode} when deleting a hiddentype doc`, async () =>
+        await supertest
+          .delete(`${getUrlPrefix(spaceId)}/api/saved_objects/hiddentype/hiddentype_1`)
+          .auth(user.username, user.password)
+          .expect(tests.hiddenType.statusCode)
+          .then(tests.hiddenType.response));
+
       it(`should return ${tests.invalidId.statusCode} when deleting an unknown doc`, async () =>
         await supertest
           .delete(
@@ -119,6 +137,7 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   deleteTest.only = makeDeleteTest(describe.only);
 
   return {
+    expectGenericNotFound,
     createExpectSpaceAwareNotFound,
     createExpectUnknownDocNotFound,
     deleteTest,
@@ -126,5 +145,6 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     expectRbacInvalidIdForbidden,
     expectRbacNotSpaceAwareForbidden,
     expectRbacSpaceAwareForbidden,
+    expectRbacHiddenTypeForbidden,
   };
 }

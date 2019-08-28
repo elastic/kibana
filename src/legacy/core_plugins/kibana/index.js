@@ -35,7 +35,6 @@ import { registerKqlTelemetryApi } from './server/routes/api/kql_telemetry';
 import { registerFieldFormats } from './server/field_formats/register';
 import { registerTutorials } from './server/tutorials/register';
 import * as systemApi from './server/lib/system_api';
-import handleEsError from './server/lib/handle_es_error';
 import mappings from './mappings.json';
 import { getUiSettingDefaults } from './ui_setting_defaults';
 import { makeKQLUsageCollector } from './server/lib/kql_usage_collector';
@@ -61,7 +60,9 @@ export default function (kibana) {
     },
 
     uiExports: {
-      hacks: ['plugins/kibana/dev_tools/hacks/hide_empty_tools'],
+      hacks: [
+        'plugins/kibana/dev_tools/hacks/hide_empty_tools',
+      ],
       fieldFormats: ['plugins/kibana/field_formats/register'],
       savedObjectTypes: [
         'plugins/kibana/visualize/saved_visualizations/saved_visualization_register',
@@ -171,7 +172,7 @@ export default function (kibana) {
           },
         },
         search: {
-          icon: 'search',
+          icon: 'discoverApp',
           defaultSearchField: 'title',
           isImportableAndExportable: true,
           getTitle(obj) {
@@ -266,17 +267,20 @@ export default function (kibana) {
           show: true,
           createShortUrl: true,
           save: true,
+          saveQuery: true,
         },
         visualize: {
           show: true,
           createShortUrl: true,
           delete: true,
           save: true,
+          saveQuery: true,
         },
         dashboard: {
           createNew: true,
           show: true,
           showWriteControls: true,
+          saveQuery: true,
         },
         catalogue: {
           discover: true,
@@ -341,7 +345,6 @@ export default function (kibana) {
       registerTutorials(server);
       makeKQLUsageCollector(server);
       server.expose('systemApi', systemApi);
-      server.expose('handleEsError', handleEsError);
       server.injectUiAppVars('kibana', () => injectVars(server));
     },
   });

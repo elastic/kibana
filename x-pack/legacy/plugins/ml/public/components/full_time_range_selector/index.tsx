@@ -3,33 +3,5 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import React from 'react';
-
-import { FormattedMessage } from '@kbn/i18n/react';
-import { IndexPattern } from 'ui/index_patterns';
-import { EuiButton } from '@elastic/eui';
-import { Query } from 'src/legacy/core_plugins/data/public';
-import { setFullTimeRange } from './full_time_range_selector_service';
-
-interface Props {
-  indexPattern: IndexPattern;
-  query: Query;
-  disabled: boolean;
-}
-
-// Component for rendering a button which automatically sets the range of the time filter
-// to the time range of data in the index(es) mapped to the supplied Kibana index pattern or query.
-export const FullTimeRangeSelector: React.SFC<Props> = ({ indexPattern, query, disabled }) => {
-  return (
-    <EuiButton fill isDisabled={disabled} onClick={() => setFullTimeRange(indexPattern, query)}>
-      <FormattedMessage
-        id="xpack.ml.fullTimeRangeSelector.useFullDataButtonLabel"
-        defaultMessage="Use full {indexPatternTitle} data"
-        values={{
-          indexPatternTitle: indexPattern.title,
-        }}
-      />
-    </EuiButton>
-  );
-};
+export { FullTimeRangeSelector } from './full_time_range_selector';
+export { getTimeFilterRange, TimeRange } from './full_time_range_selector_service';

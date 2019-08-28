@@ -4,24 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger } from '../../types';
-
 type ServerLog = (tags: string[], msg: string) => void;
 
-export class LevelLogger implements Logger {
+export class LevelLogger {
   private _logger: any;
   private _tags: string[];
+  private _isVerbose: boolean;
 
   public warn: (msg: string, tags?: string[]) => void;
 
-  static createForServer(server: any, tags: string[]) {
+  static createForServer(server: any, tags: string[], isVerbose = false) {
     const serverLog: ServerLog = (tgs: string[], msg: string) => server.log(tgs, msg);
-    return new LevelLogger(serverLog, tags);
+    return new LevelLogger(serverLog, tags, isVerbose);
   }
 
-  constructor(logger: ServerLog, tags: string[]) {
+  constructor(logger: ServerLog, tags: string[], isVerbose: boolean) {
     this._logger = logger;
     this._tags = tags;
+    this._isVerbose = isVerbose;
 
     /*
      * This shortcut provides maintenance convenience: Reporting code has been
@@ -46,7 +46,11 @@ export class LevelLogger implements Logger {
     this._logger([...this._tags, ...tags, 'info'], msg);
   }
 
+  public get isVerbose() {
+    return this._isVerbose;
+  }
+
   public clone(tags: string[]) {
-    return new LevelLogger(this._logger, [...this._tags, ...tags]);
+    return new LevelLogger(this._logger, [...this._tags, ...tags], this._isVerbose);
   }
 }

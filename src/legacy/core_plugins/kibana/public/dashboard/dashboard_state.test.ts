@@ -24,7 +24,7 @@ import { getAppStateMock, getSavedDashboardMock } from './__tests__';
 import { AppStateClass } from 'ui/state_management/app_state';
 import { DashboardAppState } from './types';
 import { Timefilter } from 'ui/timefilter';
-import { ViewMode } from '../../../embeddable_api/public';
+import { ViewMode } from '../../../embeddable_api/public/np_ready/public';
 
 describe('DashboardState', function() {
   let dashboardState: DashboardStateManager;
@@ -42,13 +42,17 @@ describe('DashboardState', function() {
     getRefreshInterval: jest.fn(),
     disableTimeRangeSelector: jest.fn(),
     enableAutoRefreshSelector: jest.fn(),
-    off: jest.fn(),
-    on: jest.fn(),
     getActiveBounds: () => {},
     enableTimeRangeSelector: () => {},
     isAutoRefreshSelectorEnabled: true,
     isTimeRangeSelectorEnabled: true,
+    getAutoRefreshFetch$: jest.fn(),
+    getEnabledUpdated$: jest.fn(),
+    getRefreshIntervalUpdate$: jest.fn(),
+    getFetch$: jest.fn(),
+    getTimeUpdate$: jest.fn(),
   };
+
   function initDashboardState() {
     dashboardState = new DashboardStateManager({
       savedDashboard,

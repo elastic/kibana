@@ -70,6 +70,7 @@ describe('Timeline', () => {
           showCallOutUnauthorizedMsg={false}
           start={startDate}
           sort={sort}
+          toggleColumn={jest.fn()}
         />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -104,6 +105,7 @@ describe('Timeline', () => {
               showCallOutUnauthorizedMsg={false}
               start={startDate}
               sort={sort}
+              toggleColumn={jest.fn()}
             />
           </MockedProvider>
         </TestProviders>
@@ -141,6 +143,7 @@ describe('Timeline', () => {
               showCallOutUnauthorizedMsg={false}
               start={startDate}
               sort={sort}
+              toggleColumn={jest.fn()}
             />
           </MockedProvider>
         </TestProviders>
@@ -178,6 +181,7 @@ describe('Timeline', () => {
               showCallOutUnauthorizedMsg={false}
               start={startDate}
               sort={sort}
+              toggleColumn={jest.fn()}
             />
           </MockedProvider>
         </TestProviders>
@@ -220,6 +224,7 @@ describe('Timeline', () => {
                 showCallOutUnauthorizedMsg={false}
                 start={startDate}
                 sort={sort}
+                toggleColumn={jest.fn()}
               />
             </MockedProvider>
           </TestProviders>
@@ -264,6 +269,7 @@ describe('Timeline', () => {
                 showCallOutUnauthorizedMsg={false}
                 start={startDate}
                 sort={sort}
+                toggleColumn={jest.fn()}
               />
             </MockedProvider>
           </TestProviders>
@@ -316,6 +322,7 @@ describe('Timeline', () => {
                 showCallOutUnauthorizedMsg={false}
                 start={startDate}
                 sort={sort}
+                toggleColumn={jest.fn()}
               />
             </MockedProvider>
           </TestProviders>
@@ -372,6 +379,7 @@ describe('Timeline', () => {
                 showCallOutUnauthorizedMsg={false}
                 start={startDate}
                 sort={sort}
+                toggleColumn={jest.fn()}
               />
             </MockedProvider>
           </TestProviders>
@@ -431,6 +439,7 @@ describe('Timeline', () => {
                 showCallOutUnauthorizedMsg={false}
                 start={startDate}
                 sort={sort}
+                toggleColumn={jest.fn()}
               />
             </MockedProvider>
           </TestProviders>
@@ -480,6 +489,7 @@ describe('Timeline', () => {
                 showCallOutUnauthorizedMsg={false}
                 start={startDate}
                 sort={sort}
+                toggleColumn={jest.fn()}
               />
             </MockedProvider>
           </TestProviders>
@@ -535,6 +545,7 @@ describe('Timeline', () => {
                 showCallOutUnauthorizedMsg={false}
                 start={startDate}
                 sort={sort}
+                toggleColumn={jest.fn()}
               />
             </MockedProvider>
           </TestProviders>
@@ -594,6 +605,7 @@ describe('Timeline', () => {
                 showCallOutUnauthorizedMsg={false}
                 start={startDate}
                 sort={sort}
+                toggleColumn={jest.fn()}
               />
             </MockedProvider>
           </TestProviders>

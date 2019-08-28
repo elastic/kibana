@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { DiscoveredPlugin } from '../../server';
+import { DiscoveredPlugin, PluginOpaqueId } from '../../server';
 import { PluginInitializerContext } from './plugin_context';
 import { loadPluginBundle } from './plugin_loader';
 import { CoreStart, CoreSetup } from '..';
@@ -72,6 +72,7 @@ export class PluginWrapper<
 
   constructor(
     readonly discoveredPlugin: DiscoveredPlugin,
+    public readonly opaqueId: PluginOpaqueId,
     private readonly initializerContext: PluginInitializerContext
   ) {
     this.name = discoveredPlugin.id;

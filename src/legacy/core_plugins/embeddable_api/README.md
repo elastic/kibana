@@ -29,3 +29,11 @@ A developer can register new triggers that their embeddables, or external compon
 ## Examples
 
 Many examples can be viewed in the functionally tested `kbn_tp_embeddable_explorer` plugin, as well as the jest tested classes inside the `embeddable_api/public/test_samples` folder.
+
+## Testing
+
+Run unit tests
+
+```shell
+node scripts/jest embeddable_api
+```

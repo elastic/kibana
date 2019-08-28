@@ -49,11 +49,11 @@
       "properties": {
         "action": {
           "properties": {
-            "actionTypeConfig": {
+            "config": {
               "enabled": false,
               "type": "object"
             },
-            "actionTypeConfigSecrets": {
+            "secrets": {
               "type": "binary"
             },
             "actionTypeId": {

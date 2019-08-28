@@ -14,6 +14,7 @@ export async function getBuckets(
   transactionType: string,
   transactionId: string,
   traceId: string,
+  distributionMax: number,
   bucketSize: number,
   setup: Setup
 ) {
@@ -23,6 +24,7 @@ export async function getBuckets(
     transactionType,
     transactionId,
     traceId,
+    distributionMax,
     bucketSize,
     setup
   );

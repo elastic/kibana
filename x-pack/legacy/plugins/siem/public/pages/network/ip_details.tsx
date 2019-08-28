@@ -302,6 +302,8 @@ export const IPDetailsComponent = pure<IPDetailsComponentProps>(
   )
 );
 
+IPDetailsComponent.displayName = 'IPDetailsComponent';
+
 const makeMapStateToProps = () => {
   const getNetworkFilterQuery = networkSelectors.networkFilterQueryAsJson();
   const getIpDetailsFlowTargetSelector = networkSelectors.ipDetailsFlowTargetSelector();

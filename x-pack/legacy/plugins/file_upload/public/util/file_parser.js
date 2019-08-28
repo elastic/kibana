@@ -35,7 +35,7 @@ export function jsonPreview(json, previewFunction) {
   // Call preview (if any)
   if (json && previewFunction) {
     const defaultName = _.get(json, 'name', 'Import File');
-    previewFunction(_.cloneDeep(json), defaultName);
+    previewFunction(json, defaultName);
   }
 }
 

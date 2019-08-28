@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { isBoolean } from 'lodash';
 import React, { Fragment } from 'react';
 import { idx } from '@kbn/elastic-idx';
 import {
@@ -12,21 +13,22 @@ import {
   HTTP_REQUEST_METHOD,
   TRANSACTION_ID,
   URL_FULL,
-  USER_ID
+  USER_ID,
+  ERROR_PAGE_URL
 } from '../../../../../common/elasticsearch_fieldnames';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { APMError } from '../../../../../typings/es_schemas/ui/APMError';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
-import { APMLink } from '../../../shared/Links/APMLink';
-import { legacyEncodeURIComponent } from '../../../shared/Links/url_helpers';
 import { StickyProperties } from '../../../shared/StickyProperties';
+import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
+import { isRumAgentName } from '../../../../../common/agent_name';
 
 interface Props {
   error: APMError;
   transaction: Transaction | undefined;
 }
 
-function TransactionLink({
+function TransactionLinkWrapper({
   transaction
 }: {
   transaction: Transaction | undefined;
@@ -40,26 +42,33 @@ function TransactionLink({
     return <Fragment>{transaction.transaction.id}</Fragment>;
   }
 
-  const path = `/${
-    transaction.service.name
-  }/transactions/${legacyEncodeURIComponent(
-    transaction.transaction.type
-  )}/${legacyEncodeURIComponent(transaction.transaction.name)}`;
-
   return (
-    <APMLink
-      path={path}
-      query={{
-        transactionId: transaction.transaction.id,
-        traceId: transaction.trace.id
-      }}
+    <TransactionDetailLink
+      serviceName={transaction.service.name}
+      transactionId={transaction.transaction.id}
+      traceId={transaction.trace.id}
+      transactionName={transaction.transaction.name}
+      transactionType={transaction.transaction.type}
     >
       {transaction.transaction.id}
-    </APMLink>
+    </TransactionDetailLink>
   );
 }
 
 export function StickyErrorProperties({ error, transaction }: Props) {
+  const isHandled = idx(error, _ => _.error.exception[0].handled);
+  const isRumAgent = isRumAgentName(error.agent.name);
+
+  const { urlFieldName, urlValue } = isRumAgent
+    ? {
+        urlFieldName: ERROR_PAGE_URL,
+        urlValue: idx(error, _ => _.error.page.url)
+      }
+    : {
+        urlFieldName: URL_FULL,
+        urlValue: idx(error, _ => _.url.full)
+      };
+
   const stickyProperties = [
     {
       fieldName: '@timestamp',
@@ -70,12 +79,9 @@ export function StickyErrorProperties({ error, transaction }: Props) {
       width: '50%'
     },
     {
-      fieldName: URL_FULL,
+      fieldName: urlFieldName,
       label: 'URL',
-      val:
-        idx(error, _ => _.context.page.url) ||
-        idx(error, _ => _.url.full) ||
-        NOT_AVAILABLE_LABEL,
+      val: urlValue || NOT_AVAILABLE_LABEL,
       truncated: true,
       width: '50%'
     },
@@ -92,9 +98,7 @@ export function StickyErrorProperties({ error, transaction }: Props) {
       label: i18n.translate('xpack.apm.errorGroupDetails.handledLabel', {
         defaultMessage: 'Handled'
       }),
-      val:
-        String(idx(error, _ => _.error.exception[0].handled)) ||
-        NOT_AVAILABLE_LABEL,
+      val: isBoolean(isHandled) ? String(isHandled) : NOT_AVAILABLE_LABEL,
       width: '25%'
     },
     {
@@ -105,7 +109,7 @@ export function StickyErrorProperties({ error, transaction }: Props) {
           defaultMessage: 'Transaction sample ID'
         }
       ),
-      val: <TransactionLink transaction={transaction} />,
+      val: <TransactionLinkWrapper transaction={transaction} />,
       width: '25%'
     },
     {

@@ -33,7 +33,7 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
   } = useAppDependencies();
   const { FormattedMessage } = i18n;
   const {
-    indices,
+    indices: restoreIndices,
     renamePattern,
     renameReplacement,
     partial,
@@ -45,7 +45,13 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
   const { index_settings: serializedIndexSettings } = serializedRestoreSettings;
 
   const [isShowingFullIndicesList, setIsShowingFullIndicesList] = useState<boolean>(false);
-  const hiddenIndicesCount = indices && indices.length > 10 ? indices.length - 10 : 0;
+  const displayIndices = restoreIndices
+    ? typeof restoreIndices === 'string'
+      ? restoreIndices.split(',')
+      : restoreIndices
+    : undefined;
+  const hiddenIndicesCount =
+    displayIndices && displayIndices.length > 10 ? displayIndices.length - 10 : 0;
 
   const renderSummaryTab = () => (
     <Fragment>
@@ -82,18 +88,19 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              {indices ? (
+              {displayIndices ? (
                 <EuiText>
                   <ul>
-                    {(isShowingFullIndicesList ? indices : [...indices].splice(0, 10)).map(
-                      index => (
-                        <li key={index}>
-                          <EuiTitle size="xs">
-                            <span>{index}</span>
-                          </EuiTitle>
-                        </li>
-                      )
-                    )}
+                    {(isShowingFullIndicesList
+                      ? displayIndices
+                      : [...displayIndices].splice(0, 10)
+                    ).map(index => (
+                      <li key={index}>
+                        <EuiTitle size="xs">
+                          <span>{index}</span>
+                        </EuiTitle>
+                      </li>
+                    ))}
                     {hiddenIndicesCount ? (
                       <li key="hiddenIndicesCount">
                         <EuiTitle size="xs">

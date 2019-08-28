@@ -6,9 +6,9 @@
 
 import { snapshotHistogramQueryString } from '../../../../../legacy/plugins/uptime/public/queries/snapshot_histogram_query';
 import { expectFixtureEql } from './expect_fixture_eql';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getService }: { getService: any }) {
+export default function({ getService }: FtrProviderContext) {
   describe('snapshotHistogram', () => {
     const supertest = getService('supertest');
 

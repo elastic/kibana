@@ -16,6 +16,7 @@ import { TimeseriesChart } from './timeseries_chart';
 // mocking the following files because they import some core kibana
 // code which the jest setup isn't happy with.
 jest.mock('ui/chrome', () => ({
+  addBasePath: path => path,
   getBasePath: path => path,
   // returns false for mlAnnotationsEnabled
   getInjected: () => false,

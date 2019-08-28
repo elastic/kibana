@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { difference } from 'lodash';
+import { difference, isEqual } from 'lodash';
+import { BehaviorSubject } from 'rxjs';
 import { toastNotifications } from 'ui/notify';
-import { mlJobService } from '../../services/job_service';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import d3 from 'd3';
 
+import { mlJobService } from '../../services/job_service';
 
 function warnAboutInvalidJobIds(invalidIds) {
   if (invalidIds.length > 0) {
@@ -33,6 +34,30 @@ function getInvalidJobIds(ids) {
     return (jobExists === false && id !== '*');
   });
 }
+
+export const jobSelectServiceFactory = (globalState) => {
+  const { jobIds, selectedGroups } = getSelectedJobIds(globalState);
+  const jobSelectService = new BehaviorSubject({ selection: jobIds, groups: selectedGroups, resetSelection: false });
+
+  // Subscribe to changes to globalState and trigger
+  // a jobSelectService update if the job selection changed.
+  const listener = () => {
+    const { jobIds: newJobIds, selectedGroups: newSelectedGroups } = getSelectedJobIds(globalState);
+    const oldSelectedJobIds = jobSelectService.getValue().selection;
+
+    if (newJobIds && !(isEqual(oldSelectedJobIds, newJobIds))) {
+      jobSelectService.next({ selection: newJobIds, groups: newSelectedGroups });
+    }
+  };
+
+  globalState.on('save_with_changes', listener);
+
+  const unsubscribeFromGlobalState = () => {
+    globalState.off('save_with_changes', listener);
+  };
+
+  return { jobSelectService, unsubscribeFromGlobalState };
+};
 
 function loadJobIdsFromGlobalState(globalState) { // jobIds, groups
   // fetch to get the latest state

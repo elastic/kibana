@@ -156,7 +156,7 @@ export class Handler {
     chartSelection.each(function (chartData) {
       const chart = new self.ChartClass(self, this, chartData);
 
-      self.vis.activeEvents().forEach(function (event) {
+      self.vis.eventNames().forEach(function (event) {
         self.enable(event, chart);
       });
 

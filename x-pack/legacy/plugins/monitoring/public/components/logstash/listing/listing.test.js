@@ -60,7 +60,8 @@ describe('Listing', () => {
       },
       sorting: {
         sort: 'asc'
-      }
+      },
+      setupMode: {}
     };
 
     const component = shallow(<Listing {...props} />);
@@ -79,7 +80,8 @@ describe('Listing', () => {
       },
       sorting: {
         sort: 'asc'
-      }
+      },
+      setupMode: {}
     };
 
     const component = shallow(<Listing {...props} />);

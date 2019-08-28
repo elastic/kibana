@@ -16,6 +16,7 @@ import { LoggerFactory } from '../utils/log_factory';
 import { AbstractLauncher } from './abstract_launcher';
 import { LanguageServerProxy } from './proxy';
 import { InitializeOptions, RequestExpander } from './request_expander';
+import { ExternalProgram } from './process/external_program';
 
 const JAVA_LANG_DETACH_PORT = 2090;
 
@@ -41,6 +42,13 @@ export class JavaLauncher extends AbstractLauncher {
             'java.import.gradle.enabled': this.options.security.enableGradleImport,
             'java.import.maven.enabled': this.options.security.enableMavenImport,
             'java.autobuild.enabled': false,
+          },
+        },
+        clientCapabilities: {
+          textDocument: {
+            documentSymbol: {
+              hierarchicalDocumentSymbolSupport: true,
+            },
           },
         },
       } as InitializeOptions,
@@ -179,7 +187,7 @@ export class JavaLauncher extends AbstractLauncher {
         p.pid
       }, JAVA_HOME:${javaHomePath}`
     );
-    return p;
+    return new ExternalProgram(p, this.options, log);
   }
 
   // TODO(pcxu): run /usr/libexec/java_home to get all java homes for macOS

@@ -7,10 +7,9 @@ import expect from '@kbn/expect';
 // eslint-disable-next-line max-len
 import { VisualizeConstants } from '../../../../../../src/legacy/core_plugins/kibana/public/visualize/visualize_constants';
 import { SpacesService } from '../../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const spacesService: SpacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'visualize', 'security', 'spaceSelector']);
@@ -59,7 +58,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('visualizationLoader', 10000);
+        await testSubjects.existOrFail('visualizationLoader', { timeout: 10000 });
       });
     });
 
@@ -96,7 +95,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('homeApp', 10000);
+        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
       });
 
       it(`edit visualization for object which doesn't exist redirects to the home page`, async () => {
@@ -109,7 +108,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('homeApp', 10000);
+        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
       });
 
       it(`edit visualization for object which exists redirects to the home page`, async () => {
@@ -122,7 +121,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('homeApp', 10000);
+        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
       });
     });
   });

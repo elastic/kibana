@@ -44,6 +44,7 @@ import {
 let jobsRefreshInterval =  null;
 let deletingJobsRefreshTimeout = null;
 
+// 'isManagementTable' bool prop to determine when to configure table for use in Kibana management page
 export class JobsListView extends Component {
   constructor(props) {
     super(props);
@@ -68,35 +69,42 @@ export class JobsListView extends Component {
     this.showCreateWatchFlyout = () => {};
 
     this.blockRefresh = false;
+    this.refreshIntervalSubscription = null;
   }
 
   componentDidMount() {
+    if (this.props.isManagementTable === true) {
+      this.refreshJobSummaryList(true);
+    } else {
     // The advanced job wizard is still angularjs based and triggers
     // broadcast events which it expects the jobs list to be subscribed to.
-    this.props.angularWrapperScope.$on('jobsUpdated', () => {
-      this.refreshJobSummaryList(true);
-    });
-    this.props.angularWrapperScope.$on('openCreateWatchWindow', (e, job) => { // eslint-disable-line no-unused-vars
-      this.showCreateWatchFlyout(job.job_id);
-    });
+      this.props.angularWrapperScope.$on('jobsUpdated', () => {
+        this.refreshJobSummaryList(true);
+      });
+      this.props.angularWrapperScope.$on('openCreateWatchWindow', (e, job) => { // eslint-disable-line no-unused-vars
+        this.showCreateWatchFlyout(job.job_id);
+      });
 
-    timefilter.disableTimeRangeSelector();
-    timefilter.enableAutoRefreshSelector();
+      timefilter.disableTimeRangeSelector();
+      timefilter.enableAutoRefreshSelector();
 
-    this.initAutoRefresh();
-    this.initAutoRefreshUpdate();
+      this.initAutoRefresh();
+      this.initAutoRefreshUpdate();
 
-    // check to see if we need to open the start datafeed modal
-    // after the page has rendered. This will happen if the user
-    // has just created a job in the advanced wizard and selected to
-    // start the datafeed now.
-    this.openAutoStartDatafeedModal();
+      // check to see if we need to open the start datafeed modal
+      // after the page has rendered. This will happen if the user
+      // has just created a job in the advanced wizard and selected to
+      // start the datafeed now.
+      this.openAutoStartDatafeedModal();
+    }
   }
 
   componentWillUnmount() {
-    timefilter.off('refreshIntervalUpdate');
-    deletingJobsRefreshTimeout = null;
-    this.clearRefreshInterval();
+    if (this.props.isManagementTable === undefined) {
+      if (this.refreshIntervalSubscription) this.refreshIntervalSubscription.unsubscribe();
+      deletingJobsRefreshTimeout = null;
+      this.clearRefreshInterval();
+    }
   }
 
   initAutoRefresh() {
@@ -115,8 +123,8 @@ export class JobsListView extends Component {
 
   initAutoRefreshUpdate() {
     // update the interval if it changes
-    timefilter.on('refreshIntervalUpdate', () => {
-      this.setAutoRefresh();
+    this.refreshIntervalSubscription = timefilter.getRefreshIntervalUpdate$().subscribe({
+      next: this.setAutoRefresh
     });
   }
 
@@ -127,7 +135,8 @@ export class JobsListView extends Component {
     } else {
       this.setRefreshInterval(value);
     }
-    this.refreshJobSummaryList();
+    // force load the jobs list when the refresh interval changes
+    this.refreshJobSummaryList(true);
   }
 
   setRefreshInterval(interval) {
@@ -166,6 +175,7 @@ export class JobsListView extends Component {
             job={this.state.fullJobsList[jobId]}
             addYourself={this.addUpdateFunction}
             removeYourself={this.removeUpdateFunction}
+            showFullDetails={this.props.isManagementTable !== true}
           />
         );
       } else {
@@ -174,6 +184,7 @@ export class JobsListView extends Component {
             jobId={jobId}
             addYourself={this.addUpdateFunction}
             removeYourself={this.removeUpdateFunction}
+            showFullDetails={this.props.isManagementTable !== true}
           />
         );
       }
@@ -195,6 +206,7 @@ export class JobsListView extends Component {
                     job={job}
                     addYourself={this.addUpdateFunction}
                     removeYourself={this.removeUpdateFunction}
+                    showFullDetails={this.props.isManagementTable !== true}
                   />
                 );
               }
@@ -350,6 +362,28 @@ export class JobsListView extends Component {
     }
   }
 
+  renderManagementJobsListComponents() {
+    const { loading, itemIdToExpandedRowMap, filteredJobsSummaryList, fullJobsList, selectedJobs } = this.state;
+    return (
+      <div className="managementJobsList">
+        <div>
+          <JobFilterBar setFilters={this.setFilters} />
+        </div>
+        <JobsList
+          jobsSummaryList={filteredJobsSummaryList}
+          fullJobsList={fullJobsList}
+          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+          toggleRow={this.toggleRow}
+          selectJobChange={this.selectJobChange}
+          selectedJobsCount={selectedJobs.length}
+          loading={loading}
+          isManagementTable={true}
+          isMlEnabledInSpace={this.props.isMlEnabledInSpace}
+        />
+      </div>
+    );
+  }
+
   renderJobsListComponents() {
     const { loading, jobsSummaryList } = this.state;
     const jobIds = jobsSummaryList.map(j => j.id);
@@ -398,7 +432,6 @@ export class JobsListView extends Component {
         <CreateWatchFlyout
           setShowFunction={this.setShowCreateWatchFlyoutFunction}
           unsetShowFunction={this.unsetShowCreateWatchFlyoutFunction}
-          compile={this.props.compile}
         />
       </div>
     );
@@ -406,6 +439,7 @@ export class JobsListView extends Component {
 
   render() {
     const { isRefreshing, jobsSummaryList } = this.state;
+    const { isManagementTable } = this.props;
 
     return (
       <React.Fragment>
@@ -424,9 +458,10 @@ export class JobsListView extends Component {
                     isRefreshing={isRefreshing}
                   />
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <NewJobButton />
-                </EuiFlexItem>
+                {isManagementTable === undefined &&
+                  <EuiFlexItem grow={false}>
+                    <NewJobButton />
+                  </EuiFlexItem>}
               </EuiFlexGroup>
             </div>
           </header>
@@ -435,7 +470,8 @@ export class JobsListView extends Component {
 
           <EuiSpacer size="s" />
 
-          { this.renderJobsListComponents() }
+          { !isManagementTable && this.renderJobsListComponents() }
+          { isManagementTable && this.renderManagementJobsListComponents() }
         </ div>
       </React.Fragment>
     );

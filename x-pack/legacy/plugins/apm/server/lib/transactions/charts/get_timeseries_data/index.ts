@@ -11,8 +11,8 @@ import { timeseriesTransformer } from './transform';
 
 export async function getApmTimeseriesData(options: {
   serviceName: string;
-  transactionType?: string;
-  transactionName?: string;
+  transactionType: string | undefined;
+  transactionName: string | undefined;
   setup: Setup;
 }) {
   const { start, end } = options.setup;

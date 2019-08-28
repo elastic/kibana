@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import queryString from 'querystring';
-import { kfetch } from 'ui/kfetch';
+import { npStart } from 'ui/new_platform';
 
 import { Action } from 'redux-actions';
 import { call, put, takeEvery, takeLatest } from 'redux-saga/effects';
@@ -52,9 +52,7 @@ function requestDocumentSearch(payload: DocumentSearchPayload) {
   }
 
   if (query && query.length > 0) {
-    return kfetch({
-      pathname: `/api/code/search/doc`,
-      method: 'get',
+    return npStart.core.http.get(`/api/code/search/doc`, {
       query: queryParams,
     });
   } else {
@@ -76,9 +74,7 @@ function* handleDocumentSearch(action: Action<DocumentSearchPayload>) {
 }
 
 function requestRepositorySearch(q: string) {
-  return kfetch({
-    pathname: `/api/code/search/repo`,
-    method: 'get',
+  return npStart.core.http.get(`/api/code/search/repo`, {
     query: { q },
   });
 }

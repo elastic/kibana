@@ -18,7 +18,7 @@ import { Location } from 'history';
 import React from 'react';
 import { Transaction as ITransaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
-import { TransactionLink } from '../../../shared/Links/TransactionLink';
+import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
 import { TransactionActionMenu } from '../../../shared/TransactionActionMenu/TransactionActionMenu';
 import { StickyTransactionProperties } from './StickyTransactionProperties';
 import { TransactionTabs } from './TransactionTabs';
@@ -82,11 +82,18 @@ function MaybeViewTraceLink({
 
     // the user is viewing a zoomed in version of the trace. Link to the full trace
   } else {
+    const traceRoot = waterfall.traceRoot;
     return (
       <EuiFlexItem grow={false}>
-        <TransactionLink transaction={waterfall.traceRoot}>
+        <TransactionDetailLink
+          serviceName={traceRoot.service.name}
+          transactionId={traceRoot.transaction.id}
+          traceId={traceRoot.trace.id}
+          transactionName={traceRoot.transaction.name}
+          transactionType={traceRoot.transaction.type}
+        >
           <EuiButton iconType="apmTrace">{viewFullTraceButtonLabel}</EuiButton>
-        </TransactionLink>
+        </TransactionDetailLink>
       </EuiFlexItem>
     );
   }
@@ -97,13 +104,15 @@ interface Props {
   urlParams: IUrlParams;
   location: Location;
   waterfall: IWaterfall;
+  exceedsMax: boolean;
 }
 
 export const Transaction: React.SFC<Props> = ({
   transaction,
   urlParams,
   location,
-  waterfall
+  waterfall,
+  exceedsMax
 }) => {
   return (
     <EuiPanel paddingSize="m">
@@ -149,6 +158,7 @@ export const Transaction: React.SFC<Props> = ({
         location={location}
         urlParams={urlParams}
         waterfall={waterfall}
+        exceedsMax={exceedsMax}
       />
     </EuiPanel>
   );

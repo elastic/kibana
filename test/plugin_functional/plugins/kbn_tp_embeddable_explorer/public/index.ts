@@ -17,7 +17,34 @@
  * under the License.
  */
 
+import { npStart } from '../../../../../src/legacy/ui/public/new_platform';
+import { start } from '../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import {
+  HelloWorldAction,
+  SayHelloAction,
+  SendMessageAction,
+  HelloWorldEmbeddableFactory,
+  ContactCardEmbeddableFactory,
+} from '../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/test_samples';
+
 import { Plugin as EmbeddableExplorer } from './plugin';
 import { createShim } from './shim';
+
+const helloWorldAction = new HelloWorldAction(npStart.core.overlays);
+const sayHelloAction = new SayHelloAction(alert);
+const sendMessageAction = new SendMessageAction(npStart.core.overlays);
+const helloWorldEmbeddableFactory = new HelloWorldEmbeddableFactory();
+const contactCardEmbeddableFactory = new ContactCardEmbeddableFactory(
+  {},
+  start.executeTriggerActions,
+  npStart.core.overlays
+);
+
+start.registerAction(helloWorldAction);
+start.registerAction(sayHelloAction);
+start.registerAction(sendMessageAction);
+start.registerEmbeddableFactory(helloWorldEmbeddableFactory.type, helloWorldEmbeddableFactory);
+start.registerEmbeddableFactory(contactCardEmbeddableFactory.type, contactCardEmbeddableFactory);
+
 const embeddableExplorer = new EmbeddableExplorer();
 embeddableExplorer.start(createShim());

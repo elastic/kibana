@@ -16,7 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IndexPatternEnhanced } from 'ui/index_patterns/_index_pattern';
+
+import { IndexPattern } from 'ui/index_patterns';
 // @ts-ignore
 import { shortenDottedString } from '../../../../../common/utils/shorten_dotted_string';
 
@@ -57,7 +58,7 @@ export function getTimeColumn(timeFieldName: string): ColumnProps {
  */
 export function getDisplayedColumns(
   columns: string[],
-  indexPattern: IndexPatternEnhanced,
+  indexPattern: IndexPattern,
   hideTimeField: boolean,
   isShortDots: boolean
 ) {

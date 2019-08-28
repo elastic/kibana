@@ -60,6 +60,8 @@ const Details = styled.div`
   margin: 10px 0;
 `;
 
+Details.displayName = 'Details';
+
 const EVENT_CATEGORY_FIELD = 'event.category';
 const EVENT_ACTION_FIELD = 'event.action';
 const NETWORK_TRAFFIC = 'network_traffic';
@@ -82,10 +84,10 @@ export const netflowRowRenderer: RowRenderer = {
       eventActionMatches(get(EVENT_ACTION_FIELD, ecs))
     );
   },
-  renderRow: ({ data, width, children }) => (
+  renderRow: ({ data, children }) => (
     <Row>
       {children}
-      <RowRendererContainer width={width}>
+      <RowRendererContainer>
         <Details>
           <Netflow
             contextId={NETWORK_FLOW}

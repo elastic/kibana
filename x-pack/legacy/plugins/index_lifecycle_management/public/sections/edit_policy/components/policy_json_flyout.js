@@ -5,20 +5,18 @@
  */
 
 import React, { PureComponent } from 'react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import PropTypes from 'prop-types';
-import { toastNotifications } from 'ui/notify';
-import copy from 'copy-to-clipboard';
 
 import {
-  EuiButton,
+  EuiButtonEmpty,
   EuiCodeBlock,
+  EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiFlyout,
   EuiFlyoutHeader,
-  EuiPortal,
+  EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -27,58 +25,74 @@ export class PolicyJsonFlyout extends PureComponent {
     close: PropTypes.func.isRequired,
     lifecycle: PropTypes.object.isRequired,
   };
+
   getEsJson({ phases }) {
     return JSON.stringify({
       policy: {
         phases
       }
-    }, null, 4);
+    }, null, 2);
   }
-  copyToClipboard(lifecycle) {
-    copy(this.getEsJson(lifecycle));
-    toastNotifications.add(i18n.translate(
-      'xpack.indexLifecycleMgmt.editPolicy.policyJsonFlyout.copiedToClipboardMessage',
-      {
-        defaultMessage: 'JSON copied to clipboard'
-      }
-    ));
-  }
+
   render() {
     const { lifecycle, close, policyName } = this.props;
+    const endpoint = `PUT _ilm/policy/${policyName || '<policyName>'}`;
+    const request = `${endpoint}\n${this.getEsJson(lifecycle)}`;
 
     return (
-      <EuiPortal>
-        <EuiFlyout maxWidth={400} ownFocus onClose={close}>
-          <EuiFlyoutHeader>
-            <EuiTitle>
-              <h2>
+      <EuiFlyout maxWidth={480} onClose={close}>
+        <EuiFlyoutHeader>
+          <EuiTitle>
+            <h2>
+              {policyName ? (
                 <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.policyJsonFlyout.title"
-                  defaultMessage="JSON for index lifecycle policy {policyName}"
+                  id="xpack.indexLifecycleMgmt.policyJsonFlyout.namedTitle"
+                  defaultMessage="Request for '{policyName}'"
                   values={{ policyName }}
                 />
-              </h2>
-            </EuiTitle>
-          </EuiFlyoutHeader>
+              ) : (
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.policyJsonFlyout.unnamedTitle"
+                  defaultMessage="Request"
+                />
+              )}
+            </h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
 
-          <EuiFlyoutBody>
-            <EuiCodeBlock
-              language="json"
-            >
-              {this.getEsJson(lifecycle)}
-            </EuiCodeBlock>
-          </EuiFlyoutBody>
-
-          <EuiFlyoutFooter>
-            <EuiButton onClick={() => this.copyToClipboard(lifecycle)}>
+        <EuiFlyoutBody>
+          <EuiText>
+            <p>
               <FormattedMessage
-                id="xpack.indexLifecycleMgmt.policyJsonFlyout.copyToClipboardButton"
-                defaultMessage="Copy to clipboard"
+                id="xpack.indexLifecycleMgmt.policyJsonFlyout.descriptionText"
+                defaultMessage="This Elasticsearch request will create or update this index lifecycle policy."
               />
-            </EuiButton>
-          </EuiFlyoutFooter>
-        </EuiFlyout>
-      </EuiPortal>
+            </p>
+          </EuiText>
+
+          <EuiSpacer />
+
+          <EuiCodeBlock
+            language="json"
+            isCopyable
+          >
+            {request}
+          </EuiCodeBlock>
+        </EuiFlyoutBody>
+
+        <EuiFlyoutFooter>
+          <EuiButtonEmpty
+            iconType="cross"
+            onClick={close}
+            flush="left"
+          >
+            <FormattedMessage
+              id="xpack.indexLifecycleMgmt.policyJsonFlyout.closeButtonLabel"
+              defaultMessage="Close"
+            />
+          </EuiButtonEmpty>
+        </EuiFlyoutFooter>
+      </EuiFlyout>
     );
   }
 }

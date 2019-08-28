@@ -82,6 +82,14 @@ kibana_vars=(
     vega.enableExternalUrls
     xpack.apm.enabled
     xpack.apm.ui.enabled
+    xpack.apm.ui.maxTraceItems
+    apm_oss.apmAgentConfigurationIndex
+    apm_oss.indexPattern
+    apm_oss.errorIndices
+    apm_oss.onboardingIndices
+    apm_oss.spanIndices
+    apm_oss.transactionIndices
+    apm_oss.metricsIndices
     xpack.canvas.enabled
     xpack.graph.enabled
     xpack.grokdebugger.enabled
@@ -145,6 +153,9 @@ kibana_vars=(
     xpack.security.encryptionKey
     xpack.security.secureCookies
     xpack.security.sessionTimeout
+    xpack.security.public.protocol
+    xpack.security.public.hostname
+    xpack.security.public.port
     xpack.telemetry.enabled
 )
 

@@ -239,7 +239,7 @@ export const ML_DATA_PREVIEW_COUNT = 10;
 export function prefixDatafeedId(datafeedId, prefix) {
   return (datafeedId.match(/^datafeed-/)) ?
     datafeedId.replace(/^datafeed-/, `datafeed-${prefix}`) :
-    `${prefix}${datafeedId}`;
+    `datafeed-${prefix}${datafeedId}`;
 }
 
 // Returns a name which is safe to use in elasticsearch aggregations for the supplied

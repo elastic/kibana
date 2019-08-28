@@ -93,12 +93,16 @@ export class SpacesService {
           .pipe(
             map(([clusterClient, config]) => {
               const internalRepository = savedObjects.getSavedObjectsRepository(
-                clusterClient.callAsInternalUser
+                clusterClient.callAsInternalUser,
+                ['space']
               );
 
               const callCluster = clusterClient.asScoped(request).callAsCurrentUser;
 
-              const callWithRequestRepository = savedObjects.getSavedObjectsRepository(callCluster);
+              const callWithRequestRepository = savedObjects.getSavedObjectsRepository(
+                callCluster,
+                ['space']
+              );
 
               const authorization = security.isEnabled ? security.authorization : null;
 

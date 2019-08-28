@@ -15,7 +15,8 @@ import {
   mockScopedClusterClient,
 } from './base.mock';
 
-import { OIDCAuthenticationProvider } from './oidc';
+import { KibanaRequest } from '../../../../../../src/core/server';
+import { OIDCAuthenticationProvider, OIDCAuthenticationFlow, ProviderLoginAttempt } from './oidc';
 
 describe('OIDCAuthenticationProvider', () => {
   let provider: OIDCAuthenticationProvider;
@@ -56,6 +57,7 @@ describe('OIDCAuthenticationProvider', () => {
       });
 
       const authenticationResult = await provider.login(request, {
+        flow: OIDCAuthenticationFlow.InitiatedBy3rdParty,
         iss: 'theissuer',
         loginHint: 'loginhint',
       });
@@ -80,123 +82,138 @@ describe('OIDCAuthenticationProvider', () => {
       });
     });
 
-    it('gets token and redirects user to requested URL if OIDC authentication response is valid.', async () => {
-      const request = httpServerMock.createKibanaRequest({
-        path: '/api/security/v1/oidc?code=somecodehere&state=somestatehere',
+    function defineAuthenticationFlowTests(
+      getMocks: () => {
+        request: KibanaRequest;
+        attempt: ProviderLoginAttempt;
+        expectedRedirectURI?: string;
+      }
+    ) {
+      it('gets token and redirects user to requested URL if OIDC authentication response is valid.', async () => {
+        const { request, attempt, expectedRedirectURI } = getMocks();
+
+        mockOptions.client.callAsInternalUser
+          .withArgs('shield.oidcAuthenticate')
+          .resolves({ access_token: 'some-token', refresh_token: 'some-refresh-token' });
+
+        const authenticationResult = await provider.login(request, attempt, {
+          state: 'statevalue',
+          nonce: 'noncevalue',
+          nextURL: '/base-path/some-path',
+        });
+
+        sinon.assert.calledWithExactly(
+          mockOptions.client.callAsInternalUser,
+          'shield.oidcAuthenticate',
+          { body: { state: 'statevalue', nonce: 'noncevalue', redirect_uri: expectedRedirectURI } }
+        );
+
+        expect(authenticationResult.redirected()).toBe(true);
+        expect(authenticationResult.redirectURL).toBe('/base-path/some-path');
+        expect(authenticationResult.state).toEqual({
+          accessToken: 'some-token',
+          refreshToken: 'some-refresh-token',
+        });
       });
 
-      mockOptions.client.callAsInternalUser
-        .withArgs('shield.oidcAuthenticate')
-        .resolves({ access_token: 'some-token', refresh_token: 'some-refresh-token' });
+      it('fails if authentication response is presented but session state does not contain the state parameter.', async () => {
+        const { request, attempt } = getMocks();
 
-      const authenticationResult = await provider.login(
-        request,
-        { code: 'somecodehere' },
-        { state: 'statevalue', nonce: 'noncevalue', nextURL: '/base-path/some-path' }
-      );
+        const authenticationResult = await provider.login(request, attempt, {
+          nextURL: '/base-path/some-path',
+        });
 
-      sinon.assert.calledWithExactly(
-        mockOptions.client.callAsInternalUser,
-        'shield.oidcAuthenticate',
-        {
-          body: {
-            state: 'statevalue',
-            nonce: 'noncevalue',
-            redirect_uri: '/api/security/v1/oidc?code=somecodehere&state=somestatehere',
-          },
-        }
-      );
+        sinon.assert.notCalled(mockOptions.client.callAsInternalUser);
 
-      expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('/base-path/some-path');
-      expect(authenticationResult.state).toEqual({
-        accessToken: 'some-token',
-        refreshToken: 'some-refresh-token',
-      });
-    });
-
-    it('fails if authentication response is presented but session state does not contain the state parameter.', async () => {
-      const request = httpServerMock.createKibanaRequest({ path: '/api/security/v1/oidc' });
-
-      const authenticationResult = await provider.login(
-        request,
-        { code: 'somecodehere' },
-        { nextURL: '/base-path/some-path' }
-      );
-
-      sinon.assert.notCalled(mockOptions.client.callAsInternalUser);
-
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toEqual(
-        Boom.badRequest(
-          'Response session state does not have corresponding state or nonce parameters or redirect URL.'
-        )
-      );
-    });
-
-    it('fails if authentication response is presented but session state does not contain redirect URL.', async () => {
-      const request = httpServerMock.createKibanaRequest({ path: '/api/security/v1/oidc' });
-
-      const authenticationResult = await provider.login(
-        request,
-        { code: 'somecodehere' },
-        { state: 'statevalue', nonce: 'noncevalue' }
-      );
-
-      sinon.assert.notCalled(mockOptions.client.callAsInternalUser);
-
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toEqual(
-        Boom.badRequest(
-          'Response session state does not have corresponding state or nonce parameters or redirect URL.'
-        )
-      );
-    });
-
-    it('fails if session state is not presented.', async () => {
-      const request = httpServerMock.createKibanaRequest({
-        path: '/api/security/v1/oidc?code=somecodehere&state=somestatehere',
+        expect(authenticationResult.failed()).toBe(true);
+        expect(authenticationResult.error).toEqual(
+          Boom.badRequest(
+            'Response session state does not have corresponding state or nonce parameters or redirect URL.'
+          )
+        );
       });
 
-      const authenticationResult = await provider.login(request, { code: 'somecodehere' }, {});
+      it('fails if authentication response is presented but session state does not contain redirect URL.', async () => {
+        const { request, attempt } = getMocks();
 
-      sinon.assert.notCalled(mockOptions.client.callAsInternalUser);
+        const authenticationResult = await provider.login(request, attempt, {
+          state: 'statevalue',
+          nonce: 'noncevalue',
+        });
 
-      expect(authenticationResult.failed()).toBe(true);
-    });
+        sinon.assert.notCalled(mockOptions.client.callAsInternalUser);
 
-    it('fails if code is invalid.', async () => {
-      const request = httpServerMock.createKibanaRequest({
-        path: '/api/security/v1/oidc?code=somecodehere&state=somestatehere',
+        expect(authenticationResult.failed()).toBe(true);
+        expect(authenticationResult.error).toEqual(
+          Boom.badRequest(
+            'Response session state does not have corresponding state or nonce parameters or redirect URL.'
+          )
+        );
       });
 
-      const failureReason = new Error(
-        'Failed to exchange code for Id Token using the Token Endpoint.'
-      );
-      mockOptions.client.callAsInternalUser
-        .withArgs('shield.oidcAuthenticate')
-        .returns(Promise.reject(failureReason));
+      it('fails if session state is not presented.', async () => {
+        const { request, attempt } = getMocks();
 
-      const authenticationResult = await provider.login(
-        request,
-        { code: 'somecodehere' },
-        { state: 'statevalue', nonce: 'noncevalue', nextURL: '/base-path/some-path' }
-      );
+        const authenticationResult = await provider.login(request, attempt, {});
 
-      sinon.assert.calledWithExactly(
-        mockOptions.client.callAsInternalUser,
-        'shield.oidcAuthenticate',
-        {
-          body: {
-            state: 'statevalue',
-            nonce: 'noncevalue',
-            redirect_uri: '/api/security/v1/oidc?code=somecodehere&state=somestatehere',
-          },
-        }
-      );
+        sinon.assert.notCalled(mockOptions.client.callAsInternalUser);
 
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toBe(failureReason);
+        expect(authenticationResult.failed()).toBe(true);
+      });
+
+      it('fails if authentication response is not valid.', async () => {
+        const { request, attempt, expectedRedirectURI } = getMocks();
+
+        const failureReason = new Error(
+          'Failed to exchange code for Id Token using the Token Endpoint.'
+        );
+        mockOptions.client.callAsInternalUser
+          .withArgs('shield.oidcAuthenticate')
+          .returns(Promise.reject(failureReason));
+
+        const authenticationResult = await provider.login(request, attempt, {
+          state: 'statevalue',
+          nonce: 'noncevalue',
+          nextURL: '/base-path/some-path',
+        });
+
+        sinon.assert.calledWithExactly(
+          mockOptions.client.callAsInternalUser,
+          'shield.oidcAuthenticate',
+          { body: { state: 'statevalue', nonce: 'noncevalue', redirect_uri: expectedRedirectURI } }
+        );
+
+        expect(authenticationResult.failed()).toBe(true);
+        expect(authenticationResult.error).toBe(failureReason);
+      });
+    }
+
+    describe('authorization code flow', () => {
+      defineAuthenticationFlowTests(() => ({
+        request: httpServerMock.createKibanaRequest({
+          path: '/api/security/v1/oidc?code=somecodehere&state=somestatehere',
+        }),
+        attempt: {
+          flow: OIDCAuthenticationFlow.AuthorizationCode,
+          authenticationResponseURI: '/api/security/v1/oidc?code=somecodehere&state=somestatehere',
+        },
+        expectedRedirectURI: '/api/security/v1/oidc?code=somecodehere&state=somestatehere',
+      }));
+    });
+
+    describe('implicit flow', () => {
+      defineAuthenticationFlowTests(() => ({
+        request: httpServerMock.createKibanaRequest({
+          path:
+            '/api/security/v1/oidc?authenticationResponseURI=http://kibana/api/security/v1/oidc/implicit#id_token=sometoken',
+        }),
+        attempt: {
+          flow: OIDCAuthenticationFlow.Implicit,
+          authenticationResponseURI:
+            'http://kibana/api/security/v1/oidc/implicit#id_token=sometoken',
+        },
+        expectedRedirectURI: 'http://kibana/api/security/v1/oidc/implicit#id_token=sometoken',
+      }));
     });
   });
 

@@ -4,14 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Services, ActionTypeRegistryContract, ActionTypeExecutorResult } from '../types';
-import { validateActionTypeConfig } from './validate_action_type_config';
-import { validateActionTypeParams } from './validate_action_type_params';
+import {
+  ActionTypeExecutorResult,
+  ActionTypeRegistryContract,
+  RawAction,
+  Services,
+} from '../types';
+import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
 import { EncryptedSavedObjectsPlugin } from '../../../encrypted_saved_objects';
 
 interface ExecuteOptions {
   actionId: string;
-  namespace: string;
+  namespace?: string;
   services: Services;
   params: Record<string, any>;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPlugin;
@@ -26,37 +30,41 @@ export async function execute({
   params,
   encryptedSavedObjectsPlugin,
 }: ExecuteOptions): Promise<ActionTypeExecutorResult> {
-  // TODO: Ensure user can read the action before processing
-  const action = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser('action', actionId, {
+  // Ensure user can read the action before processing
+  const {
+    attributes: { actionTypeId, config, description },
+  } = await services.savedObjectsClient.get<RawAction>('action', actionId);
+  // Only get encrypted attributes here, the remaining attributes can be fetched in
+  // the savedObjectsClient call
+  const {
+    attributes: { secrets },
+  } = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<RawAction>('action', actionId, {
     namespace,
   });
-  const actionType = actionTypeRegistry.get(action.attributes.actionTypeId);
-  const mergedActionTypeConfig = {
-    ...(action.attributes.actionTypeConfig || {}),
-    ...(action.attributes.actionTypeConfigSecrets || {}),
-  };
+  const actionType = actionTypeRegistry.get(actionTypeId);
 
-  let validatedConfig;
   let validatedParams;
+  let validatedConfig;
+  let validatedSecrets;
 
   try {
-    validatedConfig = validateActionTypeConfig(actionType, mergedActionTypeConfig);
-    validatedParams = validateActionTypeParams(actionType, params);
+    validatedParams = validateParams(actionType, params);
+    validatedConfig = validateConfig(actionType, config);
+    validatedSecrets = validateSecrets(actionType, secrets);
   } catch (err) {
-    return { status: 'error', message: err.message };
+    return { status: 'error', message: err.message, retry: false };
   }
 
   let result: ActionTypeExecutorResult | null = null;
-
-  const { actionTypeId, description } = action.attributes;
   const actionLabel = `${actionId} - ${actionTypeId} - ${description}`;
 
   try {
     result = await actionType.executor({
       id: actionId,
       services,
-      config: validatedConfig,
       params: validatedParams,
+      config: validatedConfig,
+      secrets: validatedSecrets,
     });
   } catch (err) {
     services.log(

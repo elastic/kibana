@@ -29,9 +29,9 @@ it('sends proper arguments to action find function', async () => {
   };
   const expectedResult = {
     total: 0,
-    per_page: 10,
+    perPage: 10,
     page: 1,
-    saved_objects: [],
+    data: [],
   };
 
   actionsClient.find.mockResolvedValueOnce(expectedResult);

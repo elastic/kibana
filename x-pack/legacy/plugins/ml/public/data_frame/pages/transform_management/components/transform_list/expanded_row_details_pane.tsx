@@ -51,7 +51,7 @@ interface ExpandedRowDetailsPaneProps {
 export const ExpandedRowDetailsPane: SFC<ExpandedRowDetailsPaneProps> = ({ sections }) => {
   return (
     <EuiFlexGroup>
-      <EuiFlexItem>
+      <EuiFlexItem style={{ width: '50%' }}>
         {sections
           .filter(s => s.position === 'left')
           .map(s => (
@@ -61,7 +61,7 @@ export const ExpandedRowDetailsPane: SFC<ExpandedRowDetailsPaneProps> = ({ secti
             </Fragment>
           ))}
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem style={{ width: '50%' }}>
         {sections
           .filter(s => s.position === 'right')
           .map(s => (

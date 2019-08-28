@@ -13,7 +13,7 @@ describe('restore_settings_serialization()', () => {
     expect(serializeRestoreSettings({})).toEqual({});
   });
 
-  it('should serialize partial restore settings', () => {
+  it('should serialize partial restore settings with array indices', () => {
     expect(serializeRestoreSettings({})).toEqual({});
     expect(
       serializeRestoreSettings({
@@ -23,6 +23,21 @@ describe('restore_settings_serialization()', () => {
       })
     ).toEqual({
       indices: ['foo', 'bar'],
+      ignore_index_settings: ['setting1'],
+      partial: true,
+    });
+  });
+
+  it('should serialize partial restore settings with index pattern', () => {
+    expect(serializeRestoreSettings({})).toEqual({});
+    expect(
+      serializeRestoreSettings({
+        indices: 'foo*,bar',
+        ignoreIndexSettings: ['setting1'],
+        partial: true,
+      })
+    ).toEqual({
+      indices: 'foo*,bar',
       ignore_index_settings: ['setting1'],
       partial: true,
     });

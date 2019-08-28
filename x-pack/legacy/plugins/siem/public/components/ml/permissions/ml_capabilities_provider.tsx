@@ -16,6 +16,8 @@ import * as i18n from './translations';
 
 export const MlCapabilitiesContext = React.createContext<MlCapabilities>(emptyMlCapabilities);
 
+MlCapabilitiesContext.displayName = 'MlCapabilitiesContext';
+
 export const MlCapabilitiesProvider = React.memo<{ children: JSX.Element }>(({ children }) => {
   const [capabilities, setCapabilities] = useState(emptyMlCapabilities);
   const config = useContext(KibanaConfigContext);
@@ -42,3 +44,5 @@ export const MlCapabilitiesProvider = React.memo<{ children: JSX.Element }>(({ c
     <MlCapabilitiesContext.Provider value={capabilities}>{children}</MlCapabilitiesContext.Provider>
   );
 });
+
+MlCapabilitiesProvider.displayName = 'MlCapabilitiesProvider';

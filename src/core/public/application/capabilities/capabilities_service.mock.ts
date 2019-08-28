@@ -18,12 +18,14 @@
  */
 import { CapabilitiesService, CapabilitiesStart } from './capabilities_service';
 import { deepFreeze } from '../../../utils/';
-import { MixedApp } from '../application_service';
+import { App, LegacyApp } from '../application_service';
 
 const createStartContractMock = (
-  apps: readonly MixedApp[] = []
+  apps: readonly App[] = [],
+  legacyApps: readonly LegacyApp[] = []
 ): jest.Mocked<CapabilitiesStart> => ({
   availableApps: apps,
+  availableLegacyApps: legacyApps,
   capabilities: deepFreeze({
     catalogue: {},
     management: {},
@@ -33,7 +35,9 @@ const createStartContractMock = (
 
 type CapabilitiesServiceContract = PublicMethodsOf<CapabilitiesService>;
 const createMock = (): jest.Mocked<CapabilitiesServiceContract> => ({
-  start: jest.fn().mockImplementation(({ apps }) => createStartContractMock(apps)),
+  start: jest
+    .fn()
+    .mockImplementation(({ apps, legacyApps }) => createStartContractMock(apps, legacyApps)),
 });
 
 export const capabilitiesServiceMock = {

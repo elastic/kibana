@@ -19,7 +19,6 @@ exports[`TableHeader with time column renders correctly 1`] = `
         class="euiToolTipAnchor"
       >
         <button
-          aria-describedby="docTableHeader-time-tt"
           aria-label="Sort time descending"
           class="fa fa-sort-up"
           data-test-subj="docTableHeaderFieldSort_time"
@@ -38,7 +37,6 @@ exports[`TableHeader with time column renders correctly 1`] = `
         class="euiToolTipAnchor"
       >
         <button
-          aria-describedby="docTableHeader-first-tt"
           aria-label="Remove first column"
           class="fa fa-remove kbnDocTableHeader__move"
           data-test-subj="docTableRemoveHeader-first"
@@ -48,7 +46,6 @@ exports[`TableHeader with time column renders correctly 1`] = `
         class="euiToolTipAnchor"
       >
         <button
-          aria-describedby="docTableHeader-first-tt"
           aria-label="Move first column to the right"
           class="fa fa-angle-double-right kbnDocTableHeader__move"
           data-test-subj="docTableMoveRightHeader-first"
@@ -67,7 +64,6 @@ exports[`TableHeader with time column renders correctly 1`] = `
         class="euiToolTipAnchor"
       >
         <button
-          aria-describedby="docTableHeader-middle-tt"
           aria-label="Remove middle column"
           class="fa fa-remove kbnDocTableHeader__move"
           data-test-subj="docTableRemoveHeader-middle"
@@ -77,7 +73,6 @@ exports[`TableHeader with time column renders correctly 1`] = `
         class="euiToolTipAnchor"
       >
         <button
-          aria-describedby="docTableHeader-middle-tt"
           aria-label="Move middle column to the left"
           class="fa fa-angle-double-left kbnDocTableHeader__move"
           data-test-subj="docTableMoveLeftHeader-middle"
@@ -87,7 +82,6 @@ exports[`TableHeader with time column renders correctly 1`] = `
         class="euiToolTipAnchor"
       >
         <button
-          aria-describedby="docTableHeader-middle-tt"
           aria-label="Move middle column to the right"
           class="fa fa-angle-double-right kbnDocTableHeader__move"
           data-test-subj="docTableMoveRightHeader-middle"
@@ -106,7 +100,6 @@ exports[`TableHeader with time column renders correctly 1`] = `
         class="euiToolTipAnchor"
       >
         <button
-          aria-describedby="docTableHeader-last-tt"
           aria-label="Remove last column"
           class="fa fa-remove kbnDocTableHeader__move"
           data-test-subj="docTableRemoveHeader-last"
@@ -116,7 +109,6 @@ exports[`TableHeader with time column renders correctly 1`] = `
         class="euiToolTipAnchor"
       >
         <button
-          aria-describedby="docTableHeader-last-tt"
           aria-label="Move last column to the left"
           class="fa fa-angle-double-left kbnDocTableHeader__move"
           data-test-subj="docTableMoveLeftHeader-last"
@@ -146,7 +138,6 @@ exports[`TableHeader without time column renders correctly 1`] = `
         class="euiToolTipAnchor"
       >
         <button
-          aria-describedby="docTableHeader-first-tt"
           aria-label="Remove first column"
           class="fa fa-remove kbnDocTableHeader__move"
           data-test-subj="docTableRemoveHeader-first"
@@ -156,7 +147,6 @@ exports[`TableHeader without time column renders correctly 1`] = `
         class="euiToolTipAnchor"
       >
         <button
-          aria-describedby="docTableHeader-first-tt"
           aria-label="Move first column to the right"
           class="fa fa-angle-double-right kbnDocTableHeader__move"
           data-test-subj="docTableMoveRightHeader-first"
@@ -175,7 +165,6 @@ exports[`TableHeader without time column renders correctly 1`] = `
         class="euiToolTipAnchor"
       >
         <button
-          aria-describedby="docTableHeader-middle-tt"
           aria-label="Remove middle column"
           class="fa fa-remove kbnDocTableHeader__move"
           data-test-subj="docTableRemoveHeader-middle"
@@ -185,7 +174,6 @@ exports[`TableHeader without time column renders correctly 1`] = `
         class="euiToolTipAnchor"
       >
         <button
-          aria-describedby="docTableHeader-middle-tt"
           aria-label="Move middle column to the left"
           class="fa fa-angle-double-left kbnDocTableHeader__move"
           data-test-subj="docTableMoveLeftHeader-middle"
@@ -195,7 +183,6 @@ exports[`TableHeader without time column renders correctly 1`] = `
         class="euiToolTipAnchor"
       >
         <button
-          aria-describedby="docTableHeader-middle-tt"
           aria-label="Move middle column to the right"
           class="fa fa-angle-double-right kbnDocTableHeader__move"
           data-test-subj="docTableMoveRightHeader-middle"
@@ -214,7 +201,6 @@ exports[`TableHeader without time column renders correctly 1`] = `
         class="euiToolTipAnchor"
       >
         <button
-          aria-describedby="docTableHeader-last-tt"
           aria-label="Remove last column"
           class="fa fa-remove kbnDocTableHeader__move"
           data-test-subj="docTableRemoveHeader-last"
@@ -224,7 +210,6 @@ exports[`TableHeader without time column renders correctly 1`] = `
         class="euiToolTipAnchor"
       >
         <button
-          aria-describedby="docTableHeader-last-tt"
           aria-label="Move last column to the left"
           class="fa fa-angle-double-left kbnDocTableHeader__move"
           data-test-subj="docTableMoveLeftHeader-last"

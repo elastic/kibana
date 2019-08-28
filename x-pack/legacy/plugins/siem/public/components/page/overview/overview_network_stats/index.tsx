@@ -146,11 +146,15 @@ export const DescriptionListDescription = styled(EuiDescriptionListDescription)`
   text-align: right;
 `;
 
+DescriptionListDescription.displayName = 'DescriptionListDescription';
+
 const StatValue = pure<{ isLoading: boolean; value: React.ReactNode | null | undefined }>(
   ({ isLoading, value }) => (
     <>{isLoading ? <EuiLoadingSpinner size="m" /> : value != null ? value : getEmptyTagValue()}</>
   )
 );
+
+StatValue.displayName = 'StatValue';
 
 export const OverviewNetworkStats = pure<OverviewNetworkProps>(({ data, loading }) => (
   <EuiDescriptionList type="column">
@@ -164,3 +168,5 @@ export const OverviewNetworkStats = pure<OverviewNetworkProps>(({ data, loading 
     ))}
   </EuiDescriptionList>
 ));
+
+OverviewNetworkStats.displayName = 'OverviewNetworkStats';

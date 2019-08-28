@@ -7,7 +7,6 @@
 import { EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { isEmpty } from 'lodash/fp';
-import { Anomaly } from '../types';
 import { getEntries } from '../get_entries';
 
 export const createKeyAndValue = (influencer: Record<string, string>): string => {
@@ -19,19 +18,14 @@ export const createKeyAndValue = (influencer: Record<string, string>): string =>
   }
 };
 
-export const createInfluencers = (score: Anomaly): JSX.Element => {
-  return (
-    <>
-      {score.influencers
-        .filter(influencer => !isEmpty(influencer))
-        .map(influencer => {
-          const keyAndValue = createKeyAndValue(influencer);
-          return (
-            <EuiFlexItem key={keyAndValue} grow={false}>
-              {keyAndValue}
-            </EuiFlexItem>
-          );
-        })}
-    </>
-  );
-};
+export const createInfluencers = (influencers: Array<Record<string, string>> = []): JSX.Element[] =>
+  influencers
+    .filter(influencer => !isEmpty(influencer))
+    .map(influencer => {
+      const keyAndValue = createKeyAndValue(influencer);
+      return (
+        <EuiFlexItem key={keyAndValue} grow={false}>
+          {keyAndValue}
+        </EuiFlexItem>
+      );
+    });

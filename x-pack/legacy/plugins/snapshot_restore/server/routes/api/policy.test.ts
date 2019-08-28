@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Request, ResponseToolkit } from 'hapi';
-import { getAllHandler, getOneHandler } from './policy';
+import {
+  getAllHandler,
+  getOneHandler,
+  executeHandler,
+  deleteHandler,
+  createHandler,
+  updateHandler,
+  getIndicesHandler,
+} from './policy';
 
 describe('[Snapshot and Restore API Routes] Restore', () => {
   const mockRequest = {} as Request;
@@ -113,6 +121,205 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
       const callWithRequest = jest.fn().mockRejectedValueOnce(new Error());
       await expect(
         getOneHandler(mockOneRequest, callWithRequest, mockResponseToolkit)
+      ).rejects.toThrow();
+    });
+  });
+
+  describe('executeHandler()', () => {
+    const name = 'fooPolicy';
+    const mockExecuteRequest = ({
+      params: {
+        name,
+      },
+    } as unknown) as Request;
+
+    it('should return snapshot name from ES', async () => {
+      const mockEsResponse = {
+        snapshot_name: 'foo-policy-snapshot',
+      };
+      const callWithRequest = jest.fn().mockResolvedValueOnce(mockEsResponse);
+      const expectedResponse = {
+        snapshotName: 'foo-policy-snapshot',
+      };
+      await expect(
+        executeHandler(mockExecuteRequest, callWithRequest, mockResponseToolkit)
+      ).resolves.toEqual(expectedResponse);
+    });
+
+    it('should throw if ES error', async () => {
+      const callWithRequest = jest.fn().mockRejectedValueOnce(new Error());
+      await expect(
+        executeHandler(mockExecuteRequest, callWithRequest, mockResponseToolkit)
+      ).rejects.toThrow();
+    });
+  });
+
+  describe('deleteHandler()', () => {
+    const names = ['fooPolicy', 'barPolicy'];
+    const mockCreateRequest = ({
+      params: {
+        names: names.join(','),
+      },
+    } as unknown) as Request;
+
+    it('should return successful ES responses', async () => {
+      const mockEsResponse = { acknowledged: true };
+      const callWithRequest = jest
+        .fn()
+        .mockResolvedValueOnce(mockEsResponse)
+        .mockResolvedValueOnce(mockEsResponse);
+      const expectedResponse = { itemsDeleted: names, errors: [] };
+      await expect(
+        deleteHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
+      ).resolves.toEqual(expectedResponse);
+    });
+
+    it('should return error ES responses', async () => {
+      const mockEsError = new Error('Test error') as any;
+      mockEsError.response = '{}';
+      mockEsError.statusCode = 500;
+      const callWithRequest = jest
+        .fn()
+        .mockRejectedValueOnce(mockEsError)
+        .mockRejectedValueOnce(mockEsError);
+      const expectedResponse = {
+        itemsDeleted: [],
+        errors: names.map(name => ({
+          name,
+          error: mockEsError,
+        })),
+      };
+      await expect(
+        deleteHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
+      ).resolves.toEqual(expectedResponse);
+    });
+
+    it('should return combination of ES successes and errors', async () => {
+      const mockEsError = new Error('Test error') as any;
+      mockEsError.response = '{}';
+      mockEsError.statusCode = 500;
+      const mockEsResponse = { acknowledged: true };
+      const callWithRequest = jest
+        .fn()
+        .mockRejectedValueOnce(mockEsError)
+        .mockResolvedValueOnce(mockEsResponse);
+      const expectedResponse = {
+        itemsDeleted: [names[1]],
+        errors: [
+          {
+            name: names[0],
+            error: mockEsError,
+          },
+        ],
+      };
+      await expect(
+        deleteHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
+      ).resolves.toEqual(expectedResponse);
+    });
+  });
+
+  describe('createHandler()', () => {
+    const name = 'fooPolicy';
+    const mockCreateRequest = ({
+      payload: {
+        name,
+      },
+    } as unknown) as Request;
+
+    it('should return successful ES response', async () => {
+      const mockEsResponse = { acknowledged: true };
+      const callWithRequest = jest
+        .fn()
+        .mockReturnValueOnce({})
+        .mockReturnValueOnce(mockEsResponse);
+      const expectedResponse = { ...mockEsResponse };
+      await expect(
+        createHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
+      ).resolves.toEqual(expectedResponse);
+    });
+
+    it('should return error if policy with the same name already exists', async () => {
+      const mockEsResponse = { [name]: {} };
+      const callWithRequest = jest.fn().mockReturnValue(mockEsResponse);
+      await expect(
+        createHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
+      ).rejects.toThrow();
+    });
+
+    it('should throw if ES error', async () => {
+      const callWithRequest = jest
+        .fn()
+        .mockReturnValueOnce({})
+        .mockRejectedValueOnce(new Error());
+      await expect(
+        createHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
+      ).rejects.toThrow();
+    });
+  });
+
+  describe('updateHandler()', () => {
+    const name = 'fooPolicy';
+    const mockCreateRequest = ({
+      params: {
+        name,
+      },
+      payload: {
+        name,
+      },
+    } as unknown) as Request;
+
+    it('should return successful ES response', async () => {
+      const mockEsResponse = { acknowledged: true };
+      const callWithRequest = jest
+        .fn()
+        .mockReturnValueOnce({ [name]: {} })
+        .mockReturnValueOnce(mockEsResponse);
+      const expectedResponse = { ...mockEsResponse };
+      await expect(
+        updateHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
+      ).resolves.toEqual(expectedResponse);
+    });
+
+    it('should throw if ES error', async () => {
+      const callWithRequest = jest.fn().mockRejectedValueOnce(new Error());
+      await expect(
+        updateHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
+      ).rejects.toThrow();
+    });
+  });
+
+  describe('getIndicesHandler()', () => {
+    it('should arrify and sort index names returned from ES', async () => {
+      const mockEsResponse = [
+        {
+          index: 'fooIndex',
+        },
+        {
+          index: 'barIndex',
+        },
+      ];
+      const callWithRequest = jest.fn().mockReturnValueOnce(mockEsResponse);
+      const expectedResponse = {
+        indices: ['barIndex', 'fooIndex'],
+      };
+      await expect(
+        getIndicesHandler(mockRequest, callWithRequest, mockResponseToolkit)
+      ).resolves.toEqual(expectedResponse);
+    });
+
+    it('should return empty array if no indices returned from ES', async () => {
+      const mockEsResponse: any[] = [];
+      const callWithRequest = jest.fn().mockReturnValueOnce(mockEsResponse);
+      const expectedResponse = { indices: [] };
+      await expect(
+        getIndicesHandler(mockRequest, callWithRequest, mockResponseToolkit)
+      ).resolves.toEqual(expectedResponse);
+    });
+
+    it('should throw if ES error', async () => {
+      const callWithRequest = jest.fn().mockRejectedValueOnce(new Error());
+      await expect(
+        getIndicesHandler(mockRequest, callWithRequest, mockResponseToolkit)
       ).rejects.toThrow();
     });
   });

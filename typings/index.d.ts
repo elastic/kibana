@@ -30,3 +30,10 @@ type MethodKeysOf<T> = {
 type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;
 
 type MockedKeys<T> = { [P in keyof T]: jest.Mocked<T[P]> };
+
+type DeeplyMockedKeys<T> = {
+  [P in keyof T]: T[P] extends (...args: any[]) => any
+    ? jest.MockInstance<ReturnType<T[P]>, Parameters<T[P]>>
+    : DeeplyMockedKeys<T[P]>;
+} &
+  T;

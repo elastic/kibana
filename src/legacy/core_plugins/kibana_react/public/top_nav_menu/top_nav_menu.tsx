@@ -21,12 +21,15 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
+import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
-import { SearchBar, SearchBarProps } from '../search_bar';
+import { SearchBar, SearchBarProps } from '../../../../core_plugins/data/public';
 
 type Props = Partial<SearchBarProps> & {
   name: string;
+  uiSettings: UiSettingsClientContract;
+  savedObjectsClient: SavedObjectsClientContract;
   config?: TopNavMenuData[];
   showSearchBar?: boolean;
 };
@@ -54,12 +57,13 @@ export function TopNavMenu(props: Props) {
 
   function renderSearchBar() {
     // Validate presense of all required fields
-    if (!props.showSearchBar) return;
-
+    if (!props.showSearchBar || !props.savedObjectsClient) return;
     return (
       <SearchBar
+        savedObjectsClient={props.savedObjectsClient}
         query={props.query}
         filters={props.filters}
+        uiSettings={props.uiSettings}
         showQueryBar={props.showQueryBar}
         showQueryInput={props.showQueryInput}
         showFilterBar={props.showFilterBar}
@@ -76,6 +80,11 @@ export function TopNavMenu(props: Props) {
         refreshInterval={props.refreshInterval}
         indexPatterns={props.indexPatterns}
         store={props.store}
+        savedQuery={props.savedQuery}
+        showSaveQuery={props.showSaveQuery}
+        onClearSavedQuery={props.onClearSavedQuery}
+        onSaved={props.onSaved}
+        onSavedQueryUpdated={props.onSavedQueryUpdated}
       />
     );
   }

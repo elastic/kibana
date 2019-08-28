@@ -17,10 +17,9 @@
  * under the License.
  */
 
-interface TimeRange {
-  from: string;
-  to: string;
-}
+import { TimeRange } from '../../../../plugins/data/public';
+
+export { TimeRange };
 
 export interface TimeHistory {
   add: (options: TimeRange) => void;

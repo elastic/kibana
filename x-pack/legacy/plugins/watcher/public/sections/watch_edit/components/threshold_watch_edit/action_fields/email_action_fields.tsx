@@ -87,12 +87,8 @@ export const EmailActionFields: React.FunctionComponent<Props> = ({
         />
       </EuiFormRow>
 
-      <ErrableFormRow
-        id="emailBody"
-        errorKey="body"
+      <EuiFormRow
         fullWidth
-        errors={errors}
-        isShowingErrors={hasErrors && body !== undefined}
         label={i18n.translate(
           'xpack.watcher.sections.watchEdit.threshold.emailAction.bodyTextAreaFieldLabel',
           {
@@ -108,13 +104,8 @@ export const EmailActionFields: React.FunctionComponent<Props> = ({
           onChange={e => {
             editAction({ key: 'body', value: e.target.value });
           }}
-          onBlur={() => {
-            if (!body) {
-              editAction({ key: 'body', value: '' });
-            }
-          }}
         />
-      </ErrableFormRow>
+      </EuiFormRow>
     </Fragment>
   );
 };

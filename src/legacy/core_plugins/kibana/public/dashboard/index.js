@@ -39,8 +39,8 @@ import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { uiModules } from 'ui/modules';
 import 'ui/capabilities/route_setup';
 
-import { data } from 'plugins/data/setup';
-data.filter.loadLegacyDirectives();
+// load directives
+import '../../../data/public';
 
 const app = uiModules.get('app/dashboard', [
   'ngRoute',
@@ -97,8 +97,8 @@ uiRoutes
       $scope.getViewUrl = ({ id }) => {
         return chrome.addBasePath(`#${createDashboardEditUrl(id)}`);
       };
-      $scope.delete = (ids) => {
-        return services.dashboards.delete(ids);
+      $scope.delete = (dashboards) => {
+        return services.dashboards.delete(dashboards.map(d => d.id));
       };
       $scope.hideWriteControls = dashboardConfig.getHideWriteControls();
       $scope.initialFilter = ($location.search()).filter || EMPTY_FILTER;

@@ -165,7 +165,10 @@ describe('<JobTable />', () => {
 
       const contextMenuButtons = contextMenu.find('button');
       const buttonsLabel = contextMenuButtons.map(btn => btn.text());
-      expect(buttonsLabel).toEqual(['Start job', 'Delete job']);
+      const hasExpectedLabels = ['Start job', 'Delete job']
+        .every(expectedLabel => buttonsLabel.includes(expectedLabel));
+
+      expect(hasExpectedLabels).toBe(true);
     });
 
     it('should only have a "stop" action when the job is started', () => {
@@ -178,7 +181,8 @@ describe('<JobTable />', () => {
 
       const contextMenuButtons = find('jobActionContextMenu').find('button');
       const buttonsLabel = contextMenuButtons.map(btn => btn.text());
-      expect(buttonsLabel).toEqual(['Stop job']);
+      const hasExpectedLabels = buttonsLabel.includes('Stop job');
+      expect(hasExpectedLabels).toBe(true);
     });
 
     it('should offer both "start" and "stop" actions when selecting job with different a status', () => {
@@ -193,7 +197,10 @@ describe('<JobTable />', () => {
 
       const contextMenuButtons = find('jobActionContextMenu').find('button');
       const buttonsLabel = contextMenuButtons.map(btn => btn.text());
-      expect(buttonsLabel).toEqual(['Start jobs', 'Stop jobs']);
+      const hasExpectedLabels = ['Start jobs', 'Stop jobs']
+        .every(expectedLabel => buttonsLabel.includes(expectedLabel));
+
+      expect(hasExpectedLabels).toBe(true);
     });
   });
 });

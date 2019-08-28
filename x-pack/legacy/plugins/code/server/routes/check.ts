@@ -4,21 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
 import fetch from 'node-fetch';
+
 import { Logger } from '../log';
+import { ServerFacade } from '../..';
 
 export async function checkCodeNode(url: string, log: Logger, rndStr: string) {
-  const res = await fetch(`${url}/api/code/codeNode?rndStr=${rndStr}`, {});
-  if (res.ok) {
-    return await res.json();
+  try {
+    const res = await fetch(`${url}/api/code/codeNode?rndStr=${rndStr}`, {});
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (e) {
+    // request failed
+    log.error(e);
   }
 
   log.info(`Access code node ${url} failed, try again later.`);
   return null;
 }
 
-export function checkRoute(server: Server, rndStr: string) {
+export function checkRoute(server: ServerFacade, rndStr: string) {
   server.route({
     method: 'GET',
     path: '/api/code/codeNode',

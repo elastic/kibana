@@ -57,11 +57,11 @@ export const TruncateHeightSection: React.SFC<Props> = ({
           >
             <Ellipsis horizontal={!isOpen} />{' '}
             {isOpen
-              ? i18n.translate('xpack.apm.toggleHeight.showMoreButtonLabel', {
-                  defaultMessage: 'Show more lines'
-                })
-              : i18n.translate('xpack.apm.toggleHeight.showLessButtonLabel', {
+              ? i18n.translate('xpack.apm.toggleHeight.showLessButtonLabel', {
                   defaultMessage: 'Show fewer lines'
+                })
+              : i18n.translate('xpack.apm.toggleHeight.showMoreButtonLabel', {
+                  defaultMessage: 'Show more lines'
                 })}
           </EuiLink>
         </ToggleButtonContainer>

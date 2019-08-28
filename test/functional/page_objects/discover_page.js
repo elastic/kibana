@@ -248,7 +248,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async expectMissingFieldListItemVisualize(field) {
-      await testSubjects.missingOrFail(`fieldVisualize-${field}`);
+      await testSubjects.missingOrFail(`fieldVisualize-${field}`, { allowHidden: true });
     }
 
     async clickFieldListPlusFilter(field, value) {
@@ -288,7 +288,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       const fieldFilterFormExists = await testSubjects.exists('discoverFieldFilter');
       if (fieldFilterFormExists) {
         await testSubjects.click('toggleFieldFilterButton');
-        await testSubjects.missingOrFail('discoverFieldFilter');
+        await testSubjects.missingOrFail('discoverFieldFilter', { allowHidden: true });
       }
     }
 

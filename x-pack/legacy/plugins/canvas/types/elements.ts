@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ExpressionAST } from 'src/plugins/data/common/expressions';
+
 export interface ElementSpec {
   name: string;
   image: string;
@@ -49,17 +51,7 @@ export interface CustomElement {
   content: string;
 }
 
-export interface AST {
-  type: string;
-  chain: Array<{
-    function: string;
-    arguments: {
-      [s: string]: AST[];
-    };
-  }>;
-}
-
-interface Position {
+export interface ElementPosition {
   /**
    * distance from the left edge of the page
    */
@@ -94,7 +86,7 @@ export interface PositionedElement {
   /**
    * layout engine settings
    */
-  position: Position;
+  position: ElementPosition;
   /**
    * Canvas expression used to generate the element
    */
@@ -102,5 +94,5 @@ export interface PositionedElement {
   /**
    * AST of the Canvas expression for the element
    */
-  ast: AST;
+  ast: ExpressionAST;
 }

@@ -5,6 +5,7 @@
  */
 
 import { EuiTab, EuiTabs } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import querystring from 'querystring';
 import React from 'react';
 import url from 'url';
@@ -44,14 +45,20 @@ export class ScopeTabs extends React.PureComponent<Props> {
             isSelected={this.props.scope !== SearchScope.REPOSITORY}
             onClick={this.onTabClicked(SearchScope.DEFAULT)}
           >
-            Code
+            <FormattedMessage
+              id="xpack.code.searchPage.scopeTabs.codeTabLabel"
+              defaultMessage="Code"
+            />
           </EuiTab>
           <EuiTab
             className="codeUtility__width--half"
             isSelected={this.props.scope === SearchScope.REPOSITORY}
             onClick={this.onTabClicked(SearchScope.REPOSITORY)}
           >
-            Repository
+            <FormattedMessage
+              id="xpack.code.searchPage.scopeTabs.repositoryTabLabel"
+              defaultMessage="Repository"
+            />
           </EuiTab>
         </EuiTabs>
       </div>

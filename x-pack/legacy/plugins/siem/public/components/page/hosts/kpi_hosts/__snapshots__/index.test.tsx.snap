@@ -2,24 +2,26 @@
 
 exports[`kpiHostsComponent render it should render KpiHostDetailsData 1`] = `
 <EuiFlexGroup>
-  <Memo()
-    description="User Authentications"
+  <StatItemsComponent
+    description="User authentications"
     enableAreaChart={true}
     enableBarChart={true}
     fields={
       Array [
         Object {
           "color": "#00B3A4",
-          "description": "Success",
+          "description": "success",
           "icon": "check",
           "key": "authSuccess",
+          "name": "Succ.",
           "value": null,
         },
         Object {
           "color": "#920000",
-          "description": "Fail",
+          "description": "fail",
           "icon": "cross",
           "key": "authFailure",
+          "name": "Fail",
           "value": null,
         },
       ]
@@ -28,7 +30,7 @@ exports[`kpiHostsComponent render it should render KpiHostDetailsData 1`] = `
     index={0}
     key="authentication"
   />
-  <Memo()
+  <StatItemsComponent
     description="Unique IPs"
     enableAreaChart={true}
     enableBarChart={true}
@@ -36,7 +38,7 @@ exports[`kpiHostsComponent render it should render KpiHostDetailsData 1`] = `
       Array [
         Object {
           "color": "#DB1374",
-          "description": "Source",
+          "description": "source",
           "icon": "visMapCoordinate",
           "key": "uniqueSourceIps",
           "name": "Src.",
@@ -44,9 +46,10 @@ exports[`kpiHostsComponent render it should render KpiHostDetailsData 1`] = `
         },
         Object {
           "color": "#490092",
-          "description": "Destination",
+          "description": "destination",
           "icon": "visMapCoordinate",
           "key": "uniqueDestinationIps",
+          "name": "Dest.",
           "value": null,
         },
       ]
@@ -60,7 +63,7 @@ exports[`kpiHostsComponent render it should render KpiHostDetailsData 1`] = `
 
 exports[`kpiHostsComponent render it should render KpiHostsData 1`] = `
 <EuiFlexGroup>
-  <Memo()
+  <StatItemsComponent
     description="Hosts"
     enableAreaChart={true}
     fields={
@@ -77,24 +80,26 @@ exports[`kpiHostsComponent render it should render KpiHostsData 1`] = `
     index={0}
     key="hosts"
   />
-  <Memo()
-    description="User Authentications"
+  <StatItemsComponent
+    description="User authentications"
     enableAreaChart={true}
     enableBarChart={true}
     fields={
       Array [
         Object {
           "color": "#00B3A4",
-          "description": "Success",
+          "description": "success",
           "icon": "check",
           "key": "authSuccess",
+          "name": "Succ.",
           "value": null,
         },
         Object {
           "color": "#920000",
-          "description": "Fail",
+          "description": "fail",
           "icon": "cross",
           "key": "authFailure",
+          "name": "Fail",
           "value": null,
         },
       ]
@@ -103,7 +108,7 @@ exports[`kpiHostsComponent render it should render KpiHostsData 1`] = `
     index={1}
     key="authentication"
   />
-  <Memo()
+  <StatItemsComponent
     description="Unique IPs"
     enableAreaChart={true}
     enableBarChart={true}
@@ -111,7 +116,7 @@ exports[`kpiHostsComponent render it should render KpiHostsData 1`] = `
       Array [
         Object {
           "color": "#DB1374",
-          "description": "Source",
+          "description": "source",
           "icon": "visMapCoordinate",
           "key": "uniqueSourceIps",
           "name": "Src.",
@@ -119,9 +124,10 @@ exports[`kpiHostsComponent render it should render KpiHostsData 1`] = `
         },
         Object {
           "color": "#490092",
-          "description": "Destination",
+          "description": "destination",
           "icon": "visMapCoordinate",
           "key": "uniqueDestinationIps",
+          "name": "Dest.",
           "value": null,
         },
       ]
@@ -134,7 +140,7 @@ exports[`kpiHostsComponent render it should render KpiHostsData 1`] = `
 `;
 
 exports[`kpiHostsComponent render it should render spinner if it is loading 1`] = `
-<Styled(EuiFlexGroup)
+<FlexGroupSpinner
   alignItems="center"
   justifyContent="center"
 >
@@ -145,5 +151,5 @@ exports[`kpiHostsComponent render it should render spinner if it is loading 1`] 
       size="xl"
     />
   </EuiFlexItem>
-</Styled(EuiFlexGroup)>
+</FlexGroupSpinner>
 `;

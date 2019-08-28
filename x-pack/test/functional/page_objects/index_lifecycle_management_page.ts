@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export const IndexLifecycleManagementPageProvider = ({
-  getService,
-}: KibanaFunctionalTestDefaultProviders) => {
+export function IndexLifecycleManagementPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   return {
@@ -19,4 +17,4 @@ export const IndexLifecycleManagementPageProvider = ({
       return await testSubjects.find('createPolicyButton');
     },
   };
-};
+}

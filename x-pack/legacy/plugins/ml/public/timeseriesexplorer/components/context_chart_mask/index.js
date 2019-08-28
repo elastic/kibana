@@ -5,4 +5,4 @@
  */
 
 
-export * from './context_chart_mask';
+export { ContextChartMask } from './context_chart_mask';

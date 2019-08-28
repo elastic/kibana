@@ -112,6 +112,7 @@ export class IndexSettings extends Component {
           }
         >
           <EuiSelect
+            data-test-subj="fileImportIndexSelect"
             disabled={indexDisabled}
             options={indexTypes.map(indexType => ({
               text: indexType,
@@ -131,6 +132,7 @@ export class IndexSettings extends Component {
           error={[indexNameError]}
         >
           <EuiFieldText
+            data-test-subj="fileUploadIndexNameInput"
             disabled={indexDisabled}
             placeholder={i18n.translate('xpack.fileUpload.enterIndexName', {
               defaultMessage: 'Enter Index Name',

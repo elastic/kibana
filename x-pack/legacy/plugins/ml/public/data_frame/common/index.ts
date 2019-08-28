@@ -17,13 +17,6 @@ export {
 } from './fields';
 export { DropDownLabel, DropDownOption, Label } from './dropdown';
 export {
-  KibanaContext,
-  KibanaContextValue,
-  isKibanaContext,
-  NullableKibanaContextValue,
-  SavedSearchQuery,
-} from './kibana_context';
-export {
   isTransformIdValid,
   refreshTransformList$,
   useRefreshTransformList,

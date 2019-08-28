@@ -1,0 +1,192 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ShardFailureDescription renders matching snapshot given valid properties 1`] = `
+<div>
+  <ShardFailureDescriptionHeader
+    index="repro2"
+    intl={
+      Object {
+        "defaultFormats": Object {},
+        "defaultLocale": "en",
+        "formatDate": [Function],
+        "formatHTMLMessage": [Function],
+        "formatMessage": [Function],
+        "formatNumber": [Function],
+        "formatPlural": [Function],
+        "formatRelative": [Function],
+        "formatTime": [Function],
+        "formats": Object {
+          "date": Object {
+            "full": Object {
+              "day": "numeric",
+              "month": "long",
+              "weekday": "long",
+              "year": "numeric",
+            },
+            "long": Object {
+              "day": "numeric",
+              "month": "long",
+              "year": "numeric",
+            },
+            "medium": Object {
+              "day": "numeric",
+              "month": "short",
+              "year": "numeric",
+            },
+            "short": Object {
+              "day": "numeric",
+              "month": "numeric",
+              "year": "2-digit",
+            },
+          },
+          "number": Object {
+            "currency": Object {
+              "style": "currency",
+            },
+            "percent": Object {
+              "style": "percent",
+            },
+          },
+          "relative": Object {
+            "days": Object {
+              "units": "day",
+            },
+            "hours": Object {
+              "units": "hour",
+            },
+            "minutes": Object {
+              "units": "minute",
+            },
+            "months": Object {
+              "units": "month",
+            },
+            "seconds": Object {
+              "units": "second",
+            },
+            "years": Object {
+              "units": "year",
+            },
+          },
+          "time": Object {
+            "full": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+              "timeZoneName": "short",
+            },
+            "long": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+              "timeZoneName": "short",
+            },
+            "medium": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+            },
+            "short": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+            },
+          },
+        },
+        "formatters": Object {
+          "getDateTimeFormat": [Function],
+          "getMessageFormat": [Function],
+          "getNumberFormat": [Function],
+          "getPluralFormat": [Function],
+          "getRelativeFormat": [Function],
+        },
+        "locale": "en",
+        "messages": Object {},
+        "now": [Function],
+        "onError": [Function],
+        "textComponent": Symbol(react.fragment),
+        "timeZone": null,
+      }
+    }
+    node="itsmeyournode"
+    reason={
+      Object {
+        "caused_by": Object {
+          "reason": "Gimme reason",
+          "type": "illegal_argument_exception",
+        },
+        "lang": "painless",
+        "reason": "runtime error",
+        "script": "return doc['targetfield'].value;",
+        "script_stack": Array [
+          "return doc['targetfield'].value;",
+          "           ^---- HERE",
+        ],
+        "type": "script_exception",
+      }
+    }
+    shard={0}
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <EuiDescriptionList
+    className="shardFailureModal__desc"
+    compressed={true}
+    descriptionProps={
+      Object {
+        "className": "shardFailureModal__descValue",
+      }
+    }
+    listItems={
+      Array [
+        Object {
+          "description": "script_exception",
+          "title": "Type",
+        },
+        Object {
+          "description": "runtime error",
+          "title": "Reason",
+        },
+        Object {
+          "description": <EuiCodeBlock
+            isCopyable={true}
+            language="java"
+            paddingSize="s"
+          >
+            return doc['targetfield'].value;
+           ^---- HERE
+          </EuiCodeBlock>,
+          "title": "Script stack",
+        },
+        Object {
+          "description": <EuiCodeBlock
+            isCopyable={true}
+            language="java"
+            paddingSize="s"
+          >
+            return doc['targetfield'].value;
+          </EuiCodeBlock>,
+          "title": "Script",
+        },
+        Object {
+          "description": "painless",
+          "title": "Lang",
+        },
+        Object {
+          "description": "illegal_argument_exception",
+          "title": "Caused by type",
+        },
+        Object {
+          "description": "Gimme reason",
+          "title": "Caused by reason",
+        },
+      ]
+    }
+    titleProps={
+      Object {
+        "className": "shardFailureModal__descTitle",
+      }
+    }
+    type="column"
+  />
+</div>
+`;

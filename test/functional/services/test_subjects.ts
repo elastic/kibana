@@ -59,11 +59,14 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
 
     public async missingOrFail(
       selector: string,
-      existsOptions?: ExistsOptions
+      options: ExistsOptions = {}
     ): Promise<void | never> {
-      if (await this.exists(selector, existsOptions)) {
-        throw new Error(`expected testSubject(${selector}) to not exist`);
-      }
+      const { timeout = WAIT_FOR_EXISTS_TIME, allowHidden = false } = options;
+
+      log.debug(`TestSubjects.missingOrFail(${selector})`);
+      return await (allowHidden
+        ? this.waitForHidden(selector, timeout)
+        : find.waitForDeletedByCssSelector(testSubjSelector(selector), timeout));
     }
 
     public async append(selector: string, text: string): Promise<void> {
@@ -243,6 +246,12 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
       value: string
     ): Promise<void> {
       await find.waitForAttributeToChange(testSubjSelector(selector), attribute, value);
+    }
+
+    public async waitForHidden(selector: string, timeout?: number): Promise<void> {
+      log.debug(`TestSubjects.waitForHidden(${selector})`);
+      const element = await this.find(selector);
+      await find.waitForElementHidden(element, timeout);
     }
 
     public getCssSelector(selector: string): string {

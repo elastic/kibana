@@ -20,6 +20,7 @@ import {
   EuiTabbedContent,
   EuiText,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { connect } from 'react-redux';
 import { InstallationType } from '../../../common/installation';
@@ -51,24 +52,40 @@ const LanguageServerLi = (props: {
   let button = null;
   let state = null;
   if (status === LanguageServerStatus.RUNNING) {
-    state = <EuiText size="xs">Running ...</EuiText>;
+    state = (
+      <EuiText size="xs">
+        <FormattedMessage
+          id="xpack.code.adminPage.langserverTab.runningText"
+          defaultMessage="Running ..."
+        />
+      </EuiText>
+    );
   } else if (status === LanguageServerStatus.NOT_INSTALLED) {
     state = (
       <EuiText size="xs" color={'subdued'}>
-        Not Installed
+        <FormattedMessage
+          id="xpack.code.adminPage.langserverTab.notInstalledText"
+          defaultMessage="Not Installed"
+        />
       </EuiText>
     );
   } else if (status === LanguageServerStatus.READY) {
     state = (
       <EuiText size="xs" color={'subdued'}>
-        Installed
+        <FormattedMessage
+          id="xpack.code.adminPage.langserverTab.installedText"
+          defaultMessage="Installed"
+        />
       </EuiText>
     );
   }
   if (props.languageServer.installationType === InstallationType.Plugin) {
     button = (
       <EuiButton size="s" color="secondary" onClick={onInstallClick}>
-        Setup
+        <FormattedMessage
+          id="xpack.code.adminPage.langserverTab.setupButtonLabel"
+          defaultMessage="Setup"
+        />
       </EuiButton>
     );
   }
@@ -139,12 +156,13 @@ class AdminLanguageSever extends React.PureComponent<Props, State> {
         <EuiSpacer />
         <EuiText>
           <h3>
-            {this.props.languageServers.length}
-            {this.props.languageServers.length > 1 ? (
-              <span> Language servers</span>
-            ) : (
-              <span> Language server</span>
-            )}
+            <span>
+              <FormattedMessage
+                id="xpack.code.adminPage.langserverTab.languageServersDescription"
+                defaultMessage="{serverCount} {serverCount, plural, one {Language server} other {Language servers}}"
+                values={{ serverCount: this.props.languageServers.length }}
+              />
+            </span>
           </h3>
         </EuiText>
         <EuiSpacer />
@@ -186,16 +204,48 @@ const LanguageServerInstruction = (props: {
         <div>
           <EuiSpacer />
           <EuiText grow={false}>
-            <h3>Install</h3>
+            <h3>
+              <FormattedMessage
+                id="xpack.code.adminPage.langserverTab.setup.installTitle"
+                defaultMessage="Install"
+              />
+            </h3>
             <ol>
-              <li>Stop your kibana Code node.</li>
-              <li>Use the following command to install the {props.name} language server.</li>
+              <li>
+                <FormattedMessage
+                  id="xpack.code.adminPage.langserverTab.setup.stopKibanaDescription"
+                  defaultMessage="Stop your kibana Code node."
+                />
+              </li>
+              <li>
+                <FormattedMessage
+                  id="xpack.code.adminPage.langserverTab.setup.useFollowingCommandToInstallDescription"
+                  defaultMessage="Use the following command to install the {name} language server."
+                  values={{ name: props.name }}
+                />
+              </li>
             </ol>
             <EuiCodeBlock language="shell">{installCode}</EuiCodeBlock>
-            <h3>Uninstall</h3>
+            <h3>
+              <FormattedMessage
+                id="xpack.code.adminPage.langserverTab.setup.uninstallTitle"
+                defaultMessage="Uninstall"
+              />
+            </h3>
             <ol>
-              <li>Stop your kibana Code node.</li>
-              <li>Use the following command to remove the {props.name} language server.</li>
+              <li>
+                <FormattedMessage
+                  id="xpack.code.adminPage.langserverTab.setup.stopKibanaDescription"
+                  defaultMessage="Stop your kibana Code node."
+                />
+              </li>
+              <li>
+                <FormattedMessage
+                  id="xpack.code.adminPage.langserverTab.setup.useFollowingCommandToRemoveDescription"
+                  defaultMessage="Use the following command to remove the {name} language server."
+                  values={{ name: props.name }}
+                />
+              </li>
             </ol>
             <EuiCodeBlock language="shell">
               bin/kibana-plugin remove {props.pluginName}
@@ -213,14 +263,22 @@ const LanguageServerInstruction = (props: {
         <EuiOverlayMask>
           <EuiModal onClose={props.close} maxWidth={false}>
             <EuiModalHeader>
-              <EuiModalHeaderTitle>Installation Instructions</EuiModalHeaderTitle>
+              <EuiModalHeaderTitle>
+                <FormattedMessage
+                  id="xpack.code.adminPage.langserverTab.setup.installationInstructionTitle"
+                  defaultMessage="Installation Instructions"
+                />
+              </EuiModalHeaderTitle>
             </EuiModalHeader>
             <EuiModalBody>
               <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[1]} size={'m'} />
             </EuiModalBody>
             <EuiModalFooter>
               <EuiButton onClick={props.close} fill>
-                Close
+                <FormattedMessage
+                  id="xpack.code.adminPage.langserverTab.setup.closeButtonLabel"
+                  defaultMessage="Close"
+                />
               </EuiButton>
             </EuiModalFooter>
           </EuiModal>

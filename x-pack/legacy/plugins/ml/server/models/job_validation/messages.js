@@ -255,7 +255,7 @@ export const getMessages = () => {
     job_id_valid: {
       status: 'SUCCESS',
       heading: i18n.translate('xpack.ml.models.jobValidation.messages.jobIdValidHeading', {
-        defaultMessage: 'Job id format is valid.',
+        defaultMessage: 'Job id format is valid',
       }),
       text: i18n.translate('xpack.ml.models.jobValidation.messages.jobIdValidMessage', {
         defaultMessage: 'Lowercase alphanumeric (a-z and 0-9) characters, hyphens or underscores, ' +
@@ -274,7 +274,7 @@ export const getMessages = () => {
     job_group_id_valid: {
       status: 'SUCCESS',
       heading: i18n.translate('xpack.ml.models.jobValidation.messages.jobGroupIdValidHeading', {
-        defaultMessage: 'Job group id formats are valid.',
+        defaultMessage: 'Job group id formats are valid',
       }),
       text: i18n.translate('xpack.ml.models.jobValidation.messages.jobGroupIdValidMessage', {
         defaultMessage: 'Lowercase alphanumeric (a-z and 0-9) characters, hyphens or underscores, ' +

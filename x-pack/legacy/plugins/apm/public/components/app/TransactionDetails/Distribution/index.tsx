@@ -8,7 +8,7 @@ import { EuiIconTip, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
 import React, { FunctionComponent, useCallback } from 'react';
-import { ITransactionDistributionAPIResponse } from '../../../../../server/lib/transactions/distribution';
+import { TransactionDistributionAPIResponse } from '../../../../../server/lib/transactions/distribution';
 import { IBucket } from '../../../../../server/lib/transactions/distribution/get_buckets/transform';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { getTimeFormatter, timeUnit } from '../../../../utils/formatters';
@@ -88,7 +88,7 @@ const getFormatYLong = (transactionType: string | undefined) => (t: number) => {
 };
 
 interface Props {
-  distribution?: ITransactionDistributionAPIResponse;
+  distribution?: TransactionDistributionAPIResponse;
   urlParams: IUrlParams;
   isLoading: boolean;
 }

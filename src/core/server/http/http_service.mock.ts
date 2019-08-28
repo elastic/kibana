@@ -18,13 +18,11 @@
  */
 
 import { Server } from 'hapi';
-import { HttpService } from './http_service';
-import { HttpServerSetup } from './http_server';
-import { HttpServiceSetup } from './http_service';
+import { HttpService, HttpServiceSetup } from './http_service';
 import { OnPreAuthToolkit } from './lifecycle/on_pre_auth';
 import { AuthToolkit } from './lifecycle/auth';
-import { OnPostAuthToolkit } from './lifecycle/on_post_auth';
 import { sessionStorageMock } from './cookie_session_storage.mocks';
+import { IRouter } from './router';
 
 type ServiceSetupMockType = jest.Mocked<HttpServiceSetup> & {
   basePath: jest.Mocked<HttpServiceSetup['basePath']>;
@@ -37,28 +35,41 @@ const createBasePathMock = (): jest.Mocked<HttpServiceSetup['basePath']> => ({
   remove: jest.fn(),
 });
 
+const createRouterMock = (): jest.Mocked<IRouter> => ({
+  routerPath: '/',
+  get: jest.fn(),
+  post: jest.fn(),
+  put: jest.fn(),
+  delete: jest.fn(),
+  getRoutes: jest.fn(),
+});
+
 const createSetupContractMock = () => {
   const setupContract: ServiceSetupMockType = {
-    // we can mock some hapi server method when we need it
-    server: {} as Server,
+    // we can mock other hapi server methods when we need it
+    server: ({
+      route: jest.fn(),
+      start: jest.fn(),
+      stop: jest.fn(),
+    } as unknown) as Server,
     createCookieSessionStorageFactory: jest.fn(),
     registerOnPreAuth: jest.fn(),
     registerAuth: jest.fn(),
     registerOnPostAuth: jest.fn(),
-    registerRouter: jest.fn(),
+    registerRouteHandlerContext: jest.fn(),
+    createRouter: jest.fn(),
     basePath: createBasePathMock(),
     auth: {
       get: jest.fn(),
       isAuthenticated: jest.fn(),
       getAuthHeaders: jest.fn(),
     },
-    createNewServer: jest.fn(),
     isTlsEnabled: false,
   };
-  setupContract.createNewServer.mockResolvedValue({} as HttpServerSetup);
   setupContract.createCookieSessionStorageFactory.mockResolvedValue(
     sessionStorageMock.createFactory()
   );
+  setupContract.createRouter.mockImplementation(createRouterMock);
   return setupContract;
 };
 
@@ -75,20 +86,11 @@ const createHttpServiceMock = () => {
 
 const createOnPreAuthToolkitMock = (): jest.Mocked<OnPreAuthToolkit> => ({
   next: jest.fn(),
-  redirected: jest.fn(),
-  rejected: jest.fn(),
+  rewriteUrl: jest.fn(),
 });
 
 const createAuthToolkitMock = (): jest.Mocked<AuthToolkit> => ({
   authenticated: jest.fn(),
-  redirected: jest.fn(),
-  rejected: jest.fn(),
-});
-
-const createOnPostAuthToolkitMock = (): jest.Mocked<OnPostAuthToolkit> => ({
-  next: jest.fn(),
-  redirected: jest.fn(),
-  rejected: jest.fn(),
 });
 
 export const httpServiceMock = {
@@ -97,5 +99,4 @@ export const httpServiceMock = {
   createSetupContract: createSetupContractMock,
   createOnPreAuthToolkit: createOnPreAuthToolkitMock,
   createAuthToolkit: createAuthToolkitMock,
-  createOnPostAuthToolkit: createOnPostAuthToolkitMock,
 };

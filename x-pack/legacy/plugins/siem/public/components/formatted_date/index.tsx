@@ -30,6 +30,8 @@ export const PreferenceFormattedDate = pure<{ value: Date }>(({ value }) => {
   );
 });
 
+PreferenceFormattedDate.displayName = 'PreferenceFormattedDate';
+
 /**
  * Renders the specified date value in a format determined by the user's preferences,
  * with a tooltip that renders:
@@ -56,3 +58,5 @@ export const FormattedDate = pure<{
     );
   }
 );
+
+FormattedDate.displayName = 'FormattedDate';

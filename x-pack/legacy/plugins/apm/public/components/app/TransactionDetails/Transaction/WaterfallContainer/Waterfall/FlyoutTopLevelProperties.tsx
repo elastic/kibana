@@ -11,9 +11,9 @@ import {
   TRANSACTION_NAME
 } from '../../../../../../../common/elasticsearch_fieldnames';
 import { Transaction } from '../../../../../../../typings/es_schemas/ui/Transaction';
-import { APMLink } from '../../../../../shared/Links/APMLink';
-import { TransactionLink } from '../../../../../shared/Links/TransactionLink';
+import { TransactionDetailLink } from '../../../../../shared/Links/apm/TransactionDetailLink';
 import { StickyProperties } from '../../../../../shared/StickyProperties';
+import { TransactionOverviewLink } from '../../../../../shared/Links/apm/TransactionOverviewLink';
 
 interface Props {
   transaction?: Transaction;
@@ -31,9 +31,9 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
       }),
       fieldName: SERVICE_NAME,
       val: (
-        <APMLink path={`/${transaction.service.name}`}>
+        <TransactionOverviewLink serviceName={transaction.service.name}>
           {transaction.service.name}
-        </APMLink>
+        </TransactionOverviewLink>
       ),
       width: '50%'
     },
@@ -43,9 +43,15 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
       }),
       fieldName: TRANSACTION_NAME,
       val: (
-        <TransactionLink transaction={transaction}>
+        <TransactionDetailLink
+          serviceName={transaction.service.name}
+          transactionId={transaction.transaction.id}
+          traceId={transaction.trace.id}
+          transactionName={transaction.transaction.name}
+          transactionType={transaction.transaction.type}
+        >
           {transaction.transaction.name}
-        </TransactionLink>
+        </TransactionDetailLink>
       ),
       width: '50%'
     }

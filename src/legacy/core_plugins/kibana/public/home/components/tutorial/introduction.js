@@ -96,10 +96,10 @@ function IntroductionUI({ description, previewUrl, title, exportedFieldsUrl, ico
           {icon}
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
-              <h2>
+              <h1>
                 {title} &nbsp;
                 {betaBadge}
-              </h2>
+              </h1>
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>

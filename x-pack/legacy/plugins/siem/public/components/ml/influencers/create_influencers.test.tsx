@@ -19,8 +19,13 @@ describe('create_influencers', () => {
   });
 
   test('renders correctly against snapshot', () => {
-    const wrapper = shallow(<span>{createInfluencers(anomalies.anomalies[0])}</span>);
+    const wrapper = shallow(<span>{createInfluencers(anomalies.anomalies[0].influencers)}</span>);
     expect(toJson(wrapper)).toMatchSnapshot();
+  });
+
+  test('it returns an empty string when influencers is undefined', () => {
+    const wrapper = mount(<span>{createInfluencers()}</span>);
+    expect(wrapper.text()).toEqual('');
   });
 
   test('it returns expected createKeyAndValue record with special left and right quotes', () => {
@@ -34,13 +39,13 @@ describe('create_influencers', () => {
   });
 
   test('it creates the anomalies without filtering anything out since they are all well formed', () => {
-    const wrapper = mount(<span>{createInfluencers(anomalies.anomalies[0])}</span>);
+    const wrapper = mount(<span>{createInfluencers(anomalies.anomalies[0].influencers)}</span>);
     expect(wrapper.text()).toEqual('host.name: "zeek-iowa"process.name: "du"user.name: "root"');
   });
 
   test('it returns empty text when passed in empty objects of influencers', () => {
     anomalies.anomalies[0].influencers = [{}, {}, {}];
-    const wrapper = mount(<span>{createInfluencers(anomalies.anomalies[0])}</span>);
+    const wrapper = mount(<span>{createInfluencers(anomalies.anomalies[0].influencers)}</span>);
     expect(wrapper.text()).toEqual('');
   });
 
@@ -50,7 +55,7 @@ describe('create_influencers', () => {
       {},
       { 'influencer-name-two': 'influencer-value-two' },
     ];
-    const wrapper = mount(<span>{createInfluencers(anomalies.anomalies[0])}</span>);
+    const wrapper = mount(<span>{createInfluencers(anomalies.anomalies[0].influencers)}</span>);
     expect(wrapper.text()).toEqual(
       'influencer-name-one: "influencer-value-one"influencer-name-two: "influencer-value-two"'
     );

@@ -13,6 +13,9 @@ import {
   EuiGlobalToastList,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import React, { ChangeEvent } from 'react';
 import { connect } from 'react-redux';
 import { closeToast, importRepo } from '../../actions';
@@ -71,11 +74,15 @@ class CodeImportProject extends React.PureComponent<
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFormRow
-              label="Repository URL"
+              label={i18n.translate('xpack.code.adminPage.repoTab.repositoryUrlTitle', {
+                defaultMessage: 'Repository URL',
+              })}
               helpText="e.g. https://github.com/Microsoft/TypeScript-Node-Starter"
               fullWidth
               isInvalid={this.state.isInvalid}
-              error="The URL shouldn't be empty."
+              error={i18n.translate('xpack.code.adminPage.repoTab.repositoryUrlEmptyText', {
+                defaultMessage: "The URL shouldn't be empty.",
+              })}
             >
               <EuiFieldText
                 value={this.state.value}
@@ -97,7 +104,10 @@ class CodeImportProject extends React.PureComponent<
               onClick={this.submitImportProject}
               data-test-subj="importRepositoryButton"
             >
-              Import
+              <FormattedMessage
+                id="xpack.code.adminPage.repoTab.importButtonLabel"
+                defaultMessage="Import"
+              />
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

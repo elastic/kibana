@@ -42,11 +42,8 @@ import {
   EuiCode,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Storage } from 'ui/storage';
-import { data } from 'plugins/data/setup';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
-const { QueryBarInput } = data.query.ui;
-const localStorage = new Storage(window.localStorage);
+import { QueryBarWrapper } from '../query_bar_wrapper';
 
 export class TopNPanelConfig extends Component {
   constructor(props) {
@@ -143,7 +140,7 @@ export class TopNPanelConfig extends Component {
                   }
                   fullWidth
                 >
-                  <QueryBarInput
+                  <QueryBarWrapper
                     query={{
                       language: model.filter.language
                         ? model.filter.language
@@ -151,9 +148,7 @@ export class TopNPanelConfig extends Component {
                       query: model.filter.query || '',
                     }}
                     onChange={filter => this.props.onChange({ filter })}
-                    appName={'VisEditor'}
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
-                    store={localStorage}
                   />
                 </EuiFormRow>
               </EuiFlexItem>

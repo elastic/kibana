@@ -2,14 +2,12 @@
 
 exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly against snapshot 1`] = `
 <span>
-  <styled.div>
+  <Row>
     <span>
       some children
     </span>
-    <styled.div
-      width={100}
-    >
-      <pure(Component)
+    <RowRendererContainer>
+      <SystemGenericFileDetails
         browserFields={Object {}}
         contextId="user_login"
         data={
@@ -98,21 +96,19 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
         }
         text="some text"
       />
-    </styled.div>
-  </styled.div>
+    </RowRendererContainer>
+  </Row>
 </span>
 `;
 
 exports[`GenericRowRenderer #createGenericSystemRowRenderer renders correctly against snapshot 1`] = `
 <span>
-  <styled.div>
+  <Row>
     <span>
       some children
     </span>
-    <styled.div
-      width={100}
-    >
-      <pure(Component)
+    <RowRendererContainer>
+      <SystemGenericDetails
         browserFields={Object {}}
         contextId="process_started"
         data={
@@ -201,7 +197,7 @@ exports[`GenericRowRenderer #createGenericSystemRowRenderer renders correctly ag
         }
         text="some text"
       />
-    </styled.div>
-  </styled.div>
+    </RowRendererContainer>
+  </Row>
 </span>
 `;

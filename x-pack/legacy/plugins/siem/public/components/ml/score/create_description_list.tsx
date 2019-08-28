@@ -20,6 +20,8 @@ const LargeScore = styled(EuiText)`
   font-weight: lighter;
 `;
 
+LargeScore.displayName = 'LargeScore';
+
 export const createDescriptionList = (
   score: Anomaly,
   startDate: number,
@@ -88,7 +90,7 @@ export const createDescriptionList = (
       title: i18n.INFLUENCED_BY,
       description: (
         <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-          {createInfluencers(score)}
+          {createInfluencers(score.influencers)}
         </EuiFlexGroup>
       ),
     },

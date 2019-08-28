@@ -4,6 +4,8 @@
 
 ## KibanaRequest.route property
 
+matched route details
+
 <b>Signature:</b>
 
 ```typescript

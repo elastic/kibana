@@ -61,14 +61,29 @@ export TEST_ES_PASS=<password>
 node scripts/functional_test_runner
 ----------
 
-** Selenium tests can be run in headless mode by setting the environment variable below.  Unset this variable to show the browser.
+** If you are running x-pack functional tests, start server and runner from {blob}xpack[x-pack] folder:
++
+["source", "shell"]
+----------
+node scripts/functional_tests_server.js
+node ../scripts/functional_test_runner.js
+----------
+
+** Selenium tests are run in headless mode on CI. Locally the same tests will be executed in a real browser. You can activate headless mode by setting the environment variable below:
 +
 ["source", "shell"]
 ----------
 export TEST_BROWSER_HEADLESS=1
 ----------
 
-** When running against cloud deployment, some tests are not applicable use --exclude-tag to skip those tests.  An example shell file can be found at:  {blob}test/scripts/jenkins_kibana.sh[test/scripts/jenkins_kibana.sh]
+** If you are using Google Chrome, you can slow down the local network connection to verify test stability:
++
+["source", "shell"]
+----------
+export TEST_THROTTLE_NETWORK=1
+----------
+
+** When running against a Cloud deployment, some tests are not applicable. To skip tests that do not apply, use --exclude-tag.  An example shell file can be found at: {blob}test/scripts/jenkins_cloud.sh[test/scripts/jenkins_cloud.sh]
 +
 ["source", "shell"]
 ----------
@@ -80,7 +95,8 @@ node scripts/functional_test_runner --exclude-tag skipCloud
 
 When run without any arguments the `FunctionalTestRunner` automatically loads the configuration in the standard location, but you can override that behavior with the `--config` flag. List configs with multiple --config arguments.
 
-* `--config test/functional/config.js` starts Elasticsearch and Kibana servers with the selenium tests configuration.
+* `--config test/functional/config.js` starts Elasticsearch and Kibana servers with the WebDriver tests configured to run in Chrome.
+* `--config test/functional/config.firefox.js` starts Elasticsearch and Kibana servers with the WebDriver tests configured to run in Firefox.
 * `--config test/api_integration/config.js` starts Elasticsearch and Kibana servers with the api integration tests configuration.
 
 There are also command line flags for `--bail` and `--grep`, which behave just like their mocha counterparts. For instance, use `--grep=foo` to run only tests that match a regular expression.
@@ -98,7 +114,7 @@ Use the `--help` flag for more options.
 
 The tests are written in https://mochajs.org[mocha] using https://github.com/elastic/kibana/tree/master/packages/kbn-expect[@kbn/expect] for assertions.
 
-We use https://sites.google.com/a/chromium.org/chromedriver/[chromedriver], https://theintern.github.io/leadfoot[leadfoot], and https://github.com/theintern/digdug[digdug] for automating Chrome. When the `FunctionalTestRunner` launches, digdug opens a `Tunnel` which starts chromedriver and a stripped-down instance of Chrome. It also creates an instance of https://theintern.github.io/leadfoot/module-leadfoot_Command.html[Leadfoot's `Command`] class, which is available via the `remote` service. The `remote` communicates to Chrome through the digdug `Tunnel`. See the https://theintern.github.io/leadfoot/module-leadfoot_Command.html[leadfoot/Command API] docs for all the commands you can use with `remote`.
+We use https://www.w3.org/TR/webdriver1/[WebDriver Protocol] to run tests in both Chrome and Firefox with the help of https://sites.google.com/a/chromium.org/chromedriver/[chromedriver] and https://firefox-source-docs.mozilla.org/testing/geckodriver/[geckodriver]. When the `FunctionalTestRunner` launches, remote service creates a new webdriver session, which starts the driver and a stripped-down browser instance. We use `browser` service and `webElementWrapper` class to wrap up https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/[Webdriver API].
 
 The `FunctionalTestRunner` automatically transpiles functional tests using babel, so that tests can use the same ECMAScript features that Kibana source code uses. See {blob}style_guides/js_style_guide.md[style_guides/js_style_guide.md].
 
@@ -132,6 +148,34 @@ The `FunctionalTestRunner`'s primary purpose is to execute test files. These fil
 
 **Test Suite**:::
 A test suite is a collection of tests defined by calling `describe()`, and then populated with tests and setup/teardown hooks by calling `it()`, `before()`, `beforeEach()`, etc. Every test file must define only one top level test suite, and test suites can have as many nested test suites as they like.
+
+**Tags**:::
+Use tags in `describe()` function to group functional tests. Tags include:
+* `ciGroup{id}` - Assigns test suite to a specific CI worker
+* `skipCloud` and `skipFirefox` - Excludes test suite from running on Cloud or Firefox
+* `smoke` - Groups tests that run on Chrome and Firefox
+
+**Cross-browser testing**:::
+On CI, all the functional tests are executed in Chrome by default. To also run a suite against Firefox, assign the `smoke` tag:
+
+["source","js"]
+-----------
+// on CI test suite will be run twice: in Chrome and Firefox
+describe('My Cross-browser Test Suite', function () {
+  this.tags('smoke');
+
+  it('My First Test');
+}
+-----------
+
+If the tests do not apply to Firefox, assign the `skipFirefox` tag.
+
+To run tests on Firefox locally, use `config.firefox.js`:
+
+["source","shell"]
+-----------
+node scripts/functional_test_runner --config test/functional/config.firefox.js
+-----------
 
 [float]
 ===== Anatomy of a test file
@@ -201,7 +245,7 @@ The first and only argument to all providers is a Provider API Object. This obje
 Within config files the API has the following properties
 
 [horizontal]
-`log`::: An instance of the {blob}src/utils/tooling_log/tooling_log.js[`ToolingLog`] that is ready for use
+`log`::: An instance of the {blob}packages/kbn-dev-utils/src/tooling_log/tooling_log.js[`ToolingLog`] that is ready for use
 `readConfigFile(path)`::: Returns a promise that will resolve to a Config instance that provides the values from the config file at `path`
 
 Within service and PageObject Providers the API is:
@@ -224,17 +268,17 @@ Within a test Provider the API is exactly the same as the service providers API 
 The `FunctionalTestRunner` comes with three built-in services:
 
 **config:**:::
-* Source: {blob}src/functional_test_runner/lib/config/config.js[src/functional_test_runner/lib/config/config.js]
-* Schema: {blob}src/functional_test_runner/lib/config/schema.js[src/functional_test_runner/lib/config/schema.js]
+* Source: {blob}src/functional_test_runner/lib/config/config.ts[src/functional_test_runner/lib/config/config.ts]
+* Schema: {blob}src/functional_test_runner/lib/config/schema.ts[src/functional_test_runner/lib/config/schema.ts]
 * Use `config.get(path)` to read any value from the config file
 
 **log:**:::
-* Source: {blob}src/utils/tooling_log/tooling_log.js[src/utils/tooling_log/tooling_log.js]
+* Source: {blob}packages/kbn-dev-utils/src/tooling_log/tooling_log.js[packages/kbn-dev-utils/src/tooling_log/tooling_log.js]
 * `ToolingLog` instances are readable streams. The instance provided by this service is automatically piped to stdout by the `FunctionalTestRunner` CLI
 * `log.verbose()`, `log.debug()`, `log.info()`, `log.warning()` all work just like console.log but produce more organized output
 
 **lifecycle:**:::
-* Source: {blob}src/functional_test_runner/lib/lifecycle.js[src/functional_test_runner/lib/lifecycle.js]
+* Source: {blob}src/functional_test_runner/lib/lifecycle.ts[src/functional_test_runner/lib/lifecycle.ts]
 * Designed primary for use in services
 * Exposes lifecycle events for basic coordination. Handlers can return a promise and resolve/fail asynchronously
 * Phases include: `beforeLoadTests`, `beforeTests`, `beforeEachTest`, `cleanup`, `phaseStart`, `phaseEnd`
@@ -244,15 +288,15 @@ The `FunctionalTestRunner` comes with three built-in services:
 
 The Kibana functional tests define the vast majority of the actual functionality used by tests.
 
-**retry:**:::
-* Source: {blob}test/functional/services/retry.js[test/functional/services/retry.js]
-* Helpers for retrying operations
+**browser**:::
+* Source: {blob}test/functional/services/browser.ts[test/functional/services/browser.ts]
+* Higher level wrapper for `remote` service, which exposes available browser actions
 * Popular methods:
-** `retry.try(fn)` - execute `fn` in a loop until it succeeds or the default try timeout elapses
-** `retry.tryForTime(ms, fn)` execute fn in a loop until it succeeds or `ms` milliseconds elapses
+** `browser.getWindowSize()`
+** `browser.refresh()`
 
 **testSubjects:**:::
-* Source: {blob}test/functional/services/test_subjects.js[test/functional/services/test_subjects.js]
+* Source: {blob}test/functional/services/test_subjects.ts[test/functional/services/test_subjects.ts]
 * Test subjects are elements that are tagged specifically for selecting from tests
 * Use `testSubjects` over CSS selectors when possible
 * Usage:
@@ -277,14 +321,21 @@ await testSubjects.click(‘containerButton’);
 ** `testSubjects.click(testSubjectSelector)` - Click a test subject in the page; throw if it can't be found after some time
 
 **find:**:::
-* Source: {blob}test/functional/services/find.js[test/functional/services/find.js]
+* Source: {blob}test/functional/services/find.ts[test/functional/services/find.ts]
 * Helpers for `remote.findBy*` methods that log and manage timeouts
 * Popular methods:
 ** `find.byCssSelector()`
 ** `find.allByCssSelector()`
 
+**retry:**:::
+* Source: {blob}test/common/services/retry/retry.ts[test/common/services/retry/retry.ts]
+* Helpers for retrying operations
+* Popular methods:
+** `retry.try(fn, onFailureBlock)` - Execute `fn` in a loop until it succeeds or the default timeout elapses. The optional `onFailureBlock` is executed before each retry attempt.
+** `retry.tryForTime(ms, fn, onFailureBlock)` - Execute `fn` in a loop until it succeeds or `ms` milliseconds elapses. The optional `onFailureBlock` is executed before each retry attempt.
+
 **kibanaServer:**:::
-* Source: {blob}test/functional/services/kibana_server/kibana_server.js[test/functional/services/kibana_server/kibana_server.js]
+* Source: {blob}test/common/services/kibana_server/kibana_server.js[test/common/services/kibana_server/kibana_server.js]
 * Helpers for interacting with Kibana's server
 * Commonly used methods:
 ** `kibanaServer.uiSettings.update()`
@@ -292,32 +343,28 @@ await testSubjects.click(‘containerButton’);
 ** `kibanaServer.status.getOverallState()`
 
 **esArchiver:**:::
-* Source: {blob}test/functional/services/es_archiver.js[test/functional/services/es_archiver.js]
+* Source: {blob}test/common/services/es_archiver.ts[test/common/services/es_archiver.ts]
 * Load/unload archives created with the `esArchiver`
 * Popular methods:
 ** `esArchiver.load(name)`
 ** `esArchiver.loadIfNeeded(name)`
 ** `esArchiver.unload(name)`
 
-**docTable:**:::
-* Source: {blob}test/functional/services/doc_table.js[test/functional/services/doc_table.js]
-* Helpers for interacting with doc tables
+Full list of services that are used in functional tests can be found here: {blob}test/functional/services[test/functional/services]
 
-**pointSeriesVis:**:::
-* Source: {blob}test/functional/services/point_series_vis.js[test/functional/services/point_series_vis.js]
-* Helpers for interacting with point series visualizations
 
 **Low-level utilities:**:::
 * es
-** Source: {blob}test/functional/services/es.js[test/functional/services/es.js]
+** Source: {blob}test/common/services/es.ts[test/common/services/es.ts]
 ** Elasticsearch client
 ** Higher level options: `kibanaServer.uiSettings` or `esArchiver`
 * remote
-** Source: {blob}test/functional/services/remote/remote.js[test/functional/services/remote/remote.js]
-** Instance of https://theintern.github.io/leadfoot/module-leadfoot_Command.html[Leadfoot's `Command]` class
+** Source: {blob}test/functional/services/remote/remote.ts[test/functional/services/remote/remote.ts]
+** Instance of https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/index_exports_WebDriver.html[WebDriver] class
 ** Responsible for all communication with the browser
-** Higher level options: `testSubjects`, `find`, and `PageObjects.common`
-** See the https://theintern.github.io/leadfoot/module-leadfoot_Command.html[leadfoot/Command API] for full API
+** To perform browser actions, use `remote` service 
+** For searching and manipulating with DOM elements, use `testSubjects` and `find` services
+** See the https://seleniumhq.github.io/selenium/docs/api/javascript/[selenium-webdriver docs] for the full API.
 
 [float]
 ===== Custom Services

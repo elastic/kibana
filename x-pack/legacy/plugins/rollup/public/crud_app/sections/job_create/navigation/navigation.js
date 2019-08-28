@@ -29,7 +29,6 @@ const NavigationUi = ({
   onClickToggleStart,
   startJobAfterCreation,
 }) => {
-  console.log(startJobAfterCreation);
   if (isSaving) {
     return (
       <EuiFlexGroup justifyContent="flexStart" gutterSize="m">

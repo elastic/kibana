@@ -5,6 +5,7 @@
  */
 
 import { flatten, sortByOrder } from 'lodash';
+import { idx } from '@kbn/elastic-idx';
 import {
   SERVICE_NAME,
   SPAN_SUBTYPE,
@@ -79,26 +80,14 @@ export async function getTransactionBreakdown({
   };
 
   const filters = [
-    {
-      term: {
-        [SERVICE_NAME]: {
-          value: serviceName
-        }
-      }
-    },
-    {
-      term: {
-        [TRANSACTION_TYPE]: {
-          value: transactionType
-        }
-      }
-    },
+    { term: { [SERVICE_NAME]: serviceName } },
+    { term: { [TRANSACTION_TYPE]: transactionType } },
     { range: rangeFilter(start, end) },
     ...uiFiltersES
   ];
 
   if (transactionName) {
-    filters.push({ term: { [TRANSACTION_NAME]: { value: transactionName } } });
+    filters.push({ term: { [TRANSACTION_NAME]: transactionName } });
   }
 
   const params = {
@@ -107,7 +96,7 @@ export async function getTransactionBreakdown({
       size: 0,
       query: {
         bool: {
-          must: filters
+          filter: filters
         }
       },
       aggs: {
@@ -124,8 +113,8 @@ export async function getTransactionBreakdown({
 
   const formatBucket = (
     aggs:
-      | typeof resp['aggregations']
-      | typeof resp['aggregations']['by_date']['buckets'][0]
+      | Required<typeof resp>['aggregations']
+      | Required<typeof resp>['aggregations']['by_date']['buckets'][0]
   ) => {
     const sumAllSelfTimes = aggs.sum_all_self_times.value || 0;
 
@@ -147,11 +136,12 @@ export async function getTransactionBreakdown({
     return breakdowns;
   };
 
-  const visibleKpis = sortByOrder(
-    formatBucket(resp.aggregations),
-    'percentage',
-    'desc'
-  ).slice(0, MAX_KPIS);
+  const visibleKpis = resp.aggregations
+    ? sortByOrder(formatBucket(resp.aggregations), 'percentage', 'desc').slice(
+        0,
+        MAX_KPIS
+      )
+    : [];
 
   const kpis = sortByOrder(visibleKpis, 'name').map((kpi, index) => {
     return {
@@ -162,7 +152,9 @@ export async function getTransactionBreakdown({
 
   const kpiNames = kpis.map(kpi => kpi.name);
 
-  const timeseriesPerSubtype = resp.aggregations.by_date.buckets.reduce(
+  const bucketsByDate = idx(resp.aggregations, _ => _.by_date.buckets) || [];
+
+  const timeseriesPerSubtype = bucketsByDate.reduce(
     (prev, bucket) => {
       const formattedValues = formatBucket(bucket);
       const time = bucket.key;

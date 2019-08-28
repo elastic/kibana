@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent, useContext, useState } from 'react';
+import React, { useState } from 'react';
 import moment from 'moment-timezone';
 
 import { i18n } from '@kbn/i18n';
@@ -18,8 +18,6 @@ import {
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiInMemoryTable,
-  EuiInMemoryTableProps,
   EuiPanel,
   EuiPopover,
   EuiPopoverTitle,
@@ -30,26 +28,19 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
-// TODO EUI's types for EuiInMemoryTable is missing these props
-interface ExpandableTableProps extends EuiInMemoryTableProps {
-  compressed: boolean;
-  itemIdToExpandedRowMap: ItemIdToExpandedRowMap;
-  isExpandable: boolean;
-}
-
-const ExpandableTable = (EuiInMemoryTable as any) as FunctionComponent<ExpandableTableProps>;
+import { ColumnType, MlInMemoryTable } from '../../../../../../common/types/eui/in_memory_table';
 
 import { KBN_FIELD_TYPES } from '../../../../../../common/constants/field_types';
 import { Dictionary } from '../../../../../../common/types/common';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
 
+import { useCurrentIndexPattern } from '../../../../../contexts/kibana';
+
 import {
-  isKibanaContext,
   toggleSelectedField,
   EsDoc,
   EsFieldName,
   MAX_COLUMNS,
-  KibanaContext,
   PivotQuery,
 } from '../../../../common';
 
@@ -100,13 +91,7 @@ interface Props {
 export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, query }) => {
   const [clearTable, setClearTable] = useState(false);
 
-  const kibanaContext = useContext(KibanaContext);
-
-  if (!isKibanaContext(kibanaContext)) {
-    return null;
-  }
-
-  const indexPattern = kibanaContext.currentIndexPattern;
+  const indexPattern = useCurrentIndexPattern();
 
   const [selectedFields, setSelectedFields] = useState([] as EsFieldName[]);
   const [isColumnsPopoverVisible, setColumnsPopoverVisible] = useState(false);
@@ -210,13 +195,13 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
     docFieldsCount = docFields.length;
   }
 
-  const columns = selectedFields.map(k => {
-    const column = {
+  const columns: ColumnType[] = selectedFields.map(k => {
+    const column: ColumnType = {
       field: `_source["${k}"]`,
       name: k,
       sortable: true,
       truncateText: true,
-    } as Dictionary<any>;
+    };
 
     const field = indexPattern.fields.find(f => f.name === k);
 
@@ -321,7 +306,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
   if (columns.length > 0) {
     sorting = {
       sort: {
-        field: columns[0].field,
+        field: `_source["${selectedFields[0]}"]`,
         direction: SORT_DIRECTON.ASC,
       },
     };
@@ -358,14 +343,14 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
         <EuiFlexItem grow={false}>
           <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem>
           <EuiFlexGroup alignItems="center" gutterSize="xs">
-            <EuiFlexItem>
+            <EuiFlexItem style={{ textAlign: 'right' }}>
               {docFieldsCount > MAX_COLUMNS && (
                 <EuiText size="s">
                   {i18n.translate('xpack.ml.dataframe.sourceIndexPreview.fieldSelection', {
                     defaultMessage:
-                      'showing {selectedFieldsLength, number} of {docFieldsCount, number} {docFieldsCount, plural, one {field} other {fields}}',
+                      '{selectedFieldsLength, number} of {docFieldsCount, number} {docFieldsCount, plural, one {field} other {fields}} selected',
                     values: { selectedFieldsLength: selectedFields.length, docFieldsCount },
                   })}
                 </EuiText>
@@ -431,8 +416,9 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
       {status !== SOURCE_INDEX_STATUS.LOADING && (
         <EuiProgress size="xs" color="accent" max={1} value={0} />
       )}
-      {clearTable === false && (
-        <ExpandableTable
+      {clearTable === false && columns.length > 0 && sorting !== false && (
+        <MlInMemoryTable
+          allowNeutralSort={false}
           compressed
           items={tableItems}
           columns={columns}

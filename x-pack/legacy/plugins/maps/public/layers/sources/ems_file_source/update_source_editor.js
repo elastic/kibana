@@ -7,7 +7,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { TooltipSelector } from '../../../components/tooltip_selector';
-import { getEmsVectorFilesMeta } from '../../../meta';
+import { getEMSClient } from '../../../meta';
 
 export class UpdateSourceEditor extends Component {
 
@@ -32,9 +32,11 @@ export class UpdateSourceEditor extends Component {
   async loadFields() {
     let fields;
     try {
-      const emsFiles = await getEmsVectorFilesMeta();
-      const meta = emsFiles.find((source => source.id === this.props.layerId));
-      fields = meta.fields.map(field => {
+      const emsClient = getEMSClient();
+      const emsFiles = await emsClient.getFileLayers();
+      const emsFile = emsFiles.find((emsFile => emsFile.getId() === this.props.layerId));
+      const emsFields = emsFile.getFieldsInLanguage();
+      fields = emsFields.map(field => {
         return {
           type: 'string',
           name: field.name,

@@ -39,7 +39,7 @@ require('ui/autoload/all');
 // TODO: remove ui imports completely (move to plugins)
 import 'ui/directives/input_focus';
 import 'ui/directives/saved_object_finder';
-import 'ui/listen';
+import 'ui/directives/listen';
 import 'ui/kbn_top_nav';
 import 'ui/saved_objects/ui/saved_object_save_as_checkbox';
 
@@ -326,7 +326,7 @@ app.controller('timelion', function (
     };
 
     $scope.$listen($scope.state, 'fetch_with_changes', $scope.search);
-    $scope.$listen(timefilter, 'fetch', $scope.search);
+    timefilter.getFetch$().subscribe($scope.search);
 
     $scope.opts = {
       saveExpression: saveExpression,

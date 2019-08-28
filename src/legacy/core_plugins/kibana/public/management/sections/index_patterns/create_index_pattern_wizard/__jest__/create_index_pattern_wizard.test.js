@@ -55,6 +55,7 @@ const services = {
   config: {},
   changeUrl: () => {},
   scopeApply: () => {},
+
   indexPatternCreationType: mockIndexPatternCreationType,
 };
 
@@ -183,7 +184,7 @@ describe('CreateIndexPatternWizard', () => {
             get: () => ({
               create,
             }),
-            cache: { clear }
+            clearCache: clear,
           },
           changeUrl,
           indexPatternCreationType: mockIndexPatternCreationType

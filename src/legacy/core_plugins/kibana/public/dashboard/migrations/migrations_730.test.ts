@@ -75,7 +75,7 @@ test('dashboard migration 7.3.0 migrates filters to query on search source', () 
 });
 
 // See https://github.com/elastic/kibana/issues/41240 - this can happen.
-test('dashboard migration 7.3.0 does not migrate filters to query on search source when there is no query string property', () => {
+test('dashboard migration 7.3.0 migrates filters to query on search source when there is no query string property', () => {
   const doc: DashboardDocPre700 = {
     id: 'AWviOturFv4p9HkVSIgn',
     type: 'dashboard',
@@ -100,7 +100,7 @@ test('dashboard migration 7.3.0 does not migrate filters to query on search sour
   const newDoc = migrations.dashboard['7.3.0'](doc700, mockLogger);
 
   const parsedSearchSource = JSON.parse(newDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON);
-  expect(parsedSearchSource.filter.length).toBe(1);
+  expect(parsedSearchSource.filter.length).toBe(0);
   expect(parsedSearchSource.query.query).toBe('');
 
   expect(newDoc.attributes.uiStateJSON).toBeUndefined();

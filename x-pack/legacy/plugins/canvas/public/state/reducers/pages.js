@@ -5,7 +5,7 @@
  */
 
 import { handleActions } from 'redux-actions';
-import { set, del, insert } from 'object-path-immutable';
+import immutable from 'object-path-immutable';
 import { cloneSubgraphs } from '../../lib/clone_subgraphs';
 import { getId } from '../../lib/get_id';
 import { routerProvider } from '../../lib/router_provider';
@@ -13,6 +13,8 @@ import { getDefaultPage } from '../defaults';
 import * as actions from '../actions/pages';
 import { getSelectedPageIndex } from '../selectors/workpad';
 import { isGroupId } from '../../components/workpad_page/integration_utils';
+
+const { set, del, insert } = immutable;
 
 const setPageIndex = (workpadState, index) =>
   index < 0 || !workpadState.pages[index] || getSelectedPageIndex(workpadState) === index
@@ -143,12 +145,12 @@ export const pagesReducer = handleActions(
 
     [actions.stylePage]: (workpadState, { payload }) => {
       const pageIndex = workpadState.pages.findIndex(page => page.id === payload.pageId);
-      return set(workpadState, ['pages', pageIndex, 'style'], payload.style);
+      return set(workpadState, `pages.${pageIndex}.style`, payload.style);
     },
 
     [actions.setPageTransition]: (workpadState, { payload }) => {
       const pageIndex = workpadState.pages.findIndex(page => page.id === payload.pageId);
-      return set(workpadState, ['pages', pageIndex, 'transition'], payload.transition);
+      return set(workpadState, `pages.${pageIndex}.transition`, payload.transition);
     },
   },
   {}

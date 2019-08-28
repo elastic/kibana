@@ -95,29 +95,30 @@ export const getAnomaliesHostTableColumns = (
     field: 'anomaly.influencers',
     render: (influencers, anomaliesByHost) => (
       <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-        {influencers.map(influencer => {
-          const [key, value] = getEntries(influencer);
-          const entityName = key != null ? key : '';
-          const entityValue = value != null ? value : '';
-          return (
-            <EuiFlexItem
-              key={`${entityName}-${entityValue}-${createCompoundHostKey(anomaliesByHost)}`}
-              grow={false}
-            >
-              <EuiFlexGroup gutterSize="none" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EntityDraggable
-                    idPrefix={`anomalies-host-table-influencers-${entityName}-${entityValue}-${createCompoundHostKey(
-                      anomaliesByHost
-                    )}`}
-                    entityName={entityName}
-                    entityValue={entityValue}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          );
-        })}
+        {influencers &&
+          influencers.map(influencer => {
+            const [key, value] = getEntries(influencer);
+            const entityName = key != null ? key : '';
+            const entityValue = value != null ? value : '';
+            return (
+              <EuiFlexItem
+                key={`${entityName}-${entityValue}-${createCompoundHostKey(anomaliesByHost)}`}
+                grow={false}
+              >
+                <EuiFlexGroup gutterSize="none" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EntityDraggable
+                      idPrefix={`anomalies-host-table-influencers-${entityName}-${entityValue}-${createCompoundHostKey(
+                        anomaliesByHost
+                      )}`}
+                      entityName={entityName}
+                      entityValue={entityValue}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            );
+          })}
       </EuiFlexGroup>
     ),
   },

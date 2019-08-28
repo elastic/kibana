@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-import './checkbox_showcharts';
-import './select_interval';
-import './select_severity';
+export { CheckboxShowCharts, showCharts$ } from './checkbox_showcharts';
+export { interval$, SelectInterval } from './select_interval';
+export { SelectSeverity, severity$, SEVERITY_OPTIONS } from './select_severity';

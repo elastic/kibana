@@ -51,6 +51,8 @@ const DropTargetDataProviders = styled.div`
   background-color: ${props => props.theme.eui.euiFormBackgroundColor};
 `;
 
+DropTargetDataProviders.displayName = 'DropTargetDataProviders';
+
 const getDroppableId = (id: string): string => `${droppableTimelineProvidersPrefix}${id}`;
 
 /**
@@ -85,7 +87,7 @@ export const DataProviders = pure<Props>(
   }) => (
     <DropTargetDataProviders data-test-subj="dataProviders">
       <TimelineContext.Consumer>
-        {({ isLoading }) => (
+        {isLoading => (
           <DroppableWrapper isDropDisabled={!show || isLoading} droppableId={getDroppableId(id)}>
             {dataProviders != null && dataProviders.length ? (
               <Providers
@@ -108,3 +110,5 @@ export const DataProviders = pure<Props>(
     </DropTargetDataProviders>
   )
 );
+
+DataProviders.displayName = 'DataProviders';

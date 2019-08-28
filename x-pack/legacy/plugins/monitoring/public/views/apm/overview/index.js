@@ -12,13 +12,14 @@ import template from './index.html';
 import { MonitoringViewBaseController } from '../../base_controller';
 import { ApmOverview } from '../../../components/apm/overview';
 import { I18nContext } from 'ui/i18n';
+import { CODE_PATH_APM } from '../../../../common/constants';
 
 uiRoutes.when('/apm', {
   template,
   resolve: {
     clusters: function (Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: [CODE_PATH_APM] });
     },
   },
   controller: class extends MonitoringViewBaseController {

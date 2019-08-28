@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { embeddableFactories, EmbeddableFactory } from 'plugins/embeddable_api';
 
 import 'ui/autoload/all';
 import 'uiExports/embeddableFactories';
@@ -26,27 +25,32 @@ import uiRoutes from 'ui/routes';
 
 // @ts-ignore
 import { uiModules } from 'ui/modules';
+
+import { Plugin } from '../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { start } from '../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import { npStart } from '../../../../../src/legacy/ui/public/new_platform';
+
 import template from './index.html';
 
 export interface PluginShim {
-  embeddableAPI: {
-    embeddableFactories: Map<string, EmbeddableFactory>;
-  };
+  embeddable: ReturnType<Plugin['setup']>;
 }
 
+const { inspector } = npStart.plugins;
+
 export interface CoreShim {
+  inspector: typeof inspector;
   onRenderComplete: (listener: () => void) => void;
 }
 
-const pluginShim: PluginShim = {
-  embeddableAPI: {
-    embeddableFactories,
-  },
+const plugins: PluginShim = {
+  embeddable: start,
 };
 
 let rendered = false;
 const onRenderCompleteListeners: Array<() => void> = [];
 const coreShim: CoreShim = {
+  inspector,
   onRenderComplete: (renderCompleteListener: () => void) => {
     if (rendered) {
       renderCompleteListener();
@@ -71,6 +75,6 @@ uiRoutes.when('/', {
 export function createShim(): { core: CoreShim; plugins: PluginShim } {
   return {
     core: coreShim,
-    plugins: pluginShim,
+    plugins,
   };
 }

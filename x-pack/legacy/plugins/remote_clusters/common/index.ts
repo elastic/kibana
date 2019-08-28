@@ -19,3 +19,5 @@ export const PLUGIN = {
 };
 
 export const API_BASE_PATH = '/api/remote_clusters';
+
+export { deserializeCluster, serializeCluster } from './cluster_serialization';

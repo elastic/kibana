@@ -8,9 +8,9 @@
 
 import _ from 'lodash';
 
-import { ML_RESULTS_INDEX_PATTERN } from 'plugins/ml/../common/constants/index_patterns';
-import { escapeForElasticsearchQuery } from 'plugins/ml/util/string_utils';
-import { ml } from 'plugins/ml/services/ml_api_service';
+import { ML_RESULTS_INDEX_PATTERN } from '../../../../../../common/constants/index_patterns';
+import { escapeForElasticsearchQuery } from '../../../../../util/string_utils';
+import { ml } from '../../../../../services/ml_api_service';
 
 // detector swimlane search
 function getScoresByRecord(jobId, earliestMs, latestMs, interval, firstSplitField) {
@@ -163,5 +163,3 @@ export const mlSimpleJobSearchService = {
   getScoresByRecord,
   getCategoryFields
 };
-
-

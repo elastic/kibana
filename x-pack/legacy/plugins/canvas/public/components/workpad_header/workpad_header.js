@@ -120,7 +120,7 @@ export class WorkpadHeader extends React.PureComponent {
               <EuiFlexItem grow={false}>
                 <FullscreenControl>{this._fullscreenButton}</FullscreenControl>
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <WorkpadZoom />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -133,6 +133,7 @@ export class WorkpadHeader extends React.PureComponent {
                     handler={this._keyHandler}
                     targetNodeSelector="body"
                     global
+                    isolate
                   />
                 )}
                 <EuiToolTip position="bottom" content={this._getEditToggleToolTip()}>

@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export const UptimePageProvider = ({
-  getPageObjects,
-  getService,
-}: KibanaFunctionalTestDefaultProviders) => {
+export function UptimePageProvider({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'timePicker']);
   const uptimeService = getService('uptime');
 
@@ -49,4 +46,4 @@ export const UptimePageProvider = ({
       await uptimeService.monitorIdExists('monitor-page-link-auto-http-0X131221E73F825974');
     }
   })();
-};
+}

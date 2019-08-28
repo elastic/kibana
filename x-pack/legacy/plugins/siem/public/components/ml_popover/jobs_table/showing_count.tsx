@@ -15,6 +15,8 @@ const ShowingContainer = styled.div`
   margin-top: 5px;
 `;
 
+ShowingContainer.displayName = 'ShowingContainer';
+
 export interface ShowingCountProps {
   filterResultsLength: number;
 }
@@ -25,7 +27,7 @@ export const ShowingCount = React.memo<ShowingCountProps>(({ filterResultsLength
       <FormattedMessage
         data-test-subj="query-message"
         id="xpack.siem.components.mlPopup.showingLabel"
-        defaultMessage="Showing: {filterResultsLength} {filterResultsLength, plural, one {Job} other {Jobs}}"
+        defaultMessage="Showing: {filterResultsLength} {filterResultsLength, plural, one {job} other {jobs}}"
         values={{
           filterResultsLength,
         }}
@@ -33,3 +35,5 @@ export const ShowingCount = React.memo<ShowingCountProps>(({ filterResultsLength
     </EuiText>
   </ShowingContainer>
 ));
+
+ShowingCount.displayName = 'ShowingCount';

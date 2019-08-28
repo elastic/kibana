@@ -8,14 +8,26 @@ import { omit } from 'lodash';
 import { SavedObjectsClientContract, SavedObjectReference } from 'src/core/server';
 import { Alert, RawAlert, AlertTypeRegistry, AlertAction, Log } from './types';
 import { TaskManager } from '../../task_manager';
-import { validateAlertTypeParams, parseDuration } from './lib';
+import { validateAlertTypeParams } from './lib';
+import { CreateAPIKeyResult as SecurityPluginCreateAPIKeyResult } from '../../../../plugins/security/server';
+
+interface FailedCreateAPIKeyResult {
+  created: false;
+}
+interface SuccessCreateAPIKeyResult {
+  created: true;
+  result: SecurityPluginCreateAPIKeyResult;
+}
+export type CreateAPIKeyResult = FailedCreateAPIKeyResult | SuccessCreateAPIKeyResult;
 
 interface ConstructorOptions {
   log: Log;
   taskManager: TaskManager;
   savedObjectsClient: SavedObjectsClientContract;
   alertTypeRegistry: AlertTypeRegistry;
-  basePath: string;
+  spaceId?: string;
+  getUserName: () => Promise<string | null>;
+  createAPIKey: () => Promise<CreateAPIKeyResult>;
 }
 
 interface FindOptions {
@@ -34,8 +46,15 @@ interface FindOptions {
   };
 }
 
+interface FindResult {
+  page: number;
+  perPage: number;
+  total: number;
+  data: object[];
+}
+
 interface CreateOptions {
-  data: Alert;
+  data: Pick<Alert, Exclude<keyof Alert, 'createdBy' | 'updatedBy' | 'apiKey' | 'apiKeyOwner'>>;
   options?: {
     migrationVersion?: Record<string, string>;
   };
@@ -53,31 +72,45 @@ interface UpdateOptions {
 
 export class AlertsClient {
   private readonly log: Log;
-  private readonly basePath: string;
+  private readonly getUserName: () => Promise<string | null>;
+  private readonly spaceId?: string;
   private readonly taskManager: TaskManager;
   private readonly savedObjectsClient: SavedObjectsClientContract;
   private readonly alertTypeRegistry: AlertTypeRegistry;
+  private readonly createAPIKey: () => Promise<CreateAPIKeyResult>;
 
   constructor({
     alertTypeRegistry,
     savedObjectsClient,
     taskManager,
     log,
-    basePath,
+    spaceId,
+    getUserName,
+    createAPIKey,
   }: ConstructorOptions) {
     this.log = log;
-    this.basePath = basePath;
+    this.getUserName = getUserName;
+    this.spaceId = spaceId;
     this.taskManager = taskManager;
     this.alertTypeRegistry = alertTypeRegistry;
     this.savedObjectsClient = savedObjectsClient;
+    this.createAPIKey = createAPIKey;
   }
 
   public async create({ data, options }: CreateOptions) {
     // Throws an error if alert type isn't registered
     const alertType = this.alertTypeRegistry.get(data.alertTypeId);
     const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.alertTypeParams);
+    const apiKey = await this.createAPIKey();
+    const username = await this.getUserName();
     const { alert: rawAlert, references } = this.getRawAlert({
       ...data,
+      createdBy: username,
+      updatedBy: username,
+      apiKeyOwner: apiKey.created && username ? username : undefined,
+      apiKey: apiKey.created
+        ? Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64')
+        : undefined,
       alertTypeParams: validatedAlertTypeParams,
     });
     const createdAlert = await this.savedObjectsClient.create('alert', rawAlert, {
@@ -90,8 +123,7 @@ export class AlertsClient {
         scheduledTask = await this.scheduleAlert(
           createdAlert.id,
           rawAlert.alertTypeId,
-          rawAlert.interval,
-          this.basePath
+          rawAlert.interval
         );
       } catch (e) {
         // Cleanup data, something went wrong scheduling the task
@@ -124,14 +156,22 @@ export class AlertsClient {
     return this.getAlertFromRaw(result.id, result.attributes, result.references);
   }
 
-  public async find({ options = {} }: FindOptions = {}) {
+  public async find({ options = {} }: FindOptions = {}): Promise<FindResult> {
     const results = await this.savedObjectsClient.find({
       ...options,
       type: 'alert',
     });
-    return results.saved_objects.map(result =>
+
+    const data = results.saved_objects.map(result =>
       this.getAlertFromRaw(result.id, result.attributes, result.references)
     );
+
+    return {
+      page: results.page,
+      perPage: results.per_page,
+      total: results.total,
+      data,
+    };
   }
 
   public async delete({ id }: { id: string }) {
@@ -147,11 +187,13 @@ export class AlertsClient {
     const existingObject = await this.savedObjectsClient.get('alert', id);
     const { alertTypeId } = existingObject.attributes;
     const alertType = this.alertTypeRegistry.get(alertTypeId);
+    const apiKey = await this.createAPIKey();
 
     // Validate
     const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.alertTypeParams);
 
     const { actions, references } = this.extractReferences(data.actions);
+    const username = await this.getUserName();
     const updatedObject = await this.savedObjectsClient.update(
       'alert',
       id,
@@ -159,6 +201,11 @@ export class AlertsClient {
         ...data,
         alertTypeParams: validatedAlertTypeParams,
         actions,
+        updatedBy: username,
+        apiKeyOwner: apiKey.created ? username : null,
+        apiKey: apiKey.created
+          ? Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64')
+          : null,
       },
       {
         ...options,
@@ -171,18 +218,24 @@ export class AlertsClient {
   public async enable({ id }: { id: string }) {
     const existingObject = await this.savedObjectsClient.get('alert', id);
     if (existingObject.attributes.enabled === false) {
+      const apiKey = await this.createAPIKey();
       const scheduledTask = await this.scheduleAlert(
         id,
         existingObject.attributes.alertTypeId,
-        existingObject.attributes.interval,
-        this.basePath
+        existingObject.attributes.interval
       );
+      const username = await this.getUserName();
       await this.savedObjectsClient.update(
         'alert',
         id,
         {
           enabled: true,
+          updatedBy: username,
+          apiKeyOwner: apiKey.created ? username : null,
           scheduledTaskId: scheduledTask.id,
+          apiKey: apiKey.created
+            ? Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64')
+            : null,
         },
         { references: existingObject.references }
       );
@@ -192,31 +245,31 @@ export class AlertsClient {
   public async disable({ id }: { id: string }) {
     const existingObject = await this.savedObjectsClient.get('alert', id);
     if (existingObject.attributes.enabled === true) {
-      await this.taskManager.remove(existingObject.attributes.scheduledTaskId);
       await this.savedObjectsClient.update(
         'alert',
         id,
         {
           enabled: false,
           scheduledTaskId: null,
+          apiKey: null,
+          apiKeyOwner: null,
+          updatedBy: await this.getUserName(),
         },
         { references: existingObject.references }
       );
+      await this.taskManager.remove(existingObject.attributes.scheduledTaskId);
     }
   }
 
-  private async scheduleAlert(id: string, alertTypeId: string, interval: string, basePath: string) {
+  private async scheduleAlert(id: string, alertTypeId: string, interval: string) {
     return await this.taskManager.schedule({
       taskType: `alerting:${alertTypeId}`,
       params: {
         alertId: id,
-        basePath,
+        spaceId: this.spaceId,
       },
       state: {
-        // This is here because we can't rely on the task manager's internal runAt.
-        // It changes it for timeout, etc when a task is running.
-        scheduledRunAt: new Date(Date.now() + parseDuration(interval)),
-        previousScheduledRunAt: null,
+        previousStartedAt: null,
         alertTypeState: {},
         alertInstances: {},
       },

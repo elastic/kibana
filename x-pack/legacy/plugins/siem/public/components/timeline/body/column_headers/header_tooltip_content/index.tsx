@@ -20,17 +20,25 @@ const IconType = styled(EuiIcon)`
   top: -2px;
 `;
 
+IconType.displayName = 'IconType';
+
 const P = styled.p`
   margin-bottom: 5px;
 `;
+
+P.displayName = 'P';
 
 const ToolTipTableMetadata = styled.span`
   margin-right: 5px;
 `;
 
+ToolTipTableMetadata.displayName = 'ToolTipTableMetadata';
+
 const ToolTipTableValue = styled.span`
   word-wrap: break-word;
 `;
+
+ToolTipTableValue.displayName = 'ToolTipTableValue';
 
 export const HeaderToolTipContent = pure<{ header: ColumnHeader }>(({ header }) => (
   <>
@@ -73,3 +81,5 @@ export const HeaderToolTipContent = pure<{ header: ColumnHeader }>(({ header }) 
     ) : null}
   </>
 ));
+
+HeaderToolTipContent.displayName = 'HeaderToolTipContent';

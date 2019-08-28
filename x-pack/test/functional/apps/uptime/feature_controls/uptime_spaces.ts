@@ -5,10 +5,9 @@
  */
 import expect from '@kbn/expect';
 import { SpacesService } from '../../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+export default function({ getPageObjects, getService }: FtrProviderContext) {
   const spacesService: SpacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'error', 'timePicker', 'security']);
   const testSubjects = getService('testSubjects');
@@ -40,7 +39,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
       it('can navigate to Uptime app', async () => {
         await PageObjects.common.navigateToApp('uptime');
-        await testSubjects.existOrFail('uptimeApp', 10000);
+        await testSubjects.existOrFail('uptimeApp', { timeout: 10000 });
       });
     });
 

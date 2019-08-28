@@ -14,6 +14,7 @@ import { BASE_PATH, UIM_REPOSITORY_LIST_LOAD } from '../../../constants';
 import { useAppDependencies } from '../../../index';
 import { useLoadRepositories } from '../../../services/http';
 import { uiMetricService } from '../../../services/ui_metric';
+import { linkToAddRepository, linkToRepository } from '../../../services/navigation';
 
 import { RepositoryDetails } from './repository_details';
 import { RepositoryTable } from './repository_table';
@@ -36,18 +37,16 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   const {
     error,
-    loading,
+    isLoading,
     data: { repositories, managedRepository } = {
       repositories: undefined,
       managedRepository: undefined,
     },
-    request: reload,
+    sendRequest: reload,
   } = useLoadRepositories();
 
   const openRepositoryDetailsUrl = (newRepositoryName: Repository['name']): string => {
-    return history.createHref({
-      pathname: `${BASE_PATH}/repositories/${newRepositoryName}`,
-    });
+    return linkToRepository(newRepositoryName);
   };
 
   const closeRepositoryDetails = () => {
@@ -71,7 +70,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   let content;
 
-  if (loading) {
+  if (isLoading) {
     content = (
       <SectionLoading>
         <FormattedMessage
@@ -116,9 +115,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
         }
         actions={
           <EuiButton
-            href={history.createHref({
-              pathname: `${BASE_PATH}/add_repository`,
-            })}
+            href={linkToAddRepository()}
             fill
             iconType="plusInCircle"
             data-test-subj="registerRepositoryButton"

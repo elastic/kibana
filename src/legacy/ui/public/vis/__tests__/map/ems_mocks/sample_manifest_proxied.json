@@ -1,0 +1,16 @@
+{
+  "services": [
+    {
+      "id": "tiles_v2",
+      "name": "Elastic Maps Tile Service",
+      "manifest": "/tiles",
+      "type": "tms"
+    },
+    {
+      "id": "geo_layers",
+      "name": "Elastic Maps Vector Service",
+      "manifest": "/files",
+      "type": "file"
+    }
+  ]
+}

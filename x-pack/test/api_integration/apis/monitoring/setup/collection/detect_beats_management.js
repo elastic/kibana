@@ -7,6 +7,7 @@
 import expect from '@kbn/expect';
 import fixture from './fixtures/detect_beats_management';
 
+
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -28,10 +29,12 @@ export default function ({ getService }) {
 
     it('should get collection status', async () => {
       const { body } = await supertest
-        .post('/api/monitoring/v1/setup/collection')
+        .post('/api/monitoring/v1/setup/collection/cluster?skipLiveData=true')
         .set('kbn-xsrf', 'xxx')
         .send({ timeRange })
         .expect(200);
+
+
       expect(body).to.eql(fixture);
     });
   });

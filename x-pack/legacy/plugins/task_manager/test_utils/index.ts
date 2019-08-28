@@ -20,7 +20,7 @@ export function mockLogger() {
   return {
     info: sinon.stub(),
     debug: sinon.stub(),
-    warning: sinon.stub(),
+    warn: sinon.stub(),
     error: sinon.stub(),
   };
 }

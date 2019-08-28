@@ -24,23 +24,13 @@ import { getIconHeaderColumns } from './icon_header_columns';
 
 import * as i18n from '../translations';
 
-const TimelinesTableContainer = styled.div`
+const BasicTable = styled(EuiBasicTable)`
   .euiTableCellContent {
     animation: none;
-    text-align: left;
-  }
-
-  .euiTableCellContent__text {
-    width: 100%;
-  }
-
-  tbody {
-    th,
-    td {
-      vertical-align: top;
-    }
   }
 `;
+
+BasicTable.displayName = 'BasicTable';
 
 const getExtendedColumnsIfEnabled = (showExtendedColumnsAndActions: boolean) =>
   showExtendedColumnsAndActions ? [...getExtendedColumns()] : [];
@@ -146,30 +136,29 @@ export const TimelinesTable = pure<TimelinesTableProps>(
     };
 
     return (
-      <TimelinesTableContainer data-test-subj="timelines-table-container">
-        <EuiBasicTable
-          compressed={true}
-          columns={getTimelinesTableColumns({
-            deleteTimelines,
-            itemIdToExpandedNotesRowMap,
-            onOpenTimeline,
-            onToggleShowNotes,
-            showExtendedColumnsAndActions,
-          })}
-          data-test-subj="timelines-table"
-          isExpandable={true}
-          isSelectable={showExtendedColumnsAndActions}
-          itemId="savedObjectId"
-          itemIdToExpandedRowMap={itemIdToExpandedNotesRowMap}
-          items={searchResults}
-          loading={isLoading}
-          noItemsMessage={i18n.ZERO_TIMELINES_MATCH}
-          onChange={onTableChange}
-          pagination={pagination}
-          selection={showExtendedColumnsAndActions ? selection : undefined}
-          sorting={sorting}
-        />
-      </TimelinesTableContainer>
+      <BasicTable
+        columns={getTimelinesTableColumns({
+          deleteTimelines,
+          itemIdToExpandedNotesRowMap,
+          onOpenTimeline,
+          onToggleShowNotes,
+          showExtendedColumnsAndActions,
+        })}
+        data-test-subj="timelines-table"
+        isExpandable={true}
+        isSelectable={showExtendedColumnsAndActions}
+        itemId="savedObjectId"
+        itemIdToExpandedRowMap={itemIdToExpandedNotesRowMap}
+        items={searchResults}
+        loading={isLoading}
+        noItemsMessage={i18n.ZERO_TIMELINES_MATCH}
+        onChange={onTableChange}
+        pagination={pagination}
+        selection={showExtendedColumnsAndActions ? selection : undefined}
+        sorting={sorting}
+      />
     );
   }
 );
+
+TimelinesTable.displayName = 'TimelinesTable';

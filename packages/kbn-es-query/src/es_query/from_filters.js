@@ -61,7 +61,8 @@ const cleanFilter = function (filter) {
 
 export function buildQueryFromFilters(filters = [], indexPattern, ignoreFilterIfFieldNotInIndex) {
   return {
-    must: filters
+    must: [],
+    filter: filters
       .filter(filterNegate(false))
       .filter(filter => !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern))
       .map(translateToQuery)
@@ -69,7 +70,6 @@ export function buildQueryFromFilters(filters = [], indexPattern, ignoreFilterIf
       .map(filter => {
         return migrateFilter(filter, indexPattern);
       }),
-    filter: [],
     should: [],
     must_not: filters
       .filter(filterNegate(true))

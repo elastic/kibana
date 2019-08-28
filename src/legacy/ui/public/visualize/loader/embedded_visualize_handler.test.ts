@@ -86,7 +86,7 @@ describe('EmbeddedVisualizeHandler', () => {
   describe('autoFetch', () => {
     it('should trigger a reload when autoFetch=true and auto refresh happens', () => {
       const spy = jest.spyOn(handler, 'fetchAndRender');
-      timefilter.emit('autoRefreshFetch');
+      timefilter._triggerAutoRefresh();
       jest.runAllTimers();
       expect(spy).toHaveBeenCalledTimes(1);
       expect(spy).toHaveBeenCalledWith(true);
@@ -110,7 +110,7 @@ describe('EmbeddedVisualizeHandler', () => {
         }
       );
       const spy = jest.spyOn(handler, 'fetchAndRender');
-      timefilter.emit('autoRefreshFetch');
+      timefilter._triggerAutoRefresh();
       jest.runAllTimers();
       expect(spy).not.toHaveBeenCalled();
     });
@@ -157,7 +157,7 @@ describe('EmbeddedVisualizeHandler', () => {
     });
 
     it('should call dataLoader.render with updated filters', () => {
-      const params = { filters: [{ foo: 'bar' }] };
+      const params = { filters: [{ meta: { disabled: false } }] };
       handler.update(params);
       jest.runAllTimers();
       expect(mockDataLoaderFetch).toHaveBeenCalledWith({ ...dataLoaderParams, ...params });

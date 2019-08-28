@@ -4,6 +4,8 @@
 
 ## SavedObject.type property
 
+The type of Saved Object. Each plugin can define it's own custom Saved Object types.
+
 <b>Signature:</b>
 
 ```typescript

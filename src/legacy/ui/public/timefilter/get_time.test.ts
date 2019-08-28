@@ -43,7 +43,7 @@ describe('get_time', () => {
               filterable: true,
             },
           ],
-        },
+        } as any,
         { from: 'now-60y', to: 'now' }
       ) as Filter;
       expect(filter.range.date).to.eql({

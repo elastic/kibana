@@ -1,8 +1,8 @@
 [role="xpack"]
 [[ml-jobs]]
-== Creating machine learning jobs
+== Creating {anomaly-jobs}
 
-Machine learning jobs contain the configuration information and metadata
+{anomaly-jobs-cap} contain the configuration information and metadata
 necessary to perform an analytics task.
 
 {kib} provides the following wizards to make it easier to create jobs:
@@ -33,7 +33,7 @@ appears:
 [role="screenshot"]
 image::ml/images/ml-data-recognizer-sample.jpg[A screenshot of the {kib} sample data web log job creation wizard]
 
-TIP: Alternatively, after you load a sample data set on the {kib} home page, you can click *View data* > *ML jobs*. There are {ml} jobs for both the sample eCommerce orders data set and the sample web logs data set.
+TIP: Alternatively, after you load a sample data set on the {kib} home page, you can click *View data* > *ML jobs*. There are {anomaly-jobs} for both the sample eCommerce orders data set and the sample web logs data set.
 
 If you use {filebeat-ref}/index.html[{filebeat}]
 to ship access logs from your
@@ -57,17 +57,17 @@ wizards appear:
 [role="screenshot"]
 image::ml/images/ml-data-recognizer-metricbeat.jpg[A screenshot of the {metricbeat} job creation wizards]
 
-These wizards create {ml} jobs, dashboards, searches, and visualizations that
-are customized to help you analyze your {auditbeat}, {filebeat}, and
+These wizards create {anomaly-jobs}, dashboards, searches, and visualizations 
+that are customized to help you analyze your {auditbeat}, {filebeat}, and
 {metricbeat} data.
 
 [NOTE] 
 ===============================
 If your data is located outside of {es}, you cannot use {kib} to create
 your jobs and you cannot use {dfeeds} to retrieve your data in real time.
-Machine learning analysis is still possible, however, by using APIs to
+{anomal-detect-cap} is still possible, however, by using APIs to
 create and manage jobs and post data to them. For more information, see
-{ref}/ml-apis.html[Machine Learning APIs].
+{ref}/ml-apis.html[{ml-cap} {anomaly-detect} APIs].
 ===============================
 
 ////

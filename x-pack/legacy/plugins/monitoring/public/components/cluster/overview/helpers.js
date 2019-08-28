@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
+import { get } from 'lodash';
 import { formatBytesUsage, formatPercentageUsage } from 'plugins/monitoring/lib/format_number';
-
 import {
   EuiSpacer,
   EuiFlexItem,
@@ -15,6 +15,7 @@ import {
   EuiIcon,
   EuiHealth,
   EuiText,
+  EuiLink
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -26,14 +27,14 @@ export function HealthStatusIndicator(props) {
     red: 'danger'
   };
 
-  const statusColor = statusColorMap[props.status];
+  const statusColor = statusColorMap[props.status] || 'n/a';
 
   return (
     <EuiHealth color={statusColor} data-test-subj="statusIcon">
       <FormattedMessage
         id="xpack.monitoring.cluster.overview.healthStatusDescription"
         defaultMessage="Health is {status}"
-        values={{ status: props.status }}
+        values={{ status: props.status || 'n/a' }}
       />
     </EuiHealth>
   );
@@ -123,5 +124,15 @@ export function BytesPercentageUsage({ usedBytes, maxBytes }) {
     );
   }
 
-  return null;
+  return <EuiText>0</EuiText>;
+}
+
+export function DisabledIfNoDataAndInSetupModeLink({ setupModeEnabled, setupModeData, children, ...props }) {
+  if (setupModeEnabled && get(setupModeData, 'totalUniqueInstanceCount', 0) === 0) {
+    return children;
+  }
+
+  return (
+    <EuiLink {...props}>{children}</EuiLink>
+  );
 }

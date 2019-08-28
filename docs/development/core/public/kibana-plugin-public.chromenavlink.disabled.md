@@ -4,9 +4,11 @@
 
 ## ChromeNavLink.disabled property
 
-Disables a link from being clickable.
+> Warning: This API is now obsolete.
+> 
+> 
 
-NOTE: this is only used by the ML and Graph plugins currently. They use this field to disable the nav link when the license is expired.
+Disables a link from being clickable.
 
 <b>Signature:</b>
 

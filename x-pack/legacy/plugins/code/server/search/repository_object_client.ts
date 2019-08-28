@@ -17,7 +17,7 @@ import {
   RepositoryGitStatusReservedField,
   RepositoryIndexName,
   RepositoryIndexNamePrefix,
-  RepositoryLspIndexStatusReservedField,
+  RepositoryIndexStatusReservedField,
   RepositoryRandomPathReservedField,
   RepositoryReservedField,
 } from '../indexer/schema';
@@ -34,8 +34,8 @@ export class RepositoryObjectClient {
     return await this.getRepositoryObject(repoUri, RepositoryGitStatusReservedField);
   }
 
-  public async getRepositoryLspIndexStatus(repoUri: RepositoryUri): Promise<WorkerProgress> {
-    return await this.getRepositoryObject(repoUri, RepositoryLspIndexStatusReservedField);
+  public async getRepositoryIndexStatus(repoUri: RepositoryUri): Promise<WorkerProgress> {
+    return await this.getRepositoryObject(repoUri, RepositoryIndexStatusReservedField);
   }
 
   public async getRepositoryDeleteStatus(repoUri: RepositoryUri): Promise<WorkerProgress> {
@@ -79,12 +79,8 @@ export class RepositoryObjectClient {
     return await this.setRepositoryObject(repoUri, RepositoryGitStatusReservedField, gitStatus);
   }
 
-  public async setRepositoryLspIndexStatus(repoUri: RepositoryUri, indexStatus: WorkerProgress) {
-    return await this.setRepositoryObject(
-      repoUri,
-      RepositoryLspIndexStatusReservedField,
-      indexStatus
-    );
+  public async setRepositoryIndexStatus(repoUri: RepositoryUri, indexStatus: WorkerProgress) {
+    return await this.setRepositoryObject(repoUri, RepositoryIndexStatusReservedField, indexStatus);
   }
 
   public async setRepositoryDeleteStatus(repoUri: RepositoryUri, deleteStatus: WorkerProgress) {
@@ -111,8 +107,8 @@ export class RepositoryObjectClient {
     return await this.updateRepositoryObject(repoUri, RepositoryGitStatusReservedField, obj);
   }
 
-  public async updateRepositoryLspIndexStatus(repoUri: RepositoryUri, obj: any) {
-    return await this.updateRepositoryObject(repoUri, RepositoryLspIndexStatusReservedField, obj);
+  public async updateRepositoryIndexStatus(repoUri: RepositoryUri, obj: any) {
+    return await this.updateRepositoryObject(repoUri, RepositoryIndexStatusReservedField, obj);
   }
 
   public async updateRepositoryDeleteStatus(repoUri: RepositoryUri, obj: any) {

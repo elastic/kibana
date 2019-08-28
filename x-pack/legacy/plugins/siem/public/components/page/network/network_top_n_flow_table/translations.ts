@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const TOP_TALKERS = i18n.translate('xpack.siem.networkTopNFlowTable.title', {
-  defaultMessage: 'Top Talkers',
+  defaultMessage: 'Top talkers',
 });
 
 export const UNIT = (totalCount: number) =>
@@ -36,7 +36,7 @@ export const SERVER_IP = i18n.translate('xpack.siem.networkTopNFlowTable.column.
 });
 
 export const DOMAIN = i18n.translate('xpack.siem.networkTopNFlowTable.column.lastDomainTitle', {
-  defaultMessage: 'Last Domain',
+  defaultMessage: 'Last domain',
 });
 
 export const BYTES = i18n.translate('xpack.siem.networkTopNFlowTable.column.bytesTitle', {
@@ -54,62 +54,58 @@ export const DIRECTION = i18n.translate('xpack.siem.networkTopNFlowTable.column.
 export const UNIQUE_SOURCE_IP = i18n.translate(
   'xpack.siem.networkTopNFlowTable.column.uniqueSourceIpsTitle',
   {
-    defaultMessage: 'Unique Source IPs',
+    defaultMessage: 'Unique source IPs',
   }
 );
 
 export const UNIQUE_DESTINATION_IP = i18n.translate(
   'xpack.siem.networkTopNFlowTable.column.uniqueDestinationIpsTitle',
   {
-    defaultMessage: 'Unique Destination IPs',
+    defaultMessage: 'Unique destination IPs',
   }
 );
 
 export const UNIQUE_CLIENT_IP = i18n.translate(
   'xpack.siem.networkTopNFlowTable.column.uniqueClientIpsTitle',
   {
-    defaultMessage: 'Unique Client IPs',
+    defaultMessage: 'Unique client IPs',
   }
 );
 
 export const UNIQUE_SERVER_IP = i18n.translate(
   'xpack.siem.networkTopNFlowTable.column.uniqueServerIpsTitle',
   {
-    defaultMessage: 'Unique Server IPs',
+    defaultMessage: 'Unique server IPs',
   }
 );
 
 export const BY_SOURCE_IP = i18n.translate(
   'xpack.siem.networkTopNFlowTable.select.bySourceIpDropDownOptionLabel',
   {
-    defaultMessage: 'By Source IP',
+    defaultMessage: 'By source IP',
   }
 );
 
 export const BY_DESTINATION_IP = i18n.translate(
   'xpack.siem.networkTopNFlowTable.select.byDestinationIpDropDownOptionLabel',
   {
-    defaultMessage: 'By Destination IP',
+    defaultMessage: 'By destination IP',
   }
 );
 
 export const BY_CLIENT_IP = i18n.translate(
   'xpack.siem.networkTopNFlowTable.select.byClientIpDropDownOptionLabel',
   {
-    defaultMessage: 'By Client IP',
+    defaultMessage: 'By client IP',
   }
 );
 
 export const BY_SERVER_IP = i18n.translate(
   'xpack.siem.networkTopNFlowTable.select.byServerIpDropDownOptionLabel',
   {
-    defaultMessage: 'By Server IP',
+    defaultMessage: 'By server IP',
   }
 );
-
-export const MORE = i18n.translate('xpack.siem.networkTopNFlowTable.moreDescription', {
-  defaultMessage: 'More ...',
-});
 
 export const ROWS_5 = i18n.translate('xpack.siem.networkTopNFlowTable.rows', {
   values: { numRows: 5 },

@@ -9,6 +9,7 @@ import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 
+import { isEqual } from 'lodash/fp';
 import {
   hostsModel,
   hostsSelectors,
@@ -23,10 +24,17 @@ import { CONSTANTS } from './constants';
 import { UrlStateContainerPropTypes, UrlStateProps, KqlQueryObject } from './types';
 import { useUrlStateHooks } from './use_url_state';
 
-export const UrlStateContainer = (props: UrlStateContainerPropTypes) => {
-  const { isInitializing } = useUrlStateHooks(props);
-  return props.children({ isInitializing });
-};
+export const UrlStateContainer = React.memo<UrlStateContainerPropTypes>(
+  props => {
+    const { isInitializing } = useUrlStateHooks(props);
+    return <>{props.children({ isInitializing })}</>;
+  },
+  (prevProps, nextProps) =>
+    prevProps.location.pathname === nextProps.location.pathname &&
+    isEqual(prevProps.urlState, nextProps.urlState)
+);
+
+UrlStateContainer.displayName = 'UrlStateContainer';
 
 const makeMapStateToProps = () => {
   const getInputsSelector = inputsSelectors.inputsSelector();

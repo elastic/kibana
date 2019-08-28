@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server, ServerRoute, RouteOptions } from 'hapi';
+import { ServerFacade, ServerRouteFacade, RouteOptionsFacade } from '..';
 
 export class CodeServerRouter {
-  constructor(readonly server: Server) {}
+  constructor(readonly server: ServerFacade) {}
 
   route(route: CodeRoute) {
-    const routeOptions: RouteOptions = (route.options || {}) as RouteOptions;
+    const routeOptions: RouteOptionsFacade = (route.options || {}) as RouteOptionsFacade;
     routeOptions.tags = [
       ...(routeOptions.tags || []),
       `access:code_${route.requireAdmin ? 'admin' : 'user'}`,
@@ -25,6 +25,6 @@ export class CodeServerRouter {
   }
 }
 
-export interface CodeRoute extends ServerRoute {
+export interface CodeRoute extends ServerRouteFacade {
   requireAdmin?: boolean;
 }

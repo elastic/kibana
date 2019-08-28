@@ -34,6 +34,16 @@ describe('Filter Bar Directive', function() {
       expect(onlyDisabledFiltersChanged(newFilters, filters)).to.be(true);
     });
 
+    it('should return false if there are no old filters', function() {
+      const newFilters = [{ meta: { disabled: false } }] as Filter[];
+      expect(onlyDisabledFiltersChanged(newFilters, undefined)).to.be(false);
+    });
+
+    it('should return false if there are no new filters', function() {
+      const filters = [{ meta: { disabled: false } }] as Filter[];
+      expect(onlyDisabledFiltersChanged(undefined, filters)).to.be(false);
+    });
+
     it('should return false if all filters are not disabled', function() {
       const filters = [
         { meta: { disabled: false } },

@@ -16,20 +16,19 @@ import { ImpactBar } from '../../../shared/ImpactBar';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
-import { TransactionLink } from '../../../shared/Links/TransactionLink';
+import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
 
-const TransactionNameLink = styled(TransactionLink)`
+const TransactionNameLink = styled(TransactionDetailLink)`
   ${truncate('100%')};
   font-family: ${fontFamilyCode};
 `;
 
 interface Props {
   items: ITransactionGroup[];
-  serviceName: string;
   isLoading: boolean;
 }
 
-export function TransactionList({ items, serviceName, isLoading }: Props) {
+export function TransactionList({ items, isLoading }: Props) {
   const columns: Array<ITableColumn<ITransactionGroup>> = useMemo(
     () => [
       {
@@ -39,13 +38,19 @@ export function TransactionList({ items, serviceName, isLoading }: Props) {
         }),
         width: '50%',
         sortable: true,
-        render: (transactionName: string, item: typeof items[0]) => {
+        render: (transactionName: string, { sample }: ITransactionGroup) => {
           return (
             <EuiToolTip
               id="transaction-name-link-tooltip"
               content={transactionName || NOT_AVAILABLE_LABEL}
             >
-              <TransactionNameLink transaction={item.sample}>
+              <TransactionNameLink
+                serviceName={sample.service.name}
+                transactionId={sample.transaction.id}
+                traceId={sample.trace.id}
+                transactionName={sample.transaction.name}
+                transactionType={sample.transaction.type}
+              >
                 {transactionName || NOT_AVAILABLE_LABEL}
               </TransactionNameLink>
             </EuiToolTip>
@@ -104,7 +109,7 @@ export function TransactionList({ items, serviceName, isLoading }: Props) {
         render: (value: number) => <ImpactBar value={value} />
       }
     ],
-    [serviceName]
+    []
   );
 
   const noItemsMessage = (

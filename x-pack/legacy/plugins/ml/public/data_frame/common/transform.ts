@@ -47,7 +47,6 @@ export interface CreateRequestBody extends PreviewRequestBody {
 
 export interface DataFrameTransformPivotConfig extends CreateRequestBody {
   id: DataFrameTransformId;
-  mode?: string; // added property on client side to allow filtering by this field
 }
 
 // Don't allow intervals of '0', don't allow floating intervals.

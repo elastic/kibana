@@ -23,16 +23,16 @@ import { TableHeader } from './table_header';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { SortOrder } from './helpers';
-import { IndexPatternEnhanced, StaticIndexPatternField } from 'ui/index_patterns/_index_pattern';
+import { IndexPattern, FieldType } from 'ui/index_patterns';
 
 function getMockIndexPattern() {
-  return {
+  return ({
     id: 'test',
     title: 'Test',
     timeFieldName: 'time',
     fields: [],
     isTimeNanosBased: () => false,
-    getFieldByName: name => {
+    getFieldByName: (name: string) => {
       if (name === 'test1') {
         return {
           name,
@@ -40,7 +40,7 @@ function getMockIndexPattern() {
           aggregatable: false,
           searchable: true,
           sortable: true,
-        } as StaticIndexPatternField;
+        } as FieldType;
       } else {
         return {
           name,
@@ -48,10 +48,10 @@ function getMockIndexPattern() {
           aggregatable: false,
           searchable: true,
           sortable: false,
-        } as StaticIndexPatternField;
+        } as FieldType;
       }
     },
-  } as IndexPatternEnhanced;
+  } as unknown) as IndexPattern;
 }
 
 function getMockProps(props = {}) {
@@ -59,7 +59,7 @@ function getMockProps(props = {}) {
     indexPattern: getMockIndexPattern(),
     hideTimeColumn: false,
     columns: ['first', 'middle', 'last'],
-    sortOrder: ['time', 'asc'] as SortOrder,
+    sortOrder: [['time', 'asc']] as SortOrder[],
     isShortDots: true,
     onRemoveColumn: jest.fn(),
     onChangeSortOrder: jest.fn(),
@@ -89,7 +89,7 @@ describe('TableHeader with time column', () => {
 
   test('time column is sortable with button, cycling sort direction', () => {
     findTestSubject(wrapper, 'docTableHeaderFieldSort_time').simulate('click');
-    expect(props.onChangeSortOrder).toHaveBeenCalledWith('time', 'desc');
+    expect(props.onChangeSortOrder).toHaveBeenCalledWith([['time', 'desc']]);
   });
 
   test('time column is not removeable, no button displayed', () => {

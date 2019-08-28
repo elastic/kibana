@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export enum RepoFileStatus {
   LANG_SERVER_IS_INITIALIZING = 'Language server is initializing.',
   LANG_SERVER_INITIALIZED = 'Language server initialized.',
@@ -26,6 +28,63 @@ export enum LangServerType {
   GENERIC = 'Current file is only covered by generic language server',
   DEDICATED = 'Current file is covered by dedicated language server',
 }
+
+export const RepoFileStatusText = {
+  [RepoFileStatus.LANG_SERVER_IS_INITIALIZING]: i18n.translate(
+    'xpack.code.repoFileStatus.langugageServerIsInitializitingMessage',
+    {
+      defaultMessage: 'Language server is initializing.',
+    }
+  ),
+  [RepoFileStatus.LANG_SERVER_INITIALIZED]: i18n.translate(
+    'xpack.code.repoFileStatus.languageServerInitializedMessage',
+    {
+      defaultMessage: 'Language server initialized.',
+    }
+  ),
+  [RepoFileStatus.INDEXING]: i18n.translate('xpack.code.repoFileStatus.IndexingInProgressMessage', {
+    defaultMessage: 'Indexing in progress.',
+  }),
+  [RepoFileStatus.FILE_NOT_SUPPORTED]: i18n.translate(
+    'xpack.code.repoFileStatus.fileNotSupportedMessage',
+    {
+      defaultMessage: 'Current file is not of a supported language.',
+    }
+  ),
+  [RepoFileStatus.REVISION_NOT_INDEXED]: i18n.translate(
+    'xpack.code.repoFileStatus.revisionNotIndexedMessage',
+    {
+      defaultMessage: 'Current revision is not indexed.',
+    }
+  ),
+  [RepoFileStatus.LANG_SERVER_NOT_INSTALLED]: i18n.translate(
+    'xpack.code.repoFileStatus.langServerNotInstalledMessage',
+    {
+      defaultMessage: 'Install additional language server to support current file.',
+    }
+  ),
+  [RepoFileStatus.FILE_IS_TOO_BIG]: i18n.translate(
+    'xpack.code.repoFileStatus.fileIsTooBigMessage',
+    {
+      defaultMessage: 'Current file is too big.',
+    }
+  ),
+  [LangServerType.NONE]: i18n.translate('xpack.code.repoFileStatus.langserverType.noneMessage', {
+    defaultMessage: 'Current file is not supported by any language server.',
+  }),
+  [LangServerType.GENERIC]: i18n.translate(
+    'xpack.code.repoFileStatus.langserverType.genericMessage',
+    {
+      defaultMessage: 'Current file is only covered by generic language server.',
+    }
+  ),
+  [LangServerType.DEDICATED]: i18n.translate(
+    'xpack.code.repoFileStatus.langserverType.dedicatedMessage',
+    {
+      defaultMessage: 'Current file is covered by dedicated language server.',
+    }
+  ),
+};
 
 export enum CTA {
   SWITCH_TO_HEAD,

@@ -12,10 +12,10 @@ import { errorToToaster } from '../../ml/api/error_to_toaster';
 
 import * as i18n from './translations';
 
-type Return = [boolean, string];
+type Return = [boolean, string[]];
 
 export const useIndexPatterns = (refreshToggle = false): Return => {
-  const [indexPattern, setIndexPattern] = useState<string>('');
+  const [indexPatterns, setIndexPatterns] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const config = useContext(KibanaConfigContext);
   const [, dispatchToaster] = useStateToaster();
@@ -26,7 +26,7 @@ export const useIndexPatterns = (refreshToggle = false): Return => {
         'kbn-version': config.kbnVersion,
       });
 
-      setIndexPattern(data);
+      setIndexPatterns(data);
       setIsLoading(false);
     } catch (error) {
       errorToToaster({ title: i18n.INDEX_PATTERN_FETCH_FAILURE, error, dispatchToaster });
@@ -39,5 +39,5 @@ export const useIndexPatterns = (refreshToggle = false): Return => {
     fetchFunc();
   }, [refreshToggle]);
 
-  return [isLoading, indexPattern];
+  return [isLoading, indexPatterns];
 };

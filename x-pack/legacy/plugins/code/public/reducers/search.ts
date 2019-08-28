@@ -119,7 +119,6 @@ export const search = handleActions<SearchState, SearchPayload>(
           }
           draft.isLoading = true;
           delete draft.error;
-          delete draft.documentSearchResults;
         }
       }),
     [String(documentSearchSuccess)]: (state: SearchState, action: Action<DocumentSearchResult>) =>

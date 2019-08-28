@@ -46,3 +46,5 @@ export const UserHostWorkingDir = pure<Props>(
       </>
     ) : null
 );
+
+UserHostWorkingDir.displayName = 'UserHostWorkingDir';

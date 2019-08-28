@@ -15,3 +15,5 @@ export const BasicTable = styled(EuiInMemoryTable)`
     }
   }
 `;
+
+BasicTable.displayName = 'BasicTable';

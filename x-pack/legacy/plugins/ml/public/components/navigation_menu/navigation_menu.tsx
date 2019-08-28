@@ -17,6 +17,7 @@ const tabSupport = [
   'jobs',
   'settings',
   'data_frames',
+  'data_frame_analytics',
   'datavisualizer',
   'filedatavisualizer',
   'timeseriesexplorer',

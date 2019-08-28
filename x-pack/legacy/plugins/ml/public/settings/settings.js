@@ -22,14 +22,14 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { useNavigationMenuContext } from '../util/context_utils';
+import { useUiChromeContext } from '../contexts/ui/use_ui_chrome_context';
 import { NavigationMenu } from '../components/navigation_menu/navigation_menu';
 
 export function Settings({
   canGetFilters,
   canGetCalendars
 }) {
-  const basePath = useNavigationMenuContext().chrome.getBasePath();
+  const basePath = useUiChromeContext().getBasePath();
 
   return (
     <Fragment>

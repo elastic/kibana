@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-import './checkbox_showcharts_service';
+export { CheckboxShowCharts, showCharts$ } from './checkbox_showcharts';

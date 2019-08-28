@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { get } from 'lodash/fp';
 import { mount, ReactWrapper } from 'enzyme';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
+import { ThemeProvider } from 'styled-components';
 
 import { wait } from '../../../lib/helpers';
 import { TestProviderWithoutDragAndDrop } from '../../../mock/test_providers';
@@ -20,18 +22,11 @@ const getStateChildComponent = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   wrapper: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>
 ): // eslint-disable-next-line @typescript-eslint/no-explicit-any
-React.Component<{}, {}, any> =>
-  wrapper
-    .childAt(0)
-    .childAt(0)
-    .childAt(0)
-    .childAt(0)
-    .childAt(0)
-    .childAt(0)
-    .childAt(0)
-    .instance();
+React.Component<{}, {}, any> => wrapper.find('[data-test-subj="state-child-component"]').instance();
 
 describe('OpenTimelineModalButton', () => {
+  const theme = () => ({ eui: euiDarkVars, darkMode: true });
+
   test('it renders the expected button text', async () => {
     const wrapper = mount(
       <TestProviderWithoutDragAndDrop>
@@ -56,11 +51,16 @@ describe('OpenTimelineModalButton', () => {
   describe('statefulness', () => {
     test('defaults showModal to false', async () => {
       const wrapper = mount(
-        <TestProviderWithoutDragAndDrop>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <OpenTimelineModalButton onToggle={jest.fn()} />
-          </MockedProvider>
-        </TestProviderWithoutDragAndDrop>
+        <ThemeProvider theme={theme}>
+          <TestProviderWithoutDragAndDrop>
+            <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+              <OpenTimelineModalButton
+                data-test-subj="state-child-component"
+                onToggle={jest.fn()}
+              />
+            </MockedProvider>
+          </TestProviderWithoutDragAndDrop>
+        </ThemeProvider>
       );
 
       await wait();
@@ -72,11 +72,13 @@ describe('OpenTimelineModalButton', () => {
 
     test('it sets showModal to true when the button is clicked', async () => {
       const wrapper = mount(
-        <TestProviderWithoutDragAndDrop>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <OpenTimelineModalButton onToggle={jest.fn()} />
-          </MockedProvider>
-        </TestProviderWithoutDragAndDrop>
+        <ThemeProvider theme={theme}>
+          <TestProviderWithoutDragAndDrop>
+            <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+              <OpenTimelineModalButton onToggle={jest.fn()} />
+            </MockedProvider>
+          </TestProviderWithoutDragAndDrop>
+        </ThemeProvider>
       );
 
       await wait();
@@ -114,11 +116,13 @@ describe('OpenTimelineModalButton', () => {
 
     test('it renders the modal when showModal is true', async () => {
       const wrapper = mount(
-        <TestProviderWithoutDragAndDrop>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <OpenTimelineModalButton onToggle={jest.fn()} />
-          </MockedProvider>
-        </TestProviderWithoutDragAndDrop>
+        <ThemeProvider theme={theme}>
+          <TestProviderWithoutDragAndDrop>
+            <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+              <OpenTimelineModalButton onToggle={jest.fn()} />
+            </MockedProvider>
+          </TestProviderWithoutDragAndDrop>
+        </ThemeProvider>
       );
 
       await wait();
@@ -142,11 +146,16 @@ describe('OpenTimelineModalButton', () => {
   describe('onToggle prop', () => {
     test('it still correctly updates the showModal state if `onToggle` is not provided as a prop', async () => {
       const wrapper = mount(
-        <TestProviderWithoutDragAndDrop>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <OpenTimelineModalButton onToggle={jest.fn()} />
-          </MockedProvider>
-        </TestProviderWithoutDragAndDrop>
+        <ThemeProvider theme={theme}>
+          <TestProviderWithoutDragAndDrop>
+            <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+              <OpenTimelineModalButton
+                data-test-subj="state-child-component"
+                onToggle={jest.fn()}
+              />
+            </MockedProvider>
+          </TestProviderWithoutDragAndDrop>
+        </ThemeProvider>
       );
 
       await wait();
@@ -164,11 +173,13 @@ describe('OpenTimelineModalButton', () => {
     test('it invokes the optional onToggle function provided as a prop when the open timeline button is clicked', async () => {
       const onToggle = jest.fn();
       const wrapper = mount(
-        <TestProviderWithoutDragAndDrop>
-          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-            <OpenTimelineModalButton onToggle={onToggle} />
-          </MockedProvider>
-        </TestProviderWithoutDragAndDrop>
+        <ThemeProvider theme={theme}>
+          <TestProviderWithoutDragAndDrop>
+            <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+              <OpenTimelineModalButton onToggle={onToggle} />
+            </MockedProvider>
+          </TestProviderWithoutDragAndDrop>
+        </ThemeProvider>
       );
 
       await wait();

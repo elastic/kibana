@@ -24,6 +24,8 @@ const TimeIcon = styled(EuiIcon)`
   top: -1px;
 `;
 
+TimeIcon.displayName = 'TimeIcon';
+
 /**
  * Renders a column of draggable badges containing:
  * - `event.duration`
@@ -104,3 +106,5 @@ export const DurationEventStartEnd = pure<{
       : null}
   </EuiFlexGroup>
 ));
+
+DurationEventStartEnd.displayName = 'DurationEventStartEnd';

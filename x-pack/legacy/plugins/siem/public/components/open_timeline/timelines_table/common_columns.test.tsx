@@ -5,9 +5,11 @@
  */
 
 import { EuiButtonIconProps } from '@elastic/eui';
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { cloneDeep, omit } from 'lodash/fp';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import * as React from 'react';
+import { ThemeProvider } from 'styled-components';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines/timelines_page';
 import { getEmptyValue } from '../../empty_value';
@@ -20,6 +22,7 @@ import * as i18n from '../translations';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
 
 describe('#getCommonColumns', () => {
+  const theme = () => ({ eui: euiDarkVars, darkMode: true });
   let mockResults: OpenTimelineResult[];
 
   beforeEach(() => {
@@ -226,23 +229,25 @@ describe('#getCommonColumns', () => {
       };
 
       const wrapper = mountWithIntl(
-        <TimelinesTable
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
-          itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          searchResults={hasNotes}
-          showExtendedColumnsAndActions={true}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          totalSearchResultsCount={hasNotes.length}
-        />
+        <ThemeProvider theme={theme}>
+          <TimelinesTable
+            deleteTimelines={jest.fn()}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            loading={false}
+            itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
+            onOpenTimeline={jest.fn()}
+            onSelectionChange={jest.fn()}
+            onTableChange={jest.fn()}
+            onToggleShowNotes={jest.fn()}
+            pageIndex={0}
+            pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            searchResults={hasNotes}
+            showExtendedColumnsAndActions={true}
+            sortDirection={DEFAULT_SORT_DIRECTION}
+            sortField={DEFAULT_SORT_FIELD}
+            totalSearchResultsCount={hasNotes.length}
+          />
+        </ThemeProvider>
       );
 
       const props = wrapper
@@ -304,23 +309,25 @@ describe('#getCommonColumns', () => {
       };
 
       const wrapper = mountWithIntl(
-        <TimelinesTable
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
-          itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={onToggleShowNotes}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          searchResults={hasNotes}
-          showExtendedColumnsAndActions={true}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          totalSearchResultsCount={hasNotes.length}
-        />
+        <ThemeProvider theme={theme}>
+          <TimelinesTable
+            deleteTimelines={jest.fn()}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            loading={false}
+            itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
+            onOpenTimeline={jest.fn()}
+            onSelectionChange={jest.fn()}
+            onTableChange={jest.fn()}
+            onToggleShowNotes={onToggleShowNotes}
+            pageIndex={0}
+            pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            searchResults={hasNotes}
+            showExtendedColumnsAndActions={true}
+            sortDirection={DEFAULT_SORT_DIRECTION}
+            sortField={DEFAULT_SORT_FIELD}
+            totalSearchResultsCount={hasNotes.length}
+          />
+        </ThemeProvider>
       );
 
       wrapper

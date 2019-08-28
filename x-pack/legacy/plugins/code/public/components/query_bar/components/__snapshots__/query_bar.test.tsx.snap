@@ -623,7 +623,19 @@ exports[`render correctly with empty query string 1`] = `
                                     <span
                                       className="euiTextColor euiTextColor--secondary"
                                     >
-                                       Search Filters 
+                                      <FormattedMessage
+                                        defaultMessage=" {filterCount, plural, one {Search Filter} other {Search Filters}} "
+                                        id="xpack.code.searchBar.searchFilterTitle"
+                                        values={
+                                          Object {
+                                            "filterCount": 0,
+                                          }
+                                        }
+                                      >
+                                        <span>
+                                           Search Filters 
+                                        </span>
+                                      </FormattedMessage>
                                     </span>
                                   </EuiTextColor>
                                 </span>
@@ -1332,7 +1344,19 @@ exports[`render correctly with input query string changed 1`] = `
                                         <span
                                           className="euiTextColor euiTextColor--secondary"
                                         >
-                                           Search Filters 
+                                          <FormattedMessage
+                                            defaultMessage=" {filterCount, plural, one {Search Filter} other {Search Filters}} "
+                                            id="xpack.code.searchBar.searchFilterTitle"
+                                            values={
+                                              Object {
+                                                "filterCount": 0,
+                                              }
+                                            }
+                                          >
+                                            <span>
+                                               Search Filters 
+                                            </span>
+                                          </FormattedMessage>
                                         </span>
                                       </EuiTextColor>
                                     </span>

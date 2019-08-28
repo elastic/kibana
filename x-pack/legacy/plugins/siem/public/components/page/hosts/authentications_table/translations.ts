@@ -16,46 +16,46 @@ export const AUTHENTICATIONS = i18n.translate(
 export const UNIT = (totalCount: number) =>
   i18n.translate('xpack.siem.authenticationsTable.unit', {
     values: { totalCount },
-    defaultMessage: `{totalCount, plural, =1 {User} other {Users}}`,
+    defaultMessage: `{totalCount, plural, =1 {user} other {users}}`,
   });
 
 export const LAST_SUCCESSFUL_SOURCE = i18n.translate(
   'xpack.siem.authenticationsTable.lastSuccessfulSource',
   {
-    defaultMessage: 'Last Successful Source',
+    defaultMessage: 'Last successful source',
   }
 );
 
 export const LAST_SUCCESSFUL_DESTINATION = i18n.translate(
   'xpack.siem.authenticationsTable.lastSuccessfulDestination',
   {
-    defaultMessage: 'Last Successful Destination',
+    defaultMessage: 'Last successful destination',
   }
 );
 
 export const LAST_SUCCESSFUL_TIME = i18n.translate(
   'xpack.siem.authenticationsTable.lastSuccessfulTime',
   {
-    defaultMessage: 'Last Success',
+    defaultMessage: 'Last success',
   }
 );
 
 export const LAST_FAILED_SOURCE = i18n.translate(
   'xpack.siem.authenticationsTable.lastFailedSource',
   {
-    defaultMessage: 'Last Failed Source',
+    defaultMessage: 'Last failed source',
   }
 );
 
 export const LAST_FAILED_DESTINATION = i18n.translate(
   'xpack.siem.authenticationsTable.lastFailedDestination',
   {
-    defaultMessage: 'Last Failed Destination',
+    defaultMessage: 'Last failed destination',
   }
 );
 
 export const LAST_FAILED_TIME = i18n.translate('xpack.siem.authenticationsTable.lastFailedTime', {
-  defaultMessage: 'Last Failure',
+  defaultMessage: 'Last failure',
 });
 
 export const SUCCESSES = i18n.translate('xpack.siem.authenticationsTable.successes', {

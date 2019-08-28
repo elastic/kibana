@@ -17,12 +17,17 @@
  * under the License.
  */
 
-interface Coordinates {
+interface DecodedGeoHash {
   latitude: number[];
   longitude: number[];
 }
 
-export function decodeGeoHash(geohash: number[]): Coordinates {
+/**
+ * Decodes geohash to object containing
+ * top-left and bottom-right corners of
+ * rectangle and center point.
+ */
+export function decodeGeoHash(geohash: string): DecodedGeoHash {
   const BITS: number[] = [16, 8, 4, 2, 1];
   const BASE32: string = '0123456789bcdefghjkmnpqrstuvwxyz';
   let isEven: boolean = true;
@@ -34,9 +39,8 @@ export function decodeGeoHash(geohash: number[]): Coordinates {
   lon[1] = 180.0;
   let latErr: number = 90.0;
   let lonErr: number = 180.0;
-  for (const geohashEl of geohash) {
-    const c: string = geohashEl.toString();
-    const cd: number = BASE32.indexOf(c);
+  [...geohash].forEach((nextChar: string) => {
+    const cd: number = BASE32.indexOf(nextChar);
     for (let j = 0; j < 5; j++) {
       const mask: number = BITS[j];
       if (isEven) {
@@ -48,13 +52,13 @@ export function decodeGeoHash(geohash: number[]): Coordinates {
       }
       isEven = !isEven;
     }
-  }
+  });
   lat[2] = (lat[0] + lat[1]) / 2;
   lon[2] = (lon[0] + lon[1]) / 2;
   return {
     latitude: lat,
     longitude: lon,
-  } as Coordinates;
+  } as DecodedGeoHash;
 }
 
 function refineInterval(interval: number[], cd: number, mask: number) {

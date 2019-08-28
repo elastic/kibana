@@ -5,16 +5,42 @@ exports[`Data Frame: <DefinePivotSummary /> Minimal initialization 1`] = `
   <ContextProvider
     value={
       Object {
-        "combinedQuery": Object {},
+        "combinedQuery": Object {
+          "language": "the-query-language",
+          "query": "the-query-string",
+        },
         "currentIndexPattern": Object {
           "fields": Array [],
           "id": "the-index-pattern-id",
           "title": "the-index-pattern-title",
         },
-        "currentSavedSearch": Object {},
-        "indexPatterns": Object {},
+        "currentSavedSearch": Object {
+          "columns": Array [],
+          "destroy": [Function],
+          "id": "the-saved-search-id",
+          "searchSource": Object {},
+          "sort": Array [],
+          "title": "the-saved-search-title",
+        },
+        "indexPatterns": _temp {
+          "clearCache": [MockFunction],
+          "config": Object {},
+          "fieldFormats": Array [],
+          "get": [MockFunction],
+          "getDefault": [MockFunction],
+          "getFields": [MockFunction],
+          "getIds": [MockFunction],
+          "getTitles": [MockFunction],
+          "make": [MockFunction],
+          "refreshSavedObjectsCache": Object {},
+          "savedObjectsClient": Object {},
+        },
         "kbnBaseUrl": "url",
-        "kibanaConfig": Object {},
+        "kibanaConfig": Object {
+          "get": [Function],
+          "has": [Function],
+          "set": [Function],
+        },
       }
     }
   >
@@ -39,9 +65,11 @@ exports[`Data Frame: <DefinePivotSummary /> Minimal initialization 1`] = `
           },
         }
       }
-      isAdvancedEditorEnabled={false}
+      isAdvancedPivotEditorEnabled={false}
+      isAdvancedSourceEditorEnabled={false}
       searchQuery="the-search-query"
       searchString="the-query"
+      sourceConfigUpdated={false}
       valid={true}
     />
   </ContextProvider>

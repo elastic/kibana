@@ -21,8 +21,6 @@
  * WARNING: these typings are incomplete
  */
 
-import { StaticIndexPattern } from 'ui/index_patterns';
-
 export type KueryNode = any;
 
 export interface KueryParseOptions {
@@ -46,6 +44,6 @@ export function fromKueryExpression(
   parseOptions?: KueryParseOptions
 ): KueryNode;
 
-export function toElasticsearchQuery(node: KueryNode, indexPattern: StaticIndexPattern): JsonObject;
+export function toElasticsearchQuery(node: KueryNode, indexPattern: any): JsonObject;
 
 export function doesKueryExpressionHaveLuceneSyntaxError(expression: string): boolean;

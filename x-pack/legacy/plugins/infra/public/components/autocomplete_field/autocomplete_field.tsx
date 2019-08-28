@@ -28,6 +28,7 @@ interface AutocompleteFieldProps {
   suggestions: AutocompleteSuggestion[];
   value: string;
   autoFocus?: boolean;
+  'aria-label'?: string;
 }
 
 interface AutocompleteFieldState {
@@ -49,7 +50,14 @@ export class AutocompleteField extends React.Component<
   private inputElement: HTMLInputElement | null = null;
 
   public render() {
-    const { suggestions, isLoadingSuggestions, isValid, placeholder, value } = this.props;
+    const {
+      suggestions,
+      isLoadingSuggestions,
+      isValid,
+      placeholder,
+      value,
+      'aria-label': ariaLabel,
+    } = this.props;
     const { areSuggestionsVisible, selectedIndex } = this.state;
 
     return (
@@ -65,9 +73,9 @@ export class AutocompleteField extends React.Component<
             onKeyDown={this.handleKeyDown}
             onKeyUp={this.handleKeyUp}
             onSearch={this.submit}
-            onBlur={this.submit}
             placeholder={placeholder}
             value={value}
+            aria-label={ariaLabel}
           />
           {areSuggestionsVisible && !isLoadingSuggestions && suggestions.length > 0 ? (
             <SuggestionsPanel>

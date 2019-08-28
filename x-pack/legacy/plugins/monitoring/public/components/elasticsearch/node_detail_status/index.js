@@ -15,6 +15,7 @@ export function NodeDetailStatus({ stats }) {
     transport_address: transportAddress,
     usedHeap,
     freeSpace,
+    totalSpace,
     documents,
     dataSize,
     indexCount,
@@ -23,6 +24,8 @@ export function NodeDetailStatus({ stats }) {
     status,
     isOnline,
   } = stats;
+
+  const percentSpaceUsed = (freeSpace / totalSpace) * 100;
 
   const metrics = [
     {
@@ -45,9 +48,9 @@ export function NodeDetailStatus({ stats }) {
     },
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.nodeDetailStatus.freeDiskSpaceLabel', {
-        defaultMessage: 'Free Disk Space'
+        defaultMessage: 'Free Disk Space',
       }),
-      value: formatMetric(freeSpace, '0.0 b'),
+      value: formatMetric(freeSpace, '0.0 b') + ' (' + formatMetric(percentSpaceUsed, '0,0.[00]', '%', { prependSpace: false  }) + ')',
       'data-test-subj': 'freeDiskSpace'
     },
     {

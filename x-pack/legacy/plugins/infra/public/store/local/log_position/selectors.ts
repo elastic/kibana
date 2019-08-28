@@ -22,11 +22,17 @@ export const selectMiddleVisiblePosition = (state: LogPositionState) =>
 export const selectLastVisiblePosition = (state: LogPositionState) =>
   state.visiblePositions.endKey ? state.visiblePositions.endKey : null;
 
+export const selectControlsShouldDisplayTargetPosition = (state: LogPositionState) =>
+  state.controlsShouldDisplayTargetPosition;
+
 export const selectVisibleMidpointOrTarget = createSelector(
   selectMiddleVisiblePosition,
   selectTargetPosition,
-  (middleVisiblePosition, targetPosition) => {
-    if (middleVisiblePosition) {
+  selectControlsShouldDisplayTargetPosition,
+  (middleVisiblePosition, targetPosition, displayTargetPosition) => {
+    if (displayTargetPosition) {
+      return targetPosition;
+    } else if (middleVisiblePosition) {
       return middleVisiblePosition;
     } else if (targetPosition) {
       return targetPosition;

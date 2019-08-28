@@ -4,8 +4,10 @@
 
 ## ApplicationStart.availableApps property
 
+Apps available based on the current capabilities. Should be used to show navigation links and make routing decisions.
+
 <b>Signature:</b>
 
 ```typescript
-availableApps: CapabilitiesStart['availableApps'];
+availableApps: readonly App[];
 ```

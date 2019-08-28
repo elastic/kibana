@@ -7,6 +7,8 @@
 import { has } from 'lodash/fp';
 
 import * as i18n from './translations';
+import { MlError } from '../types';
+import { SetupMlResponse } from '../../ml_popover/types';
 
 export interface MessageBody {
   error?: string;
@@ -15,11 +17,7 @@ export interface MessageBody {
 }
 
 export interface MlStartJobError {
-  error: {
-    msg: string;
-    response: string;
-    statusCode: number;
-  };
+  error: MlError;
   started: boolean;
 }
 
@@ -66,6 +64,41 @@ export const tryParseResponse = (response: string): string => {
     return JSON.stringify(JSON.parse(response), null, 2);
   } catch (error) {
     return response;
+  }
+};
+
+export const throwIfErrorAttachedToSetup = (setupResponse: SetupMlResponse): void => {
+  const jobErrors = setupResponse.jobs.reduce<string[]>((accum, job) => {
+    if (job.error != null) {
+      accum = [
+        ...accum,
+        job.error.msg,
+        tryParseResponse(job.error.response),
+        `${i18n.STATUS_CODE} ${job.error.statusCode}`,
+      ];
+      return accum;
+    } else {
+      return accum;
+    }
+  }, []);
+
+  const dataFeedErrors = setupResponse.datafeeds.reduce<string[]>((accum, dataFeed) => {
+    if (dataFeed.error != null) {
+      accum = [
+        ...accum,
+        dataFeed.error.msg,
+        tryParseResponse(dataFeed.error.response),
+        `${i18n.STATUS_CODE} ${dataFeed.error.statusCode}`,
+      ];
+      return accum;
+    } else {
+      return accum;
+    }
+  }, []);
+
+  const errors = [...jobErrors, ...dataFeedErrors];
+  if (errors.length > 0) {
+    throw new ToasterErrors(errors);
   }
 };
 
