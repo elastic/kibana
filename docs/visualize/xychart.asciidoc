@@ -33,6 +33,7 @@ NOTE: In Elasticsearch releases 1.4.3 and later, this functionality requires you
 
 The availability of these options varies depending on the aggregation you choose.
 
+[[_metrics_amp_axes]]
 === Metrics & Axes
 
 Select the *Metrics & Axes* tab to change the way each individual metric is shown on the chart. 

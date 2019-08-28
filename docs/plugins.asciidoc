@@ -67,6 +67,7 @@ If plugins were installed as a different user and the server is not starting, th
 [source,shell]
 $ chown -R kibana:kibana /path/to/kibana/optimize
 
+[[_updating_amp_removing_plugins]]
 == Updating & Removing Plugins
 
 To update a plugin, remove the current version and reinstall the plugin.
