@@ -25,7 +25,7 @@ import { IScope } from 'angular';
 import uiRoutes from 'ui/routes';
 import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import { TimeHistoryManager } from './time_history';
-import { TimefilterManager } from './timefilter';
+import { TimefilterManager, TimefilterConfig } from './timefilter';
 import { Timefilter, TimeHistory } from './index';
 
 /**
@@ -39,13 +39,17 @@ export interface TimeFilterServiceDependencies {
 
 export class TimefilterService {
   public setup({ uiSettings }: TimeFilterServiceDependencies) {
+    const timefilterConfig = {
+      timeDefaults: uiSettings.get('timepicker:timeDefaults'),
+      refreshIntervalDefaults: uiSettings.get('timepicker:refreshIntervalDefaults'),
+    };
     const history: TimeHistory = new TimeHistoryManager();
-    const timefilter: Timefilter = new TimefilterManager(uiSettings, history);
+    const timefilter: Timefilter = new TimefilterManager(timefilterConfig, history);
 
     uiRoutes.addSetupWork((globalState, $rootScope) => {
       return TimefilterService.registerTimefilterWithGlobalState(
         timefilter,
-        uiSettings,
+        timefilterConfig,
         globalState,
         $rootScope
       );
@@ -79,25 +83,22 @@ export class TimefilterService {
   // Kibana issue https://github.com/elastic/kibana/issues/19110 tracks the removal of this dependency on uiRouter
   private static registerTimefilterWithGlobalState(
     timefilter: Timefilter,
-    uiSettings: UiSettingsClientContract,
+    timefilterConfig: TimefilterConfig,
     globalState: any,
     $rootScope: IScope
   ) {
-    const timeDefaults = uiSettings.get('timepicker:timeDefaults');
-    const refreshIntervalDefaults = uiSettings.get('timepicker:refreshIntervalDefaults');
-
-    timefilter.setTime(_.defaults(globalState.time || {}, timeDefaults));
+    timefilter.setTime(_.defaults(globalState.time || {}, timefilterConfig.timeDefaults));
     timefilter.setRefreshInterval(
-      _.defaults(globalState.refreshInterval || {}, refreshIntervalDefaults)
+      _.defaults(globalState.refreshInterval || {}, timefilterConfig.refreshIntervalDefaults)
     );
 
     globalState.on('fetch_with_changes', () => {
       // clone and default to {} in one
-      const newTime: TimeRange = _.defaults({}, globalState.time, timeDefaults);
+      const newTime: TimeRange = _.defaults({}, globalState.time, timefilterConfig.timeDefaults);
       const newRefreshInterval: RefreshInterval = _.defaults(
         {},
         globalState.refreshInterval,
-        refreshIntervalDefaults
+        timefilterConfig.refreshIntervalDefaults
       );
 
       if (newTime) {
