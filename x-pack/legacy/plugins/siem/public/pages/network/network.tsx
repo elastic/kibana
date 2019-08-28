@@ -5,6 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -46,6 +47,15 @@ interface NetworkComponentReduxProps {
     to: number;
   }>;
 }
+
+const flexDirectionMq = window.matchMedia(
+  'screen and (min-width: ' + euiLightVars.euiBreakpoints.xl + ')'
+);
+const widthChange = e => {
+  // console.log(e.matches);
+  return e.matches;
+};
+flexDirectionMq.addListener(widthChange);
 
 type NetworkComponentProps = NetworkComponentReduxProps;
 const NetworkComponent = pure<NetworkComponentProps>(
@@ -96,7 +106,7 @@ const NetworkComponent = pure<NetworkComponentProps>(
 
                       <EuiSpacer />
 
-                      <EuiFlexGroup>
+                      <EuiFlexGroup direction={widthChange(flexDirectionMq) ? 'row' : 'column'}>
                         <EuiFlexItem>
                           <NetworkTopNFlowQuery
                             endDate={to}
