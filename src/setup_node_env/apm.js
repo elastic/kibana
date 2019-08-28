@@ -17,8 +17,14 @@
  * under the License.
  */
 
-require('symbol-observable');
-require('./root');
-require('./node_version_validator');
-require('./apm');
-require('./babel_register');
+var pkg = require('../../package.json');
+
+var isKibanaDistributable = Boolean(pkg.build && pkg.build.distributable === true);
+
+if (!isKibanaDistributable && process.env.APM_ENABLED !== 'false') {
+  process.env.APM_ENABLED = 'true';
+  /**
+   * Placeholder for APM Node.js agent to be
+   * started here
+   */
+}

@@ -17,8 +17,23 @@
  * under the License.
  */
 
-require('symbol-observable');
-require('./root');
-require('./node_version_validator');
-require('./apm');
-require('./babel_register');
+const apmEnabled = process.env.APM_ENABLED === 'true';
+
+export function apmImport() {
+  return apmEnabled ? 'import { init } from "@elastic/apm-rum"' : '';
+}
+
+export function apmInit(config) {
+  return apmEnabled ? `init(${config})` : '';
+}
+
+/**
+ * TODO: Fetch it from central place
+ * as Node.js agent
+ */
+export function getApmConfig() {
+  return {
+    serviceName: 'kibana-frontend',
+    serverUrl: 'http://localhost:8200',
+  };
+}

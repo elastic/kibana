@@ -56,7 +56,16 @@ export default function RouteManager() {
     }
   };
 
-  self.run = function($location, $route, $injector) {
+  self.run = function($location, $route, $injector, $rootScope) {
+    if (window.elasticApm) {
+      $rootScope.$on('$routeChangeStart', (_, nextRoute) => {
+        const currTransaction = window.elasticApm.getCurrentTransaction();
+        if (currTransaction && nextRoute.$$route) {
+          currTransaction.name = nextRoute.$$route.originalPath;
+        }
+      });
+    }
+
     self.getBreadcrumbs = () => {
       const breadcrumbs = parsePathToBreadcrumbs($location.path());
       const map = $route.current.mapBreadcrumbs;
