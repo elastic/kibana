@@ -4,50 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
-import { IndexPatternMapping } from './types';
+import { IndexPatternMapping } from '../types';
 
-/**
- * Returns `Source/Destination Point-to-point` Map LayerList configuration, with a source,
- * destination, and line layer for each of the provided indexPatterns
- *
- * @param indexPatternIds array of indexPatterns' title and id
- */
-export const getLayerList = (indexPatternIds: IndexPatternMapping[]) => {
-  return [
-    {
-      sourceDescriptor: { type: 'EMS_TMS', isAutoSelect: true },
-      id: uuid.v4(),
-      label: null,
-      minZoom: 0,
-      maxZoom: 24,
-      alpha: 1,
-      visible: true,
-      applyGlobalQuery: true,
-      style: { type: 'TILE', properties: {} },
-      type: 'TILE',
-    },
-    ...indexPatternIds.reduce((acc: object[], { title, id }) => {
-      return [
-        ...acc,
-        getLineLayer(title, id),
-        getDestinationLayer(title, id),
-        getSourceLayer(title, id),
-      ];
-    }, []),
-  ];
-};
+export const mockIndexPatternIds: IndexPatternMapping[] = [
+  { title: 'filebeat-*', id: '8c7323ac-97ad-4b53-ac0a-40f8f691a918' },
+];
 
-/**
- * Returns Document Data Source layer configuration ('source.geo.location') for the given
- * indexPattern title/id
- *
- * @param indexPatternTitle used as layer name in LayerToC UI: "${indexPatternTitle} | Source point"
- * @param indexPatternId used as layer's indexPattern to query for data
- */
-export const getSourceLayer = (indexPatternTitle: string, indexPatternId: string) => ({
+export const mockSourceLayer = {
   sourceDescriptor: {
-    id: uuid.v4(),
+    id: 'uuid.v4()',
     type: 'ES_SEARCH',
     geoField: 'source.geo.location',
     filterByMapBounds: false,
@@ -55,7 +20,7 @@ export const getSourceLayer = (indexPatternTitle: string, indexPatternId: string
     useTopHits: false,
     topHitsTimeField: '@timestamp',
     topHitsSize: 1,
-    indexPatternId,
+    indexPatternId: '8c7323ac-97ad-4b53-ac0a-40f8f691a918',
   },
   style: {
     type: 'VECTOR',
@@ -68,8 +33,8 @@ export const getSourceLayer = (indexPatternTitle: string, indexPatternId: string
       symbol: { options: { symbolizeAs: 'circle', symbolId: 'arrow-es' } },
     },
   },
-  id: uuid.v4(),
-  label: `${indexPatternTitle} | Source Point`,
+  id: 'uuid.v4()',
+  label: `filebeat-* | Source Point`,
   minZoom: 0,
   maxZoom: 24,
   alpha: 0.75,
@@ -78,18 +43,11 @@ export const getSourceLayer = (indexPatternTitle: string, indexPatternId: string
   type: 'VECTOR',
   query: { query: 'source.geo.location:* and destination.geo.location:*', language: 'kuery' },
   joins: [],
-});
+};
 
-/**
- * Returns Document Data Source layer configuration ('destination.geo.location') for the given
- * indexPattern title/id
- *
- * @param indexPatternTitle used as layer name in LayerToC UI: "${indexPatternTitle} | Destination point"
- * @param indexPatternId used as layer's indexPattern to query for data
- */
-export const getDestinationLayer = (indexPatternTitle: string, indexPatternId: string) => ({
+export const mockDestinationLayer = {
   sourceDescriptor: {
-    id: uuid.v4(),
+    id: 'uuid.v4()',
     type: 'ES_SEARCH',
     geoField: 'destination.geo.location',
     filterByMapBounds: true,
@@ -97,7 +55,7 @@ export const getDestinationLayer = (indexPatternTitle: string, indexPatternId: s
     useTopHits: false,
     topHitsTimeField: '@timestamp',
     topHitsSize: 1,
-    indexPatternId,
+    indexPatternId: '8c7323ac-97ad-4b53-ac0a-40f8f691a918',
   },
   style: {
     type: 'VECTOR',
@@ -110,8 +68,8 @@ export const getDestinationLayer = (indexPatternTitle: string, indexPatternId: s
       symbol: { options: { symbolizeAs: 'circle', symbolId: 'airfield' } },
     },
   },
-  id: uuid.v4(),
-  label: `${indexPatternTitle} | Destination Point`,
+  id: 'uuid.v4()',
+  label: `filebeat-* | Destination Point`,
   minZoom: 0,
   maxZoom: 24,
   alpha: 0.75,
@@ -119,20 +77,13 @@ export const getDestinationLayer = (indexPatternTitle: string, indexPatternId: s
   applyGlobalQuery: true,
   type: 'VECTOR',
   query: { query: 'source.geo.location:* and destination.geo.location:*', language: 'kuery' },
-});
+};
 
-/**
- * Returns Point-to-point Data Source layer configuration ('source.geo.location' &
- * 'source.geo.location') for the given indexPattern title/id
- *
- * @param indexPatternTitle used as layer name in LayerToC UI: "${indexPatternTitle} | Line"
- * @param indexPatternId used as layer's indexPattern to query for data
- */
-export const getLineLayer = (indexPatternTitle: string, indexPatternId: string) => ({
+export const mockLineLayer = {
   sourceDescriptor: {
     type: 'ES_PEW_PEW',
-    id: uuid.v4(),
-    indexPatternId,
+    id: 'uuid.v4()',
+    indexPatternId: '8c7323ac-97ad-4b53-ac0a-40f8f691a918',
     sourceGeoField: 'source.geo.location',
     destGeoField: 'destination.geo.location',
     metrics: [
@@ -166,8 +117,8 @@ export const getLineLayer = (indexPatternTitle: string, indexPatternId: string) 
       symbol: { options: { symbolizeAs: 'circle', symbolId: 'airfield' } },
     },
   },
-  id: uuid.v4(),
-  label: `${indexPatternTitle} | Line`,
+  id: 'uuid.v4()',
+  label: `filebeat-* | Line`,
   minZoom: 0,
   maxZoom: 24,
   alpha: 1,
@@ -175,4 +126,43 @@ export const getLineLayer = (indexPatternTitle: string, indexPatternId: string) 
   applyGlobalQuery: true,
   type: 'VECTOR',
   query: { query: '', language: 'kuery' },
-});
+};
+
+export const mockLayerList = [
+  {
+    sourceDescriptor: { type: 'EMS_TMS', isAutoSelect: true },
+    id: 'uuid.v4()',
+    label: null,
+    minZoom: 0,
+    maxZoom: 24,
+    alpha: 1,
+    visible: true,
+    applyGlobalQuery: true,
+    style: { type: 'TILE', properties: {} },
+    type: 'TILE',
+  },
+  mockLineLayer,
+  mockDestinationLayer,
+  mockSourceLayer,
+];
+
+export const mockLayerListDouble = [
+  {
+    sourceDescriptor: { type: 'EMS_TMS', isAutoSelect: true },
+    id: 'uuid.v4()',
+    label: null,
+    minZoom: 0,
+    maxZoom: 24,
+    alpha: 1,
+    visible: true,
+    applyGlobalQuery: true,
+    style: { type: 'TILE', properties: {} },
+    type: 'TILE',
+  },
+  mockLineLayer,
+  mockDestinationLayer,
+  mockSourceLayer,
+  mockLineLayer,
+  mockDestinationLayer,
+  mockSourceLayer,
+];
