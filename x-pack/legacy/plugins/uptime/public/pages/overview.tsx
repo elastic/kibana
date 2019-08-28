@@ -7,16 +7,24 @@
 // @ts-ignore EuiSearchBar is not exported by EUI
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSearchBar, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Fragment, useContext, useEffect } from 'react';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
-import { EmptyState, MonitorList, Snapshot, SnapshotHistogram } from '../components/functional';
+import {
+  EmptyState,
+  FilterDropdowns,
+  KueryBar,
+  MonitorList,
+  Snapshot,
+  SnapshotHistogram,
+} from '../components/functional';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
 import { useUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../infra/public';
-import { KueryBar } from '../components/functional/kuery_bar';
-import { FilterDropdowns } from '../components/functional/filter_dropdowns';
+import { getIndexPattern } from '../lib/adapters/index_pattern';
+import { toStaticIndexPattern } from '../lib/helper';
 
 interface OverviewPageProps {
   basePath: string;
@@ -34,7 +42,7 @@ type Props = OverviewPageProps;
 const combineFiltersAndUserSearch = (filters: string, search: string) => {
   if (!filters) return search;
   if (!search) return filters;
-  return `${filters} AND ${search}`;
+  return `(${filters}) and (${search})`;
 };
 
 /**
@@ -49,17 +57,21 @@ const stringifyKueries = (kueries: Map<string, string[]>): string =>
       if (!value || value.length === 0) return '';
       return value.reduce((prev, cur, index, array) => {
         const expression = `${key}:${cur}`;
-        if (array.length === 1 || index === 0) {
+        if (array.length === 1) {
           return expression;
+        } else if (array.length > 1 && index === 0) {
+          return `(${expression}`;
+        } else if (index + 1 === array.length) {
+          return `${prev} or ${expression})`;
         }
-        return `${prev} OR ${expression}`;
+        return `${prev} or ${expression}`;
       }, '');
     })
     .reduce((prev, cur, index, array) => {
       if (array.length === 1 || index === 0) {
         return cur;
       }
-      return `${prev} AND ${cur}`;
+      return `${prev} and ${cur}`;
     }, '');
 
 export type UptimeSearchBarQueryChangeHandler = (queryChangedEvent: {
@@ -84,9 +96,22 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
     // monitorListSortDirection,
     // monitorListSortField,
     search,
+    statusFilter,
   } = params;
 
+  const [indexPattern, setIndexPattern] = useState<any>(undefined);
+
+  async function fetchIndexPattern() {
+    try {
+      const result = await getIndexPattern(basePath);
+      setIndexPattern(result);
+    } catch {
+      setIndexPattern(undefined);
+    }
+  }
+
   useEffect(() => {
+    fetchIndexPattern();
     setBreadcrumbs(getOverviewPageBreadcrumbs());
     logOverviewPageLoad();
     if (setHeadingText) {
@@ -115,9 +140,12 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
   try {
     // toESQuery will throw errors
     if (filterQueryString || urlFilters) {
-      const esQuery = combineFiltersAndUserSearch(filterQueryString, kueryString);
-      if (esQuery) {
-        filters = JSON.stringify(EuiSearchBar.Query.toESQuery(esQuery));
+      if (indexPattern) {
+        const staticIndexPattern = toStaticIndexPattern(indexPattern);
+        const combinedFilterString = combineFiltersAndUserSearch(filterQueryString, kueryString);
+        const ast = fromKueryExpression(combinedFilterString);
+        const elasticsearchQuery = toElasticsearchQuery(ast, staticIndexPattern);
+        filters = JSON.stringify(elasticsearchQuery);
       }
     }
   } catch (e) {
@@ -128,6 +156,7 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
     dateRangeStart,
     dateRangeEnd,
     filters,
+    statusFilter,
   };
 
   const onFilterKueryUpdate = (filtersKuery: string) => {
@@ -164,7 +193,7 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
           </EuiFlexItem>
           {error && (
             <EuiCallOut title="Hello" color="danger" iconType="alert">
-              <p>There was an error parsing the filter query. Error: {error}</p>
+              <p>There was an error parsing the filter query. Error: {error.message}</p>
             </EuiCallOut>
           )}
         </EuiFlexGroup>

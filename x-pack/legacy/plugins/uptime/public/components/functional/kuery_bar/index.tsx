@@ -16,6 +16,7 @@ import { Typeahead } from './typeahead';
 import { getIndexPattern } from '../../../lib/adapters/index_pattern';
 import { UptimeSettingsContext } from '../../../contexts';
 import { useUrlParams } from '../../../hooks';
+import { toStaticIndexPattern } from '../../../lib/helper';
 
 const Container = styled.div`
   margin-bottom: 10px;
@@ -70,11 +71,7 @@ export function KueryBar() {
 
   async function fetchIndexPattern() {
     const getPatternResult = await getIndexPattern(basePath);
-    setIndexPattern({
-      ...getPatternResult,
-      fields: JSON.parse(getPatternResult.attributes.fields),
-      title: getPatternResult.id,
-    });
+    setIndexPattern(toStaticIndexPattern(getPatternResult));
     setIsLoadingIndexPattern(false);
   }
 
