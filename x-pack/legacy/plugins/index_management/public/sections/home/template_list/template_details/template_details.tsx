@@ -102,7 +102,8 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
 }) => {
   const decodedTemplateName = decodePath(templateName);
   const { error, data: templateDetails, isLoading } = loadIndexTemplate(decodedTemplateName);
-  const { isManaged } = templateDetails || {};
+  // TS complains if we use destructuring here. Fixed in 3.6.0 (https://github.com/microsoft/TypeScript/pull/31711).
+  const isManaged = templateDetails ? templateDetails.isManaged : undefined;
   const [templateToDelete, setTemplateToDelete] = useState<Array<Template['name']>>([]);
   const [activeTab, setActiveTab] = useState<string>(SUMMARY_TAB_ID);
   const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);
