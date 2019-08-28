@@ -86,7 +86,7 @@
 
       <div class="euiFlexGrid euiFlexGrid--gutterLarge euiFlexGrid--fourths">
         <div class="euiFlexItem" ng-class='{disabled: isTimeBasedIndex===false}'>
-          <a ng-href="{{getUrl('#jobs/new_job/single_metric')}}" ng-class='{disabled: isTimeBasedIndex===false}' class="euiLink synopsis">
+          <a ng-href="{{getUrl('#jobs/new_job/single_metric')}}" ng-class='{disabled: isTimeBasedIndex===false}' class="euiLink synopsis" data-test-subj="mlJobTypeLinkSingleMetricJob">
             <div class="euiPanel euiPanel--paddingMedium synopsisPanel">
               <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--responsive">
                 <div class="euiFlexItem euiFlexItem--flexGrowZero">
@@ -118,7 +118,7 @@
           </a>
         </div>
         <div class="euiFlexItem" ng-class='{disabled: isTimeBasedIndex===false}'>
-          <a ng-href="{{getUrl('#jobs/new_job/multi_metric')}}" ng-class='{disabled: isTimeBasedIndex===false}' class="euiLink synopsis">
+          <a ng-href="{{getUrl('#jobs/new_job/multi_metric')}}" ng-class='{disabled: isTimeBasedIndex===false}' class="euiLink synopsis" ata-test-subj="mlJobTypeLinkMultiMetricJob">
             <div class="euiPanel euiPanel--paddingMedium synopsisPanel">
               <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--responsive">
                 <div class="euiFlexItem euiFlexItem--flexGrowZero">
@@ -150,7 +150,7 @@
           </a>
         </div>
         <div class="euiFlexItem" ng-class='{disabled: isTimeBasedIndex===false}'>
-          <a ng-href="{{getUrl('#jobs/new_job/population')}}" ng-class='{disabled: isTimeBasedIndex===false}' class="euiLink synopsis">
+          <a ng-href="{{getUrl('#jobs/new_job/population')}}" ng-class='{disabled: isTimeBasedIndex===false}' class="euiLink synopsis" data-test-subj="mlJobTypeLinkPopulationJob">
             <div class="euiPanel euiPanel--paddingMedium synopsisPanel">
               <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--responsive">
                 <div class="euiFlexItem euiFlexItem--flexGrowZero">
