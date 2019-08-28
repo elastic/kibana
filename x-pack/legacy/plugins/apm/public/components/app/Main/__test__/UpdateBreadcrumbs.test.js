@@ -8,7 +8,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { UpdateBreadcrumbs } from '../UpdateBreadcrumbs';
-import * as hooks from '../../../../hooks/useCore';
+import * as kibanaCore from '../../../../../../observability/public/context/kibana_core';
 
 jest.mock('ui/kfetch');
 jest.mock('ui/index_patterns');
@@ -20,7 +20,7 @@ const coreMock = {
   }
 };
 
-jest.spyOn(hooks, 'useCore').mockReturnValue(coreMock);
+jest.spyOn(kibanaCore, 'useKibanaCore').mockReturnValue(coreMock);
 
 function expectBreadcrumbToMatchSnapshot(route) {
   mount(

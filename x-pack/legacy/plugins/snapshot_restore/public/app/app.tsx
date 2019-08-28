@@ -8,9 +8,17 @@ import React, { useContext } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { EuiPageContent } from '@elastic/eui';
 
+import { APP_REQUIRED_CLUSTER_PRIVILEGES } from '../../common/constants';
 import { SectionLoading, SectionError } from './components';
 import { BASE_PATH, DEFAULT_SECTION, Section } from './constants';
-import { RepositoryAdd, RepositoryEdit, RestoreSnapshot, SnapshotRestoreHome } from './sections';
+import {
+  RepositoryAdd,
+  RepositoryEdit,
+  RestoreSnapshot,
+  SnapshotRestoreHome,
+  PolicyAdd,
+  PolicyEdit,
+} from './sections';
 import { useAppDependencies } from './index';
 import { AuthorizationContext, WithPrivileges, NotAuthorizedSection } from './lib/authorization';
 
@@ -36,7 +44,7 @@ export const App: React.FunctionComponent = () => {
       error={apiError}
     />
   ) : (
-    <WithPrivileges privileges="cluster.*">
+    <WithPrivileges privileges={APP_REQUIRED_CLUSTER_PRIVILEGES.map(name => `cluster.${name}`)}>
       {({ isLoading, hasPrivileges, privilegesMissing }) =>
         isLoading ? (
           <SectionLoading>
@@ -69,6 +77,8 @@ export const App: React.FunctionComponent = () => {
                 path={`${BASE_PATH}/restore/:repositoryName/:snapshotId*`}
                 component={RestoreSnapshot}
               />
+              <Route exact path={`${BASE_PATH}/add_policy`} component={PolicyAdd} />
+              <Route exact path={`${BASE_PATH}/edit_policy/:name*`} component={PolicyEdit} />
               <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}/${DEFAULT_SECTION}`} />
             </Switch>
           </div>

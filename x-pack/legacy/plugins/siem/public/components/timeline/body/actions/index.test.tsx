@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { mount } from 'enzyme';
 import * as React from 'react';
 
@@ -124,39 +123,6 @@ describe('Actions', () => {
     expect(onEventToggled).toBeCalled();
   });
 
-  test('it invokes onPinClicked when the button for pinning events is clicked', () => {
-    const onPinClicked = jest.fn();
-
-    const wrapper = mount(
-      <TestProviders>
-        <Actions
-          actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
-          associateNote={jest.fn()}
-          checked={false}
-          expanded={false}
-          eventId="abc"
-          eventIsPinned={false}
-          getNotesByIds={jest.fn()}
-          loading={false}
-          noteIds={[]}
-          onEventToggled={jest.fn()}
-          onPinClicked={onPinClicked}
-          showCheckboxes={false}
-          showNotes={false}
-          toggleShowNotes={jest.fn()}
-          updateNote={jest.fn()}
-        />
-      </TestProviders>
-    );
-
-    wrapper
-      .find('[data-test-subj="pin"]')
-      .first()
-      .simulate('click');
-
-    expect(onPinClicked).toBeCalled();
-  });
-
   test('it invokes toggleShowNotes when the button for adding notes is clicked', () => {
     const toggleShowNotes = jest.fn();
 
@@ -188,5 +154,38 @@ describe('Actions', () => {
       .simulate('click');
 
     expect(toggleShowNotes).toBeCalled();
+  });
+
+  test('it invokes onPinClicked when the button for pinning events is clicked', () => {
+    const onPinClicked = jest.fn();
+
+    const wrapper = mount(
+      <TestProviders>
+        <Actions
+          actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
+          associateNote={jest.fn()}
+          checked={false}
+          expanded={false}
+          eventId="abc"
+          eventIsPinned={false}
+          getNotesByIds={jest.fn()}
+          loading={false}
+          noteIds={[]}
+          onEventToggled={jest.fn()}
+          onPinClicked={onPinClicked}
+          showCheckboxes={false}
+          showNotes={false}
+          toggleShowNotes={jest.fn()}
+          updateNote={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    wrapper
+      .find('[data-test-subj="pin"]')
+      .first()
+      .simulate('click');
+
+    expect(onPinClicked).toHaveBeenCalled();
   });
 });
