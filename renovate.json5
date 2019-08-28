@@ -594,6 +594,14 @@
         ],
       },
       {
+        groupSlug: 'archiver',
+        groupName: 'archiver related packages',
+        packageNames: [
+          'archiver',
+          '@types/archiver',
+        ],
+      },
+      {
         groupSlug: 'base64-js',
         groupName: 'base64-js related packages',
         packageNames: [

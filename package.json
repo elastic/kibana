@@ -425,6 +425,7 @@
     "nock": "10.0.6",
     "node-sass": "^4.9.4",
     "normalize-path": "^3.0.0",
+    "null-loader": "^3.0.0",
     "nyc": "^14.1.1",
     "pixelmatch": "4.0.2",
     "pkg-up": "^2.0.0",
