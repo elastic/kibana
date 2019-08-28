@@ -14,6 +14,8 @@ import {
   GeoJSONSourceOptions
 } from 'mapbox-gl';
 import { GeoJsonProperties } from 'geojson';
+import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { shade, tint } from 'polished';
 
 interface ChoroplethDataElement {
   key: string;
@@ -36,16 +38,16 @@ interface Props {
 const CHOROPLETH_LAYER_ID = 'choropleth_layer';
 const CHOROPLETH_POLYGONS_SOURCE_ID = 'choropleth_polygons';
 
-const linearScale = (x: number, range = { min: 0, max: 1 }) =>
-  (range.max - range.min) * x + range.min;
-const quadradicScale = (x: number, range = { min: 0, max: 1 }) =>
-  4 * (range.max - range.min) * (x ** 2 - x) + range.max;
-
 export function getProgressionColor(scale: number) {
-  const hue = quadradicScale(scale, { min: 200, max: 218 });
-  const saturation = 55;
-  const lightness = Math.round(linearScale(1 - scale, { min: 35, max: 98 }));
-  return `hsl(${hue},${saturation}%,${lightness}%)`;
+  const baseColor = euiLightVars.euiColorPrimary;
+  const adjustedScale = 0.75 * scale + 0.05; // prevents pure black & white as min/max colors.
+  if (adjustedScale < 0.5) {
+    return tint(adjustedScale * 2, baseColor);
+  }
+  if (adjustedScale > 0.5) {
+    return shade(1 - (adjustedScale - 0.5) * 2, baseColor);
+  }
+  return baseColor;
 }
 
 export function getDataRange(data: Props['data']) {
@@ -98,7 +100,12 @@ export const ChoroplethMap: React.SFC<Props> = props => {
 
   const updateHoverStateOnMousemove = useCallback(
     (event: mapboxgl.MapMouseEvent & mapboxgl.EventData) => {
-      if (map && popupRef.current && data.length) {
+      if (
+        map &&
+        popupRef.current &&
+        data.length &&
+        map.getLayer(CHOROPLETH_LAYER_ID)
+      ) {
         popupRef.current.setLngLat(event.lngLat);
         const hoverFeatures = map.queryRenderedFeatures(event.point, {
           layers: [CHOROPLETH_LAYER_ID]
