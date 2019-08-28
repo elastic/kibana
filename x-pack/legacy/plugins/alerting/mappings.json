@@ -40,6 +40,9 @@
       },
       "apiKey": {
         "type": "binary"
+      },
+      "apiKeyOwner": {
+        "type": "keyword"
       }
     }
   }

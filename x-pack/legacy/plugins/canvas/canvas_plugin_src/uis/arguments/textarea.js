@@ -20,7 +20,7 @@ const TextAreaArgInput = ({ updateValue, value, confirm, commit, renderError, ar
   return (
     <EuiForm>
       <EuiTextArea
-        className="canvasTextArea--code"
+        className="canvasTextArea__code"
         id={argId}
         rows={10}
         value={value}
