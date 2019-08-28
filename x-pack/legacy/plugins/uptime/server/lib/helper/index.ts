@@ -7,3 +7,4 @@
 export { dropLatestBucket } from './drop_latest_bucket';
 export { formatEsBucketsForHistogram } from './format_es_buckets_for_histogram';
 export { getHistogramInterval } from './get_histogram_interval';
+export { parseFilterQuery } from './parse_filter_query';

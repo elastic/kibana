@@ -10,11 +10,11 @@ import { INDEX_NAMES } from '../../../../common/constants';
 import {
   DocCount,
   HistogramDataPoint,
+  HttpBody,
   Ping,
   PingResults,
-  HttpBody,
 } from '../../../../common/graphql/types';
-import { formatEsBucketsForHistogram, getFilteredQueryAndStatusFilter } from '../../helper';
+import { formatEsBucketsForHistogram, parseFilterQuery } from '../../helper';
 import { DatabaseAdapter, HistogramQueryResult } from '../database';
 import { UMPingsAdapter } from './adapter_types';
 import { getHistogramInterval } from '../../helper/get_histogram_interval';
@@ -196,26 +196,27 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     dateRangeStart: string,
     dateRangeEnd: string,
     filters?: string | null,
-    monitorId?: string | null
+    monitorId?: string | null,
+    statusFilter?: string | null
   ): Promise<HistogramDataPoint[]> {
-    const { statusFilter, query } = getFilteredQueryAndStatusFilter(
-      dateRangeStart,
-      dateRangeEnd,
-      filters
-    );
-
-    const combinedQuery = !monitorId
-      ? query
-      : {
-          bool: {
-            filter: [{ match: { 'monitor.id': monitorId } }, query],
-          },
-        };
+    const boolFilters = parseFilterQuery(filters);
+    const filter: any[] = [{ range: { '@timestamp': { gte: dateRangeStart, lte: dateRangeEnd } } }];
+    if (monitorId) {
+      filter.push({ match: { 'monitor.id': monitorId } });
+    }
+    if (boolFilters) {
+      filter.push(boolFilters);
+    }
+    const query = {
+      bool: {
+        filter,
+      },
+    };
 
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
-        query: combinedQuery,
+        query,
         size: 0,
         aggs: {
           timeseries: {

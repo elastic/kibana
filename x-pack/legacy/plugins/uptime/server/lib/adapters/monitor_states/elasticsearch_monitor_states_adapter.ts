@@ -18,7 +18,7 @@ import {
   StatesIndexStatus,
 } from '../../../../common/graphql/types';
 import { INDEX_NAMES, STATES, QUERY } from '../../../../common/constants';
-import { getHistogramInterval, getFilteredQueryAndStatusFilter } from '../../helper';
+import { getHistogramInterval, parseFilterQuery } from '../../helper';
 
 type SortChecks = (check: Check) => string[];
 const checksSortBy = (check: Check) => [
@@ -36,26 +36,41 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
   private async runLegacyMonitorStatesRecentCheckGroupsQuery(
     request: any,
     query: any,
+    dateRangeStart: string,
+    dateRangeEnd: string,
     searchAfter?: any,
     size: number = 50
   ): Promise<LegacyMonitorStatesRecentCheckGroupsQueryResult> {
     const checkGroupsById = new Map<string, string[]>();
     let afterKey: any = searchAfter;
 
+    const filter: any[] = [
+      {
+        range: {
+          '@timestamp': {
+            gte: dateRangeStart,
+            lte: dateRangeEnd,
+          },
+        },
+      },
+      {
+        // We check for summary.up to ensure that the check group
+        // is complete. Summary fields are only present on
+        // completed check groups.
+        exists: {
+          field: 'summary.up',
+        },
+      },
+    ];
+
+    if (query) {
+      filter.push(query);
+    }
+
     const body = {
       query: {
         bool: {
-          filter: [
-            {
-              // We check for summary.up to ensure that the check group
-              // is complete. Summary fields are only present on
-              // completed check groups.
-              exists: {
-                field: 'summary.up',
-              },
-            },
-            query,
-          ],
+          filter,
         },
       },
       sort: [
@@ -149,11 +164,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     size: number = 50
   ): Promise<LegacyMonitorStatesQueryResult> {
     size = Math.min(size, QUERY.DEFAULT_AGGS_CAP);
-    const { query, statusFilter } = getFilteredQueryAndStatusFilter(
-      dateRangeStart,
-      dateRangeEnd,
-      filters
-    );
+    const query = parseFilterQuery(filters);
 
     // First we fetch the most recent check groups for this query
     // This is a critical performance optimization.
@@ -164,20 +175,33 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     const { checkGroups, afterKey } = await this.runLegacyMonitorStatesRecentCheckGroupsQuery(
       request,
       query,
+      dateRangeStart,
+      dateRangeEnd,
       searchAfter,
       size
     );
+    const filter = [
+      { terms: { 'monitor.check_group': checkGroups } },
+      {
+        range: {
+          '@timestamp': {
+            gte: dateRangeStart,
+            lte: dateRangeEnd,
+          },
+        },
+      },
+    ];
+    if (query) {
+      // Even though this work is already done when calculating the groups
+      // this helps the planner
+      filter.push(query);
+    }
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
         query: {
           bool: {
-            filter: [
-              { terms: { 'monitor.check_group': checkGroups } },
-              // Even though this work is already done when calculating the groups
-              // this helps the planner
-              query,
-            ],
+            filter,
           },
         },
         sort: [{ '@timestamp': 'desc' }],
@@ -382,7 +406,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     };
 
     const result = await this.database.search(request, params);
-    return { afterKey, result, statusFilter };
+    return { afterKey, result };
   }
 
   private getMonitorBuckets(queryResult: any, statusFilter?: any) {
@@ -399,12 +423,13 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    filters?: string | null
+    filters?: string | null,
+    statusFilter?: string | null
   ): Promise<MonitorSummary[]> {
     const monitors: any[] = [];
     let searchAfter: any | null = null;
     do {
-      const { result, statusFilter, afterKey } = await this.runLegacyMonitorStatesQuery(
+      const { result, afterKey } = await this.runLegacyMonitorStatesQuery(
         request,
         dateRangeStart,
         dateRangeEnd,
