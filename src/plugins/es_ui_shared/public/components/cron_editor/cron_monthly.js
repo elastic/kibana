@@ -1,7 +1,20 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 import React, { Fragment } from 'react';
@@ -16,54 +29,54 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-export const CronWeekly = ({
+export const CronMonthly = ({
   minute,
   minuteOptions,
   hour,
   hourOptions,
-  day,
-  dayOptions,
+  date,
+  dateOptions,
   onChange,
 }) => (
   <Fragment>
     <EuiFormRow
       label={(
         <FormattedMessage
-          id="xpack.rollupJobs.cronEditor.cronWeekly.fieldDateLabel"
-          defaultMessage="Day"
+          id="esUi.cronEditor.cronMonthly.fieldDateLabel"
+          defaultMessage="Date"
         />
       )}
       fullWidth
-      data-test-subj="rollupCronFrequencyConfiguration"
+      data-test-subj="cronFrequencyConfiguration"
     >
       <EuiSelect
-        options={dayOptions}
-        value={day}
-        onChange={e => onChange({ day: e.target.value })}
+        options={dateOptions}
+        value={date}
+        onChange={e => onChange({ date: e.target.value })}
         fullWidth
         prepend={(
           <EuiText size="xs">
             <strong>
               <FormattedMessage
-                id="xpack.rollupJobs.cronEditor.cronWeekly.textOnLabel"
-                defaultMessage="On"
+                id="esUi.cronEditor.cronMonthly.textOnTheLabel"
+                defaultMessage="On the"
               />
             </strong>
           </EuiText>
         )}
-        data-test-subj="rollupJobCreateFrequencyWeeklyDaySelect"
+        data-test-subj="cronFrequencyMonthlyDateSelect"
       />
     </EuiFormRow>
 
     <EuiFormRow
       label={(
         <FormattedMessage
-          id="xpack.rollupJobs.cronEditor.cronWeekly.fieldTimeLabel"
+          id="esUi.cronEditor.cronMonthly.fieldTimeLabel"
           defaultMessage="Time"
         />
       )}
       fullWidth
-      data-test-subj="rollupCronFrequencyConfiguration"
+      data-test-subj="cronFrequencyConfiguration"
     >
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow={false}>
@@ -76,13 +89,13 @@ export const CronWeekly = ({
               <EuiText size="xs">
                 <strong>
                   <FormattedMessage
-                    id="xpack.rollupJobs.cronEditor.cronWeekly.fieldHour.textAtLabel"
+                    id="esUi.cronEditor.cronMonthly.fieldHour.textAtLabel"
                     defaultMessage="At"
                   />
                 </strong>
               </EuiText>
             )}
-            data-test-subj="rollupJobCreateFrequencyWeeklyHourSelect"
+            data-test-subj="cronFrequencyMonthlyHourSelect"
           />
         </EuiFlexItem>
 
@@ -99,7 +112,7 @@ export const CronWeekly = ({
                 </strong>
               </EuiText>
             )}
-            data-test-subj="rollupJobCreateFrequencyWeeklyMinuteSelect"
+            data-test-subj="cronFrequencyMonthlyMinuteSelect"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -107,12 +120,12 @@ export const CronWeekly = ({
   </Fragment>
 );
 
-CronWeekly.propTypes = {
+CronMonthly.propTypes = {
   minute: PropTypes.string.isRequired,
   minuteOptions: PropTypes.array.isRequired,
   hour: PropTypes.string.isRequired,
   hourOptions: PropTypes.array.isRequired,
-  day: PropTypes.string.isRequired,
-  dayOptions: PropTypes.array.isRequired,
+  date: PropTypes.string.isRequired,
+  dateOptions: PropTypes.array.isRequired,
   onChange: PropTypes.func.isRequired,
 };
