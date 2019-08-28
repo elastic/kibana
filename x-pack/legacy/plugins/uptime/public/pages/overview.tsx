@@ -159,7 +159,7 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
     statusFilter,
   };
 
-  const onFilterKueryUpdate = (filtersKuery: string) => {
+  const onFilterUpdate = (filtersKuery: string) => {
     if (urlFilters !== filtersKuery) {
       updateUrl({ filters: filtersKuery });
     }
@@ -186,8 +186,8 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <FilterDropdowns
-              currentKuery={urlFilters}
-              onFilterKueryUpdate={onFilterKueryUpdate}
+              currentFilter={urlFilters}
+              onFilterUpdate={onFilterUpdate}
               variables={sharedProps}
             />
           </EuiFlexItem>

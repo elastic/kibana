@@ -18,17 +18,17 @@ interface FilterBarQueryResult {
 }
 
 interface FilterBarDropdownsProps {
-  currentKuery: string;
-  onFilterKueryUpdate: (kuery: string) => void;
+  currentFilter: string;
+  onFilterUpdate: (kuery: string) => void;
 }
 
 type Props = UptimeGraphQLQueryProps<FilterBarQueryResult> & FilterBarDropdownsProps;
 
 export const FilterDropdownsComponent = ({
   loading: isLoading,
-  currentKuery,
+  currentFilter,
   data,
-  onFilterKueryUpdate,
+  onFilterUpdate,
 }: Props) => {
   const ids = get<string[]>(data, 'filterBar.ids', []);
   const locations = get<string[]>(data, 'filterBar.locations', []);
@@ -38,28 +38,30 @@ export const FilterDropdownsComponent = ({
 
   let filterKueries: Map<string, string[]>;
   try {
-    filterKueries = new Map<string, string[]>(JSON.parse(currentKuery));
+    filterKueries = new Map<string, string[]>(JSON.parse(currentFilter));
   } catch {
     filterKueries = new Map<string, string[]>();
   }
 
-  const onKueryUpdate = (values: string[], fieldName: string) => {
-    const nextFilterKueries = new Map<string, string[]>([...filterKueries]);
-    nextFilterKueries.set(fieldName, values);
-    Array.from(nextFilterKueries.keys()).forEach(key => {
-      const value = nextFilterKueries.get(key);
+  /**
+   * Handle an added or removed value to filter against for an uptime field.
+   * @param fieldName the name of the field to filter against
+   * @param values the list of values to use when filter a field
+   */
+  const onFilterFieldChange = (fieldName: string, values: string[]) => {
+    // add new term to filter map, toggle it off if already present
+    const updatedFilterMap = new Map<string, string[]>([...filterKueries]);
+    updatedFilterMap.set(fieldName, values);
+    Array.from(updatedFilterMap.keys()).forEach(key => {
+      const value = updatedFilterMap.get(key);
       if (value && value.length === 0) {
-        nextFilterKueries.delete(key);
+        updatedFilterMap.delete(key);
       }
     });
-    const kueryArray = Array.from(nextFilterKueries);
-    let toPass;
-    if (kueryArray.length === 0) {
-      toPass = '';
-    } else {
-      toPass = JSON.stringify(kueryArray);
-    }
-    onFilterKueryUpdate(toPass);
+
+    // store the new set of filters
+    const persistedFilters = Array.from(updatedFilterMap);
+    onFilterUpdate(persistedFilters.length === 0 ? '' : JSON.stringify(persistedFilters));
   };
 
   const getSelectedItems = (fieldName: string) => filterKueries.get(fieldName) || [];
@@ -70,7 +72,7 @@ export const FilterDropdownsComponent = ({
       id: 'location',
       isLoading,
       items: locations,
-      onKueryUpdate,
+      onFilterFieldChange,
       selectedItems: getSelectedItems('observer.geo.name'),
       title: 'Location',
     },
@@ -79,7 +81,7 @@ export const FilterDropdownsComponent = ({
       id: 'id',
       isLoading,
       items: ids,
-      onKueryUpdate,
+      onFilterFieldChange,
       selectedItems: getSelectedItems('monitor.id'),
       title: 'ID',
     },
@@ -88,7 +90,7 @@ export const FilterDropdownsComponent = ({
       id: 'url',
       isLoading,
       items: urls,
-      onKueryUpdate,
+      onFilterFieldChange,
       selectedItems: getSelectedItems('url.full'),
       title: 'URL',
     },
@@ -97,7 +99,7 @@ export const FilterDropdownsComponent = ({
       id: 'port',
       isLoading,
       items: ports,
-      onKueryUpdate,
+      onFilterFieldChange,
       selectedItems: getSelectedItems('url.port'),
       title: 'Port',
     },
@@ -106,7 +108,7 @@ export const FilterDropdownsComponent = ({
       id: 'scheme',
       isLoading,
       items: schemes,
-      onKueryUpdate,
+      onFilterFieldChange,
       selectedItems: getSelectedItems('monitor.type'),
       title: 'Scheme',
     },

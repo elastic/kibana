@@ -13,7 +13,7 @@ export interface FilterPopoverProps {
   id: string;
   isLoading: boolean;
   items: string[];
-  onKueryUpdate: (values: string[], fieldName: string) => void;
+  onFilterFieldChange: (fieldName: string, values: string[]) => void;
   selectedItems: string[];
   title: string;
 }
@@ -28,7 +28,7 @@ export const FilterPopover = ({
   id,
   isLoading,
   items,
-  onKueryUpdate,
+  onFilterFieldChange,
   selectedItems,
   title,
 }: FilterPopoverProps) => {
@@ -60,7 +60,7 @@ export const FilterPopover = ({
       }
       closePopover={() => {
         setIsOpen(false);
-        onKueryUpdate(tempSelectedItems, fieldName);
+        onFilterFieldChange(fieldName, tempSelectedItems);
       }}
       id={id}
       isOpen={isOpen}
