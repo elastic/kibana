@@ -7,9 +7,9 @@
 import { take, skip } from 'rxjs/operators';
 import { merge } from 'lodash';
 import { ClusterClient } from 'src/core/server';
-import { coreMock } from '../../../../src/core/server/mocks';
-import { Plugin } from './plugin';
-import { schema } from './schema';
+import { coreMock } from '../../../../../src/core/server/mocks';
+import { Plugin } from '../plugin';
+import { schema } from '../schema';
 
 export async function licenseMerge(xpackInfo = {}) {
   return merge(

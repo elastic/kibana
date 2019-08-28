@@ -8,7 +8,7 @@ import { take, skip } from 'rxjs/operators';
 import { ILicense } from './types';
 import { Plugin } from './plugin';
 import { License } from './license';
-import { setup, setupOnly, licenseMerge } from '../__fixtures__/setup';
+import { setup, setupOnly, licenseMerge } from './__fixtures__/setup';
 
 describe('licensing plugin', () => {
   let plugin: Plugin;

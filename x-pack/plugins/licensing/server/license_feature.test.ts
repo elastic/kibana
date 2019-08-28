@@ -6,7 +6,7 @@
 
 import { ILicense } from './types';
 import { Plugin } from './plugin';
-import { setup } from '../__fixtures__/setup';
+import { setup } from './__fixtures__/setup';
 
 describe('licensing feature', () => {
   let plugin: Plugin;
