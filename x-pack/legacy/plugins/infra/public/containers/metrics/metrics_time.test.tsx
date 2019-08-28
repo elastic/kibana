@@ -54,19 +54,5 @@ describe('useMetricsTime hook', () => {
 
       expect(getLastHookValue().isAutoReloading).toBe(true);
     });
-
-    it('sets up an interval when turned on', () => {
-      const { act } = mountHook(() => useMetricsTime());
-      const refreshInterval = 10000;
-
-      act(({ setAutoReload, setRefreshInterval }) => {
-        setRefreshInterval(refreshInterval);
-        setAutoReload(true);
-        jest.runOnlyPendingTimers();
-      });
-
-      expect(setInterval).toHaveBeenCalledTimes(1);
-      expect(setInterval).toHaveBeenLastCalledWith(expect.any(Function), refreshInterval);
-    });
   });
 });
