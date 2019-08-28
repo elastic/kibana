@@ -7,6 +7,7 @@
 import { formatNumber } from '@elastic/eui/lib/services/format';
 import { EuiCodeBlock, EuiDescriptionList, EuiText } from '@elastic/eui';
 import React, { Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 import { Ping, HttpBody } from '../../../../common/graphql/types';
 
 interface Props {
@@ -18,8 +19,19 @@ const BodyDescription = ({ body }: { body: HttpBody }) => {
   const bodyBytes = body.bytes || 0;
 
   const truncatedText =
-    contentBytes > 0 && contentBytes < bodyBytes ? `Showing first ${contentBytes} bytes.` : null;
-  const bodySizeText = bodyBytes > 0 ? `Body size is ${formatNumber(bodyBytes, '0b')}.` : null;
+    contentBytes > 0 && contentBytes < bodyBytes
+      ? i18n.translate('xpack.uptime.pingList.expandedRow.truncated', {
+          defaultMessage: 'Showing first {contentBytes} bytes.',
+          values: { contentBytes },
+        })
+      : null;
+  const bodySizeText =
+    bodyBytes > 0
+      ? i18n.translate('xpack.uptime.pingList.expandedRow.bodySize', {
+          defaultMessage: 'Body size is {bodyBytes}.',
+          values: { bodyBytes: formatNumber(bodyBytes, '0b') },
+        })
+      : null;
   const combinedText = [truncatedText, bodySizeText].filter(s => s).join(' ');
 
   return <EuiText>{combinedText}</EuiText>;
@@ -34,7 +46,7 @@ export const PingListExpandedRowComponent = ({ ping }: Props) => {
   // Show the error block
   if (ping.error) {
     listItems.push({
-      title: 'Error',
+      title: i18n.translate('xpack.uptime.pingList.expandedRow.error', { defaultMessage: 'Error' }),
       description: <EuiText>{ping.error.message}</EuiText>,
     });
   }
@@ -44,7 +56,9 @@ export const PingListExpandedRowComponent = ({ ping }: Props) => {
     const body = ping.http.response.body;
 
     listItems.push({
-      title: 'Response Body',
+      title: i18n.translate('xpack.uptime.pingList.expandedRow.response_body', {
+        defaultMessage: 'Response Body',
+      }),
       description: (
         <Fragment>
           <BodyDescription body={body} />
