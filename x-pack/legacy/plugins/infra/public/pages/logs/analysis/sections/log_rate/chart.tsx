@@ -6,7 +6,6 @@
 
 import React, { useMemo, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { first, last } from 'lodash';
 import moment from 'moment';
 import {
   Axis,
