@@ -1,9 +1,10 @@
 {
   "job_type": "anomaly_detector",
   "description": "Detect anomalies in the log entry ingestion rate",
-  "groups": ["logs-ui-x"],
+  "groups": ["logs-ui"],
   "analysis_config": {
     "bucket_span": "15m",
+    "summary_count_field_name": "doc_count_per_minute",
     "detectors": [
       {
         "detector_description": "count",
