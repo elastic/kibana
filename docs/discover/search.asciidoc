@@ -110,14 +110,15 @@ To save the current query text, filters, and time filter:
 
 . Click *#* in the search bar, next to the query text input.
 . Click *Save current query* in the popover.
++
+[role="screenshot"]
+image::discover/images/saved-query-management-component-all-privileges.png["Example of the saved query management popover with a list of saved queries with write access",width="80%"]
++
 . Enter a name, a description, and then select the filter options that you want to include. By default filters are automatically included, but the time filter is not.
 +
 [role="screenshot"]
 image::discover/images/saved-query-save-form-default-filters.png["Example of the saved query management save form with the filters option included and the time filter option excluded",width="80%"]
-. Click *Save current query*.
-+
-[role="screenshot"]
-image::discover/images/saved-query-management-component-all-privileges.png["Example of the saved query management popover with a list of saved queries with write access",width="80%"]
+. Click *Save*.
 
 ==== Loading a query
 To load a saved query into Discover, Dashboard, or Visualize:
@@ -133,14 +134,17 @@ To save the changes as a new query:
 . Click *#* in the search bar, next to the query text input.
 . Click *Save as new* in the popover.
 . Enter a name and a description, and then select the filter options that you want to include.
-. Click *Save current query*.
+. Click *Save*.
++
+[role="screenshot"]
+image::discover/images/saved-query-management-component-save-as-new-query.png["Example of the saved query management popover when a query is loaded and we have made changes to the query",width="80%"]
 
 To save the changes to the current query:
 
 . Click *#* in the search bar.
 . Click *Save changes* in the popover.
 . Enter a description, and then select the filter options that you want to include.
-. Click *Save current query*.
+. Click *Save*.
 
 ==== Clearing a query
 To clear a query that is currently loaded in an application:
@@ -152,10 +156,11 @@ To clear a query that is currently loaded in an application:
 To completely delete a query:
 
 . Click *#* in the search bar, next to the query text input.
+. Hover on the query you want to delete.
 . Click the trash can icon to delete the query.
 +
 [role="screenshot"]
-image::discover/images/saved-query-management-component-save-as-new-query.png["Example of the saved query management popover when a query is loaded and we are about to delete a query",width="80%"]
+image::discover/images/saved-query-management-component-delete-query-button.png["Example of the saved query management popover when a query is hovered over and we are about to delete a query",width="80%"]
 
 You can import, export, and delete saved queries from <<managing-saved-objects, Saved Objects in Management>>.
 
