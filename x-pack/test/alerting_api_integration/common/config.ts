@@ -60,7 +60,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'actions')}`,
           `--server.xsrf.whitelist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           `--xpack.actions.webhook.whitelistedEndpoints=${JSON.stringify([
-            'http://localhost/',
+            'localhost',
             'some.non.existent.com',
           ])}`,
           ...(ssl
