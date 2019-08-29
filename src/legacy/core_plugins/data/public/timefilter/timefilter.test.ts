@@ -18,7 +18,7 @@
  */
 
 jest.mock(
-  './lib/parse_querystring',
+  'ui/timefilter/lib/parse_querystring',
   () => ({
     parseQueryString: () => {
       return {
@@ -309,7 +309,7 @@ describe('calculateBounds', () => {
     expect(result.max && result.max.valueOf()).to.eql(clockNowTicks);
   });
 
-  test.skip('uses forceNow string', () => {
+  test('uses forceNow string', () => {
     const timeRange = {
       from: 'now-15m',
       to: 'now',
@@ -324,7 +324,7 @@ describe('calculateBounds', () => {
     expect(result.max && result.max.valueOf()).to.eql(forceNowTicks);
   });
 
-  test.skip(`throws Error if forceNow can't be parsed`, () => {
+  test(`throws Error if forceNow can't be parsed`, () => {
     const timeRange = {
       from: 'now-15m',
       to: 'now',
