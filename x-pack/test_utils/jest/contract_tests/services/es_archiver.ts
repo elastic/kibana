@@ -21,7 +21,6 @@ export const getEsArchiver = (options: {
   logLevel?: 'silent' | 'error' | 'warning' | 'info' | 'debug' | 'verbose';
   dir: string;
 }) => {
-  options.logLevel = options.logLevel || 'info';
 
   let esConfig: ESServerConfig | undefined;
   if (process.env.__JEST__ESServer) {
