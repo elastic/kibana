@@ -8,9 +8,8 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['header', 'common']);
-  const find = getService('find');
+export default function({ getPageObjects }: FtrProviderContext) {
+  const PageObjects = getPageObjects(['header', 'common', 'lens']);
 
   describe('indexpattern_datapanel', () => {
     beforeEach(async () => {
@@ -18,7 +17,10 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should list the index pattern fields', async () => {
-      const fields = await find.allByCssSelector('[data-test-subj="lnsFieldListPanelField"]');
+      await PageObjects.lens.openIndexPatternFiltersPopover();
+      await PageObjects.lens.toggleExistenceFilter();
+
+      const fields = await PageObjects.lens.findAllFields();
       const fieldText = await Promise.all(fields.map(field => field.getVisibleText()));
       expect(fieldText).to.eql([
         '_score',

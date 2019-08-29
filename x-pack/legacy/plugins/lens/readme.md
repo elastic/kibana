@@ -2,6 +2,8 @@
 
 ## Testing
 
+Run all tests from the `x-pack` root directory
+
 - Unit tests: `node scripts/jest --watch lens`
 - Functional tests:
   - Run `node scripts/functional_tests_server`

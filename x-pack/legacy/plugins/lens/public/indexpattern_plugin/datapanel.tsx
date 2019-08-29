@@ -23,6 +23,7 @@ import {
   EuiContextMenuPanelProps,
   EuiPopover,
   EuiCallOut,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -438,8 +439,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                       hasActiveFilters={localState.typeFilter.length > 0 || showEmptyFields}
                       numActiveFilters={localState.typeFilter.length + (showEmptyFields ? 1 : 0)}
                     >
-                      {i18n.translate('xpack.lens.indexPatterns.typeFilterLabel', {
-                        defaultMessage: 'Types',
+                      {i18n.translate('xpack.lens.indexPatterns.filtersLabel', {
+                        defaultMessage: 'Filters',
                       })}
                     </EuiFilterButton>
                   }
@@ -510,6 +511,20 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                   />
                 );
               })}
+
+              {!localState.isLoading && paginatedFields.length === 0 && (
+                <EuiText>
+                  {showEmptyFields
+                    ? i18n.translate('xpack.lens.indexPatterns.hiddenFieldsLabel', {
+                        defaultMessage:
+                          'No fields have data with the current filters. You can show fields without data using the filters above.',
+                      })
+                    : i18n.translate('xpack.lens.indexPatterns.noFieldsLabel', {
+                        defaultMessage: 'No fields can be visualized from {title}',
+                        values: { title: indexPatterns[currentIndexPatternId].title },
+                      })}
+                </EuiText>
+              )}
             </div>
           </div>
         </EuiFlexItem>
