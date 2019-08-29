@@ -154,7 +154,9 @@ export class JsonUploadAndParse extends Component {
     }
 
     // Indexing complete, update state & callback (if any)
-    this.setState({ currentIndexingStage: INDEXING_STAGE.INDEXING_COMPLETE });
+    this.setState({
+      currentIndexingStage: INDEXING_STAGE.INDEX_PATTERN_COMPLETE
+    });
     if (onIndexingComplete) {
       onIndexingComplete({
         indexDataResp,
@@ -221,7 +223,9 @@ export class JsonUploadAndParse extends Component {
             importStage={currentIndexingStage}
             indexDataResp={indexDataResp}
             indexPatternResp={indexPatternResp}
-            complete={currentIndexingStage === INDEXING_STAGE.INDEXING_COMPLETE}
+            complete={
+              currentIndexingStage === INDEXING_STAGE.INDEX_PATTERN_COMPLETE
+            }
             indexName={indexName}
           />
           : (
