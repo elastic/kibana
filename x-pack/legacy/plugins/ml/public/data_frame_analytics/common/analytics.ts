@@ -35,6 +35,12 @@ interface GenericAnalysis {
 
 type AnalysisConfig = OutlierAnalysis | RegressionAnalysis | GenericAnalysis;
 
+enum ANALYSIS_CONFIG_TYPE {
+  OUTLIER_DETECTION = 'outlier_detection',
+  REGRESSION = 'regression',
+  UNKNOWN = 'unknown',
+}
+
 export const getAnalysisType = (analysis: AnalysisConfig) => {
   const keys = Object.keys(analysis);
 
@@ -42,12 +48,12 @@ export const getAnalysisType = (analysis: AnalysisConfig) => {
     return keys[0];
   }
 
-  return 'unknown';
+  return ANALYSIS_CONFIG_TYPE.UNKNOWN;
 };
 
 export const isOutlierAnalysis = (arg: any): arg is OutlierAnalysis => {
   const keys = Object.keys(arg);
-  return keys.length === 1 && keys[0] === 'outlier_detection';
+  return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION;
 };
 
 export interface DataFrameAnalyticsConfig {
