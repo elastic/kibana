@@ -21,6 +21,8 @@ import {
 } from '@elastic/eui';
 import dateMath from '@elastic/datemath';
 import moment from 'moment';
+
+import euiStyled from '../../../../../../common/eui_styled_components';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
 import { useInterval } from '../../../hooks/use_interval';
 import { useLogAnalysisResults } from '../../../containers/logs/log_analysis';
@@ -176,7 +178,7 @@ export const AnalysisResultsContent = ({ sourceId }: { sourceId: string }) => {
               </EuiFlexGroup>
             </EuiPanel>
           </EuiPage>
-          <EuiPage style={{ minHeight: '100vh' }}>
+          <ExpandingPage>
             <EuiPageBody>
               <EuiPageContent>
                 <EuiPageContentBody>
@@ -184,9 +186,13 @@ export const AnalysisResultsContent = ({ sourceId }: { sourceId: string }) => {
                 </EuiPageContentBody>
               </EuiPageContent>
             </EuiPageBody>
-          </EuiPage>
+          </ExpandingPage>
         </>
       )}
     </>
   );
 };
+
+const ExpandingPage = euiStyled(EuiPage)`
+  flex: 1 0 0%;
+`;

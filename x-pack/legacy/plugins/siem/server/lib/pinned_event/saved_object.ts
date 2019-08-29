@@ -151,6 +151,13 @@ export class PinnedEvent {
       await this.deletePinnedEventOnTimeline(request, [pinnedEventId]);
       return null;
     } catch (err) {
+      if (getOr(null, 'output.statusCode', err) === 404) {
+        /*
+         * Why we are doing that, because if it is not found for sure that it will be unpinned
+         * There is no need to bring back this error since we can assume that it is unpinned
+         */
+        return null;
+      }
       if (getOr(null, 'output.statusCode', err) === 403) {
         return pinnedEventId != null
           ? {

@@ -125,23 +125,34 @@ export function isSparseDataJob(job: Job, datafeed: Datafeed): boolean {
   return false;
 }
 
-export function convertToMultiMetricJob(jobCreator: JobCreator) {
-  jobCreator.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
+function stashCombinedJob(jobCreator: JobCreator, skipTimeRangeStep: boolean = false) {
   mlJobService.tempJobCloningObjects.job = {
     ...jobCreator.jobConfig,
     datafeed_config: jobCreator.datafeedConfig,
   };
 
-  mlJobService.tempJobCloningObjects.skipTimeRangeStep = true;
+  if (skipTimeRangeStep === true) {
+    mlJobService.tempJobCloningObjects.skipTimeRangeStep = true;
+  }
+}
+
+export function convertToMultiMetricJob(jobCreator: JobCreator) {
+  jobCreator.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
+  stashCombinedJob(jobCreator, true);
+
   window.location.href = window.location.href.replace('single_metric', 'multi_metric');
 }
 
 export function convertToAdvancedJob(jobCreator: JobCreator) {
-  jobCreator.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
-  mlJobService.currentJob = {
-    ...jobCreator.jobConfig,
-    datafeed_config: jobCreator.datafeedConfig,
-  };
+  jobCreator.createdBy = null;
+  stashCombinedJob(jobCreator);
 
-  window.location.href = window.location.href.replace('new_new_job/multi_metric', 'advanced');
+  window.location.href = window.location.href.replace('multi_metric', 'advanced');
+}
+
+export function resetJob(jobCreator: JobCreator) {
+  jobCreator.jobId = '';
+  stashCombinedJob(jobCreator, true);
+
+  window.location.href = '#/jobs/new_job';
 }
