@@ -35,5 +35,19 @@ export default function ({ getPageObjects, getService }) {
       });
 
     });
+
+    describe('dynamic line coloring', () => {
+      before(async () => {
+        await PageObjects.maps.loadSavedMap('pew pew demo');
+        await PageObjects.maps.enterFullScreen();
+        await PageObjects.maps.closeLegend();
+      });
+
+      // eslint-disable-next-line max-len
+      it('should symbolize pew pew lines', async () => {
+        await visualTesting.snapshot();
+      });
+
+    });
   });
 }
