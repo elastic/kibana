@@ -16,11 +16,7 @@ import {
   SortDirection,
 } from '@elastic/eui';
 
-import {
-  DataFrameAnalyticsId,
-  moveToAnalyticsWizard,
-  useRefreshAnalyticsList,
-} from '../../../../common';
+import { DataFrameAnalyticsId, useRefreshAnalyticsList } from '../../../../common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
 import { getTaskStateBadge } from './columns';
 
@@ -33,6 +29,7 @@ import {
   Query,
   Clause,
 } from './common';
+import { ActionDispatchers } from '../../hooks/use_create_analytics_form/actions';
 import { getAnalyticsFactory } from '../../services/analytics_service';
 import { getColumns } from './columns';
 import { ExpandedRow } from './expanded_row';
@@ -65,11 +62,13 @@ function stringMatch(str: string | undefined, substr: string) {
 interface Props {
   isManagementTable?: boolean;
   blockRefresh?: boolean;
+  openCreateJobModal?: ActionDispatchers['openModal'];
 }
 // isManagementTable - for use in Kibana managagement ML section
 export const DataFrameAnalyticsList: FC<Props> = ({
   isManagementTable = false,
   blockRefresh = false,
+  openCreateJobModal,
 }) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -208,21 +207,21 @@ export const DataFrameAnalyticsList: FC<Props> = ({
           title={
             <h2>
               {i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptTitle', {
-                defaultMessage: 'No data frame analytics found',
+                defaultMessage: 'No data frame analytics jobs found',
               })}
             </h2>
           }
-          actions={[
-            <EuiButtonEmpty
-              onClick={moveToAnalyticsWizard}
-              isDisabled={disabled}
-              style={{ display: 'none' }}
-            >
-              {i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptButtonText', {
-                defaultMessage: 'Create your first data frame analytics',
-              })}
-            </EuiButtonEmpty>,
-          ]}
+          actions={
+            !isManagementTable && openCreateJobModal !== undefined
+              ? [
+                  <EuiButtonEmpty onClick={openCreateJobModal} isDisabled={disabled}>
+                    {i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptButtonText', {
+                      defaultMessage: 'Create your first data frame analytics job',
+                    })}
+                  </EuiButtonEmpty>,
+                ]
+              : []
+          }
           data-test-subj="mlNoDataFrameAnalyticsFound"
         />
       </Fragment>

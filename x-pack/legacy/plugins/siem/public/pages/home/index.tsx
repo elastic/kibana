@@ -31,7 +31,7 @@ import { WithSource } from '../../containers/source';
 import { MlPopover } from '../../components/ml_popover/ml_popover';
 import { MlHostConditionalContainer } from '../../components/ml/conditional_links/ml_host_conditional_container';
 import { MlNetworkConditionalContainer } from '../../components/ml/conditional_links/ml_network_conditional_container';
-
+import { navTabs } from './home_navigations';
 const WrappedByAutoSizer = styled.div`
   height: 100%;
 `;
@@ -108,7 +108,7 @@ export const HomePage = pure(() => (
                   <NavGlobal>
                     <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
                       <EuiFlexItem>
-                        <SiemNavigation />
+                        <SiemNavigation navTabs={navTabs} />
                       </EuiFlexItem>
 
                       <EuiFlexItem grow={false}>
@@ -142,7 +142,7 @@ export const HomePage = pure(() => (
                   <Switch>
                     <Redirect from="/" exact={true} to="/overview" />
                     <Route
-                      path="/overview"
+                      path="/:pageName(overview)"
                       render={props => (
                         <PageRoute
                           {...props}
@@ -153,10 +153,10 @@ export const HomePage = pure(() => (
                         />
                       )}
                     />
-                    <Route path="/hosts" component={HostsContainer} />
-                    <Route path="/network" component={NetworkContainer} />
+                    <Route path="/:pageName(hosts)" component={HostsContainer} />
+                    <Route path="/:pageName(network)" component={NetworkContainer} />
                     <Route
-                      path="/timelines"
+                      path="/:pageName(timelines)"
                       render={props => (
                         <PageRoute
                           {...props}
