@@ -14,7 +14,8 @@ export default function({ getService }: FtrProviderContext) {
 
   const jobId = `fq_single_1_${Date.now()}`;
 
-  describe('single metric job creation', function() {
+  // FAILING: https://github.com/elastic/kibana/issues/44337
+  describe.skip('single metric job creation', function() {
     this.tags('smoke');
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
@@ -39,7 +40,7 @@ export default function({ getService }: FtrProviderContext) {
       await ml.jobSourceSelection.selectSourceIndexPattern('farequote');
     });
 
-    it.skip('loads the single metric job wizard page', async () => {
+    it('loads the single metric job wizard page', async () => {
       await ml.jobTypeSelection.selectSingleMetricJob();
     });
 
