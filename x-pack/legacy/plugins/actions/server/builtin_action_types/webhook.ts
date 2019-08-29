@@ -52,7 +52,7 @@ export function validateConfig(
     kibanaConfig.map(config => ActionTypeConfigSchema.validate(config));
   } catch (err) {
     throw Boom.badRequest(
-      `error validating the Webhook Action Kiaban configuration: ${err.message} ${JSON.stringify(
+      `error validating the Webhook Action Kiabana configuration: ${err.message} ${JSON.stringify(
         kibanaConfig
       )}`
     );
