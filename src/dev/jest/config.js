@@ -22,6 +22,7 @@ import { RESERVED_DIR_JEST_INTEGRATION_TESTS } from '../constants';
 export default {
   rootDir: '../../..',
   roots: [
+    '<rootDir>/packages/kbn-plugin-generator',
     '<rootDir>/src/plugins',
     '<rootDir>/src/legacy/ui',
     '<rootDir>/src/core',
@@ -37,7 +38,6 @@ export default {
     '<rootDir>/packages',
     '<rootDir>/src/test_utils',
     '<rootDir>/test/functional/services/remote',
-    '<rootDir>/packages/kbn-plugin-generator',
   ],
   collectCoverageFrom: [
     'packages/kbn-ui-framework/src/components/**/*.js',
