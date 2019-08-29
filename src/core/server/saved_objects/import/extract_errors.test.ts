@@ -21,13 +21,13 @@ import { SavedObject } from '../types';
 import { extractErrors } from './extract_errors';
 
 describe('extractErrors()', () => {
-  test('returns empty array when no errors exist', () => {
+  test('returns empty array when no errors exist', async () => {
     const savedObjects: SavedObject[] = [];
-    const result = extractErrors(savedObjects, savedObjects);
+    const result = await extractErrors(savedObjects, savedObjects);
     expect(result).toMatchInlineSnapshot(`Array []`);
   });
 
-  test('extracts errors from saved objects', () => {
+  test('extracts errors from saved objects', async () => {
     const savedObjects: SavedObject[] = [
       {
         id: '1',
@@ -62,7 +62,7 @@ describe('extractErrors()', () => {
         },
       },
     ];
-    const result = extractErrors(savedObjects, savedObjects);
+    const result = await extractErrors(savedObjects, savedObjects);
     expect(result).toMatchInlineSnapshot(`
 Array [
   Object {
