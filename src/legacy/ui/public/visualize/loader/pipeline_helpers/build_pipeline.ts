@@ -416,7 +416,7 @@ const buildVisConfig: BuildVisConfigFunction = {
 
 export const buildVislibDimensions = async (
   vis: any,
-  params: { searchSource: any; timeRange?: any }
+  params: { searchSource: any; timeRange?: any; abortSignal?: AbortSignal }
 ) => {
   const schemas = getSchemas(vis, params.timeRange);
   const dimensions = {
@@ -439,7 +439,18 @@ export const buildVislibDimensions = async (
     } else if (xAgg.type.name === 'histogram') {
       const intervalParam = xAgg.type.params.byName.interval;
       const output = { params: {} as any };
-      await intervalParam.modifyAggConfigOnSearchRequestStart(xAgg, params.searchSource);
+      const searchRequest = {
+        whenAborted: (fn: any) => {
+          if (params.abortSignal) {
+            params.abortSignal.addEventListener('abort', fn);
+          }
+        },
+      };
+      await intervalParam.modifyAggConfigOnSearchRequestStart(
+        xAgg,
+        params.searchSource,
+        searchRequest
+      );
       intervalParam.write(xAgg, output);
       dimensions.x.params.interval = output.params.interval;
     }
@@ -453,7 +464,7 @@ export const buildVislibDimensions = async (
 // take a Vis object and decorate it with the necessary params (dimensions, bucket, metric, etc)
 export const getVisParams = async (
   vis: Vis,
-  params: { searchSource: SearchSource; timeRange?: any }
+  params: { searchSource: SearchSource; timeRange?: any; abortSignal?: AbortSignal }
 ) => {
   const schemas = getSchemas(vis, params.timeRange);
   let visConfig = cloneDeep(vis.params);

@@ -6,7 +6,7 @@
 
 export default function ({ loadTestFile }) {
   describe('upgrade assistant', function () {
-    this.tags('ciGroup7');
+    this.tags('ciGroup2');
 
     loadTestFile(require.resolve('./reindexing'));
   });
