@@ -419,7 +419,6 @@ export default function({ getService }: FtrProviderContext) {
                 savedObjectsClientSuccess: false,
                 callClusterError: {
                   ...indexedRecord._source.state.callClusterError,
-                  msg: `[security_exception] action [indices:data/write/bulk[s]] is unauthorized for user [${user.username}]`,
                   statusCode: 403,
                 },
                 savedObjectsClientError: {
