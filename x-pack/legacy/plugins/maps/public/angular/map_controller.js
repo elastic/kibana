@@ -125,6 +125,7 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
     mapStateJSON: savedMap.mapStateJSON,
     globalState: globalState,
   });
+
   /* Saved Queries */
   $scope.showSaveQuery = capabilities.get().maps.saveQuery;
 
@@ -153,11 +154,6 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
   };
 
   function updateStateFromSavedQuery(savedQuery) {
-    // use the items from the saved query as the arguments to onQueryChange
-    // onQueryChange syncs the app with the global state, taking the args given and setting those to $scope and $state variables.
-
-    // the time filter is tricky here, TODO: fix the timefilter issues
-
     if (savedQuery.attributes.timefilter) {
       if (savedQuery.attributes.timefilter.refreshInterval) {
         $scope.refreshConfig.interval = savedQuery.attributes.timefilter.refreshInterval.value;
@@ -166,7 +162,7 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
       onQueryChange({
         filters: savedQuery.attributes.filters || [],
         query: savedQuery.attributes.query,
-        time: { from: savedQuery.attributes.timefilter.timeFrom, to: savedQuery.attributes.timefilter.timeTo }
+        time: savedQuery.attributes.timefilter
       });
     } else {
       onQueryChange({
@@ -178,12 +174,14 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
 
   $scope.$watch('savedQuery', (newSavedQuery, oldSavedQuery) => {
     if (!newSavedQuery) return;
+
     $state.savedQuery = newSavedQuery.id;
 
     if (newSavedQuery.id === (oldSavedQuery && oldSavedQuery.id)) {
       updateStateFromSavedQuery(newSavedQuery);
     }
   });
+
   $scope.$watch(() => $state.savedQuery, newSavedQueryId => {
     if (!newSavedQueryId) {
       $scope.savedQuery = undefined;
@@ -196,7 +194,7 @@ app.controller('GisMapController', ($scope, $route, kbnUrl, localStorage, AppSta
       });
     });
   });
-
+  /* End of Saved Queries */
   async function onQueryChange({ filters, query, time }) {
     if (filters) {
       await data.filter.filterManager.setFilters(filters); // Maps and merges filters
