@@ -5,8 +5,8 @@
  */
 
 import open from 'opn';
-import { Page, SerializableOrJSHandle, EvaluateFn } from 'puppeteer';
 import { parse as parseUrl } from 'url';
+import { Page, SerializableOrJSHandle, EvaluateFn } from 'puppeteer';
 import { ViewZoomWidthHeight } from '../../../../export_types/common/layouts/layout';
 import { LevelLogger } from '../../../../server/lib';
 import {
