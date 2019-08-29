@@ -23,7 +23,8 @@ import _ from 'lodash';
 import ngMock from 'ng_mock';
 import 'ui/private';
 import '..';
-import FixturesStubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
+import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import hits from 'fixtures/real_hits';
 
 // Load the kibana app dependencies.
 
@@ -37,7 +38,7 @@ let $scope;
 let $timeout;
 
 
-let searchSource;
+let indexPattern;
 
 const init = function ($elem, props) {
   ngMock.inject(function ($rootScope, $compile, _$timeout_) {
@@ -67,12 +68,22 @@ describe('docTable', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(function () {
-    $elem = angular.element('<doc-table search-source="searchSource" columns="columns" sorting="sorting"></doc-table>');
+    $elem = angular.element(`
+      <doc-table
+        index-pattern="indexPattern"
+        hits="hits"
+        total-hit-count="totalHitCount"
+        columns="columns"
+        sorting="sorting"
+      ></doc-table>
+    `);
     ngMock.inject(function (Private) {
-      searchSource = Private(FixturesStubbedSearchSourceProvider);
+      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     });
     init($elem, {
-      searchSource,
+      indexPattern,
+      hits: [...hits],
+      totalHitCount: hits.length,
       columns: [],
       sorting: ['@timestamp', 'desc']
     });
@@ -88,18 +99,8 @@ describe('docTable', function () {
     expect($elem.text()).to.not.be.empty();
   });
 
-  it('should set the indexPattern to that of the searchSource', function () {
-    expect($scope.indexPattern).to.be(searchSource.getField('index'));
-  });
-
-  it('should set size and sort on the searchSource', function () {
-    expect($scope.searchSource.setField.getCall(0).args[0]).to.be('size');
-    expect($scope.searchSource.setField.getCall(1).args[0]).to.be('sort');
-  });
-
   it('should have an addRows function that increases the row count', function () {
     expect($scope.addRows).to.be.a(Function);
-    searchSource.crankResults();
     $scope.$digest();
     expect($scope.limit).to.be(50);
     $scope.addRows();
@@ -109,26 +110,12 @@ describe('docTable', function () {
   it('should reset the row limit when results are received', function () {
     $scope.limit = 100;
     expect($scope.limit).to.be(100);
-    searchSource.crankResults();
+    $scope.hits = [...hits];
     $scope.$digest();
     expect($scope.limit).to.be(50);
   });
 
-  it('should put the hits array on scope', function () {
-    expect($scope.hits).to.be(undefined);
-    searchSource.crankResults();
-    $scope.$digest();
-    expect($scope.hits).to.be.an(Array);
-  });
-
-  it('should destroy the searchSource when the scope is destroyed', function () {
-    expect(searchSource.destroy.called).to.be(false);
-    $scope.$destroy();
-    expect(searchSource.destroy.called).to.be(true);
-  });
-
   it('should have a header and a table element', function () {
-    searchSource.crankResults();
     $scope.$digest();
 
     expect($elem.find('thead').length).to.be(1);

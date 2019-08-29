@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import execa from 'execa';
 import { resolve } from 'path';
 import { writeFileSync } from 'fs';
 import pluginHelpers from '@kbn/plugin-helpers';
@@ -22,13 +21,7 @@ export default (gulp, { buildTarget }) => {
 
     const log = new ToolingLog({
       level: 'info',
-      writeTo: process.stdout,
-    });
-
-    execa.sync(process.execPath, ['legacy/plugins/canvas/scripts/external_runtime'], {
-      cwd: resolve(__dirname, '..'),
-      stdio: ['ignore', 'inherit', 'inherit'],
-      buffer: false,
+      writeTo: process.stdout
     });
 
     writeFileSync(
@@ -36,7 +29,7 @@ export default (gulp, { buildTarget }) => {
       await generateNoticeFromSource({
         productName: 'Kibana X-Pack',
         log,
-        directory: buildRoot,
+        directory: buildRoot
       })
     );
   });
