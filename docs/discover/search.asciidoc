@@ -100,7 +100,7 @@ Saved queries don't include information specific to Discover, such as the curren
 
 [role="xpack"]
 ==== Read only access
-If you have insufficient privileges to save queries, the *Save* button isn't visible in the saved query management popover.
+If you have insufficient privileges to save queries, the *Save current query* button isn't visible in the saved query management popover.
 
 [role="screenshot"]
 image::discover/images/saved-query-management-component-readonly.png["Example of the saved query management popover with read only access to Discover",width="80%"]
@@ -109,12 +109,12 @@ image::discover/images/saved-query-management-component-readonly.png["Example of
 To save the current query text, filters, and time filter:
 
 . Click *#* in the search bar, next to the query text input.
-. Click *Save* in the popover.
+. Click *Save current query* in the popover.
 . Enter a name, a description, and then select the filter options that you want to include. By default filters are automatically included, but the time filter is not.
 +
 [role="screenshot"]
 image::discover/images/saved-query-save-form.png["Example of the saved query management save form with the filters option included and the time filter option excluded",width="80%"]
-. Click *Save*.
+. Click *Save current query*.
 +
 [role="screenshot"]
 image::discover/images/saved-query-management-component.png["Example of the saved query management popover with a list of saved queries with write access",width="80%"]
@@ -133,14 +133,14 @@ To save the changes as a new query:
 . Click *#* in the search bar, next to the query text input.
 . Click *Save as new* in the popover.
 . Enter a name and a description, and then select the filter options that you want to include.
-. Click *Save*.
+. Click *Save current query*.
 
 To save the changes to the current query:
 
 . Click *#* in the search bar.
 . Click *Save changes* in the popover.
 . Enter a description, and then select the filter options that you want to include.
-. Click *Save*.
+. Click *Save current query*.
 
 ==== Clearing a query
 To clear a query that is currently loaded in an application:
