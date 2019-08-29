@@ -46,6 +46,11 @@ export class MonitorIterator {
     return Object.assign({}, this.queryContext.pagination, { cursorKey });
   }
 
+  async paginationBeforeCurrent(): Promise<CursorPagination | null> {
+    const reverseFetcher = await iterator.reverse();
+    return reverseFetcher && (await reverseFetcher.paginationAfterCurrent());
+  }
+
   // Returns a copy of this fetcher that goes backwards, not forwards from the current positon
   reverse(): MonitorIterator | null {
     const reverseContext = Object.assign({}, this.queryContext);

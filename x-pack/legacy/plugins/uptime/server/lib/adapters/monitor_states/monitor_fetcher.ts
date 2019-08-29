@@ -25,13 +25,12 @@ export const fetchPaginatedMonitors = async (
     if (!monitor) {
       break; // No more items to fetch
     }
-    // On our first item set the previous pagination to be items before this if they exist
-    if (items.length === 0) {
-      const reverseFetcher = await iterator.reverse();
-      paginationBefore = reverseFetcher && (await reverseFetcher.paginationAfterCurrent());
-    }
-
     items.push(monitor);
+
+    // We want the before pagination to be before the first item we encounter
+    if (items.length === 0) {
+      paginationBefore = await iterator.paginationBeforeCurrent();
+    }
   }
   console.log('Fetching done', new Date().getTime() - start.getTime() + 'ms', items.length, size);
 
@@ -53,6 +52,7 @@ export const fetchPaginatedMonitors = async (
   };
 };
 
+// Returns true if the order returned by the ES query matches the requested sort order.
 const searchSortAligned = (pagination: CursorPagination): boolean => {
   if (pagination.cursorDirection === CursorDirection.AFTER) {
     return pagination.sortOrder === SortOrder.ASC;
