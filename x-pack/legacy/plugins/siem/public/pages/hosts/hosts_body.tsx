@@ -8,7 +8,6 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
-import { UseUrlState } from '../../components/url_state';
 import { GlobalTime } from '../../containers/global_time';
 
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
@@ -27,30 +26,26 @@ const HostsBodyComponent = pure<HostsComponentProps>(
         {({ indicesExist, indexPattern }) =>
           indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
             <GlobalTime>
-              {({ to, from, setQuery }) => (
-                <UseUrlState indexPattern={indexPattern}>
-                  {({ isInitializing }) => (
-                    <>
-                      {children({
-                        endDate: to,
-                        filterQuery,
-                        skip: isInitializing,
-                        setQuery,
-                        startDate: from,
-                        type: hostsModel.HostsType.page,
-                        indexPattern,
-                        narrowDateRange: (score: Anomaly, interval: string) => {
-                          const fromTo = scoreIntervalToDateTime(score, interval);
-                          setAbsoluteRangeDatePicker({
-                            id: 'global',
-                            from: fromTo.from,
-                            to: fromTo.to,
-                          });
-                        },
-                      })}
-                    </>
-                  )}
-                </UseUrlState>
+              {({ to, from, setQuery, isInitializing }) => (
+                <>
+                  {children({
+                    endDate: to,
+                    filterQuery,
+                    skip: isInitializing,
+                    setQuery,
+                    startDate: from,
+                    type: hostsModel.HostsType.page,
+                    indexPattern,
+                    narrowDateRange: (score: Anomaly, interval: string) => {
+                      const fromTo = scoreIntervalToDateTime(score, interval);
+                      setAbsoluteRangeDatePicker({
+                        id: 'global',
+                        from: fromTo.from,
+                        to: fromTo.to,
+                      });
+                    },
+                  })}
+                </>
               )}
             </GlobalTime>
           ) : null

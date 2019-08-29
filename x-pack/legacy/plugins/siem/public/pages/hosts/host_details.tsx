@@ -26,7 +26,6 @@ import { KpiHostsComponent } from '../../components/page/hosts';
 
 import { HostOverview } from '../../components/page/hosts/host_overview';
 import { manageQuery } from '../../components/page/manage_query';
-import { UseUrlState } from '../../components/url_state';
 import { GlobalTime } from '../../containers/global_time';
 import { HostOverviewByNameQuery } from '../../containers/hosts/overview';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
@@ -93,97 +92,89 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
               />
 
               <GlobalTime>
-                {({ to, from, setQuery }) => (
-                  <UseUrlState indexPattern={indexPattern}>
-                    {({ isInitializing }) => (
-                      <>
-                        <HostOverviewByNameQuery
-                          sourceId="default"
-                          hostName={hostName}
-                          skip={isInitializing}
+                {({ to, from, setQuery, isInitializing }) => (
+                  <>
+                    <HostOverviewByNameQuery
+                      sourceId="default"
+                      hostName={hostName}
+                      skip={isInitializing}
+                      startDate={from}
+                      endDate={to}
+                    >
+                      {({ hostOverview, loading, id, inspect, refetch }) => (
+                        <AnomalyTableProvider
+                          criteriaFields={hostToCriteria(hostOverview)}
                           startDate={from}
                           endDate={to}
-                        >
-                          {({ hostOverview, loading, id, inspect, refetch }) => (
-                            <AnomalyTableProvider
-                              criteriaFields={hostToCriteria(hostOverview)}
-                              startDate={from}
-                              endDate={to}
-                              skip={isInitializing}
-                            >
-                              {({ isLoadingAnomaliesData, anomaliesData }) => (
-                                <HostOverviewManage
-                                  id={id}
-                                  inspect={inspect}
-                                  refetch={refetch}
-                                  setQuery={setQuery}
-                                  data={hostOverview}
-                                  anomaliesData={anomaliesData}
-                                  isLoadingAnomaliesData={isLoadingAnomaliesData}
-                                  loading={loading}
-                                  startDate={from}
-                                  endDate={to}
-                                  narrowDateRange={(score, interval) => {
-                                    const fromTo = scoreIntervalToDateTime(score, interval);
-                                    setAbsoluteRangeDatePicker({
-                                      id: 'global',
-                                      from: fromTo.from,
-                                      to: fromTo.to,
-                                    });
-                                  }}
-                                />
-                              )}
-                            </AnomalyTableProvider>
-                          )}
-                        </HostOverviewByNameQuery>
-
-                        <EuiHorizontalRule />
-
-                        <KpiHostDetailsQuery
-                          sourceId="default"
-                          filterQuery={getFilterQuery(
-                            hostName,
-                            filterQueryExpression,
-                            indexPattern
-                          )}
                           skip={isInitializing}
-                          startDate={from}
-                          endDate={to}
                         >
-                          {({ kpiHostDetails, id, inspect, loading, refetch }) => (
-                            <KpiHostDetailsManage
-                              data={kpiHostDetails}
-                              from={from}
+                          {({ isLoadingAnomaliesData, anomaliesData }) => (
+                            <HostOverviewManage
                               id={id}
                               inspect={inspect}
-                              loading={loading}
                               refetch={refetch}
                               setQuery={setQuery}
-                              to={to}
-                              narrowDateRange={(min: number, max: number) => {
-                                /**
-                                 * Using setTimeout here because of this issue:
-                                 * https://github.com/elastic/elastic-charts/issues/360
-                                 * Need to remove the setTimeout here after this issue is fixed.
-                                 * */
-                                setTimeout(() => {
-                                  setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
-                                }, 500);
+                              data={hostOverview}
+                              anomaliesData={anomaliesData}
+                              isLoadingAnomaliesData={isLoadingAnomaliesData}
+                              loading={loading}
+                              startDate={from}
+                              endDate={to}
+                              narrowDateRange={(score, interval) => {
+                                const fromTo = scoreIntervalToDateTime(score, interval);
+                                setAbsoluteRangeDatePicker({
+                                  id: 'global',
+                                  from: fromTo.from,
+                                  to: fromTo.to,
+                                });
                               }}
                             />
                           )}
-                        </KpiHostDetailsQuery>
+                        </AnomalyTableProvider>
+                      )}
+                    </HostOverviewByNameQuery>
 
-                        <EuiHorizontalRule />
-                        <SiemNavigation
-                          navTabs={navTabsHostDetails(hostName)}
-                          display="default"
-                          showBorder={true}
+                    <EuiHorizontalRule />
+
+                    <KpiHostDetailsQuery
+                      sourceId="default"
+                      filterQuery={getFilterQuery(hostName, filterQueryExpression, indexPattern)}
+                      skip={isInitializing}
+                      startDate={from}
+                      endDate={to}
+                    >
+                      {({ kpiHostDetails, id, inspect, loading, refetch }) => (
+                        <KpiHostDetailsManage
+                          data={kpiHostDetails}
+                          from={from}
+                          id={id}
+                          inspect={inspect}
+                          loading={loading}
+                          refetch={refetch}
+                          setQuery={setQuery}
+                          to={to}
+                          narrowDateRange={(min: number, max: number) => {
+                            /**
+                             * Using setTimeout here because of this issue:
+                             * https://github.com/elastic/elastic-charts/issues/360
+                             * Need to remove the setTimeout here after this issue is fixed.
+                             * */
+                            setTimeout(() => {
+                              setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+                            }, 500);
+                          }}
                         />
-                        <EuiSpacer />
-                      </>
-                    )}
-                  </UseUrlState>
+                      )}
+                    </KpiHostDetailsQuery>
+
+                    <EuiHorizontalRule />
+                    <SiemNavigation
+                      navTabs={navTabsHostDetails(hostName)}
+                      display="default"
+                      showBorder={true}
+                    />
+                    <EuiSpacer />
+                  </>
                 )}
               </GlobalTime>
             </StickyContainer>
@@ -216,30 +207,26 @@ const HostDetailsBodyComponent = React.memo<HostDetailsComponentProps>(
         {({ indicesExist, indexPattern }) =>
           indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
             <GlobalTime>
-              {({ to, from, setQuery }) => (
-                <UseUrlState indexPattern={indexPattern}>
-                  {({ isInitializing }) => (
-                    <>
-                      {children({
-                        endDate: to,
-                        filterQuery: getFilterQuery(hostName, filterQueryExpression, indexPattern),
-                        skip: isInitializing,
-                        setQuery,
-                        startDate: from,
-                        type,
-                        indexPattern,
-                        narrowDateRange: (score: Anomaly, interval: string) => {
-                          const fromTo = scoreIntervalToDateTime(score, interval);
-                          setAbsoluteRangeDatePicker({
-                            id: 'global',
-                            from: fromTo.from,
-                            to: fromTo.to,
-                          });
-                        },
-                      })}
-                    </>
-                  )}
-                </UseUrlState>
+              {({ to, from, setQuery, isInitializing }) => (
+                <>
+                  {children({
+                    endDate: to,
+                    filterQuery: getFilterQuery(hostName, filterQueryExpression, indexPattern),
+                    skip: isInitializing,
+                    setQuery,
+                    startDate: from,
+                    type,
+                    indexPattern,
+                    narrowDateRange: (score: Anomaly, interval: string) => {
+                      const fromTo = scoreIntervalToDateTime(score, interval);
+                      setAbsoluteRangeDatePicker({
+                        id: 'global',
+                        from: fromTo.from,
+                        to: fromTo.to,
+                      });
+                    },
+                  })}
+                </>
               )}
             </GlobalTime>
           ) : null
