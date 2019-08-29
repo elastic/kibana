@@ -21,6 +21,7 @@
 // as the consumer of the library must use the <UseField /> component
 export { useForm } from './hooks';
 
+export * from './form_context';
 export * from './components';
 export * from './constants';
 export * from './types';
