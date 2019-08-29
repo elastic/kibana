@@ -6,7 +6,7 @@
 
 import dateMath from '@elastic/datemath';
 import ApolloClient from 'apollo-client';
-import { getOr } from 'lodash/fp';
+import { getOr, set } from 'lodash/fp';
 import { ActionCreator } from 'typescript-fsa';
 
 import { Dispatch } from 'redux';
@@ -19,7 +19,7 @@ import {
   addTimeline as dispatchAddTimeline,
 } from '../../store/timeline/actions';
 
-import { TimelineModel } from '../../store/timeline/model';
+import { TimelineModel, timelineDefaults } from '../../store/timeline/model';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import {
   defaultColumnHeaderType,
@@ -60,6 +60,82 @@ const omitTypename = (key: string, value: keyof TimelineModel) =>
 const omitTypenameInTimeline = (timeline: TimelineResult): TimelineResult =>
   JSON.parse(JSON.stringify(timeline), omitTypename);
 
+export const defaultTimelineToTimelineModel = (
+  timeline: TimelineResult,
+  duplicate: boolean
+): TimelineModel => {
+  return Object.entries({
+    ...timeline,
+    columns:
+      timeline.columns != null
+        ? timeline.columns.map(col => {
+            const timelineCols: ColumnHeader = {
+              ...col,
+              columnHeaderType: defaultColumnHeaderType,
+              id: col.id != null ? col.id : 'unknown',
+              placeholder: col.placeholder != null ? col.placeholder : undefined,
+              category: col.category != null ? col.category : undefined,
+              description: col.description != null ? col.description : undefined,
+              example: col.example != null ? col.example : undefined,
+              type: col.type != null ? col.type : undefined,
+              aggregatable: col.aggregatable != null ? col.aggregatable : undefined,
+              width:
+                col.id === '@timestamp' ? DEFAULT_DATE_COLUMN_MIN_WIDTH : DEFAULT_COLUMN_MIN_WIDTH,
+            };
+            return timelineCols;
+          })
+        : defaultHeaders,
+    eventIdToNoteIds: duplicate
+      ? {}
+      : timeline.eventIdToNoteIds != null
+      ? timeline.eventIdToNoteIds.reduce((acc, note) => {
+          if (note.eventId != null) {
+            const eventNotes = getOr([], note.eventId, acc);
+            return { ...acc, [note.eventId]: [...eventNotes, note.noteId] };
+          }
+          return acc;
+        }, {})
+      : {},
+    isFavorite: duplicate
+      ? false
+      : timeline.favorite != null
+      ? timeline.favorite.length > 0
+      : false,
+    noteIds: duplicate ? [] : timeline.noteIds != null ? timeline.noteIds : [],
+    pinnedEventIds: duplicate
+      ? {}
+      : timeline.pinnedEventIds != null
+      ? timeline.pinnedEventIds.reduce(
+          (acc, pinnedEventId) => ({ ...acc, [pinnedEventId]: true }),
+          {}
+        )
+      : {},
+    pinnedEventsSaveObject: duplicate
+      ? {}
+      : timeline.pinnedEventsSaveObject != null
+      ? timeline.pinnedEventsSaveObject.reduce(
+          (acc, pinnedEvent) => ({
+            ...acc,
+            ...(pinnedEvent.eventId != null ? { [pinnedEvent.eventId]: pinnedEvent } : {}),
+          }),
+          {}
+        )
+      : {},
+    id: duplicate ? '' : timeline.savedObjectId,
+    savedObjectId: duplicate ? null : timeline.savedObjectId,
+    version: duplicate ? null : timeline.version,
+    title: duplicate ? '' : timeline.title || '',
+  }).reduce(
+    (acc: TimelineModel, [key, value]) => {
+      if (value != null) {
+        acc = set(key, value, acc);
+      }
+      return acc;
+    },
+    { ...timelineDefaults, id: '' }
+  );
+};
+
 export const formatTimelineResultToModel = (
   timelineToOpen: TimelineResult,
   duplicate: boolean = false
@@ -67,69 +143,7 @@ export const formatTimelineResultToModel = (
   const { notes, ...timelineModel } = timelineToOpen;
   return {
     notes,
-    timeline: {
-      ...timelineModel,
-      columns:
-        timelineModel.columns != null
-          ? timelineModel.columns.map(col => {
-              const timelineCols: ColumnHeader = {
-                ...col,
-                columnHeaderType: defaultColumnHeaderType,
-                id: col.id != null ? col.id : 'unknown',
-                placeholder: col.placeholder != null ? col.placeholder : undefined,
-                category: col.category != null ? col.category : undefined,
-                description: col.description != null ? col.description : undefined,
-                example: col.example != null ? col.example : undefined,
-                type: col.type != null ? col.type : undefined,
-                aggregatable: col.aggregatable != null ? col.aggregatable : undefined,
-                width:
-                  col.id === '@timestamp'
-                    ? DEFAULT_DATE_COLUMN_MIN_WIDTH
-                    : DEFAULT_COLUMN_MIN_WIDTH,
-              };
-              return timelineCols;
-            })
-          : defaultHeaders,
-      eventIdToNoteIds: duplicate
-        ? {}
-        : timelineModel.eventIdToNoteIds != null
-        ? timelineModel.eventIdToNoteIds.reduce((acc, note) => {
-            if (note.eventId != null) {
-              const eventNotes = getOr([], note.eventId, acc);
-              return { ...acc, [note.eventId]: [...eventNotes, note.noteId] };
-            }
-            return acc;
-          }, {})
-        : {},
-      isFavorite: duplicate
-        ? false
-        : timelineModel.favorite != null
-        ? timelineModel.favorite.length > 0
-        : false,
-      noteIds: duplicate ? [] : timelineModel.noteIds != null ? timelineModel.noteIds : [],
-      pinnedEventIds: duplicate
-        ? {}
-        : timelineModel.pinnedEventIds != null
-        ? timelineModel.pinnedEventIds.reduce(
-            (acc, pinnedEventId) => ({ ...acc, [pinnedEventId]: true }),
-            {}
-          )
-        : {},
-      pinnedEventsSaveObject: duplicate
-        ? {}
-        : timelineModel.pinnedEventsSaveObject != null
-        ? timelineModel.pinnedEventsSaveObject.reduce(
-            (acc, pinnedEvent) => ({
-              ...acc,
-              ...(pinnedEvent.eventId != null ? { [pinnedEvent.eventId]: pinnedEvent } : {}),
-            }),
-            {}
-          )
-        : {},
-      savedObjectId: duplicate ? null : timelineModel.savedObjectId,
-      version: duplicate ? null : timelineModel.version,
-      title: duplicate ? '' : timelineModel.title || '',
-    } as TimelineModel,
+    timeline: defaultTimelineToTimelineModel(timelineModel, duplicate),
   };
 };
 

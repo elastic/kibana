@@ -104,103 +104,13 @@ describe('Timeline', () => {
         id: 'foo',
         timeline: {
           ...timelineByIdMock.foo,
-          savedObjectId: 'superUniqueId',
-          title: 'saved object timeline',
-          version: 'doNotForgetVersion',
         },
       });
 
       expect(update).toEqual({
         foo: {
-          columns: [
-            {
-              columnHeaderType: 'not-filtered',
-              id: '@timestamp',
-              width: 240,
-            },
-            {
-              columnHeaderType: 'not-filtered',
-              id: 'message',
-              width: 180,
-            },
-            {
-              columnHeaderType: 'not-filtered',
-              id: 'event.category',
-              width: 180,
-            },
-            {
-              columnHeaderType: 'not-filtered',
-              id: 'event.action',
-              width: 180,
-            },
-            {
-              columnHeaderType: 'not-filtered',
-              id: 'host.name',
-              width: 180,
-            },
-            {
-              columnHeaderType: 'not-filtered',
-              id: 'source.ip',
-              width: 180,
-            },
-            {
-              columnHeaderType: 'not-filtered',
-              id: 'destination.ip',
-              width: 180,
-            },
-            {
-              columnHeaderType: 'not-filtered',
-              id: 'user.name',
-              width: 180,
-            },
-          ],
-          dataProviders: [
-            {
-              and: [],
-              enabled: true,
-              excluded: false,
-              id: '123',
-              kqlQuery: '',
-              name: 'data provider 1',
-              queryMatch: {
-                field: '',
-                operator: ':',
-                value: '',
-              },
-            },
-          ],
-          dateRange: {
-            end: 0,
-            start: 0,
-          },
-          description: '',
-          eventIdToNoteIds: {},
-          highlightedDropAndProviderId: '',
-          historyIds: [],
-          id: 'superUniqueId',
-          isFavorite: false,
-          isLive: false,
-          isLoading: false,
-          isSaving: false,
-          itemsPerPage: 25,
-          itemsPerPageOptions: [10, 25, 50, 100],
-          kqlMode: 'filter',
-          kqlQuery: {
-            filterQuery: null,
-            filterQueryDraft: null,
-          },
-          noteIds: [],
-          pinnedEventIds: {},
-          pinnedEventsSaveObject: {},
-          savedObjectId: 'superUniqueId',
+          ...timelineByIdMock.foo,
           show: true,
-          sort: {
-            columnId: '@timestamp',
-            sortDirection: 'desc',
-          },
-          title: 'saved object timeline',
-          version: 'doNotForgetVersion',
-          width: 1100,
         },
       });
     });

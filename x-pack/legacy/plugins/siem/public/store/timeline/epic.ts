@@ -134,6 +134,7 @@ export const createTimelineEpic = <State>(): Epic<
           const addNewTimeline: TimelineModel = get('payload.timeline', action);
           myEpicTimelineId.setTimelineId(addNewTimeline.savedObjectId);
           myEpicTimelineId.setTimelineVersion(addNewTimeline.version);
+          return true;
         } else if (timelineActionsType.includes(action.type) && !timelineId.isLoading) {
           return true;
         }
