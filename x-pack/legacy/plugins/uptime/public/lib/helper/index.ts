@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { combineFiltersAndUserSearch } from './combine_filters_and_user_search';
 export { convertMicrosecondsToMilliseconds } from './convert_measurements';
 export * from './observability_integration';
 export { getApiPath } from './get_api_path';

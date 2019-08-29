@@ -23,7 +23,7 @@ import { useUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../infra/public';
 import { getIndexPattern } from '../lib/adapters/index_pattern';
-import { toStaticIndexPattern, stringifyKueries } from '../lib/helper';
+import { combineFiltersAndUserSearch, stringifyKueries, toStaticIndexPattern } from '../lib/helper';
 
 interface OverviewPageProps {
   basePath: string;
@@ -37,12 +37,6 @@ interface OverviewPageProps {
 }
 
 type Props = OverviewPageProps;
-
-const combineFiltersAndUserSearch = (filters: string, search: string) => {
-  if (!filters) return search;
-  if (!search) return filters;
-  return `(${filters}) and (${search})`;
-};
 
 export type UptimeSearchBarQueryChangeHandler = (queryChangedEvent: {
   query?: { text: string };
