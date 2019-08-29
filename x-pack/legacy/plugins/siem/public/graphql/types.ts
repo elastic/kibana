@@ -944,11 +944,13 @@ export interface Overview {
 }
 
 export interface AutonomousSystem {
-  as_org?: string | null;
+  number?: number | null;
 
-  asn?: string | null;
+  organization?: AutonomousSystemOrganization | null;
+}
 
-  ip?: string | null;
+export interface AutonomousSystemOrganization {
+  name?: string | null;
 }
 
 export interface DomainsData {
@@ -2879,11 +2881,15 @@ export namespace GetIpOverviewQuery {
   export type AutonomousSystem = {
     __typename?: 'AutonomousSystem';
 
-    as_org?: string | null;
+    number?: number | null;
 
-    asn?: string | null;
+    organization?: Organization | null;
+  };
 
-    ip?: string | null;
+  export type Organization = {
+    __typename?: 'AutonomousSystemOrganization';
+
+    name?: string | null;
   };
 
   export type Geo = {
@@ -2927,11 +2933,15 @@ export namespace GetIpOverviewQuery {
   export type _AutonomousSystem = {
     __typename?: 'AutonomousSystem';
 
-    as_org?: string | null;
+    number?: number | null;
 
-    asn?: string | null;
+    organization?: _Organization | null;
+  };
 
-    ip?: string | null;
+  export type _Organization = {
+    __typename?: 'AutonomousSystemOrganization';
+
+    name?: string | null;
   };
 
   export type _Geo = {
