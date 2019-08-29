@@ -157,10 +157,10 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
           siemDefaultIndices.includes(ip.attributes.title)
         );
 
-        const failedToSetup = setupEmbeddablesAPI();
+        const setupSuccessfully = setupEmbeddablesAPI();
 
         // Ensure at least one `siem:defaultIndex` index pattern exists before trying to import
-        if (matchingIndexPatterns.length === 0 || failedToSetup) {
+        if (matchingIndexPatterns.length === 0 || !setupSuccessfully) {
           setIsLoading(false);
           setIsError(true);
           return;
