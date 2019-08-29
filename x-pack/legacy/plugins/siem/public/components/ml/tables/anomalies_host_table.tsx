@@ -72,13 +72,7 @@ export const AnomaliesHostTable = React.memo<AnomaliesHostTableProps>(
             tooltip={i18n.TOOLTIP}
           />
 
-          <BasicTable
-            columns={columns}
-            compressed
-            items={hosts}
-            pagination={pagination}
-            sorting={sorting}
-          />
+          <BasicTable items={hosts} columns={columns} pagination={pagination} sorting={sorting} />
 
           {loading && (
             <Loader data-test-subj="anomalies-host-table-loading-panel" overlay size="xl" />

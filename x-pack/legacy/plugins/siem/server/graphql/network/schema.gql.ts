@@ -19,44 +19,22 @@ export const networkSchema = gql`
   }
 
   type TopNFlowNetworkEcsField {
-    bytes_in: Float
-    bytes_out: Float
+    bytes: Float
+    packets: Float
+    transport: String
+    direction: [NetworkDirectionEcs!]
   }
 
-  type GeoItem {
-    geo: GeoEcsFields
-    flowTarget: FlowTarget
-  }
-
-  type AutonomousSystemItem {
-    name: String
-    number: Float
-  }
-
-  type TopNFlowItemSource {
-    autonomous_system: AutonomousSystemItem
+  type TopNFlowItem {
+    count: Float
     domain: [String!]
     ip: String
-    location: GeoItem
-    flows: Float
-    destination_ips: Float
-  }
-
-  type TopNFlowItemDestination {
-    autonomous_system: AutonomousSystemItem
-    domain: [String!]
-    ip: String
-    location: GeoItem
-    flows: Float
-    source_ips: Float
   }
 
   enum NetworkTopNFlowFields {
-    bytes_in
-    bytes_out
-    flows
-    destination_ips
-    source_ips
+    bytes
+    packets
+    ipCount
   }
 
   input NetworkTopNFlowSortField {
@@ -66,8 +44,10 @@ export const networkSchema = gql`
 
   type NetworkTopNFlowItem {
     _id: String
-    source: TopNFlowItemSource
-    destination: TopNFlowItemDestination
+    source: TopNFlowItem
+    destination: TopNFlowItem
+    client: TopNFlowItem
+    server: TopNFlowItem
     network: TopNFlowNetworkEcsField
   }
 
@@ -122,7 +102,8 @@ export const networkSchema = gql`
     NetworkTopNFlow(
       id: String
       filterQuery: String
-      flowTarget: FlowTargetNew!
+      flowDirection: FlowDirection!
+      flowTarget: FlowTarget!
       pagination: PaginationInputPaginated!
       sort: NetworkTopNFlowSortField!
       timerange: TimerangeInput!

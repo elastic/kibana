@@ -38,33 +38,27 @@ export interface HeaderPanelProps {
 export const HeaderPanel = pure<HeaderPanelProps>(
   ({ border, children, id, showInspect = false, subtitle, title, tooltip }) => (
     <Header border={border}>
-      <EuiFlexGroup alignItems="center">
+      <EuiFlexGroup alignItems="center" gutterSize="m">
         <EuiFlexItem>
-          <EuiFlexGroup alignItems="center" responsive={false}>
-            <EuiFlexItem>
-              <EuiTitle>
-                <h2 data-test-subj="panel_headline_title">
-                  {title}
-                  {tooltip && (
-                    <>
-                      {' '}
-                      <EuiIconTip color="subdued" content={tooltip} size="l" type="iInCircle" />
-                    </>
-                  )}
-                </h2>
-              </EuiTitle>
+          <EuiTitle>
+            <h2 data-test-subj="panel_headline_title">
+              {title}
+              {tooltip && (
+                <>
+                  {' '}
+                  <EuiIconTip color="subdued" content={tooltip} size="l" type="iInCircle" />
+                </>
+              )}
+            </h2>
+          </EuiTitle>
 
-              <EuiText color="subdued" size="xs">
-                {subtitle}
-              </EuiText>
-            </EuiFlexItem>
+          <EuiText color="subdued" size="s">
+            {subtitle}
+          </EuiText>
+        </EuiFlexItem>
 
-            {id && (
-              <EuiFlexItem grow={false}>
-                <InspectButton queryId={id} inspectIndex={0} show={showInspect} title={title} />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          {id && <InspectButton queryId={id} inspectIndex={0} show={showInspect} title={title} />}
         </EuiFlexItem>
 
         {children && <EuiFlexItem grow={false}>{children}</EuiFlexItem>}

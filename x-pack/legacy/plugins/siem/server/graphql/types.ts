@@ -1195,57 +1195,33 @@ export interface NetworkTopNFlowEdges {
 export interface NetworkTopNFlowItem {
   _id?: string | null;
 
-  source?: TopNFlowItemSource | null;
+  source?: TopNFlowItem | null;
 
-  destination?: TopNFlowItemDestination | null;
+  destination?: TopNFlowItem | null;
+
+  client?: TopNFlowItem | null;
+
+  server?: TopNFlowItem | null;
 
   network?: TopNFlowNetworkEcsField | null;
 }
 
-export interface TopNFlowItemSource {
-  autonomous_system?: AutonomousSystemItem | null;
+export interface TopNFlowItem {
+  count?: number | null;
 
   domain?: string[] | null;
 
   ip?: string | null;
-
-  location?: GeoItem | null;
-
-  flows?: number | null;
-
-  destination_ips?: number | null;
-}
-
-export interface AutonomousSystemItem {
-  name?: string | null;
-
-  number?: number | null;
-}
-
-export interface GeoItem {
-  geo?: GeoEcsFields | null;
-
-  flowTarget?: FlowTarget | null;
-}
-
-export interface TopNFlowItemDestination {
-  autonomous_system?: AutonomousSystemItem | null;
-
-  domain?: string[] | null;
-
-  ip?: string | null;
-
-  location?: GeoItem | null;
-
-  flows?: number | null;
-
-  source_ips?: number | null;
 }
 
 export interface TopNFlowNetworkEcsField {
-  bytes_in?: number | null;
+  bytes?: number | null;
 
-  bytes_out?: number | null;
+  packets?: number | null;
+
+  transport?: string | null;
+
+  direction?: NetworkDirectionEcs[] | null;
 }
 
 export interface NetworkDnsData {
@@ -2008,7 +1984,9 @@ export interface NetworkTopNFlowSourceArgs {
 
   filterQuery?: string | null;
 
-  flowTarget: FlowTargetNew;
+  flowDirection: FlowDirection;
+
+  flowTarget: FlowTarget;
 
   pagination: PaginationInputPaginated;
 
@@ -2174,17 +2152,10 @@ export enum UsersFields {
   count = 'count',
 }
 
-export enum FlowTargetNew {
-  destination = 'destination',
-  source = 'source',
-}
-
 export enum NetworkTopNFlowFields {
-  bytes_in = 'bytes_in',
-  bytes_out = 'bytes_out',
-  flows = 'flows',
-  destination_ips = 'destination_ips',
-  source_ips = 'source_ips',
+  bytes = 'bytes',
+  packets = 'packets',
+  ipCount = 'ipCount',
 }
 
 export enum NetworkDnsFields {
@@ -2844,7 +2815,9 @@ export namespace SourceResolvers {
 
     filterQuery?: string | null;
 
-    flowTarget: FlowTargetNew;
+    flowDirection: FlowDirection;
+
+    flowTarget: FlowTarget;
 
     pagination: PaginationInputPaginated;
 
@@ -6330,9 +6303,13 @@ export namespace NetworkTopNFlowItemResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = NetworkTopNFlowItem> {
     _id?: IdResolver<string | null, TypeParent, Context>;
 
-    source?: SourceResolver<TopNFlowItemSource | null, TypeParent, Context>;
+    source?: SourceResolver<TopNFlowItem | null, TypeParent, Context>;
 
-    destination?: DestinationResolver<TopNFlowItemDestination | null, TypeParent, Context>;
+    destination?: DestinationResolver<TopNFlowItem | null, TypeParent, Context>;
+
+    client?: ClientResolver<TopNFlowItem | null, TypeParent, Context>;
+
+    server?: ServerResolver<TopNFlowItem | null, TypeParent, Context>;
 
     network?: NetworkResolver<TopNFlowNetworkEcsField | null, TypeParent, Context>;
   }
@@ -6343,12 +6320,22 @@ export namespace NetworkTopNFlowItemResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type SourceResolver<
-    R = TopNFlowItemSource | null,
+    R = TopNFlowItem | null,
     Parent = NetworkTopNFlowItem,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type DestinationResolver<
-    R = TopNFlowItemDestination | null,
+    R = TopNFlowItem | null,
+    Parent = NetworkTopNFlowItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type ClientResolver<
+    R = TopNFlowItem | null,
+    Parent = NetworkTopNFlowItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type ServerResolver<
+    R = TopNFlowItem | null,
     Parent = NetworkTopNFlowItem,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -6359,152 +6346,60 @@ export namespace NetworkTopNFlowItemResolvers {
   > = Resolver<R, Parent, Context>;
 }
 
-export namespace TopNFlowItemSourceResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = TopNFlowItemSource> {
-    autonomous_system?: AutonomousSystemResolver<AutonomousSystemItem | null, TypeParent, Context>;
+export namespace TopNFlowItemResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = TopNFlowItem> {
+    count?: CountResolver<number | null, TypeParent, Context>;
 
     domain?: DomainResolver<string[] | null, TypeParent, Context>;
 
     ip?: IpResolver<string | null, TypeParent, Context>;
-
-    location?: LocationResolver<GeoItem | null, TypeParent, Context>;
-
-    flows?: FlowsResolver<number | null, TypeParent, Context>;
-
-    destination_ips?: DestinationIpsResolver<number | null, TypeParent, Context>;
   }
 
-  export type AutonomousSystemResolver<
-    R = AutonomousSystemItem | null,
-    Parent = TopNFlowItemSource,
+  export type CountResolver<
+    R = number | null,
+    Parent = TopNFlowItem,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type DomainResolver<
     R = string[] | null,
-    Parent = TopNFlowItemSource,
+    Parent = TopNFlowItem,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type IpResolver<
     R = string | null,
-    Parent = TopNFlowItemSource,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type LocationResolver<
-    R = GeoItem | null,
-    Parent = TopNFlowItemSource,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type FlowsResolver<
-    R = number | null,
-    Parent = TopNFlowItemSource,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type DestinationIpsResolver<
-    R = number | null,
-    Parent = TopNFlowItemSource,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-}
-
-export namespace AutonomousSystemItemResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = AutonomousSystemItem> {
-    name?: NameResolver<string | null, TypeParent, Context>;
-
-    number?: NumberResolver<number | null, TypeParent, Context>;
-  }
-
-  export type NameResolver<
-    R = string | null,
-    Parent = AutonomousSystemItem,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type NumberResolver<
-    R = number | null,
-    Parent = AutonomousSystemItem,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-}
-
-export namespace GeoItemResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = GeoItem> {
-    geo?: GeoResolver<GeoEcsFields | null, TypeParent, Context>;
-
-    flowTarget?: FlowTargetResolver<FlowTarget | null, TypeParent, Context>;
-  }
-
-  export type GeoResolver<
-    R = GeoEcsFields | null,
-    Parent = GeoItem,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type FlowTargetResolver<
-    R = FlowTarget | null,
-    Parent = GeoItem,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-}
-
-export namespace TopNFlowItemDestinationResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = TopNFlowItemDestination> {
-    autonomous_system?: AutonomousSystemResolver<AutonomousSystemItem | null, TypeParent, Context>;
-
-    domain?: DomainResolver<string[] | null, TypeParent, Context>;
-
-    ip?: IpResolver<string | null, TypeParent, Context>;
-
-    location?: LocationResolver<GeoItem | null, TypeParent, Context>;
-
-    flows?: FlowsResolver<number | null, TypeParent, Context>;
-
-    source_ips?: SourceIpsResolver<number | null, TypeParent, Context>;
-  }
-
-  export type AutonomousSystemResolver<
-    R = AutonomousSystemItem | null,
-    Parent = TopNFlowItemDestination,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type DomainResolver<
-    R = string[] | null,
-    Parent = TopNFlowItemDestination,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type IpResolver<
-    R = string | null,
-    Parent = TopNFlowItemDestination,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type LocationResolver<
-    R = GeoItem | null,
-    Parent = TopNFlowItemDestination,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type FlowsResolver<
-    R = number | null,
-    Parent = TopNFlowItemDestination,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type SourceIpsResolver<
-    R = number | null,
-    Parent = TopNFlowItemDestination,
+    Parent = TopNFlowItem,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }
 
 export namespace TopNFlowNetworkEcsFieldResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = TopNFlowNetworkEcsField> {
-    bytes_in?: BytesInResolver<number | null, TypeParent, Context>;
+    bytes?: BytesResolver<number | null, TypeParent, Context>;
 
-    bytes_out?: BytesOutResolver<number | null, TypeParent, Context>;
+    packets?: PacketsResolver<number | null, TypeParent, Context>;
+
+    transport?: TransportResolver<string | null, TypeParent, Context>;
+
+    direction?: DirectionResolver<NetworkDirectionEcs[] | null, TypeParent, Context>;
   }
 
-  export type BytesInResolver<
+  export type BytesResolver<
     R = number | null,
     Parent = TopNFlowNetworkEcsField,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type BytesOutResolver<
+  export type PacketsResolver<
     R = number | null,
+    Parent = TopNFlowNetworkEcsField,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type TransportResolver<
+    R = string | null,
+    Parent = TopNFlowNetworkEcsField,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type DirectionResolver<
+    R = NetworkDirectionEcs[] | null,
     Parent = TopNFlowNetworkEcsField,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
