@@ -6,9 +6,10 @@
 
 import createContainer from 'constate-latest';
 import React, { useContext, useState, useMemo, useCallback } from 'react';
-import { isString, isNumber } from 'lodash';
+import { isNumber } from 'lodash';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
+import rt from 'io-ts';
 import { replaceStateKeyInQueryString, UrlStateContainer } from '../../utils/url_state';
 import { InfraTimerangeInput } from '../../graphql/types';
 
@@ -150,18 +151,20 @@ const mapToUrlState = (value: any): MetricsTimeUrlState | undefined =>
       }
     : undefined;
 
+const MetricsTimeRT = rt.type({
+  from: rt.union([rt.string, rt.number]),
+  to: rt.union([rt.string, rt.number]),
+  interval: rt.string,
+});
+
 const mapToTimeUrlState = (value: any) => {
-  if (value) {
-    if (isNumber(value.to) && isNumber(value.from)) {
-      return {
-        ...value,
-        to: moment(value.to).toISOString(),
-        from: moment(value.from).toISOString(),
-      };
-    }
-    if (isString(value.to) && isString(value.from)) {
-      return value;
-    }
+  const result = MetricsTimeRT.decode(value);
+  if (result.isRight()) {
+    const to = isNumber(result.value.to) ? moment(result.value.to).toISOString() : result.value.to;
+    const from = isNumber(result.value.from)
+      ? moment(result.value.from).toISOString()
+      : result.value.from;
+    return { ...result.value, from, to };
   }
   return undefined;
 };
