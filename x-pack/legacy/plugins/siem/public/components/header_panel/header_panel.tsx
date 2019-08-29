@@ -14,6 +14,7 @@ import { InspectButton } from '../inspect';
 const Header = styled.header<{ border?: boolean }>`
   ${props => css`
     margin-bottom: ${props.theme.eui.euiSizeL};
+    user-select: text;
 
     ${props.border &&
       `
@@ -54,7 +55,7 @@ export const HeaderPanel = pure<HeaderPanelProps>(
                 </h2>
               </EuiTitle>
 
-              <EuiText color="subdued" size="xs">
+              <EuiText color="subdued" data-test-subj="subtitle" size="xs">
                 {subtitle}
               </EuiText>
             </EuiFlexItem>
