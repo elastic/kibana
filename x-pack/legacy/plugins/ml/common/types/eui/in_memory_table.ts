@@ -164,6 +164,7 @@ export type EuiInMemoryTableProps = CommonProps & {
   sorting?: Sorting;
   // Set `allowNeutralSort` to false to force column sorting. Defaults to true.
   allowNeutralSort?: boolean;
+  responsive?: boolean;
   selection?: SelectionType;
   itemId?: ItemIdType;
   itemIdToExpandedRowMap?: Record<string, Item>;

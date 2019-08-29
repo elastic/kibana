@@ -24,8 +24,7 @@ export default function exploreRepositoryFunctionalTests({
 
   const FIND_TIME = config.get('timeouts.find');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/43557
-  describe.skip('Explore Repository', function() {
+  describe('Explore Repository', function() {
     this.tags('smoke');
     describe('Explore a repository', () => {
       const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
@@ -95,6 +94,8 @@ export default function exploreRepositoryFunctionalTests({
         // open a file that does not exists
         const url = `${PageObjects.common.getHostPort()}/app/code#/github.com/elastic/TypeScript-Node-Starter/tree/master/I_DO_NOT_EXIST`;
         await browser.get(url);
+        await PageObjects.header.awaitKibanaChrome();
+
         await retry.try(async () => {
           const currentUrl: string = await browser.getCurrentUrl();
           expect(
@@ -222,6 +223,8 @@ export default function exploreRepositoryFunctionalTests({
         log.debug('it goes to a deep node of file tree');
         const url = `${PageObjects.common.getHostPort()}/app/code#/github.com/elastic/TypeScript-Node-Starter/blob/master/src/models/User.ts`;
         await browser.get(url);
+        await PageObjects.header.awaitKibanaChrome();
+
         // Click breadcrumb does not affect file tree
         await retry.try(async () => {
           expect(await exists('codeFileBreadcrumb-src')).ok();
@@ -305,6 +308,8 @@ export default function exploreRepositoryFunctionalTests({
         const notExistRepoUri = 'github.com/I_DO_NOT_EXIST/I_DO_NOT_EXIST';
         const url = `${PageObjects.common.getHostPort()}/app/code#/${notExistRepoUri}`;
         await browser.get(url);
+        await PageObjects.header.awaitKibanaChrome();
+
         await retry.try(async () => {
           const currentUrl: string = await browser.getCurrentUrl();
           // should redirect to main page
