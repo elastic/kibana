@@ -767,7 +767,6 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "query:okjpgs",
     "source": {
       "query": {
