@@ -40,6 +40,7 @@ const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
 
 interface HostsComponentReduxProps {
   filterQuery: string;
+  kqlQueryExpression: string;
   setAbsoluteRangeDatePicker: ActionCreator<{
     id: InputsModelId;
     from: number;
