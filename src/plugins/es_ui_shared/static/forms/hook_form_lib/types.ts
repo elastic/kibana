@@ -25,7 +25,7 @@ export interface Form<T = FormData> {
   readonly isSubmitting: boolean;
   readonly isValid: boolean;
   readonly options: FormOptions;
-  onSubmit: (e?: FormEvent<HTMLFormElement> | MouseEvent) => Promise<{ data: T; isValid: boolean }>;
+  submit: (e?: FormEvent<HTMLFormElement> | MouseEvent) => Promise<{ data: T; isValid: boolean }>;
   setFieldValue: (fieldName: string, value: FieldValue) => void;
   setFieldErrors: (fieldName: string, errors: ValidationError[]) => void;
   getFields: () => FieldsMap;

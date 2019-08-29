@@ -151,7 +151,7 @@ export const useForm = <T = FormData>(
     return config;
   };
 
-  const onSubmitForm: Form<T>['onSubmit'] = async e => {
+  const submitForm: Form<T>['submit'] = async e => {
     if (e) {
       e.preventDefault();
     }
@@ -178,7 +178,7 @@ export const useForm = <T = FormData>(
     isSubmitting,
     isValid,
     options,
-    onSubmit: onSubmitForm,
+    submit: submitForm,
     setFieldValue,
     setFieldErrors,
     getFields,
