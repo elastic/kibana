@@ -334,7 +334,7 @@
     "@types/semver": "^5.5.0",
     "@types/sinon": "^7.0.0",
     "@types/strip-ansi": "^3.0.0",
-    "@types/styled-components": "^3.0.1",
+    "@types/styled-components": "^3.0.2",
     "@types/supertest": "^2.0.5",
     "@types/type-detect": "^4.0.1",
     "@types/uuid": "^3.4.4",

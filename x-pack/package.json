@@ -98,7 +98,7 @@
     "@types/storybook__addon-info": "^4.1.1",
     "@types/storybook__addon-knobs": "^4.0.4",
     "@types/storybook__react": "^4.0.1",
-    "@types/styled-components": "^3.0.1",
+    "@types/styled-components": "^3.0.2",
     "@types/supertest": "^2.0.5",
     "@types/tar-fs": "^1.16.1",
     "@types/tinycolor2": "^1.4.1",
