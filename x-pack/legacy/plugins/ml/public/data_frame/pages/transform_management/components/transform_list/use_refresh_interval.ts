@@ -66,9 +66,6 @@ export const useRefreshInterval = (
     }
 
     function clearRefreshInterval() {
-      if (refreshIntervalSubscription) {
-        refreshIntervalSubscription.unsubscribe();
-      }
       setBlockRefresh(true);
       if (transformRefreshInterval !== null) {
         window.clearInterval(transformRefreshInterval);
