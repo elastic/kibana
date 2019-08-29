@@ -21,6 +21,7 @@ require('@kbn/test').runTestsCli([
   require.resolve('../test/token_api_integration/config.js'),
   require.resolve('../test/oidc_api_integration/config.ts'),
   require.resolve('../test/oidc_api_integration/implicit_flow.config.ts'),
+  require.resolve('../test/pki_api_integration/config.ts'),
   require.resolve('../test/spaces_api_integration/spaces_only/config'),
   require.resolve('../test/spaces_api_integration/security_and_spaces/config_trial'),
   require.resolve('../test/spaces_api_integration/security_and_spaces/config_basic'),
