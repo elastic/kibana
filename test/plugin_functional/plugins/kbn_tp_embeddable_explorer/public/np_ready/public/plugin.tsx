@@ -19,7 +19,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 
 import {
   Start as InspectorStartContract,
@@ -74,18 +73,21 @@ export class EmbeddableExplorerPublicPlugin
     const helloWorldEmbeddableFactory = new HelloWorldEmbeddableFactory();
     const contactCardEmbeddableFactory = new ContactCardEmbeddableFactory(
       {},
-      start.executeTriggerActions,
+      plugins.embeddable.executeTriggerActions,
       core.overlays
     );
 
-    start.registerAction(helloWorldAction);
-    start.registerAction(sayHelloAction);
-    start.registerAction(sendMessageAction);
+    plugins.embeddable.registerAction(helloWorldAction);
+    plugins.embeddable.registerAction(sayHelloAction);
+    plugins.embeddable.registerAction(sendMessageAction);
 
-    start.attachAction(CONTEXT_MENU_TRIGGER, HELLO_WORLD_ACTION_ID);
+    plugins.embeddable.attachAction(CONTEXT_MENU_TRIGGER, HELLO_WORLD_ACTION_ID);
 
-    start.registerEmbeddableFactory(helloWorldEmbeddableFactory.type, helloWorldEmbeddableFactory);
-    start.registerEmbeddableFactory(
+    plugins.embeddable.registerEmbeddableFactory(
+      helloWorldEmbeddableFactory.type,
+      helloWorldEmbeddableFactory
+    );
+    plugins.embeddable.registerEmbeddableFactory(
       contactCardEmbeddableFactory.type,
       contactCardEmbeddableFactory
     );
@@ -94,9 +96,9 @@ export class EmbeddableExplorerPublicPlugin
       const root = document.getElementById(REACT_ROOT_ID);
       ReactDOM.render(
         <App
-          getActions={start.getTriggerCompatibleActions}
-          getAllEmbeddableFactories={start.getEmbeddableFactories}
-          getEmbeddableFactory={start.getEmbeddableFactory}
+          getActions={plugins.embeddable.getTriggerCompatibleActions}
+          getAllEmbeddableFactories={plugins.embeddable.getEmbeddableFactories}
+          getEmbeddableFactory={plugins.embeddable.getEmbeddableFactory}
           notifications={core.notifications}
           overlays={core.overlays}
           inspector={plugins.inspector}
