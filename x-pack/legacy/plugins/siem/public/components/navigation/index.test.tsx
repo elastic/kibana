@@ -12,7 +12,7 @@ import { CONSTANTS } from '../url_state/constants';
 import { SiemNavigationComponent } from './';
 import { setBreadcrumbs } from './breadcrumbs';
 import { navTabs } from '../../pages/home/home_navigations';
-import { TabNavigationProps } from './tab_navigation';
+import { TabNavigationProps } from './type';
 
 jest.mock('./breadcrumbs', () => ({
   setBreadcrumbs: jest.fn(),
@@ -74,6 +74,10 @@ describe('SIEM Navigation', () => {
       },
     },
     hosts: {
+      filterQuery: null,
+      queryLocation: null,
+    },
+    hostDetails: {
       filterQuery: null,
       queryLocation: null,
     },

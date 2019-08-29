@@ -9,7 +9,7 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import * as i18n from './translations';
 
-import { NavTab } from '../../components/navigation/tab_navigation';
+import { NavTab } from '../../components/navigation/type';
 import { EventsTable, HostsTable, UncommonProcessTable } from '../../components/page/hosts';
 
 import { HostsQuery } from '../../containers/hosts';
@@ -24,7 +24,6 @@ import { manageQuery } from '../../components/page/manage_query';
 import { AuthenticationsQuery } from '../../containers/authentications';
 import { ESTermQuery } from '../../../common/typed_json';
 import { HostsTableType } from '../../store/hosts/model';
-import { SiemPageName } from '../home/home_navigations';
 
 const getTabsOnHostsUrl = (tabName: HostsTableType) => `#/hosts/${tabName}`;
 const getTabsOnHostDetailsUrl = (hostName: string, tabName: HostsTableType) => {
@@ -91,6 +90,7 @@ export const navTabsHostDetails = (hostName: string): Record<KeyHostDetailsNavTa
     href: getTabsOnHostDetailsUrl(hostName, HostsTableType.authentications),
     disabled: false,
     urlKey: 'host',
+    isDetailPage: true,
   },
   [HostsTableType.uncommonProcesses]: {
     id: HostsTableType.uncommonProcesses,
@@ -98,6 +98,7 @@ export const navTabsHostDetails = (hostName: string): Record<KeyHostDetailsNavTa
     href: getTabsOnHostDetailsUrl(hostName, HostsTableType.uncommonProcesses),
     disabled: false,
     urlKey: 'host',
+    isDetailPage: true,
   },
   [HostsTableType.anomalies]: {
     id: HostsTableType.anomalies,
@@ -105,6 +106,7 @@ export const navTabsHostDetails = (hostName: string): Record<KeyHostDetailsNavTa
     href: getTabsOnHostDetailsUrl(hostName, HostsTableType.anomalies),
     disabled: false,
     urlKey: 'host',
+    isDetailPage: true,
   },
   [HostsTableType.events]: {
     id: HostsTableType.events,
@@ -112,6 +114,7 @@ export const navTabsHostDetails = (hostName: string): Record<KeyHostDetailsNavTa
     href: getTabsOnHostDetailsUrl(hostName, HostsTableType.events),
     disabled: false,
     urlKey: 'host',
+    isDetailPage: true,
   },
 });
 

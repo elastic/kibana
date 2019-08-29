@@ -7,17 +7,29 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import { TabNavigation, TabNavigationProps } from './';
+import { TabNavigation } from './';
+import { TabNavigationProps } from '../type';
 import { navTabs, SiemPageName } from '../../../pages/home/home_navigations';
 import { HostsTableType } from '../../../store/hosts/model';
 import { navTabsHostDetails } from '../../../pages/hosts/hosts_navigations';
 import { CONSTANTS } from '../../url_state/constants';
 
 describe('Tab Navigation', () => {
+  const pageName = SiemPageName.hosts;
+  const hostName = 'siem-window';
+  const tabName = HostsTableType.authentications;
+  const pathName = `/${pageName}/${hostName}/${tabName}`;
+  const mockMatch = {
+    params: {
+      pageName,
+      hostName,
+      tabName,
+    },
+  };
   describe('Page Navigation', () => {
     const mockProps: TabNavigationProps = {
       location: {
-        pathname: '/hosts',
+        pathname: pathName,
         search: '',
         state: '',
         hash: '',
@@ -49,6 +61,10 @@ describe('Tab Navigation', () => {
         filterQuery: null,
         queryLocation: null,
       },
+      hostDetails: {
+        filterQuery: null,
+        queryLocation: null,
+      },
       network: {
         filterQuery: {
           expression: 'host.name:"siem-es"',
@@ -68,7 +84,14 @@ describe('Tab Navigation', () => {
       const wrapper = shallow(<TabNavigation {...mockProps} />);
       const networkTab = () => wrapper.find('[data-test-subj="navigation-network"]');
       expect(networkTab().prop('isSelected')).toBeFalsy();
-      wrapper.setProps({ location: '/network', match: {} });
+      wrapper.setProps({
+        location: {
+          pathname: '/network',
+          search: '',
+          state: '',
+          hash: '',
+        },
+      });
       wrapper.update();
       expect(networkTab().prop('isSelected')).toBeTruthy();
     });
@@ -82,17 +105,6 @@ describe('Tab Navigation', () => {
   });
 
   describe('Table Navigation', () => {
-    const pageName = SiemPageName.hosts;
-    const hostName = 'siem-window';
-    const tabName = HostsTableType.authentications;
-    const pathName = `/${pageName}/${hostName}/${tabName}`;
-    const mockMatch = {
-      params: {
-        pageName,
-        hostName,
-        tabName,
-      },
-    };
     const mockProps: TabNavigationProps = {
       location: {
         pathname: pathName,
@@ -124,11 +136,15 @@ describe('Tab Navigation', () => {
           linkTo: ['global'],
         },
       },
+      network: {
+        filterQuery: null,
+        queryLocation: null,
+      },
       hosts: {
         filterQuery: null,
         queryLocation: null,
       },
-      network: {
+      hostDetails: {
         filterQuery: {
           expression: 'host.name:"siem-es"',
           kind: 'kuery',
@@ -167,7 +183,7 @@ describe('Tab Navigation', () => {
         `[data-test-subj="navigation-link-${HostsTableType.authentications}"]`
       );
       expect(firstTab.props().href).toBe(
-        `#/${pageName}/${hostName}/${HostsTableType.authentications}?kqlQuery=(filterQuery:(expression:'host.name:%22siem-es%22',kind:kuery),queryLocation:hosts.page)&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))"`
+        `#/${pageName}/${hostName}/${HostsTableType.authentications}?kqlQuery=(filterQuery:(expression:'host.name:%22siem-es%22',kind:kuery),queryLocation:hosts.page)&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))`
       );
     });
   });

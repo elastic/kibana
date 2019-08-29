@@ -10,7 +10,8 @@ import { connect } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import { setBreadcrumbs } from './breadcrumbs';
-import { TabNavigation, TabNavigationProps } from './tab_navigation';
+import { TabNavigation } from './tab_navigation';
+import { TabNavigationProps, SiemNavigationComponentProps } from './type';
 import {
   inputsSelectors,
   hostsSelectors,
@@ -56,6 +57,7 @@ export class SiemNavigationComponent extends React.Component<
       display,
       location,
       hosts,
+      hostDetails,
       match,
       navTabs,
       network,
@@ -68,6 +70,7 @@ export class SiemNavigationComponent extends React.Component<
         display={display}
         location={location}
         hosts={hosts}
+        hostDetails={hostDetails}
         match={match}
         navTabs={navTabs}
         network={network}
@@ -104,6 +107,10 @@ const makeMapStateToProps = () => {
         filterQuery: getHostsFilterQueryAsKuery(state, hostsModel.HostsType.page),
         queryLocation: CONSTANTS.hostsPage,
       },
+      hostDetails: {
+        filterQuery: getHostsFilterQueryAsKuery(state, hostsModel.HostsType.details),
+        queryLocation: CONSTANTS.hostsDetails,
+      },
       network: {
         filterQuery: getNetworkFilterQueryAsKuery(state, networkModel.NetworkType.page),
         queryLocation: CONSTANTS.networkPage,
@@ -125,7 +132,7 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const SiemNavigation = compose<React.ComponentClass>(
+export const SiemNavigation = compose<React.ComponentClass<SiemNavigationComponentProps>>(
   withRouter,
   connect(makeMapStateToProps)
 )(SiemNavigationComponent);

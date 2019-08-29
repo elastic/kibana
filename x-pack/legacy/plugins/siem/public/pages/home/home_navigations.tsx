@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as i18n from '../../components/navigation/translations';
-import { NavTab } from '../../components/navigation/tab_navigation';
+import { NavTab } from '../../components/navigation/type';
 import {
   getOverviewUrl,
   getNetworkUrl,

@@ -179,12 +179,12 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
               </GlobalTime>
             </StickyContainer>
           ) : (
-              <>
-                <HeaderPage title={hostName} />
+            <>
+              <HeaderPage title={hostName} />
 
-                <HostsEmptyPage />
-              </>
-            )
+              <HostsEmptyPage />
+            </>
+          )
         }
       </WithSource>
     );
@@ -307,8 +307,8 @@ const getFilterQuery = (
       ? { term: { 'host.name': hostName } }
       : ''
     : convertKueryToElasticSearchQuery(
-      `${filterQueryExpression} ${
-      hostName ? `and host.name: "${escapeQueryValue(hostName)}"` : ''
-      }`,
-      indexPattern
-    );
+        `${filterQueryExpression} ${
+          hostName ? `and host.name: "${escapeQueryValue(hostName)}"` : ''
+        }`,
+        indexPattern
+      );

@@ -14,39 +14,14 @@ import { trackUiAction as track, METRIC_TYPE } from '../../../lib/track_usage';
 import { HostsTableType } from '../../../store/hosts/model';
 import { UrlInputsModel } from '../../../store/inputs/model';
 import { CONSTANTS } from '../../url_state/constants';
-import { KqlQuery, UrlStateType, URL_STATE_KEYS, KeyUrlState } from '../../url_state/types';
-
-import { NavigationParams } from '../breadcrumbs';
+import { KqlQuery, URL_STATE_KEYS, KeyUrlState } from '../../url_state/types';
+import { NavTab, NavMatchParams, TabNavigationProps } from '../type';
 
 import {
   replaceQueryStringInLocation,
   replaceStateKeyInQueryString,
   getQueryStringFromLocation,
 } from '../../url_state/helpers';
-
-export interface NavTab {
-  id: string;
-  name: string;
-  href: string;
-  disabled: boolean;
-  urlKey: UrlStateType;
-}
-
-interface NavMatchParams {
-  params: NavigationParams;
-}
-
-export interface TabNavigationProps {
-  location: Location;
-  hosts: KqlQuery;
-  navTabs: Record<string, NavTab>;
-  network: KqlQuery;
-  [CONSTANTS.timerange]: UrlInputsModel;
-  [CONSTANTS.timelineId]: string;
-  display?: 'default' | 'condensed';
-  match?: NavMatchParams;
-  showBorder?: boolean;
-}
 
 const TabContainer = styled.div`
   .euiLink {
@@ -139,7 +114,7 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
           CONSTANTS.timelineId
         ];
         if (urlKey === CONSTANTS.kqlQuery && tab.urlKey === 'host') {
-          urlStateToReplace = this.props.hosts;
+          urlStateToReplace = tab.isDetailPage ? this.props.hostDetails : this.props.hosts;
         } else if (urlKey === CONSTANTS.kqlQuery && tab.urlKey === 'network') {
           urlStateToReplace = this.props.network;
         } else if (urlKey === CONSTANTS.timerange) {
