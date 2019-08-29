@@ -5,7 +5,8 @@
  */
 
 import {
-  FlowTargetNew,
+  FlowDirection,
+  FlowTarget,
   NetworkDnsSortField,
   NetworkTopNFlowData,
   NetworkTopNFlowSortField,
@@ -18,7 +19,8 @@ export * from './types';
 
 export interface NetworkTopNFlowRequestOptions extends RequestOptionsPaginated {
   networkTopNFlowSort: NetworkTopNFlowSortField;
-  flowTarget: FlowTargetNew;
+  flowTarget: FlowTarget;
+  flowDirection: FlowDirection;
 }
 
 export interface NetworkDnsRequestOptions extends RequestOptionsPaginated {

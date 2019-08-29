@@ -144,19 +144,13 @@ describe('AddToKql Component', () => {
 
     expect(store.getState().network.page).toEqual({
       queries: {
-        topNFlowDestination: {
+        topNFlow: {
           activePage: 0,
           limit: 10,
+          flowDirection: 'uniDirectional',
+          flowTarget: 'source',
           topNFlowSort: {
-            field: 'bytes_out',
-            direction: 'desc',
-          },
-        },
-        topNFlowSource: {
-          activePage: 0,
-          limit: 10,
-          topNFlowSort: {
-            field: 'bytes_out',
+            field: 'bytes',
             direction: 'desc',
           },
         },

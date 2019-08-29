@@ -10,17 +10,21 @@ import styled from 'styled-components';
 
 import * as i18n from './translations';
 
-const EmptyWrapper = styled.span`
-  color: ${props => props.theme.eui.euiColorMediumShade};
+const EmptyString = styled.span`
+  color: ${({
+    theme: {
+      eui: { euiColorMediumShade },
+    },
+  }) => euiColorMediumShade};
 `;
 
-EmptyWrapper.displayName = 'EmptyWrapper';
+EmptyString.displayName = 'EmptyString';
 
-export const getEmptyValue = () => '—';
+export const getEmptyValue = () => '--';
 export const getEmptyString = () => `(${i18n.EMPTY_STRING})`;
 
-export const getEmptyTagValue = () => <EmptyWrapper>{getEmptyValue()}</EmptyWrapper>;
-export const getEmptyStringTag = () => <EmptyWrapper>{getEmptyString()}</EmptyWrapper>;
+export const getEmptyTagValue = () => <>{getEmptyValue()}</>;
+export const getEmptyStringTag = () => <EmptyString>{getEmptyString()}</EmptyString>;
 
 export const defaultToEmptyTag = <T extends unknown>(item: T): JSX.Element => {
   if (item == null) {

@@ -6,8 +6,6 @@
 
 import { mount } from 'enzyme';
 import * as React from 'react';
-import { ThemeProvider } from 'styled-components';
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 
 import { mockBrowserFields } from '../../containers/source/mock';
 
@@ -18,20 +16,17 @@ import * as i18n from './translations';
 const timelineId = 'test';
 
 describe('CategoriesPane', () => {
-  const theme = () => ({ eui: euiDarkVars, darkMode: true });
   test('it renders the expected title', () => {
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
-        <CategoriesPane
-          browserFields={mockBrowserFields}
-          filteredBrowserFields={mockBrowserFields}
-          width={CATEGORY_PANE_WIDTH}
-          onCategorySelected={jest.fn()}
-          onUpdateColumns={jest.fn()}
-          selectedCategoryId={''}
-          timelineId={timelineId}
-        />
-      </ThemeProvider>
+      <CategoriesPane
+        browserFields={mockBrowserFields}
+        filteredBrowserFields={mockBrowserFields}
+        width={CATEGORY_PANE_WIDTH}
+        onCategorySelected={jest.fn()}
+        onUpdateColumns={jest.fn()}
+        selectedCategoryId={''}
+        timelineId={timelineId}
+      />
     );
 
     expect(
@@ -44,7 +39,7 @@ describe('CategoriesPane', () => {
 
   test('it renders a "No fields match" message when filteredBrowserFields is empty', () => {
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
+      <div>
         <CategoriesPane
           browserFields={mockBrowserFields}
           filteredBrowserFields={{}}
@@ -54,7 +49,7 @@ describe('CategoriesPane', () => {
           selectedCategoryId={''}
           timelineId={timelineId}
         />
-      </ThemeProvider>
+      </div>
     );
 
     expect(
