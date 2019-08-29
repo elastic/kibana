@@ -231,6 +231,7 @@
     "react-router-dom": "^4.3.1",
     "react-sizeme": "^2.3.6",
     "reactcss": "1.2.3",
+    "recharts": "1.6.2",
     "redux": "4.0.0",
     "redux-actions": "2.2.1",
     "redux-thunk": "2.3.0",
