@@ -285,9 +285,9 @@ export const useCreateAnalyticsForm = () => {
       addRequestMessage({
         error: getErrorMessage(e),
         message: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.errorCreatingDataFrameAnalyticsJob',
+          'xpack.ml.dataframe.analytics.create.errorStartingDataFrameAnalyticsJob',
           {
-            defaultMessage: 'An error occurred creating the data frame analytics job:',
+            defaultMessage: 'An error occurred starting the data frame analytics job:',
           }
         ),
       });
