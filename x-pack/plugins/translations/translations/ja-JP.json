@@ -10321,7 +10321,6 @@
     "xpack.uptime.monitorStatusBar.timestampFromNowTextAriaLabel": "最終確認からの経過時間",
     "xpack.uptime.overviewPage.headerText": "概要",
     "xpack.uptime.pingList.checkHistoryTitle": "履歴",
-    "xpack.uptime.pingList.columns.errorMessageTooltipTitle": "エラーメッセージ",
     "xpack.uptime.pingList.durationMsColumnLabel": "期間",
     "xpack.uptime.pingList.errorTypeColumnLabel": "エラータイプ",
     "xpack.uptime.pingList.ipAddressColumnLabel": "IP",
