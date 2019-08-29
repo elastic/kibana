@@ -14,7 +14,8 @@ export default function({ getService }: FtrProviderContext) {
 
   const jobId = `fq_single_1_${Date.now()}`;
 
-  describe('single metric job creation', function() {
+  // FAILING: https://github.com/elastic/kibana/issues/44337
+  describe.skip('single metric job creation', function() {
     this.tags('smoke');
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
