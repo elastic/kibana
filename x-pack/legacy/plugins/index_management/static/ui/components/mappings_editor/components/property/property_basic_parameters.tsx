@@ -10,9 +10,9 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
   UseField,
   Form,
-} from '../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/hook_form_lib';
-import { Field } from '../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/components';
-import { parametersDefinition, ParameterName, DataTypeDefinition } from '../config';
+} from '../../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/hook_form_lib';
+import { Field } from '../../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/components';
+import { parametersDefinition, ParameterName, DataTypeDefinition } from '../../config';
 
 interface Props {
   form: Form;
@@ -61,7 +61,6 @@ export const PropertyBasicParameters = ({
               return (
                 <EuiFlexItem key={parameter} grow={i !== 0}>
                   <UseField
-                    form={form}
                     path={fieldPathPrefix + parameter}
                     defaultValue={defaultValueParam(parameter)}
                     config={

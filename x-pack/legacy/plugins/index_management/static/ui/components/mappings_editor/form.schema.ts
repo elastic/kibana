@@ -7,7 +7,10 @@
 import {
   FormSchema,
   FIELD_TYPES,
+  VALIDATION_TYPES,
 } from '../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/hook_form_lib';
+
+import { containsCharsField } from '../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/lib/field_validators';
 
 export const schema: FormSchema = {
   dynamic: {
@@ -33,5 +36,14 @@ export const schema: FormSchema = {
     helpText: 'The dynamic_date_formats can be customised to support your own date formats.',
     type: FIELD_TYPES.COMBO_BOX,
     defaultValue: [],
+    validations: [
+      {
+        validator: containsCharsField({
+          message: 'Spaces are not allowed.',
+          chars: ' ',
+        }),
+        type: VALIDATION_TYPES.ARRAY_ITEM,
+      },
+    ],
   },
 };
