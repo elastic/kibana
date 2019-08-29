@@ -10,5 +10,9 @@ export enum CONSTANTS {
   kqlQuery = 'kqlQuery',
   networkDetails = 'network.details',
   networkPage = 'network.page',
+  overviewPage = 'overview.page',
+  timelinePage = 'timeline.page',
   timerange = 'timerange',
+  timelineId = 'timelineId',
+  unknown = 'unknown',
 }
