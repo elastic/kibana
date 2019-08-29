@@ -1,74 +1,58 @@
 [[vega-graph]]
-== Vega Graphs
-experimental[]
+=== Vega graphs
+experimental[] 
 
-You can build https://vega.github.io/vega/examples/[Vega] and
-https://vega.github.io/vega-lite/examples/[Vega-Lite] data visualizations
-into Kibana, either standalone, or on top of a map.  To see Vega in action,
-watch this
-https://www.youtube.com/watch?v=lQGCipY3th8[short introduction video].
+The Vega visualization in {kib} supports https://vega.github.io/vega/examples/[Vega] and https://vega.github.io/vega-lite/examples/[Vega-Lite]. 
 
-Currently Vega version 4.3 and Vega-Lite version 2.6 are supported.
+When you create a Vega visualization, you can edit the `schema` value in the dev tools to the left of the graph to define which of the two expression languages you would like to use. The `schema` value defines the language you would like to use, and the minimum required version. For example: 
 
-NOTE: In Vega it is possible to load data dynamically, e.g. by setting signals as data urls. This is not supported in Kibana as all data is fetched at once prior to passing it to the Vega renderer.
+* Vega-Lite: `$schema: https://vega.github.io/schema/vega-lite/v2.json`
 
+* Vega: `$schema: https://vega.github.io/schema/vega/v4.json`
+ 
+The `schema` URL is used only for identification, and does not need to be accessible by {kib}.
+
+Vega-Lite is the simplified version of Vega; it automates some constructions and has 
+much shorter specifications than Vega. Before rendering, Vega-Lite is automatically converted into 
+Vega, but it has some limitations, and there are some visualizations expressed in Vega that cannot be expressed in Vega-Lite. For more information, refer to the https://vega.github.io/vega-lite/[Vega-Lite documentation].
+
+Want to see Vega in action? Watch the https://www.youtube.com/watch?v=lQGCipY3th8[Vega introduction video].
+
+NOTE: {kib} supports Vega 4.3 and Vega-Lite 2.6.
+
+NOTE: In Vega, it is possible to dynamically load data, e.g. by setting signals as data URLs. This is not supported in {kib} as all data is fetched at once prior to passing it to the Vega renderer.
 
 [[vega-quick-demo]]
-=== Getting Started with Vega
+=== Vega tutorial
 
-* To experiment using sample data, first click the {kib} logo in the upper left hand corner
-and then click the link next to *Sample Data*.
-* Once you have data loaded, go to *Visualize*, click *+*, and select *Vega* to see an example graph. 
-*Note*: The default graph is written in Vega-Lite, but you can build visualizations 
-in either language. See <<vega-vs-vegalite, Vega vs. Vega-Lite>> for more information. 
-* Try changing `mark` from `line` to `point`, `area`, `bar`, `circle`,
-or `square`. Check out the 
-https://vega.github.io/vega-lite/docs/mark.html#mark-def[Vega-Lite docs] for more information.
-* Explore other available https://vega.github.io/vega/examples/[Vega] or
-https://vega.github.io/vega-lite/examples/[Vega-Lite] visualizations. 
-*Note*: You might need to make URLs absolute, for example, replace
-`"url": "data/world-110m.json"` with
-`"url": "https://vega.github.io/editor/data/world-110m.json"`. 
+[float]
+[[vega-before-you-begin]]
+==== Before you begin
+
+For this tutorial, you'll need to add the <<add-sample-data, sample data>>.
+
+[float]
+[[vega-create-visualization]]
+==== Create the visualization
+
+. When you create Vega visualizations, they automatically open in Vega-Lite. To convert Vega-Lite to Vega, use the https://vega.github.io/editor/[editor]. 
+ 
+. Try changing `mark` from `line` to `point`, `area`, `bar`, `circle`, or `square`.
+ 
+. You might need to make URLs absolute, for example, replace `"url": "data/world-110m.json"` with `"url": "https://vega.github.io/editor/data/world-110m.json"`. 
++
 See <<vega-using-vega-and-vegalite-examples, Vega and Vega-Lite examples>>.
-* For more information on getting started, check out this https://www.elastic.co/blog/getting-started-with-vega-visualizations-in-kibana[blog post].  
 
-
-[[vega-vs-vegalite]]
-=== Vega vs Vega-Lite
-
-The Vega visualization in {kib} supports both Vega and Vega-Lite. You can use the 
-`schema` value to define which language you would like to use and its minimum 
-required version.
- 
-For example: 
-
-* Vega-Lite v2: `$schema: https://vega.github.io/schema/vega-lite/v2.json`
-* Vega v4: `$schema: https://vega.github.io/schema/vega/v4.json`
- 
-The `schema` URL is only used for identification, and does not need to be accessible by {kib}.
-
-Vega-Lite is a simplified version of Vega; it automates some constructions and has 
-much shorter specifications than Vega. Vega-Lite is automatically converted into 
-Vega before rendering, but it has some limitations, and there are some visualizations
-that can be expressed in Vega that cannot be expressed in Vega-Lite. You can learn more
-in the https://vega.github.io/vega-lite/[Vega-Lite documentation].
-
-You can use https://vega.github.io/editor/[this editor] to convert Vega-Lite into
-Vega. 
-
-When you create a Vega visualization in {kib}, you can edit the `schema` 
-value in the dev tools to the left of the graph to define which of the two expression 
-languages you would like to use (see examples above).
-
+For more information on getting started, check out the https://www.elastic.co/blog/getting-started-with-vega-visualizations-in-kibana[getting started blog post].  
 
 [[vega-querying-elasticsearch]]
-=== Querying Elasticsearch
+==== Querying Elasticsearch
 
 By default, Vega's https://vega.github.io/vega/docs/data/[data] element
-can use embedded and external data with a `"url"` parameter. Kibana adds support for the direct Elasticsearch queries by overloading
+can use embedded and external data with a `"url"` parameter. {kib} adds support for the direct Elasticsearch queries by overloading
 the `"url"` value.
 
-Here is an example of an Elasticsearch query that counts the number of documents in all indexes. The query uses *@timestamp* field to filter the time range, and break it into histogram buckets.
+Here is an example of an Elasticsearch query that counts the number of documents in all indexes. The query uses the *@timestamp* field to filter the time range, and break it into histogram buckets.
 
 [source,yaml]
 ----
@@ -118,7 +102,7 @@ The full result has this kind of structure:
     "time_buckets": {
       "buckets": [{
           "key_as_string": "2015-11-30T22:00:00.000Z",
-          "key": 1448920800000,
+          "key": 1448920800000, <1>
           "doc_count": 28
         }, {
           "key_as_string": "2015-11-30T23:00:00.000Z",
@@ -127,10 +111,9 @@ The full result has this kind of structure:
         }, ...
 ----
 
-Note that `"key"` is a unix timestamp, and can be used without conversions by the
-Vega date expressions.
+<1> `"key"` is a unix timestamp, and can be used without conversions by the Vega date expressions.
 
-For most graphs we only need the list of the bucket values, so we use `format: {property: "aggregations.time_buckets.buckets"}` expression to focus on just the data we need.
+For most graphs you only need the list of the bucket values. Use the `format: {property: "aggregations.time_buckets.buckets"}` expression to focus on just the data your need.
 
 Query may be specified with individual range and dashboard context as
 well. This query is equivalent to `"%context%": true, "%timefield%": "@timestamp"`,
@@ -185,7 +168,7 @@ on the currently picked range: `"interval": {"%autointerval%": 10}` will
 try to get about 10-15 data points (buckets).
 
 [[vega-esmfiles]]
-=== Elastic Map Files
+==== Elastic map files
 
 It is possible to access Elastic Map Service's files via the same mechanism
 
@@ -204,7 +187,7 @@ format: {property: "features"}
 ----
 
 [[vega-with-a-map]]
-=== Vega with a Map
+==== Vega with a map
 
 Kibana's default map can be used as a base of the Vega graph. To enable,
 the graph must specify `type=map` in the host configuration:
@@ -254,10 +237,10 @@ These signals can be used in the graph, or can be updated to modify the
 positioning of the map.
 
 [[vega-debugging]]
-=== Debugging
+==== Debugging
 
 [[vega-browser-debugging-console]]
-==== Browser Debugging console
+===== Browser Debugging console
 
 Use browser debugging tools (e.g. F12 or Ctrl+Shift+J in Chrome) to
 inspect the `VEGA_DEBUG` variable:
@@ -270,7 +253,7 @@ of Vega-Lite, this is the output of the Vega-Lite compiler.
 Vega-Lite compilation.
 
 [[vega-data]]
-==== Data
+===== Data
 
 If you are using Elasticsearch query, make sure your resulting data is
 what you expected. The easiest way to view it is by using "networking"
@@ -292,23 +275,23 @@ to your kibana.yml file.
 
 [[vega-notes]]
 [[vega-useful-links]]
-=== Useful Links
+==== Useful Links
 
-==== Vega Editor
+===== Vega Editor
 The https://vega.github.io/editor/[Vega Editor] includes examples for Vega & Vega-Lite, but does not support any 
 {kib}-specific features like {es} requests and interactive base maps.
 
-==== Vega-Lite resources
+===== Vega-Lite resources
 * https://vega.github.io/vega-lite/tutorials/getting_started.html[Tutorials]
 * https://vega.github.io/vega-lite/docs/[Docs]
 * https://vega.github.io/vega-lite/examples/[Examples]
 
-==== Vega resources 
+===== Vega resources 
 * https://vega.github.io/vega/tutorials/[Tutorials]
 * https://vega.github.io/vega/docs/[Docs]
 * https://vega.github.io/vega/examples/[Examples]
 
-==== Elastic blog posts
+===== Elastic blog posts
 * https://www.elastic.co/blog/getting-started-with-vega-visualizations-in-kibana[Getting Started with Vega Visualizations in Kibana]
 * https://www.elastic.co/blog/custom-vega-visualizations-in-kibana[Custom Vega Visualizations in Kibana]  
 * https://www.elastic.co/blog/sankey-visualization-with-vega-in-kibana[Sankey Visualization with Vega in Kibana]

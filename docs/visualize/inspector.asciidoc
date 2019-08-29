@@ -1,5 +1,5 @@
 [[vis-inspector]]
-== Inspecting Visualizations
+== Inspect visualizations
 
 Many visualizations allow you to inspect the data behind the 
 visualization. 

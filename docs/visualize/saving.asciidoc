@@ -1,5 +1,5 @@
 [[save-visualize]]
-== Saving Visualizations
+== Save visualizations
 Saving visualizations enables you to reload them in Visualize and use them in
 <<dashboard, dashboards>>.
 
