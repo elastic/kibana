@@ -29,7 +29,7 @@ import { initializeOutput } from '../../../../../../quarantined/src/output';
 // @ts-ignore
 import init from '../../../../../../quarantined/src/app';
 
-import { ConsoleMenu } from '../../../components/console_menu';
+import { ConsoleMenu } from '../../../components';
 
 import { autoIndent, getDocumentation } from './console_menu_actions';
 import { Panel, PanelsContainer } from '../../../components/split_panel';
@@ -133,7 +133,11 @@ export const ConsoleEditor = React.memo(
     useUIAceKeyboardMode(maybeTextArea);
 
     return (
-      <div style={{ height: '100%', width: '100%' }} ref={containerRef}>
+      <div
+        className="consoleContainer"
+        style={{ height: '100%', width: '100%' }}
+        ref={containerRef}
+      >
         <PanelsContainer onPanelWidthChange={onPanelWidthChange}>
           <Panel
             style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}

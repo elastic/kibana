@@ -19,13 +19,16 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { IScope } from 'angular';
-import { showSettingsModal } from './settings_show_modal';
+// import { showSettingsModal } from './settings_show_modal';
 
 // help
-import { showHelpPanel } from './help_show_panel';
+// import { showHelpPanel } from './help_show_panel';
 
-export function getTopNavConfig($scope: IScope, toggleHistory: () => {}) {
+interface Props {
+  toggleHistory: () => void;
+}
+
+export function getTopNavConfig({ toggleHistory }: Props) {
   return [
     {
       id: 'history',
@@ -36,7 +39,7 @@ export function getTopNavConfig($scope: IScope, toggleHistory: () => {}) {
         defaultMessage: 'History',
       }),
       run: () => {
-        $scope.$evalAsync(toggleHistory);
+        toggleHistory();
       },
       testId: 'consoleHistoryButton',
     },
@@ -49,7 +52,7 @@ export function getTopNavConfig($scope: IScope, toggleHistory: () => {}) {
         defaultMessage: 'Settings',
       }),
       run: () => {
-        showSettingsModal();
+        // showSettingsModal();
       },
       testId: 'consoleSettingsButton',
     },
@@ -62,10 +65,10 @@ export function getTopNavConfig($scope: IScope, toggleHistory: () => {}) {
         defaultMessage: 'Help',
       }),
       run: () => {
-        const hideHelpPanel = showHelpPanel();
-        $scope.$on('$destroy', () => {
-          hideHelpPanel();
-        });
+        // const hideHelpPanel = showHelpPanel();
+        // $scope.$on('$destroy', () => {
+        //   hideHelpPanel();
+        // });
       },
       testId: 'consoleHelpButton',
     },

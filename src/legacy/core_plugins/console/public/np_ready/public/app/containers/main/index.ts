@@ -17,6 +17,4 @@
  * under the License.
  */
 
-export * from './split_panel';
-export { TopNavMenuItem, TopNavMenu } from './top_nav_menu';
-export { ConsoleMenu } from './console_menu';
+export { Main } from './main';

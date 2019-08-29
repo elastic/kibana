@@ -20,12 +20,14 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { debounce } from 'lodash';
 
-import { ConsoleEditor, ConsoleHistory } from './editor';
+import { TopNavMenu } from '../../components';
+import { ConsoleEditor, ConsoleHistory } from '../editor';
 
-import { useAppContext } from '../context';
-import { StorageKeys } from '../services/storage';
+import { useAppContext } from '../../context';
+import { StorageKeys } from '../../services/storage';
 
-import { createSettings } from './editor/legacy/settings';
+import { createSettings } from '../editor/legacy/settings';
+import { getTopNavConfig } from './get_top_nav';
 
 const INITIAL_PANEL_WIDTH = 50;
 
@@ -34,7 +36,7 @@ export function Main() {
 
   const settingsRef = useRef(createSettings({ storage }));
   const [editorReady, setEditorReady] = useState<boolean>(false);
-  const [, setShowingHistory] = useState(false);
+  const [showingHistory, setShowingHistory] = useState(false);
   const [firstPanelWidth, secondPanelWidth] = storage.get(StorageKeys.WIDTH, [
     INITIAL_PANEL_WIDTH,
     INITIAL_PANEL_WIDTH,
@@ -61,7 +63,11 @@ export function Main() {
 
   return (
     <>
-      {renderConsoleHistory()}
+      {showingHistory ? (
+        renderConsoleHistory()
+      ) : (
+        <TopNavMenu items={getTopNavConfig({ toggleHistory: () => setShowingHistory(true) })} />
+      )}
       <ConsoleEditor
         onEditorsReady={onEditorReady}
         settings={settingsRef.current}

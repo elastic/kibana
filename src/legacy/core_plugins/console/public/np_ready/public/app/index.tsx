@@ -26,7 +26,7 @@ export function boot(deps: { docLinkVersion: string; I18nContext: any; ResizeChe
   const { I18nContext, ResizeChecker } = deps;
   const storage = createStorage({
     engine: window.localStorage,
-    prefix: 'console_editor:',
+    prefix: 'sense:',
   });
 
   const history = createHistory({ storage });

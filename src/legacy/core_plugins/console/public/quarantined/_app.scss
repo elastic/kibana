@@ -1,6 +1,9 @@
 // TODO: Move all of the styles here (should be modularised by, e.g., CSS-in-JS or CSS modules).
 #consoleRoot {
   height: 100%;
+}
+
+.consoleContainer {
   padding: $euiSizeS;
 }
 

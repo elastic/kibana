@@ -17,6 +17,31 @@
  * under the License.
  */
 
-export * from './split_panel';
-export { TopNavMenuItem, TopNavMenu } from './top_nav_menu';
-export { ConsoleMenu } from './console_menu';
+import React from 'react';
+import { EuiTabs, EuiTab } from '@elastic/eui';
+
+export interface TopNavMenuItem {
+  id: string;
+  label: string;
+  description: string;
+  run: () => void;
+  testId: string;
+}
+
+interface Props {
+  items: TopNavMenuItem[];
+}
+
+export function TopNavMenu({ items }: Props) {
+  return (
+    <EuiTabs size="s">
+      {items.map((item, idx) => {
+        return (
+          <EuiTab key={idx} onClick={item.run} title={item.label}>
+            {item.label}
+          </EuiTab>
+        );
+      })}
+    </EuiTabs>
+  );
+}
