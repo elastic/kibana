@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore EuiSearchBar is not exported by EUI
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSearchBar, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
@@ -24,7 +23,7 @@ import { useUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../infra/public';
 import { getIndexPattern } from '../lib/adapters/index_pattern';
-import { toStaticIndexPattern } from '../lib/helper';
+import { toStaticIndexPattern, stringifyKueries } from '../lib/helper';
 
 interface OverviewPageProps {
   basePath: string;
@@ -44,35 +43,6 @@ const combineFiltersAndUserSearch = (filters: string, search: string) => {
   if (!search) return filters;
   return `(${filters}) and (${search})`;
 };
-
-/**
- * Extract a map's keys to an array, then map those keys to a string per key.
- * The strings contain all of the values chosen for the given field (which is also the key value).
- * Reduce the list of query strings to a singular string, with AND operators between.
- */
-const stringifyKueries = (kueries: Map<string, string[]>): string =>
-  Array.from(kueries.keys())
-    .map(key => {
-      const value = kueries.get(key);
-      if (!value || value.length === 0) return '';
-      return value.reduce((prev, cur, index, array) => {
-        const expression = `${key}:${cur}`;
-        if (array.length === 1) {
-          return expression;
-        } else if (array.length > 1 && index === 0) {
-          return `(${expression}`;
-        } else if (index + 1 === array.length) {
-          return `${prev} or ${expression})`;
-        }
-        return `${prev} or ${expression}`;
-      }, '');
-    })
-    .reduce((prev, cur, index, array) => {
-      if (array.length === 1 || index === 0) {
-        return cur;
-      }
-      return `${prev} and ${cur}`;
-    }, '');
 
 export type UptimeSearchBarQueryChangeHandler = (queryChangedEvent: {
   query?: { text: string };

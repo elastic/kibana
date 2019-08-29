@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getChartDateLabel } from './charts';
 export { convertMicrosecondsToMilliseconds } from './convert_measurements';
 export * from './observability_integration';
-export { seriesHasDownValues } from './series_has_down_values';
-export { UptimeUrlParams, getSupportedUrlParams } from './url_params';
 export { getApiPath } from './get_api_path';
+export { getChartDateLabel } from './charts';
+export { seriesHasDownValues } from './series_has_down_values';
+export { stringifyKueries } from './stringify_kueries';
 export { toStaticIndexPattern } from './to_static_index_pattern';
+export { UptimeUrlParams, getSupportedUrlParams } from './url_params';
