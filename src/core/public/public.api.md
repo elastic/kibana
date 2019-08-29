@@ -5,6 +5,7 @@
 ```ts
 
 import { IconType } from '@elastic/eui';
+import { MouseEventHandler } from 'react';
 import { Observable } from 'rxjs';
 import React from 'react';
 import * as Rx from 'rxjs';
@@ -62,6 +63,8 @@ export interface ChromeBreadcrumb {
     'data-test-subj'?: string;
     // (undocumented)
     href?: string;
+    // (undocumented)
+    onClick?: MouseEventHandler<HTMLButtonElement>;
     // (undocumented)
     text: string;
 }
