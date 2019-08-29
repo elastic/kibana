@@ -213,7 +213,6 @@ export const PingListComponent = ({
 
   return (
     <Fragment>
-      <EuiSpacer size="s" />
       <EuiPanel>
         <EuiTitle size="xs">
           <h4>
