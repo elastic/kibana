@@ -23,6 +23,7 @@ import { ServerOptions } from './server_options';
 import {
   checkCodeNode,
   checkRoute,
+  commitSearchRoute,
   documentSearchRoute,
   fileRoute,
   installRoute,
@@ -272,6 +273,9 @@ export class CodePlugin {
       this.serverOptions
     );
     repositorySearchRoute(codeServerRouter, this.log);
+    if (this.serverOptions.enableCommitIndexing) {
+      commitSearchRoute(codeServerRouter, this.log);
+    }
     documentSearchRoute(codeServerRouter, this.log);
     symbolSearchRoute(codeServerRouter, this.log);
     fileRoute(codeServerRouter, codeServices);

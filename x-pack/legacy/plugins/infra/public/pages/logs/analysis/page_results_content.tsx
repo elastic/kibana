@@ -21,12 +21,15 @@ import {
 } from '@elastic/eui';
 import dateMath from '@elastic/datemath';
 import moment from 'moment';
+
+import euiStyled from '../../../../../../common/eui_styled_components';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
 import { useInterval } from '../../../hooks/use_interval';
 import { useLogAnalysisResults } from '../../../containers/logs/log_analysis';
 import { useLogAnalysisResultsUrlState } from '../../../containers/logs/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import { LogRateResults } from './sections/log_rate';
+import { FirstUseCallout } from './first_use';
 
 const DATE_PICKER_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
 
@@ -40,7 +43,13 @@ const getLoadingState = () => {
   );
 };
 
-export const AnalysisResultsContent = ({ sourceId }: { sourceId: string }) => {
+export const AnalysisResultsContent = ({
+  sourceId,
+  isFirstUse,
+}: {
+  sourceId: string;
+  isFirstUse: boolean;
+}) => {
   useTrackPageview({ app: 'infra_logs', path: 'analysis_results' });
   useTrackPageview({ app: 'infra_logs', path: 'analysis_results', delay: 15000 });
 
@@ -87,6 +96,9 @@ export const AnalysisResultsContent = ({ sourceId }: { sourceId: string }) => {
     endTime: timeRange.endTime,
     bucketDuration,
   });
+  const hasResults = useMemo(() => logEntryRate && logEntryRate.histogramBuckets.length > 0, [
+    logEntryRate,
+  ]);
   const handleTimeRangeChange = useCallback(
     ({ start, end }: { start: string; end: string }) => {
       const parsedStart = dateMath.parse(start);
@@ -176,17 +188,26 @@ export const AnalysisResultsContent = ({ sourceId }: { sourceId: string }) => {
               </EuiFlexGroup>
             </EuiPanel>
           </EuiPage>
-          <EuiPage style={{ minHeight: '100vh' }}>
+          <ExpandingPage>
             <EuiPageBody>
               <EuiPageContent>
                 <EuiPageContentBody>
-                  <LogRateResults isLoading={isLoading} results={logEntryRate} />
+                  {isFirstUse && !hasResults ? <FirstUseCallout /> : null}
+                  <LogRateResults
+                    isLoading={isLoading}
+                    results={logEntryRate}
+                    timeRange={timeRange}
+                  />
                 </EuiPageContentBody>
               </EuiPageContent>
             </EuiPageBody>
-          </EuiPage>
+          </ExpandingPage>
         </>
       )}
     </>
   );
 };
+
+const ExpandingPage = euiStyled(EuiPage)`
+  flex: 1 0 0%;
+`;
