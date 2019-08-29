@@ -174,8 +174,7 @@ export async function getTransactionBreakdown({
           ...p,
           [name]: p[name].concat({
             x: time,
-            y: percentage,
-            hasData: percentage !== null
+            y: percentage
           })
         };
       }, prev);
@@ -195,6 +194,7 @@ export async function getTransactionBreakdown({
           const value = series[series.length - 1];
           const isEmpty = value.y === null;
           if (isEmpty) {
+            // local mutation to prevent complicated map/reduce calls
             value.y = 0;
           }
         });
@@ -202,10 +202,7 @@ export async function getTransactionBreakdown({
 
       return updatedSeries;
     },
-    {} as Record<
-      string,
-      Array<{ x: number; y: number | null; hasData: boolean }>
-    >
+    {} as Record<string, Array<{ x: number; y: number | null }>>
   );
 
   const timeseries = kpis.map(kpi => ({

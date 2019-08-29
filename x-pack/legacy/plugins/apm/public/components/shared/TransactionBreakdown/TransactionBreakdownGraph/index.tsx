@@ -21,8 +21,8 @@ const tickFormatY = (y: number | null | undefined) => {
   return numeral(y || 0).format('0 %');
 };
 
-const formatTooltipValue = (coordinate: Coordinate & { hasData?: boolean }) => {
-  return coordinate.hasData && isValidCoordinateValue(coordinate.y)
+const formatTooltipValue = (coordinate: Coordinate) => {
+  return isValidCoordinateValue(coordinate.y)
     ? asPercent(coordinate.y, 1)
     : NOT_AVAILABLE_LABEL;
 };
