@@ -21,7 +21,12 @@ import { UpgradeContents } from './upgrade_contents';
 import { FilterGroup } from './jobs_table/filter_group';
 import { ShowingCount } from './jobs_table/showing_count';
 import { PopoverDescription } from './popover_description';
-import { getConfigTemplatesToInstall, getJobsToDisplay, getJobsToInstall } from './helpers';
+import {
+  getConfigTemplatesToInstall,
+  getIndexPatternTitles,
+  getJobsToDisplay,
+  getJobsToInstall,
+} from './helpers';
 import { configTemplates, siemJobPrefix } from './config_templates';
 import { useStateToaster } from '../toasters';
 import { errorToToaster } from '../ml/api/error_to_toaster';
@@ -100,6 +105,8 @@ export const MlPopover = React.memo(() => {
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const headers = { 'kbn-version': kbnVersion };
 
+  const configuredIndexPatternTitles = getIndexPatternTitles(configuredIndexPatterns);
+
   // Enable/Disable Job & Datafeed -- passed to JobsTable for use as callback on JobSwitch
   const enableDatafeed = async (jobName: string, latestTimestampMs: number, enable: boolean) => {
     // Max start time for job is no more than two weeks ago to ensure job performance
@@ -136,7 +143,7 @@ export const MlPopover = React.memo(() => {
   const configTemplatesToInstall = getConfigTemplatesToInstall(
     configTemplates,
     installedJobIds,
-    configuredIndexPatterns || []
+    configuredIndexPatternTitles || []
   );
 
   // Filter installed job to show all 'siem' group jobs or just embedded
@@ -152,7 +159,7 @@ export const MlPopover = React.memo(() => {
   useEffect(() => {
     if (
       jobSummaryData != null &&
-      configuredIndexPatterns.length > 0 &&
+      configuredIndexPatternTitles.length > 0 &&
       configTemplatesToInstall.length > 0
     ) {
       const setupJobs = async () => {
@@ -178,7 +185,7 @@ export const MlPopover = React.memo(() => {
       };
       setupJobs();
     }
-  }, [jobSummaryData, configuredIndexPatterns]);
+  }, [jobSummaryData, configuredIndexPatternTitles]);
 
   if (!capabilities.isPlatinumOrTrialLicense) {
     // If the user does not have platinum show upgrade UI
