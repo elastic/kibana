@@ -2,24 +2,6 @@
 
 exports[`PingList component renders sorted list without errors 1`] = `
 <Fragment>
-  <EuiFlexGroup
-    alignItems="center"
-    gutterSize="s"
-    responsive={false}
-  >
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiBadge
-        color="hollow"
-      >
-        9231
-      </EuiBadge>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiSpacer
-    size="s"
-  />
   <EuiPanel
     grow={true}
     hasShadow={false}

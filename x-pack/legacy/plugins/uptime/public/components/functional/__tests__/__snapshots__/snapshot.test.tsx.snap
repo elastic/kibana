@@ -20,12 +20,13 @@ exports[`Snapshot component renders without errors 1`] = `
     </EuiTitle>
     <EuiFlexGroup
       direction="column"
+      gutterSize="m"
     >
       <EuiFlexItem
         grow={false}
       >
         <EuiSpacer
-          size="s"
+          size="xs"
         />
       </EuiFlexItem>
       <EuiFlexItem>
