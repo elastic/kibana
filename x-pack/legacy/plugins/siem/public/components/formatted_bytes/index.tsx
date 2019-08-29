@@ -19,7 +19,7 @@ export const PreferenceFormattedBytes = React.memo<{ value: string | number }>((
     <>
       {config.bytesFormat
         ? numeral(value).format(config.bytesFormat)
-        : numeral(value).format('0,0.[000]b')}
+        : numeral(value).format('0,0.[0]b')}
     </>
   );
 });
