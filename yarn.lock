@@ -1076,10 +1076,10 @@
     ts-debounce "^1.0.0"
     uuid "^3.3.2"
 
-"@elastic/ctags-langserver@^0.1.8":
-  version "0.1.8"
-  resolved "https://registry.yarnpkg.com/@elastic/ctags-langserver/-/ctags-langserver-0.1.8.tgz#98d82d63a415080422bd8681bb4680cec754e9ca"
-  integrity sha512-PM24l8hCxahi+DndPAYHM0bIhb6/QCBH9WtZh1NUZCfrSYsy5CkB4yZMoyPAYIr2VKWvnIfr+YKT6i/2JaFv5w==
+"@elastic/ctags-langserver@^0.1.9":
+  version "0.1.9"
+  resolved "https://registry.yarnpkg.com/@elastic/ctags-langserver/-/ctags-langserver-0.1.9.tgz#d6e8ad0771db4e1d0fda297570885327c2c505ab"
+  integrity sha512-eIw5c2WkOTZyodTLWOShHRLEe0jA5umvqH1oTS5PtRbXsLwAIdF1MX4J+An+ScVFYUd4gZjQNVE5gKCuMRPfmg==
   dependencies:
     "@elastic/lsp-extension" "^0.1.1"
     "@elastic/node-ctags" "1.0.2"
@@ -1088,6 +1088,7 @@
     line-column "^1.0.2"
     minimatch "3.0.4"
     mz "^2.7.0"
+    parse-gitignore "1.0.1"
     vscode-languageserver "^5.2.1"
 
 "@elastic/elasticsearch@^7.3.0":
@@ -21408,6 +21409,11 @@ parse-git-config@^1.1.1:
     fs-exists-sync "^0.1.0"
     git-config-path "^1.0.1"
     ini "^1.3.4"
+
+parse-gitignore@1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/parse-gitignore/-/parse-gitignore-1.0.1.tgz#8b9dc57f17b810d495c5dfa62eb07caffe7758c7"
+  integrity sha512-UGyowyjtx26n65kdAMWhm6/3uy5uSrpcuH7tt+QEVudiBoVS+eqHxD5kbi9oWVRwj7sCzXqwuM+rUGw7earl6A==
 
 parse-glob@^3.0.4:
   version "3.0.4"
