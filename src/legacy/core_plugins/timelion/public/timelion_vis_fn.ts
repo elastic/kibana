@@ -19,20 +19,17 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { TimelionRequestHandlerProvider } from './vis/timelion_request_handler';
 import chrome from 'ui/chrome';
+import { TimelionRequestHandlerProvider } from './vis/timelion_request_handler';
 
 export const timelionVis = () => ({
   name: 'timelion_vis',
   type: 'render',
   context: {
-    types: [
-      'kibana_context',
-      'null',
-    ],
+    types: ['kibana_context', 'null'],
   },
   help: i18n.translate('timelion.function.help', {
-    defaultMessage: 'Timelion visualization'
+    defaultMessage: 'Timelion visualization',
   }),
   args: {
     expression: {
@@ -43,11 +40,11 @@ export const timelionVis = () => ({
     interval: {
       types: ['string', 'null'],
       default: 'auto',
-    }
+    },
   },
-  async fn(context, args) {
+  async fn(context: any, args: any) {
     const $injector = await chrome.dangerouslyGetActiveInjector();
-    const Private = $injector.get('Private');
+    const Private = $injector.get('Private') as any;
     const timelionRequestHandler = Private(TimelionRequestHandlerProvider).handler;
 
     const visParams = { expression: args.expression, interval: args.interval };
@@ -57,7 +54,7 @@ export const timelionVis = () => ({
       query: get(context, 'query', null),
       filters: get(context, 'filters', null),
       forceFetch: true,
-      visParams: visParams,
+      visParams,
     });
 
     response.visType = 'timelion';

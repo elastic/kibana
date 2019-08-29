@@ -18,42 +18,56 @@
  */
 
 import _ from 'lodash';
+// @ts-ignore
 import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
+// @ts-ignore
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 
-const TimelionRequestHandlerProvider = function (Private, $http, config) {
+const TimelionRequestHandlerProvider = function(Private: any, $http: any, config: any) {
   const timezone = Private(timezoneProvider)();
 
   return {
     name: 'timelion',
-    handler: function ({ timeRange, filters, query, visParams }) {
-
+    handler({
+      timeRange,
+      filters,
+      query,
+      visParams,
+    }: {
+      timeRange: any;
+      filters: any;
+      query: any;
+      visParams: any;
+    }) {
       return new Promise((resolve, reject) => {
         const expression = visParams.expression;
         if (!expression) return;
         const esQueryConfigs = getEsQueryConfig(config);
-        const httpResult = $http.post('../api/timelion/run', {
-          sheet: [expression],
-          extended: {
-            es: {
-              filter: buildEsQuery(undefined, query, filters, esQueryConfigs)
-            }
-          },
-          time: _.extend(timeRange, {
-            interval: visParams.interval,
-            timezone: timezone
-          }),
-        })
-          .then(resp => resp.data)
-          .catch(resp => { throw resp.data; });
+        const httpResult = $http
+          .post('../api/timelion/run', {
+            sheet: [expression],
+            extended: {
+              es: {
+                filter: buildEsQuery(undefined, query, filters, esQueryConfigs),
+              },
+            },
+            time: _.extend(timeRange, {
+              interval: visParams.interval,
+              timezone,
+            }),
+          })
+          .then((resp: any) => resp.data)
+          .catch((resp: any) => {
+            throw resp.data;
+          });
 
         httpResult
-          .then(function (resp) {
+          .then(function(resp: any) {
             resolve(resp);
           })
-          .catch(function (resp) {
+          .catch(function(resp: any) {
             const err = new Error(resp.message);
             err.stack = resp.stack;
             toastNotifications.addError(err, {
@@ -64,7 +78,7 @@ const TimelionRequestHandlerProvider = function (Private, $http, config) {
             reject(err);
           });
       });
-    }
+    },
   };
 };
 

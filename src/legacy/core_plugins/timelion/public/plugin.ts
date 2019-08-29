@@ -26,13 +26,9 @@ import {
 import { VisualizationsSetup } from 'src/legacy/core_plugins/visualizations/public';
 import { Plugin as DataPublicPlugin } from 'src/plugins/data/public';
 import { IFeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
-// @ts-ignore
 import { timelionVis } from './timelion_vis_fn';
-// @ts-ignore
 import { TimelionVisProvider } from './vis';
-// @ts-ignore
 import { registerFeature } from './register_feature';
-// @ts-ignore
 import { timeChartProvider } from './panels/timechart/timechart';
 
 /** @internal */

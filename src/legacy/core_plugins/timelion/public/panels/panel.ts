@@ -19,20 +19,22 @@
 
 import { i18n } from '@kbn/i18n';
 
-export default function Panel(name, config) {
+export class Panel {
+  name: any;
+  help: any;
+  render: any;
 
-  this.name = name;
+  constructor(name: any, config: any) {
+    this.name = name;
+    this.help = config.help || '';
+    this.render = config.render;
 
-  this.help = config.help || '';
-
-  this.render = config.render;
-
-  if (!config.render) {
-    throw new Error (
-      i18n.translate('timelion.panels.noRenderFunctionErrorMessage', {
-        defaultMessage: 'Panel must have a rendering function'
-      })
-    );
+    if (!config.render) {
+      throw new Error(
+        i18n.translate('timelion.panels.noRenderFunctionErrorMessage', {
+          defaultMessage: 'Panel must have a rendering function',
+        })
+      );
+    }
   }
-
 }

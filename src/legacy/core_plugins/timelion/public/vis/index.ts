@@ -17,17 +17,19 @@
  * under the License.
  */
 
+// @ts-ignore
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
-import { TimelionRequestHandlerProvider } from './timelion_request_handler';
+// @ts-ignore
 import { DefaultEditorSize } from 'ui/vis/editor_size';
 // we also need to load the controller and directive used by the template
 import './timelion_vis_controller';
 import '../directives/timelion_expression_input';
+import { TimelionRequestHandlerProvider } from './timelion_request_handler';
 import visConfigTemplate from './timelion_vis.html';
 import editorConfigTemplate from './timelion_vis_params.html';
 
-export function TimelionVisProvider(Private) {
+export function TimelionVisProvider(Private: any) {
   const VisFactory = Private(VisFactoryProvider);
   const timelionRequestHandler = Private(TimelionRequestHandlerProvider);
 
@@ -43,7 +45,7 @@ export function TimelionVisProvider(Private) {
     visConfig: {
       defaults: {
         expression: '.es(*)',
-        interval: 'auto'
+        interval: 'auto',
       },
       template: visConfigTemplate,
     },
