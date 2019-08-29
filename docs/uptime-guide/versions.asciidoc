@@ -5,7 +5,7 @@
 // release-state is only:   released | prerelease | unreleased
 
 :version:         7.4.0
-:branch:          7.x
+:branch:          7.4
 :major-version:   7.x
 :short-version:   7
 :release-state:   unreleased
