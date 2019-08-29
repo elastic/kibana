@@ -45,13 +45,13 @@ export const UseArray = ({ path, initialNumberOfItems, children }: Props) => {
   const getInitialItemsFromValues = (values: any[]): ArrayItem[] =>
     values.map((_, index) => ({
       id: uniqueId.current++,
-      path: `${path}.${index}`,
+      path: `${path}[${index}]`,
       isNew: false,
     }));
 
   const getNewItemAtIndex = (index: number): ArrayItem => ({
     id: uniqueId.current++,
-    path: `${path}.${index}`,
+    path: `${path}[${index}]`,
     isNew: true,
   });
 
@@ -66,7 +66,7 @@ export const UseArray = ({ path, initialNumberOfItems, children }: Props) => {
       (row, index) =>
         ({
           ...row,
-          path: `${path}.${index}`,
+          path: `${path}[${index}]`,
         } as ArrayItem)
     );
 
