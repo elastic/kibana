@@ -7,7 +7,13 @@
 import { get } from 'lodash';
 import moment from 'moment';
 import { INDEX_NAMES } from '../../../../common/constants';
-import { DocCount, HistogramDataPoint, Ping, PingResults } from '../../../../common/graphql/types';
+import {
+  DocCount,
+  HistogramDataPoint,
+  Ping,
+  PingResults,
+  HttpBody,
+} from '../../../../common/graphql/types';
 import { formatEsBucketsForHistogram, getFilteredQueryAndStatusFilter } from '../../helper';
 import { DatabaseAdapter, HistogramQueryResult } from '../database';
 import { UMPingsAdapter } from './adapter_types';
@@ -83,9 +89,18 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
 
     const locations = get(aggs, 'locations', { buckets: [{ key: 'N/A', doc_count: 0 }] });
 
-    const pings: Ping[] = hits.map(({ _source }: any) => {
+    const pings: Ping[] = hits.map(({ _id, _source }: any) => {
       const timestamp = _source['@timestamp'];
-      return { timestamp, ..._source };
+
+      // Calculate here the length of the content string in bytes, this is easier than in client JS, where
+      // we don't have access to Buffer.byteLength. There are some hacky ways to do this in the
+      // client but this is cleaner.
+      const httpBody = get<HttpBody>(_source, 'http.response.body');
+      if (httpBody && httpBody.content) {
+        httpBody.content_bytes = Buffer.byteLength(httpBody.content);
+      }
+
+      return { id: _id, timestamp, ..._source };
     });
 
     const results: PingResults = {
