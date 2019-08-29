@@ -35,9 +35,9 @@ export const SnapshotComponent = ({ data }: UptimeGraphQLQueryProps<SnapshotQuer
             />
           </h5>
         </EuiTitle>
-        <EuiFlexGroup direction="column">
+        <EuiFlexGroup direction="column" gutterSize="m">
           <EuiFlexItem grow={false}>
-            <EuiSpacer size="s" />
+            <EuiSpacer size="xs" />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFlexGroup justifyContent="spaceEvenly" gutterSize="s">
