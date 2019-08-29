@@ -65,12 +65,12 @@ export function validateConfig(
       .getOrElse(false);
 
     if (!anyUrlAllowed) {
-      const urlHostname = new URL(url).hostname;
+      const urlHostname = new URL(url).hostname.toLowerCase();
       const isWhitelisted = kibanaConfig
         .map(({ whitelistedEndpoints }) => {
           return fromNullable(
             asArray(whitelistedEndpoints).find(
-              whitelistedUrl => parseWhitelistURL(whitelistedUrl) === urlHostname
+              whitelistedUrl => whitelistedUrl.toLowerCase() === urlHostname
             )
           ).isSome();
         })
@@ -90,15 +90,6 @@ export function validateConfig(
       }
     }
   };
-}
-
-function parseWhitelistURL(whitelistedUrl: string): string {
-  try {
-    return new URL(whitelistedUrl).hostname;
-  } catch (e) {
-    // if we can't parse the URL assume that it is specifying the hostname itself
-    return whitelistedUrl;
-  }
 }
 
 // secrets definition

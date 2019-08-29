@@ -167,7 +167,7 @@ describe('config validation', () => {
 
   test('config validation passes when kibana config whitelists the hostname in the specified URL', () => {
     const kiabanaActionConfig = some({
-      whitelistedEndpoints: ['http://mylisteningserver'],
+      whitelistedEndpoints: ['mylisteningserver'],
     });
     const config: Record<string, any> = {
       url: 'http://mylisteningserver:9200/endpoint',
@@ -183,26 +183,10 @@ describe('config validation', () => {
 
   test('config validation passes when kibana config whitelists multiple hostnames, including the specified URL', () => {
     const kiabanaActionConfig = some({
-      whitelistedEndpoints: ['http://localhost', 'http://mylisteningserver'],
+      whitelistedEndpoints: ['http://localhost', 'api.mylisteningserver.com'],
     });
     const config: Record<string, any> = {
-      url: 'http://mylisteningserver:9200/endpoint',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    };
-
-    expect(
-      validateWebhookConfig(kiabanaActionConfig as Option<WebhookActionKibanaConfig>)(config)
-    ).toBeUndefined();
-  });
-
-  test('config validation passes when kibana config whitelists just the hostname', () => {
-    const kiabanaActionConfig = some({
-      whitelistedEndpoints: ['http://localhost', 'mylisteningserver.com'],
-    });
-    const config: Record<string, any> = {
-      url: 'http://mylisteningserver.com:9200/endpoint',
+      url: 'http://api.mylisteningserver.com:9200/endpoint',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -215,7 +199,7 @@ describe('config validation', () => {
 
   test('config validation returns an error if there is a whitelist but the specified URL isnt on it', () => {
     const kiabanaActionConfig = some({
-      whitelistedEndpoints: ['http://localhost', 'http://webhook.elastic.co'],
+      whitelistedEndpoints: ['localhost', 'webhook.elastic.co'],
     });
     const config: Record<string, any> = {
       url: 'http://mylisteningserver:9200/endpoint',
