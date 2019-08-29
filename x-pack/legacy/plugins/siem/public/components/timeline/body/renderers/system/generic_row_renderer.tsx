@@ -30,10 +30,10 @@ export const createGenericSystemRowRenderer = ({
       action.toLowerCase() === actionName
     );
   },
-  renderRow: ({ browserFields, data, width, children }) => (
+  renderRow: ({ browserFields, data, children }) => (
     <Row>
       {children}
-      <RowRendererContainer width={width}>
+      <RowRendererContainer>
         <SystemGenericDetails
           browserFields={browserFields}
           data={data}
@@ -62,10 +62,10 @@ export const createGenericFileRowRenderer = ({
       action.toLowerCase() === actionName
     );
   },
-  renderRow: ({ browserFields, data, width, children }) => (
+  renderRow: ({ browserFields, data, children }) => (
     <Row>
       {children}
-      <RowRendererContainer width={width}>
+      <RowRendererContainer>
         <SystemGenericFileDetails
           browserFields={browserFields}
           data={data}

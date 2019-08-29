@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { idx } from '@kbn/elastic-idx';
 import { Setup } from '../../../helpers/setup_request';
 import {
   SERVICE_NAME,
@@ -42,6 +43,6 @@ export async function getUnavailableEnvironments({
   };
 
   const resp = await client.search(params);
-  const buckets = resp.aggregations.environments.buckets;
+  const buckets = idx(resp.aggregations, _ => _.environments.buckets) || [];
   return buckets.map(bucket => bucket.key);
 }

@@ -16,6 +16,7 @@ export const services = {
   esSupertestWithoutAuth: apiIntegrationServices.esSupertestWithoutAuth,
   supertest: kibanaApiIntegrationServices.supertest,
   supertestWithoutAuth: apiIntegrationServices.supertestWithoutAuth,
+  retry: kibanaApiIntegrationServices.retry,
   esArchiver: kibanaFunctionalServices.esArchiver,
   kibanaServer: kibanaFunctionalServices.kibanaServer,
 };

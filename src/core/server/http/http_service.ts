@@ -25,12 +25,22 @@ import { LoggerFactory } from '../logging';
 import { CoreService } from '../../types';
 
 import { Logger } from '../logging';
+import { ContextSetup } from '../context';
 import { CoreContext } from '../core_context';
+import { PluginOpaqueId } from '../plugins';
 
 import { Router, IRouter } from './router';
 import { HttpConfig, HttpConfigType } from './http_config';
 import { HttpServer, HttpServerSetup } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
+
+import { RequestHandlerContextContainer, RequestHandlerContextProvider } from './types';
+
+import { RequestHandlerContext } from '../../server';
+
+interface SetupDeps {
+  context: ContextSetup;
+}
 
 /** @public */
 export type HttpServiceSetup = Omit<HttpServerSetup, 'registerRouter'> & {
@@ -44,10 +54,37 @@ export type HttpServiceSetup = Omit<HttpServerSetup, 'registerRouter'> & {
    * // handler is called when '${my-plugin-id}/path' resource is requested with `GET` method
    * router.get({ path: '/path', validate: false }, (context, req, res) => res.ok({ content: 'ok' }));
    * ```
+   * @public
+   */
+  createRouter: (path: string, plugin?: PluginOpaqueId) => IRouter;
+  /**
+   * Register a context provider for a route handler.
+   * @example
+   * ```ts
+   *  // my-plugin.ts
+   *  deps.http.registerRouteHandlerContext(
+   *    'myApp',
+   *    (context, req) => {
+   *     async function search (id: string) {
+   *       return await context.elasticsearch.adminClient.callAsInternalUser('endpoint', id);
+   *     }
+   *     return { search };
+   *    }
+   *  );
    *
-   * @internal
-   * */
-  createRouter: (path: string) => IRouter;
+   * // my-route-handler.ts
+   *  router.get({ path: '/', validate: false }, async (context, req, res) => {
+   *    const response = await context.myApp.search(...);
+   *    return res.ok(response);
+   *  });
+   * ```
+   * @public
+   */
+  registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
+    pluginOpaqueId: PluginOpaqueId,
+    contextName: T,
+    provider: RequestHandlerContextProvider<RequestHandlerContext>
+  ) => RequestHandlerContextContainer<RequestHandlerContext>;
 };
 
 /** @public */
@@ -66,6 +103,7 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
   private readonly logger: LoggerFactory;
   private readonly log: Logger;
   private notReadyServer?: Server;
+  private requestHandlerContext?: RequestHandlerContextContainer<RequestHandlerContext>;
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger;
@@ -80,7 +118,8 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
     );
   }
 
-  public async setup() {
+  public async setup(deps: SetupDeps) {
+    this.requestHandlerContext = deps.context.createContextContainer();
     this.configSubscription = this.config$.subscribe(() => {
       if (this.httpServer.isListening()) {
         // If the server is already running we can't make any config changes
@@ -101,11 +140,18 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
     const contract: HttpServiceSetup = {
       ...serverContract,
 
-      createRouter: (path: string) => {
-        const router = new Router(path, this.log);
+      createRouter: (path: string, pluginId: PluginOpaqueId = this.coreContext.coreId) => {
+        const enhanceHandler = this.requestHandlerContext!.createHandler.bind(null, pluginId);
+        const router = new Router(path, this.log, enhanceHandler);
         registerRouter(router);
         return router;
       },
+
+      registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
+        pluginOpaqueId: PluginOpaqueId,
+        contextName: T,
+        provider: RequestHandlerContextProvider<RequestHandlerContext>
+      ) => this.requestHandlerContext!.registerContext(pluginOpaqueId, contextName, provider),
     };
 
     return contract;

@@ -24,10 +24,9 @@ export class FileSuggestionsProvider extends AbstractSuggestionsProvider {
     repoScope?: string[]
   ): Promise<AutocompleteSuggestionGroup> {
     try {
-      const queryParams: { q: string; repoScope?: string } = { q: query };
-      if (repoScope && repoScope.length > 0) {
-        queryParams.repoScope = repoScope.join(',');
-      }
+      const queryParams: { q: string; repoScope?: string[] } = { q: query, repoScope };
+      // actually, query accepts string[] as value's  type
+      // @ts-ignore
       const res = await npStart.core.http.get(`/api/code/suggestions/doc`, {
         query: queryParams,
       });

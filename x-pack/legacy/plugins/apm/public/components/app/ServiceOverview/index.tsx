@@ -11,14 +11,14 @@ import React, { useEffect, useMemo } from 'react';
 import { toastNotifications } from 'ui/notify';
 import url from 'url';
 import { useFetcher } from '../../../hooks/useFetcher';
-import { loadServiceList } from '../../../services/rest/apm/services';
 import { NoServicesMessage } from './NoServicesMessage';
 import { ServiceList } from './ServiceList';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useTrackPageview } from '../../../../../infra/public';
-import { useCore } from '../../../hooks/useCore';
+import { useKibanaCore } from '../../../../../observability/public';
 import { PROJECTION } from '../../../../common/projections/typings';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
+import { callApmApi } from '../../../services/rest/callApmApi';
 
 const initalData = {
   items: [],
@@ -29,14 +29,19 @@ const initalData = {
 let hasDisplayedToast = false;
 
 export function ServiceOverview() {
-  const core = useCore();
+  const core = useKibanaCore();
   const {
     urlParams: { start, end },
     uiFilters
   } = useUrlParams();
   const { data = initalData, status } = useFetcher(() => {
     if (start && end) {
-      return loadServiceList({ start, end, uiFilters });
+      return callApmApi({
+        pathname: '/api/apm/services',
+        params: {
+          query: { start, end, uiFilters: JSON.stringify(uiFilters) }
+        }
+      });
     }
   }, [start, end, uiFilters]);
 

@@ -47,6 +47,7 @@ module.directive('kbnTopNav', () => {
       const localStorage = new Storage(window.localStorage);
       child.setAttribute('store', 'store');
       child.setAttribute('ui-settings', 'uiSettings');
+      child.setAttribute('saved-objects-client', 'savedObjectsClient');
 
       // Append helper directive
       elem.append(child);
@@ -54,6 +55,7 @@ module.directive('kbnTopNav', () => {
       const linkFn = ($scope, _, $attr) => {
         $scope.store = localStorage;
         $scope.uiSettings = chrome.getUiSettingsClient();
+        $scope.savedObjectsClient = chrome.getSavedObjectsClient();
 
         // Watch config changes
         $scope.$watch(() => {
@@ -92,14 +94,19 @@ module.directive('kbnTopNavHelper', (reactDirective) => {
       ['disabledButtons', { watchDepth: 'reference' }],
 
       ['query', { watchDepth: 'reference' }],
+      ['savedQuery', { watchDepth: 'reference' }],
       ['store', { watchDepth: 'reference' }],
       ['uiSettings', { watchDepth: 'reference' }],
+      ['savedObjectsClient', { watchDepth: 'reference' }],
       ['intl', { watchDepth: 'reference' }],
       ['store', { watchDepth: 'reference' }],
 
       ['onQuerySubmit', { watchDepth: 'reference' }],
       ['onFiltersUpdated', { watchDepth: 'reference' }],
       ['onRefreshChange', { watchDepth: 'reference' }],
+      ['onClearSavedQuery', { watchDepth: 'reference' }],
+      ['onSaved', { watchDepth: 'reference' }],
+      ['onSavedQueryUpdated', { watchDepth: 'reference' }],
 
       ['indexPatterns', { watchDepth: 'collection' }],
       ['filters', { watchDepth: 'collection' }],
@@ -111,6 +118,7 @@ module.directive('kbnTopNavHelper', (reactDirective) => {
       'showQueryBar',
       'showQueryInput',
       'showDatePicker',
+      'showSaveQuery',
 
       'appName',
       'screenTitle',

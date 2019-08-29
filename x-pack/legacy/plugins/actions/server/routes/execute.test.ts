@@ -13,7 +13,7 @@ import { executeRoute } from './execute';
 
 const getServices = jest.fn();
 
-const { server, actionTypeRegistry, savedObjectsClient } = createMockServer();
+const { server, actionTypeRegistry } = createMockServer();
 executeRoute({ server, actionTypeRegistry, getServices });
 
 beforeEach(() => jest.resetAllMocks());
@@ -42,13 +42,6 @@ it('executes an action with proper parameters', async () => {
   expect(statusCode).toBe(200);
   expect(payload).toBe('{"success":true}');
 
-  expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
-  expect(savedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  "action",
-  "1",
-]
-`);
   expect(execute).toHaveBeenCalledTimes(1);
   const executeCall = execute.mock.calls[0][0];
   expect(executeCall.params).toEqual({

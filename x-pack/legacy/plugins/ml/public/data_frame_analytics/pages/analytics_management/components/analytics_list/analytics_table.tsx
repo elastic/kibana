@@ -7,11 +7,9 @@
 // This component extends EuiInMemoryTable with some
 // fixes and TS specs until the changes become available upstream.
 
-import React, { Component, Fragment } from 'react';
+import React, { Fragment } from 'react';
 
-import { EuiInMemoryTable, EuiInMemoryTableProps, EuiProgress } from '@elastic/eui';
-
-import { ItemIdToExpandedRowMap } from './common';
+import { EuiProgress } from '@elastic/eui';
 
 // The built in loading progress bar of EuiInMemoryTable causes a full DOM replacement
 // of the table and doesn't play well with auto-refreshing. That's why we're displaying
@@ -73,21 +71,9 @@ const getInitialSorting = (columns: any, sorting: any) => {
   };
 };
 
-// TODO EUI's types for EuiInMemoryTable is missing these props
-interface ExpandableTableProps extends EuiInMemoryTableProps {
-  itemIdToExpandedRowMap?: ItemIdToExpandedRowMap;
-  isExpandable?: boolean;
-  onChange({ page }: { page?: {} | undefined }): void;
-  loading?: boolean;
-  compressed?: boolean;
-  error?: string;
-}
-interface ComponentWithConstructor<T> extends Component {
-  new (): Component<T>;
-}
-const ExpandableTable = (EuiInMemoryTable as any) as ComponentWithConstructor<ExpandableTableProps>;
+import { MlInMemoryTable } from '../../../../../../common/types/eui/in_memory_table';
 
-export class AnalyticsTable extends ExpandableTable {
+export class AnalyticsTable extends MlInMemoryTable {
   static getDerivedStateFromProps(nextProps: any, prevState: any) {
     const derivedState = {
       ...prevState.prevProps,

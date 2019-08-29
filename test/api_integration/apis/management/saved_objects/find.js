@@ -227,7 +227,7 @@ export default function ({ getService }) {
           .then(resp => {
             expect(resp.body.saved_objects).to.have.length(1);
             expect(resp.body.saved_objects[0].meta).to.eql({
-              icon: 'search',
+              icon: 'discoverApp',
               title: 'OneRecord',
               editUrl: '/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
