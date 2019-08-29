@@ -53,9 +53,12 @@ class TableListViewUi extends React.Component {
   constructor(props) {
     super(props);
 
-    const perPage = npStart.core.uiSettings.get('savedObjects:perPage');
-    const pageSizeOptions = _.uniq([10, 20, 50, perPage]).sort();
-
+    const initialPageSize = npStart.core.uiSettings.get('savedObjects:perPage');
+    this.pagination = {
+      initialPageIndex: 0,
+      initialPageSize,
+      pageSizeOptions: _.uniq([10, 20, 50, initialPageSize]).sort(),
+    };
     this.state = {
       items: [],
       totalItems: 0,
@@ -66,9 +69,6 @@ class TableListViewUi extends React.Component {
       showLimitError: false,
       filter: this.props.initialFilter,
       selectedIds: [],
-      page: 0,
-      perPage,
-      pageSizeOptions,
     };
 
   }
@@ -314,12 +314,6 @@ class TableListViewUi extends React.Component {
   }
 
   renderTable() {
-    const pagination = {
-      initialPageIndex: this.state.page,
-      initialPageSize: this.state.perPage,
-      pageSizeOptions: this.state.pageSizeOptions,
-    };
-
     const selection = this.props.deleteItems ? {
       onSelectionChange: (selection) => {
         this.setState({
@@ -372,7 +366,7 @@ class TableListViewUi extends React.Component {
         itemId="id"
         items={this.state.items}
         columns={columns}
-        pagination={pagination}
+        pagination={this.pagination}
         loading={this.state.isFetchingItems}
         message={noItemsMessage}
         selection={selection}
