@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
@@ -14,6 +14,7 @@ import {
   FilterDropdowns,
   KueryBar,
   MonitorList,
+  OverviewPageParsingErrorCallout,
   Snapshot,
   SnapshotHistogram,
 } from '../components/functional';
@@ -155,11 +156,7 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
               variables={sharedProps}
             />
           </EuiFlexItem>
-          {error && (
-            <EuiCallOut title="Hello" color="danger" iconType="alert">
-              <p>There was an error parsing the filter query. Error: {error.message}</p>
-            </EuiCallOut>
-          )}
+          {error && <OverviewPageParsingErrorCallout error={error} />}
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="s">
