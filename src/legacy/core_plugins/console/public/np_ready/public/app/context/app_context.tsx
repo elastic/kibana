@@ -24,6 +24,7 @@ interface ContextValue {
   history: History;
   storage: Storage;
   docLinkVersion: string;
+  ResizeChecker: any;
 }
 
 interface ContextProps {

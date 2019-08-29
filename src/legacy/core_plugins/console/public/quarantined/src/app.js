@@ -20,14 +20,19 @@
 const $ = require('jquery');
 const mappings = require('./mappings');
 
+const DEFAULT_INPUT_VALUE = `GET _search
+{
+  "query": {
+    "match_all": { }
+  }
+}`;
+
 export default function init(input, output, history, sourceLocation = 'stored') {
   $(document.body).removeClass('fouc');
 
   // set the value of the input and clear the output
   function resetToValues(content) {
-    if (content != null) {
-      input.update(content);
-    }
+    input.update(content != null ? content : DEFAULT_INPUT_VALUE);
     output.update('');
   }
 

@@ -17,25 +17,8 @@
  * under the License.
  */
 
-import { render, unmountComponentAtNode } from 'react-dom';
-
-import { PluginInitializerContext, Plugin, CoreStart } from '../../../../../../core/public';
-import { boot } from './app';
-import { XCoreSetup } from './legacy';
-
-export class ConsoleUIPlugin implements Plugin<any, any> {
-  // @ts-ignore
-  constructor(private readonly ctx: PluginInitializerContext) {}
-
-  async setup({ application, docLinkVersion, I18nContext, ResizeChecker }: XCoreSetup) {
-    application.register({
-      id: 'console',
-      async mount(ctx, targetElement) {
-        render(boot({ docLinkVersion, I18nContext, ResizeChecker }), targetElement);
-        return () => unmountComponentAtNode(targetElement);
-      },
-    });
-  }
-
-  async start(core: CoreStart) {}
+export function installEditorsResizeChecker(ResizeChecker: any, $el: any, ...editors: any[]) {
+  const checker = new ResizeChecker($el);
+  checker.on('resize', () => editors.forEach(e => e.resize()));
+  return () => checker.destroy();
 }

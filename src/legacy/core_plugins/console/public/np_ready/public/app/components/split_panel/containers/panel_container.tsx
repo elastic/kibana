@@ -33,7 +33,7 @@ const initialState = { currentPanel: -1, isDragging: false, currentResizerPos: -
 const pxToPercent = (proportion: number, whole: number) => (proportion / whole) * 100;
 
 // TODO: Write tests for this
-export function PanelContainer({ children, onPanelWidthChange }: Props) {
+export function PanelsContainer({ children, onPanelWidthChange }: Props) {
   const [head, ...rest] = Children.toArray(children);
 
   const registryRef = useRef(new PanelRegistry());

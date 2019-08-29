@@ -22,7 +22,8 @@ import { AppContextProvider } from './context';
 import { Main } from './containers';
 import { createStorage, createHistory } from './services';
 
-export function boot(I18nContext: any, deps: { docLinkVersion: string }) {
+export function boot(deps: { docLinkVersion: string; I18nContext: any; ResizeChecker: any }) {
+  const { I18nContext, ResizeChecker } = deps;
   const storage = createStorage({
     engine: window.localStorage,
     prefix: 'console_editor:',
@@ -32,7 +33,7 @@ export function boot(I18nContext: any, deps: { docLinkVersion: string }) {
 
   return (
     <I18nContext>
-      <AppContextProvider value={{ ...deps, storage, history }}>
+      <AppContextProvider value={{ ...deps, storage, history, ResizeChecker }}>
         <Main />
       </AppContextProvider>
     </I18nContext>

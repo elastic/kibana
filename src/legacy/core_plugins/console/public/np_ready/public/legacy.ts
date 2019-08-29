@@ -24,6 +24,7 @@ import { npSetup, npStart } from 'ui/new_platform';
 import uiRoutes from 'ui/routes';
 import { DOC_LINK_VERSION } from 'ui/documentation_links';
 import { I18nContext } from 'ui/i18n';
+import { ResizeChecker } from 'ui/resize_checker';
 import 'ui/autoload/styles';
 import 'ui/capabilities/route_setup';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
@@ -41,6 +42,7 @@ interface SetupRegisterAppArgs {
 
 export interface XCoreSetup extends CoreSetup {
   docLinkVersion: string;
+  ResizeChecker: any;
   I18nContext: any;
   application: {
     register(args: SetupRegisterAppArgs): void;
@@ -68,6 +70,7 @@ uiRoutes.when('/dev_tools/console', {
       const xNpSetupCore: XCoreSetup = {
         ...npSetup.core,
         I18nContext,
+        ResizeChecker,
         docLinkVersion: DOC_LINK_VERSION,
         application: {
           register(args: SetupRegisterAppArgs): void {

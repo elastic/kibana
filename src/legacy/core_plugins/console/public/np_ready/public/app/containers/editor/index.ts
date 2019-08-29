@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { ConsoleEditor } from './legacy';
+export { ConsoleEditor, ConsoleHistory } from './legacy';

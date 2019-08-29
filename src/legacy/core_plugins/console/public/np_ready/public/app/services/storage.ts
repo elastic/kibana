@@ -19,10 +19,6 @@
 
 import { transform, keys, startsWith } from 'lodash';
 
-interface GenericObject {
-  [key: string]: any;
-}
-
 type IStorageEngine = typeof window.localStorage;
 
 export enum StorageKeys {
@@ -32,7 +28,7 @@ export enum StorageKeys {
 export class Storage {
   constructor(private readonly engine: IStorageEngine, private readonly prefix: string) {}
 
-  encode(val: GenericObject) {
+  encode(val: any) {
     return JSON.stringify(val);
   }
 
@@ -52,7 +48,7 @@ export class Storage {
     }
   }
 
-  set(key: string, val: GenericObject) {
+  set(key: string, val: any) {
     this.engine.setItem(this.encodeKey(key), this.encode(val));
     return val;
   }

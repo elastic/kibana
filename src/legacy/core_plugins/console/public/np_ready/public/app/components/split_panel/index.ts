@@ -18,4 +18,4 @@
  */
 
 export { Panel } from './containers/panel';
-export { PanelContainer } from './containers/panel_container';
+export { PanelsContainer } from './containers/panel_container';

@@ -23,14 +23,17 @@ import { memoize } from 'lodash';
 import moment from 'moment';
 import { keyCodes } from '@elastic/eui';
 
-import { useAppContext } from '../../context';
+import { useAppContext } from '../../../../context';
+import { HistoryViewer } from './history_viewer';
+import { Settings } from '../settings';
 
 interface Props {
+  settings: Settings;
   close: () => void;
 }
 
-export function HistoryList({ close }: Props) {
-  const { history } = useAppContext();
+export function ConsoleHistory({ close, settings }: Props) {
+  const { history, ResizeChecker } = useAppContext();
   const [reqs, setReqs] = useState<any[]>([]);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
@@ -71,14 +74,14 @@ export function HistoryList({ close }: Props) {
     initialize();
   }, []);
 
+  /* eslint-disable */
   return (
     <div className="conHistory">
       <h2 className="kuiLocalDropdownTitle">
         {i18n.translate('console.historyPage.pageTitle', { defaultMessage: 'History' })}
       </h2>
       <div className="conHistory__body">
-        {/* eslint-disable-next-line */}
-        <ul
+       <ul
           onKeyDown={(ev: React.KeyboardEvent) => {
             if (ev.keyCode === keyCodes.ENTER) {
               restore();
@@ -99,20 +102,21 @@ export function HistoryList({ close }: Props) {
             viewingReq.current = reqs[nextSelectedIndex];
             setSelectedIndex(nextSelectedIndex);
           }}
+          role="listbox"
           className="list-group conHistory__reqs"
           tabIndex={0}
-          aria-activedescendant="historyReq{{ history.selectedIndex }}"
-          scrollto-activedescendant
-          ng-keydown="history.onKeyDown($event)"
+          // aria-activedescendant={`historyReq${selectedIndex}`}
+          // scrollto-activedescendant="true"
           aria-label="{{:: 'console.historyPage.requestListAriaLabel' | i18n: { defaultMessage: 'History of sent requests' } }}"
         >
           {reqs.map((req, idx) => {
-            const isSelected = viewingReq === req;
+            const isSelected = viewingReq.current === req;
             return (
               // Ignore a11y issues on li's
               // eslint-disable-next-line
               <li
                 key={idx}
+                id={`historyReq${idx}`}
                 className={`list-group-item conHistory__req ${
                   isSelected ? 'conHistory__req-selected' : ''
                 }`}
@@ -121,6 +125,7 @@ export function HistoryList({ close }: Props) {
                   viewingReq.current = req;
                   setSelectedIndex(idx);
                 }}
+                role="option"
                 onMouseEnter={() => (viewingReq.current = req)}
                 onMouseLeave={() => (viewingReq.current = selectedReq.current)}
                 onDoubleClick={() => restore(req)}
@@ -128,7 +133,7 @@ export function HistoryList({ close }: Props) {
                   defaultMessage: 'Request: {historyItem}',
                   values: { historyItem: describeReq(req) },
                 })}
-                aria-selected={selectedReq === req}
+                aria-selected={isSelected}
               >
                 {describeReq(req)}
                 <span className="conHistory__reqIcon">
@@ -139,7 +144,11 @@ export function HistoryList({ close }: Props) {
           })}
         </ul>
 
-        {/* <sense-history-viewer className="conHistory__viewer" req="history.viewingReq"/> */}
+        <HistoryViewer
+          settings={settings}
+          req={viewingReq.current!}
+          ResizeChecker={ResizeChecker}
+        />
       </div>
 
       <div className="conHistory__footer">

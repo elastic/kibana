@@ -25,19 +25,10 @@ const SenseEditor = require('./sense_editor/editor');
 const settings = require('./settings');
 const utils = require('./utils');
 const es = require('./es');
-import { uiModules } from 'ui/modules';
 
 let input;
 export function initializeInput($el, $actionsEl, output, history, openDocumentation = () => {}) {
   input = new SenseEditor($el);
-
-  // this may not exist if running from tests
-  if (uiModules) {
-    const appSense = uiModules.get('app/sense');
-    if (appSense && appSense.setupResizeCheckerForRootEditors) {
-      appSense.setupResizeCheckerForRootEditors($el, input, output);
-    }
-  }
 
   input.autocomplete = new Autocomplete(input);
 
@@ -230,7 +221,6 @@ export function initializeInput($el, $actionsEl, output, history, openDocumentat
   input.highlightCurrentRequestsAndUpdateActionBar();
 
   input.sendCurrentRequestToES = sendCurrentRequestToES;
-  require('./input_resize')(input, output);
 
   return input;
 }
