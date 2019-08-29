@@ -22,7 +22,6 @@ export enum TELEMETRY_EVENT {
   CUSTOM_JOB_DISABLED = 'custom_job_disabled',
   JOB_ENABLE_FAILURE = 'job_enable_failure',
   JOB_DISABLE_FAILURE = 'job_disable_failure',
-  ENABLED_JOBS_TOTAL = 'enabled_jobs_total',
 
   // Timeline
   TIMELINE_OPENED = 'open_timeline',
