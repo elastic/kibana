@@ -31,9 +31,16 @@ export function apmInit(config) {
  * TODO: Fetch it from central place
  * as Node.js agent
  */
-export function getApmConfig() {
+export function getApmConfig(legacyMetadata) {
+  /**
+   * we use the injected metadata from the server to extract the
+   * app URL path to be used for page-load transaction
+   */
+  const navLink = legacyMetadata.app._navLink.toJSON();
+
   return {
     serviceName: 'kibana-frontend',
     serverUrl: 'http://localhost:8200',
+    pageLoadTransactionName: navLink.url,
   };
 }
