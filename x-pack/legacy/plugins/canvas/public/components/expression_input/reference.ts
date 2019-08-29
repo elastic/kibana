@@ -29,10 +29,19 @@ export function getFunctionReferenceStr(fnDef: CanvasFunction) {
 export function getArgReferenceStr(argDef: CanvasArgValue) {
   const { aliases, types, default: def, required, help } = argDef;
 
-  const ref = `**Aliases**: ${
-    aliases && aliases.length ? aliases.join(' | ') : 'null'
-  }, **Types**: ${types && types.length ? types.join(' | ') : 'null'}
-\n\n${def != null ? '**Default**: ' + def + ', ' : ''}**Required**: ${String(Boolean(required))}
+  const secondLineArr = [];
+
+  if (def != null) {
+    secondLineArr.push(`**Default**: ${def}`);
+  }
+
+  if (aliases && aliases.length) {
+    secondLineArr.push(`**Aliases**: ${aliases.join(' | ')}`);
+  }
+
+  const ref = `**Types**: ${types && types.length ? types.join(' | ') : 'null'},
+ **Required**: ${String(Boolean(required))}
+\n\n${secondLineArr.join(', ')}
 \n\n${help}`;
 
   return ref;
