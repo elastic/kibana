@@ -94,22 +94,22 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                   <UseUrlState indexPattern={indexPattern}>
                     {({ isInitializing }) => (
                       <>
-                      <NetworkFilter
-                        indexPattern={indexPattern}
-                        type={networkModel.NetworkType.page}
-                      >
-                        {({ applyFilterQueryFromKueryExpression }) => (
-                          <EmbeddedMap
-                            applyFilterQueryFromKueryExpression={
-                              applyFilterQueryFromKueryExpression
-                            }
-                            queryExpression={queryExpression}
-                            startDate={from}
-                            endDate={to}
-                            setQuery={setQuery}
-                          />
-                        )}
-                      </NetworkFilter>
+                        <NetworkFilter
+                          indexPattern={indexPattern}
+                          type={networkModel.NetworkType.page}
+                        >
+                          {({ applyFilterQueryFromKueryExpression }) => (
+                            <EmbeddedMap
+                              applyFilterQueryFromKueryExpression={
+                                applyFilterQueryFromKueryExpression
+                              }
+                              queryExpression={queryExpression}
+                              startDate={from}
+                              endDate={to}
+                              setQuery={setQuery}
+                            />
+                          )}
+                        </NetworkFilter>
 
                         <KpiNetworkQuery
                           endDate={to}
