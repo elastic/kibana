@@ -13,9 +13,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const globalNav = getService('globalNav');
+  const queryBar = getService('queryBar');
+  const savedQueryManagementComponent = getService('savedQueryManagementComponent');
 
   // FLAKY: https://github.com/elastic/kibana/issues/38414
-  describe.skip('security feature controls', () => {
+  describe('security feature controls', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('maps/data');
       await esArchiver.load('maps/kibana');
@@ -81,6 +83,37 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`doesn't show read-only badge`, async () => {
         await globalNav.badgeMissingOrFail();
+      });
+
+      it('allows saving via the saved query management component popover with no query loaded', async () => {
+        await PageObjects.maps.openNewMap();
+        await queryBar.setQuery('response:200');
+        await savedQueryManagementComponent.saveNewQuery('foo', 'bar', true, false);
+        await savedQueryManagementComponent.savedQueryExistOrFail('foo');
+      });
+
+      it('allows saving a currently loaded saved query as a new query via the saved query management component ', async () => {
+        await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
+          'foo2',
+          'bar2',
+          true,
+          false
+        );
+        await savedQueryManagementComponent.savedQueryExistOrFail('foo2');
+      });
+
+      it('allow saving changes to a currently loaded query via the saved query management component', async () => {
+        await queryBar.setQuery('response:404');
+        await savedQueryManagementComponent.updateCurrentlyLoadedQuery('bar2', false, false);
+        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
+        await savedQueryManagementComponent.loadSavedQuery('foo2');
+        const queryString = await queryBar.getQueryString();
+        expect(queryString).to.eql('response:404');
+      });
+
+      it('allows deleting saved queries in the saved query management component ', async () => {
+        await savedQueryManagementComponent.deleteSavedQuery('foo2');
+        await savedQueryManagementComponent.savedQueryMissingOrFail('foo2');
       });
     });
 
