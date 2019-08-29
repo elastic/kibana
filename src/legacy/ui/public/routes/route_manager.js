@@ -58,10 +58,17 @@ export default function RouteManager() {
 
   self.run = function($location, $route, $injector, $rootScope) {
     if (window.elasticApm) {
+      /**
+       * Capture route-change events as transactions which happens after
+       * the browser's on load event.
+       *
+       * In Kibana app, this logic would run after the boostrap js files gets
+       * downloaded and they will get associated with the page-load event
+       */
       $rootScope.$on('$routeChangeStart', (_, nextRoute) => {
-        const currTransaction = window.elasticApm.getCurrentTransaction();
-        if (currTransaction && nextRoute.$$route) {
-          currTransaction.name = nextRoute.$$route.originalPath;
+        if (nextRoute.$$route) {
+          const name = nextRoute.$$route.originalPath;
+          window.elasticApm.startTransaction(name, 'route-change');
         }
       });
     }
