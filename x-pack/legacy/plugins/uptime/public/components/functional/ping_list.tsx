@@ -54,7 +54,7 @@ interface ExpandedRowMap {
 
 export const BaseLocationOptions = [{ label: 'All', value: 'All' }];
 
-const toggleDetails = (
+export const toggleDetails = (
   ping: Ping,
   itemIdToExpandedRowMap: ExpandedRowMap,
   setItemIdToExpandedRowMap: (update: ExpandedRowMap) => any
@@ -210,7 +210,11 @@ export const PingListComponent = ({
     render: (item: Ping) => (
       <EuiButtonIcon
         onClick={() => toggleDetails(item, itemIdToExpandedRowMap, setItemIdToExpandedRowMap)}
-        aria-label={itemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
+        aria-label={
+          itemIdToExpandedRowMap[item.id]
+            ? i18n.translate('xpack.uptime.pingList.collapseRow', { defaultMessage: 'Collapse' })
+            : i18n.translate('xpack.uptime.pingList.expandRow', { defaultMessage: 'Expand' })
+        }
         iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
       />
     ),

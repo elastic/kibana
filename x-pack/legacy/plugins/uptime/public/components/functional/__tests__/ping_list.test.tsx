@@ -6,9 +6,10 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { PingResults } from '../../../../common/graphql/types';
-import { PingListComponent, BaseLocationOptions } from '../ping_list';
+import { PingResults, Ping } from '../../../../common/graphql/types';
+import { PingListComponent, BaseLocationOptions, toggleDetails } from '../ping_list';
 import { EuiComboBoxOptionProps } from '@elastic/eui';
+import { ExpandedRowMap } from '../monitor_list/types';
 
 describe('PingList component', () => {
   let pingList: { allPings: PingResults };
@@ -213,5 +214,38 @@ describe('PingList component', () => {
       />
     );
     expect(component).toMatchSnapshot();
+  });
+
+  describe('toggleDetails', () => {
+    let itemIdToExpandedRowMap: ExpandedRowMap;
+    let pings: Ping[];
+
+    const setItemIdToExpandedRowMap = (update: ExpandedRowMap) => (itemIdToExpandedRowMap = update);
+
+    beforeEach(() => {
+      itemIdToExpandedRowMap = {};
+      pings = pingList.allPings.pings;
+    });
+
+    it('should expand an item if empty', () => {
+      const ping = pings[0];
+      toggleDetails(ping, itemIdToExpandedRowMap, setItemIdToExpandedRowMap);
+      expect(itemIdToExpandedRowMap).toHaveProperty(ping.id);
+    });
+
+    it('should un-expand an item if clicked again', () => {
+      const ping = pings[0];
+      toggleDetails(ping, itemIdToExpandedRowMap, setItemIdToExpandedRowMap);
+      toggleDetails(ping, itemIdToExpandedRowMap, setItemIdToExpandedRowMap);
+      expect(itemIdToExpandedRowMap).toEqual({});
+    });
+
+    it('should expand the new row and close the old when when a new row is clicked', () => {
+      const pingA = pings[0];
+      const pingB = pings[1];
+      toggleDetails(pingA, itemIdToExpandedRowMap, setItemIdToExpandedRowMap);
+      toggleDetails(pingB, itemIdToExpandedRowMap, setItemIdToExpandedRowMap);
+      expect(itemIdToExpandedRowMap).toHaveProperty(pingB.id);
+    });
   });
 });
