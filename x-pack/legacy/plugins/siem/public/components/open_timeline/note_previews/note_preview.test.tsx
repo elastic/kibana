@@ -187,7 +187,7 @@ describe('NotePreview', () => {
           .find('[data-test-subj="posted"]')
           .first()
           .text()
-      ).toEqual(`Posted: ${getEmptyValue()}`);
+      ).toEqual('Posted: --');
     });
 
     test('it renders placeholder text when updated is null', () => {
@@ -202,7 +202,7 @@ describe('NotePreview', () => {
           .find('[data-test-subj="posted"]')
           .first()
           .text()
-      ).toEqual(`Posted: ${getEmptyValue()}`);
+      ).toEqual('Posted: --');
     });
   });
 });

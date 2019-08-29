@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import styled from 'styled-components';
-import { EuiLink, EuiPopover, EuiToolTip, EuiText, EuiTextColor } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useState } from 'react';
+import React from 'react';
 
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
@@ -15,10 +14,6 @@ import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
 import { Provider } from '../timeline/data_providers/provider';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
 import { MoreRowItems, Spacer } from '../page';
-
-const Subtext = styled.div`
-  font-size: ${props => props.theme.eui.euiFontSizeXS};
-`;
 
 export const getRowItemDraggable = ({
   rowItem,
@@ -149,56 +144,35 @@ export const getRowItemOverflow = (
   return (
     <>
       {rowItems.length > overflowIndexStart && (
-        <Popover count={rowItems.length - overflowIndexStart} idPrefix={idPrefix}>
-          <EuiText size="xs">
-            <ul>
+        <EuiToolTip
+          content={
+            <>
               {rowItems
                 .slice(overflowIndexStart, overflowIndexStart + maxOverflowItems)
                 .map(rowItem => (
-                  <li key={`${idPrefix}-${rowItem}`}>{defaultToEmptyTag(rowItem)}</li>
+                  <span key={`${idPrefix}-${rowItem}`}>
+                    {defaultToEmptyTag(rowItem)}
+                    <br />
+                  </span>
                 ))}
-            </ul>
-
-            {rowItems.length > overflowIndexStart + maxOverflowItems && (
-              <p data-test-subj="popover-additional-overflow">
-                <EuiTextColor color="subdued">
-                  {rowItems.length - overflowIndexStart - maxOverflowItems}{' '}
+              {rowItems.length > overflowIndexStart + maxOverflowItems && (
+                <b>
+                  <br />
                   <FormattedMessage
                     id="xpack.siem.tables.rowItemHelper.moreDescription"
-                    defaultMessage="more not shown"
+                    defaultMessage="More..."
                   />
-                </EuiTextColor>
-              </p>
-            )}
-          </EuiText>
-        </Popover>
+                </b>
+              )}
+            </>
+          }
+        >
+          <MoreRowItems type="boxesHorizontal" />
+        </EuiToolTip>
       )}
     </>
   );
 };
-
-export const Popover = React.memo<{
-  children: React.ReactNode;
-  count: number;
-  idPrefix: string;
-}>(({ children, count, idPrefix }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <Subtext>
-      <EuiPopover
-        button={<EuiLink onClick={() => setIsOpen(!isOpen)}>{`+${count} More`}</EuiLink>}
-        closePopover={() => setIsOpen(!isOpen)}
-        id={`${idPrefix}-popover`}
-        isOpen={isOpen}
-      >
-        {children}
-      </EuiPopover>
-    </Subtext>
-  );
-});
-
-Popover.displayName = 'Popover';
 
 export const OverflowField = React.memo<{
   value: string;

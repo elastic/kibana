@@ -49,7 +49,7 @@ export const HeaderPage = pure<HeaderPageProps>(
             </h1>
           </EuiTitle>
 
-          <EuiText color="subdued" size="xs">
+          <EuiText color="subdued" size="s">
             {subtitle}
           </EuiText>
         </EuiFlexItem>

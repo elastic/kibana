@@ -104,7 +104,6 @@ type Func<T> = (arg: T) => string | number;
 
 export interface Columns<T, U = T> {
   field?: string;
-  align?: string;
   name: string | React.ReactNode;
   isMobileHeader?: boolean;
   sortable?: boolean | Func<T>;
@@ -210,9 +209,8 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
         ) : (
           <>
             <BasicTable
-              columns={columns}
-              compressed
               items={pageOfItems}
+              columns={columns}
               onChange={onChange}
               sorting={
                 sorting
@@ -312,10 +310,6 @@ const BasicTable = styled(EuiBasicTable)`
     th,
     td {
       vertical-align: top;
-    }
-
-    .euiTableCellContent {
-      display: block;
     }
   }
 `;
