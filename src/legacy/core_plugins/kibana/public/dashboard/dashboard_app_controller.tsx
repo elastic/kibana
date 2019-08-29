@@ -24,6 +24,7 @@ import angular from 'angular';
 import { uniq } from 'lodash';
 
 import chrome from 'ui/chrome';
+import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import { toastNotifications } from 'ui/notify';
 
 // @ts-ignore
@@ -431,7 +432,7 @@ export class DashboardAppController {
     };
 
     $scope.onSavedQueryUpdated = savedQuery => {
-      $scope.savedQuery = savedQuery;
+      $scope.savedQuery = { ...savedQuery };
     };
 
     $scope.onClearSavedQuery = () => {
@@ -446,7 +447,6 @@ export class DashboardAppController {
         },
         []
       );
-      courier.fetch();
     };
 
     const updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
@@ -464,7 +464,6 @@ export class DashboardAppController {
           timefilter.setRefreshInterval(savedQuery.attributes.timefilter.refreshInterval);
         }
       }
-      courier.fetch();
     };
 
     $scope.$watch('savedQuery', (newSavedQuery: SavedQuery, oldSavedQuery: SavedQuery) => {
@@ -515,23 +514,25 @@ export class DashboardAppController {
       }
     );
 
-    $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {
-      // The only reason this is here is so that search embeddables work on a dashboard with
-      // a refresh interval turned on. This kicks off the search poller. It should be
-      // refactored so no embeddables need to listen to the timefilter directly but instead
-      // the container tells it when to reload.
-      courier.fetch();
-    });
+    $scope.timefilterSubscriptions$ = new Subscription();
 
-    $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', () => {
-      updateState();
-      refreshDashboardContainer();
-    });
+    $scope.timefilterSubscriptions$.add(
+      subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
+        next: () => {
+          updateState();
+          refreshDashboardContainer();
+        },
+      })
+    );
 
-    $scope.$listenAndDigestAsync(timefilter, 'timeUpdate', () => {
-      updateState();
-      refreshDashboardContainer();
-    });
+    $scope.timefilterSubscriptions$.add(
+      subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
+        next: () => {
+          updateState();
+          refreshDashboardContainer();
+        },
+      })
+    );
 
     function updateViewMode(newMode: ViewMode) {
       $scope.topNavMenu = getTopNavConfig(
@@ -799,6 +800,8 @@ export class DashboardAppController {
 
     $scope.$on('$destroy', () => {
       updateSubscription.unsubscribe();
+      $scope.timefilterSubscriptions$.unsubscribe();
+
       dashboardStateManager.destroy();
       if (inputSubscription) {
         inputSubscription.unsubscribe();
