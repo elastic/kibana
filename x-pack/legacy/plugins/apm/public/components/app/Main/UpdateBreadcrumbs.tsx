@@ -5,7 +5,6 @@
  */
 
 import { Location } from 'history';
-import { last } from 'lodash';
 import React from 'react';
 import { InternalCoreStart } from 'src/core/public';
 import { useKibanaCore } from '../../../../../observability/public';
@@ -19,6 +18,13 @@ interface Props {
   core: InternalCoreStart;
 }
 
+function getTitleFromBreadCrumbs(breadcrumbs: Breadcrumb[]) {
+  return breadcrumbs
+    .map(({ value }) => value)
+    .reverse()
+    .join(' | ');
+}
+
 class UpdateBreadcrumbsComponent extends React.Component<Props> {
   public updateHeaderBreadcrumbs() {
     const breadcrumbs = this.props.breadcrumbs.map(({ value, match }) => ({
@@ -26,8 +32,7 @@ class UpdateBreadcrumbsComponent extends React.Component<Props> {
       href: getAPMHref(match.url, this.props.location.search)
     }));
 
-    const current = last(breadcrumbs) || { text: '' };
-    document.title = current.text;
+    document.title = getTitleFromBreadCrumbs(this.props.breadcrumbs);
     this.props.core.chrome.setBreadcrumbs(breadcrumbs);
   }
 

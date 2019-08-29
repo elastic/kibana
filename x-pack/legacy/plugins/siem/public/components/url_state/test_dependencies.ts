@@ -5,25 +5,22 @@
  */
 
 import { ActionCreator } from 'typescript-fsa';
-import { hostsModel, KueryFilterQuery, networkModel, SerializedFilterQuery } from '../../store';
-import { UrlStateContainerPropTypes, LocationTypesNoNull } from './types';
+import { hostsModel, networkModel, SerializedFilterQuery } from '../../store';
+import { UrlStateContainerPropTypes, LocationTypes, KqlQuery } from './types';
 import { CONSTANTS } from './constants';
 import { InputsModelId } from '../../store/inputs/constants';
+import { DispatchUpdateTimeline } from '../open_timeline/types';
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
 
-export const filterQuery: KueryFilterQuery = {
-  expression: 'host.name:"siem-es"',
-  kind: 'kuery',
-};
-
-export const serializedFilterQuery: SerializedFilterQuery = {
-  kuery: filterQuery,
-  serializedQuery: JSON.stringify({
-    bool: { should: [{ match_phrase: { 'host.name': 'siem-es' } }], minimum_should_match: 1 },
-  }),
-};
+export const getFilterQuery = (queryLocation: LocationTypes): KqlQuery => ({
+  filterQuery: {
+    expression: 'host.name:"siem-es"',
+    kind: 'kuery',
+  },
+  queryLocation,
+});
 
 const defaultLocation = {
   hash: '',
@@ -47,13 +44,13 @@ export const mockHistory = {
 };
 
 export const defaultProps: UrlStateContainerPropTypes = {
-  children: jest.fn(),
   match: {
     isExact: true,
     params: '',
     path: '',
     url: '',
   },
+  isInitializing: true,
   indexPattern: {
     fields: [
       {
@@ -89,28 +86,16 @@ export const defaultProps: UrlStateContainerPropTypes = {
       },
     },
     [CONSTANTS.kqlQuery]: {
-      [CONSTANTS.hostsDetails]: {
-        filterQuery: null,
-        queryLocation: CONSTANTS.hostsDetails,
-        type: hostsModel.HostsType.details,
-      },
-      [CONSTANTS.hostsPage]: {
-        filterQuery: null,
-        queryLocation: CONSTANTS.hostsPage,
-        type: hostsModel.HostsType.page,
-      },
-      [CONSTANTS.networkDetails]: {
-        filterQuery: null,
-        queryLocation: CONSTANTS.networkDetails,
-        type: networkModel.NetworkType.details,
-      },
-      [CONSTANTS.networkPage]: {
-        filterQuery: null,
-        queryLocation: CONSTANTS.networkPage,
-        type: networkModel.NetworkType.page,
-      },
+      filterQuery: null,
+      queryLocation: null,
     },
+    [CONSTANTS.timelineId]: '',
   },
+  addGlobalLinkTo: (jest.fn() as unknown) as ActionCreator<{ linkToId: InputsModelId }>,
+  addTimelineLinkTo: (jest.fn() as unknown) as ActionCreator<{ linkToId: InputsModelId }>,
+  dispatch: jest.fn(),
+  removeGlobalLinkTo: (jest.fn() as unknown) as ActionCreator<void>,
+  removeTimelineLinkTo: (jest.fn() as unknown) as ActionCreator<void>,
   setAbsoluteTimerange: (jest.fn() as unknown) as ActionCreator<{
     from: number;
     fromStr: undefined;
@@ -133,8 +118,10 @@ export const defaultProps: UrlStateContainerPropTypes = {
     to: number;
     toStr: string;
   }>,
-  toggleTimelineLinkTo: (jest.fn() as unknown) as ActionCreator<{
-    linkToId: InputsModelId;
+  updateTimeline: (jest.fn() as unknown) as DispatchUpdateTimeline,
+  updateTimelineIsLoading: (jest.fn() as unknown) as ActionCreator<{
+    id: string;
+    isLoading: boolean;
   }>,
   history: {
     ...mockHistory,
@@ -146,18 +133,12 @@ export const defaultProps: UrlStateContainerPropTypes = {
 export const getMockProps = (
   location = defaultLocation,
   kqlQueryKey = CONSTANTS.networkPage,
-  kqlQueryValue: KueryFilterQuery | null
+  kqlQueryValue: KqlQuery | null
 ): UrlStateContainerPropTypes => ({
   ...defaultProps,
   urlState: {
     ...defaultProps.urlState,
-    [CONSTANTS.kqlQuery]: {
-      ...defaultProps.urlState[CONSTANTS.kqlQuery],
-      [kqlQueryKey]: {
-        ...defaultProps.urlState[CONSTANTS.kqlQuery][kqlQueryKey],
-        filterQuery: kqlQueryValue,
-      },
-    },
+    [CONSTANTS.kqlQuery]: kqlQueryValue || { filterQuery: null, queryLocation: null },
   },
   history: {
     ...mockHistory,
@@ -169,11 +150,10 @@ export const getMockProps = (
 interface GetMockPropsObj {
   examplePath: string;
   namespaceLower: string;
-  page: LocationTypesNoNull;
-  type: string;
+  page: LocationTypes;
 }
 
-export const getMockPropsObj = ({ page, examplePath, namespaceLower, type }: GetMockPropsObj) => ({
+export const getMockPropsObj = ({ page, examplePath, namespaceLower }: GetMockPropsObj) => ({
   noSearch: {
     undefinedQuery: getMockProps(
       {
@@ -193,7 +173,7 @@ export const getMockPropsObj = ({ page, examplePath, namespaceLower, type }: Get
         state: '',
       },
       page,
-      filterQuery
+      getFilterQuery(page)
     ),
   },
   relativeTimeSearch: {
@@ -201,7 +181,7 @@ export const getMockPropsObj = ({ page, examplePath, namespaceLower, type }: Get
       {
         hash: '',
         pathname: examplePath,
-        search: `?_g=()&kqlQuery=(filterQuery:(expression:'host.name:%22siem-es%22',kind:kuery),queryLocation:${page},type:${type})&timerange=(global:(linkTo:!(),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))`,
+        search: `?_g=()&kqlQuery=(filterQuery:(expression:'host.name:%22siem-es%22',kind:kuery),queryLocation:${page})&timerange=(global:(linkTo:!(),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))`,
         state: '',
       },
       page,
@@ -211,11 +191,11 @@ export const getMockPropsObj = ({ page, examplePath, namespaceLower, type }: Get
       {
         hash: '',
         pathname: examplePath,
-        search: `?_g=()&kqlQuery=(filterQuery:(expression:'host.name:%22siem-es%22',kind:kuery),queryLocation:${page},type:${type})&timerange=(global:(linkTo:!(),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))`,
+        search: `?_g=()&kqlQuery=(filterQuery:(expression:'host.name:%22siem-es%22',kind:kuery),queryLocation:${page})&timerange=(global:(linkTo:!(),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))`,
         state: '',
       },
       page,
-      filterQuery
+      getFilterQuery(page)
     ),
   },
   absoluteTimeSearch: {
@@ -239,7 +219,7 @@ export const getMockPropsObj = ({ page, examplePath, namespaceLower, type }: Get
         state: '',
       },
       page,
-      filterQuery
+      getFilterQuery(page)
     ),
   },
   oppositeQueryLocationSearch: {
@@ -249,7 +229,7 @@ export const getMockPropsObj = ({ page, examplePath, namespaceLower, type }: Get
         pathname: examplePath,
         search: `?_g=()&kqlQuery=(filterQuery:(expression:'host.name:%22siem-es%22',kind:kuery),queryLocation:${
           namespaceLower === 'hosts' ? 'network' : 'hosts'
-        }.page,type:${type})&timerange=(global:(linkTo:!(),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))`,
+        }.page)&timerange=(global:(linkTo:!(),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))`,
         state: '',
       },
       page,
@@ -288,5 +268,17 @@ export const testCases = [
     /* namespaceUpper */ 'Network',
     /* examplePath */ '/network/ip/100.90.80',
     /* type */ networkModel.NetworkType.details,
+  ],
+  [
+    /* page */ CONSTANTS.overviewPage,
+    /* namespaceLower */ 'overview',
+    /* namespaceUpper */ 'Overview',
+    /* examplePath */ '/overview',
+  ],
+  [
+    /* page */ CONSTANTS.timelinePage,
+    /* namespaceLower */ 'timeline',
+    /* namespaceUpper */ 'Timeline',
+    /* examplePath */ '/timeline',
   ],
 ];

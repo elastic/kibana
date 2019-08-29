@@ -4,14 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
+import chrome from 'ui/chrome';
 
-import { Source, useSource } from '../../../containers/source';
-import { useSourceId } from '../../../containers/source_id';
+import { LogAnalysisJobs } from '../../../containers/logs/log_analysis';
+import { Source } from '../../../containers/source';
 
 export const AnalysisPageProviders: React.FunctionComponent = ({ children }) => {
-  const [sourceId] = useSourceId();
-  const source = useSource({ sourceId });
+  const { sourceId, source } = useContext(Source.Context);
+  const spaceId = chrome.getInjected('activeSpace').space.id;
 
-  return <Source.Context.Provider value={source}>{children}</Source.Context.Provider>;
+  return (
+    <LogAnalysisJobs.Provider
+      indexPattern={source ? source.configuration.logAlias : ''}
+      sourceId={sourceId}
+      spaceId={spaceId}
+      timeField={source ? source.configuration.fields.timestamp : ''}
+    >
+      {children}
+    </LogAnalysisJobs.Provider>
+  );
 };
