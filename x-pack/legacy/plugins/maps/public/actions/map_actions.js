@@ -17,6 +17,7 @@ import {
   getTooltipState
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
+import { getCancelRequestCallbacks } from '../reducers/non_serializable_instances';
 import { updateFlyout } from '../actions/ui_actions';
 import { SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
 
@@ -57,14 +58,15 @@ export const UPDATE_DRAW_STATE = 'UPDATE_DRAW_STATE';
 export const SET_SCROLL_ZOOM = 'SET_SCROLL_ZOOM';
 export const SET_MAP_INIT_ERROR = 'SET_MAP_INIT_ERROR';
 
-function getLayerLoadingCallbacks(dispatch, layerId) {
+function getLayerLoadingCallbacks(dispatch, state, layerId) {
   return {
     startLoading: (dataId, requestToken, meta) => dispatch(startDataLoad(layerId, dataId, requestToken, meta)),
     stopLoading: (dataId, requestToken, data, meta) => dispatch(endDataLoad(layerId, dataId, requestToken, data, meta)),
     onLoadError: (dataId, requestToken, errorMessage) => dispatch(onDataLoadError(layerId, dataId, requestToken, errorMessage)),
     updateSourceData: (newData) => {
       dispatch(updateSourceDataRequest(layerId, newData));
-    }
+    },
+    registerCancelCallback: (requestToken, callback) => registerCancelCallback(requestToken, callback, state)
   };
 }
 
@@ -74,11 +76,30 @@ function getLayerById(layerId, state) {
   });
 }
 
+function cancelRequest(requestToken, state) {
+  if (!requestToken) {
+    return;
+  }
+
+  const cancelCallback = getCancelRequestCallbacks(state).get(requestToken);
+  if (cancelCallback) {
+    cancelCallback();
+  }
+}
+
+function registerCancelCallback(requestToken, callback, state) {
+  getCancelRequestCallbacks(state).set(requestToken, callback);
+}
+
+function unregisterCancelCallback(requestToken, state) {
+  getCancelRequestCallbacks(state).set(requestToken, null);
+}
+
 async function syncDataForAllLayers(getState, dispatch, dataFilters) {
   const state = getState();
   const layerList = getLayerList(state);
   const syncs = layerList.map(layer => {
-    const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
+    const loadingFunctions = getLayerLoadingCallbacks(dispatch, state, layer.getId());
     return layer.syncData({ ...loadingFunctions, dataFilters });
   });
   await Promise.all(syncs);
@@ -408,13 +429,20 @@ export function clearGoto() {
 }
 
 export function startDataLoad(layerId, dataId, requestToken, meta = {}) {
-  return ({
-    meta,
-    type: LAYER_DATA_LOAD_STARTED,
-    layerId,
-    dataId,
-    requestToken
-  });
+  return (dispatch, getState) => {
+    const layer = getLayerById(layerId, getState());
+    if (layer) {
+      cancelRequest(layer.getPrevRequestToken(dataId), getState());
+    }
+
+    dispatch({
+      meta,
+      type: LAYER_DATA_LOAD_STARTED,
+      layerId,
+      dataId,
+      requestToken
+    });
+  };
 }
 
 export function updateSourceDataRequest(layerId, newData) {
@@ -431,7 +459,8 @@ export function updateSourceDataRequest(layerId, newData) {
 }
 
 export function endDataLoad(layerId, dataId, requestToken, data, meta) {
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
+    unregisterCancelCallback(requestToken, getState());
     dispatch(clearTooltipStateForLayer(layerId));
     dispatch({
       type: LAYER_DATA_LOAD_ENDED,
@@ -452,7 +481,8 @@ export function endDataLoad(layerId, dataId, requestToken, data, meta) {
 }
 
 export function onDataLoadError(layerId, dataId, requestToken, errorMessage) {
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
+    unregisterCancelCallback(requestToken, getState());
     dispatch(clearTooltipStateForLayer(layerId));
     dispatch({
       type: LAYER_DATA_LOAD_ERROR,
@@ -484,7 +514,7 @@ export function syncDataForLayer(layerId) {
     const targetLayer = getLayerById(layerId, getState());
     if (targetLayer) {
       const dataFilters = getDataFilters(getState());
-      const loadingFunctions = getLayerLoadingCallbacks(dispatch, layerId);
+      const loadingFunctions = getLayerLoadingCallbacks(dispatch, getState(), layerId);
       await targetLayer.syncData({
         ...loadingFunctions,
         dataFilters

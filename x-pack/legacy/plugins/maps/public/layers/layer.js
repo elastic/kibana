@@ -52,9 +52,18 @@ export class AbstractLayer {
   }
 
   destroy() {
-    if(this._source) {
+    if (this._source) {
       this._source.destroy();
     }
+  }
+
+  getPrevRequestToken(dataId) {
+    const prevDataRequest = this.getDataRequest(dataId);
+    if (!prevDataRequest) {
+      return;
+    }
+
+    return prevDataRequest.getRequestToken();
   }
 
   async cloneDescriptor() {

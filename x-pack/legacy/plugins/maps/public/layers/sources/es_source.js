@@ -131,7 +131,12 @@ export class AbstractESSource extends AbstractVectorSource {
   }
 
 
-  async _runEsQuery(requestName, searchSource, requestDescription) {
+  async _runEsQuery(requestName, searchSource, registerCancelCallback, requestDescription) {
+    const cancel = () => {
+      searchSource.cancelQueued();
+    };
+    registerCancelCallback(cancel);
+
     try {
       return await fetchSearchSourceAndRecordWithInspector({
         inspectorAdapters: this._inspectorAdapters,
@@ -141,6 +146,9 @@ export class AbstractESSource extends AbstractVectorSource {
         requestDesc: requestDescription
       });
     } catch(error) {
+      // If the fetch was aborted, no need to surface this in the UI
+      if (error.name === 'AbortError') return;
+
       throw new Error(i18n.translate('xpack.maps.source.esSource.requestFailedErrorMessage', {
         defaultMessage: `Elasticsearch search request failed, error: {message}`,
         values: { message: error.message }

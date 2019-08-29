@@ -90,7 +90,7 @@ export class ESTermSource extends AbstractESSource {
     return `${metricLabel} of ${this._descriptor.indexPatternTitle}:${this._descriptor.term}`;
   }
 
-  async getPropertiesMap(searchFilters, leftSourceName, leftFieldName) {
+  async getPropertiesMap(searchFilters, leftSourceName, leftFieldName, registerCancelCallback) {
 
     if (!this.hasCompleteConfig()) {
       return [];
@@ -104,7 +104,7 @@ export class ESTermSource extends AbstractESSource {
 
     const requestName = `${this._descriptor.indexPatternTitle}.${this._descriptor.term}`;
     const requestDesc = this._getRequestDescription(leftSourceName, leftFieldName);
-    const rawEsData = await this._runEsQuery(requestName, searchSource, requestDesc);
+    const rawEsData = await this._runEsQuery(requestName, searchSource, registerCancelCallback, requestDesc);
 
     const metricPropertyNames = configStates
       .filter(configState => {

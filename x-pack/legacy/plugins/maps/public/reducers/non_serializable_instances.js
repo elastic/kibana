@@ -24,6 +24,7 @@ export function nonSerializableInstances(state) {
   if (!state) {
     return {
       inspectorAdapters: createInspectorAdapters(),
+      cancelRequestCallbacks: new Map(), // key is request token, value is cancel callback
     };
   }
 
@@ -34,4 +35,8 @@ export function nonSerializableInstances(state) {
 // Selectors
 export const getInspectorAdapters = ({ nonSerializableInstances }) => {
   return _.get(nonSerializableInstances, 'inspectorAdapters', {});
+};
+
+export const getCancelRequestCallbacks = ({ nonSerializableInstances }) => {
+  return nonSerializableInstances.cancelRequestCallbacks;
 };

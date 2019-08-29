@@ -348,7 +348,7 @@ export class VectorLayer extends AbstractLayer {
       && !updateDueToSourceMetaChange;
   }
 
-  async _syncJoin({ join, startLoading, stopLoading, onLoadError, dataFilters }) {
+  async _syncJoin({ join, startLoading, stopLoading, onLoadError, registerCancelCallback, dataFilters }) {
 
     const joinSource = join.getRightJoinSource();
     const sourceDataId = join.getSourceId();
@@ -376,7 +376,11 @@ export class VectorLayer extends AbstractLayer {
       const leftSourceName = await this.getSourceName();
       const {
         propertiesMap
-      } = await joinSource.getPropertiesMap(searchFilters, leftSourceName, join.getLeftFieldName());
+      } = await joinSource.getPropertiesMap(
+        searchFilters,
+        leftSourceName,
+        join.getLeftFieldName(),
+        registerCancelCallback.bind(null, requestToken));
       stopLoading(sourceDataId, requestToken, propertiesMap);
       return {
         dataHasChanged: true,
@@ -393,9 +397,9 @@ export class VectorLayer extends AbstractLayer {
     }
   }
 
-  async _syncJoins({ startLoading, stopLoading, onLoadError, dataFilters }) {
+  async _syncJoins(syncContext) {
     const joinSyncs = this.getValidJoins().map(async join => {
-      return this._syncJoin({ join, startLoading, stopLoading, onLoadError, dataFilters });
+      return this._syncJoin({ join, ...syncContext });
     });
 
     return await Promise.all(joinSyncs);
@@ -457,7 +461,7 @@ export class VectorLayer extends AbstractLayer {
     }
   }
 
-  async _syncSource({ startLoading, stopLoading, onLoadError, dataFilters }) {
+  async _syncSource({ startLoading, stopLoading, onLoadError, registerCancelCallback, dataFilters }) {
 
     const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
 
@@ -474,7 +478,10 @@ export class VectorLayer extends AbstractLayer {
     try {
       startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, searchFilters);
       const layerName = await this.getDisplayName();
-      const { data: featureCollection, meta } = await this._source.getGeoJsonWithMeta(layerName, searchFilters);
+      const {
+        data: featureCollection,
+        meta
+      } = await this._source.getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback.bind(null, requestToken));
       this._assignIdsToFeatures(featureCollection);
       stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, featureCollection, meta);
       return {
@@ -516,18 +523,18 @@ export class VectorLayer extends AbstractLayer {
 
   }
 
-  async syncData({ startLoading, stopLoading, onLoadError, dataFilters, updateSourceData }) {
-    if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
+  async syncData(syncContext) {
+    if (!this.isVisible() || !this.showAtZoomLevel(syncContext.dataFilters.zoom)) {
       return;
     }
 
-    const sourceResult = await this._syncSource({ startLoading, stopLoading, onLoadError, dataFilters });
+    const sourceResult = await this._syncSource(syncContext);
     if (!sourceResult.featureCollection || !sourceResult.featureCollection.features.length) {
       return;
     }
 
-    const joinStates = await this._syncJoins({ startLoading, stopLoading, onLoadError, dataFilters });
-    await this._performInnerJoins(sourceResult, joinStates, updateSourceData);
+    const joinStates = await this._syncJoins(syncContext);
+    await this._performInnerJoins(sourceResult, joinStates, syncContext.updateSourceData);
 
   }
 
