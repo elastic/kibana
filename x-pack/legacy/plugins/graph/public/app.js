@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import 'ace';
 import rison from 'rison-node';
 import React from 'react';
+import Rx from 'rxjs';
 
 // import the uiExports that we want to "use"
 import 'uiExports/fieldFormats';
@@ -41,6 +42,7 @@ import { getReadonlyBadge } from './badge';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { GraphListing } from './components/graph_listing';
+import { GraphSettings } from './components/graph_settings/graph_settings';
 
 import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs, getHomePath } from './services/url';
 import { save } from  './services/save';
@@ -58,7 +60,10 @@ import {
 } from './style_choices';
 import {
   getOutlinkEncoders,
-} from './angular/services/outlink_encoders';
+} from './services/outlink_encoders';
+import {
+  asAngularSyncedObservable,
+} from './services/as_observable';
 
 import settingsTemplate from './angular/templates/settings.html';
 
@@ -913,6 +918,26 @@ app.controller('graphuiPlugin', function (
       defaultMessage: 'Settings',
     }),
     run: () => {
+      const settingsObservable = asAngularSyncedObservable(() => ({
+        advancedSettings: { ...$scope.exploreControls },
+        updateAdvancedSettings: (updatedSettings) => {
+          $scope.exploreControls = updatedSettings;
+        },
+        blacklistedNodes: [...$scope.workspace.blacklistedNodes],
+        unblacklistNode: $scope.workspace.unblacklist,
+        urlTemplates: [...$scope.urlTemplates],
+        removeUrlTemplate: $scope.removeUrlTemplate,
+        saveUrlTemplate: $scope.saveUrlTemplate,
+        allFields: [...$scope.allFields]
+      }), $scope.$digest.bind($scope));
+      const flyoutRef = npStart.core.overlays.openFlyout(<GraphSettings
+        observable={settingsObservable}
+        onLeave={() => { flyoutRef.close(); }}
+      />, {
+        size: 's',
+        closeButtonAriaLabel: i18n.translate('xpack.graph.settings.closeLabel', { defaultMessage: 'Close' }),
+        'data-test-subj': 'graphSettingsFlyout'
+      });
       $scope.$evalAsync(() => {
         const curState = $scope.menus.showSettings;
         $scope.closeMenus();
