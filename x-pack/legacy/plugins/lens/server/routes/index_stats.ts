@@ -19,10 +19,10 @@ type Document = Record<string, unknown>;
 type Fields = Array<{ name: string; type: string; esTypes?: string[] }>;
 
 export async function initStatsRoute(setup: CoreSetup) {
-  const router = setup.http.createRouter('/api/lens/index_stats/{indexPatternTitle}');
+  const router = setup.http.createRouter();
   router.post(
     {
-      path: '',
+      path: '/index_stats/{indexPatternTitle}',
       validate: {
         params: schema.object({
           indexPatternTitle: schema.string(),

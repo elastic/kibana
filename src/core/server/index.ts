@@ -211,7 +211,7 @@ export interface CoreSetup {
       name: T,
       provider: RequestHandlerContextProvider<RequestHandlerContext>
     ) => RequestHandlerContextContainer<RequestHandlerContext>;
-    createRouter: (basePath: string) => IRouter;
+    createRouter: () => IRouter;
   };
 }
 

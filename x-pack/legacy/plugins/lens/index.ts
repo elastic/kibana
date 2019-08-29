@@ -85,7 +85,10 @@ export const lens: LegacyPluginInitializer = kibana => {
       // Set up with the new platform plugin lifecycle API.
       const plugin = lensServerPlugin();
       await plugin.setup(({
-        http: kbnServer.newPlatform.setup.core.http,
+        http: {
+          ...kbnServer.newPlatform.setup.core.http,
+          createRouter: () => kbnServer.newPlatform.setup.core.http.createRouter('/api/lens'),
+        },
       } as unknown) as CoreSetup);
 
       server.events.on('stop', async () => {
