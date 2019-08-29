@@ -24,12 +24,10 @@ export async function extractErrors(
   savedObjectResults: SavedObject[],
   savedObjectsToImport: SavedObject[],
   savedObjectsClient?: SavedObjectsClientContract,
-  sourceSpaceId?:string
+  sourceSpaceId?: string
 ) {
   const errors: SavedObjectsImportError[] = [];
   const originalSavedObjectsMap = new Map<string, SavedObject>();
-
-  //const log = new ToolingLog({ level: 'info', writeTo: process.stdout });
 
   for (const savedObject of savedObjectsToImport) {
     originalSavedObjectsMap.set(`${savedObject.type}:${savedObject.id}`, savedObject);
@@ -39,7 +37,6 @@ export async function extractErrors(
       const originalSavedObject = originalSavedObjectsMap.get(
         `${savedObject.type}:${savedObject.id}`
       );
-      
       const title =
         originalSavedObject &&
         originalSavedObject.attributes &&
@@ -51,20 +48,20 @@ export async function extractErrors(
 
         if (savedObjectsClient) {
           try {
-            if (sourceSpaceId!==undefined) {
-              var resp = await savedObjectsClient.get(savedObject.type, savedObject.id,{namespace:sourceSpaceId});
+            if (sourceSpaceId !== undefined) {
+              const resp = await savedObjectsClient.get(savedObject.type, savedObject.id, {
+                namespace: sourceSpaceId,
+              });
               realTitle = resp.attributes.title;
-            }
-            else {
-              var resp = await savedObjectsClient.get(savedObject.type, savedObject.id);
+            } else {
+              const resp = await savedObjectsClient.get(savedObject.type, savedObject.id);
               realTitle = resp.attributes.title;
             }
           } catch (e) {
             // this shouldn't go wrong, but we re-throw the exception just in case
-            throw (e);
+            throw e;
           }
         }
-        
         errors.push({
           id: savedObject.id,
           type: savedObject.type,
