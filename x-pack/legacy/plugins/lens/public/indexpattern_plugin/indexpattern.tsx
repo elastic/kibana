@@ -28,7 +28,7 @@ import {
 import { isDraggedField } from './utils';
 import { LayerPanel } from './layerpanel';
 import { IndexPatternColumn } from './operations';
-import { Datasource } from '..';
+import { Datasource, StateSetter } from '..';
 
 export { OperationType, IndexPatternColumn } from './operations';
 
@@ -37,6 +37,14 @@ export interface IndexPattern {
   fields: IndexPatternField[];
   title: string;
   timeFieldName?: string | null;
+  hasExistence?: boolean;
+  fieldFormatMap?: Record<
+    string,
+    {
+      id: string;
+      params: unknown;
+    }
+  >;
 }
 
 export interface IndexPatternField {
@@ -58,6 +66,11 @@ export interface IndexPatternField {
       }
     >
   >;
+
+  // Loaded separately
+  exists?: boolean;
+  cardinality?: number;
+  count?: number;
 }
 
 export interface DraggedField {
@@ -78,6 +91,7 @@ export interface IndexPatternPersistedState {
 
 export type IndexPatternPrivateState = IndexPatternPersistedState & {
   indexPatterns: Record<string, IndexPattern>;
+  showEmptyFields: boolean;
 };
 
 export function columnToOperation(column: IndexPatternColumn): Operation {
@@ -155,12 +169,14 @@ export function getIndexPatternDatasource({
         return {
           ...state,
           indexPatterns,
+          showEmptyFields: false,
         };
       }
       return {
         currentIndexPatternId: indexPatternObjects ? indexPatternObjects[0].id : '',
         indexPatterns,
         layers: {},
+        showEmptyFields: false,
       };
     },
 
@@ -223,7 +239,11 @@ export function getIndexPatternDatasource({
       );
     },
 
-    getPublicAPI(state, setState, layerId) {
+    getPublicAPI(
+      state: IndexPatternPrivateState,
+      setState: StateSetter<IndexPatternPrivateState>,
+      layerId: string
+    ) {
       return {
         getTableSpec: () => {
           return state.layers[layerId].columnOrder.map(colId => ({ columnId: colId }));

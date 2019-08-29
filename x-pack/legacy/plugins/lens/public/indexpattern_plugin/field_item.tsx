@@ -5,15 +5,18 @@
  */
 
 import React from 'react';
-import { IndexPatternField, DraggedField } from './indexpattern';
+// @ts-ignore
+import { fieldFormats } from '../../../../../../src/legacy/ui/public/registry/field_formats';
+import { IndexPattern, IndexPatternField, DraggedField } from './indexpattern';
 import { DragDrop } from '../drag_drop';
 import { FieldIcon } from './field_icon';
 import { DataType } from '..';
 
 export interface FieldItemProps {
   field: IndexPatternField;
-  indexPatternId: string;
+  indexPattern: IndexPattern;
   highlight?: string;
+  exists: boolean;
 }
 
 function wrapOnDot(str?: string) {
@@ -23,8 +26,8 @@ function wrapOnDot(str?: string) {
   return str ? str.replace(/\./g, '.\u200B') : '';
 }
 
-export function FieldItem({ field, indexPatternId, highlight }: FieldItemProps) {
-  const wrappableName = wrapOnDot(field.name);
+export function FieldItem({ field, indexPattern, highlight, exists }: FieldItemProps) {
+  const wrappableName = wrapOnDot(field.name)!;
   const wrappableHighlight = wrapOnDot(highlight);
   const highlightIndex = wrappableHighlight
     ? wrappableName.toLowerCase().indexOf(wrappableHighlight.toLowerCase())
@@ -42,15 +45,20 @@ export function FieldItem({ field, indexPatternId, highlight }: FieldItemProps) 
 
   return (
     <DragDrop
+      value={{ field, indexPatternId: indexPattern.id } as DraggedField}
       dataTestSubj="lnsFieldListPanelField"
-      value={{ field, indexPatternId } as DraggedField}
       draggable
-      className={`lnsFieldListPanel__field lnsFieldListPanel__field-btn-${field.type}`}
+      className={`lnsFieldListPanel__field lnsFieldListPanel__field-btn-${
+        field.type
+      } lnsFieldListPanel__field-${exists ? 'exists' : 'missing'}`}
     >
-      <FieldIcon type={field.type as DataType} />
-      <span className="lnsFieldListPanel__fieldName" title={field.name}>
-        {wrappableHighlightableFieldName}
-      </span>
+      <div className="lnsFieldListPanel__fieldInfo">
+        <FieldIcon type={field.type as DataType} />
+
+        <span className="lnsFieldListPanel__fieldName" title={field.name}>
+          {wrappableHighlightableFieldName}
+        </span>
+      </div>
     </DragDrop>
   );
 }

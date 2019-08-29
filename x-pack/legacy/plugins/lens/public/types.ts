@@ -121,6 +121,8 @@ export interface DatasourceDataPanelProps<T = unknown> {
   state: T;
   dragDropContext: DragContextState;
   setState: StateSetter<T>;
+  query: Query;
+  dateRange: FramePublicAPI['dateRange'];
 }
 
 // The only way a visualization has to restrict the query building
@@ -174,7 +176,7 @@ export interface VisualizationProps<T = unknown> {
   dragDropContext: DragContextState;
   frame: FramePublicAPI;
   state: T;
-  setState: (newState: T) => void;
+  setState: StateSetter<T>;
 }
 
 export interface SuggestionRequest<T = unknown> {

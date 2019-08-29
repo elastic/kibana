@@ -33,30 +33,35 @@ const expectedIndexPatterns = {
     id: '1',
     title: 'my-fake-index-pattern',
     timeFieldName: 'timestamp',
+    hasExistence: true,
     fields: [
       {
         name: 'timestamp',
         type: 'date',
         aggregatable: true,
         searchable: true,
+        exists: true,
       },
       {
         name: 'bytes',
         type: 'number',
         aggregatable: true,
         searchable: true,
+        exists: true,
       },
       {
         name: 'memory',
         type: 'number',
         aggregatable: true,
         searchable: true,
+        exists: true,
       },
       {
         name: 'source',
         type: 'string',
         aggregatable: true,
         searchable: true,
+        exists: true,
       },
     ],
   },
@@ -80,6 +85,7 @@ describe('IndexPatternDimensionPanel', () => {
     state = {
       indexPatterns: expectedIndexPatterns,
       currentIndexPatternId: '1',
+      showEmptyFields: false,
       layers: {
         first: {
           indexPatternId: '1',
@@ -956,6 +962,7 @@ describe('IndexPatternDimensionPanel', () => {
           },
         },
         currentIndexPatternId: '1',
+        showEmptyFields: false,
         layers: {
           myLayer: {
             indexPatternId: 'foo',

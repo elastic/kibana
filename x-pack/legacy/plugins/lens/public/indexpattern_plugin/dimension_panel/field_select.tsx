@@ -24,6 +24,7 @@ export type FieldChoice =
 
 export interface FieldSelectProps {
   currentIndexPattern: IndexPattern;
+  showEmptyFields: boolean;
   fieldMap: Record<string, IndexPatternField>;
   incompatibleSelectedOperationType: OperationType | null;
   selectedColumnOperationType?: OperationType;
@@ -34,16 +35,18 @@ export interface FieldSelectProps {
 }
 
 export function FieldSelect({
+  currentIndexPattern,
+  showEmptyFields,
+  fieldMap,
   incompatibleSelectedOperationType,
   selectedColumnOperationType,
   selectedColumnSourceField,
   operationFieldSupportMatrix,
-  currentIndexPattern,
-  fieldMap,
   onChoose,
   onDeleteColumn,
 }: FieldSelectProps) {
   const { operationByDocument, operationByField } = operationFieldSupportMatrix;
+
   const memoizedFieldOptions = useMemo(() => {
     const fields = Object.keys(operationByField).sort();
 
@@ -97,25 +100,31 @@ export function FieldSelect({
                   ? selectedColumnOperationType
                   : undefined,
             },
+            exists: fieldMap[field].exists || false,
             compatible: isCompatibleWithCurrentOperation(field),
           }))
-          .sort(({ compatible: a }, { compatible: b }) => {
-            if (a && !b) {
+          .filter(field => (showEmptyFields ? true : field.exists))
+          .sort((a, b) => {
+            if (a.compatible && !b.compatible) {
               return -1;
             }
-            if (!a && b) {
+            if (!a.compatible && b.compatible) {
               return 1;
             }
             return 0;
           })
-          .map(({ label, value, compatible }) => ({
+          .map(({ label, value, compatible, exists }) => ({
             label,
             value,
-            className: classNames({ 'lnsConfigPanel__fieldOption--incompatible': !compatible }),
+            className: classNames({
+              'lnsConfigPanel__fieldOption--incompatible': !compatible,
+              'lnsConfigPanel__fieldOption--nonExistant': !exists,
+            }),
             'data-test-subj': `lns-fieldOption${compatible ? '' : 'Incompatible'}-${label}`,
           })),
       });
     }
+
     return fieldOptions;
   }, [
     incompatibleSelectedOperationType,
@@ -124,6 +133,7 @@ export function FieldSelect({
     operationFieldSupportMatrix,
     currentIndexPattern,
     fieldMap,
+    showEmptyFields,
   ]);
 
   return (

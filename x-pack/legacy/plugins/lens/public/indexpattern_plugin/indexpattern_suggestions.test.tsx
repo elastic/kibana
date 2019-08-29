@@ -306,6 +306,7 @@ describe('IndexPattern Data Source suggestions', () => {
       it('should not make any suggestions for a number without a time field', async () => {
         const state: IndexPatternPrivateState = {
           currentIndexPatternId: '1',
+          showEmptyFields: false,
           indexPatterns: {
             1: {
               id: '1',
@@ -478,6 +479,7 @@ describe('IndexPattern Data Source suggestions', () => {
       it('should not make any suggestions for a number without a time field', async () => {
         const state: IndexPatternPrivateState = {
           currentIndexPatternId: '1',
+          showEmptyFields: false,
           indexPatterns: {
             1: {
               id: '1',
@@ -864,6 +866,7 @@ describe('IndexPattern Data Source suggestions', () => {
     it('returns no suggestions if there are no columns', () => {
       expect(
         indexPatternDatasource.getDatasourceSuggestionsFromCurrentState({
+          showEmptyFields: false,
           indexPatterns: expectedIndexPatterns,
           layers: {
             first: {
