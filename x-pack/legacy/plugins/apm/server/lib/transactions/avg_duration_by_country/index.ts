@@ -69,7 +69,7 @@ export async function getTransactionAvgDurationByCountry({
   const avgDurationsByCountry = buckets.map(
     ({ key, doc_count, avg_duration: { value } }) => ({
       key,
-      doc_count,
+      docCount: doc_count,
       value: value === null ? 0 : value
     })
   );

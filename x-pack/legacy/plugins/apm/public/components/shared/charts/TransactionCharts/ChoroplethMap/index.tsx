@@ -21,13 +21,13 @@ import { ChoroplethToolTip } from './ChoroplethToolTip';
 interface ChoroplethDataElement {
   key: string;
   value: number;
-  doc_count: any;
+  docCount: any;
 }
 
 interface Tooltip {
   name: string;
   value: number;
-  doc_count: number;
+  docCount: number;
 }
 
 interface Props {
@@ -69,13 +69,18 @@ export const ChoroplethMap: React.SFC<Props> = props => {
   const popupContainerRef = useRef<HTMLDivElement>(null);
   const enableScrollZoom = useRef(false);
   const [tooltipState, setTooltipState] = useState<Tooltip | null>(null);
-  const [min, max] = useMemo(() => [getMin(data) || 0, getMax(data)] || 0, [
-    data
-  ]);
+  const [min, max] = useMemo(() => {
+    const minValue = getMin(data);
+    const maxValue = getMax(data);
+    return [
+      Number.isFinite(minValue) ? minValue : 0,
+      Number.isFinite(maxValue) ? maxValue : 0
+    ];
+  }, [data]);
 
   // converts input data to a scaled value between 0 and 1
   const getValueScale = useCallback(
-    (value: number) => (min - max !== 0 ? (value - min) / (max - min) : 0),
+    (value: number) => (value - min) / (max - min),
     [max, min]
   );
 
@@ -87,8 +92,12 @@ export const ChoroplethMap: React.SFC<Props> = props => {
     }
   }, []);
 
-  const updateHoverStateOnMousemove = useCallback(
-    (event: mapboxgl.MapMouseEvent & mapboxgl.EventData) => {
+  // side effect creates a new mouseover handler referencing new component state
+  // and replaces the old one stored in `updateTooltipStateOnMousemoveRef`
+  useEffect(() => {
+    const updateTooltipStateOnMousemove = (
+      event: mapboxgl.MapMouseEvent & mapboxgl.EventData
+    ) => {
       const isMapQueryable =
         map &&
         popupRef.current &&
@@ -123,29 +132,23 @@ export const ChoroplethMap: React.SFC<Props> = props => {
         setTooltipState({
           name: geojsonProperties.name,
           value: item.value,
-          doc_count: item.doc_count
+          docCount: item.docCount
         });
-    },
-    [map, data, tooltipState]
+    };
+    updateTooltipStateOnMousemoveRef.current = updateTooltipStateOnMousemove;
+  }, [map, data, tooltipState]);
+
+  const updateTooltipStateOnMousemoveRef = useRef(
+    (event: mapboxgl.MapMouseEvent & mapboxgl.EventData) => {}
   );
 
-  const updateHoverStateOnMouseout = useCallback(
+  const updateTooltipStateOnMouseout = useCallback(
     (event: mapboxgl.MapMouseEvent & mapboxgl.EventData) => {
       enableScrollZoom.current = false;
       setTooltipState(null);
     },
     []
   );
-
-  // When new, memoized handlers are created with useCallback,
-  // these references allow the old handlers to be removed
-  const updateHoverStateOnMousemoveRef = useRef<
-    ((event: mapboxgl.MapMouseEvent & mapboxgl.EventData) => void) | null
-  >(null);
-
-  const updateHoverStateOnMouseoutRef = useRef<
-    ((event: mapboxgl.MapMouseEvent & mapboxgl.EventData) => void) | null
-  >(null);
 
   // initialization side effect, only runs once
   useEffect(() => {
@@ -175,6 +178,12 @@ export const ChoroplethMap: React.SFC<Props> = props => {
       closeOnClick: false
     });
 
+    // always use the current handler which changes with component state
+    mapboxMap.on('mousemove', (...args) =>
+      updateTooltipStateOnMousemoveRef.current(...args)
+    );
+    mapboxMap.on('mouseout', updateTooltipStateOnMouseout);
+
     // only scroll zoom when key is pressed
     const canvasElement = mapboxMap.getCanvas();
     canvasElement.addEventListener('wheel', controlScrollZoomOnWheel);
@@ -191,25 +200,7 @@ export const ChoroplethMap: React.SFC<Props> = props => {
     return () => {
       canvasElement.removeEventListener('wheel', controlScrollZoomOnWheel);
     };
-  }, [controlScrollZoomOnWheel]);
-
-  // side effect swaps the old handlers with new ones when they update
-  useEffect(() => {
-    if (!map) {
-      return;
-    }
-    if (
-      updateHoverStateOnMousemoveRef.current &&
-      updateHoverStateOnMouseoutRef.current
-    ) {
-      map.off('mousemove', updateHoverStateOnMousemoveRef.current);
-      map.off('mouseout', updateHoverStateOnMouseoutRef.current);
-    }
-    map.on('mousemove', updateHoverStateOnMousemove);
-    map.on('mouseout', updateHoverStateOnMouseout);
-    updateHoverStateOnMousemoveRef.current = updateHoverStateOnMousemove;
-    updateHoverStateOnMouseoutRef.current = updateHoverStateOnMouseout;
-  }, [map, updateHoverStateOnMousemove, updateHoverStateOnMouseout]);
+  }, [controlScrollZoomOnWheel, updateTooltipStateOnMouseout]);
 
   // side effect replaces choropleth layer with new one on data changes
   useEffect(() => {
