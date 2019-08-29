@@ -186,6 +186,31 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         it(`can't add layer`, async () => {
           await PageObjects.maps.expectMissingAddLayerButton();
         });
+
+        it('allows loading a saved query via the saved query management component', async () => {
+          await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
+          const queryString = await queryBar.getQueryString();
+          expect(queryString).to.eql('response:200');
+        });
+
+        it('does not allow saving via the saved query management component popover with no query loaded', async () => {
+          await savedQueryManagementComponent.saveNewQueryMissingOrFail();
+        });
+
+        it('does not allow saving changes to saved query from the saved query management component', async () => {
+          await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
+          await queryBar.setQuery('response:404');
+          await savedQueryManagementComponent.updateCurrentlyLoadedQueryMissingOrFail();
+        });
+
+        it('does not allow deleting a saved query from the saved query management component', async () => {
+          await savedQueryManagementComponent.deleteSavedQueryMissingOrFail('OKJpgs');
+        });
+
+        it('allows clearing the currently loaded saved query', async () => {
+          await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
+          await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
+        });
       });
     });
 
