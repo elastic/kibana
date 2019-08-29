@@ -9,8 +9,8 @@ import { OutlinkEncoder } from '../services/outlink_encoders';
 
 export interface UrlTemplate {
   url: string;
-  title: string;
-  icon: FontawesomeIcon;
+  description: string;
+  icon: FontawesomeIcon | null;
   encoder: OutlinkEncoder;
 }
 

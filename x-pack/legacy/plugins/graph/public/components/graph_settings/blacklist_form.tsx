@@ -52,6 +52,7 @@ export function BlacklistForm({
                 &nbsp;
               </>
             }
+            // TODO this is not enough to be unique
             key={node.label}
             label={node.label}
             extraAction={{

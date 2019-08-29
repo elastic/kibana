@@ -18,7 +18,7 @@ import {
 import * as Rx from 'rxjs';
 import { AdvancedSettingsForm } from './advanced_settings_form';
 import { BlacklistForm } from './blacklist_form';
-import { DrilldownsForm } from './drilldowns_form';
+import { DrilldownList } from './drilldown_list';
 import { WorkspaceNode, AdvancedSettings, UrlTemplate, Field } from '../../types';
 
 const tabs = [
@@ -36,7 +36,7 @@ const tabs = [
     title: i18n.translate('xpack.graph.settings.drillDownsTitle', {
       defaultMessage: 'Drill-downs',
     }),
-    component: DrilldownsForm,
+    component: DrilldownList,
   },
 ];
 
@@ -47,7 +47,7 @@ export interface GraphSettingsProps {
   unblacklistNode: (node: WorkspaceNode) => void;
   urlTemplates: UrlTemplate[];
   removeUrlTemplate: (urlTemplate: UrlTemplate) => void;
-  saveUrlTemplate: (urlTemplate: UrlTemplate) => void;
+  saveUrlTemplate: (index: number, urlTemplate: UrlTemplate) => void;
   allFields: Field[];
 }
 

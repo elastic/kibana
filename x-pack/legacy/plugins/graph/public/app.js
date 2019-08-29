@@ -618,32 +618,12 @@ app.controller('graphuiPlugin', function (
     Object.assign($scope.newUrlTemplate, urlTemplate, { templateBeingEdited: urlTemplate });
   };
 
-  $scope.saveUrlTemplate = function () {
-    const found = $scope.newUrlTemplate.url.search(drillDownRegex) > -1;
-    if (!found) {
-      toastNotifications.addWarning({
-        title: i18n.translate('xpack.graph.settings.drillDowns.invalidUrlWarningTitle', {
-          defaultMessage: 'Invalid URL',
-        }),
-        text: i18n.translate('xpack.graph.settings.drillDowns.invalidUrlWarningText', {
-          defaultMessage: 'The URL must contain a {placeholder} string',
-          values: {
-            placeholder: '{{gquery}}'
-          }
-        }),
-      });
-      return;
+  $scope.saveUrlTemplate = function (index, urlTemplate) {
+    if (index !== -1) {
+      $scope.urlTemplates[index] = urlTemplate;
+    } else {
+      $scope.urlTemplates.push(urlTemplate);
     }
-    if ($scope.newUrlTemplate.templateBeingEdited) {
-
-      if ($scope.urlTemplates.indexOf($scope.newUrlTemplate.templateBeingEdited) >= 0) {
-        //patch any existing object
-        Object.assign($scope.newUrlTemplate.templateBeingEdited, $scope.newUrlTemplate, { isDefault: false });
-        return;
-      }
-    }
-    $scope.urlTemplates.push($scope.newUrlTemplate);
-    $scope.resetNewUrlTemplate();
   };
 
   $scope.removeUrlTemplate = function (urlTemplate) {

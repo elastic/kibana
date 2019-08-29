@@ -112,6 +112,16 @@ export function AdvancedSettingsForm({
           )}
           singleSelection={{ asPlainText: true }}
           options={allFields.map(field => ({ label: field.name, value: field }))}
+          selectedOptions={
+            advancedSettings.sampleDiversityField
+              ? [
+                  {
+                    label: advancedSettings.sampleDiversityField.name,
+                    value: advancedSettings.sampleDiversityField,
+                  },
+                ]
+              : []
+          }
           onChange={choices => {
             updateSetting(
               'sampleDiversityField',
@@ -121,25 +131,27 @@ export function AdvancedSettingsForm({
         />
       </EuiFormRow>
 
-      <EuiFormRow
-        helpText={i18n.translate('xpack.graph.settings.advancedSettings.maxValuesInputHelpText', {
-          defaultMessage:
-            'Max number of documents in a sample that can contain the same value for the {fieldName} field',
-          values: {
-            fieldName: 'field',
-          },
-        })}
-        label={i18n.translate('xpack.graph.settings.advancedSettings.maxValuesInputLabel', {
-          defaultMessage: 'Max docs per field',
-        })}
-      >
-        <EuiFieldNumber
-          min={1}
-          max={500000}
-          value={advancedSettings.maxValuesPerDoc}
-          onChange={getNumberUpdater('maxValuesPerDoc')}
-        />
-      </EuiFormRow>
+      {advancedSettings.sampleDiversityField && (
+        <EuiFormRow
+          helpText={i18n.translate('xpack.graph.settings.advancedSettings.maxValuesInputHelpText', {
+            defaultMessage:
+              'Max number of documents in a sample that can contain the same value for the {fieldName} field',
+            values: {
+              fieldName: 'field',
+            },
+          })}
+          label={i18n.translate('xpack.graph.settings.advancedSettings.maxValuesInputLabel', {
+            defaultMessage: 'Max docs per field',
+          })}
+        >
+          <EuiFieldNumber
+            min={1}
+            max={500000}
+            value={advancedSettings.maxValuesPerDoc}
+            onChange={getNumberUpdater('maxValuesPerDoc')}
+          />
+        </EuiFormRow>
+      )}
 
       <EuiFormRow
         helpText={i18n.translate('xpack.graph.settings.advancedSettings.timeoutInputHelpText', {
