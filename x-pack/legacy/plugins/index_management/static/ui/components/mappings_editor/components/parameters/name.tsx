@@ -31,7 +31,7 @@ export const Name = ({ field, parentObject, fieldProps = {} }: Props) => {
     errorCode: ERROR_CODES.NAME_CONFLICT,
   });
 
-  const isInvalid = field.errors.length ? !field.isUpdating : false;
+  const isInvalid = field.errors.length ? !field.isChangingValue : false;
 
   // Concatenate error messages.
   const errorMessage: string | null =

@@ -46,19 +46,19 @@ interface Props {
   [key: string]: any;
 }
 
-// We need to dynamically add the "nameValidation" as it validates
+// We need to dynamically add the "uniqueNameValidation" as it validates
 // that the field name value provided does not already exist on the parent object.
 const updateNameParameterValidations = (
   fieldConfig: FieldConfig,
   parentObject: Record<string, any>,
   initialValue = ''
 ): ValidationConfig[] => {
-  const nameValidation: ValidationConfig['validator'] = ({ path, value, form, formData }) => {
+  const uniqueNameValidation: ValidationConfig['validator'] = ({ value }) => {
     if (Object.keys(parentObject).some(key => key !== initialValue && key === value)) {
       return nameConflictError();
     }
   };
-  return [...fieldConfig.validations!, { validator: nameValidation }];
+  return [...fieldConfig.validations!, { validator: uniqueNameValidation }];
 };
 
 const fieldConfig = (param: ParameterName): FieldConfig =>
