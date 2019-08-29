@@ -36,10 +36,6 @@ describe('useMetricsTime hook', () => {
   });
 
   describe('AutoReloading state', () => {
-    beforeEach(() => {
-      jest.useFakeTimers();
-    });
-
     it('has a default value', () => {
       const { getLastHookValue } = mountHook(() => useMetricsTime().isAutoReloading);
       expect(getLastHookValue()).toBe(false);
