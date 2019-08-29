@@ -4,7 +4,7 @@ exports[`Hosts Table rendering it renders the default Hosts table 1`] = `
 <ContextProvider
   value={
     Object {
-      "bytesFormat": "0,0.[000]b",
+      "bytesFormat": "0,0.[0]b",
       "dateFormat": "MMM D, YYYY @ HH:mm:ss.SSS",
       "dateFormatTz": "UTC",
       "timezone": "UTC",

@@ -28,7 +28,7 @@ describe('formatted_bytes', () => {
             <PreferenceFormattedBytes value={bytes} />
           </TestProviders>
         );
-        expect(wrapper.text()).toEqual('2.676MB');
+        expect(wrapper.text()).toEqual('2.7MB');
       });
 
       test('it renders bytes according to the default format', () => {
@@ -37,7 +37,7 @@ describe('formatted_bytes', () => {
             <PreferenceFormattedBytes value={bytes} />
           </TestProviders>
         );
-        expect(wrapper.text()).toEqual('2.676MB');
+        expect(wrapper.text()).toEqual('2.7MB');
       });
 
       test('it renders bytes supplied as a number according to the default format', () => {
@@ -46,7 +46,7 @@ describe('formatted_bytes', () => {
             <PreferenceFormattedBytes value={+bytes} />
           </TestProviders>
         );
-        expect(wrapper.text()).toEqual('2.676MB');
+        expect(wrapper.text()).toEqual('2.7MB');
       });
 
       test('it renders bytes according to new format', () => {
