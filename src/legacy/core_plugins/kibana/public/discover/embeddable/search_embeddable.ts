@@ -191,6 +191,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     if (this.autoRefreshFetchSubscription) {
       this.autoRefreshFetchSubscription.unsubscribe();
     }
+    this.savedSearch.searchSource.cancelQueued();
   }
 
   private initializeSearchScope() {
@@ -270,6 +271,10 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     if (!this.searchScope) return;
 
     const { searchSource } = this.savedSearch;
+
+    // Abort any in-progress requests
+    searchSource.cancelQueued();
+
     searchSource.setField('size', config.get('discover:sampleSize'));
     searchSource.setField('sort', getSort(this.searchScope.sort, this.searchScope.indexPattern));
 
@@ -304,6 +309,9 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
         this.searchScope!.totalHitCount = resp.hits.total;
       });
     } catch (error) {
+      // If the fetch was aborted, no need to surface this in the UI
+      if (error.name === 'AbortError') return;
+
       toastNotifications.addError(error, {
         title: i18n.translate('kbn.embeddable.errorTitle', {
           defaultMessage: 'Error fetching data',
