@@ -24,3 +24,13 @@ it('Should convert tile key to geojson Polygon', () => {
     left: 77.33276
   });
 });
+
+it('Should convert tile key to geojson Polygon with extra precision', () => {
+  const geometry = getTileBoundingBox('26/19762828/25222702');
+  expect(geometry).toEqual({
+    top: 40.7491508,
+    bottom: 40.7491467,
+    right: -73.9839238,
+    left: -73.9839292
+  });
+});
