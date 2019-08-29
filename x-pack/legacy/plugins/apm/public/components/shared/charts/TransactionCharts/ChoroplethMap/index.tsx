@@ -12,7 +12,6 @@ import React, {
   useMemo
 } from 'react';
 import { Map, NavigationControl, Popup } from 'mapbox-gl';
-import { GeoJsonProperties } from 'geojson';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { shade, tint } from 'polished';
 import { ChoroplethToolTip } from './ChoroplethToolTip';
@@ -20,13 +19,19 @@ import { ChoroplethToolTip } from './ChoroplethToolTip';
 interface ChoroplethItem {
   key: string;
   value: number;
-  docCount: any;
+  docCount: number;
 }
 
 interface Tooltip {
   name: string;
   value: number;
   docCount: number;
+}
+
+interface WorldCountryFeatureProperties {
+  name: string;
+  iso2: string;
+  iso3: string;
 }
 
 interface Props {
@@ -101,28 +106,31 @@ export const ChoroplethMap: React.SFC<Props> = props => {
         layers: [CHOROPLETH_LAYER_ID]
       });
 
-      if (!hoverFeatures[0]) {
+      if (tooltipState && hoverFeatures.length === 0) {
         return setTooltipState(null);
       }
 
-      const geojsonProperties = hoverFeatures[0].properties as NonNullable<
-        GeoJsonProperties
-      >;
+      const featureProperties = hoverFeatures[0]
+        .properties as WorldCountryFeatureProperties;
 
-      if (tooltipState && tooltipState.name === geojsonProperties.name) {
+      if (tooltipState && tooltipState.name === featureProperties.name) {
         return;
       }
 
       const item = items.find(
         ({ key }) =>
-          geojsonProperties && key === geojsonProperties[GEOJSON_KEY_PROPERTY]
+          featureProperties && key === featureProperties[GEOJSON_KEY_PROPERTY]
       );
-      if (item)
-        setTooltipState({
-          name: geojsonProperties.name,
+
+      if (item) {
+        return setTooltipState({
+          name: featureProperties.name,
           value: item.value,
           docCount: item.docCount
         });
+      }
+
+      setTooltipState(null);
     };
     updateTooltipStateOnMousemoveRef.current = updateTooltipStateOnMousemove;
   }, [map, items, tooltipState]);
