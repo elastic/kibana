@@ -22,6 +22,7 @@ import IntlMessageFormat from 'intl-messageformat';
 import IntlRelativeFormat from 'intl-relativeformat';
 
 import { Translation } from '../translation';
+import { getUserLanguage } from './language_detector';
 import { Formats, formats as EN_FORMATS } from './formats';
 import { hasValues, isObject, isString, mergeAll } from './helper';
 import { isPseudoLocale, translateUsingPseudoLocale } from './pseudo_locale';
@@ -240,6 +241,8 @@ export function init(newTranslation?: Translation) {
  * @param translationsUrl URL pointing to the JSON bundle with translations.
  */
 export async function load(translationsUrl: string) {
+  console.log('loading!!')
+  getUserLanguage();
   // Once this package is integrated into core Kibana we should switch to an abstraction
   // around `fetch` provided by the platform, e.g. `kfetch`.
   const response = await fetch(translationsUrl, {

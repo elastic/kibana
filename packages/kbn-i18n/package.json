@@ -24,6 +24,8 @@
     "typescript": "3.5.3"
   },
   "dependencies": {
+    "i18next": "^17.0.12",
+    "i18next-browser-languagedetector": "^3.0.3",
     "intl-format-cache": "^2.1.0",
     "intl-messageformat": "^2.2.0",
     "intl-relativeformat": "^2.1.0",
