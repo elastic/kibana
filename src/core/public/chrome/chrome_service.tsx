@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { MouseEventHandler } from 'react';
 import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import * as Url from 'url';
@@ -63,7 +63,7 @@ export interface ChromeBreadcrumb {
   text: string;
   href?: string;
   'data-test-subj'?: string;
-  onClick?: () => void;
+  onClick?: MouseEventHandler<HTMLButtonElement>;
 }
 
 /** @public */

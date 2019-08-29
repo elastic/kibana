@@ -33,7 +33,6 @@ import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 
 import { docTitle } from 'ui/doc_title/doc_title';
 
-// @ts-ignore
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 
 import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
