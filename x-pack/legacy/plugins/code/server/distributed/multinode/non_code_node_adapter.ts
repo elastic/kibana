@@ -40,6 +40,10 @@ export class NonCodeNodeAdapter implements ServiceHandlerAdapter {
 
   locator: ResourceLocator = new CodeNodeResourceLocator(this.codeNodeUrl);
 
+  async start(): Promise<void> {}
+
+  async stop(): Promise<void> {}
+
   getService<def extends ServiceDefinition>(serviceDefinition: def): ServiceMethodMap<def> {
     const serviceHandler = this.handlers.get(serviceDefinition);
     if (!serviceHandler) {

@@ -35,7 +35,8 @@ module.directive('mlDataFrameAnalyticsExploration', ($injector: InjectorService)
       const kibanaConfig = $injector.get<KibanaConfigTypeFix>('config');
       const Private = $injector.get<IPrivate>('Private');
 
-      const { indexPattern, savedSearch, combinedQuery } = Private(SearchItemsProvider)();
+      const createSearchItems = Private(SearchItemsProvider);
+      const { indexPattern, savedSearch, combinedQuery } = createSearchItems();
 
       const kibanaContext = {
         combinedQuery,

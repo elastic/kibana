@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 import { ColumnarPage } from '../../../components/page';
@@ -12,17 +12,39 @@ import { LoadingPage } from '../../../components/loading_page';
 import { AnalysisPageProviders } from './page_providers';
 import { AnalysisResultsContent } from './page_results_content';
 import { AnalysisSetupContent } from './page_setup_content';
+import { AnalysisSetupUnavailable } from './page_setup_unavailable';
 import { useLogAnalysisJobs } from '../../../containers/logs/log_analysis/log_analysis_jobs';
+import { useLogAnalysisCleanup } from '../../../containers/logs/log_analysis/log_analysis_cleanup';
+import { useLogAnalysisCapabilities } from '../../../containers/logs/log_analysis';
 import { Source } from '../../../containers/source';
 
 export const AnalysisPage = () => {
   const { sourceId, source } = useContext(Source.Context);
   const spaceId = chrome.getInjected('activeSpace').space.id;
-  const { isSetupRequired, isLoadingSetupStatus } = useLogAnalysisJobs({
+  const {
+    isSetupRequired,
+    isLoadingSetupStatus,
+    setupMlModule,
+    isSettingUpMlModule,
+    didSetupFail,
+    hasCompletedSetup,
+  } = useLogAnalysisJobs({
     indexPattern: source ? source.configuration.logAlias : '',
     sourceId,
     spaceId,
+    timeField: source ? source.configuration.fields.timestamp : '',
   });
+  const { hasLogAnalysisCapabilites } = useLogAnalysisCapabilities();
+  if (!hasLogAnalysisCapabilites) {
+    return <AnalysisSetupUnavailable />;
+  }
+
+  const { cleanupMLResources, isCleaningUp } = useLogAnalysisCleanup({ sourceId, spaceId });
+  useEffect(() => {
+    if (didSetupFail) {
+      cleanupMLResources();
+    }
+  }, [didSetupFail, cleanupMLResources]);
 
   return (
     <AnalysisPageProviders>
@@ -34,9 +56,15 @@ export const AnalysisPage = () => {
             })}
           />
         ) : isSetupRequired ? (
-          <AnalysisSetupContent />
+          <AnalysisSetupContent
+            didSetupFail={didSetupFail}
+            isSettingUp={isSettingUpMlModule}
+            setupMlModule={setupMlModule}
+            isCleaningUpAFailedSetup={isCleaningUp}
+            indexPattern={source ? source.configuration.logAlias : ''}
+          />
         ) : (
-          <AnalysisResultsContent />
+          <AnalysisResultsContent sourceId={sourceId} isFirstUse={hasCompletedSetup} />
         )}
       </ColumnarPage>
     </AnalysisPageProviders>

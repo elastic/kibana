@@ -59,6 +59,10 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     jobCreator.cloneFromExistingJob(job, datafeed);
 
     skipTimeRangeStep = mlJobService.tempJobCloningObjects.skipTimeRangeStep;
+    // if we're not skipping the time range, this is a standard job clone, so wipe the jobId
+    if (skipTimeRangeStep === false) {
+      jobCreator.jobId = '';
+    }
     mlJobService.tempJobCloningObjects.skipTimeRangeStep = false;
     mlJobService.tempJobCloningObjects.job = undefined;
   } else {
