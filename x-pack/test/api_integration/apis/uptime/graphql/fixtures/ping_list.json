@@ -63,7 +63,8 @@
         "timestamp": "2019-01-28T18:43:15.077Z",
         "http": {
           "response": {
-            "status_code": 200
+            "status_code": 200,
+            "body": null
           }
         },
         "error": null,
@@ -84,7 +85,8 @@
         "timestamp": "2019-01-28T18:43:15.077Z",
         "http": {
           "response": {
-            "status_code": 200
+            "status_code": 200,
+            "body": null
           }
         },
         "error": null,
@@ -105,7 +107,8 @@
         "timestamp": "2019-01-28T18:43:15.077Z",
         "http": {
           "response": {
-            "status_code": 200
+            "status_code": 200,
+            "body": null
           }
         },
         "error": null,
@@ -160,7 +163,8 @@
         "timestamp": "2019-01-28T18:43:13.074Z",
         "http": {
           "response": {
-            "status_code": 301
+            "status_code": 301,
+            "body": null
           }
         },
         "error": null,
@@ -181,7 +185,8 @@
         "timestamp": "2019-01-28T18:43:13.074Z",
         "http": {
           "response": {
-            "status_code": 200
+            "status_code": 200,
+            "body": null
           }
         },
         "error": null,
