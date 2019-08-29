@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-onClick?: () => void;
+onClick?: MouseEventHandler<HTMLButtonElement>;
 ```
