@@ -40,7 +40,8 @@ const CourierRequestHandlerProvider = function () {
       partialRows,
       metricsAtAllLevels,
       inspectorAdapters,
-      queryFilter
+      queryFilter,
+      abortSignal,
     }) {
       // Create a new search source that inherits the original search source
       // but has the appropriate timeRange applied via a filter.
@@ -101,6 +102,11 @@ const CourierRequestHandlerProvider = function () {
         request.stats(getRequestInspectorStats(requestSearchSource));
 
         try {
+          // Abort any in-progress requests before fetching again
+          if (abortSignal) {
+            abortSignal.addEventListener('abort', () => requestSearchSource.cancelQueued());
+          }
+
           const response = await requestSearchSource.fetch();
 
           searchSource.lastQuery = queryHash;
@@ -133,7 +139,8 @@ const CourierRequestHandlerProvider = function () {
             aggs,
             agg,
             requestSearchSource,
-            inspectorAdapters
+            inspectorAdapters,
+            abortSignal,
           );
         }
       }

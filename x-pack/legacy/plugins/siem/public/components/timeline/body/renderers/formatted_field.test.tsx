@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { get } from 'lodash/fp';
 import * as React from 'react';
+import { ThemeProvider } from 'styled-components';
 
 import { mockTimelineData, TestProviders } from '../../../../mock';
 import { getEmptyValue } from '../../../empty_value';
@@ -16,6 +18,8 @@ import { FormattedFieldValue } from './formatted_field';
 jest.mock('../../../../lib/settings/use_kibana_ui_setting');
 
 describe('Events', () => {
+  const theme = () => ({ eui: euiDarkVars, darkMode: true });
+
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
       <FormattedFieldValue
@@ -92,13 +96,15 @@ describe('Events', () => {
 
   test('it renders placeholder text for a non-date field when the field is NOT populated', () => {
     const wrapper = mount(
-      <FormattedFieldValue
-        eventId={mockTimelineData[0].ecs._id}
-        contextId="test"
-        fieldName="fake.field"
-        fieldType="text"
-        value={get('fake.field', mockTimelineData[0].ecs)}
-      />
+      <ThemeProvider theme={theme}>
+        <FormattedFieldValue
+          eventId={mockTimelineData[0].ecs._id}
+          contextId="test"
+          fieldName="fake.field"
+          fieldType="text"
+          value={get('fake.field', mockTimelineData[0].ecs)}
+        />
+      </ThemeProvider>
     );
 
     expect(wrapper.text()).toEqual(getEmptyValue());

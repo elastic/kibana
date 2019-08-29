@@ -21,7 +21,7 @@ import React from 'react';
 import { EuiLink, EuiSpacer, EuiText, EuiScreenReaderOnly } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { TextInputOption } from '../../../kbn_vislib_vis_types/public/controls/text_input';
+import { TextInputOption } from '../../../kbn_vislib_vis_types/public/components';
 import { WMSOptions } from '../types';
 
 interface WmsInternalOptions {
