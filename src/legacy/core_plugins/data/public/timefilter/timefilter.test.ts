@@ -38,24 +38,14 @@ import { TimefilterManager } from './timefilter';
 import { Subscription } from 'rxjs';
 import { TimeRange, RefreshInterval } from 'src/plugins/data/public';
 
-import { coreMock } from '../../../../../core/public/mocks';
-const setupMock = coreMock.createSetup();
-
 import { timefilterServiceMock } from './timefilter_service.mock';
 const timefilterSetupMock = timefilterServiceMock.createSetupContract();
 
-setupMock.uiSettings.get.mockImplementation((key: string) => {
-  switch (key) {
-    case 'timepicker:timeDefaults':
-      return { from: 'now-15m', to: 'now' };
-    case 'timepicker:refreshIntervalDefaults':
-      return { pause: false, value: 0 };
-    default:
-      throw new Error(`Unexpected config key: ${key}`);
-  }
-});
-
-const timefilter = new TimefilterManager(setupMock.uiSettings, timefilterSetupMock.history);
+const timefilterConfig = {
+  timeDefaults: { from: 'now-15m', to: 'now' },
+  refreshIntervalDefaults: { pause: false, value: 0 },
+};
+const timefilter = new TimefilterManager(timefilterConfig, timefilterSetupMock.history);
 
 function stubNowTime(nowTime: any) {
   // @ts-ignore
