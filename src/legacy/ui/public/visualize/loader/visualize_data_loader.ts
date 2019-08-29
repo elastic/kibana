@@ -70,6 +70,7 @@ export class VisualizeDataLoader {
     const visParams = await getVisParams(this.vis, {
       searchSource: params.searchSource,
       timeRange: params.timeRange,
+      abortSignal: params.abortSignal,
     });
 
     const filters = params.filters || [];
@@ -85,6 +86,7 @@ export class VisualizeDataLoader {
       ...params,
       query,
       filters: filters.concat(savedFilters).filter(f => !f.meta.disabled),
+      abortSignal: params.abortSignal,
     });
 
     // No need to call the response handler when there have been no data nor has there been changes

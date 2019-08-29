@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FIELDS_BROWSER_CONTAINER, FIELDS_BROWSER_FILTER_INPUT, FIELDS_BUTTON } from './selectors';
+import {
+  FIELDS_BROWSER_CONTAINER,
+  FIELDS_BROWSER_FILTER_INPUT,
+  TIMELINE_FIELDS_BUTTON,
+} from './selectors';
 import {
   assertAtLeastOneEventMatchesSearch,
   executeKQL,
@@ -14,8 +18,8 @@ import {
 import { TIMELINE_DATA_PROVIDERS } from '../timeline/selectors';
 
 /** Opens the timeline's Field Browser */
-export const openFieldsBrowser = () => {
-  cy.get(FIELDS_BUTTON).click();
+export const openTimelineFieldsBrowser = () => {
+  cy.get(TIMELINE_FIELDS_BUTTON).click();
 
   cy.get(FIELDS_BROWSER_CONTAINER).should('exist');
 };
