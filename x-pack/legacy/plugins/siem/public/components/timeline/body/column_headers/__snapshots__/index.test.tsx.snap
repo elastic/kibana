@@ -481,6 +481,7 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
               }
               data-test-subj="field-browser"
               height={300}
+              isEventViewer={false}
               onUpdateColumns={[MockFunction]}
               timelineId="test"
               toggleColumn={[MockFunction]}

@@ -20,7 +20,7 @@ describe('timeline search or filter KQL bar', () => {
   });
 
   afterEach(() => {
-    logout();
+    return logout();
   });
 
   it('executes a KQL query', () => {

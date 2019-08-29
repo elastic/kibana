@@ -48,6 +48,7 @@ import { Anomaly } from '../../components/ml/types';
 import { NavigationParams } from '../../components/navigation/breadcrumbs';
 import { HostsTableType } from '../../store/hosts/model';
 import { HostsQueryProps } from './hosts';
+import { getHostDetailsEventsKqlQueryExpression } from './helpers';
 
 const type = hostsModel.HostsType.details;
 
@@ -212,6 +213,10 @@ const HostDetailsBodyComponent = React.memo<HostDetailsComponentProps>(
                   {children({
                     endDate: to,
                     filterQuery: getFilterQuery(hostName, filterQueryExpression, indexPattern),
+                    kqlQueryExpression: getHostDetailsEventsKqlQueryExpression({
+                      filterQueryExpression,
+                      hostName,
+                    }),
                     skip: isInitializing,
                     setQuery,
                     startDate: from,
