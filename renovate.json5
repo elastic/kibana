@@ -242,14 +242,6 @@
         ],
       },
       {
-        groupSlug: 'history',
-        groupName: 'history related packages',
-        packageNames: [
-          'history',
-          '@types/history',
-        ],
-      },
-      {
         groupSlug: 'json-stable-stringify',
         groupName: 'json-stable-stringify related packages',
         packageNames: [
@@ -375,6 +367,14 @@
         packageNames: [
           'has-ansi',
           '@types/has-ansi',
+        ],
+      },
+      {
+        groupSlug: 'history',
+        groupName: 'history related packages',
+        packageNames: [
+          'history',
+          '@types/history',
         ],
       },
       {

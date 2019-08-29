@@ -90,7 +90,7 @@ export class AppContainer extends React.Component<Props, State> {
 
   async unmountApp() {
     if (this.unmountFunc) {
-      await this.unmountFunc();
+      this.unmountFunc();
       this.unmountFunc = undefined;
     }
   }
