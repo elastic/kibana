@@ -18,14 +18,14 @@
       "id": "rare_process_windows_ecs",
       "file": "rare_process_windows_ecs.json"
     }, {
-      "id": "windows_anomalous_network_activity",
-      "file": "windows_anomalous_network_activity.json"
+      "id": "windows_anomalous_network_activity_ecs",
+      "file": "windows_anomalous_network_activity_ecs.json"
     }, {
-      "id": "windows_anomalous_path_activity",
-      "file": "windows_anomalous_path_activity.json"
+      "id": "windows_anomalous_path_activity_ecs",
+      "file": "windows_anomalous_path_activity_ecs.json"
     }, {
-      "id": "windows_anomalous_process_all_hosts",
-      "file": "windows_anomalous_process_all_hosts.json"
+      "id": "windows_anomalous_process_all_hosts_ecs",
+      "file": "windows_anomalous_process_all_hosts_ecs.json"
     }, {
       "id": "windows_anomalous_process_creation",
       "file": "windows_anomalous_process_creation.json"
@@ -36,8 +36,8 @@
       "id": "windows_anomalous_service",
       "file": "windows_anomalous_service.json"
     }, {
-      "id": "windows_anomalous_user_name",
-      "file": "windows_anomalous_user_name.json"
+      "id": "windows_anomalous_user_name_ecs",
+      "file": "windows_anomalous_user_name_ecs.json"
     }
   ],
   "datafeeds": [
@@ -46,17 +46,17 @@
       "file": "datafeed_rare_process_windows_ecs.json",
       "job_id": "rare_process_windows_ecs"
     }, {
-      "id": "datafeed-windows_anomalous_network_activity",
-      "file": "datafeed_windows_anomalous_network_activity.json",
-      "job_id": "windows_anomalous_network_activity"
+      "id": "datafeed-windows_anomalous_network_activity_ecs",
+      "file": "datafeed_windows_anomalous_network_activity_ecs.json",
+      "job_id": "windows_anomalous_network_activity_ecs"
     }, {
-      "id": "datafeed-windows_anomalous_path_activity",
-      "file": "datafeed_windows_anomalous_path_activity.json",
-      "job_id": "windows_anomalous_path_activity"
+      "id": "datafeed-windows_anomalous_path_activity_ecs",
+      "file": "datafeed_windows_anomalous_path_activity_ecs.json",
+      "job_id": "windows_anomalous_path_activity_ecs"
     }, {
-      "id": "datafeed-windows_anomalous_process_all_hosts",
-      "file": "datafeed_windows_anomalous_process_all_hosts.json",
-      "job_id": "windows_anomalous_process_all_hosts"
+      "id": "datafeed-windows_anomalous_process_all_hosts_ecs",
+      "file": "datafeed_windows_anomalous_process_all_hosts_ecs.json",
+      "job_id": "windows_anomalous_process_all_hosts_ecs"
     }, {
       "id": "datafeed-windows_anomalous_process_creation",
       "file": "datafeed_windows_anomalous_process_creation.json",
@@ -70,9 +70,9 @@
       "file": "datafeed_windows_anomalous_service.json",
       "job_id": "windows_anomalous_service"
     }, {
-      "id": "datafeed-windows_anomalous_user_name",
-      "file": "datafeed_windows_anomalous_user_name.json",
-      "job_id": "windows_anomalous_user_name"
+      "id": "datafeed-windows_anomalous_user_name_ecs",
+      "file": "datafeed_windows_anomalous_user_name_ecs.json",
+      "job_id": "windows_anomalous_user_name_ecs"
     }
   ]
 }
