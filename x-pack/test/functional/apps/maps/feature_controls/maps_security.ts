@@ -17,7 +17,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
 
   // FLAKY: https://github.com/elastic/kibana/issues/38414
-  describe('security feature controls', () => {
+  describe.skip('security feature controls', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('maps/data');
       await esArchiver.load('maps/kibana');
