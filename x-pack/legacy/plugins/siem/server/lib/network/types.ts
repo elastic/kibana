@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NetworkDnsData, NetworkTopNFlowData } from '../../graphql/types';
+import { NetworkDirectionEcs, NetworkDnsData, NetworkTopNFlowData } from '../../graphql/types';
 import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
-import { SearchHit, TotalValue } from '../types';
+import { SearchHit } from '../types';
 
 export interface NetworkAdapter {
   getNetworkTopNFlow(
@@ -21,58 +21,27 @@ export interface GenericBuckets {
   doc_count: number;
 }
 
-interface LocationHit<T> {
-  doc_count: number;
-  top_geo: {
-    hits: {
-      total: TotalValue | number;
-      max_score: number | null;
-      hits: Array<{
-        _source: T;
-        sort?: [number];
-        _index?: string;
-        _type?: string;
-        _id?: string;
-        _score?: number | null;
-      }>;
-    };
-  };
-}
-
-interface AutonomousSystemHit<T> {
-  doc_count: number;
-  top_as: {
-    hits: {
-      total: TotalValue | number;
-      max_score: number | null;
-      hits: Array<{
-        _source: T;
-        sort?: [number];
-        _index?: string;
-        _type?: string;
-        _id?: string;
-        _score?: number | null;
-      }>;
-    };
-  };
+export interface DirectionBuckets {
+  key: NetworkDirectionEcs;
 }
 
 export interface NetworkTopNFlowBuckets {
   key: string;
-  autonomous_system: AutonomousSystemHit<object>;
-  bytes_in: {
+  bytes: {
     value: number;
   };
-  bytes_out: {
+  packets: {
+    value: number;
+  };
+  ip_count: {
     value: number;
   };
   domain: {
     buckets: GenericBuckets[];
   };
-  location: LocationHit<object>;
-  flows: number;
-  destination_ips?: number;
-  source_ips?: number;
+  direction: {
+    buckets: DirectionBuckets[];
+  };
 }
 
 export interface NetworkTopNFlowData extends SearchHit {
@@ -80,10 +49,10 @@ export interface NetworkTopNFlowData extends SearchHit {
     top_n_flow_count?: {
       value: number;
     };
-    destination?: {
+    top_uni_flow?: {
       buckets: NetworkTopNFlowBuckets[];
     };
-    source?: {
+    top_bi_flow?: {
       buckets: NetworkTopNFlowBuckets[];
     };
   };

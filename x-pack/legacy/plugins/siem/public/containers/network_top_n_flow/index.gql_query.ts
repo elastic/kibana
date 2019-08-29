@@ -9,10 +9,11 @@ import gql from 'graphql-tag';
 export const networkTopNFlowQuery = gql`
   query GetNetworkTopNFlowQuery(
     $sourceId: ID!
+    $flowDirection: FlowDirection!
     $filterQuery: String
     $pagination: PaginationInputPaginated!
     $sort: NetworkTopNFlowSortField!
-    $flowTarget: FlowTargetNew!
+    $flowTarget: FlowTarget!
     $timerange: TimerangeInput!
     $defaultIndex: [String!]!
     $inspect: Boolean!
@@ -21,6 +22,7 @@ export const networkTopNFlowQuery = gql`
       id
       NetworkTopNFlow(
         filterQuery: $filterQuery
+        flowDirection: $flowDirection
         flowTarget: $flowTarget
         pagination: $pagination
         sort: $sort
@@ -31,50 +33,29 @@ export const networkTopNFlowQuery = gql`
         edges {
           node {
             source {
-              autonomous_system {
-                name
-                number
-              }
-              domain
+              count
               ip
-              location {
-                geo {
-                  continent_name
-                  country_name
-                  country_iso_code
-                  city_name
-                  region_iso_code
-                  region_name
-                }
-                flowTarget
-              }
-              flows
-              destination_ips
+              domain
             }
             destination {
-              autonomous_system {
-                name
-                number
-              }
-              domain
+              count
               ip
-              location {
-                geo {
-                  continent_name
-                  country_name
-                  country_iso_code
-                  city_name
-                  region_iso_code
-                  region_name
-                }
-                flowTarget
-              }
-              flows
-              source_ips
+              domain
+            }
+            client {
+              count
+              ip
+              domain
+            }
+            server {
+              count
+              ip
+              domain
             }
             network {
-              bytes_in
-              bytes_out
+              bytes
+              direction
+              packets
             }
           }
           cursor {
