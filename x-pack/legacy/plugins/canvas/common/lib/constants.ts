@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RUNTIME_NAME } from '../../external_runtime/constants';
-
 export const CANVAS_TYPE = 'canvas-workpad';
 export const CUSTOM_ELEMENT_TYPE = 'canvas-element';
 export const CANVAS_APP = 'canvas';
@@ -35,7 +33,3 @@ export const CANVAS_LAYOUT_STAGE_CONTENT_SELECTOR = `canvasLayout__stageContent`
 export const DATATABLE_COLUMN_TYPES = ['string', 'number', 'null', 'boolean', 'date'];
 export const LAUNCHED_FULLSCREEN = 'workpad-full-screen-launch';
 export const LAUNCHED_FULLSCREEN_AUTOPLAY = 'workpad-full-screen-launch-with-autoplay';
-export const API_ROUTE_SNAPSHOT_BASE = '/public/canvas';
-export const API_ROUTE_SNAPSHOT_ZIP = `${API_ROUTE_SNAPSHOT_BASE}/zip`;
-export const API_ROUTE_SNAPSHOT_RUNTIME = `${API_ROUTE_SNAPSHOT_BASE}/runtime`;
-export const API_ROUTE_SNAPSHOT_RUNTIME_DOWNLOAD = `${API_ROUTE_SNAPSHOT_BASE}/${RUNTIME_NAME}.js`;
