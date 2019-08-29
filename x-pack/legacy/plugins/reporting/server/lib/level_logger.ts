@@ -6,6 +6,10 @@
 
 type ServerLog = (tags: string[], msg: string) => void;
 
+const trimStr = (toTrim: string) => {
+  return typeof toTrim === 'string' ? toTrim.trim() : toTrim;
+};
+
 export class LevelLogger {
   private _logger: any;
   private _tags: string[];
@@ -35,15 +39,15 @@ export class LevelLogger {
   }
 
   public warning(msg: string, tags: string[] = []) {
-    this._logger([...this._tags, ...tags, 'warning'], msg);
+    this._logger([...this._tags, ...tags, 'warning'], trimStr(msg));
   }
 
   public debug(msg: string, tags: string[] = []) {
-    this._logger([...this._tags, ...tags, 'debug'], msg);
+    this._logger([...this._tags, ...tags, 'debug'], trimStr(msg));
   }
 
   public info(msg: string, tags: string[] = []) {
-    this._logger([...this._tags, ...tags, 'info'], msg);
+    this._logger([...this._tags, ...tags, 'info'], trimStr(msg));
   }
 
   public get isVerbose() {
