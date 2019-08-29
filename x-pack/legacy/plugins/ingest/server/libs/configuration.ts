@@ -8,7 +8,7 @@ import uuidv4 from 'uuid/v4';
 import uuid from 'uuid/v4';
 import { ConfigAdapter } from './adapters/configurations/default';
 import { BackendFrameworkLib } from './framework';
-import { ConfigurationFile } from './adapters/configurations/adapter_types';
+import { ConfigurationFile, Datasource } from './adapters/configurations/adapter_types';
 
 export class ConfigurationLib {
   constructor(
@@ -124,6 +124,7 @@ export class ConfigurationLib {
     // TODO: ensure new version is greater then old
     // TODO: Ensure new version is a valid version number for agent
     // TODO: ensure new version works with current ES version
+    // TODO: trigger and merge in config changes from intigrations
 
     await this.adapter.update(newConfig.id, {
       id: newConfig.id,
@@ -142,6 +143,9 @@ export class ConfigurationLib {
   }
 
   public async rollForward(id: string): Promise<{ id: string; version: number }> {
+    const oldConfig = await this.adapter.get(id);
+
+    await this._update(oldConfig, {});
     return {
       id: 'fsdfsdf',
       version: 0,
@@ -151,8 +155,8 @@ export class ConfigurationLib {
   /**
    * request* because in the future with an approval flow it will not directly make the change
    */
-  public async requestAddDataSource(id: string) {
-    const oldConfig = await this.adapter.get(id);
+  public async requestAddDataSource(configId: string, datasource: Datasource) {
+    const oldConfig = await this.adapter.get(configId);
 
     if (oldConfig.status === 'active') {
       throw new Error(
@@ -160,14 +164,38 @@ export class ConfigurationLib {
       );
     }
 
-    // const newConfig = await this._update(oldConfig, configuration);
+    // TODO add inputs, and replace in array with IDs
+
+    await this._update(oldConfig, {
+      data_sources: [...oldConfig.data_sources, datasource],
+    });
+
+    // TODO return data
   }
 
   /**
    * request* because in the future with an approval flow it will not directly make the change
    */
-  public async requestDeleteDataSource() {
-    throw new Error('Not yet implamented');
+  public async requestDeleteDataSource(configId: string, datasourceUUID: string) {
+    const oldConfig = await this.adapter.get(configId);
+
+    if (oldConfig.status === 'active') {
+      throw new Error(
+        `Config ${oldConfig.id} can not be updated becuase it is ${oldConfig.status}`
+      );
+    }
+
+    if (!oldConfig.data_sources.find(ds => ds.uuid !== datasourceUUID)) {
+      throw new Error(
+        `Config ${oldConfig.id} does not contain a datasource with a uuid of ${datasourceUUID}`
+      );
+    }
+
+    await this._update(oldConfig, {
+      data_sources: oldConfig.data_sources.filter(ds => ds.uuid !== datasourceUUID),
+    });
+
+    // TODO return something
   }
 
   public async listDataSources() {
@@ -175,11 +203,15 @@ export class ConfigurationLib {
   }
 
   private async _update(oldConfig: ConfigurationFile, config: Partial<ConfigurationFile>) {
-    const newConfig = await this.adapter.create(
-      merge<ConfigurationFile>({}, omit(oldConfig, ['id']), config)
-    );
+    const newConfig = await this.adapter.create({
+      ...merge<ConfigurationFile>({}, omit(oldConfig, ['id']), config),
+      version: oldConfig.version + 1,
+    });
 
-    // TODO update oldConfig to set status to locked
+    await this.adapter.update(oldConfig.id, {
+      ...omit(oldConfig, ['id']),
+      status: 'locked',
+    });
     // TODO fire events for fleet that update was made
 
     return newConfig;
