@@ -320,12 +320,22 @@ export const IPDetails = connect(
   }
 )(IPDetailsComponent);
 
-export const getBreadcrumbs = (ip: string): Breadcrumb[] => [
-  {
-    text: i18n.PAGE_TITLE,
-    href: getNetworkUrl(),
-  },
-  {
-    text: decodeIpv6(ip),
-  },
-];
+export const getBreadcrumbs = (ip: string): Breadcrumb[] => {
+  const breadcrumbs = [
+    {
+      text: i18n.PAGE_TITLE,
+      href: getNetworkUrl(),
+    },
+  ];
+  if (ip) {
+    return [
+      ...breadcrumbs,
+      {
+        text: decodeIpv6(ip),
+        href: '',
+      },
+    ];
+  } else {
+    return breadcrumbs;
+  }
+};

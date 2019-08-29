@@ -57,7 +57,7 @@ describe('useCreateAnalyticsForm()', () => {
     act(() => {
       // this should be actions.openModal(), but that doesn't work yet because act() doesn't support async yet.
       // we need to wait for an update to React 16.9
-      actions.setFormState({ isModalVisible: true });
+      actions.setIsModalVisible(true);
     });
     const { state: stateModalOpen } = getLastHookValue();
     expect(stateModalOpen.isModalVisible).toBe(true);
@@ -65,7 +65,7 @@ describe('useCreateAnalyticsForm()', () => {
     act(() => {
       // this should be actions.closeModal(), but that doesn't work yet because act() doesn't support async yet.
       // we need to wait for an update to React 16.9
-      actions.setFormState({ isModalVisible: false });
+      actions.setIsModalVisible(false);
     });
     const { state: stateModalClosed } = getLastHookValue();
     expect(stateModalClosed.isModalVisible).toBe(false);

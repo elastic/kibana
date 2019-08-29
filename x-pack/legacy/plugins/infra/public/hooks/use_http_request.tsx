@@ -58,7 +58,12 @@ export function useHTTPRequest<Response>(
     [pathname, body, method]
   );
 
-  const loading = useMemo(() => request.state === 'pending', [request.state]);
+  const loading = useMemo(() => {
+    if (request.state === 'resolved' && response === null) {
+      return true;
+    }
+    return request.state === 'pending';
+  }, [request.state, response]);
 
   return {
     response,
