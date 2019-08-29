@@ -19,6 +19,7 @@ describe('PingList component', () => {
         total: 9231,
         pings: [
           {
+            id: 'id1',
             timestamp: '2019-01-28T17:47:08.078Z',
             http: null,
             error: {
@@ -36,6 +37,7 @@ describe('PingList component', () => {
             },
           },
           {
+            id: 'id2',
             timestamp: '2019-01-28T17:47:09.075Z',
             http: null,
             error: {
@@ -53,6 +55,7 @@ describe('PingList component', () => {
             },
           },
           {
+            id: 'id3',
             timestamp: '2019-01-28T17:47:06.077Z',
             http: null,
             error: null,
@@ -67,6 +70,7 @@ describe('PingList component', () => {
             },
           },
           {
+            id: 'id4',
             timestamp: '2019-01-28T17:47:07.075Z',
             http: null,
             error: {
@@ -84,6 +88,7 @@ describe('PingList component', () => {
             },
           },
           {
+            id: 'id5',
             timestamp: '2019-01-28T17:47:07.074Z',
             http: null,
             error: {
@@ -102,6 +107,7 @@ describe('PingList component', () => {
             },
           },
           {
+            id: 'id6',
             timestamp: '2019-01-28T17:47:18.080Z',
             http: null,
             error: {
@@ -119,6 +125,7 @@ describe('PingList component', () => {
             },
           },
           {
+            id: 'id7',
             timestamp: '2019-01-28T17:47:19.076Z',
             http: null,
             error: {
@@ -136,6 +143,7 @@ describe('PingList component', () => {
             },
           },
           {
+            id: 'id8',
             timestamp: '2019-01-28T17:47:19.076Z',
             http: null,
             error: {
@@ -154,6 +162,7 @@ describe('PingList component', () => {
             },
           },
           {
+            id: 'id9',
             timestamp: '2019-01-28T17:47:19.077Z',
             http: { response: { status_code: 200 } },
             error: null,
