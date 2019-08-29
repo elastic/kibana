@@ -51,35 +51,7 @@ export const callSetupMlModuleAPI = async (
             },
           },
         ],
-        datafeedOverrides: [
-          {
-            job_id: 'log-entry-rate',
-            aggregations: {
-              buckets: {
-                date_histogram: {
-                  field: timeField,
-                  fixed_interval: `${bucketSpan}ms`,
-                },
-                aggregations: {
-                  [timeField]: {
-                    max: {
-                      field: `${timeField}`,
-                    },
-                  },
-                  doc_count_per_minute: {
-                    bucket_script: {
-                      script: {
-                        params: {
-                          bucket_span_in_ms: bucketSpan,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        ],
+        datafeedOverrides: [],
       })
     ),
   });
