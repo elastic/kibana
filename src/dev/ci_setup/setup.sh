@@ -8,10 +8,8 @@ cacheDir="${CACHE_DIR:-"$HOME/.kibana"}"
 RED='\033[0;31m'
 C_RESET='\033[0m' # Reset color
 
-###
-### keep until 7.5.0 snapshots are available
-###
-export TEST_ES_BRANCH=7.4.0
+# force manually created 7.5 snapshots until live ones are available
+export KBN_ES_SNAPSHOT_URL="https://storage.googleapis.com/kibana-ci-tmp-artifacts/{name}-7.5.0-SNAPSHOT-{os}-x86_64.{ext}"
 
 ###
 ### Since the Jenkins logging output collector doesn't look like a TTY
