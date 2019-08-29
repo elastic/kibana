@@ -10,15 +10,23 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
       grow={false}
     >
       <DefaultDraggable
-        field="source.autonomous_system.as_org"
-        id="ip-overview-source.autonomous_system.as_org"
+        field="source.as.organization.name"
+        id="ip-overview-source.as.organization.name"
         value="Test Org"
       />
-       /
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      /
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
       <DefaultDraggable
-        field="source.autonomous_system.asn"
-        id="ip-overview-source.autonomous_system.asn"
-        value="Test ASN"
+        field="source.as.number"
+        id="ip-overview-source.as.number"
+        value="12345"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
