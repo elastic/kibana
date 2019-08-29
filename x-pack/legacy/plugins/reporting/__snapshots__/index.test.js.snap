@@ -26,7 +26,7 @@ Object {
   },
   "csv": Object {
     "checkForFormulas": true,
-    "enablePanelActionDownload": false,
+    "enablePanelActionDownload": true,
     "maxSizeBytes": 10485760,
     "scroll": Object {
       "duration": "30s",
@@ -88,7 +88,7 @@ Object {
   },
   "csv": Object {
     "checkForFormulas": true,
-    "enablePanelActionDownload": false,
+    "enablePanelActionDownload": true,
     "maxSizeBytes": 10485760,
     "scroll": Object {
       "duration": "30s",
@@ -149,7 +149,7 @@ Object {
   },
   "csv": Object {
     "checkForFormulas": true,
-    "enablePanelActionDownload": false,
+    "enablePanelActionDownload": true,
     "maxSizeBytes": 10485760,
     "scroll": Object {
       "duration": "30s",
@@ -211,7 +211,7 @@ Object {
   },
   "csv": Object {
     "checkForFormulas": true,
-    "enablePanelActionDownload": false,
+    "enablePanelActionDownload": true,
     "maxSizeBytes": 10485760,
     "scroll": Object {
       "duration": "30s",

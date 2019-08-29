@@ -97,32 +97,37 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
 
 exports[`Table Helpers #getRowItemOverflow it returns correctly against snapshot 1`] = `
 <div>
-  <EuiToolTip
-    content={
-      <React.Fragment>
-        <span>
-          <React.Fragment>
-            item2
-          </React.Fragment>
-          <br />
-        </span>
-        <b>
-          <br />
+  <Popover
+    count={2}
+    idPrefix="attrName"
+  >
+    <EuiText
+      size="xs"
+    >
+      <ul>
+        <li
+          key="attrName-item2"
+        >
+          item2
+        </li>
+      </ul>
+      <p
+        data-test-subj="popover-additional-overflow"
+      >
+        <EuiTextColor
+          color="subdued"
+        >
+          1
+           
           <FormattedMessage
-            defaultMessage="More..."
+            defaultMessage="more not shown"
             id="xpack.siem.tables.rowItemHelper.moreDescription"
             values={Object {}}
           />
-        </b>
-      </React.Fragment>
-    }
-    delay="regular"
-    position="top"
-  >
-    <MoreRowItems
-      type="boxesHorizontal"
-    />
-  </EuiToolTip>
+        </EuiTextColor>
+      </p>
+    </EuiText>
+  </Popover>
 </div>
 `;
 

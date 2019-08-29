@@ -186,7 +186,7 @@ test('Document search', async () => {
 });
 
 test('Document suggest', async () => {
-  // 1. The first response should have 1 result.
+  // 1. The first response should have 2 docs.
   const responseWithResult = await docSearchClient.suggest({ query: 'string', page: 1 });
   expect(responseWithResult).toEqual(
     expect.objectContaining({
