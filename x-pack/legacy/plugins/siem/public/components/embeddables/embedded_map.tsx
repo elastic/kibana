@@ -118,7 +118,7 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
 
         setEmbeddable(embeddableObject);
       } catch (e) {
-        // TODO: Throw toast
+        // TODO: Throw toast https://github.com/elastic/siem-team/issues/449
       }
     };
 
@@ -143,7 +143,7 @@ export const EmbeddedMap = React.memo<EmbeddedMapProps>(
         }
         return true;
       } catch (e) {
-        // TODO: Throw toast
+        // TODO: Throw toast https://github.com/elastic/siem-team/issues/449
         return false;
       }
     };

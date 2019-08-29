@@ -17,6 +17,8 @@ import { IndexPatternSavedObject } from '../types';
 
 type Return = [boolean, IndexPatternSavedObject[]];
 
+// TODO: Used by more than just ML now -- refactor to shared component https://github.com/elastic/siem-team/issues/448
+
 export const useIndexPatterns = (refreshToggle = false): Return => {
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternSavedObject[]>([]);
   const [isLoading, setIsLoading] = useState(true);

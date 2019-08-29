@@ -199,7 +199,7 @@ export const jobsSummary = async (
 
 /**
  * Fetches Configured Index Patterns from the Kibana saved objects API (as ML does during create job flow)
- *
+ * TODO: Used by more than just ML now -- refactor to shared component https://github.com/elastic/siem-team/issues/448
  * @param headers
  */
 export const getIndexPatterns = async (
