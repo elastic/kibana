@@ -55,6 +55,8 @@ const ShiftedEuiText = styled(EuiText)`
   top: 5px;
 `;
 
+const RUM_PAGE_LOAD_TYPE = 'page-load';
+
 export class TransactionCharts extends Component<TransactionChartProps> {
   public getMaxY = (responseTimeSeries: TimeSeries[]) => {
     const coordinates = flatten(
@@ -198,7 +200,7 @@ export class TransactionCharts extends Component<TransactionChartProps> {
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGrid>
-        {transactionType === 'page-load' ? (
+        {transactionType === RUM_PAGE_LOAD_TYPE ? (
           <>
             <EuiSpacer size="s" />
             <PageLoadCharts />
@@ -227,7 +229,7 @@ function tpmLabel(type?: string) {
 
 function responseTimeLabel(type?: string) {
   switch (type) {
-    case 'page-load':
+    case RUM_PAGE_LOAD_TYPE:
       return i18n.translate(
         'xpack.apm.metrics.transactionChart.pageLoadTimesLabel',
         {

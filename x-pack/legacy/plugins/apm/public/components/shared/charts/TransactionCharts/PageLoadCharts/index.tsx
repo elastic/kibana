@@ -7,9 +7,12 @@
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { RegionMapChart } from '../RegionMapChart';
+import { useAvgDurationByCountry } from '../../../../../hooks/useAvgDurationByCountry';
+import { ChoroplethMap } from '../ChoroplethMap';
 
 export const PageLoadCharts: React.SFC = () => {
+  const { data } = useAvgDurationByCountry();
+
   return (
     <EuiFlexGrid columns={1} gutterSize="s">
       <EuiFlexItem>
@@ -25,7 +28,7 @@ export const PageLoadCharts: React.SFC = () => {
               )}
             </span>
           </EuiTitle>
-          <RegionMapChart />
+          <ChoroplethMap data={data} />
         </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGrid>

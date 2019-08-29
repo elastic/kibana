@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import { flatten, sortByOrder } from 'lodash';
 import {
   CLIENT_GEO_COUNTRY_ISO_CODE,
   PROCESSOR_EVENT,
@@ -35,7 +34,7 @@ export async function getTransactionAvgDurationByCountry({
       query: {
         bool: {
           filter: [
-            { term: { [SERVICE_NAME]: 'client' } },
+            { term: { [SERVICE_NAME]: serviceName } },
             { term: { [PROCESSOR_EVENT]: 'transaction' } },
             { term: { [TRANSACTION_TYPE]: 'page-load' } },
             { exists: { field: CLIENT_GEO_COUNTRY_ISO_CODE } },
@@ -61,17 +60,19 @@ export async function getTransactionAvgDurationByCountry({
   };
 
   const resp = await client.search(params);
-  if (resp.aggregations) {
-    const buckets = resp.aggregations.country_code.buckets;
-    const avgDurationsByCountry = buckets.map(
-      ({ key, doc_count, avg_duration: { value } }) => ({
-        key,
-        doc_count,
-        value: value === null ? 0 : Math.round(value / 1000)
-      })
-    );
 
-    return avgDurationsByCountry;
+  if (!resp.aggregations) {
+    return [];
   }
-  return [];
+
+  const buckets = resp.aggregations.country_code.buckets;
+  const avgDurationsByCountry = buckets.map(
+    ({ key, doc_count, avg_duration: { value } }) => ({
+      key,
+      doc_count,
+      value: value === null ? 0 : value
+    })
+  );
+
+  return avgDurationsByCountry;
 }
