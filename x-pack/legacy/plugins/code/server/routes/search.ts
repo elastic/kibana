@@ -159,7 +159,7 @@ export function documentSearchRoute(router: CodeServerRouter, log: Logger) {
   // * lineNumStart: the start line number of the snippet.
   // * lineNumEnd: Optional. The end line number of the snippet.
   router.route({
-    path: '/api/code/integration/resolveSnippets',
+    path: '/api/code/integration/snippets',
     method: 'GET',
     async handler(req: RequestFacade) {
       const { repoUri, revision, filePath, lineNum, lineNumEnd } = req.query as RequestQueryFacade;
