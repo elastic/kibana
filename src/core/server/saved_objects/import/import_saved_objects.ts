@@ -33,7 +33,8 @@ export async function importSavedObjects({
   savedObjectsClient,
   supportedTypes,
   namespace,
-}: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse> {
+}: SavedObjectsImportOptions,
+  sourceSpaceId?:string): Promise<SavedObjectsImportResponse> {
   let errorAccumulator: SavedObjectsImportError[] = [];
 
   // Get the objects to import
@@ -66,13 +67,13 @@ export async function importSavedObjects({
     namespace,
   });
 
-  const soErrors=await extractErrors(bulkCreateResult.saved_objects, filteredObjects,savedObjectsClient);
-
-  errorAccumulator = [
-    ...errorAccumulator,
-    ...soErrors,
-  ];
-
+  const soErrors = await extractErrors(
+    bulkCreateResult.saved_objects,
+    filteredObjects,
+    savedObjectsClient,
+    sourceSpaceId
+  );
+  errorAccumulator = [...errorAccumulator, ...soErrors];
   return {
     success: errorAccumulator.length === 0,
     successCount: bulkCreateResult.saved_objects.filter(obj => !obj.error).length,

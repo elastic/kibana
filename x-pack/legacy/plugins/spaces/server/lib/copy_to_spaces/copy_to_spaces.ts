@@ -29,6 +29,7 @@ export function copySavedObjectsToSpacesFactory(
     sourceSpaceId: string,
     options: Pick<CopyOptions, 'includeReferences' | 'objects'>
   ) => {
+
     const objectStream = await importExport.getSortedObjectsForExport({
       namespace: spaceIdToNamespace(sourceSpaceId),
       includeReferencesDeep: options.includeReferences,
@@ -44,9 +45,11 @@ export function copySavedObjectsToSpacesFactory(
   const importObjectsToSpace = async (
     spaceId: string,
     objectsStream: Readable,
-    options: CopyOptions
+    options: CopyOptions,
+    srcSpaceId? : string
   ) => {
     try {
+
       const importResponse = await importExport.importSavedObjects({
         namespace: spaceIdToNamespace(spaceId),
         objectLimit: importExport.objectLimit,
@@ -54,7 +57,7 @@ export function copySavedObjectsToSpacesFactory(
         savedObjectsClient,
         supportedTypes: eligibleTypes,
         readStream: objectsStream,
-      });
+      },srcSpaceId);
 
       return {
         success: importResponse.success,
@@ -79,7 +82,8 @@ export function copySavedObjectsToSpacesFactory(
       response[spaceId] = await importObjectsToSpace(
         spaceId,
         createReadableStreamFromArray(exportedSavedObjects),
-        options
+        options,
+        sourceSpaceId
       );
     }
 

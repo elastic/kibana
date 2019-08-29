@@ -16,17 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObject } from '../types';
 import { SavedObjectsClientContract } from 'src/core/server';
+import { SavedObject } from '../types';
 import { SavedObjectsImportError } from './types';
 
 export async function extractErrors(
   savedObjectResults: SavedObject[],
   savedObjectsToImport: SavedObject[],
-  savedObjectsClient?: SavedObjectsClientContract
+  savedObjectsClient?: SavedObjectsClientContract,
+  sourceSpaceId?:string
 ) {
   const errors: SavedObjectsImportError[] = [];
   const originalSavedObjectsMap = new Map<string, SavedObject>();
+
+  //const log = new ToolingLog({ level: 'info', writeTo: process.stdout });
+
   for (const savedObject of savedObjectsToImport) {
     originalSavedObjectsMap.set(`${savedObject.type}:${savedObject.id}`, savedObject);
   }
@@ -42,26 +46,29 @@ export async function extractErrors(
         originalSavedObject.attributes.title;
 
       if (savedObject.error.statusCode === 409) {
-
         // find the correct title of the saved object that conflicts, in order to use it in the message box
-        var realTitle=title;
+        let realTitle = title;
 
         if (savedObjectsClient) {
-          try
-          {
-            var resp=await savedObjectsClient.get(savedObject.type,savedObject.id);
-            realTitle=resp.attributes.title;
+          try {
+            if (sourceSpaceId!==undefined) {
+              var resp = await savedObjectsClient.get(savedObject.type, savedObject.id,{namespace:sourceSpaceId});
+              realTitle = resp.attributes.title;
+            }
+            else {
+              var resp = await savedObjectsClient.get(savedObject.type, savedObject.id);
+              realTitle = resp.attributes.title;
+            }
+          } catch (e) {
+            // this shouldn't go wrong, but we re-throw the exception just in case
+            throw (e);
           }
-          catch(e)
-          {
-            // if something goes wrong, just use the "title" (new title of the object that is going to be imported)
-          }
-        }        
-
+        }
+        
         errors.push({
           id: savedObject.id,
           type: savedObject.type,
-          title:realTitle,
+          title: realTitle,
           error: {
             type: 'conflict',
           },
