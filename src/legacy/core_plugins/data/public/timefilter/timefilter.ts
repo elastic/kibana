@@ -20,7 +20,6 @@
 import _ from 'lodash';
 import { Observable, Subject, BehaviorSubject } from 'rxjs';
 import moment, { Moment } from 'moment';
-import { UiSettingsClientContract } from 'src/core/public';
 import { RefreshInterval, TimeRange } from 'src/plugins/data/public';
 import { IndexPattern } from 'src/legacy/core_plugins/data/public';
 import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
