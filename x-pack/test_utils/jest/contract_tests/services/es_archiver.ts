@@ -33,7 +33,7 @@ export const getEsArchiver = (options: {
   }
 
   const log = new ToolingLog({
-    level: options.logLevel,
+    level: options.logLevel || 'info',
     writeTo: process.stdout,
   });
 
