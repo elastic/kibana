@@ -5,21 +5,13 @@
  */
 
 import styled from 'styled-components';
-import { EuiInMemoryTable, EuiInMemoryTableProps } from '@elastic/eui';
+import { EuiInMemoryTable } from '@elastic/eui';
 
-// TODO: Remove this once EuiBasicTable supports in its table props the boolean of compressed
-type ExtendedInMemoryTable = EuiInMemoryTableProps & { compressed: boolean };
-const Extended: React.FunctionComponent<ExtendedInMemoryTable> = EuiInMemoryTable;
-
-export const BasicTable = styled(Extended)`
+export const BasicTable = styled(EuiInMemoryTable)`
   tbody {
     th,
     td {
       vertical-align: top;
-    }
-
-    .euiTableCellContent {
-      display: block;
     }
   }
 `;

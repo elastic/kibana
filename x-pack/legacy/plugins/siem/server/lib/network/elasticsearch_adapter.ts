@@ -7,10 +7,8 @@
 import { get, getOr } from 'lodash/fp';
 
 import {
-  FlowTargetNew,
-  AutonomousSystemItem,
+  FlowDirection,
   FlowTarget,
-  GeoItem,
   NetworkDnsData,
   NetworkDnsEdges,
   NetworkTopNFlowData,
@@ -23,7 +21,7 @@ import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 
 import { NetworkDnsRequestOptions, NetworkTopNFlowRequestOptions } from './index';
 import { buildDnsQuery } from './query_dns.dsl';
-import { buildTopNFlowQuery, getOppositeField } from './query_top_n_flow.dsl';
+import { buildTopNFlowQuery } from './query_top_n_flow.dsl';
 import { NetworkAdapter, NetworkDnsBuckets, NetworkTopNFlowBuckets } from './types';
 
 export class ElasticsearchNetworkAdapter implements NetworkAdapter {
@@ -33,9 +31,6 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
     request: FrameworkRequest,
     options: NetworkTopNFlowRequestOptions
   ): Promise<NetworkTopNFlowData> {
-    if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
-      throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
-    }
     const dsl = buildTopNFlowQuery(options);
     const response = await this.framework.callWithRequest<NetworkTopNFlowData, TermAggregation>(
       request,
@@ -69,9 +64,6 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
     request: FrameworkRequest,
     options: NetworkDnsRequestOptions
   ): Promise<NetworkDnsData> {
-    if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
-      throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
-    }
     const dsl = buildDnsQuery(options);
     const response = await this.framework.callWithRequest<NetworkDnsData, TermAggregation>(
       request,
@@ -107,73 +99,37 @@ const getTopNFlowEdges = (
   response: DatabaseSearchResponse<NetworkTopNFlowData, TermAggregation>,
   options: NetworkTopNFlowRequestOptions
 ): NetworkTopNFlowEdges[] => {
+  if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
+    throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
+  }
+  if (options.flowDirection === FlowDirection.uniDirectional) {
+    return formatTopNFlowEdges(
+      getOr([], 'aggregations.top_uni_flow.buckets', response),
+      options.flowTarget
+    );
+  }
   return formatTopNFlowEdges(
-    getOr([], `aggregations.${options.flowTarget}.buckets`, response),
+    getOr([], 'aggregations.top_bi_flow.buckets', response),
     options.flowTarget
   );
 };
 
-const getFlowTargetFromString = (flowAsString: string) =>
-  flowAsString === 'source' ? FlowTarget.source : FlowTarget.destination;
-
-const getGeoItem = (result: NetworkTopNFlowBuckets): GeoItem | null =>
-  result.location.top_geo.hits.hits.length > 0
-    ? {
-        geo: getOr(
-          '',
-          `location.top_geo.hits.hits[0]._source.${
-            Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
-          }.geo`,
-          result
-        ),
-        flowTarget: getFlowTargetFromString(
-          Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
-        ),
-      }
-    : null;
-
-const getAsItem = (result: NetworkTopNFlowBuckets): AutonomousSystemItem | null =>
-  result.autonomous_system.top_as.hits.hits.length > 0
-    ? {
-        number: getOr(
-          null,
-          `autonomous_system.top_as.hits.hits[0]._source.${
-            Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
-          }.as.number`,
-          result
-        ),
-        name: getOr(
-          '',
-          `autonomous_system.top_as.hits.hits[0]._source.${
-            Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
-          }.as.organization.name`,
-          result
-        ),
-      }
-    : null;
-
 const formatTopNFlowEdges = (
   buckets: NetworkTopNFlowBuckets[],
-  flowTarget: FlowTargetNew
+  flowTarget: FlowTarget
 ): NetworkTopNFlowEdges[] =>
   buckets.map((bucket: NetworkTopNFlowBuckets) => ({
     node: {
       _id: bucket.key,
       [flowTarget]: {
+        count: getOrNumber('ip_count.value', bucket),
         domain: bucket.domain.buckets.map(bucketDomain => bucketDomain.key),
         ip: bucket.key,
-        location: getGeoItem(bucket),
-        autonomous_system: getAsItem(bucket),
-        flows: getOr(0, 'flows.value', bucket),
-        [`${getOppositeField(flowTarget)}_ips`]: getOr(
-          0,
-          `${getOppositeField(flowTarget)}_ips.value`,
-          bucket
-        ),
       },
       network: {
-        bytes_in: getOr(0, 'bytes_in.value', bucket),
-        bytes_out: getOr(0, 'bytes_out.value', bucket),
+        bytes: getOrNumber('bytes.value', bucket),
+        packets: getOrNumber('packets.value', bucket),
+        direction: bucket.direction.buckets.map(bucketDir => bucketDir.key),
       },
     },
     cursor: {
