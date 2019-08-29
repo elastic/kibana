@@ -10,9 +10,9 @@ import { asTime, asInteger } from '../../../../../utils/formatters';
 import { fontSizes } from '../../../../../style/variables';
 
 export const ChoroplethToolTip: React.SFC<{
-  name?: string;
-  value?: number;
-  docCount?: number;
+  name: string;
+  value: number;
+  docCount: number;
 }> = ({ name, value, docCount }) => {
   return (
     <div style={{ textAlign: 'center' }}>
@@ -26,14 +26,14 @@ export const ChoroplethToolTip: React.SFC<{
         )}
       </div>
       <div style={{ fontWeight: 'bold', fontSize: fontSizes.large }}>
-        {value ? asTime(value) : null}
+        {asTime(value)}
       </div>
       <div>
         (
         {i18n.translate(
           'xpack.apm.metrics.pageLoadCharts.RegionMapChart.ToolTip.countPageLoads',
           {
-            values: { docCount: asInteger(docCount || 0) },
+            values: { docCount: asInteger(docCount) },
             defaultMessage: '{docCount} page loads'
           }
         )}

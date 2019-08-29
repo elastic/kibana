@@ -7,7 +7,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { fontSizes } from '../../../../../style/variables';
-import { asTime } from '../../../../../utils/formatters';
+import { getTimeFormatter } from '../../../../../utils/formatters';
 
 const LegendLabel = styled.span`
   font-size: ${fontSizes.small};
@@ -17,25 +17,29 @@ export const Legend: React.SFC<{
   getColorStyle: (scale: number) => string;
   min: number;
   max: number;
-}> = ({ getColorStyle, min, max }) => (
-  <div>
-    <div
-      style={{
-        height: 6,
-        opacity: 0.75,
-        backgroundImage: `linear-gradient(to right, ${[0, 0.5, 1]
-          .map(getColorStyle)
-          .join(',')})`
-      }}
-    />
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'space-between'
-      }}
-    >
-      <LegendLabel>{asTime(min)}</LegendLabel>
-      <LegendLabel>{asTime(max)}</LegendLabel>
+}> = ({ getColorStyle, min, max }) => {
+  const formatter = getTimeFormatter(max);
+
+  return (
+    <div>
+      <div
+        style={{
+          height: 6,
+          opacity: 0.75,
+          backgroundImage: `linear-gradient(to right, ${[0, 0.5, 1]
+            .map(getColorStyle)
+            .join(',')})`
+        }}
+      />
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between'
+        }}
+      >
+        <LegendLabel>{formatter(min)}</LegendLabel>
+        <LegendLabel>{formatter(max)}</LegendLabel>
+      </div>
     </div>
-  </div>
-);
+  );
+};

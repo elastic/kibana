@@ -28,7 +28,7 @@ export const PageLoadCharts: React.SFC = () => {
               )}
             </span>
           </EuiTitle>
-          <ChoroplethMap data={data} />
+          <ChoroplethMap items={data} />
         </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGrid>

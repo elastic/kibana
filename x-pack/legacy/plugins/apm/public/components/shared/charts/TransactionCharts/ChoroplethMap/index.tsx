@@ -18,7 +18,7 @@ import { shade, tint } from 'polished';
 import { Legend } from './Legend';
 import { ChoroplethToolTip } from './ChoroplethToolTip';
 
-interface ChoroplethDataElement {
+interface ChoroplethItem {
   key: string;
   value: number;
   docCount: any;
@@ -31,7 +31,7 @@ interface Tooltip {
 }
 
 interface Props {
-  data: ChoroplethDataElement[];
+  items: ChoroplethItem[];
 }
 
 const CHOROPLETH_LAYER_ID = 'choropleth_layer';
@@ -54,31 +54,23 @@ export function getProgressionColor(scale: number) {
   return baseColor;
 }
 
-const getMin = (items: ChoroplethDataElement[]) =>
+const getMin = (items: ChoroplethItem[]) =>
   Math.min(...items.map(item => item.value));
 
-const getMax = (items: ChoroplethDataElement[]) =>
+const getMax = (items: ChoroplethItem[]) =>
   Math.max(...items.map(item => item.value));
 
 export const ChoroplethMap: React.SFC<Props> = props => {
-  const { data } = props;
+  const { items } = props;
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<Map | null>(null);
   const popupRef = useRef<Popup | null>(null);
   const popupContainerRef = useRef<HTMLDivElement>(null);
-  const enableScrollZoom = useRef(false);
   const [tooltipState, setTooltipState] = useState<Tooltip | null>(null);
-  const [min, max] = useMemo(() => {
-    const minValue = getMin(data);
-    const maxValue = getMax(data);
-    return [
-      Number.isFinite(minValue) ? minValue : 0,
-      Number.isFinite(maxValue) ? maxValue : 0
-    ];
-  }, [data]);
+  const [min, max] = useMemo(() => [getMin(items), getMax(items)], [items]);
 
-  // converts input data to a scaled value between 0 and 1
+  // converts an item value to a scaled value between 0 and 1
   const getValueScale = useCallback(
     (value: number) => (value - min) / (max - min),
     [max, min]
@@ -95,13 +87,11 @@ export const ChoroplethMap: React.SFC<Props> = props => {
   // side effect creates a new mouseover handler referencing new component state
   // and replaces the old one stored in `updateTooltipStateOnMousemoveRef`
   useEffect(() => {
-    const updateTooltipStateOnMousemove = (
-      event: mapboxgl.MapMouseEvent & mapboxgl.EventData
-    ) => {
+    const updateTooltipStateOnMousemove = (event: mapboxgl.MapMouseEvent) => {
       const isMapQueryable =
         map &&
         popupRef.current &&
-        data.length &&
+        items.length &&
         map.getLayer(CHOROPLETH_LAYER_ID);
 
       if (!isMapQueryable) {
@@ -124,7 +114,7 @@ export const ChoroplethMap: React.SFC<Props> = props => {
         return;
       }
 
-      const item = data.find(
+      const item = items.find(
         ({ key }) =>
           geojsonProperties && key === geojsonProperties[GEOJSON_KEY_PROPERTY]
       );
@@ -136,18 +126,10 @@ export const ChoroplethMap: React.SFC<Props> = props => {
         });
     };
     updateTooltipStateOnMousemoveRef.current = updateTooltipStateOnMousemove;
-  }, [map, data, tooltipState]);
+  }, [map, items, tooltipState]);
 
   const updateTooltipStateOnMousemoveRef = useRef(
     (event: mapboxgl.MapMouseEvent & mapboxgl.EventData) => {}
-  );
-
-  const updateTooltipStateOnMouseout = useCallback(
-    (event: mapboxgl.MapMouseEvent & mapboxgl.EventData) => {
-      enableScrollZoom.current = false;
-      setTooltipState(null);
-    },
-    []
   );
 
   // initialization side effect, only runs once
@@ -182,7 +164,9 @@ export const ChoroplethMap: React.SFC<Props> = props => {
     mapboxMap.on('mousemove', (...args) =>
       updateTooltipStateOnMousemoveRef.current(...args)
     );
-    mapboxMap.on('mouseout', updateTooltipStateOnMouseout);
+    mapboxMap.on('mouseout', () => {
+      setTooltipState(null);
+    });
 
     // only scroll zoom when key is pressed
     const canvasElement = mapboxMap.getCanvas();
@@ -200,9 +184,9 @@ export const ChoroplethMap: React.SFC<Props> = props => {
     return () => {
       canvasElement.removeEventListener('wheel', controlScrollZoomOnWheel);
     };
-  }, [controlScrollZoomOnWheel, updateTooltipStateOnMouseout]);
+  }, [controlScrollZoomOnWheel]);
 
-  // side effect replaces choropleth layer with new one on data changes
+  // side effect replaces choropleth layer with new one on items changes
   useEffect(() => {
     if (!map) {
       return;
@@ -217,11 +201,11 @@ export const ChoroplethMap: React.SFC<Props> = props => {
       map.removeLayer(CHOROPLETH_LAYER_ID);
     }
 
-    if (data.length === 0) {
+    if (items.length === 0) {
       return;
     }
 
-    const stops = data.map(({ key, value }) => [
+    const stops = items.map(({ key, value }) => [
       key,
       getProgressionColor(getValueScale(value))
     ]);
@@ -246,9 +230,9 @@ export const ChoroplethMap: React.SFC<Props> = props => {
       },
       symbolLayer ? symbolLayer.id : undefined
     );
-  }, [map, data, getValueScale]);
+  }, [map, items, getValueScale]);
 
-  // side effect to only render the Popup when hovering a region with data
+  // side effect to only render the Popup when hovering a region with a matching item
   useEffect(() => {
     if (!(popupContainerRef.current && map && popupRef.current)) {
       return;
@@ -263,16 +247,21 @@ export const ChoroplethMap: React.SFC<Props> = props => {
     }
   }, [map, tooltipState]);
 
+  const toolTipProps = { name: '', value: 0, docCount: 0, ...tooltipState };
+  const hasMinMax = Number.isFinite(min) && Number.isFinite(max);
+
   // render map container and tooltip in a hidden container
   return (
     <div>
       <div ref={containerRef} style={{ height: 256 }} />
       <div style={{ display: 'none' }}>
         <div ref={popupContainerRef}>
-          <ChoroplethToolTip {...tooltipState} />
+          <ChoroplethToolTip {...toolTipProps} />
         </div>
       </div>
-      <Legend getColorStyle={getProgressionColor} min={min} max={max} />
+      {hasMinMax ? (
+        <Legend getColorStyle={getProgressionColor} min={min} max={max} />
+      ) : null}
     </div>
   );
 };
