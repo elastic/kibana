@@ -5,6 +5,7 @@
  */
 
 import { HeadlessChromiumDriver } from '../../../server/browsers/chromium/driver';
+import { LevelLogger } from '../../../server/lib';
 
 export interface ViewZoomWidthHeight {
   zoom: number;
@@ -71,5 +72,5 @@ export type LayoutInstance = Layout & {
   // Fields that are not part of Layout: the instances
   // independently implement these fields on their own
   selectors: LayoutSelectorDictionary;
-  positionElements?: (browser: HeadlessChromiumDriver) => Promise<void>;
+  positionElements?: (browser: HeadlessChromiumDriver, logger: LevelLogger) => Promise<void>;
 };

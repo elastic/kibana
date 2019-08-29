@@ -326,7 +326,7 @@ app.controller('timelion', function (
     };
 
     $scope.$listen($scope.state, 'fetch_with_changes', $scope.search);
-    $scope.$listen(timefilter, 'fetch', $scope.search);
+    timefilter.getFetch$().subscribe($scope.search);
 
     $scope.opts = {
       saveExpression: saveExpression,

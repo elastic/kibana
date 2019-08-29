@@ -93,7 +93,7 @@ export const ChartView = ({ data }: Props) => {
           <Axis
             id={getAxisId('values')}
             title={i18n.translate('xpack.infra.logs.analysis.logRateSectionYaxisTitle', {
-              defaultMessage: 'Log entries',
+              defaultMessage: 'Log entries per 15 minutes',
             })}
             position="left"
             tickFormat={value => Number(value).toFixed(0)}
@@ -128,7 +128,7 @@ export const ChartView = ({ data }: Props) => {
           <LineSeries
             id={lineSpecId}
             name={i18n.translate('xpack.infra.logs.analysis.logRateSectionLineSeriesName', {
-              defaultMessage: 'Log entries (avg)',
+              defaultMessage: 'Log entries per 15 minutes (avg)',
             })}
             xScaleType="time"
             yScaleType="linear"
