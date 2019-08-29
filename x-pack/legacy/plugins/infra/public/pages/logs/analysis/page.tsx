@@ -12,8 +12,10 @@ import { LoadingPage } from '../../../components/loading_page';
 import { AnalysisPageProviders } from './page_providers';
 import { AnalysisResultsContent } from './page_results_content';
 import { AnalysisSetupContent } from './page_setup_content';
+import { AnalysisSetupUnavailable } from './page_setup_unavailable';
 import { useLogAnalysisJobs } from '../../../containers/logs/log_analysis/log_analysis_jobs';
 import { useLogAnalysisCleanup } from '../../../containers/logs/log_analysis/log_analysis_cleanup';
+import { useLogAnalysisCapabilities } from '../../../containers/logs/log_analysis';
 import { Source } from '../../../containers/source';
 
 export const AnalysisPage = () => {
@@ -32,6 +34,11 @@ export const AnalysisPage = () => {
     spaceId,
     timeField: source ? source.configuration.fields.timestamp : '',
   });
+  const { hasLogAnalysisCapabilites } = useLogAnalysisCapabilities();
+  if (!hasLogAnalysisCapabilites) {
+    return <AnalysisSetupUnavailable />;
+  }
+
   const { cleanupMLResources, isCleaningUp } = useLogAnalysisCleanup({ sourceId, spaceId });
   useEffect(() => {
     if (didSetupFail) {

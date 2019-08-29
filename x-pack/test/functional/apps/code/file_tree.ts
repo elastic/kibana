@@ -18,8 +18,7 @@ export default function exploreRepositoryFunctionalTests({
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
   const exists = async (selector: string) => testSubjects.exists(selector, { allowHidden: true });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/43492
-  describe.skip('File Tree', function() {
+  describe('File Tree', function() {
     this.tags('smoke');
     const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
 
@@ -98,7 +97,11 @@ export default function exploreRepositoryFunctionalTests({
 
       await browser.refresh();
 
-      await retry.tryForTime(15000, async () => {
+      await PageObjects.header.awaitKibanaChrome();
+
+      await testSubjects.waitForDeleted('.euiLoadingSpinner');
+
+      await retry.tryForTime(30000, async () => {
         // should only open one folder at this time
         expect(await exists('codeFileTreeNode-Directory-Icon-elastic/src/code-open')).ok();
         expect(await exists('codeFileTreeNode-Directory-Icon-kibana/src/code-closed')).ok();
