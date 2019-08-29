@@ -17,37 +17,31 @@
  * under the License.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { I18nContext } from 'ui/i18n';
-import { WelcomePanel } from '../components/welcome_panel';
+import React, { useEffect } from 'react';
 // @ts-ignore
-import storage from '../storage';
+import exampleText from 'raw-loader!../constants/help_example.txt';
+import $ from 'jquery';
+// @ts-ignore
+import SenseEditor from '../../../../quarantined/src/sense_editor/editor';
 
-let isOpen = false;
+interface EditorExampleProps {
+  panel: string;
+}
 
-export function showWelcomePanel(): () => void {
-  const onClose = () => {
-    if (!container) return;
-    ReactDOM.unmountComponentAtNode(container);
-    isOpen = false;
-  };
+export function EditorExample(props: EditorExampleProps) {
+  const elemId = `help-example-${props.panel}`;
 
-  const onDismiss = () => {
-    storage.set('version_welcome_shown', '@@SENSE_REVISION');
-    onClose();
-  };
+  useEffect(() => {
+    const el = $(`#${elemId}`);
+    el.text(exampleText.trim());
+    const editor = new SenseEditor(el);
+    editor.setReadOnly(true);
+    editor.$blockScrolling = Infinity;
 
-  const container = document.getElementById('consoleWelcomePanel');
-  if (container && !isOpen) {
-    isOpen = true;
-    const element = (
-      <I18nContext>
-        <WelcomePanel onDismiss={onDismiss} />
-      </I18nContext>
-    );
-    ReactDOM.render(element, container);
-  }
+    return () => {
+      editor.destroy();
+    };
+  }, []);
 
-  return onClose;
+  return <div id={elemId} className="conHelp__example" />;
 }

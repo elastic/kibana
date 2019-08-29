@@ -18,4 +18,5 @@
  */
 
 export { createHistory, History } from './history';
-export { createStorage, Storage } from './storage';
+export { createStorage, Storage, StorageKeys } from './storage';
+export { createSettings, Settings, DevToolsSettings } from './settings';

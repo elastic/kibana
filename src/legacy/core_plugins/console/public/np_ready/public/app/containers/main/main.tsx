@@ -17,26 +17,43 @@
  * under the License.
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { debounce } from 'lodash';
 
-import { TopNavMenu } from '../../components';
-import { ConsoleEditor, ConsoleHistory } from '../editor';
+import {
+  AutocompleteOptions,
+  TopNavMenu,
+  WelcomePanel,
+  DevToolsSettingsModal,
+  HelpPanel,
+} from '../../components';
 
+import { MemoConsoleEditor, ConsoleHistory } from '../editor';
 import { useAppContext } from '../../context';
-import { StorageKeys } from '../../services/storage';
+import { StorageKeys, DevToolsSettings } from '../../services';
 
-import { createSettings } from '../editor/legacy/settings';
+// @ts-ignore
+import mappings from '../../../../../quarantined/src/mappings';
+
 import { getTopNavConfig } from './get_top_nav';
 
 const INITIAL_PANEL_WIDTH = 50;
 
 export function Main() {
-  const { storage, docLinkVersion } = useAppContext();
+  const {
+    services: { storage, settings },
+    docLinkVersion,
+  } = useAppContext();
 
-  const settingsRef = useRef(createSettings({ storage }));
   const [editorReady, setEditorReady] = useState<boolean>(false);
-  const [showingHistory, setShowingHistory] = useState(false);
+  const [showWelcome, setShowWelcomePanel] = useState(
+    () => storage.get('version_welcome_shown') !== '@@SENSE_REVISION'
+  );
+
+  const [showingHistory, setShowHistory] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
+
   const [firstPanelWidth, secondPanelWidth] = storage.get(StorageKeys.WIDTH, [
     INITIAL_PANEL_WIDTH,
     INITIAL_PANEL_WIDTH,
@@ -56,26 +73,90 @@ export function Main() {
   const onEditorReady = useCallback(() => setEditorReady(true), []);
 
   const renderConsoleHistory = () => {
-    return editorReady ? (
-      <ConsoleHistory settings={settingsRef.current} close={() => setShowingHistory(false)} />
-    ) : null;
+    return editorReady ? <ConsoleHistory close={() => setShowHistory(false)} /> : null;
+  };
+
+  const refreshAutocompleteSettings = (selectedSettings: any) => {
+    mappings.retrieveAutoCompleteInfo(selectedSettings);
+  };
+
+  const getAutocompleteDiff = (newSettings: DevToolsSettings, prevSettings: DevToolsSettings) => {
+    return Object.keys(newSettings.autocomplete).filter(key => {
+      // @ts-ignore
+      return prevSettings.autocomplete[key] !== newSettings.autocomplete[key];
+    });
+  };
+
+  const fetchAutocompleteSettingsIfNeeded = (
+    newSettings: DevToolsSettings,
+    prevSettings: DevToolsSettings
+  ) => {
+    // We'll only retrieve settings if polling is on. The expectation here is that if the user
+    // disables polling it's because they want manual control over the fetch request (possibly
+    // because it's a very expensive request given their cluster and bandwidth). In that case,
+    // they would be unhappy with any request that's sent automatically.
+    if (newSettings.polling) {
+      const autocompleteDiff = getAutocompleteDiff(newSettings, prevSettings);
+
+      const isSettingsChanged = autocompleteDiff.length > 0;
+      const isPollingChanged = prevSettings.polling !== newSettings.polling;
+
+      if (isSettingsChanged) {
+        // If the user has changed one of the autocomplete settings, then we'll fetch just the
+        // ones which have changed.
+        const changedSettings: any = autocompleteDiff.reduce(
+          (changedSettingsAccum: any, setting: string): any => {
+            changedSettingsAccum[setting] =
+              newSettings.autocomplete[setting as AutocompleteOptions];
+            return changedSettingsAccum;
+          },
+          {}
+        );
+        mappings.retrieveAutoCompleteInfo(changedSettings.autocomplete);
+      } else if (isPollingChanged) {
+        // If the user has turned polling on, then we'll fetch all selected autocomplete settings.
+        mappings.retrieveAutoCompleteInfo();
+      }
+    }
+  };
+
+  const onSaveSettings = async (newSettings: DevToolsSettings) => {
+    const prevSettings = settings.getCurrentSettings();
+    settings.updateSettings(newSettings);
+    fetchAutocompleteSettingsIfNeeded(newSettings, prevSettings);
+    setShowSettings(false);
   };
 
   return (
     <>
-      {showingHistory ? (
-        renderConsoleHistory()
-      ) : (
-        <TopNavMenu items={getTopNavConfig({ toggleHistory: () => setShowingHistory(true) })} />
-      )}
-      <ConsoleEditor
+      <TopNavMenu
+        items={getTopNavConfig({
+          onClickHistory: () => setShowHistory(!showingHistory),
+          onClickSettings: () => setShowSettings(true),
+          onClickHelp: () => setShowHelp(!showHelp),
+        })}
+      />
+      {showingHistory ? renderConsoleHistory() : null}
+      <MemoConsoleEditor
         onEditorsReady={onEditorReady}
-        settings={settingsRef.current}
         docLinkVersion={docLinkVersion}
         onPanelWidthChange={onPanelWidthChange}
         initialInputPanelWidth={firstPanelWidth}
         initialOutputPanelWidth={secondPanelWidth}
       />
+
+      {showWelcome ? <WelcomePanel onDismiss={() => setShowWelcomePanel(false)} /> : null}
+
+      {showSettings ? (
+        <DevToolsSettingsModal
+          onSaveSettings={onSaveSettings}
+          onClose={() => setShowSettings(false)}
+          refreshAutocompleteSettings={refreshAutocompleteSettings}
+          settings={settings.getCurrentSettings()}
+        />
+      ) : null}
+
+      {showHelp ? <HelpPanel onClose={() => setShowHelp(false)} /> : null}
     </>
   );
 }

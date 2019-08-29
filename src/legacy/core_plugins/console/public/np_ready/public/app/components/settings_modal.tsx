@@ -35,7 +35,8 @@ import {
   EuiOverlayMask,
   EuiSwitch,
 } from '@elastic/eui';
-import { DevToolsSettings } from './dev_tools_settings';
+
+import { DevToolsSettings } from '../services';
 
 export type AutocompleteOptions = 'fields' | 'indices' | 'templates';
 
@@ -145,11 +146,9 @@ export function DevToolsSettingsModal(props: Props) {
           onClick={() => {
             // Only refresh the currently selected settings.
             props.refreshAutocompleteSettings({
-              autocomplete: {
-                fields,
-                indices,
-                templates,
-              },
+              fields,
+              indices,
+              templates,
             });
           }}
         >

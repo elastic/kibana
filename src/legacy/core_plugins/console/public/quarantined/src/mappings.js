@@ -17,10 +17,11 @@
  * under the License.
  */
 
+import { legacyBackDoorToSettings } from '../../np_ready/public/app';
+
 const $ = require('jquery');
 const _ = require('lodash');
 const es = require('./es');
-const settings = require('./settings');
 
 // NOTE: If this value ever changes to be a few seconds or less, it might introduce flakiness
 // due to timing issues in our app.js tests.
@@ -257,7 +258,7 @@ function clear() {
 }
 
 function retrieveSettings(settingsKey, settingsToRetrieve) {
-  const currentSettings = settings.getAutocomplete();
+  const currentSettings = legacyBackDoorToSettings().getAutocomplete();
   const settingKeyToPathMap = {
     fields: '_mapping',
     indices: '_aliases',
@@ -289,7 +290,7 @@ function retrieveSettings(settingsKey, settingsToRetrieve) {
 //      unchanged alone (both selected and unselected).
 //   3. Poll: Use saved. Fetch selected. Ignore unselected.
 
-function retrieveAutoCompleteInfo(settingsToRetrieve = settings.getAutocomplete()) {
+function retrieveAutoCompleteInfo(settingsToRetrieve = legacyBackDoorToSettings().getAutocomplete()) {
   if (pollTimeoutId) {
     clearTimeout(pollTimeoutId);
   }
@@ -329,7 +330,7 @@ function retrieveAutoCompleteInfo(settingsToRetrieve = settings.getAutocomplete(
       pollTimeoutId = setTimeout(() => {
         // This looks strange/inefficient, but it ensures correct behavior because we don't want to send
         // a scheduled request if the user turns off polling.
-        if (settings.getPolling()) {
+        if (legacyBackDoorToSettings().getPolling()) {
           retrieveAutoCompleteInfo();
         }
       }, POLL_INTERVAL);

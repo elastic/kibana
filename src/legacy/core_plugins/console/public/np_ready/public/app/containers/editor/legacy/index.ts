@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { ConsoleEditor } from './console_editor';
+export { ConsoleEditor, MemoConsoleEditor } from './console_editor';
 export { ConsoleHistory } from './console_history';

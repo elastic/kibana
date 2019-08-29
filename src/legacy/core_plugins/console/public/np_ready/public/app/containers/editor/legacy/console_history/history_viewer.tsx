@@ -21,7 +21,7 @@ import React, { useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import $ from 'jquery';
 
-import { Settings } from '../settings';
+import { Settings } from '../../../../services';
 import { installEditorsResizeChecker } from '../install_console_resize_checker';
 
 // @ts-ignore

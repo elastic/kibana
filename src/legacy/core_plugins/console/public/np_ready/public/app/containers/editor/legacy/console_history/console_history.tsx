@@ -25,31 +25,39 @@ import { keyCodes } from '@elastic/eui';
 
 import { useAppContext } from '../../../../context';
 import { HistoryViewer } from './history_viewer';
-import { Settings } from '../settings';
 
 interface Props {
-  settings: Settings;
   close: () => void;
 }
 
-export function ConsoleHistory({ close, settings }: Props) {
-  const { history, ResizeChecker } = useAppContext();
+export function ConsoleHistory({ close }: Props) {
+  const {
+    services: { history, settings },
+    ResizeChecker,
+  } = useAppContext();
+
   const [reqs, setReqs] = useState<any[]>([]);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
   const selectedReq = useRef<any>(null);
   const viewingReq = useRef<any>(null);
 
-  const describeReq = memoize((req: any) => {
-    const endpoint = req.endpoint;
-    const date = moment(req.time);
+  const [describeReq] = useState(() => {
+    const _describeReq = (req: any) => {
+      const endpoint = req.endpoint;
+      const date = moment(req.time);
 
-    let formattedDate = date.format('MMM D');
-    if (date.diff(moment(), 'days') > -7) {
-      formattedDate = date.fromNow();
-    }
+      let formattedDate = date.format('MMM D');
+      if (date.diff(moment(), 'days') > -7) {
+        formattedDate = date.fromNow();
+      }
 
-    return `${endpoint} (${formattedDate})`;
+      return `${endpoint} (${formattedDate})`;
+    };
+
+    (_describeReq as any).cache = new WeakMap();
+
+    return memoize(_describeReq);
   });
 
   const initialize = () => {
@@ -81,22 +89,24 @@ export function ConsoleHistory({ close, settings }: Props) {
         {i18n.translate('console.historyPage.pageTitle', { defaultMessage: 'History' })}
       </h2>
       <div className="conHistory__body">
-       <ul
+        <ul
           onKeyDown={(ev: React.KeyboardEvent) => {
             if (ev.keyCode === keyCodes.ENTER) {
               restore();
               return;
             }
 
+            let currentIdx = selectedIndex;
+
             if (ev.keyCode === keyCodes.UP) {
               ev.preventDefault();
-              setSelectedIndex(selectedIndex - 1);
+              --currentIdx;
             } else if (ev.keyCode === keyCodes.DOWN) {
               ev.preventDefault();
-              setSelectedIndex(selectedIndex + 1);
+              ++currentIdx;
             }
 
-            const nextSelectedIndex = Math.min(Math.max(0, selectedIndex), reqs.length - 1);
+            const nextSelectedIndex = Math.min(Math.max(0, currentIdx), reqs.length - 1);
 
             selectedReq.current = reqs[nextSelectedIndex];
             viewingReq.current = reqs[nextSelectedIndex];
@@ -110,6 +120,7 @@ export function ConsoleHistory({ close, settings }: Props) {
           aria-label="{{:: 'console.historyPage.requestListAriaLabel' | i18n: { defaultMessage: 'History of sent requests' } }}"
         >
           {reqs.map((req, idx) => {
+            const reqDescription = describeReq(req);
             const isSelected = viewingReq.current === req;
             return (
               // Ignore a11y issues on li's
@@ -131,11 +142,11 @@ export function ConsoleHistory({ close, settings }: Props) {
                 onDoubleClick={() => restore(req)}
                 aria-label={i18n.translate('console.historyPage.itemOfRequestListAriaLabel', {
                   defaultMessage: 'Request: {historyItem}',
-                  values: { historyItem: describeReq(req) },
+                  values: { historyItem: reqDescription },
                 })}
                 aria-selected={isSelected}
               >
-                {describeReq(req)}
+                {reqDescription}
                 <span className="conHistory__reqIcon">
                   <i className="fa fa-chevron-right" />
                 </span>

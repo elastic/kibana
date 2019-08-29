@@ -18,11 +18,14 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { History, Storage } from '../services';
+import { History, Storage, Settings } from '../services';
 
 interface ContextValue {
-  history: History;
-  storage: Storage;
+  services: {
+    history: History;
+    storage: Storage;
+    settings: Settings;
+  };
   docLinkVersion: string;
   ResizeChecker: any;
 }

@@ -22,12 +22,18 @@ require('brace/ext/searchbox');
 import Autocomplete from './autocomplete';
 import mappings from './mappings';
 const SenseEditor = require('./sense_editor/editor');
-const settings = require('./settings');
 const utils = require('./utils');
 const es = require('./es');
 
 let input;
-export function initializeInput($el, $actionsEl, output, history, openDocumentation = () => {}) {
+export function initializeInput(
+  $el,
+  $actionsEl,
+  output,
+  history,
+  settings,
+  openDocumentation = () => {}
+) {
   input = new SenseEditor($el);
 
   input.autocomplete = new Autocomplete(input);

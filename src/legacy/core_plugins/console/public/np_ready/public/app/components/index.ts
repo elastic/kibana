@@ -20,3 +20,6 @@
 export * from './split_panel';
 export { TopNavMenuItem, TopNavMenu } from './top_nav_menu';
 export { ConsoleMenu } from './console_menu';
+export { WelcomePanel } from './welcome_panel';
+export { AutocompleteOptions, DevToolsSettingsModal } from './settings_modal';
+export { HelpPanel } from './help_panel';

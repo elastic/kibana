@@ -25,10 +25,12 @@ import { i18n } from '@kbn/i18n';
 // import { showHelpPanel } from './help_show_panel';
 
 interface Props {
-  toggleHistory: () => void;
+  onClickHistory: () => void;
+  onClickSettings: () => void;
+  onClickHelp: () => void;
 }
 
-export function getTopNavConfig({ toggleHistory }: Props) {
+export function getTopNavConfig({ onClickHistory, onClickSettings, onClickHelp }: Props) {
   return [
     {
       id: 'history',
@@ -39,7 +41,7 @@ export function getTopNavConfig({ toggleHistory }: Props) {
         defaultMessage: 'History',
       }),
       run: () => {
-        toggleHistory();
+        onClickHistory();
       },
       testId: 'consoleHistoryButton',
     },
@@ -52,7 +54,7 @@ export function getTopNavConfig({ toggleHistory }: Props) {
         defaultMessage: 'Settings',
       }),
       run: () => {
-        // showSettingsModal();
+        onClickSettings();
       },
       testId: 'consoleSettingsButton',
     },
@@ -65,10 +67,7 @@ export function getTopNavConfig({ toggleHistory }: Props) {
         defaultMessage: 'Help',
       }),
       run: () => {
-        // const hideHelpPanel = showHelpPanel();
-        // $scope.$on('$destroy', () => {
-        //   hideHelpPanel();
-        // });
+        onClickHelp();
       },
       testId: 'consoleHelpButton',
     },

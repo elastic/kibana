@@ -17,7 +17,19 @@
  * under the License.
  */
 
-import { Storage } from '../../../services';
+import { Storage } from '.';
+
+export interface DevToolsSettings {
+  fontSize: number;
+  wrapMode: boolean;
+  autocomplete: {
+    fields: boolean;
+    indices: boolean;
+    templates: boolean;
+  };
+  polling: boolean;
+  tripleQuotes: boolean;
+}
 
 export class Settings {
   private input: any | null = null;
@@ -100,7 +112,7 @@ export class Settings {
     }
   }
 
-  getCurrentSettings() {
+  getCurrentSettings(): DevToolsSettings {
     return {
       autocomplete: this.getAutocomplete(),
       wrapMode: this.getWrapMode(),

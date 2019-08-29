@@ -20,20 +20,29 @@
 import React from 'react';
 import { AppContextProvider } from './context';
 import { Main } from './containers';
-import { createStorage, createHistory } from './services';
+import { createStorage, createHistory, createSettings, Settings } from './services';
+
+let settingsRef: Settings;
+export function legacyBackDoorToSettings() {
+  return settingsRef;
+}
 
 export function boot(deps: { docLinkVersion: string; I18nContext: any; ResizeChecker: any }) {
   const { I18nContext, ResizeChecker } = deps;
+
   const storage = createStorage({
     engine: window.localStorage,
     prefix: 'sense:',
   });
-
   const history = createHistory({ storage });
+  const settings = createSettings({ storage });
+  settingsRef = settings;
 
   return (
     <I18nContext>
-      <AppContextProvider value={{ ...deps, storage, history, ResizeChecker }}>
+      <AppContextProvider
+        value={{ ...deps, services: { storage, history, settings }, ResizeChecker }}
+      >
         <Main />
       </AppContextProvider>
     </I18nContext>

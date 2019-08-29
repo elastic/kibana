@@ -19,19 +19,18 @@
 
 import _ from 'lodash';
 const ace = require('brace');
-const settings = require('./settings');
 const OutputMode = require('./sense_editor/mode/output');
 const smartResize = require('./smart_resize');
 
 let output;
-export function initializeOutput($el) {
+export function initializeOutput($el, settings) {
   output = ace.acequire('ace/ace').edit($el[0]);
 
   const outputMode = new OutputMode.Mode();
 
   output.$blockScrolling = Infinity;
   output.resize = smartResize(output);
-  output.update = function (val, mode, cb) {
+  output.update = (val, mode, cb) => {
     if (typeof mode === 'function') {
       cb = mode;
       mode = void 0;
@@ -39,14 +38,14 @@ export function initializeOutput($el) {
 
     const session = output.getSession();
 
-    session.setMode(val ? (mode || outputMode) : 'ace/mode/text');
+    session.setMode(val ? mode || outputMode : 'ace/mode/text');
     session.setValue(val);
     if (typeof cb === 'function') {
       setTimeout(cb);
     }
   };
 
-  output.append = function (val, foldPrevious, cb) {
+  output.append = (val, foldPrevious, cb) => {
     if (typeof foldPrevious === 'function') {
       cb = foldPrevious;
       foldPrevious = true;
@@ -68,12 +67,13 @@ export function initializeOutput($el) {
 
   output.$el = $el;
 
-  (function (session) {
+  // eslint-disable-next-line
+  (function setupSession(session) {
     session.setMode('ace/mode/text');
     session.setFoldStyle('markbeginend');
     session.setTabSize(2);
     session.setUseWrapMode(true);
-  }(output.getSession()));
+  })(output.getSession());
 
   output.setShowPrintMargin(false);
   output.setReadOnly(true);

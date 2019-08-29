@@ -37,7 +37,6 @@ import { Panel, PanelsContainer } from '../../../components/split_panel';
 import { useUIAceKeyboardMode } from './use_ui_ace_keyboard_mode';
 import { useAppContext } from '../../../context';
 import { installEditorsResizeChecker } from './install_console_resize_checker';
-import { Settings } from './settings';
 
 const PANEL_MIN_WIDTH = '100px';
 
@@ -53,139 +52,131 @@ export interface ConsoleEditorProps {
   docLinkVersion: string;
   onPanelWidthChange: (widths: number[]) => void;
   onEditorsReady: () => void;
-  settings: Settings;
   initialInputPanelWidth: number;
   initialOutputPanelWidth: number;
 }
 
-export const ConsoleEditor = React.memo(
-  ({
-    onPanelWidthChange,
-    docLinkVersion,
-    initialInputPanelWidth,
-    initialOutputPanelWidth,
-    onEditorsReady,
-    settings,
-  }: ConsoleEditorProps) => {
-    const { history, ResizeChecker } = useAppContext();
+export function ConsoleEditor({
+  onPanelWidthChange,
+  docLinkVersion,
+  initialInputPanelWidth,
+  initialOutputPanelWidth,
+  onEditorsReady,
+}: ConsoleEditorProps) {
+  const {
+    services: { history, settings },
+    ResizeChecker,
+  } = useAppContext();
 
-    const containerRef = useRef<HTMLDivElement | null>(null);
-    const editorRef = useRef<HTMLDivElement | null>(null);
-    const outputRef = useRef<HTMLDivElement | null>(null);
-    const actionsRef = useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const editorRef = useRef<HTMLDivElement | null>(null);
+  const outputRef = useRef<HTMLDivElement | null>(null);
+  const actionsRef = useRef<HTMLDivElement | null>(null);
 
-    const [, setLastRequestTimestamp] = useState<number>(null as any);
-    const [editor, setEditor] = useState<any>(null as any);
-    const [, setOutput] = useState<any>(null as any);
-    const [maybeTextArea, setTextArea] = useState<HTMLTextAreaElement | null>(null);
+  const [, setLastRequestTimestamp] = useState<number>(null as any);
+  const [editor, setEditor] = useState<any>(null as any);
+  const [, setOutput] = useState<any>(null as any);
+  const [maybeTextArea, setTextArea] = useState<HTMLTextAreaElement | null>(null);
 
-    const sendCurrentRequest = () => {
-      editor.focus();
-      editor.sendCurrentRequestToES(() => {
-        // History watches this value and will re-render itself when it changes, so that
-        // the list of requests stays up-to-date as new requests are sent.
-        setLastRequestTimestamp(new Date().getTime());
-      });
-      return false;
+  const sendCurrentRequest = () => {
+    editor.focus();
+    editor.sendCurrentRequestToES(() => {
+      // History watches this value and will re-render itself when it changes, so that
+      // the list of requests stays up-to-date as new requests are sent.
+      setLastRequestTimestamp(new Date().getTime());
+    });
+    return false;
+  };
+
+  useEffect(() => {
+    const editor$ = $(editorRef.current!);
+    const output$ = $(outputRef.current!);
+    const actions$ = $(actionsRef.current!);
+
+    const outputEditor = initializeOutput(output$, settings);
+    const inputEditor = initializeInput(editor$, actions$, outputEditor, history, settings);
+
+    settings.registerOutput(outputEditor);
+    settings.registerInput(inputEditor);
+    history.setEditor(inputEditor);
+
+    init(inputEditor, outputEditor, history);
+
+    const subscriptions = [
+      installEditorsResizeChecker(ResizeChecker, containerRef.current!, inputEditor, outputEditor),
+      installEditorsResizeChecker(ResizeChecker, editorRef.current!, inputEditor),
+      installEditorsResizeChecker(ResizeChecker, outputRef.current!, outputEditor),
+    ];
+
+    const session = inputEditor.getSession();
+    session.getSelection().on('changeCursor', () => {
+      // Fire and forget
+      getDocumentation(inputEditor, docLinkVersion);
+    });
+
+    setTextArea(editorRef.current!.querySelector('textarea'));
+    setOutput(outputEditor);
+    setEditor(inputEditor);
+    onEditorsReady();
+
+    return () => {
+      subscriptions.map(unsubscribe => unsubscribe());
     };
+  }, []);
 
-    useEffect(() => {
-      const editor$ = $(editorRef.current!);
-      const output$ = $(outputRef.current!);
-      const actions$ = $(actionsRef.current!);
+  useUIAceKeyboardMode(maybeTextArea);
 
-      const outputEditor = initializeOutput(output$);
-      const inputEditor = initializeInput(editor$, actions$, outputEditor, history);
-
-      settings.registerOutput(outputEditor);
-      settings.registerInput(inputEditor);
-      history.setEditor(inputEditor);
-
-      init(inputEditor, outputEditor, history);
-
-      const subscriptions = [
-        installEditorsResizeChecker(
-          ResizeChecker,
-          containerRef.current!,
-          inputEditor,
-          outputEditor
-        ),
-        installEditorsResizeChecker(ResizeChecker, editorRef.current!, inputEditor),
-        installEditorsResizeChecker(ResizeChecker, outputRef.current!, outputEditor),
-      ];
-
-      const session = inputEditor.getSession();
-      session.getSelection().on('changeCursor', () => {
-        // Fire and forget
-        getDocumentation(inputEditor, docLinkVersion);
-      });
-
-      setTextArea(editorRef.current!.querySelector('textarea'));
-      setOutput(outputEditor);
-      setEditor(inputEditor);
-      onEditorsReady();
-
-      return () => {
-        subscriptions.map(unsubscribe => unsubscribe());
-      };
-    }, []);
-
-    useUIAceKeyboardMode(maybeTextArea);
-
-    return (
-      <div
-        className="consoleContainer"
-        style={{ height: '100%', width: '100%' }}
-        ref={containerRef}
-      >
-        <PanelsContainer onPanelWidthChange={onPanelWidthChange}>
-          <Panel
-            style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
-            initialWidth={initialInputPanelWidth + '%'}
-          >
-            <div style={abs} className="conApp">
-              <div className="conApp__editor">
-                <ul className="conApp__autoComplete" id="autocomplete" />
-                <div ref={actionsRef} className="conApp__editorActions" id="ConAppEditorActions">
-                  <EuiToolTip
-                    content={i18n.translate('console.sendRequestButtonTooltip', {
-                      defaultMessage: 'click to send request',
-                    })}
+  return (
+    <div className="consoleContainer" style={{ height: '100%', width: '100%' }} ref={containerRef}>
+      <PanelsContainer onPanelWidthChange={onPanelWidthChange}>
+        <Panel
+          style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
+          initialWidth={initialInputPanelWidth + '%'}
+        >
+          <div style={abs} className="conApp">
+            <div className="conApp__editor">
+              <ul className="conApp__autoComplete" id="autocomplete" />
+              <div ref={actionsRef} className="conApp__editorActions" id="ConAppEditorActions">
+                <EuiToolTip
+                  content={i18n.translate('console.sendRequestButtonTooltip', {
+                    defaultMessage: 'click to send request',
+                  })}
+                >
+                  <button
+                    onClick={sendCurrentRequest}
+                    data-test-subj="send-request-button"
+                    className="conApp__editorActionButton conApp__editorActionButton--success"
                   >
-                    <button
-                      onClick={sendCurrentRequest}
-                      data-test-subj="send-request-button"
-                      className="conApp__editorActionButton conApp__editorActionButton--success"
-                    >
-                      <i className="fa fa-play" />
-                    </button>
-                  </EuiToolTip>
-                  <ConsoleMenu
-                    getCurl={(cb: any) => {
-                      editor.getRequestsAsCURL(cb);
-                    }}
-                    getDocumentation={() => {
-                      return getDocumentation(editor, docLinkVersion);
-                    }}
-                    autoIndent={(event: any) => {
-                      autoIndent(editor, event);
-                    }}
-                  />
-                </div>
-                <div ref={editorRef} id="ConAppEditor" className="conApp__editorContent" />
+                    <i className="fa fa-play" />
+                  </button>
+                </EuiToolTip>
+                <ConsoleMenu
+                  getCurl={(cb: any) => {
+                    editor.getRequestsAsCURL(cb);
+                  }}
+                  getDocumentation={() => {
+                    return getDocumentation(editor, docLinkVersion);
+                  }}
+                  autoIndent={(event: any) => {
+                    autoIndent(editor, event);
+                  }}
+                />
               </div>
+              <div ref={editorRef} id="ConAppEditor" className="conApp__editorContent" />
             </div>
-          </Panel>
-          <Panel
-            style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
-            initialWidth={initialOutputPanelWidth + '%'}
-          >
-            <div className="conApp__output" data-test-subj="response-editor">
-              <div ref={outputRef} className="conApp__outputContent" id="ConAppOutput" />
-            </div>
-          </Panel>
-        </PanelsContainer>
-      </div>
-    );
-  }
-);
+          </div>
+        </Panel>
+        <Panel
+          style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
+          initialWidth={initialOutputPanelWidth + '%'}
+        >
+          <div className="conApp__output" data-test-subj="response-editor">
+            <div ref={outputRef} className="conApp__outputContent" id="ConAppOutput" />
+          </div>
+        </Panel>
+      </PanelsContainer>
+    </div>
+  );
+}
+
+export const MemoConsoleEditor = React.memo(ConsoleEditor);
