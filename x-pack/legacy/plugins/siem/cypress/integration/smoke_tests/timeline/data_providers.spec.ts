@@ -18,7 +18,7 @@ describe('timeline data providers', () => {
   });
 
   afterEach(() => {
-    logout();
+    return logout();
   });
 
   it('renders the data provider of a host dragged from the All Hosts widget on the hosts page', () => {

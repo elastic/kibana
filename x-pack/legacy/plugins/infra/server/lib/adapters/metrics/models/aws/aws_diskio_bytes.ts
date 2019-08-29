@@ -11,6 +11,8 @@ import {
 } from '../../adapter_types';
 import { InfraMetric } from '../../../../../graphql/types';
 
+// see discussion in: https://github.com/elastic/kibana/issues/42687
+
 export const awsDiskioBytes: InfraMetricModelCreator = (
   timeField,
   indexPattern,
@@ -30,14 +32,24 @@ export const awsDiskioBytes: InfraMetricModelCreator = (
       metrics: [
         {
           field: 'aws.ec2.diskio.write.bytes',
-          id: 'max-diskio-out',
-          type: InfraMetricModelMetricType.max,
+          id: 'sum-diskio-out',
+          type: InfraMetricModelMetricType.sum,
         },
         {
-          id: 'by-second-max-diskio-out',
-          type: InfraMetricModelMetricType.calculation,
-          variables: [{ id: 'var-max', name: 'max', field: 'max-diskio-out' }],
-          script: 'params.max / 300', // TODO: https://github.com/elastic/kibana/issues/42687
+          id: 'csum-sum-diskio-out',
+          field: 'sum-diskio-out',
+          type: InfraMetricModelMetricType.cumulative_sum,
+        },
+        {
+          id: 'deriv-csum-sum-diskio-out',
+          unit: '1s',
+          type: InfraMetricModelMetricType.derivative,
+          field: 'csum-sum-diskio-out',
+        },
+        {
+          id: 'posonly-deriv-csum-sum-diskio-out',
+          field: 'deriv-csum-sum-diskio-out',
+          type: InfraMetricModelMetricType.positive_only,
         },
       ],
       split_mode: 'everything',
@@ -47,14 +59,30 @@ export const awsDiskioBytes: InfraMetricModelCreator = (
       metrics: [
         {
           field: 'aws.ec2.diskio.read.bytes',
-          id: 'max-diskio-in',
-          type: InfraMetricModelMetricType.max,
+          id: 'sum-diskio-in',
+          type: InfraMetricModelMetricType.sum,
         },
         {
-          id: 'inverted-by-second-max-diskio-in',
+          id: 'csum-sum-diskio-in',
+          field: 'sum-diskio-in',
+          type: InfraMetricModelMetricType.cumulative_sum,
+        },
+        {
+          id: 'deriv-csum-sum-diskio-in',
+          unit: '1s',
+          type: InfraMetricModelMetricType.derivative,
+          field: 'csum-sum-diskio-in',
+        },
+        {
+          id: 'posonly-deriv-csum-sum-diskio-in',
+          field: 'deriv-csum-sum-diskio-in',
+          type: InfraMetricModelMetricType.positive_only,
+        },
+        {
+          id: 'inverted-posonly-deriv-csum-sum-diskio-in',
           type: InfraMetricModelMetricType.calculation,
-          variables: [{ id: 'var-max', name: 'max', field: 'max-diskio-in' }],
-          script: 'params.max / -300', // TODO: https://github.com/elastic/kibana/issues/42687
+          variables: [{ id: 'var-rate', name: 'rate', field: 'posonly-deriv-csum-sum-diskio-in' }],
+          script: 'params.rate * -1',
         },
       ],
       split_mode: 'everything',

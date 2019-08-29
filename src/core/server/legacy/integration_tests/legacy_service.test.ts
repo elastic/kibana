@@ -32,7 +32,7 @@ describe('legacy service', () => {
       const rootUrl = '/route';
       const router = http.createRouter(rootUrl);
       router.get({ path: '/new-platform', validate: false }, (context, req, res) =>
-        res.ok({ content: 'from-new-platform' })
+        res.ok({ body: 'from-new-platform' })
       );
 
       await root.start();
@@ -45,9 +45,7 @@ describe('legacy service', () => {
         handler: () => 'ok from legacy server',
       });
 
-      await kbnTestServer.request
-        .get(root, '/route/new-platform')
-        .expect(200, { content: 'from-new-platform' });
+      await kbnTestServer.request.get(root, '/route/new-platform').expect(200, 'from-new-platform');
 
       await kbnTestServer.request.get(root, legacyPlatformUrl).expect(200, 'ok from legacy server');
     });
@@ -56,7 +54,7 @@ describe('legacy service', () => {
       const rootUrl = '/route';
       const router = http.createRouter(rootUrl);
       router.get({ path: '', validate: false }, (context, req, res) =>
-        res.ok({ content: 'from-new-platform' })
+        res.ok({ body: 'from-new-platform' })
       );
 
       await root.start();

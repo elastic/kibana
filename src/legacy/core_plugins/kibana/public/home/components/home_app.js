@@ -30,12 +30,10 @@ import {
 } from 'react-router-dom';
 import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
+import { telemetryOptInProvider, shouldShowTelemetryOptIn } from '../kibana_services';
 import chrome from 'ui/chrome';
 
-export function HomeApp({
-  directories,
-}) {
-
+export function HomeApp({ directories }) {
   const isCloudEnabled = chrome.getInjected('isCloudEnabled', false);
   const apmUiEnabled = chrome.getInjected('apmUiEnabled', true);
   const mlEnabled = chrome.getInjected('mlEnabled', false);
@@ -94,6 +92,10 @@ export function HomeApp({
             find={savedObjectsClient.find}
             localStorage={localStorage}
             urlBasePath={chrome.getBasePath()}
+            shouldShowTelemetryOptIn={shouldShowTelemetryOptIn}
+            setOptIn={telemetryOptInProvider.setOptIn}
+            fetchTelemetry={telemetryOptInProvider.fetchExample}
+            getTelemetryBannerId={telemetryOptInProvider.getBannerId}
           />
         </Route>
       </Switch>

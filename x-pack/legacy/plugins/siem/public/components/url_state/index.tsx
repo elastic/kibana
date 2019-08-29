@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { compose } from 'redux';
+import { compose, Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 
@@ -17,17 +17,20 @@ import {
   networkModel,
   networkSelectors,
   State,
+  timelineSelectors,
 } from '../../store';
-import { hostsActions, inputsActions, networkActions } from '../../store/actions';
+import { hostsActions, inputsActions, networkActions, timelineActions } from '../../store/actions';
 
 import { CONSTANTS } from './constants';
-import { UrlStateContainerPropTypes, UrlStateProps, KqlQueryObject } from './types';
+import { UrlStateContainerPropTypes, UrlStateProps, KqlQuery, LocationTypes } from './types';
 import { useUrlStateHooks } from './use_url_state';
+import { dispatchUpdateTimeline } from '../open_timeline/helpers';
+import { getCurrentLocation } from './helpers';
 
 export const UrlStateContainer = React.memo<UrlStateContainerPropTypes>(
   props => {
-    const { isInitializing } = useUrlStateHooks(props);
-    return <>{props.children({ isInitializing })}</>;
+    useUrlStateHooks(props);
+    return null;
   },
   (prevProps, nextProps) =>
     prevProps.location.pathname === nextProps.location.pathname &&
@@ -40,33 +43,48 @@ const makeMapStateToProps = () => {
   const getInputsSelector = inputsSelectors.inputsSelector();
   const getHostsFilterQueryAsKuery = hostsSelectors.hostsFilterQueryAsKuery();
   const getNetworkFilterQueryAsKuery = networkSelectors.networkFilterQueryAsKuery();
-  const mapStateToProps = (state: State) => {
+  const getTimelines = timelineSelectors.getTimelines();
+  const mapStateToProps = (state: State, { location }: UrlStateContainerPropTypes) => {
     const inputState = getInputsSelector(state);
     const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
     const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
 
-    const kqlQueryInitialState: KqlQueryObject = {
-      [CONSTANTS.hostsDetails]: {
-        filterQuery: getHostsFilterQueryAsKuery(state, hostsModel.HostsType.details),
-        queryLocation: CONSTANTS.hostsDetails,
-        type: hostsModel.HostsType.details,
-      },
-      [CONSTANTS.hostsPage]: {
-        filterQuery: getHostsFilterQueryAsKuery(state, hostsModel.HostsType.page),
-        queryLocation: CONSTANTS.hostsPage,
-        type: hostsModel.HostsType.page,
-      },
-      [CONSTANTS.networkDetails]: {
-        filterQuery: getNetworkFilterQueryAsKuery(state, networkModel.NetworkType.details),
-        queryLocation: CONSTANTS.networkDetails,
-        type: networkModel.NetworkType.details,
-      },
-      [CONSTANTS.networkPage]: {
-        filterQuery: getNetworkFilterQueryAsKuery(state, networkModel.NetworkType.page),
-        queryLocation: CONSTANTS.networkPage,
-        type: networkModel.NetworkType.page,
-      },
+    const page: LocationTypes | null = getCurrentLocation(location.pathname);
+    const kqlQueryInitialState: KqlQuery = {
+      filterQuery: null,
+      queryLocation: page,
     };
+    if (page === CONSTANTS.hostsPage) {
+      kqlQueryInitialState.filterQuery = getHostsFilterQueryAsKuery(
+        state,
+        hostsModel.HostsType.page
+      );
+    } else if (page === CONSTANTS.hostsDetails) {
+      kqlQueryInitialState.filterQuery = getHostsFilterQueryAsKuery(
+        state,
+        hostsModel.HostsType.details
+      );
+    } else if (page === CONSTANTS.networkPage) {
+      kqlQueryInitialState.filterQuery = getNetworkFilterQueryAsKuery(
+        state,
+        networkModel.NetworkType.page
+      );
+    } else if (page === CONSTANTS.networkDetails) {
+      kqlQueryInitialState.filterQuery = getNetworkFilterQueryAsKuery(
+        state,
+        networkModel.NetworkType.details
+      );
+    }
+
+    const openTimelineId = Object.entries(getTimelines(state)).reduce(
+      (useTimelineId, [timelineId, timelineObj]) => {
+        if (timelineObj.savedObjectId != null) {
+          useTimelineId = timelineObj.savedObjectId;
+        }
+        return useTimelineId;
+      },
+      ''
+    );
 
     return {
       urlState: {
@@ -81,6 +99,7 @@ const makeMapStateToProps = () => {
           },
         },
         [CONSTANTS.kqlQuery]: kqlQueryInitialState,
+        [CONSTANTS.timelineId]: openTimelineId,
       },
     };
   };
@@ -88,16 +107,24 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+  addGlobalLinkTo: inputsActions.addGlobalLinkTo,
+  addTimelineLinkTo: inputsActions.addTimelineLinkTo,
+  removeGlobalLinkTo: inputsActions.removeGlobalLinkTo,
+  removeTimelineLinkTo: inputsActions.removeTimelineLinkTo,
+  setAbsoluteTimerange: inputsActions.setAbsoluteRangeDatePicker,
+  setHostsKql: hostsActions.applyHostsFilterQuery,
+  setNetworkKql: networkActions.applyNetworkFilterQuery,
+  setRelativeTimerange: inputsActions.setRelativeRangeDatePicker,
+  updateTimeline: dispatchUpdateTimeline(dispatch),
+  updateTimelineIsLoading: timelineActions.updateIsLoading,
+  dispatch,
+});
+
 export const UseUrlState = compose<React.ComponentClass<UrlStateProps>>(
   withRouter,
   connect(
     makeMapStateToProps,
-    {
-      setAbsoluteTimerange: inputsActions.setAbsoluteRangeDatePicker,
-      setHostsKql: hostsActions.applyHostsFilterQuery,
-      setNetworkKql: networkActions.applyNetworkFilterQuery,
-      setRelativeTimerange: inputsActions.setRelativeRangeDatePicker,
-      toggleTimelineLinkTo: inputsActions.toggleTimelineLinkTo,
-    }
+    mapDispatchToProps
   )
 )(UrlStateContainer);

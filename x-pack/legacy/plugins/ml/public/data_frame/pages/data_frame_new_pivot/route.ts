@@ -9,11 +9,12 @@ import uiRoutes from 'ui/routes';
 // @ts-ignore
 import { checkBasicLicense } from '../../../license/check_license';
 import { checkCreateDataFrameTransformPrivilege } from '../../../privilege/check_privilege';
-// @ts-ignore
-import { loadCurrentIndexPattern, loadCurrentSavedSearch } from '../../../util/index_utils';
-// @ts-ignore
-import { loadIndexPatterns } from '../../../util/index_utils';
-
+import {
+  loadCurrentIndexPattern,
+  loadCurrentSavedSearch,
+  loadIndexPatterns,
+  // @ts-ignore
+} from '../../../util/index_utils';
 import indexOrSearchTemplate from '../../../jobs/new_job/wizard/steps/index_or_search/index_or_search.html';
 
 import {

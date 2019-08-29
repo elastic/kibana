@@ -181,10 +181,9 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
 export const getIpOverviewAgg = (type: string, overviewHit: OverviewHit | {}) => {
   const firstSeen = getOr(null, `firstSeen.value_as_string`, overviewHit);
   const lastSeen = getOr(null, `lastSeen.value_as_string`, overviewHit);
-
   const autonomousSystem: AutonomousSystem | null = getOr(
     null,
-    `autonomousSystem.results.hits.hits[0]._source.autonomous_system`,
+    `as.results.hits.hits[0]._source.${type}.as`,
     overviewHit
   );
   const geoFields: GeoEcsFields | null = getOr(

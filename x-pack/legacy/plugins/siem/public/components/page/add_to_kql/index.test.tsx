@@ -104,6 +104,7 @@ describe('AddToKql Component', () => {
           activePage: 0,
           limit: 10,
         },
+        anomalies: null,
       },
       filterQuery: {
         kuery: {
@@ -143,13 +144,19 @@ describe('AddToKql Component', () => {
 
     expect(store.getState().network.page).toEqual({
       queries: {
-        topNFlow: {
+        topNFlowDestination: {
           activePage: 0,
           limit: 10,
-          flowDirection: 'uniDirectional',
-          flowTarget: 'source',
           topNFlowSort: {
-            field: 'bytes',
+            field: 'bytes_out',
+            direction: 'desc',
+          },
+        },
+        topNFlowSource: {
+          activePage: 0,
+          limit: 10,
+          topNFlowSort: {
+            field: 'bytes_out',
             direction: 'desc',
           },
         },

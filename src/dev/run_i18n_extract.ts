@@ -21,9 +21,9 @@ import chalk from 'chalk';
 import Listr from 'listr';
 import { resolve } from 'path';
 
+import { createFailError, run } from '@kbn/dev-utils';
 import { ErrorReporter, serializeToJson, serializeToJson5, writeFileAsync } from './i18n';
 import { extractDefaultMessages, mergeConfigs } from './i18n/tasks';
-import { createFailError, run } from './run';
 
 run(
   async ({
@@ -88,6 +88,7 @@ run(
         log.error(error);
       }
     }
+    process.exit();
   },
   {
     flags: {
