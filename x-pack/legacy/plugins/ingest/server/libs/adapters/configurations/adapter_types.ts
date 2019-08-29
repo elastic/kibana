@@ -15,13 +15,16 @@ export const RuntimeDatasourceInput = t.interface(
   'DatasourceInput'
 );
 
-const DataSource = t.interface({
-  uuid: t.string,
-  ref_source: t.union([t.undefined, t.string]),
-  ref: t.union([t.undefined, t.string]),
-  config: t.union([t.undefined, t.string]),
-  inputs: t.array(t.string),
-});
+const RuntimeDatasource = t.interface(
+  {
+    uuid: t.string,
+    ref_source: t.union([t.undefined, t.string]),
+    ref: t.union([t.undefined, t.string]),
+    config: t.union([t.undefined, t.string]),
+    inputs: t.array(t.string),
+  },
+  'Datasource'
+);
 
 export const NewRuntimeConfigurationFile = t.interface(
   {
@@ -32,7 +35,7 @@ export const NewRuntimeConfigurationFile = t.interface(
     shared_id: t.string,
     version: t.number,
     agent_version: t.string,
-    data_sources: t.array(DataSource),
+    data_sources: t.array(RuntimeDatasource),
   },
   'ConfigurationFile'
 );
@@ -74,4 +77,5 @@ export type NewBackupConfigurationFile = t.TypeOf<typeof NewRuntimeBackupConfigu
 export type BackupConfigurationFile = t.TypeOf<typeof RuntimeBackupConfigurationFile>;
 export type ConfigurationFile = t.TypeOf<typeof RuntimeConfigurationFile>;
 export type NewConfigurationFile = t.TypeOf<typeof NewRuntimeConfigurationFile>;
+export type Datasource = t.TypeOf<typeof RuntimeDatasource>;
 export type DatasourceInput = t.TypeOf<typeof RuntimeDatasourceInput>;
