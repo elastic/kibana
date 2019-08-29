@@ -33,7 +33,7 @@ export function checkViewOrCreateJobs(Private, $route, kbnBaseUrl, kbnUrl) {
           window.location.href = `${basePath}${resultsPageUrl}`;
           reject();
         } else {
-          window.location.href = `${basePath}ml#/jobs/new_job/simple/recognize?id=${moduleId}&index=${indexPatternId}`;
+          window.location.href = `${basePath}ml#/jobs/new_job/recognize?id=${moduleId}&index=${indexPatternId}`;
           reject();
         }
 

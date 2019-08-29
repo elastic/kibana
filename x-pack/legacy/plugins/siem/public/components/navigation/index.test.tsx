@@ -9,6 +9,7 @@ import * as React from 'react';
 
 import { SiemNavigationComponent } from './';
 import { setBreadcrumbs } from './breadcrumbs';
+import { navTabs } from '../../pages/home/home_navigations';
 
 jest.mock('./breadcrumbs', () => ({
   setBreadcrumbs: jest.fn(),
@@ -45,13 +46,13 @@ describe('SIEM Navigation', () => {
       listen: jest.fn(),
     },
   };
-  const wrapper = shallow(<SiemNavigationComponent {...mockProps} />);
+  const wrapper = shallow(<SiemNavigationComponent {...mockProps} navTabs={navTabs} />);
   test('it calls setBreadcrumbs with correct path on mount', () => {
-    expect(setBreadcrumbs).toHaveBeenNthCalledWith(1, '/hosts');
+    expect(setBreadcrumbs).toHaveBeenNthCalledWith(1, '/hosts', {});
   });
   test('it calls setBreadcrumbs with correct path on update', () => {
     wrapper.setProps({ location: { pathname: '/network' } });
     wrapper.update();
-    expect(setBreadcrumbs).toHaveBeenNthCalledWith(2, '/network');
+    expect(setBreadcrumbs).toHaveBeenNthCalledWith(2, '/network', {});
   });
 });

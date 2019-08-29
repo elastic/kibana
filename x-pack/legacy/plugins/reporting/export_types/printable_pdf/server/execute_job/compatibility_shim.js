@@ -32,10 +32,13 @@ export function compatibilityShimFactory(server) {
   };
 
   return function (executeJob) {
-    return async function (job, cancellationToken) {
-      const urls = job.objects.map(savedObject => getSavedObjectAbsoluteUrl(job, savedObject));
+    return async function (jobId, job, cancellationToken) {
+      const jobToExecute = {
+        ...job,
+        urls: job.objects.map(savedObject => getSavedObjectAbsoluteUrl(job, savedObject)),
+      };
 
-      return await executeJob({ ...job, urls }, cancellationToken);
+      return await executeJob(jobId, jobToExecute, cancellationToken);
     };
   };
 }
