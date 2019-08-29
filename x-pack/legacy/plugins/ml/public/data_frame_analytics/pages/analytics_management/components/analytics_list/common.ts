@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DataFrameAnalyticsId, DataFrameAnalyticsOutlierConfig } from '../../../../common';
+import { DataFrameAnalyticsId, DataFrameAnalyticsConfig } from '../../../../common';
 
 export enum DATA_FRAME_TASK_STATE {
   FAILED = 'failed',
@@ -59,7 +59,7 @@ export function isDataFrameAnalyticsStats(arg: any): arg is DataFrameAnalyticsSt
 export interface DataFrameAnalyticsListRow {
   id: DataFrameAnalyticsId;
   checkpointing: object;
-  config: DataFrameAnalyticsOutlierConfig;
+  config: DataFrameAnalyticsConfig;
   mode: string;
   stats: DataFrameAnalyticsStats;
 }

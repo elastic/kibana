@@ -40,7 +40,7 @@ import { ml } from '../../../../../services/ml_api_service';
 import {
   sortColumns,
   toggleSelectedField,
-  DataFrameAnalyticsOutlierConfig,
+  DataFrameAnalyticsConfig,
   EsFieldName,
   EsDoc,
   MAX_COLUMNS,
@@ -62,7 +62,7 @@ const FEATURE_INFLUENCE = 'feature_influence';
 
 interface GetDataFrameAnalyticsResponse {
   count: number;
-  data_frame_analytics: DataFrameAnalyticsOutlierConfig[];
+  data_frame_analytics: DataFrameAnalyticsConfig[];
 }
 
 // Defining our own ENUM here.
@@ -98,9 +98,7 @@ interface Props {
 }
 
 export const Exploration: FC<Props> = React.memo(({ jobId }) => {
-  const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsOutlierConfig | undefined>(
-    undefined
-  );
+  const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
 
   useEffect(() => {
     (async function() {

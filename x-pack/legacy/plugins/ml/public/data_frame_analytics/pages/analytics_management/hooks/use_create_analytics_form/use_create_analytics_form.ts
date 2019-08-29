@@ -14,7 +14,7 @@ import { useKibanaContext } from '../../../../../contexts/kibana';
 import {
   useRefreshAnalyticsList,
   DataFrameAnalyticsId,
-  DataFrameAnalyticsOutlierConfig,
+  DataFrameAnalyticsConfig,
 } from '../../../../common';
 
 import { ActionDispatchers, ACTION } from './actions';
@@ -198,7 +198,7 @@ export const useCreateAnalyticsForm = () => {
     try {
       setJobIds(
         (await ml.dataFrameAnalytics.getDataFrameAnalytics()).data_frame_analytics.map(
-          (job: DataFrameAnalyticsOutlierConfig) => job.id
+          (job: DataFrameAnalyticsConfig) => job.id
         )
       );
     } catch (e) {

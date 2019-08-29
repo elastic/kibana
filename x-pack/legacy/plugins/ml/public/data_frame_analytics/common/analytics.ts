@@ -12,16 +12,45 @@ import { Subscription } from 'rxjs';
 // @ts-ignore
 import { isJobIdValid } from '../../../common/util/job_utils';
 
-// TODO
-export const moveToAnalyticsWizard = () => {};
-
 export const isAnalyticsIdValid = isJobIdValid;
 
 export type IndexName = string;
 export type IndexPattern = string;
 export type DataFrameAnalyticsId = string;
 
-export interface DataFrameAnalyticsOutlierConfig {
+interface OutlierAnalysis {
+  outlier_detection: {};
+}
+
+interface RegressionAnalysis {
+  regression: {
+    dependent_variable: string;
+    training_percent?: number;
+  };
+}
+
+interface GenericAnalysis {
+  [key: string]: Record<string, any>;
+}
+
+type AnalysisConfig = OutlierAnalysis | RegressionAnalysis | GenericAnalysis;
+
+export const getAnalysisType = (analysis: AnalysisConfig) => {
+  const keys = Object.keys(analysis);
+
+  if (keys.length === 1) {
+    return keys[0];
+  }
+
+  return 'unknown';
+};
+
+export const isOutlierAnalysis = (arg: any): arg is OutlierAnalysis => {
+  const keys = Object.keys(arg);
+  return keys.length === 1 && keys[0] === 'outlier_detection';
+};
+
+export interface DataFrameAnalyticsConfig {
   id: DataFrameAnalyticsId;
   // Description attribute is not supported yet
   // description?: string;
@@ -32,9 +61,7 @@ export interface DataFrameAnalyticsOutlierConfig {
   source: {
     index: IndexName;
   };
-  analysis: {
-    outlier_detection: {};
-  };
+  analysis: AnalysisConfig;
   analyzed_fields: {
     includes: string[];
     excludes: string[];
