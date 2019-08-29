@@ -33,8 +33,8 @@ const configSchemaProps = {
   }),
   headers: nullableType(HeadersSchema),
 };
-export type ActionTypeConfigType = TypeOf<typeof UnvalidatedConfigSchema>;
-const UnvalidatedConfigSchema = schema.object(configSchemaProps);
+export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
+const ConfigSchema = schema.object(configSchemaProps);
 
 export type WebhookActionKibanaConfig = TypeOf<typeof ActionTypeConfigSchema>;
 const ActionTypeConfigSchema = schema.object({
@@ -122,13 +122,13 @@ export const actionType: ConfigureableActionType<WebhookActionKibanaConfig> = {
 };
 
 function configureActionType(kibanaConfig: Option<WebhookActionKibanaConfig>): ActionType {
-  const ConfigSchema = schema.object(configSchemaProps, {
+  const ValidatedConfigSchema = schema.object(configSchemaProps, {
     validate: validateConfig(kibanaConfig),
   });
   return {
     ...actionType,
     validate: {
-      config: ConfigSchema,
+      config: ValidatedConfigSchema,
       secrets: SecretsSchema,
       params: ParamsSchema,
     },
