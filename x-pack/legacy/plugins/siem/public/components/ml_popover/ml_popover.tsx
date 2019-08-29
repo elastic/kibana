@@ -32,6 +32,7 @@ import { useStateToaster } from '../toasters';
 import { errorToToaster } from '../ml/api/error_to_toaster';
 import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 import { DEFAULT_KBN_VERSION } from '../../../common/constants';
+import { METRIC_TYPE, TELEMETRY_EVENT, trackUiAction as track } from '../../lib/track_usage';
 
 const PopoverContentsDiv = styled.div`
   max-width: 550px;
@@ -109,6 +110,8 @@ export const MlPopover = React.memo(() => {
 
   // Enable/Disable Job & Datafeed -- passed to JobsTable for use as callback on JobSwitch
   const enableDatafeed = async (jobName: string, latestTimestampMs: number, enable: boolean) => {
+    submitTelemetry(jobName, enable, embeddedJobIds);
+
     // Max start time for job is no more than two weeks ago to ensure job performance
     const maxStartTime = moment
       .utc()
@@ -120,12 +123,14 @@ export const MlPopover = React.memo(() => {
       try {
         await startDatafeeds([`datafeed-${jobName}`], headers, startTime);
       } catch (error) {
+        track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_ENABLE_FAILURE);
         errorToToaster({ title: i18n.START_JOB_FAILURE, error, dispatchToaster });
       }
     } else {
       try {
         await stopDatafeeds([`datafeed-${jobName}`], headers);
       } catch (error) {
+        track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_DISABLE_FAILURE);
         errorToToaster({ title: i18n.STOP_JOB_FAILURE, error, dispatchToaster });
       }
     }
@@ -262,5 +267,19 @@ export const MlPopover = React.memo(() => {
     return null;
   }
 });
+
+const submitTelemetry = (jobName: string, enabled: boolean, embeddedJobIds: string[]) => {
+  // Report type of job enabled/disabled
+  track(
+    METRIC_TYPE.COUNT,
+    embeddedJobIds.includes(jobName)
+      ? enabled
+        ? TELEMETRY_EVENT.SIEM_JOB_ENABLED
+        : TELEMETRY_EVENT.SIEM_JOB_DISABLED
+      : enabled
+      ? TELEMETRY_EVENT.CUSTOM_JOB_ENABLED
+      : TELEMETRY_EVENT.CUSTOM_JOB_DISABLED
+  );
+};
 
 MlPopover.displayName = 'MlPopover';
