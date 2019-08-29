@@ -15,7 +15,6 @@ import { Map, NavigationControl, Popup } from 'mapbox-gl';
 import { GeoJsonProperties } from 'geojson';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { shade, tint } from 'polished';
-import { Legend } from './Legend';
 import { ChoroplethToolTip } from './ChoroplethToolTip';
 
 interface ChoroplethItem {
@@ -247,21 +246,15 @@ export const ChoroplethMap: React.SFC<Props> = props => {
     }
   }, [map, tooltipState]);
 
-  const toolTipProps = { name: '', value: 0, docCount: 0, ...tooltipState };
-  const hasMinMax = Number.isFinite(min) && Number.isFinite(max);
-
   // render map container and tooltip in a hidden container
   return (
     <div>
       <div ref={containerRef} style={{ height: 256 }} />
       <div style={{ display: 'none' }}>
         <div ref={popupContainerRef}>
-          <ChoroplethToolTip {...toolTipProps} />
+          {tooltipState ? <ChoroplethToolTip {...tooltipState} /> : null}
         </div>
       </div>
-      {hasMinMax ? (
-        <Legend getColorStyle={getProgressionColor} min={min} max={max} />
-      ) : null}
     </div>
   );
 };
