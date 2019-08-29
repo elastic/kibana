@@ -177,6 +177,7 @@ describe('PingList component', () => {
             },
           },
           {
+            id: 'id10',
             timestamp: '2019-01-28T17:47:19.077Z',
             http: { response: { status_code: 200 } },
             error: null,

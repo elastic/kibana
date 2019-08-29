@@ -6,9 +6,14 @@
 
 import expect from '@kbn/expect';
 import { pingsQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
-import { expectFixtureEql } from './expect_fixture_eql';
+import { expectPingFixtureEql } from './expect_fixture_eql';
+import { Ping, PingResults } from '../../../../../legacy/plugins/uptime/common/graphql/types';
 
-export default function({ getService }) {
+const expectPingFixtureEql = (data: { allPings: PingResults }, fixtureName: string) => {
+  expectPingFixtureEql(data, fixtureName, d => d.allPings.pings.forEach((p: Ping) => delete p.id));
+};
+
+export default function({ getService }: any) {
   describe('pingList query', () => {
     const supertest = getService('supertest');
 
@@ -31,7 +36,7 @@ export default function({ getService }) {
         allPings: { pings },
       } = data;
       expect(pings).length(10);
-      expectFixtureEql(data, 'ping_list');
+      expectPingFixtureEql(data, 'ping_list');
     });
 
     it('returns a list of pings for the date range and given size', async () => {
@@ -55,7 +60,7 @@ export default function({ getService }) {
         allPings: { pings },
       } = data;
       expect(pings).length(SIZE);
-      expectFixtureEql(data, 'ping_list_count');
+      expectPingFixtureEql(data, 'ping_list_count');
     });
 
     it('returns a list of pings for a monitor ID', async () => {
@@ -77,7 +82,7 @@ export default function({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getPingsQuery });
-      expectFixtureEql(data, 'ping_list_monitor_id');
+      expectPingFixtureEql(data, 'ping_list_monitor_id');
     });
 
     it('returns a list of pings sorted ascending', async () => {
@@ -100,7 +105,7 @@ export default function({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getPingsQuery });
-      expectFixtureEql(data, 'ping_list_sort', d => d.allPings.pings.forEach(p => delete p.id));
+      expectPingFixtureEql(data, 'ping_list_sort');
     });
   });
 }

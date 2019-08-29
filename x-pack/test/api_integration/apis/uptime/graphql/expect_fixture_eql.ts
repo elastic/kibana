@@ -19,7 +19,7 @@ const excludeFieldsFrom = (from: any, excluder?: (d: any) => any): any => {
   return clone;
 };
 
-export const expectFixtureEql = (data: any, fixtureName: string, excluder?: (d: any) => any) => {
+export const expectFixtureEql = <T>(data: T, fixtureName: string, excluder?: (d: T) => void) => {
   const fixturePath = join(fixturesDir, `${fixtureName}.json`);
   if (process.env.UPDATE_UPTIME_FIXTURES) {
     fs.writeFileSync(fixturePath, JSON.stringify(data, null, 2));
