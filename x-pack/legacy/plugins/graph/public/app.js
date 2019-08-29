@@ -99,7 +99,7 @@ uiRoutes
   .when('/home', {
     template: listingTemplate,
     badge: getReadonlyBadge,
-    controller($injector, $location, $scope, $route, Private, config, Promise, kbnBaseUrl) {
+    controller($injector, $location, $scope, Private, config, Promise, kbnBaseUrl) {
       checkLicense(Promise, kbnBaseUrl);
       const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
       const graphService = services['Graph workspace'];
@@ -116,8 +116,8 @@ uiRoutes
         kbnUrl.redirect(getEditPath(workspace));
       };
       $scope.getViewUrl = (workspace) => getEditUrl(chrome, workspace);
-      $scope.delete = (ids) => {
-        return graphService.delete(ids);
+      $scope.delete = (workspaces) => {
+        return graphService.delete(workspaces.map(({ id }) => id));
       };
       $scope.capabilities = capabilities.get().graph;
       $scope.initialFilter = ($location.search()).filter || '';
@@ -910,10 +910,11 @@ app.controller('graphuiPlugin', function (
     chrome,
     savedWorkspace: $route.current.locals.savedWorkspace,
     navigateTo: () => {
-      canWipeWorkspace(function () {
-        $scope.$evalAsync(() => {
-          kbnUrl.changePath('/home/');
-        });
+      // TODO this should be wrapped into canWipeWorkspace,
+      // but the check is too simple right now. Change this
+      // once actual state-diffing is in place.
+      $scope.$evalAsync(() => {
+        kbnUrl.changePath('/home/');
       });
     }
   });
