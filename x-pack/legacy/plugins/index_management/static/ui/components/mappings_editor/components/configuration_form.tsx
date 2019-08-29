@@ -9,6 +9,7 @@ import { EuiForm } from '@elastic/eui';
 import {
   useForm,
   UseField,
+  FormProvider,
 } from '../../../../../../../../../src/plugins/elasticsearch_ui_shared/static/forms/hook_form_lib';
 
 import {
@@ -38,21 +39,21 @@ export const ConfigurationForm = ({
   }, [form]);
 
   return (
-    <EuiForm className="mappings-editor">
-      {/* Global Mappings configuration */}
-      <FormRow title="Configuration" description="Global settings for the index mappings">
-        <UseField
-          path="dynamic"
-          form={form}
-          componentProps={{
-            fieldProps: { options: DYNAMIC_SETTING_OPTIONS },
-          }}
-          component={Field}
-        />
-        <UseField path="date_detection" form={form} component={Field} />
-        <UseField path="numeric_detection" form={form} component={Field} />
-        <UseField path="dynamic_date_formats" form={form} component={Field} />
-      </FormRow>
-    </EuiForm>
+    <FormProvider form={form}>
+      <EuiForm className="mappings-editor">
+        <FormRow title="Configuration" description="Global settings for the index mappings">
+          <UseField
+            path="dynamic"
+            componentProps={{
+              fieldProps: { options: DYNAMIC_SETTING_OPTIONS },
+            }}
+            component={Field}
+          />
+          <UseField path="date_detection" component={Field} />
+          <UseField path="numeric_detection" component={Field} />
+          <UseField path="dynamic_date_formats" component={Field} />
+        </FormRow>
+      </EuiForm>
+    </FormProvider>
   );
 };
