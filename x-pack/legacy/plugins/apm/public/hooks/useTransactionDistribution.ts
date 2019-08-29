@@ -28,58 +28,30 @@ export function useTransactionDistribution(urlParams: IUrlParams) {
   } = urlParams;
   const uiFilters = useUiFilters(urlParams);
 
-  const { data, status, error } = useFetcher(
-    prevResult => {
-      // if a previous transaction distribution has been loaded and includes the sample
-      // there is no reason to loading it again
-      const alreadyHasSample = prevResult.data.buckets.some(bucket => {
-        return (
-          bucket.sample &&
-          bucket.sample.traceId === traceId &&
-          bucket.sample.transactionId === transactionId
-        );
-      });
-
-      if (
-        !alreadyHasSample &&
-        serviceName &&
-        start &&
-        end &&
-        transactionType &&
-        transactionName
-      ) {
-        return callApmApi({
-          pathname:
-            '/api/apm/services/{serviceName}/transaction_groups/distribution',
-          params: {
-            path: {
-              serviceName
-            },
-            query: {
-              start,
-              end,
-              transactionType,
-              transactionName,
-              transactionId,
-              traceId,
-              uiFilters: JSON.stringify(uiFilters)
-            }
+  const { data = INITIAL_DATA, status, error } = useFetcher(() => {
+    if (serviceName && start && end && transactionType && transactionName) {
+      return callApmApi({
+        pathname:
+          '/api/apm/services/{serviceName}/transaction_groups/distribution',
+        params: {
+          path: {
+            serviceName
+          },
+          query: {
+            start,
+            end,
+            transactionType,
+            transactionName,
+            transactionId,
+            traceId,
+            uiFilters: JSON.stringify(uiFilters)
           }
-        });
-      }
-    },
-    [
-      serviceName,
-      start,
-      end,
-      transactionType,
-      transactionName,
-      transactionId,
-      traceId,
-      uiFilters
-    ],
-    { initialState: INITIAL_DATA }
-  );
+        }
+      });
+    }
+    // the histogram should not be refetched if the transactionId or traceId changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [serviceName, start, end, transactionType, transactionName, uiFilters]);
 
   return { data, status, error };
 }
