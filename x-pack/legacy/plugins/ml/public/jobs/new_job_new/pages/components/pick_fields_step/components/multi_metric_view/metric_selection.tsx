@@ -8,7 +8,6 @@ import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { MultiMetricJobCreator, isMultiMetricJobCreator } from '../../../../../common/job_creator';
-import { Results, ModelItem, Anomaly } from '../../../../../common/results_loader';
 import { LineChartData } from '../../../../../common/chart_loader';
 import { DropDownLabel, DropDownProps } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
@@ -19,18 +18,16 @@ import { ChartGrid } from './chart_grid';
 import { mlMessageBarService } from '../../../../../../../components/messagebar/messagebar_service';
 
 interface Props {
-  isActive: boolean;
   setIsValid: (na: boolean) => void;
 }
 
-export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
+export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
   const {
     jobCreator: jc,
     jobCreatorUpdate,
     jobCreatorUpdated,
     chartLoader,
     chartInterval,
-    resultsLoader,
   } = useContext(JobCreatorContext);
 
   if (isMultiMetricJobCreator(jc) === false) {
@@ -45,14 +42,13 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
   );
   const [lineChartsData, setLineChartsData] = useState<LineChartData>({});
   const [loadingData, setLoadingData] = useState(false);
-  const [modelData, setModelData] = useState<Record<number, ModelItem[]>>([]);
-  const [anomalyData, setAnomalyData] = useState<Record<number, Anomaly[]>>([]);
   const [start, setStart] = useState(jobCreator.start);
   const [end, setEnd] = useState(jobCreator.end);
 
   const [chartSettings, setChartSettings] = useState(defaultChartSettings);
   const [splitField, setSplitField] = useState(jobCreator.splitField);
   const [fieldValues, setFieldValues] = useState<string[]>([]);
+  const [pageReady, setPageReady] = useState(false);
 
   function detectorChangeHandler(selectedOptionsIn: DropDownLabel[]) {
     addDetector(selectedOptionsIn);
@@ -76,17 +72,8 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     setAggFieldPairList([...aggFieldPairList]);
   }
 
-  function setResultsWrapper(results: Results) {
-    setModelData(results.model);
-    setAnomalyData(results.anomalies);
-  }
-
   useEffect(() => {
-    // subscribe to progress and results
-    const subscription = resultsLoader.subscribeToResults(setResultsWrapper);
-    return () => {
-      subscription.unsubscribe();
-    };
+    setPageReady(true);
   }, []);
 
   // watch for changes in detector list length
@@ -155,7 +142,7 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     const cs = getChartSettings();
     setChartSettings(cs);
 
-    if (aggFieldPairList.length > 0) {
+    if (allDataReady()) {
       setLoadingData(true);
       try {
         const resp: LineChartData = await chartLoader.loadLineCharts(
@@ -175,6 +162,14 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
     }
   }
 
+  function allDataReady() {
+    return (
+      pageReady &&
+      aggFieldPairList.length > 0 &&
+      (splitField === null || (splitField !== null && fieldValues.length > 0))
+    );
+  }
+
   return (
     <Fragment>
       <ChartGrid
@@ -183,21 +178,19 @@ export const MultiMetricDetectors: FC<Props> = ({ isActive, setIsValid }) => {
         splitField={splitField}
         fieldValues={fieldValues}
         lineChartsData={lineChartsData}
-        modelData={modelData}
-        anomalyData={anomalyData}
-        deleteDetector={isActive ? deleteDetector : undefined}
+        modelData={[]}
+        anomalyData={[]}
+        deleteDetector={deleteDetector}
         jobType={jobCreator.type}
         loading={loadingData}
       />
 
-      {isActive && (
-        <MetricSelector
-          fields={fields}
-          detectorChangeHandler={detectorChangeHandler}
-          selectedOptions={selectedOptions}
-          removeOptions={aggFieldPairList}
-        />
-      )}
+      <MetricSelector
+        fields={fields}
+        detectorChangeHandler={detectorChangeHandler}
+        selectedOptions={selectedOptions}
+        removeOptions={aggFieldPairList}
+      />
     </Fragment>
   );
 };

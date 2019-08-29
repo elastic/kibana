@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
+import { memoize as memoizeOrig } from 'lodash';
 import { IndexPattern } from 'ui/index_patterns';
 import { IndexPatternTitle } from '../../../../../common/types/kibana';
 import { Field, SplitField, AggFieldPair } from '../../../../../common/types/fields';
 import { ml } from '../../../../services/ml_api_service';
 import { mlResultsService } from '../../../../services/results_service';
-import { getCategoryFields } from './searches';
+import { getCategoryFields as getCategoryFieldsOrig } from './searches';
 
 type DetectorIndex = number;
 export interface LineChartPoint {
@@ -20,16 +20,19 @@ export interface LineChartPoint {
 type SplitFieldValue = string | null;
 export type LineChartData = Record<DetectorIndex, LineChartPoint[]>;
 
-export class ChartLoader {
-  protected _indexPattern: IndexPattern;
-  protected _savedSearch: SavedSearch;
-  protected _indexPatternTitle: IndexPatternTitle = '';
-  protected _timeFieldName: string = '';
-  protected _query: object = {};
+const memoize = (f: Function) => memoizeOrig(f, (...args: any[]) => JSON.stringify(args));
 
-  constructor(indexPattern: IndexPattern, savedSearch: SavedSearch, query: object) {
-    this._indexPattern = indexPattern;
-    this._savedSearch = savedSearch;
+const newJobLineChart = memoize(ml.jobs.newJobLineChart);
+const newJobPopulationsChart = memoize(ml.jobs.newJobPopulationsChart);
+const getEventRateData = memoize(mlResultsService.getEventRateData);
+const getCategoryFields = memoize(getCategoryFieldsOrig);
+
+export class ChartLoader {
+  private _indexPatternTitle: IndexPatternTitle = '';
+  private _timeFieldName: string = '';
+  private _query: object = {};
+
+  constructor(indexPattern: IndexPattern, query: object) {
     this._indexPatternTitle = indexPattern.title;
     this._query = query;
 
@@ -49,7 +52,7 @@ export class ChartLoader {
     if (this._timeFieldName !== '') {
       const splitFieldName = splitField !== null ? splitField.name : null;
 
-      const resp = await ml.jobs.newJobLineChart(
+      const resp = await newJobLineChart(
         this._indexPatternTitle,
         this._timeFieldName,
         start,
@@ -75,7 +78,7 @@ export class ChartLoader {
     if (this._timeFieldName !== '') {
       const splitFieldName = splitField !== null ? splitField.name : '';
 
-      const resp = await ml.jobs.newJobPopulationsChart(
+      const resp = await newJobPopulationsChart(
         this._indexPatternTitle,
         this._timeFieldName,
         start,
@@ -96,7 +99,7 @@ export class ChartLoader {
     intervalMs: number
   ): Promise<LineChartPoint[]> {
     if (this._timeFieldName !== '') {
-      const resp = await mlResultsService.getEventRateData(
+      const resp = await getEventRateData(
         this._indexPatternTitle,
         this._query,
         this._timeFieldName,
