@@ -15,8 +15,8 @@
   },
   "jobs": [
     {
-      "id": "rare_process_windows_ecs",
-      "file": "rare_process_windows_ecs.json"
+      "id": "rare_process_by_host_windows_ecs",
+      "file": "rare_process_by_host_windows_ecs.json"
     }, {
       "id": "windows_anomalous_network_activity_ecs",
       "file": "windows_anomalous_network_activity_ecs.json"
@@ -42,9 +42,9 @@
   ],
   "datafeeds": [
     {
-      "id": "datafeed-rare_process_windows_ecs",
-      "file": "datafeed_rare_process_windows_ecs.json",
-      "job_id": "rare_process_windows_ecs"
+      "id": "datafeed-rare_process_by_host_windows_ecs",
+      "file": "datafeed_rare_process_by_host_windows_ecs.json",
+      "job_id": "rare_process_by_host_windows_ecs"
     }, {
       "id": "datafeed-windows_anomalous_network_activity_ecs",
       "file": "datafeed_windows_anomalous_network_activity_ecs.json",
