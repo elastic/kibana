@@ -1,28 +1,4 @@
 {
   "job_id": "JOB_ID",
-  "indexes": ["INDEX_PATTERN_NAME"],
-  "aggregations": {
-    "buckets": {
-      "date_histogram": {
-        "field": "@timestamp",
-        "fixed_interval": "900000ms"
-      },
-      "aggregations": {
-        "doc_count_per_minute": {
-          "bucket_script": {
-            "buckets_path": {
-              "doc_count": "_count"
-            },
-            "script": {
-              "lang": "painless",
-              "params": {
-                "bucket_span_in_ms": 900000
-              },
-              "source": "60 * 1000 * params.doc_count / params.bucket_span_in_ms"
-            }
-          }
-        }
-      }
-    }
-  }
+  "indexes": ["INDEX_PATTERN_NAME"]
 }

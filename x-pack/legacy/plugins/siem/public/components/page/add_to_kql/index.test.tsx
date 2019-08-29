@@ -104,6 +104,7 @@ describe('AddToKql Component', () => {
           activePage: 0,
           limit: 10,
         },
+        anomalies: null,
       },
       filterQuery: {
         kuery: {

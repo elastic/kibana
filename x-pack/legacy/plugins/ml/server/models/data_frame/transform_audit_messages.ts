@@ -8,7 +8,7 @@ import { ML_DF_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/inde
 import { callWithRequestType } from '../../../common/types/kibana';
 import { TransformMessage } from '../../../common/types/audit_message';
 
-const SIZE = 50;
+const SIZE = 500;
 
 interface Message {
   _index: string;
