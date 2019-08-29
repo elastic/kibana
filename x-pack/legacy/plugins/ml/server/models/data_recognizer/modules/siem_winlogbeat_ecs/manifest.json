@@ -17,6 +17,27 @@
     {
       "id": "rare_process_windows_ecs",
       "file": "rare_process_windows_ecs.json"
+    }, {
+      "id": "windows_anomalous_network_activity",
+      "file": "windows_anomalous_network_activity.json"
+    }, {
+      "id": "windows_anomalous_path_activity",
+      "file": "windows_anomalous_path_activity.json"
+    }, {
+      "id": "windows_anomalous_process_all_hosts",
+      "file": "windows_anomalous_process_all_hosts.json"
+    }, {
+      "id": "windows_anomalous_process_creation",
+      "file": "windows_anomalous_process_creation.json"
+    }, {
+      "id": "windows_anomalous_script",
+      "file": "windows_anomalous_script.json"
+    }, {
+      "id": "windows_anomalous_service",
+      "file": "windows_anomalous_service.json"
+    }, {
+      "id": "windows_anomalous_user_name",
+      "file": "windows_anomalous_user_name.json"
     }
   ],
   "datafeeds": [
@@ -24,6 +45,34 @@
       "id": "datafeed-rare_process_windows_ecs",
       "file": "datafeed_rare_process_windows_ecs.json",
       "job_id": "rare_process_windows_ecs"
+    }, {
+      "id": "datafeed-windows_anomalous_network_activity",
+      "file": "datafeed_windows_anomalous_network_activity.json",
+      "job_id": "windows_anomalous_network_activity"
+    }, {
+      "id": "datafeed-windows_anomalous_path_activity",
+      "file": "datafeed_windows_anomalous_path_activity.json",
+      "job_id": "windows_anomalous_path_activity"
+    }, {
+      "id": "datafeed-windows_anomalous_process_all_hosts",
+      "file": "datafeed_windows_anomalous_process_all_hosts.json",
+      "job_id": "windows_anomalous_process_all_hosts"
+    }, {
+      "id": "datafeed-windows_anomalous_process_creation",
+      "file": "datafeed_windows_anomalous_process_creation.json",
+      "job_id": "windows_anomalous_process_creation"
+    }, {
+      "id": "datafeed-windows_anomalous_script",
+      "file": "datafeed_windows_anomalous_script.json",
+      "job_id": "windows_anomalous_script"
+    }, {
+      "id": "datafeed-windows_anomalous_service",
+      "file": "datafeed_windows_anomalous_service.json",
+      "job_id": "windows_anomalous_service"
+    }, {
+      "id": "datafeed-windows_anomalous_user_name",
+      "file": "datafeed_windows_anomalous_user_name.json",
+      "job_id": "windows_anomalous_user_name"
     }
   ]
 }

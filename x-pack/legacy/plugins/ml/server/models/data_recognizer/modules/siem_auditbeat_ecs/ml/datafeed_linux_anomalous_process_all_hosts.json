@@ -1,0 +1,25 @@
+{
+    "job_id": "JOB_ID",
+    "indices": [
+      "INDEX_PATTERN_NAME"
+    ],
+    "query": {
+        "bool": {
+          "filter": [
+            {"term": {"event.action": "executed"}}
+          ],
+          "must_not": [
+            {
+              "bool": {
+                "should": [
+                  {"term": {"user.name": "jenkins-worker"}},
+                  {"term": {"user.name": "jenkins-user"}},
+                  {"term": {"user.name": "jenkins"}},
+                  {"wildcard": {"process.name": {"wildcard": "jenkins*"}}}
+                ]
+              }
+            }
+          ]
+        }
+    }
+}

@@ -6,15 +6,18 @@
 
 import { SnapshotConfig, SnapshotConfigEs } from './snapshot';
 
-export interface SlmPolicy {
+export interface SlmPolicyPayload {
   name: string;
-  version: number;
-  modifiedDate: string;
-  modifiedDateMillis: number;
   snapshotName: string;
   schedule: string;
   repository: string;
-  config: SnapshotConfig;
+  config?: SnapshotConfig;
+}
+
+export interface SlmPolicy extends SlmPolicyPayload {
+  version: number;
+  modifiedDate: string;
+  modifiedDateMillis: number;
   nextExecution: string;
   nextExecutionMillis: number;
   lastSuccess?: {
@@ -28,6 +31,9 @@ export interface SlmPolicy {
     time: number;
     details: object | string;
   };
+  inProgress?: {
+    snapshotName: string;
+  };
 }
 
 export interface SlmPolicyEs {
@@ -38,7 +44,7 @@ export interface SlmPolicyEs {
     name: string;
     schedule: string;
     repository: string;
-    config: SnapshotConfigEs;
+    config?: SnapshotConfigEs;
   };
   next_execution: string;
   next_execution_millis: number;
@@ -52,5 +58,12 @@ export interface SlmPolicyEs {
     time_string: string;
     time: number;
     details: string;
+  };
+  in_progress?: {
+    name: string;
+    uuid: string;
+    state: string;
+    start_time: string;
+    start_time_millis: number;
   };
 }

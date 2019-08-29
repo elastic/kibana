@@ -37,16 +37,56 @@ exports[`Should render cancel button when drawing 1`] = `
               "items": Array [
                 Object {
                   "name": "Draw shape to filter data",
-                  "onClick": [Function],
-                  "panel": undefined,
+                  "panel": 1,
                 },
                 Object {
                   "name": "Draw bounds to filter data",
-                  "onClick": [Function],
-                  "panel": undefined,
+                  "panel": 2,
                 },
               ],
               "title": "Tools",
+            },
+            Object {
+              "content": <GeometryFilterForm
+                buttonLabel="Draw shape"
+                className="mapDrawControl__geometryFilterForm"
+                geoFields={
+                  Array [
+                    Object {
+                      "geoFieldName": "location",
+                      "geoFieldType": "geo_point",
+                      "indexPatternId": "1",
+                      "indexPatternTitle": "my_index",
+                    },
+                  ]
+                }
+                intitialGeometryLabel="shape"
+                isFilterGeometryClosed={true}
+                onSubmit={[Function]}
+              />,
+              "id": 1,
+              "title": "Draw shape to filter data",
+            },
+            Object {
+              "content": <GeometryFilterForm
+                buttonLabel="Draw bounds"
+                className="mapDrawControl__geometryFilterForm"
+                geoFields={
+                  Array [
+                    Object {
+                      "geoFieldName": "location",
+                      "geoFieldType": "geo_point",
+                      "indexPatternId": "1",
+                      "indexPatternTitle": "my_index",
+                    },
+                  ]
+                }
+                intitialGeometryLabel="bounds"
+                isFilterGeometryClosed={true}
+                onSubmit={[Function]}
+              />,
+              "id": 2,
+              "title": "Draw bounds to filter data",
             },
           ]
         }
@@ -105,16 +145,56 @@ exports[`renders 1`] = `
           "items": Array [
             Object {
               "name": "Draw shape to filter data",
-              "onClick": [Function],
-              "panel": undefined,
+              "panel": 1,
             },
             Object {
               "name": "Draw bounds to filter data",
-              "onClick": [Function],
-              "panel": undefined,
+              "panel": 2,
             },
           ],
           "title": "Tools",
+        },
+        Object {
+          "content": <GeometryFilterForm
+            buttonLabel="Draw shape"
+            className="mapDrawControl__geometryFilterForm"
+            geoFields={
+              Array [
+                Object {
+                  "geoFieldName": "location",
+                  "geoFieldType": "geo_point",
+                  "indexPatternId": "1",
+                  "indexPatternTitle": "my_index",
+                },
+              ]
+            }
+            intitialGeometryLabel="shape"
+            isFilterGeometryClosed={true}
+            onSubmit={[Function]}
+          />,
+          "id": 1,
+          "title": "Draw shape to filter data",
+        },
+        Object {
+          "content": <GeometryFilterForm
+            buttonLabel="Draw bounds"
+            className="mapDrawControl__geometryFilterForm"
+            geoFields={
+              Array [
+                Object {
+                  "geoFieldName": "location",
+                  "geoFieldType": "geo_point",
+                  "indexPatternId": "1",
+                  "indexPatternTitle": "my_index",
+                },
+              ]
+            }
+            intitialGeometryLabel="bounds"
+            isFilterGeometryClosed={true}
+            onSubmit={[Function]}
+          />,
+          "id": 2,
+          "title": "Draw bounds to filter data",
         },
       ]
     }
