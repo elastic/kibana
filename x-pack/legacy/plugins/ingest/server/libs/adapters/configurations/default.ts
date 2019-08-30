@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PathReporter } from 'io-ts/lib/PathReporter';
 import { SODatabaseAdapter } from '../so_database/default';
 import { RuntimeConfigurationFile, NewConfigurationFile } from './adapter_types';
 
@@ -28,19 +29,31 @@ export class ConfigAdapter {
   }
 
   public async get(id: string): Promise<ConfigurationFile> {
-    const config = await this.so.get<ConfigurationFile>('configurations', id);
+    const configSO = await this.so.get<ConfigurationFile>('configurations', id);
 
-    if (config.error) {
-      throw new Error(config.error.message);
+    if (configSO.error) {
+      throw new Error(configSO.error.message);
     }
 
-    if (!config.attributes) {
+    if (!configSO.attributes) {
       throw new Error(`No configuration found with ID of ${id}`);
     }
-    if (RuntimeConfigurationFile.decode(config.attributes).isRight()) {
-      return config.attributes as ConfigurationFile;
+
+    const config = {
+      id: configSO.id,
+      ...configSO.attributes,
+    };
+
+    const decoded = RuntimeConfigurationFile.decode(config);
+
+    if (decoded.isRight()) {
+      return config as ConfigurationFile;
     } else {
-      throw new Error(`Invalid ConfigurationFile data. == ${config.attributes}`);
+      throw new Error(
+        `Invalid ConfigurationFile data. == ${JSON.stringify(config)} -- ${PathReporter.report(
+          decoded
+        )}`
+      );
     }
   }
 
@@ -53,11 +66,21 @@ export class ConfigAdapter {
       perPage,
     });
     const uniqConfigurationFile = configs.saved_objects
-      .map<ConfigurationFile>(config => {
-        if (RuntimeConfigurationFile.decode(config.attributes).isRight()) {
-          return config.attributes;
+      .map<ConfigurationFile>(configSO => {
+        const config = {
+          id: configSO.id,
+          ...configSO.attributes,
+        };
+        const decoded = RuntimeConfigurationFile.decode(config);
+
+        if (decoded.isRight()) {
+          return config;
         } else {
-          throw new Error(`Invalid ConfigurationFile data. == ${config.attributes}`);
+          throw new Error(
+            `Invalid ConfigurationFile data. == ${JSON.stringify(config)}  -- ${PathReporter.report(
+              decoded
+            )}`
+          );
         }
       })
       .reduce((acc, config: ConfigurationFile) => {
@@ -98,11 +121,15 @@ export class ConfigAdapter {
       configs.concat(backupConfigs.saved_objects);
     }
 
-    return configs.map<ConfigurationFile>(config => {
-      if (RuntimeConfigurationFile.decode(config.attributes).isRight()) {
-        return config.attributes;
+    return configs.map<ConfigurationFile>(configSO => {
+      const config = {
+        id: configSO.id,
+        ...configSO.attributes,
+      };
+      if (RuntimeConfigurationFile.decode(config).isRight()) {
+        return config;
       } else {
-        throw new Error(`Invalid ConfigurationFile data. == ${config.attributes}`);
+        throw new Error(`Invalid ConfigurationFile data. == ${config}`);
       }
     });
   }

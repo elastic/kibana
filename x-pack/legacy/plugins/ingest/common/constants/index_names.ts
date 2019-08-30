@@ -5,5 +5,5 @@
  */
 
 export const INDEX_NAMES = {
-  FLEET: '.ingest',
+  INGEST: '.ingest',
 };

@@ -34,8 +34,13 @@ export const NewRuntimeConfigurationFile = t.interface(
     monitoring_enabled: t.boolean,
     shared_id: t.string,
     version: t.number,
+    status: t.union(['active', 'locked', 'inactive'].map(s => t.literal(s))),
     agent_version: t.string,
     data_sources: t.array(RuntimeDatasource),
+    created_on: t.string,
+    created_by: t.union([t.undefined, t.string]),
+    updated_on: t.string,
+    updated_by: t.union([t.undefined, t.string]),
   },
   'ConfigurationFile'
 );
@@ -54,11 +59,6 @@ export const NewRuntimeBackupConfigurationFile = t.interface(
 
 const ExistingDocument = t.interface({
   id: t.string,
-  shared_id: t.string,
-  version: t.number,
-  status: t.union(['active', 'locked', 'inactive'].map(s => t.literal(s))),
-  updated_at: t.string,
-  created_by: t.union([t.undefined, t.string]),
   updated_on: t.string,
   updated_by: t.union([t.undefined, t.string]),
 });

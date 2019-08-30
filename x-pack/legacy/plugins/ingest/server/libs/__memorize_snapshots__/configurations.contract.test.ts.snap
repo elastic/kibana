@@ -120,3 +120,3330 @@ exports['Configurations Lib create should create a new configuration - create - 
     "version": 0
   }
 }
+
+exports['Configurations Lib create should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "828adbe0-cb3e-11e9-8151-49f82eb44c93",
+    "shared_id": "94a59822-1a96-43a2-a8b3-7a469b0dddce",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - get - "828adbe0-cb3e-11e9-8151-49f82eb44c93" (3)'] = {
+  "results": {
+    "id": "828adbe0-cb3e-11e9-8151-49f82eb44c93",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "94a59822-1a96-43a2-a8b3-7a469b0dddce",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Fri Aug 30 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Fri Aug 30 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "d9ff0da0-cb3f-11e9-af03-df363cb16386",
+    "shared_id": "52047476-319e-4e46-a6b4-a82418f1ab08",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - get - "d9ff0da0-cb3f-11e9-af03-df363cb16386" (3)'] = {
+  "results": {
+    "id": "d9ff0da0-cb3f-11e9-af03-df363cb16386",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "52047476-319e-4e46-a6b4-a82418f1ab08",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Fri Aug 30 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Fri Aug 30 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "da8a84c0-cb3f-11e9-af03-df363cb16386",
+    "shared_id": "b5b9c2f2-4fe5-4415-86a3-89847fd03dd5",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - list - {"page":1,"perPage":25} (3)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Invalid ConfigurationFile data. == [object Object]\",\"name\":\"Error\",\"stack\":\"Error: Invalid ConfigurationFile data. == [object Object]\\n    at configs.saved_objects.map.configSO (/Users/mattapperson/Development/kibana-workspace/kibana/x-pack/legacy/plugins/ingest/server/libs/adapters/configurations/default.ts:77:17)\\n    at Array.map (<anonymous>)\\n    at ConfigAdapter.map [as list] (/Users/mattapperson/Development/kibana-workspace/kibana/x-pack/legacy/plugins/ingest/server/libs/adapters/configurations/default.ts:69:8)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Configurations Lib create should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "4cbcd520-cb40-11e9-8323-13c63cdf7317",
+    "shared_id": "a856ab01-2fd9-456b-aff5-587295dba122",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - get - "4cbcd520-cb40-11e9-8323-13c63cdf7317" (3)'] = {
+  "results": {
+    "id": "4cbcd520-cb40-11e9-8323-13c63cdf7317",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "a856ab01-2fd9-456b-aff5-587295dba122",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Fri Aug 30 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Fri Aug 30 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "4cca42a0-cb40-11e9-8323-13c63cdf7317",
+    "shared_id": "aa975f08-3dfe-46ae-90f3-d2c06458d933",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - list - {"page":1,"perPage":25} (3)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Invalid ConfigurationFile data. == [object Object]  -- Invalid value undefined supplied to : (ConfigurationFile & { id: string, updated_on: string, updated_by: (undefined | string) })/status: (\\\"active\\\" | \\\"locked\\\" | \\\"inactive\\\")/0: \\\"active\\\",Invalid value undefined supplied to : (ConfigurationFile & { id: string, updated_on: string, updated_by: (undefined | string) })/status: (\\\"active\\\" | \\\"locked\\\" | \\\"inactive\\\")/1: \\\"locked\\\",Invalid value undefined supplied to : (ConfigurationFile & { id: string, updated_on: string, updated_by: (undefined | string) })/status: (\\\"active\\\" | \\\"locked\\\" | \\\"inactive\\\")/2: \\\"inactive\\\",Invalid value undefined supplied to : (ConfigurationFile & { id: string, updated_on: string, updated_by: (undefined | string) })/created_on: string,Invalid value undefined supplied to : (ConfigurationFile & { id: string, updated_on: string, updated_by: (undefined | string) })/updated_on: string,Invalid value undefined supplied to : (ConfigurationFile & { id: string, updated_on: string, updated_by: (undefined | string) })/updated_on: string\",\"name\":\"Error\",\"stack\":\"Error: Invalid ConfigurationFile data. == [object Object]  -- Invalid value undefined supplied to : (ConfigurationFile & { id: string, updated_on: string, updated_by: (undefined | string) })/status: (\\\"active\\\" | \\\"locked\\\" | \\\"inactive\\\")/0: \\\"active\\\",Invalid value undefined supplied to : (ConfigurationFile & { id: string, updated_on: string, updated_by: (undefined | string) })/status: (\\\"active\\\" | \\\"locked\\\" | \\\"inactive\\\")/1: \\\"locked\\\",Invalid value undefined supplied to : (ConfigurationFile & { id: string, updated_on: string, updated_by: (undefined | string) })/status: (\\\"active\\\" | \\\"locked\\\" | \\\"inactive\\\")/2: \\\"inactive\\\",Invalid value undefined supplied to : (ConfigurationFile & { id: string, updated_on: string, updated_by: (undefined | string) })/created_on: string,Invalid value undefined supplied to : (ConfigurationFile & { id: string, updated_on: string, updated_by: (undefined | string) })/updated_on: string,Invalid value undefined supplied to : (ConfigurationFile & { id: string, updated_on: string, updated_by: (undefined | string) })/updated_on: string\\n    at configs.saved_objects.map.configSO (/Users/mattapperson/Development/kibana-workspace/kibana/x-pack/legacy/plugins/ingest/server/libs/adapters/configurations/default.ts:79:17)\\n    at Array.map (<anonymous>)\\n    at ConfigAdapter.map [as list] (/Users/mattapperson/Development/kibana-workspace/kibana/x-pack/legacy/plugins/ingest/server/libs/adapters/configurations/default.ts:69:8)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Configurations Lib create should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "47932850-cb41-11e9-bf20-8be5c6ab42d6",
+    "shared_id": "e4d5e239-1e7d-4d40-af5c-79011e6656fb",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - get - "47932850-cb41-11e9-bf20-8be5c6ab42d6" (3)'] = {
+  "results": {
+    "id": "47932850-cb41-11e9-bf20-8be5c6ab42d6",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "e4d5e239-1e7d-4d40-af5c-79011e6656fb",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Fri Aug 30 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Fri Aug 30 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "47efa030-cb41-11e9-bf20-8be5c6ab42d6",
+    "shared_id": "d64a08b0-1677-4ab8-85c0-f69189faaa33",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - list - {"page":1,"perPage":25} (3)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Invalid ConfigurationFile data. == {\\\"id\\\":\\\"9be91930-cb39-11e9-8668-b5ec39008d34\\\",\\\"name\\\":\\\"test\\\",\\\"description\\\":\\\"test description\\\",\\\"output\\\":\\\"defaut\\\",\\\"monitoring_enabled\\\":true,\\\"shared_id\\\":\\\"bedb2dad-6a20-4949-b676-9059aec26c5e\\\",\\\"version\\\":0,\\\"agent_version\\\":\\\"8.0.0\\\",\\\"data_sources\\\":[]}  -- Invalid value undefined supplied to : (ConfigurationFile & { id: string, updated_on: string, updated_by: (undefined | string) })/status: (\\\"active\\\" | \\\"locked\\\" | \\\"inactive\\\")/0: \\\"active\\\",Invalid value undefined supplied to : (ConfigurationFile & { id: string, updated_on: string, updated_by: (undefined | string) })/status: (\\\"active\\\" | \\\"locked\\\" | \\\"inactive\\\")/1: \\\"locked\\\",Invalid value undefined supplied to : (ConfigurationFile & { id: string, updated_on: string, updated_by: (undefined | string) })/status: (\\\"active\\\" | \\\"locked\\\" | \\\"inactive\\\")/2: \\\"inactive\\\",Invalid value undefined supplied to : (ConfigurationFile & { id: string, updated_on: string, updated_by: (undefined | string) })/created_on: string,Invalid value undefined supplied to : (ConfigurationFile & { id: string, updated_on: string, updated_by: (undefined | string) })/updated_on: string,Invalid value undefined supplied to : (ConfigurationFile & { id: string, updated_on: string, updated_by: (undefined | string) })/updated_on: string\",\"name\":\"Error\",\"stack\":\"Error: Invalid ConfigurationFile data. == {\\\"id\\\":\\\"9be91930-cb39-11e9-8668-b5ec39008d34\\\",\\\"name\\\":\\\"test\\\",\\\"description\\\":\\\"test description\\\",\\\"output\\\":\\\"defaut\\\",\\\"monitoring_enabled\\\":true,\\\"shared_id\\\":\\\"bedb2dad-6a20-4949-b676-9059aec26c5e\\\",\\\"version\\\":0,\\\"agent_version\\\":\\\"8.0.0\\\",\\\"data_sources\\\":[]}  -- Invalid value undefined supplied to : (ConfigurationFile & { id: string, updated_on: string, updated_by: (undefined | string) })/status: (\\\"active\\\" | \\\"locked\\\" | \\\"inactive\\\")/0: \\\"active\\\",Invalid value undefined supplied to : (ConfigurationFile & { id: string, updated_on: string, updated_by: (undefined | string) })/status: (\\\"active\\\" | \\\"locked\\\" | \\\"inactive\\\")/1: \\\"locked\\\",Invalid value undefined supplied to : (ConfigurationFile & { id: string, updated_on: string, updated_by: (undefined | string) })/status: (\\\"active\\\" | \\\"locked\\\" | \\\"inactive\\\")/2: \\\"inactive\\\",Invalid value undefined supplied to : (ConfigurationFile & { id: string, updated_on: string, updated_by: (undefined | string) })/created_on: string,Invalid value undefined supplied to : (ConfigurationFile & { id: string, updated_on: string, updated_by: (undefined | string) })/updated_on: string,Invalid value undefined supplied to : (ConfigurationFile & { id: string, updated_on: string, updated_by: (undefined | string) })/updated_on: string\\n    at configs.saved_objects.map.configSO (/Users/mattapperson/Development/kibana-workspace/kibana/x-pack/legacy/plugins/ingest/server/libs/adapters/configurations/default.ts:79:17)\\n    at Array.map (<anonymous>)\\n    at ConfigAdapter.map [as list] (/Users/mattapperson/Development/kibana-workspace/kibana/x-pack/legacy/plugins/ingest/server/libs/adapters/configurations/default.ts:69:8)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\"}",
+  "results": null
+}
+
+exports['Configurations Lib create should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "1f270c00-cb47-11e9-bb0e-61e638355333",
+    "shared_id": "161238ae-79e5-478e-9eff-007b85ebf24f",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - get - "1f270c00-cb47-11e9-bb0e-61e638355333" (3)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Saved object [configurations/1f270c00-cb47-11e9-bb0e-61e638355333] not found\",\"name\":\"Error\",\"stack\":\"Error: Saved object [configurations/1f270c00-cb47-11e9-bb0e-61e638355333] not found\\n    at Function.notFound [as createGenericNotFoundError] (/Users/mattapperson/Development/kibana-workspace/kibana/src/core/server/saved_objects/service/lib/errors.ts:142:28)\\n    at SavedObjectsRepository.createGenericNotFoundError [as get] (/Users/mattapperson/Development/kibana-workspace/kibana/src/core/server/saved_objects/service/lib/repository.ts:580:38)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\",\"data\":null,\"isBoom\":true,\"isServer\":false,\"output\":{\"statusCode\":404,\"payload\":{\"statusCode\":404,\"error\":\"Not Found\",\"message\":\"Saved object [configurations/1f270c00-cb47-11e9-bb0e-61e638355333] not found\"},\"headers\":{}}}",
+  "results": null
+}
+
+exports['Configurations Lib list should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "1fe245b0-cb47-11e9-bb0e-61e638355333",
+    "shared_id": "d18b2222-df58-41bf-8d72-26f98333b182",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - list - {"page":1,"perPage":25} (3)'] = {
+  "results": [
+    {
+      "id": "1fe245b0-cb47-11e9-bb0e-61e638355333",
+      "name": "test",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "d18b2222-df58-41bf-8d72-26f98333b182",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Configurations Lib create should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "5712b0b0-cb47-11e9-917b-c76d8330c545",
+    "shared_id": "d9ca6618-9a69-438d-8c9d-9f67666eb95b",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - get - "5712b0b0-cb47-11e9-917b-c76d8330c545" (3)'] = {
+  "results": {
+    "id": "5712b0b0-cb47-11e9-917b-c76d8330c545",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "d9ca6618-9a69-438d-8c9d-9f67666eb95b",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Fri Aug 30 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Fri Aug 30 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "57979820-cb47-11e9-917b-c76d8330c545",
+    "shared_id": "64a712a9-6fce-4ad6-abb3-f84debbbeeb5",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - get info (3)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - create - {"name":"test2","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (4)'] = {
+  "results": {
+    "id": "5835ace0-cb47-11e9-917b-c76d8330c545",
+    "shared_id": "55b420d6-9201-4810-b970-f19ebd0b79de",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - get info (5)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - create - {"name":"test3","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (6)'] = {
+  "results": {
+    "id": "58d54840-cb47-11e9-917b-c76d8330c545",
+    "shared_id": "0f892a5e-1b3e-478a-ae0b-3cf6b8d4949c",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - list - {"page":1,"perPage":25} (7)'] = {
+  "results": [
+    {
+      "id": "57979820-cb47-11e9-917b-c76d8330c545",
+      "name": "test",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "64a712a9-6fce-4ad6-abb3-f84debbbeeb5",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "5835ace0-cb47-11e9-917b-c76d8330c545",
+      "name": "test2",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "55b420d6-9201-4810-b970-f19ebd0b79de",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "58d54840-cb47-11e9-917b-c76d8330c545",
+      "name": "test3",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "0f892a5e-1b3e-478a-ae0b-3cf6b8d4949c",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Configurations Lib create should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "b07d7390-cb4e-11e9-99e4-952f5cc05627",
+    "shared_id": "cd83f218-b3df-472b-ab71-94560fc082f2",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - get - "b07d7390-cb4e-11e9-99e4-952f5cc05627" (3)'] = {
+  "results": {
+    "id": "b07d7390-cb4e-11e9-99e4-952f5cc05627",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "cd83f218-b3df-472b-ab71-94560fc082f2",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Fri Aug 30 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Fri Aug 30 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "b1148370-cb4e-11e9-99e4-952f5cc05627",
+    "shared_id": "8efe13fb-81fd-4e37-98f8-bc8261829ee1",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - get info (3)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - create - {"name":"test2","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (4)'] = {
+  "results": {
+    "id": "b1b9c420-cb4e-11e9-99e4-952f5cc05627",
+    "shared_id": "f2147211-b359-4bde-9f33-f6f577d82cbb",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - get info (5)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - create - {"name":"test3","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (6)'] = {
+  "results": {
+    "id": "b26853a0-cb4e-11e9-99e4-952f5cc05627",
+    "shared_id": "852f802c-623e-4117-b9a8-254e6a1a44c2",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - list - {"page":1,"perPage":25} (7)'] = {
+  "results": [
+    {
+      "id": "b1148370-cb4e-11e9-99e4-952f5cc05627",
+      "name": "test",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "8efe13fb-81fd-4e37-98f8-bc8261829ee1",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "b1b9c420-cb4e-11e9-99e4-952f5cc05627",
+      "name": "test2",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "f2147211-b359-4bde-9f33-f6f577d82cbb",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "b26853a0-cb4e-11e9-99e4-952f5cc05627",
+      "name": "test3",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "852f802c-623e-4117-b9a8-254e6a1a44c2",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Configurations Lib update should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib update should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "b30779d0-cb4e-11e9-99e4-952f5cc05627",
+    "shared_id": "7937d6f4-04b8-4a4b-863a-9b4c792843bd",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "e0001460-cb4e-11e9-98f2-3dff4e7b815c",
+    "shared_id": "f6191903-10c9-47c8-a3af-e9069decaf8f",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - get - "e0001460-cb4e-11e9-98f2-3dff4e7b815c" (3)'] = {
+  "results": {
+    "id": "e0001460-cb4e-11e9-98f2-3dff4e7b815c",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "f6191903-10c9-47c8-a3af-e9069decaf8f",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Fri Aug 30 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Fri Aug 30 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "e0926950-cb4e-11e9-98f2-3dff4e7b815c",
+    "shared_id": "c915e106-8232-4a71-8f63-5a19698b7041",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - get info (3)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - create - {"name":"test2","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (4)'] = {
+  "results": {
+    "id": "e12d22b0-cb4e-11e9-98f2-3dff4e7b815c",
+    "shared_id": "74ded564-6913-477b-b321-aa90f7f8da89",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - get info (5)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - create - {"name":"test3","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (6)'] = {
+  "results": {
+    "id": "e1ce44b0-cb4e-11e9-98f2-3dff4e7b815c",
+    "shared_id": "8bdf2915-fa2d-4031-bf45-dbe3dd28856d",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - list - {"page":1,"perPage":25} (7)'] = {
+  "results": [
+    {
+      "id": "e12d22b0-cb4e-11e9-98f2-3dff4e7b815c",
+      "name": "test2",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "74ded564-6913-477b-b321-aa90f7f8da89",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "e0926950-cb4e-11e9-98f2-3dff4e7b815c",
+      "name": "test",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "c915e106-8232-4a71-8f63-5a19698b7041",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "e1ce44b0-cb4e-11e9-98f2-3dff4e7b815c",
+      "name": "test3",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "8bdf2915-fa2d-4031-bf45-dbe3dd28856d",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Configurations Lib update should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib update should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "e26ef180-cb4e-11e9-98f2-3dff4e7b815c",
+    "shared_id": "f8c709ee-7278-487d-b2c4-50b4631eac86",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "48fee4f0-cb4f-11e9-a747-818604ed1316",
+    "shared_id": "645546aa-c6c1-4384-9ff1-85efe9c783d3",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - get - "48fee4f0-cb4f-11e9-a747-818604ed1316" (3)'] = {
+  "results": {
+    "id": "48fee4f0-cb4f-11e9-a747-818604ed1316",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "645546aa-c6c1-4384-9ff1-85efe9c783d3",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Fri Aug 30 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Fri Aug 30 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "49571710-cb4f-11e9-a747-818604ed1316",
+    "shared_id": "c240cd44-7e52-40b5-af98-978bb3fc9c5a",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - get info (3)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - create - {"name":"test2","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (4)'] = {
+  "results": {
+    "id": "49faf830-cb4f-11e9-a747-818604ed1316",
+    "shared_id": "2f060471-6d17-44c3-9f9f-9cd72cd5f2ed",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - get info (5)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - create - {"name":"test3","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (6)'] = {
+  "results": {
+    "id": "4a97d470-cb4f-11e9-a747-818604ed1316",
+    "shared_id": "911566a4-f7ef-49a4-bf73-d071ff088f5e",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - list - {"page":1,"perPage":25} (7)'] = {
+  "results": [
+    {
+      "id": "49571710-cb4f-11e9-a747-818604ed1316",
+      "name": "test",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "c240cd44-7e52-40b5-af98-978bb3fc9c5a",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "49faf830-cb4f-11e9-a747-818604ed1316",
+      "name": "test2",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "2f060471-6d17-44c3-9f9f-9cd72cd5f2ed",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "4a97d470-cb4f-11e9-a747-818604ed1316",
+      "name": "test3",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "911566a4-f7ef-49a4-bf73-d071ff088f5e",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Configurations Lib update should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib update should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "4b341470-cb4f-11e9-a747-818604ed1316",
+    "shared_id": "1f14d783-31ec-4e0b-8511-79dbfef51879",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib update should create a new configuration - get - "1f14d783-31ec-4e0b-8511-79dbfef51879" (3)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Saved object [configurations/1f14d783-31ec-4e0b-8511-79dbfef51879] not found\",\"name\":\"Error\",\"stack\":\"Error: Saved object [configurations/1f14d783-31ec-4e0b-8511-79dbfef51879] not found\\n    at Function.notFound [as createGenericNotFoundError] (/Users/mattapperson/Development/kibana-workspace/kibana/src/core/server/saved_objects/service/lib/errors.ts:142:28)\\n    at SavedObjectsRepository.createGenericNotFoundError [as get] (/Users/mattapperson/Development/kibana-workspace/kibana/src/core/server/saved_objects/service/lib/repository.ts:580:38)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\",\"data\":null,\"isBoom\":true,\"isServer\":false,\"output\":{\"statusCode\":404,\"payload\":{\"statusCode\":404,\"error\":\"Not Found\",\"message\":\"Saved object [configurations/1f14d783-31ec-4e0b-8511-79dbfef51879] not found\"},\"headers\":{}}}",
+  "results": null
+}
+
+exports['Configurations Lib create should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "14594e10-cb50-11e9-87be-a376b154de01",
+    "shared_id": "8a2716bd-c133-4d17-9fb5-b2fb0dc270ef",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - get - "14594e10-cb50-11e9-87be-a376b154de01" (3)'] = {
+  "results": {
+    "id": "14594e10-cb50-11e9-87be-a376b154de01",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "8a2716bd-c133-4d17-9fb5-b2fb0dc270ef",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Fri Aug 30 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Fri Aug 30 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "14c137a0-cb50-11e9-87be-a376b154de01",
+    "shared_id": "1d74f925-b21d-4cdc-9057-ccb9a1eeecf7",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - get info (3)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - create - {"name":"test2","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (4)'] = {
+  "results": {
+    "id": "155d0270-cb50-11e9-87be-a376b154de01",
+    "shared_id": "40eeed6a-1d64-4586-a743-6e78e5d6fae8",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - get info (5)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - create - {"name":"test3","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (6)'] = {
+  "results": {
+    "id": "15fa05c0-cb50-11e9-87be-a376b154de01",
+    "shared_id": "8c31cc2a-7180-4ef8-ad9d-5825804337ab",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - list - {"page":1,"perPage":25} (7)'] = {
+  "results": [
+    {
+      "id": "14c137a0-cb50-11e9-87be-a376b154de01",
+      "name": "test",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "1d74f925-b21d-4cdc-9057-ccb9a1eeecf7",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "155d0270-cb50-11e9-87be-a376b154de01",
+      "name": "test2",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "40eeed6a-1d64-4586-a743-6e78e5d6fae8",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "15fa05c0-cb50-11e9-87be-a376b154de01",
+      "name": "test3",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "8c31cc2a-7180-4ef8-ad9d-5825804337ab",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Configurations Lib update should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib update should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "169d71b0-cb50-11e9-87be-a376b154de01",
+    "shared_id": "883028c2-da51-481c-8312-7377542145e9",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib update should create a new configuration - get - "883028c2-da51-481c-8312-7377542145e9" (3)'] = {
+  "thrownError": "{\"type\":\"Error\",\"message\":\"Saved object [configurations/883028c2-da51-481c-8312-7377542145e9] not found\",\"name\":\"Error\",\"stack\":\"Error: Saved object [configurations/883028c2-da51-481c-8312-7377542145e9] not found\\n    at Function.notFound [as createGenericNotFoundError] (/Users/mattapperson/Development/kibana-workspace/kibana/src/core/server/saved_objects/service/lib/errors.ts:142:28)\\n    at SavedObjectsRepository.createGenericNotFoundError [as get] (/Users/mattapperson/Development/kibana-workspace/kibana/src/core/server/saved_objects/service/lib/repository.ts:580:38)\\n    at process._tickCallback (internal/process/next_tick.js:68:7)\",\"data\":null,\"isBoom\":true,\"isServer\":false,\"output\":{\"statusCode\":404,\"payload\":{\"statusCode\":404,\"error\":\"Not Found\",\"message\":\"Saved object [configurations/883028c2-da51-481c-8312-7377542145e9] not found\"},\"headers\":{}}}",
+  "results": null
+}
+
+exports['Configurations Lib create should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "4f4d9ee0-cb50-11e9-aa94-5d7fc2a9117e",
+    "shared_id": "dc31820b-47cb-4113-9d01-8eb38b4740e2",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - get - "4f4d9ee0-cb50-11e9-aa94-5d7fc2a9117e" (3)'] = {
+  "results": {
+    "id": "4f4d9ee0-cb50-11e9-aa94-5d7fc2a9117e",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "dc31820b-47cb-4113-9d01-8eb38b4740e2",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Fri Aug 30 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Fri Aug 30 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "4f74aee0-cb50-11e9-aa94-5d7fc2a9117e",
+    "shared_id": "c0a42490-d1d4-43fb-87bf-e5287df9b3d0",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - get info (3)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - create - {"name":"test2","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (4)'] = {
+  "results": {
+    "id": "5011d940-cb50-11e9-aa94-5d7fc2a9117e",
+    "shared_id": "767fe139-6208-4a22-bd62-194eaf32b33d",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - get info (5)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - create - {"name":"test3","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (6)'] = {
+  "results": {
+    "id": "50b1c2c0-cb50-11e9-aa94-5d7fc2a9117e",
+    "shared_id": "ec689167-5a4f-40d7-bd86-e998386f4dd7",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - list - {"page":1,"perPage":25} (7)'] = {
+  "results": [
+    {
+      "id": "4f74aee0-cb50-11e9-aa94-5d7fc2a9117e",
+      "name": "test",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "c0a42490-d1d4-43fb-87bf-e5287df9b3d0",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "5011d940-cb50-11e9-aa94-5d7fc2a9117e",
+      "name": "test2",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "767fe139-6208-4a22-bd62-194eaf32b33d",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "50b1c2c0-cb50-11e9-aa94-5d7fc2a9117e",
+      "name": "test3",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "ec689167-5a4f-40d7-bd86-e998386f4dd7",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Configurations Lib update should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib update should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "5155f200-cb50-11e9-aa94-5d7fc2a9117e",
+    "shared_id": "7d2044f9-baff-4118-b9ad-dc00d00220c6",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib update should create a new configuration - get - "5155f200-cb50-11e9-aa94-5d7fc2a9117e" (3)'] = {
+  "results": {
+    "id": "5155f200-cb50-11e9-aa94-5d7fc2a9117e",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "7d2044f9-baff-4118-b9ad-dc00d00220c6",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Fri Aug 30 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Fri Aug 30 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "8b4f19f0-cb50-11e9-8d6d-995dd99e0cdb",
+    "shared_id": "4e7ecf84-8ad6-4a43-a0bd-11d980929425",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - get - "8b4f19f0-cb50-11e9-8d6d-995dd99e0cdb" (3)'] = {
+  "results": {
+    "id": "8b4f19f0-cb50-11e9-8d6d-995dd99e0cdb",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "4e7ecf84-8ad6-4a43-a0bd-11d980929425",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Fri Aug 30 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Fri Aug 30 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "8b65d640-cb50-11e9-8d6d-995dd99e0cdb",
+    "shared_id": "c7a4bf54-cb65-4c83-a4f0-cb0eabcb1991",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - get info (3)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - create - {"name":"test2","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (4)'] = {
+  "results": {
+    "id": "8c02b280-cb50-11e9-8d6d-995dd99e0cdb",
+    "shared_id": "e1582816-8390-449b-bf2d-ddcf8db688ec",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - get info (5)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - create - {"name":"test3","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (6)'] = {
+  "results": {
+    "id": "8c9fb5d0-cb50-11e9-8d6d-995dd99e0cdb",
+    "shared_id": "4b4fa65d-6299-4e5f-aa91-e36efdac37ee",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - list - {"page":1,"perPage":25} (7)'] = {
+  "results": [
+    {
+      "id": "8b65d640-cb50-11e9-8d6d-995dd99e0cdb",
+      "name": "test",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "c7a4bf54-cb65-4c83-a4f0-cb0eabcb1991",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "8c02b280-cb50-11e9-8d6d-995dd99e0cdb",
+      "name": "test2",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "e1582816-8390-449b-bf2d-ddcf8db688ec",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "8c9fb5d0-cb50-11e9-8d6d-995dd99e0cdb",
+      "name": "test3",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "4b4fa65d-6299-4e5f-aa91-e36efdac37ee",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Configurations Lib update should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib update should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "8d3d7c70-cb50-11e9-8d6d-995dd99e0cdb",
+    "shared_id": "a2cc317f-abd6-4277-a5e0-473b4e2a1cff",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib update should create a new configuration - get - "8d3d7c70-cb50-11e9-8d6d-995dd99e0cdb" (3)'] = {
+  "results": {
+    "id": "8d3d7c70-cb50-11e9-8d6d-995dd99e0cdb",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "a2cc317f-abd6-4277-a5e0-473b4e2a1cff",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Fri Aug 30 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Fri Aug 30 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Configurations Lib update should create a new configuration - create - {"name":"foo","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":1,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (4)'] = {
+  "results": {
+    "id": "8dd6fd50-cb50-11e9-8d6d-995dd99e0cdb",
+    "shared_id": "a2cc317f-abd6-4277-a5e0-473b4e2a1cff",
+    "version": 1
+  }
+}
+
+exports['Configurations Lib update should create a new configuration - update - {"id":"8d3d7c70-cb50-11e9-8d6d-995dd99e0cdb","configuration":{"name":"test","description":"test description","output":"defaut","status":"locked","monitoring_enabled":true,"shared_id":"a2cc317f-abd6-4277-a5e0-473b4e2a1cff","version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson"}} (5)'] = {
+  "results": {
+    "id": "8d3d7c70-cb50-11e9-8d6d-995dd99e0cdb",
+    "version": 1
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "b38f5c90-cb50-11e9-9be9-0fbcc740b900",
+    "shared_id": "a08e8b23-cf06-4965-b013-d20aca0b4704",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - get - "b38f5c90-cb50-11e9-9be9-0fbcc740b900" (3)'] = {
+  "results": {
+    "id": "b38f5c90-cb50-11e9-9be9-0fbcc740b900",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "a08e8b23-cf06-4965-b013-d20aca0b4704",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Fri Aug 30 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Fri Aug 30 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "b42c11c0-cb50-11e9-9be9-0fbcc740b900",
+    "shared_id": "67122291-4957-4dbc-8ffd-94fc3ebf1782",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - get info (3)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - create - {"name":"test2","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (4)'] = {
+  "results": {
+    "id": "b4c54480-cb50-11e9-9be9-0fbcc740b900",
+    "shared_id": "1c9cf326-a893-47d2-af67-36a606aca64e",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - get info (5)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - create - {"name":"test3","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (6)'] = {
+  "results": {
+    "id": "b5635940-cb50-11e9-9be9-0fbcc740b900",
+    "shared_id": "9d201a71-5a5e-4a49-b102-d8ba0f103206",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should create a new configuration - list - {"page":1,"perPage":25} (7)'] = {
+  "results": [
+    {
+      "id": "b42c11c0-cb50-11e9-9be9-0fbcc740b900",
+      "name": "test",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "67122291-4957-4dbc-8ffd-94fc3ebf1782",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "b4c54480-cb50-11e9-9be9-0fbcc740b900",
+      "name": "test2",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "1c9cf326-a893-47d2-af67-36a606aca64e",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "b5635940-cb50-11e9-9be9-0fbcc740b900",
+      "name": "test3",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "9d201a71-5a5e-4a49-b102-d8ba0f103206",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Configurations Lib update should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib update should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "b5ff4b20-cb50-11e9-9be9-0fbcc740b900",
+    "shared_id": "4d2061d6-9bdf-4ad7-ab41-6f0e5ae1a572",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib update should create a new configuration - get - "b5ff4b20-cb50-11e9-9be9-0fbcc740b900" (3)'] = {
+  "results": {
+    "id": "b5ff4b20-cb50-11e9-9be9-0fbcc740b900",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "4d2061d6-9bdf-4ad7-ab41-6f0e5ae1a572",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Fri Aug 30 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Fri Aug 30 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Configurations Lib update should create a new configuration - create - {"name":"foo","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":1,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (4)'] = {
+  "results": {
+    "id": "b69b8b20-cb50-11e9-9be9-0fbcc740b900",
+    "shared_id": "4d2061d6-9bdf-4ad7-ab41-6f0e5ae1a572",
+    "version": 1
+  }
+}
+
+exports['Configurations Lib update should create a new configuration - update - {"id":"b5ff4b20-cb50-11e9-9be9-0fbcc740b900","configuration":{"name":"test","description":"test description","output":"defaut","status":"locked","monitoring_enabled":true,"shared_id":"4d2061d6-9bdf-4ad7-ab41-6f0e5ae1a572","version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson"}} (5)'] = {
+  "results": {
+    "id": "b5ff4b20-cb50-11e9-9be9-0fbcc740b900",
+    "version": 1
+  }
+}
+
+exports['Configurations Lib update should create a new configuration - get - "b69b8b20-cb50-11e9-9be9-0fbcc740b900" (6)'] = {
+  "results": {
+    "id": "b69b8b20-cb50-11e9-9be9-0fbcc740b900",
+    "name": "foo",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "4d2061d6-9bdf-4ad7-ab41-6f0e5ae1a572",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Fri Aug 30 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Fri Aug 30 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "e9d59930-cb51-11e9-be5f-07927892658a",
+    "shared_id": "bbbc03a7-ba3a-4f3d-a747-abfacd404399",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - get - "e9d59930-cb51-11e9-be5f-07927892658a" (3)'] = {
+  "results": {
+    "id": "e9d59930-cb51-11e9-be5f-07927892658a",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "bbbc03a7-ba3a-4f3d-a747-abfacd404399",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Fri Aug 30 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Fri Aug 30 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Configurations Lib list should list all active configurations - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should list all active configurations - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "e9e99660-cb51-11e9-be5f-07927892658a",
+    "shared_id": "294a1f35-4f94-455f-8e3d-96f6da616883",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should list all active configurations - get info (3)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should list all active configurations - create - {"name":"test2","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (4)'] = {
+  "results": {
+    "id": "ea8c17f0-cb51-11e9-be5f-07927892658a",
+    "shared_id": "6f731e7d-2235-451f-9302-e574a63c11b5",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should list all active configurations - get info (5)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should list all active configurations - create - {"name":"test3","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (6)'] = {
+  "results": {
+    "id": "eb2794a0-cb51-11e9-be5f-07927892658a",
+    "shared_id": "fb192a5e-22ac-4889-8b2f-5559c014a6d4",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should list all active configurations - list - {"page":1,"perPage":25} (7)'] = {
+  "results": [
+    {
+      "id": "e9e99660-cb51-11e9-be5f-07927892658a",
+      "name": "test",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "294a1f35-4f94-455f-8e3d-96f6da616883",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "ea8c17f0-cb51-11e9-be5f-07927892658a",
+      "name": "test2",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "6f731e7d-2235-451f-9302-e574a63c11b5",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "eb2794a0-cb51-11e9-be5f-07927892658a",
+      "name": "test3",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "fb192a5e-22ac-4889-8b2f-5559c014a6d4",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Configurations Lib list should not list inactive configurations - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should not list inactive configurations - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "ebc7a530-cb51-11e9-be5f-07927892658a",
+    "shared_id": "c8be89b8-1dcb-479c-9b6a-995c14d3e19b",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should not list inactive configurations - get - "ebc7a530-cb51-11e9-be5f-07927892658a" (3)'] = {
+  "results": {
+    "id": "ebc7a530-cb51-11e9-be5f-07927892658a",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "c8be89b8-1dcb-479c-9b6a-995c14d3e19b",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Fri Aug 30 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Fri Aug 30 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Configurations Lib list should not list inactive configurations - create - {"name":"foo","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":1,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (4)'] = {
+  "results": {
+    "id": "ec6b3830-cb51-11e9-be5f-07927892658a",
+    "shared_id": "c8be89b8-1dcb-479c-9b6a-995c14d3e19b",
+    "version": 1
+  }
+}
+
+exports['Configurations Lib list should not list inactive configurations - update - {"id":"ebc7a530-cb51-11e9-be5f-07927892658a","configuration":{"name":"test","description":"test description","output":"defaut","status":"locked","monitoring_enabled":true,"shared_id":"c8be89b8-1dcb-479c-9b6a-995c14d3e19b","version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson"}} (5)'] = {
+  "results": {
+    "id": "ebc7a530-cb51-11e9-be5f-07927892658a",
+    "version": 1
+  }
+}
+
+exports['Configurations Lib list should not list inactive configurations - get info (6)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should not list inactive configurations - create - {"name":"test2","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (7)'] = {
+  "results": {
+    "id": "edac91d0-cb51-11e9-be5f-07927892658a",
+    "shared_id": "3769b35a-6c7f-4b3e-8f13-6c5269f6f08a",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should not list inactive configurations - get info (8)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should not list inactive configurations - create - {"name":"test3","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (9)'] = {
+  "results": {
+    "id": "ee496e10-cb51-11e9-be5f-07927892658a",
+    "shared_id": "e5f3daea-9f82-4433-81a8-049bb2f7f908",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should not list inactive configurations - list - {"page":1,"perPage":25} (10)'] = {
+  "results": [
+    {
+      "id": "ec6b3830-cb51-11e9-be5f-07927892658a",
+      "name": "foo",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "c8be89b8-1dcb-479c-9b6a-995c14d3e19b",
+      "version": 1,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "edac91d0-cb51-11e9-be5f-07927892658a",
+      "name": "test2",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "3769b35a-6c7f-4b3e-8f13-6c5269f6f08a",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "ee496e10-cb51-11e9-be5f-07927892658a",
+      "name": "test3",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "e5f3daea-9f82-4433-81a8-049bb2f7f908",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Configurations Lib update should update a config and invalidate the origional - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib update should update a config and invalidate the origional - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "eee75bc0-cb51-11e9-be5f-07927892658a",
+    "shared_id": "07df3329-76f1-47d7-81de-0114ade670ae",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib update should update a config and invalidate the origional - get - "eee75bc0-cb51-11e9-be5f-07927892658a" (3)'] = {
+  "results": {
+    "id": "eee75bc0-cb51-11e9-be5f-07927892658a",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "07df3329-76f1-47d7-81de-0114ade670ae",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Fri Aug 30 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Fri Aug 30 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Configurations Lib update should update a config and invalidate the origional - create - {"name":"foo","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":1,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (4)'] = {
+  "results": {
+    "id": "ef859790-cb51-11e9-be5f-07927892658a",
+    "shared_id": "07df3329-76f1-47d7-81de-0114ade670ae",
+    "version": 1
+  }
+}
+
+exports['Configurations Lib update should update a config and invalidate the origional - update - {"id":"eee75bc0-cb51-11e9-be5f-07927892658a","configuration":{"name":"test","description":"test description","output":"defaut","status":"locked","monitoring_enabled":true,"shared_id":"07df3329-76f1-47d7-81de-0114ade670ae","version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson"}} (5)'] = {
+  "results": {
+    "id": "eee75bc0-cb51-11e9-be5f-07927892658a",
+    "version": 1
+  }
+}
+
+exports['Configurations Lib update should update a config and invalidate the origional - get - "ef859790-cb51-11e9-be5f-07927892658a" (6)'] = {
+  "results": {
+    "id": "ef859790-cb51-11e9-be5f-07927892658a",
+    "name": "foo",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "07df3329-76f1-47d7-81de-0114ade670ae",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Fri Aug 30 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Fri Aug 30 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Configurations Lib update should update a config and invalidate the origional - get - "eee75bc0-cb51-11e9-be5f-07927892658a" (7)'] = {
+  "results": {
+    "id": "eee75bc0-cb51-11e9-be5f-07927892658a",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "locked",
+    "monitoring_enabled": true,
+    "shared_id": "07df3329-76f1-47d7-81de-0114ade670ae",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Fri Aug 30 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Fri Aug 30 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Configurations Lib list versions Should list past locked versions of a configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list versions Should list past locked versions of a configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "f0c20f30-cb51-11e9-be5f-07927892658a",
+    "shared_id": "bb2378ce-059e-4716-9d5e-6ddc144a6503",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list versions Should list past locked versions of a configuration - get - "f0c20f30-cb51-11e9-be5f-07927892658a" (3)'] = {
+  "results": {
+    "id": "f0c20f30-cb51-11e9-be5f-07927892658a",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "bb2378ce-059e-4716-9d5e-6ddc144a6503",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Fri Aug 30 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Fri Aug 30 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Configurations Lib list versions Should list past locked versions of a configuration - create - {"name":"foo","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":1,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (4)'] = {
+  "results": {
+    "id": "f15f3990-cb51-11e9-be5f-07927892658a",
+    "shared_id": "bb2378ce-059e-4716-9d5e-6ddc144a6503",
+    "version": 1
+  }
+}
+
+exports['Configurations Lib list versions Should list past locked versions of a configuration - update - {"id":"f0c20f30-cb51-11e9-be5f-07927892658a","configuration":{"name":"test","description":"test description","output":"defaut","status":"locked","monitoring_enabled":true,"shared_id":"bb2378ce-059e-4716-9d5e-6ddc144a6503","version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson"}} (5)'] = {
+  "results": {
+    "id": "f0c20f30-cb51-11e9-be5f-07927892658a",
+    "version": 1
+  }
+}
+
+exports['Configurations Lib list versions Should list past locked versions of a configuration - listVersions - {"sharedID":"bb2378ce-059e-4716-9d5e-6ddc144a6503","activeOnly":false,"page":1,"perPage":25} (6)'] = {
+  "results": [
+    {
+      "id": "f15f3990-cb51-11e9-be5f-07927892658a",
+      "name": "foo",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "bb2378ce-059e-4716-9d5e-6ddc144a6503",
+      "version": 1,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "f0c20f30-cb51-11e9-be5f-07927892658a",
+      "name": "test",
+      "description": "test description",
+      "output": "defaut",
+      "status": "locked",
+      "monitoring_enabled": true,
+      "shared_id": "bb2378ce-059e-4716-9d5e-6ddc144a6503",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Configurations Lib create should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "6c307570-cb53-11e9-80dd-a107d54971d0",
+    "shared_id": "cf8c124e-36ab-4b65-9eb6-2d3e45a5378f",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - get - "6c307570-cb53-11e9-80dd-a107d54971d0" (3)'] = {
+  "results": {
+    "id": "6c307570-cb53-11e9-80dd-a107d54971d0",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "cf8c124e-36ab-4b65-9eb6-2d3e45a5378f",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Fri Aug 30 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Fri Aug 30 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Configurations Lib list should list all active configurations - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should list all active configurations - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "6c80df60-cb53-11e9-80dd-a107d54971d0",
+    "shared_id": "9811dff4-0e15-43ed-aedc-5b59e7c9a485",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should list all active configurations - get info (3)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should list all active configurations - create - {"name":"test2","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (4)'] = {
+  "results": {
+    "id": "6d2583d0-cb53-11e9-80dd-a107d54971d0",
+    "shared_id": "ddbe9e20-fa9f-45b8-b1cc-82d08e00b6a4",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should list all active configurations - get info (5)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should list all active configurations - create - {"name":"test3","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (6)'] = {
+  "results": {
+    "id": "6dc59460-cb53-11e9-80dd-a107d54971d0",
+    "shared_id": "e1e31352-45be-42d3-92b2-2305116dd8e9",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should list all active configurations - list - {"page":1,"perPage":25} (7)'] = {
+  "results": [
+    {
+      "id": "6c80df60-cb53-11e9-80dd-a107d54971d0",
+      "name": "test",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "9811dff4-0e15-43ed-aedc-5b59e7c9a485",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "6d2583d0-cb53-11e9-80dd-a107d54971d0",
+      "name": "test2",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "ddbe9e20-fa9f-45b8-b1cc-82d08e00b6a4",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "6dc59460-cb53-11e9-80dd-a107d54971d0",
+      "name": "test3",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "e1e31352-45be-42d3-92b2-2305116dd8e9",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Configurations Lib list should not list inactive configurations - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should not list inactive configurations - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "6e61ad50-cb53-11e9-80dd-a107d54971d0",
+    "shared_id": "2715fe6a-4c2d-4765-8eea-c08b02c200a3",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should not list inactive configurations - get - "6e61ad50-cb53-11e9-80dd-a107d54971d0" (3)'] = {
+  "results": {
+    "id": "6e61ad50-cb53-11e9-80dd-a107d54971d0",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "2715fe6a-4c2d-4765-8eea-c08b02c200a3",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Fri Aug 30 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Fri Aug 30 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Configurations Lib list should not list inactive configurations - create - {"name":"foo","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":1,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (4)'] = {
+  "results": {
+    "id": "6f016fc0-cb53-11e9-80dd-a107d54971d0",
+    "shared_id": "2715fe6a-4c2d-4765-8eea-c08b02c200a3",
+    "version": 1
+  }
+}
+
+exports['Configurations Lib list should not list inactive configurations - update - {"id":"6e61ad50-cb53-11e9-80dd-a107d54971d0","configuration":{"name":"test","description":"test description","output":"defaut","status":"locked","monitoring_enabled":true,"shared_id":"2715fe6a-4c2d-4765-8eea-c08b02c200a3","version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson"}} (5)'] = {
+  "results": {
+    "id": "6e61ad50-cb53-11e9-80dd-a107d54971d0",
+    "version": 1
+  }
+}
+
+exports['Configurations Lib list should not list inactive configurations - get info (6)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should not list inactive configurations - create - {"name":"test2","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (7)'] = {
+  "results": {
+    "id": "703fe330-cb53-11e9-80dd-a107d54971d0",
+    "shared_id": "128bf145-1370-4c0a-886a-cbb9bda7692b",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should not list inactive configurations - get info (8)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list should not list inactive configurations - create - {"name":"test3","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (9)'] = {
+  "results": {
+    "id": "70de6d20-cb53-11e9-80dd-a107d54971d0",
+    "shared_id": "bd4030f8-0d71-465d-9bef-34d38f42227f",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list should not list inactive configurations - list - {"page":1,"perPage":25} (10)'] = {
+  "results": [
+    {
+      "id": "6f016fc0-cb53-11e9-80dd-a107d54971d0",
+      "name": "foo",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "2715fe6a-4c2d-4765-8eea-c08b02c200a3",
+      "version": 1,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "703fe330-cb53-11e9-80dd-a107d54971d0",
+      "name": "test2",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "128bf145-1370-4c0a-886a-cbb9bda7692b",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "70de6d20-cb53-11e9-80dd-a107d54971d0",
+      "name": "test3",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "bd4030f8-0d71-465d-9bef-34d38f42227f",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    }
+  ]
+}
+
+exports['Configurations Lib update should update a config and invalidate the origional - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib update should update a config and invalidate the origional - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "717aad20-cb53-11e9-80dd-a107d54971d0",
+    "shared_id": "eaaa7f46-4e8a-478a-8ba7-856f7682a024",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib update should update a config and invalidate the origional - get - "717aad20-cb53-11e9-80dd-a107d54971d0" (3)'] = {
+  "results": {
+    "id": "717aad20-cb53-11e9-80dd-a107d54971d0",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "eaaa7f46-4e8a-478a-8ba7-856f7682a024",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Fri Aug 30 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Fri Aug 30 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Configurations Lib update should update a config and invalidate the origional - create - {"name":"foo","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":1,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (4)'] = {
+  "results": {
+    "id": "72ee8870-cb53-11e9-80dd-a107d54971d0",
+    "shared_id": "eaaa7f46-4e8a-478a-8ba7-856f7682a024",
+    "version": 1
+  }
+}
+
+exports['Configurations Lib update should update a config and invalidate the origional - update - {"id":"717aad20-cb53-11e9-80dd-a107d54971d0","configuration":{"name":"test","description":"test description","output":"defaut","status":"locked","monitoring_enabled":true,"shared_id":"eaaa7f46-4e8a-478a-8ba7-856f7682a024","version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson"}} (5)'] = {
+  "results": {
+    "id": "717aad20-cb53-11e9-80dd-a107d54971d0",
+    "version": 1
+  }
+}
+
+exports['Configurations Lib update should update a config and invalidate the origional - get - "72ee8870-cb53-11e9-80dd-a107d54971d0" (6)'] = {
+  "results": {
+    "id": "72ee8870-cb53-11e9-80dd-a107d54971d0",
+    "name": "foo",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "eaaa7f46-4e8a-478a-8ba7-856f7682a024",
+    "version": 1,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Fri Aug 30 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Fri Aug 30 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Configurations Lib update should update a config and invalidate the origional - get - "717aad20-cb53-11e9-80dd-a107d54971d0" (7)'] = {
+  "results": {
+    "id": "717aad20-cb53-11e9-80dd-a107d54971d0",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "locked",
+    "monitoring_enabled": true,
+    "shared_id": "eaaa7f46-4e8a-478a-8ba7-856f7682a024",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Fri Aug 30 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Fri Aug 30 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Configurations Lib list versions Should list past locked versions of a configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib list versions Should list past locked versions of a configuration - create - {"name":"test","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "743141a0-cb53-11e9-80dd-a107d54971d0",
+    "shared_id": "2c08c793-274f-4bd2-a08a-f6160227ec6f",
+    "version": 0
+  }
+}
+
+exports['Configurations Lib list versions Should list past locked versions of a configuration - get - "743141a0-cb53-11e9-80dd-a107d54971d0" (3)'] = {
+  "results": {
+    "id": "743141a0-cb53-11e9-80dd-a107d54971d0",
+    "name": "test",
+    "description": "test description",
+    "output": "defaut",
+    "status": "active",
+    "monitoring_enabled": true,
+    "shared_id": "2c08c793-274f-4bd2-a08a-f6160227ec6f",
+    "version": 0,
+    "agent_version": "8.0.0",
+    "data_sources": [],
+    "created_on": "Fri Aug 30 2019",
+    "created_by": "mattapperson",
+    "updated_on": "Fri Aug 30 2019",
+    "updated_by": "mattapperson"
+  }
+}
+
+exports['Configurations Lib list versions Should list past locked versions of a configuration - create - {"name":"foo","description":"test description","output":"defaut","status":"active","monitoring_enabled":true,"version":1,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson","shared_id":"string"} (4)'] = {
+  "results": {
+    "id": "74ca9b70-cb53-11e9-80dd-a107d54971d0",
+    "shared_id": "2c08c793-274f-4bd2-a08a-f6160227ec6f",
+    "version": 1
+  }
+}
+
+exports['Configurations Lib list versions Should list past locked versions of a configuration - update - {"id":"743141a0-cb53-11e9-80dd-a107d54971d0","configuration":{"name":"test","description":"test description","output":"defaut","status":"locked","monitoring_enabled":true,"shared_id":"2c08c793-274f-4bd2-a08a-f6160227ec6f","version":0,"agent_version":"8.0.0","data_sources":[],"created_on":"Fri Aug 30 2019","created_by":"mattapperson","updated_on":"Fri Aug 30 2019","updated_by":"mattapperson"}} (5)'] = {
+  "results": {
+    "id": "743141a0-cb53-11e9-80dd-a107d54971d0",
+    "version": 1
+  }
+}
+
+exports['Configurations Lib list versions Should list past locked versions of a configuration - listVersions - {"sharedID":"2c08c793-274f-4bd2-a08a-f6160227ec6f","activeOnly":false,"page":1,"perPage":25} (6)'] = {
+  "results": [
+    {
+      "id": "74ca9b70-cb53-11e9-80dd-a107d54971d0",
+      "name": "foo",
+      "description": "test description",
+      "output": "defaut",
+      "status": "active",
+      "monitoring_enabled": true,
+      "shared_id": "2c08c793-274f-4bd2-a08a-f6160227ec6f",
+      "version": 1,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    },
+    {
+      "id": "743141a0-cb53-11e9-80dd-a107d54971d0",
+      "name": "test",
+      "description": "test description",
+      "output": "defaut",
+      "status": "locked",
+      "monitoring_enabled": true,
+      "shared_id": "2c08c793-274f-4bd2-a08a-f6160227ec6f",
+      "version": 0,
+      "agent_version": "8.0.0",
+      "data_sources": [],
+      "created_on": "Fri Aug 30 2019",
+      "created_by": "mattapperson",
+      "updated_on": "Fri Aug 30 2019",
+      "updated_by": "mattapperson"
+    }
+  ]
+}

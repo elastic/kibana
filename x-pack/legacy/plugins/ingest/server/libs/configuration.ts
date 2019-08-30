@@ -8,7 +8,12 @@ import uuidv4 from 'uuid/v4';
 import uuid from 'uuid/v4';
 import { ConfigAdapter } from './adapters/configurations/default';
 import { BackendFrameworkLib } from './framework';
-import { ConfigurationFile, Datasource } from './adapters/configurations/adapter_types';
+import {
+  ConfigurationFile,
+  Datasource,
+  NewConfigurationFile,
+} from './adapters/configurations/adapter_types';
+import { FrameworkAuthenticatedUser } from './adapters/framework/adapter_types';
 
 export class ConfigurationLib {
   constructor(
@@ -17,22 +22,30 @@ export class ConfigurationLib {
       framework: BackendFrameworkLib;
     }
   ) {}
-  public async create(name: string, description?: string) {
+  public async create(withUser: FrameworkAuthenticatedUser, name: string, description?: string) {
     const info = await this.libs.framework.info;
     if (!info) {
       throw new Error('Could not get version information about Kibana from xpack');
     }
-
-    return await this.adapter.create({
+    const newConfig: NewConfigurationFile = {
       name,
       description: description || '',
       output: 'defaut',
+      status: 'active',
       monitoring_enabled: true,
       shared_id: uuid(),
       version: 0,
       agent_version: info.kibana.version,
       data_sources: [],
-    });
+      created_on: new Date().toDateString(),
+      created_by: withUser.username,
+      updated_on: new Date().toDateString(),
+      updated_by: withUser.username,
+    };
+
+    // TODO io-ts validations, need custom reporter
+
+    return await this.adapter.create(newConfig);
   }
 
   public async get(id: string): Promise<ConfigurationFile> {
@@ -63,19 +76,19 @@ export class ConfigurationLib {
       output: string;
       monitoring_enabled: boolean;
     }>
-  ): Promise<{ id: string; version: number }> {
+  ): Promise<{ id: string; version: number; shared_id: string }> {
     const invalidKeys = Object.keys(configuration).filter(
       key => !['name', 'description', 'output', 'monitoring_enabled'].includes(key)
     );
 
-    if (invalidKeys.length !== -1) {
+    if (invalidKeys.length !== 0) {
       throw new Error(
         `Update was called with configuration paramaters that are not allowed: ${invalidKeys}`
       );
     }
     const oldConfig = await this.adapter.get(id);
 
-    if (oldConfig.status === 'active') {
+    if (oldConfig.status !== 'active') {
       throw new Error(
         `Config ${oldConfig.id} can not be updated becuase it is ${oldConfig.status}`
       );
