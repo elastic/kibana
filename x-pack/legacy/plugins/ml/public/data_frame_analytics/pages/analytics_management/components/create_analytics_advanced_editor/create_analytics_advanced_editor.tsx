@@ -49,7 +49,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
   };
 
   return (
-    <EuiForm>
+    <EuiForm className="mlDataFrameAnalyticsCreateForm">
       {requestMessages.map((requestMessage, i) => (
         <Fragment key={i}>
           <EuiCallOut
