@@ -21,6 +21,8 @@ import { mocksSource } from '../../containers/source/mock';
 import { InputsModelId } from '../../store/inputs/constants';
 import { ActionCreator } from 'typescript-fsa';
 
+jest.mock('../../lib/settings/use_kibana_ui_setting');
+
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
 

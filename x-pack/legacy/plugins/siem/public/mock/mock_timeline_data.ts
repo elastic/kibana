@@ -17,6 +17,7 @@ export const mockTimelineData: TimelineItem[] = [
       { field: 'host.name', value: ['apache'] },
       { field: 'source.ip', value: ['192.168.0.1'] },
       { field: 'destination.ip', value: ['192.168.0.3'] },
+      { field: 'destination.bytes', value: ['123456'] },
       { field: 'user.name', value: ['john.dee'] },
     ],
     ecs: {
@@ -45,6 +46,7 @@ export const mockTimelineData: TimelineItem[] = [
       { field: 'host.name', value: ['nginx'] },
       { field: 'source.ip', value: ['192.168.0.3'] },
       { field: 'destination.ip', value: ['192.168.0.3'] },
+      { field: 'destination.bytes', value: ['123456'] },
       { field: 'user.name', value: ['evan.davis'] },
     ],
     ecs: {
@@ -73,6 +75,7 @@ export const mockTimelineData: TimelineItem[] = [
       { field: 'host.name', value: ['suricata'] },
       { field: 'source.ip', value: ['192.168.0.3'] },
       { field: 'destination.ip', value: ['192.168.0.3'] },
+      { field: 'destination.bytes', value: ['123456'] },
       { field: 'user.name', value: ['jenny.jones'] },
     ],
     ecs: {
@@ -113,6 +116,7 @@ export const mockTimelineData: TimelineItem[] = [
       { field: 'host.name', value: ['joe.computer'] },
       { field: 'source.ip', value: ['192.168.0.3'] },
       { field: 'destination.ip', value: ['192.168.0.3'] },
+      { field: 'destination.bytes', value: ['123456'] },
       { field: 'user.name', value: ['becky.davis'] },
     ],
     ecs: {
@@ -141,6 +145,7 @@ export const mockTimelineData: TimelineItem[] = [
       { field: 'host.name', value: ['braden.davis'] },
       { field: 'source.ip', value: ['192.168.0.6'] },
       { field: 'destination.ip', value: ['192.168.0.3'] },
+      { field: 'destination.bytes', value: ['123456'] },
     ],
     ecs: {
       _id: '6',
@@ -167,6 +172,7 @@ export const mockTimelineData: TimelineItem[] = [
       { field: 'host.name', value: ['joe.computer'] },
       { field: 'source.ip', value: ['192.168.0.8'] },
       { field: 'destination.ip', value: ['192.168.0.3'] },
+      { field: 'destination.bytes', value: ['123456'] },
       { field: 'user.name', value: ['jone.doe'] },
     ],
     ecs: {
@@ -205,6 +211,7 @@ export const mockTimelineData: TimelineItem[] = [
       { field: 'host.name', value: ['joe.computer'] },
       { field: 'source.ip', value: ['192.168.0.7'] },
       { field: 'destination.ip', value: ['192.168.0.3'] },
+      { field: 'destination.bytes', value: ['123456'] },
       { field: 'user.name', value: ['jone.doe'] },
     ],
     ecs: {
@@ -233,6 +240,7 @@ export const mockTimelineData: TimelineItem[] = [
       { field: 'host.name', value: ['joe.computer'] },
       { field: 'source.ip', value: ['192.168.0.9'] },
       { field: 'destination.ip', value: ['192.168.0.3'] },
+      { field: 'destination.bytes', value: ['123456'] },
       { field: 'user.name', value: ['jone.doe'] },
     ],
     ecs: {
@@ -261,6 +269,7 @@ export const mockTimelineData: TimelineItem[] = [
       { field: 'host.name', value: ['joe.computer'] },
       { field: 'source.ip', value: ['192.168.0.10'] },
       { field: 'destination.ip', value: ['192.168.0.3'] },
+      { field: 'destination.bytes', value: ['123456'] },
       { field: 'user.name', value: ['jone.doe'] },
     ],
     ecs: {
@@ -289,6 +298,7 @@ export const mockTimelineData: TimelineItem[] = [
       { field: 'host.name', value: ['joe.computer'] },
       { field: 'source.ip', value: ['192.168.0.11'] },
       { field: 'destination.ip', value: ['192.168.0.3'] },
+      { field: 'destination.bytes', value: ['123456'] },
       { field: 'user.name', value: ['jone.doe'] },
     ],
     ecs: {
@@ -317,6 +327,7 @@ export const mockTimelineData: TimelineItem[] = [
       { field: 'host.name', value: ['joe.computer'] },
       { field: 'source.ip', value: ['192.168.0.12'] },
       { field: 'destination.ip', value: ['192.168.0.3'] },
+      { field: 'destination.bytes', value: ['123456'] },
       { field: 'user.name', value: ['jone.doe'] },
     ],
     ecs: {
@@ -345,6 +356,7 @@ export const mockTimelineData: TimelineItem[] = [
       { field: 'host.name', value: ['joe.computer'] },
       { field: 'source.ip', value: ['192.168.0.2'] },
       { field: 'destination.ip', value: ['192.168.0.3'] },
+      { field: 'destination.bytes', value: ['123456'] },
       { field: 'user.name', value: ['joe.bob'] },
     ],
     ecs: {
@@ -373,6 +385,7 @@ export const mockTimelineData: TimelineItem[] = [
       { field: 'host.name', value: ['joe.computer'] },
       { field: 'source.ip', value: ['192.168.0.8'] },
       { field: 'destination.ip', value: ['192.168.0.3'] },
+      { field: 'destination.bytes', value: ['123456'] },
     ],
     ecs: {
       _id: '13',
@@ -1359,6 +1372,7 @@ export const mockTimelineData: TimelineItem[] = [
       { field: 'host.name', value: ['apache'] },
       { field: 'source.ip', value: ['192.168.0.1'] },
       { field: 'destination.ip', value: ['192.168.0.3'] },
+      { field: 'destination.bytes', value: ['123456'] },
       { field: 'user.name', value: ['john.dee'] },
     ],
     ecs: {

@@ -111,7 +111,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
       setStarted(true);
 
       try {
-        await ml.dataFrame.startDataFrameTransform(transformId);
+        await ml.dataFrame.startDataFrameTransforms([{ id: transformId }]);
         toastNotifications.addSuccess(
           i18n.translate('xpack.ml.dataframe.stepCreateForm.startTransformSuccessMessage', {
             defaultMessage: 'Data frame transform {transformId} started successfully.',

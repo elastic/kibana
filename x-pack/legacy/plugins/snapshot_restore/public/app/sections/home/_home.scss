@@ -19,3 +19,13 @@
     }
   }
 }
+
+/*
+ * 1. Make in progress snapshot loading indicator be centered vertically
+ *    when it is inside tooltip wrapper
+ */
+.snapshotRestore__policyTable {
+  .euiToolTipAnchor {
+    display: flex;
+  }
+}

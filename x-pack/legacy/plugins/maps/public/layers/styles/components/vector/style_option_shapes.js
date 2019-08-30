@@ -12,8 +12,10 @@ export const staticColorShape = PropTypes.shape({
 });
 
 export const dynamicColorShape = PropTypes.shape({
-  color: PropTypes.string.isRequired,
+  color: PropTypes.string,
   field: fieldShape,
+  customColorRamp: PropTypes.array,
+  useCustomColorRamp: PropTypes.bool,
 });
 
 export const staticOrientationShape = PropTypes.shape({

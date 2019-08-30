@@ -29,7 +29,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { AggConfig } from 'ui/vis';
 import { Query, QueryBarInput } from 'plugins/data';
-import { npSetup } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 import { Storage } from 'ui/storage';
 const localStorage = new Storage(window.localStorage);
 
@@ -111,7 +111,8 @@ function FilterRow({
           bubbleSubmitEvent={true}
           languageSwitcherPopoverAnchorPosition="leftDown"
           store={localStorage}
-          uiSettings={npSetup.core.uiSettings}
+          uiSettings={npStart.core.uiSettings}
+          savedObjectsClient={npStart.core.savedObjects.client}
         />
       </EuiFormRow>
       {showCustomLabel ? (

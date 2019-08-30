@@ -51,6 +51,8 @@ export interface PingResults {
 }
 /** A request sent from a monitor to a host */
 export interface Ping {
+  /** unique ID for this ping */
+  id: string;
   /** The timestamp of the ping's creation */
   timestamp: string;
   /** Milliseconds from the timestamp to the current time */
@@ -172,15 +174,28 @@ export interface Os {
 }
 
 export interface Http {
-  response?: StatusCode | null;
+  response?: HttpResponse | null;
 
   rtt?: HttpRtt | null;
 
   url?: string | null;
 }
 
-export interface StatusCode {
-  status_code?: number | null;
+export interface HttpResponse {
+  status_code?: UnsignedInteger | null;
+
+  body?: HttpBody | null;
+}
+
+export interface HttpBody {
+  /** Size of HTTP response body in bytes */
+  bytes?: UnsignedInteger | null;
+  /** Hash of the HTTP response body */
+  hash?: string | null;
+  /** Response body of the HTTP Response. May be truncated based on client settings. */
+  content?: string | null;
+  /** Byte length of the content string, taking into account multibyte chars. */
+  content_bytes?: UnsignedInteger | null;
 }
 
 export interface HttpRtt {

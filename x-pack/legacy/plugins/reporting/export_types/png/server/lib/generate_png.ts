@@ -6,8 +6,8 @@
 
 import * as Rx from 'rxjs';
 import { toArray, mergeMap } from 'rxjs/operators';
+import { LevelLogger } from '../../../../server/lib';
 import { KbnServer, ConditionalHeaders } from '../../../../types';
-// @ts-ignore
 import { oncePerServer } from '../../../../server/lib/once_per_server';
 import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
 import { PreserveLayout } from '../../../common/layouts/preserve_layout';
@@ -24,11 +24,9 @@ interface UrlScreenshot {
 function generatePngObservableFn(server: KbnServer) {
   const screenshotsObservable = screenshotsObservableFactory(server);
   const captureConcurrency = 1;
-  const createPngWithScreenshots = async ({
-    urlScreenshots,
-  }: {
-    urlScreenshots: UrlScreenshot[];
-  }) => {
+
+  // prettier-ignore
+  const createPngWithScreenshots = async ({ urlScreenshots }: { urlScreenshots: UrlScreenshot[] }) => {
     if (urlScreenshots.length !== 1) {
       throw new Error(
         `Expected there to be 1 URL screenshot, but there are ${urlScreenshots.length}`
@@ -44,6 +42,7 @@ function generatePngObservableFn(server: KbnServer) {
   };
 
   return function generatePngObservable(
+    logger: LevelLogger,
     url: string,
     browserTimezone: string,
     conditionalHeaders: ConditionalHeaders,
@@ -56,7 +55,8 @@ function generatePngObservableFn(server: KbnServer) {
     const layout = new PreserveLayout(layoutParams.dimensions);
     const screenshots$ = Rx.of(url).pipe(
       mergeMap(
-        iUrl => screenshotsObservable({ url: iUrl, conditionalHeaders, layout, browserTimezone }),
+        iUrl =>
+          screenshotsObservable({ logger, url: iUrl, conditionalHeaders, layout, browserTimezone }),
         (jUrl: string, screenshot: UrlScreenshot) => screenshot,
         captureConcurrency
       )

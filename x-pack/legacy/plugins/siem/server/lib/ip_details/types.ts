@@ -45,7 +45,7 @@ export interface OverviewHit {
   };
   doc_count: number;
   geo: ResultHit<object>;
-  autonomous_system: ResultHit<object>;
+  autonomousSystem: ResultHit<object>;
   firstSeen: {
     value: number;
     value_as_string: string;

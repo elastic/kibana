@@ -16,6 +16,7 @@ import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_uti
 import { DataFrameAnalyticsListRow } from './common';
 import { ExpandedRowDetailsPane, SectionConfig } from './expanded_row_details_pane';
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
+import { ProgressBar } from './progress_bar';
 // import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
 
 function getItemDescription(value: any) {
@@ -32,25 +33,36 @@ interface Props {
 
 export const ExpandedRow: FC<Props> = ({ item }) => {
   const stateValues = { ...item.stats };
+  delete stateValues.progress;
 
   const state: SectionConfig = {
-    title: 'State',
+    title: i18n.translate('xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.state', {
+      defaultMessage: 'State',
+    }),
     items: Object.entries(stateValues).map(s => {
       return { title: s[0].toString(), description: getItemDescription(s[1]) };
     }),
     position: 'left',
   };
 
-  const checkpointing: SectionConfig = {
-    title: 'Checkpointing',
-    items: Object.entries(item.checkpointing).map(s => {
-      return { title: s[0].toString(), description: getItemDescription(s[1]) };
+  const progress: SectionConfig = {
+    title: i18n.translate(
+      'xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.progress',
+      { defaultMessage: 'Progress' }
+    ),
+    items: item.stats.progress.map(s => {
+      return {
+        title: s.phase,
+        description: <ProgressBar progress={s.progress_percent} />,
+      };
     }),
     position: 'left',
   };
 
   const stats: SectionConfig = {
-    title: 'Stats',
+    title: i18n.translate('xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.stats', {
+      defaultMessage: 'Stats',
+    }),
     items: [
       {
         title: 'create_time',
@@ -66,24 +78,21 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
 
   const tabs = [
     {
-      id: 'analytics-details',
-      name: i18n.translate(
-        'xpack.ml.dataframe.analyticsList.analyticsDetails.tabs.analyticsSettingsLabel',
-        {
-          defaultMessage: 'Analytics details',
-        }
-      ),
-      content: <ExpandedRowDetailsPane sections={[state, checkpointing, stats]} />,
+      id: 'ml-analytics-job-details',
+      name: i18n.translate('xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettingsLabel', {
+        defaultMessage: 'Job details',
+      }),
+      content: <ExpandedRowDetailsPane sections={[state, progress, stats]} />,
     },
     {
-      id: 'analytics-json',
+      id: 'ml-analytics-job-json',
       name: 'JSON',
       content: <ExpandedRowJsonPane json={item.config} />,
     },
     // Audit messages are not yet supported by the analytics API.
     /*
     {
-      id: 'analytics-messages',
+      id: 'ml-analytics-job-messages',
       name: i18n.translate(
         'xpack.ml.dataframe.analyticsList.analyticsDetails.tabs.analyticsMessagesLabel',
         {

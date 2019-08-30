@@ -48,7 +48,7 @@ export class UpdateWorker extends AbstractGitWorker {
     );
 
     // Try to cancel any existing update job for this repository.
-    this.cancellationService.cancelUpdateJob(repo.uri, CancellationReason.NEW_JOB_OVERRIDEN);
+    await this.cancellationService.cancelUpdateJob(repo.uri, CancellationReason.NEW_JOB_OVERRIDEN);
 
     let cancelled = false;
     let cancelledReason;

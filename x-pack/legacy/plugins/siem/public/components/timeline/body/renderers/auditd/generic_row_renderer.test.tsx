@@ -38,7 +38,6 @@ describe('GenericRowRenderer', () => {
       const children = connectedToRenderer.renderRow({
         browserFields,
         data: auditd,
-        width: 100,
         children: <span>{'some children'}</span>,
       });
 
@@ -68,7 +67,6 @@ describe('GenericRowRenderer', () => {
       const children = connectedToRenderer.renderRow({
         browserFields: mockBrowserFields,
         data: nonAuditd,
-        width: 100,
         children: <span>{'some children'}</span>,
       });
       const wrapper = mount(
@@ -83,7 +81,6 @@ describe('GenericRowRenderer', () => {
       const children = connectedToRenderer.renderRow({
         browserFields: mockBrowserFields,
         data: auditd,
-        width: 100,
         children: <span>{'some children '}</span>,
       });
       const wrapper = mount(
@@ -117,7 +114,6 @@ describe('GenericRowRenderer', () => {
       const children = fileToRenderer.renderRow({
         browserFields,
         data: auditdFile,
-        width: 100,
         children: <span>{'some children'}</span>,
       });
 
@@ -147,7 +143,6 @@ describe('GenericRowRenderer', () => {
       const children = fileToRenderer.renderRow({
         browserFields: mockBrowserFields,
         data: nonAuditd,
-        width: 100,
         children: <span>{'some children'}</span>,
       });
       const wrapper = mount(
@@ -162,7 +157,6 @@ describe('GenericRowRenderer', () => {
       const children = fileToRenderer.renderRow({
         browserFields: mockBrowserFields,
         data: auditdFile,
-        width: 100,
         children: <span>{'some children '}</span>,
       });
       const wrapper = mount(

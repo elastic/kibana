@@ -6,13 +6,12 @@
 
 import { useContext, useState } from 'react';
 
-import { i18n } from '@kbn/i18n';
-import { toastNotifications } from 'ui/notify';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { EVENT_RATE_FIELD_ID } from '../../../../../../../../common/types/fields';
 import { isMultiMetricJobCreator, isPopulationJobCreator } from '../../../../../common/job_creator';
 import { ml } from '../../../../../../../services/ml_api_service';
 import { useKibanaContext } from '../../../../../../../contexts/kibana';
+import { mlMessageBarService } from '../../../../../../../components/messagebar/messagebar_service';
 
 export enum ESTIMATE_STATUS {
   NOT_RUNNING,
@@ -47,20 +46,7 @@ export function useEstimateBucketSpan() {
     const { name, error, message } = await ml.estimateBucketSpan(data);
     setStatus(ESTIMATE_STATUS.NOT_RUNNING);
     if (error === true) {
-      let text = '';
-      if (message !== undefined) {
-        if (typeof message === 'object') {
-          text = message.msg || JSON.stringify(message);
-        } else {
-          text = message;
-        }
-      }
-      toastNotifications.addDanger({
-        title: i18n.translate('xpack.ml.newJob.wizard.estimateBucketSpanError', {
-          defaultMessage: `Bucket span estimation error`,
-        }),
-        text,
-      });
+      mlMessageBarService.notify.error(message);
     } else {
       jobCreator.bucketSpan = name;
       jobCreatorUpdate();

@@ -11,6 +11,7 @@ import { isFromKueryExpressionValid } from '../../lib/keury';
 import { State } from '../reducer';
 
 import { NetworkDetailsModel, NetworkPageModel, NetworkType } from './model';
+import { FlowTargetNew } from '../../graphql/types';
 
 const selectNetworkPage = (state: State): NetworkPageModel => state.network.page;
 
@@ -25,11 +26,18 @@ export const dnsSelector = () =>
     selectNetworkPage,
     network => network.queries.dns
   );
-
-export const topNFlowSelector = () =>
+export enum NetworkTableType {
+  dns = 'dns',
+  topNFlowSource = 'topNFlowSource',
+  topNFlowDestination = 'topNFlowDestination',
+}
+export const topNFlowSelector = (flowTarget: FlowTargetNew) =>
   createSelector(
     selectNetworkPage,
-    network => network.queries.topNFlow
+    network =>
+      flowTarget === FlowTargetNew.source
+        ? network.queries[NetworkTableType.topNFlowSource]
+        : network.queries[NetworkTableType.topNFlowDestination]
   );
 
 // Filter Query Selectors
@@ -37,6 +45,13 @@ export const networkFilterQueryAsJson = () =>
   createSelector(
     selectNetworkByType,
     network => (network.filterQuery ? network.filterQuery.serializedQuery : null)
+  );
+
+export const networkFilterExpression = () =>
+  createSelector(
+    selectNetworkByType,
+    network =>
+      network.filterQuery && network.filterQuery.kuery ? network.filterQuery.kuery.expression : null
   );
 
 export const networkFilterQueryAsKuery = () =>

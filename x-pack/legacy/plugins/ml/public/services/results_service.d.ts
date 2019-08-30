@@ -4,6 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+type time = string;
+export interface ModelPlotOutputResults {
+  results: Record<time, { actual: number; modelUpper: number | null; modelLower: number | null }>;
+}
+
 declare interface MlResultsService {
   getScoresByBucket: (
     jobIds: string[],
@@ -43,7 +48,7 @@ declare interface MlResultsService {
       min: string;
       max: string;
     }
-  ) => Promise<any>;
+  ) => Promise<ModelPlotOutputResults>;
   getRecordMaxScoreByTime: () => Promise<any>;
 }
 

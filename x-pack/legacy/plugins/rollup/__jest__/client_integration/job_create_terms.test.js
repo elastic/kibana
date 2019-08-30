@@ -7,21 +7,7 @@
 import { setupEnvironment, pageHelpers } from './helpers';
 
 jest.mock('ui/new_platform');
-
-jest.mock('ui/index_patterns', () => {
-  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual('../../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
-  return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE };
-});
-
-jest.mock('ui/chrome', () => ({
-  addBasePath: () => '/api/rollup',
-  breadcrumbs: { set: () => {} },
-  getInjected: () => ({}),
-  getUiSettingsClient: () => ({}),
-  getSavedObjectsClient: () => ({}),
-}));
-
-jest.mock('ui/timefilter', () => {});
+jest.mock('ui/index_patterns');
 
 jest.mock('lodash/function/debounce', () => fn => fn);
 

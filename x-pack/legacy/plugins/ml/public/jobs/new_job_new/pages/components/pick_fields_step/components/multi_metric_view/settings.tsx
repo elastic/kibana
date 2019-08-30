@@ -11,6 +11,7 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { BucketSpan } from '../bucket_span';
 import { SplitFieldSelector } from '../split_field';
 import { Influencers } from '../influencers';
+import { SparseDataSwitch } from '../sparse_data';
 
 interface Props {
   isActive: boolean;
@@ -47,7 +48,9 @@ export const MultiMetricSettings: FC<Props> = ({ isActive, setIsValid }) => {
             <EuiFlexItem>
               <BucketSpan setIsValid={setIsValid} />
             </EuiFlexItem>
-            <EuiFlexItem />
+            <EuiFlexItem>
+              <SparseDataSwitch />
+            </EuiFlexItem>
           </EuiFlexGroup>
         </Fragment>
       )}

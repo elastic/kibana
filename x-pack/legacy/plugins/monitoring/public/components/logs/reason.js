@@ -11,10 +11,28 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 
 export const Reason = ({ reason }) => {
-  let title;
-  let message;
+  let title = i18n.translate('xpack.monitoring.logs.reason.defaultTitle', {
+    defaultMessage: 'No log data found'
+  });
+  let message = (
+    <FormattedMessage
+      id="xpack.monitoring.logs.reason.defaultMessage"
+      defaultMessage="We did not find any log data and we are unable to diagnose why. {link}"
+      values={{
+        link: (
+          <EuiLink href={`${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation.html`}>
+            <FormattedMessage
+              id="xpack.monitoring.logs.reason.defaultMessageLink"
+              defaultMessage="Please verify your setup is correct."
+            />
+          </EuiLink>
+        )
+      }}
+    />
+  );
 
   if (false === reason.indexPatternExists) {
     title = i18n.translate('xpack.monitoring.logs.reason.noIndexPatternTitle', {
@@ -26,7 +44,7 @@ export const Reason = ({ reason }) => {
         defaultMessage="Set up {link}, then configure your Elasticsearch output to your monitoring cluster."
         values={{
           link: (
-            <EuiLink href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html">
+            <EuiLink href={`${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation.html`}>
               {i18n.translate('xpack.monitoring.logs.reason.noIndexPatternLink', {
                 defaultMessage: 'Filebeat'
               })}
@@ -57,7 +75,7 @@ export const Reason = ({ reason }) => {
         defaultMessage="Follow {link} to set up Elasticsearch."
         values={{
           link: (
-            <EuiLink href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-elasticsearch.html">
+            <EuiLink href={`${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-module-elasticsearch.html`}>
               {i18n.translate('xpack.monitoring.logs.reason.noTypeLink', {
                 defaultMessage: 'these directions'
               })}
@@ -77,7 +95,7 @@ export const Reason = ({ reason }) => {
         defaultMessage="Check that your {link} is correct."
         values={{
           link: (
-            <EuiLink href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html">
+            <EuiLink href={`${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation.html`}>
               {i18n.translate('xpack.monitoring.logs.reason.noClusterLink', {
                 defaultMessage: 'setup'
               })}
@@ -97,7 +115,7 @@ export const Reason = ({ reason }) => {
         defaultMessage="Check that your {link} is correct."
         values={{
           link: (
-            <EuiLink href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html">
+            <EuiLink href={`${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation.html`}>
               {i18n.translate('xpack.monitoring.logs.reason.noNodeLink', {
                 defaultMessage: 'setup'
               })}

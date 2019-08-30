@@ -7,7 +7,7 @@
 import { resolve } from 'path';
 import { createRouter } from '../../server/lib/create_router';
 import { registerIndicesRoutes } from './server/routes/api/indices';
-import { registerTemplatesRoutes } from './server/routes/api/templates';
+import { registerTemplateRoutes } from './server/routes/api/templates';
 import { registerMappingRoute } from './server/routes/api/mapping';
 import { registerSettingsRoutes } from './server/routes/api/settings';
 import { registerStatsRoute } from './server/routes/api/stats';
@@ -32,7 +32,7 @@ export function indexManagement(kibana)  {
       server.expose('addIndexManagementDataEnricher', addIndexManagementDataEnricher);
       registerLicenseChecker(server, PLUGIN.ID, PLUGIN.NAME, PLUGIN.MINIMUM_LICENSE_REQUIRED);
       registerIndicesRoutes(router);
-      registerTemplatesRoutes(router);
+      registerTemplateRoutes(router, server);
       registerSettingsRoutes(router);
       registerStatsRoute(router);
       registerMappingRoute(router);

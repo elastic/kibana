@@ -8,7 +8,6 @@ import { EuiBadge } from '@elastic/eui';
 import { defaultTo, getOr } from 'lodash/fp';
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
@@ -18,7 +17,7 @@ import { FlyoutButton } from './button';
 import { Pane } from './pane';
 import { timelineActions } from '../../store/actions';
 import { DEFAULT_TIMELINE_WIDTH } from '../timeline/body/helpers';
-import { trackUiAction as track, METRIC_TYPE } from '../../lib/track_usage';
+import { trackUiAction as track, METRIC_TYPE, TELEMETRY_EVENT } from '../../lib/track_usage';
 
 /** The height in pixels of the flyout header, exported for use in height calculations */
 export const flyoutHeaderHeight: number = 60;
@@ -34,7 +33,7 @@ export const Badge = styled(EuiBadge)`
 
 Badge.displayName = 'Badge';
 
-const Visible = styled.div<{ show: boolean }>`
+const Visible = styled.div<{ show?: boolean }>`
   visibility: ${({ show }) => (show ? 'visible' : 'hidden')};
 `;
 
@@ -49,7 +48,7 @@ interface OwnProps {
 }
 
 interface DispatchProps {
-  showTimeline?: ActionCreator<{ id: string; show: boolean }>;
+  showTimeline: ActionCreator<{ id: string; show: boolean }>;
   applyDeltaToWidth?: ({
     id,
     delta,
@@ -67,13 +66,13 @@ interface DispatchProps {
 
 interface StateReduxProps {
   dataProviders?: DataProvider[];
-  show?: boolean;
-  width?: number;
+  show: boolean;
+  width: number;
 }
 
 type Props = OwnProps & DispatchProps & StateReduxProps;
 
-export const FlyoutComponent = pure<Props>(
+export const FlyoutComponent = React.memo<Props>(
   ({
     children,
     dataProviders,
@@ -86,14 +85,14 @@ export const FlyoutComponent = pure<Props>(
     width,
   }) => (
     <>
-      <Visible show={show!}>
+      <Visible show={show}>
         <Pane
           flyoutHeight={flyoutHeight}
           headerHeight={headerHeight}
-          onClose={() => showTimeline!({ id: timelineId, show: false })}
+          onClose={() => showTimeline({ id: timelineId, show: false })}
           timelineId={timelineId}
           usersViewing={usersViewing}
-          width={width!}
+          width={width}
         >
           {children}
         </Pane>
@@ -103,8 +102,8 @@ export const FlyoutComponent = pure<Props>(
         show={!show}
         timelineId={timelineId}
         onOpen={() => {
-          track(METRIC_TYPE.LOADED, 'open_timeline');
-          showTimeline!({ id: timelineId, show: true });
+          track(METRIC_TYPE.LOADED, TELEMETRY_EVENT.TIMELINE_OPENED);
+          showTimeline({ id: timelineId, show: true });
         }}
       />
     </>

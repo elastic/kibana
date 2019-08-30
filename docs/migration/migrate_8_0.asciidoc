@@ -74,4 +74,10 @@ specified explicitly.
 
 *Impact:* Define `xpack.security.authc.saml.realm` when using the SAML authentication provider instead.
 
+[float]
+=== `optimize` directory is now in the `data` folder
+*Details:* Generated bundles have moved to the configured `path.data` folder.
+
+*Impact:* Any workflow that involved manually clearing generated bundles will have to be updated with the new path.
+
 // end::notable-breaking-changes[]

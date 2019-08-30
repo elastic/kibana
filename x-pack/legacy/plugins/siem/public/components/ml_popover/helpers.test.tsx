@@ -7,11 +7,14 @@
 import {
   mockConfigTemplates,
   mockEmbeddedJobIds,
+  mockIndexPatternSavedObjects,
   mockInstalledJobIds,
   mockJobsSummaryResponse,
 } from './__mocks__/api';
 import {
   getConfigTemplatesToInstall,
+  getIndexPatternTitleIdMapping,
+  getIndexPatternTitles,
   getJobsToDisplay,
   getJobsToInstall,
   searchFilter,
@@ -34,7 +37,7 @@ describe('helpers', () => {
       const configTemplatesToInstall = getConfigTemplatesToInstall(
         mockConfigTemplates,
         [],
-        'auditbeat-*, winlogbeat-*'
+        ['auditbeat-*', 'winlogbeat-*']
       );
       expect(configTemplatesToInstall.length).toEqual(2);
     });
@@ -43,7 +46,7 @@ describe('helpers', () => {
       const configTemplatesToInstall = getConfigTemplatesToInstall(
         mockConfigTemplates,
         [],
-        'auditbeat-*, spongbeat-*'
+        ['auditbeat-*', 'spongbeat-*']
       );
       expect(configTemplatesToInstall.length).toEqual(1);
     });
@@ -52,9 +55,18 @@ describe('helpers', () => {
       const configTemplatesToInstall = getConfigTemplatesToInstall(
         mockConfigTemplates,
         mockInstalledJobIds,
-        'auditbeat-*, winlogbeat-*'
+        ['auditbeat-*', 'winlogbeat-*']
       );
       expect(configTemplatesToInstall.length).toEqual(2);
+    });
+
+    test('returns no configTemplates if index is substring of indexPatterns', () => {
+      const configTemplatesToInstall = getConfigTemplatesToInstall(
+        mockConfigTemplates,
+        mockInstalledJobIds,
+        ['winlogbeat-**']
+      );
+      expect(configTemplatesToInstall.length).toEqual(0);
     });
   });
 
@@ -109,6 +121,35 @@ describe('helpers', () => {
     test('returns correct DisplayJobs when filterQuery matches job.description', () => {
       const jobsToDisplay = searchFilter(mockJobsSummaryResponse, 'high number');
       expect(jobsToDisplay.length).toEqual(1);
+    });
+  });
+
+  describe('getIndexPatternTitles', () => {
+    test('returns empty array when no index patterns are provided', () => {
+      const indexPatternTitles = getIndexPatternTitles([]);
+      expect(indexPatternTitles.length).toEqual(0);
+    });
+
+    test('returns titles when index patterns are provided', () => {
+      const indexPatternTitles = getIndexPatternTitles(mockIndexPatternSavedObjects);
+      expect(indexPatternTitles.length).toEqual(2);
+    });
+  });
+
+  describe('getIndexPatternTitleIdMapping', () => {
+    test('returns empty array when no index patterns are provided', () => {
+      const indexPatternTitleIdMapping = getIndexPatternTitleIdMapping([]);
+      expect(indexPatternTitleIdMapping.length).toEqual(0);
+    });
+
+    test('returns correct mapping when index patterns are provided', () => {
+      const indexPatternTitleIdMapping = getIndexPatternTitleIdMapping(
+        mockIndexPatternSavedObjects
+      );
+      expect(indexPatternTitleIdMapping).toEqual([
+        { id: '2d1fe420-eeee-11e9-ad95-4b5e687c2aee', title: 'filebeat-*' },
+        { id: '5463ec70-c7ba-ffff-ad95-4b5e687c2aee', title: 'auditbeat-*' },
+      ]);
     });
   });
 });

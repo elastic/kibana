@@ -29,6 +29,6 @@
       "_cat/allocation",
       "_cat/allocation/{nodes}"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/cat-allocation.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cat-allocation.html"
   }
 }

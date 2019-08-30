@@ -6,7 +6,6 @@
 
 import { EuiCallOut } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
@@ -48,7 +47,7 @@ const TimelineHeaderContainer = styled.div`
 
 TimelineHeaderContainer.displayName = 'TimelineHeaderContainer';
 
-export const TimelineHeader = pure<Props>(
+export const TimelineHeader = React.memo<Props>(
   ({
     browserFields,
     id,

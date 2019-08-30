@@ -72,8 +72,6 @@ ServerSideEventCount.displayName = 'ServerSideEventCount';
 /** The height of the footer, exported for use in height calculations */
 export const footerHeight = 40; // px
 
-export const isCompactFooter = (width: number): boolean => width < 600;
-
 interface FooterProps {
   itemsCount: number;
   isLive: boolean;
@@ -88,7 +86,7 @@ interface FooterProps {
   serverSideEventCount: number;
   tieBreaker: string;
   getUpdatedAt: () => number;
-  width: number;
+  compact: boolean;
 }
 
 interface FooterState {
@@ -113,7 +111,7 @@ export const EventsCount = pure<{
       data-test-subj="timelineSizeRowPopover"
       button={
         <>
-          <EuiBadge color="hollow">
+          <EuiBadge data-test-subj="local-events-count" color="hollow">
             {itemsCount}
             <EuiButtonEmpty
               size="s"
@@ -167,12 +165,42 @@ export const PagingControl = pure<{
 PagingControl.displayName = 'PagingControl';
 
 /** Renders a loading indicator and paging controls */
-export class Footer extends React.PureComponent<FooterProps, FooterState> {
+export class Footer extends React.Component<FooterProps, FooterState> {
   public readonly state = {
     isPopoverOpen: false,
     paginationLoading: false,
     updatedAt: null,
   };
+
+  public shouldComponentUpdate(
+    {
+      compact,
+      hasNextPage,
+      height,
+      isLive,
+      isLoading,
+      itemsCount,
+      itemsPerPage,
+      itemsPerPageOptions,
+      serverSideEventCount,
+    }: FooterProps,
+    { isPopoverOpen, paginationLoading, updatedAt }: FooterState
+  ) {
+    return (
+      compact !== this.props.compact ||
+      hasNextPage !== this.props.hasNextPage ||
+      height !== this.props.height ||
+      isLive !== this.props.isLive ||
+      isLoading !== this.props.isLoading ||
+      isPopoverOpen !== this.state.isPopoverOpen ||
+      itemsCount !== this.props.itemsCount ||
+      itemsPerPage !== this.props.itemsPerPage ||
+      itemsPerPageOptions !== this.props.itemsPerPageOptions ||
+      paginationLoading !== this.state.paginationLoading ||
+      serverSideEventCount !== this.props.serverSideEventCount ||
+      updatedAt !== this.state.updatedAt
+    );
+  }
 
   public componentDidUpdate(prevProps: FooterProps) {
     const { paginationLoading, updatedAt } = this.state;
@@ -205,7 +233,7 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
       serverSideEventCount,
       hasNextPage,
       getUpdatedAt,
-      width,
+      compact,
     } = this.props;
 
     if (isLoading && !this.state.paginationLoading) {
@@ -301,13 +329,10 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
             </EuiFlexItem>
 
             <EuiFlexItem data-test-subj="last-updated-container" grow={false}>
-              <FixedWidthLastUpdated
-                data-test-subj="fixed-width-last-updated"
-                compact={isCompactFooter(width)}
-              >
+              <FixedWidthLastUpdated data-test-subj="fixed-width-last-updated" compact={compact}>
                 <LastUpdatedAt
                   updatedAt={this.state.updatedAt || getUpdatedAt()}
-                  compact={isCompactFooter(width)}
+                  compact={compact}
                 />
               </FixedWidthLastUpdated>
             </EuiFlexItem>
