@@ -90,7 +90,6 @@ function ContextAppRouteController($routeParams, $scope, AppState, config, index
   $scope.$on('$destroy', function () {
     updateSubsciption.unsubscribe();
   });
-  this.anchorType = $routeParams.type || '_doc';
   this.anchorId = $routeParams.id;
   this.indexPattern = indexPattern;
   this.discoverUrl = npStart.core.chrome.navLinks.get('kibana:discover').url;
