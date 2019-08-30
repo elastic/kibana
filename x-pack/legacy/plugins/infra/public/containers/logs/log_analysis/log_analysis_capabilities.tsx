@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import createContainer from 'constate-latest';
 import { useMemo, useState, useEffect } from 'react';
 import { kfetch } from 'ui/kfetch';
 
@@ -52,6 +53,8 @@ export const useLogAnalysisCapabilities = () => {
     isLoading,
   };
 };
+
+export const LogAnalysisCapabilities = createContainer(useLogAnalysisCapabilities);
 
 const initialMlCapabilities = {
   capabilities: {

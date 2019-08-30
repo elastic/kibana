@@ -110,6 +110,7 @@
     "@elastic/numeral": "2.3.3",
     "@elastic/ui-ace": "0.2.3",
     "@hapi/wreck": "^15.0.1",
+    "@kbn/analytics": "1.0.0",
     "@kbn/babel-code-parser": "1.0.0",
     "@kbn/babel-preset": "1.0.0",
     "@kbn/config-schema": "1.0.0",
