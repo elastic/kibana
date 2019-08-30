@@ -31,9 +31,9 @@
 import { get, identity } from 'lodash';
 // @ts-ignore
 import { npSetup } from 'ui/new_platform';
-import { ajaxStream } from './lib/ajax_stream';
-import { FUNCTIONS_URL } from './lib/consts';
-import { batchedFetch } from './lib/batched_fetch';
+import { FUNCTIONS_URL } from './consts';
+import { ajaxStream } from './ajax_stream';
+import { batchedFetch } from './batched_fetch';
 
 export function getType(node: any) {
   if (node == null) return 'null';

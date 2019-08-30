@@ -34,5 +34,5 @@ export async function initializeInterpreter() {
     return interpretFn(ast, context);
   };
 
-  return { interpretAst };
+  return { interpreter: { interpretAst } };
 }
