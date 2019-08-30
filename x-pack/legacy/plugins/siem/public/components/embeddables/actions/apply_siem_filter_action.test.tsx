@@ -25,10 +25,6 @@ const isEmbeddable = (
   return get('type', embeddable) != null;
 };
 
-const isTriggerContext = (triggerContext: unknown): triggerContext is { filters: Filter[] } => {
-  return typeof triggerContext === 'object';
-};
-
 describe('ApplySiemFilterAction', () => {
   let applyFilterQueryFromKueryExpression: (expression: string) => void;
 
@@ -61,9 +57,7 @@ describe('ApplySiemFilterAction', () => {
       if (isEmbeddable(embeddable)) {
         const result = await action.isCompatible({
           embeddable,
-          triggerContext: {
-            filters: [],
-          },
+          filters: [],
         });
         expect(result).toBe(true);
       } else {
@@ -79,6 +73,7 @@ describe('ApplySiemFilterAction', () => {
       if (isEmbeddable(embeddable)) {
         const result = await action.isCompatible({
           embeddable,
+          filters: [],
         });
         expect(result).toBe(false);
       } else {
@@ -91,15 +86,14 @@ describe('ApplySiemFilterAction', () => {
       const embeddable = {
         type: MAP_SAVED_OBJECT_TYPE,
       };
-      const triggerContext = {};
-      if (isEmbeddable(embeddable) && isTriggerContext(triggerContext)) {
+      if (isEmbeddable(embeddable)) {
+        // @ts-ignore
         const result = await action.isCompatible({
           embeddable,
-          triggerContext,
         });
         expect(result).toBe(false);
       } else {
-        throw new Error('Invalid embeddable/triggerContext in unit test');
+        throw new Error('Invalid embeddable in unit test');
       }
     });
 
@@ -111,9 +105,7 @@ describe('ApplySiemFilterAction', () => {
       if (isEmbeddable(embeddable)) {
         const result = await action.isCompatible({
           embeddable,
-          triggerContext: {
-            filters: [],
-          },
+          filters: [],
         });
         expect(result).toBe(false);
       } else {
@@ -130,6 +122,7 @@ describe('ApplySiemFilterAction', () => {
       };
       if (isEmbeddable(embeddable)) {
         const error = expectError(() =>
+          // @ts-ignore
           action.execute({
             embeddable,
           })
@@ -148,24 +141,27 @@ describe('ApplySiemFilterAction', () => {
           query: { query: '' },
         }),
       };
-      const triggerContext = {
-        filters: [
-          {
-            query: {
-              match: {
-                'host.name': {
-                  query: 'zeek-newyork-sha-aa8df15',
-                  type: 'phrase',
-                },
+      const filters: Filter[] = [
+        {
+          query: {
+            match: {
+              'host.name': {
+                query: 'zeek-newyork-sha-aa8df15',
+                type: 'phrase',
               },
             },
           },
-        ],
-      };
-      if (isEmbeddable(embeddable) && isTriggerContext(triggerContext)) {
+          meta: {
+            disabled: false,
+            negate: false,
+            alias: '',
+          },
+        },
+      ];
+      if (isEmbeddable(embeddable)) {
         await action.execute({
           embeddable,
-          triggerContext,
+          filters,
         });
 
         expect(
@@ -173,7 +169,7 @@ describe('ApplySiemFilterAction', () => {
             .calls[0][0]
         ).toBe('host.name: "zeek-newyork-sha-aa8df15"');
       } else {
-        throw new Error('Invalid embeddable/triggerContext in unit test');
+        throw new Error('Invalid embeddable in unit test');
       }
     });
   });
