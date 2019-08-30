@@ -13,6 +13,8 @@ import {
   createPermissionFailureMessage,
 } from '../../../../../privilege/check_privilege';
 
+import { isOutlierAnalysis } from '../../../../common/analytics';
+
 import { getResultsUrl, isDataFrameAnalyticsRunning, DataFrameAnalyticsListRow } from './common';
 import { stopAnalytics } from '../../services/analytics_service';
 
@@ -28,13 +30,18 @@ export const getActions = () => {
       render: (item: DataFrameAnalyticsListRow) => {
         return (
           <EuiButtonEmpty
-            href={getResultsUrl(item.id)}
+            disabled={!isOutlierAnalysis(item.config.analysis)}
+            onClick={() => (window.location.href = getResultsUrl(item.id))}
             size="xs"
             color="text"
             iconType="visTable"
-            aria-label={'View'}
+            aria-label={i18n.translate('xpack.ml.dataframe.analyticsList.viewAriaLabel', {
+              defaultMessage: 'View',
+            })}
           >
-            {'View'}
+            {i18n.translate('xpack.ml.dataframe.analyticsList.viewActionName', {
+              defaultMessage: 'View',
+            })}
           </EuiButtonEmpty>
         );
       },
