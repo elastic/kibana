@@ -18,8 +18,6 @@ timeout(time: 180, unit: 'MINUTES') {
           getOssCiGroupWorker(5),
           getOssCiGroupWorker(6),
           getOssCiGroupWorkers(7),
-        ]),
-        'kibana-oss-tests-2': withWorkers('kibana-oss-tests-2', { buildOss() }, [
           getOssCiGroupWorker(8),
           getOssCiGroupWorker(9),
           getOssCiGroupWorker(10),
@@ -34,11 +32,7 @@ timeout(time: 180, unit: 'MINUTES') {
           getXpackCiGroupWorker(3),
           getXpackCiGroupWorker(4),
           getXpackCiGroupWorker(5),
-          getXpackCiGroupWorker(6),
-        ]),
-        'kibana-xpack-tests-single-2': withWorkers('kibana-xpack-tests', { buildXpack() }, [ getXpackCiGroupWorker(2) ]),
-        'kibana-xpack-tests-single-6': withWorkers('kibana-xpack-tests', { buildXpack() }, [ getXpackCiGroupWorker(6) ]),
-        'kibana-xpack-tests-2': withWorkers('kibana-xpack-tests-2', { buildXpack() }, [
+          // getXpackCiGroupWorker(6),
           getXpackCiGroupWorker(7),
           getXpackCiGroupWorker(8),
           getXpackCiGroupWorker(9),
@@ -46,6 +40,7 @@ timeout(time: 180, unit: 'MINUTES') {
           getPostBuildWorker('xpack-firefoxSmoke', { bash './test/scripts/jenkins_xpack_firefox_smoke.sh' }),
           getPostBuildWorker('xpack-visualRegression', { bash './test/scripts/jenkins_xpack_visual_regression.sh' }),
         ]),
+        'kibana-xpack-ciGroup6': legacyJobRunner('x-pack-ciGroup6'), // This group has tests that rely upon ES transport port being :9300 - that needs to be solved before parallelization can happen
         // make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
       ])
     }
@@ -118,7 +113,7 @@ def getOssCiGroupWorker(ciGroup) {
       "CI_GROUP=${ciGroup}",
       "JOB=kibana-ciGroup${ciGroup}",
     ]) {
-      bash "./test/scripts/jenkins_ci_group.sh" // TODO runbld
+      runbld "./test/scripts/jenkins_ci_group.sh" // TODO runbld
     }
   })
 }
@@ -129,7 +124,7 @@ def getXpackCiGroupWorker(ciGroup) {
       "CI_GROUP=${ciGroup}",
       "JOB=xpack-kibana-ciGroup${ciGroup}",
     ]) {
-      bash "./test/scripts/jenkins_xpack_ci_group.sh" // TODO runbld
+      runbld "./test/scripts/jenkins_xpack_ci_group.sh" // TODO runbld
     }
   })
 }
@@ -247,23 +242,13 @@ def bash(script) {
 }
 
 def doSetup() {
-  bash "./test/scripts/jenkins_setup.sh" // TODO runbld
+  runbld "./test/scripts/jenkins_setup.sh" // TODO runbld
 }
 
-// def wihtKibanaEnv(script) {
-//   bash("""
-//     . ${env.WORKSPACE}/kibana/src/dev/ci_setup/load_env_keys.sh
-//     . ${env.WORKSPACE}/kibana/src/dev/ci_setup/setup_env.sh
-//     ${script}
-//   """)
-// }
-
-// yarn run grunt functionalTests:ensureAllTestsInCiGroup;
-
 def buildOss() {
-  bash "./test/scripts/jenkins_build_kibana.sh" // TODO runbld
+  runbld "./test/scripts/jenkins_build_kibana.sh" // TODO runbld
 }
 
 def buildXpack() {
-  bash "./test/scripts/jenkins_xpack_build_kibana.sh" // TODO runbld
+  runbld "./test/scripts/jenkins_xpack_build_kibana.sh" // TODO runbld
 }

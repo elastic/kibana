@@ -22,7 +22,7 @@ export const registerHelpers = (supertest) => {
       .send({
         'name': name,
         'seeds': [
-          'localhost:9300'
+          'localhost:9300' // TODO does this need to be changed?
         ],
         'skipUnavailable': true,
       });
