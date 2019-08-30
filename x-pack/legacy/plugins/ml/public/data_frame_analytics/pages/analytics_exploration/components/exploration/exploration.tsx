@@ -30,7 +30,12 @@ import {
 import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
 import euiThemeDark from '@elastic/eui/dist/eui_theme_dark.json';
 
-import { ColumnType, MlInMemoryTable } from '../../../../../../common/types/eui/in_memory_table';
+import {
+  ColumnType,
+  MlInMemoryTable,
+  SortDirection,
+  SORT_DIRECTION,
+} from '../../../../../../common/types/eui/in_memory_table';
 
 import { useUiChromeContext } from '../../../../../contexts/ui/use_ui_chrome_context';
 
@@ -66,18 +71,10 @@ interface GetDataFrameAnalyticsResponse {
   data_frame_analytics: DataFrameAnalyticsOutlierConfig[];
 }
 
-// Defining our own ENUM here.
-// EUI's SortDirection wasn't usable as a union type
-// required for the Sorting interface.
-enum SORT_DIRECTON {
-  ASC = 'asc',
-  DESC = 'desc',
-}
-
 interface Sorting {
   sort: {
     field: string;
-    direction: string;
+    direction: SortDirection;
   };
 }
 
@@ -111,8 +108,6 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(25);
-  const [sortField, setSortField] = useState<string>('');
-  const [sortDirection, setSortDirection] = useState<string>(SORT_DIRECTON.ASC);
 
   useEffect(() => {
     (async function() {
@@ -167,11 +162,14 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
     }
   }
 
-  const { errorMessage, status, tableItems } = useExploreData(
-    jobConfig,
-    selectedFields,
-    setSelectedFields
-  );
+  const {
+    errorMessage,
+    loadExploreData,
+    sortField,
+    sortDirection,
+    status,
+    tableItems,
+  } = useExploreData(jobConfig, selectedFields, setSelectedFields);
 
   let docFields: EsFieldName[] = [];
   let docFieldsCount = 0;
@@ -329,13 +327,12 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
       const outlierScoreFieldName = `${jobConfig.dest.results_field}.${OUTLIER_SCORE}`;
       const outlierScoreFieldSelected = selectedFields.includes(outlierScoreFieldName);
 
-      const newSortField = outlierScoreFieldSelected ? outlierScoreFieldName : selectedFields[0];
-      const newSortDirection = outlierScoreFieldSelected ? SORT_DIRECTON.DESC : SORT_DIRECTON.ASC;
-      setSortField(newSortField);
-      setSortDirection(newSortDirection);
+      const field = outlierScoreFieldSelected ? outlierScoreFieldName : selectedFields[0];
+      const direction = outlierScoreFieldSelected ? SORT_DIRECTION.DESC : SORT_DIRECTION.ASC;
+      loadExploreData({ field, direction });
       return;
     }
-  }, [jobConfig, columns.length, sortField]);
+  }, [jobConfig, columns.length, sortField, sortDirection, tableItems.length]);
 
   let sorting: TableSorting = false;
   let onTableChange;
@@ -356,9 +353,10 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
       setPageIndex(index);
       setPageSize(size);
 
-      const { field, direction } = sort;
-      setSortField(field);
-      setSortDirection(direction);
+      if (sort.field !== sortField || sort.direction !== sortDirection) {
+        setClearTable(true);
+        loadExploreData(sort);
+      }
     };
   }
 
