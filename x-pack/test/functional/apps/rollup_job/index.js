@@ -5,8 +5,8 @@
  */
 
 export default function ({ loadTestFile }) {
-  // FLAKY: https://github.com/elastic/kibana/issues/43559
-  describe.skip('rollup job', function () {
+
+  describe('rollup job', function () {
     this.tags('ciGroup1');
 
     loadTestFile(require.resolve('./rollup_jobs'));
