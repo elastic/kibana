@@ -15,8 +15,6 @@ import {
   getDefaultSelectableFields,
   getFlattenedFields,
   DataFrameAnalyticsOutlierConfig,
-  EsDoc,
-  EsDocSource,
   EsFieldName,
 } from '../../../../common';
 
@@ -29,10 +27,12 @@ export enum INDEX_STATUS {
   ERROR,
 }
 
+type TableItem = Record<string, any>;
+
 export interface UseExploreDataReturnType {
   errorMessage: string;
   status: INDEX_STATUS;
-  tableItems: EsDoc[];
+  tableItems: TableItem[];
 }
 
 export const useExploreData = (
@@ -42,7 +42,7 @@ export const useExploreData = (
 ): UseExploreDataReturnType => {
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(INDEX_STATUS.UNUSED);
-  const [tableItems, setTableItems] = useState<EsDoc[]>([]);
+  const [tableItems, setTableItems] = useState<TableItem[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -86,7 +86,7 @@ export const useExploreData = (
           // or is a nested fields when displaying it via EuiInMemoryTable.
           const flattenedFields = getFlattenedFields(docs[0]._source, resultsField);
           const transformedTableItems = docs.map(doc => {
-            const item: EsDocSource = {};
+            const item: TableItem = {};
             flattenedFields.forEach(ff => {
               item[ff] = getNestedProperty(doc._source, ff);
               if (item[ff] === undefined) {
@@ -105,10 +105,7 @@ export const useExploreData = (
                 }
               }
             });
-            return {
-              ...doc,
-              _source: item,
-            };
+            return item;
           });
 
           setTableItems(transformedTableItems);
