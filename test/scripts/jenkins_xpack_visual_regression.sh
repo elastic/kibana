@@ -15,6 +15,7 @@ if [[ -z "$IS_PIPELINE_JOB" ]] ; then
   installDir="$PARENT_DIR/install/kibana"
   mkdir -p "$installDir"
   tar -xzf "$linuxBuild" -C "$installDir" --strip=1
+  export KIBANA_INSTALL_DIR="$installDir"
 else
   installDir="$PARENT_DIR/install/kibana"
   destDir="${installDir}-${CI_WORKER_NUMBER}"
@@ -31,5 +32,5 @@ checks-reporter-with-killswitch "X-Pack visual regression tests" \
   yarn run percy exec \
   node scripts/functional_tests \
     --debug --bail \
-    --kibana-install-dir "$installDir" \
+    --kibana-install-dir "$KIBANA_INSTALL_DIR" \
     --config test/visual_regression/config.js;

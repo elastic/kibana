@@ -36,6 +36,8 @@ if [[ -z "$IS_PIPELINE_JOB" ]] ; then
 
   mkdir -p "$installDir"
   tar -xzf "$linuxBuild" -C "$installDir" --strip=1
+
+  export KIBANA_INSTALL_DIR="$installDir"
 else
   installDir="$PARENT_DIR/install/kibana"
   destDir="${installDir}-${CI_WORKER_NUMBER}"
@@ -47,10 +49,12 @@ fi
 echo " -> Running functional and api tests"
 cd "$XPACK_DIR"
 
+env | sort
+
 checks-reporter-with-killswitch "X-Pack Chrome Functional tests / Group ${CI_GROUP}" \
   node scripts/functional_tests \
     --debug --bail \
-    --kibana-install-dir "$installDir" \
+    --kibana-install-dir "$KIBANA_INSTALL_DIR" \
     --include-tag "ciGroup$CI_GROUP"
 
 echo ""
