@@ -1,0 +1,93 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "agents:agent1",
+    "index": ".kibana",
+    "source": {
+      "agents": {
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI",
+        "active": true,
+        "shared_id": "agent1_filebeat",
+        "type": "PERMANENT",
+        "local_metadata": "{}",
+        "user_provided_metadata": "{}"
+      },
+      "type": "agents"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "agents:agent2",
+    "index": ".kibana",
+    "source": {
+      "agents": {
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI",
+        "active": true,
+        "shared_id": "agent2_filebeat",
+        "type": "PERMANENT",
+        "local_metadata": "{}",
+        "user_provided_metadata": "{}"
+      },
+      "type": "agents"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "agents:agent3",
+    "index": ".kibana",
+    "source": {
+      "agents": {
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI",
+        "active": true,
+        "shared_id": "agent3_metricbeat",
+        "type": "PERMANENT",
+        "local_metadata": "{}",
+        "user_provided_metadata": "{}"
+      },
+      "type": "agents"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "agents:agent4",
+    "index": ".kibana",
+    "source": {
+      "agents": {
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI",
+        "active": true,
+        "shared_id": "agent4_metricbeat",
+        "type": "PERMANENT",
+        "local_metadata": "{}",
+        "user_provided_metadata": "{}"
+      },
+      "type": "agents"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "tokens:token1",
+    "index": ".kibana",
+    "source": {
+      "tokens": {
+        "type": 0,
+        "tokenHash": "7129fcd665a3e9f9976d6d67d993178ab9267c4739e2f38c3459806a95252b5ebd245c9c2d7ebbe9f2077be24f7556076bb9c34d3269568e0434253dcde9b8ad",
+        "config_id": "config1",
+        "config_shared_id": "config1",
+        "active": true
+      },
+      "type": "tokens"
+    }
+  }
+}
