@@ -2,6 +2,34 @@
 
 set -e
 
+# retry function
+# -------------------------------------
+# Retry a command for a specified number of times until the command exits successfully.
+# Retry wait period backs off exponentially after each retry.
+#
+# The first argument should be the number of retries.
+# Remainder is treated as the command to execute.
+# -------------------------------------
+function retry {
+  local retries=$1
+  shift
+
+  local count=0
+  until "$@"; do
+    exit=$?
+    wait=$((2 ** $count))
+    count=$(($count + 1))
+    if [ $count -lt $retries ]; then
+      printf "Retry %s/%s exited %s, retrying in %s seconds...\n" "$count" "$retries" "$exit" "$wait" >&2
+      sleep $wait
+    else
+      printf "Retry %s/%s exited %s, no more retries left.\n" "$count" "$retries" "$exit" >&2
+      return $exit
+    fi
+  done
+  return 0
+}
+
 if [ -z "$VAULT_SECRET_ID" ]; then
   echo ""
   echo ""
@@ -11,9 +39,6 @@ if [ -z "$VAULT_SECRET_ID" ]; then
   echo ""
   echo ""
 else
-  # load shared helpers to get `retry` function
-  source /usr/local/bin/bash_standard_lib.sh
-
   set +x
 
   # export after define to avoid https://github.com/koalaman/shellcheck/wiki/SC2155

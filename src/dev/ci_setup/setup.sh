@@ -5,8 +5,12 @@ set -e
 dir="$(pwd)"
 cacheDir="${CACHE_DIR:-"$HOME/.kibana"}"
 
-RED='\033[0;31m'
-C_RESET='\033[0m' # Reset color
+UNAME=$(uname)
+OS="linux"
+if [[ "$UNAME" = *"MINGW64_NT"* ]]; then
+  OS="win"
+fi
+echo " -- OS=$OS"
 
 ###
 ### Since the Jenkins logging output collector doesn't look like a TTY
@@ -16,41 +20,23 @@ C_RESET='\033[0m' # Reset color
 ###
 export FORCE_COLOR=1
 
-###
-### check that we seem to be in a kibana project
-###
-if [ -f "$dir/package.json" ] && [ -f "$dir/.node-version" ]; then
-  echo "Setting up node.js and yarn in $dir"
-else
-  echo "${RED}src/dev/ci_setup/setup.sh must be run within a kibana repo${C_RESET}"
-  exit 1
-fi
-
-
 export KIBANA_DIR="$dir"
+echo " -- KIBANA_DIR='$KIBANA_DIR'"
+
 export XPACK_DIR="$KIBANA_DIR/x-pack"
+echo " -- XPACK_DIR='$XPACK_DIR'"
 
 parentDir="$(cd "$KIBANA_DIR/.."; pwd)"
 export PARENT_DIR="$parentDir"
-
-kbnBranch="$(jq -r .branch "$KIBANA_DIR/package.json")"
-export KIBANA_PKG_BRANCH="$kbnBranch"
-
-echo " -- KIBANA_DIR='$KIBANA_DIR'"
-echo " -- XPACK_DIR='$XPACK_DIR'"
 echo " -- PARENT_DIR='$PARENT_DIR'"
-echo " -- KIBANA_PKG_BRANCH='$KIBANA_PKG_BRANCH'"
+
+# uncomment to pin to a snapshot from: https://artifacts-api.elastic.co/v1/branches/{branch}/builds
+# export TEST_ES_SNAPSHOT_VERSION=8.0.0-5480a616
 echo " -- TEST_ES_SNAPSHOT_VERSION='$TEST_ES_SNAPSHOT_VERSION'"
 
 ###
 ### download node
 ###
-UNAME=$(uname)
-OS="linux"
-if [[ "$UNAME" = *"MINGW64_NT"* ]]; then
-  OS="win"
-fi
-echo " -- Running on OS: $OS"
 
 nodeVersion="$(cat "$dir/.node-version")"
 nodeDir="$cacheDir/node/$nodeVersion"
@@ -92,6 +78,13 @@ fi
 export PATH="$nodeBin:$PATH"
 
 ###
+### read kibana package branch
+###
+kbnBranch="$(node -e "console.log(require('./package.json').branch)")"
+export KIBANA_PKG_BRANCH="$kbnBranch"
+echo " -- KIBANA_PKG_BRANCH='$KIBANA_PKG_BRANCH'"
+
+###
 ### downloading yarn
 ###
 yarnVersion="$(node -e "console.log(String(require('./package.json').engines.yarn || '').replace(/^[^\d]+/,''))")"
@@ -112,53 +105,59 @@ export PATH="$PATH:$yarnGlobalDir"
 export GECKODRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
 export CHROMEDRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
 
+function verifyRunWithoutChanges {
+  cmd="$*"
+  "$@"
+
+  changes="$(git ls-files --modified)"
+  diff="$(git diff)"
+
+  if [ "$changes" != "" ] && [ "$diff" != "" ]; then
+    RED='\033[0;31m'
+    C_RESET='\033[0m' # Reset color
+
+    echo ""
+    echo -e "${RED}ERROR: '$cmd' caused changes to the following files:${C_RESET}\n"
+    echo ""
+    echo "$changes"
+    echo ""
+    echo "Diff output:"
+    git diff
+    echo ""
+    echo ""
+    exit 1
+  fi
+
+  if [ "$changes" != "" ] && [ "$diff" == "" ]; then
+    echo ""
+    echo -e "${RED}WARNING: hard reseting repo to discard un-diffable changes:\n"
+    echo ""
+    echo "$changes"
+    echo ""
+    git reset --hard;
+  fi
+}
+
 ###
 ### install dependencies
 ###
 echo " -- installing node.js dependencies"
-yarn kbn bootstrap --prefer-offline
+verifyRunWithoutChanges yarn kbn bootstrap --prefer-offline
 
-###
-### verify no git modifications
-###
-GIT_CHANGES="$(git ls-files --modified)"
-if [ "$GIT_CHANGES" ]; then
-  echo -e "\n${RED}ERROR: 'yarn kbn bootstrap' caused changes to the following files:${C_RESET}\n"
-  echo -e "$GIT_CHANGES\n"
-  exit 1
-fi
-
-###
-### rebuild kbn-pm distributable to ensure it's not out of date
-###
-echo " -- building kbn-pm distributable"
-yarn kbn run build -i @kbn/pm
-
-###
-### verify no git modifications
-###
-GIT_CHANGES="$(git ls-files --modified)"
-if [ "$GIT_CHANGES" ]; then
-  echo -e "\n${RED}ERROR: 'yarn kbn run build -i @kbn/pm' caused changes to the following files:${C_RESET}\n"
-  echo -e "$GIT_CHANGES\n"
-  exit 1
+# skip kbn-pm build check on windows, installed packages are slightly different so module ids are slightly different
+if [ "$OS" != "win" ]; then
+  ###
+  ### rebuild kbn-pm distributable to ensure it's not out of date
+  ###
+  echo " -- building kbn-pm distributable"
+  verifyRunWithoutChanges yarn kbn run build -i @kbn/pm
 fi
 
 ###
 ### rebuild kbn-pm distributable to ensure it's not out of date
 ###
 echo " -- building renovate config"
-node scripts/build_renovate_config
-
-###
-### verify no git modifications
-###
-GIT_CHANGES="$(git ls-files --modified)"
-if [ "$GIT_CHANGES" ]; then
-  echo -e "\n${RED}ERROR: 'node scripts/build_renovate_config' caused changes to the following files:${C_RESET}\n"
-  echo -e "$GIT_CHANGES\n"
-  exit 1
-fi
+verifyRunWithoutChanges node scripts/build_renovate_config
 
 ###
 ### github-checks-reporter kill switch. Remove to disable
