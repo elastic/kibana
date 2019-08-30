@@ -17,6 +17,7 @@
  * under the License.
  */
 import React, { useState } from 'react';
+import { get } from 'lodash';
 import { DocViewRenderProps } from 'ui/registry/doc_views';
 import { DocViewTableRow } from './table_row';
 import { formatValue, arrayContainsObjects } from './table_helper';
@@ -47,7 +48,7 @@ export function DocViewTable({
         {Object.keys(flattened)
           .sort()
           .map(field => {
-            const valueRaw = flattened[field];
+            const valueRaw = get(hit._source, field, flattened[field]);
             const value = formatValue(valueRaw, formatted[field]);
             const isCollapsible = typeof value === 'string' && value.length > COLLAPSE_LINE_LENGTH;
             const isCollapsed = isCollapsible && !fieldRowOpen[field];

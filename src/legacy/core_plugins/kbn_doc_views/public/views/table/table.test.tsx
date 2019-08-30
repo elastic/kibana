@@ -225,6 +225,7 @@ describe('DocViewTable at Discover Context', () => {
         Phasellus ullamcorper ipsum rutrum nunc. Nunc nonummy metus. Vestibulum volutpat pretium libero. Cras id dui. Aenean ut',
     },
   };
+
   const props = {
     hit,
     columns: ['extension'],
@@ -256,5 +257,74 @@ describe('DocViewTable at Discover Context', () => {
     expect(btn.length).toBe(1);
     btn.simulate('click');
     expect(component.html() !== html).toBeTruthy();
+  });
+});
+
+describe('DocViewTable filter', () => {
+  const hit = {
+    _index: 'company',
+    _score: 1,
+    _source: {
+      founded_date: '31/05/2014',
+    },
+    fields: {
+      founded_date: ['2014-05-31T00:00:00.000Z'],
+    },
+  };
+
+  // @ts-ignore
+  const indexPatternWithDate = {
+    fields: {
+      byName: {
+        _index: {
+          name: '_index',
+          type: 'string',
+          scripted: false,
+          filterable: true,
+        },
+        founded_date: {
+          name: 'founded_date:',
+          type: 'date',
+          scripted: false,
+          filterable: true,
+        },
+      },
+    },
+    metaFields: ['_index', '_score'],
+    flattenHit: undefined,
+    formatHit: jest.fn(doc => doc),
+  } as IndexPattern;
+
+  indexPatternWithDate.flattenHit = flattenHitWrapper(
+    indexPatternWithDate,
+    indexPatternWithDate.metaFields
+  );
+
+  const props = {
+    hit,
+    columns: ['_source'],
+    indexPattern: indexPatternWithDate,
+    filter: jest.fn(),
+  };
+  const component = mount(<DocViewTable {...props} />);
+
+  afterEach(() => {
+    props.filter.mockReset();
+  });
+
+  it('able to filter by meta fields', () => {
+    const row = findTestSubject(component, 'tableDocViewRow-_index');
+    const btn = findTestSubject(row, 'addInclusiveFilterButton');
+    expect(btn.length).toBe(1);
+    btn.simulate('click');
+    expect(props.filter.mock.calls[0][1]).toBe(hit._index);
+  });
+
+  it('takes raw value of _source fields', () => {
+    const row = findTestSubject(component, 'tableDocViewRow-founded_date');
+    const btn = findTestSubject(row, 'addInclusiveFilterButton');
+    expect(btn.length).toBe(1);
+    btn.simulate('click');
+    expect(props.filter.mock.calls[0][1]).toBe(hit._source.founded_date);
   });
 });
