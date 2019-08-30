@@ -11,11 +11,11 @@ export function LensPageProvider({ getService }: FtrProviderContext) {
 
   return {
     async openIndexPatternFiltersPopover() {
-      await testSubjects.click('indexPatternTypeFilterButton');
+      await testSubjects.click('lnsIndexPatternTypeFilterButton');
     },
 
     async toggleExistenceFilter() {
-      await testSubjects.click('emptyFilter');
+      await testSubjects.click('lnsEmptyFilter');
     },
 
     async findAllFields() {

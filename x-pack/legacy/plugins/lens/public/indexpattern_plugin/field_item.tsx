@@ -5,8 +5,6 @@
  */
 
 import React from 'react';
-// @ts-ignore
-import { fieldFormats } from '../../../../../../src/legacy/ui/public/registry/field_formats';
 import { IndexPattern, IndexPatternField, DraggedField } from './indexpattern';
 import { DragDrop } from '../drag_drop';
 import { FieldIcon } from './field_icon';

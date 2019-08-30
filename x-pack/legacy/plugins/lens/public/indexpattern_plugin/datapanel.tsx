@@ -8,7 +8,6 @@ import { mapValues, uniq } from 'lodash';
 import React, { useState, useEffect, memo, useCallback } from 'react';
 import {
   EuiComboBox,
-  EuiFieldSearch,
   EuiLoadingSpinner,
   // @ts-ignore
   EuiHighlight,
@@ -17,13 +16,17 @@ import {
   EuiTitle,
   EuiButtonEmpty,
   EuiFilterGroup,
-  EuiFilterButton,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiContextMenuPanelProps,
   EuiPopover,
+  EuiPopoverTitle,
+  EuiPopoverFooter,
   EuiCallOut,
   EuiText,
+  EuiFormControlLayout,
+  EuiSwitch,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -198,7 +201,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   if (Object.keys(indexPatterns).length === 0) {
     return (
       <EuiFlexGroup
-        gutterSize="s"
+        gutterSize="m"
         className="lnsIndexPatternDataPanel"
         direction="column"
         responsive={false}
@@ -399,56 +402,49 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             responsive={false}
           >
             <EuiFlexItem grow={true}>
-              <EuiFieldSearch
-                placeholder={i18n.translate('xpack.lens.indexPatterns.filterByNameLabel', {
-                  defaultMessage: 'Search fields',
-                  description:
-                    'Search the list of fields in the index pattern for the provided text',
-                })}
-                value={localState.nameFilter}
-                onChange={e => {
-                  setLocalState({ ...localState, nameFilter: e.target.value });
-                }}
-                aria-label={i18n.translate('xpack.lens.indexPatterns.filterByNameAriaLabel', {
-                  defaultMessage: 'Search fields',
-                })}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFilterGroup>
-                <EuiPopover
-                  id="dataPanelTypeFilter"
-                  panelClassName="euiFilterGroup__popoverPanel"
-                  panelPaddingSize="none"
-                  isOpen={localState.isTypeFilterOpen}
-                  closePopover={() =>
-                    setLocalState(s => ({ ...localState, isTypeFilterOpen: false }))
-                  }
-                  button={
-                    <EuiFilterButton
-                      onClick={() =>
-                        setLocalState(s => ({
-                          ...s,
-                          isTypeFilterOpen: !localState.isTypeFilterOpen,
-                        }))
-                      }
-                      iconType="arrowDown"
-                      data-test-subj="indexPatternTypeFilterButton"
-                      isSelected={localState.isTypeFilterOpen}
-                      numFilters={availableFieldTypes.length + 1}
-                      hasActiveFilters={localState.typeFilter.length > 0 || showEmptyFields}
-                      numActiveFilters={localState.typeFilter.length + (showEmptyFields ? 1 : 0)}
-                    >
-                      {i18n.translate('xpack.lens.indexPatterns.filtersLabel', {
-                        defaultMessage: 'Filters',
+              <EuiFormControlLayout
+                prepend={
+                  <EuiPopover
+                    id="dataPanelTypeFilter"
+                    panelClassName="euiFilterGroup__popoverPanel"
+                    panelPaddingSize="none"
+                    anchorPosition="downLeft"
+                    isOpen={localState.isTypeFilterOpen}
+                    closePopover={() =>
+                      setLocalState(s => ({ ...localState, isTypeFilterOpen: false }))
+                    }
+                    button={
+                      <EuiButtonEmpty
+                        size="s"
+                        onClick={() => {
+                          setLocalState(s => ({
+                            ...s,
+                            isTypeFilterOpen: !localState.isTypeFilterOpen,
+                          }));
+                        }}
+                        data-test-subj="lnsIndexPatternTypeFilterButton"
+                        title={i18n.translate('xpack.lens.indexPatterns.toggleFiltersPopover', {
+                          defaultMessage: 'Toggle filters for index pattern',
+                        })}
+                        aria-label={i18n.translate(
+                          'xpack.lens.indexPatterns.toggleFiltersPopover',
+                          {
+                            defaultMessage: 'Toggle filters for index pattern',
+                          }
+                        )}
+                      >
+                        <EuiIcon type="filter" size="m" />
+                      </EuiButtonEmpty>
+                    }
+                  >
+                    <EuiPopoverTitle>
+                      {i18n.translate('xpack.lens.indexPatterns.filterByTypeLabel', {
+                        defaultMessage: 'Filter by type',
                       })}
-                    </EuiFilterButton>
-                  }
-                >
-                  <FixedEuiContextMenuPanel
-                    watchedItemProps={['icon', 'disabled']}
-                    items={(availableFieldTypes as DataType[])
-                      .map(type => (
+                    </EuiPopoverTitle>
+                    <FixedEuiContextMenuPanel
+                      watchedItemProps={['icon', 'disabled']}
+                      items={(availableFieldTypes as DataType[]).map(type => (
                         <EuiContextMenuItem
                           key={type}
                           icon={localState.typeFilter.includes(type) ? 'check' : 'empty'}
@@ -464,24 +460,57 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                         >
                           <FieldIcon type={type} /> {fieldTypeNames[type]}
                         </EuiContextMenuItem>
-                      ))
-                      .concat([
-                        <EuiContextMenuItem
-                          key="empty"
-                          icon={showEmptyFields ? 'empty' : 'check'}
-                          data-test-subj="emptyFilter"
-                          onClick={() => {
-                            onToggleEmptyFields();
-                          }}
-                        >
-                          {i18n.translate('xpack.lens.datatypes.hiddenFields', {
-                            defaultMessage: 'Only show fields that contain data',
-                          })}
-                        </EuiContextMenuItem>,
-                      ])}
-                  />
-                </EuiPopover>
-              </EuiFilterGroup>
+                      ))}
+                    />
+                    <EuiPopoverFooter>
+                      <EuiSwitch
+                        checked={!showEmptyFields}
+                        onChange={() => {
+                          onToggleEmptyFields();
+                        }}
+                        label={i18n.translate('xpack.lens.datatypes.hiddenFields', {
+                          defaultMessage: 'Only show fields that contain data',
+                        })}
+                        data-test-subj="lnsEmptyFilter"
+                      />
+                    </EuiPopoverFooter>
+                  </EuiPopover>
+                }
+                clear={{
+                  title: i18n.translate('xpack.lens.indexPatterns.clearFiltersLabel', {
+                    defaultMessage: 'Clear name and type filters',
+                  }),
+                  'aria-label': i18n.translate('xpack.lens.indexPatterns.clearFiltersLabel', {
+                    defaultMessage: 'Clear name and type filters',
+                  }),
+                  onClick: () => {
+                    setLocalState(s => ({
+                      ...s,
+                      nameFilter: '',
+                      typeFilter: [],
+                    }));
+                  },
+                }}
+              >
+                <input
+                  className="euiFieldText"
+                  placeholder={i18n.translate('xpack.lens.indexPatterns.filterByNameLabel', {
+                    defaultMessage: 'Search fields',
+                    description:
+                      'Search the list of fields in the index pattern for the provided text',
+                  })}
+                  value={localState.nameFilter}
+                  onChange={e => {
+                    setLocalState({ ...localState, nameFilter: e.target.value });
+                  }}
+                  aria-label={i18n.translate('xpack.lens.indexPatterns.filterByNameAriaLabel', {
+                    defaultMessage: 'Search fields',
+                  })}
+                />
+              </EuiFormControlLayout>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFilterGroup></EuiFilterGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
           <div
