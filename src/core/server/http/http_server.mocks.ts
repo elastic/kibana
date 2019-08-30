@@ -18,6 +18,7 @@
  */
 import { Request } from 'hapi';
 import { merge } from 'lodash';
+import { Socket } from 'net';
 
 import querystring from 'querystring';
 
@@ -37,6 +38,7 @@ interface RequestFixtureOptions {
   query?: Record<string, any>;
   path?: string;
   method?: RouteMethod;
+  socket?: Socket;
 }
 
 function createKibanaRequestMock({
@@ -46,6 +48,7 @@ function createKibanaRequestMock({
   body = {},
   query = {},
   method = 'get',
+  socket = new Socket(),
 }: RequestFixtureOptions = {}) {
   const queryString = querystring.stringify(query);
   return KibanaRequest.from(
@@ -63,7 +66,7 @@ function createKibanaRequestMock({
       },
       route: { settings: {} },
       raw: {
-        req: {},
+        req: { socket },
       },
     } as any,
     {

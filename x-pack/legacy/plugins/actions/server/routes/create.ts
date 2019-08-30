@@ -28,6 +28,7 @@ export function createRoute(server: Hapi.Server) {
     method: 'POST',
     path: `/api/action`,
     options: {
+      tags: ['access:actions-all'],
       validate: {
         options: {
           abortEarly: false,

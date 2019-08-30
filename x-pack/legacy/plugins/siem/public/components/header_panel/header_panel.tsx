@@ -14,6 +14,7 @@ import { InspectButton } from '../inspect';
 const Header = styled.header<{ border?: boolean }>`
   ${props => css`
     margin-bottom: ${props.theme.eui.euiSizeL};
+    user-select: text;
 
     ${props.border &&
       `
@@ -38,27 +39,33 @@ export interface HeaderPanelProps {
 export const HeaderPanel = pure<HeaderPanelProps>(
   ({ border, children, id, showInspect = false, subtitle, title, tooltip }) => (
     <Header border={border}>
-      <EuiFlexGroup alignItems="center" gutterSize="m">
+      <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
-          <EuiTitle>
-            <h2 data-test-subj="panel_headline_title">
-              {title}
-              {tooltip && (
-                <>
-                  {' '}
-                  <EuiIconTip color="subdued" content={tooltip} size="l" type="iInCircle" />
-                </>
-              )}
-            </h2>
-          </EuiTitle>
+          <EuiFlexGroup alignItems="center" responsive={false}>
+            <EuiFlexItem>
+              <EuiTitle>
+                <h2 data-test-subj="panel_headline_title">
+                  {title}
+                  {tooltip && (
+                    <>
+                      {' '}
+                      <EuiIconTip color="subdued" content={tooltip} size="l" type="iInCircle" />
+                    </>
+                  )}
+                </h2>
+              </EuiTitle>
 
-          <EuiText color="subdued" size="s">
-            {subtitle}
-          </EuiText>
-        </EuiFlexItem>
+              <EuiText color="subdued" data-test-subj="subtitle" size="xs">
+                {subtitle}
+              </EuiText>
+            </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          {id && <InspectButton queryId={id} inspectIndex={0} show={showInspect} title={title} />}
+            {id && (
+              <EuiFlexItem grow={false}>
+                <InspectButton queryId={id} inspectIndex={0} show={showInspect} title={title} />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlexItem>
 
         {children && <EuiFlexItem grow={false}>{children}</EuiFlexItem>}

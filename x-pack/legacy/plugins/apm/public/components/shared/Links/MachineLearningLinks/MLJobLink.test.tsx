@@ -8,7 +8,7 @@ import { Location } from 'history';
 import React from 'react';
 import { getRenderedHref } from '../../../../utils/testHelpers';
 import { MLJobLink } from './MLJobLink';
-import * as hooks from '../../../../hooks/useCore';
+import * as kibanaCore from '../../../../../../observability/public/context/kibana_core';
 import { InternalCoreStart } from 'src/core/public';
 
 describe('MLJobLink', () => {
@@ -21,7 +21,7 @@ describe('MLJobLink', () => {
       }
     } as unknown) as InternalCoreStart;
 
-    spyOn(hooks, 'useCore').and.returnValue(coreMock);
+    spyOn(kibanaCore, 'useKibanaCore').and.returnValue(coreMock);
   });
 
   afterEach(() => {

@@ -418,8 +418,12 @@ describe('Flyout', () => {
         },
         obj: {
           searchSource: {
-            getOwnField: () => 'MyIndexPattern*',
+            getOwnField: (field) => {
+              if(field === 'index') { return 'MyIndexPattern*';}
+              if(field === 'filter') { return [{ meta: { index: 'filterIndex' } }];}
+            },
           },
+          _serialize: () => { return { references: [{ id: 'MyIndexPattern*' }, { id: 'filterIndex' }] };},
         },
       },
     ];
@@ -477,7 +481,17 @@ describe('Flyout', () => {
                 type: 'index-pattern',
               },
             ],
-          },
+          }, {
+            'existingIndexPatternId': 'filterIndex',
+            'list': [
+              {
+                'id': 'filterIndex',
+                'title': 'MyIndexPattern*',
+                'type': 'index-pattern',
+              },
+            ],
+            'newIndexPatternId': undefined,
+          }
         ],
       });
     });

@@ -17,11 +17,17 @@
  * under the License.
  */
 
+import { PersistedState } from 'ui/persisted_state';
+import { AggConfigs } from 'ui/vis/agg_configs';
 import { Vis } from './../..';
 
 export interface VisOptionsProps<VisParamType = unknown> {
+  aggs: AggConfigs;
   hasHistogramAgg: boolean;
   stateParams: VisParamType;
   vis: Vis;
+  uiState: PersistedState;
   setValue<T extends keyof VisParamType>(paramName: T, value: VisParamType[T]): void;
+  setValidity(isValid: boolean): void;
+  setTouched(isTouched: boolean): void;
 }

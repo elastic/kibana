@@ -5,7 +5,8 @@
  */
 
 import React, { Fragment, FC, useContext, useEffect, useState, useReducer } from 'react';
-import { EuiHorizontalRule } from '@elastic/eui';
+import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { PopulationJobCreator, isPopulationJobCreator } from '../../../../../common/job_creator';
@@ -159,11 +160,7 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
       ...defaultChartSettings,
       intervalMs: interval.getInterval().asMilliseconds(),
     };
-    if (aggFieldPairList.length > 2) {
-      cs.cols = 3;
-      cs.height = '150px';
-      cs.intervalMs = cs.intervalMs * 3;
-    } else if (aggFieldPairList.length > 1) {
+    if (aggFieldPairList.length > 1) {
       cs.cols = 2;
       cs.height = '200px';
       cs.intervalMs = cs.intervalMs * 2;
@@ -234,10 +231,14 @@ export const PopulationDetectors: FC<Props> = ({ isActive, setIsValid }) => {
         </Fragment>
       )}
 
-      {isActive === false && splitField === null && (
+      {isActive === false && splitField !== null && (
         <Fragment>
-          {/* Population label TODO */}
-          {splitField !== null && <EuiHorizontalRule margin="l" />}
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.pickFieldsStep.populationView.splitFieldTitle"
+            defaultMessage="Population split by {field}"
+            values={{ field: splitField.name }}
+          />
+          <EuiSpacer />
         </Fragment>
       )}
 

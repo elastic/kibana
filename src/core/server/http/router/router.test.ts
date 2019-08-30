@@ -20,10 +20,12 @@
 import { Router } from './router';
 import { loggingServiceMock } from '../../logging/logging_service.mock';
 const logger = loggingServiceMock.create().get();
+const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
+
 describe('Router', () => {
   describe('Options', () => {
     it('throws if validation for a route is not defined explicitly', () => {
-      const router = new Router('', logger);
+      const router = new Router('', logger, enhanceWithContext);
       expect(
         // we use 'any' because validate is a required field
         () => router.get({ path: '/' } as any, (context, req, res) => res.ok({}))
@@ -32,7 +34,7 @@ describe('Router', () => {
       );
     });
     it('throws if validation for a route is declared wrong', () => {
-      const router = new Router('', logger);
+      const router = new Router('', logger, enhanceWithContext);
       expect(() =>
         router.get(
           // we use 'any' because validate requires @kbn/config-schema usage

@@ -36,7 +36,7 @@ export class ToolbarOverlay extends React.Component {
         className="mapToolbarOverlay"
         responsive={false}
         direction="column"
-        alignItems="flexEnd"
+        alignItems="flexStart"
         gutterSize="s"
       >
 

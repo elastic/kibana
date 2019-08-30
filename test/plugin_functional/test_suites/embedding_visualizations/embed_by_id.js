@@ -47,7 +47,6 @@ export default function ({ getService }) {
   }
 
   describe('embed by id', function describeIndexTests() {
-
     describe('vis on timebased data without date histogram', () => {
       before(async () => {
         await selectVis('timebased_no-datehistogram');
