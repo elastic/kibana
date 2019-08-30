@@ -16,49 +16,40 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+/* eslint-disable @kbn/eslint/no-restricted-paths */
 import 'ui/autoload/all';
 import 'uiExports/embeddableFactories';
 import 'uiExports/embeddableActions';
 
+import { npSetup, npStart } from 'ui/new_platform';
+import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
+import { ExitFullScreenButton } from 'ui/exit_full_screen';
 import uiRoutes from 'ui/routes';
-
 // @ts-ignore
 import { uiModules } from 'ui/modules';
-
-import { Plugin } from '../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { start } from '../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
-import { npStart } from '../../../../../src/legacy/ui/public/new_platform';
+/* eslint-enable @kbn/eslint/no-restricted-paths */
 
 import template from './index.html';
 
-export interface PluginShim {
-  embeddable: ReturnType<Plugin['setup']>;
-}
+import { plugin } from '.';
+import {
+  setup as embeddableSetup,
+  start as embeddableStart,
+} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 
-const { inspector } = npStart.plugins;
+const pluginInstance = plugin({} as any);
 
-export interface CoreShim {
-  inspector: typeof inspector;
-  onRenderComplete: (listener: () => void) => void;
-}
-
-const plugins: PluginShim = {
-  embeddable: start,
-};
+export const setup = pluginInstance.setup(npSetup.core, {
+  embeddable: embeddableSetup,
+  inspector: npSetup.plugins.inspector,
+  __LEGACY: {
+    SavedObjectFinder,
+    ExitFullScreenButton,
+  },
+});
 
 let rendered = false;
 const onRenderCompleteListeners: Array<() => void> = [];
-const coreShim: CoreShim = {
-  inspector,
-  onRenderComplete: (renderCompleteListener: () => void) => {
-    if (rendered) {
-      renderCompleteListener();
-    } else {
-      onRenderCompleteListeners.push(renderCompleteListener);
-    }
-  },
-};
 
 uiRoutes.enable();
 uiRoutes.defaults(/\embeddable_explorer/, {});
@@ -72,9 +63,18 @@ uiRoutes.when('/', {
   },
 });
 
-export function createShim(): { core: CoreShim; plugins: PluginShim } {
-  return {
-    core: coreShim,
-    plugins,
-  };
-}
+export const start = pluginInstance.start(npStart.core, {
+  embeddable: embeddableStart,
+  inspector: npStart.plugins.inspector,
+  __LEGACY: {
+    SavedObjectFinder,
+    ExitFullScreenButton,
+    onRenderComplete: (renderCompleteListener: () => void) => {
+      if (rendered) {
+        renderCompleteListener();
+      } else {
+        onRenderCompleteListeners.push(renderCompleteListener);
+      }
+    },
+  },
+});
