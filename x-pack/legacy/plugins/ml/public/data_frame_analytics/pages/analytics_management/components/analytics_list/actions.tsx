@@ -13,7 +13,9 @@ import {
   createPermissionFailureMessage,
 } from '../../../../../privilege/check_privilege';
 
-import { getResultsUrl, DataFrameAnalyticsListRow, DATA_FRAME_TASK_STATE } from './common';
+import { isOutlierAnalysis } from '../../../../common/analytics';
+
+import { getResultsUrl, isDataFrameAnalyticsRunning, DataFrameAnalyticsListRow } from './common';
 import { stopAnalytics } from '../../services/analytics_service';
 
 import { StartAction } from './action_start';
@@ -28,23 +30,25 @@ export const getActions = () => {
       render: (item: DataFrameAnalyticsListRow) => {
         return (
           <EuiButtonEmpty
-            href={getResultsUrl(item.id)}
+            disabled={!isOutlierAnalysis(item.config.analysis)}
+            onClick={() => (window.location.href = getResultsUrl(item.id))}
             size="xs"
             color="text"
             iconType="visTable"
-            aria-label={'View'}
+            aria-label={i18n.translate('xpack.ml.dataframe.analyticsList.viewAriaLabel', {
+              defaultMessage: 'View',
+            })}
           >
-            {'View'}
+            {i18n.translate('xpack.ml.dataframe.analyticsList.viewActionName', {
+              defaultMessage: 'View',
+            })}
           </EuiButtonEmpty>
         );
       },
     },
     {
       render: (item: DataFrameAnalyticsListRow) => {
-        if (
-          item.stats.state !== DATA_FRAME_TASK_STATE.STARTED &&
-          item.stats.state !== DATA_FRAME_TASK_STATE.REINDEXING
-        ) {
+        if (!isDataFrameAnalyticsRunning(item.stats)) {
           return <StartAction item={item} />;
         }
 

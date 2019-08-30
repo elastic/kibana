@@ -28,7 +28,6 @@ export function fetchAnchorProvider(indexPatterns, Private) {
 
   return async function fetchAnchor(
     indexPatternId,
-    anchorType,
     anchorId,
     sort
   ) {
