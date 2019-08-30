@@ -36,11 +36,14 @@ export function getApmConfig(legacyMetadata) {
    * we use the injected metadata from the server to extract the
    * app URL path to be used for page-load transaction
    */
-  const navLink = legacyMetadata.app._navLink.toJSON();
+  const app = legacyMetadata.app;
+  const navLink = app.getNavLink();
+  const pageUrl = navLink ? navLink.toJSON().url : app._url;
 
   return {
+    active: false,
     serviceName: 'kibana-frontend',
     serverUrl: 'http://localhost:8200',
-    pageLoadTransactionName: navLink.url,
+    pageLoadTransactionName: pageUrl,
   };
 }
