@@ -18,6 +18,8 @@
  */
 
 import 'brace';
+import 'brace/ext/language_tools';
+import 'brace/ext/searchbox';
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { npSetup, npStart } from 'ui/new_platform';

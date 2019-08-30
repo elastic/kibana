@@ -19,11 +19,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-// import { showSettingsModal } from './settings_show_modal';
-
-// help
-// import { showHelpPanel } from './help_show_panel';
-
 interface Props {
   onClickHistory: () => void;
   onClickSettings: () => void;

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const ace = require('brace');
+import  ace from 'brace';
 require('./output_highlight_rules');
 
 

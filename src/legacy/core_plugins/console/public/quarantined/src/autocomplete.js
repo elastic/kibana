@@ -28,7 +28,6 @@ import { populateContext } from './autocomplete/engine';
 import { URL_PATH_END_MARKER } from './autocomplete/components';
 import _ from 'lodash';
 import ace from 'brace';
-import 'brace/ext/language_tools';
 import { i18n } from '@kbn/i18n';
 
 const AceRange = ace.acequire('ace/range').Range;

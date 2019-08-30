@@ -17,8 +17,6 @@
  * under the License.
  */
 
-require('brace');
-require('brace/ext/searchbox');
 import Autocomplete from './autocomplete';
 import mappings from './mappings';
 const SenseEditor = require('./sense_editor/editor');

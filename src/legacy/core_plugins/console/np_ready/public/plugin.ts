@@ -20,8 +20,8 @@
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { PluginInitializerContext, Plugin, CoreStart } from '../../../../../core/public';
-import { boot } from './app';
 import { XCoreSetup, XPluginSet } from './legacy';
+import { boot } from './app';
 
 export class ConsoleUIPlugin implements Plugin<any, any> {
   // @ts-ignore
