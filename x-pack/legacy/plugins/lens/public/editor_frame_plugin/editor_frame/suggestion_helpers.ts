@@ -75,37 +75,34 @@ export function getSuggestions({
           .map(suggestion => ({ ...suggestion, datasourceId }))
       );
     })
-  ).map((suggestion, index) => ({
-    ...suggestion,
-    table: { ...suggestion.table, datasourceSuggestionId: index },
-  }));
-
-  const datasourceTables = datasourceTableSuggestions.map(({ table }) => table);
+  );
 
   return _.flatten(
-    Object.entries(visualizationMap).map(([visualizationId, visualization]) => {
-      return visualization
-        .getSuggestions({
-          tables: datasourceTables,
-          state: visualizationId === activeVisualizationId ? visualizationState : undefined,
+    Object.entries(visualizationMap).map(([visualizationId, visualization]) =>
+      _.flatten(
+        datasourceTableSuggestions.map(datasourceSuggestion => {
+          const table = datasourceSuggestion.table;
+          return visualization
+            .getSuggestions({
+              table,
+              state: visualizationId === activeVisualizationId ? visualizationState : undefined,
+            })
+            .map(({ state, ...visualizationSuggestion }) => ({
+              ...visualizationSuggestion,
+              visualizationId,
+              visualizationState: state,
+              keptLayerIds:
+                visualizationId !== activeVisualizationId
+                  ? [datasourceSuggestion.table.layerId]
+                  : allLayerIds,
+              datasourceState: datasourceSuggestion.state,
+              datasourceId: datasourceSuggestion.datasourceId,
+              columns: table.columns.length,
+              changeType: table.changeType,
+            }));
         })
-        .map(({ datasourceSuggestionId, state, ...suggestion }) => {
-          const datasourceSuggestion = datasourceTableSuggestions[datasourceSuggestionId];
-          return {
-            ...suggestion,
-            visualizationId,
-            visualizationState: state,
-            keptLayerIds:
-              visualizationId !== activeVisualizationId
-                ? [datasourceSuggestion.table.layerId]
-                : allLayerIds,
-            datasourceState: datasourceSuggestion.state,
-            datasourceId: datasourceSuggestion.datasourceId,
-            columns: datasourceSuggestion.table.columns.length,
-            changeType: datasourceSuggestion.table.changeType,
-          };
-        });
-    })
+      )
+    )
   ).sort((a, b) => b.score - a.score);
 }
 

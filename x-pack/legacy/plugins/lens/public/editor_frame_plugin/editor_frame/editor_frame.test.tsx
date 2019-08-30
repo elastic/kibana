@@ -24,12 +24,11 @@ import { EuiPanel, EuiToolTip } from '@elastic/eui';
 // datasources to be processed by its callers.
 const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
 
-function generateSuggestion(datasourceSuggestionId = 1, state = {}): DatasourceSuggestion {
+function generateSuggestion(state = {}): DatasourceSuggestion {
   return {
     state,
     table: {
       columns: [],
-      datasourceSuggestionId,
       isMultiRow: true,
       layerId: 'first',
       changeType: 'unchanged',
@@ -905,7 +904,6 @@ describe('editor_frame', () => {
           state: {},
           table: {
             columns: [],
-            datasourceSuggestionId: 0,
             isMultiRow: true,
             layerId: 'first',
             changeType: 'unchanged',
@@ -989,7 +987,6 @@ describe('editor_frame', () => {
         {
           title: 'Suggested vis',
           score: 1,
-          datasourceSuggestionId: 0,
           state: initialState,
           previewIcon: 'empty',
         },
@@ -1079,28 +1076,24 @@ describe('editor_frame', () => {
               ...mockVisualization,
               getSuggestions: () => [
                 {
-                  datasourceSuggestionId: 0,
                   score: 0.1,
                   state: {},
                   title: 'Suggestion6',
                   previewIcon: 'empty',
                 },
                 {
-                  datasourceSuggestionId: 0,
                   score: 0.5,
                   state: {},
                   title: 'Suggestion3',
                   previewIcon: 'empty',
                 },
                 {
-                  datasourceSuggestionId: 0,
                   score: 0.7,
                   state: {},
                   title: 'Suggestion2',
                   previewIcon: 'empty',
                 },
                 {
-                  datasourceSuggestionId: 0,
                   score: 0.8,
                   state: {},
                   title: 'Suggestion1',
@@ -1112,14 +1105,12 @@ describe('editor_frame', () => {
               ...mockVisualization,
               getSuggestions: () => [
                 {
-                  datasourceSuggestionId: 0,
                   score: 0.4,
                   state: {},
                   title: 'Suggestion5',
                   previewIcon: 'empty',
                 },
                 {
-                  datasourceSuggestionId: 0,
                   score: 0.45,
                   state: {},
                   title: 'Suggestion4',
@@ -1163,7 +1154,6 @@ describe('editor_frame', () => {
               ...mockVisualization,
               getSuggestions: () => [
                 {
-                  datasourceSuggestionId: 0,
                   score: 0.8,
                   state: suggestionVisState,
                   title: 'Suggestion1',
@@ -1222,14 +1212,12 @@ describe('editor_frame', () => {
               ...mockVisualization,
               getSuggestions: () => [
                 {
-                  datasourceSuggestionId: 0,
                   score: 0.2,
                   state: {},
                   title: 'Suggestion1',
                   previewIcon: 'empty',
                 },
                 {
-                  datasourceSuggestionId: 0,
                   score: 0.8,
                   state: suggestionVisState,
                   title: 'Suggestion2',
@@ -1279,14 +1267,12 @@ describe('editor_frame', () => {
               ...mockVisualization,
               getSuggestions: () => [
                 {
-                  datasourceSuggestionId: 0,
                   score: 0.2,
                   state: {},
                   title: 'Suggestion1',
                   previewIcon: 'empty',
                 },
                 {
-                  datasourceSuggestionId: 0,
                   score: 0.6,
                   state: {},
                   title: 'Suggestion2',
@@ -1298,7 +1284,6 @@ describe('editor_frame', () => {
               ...mockVisualization2,
               getSuggestions: () => [
                 {
-                  datasourceSuggestionId: 0,
                   score: 0.8,
                   state: suggestionVisState,
                   title: 'Suggestion3',

@@ -8,14 +8,9 @@ import { getSuggestions } from './suggestion_helpers';
 import { createMockVisualization, createMockDatasource, DatasourceMock } from '../mocks';
 import { TableSuggestion, DatasourceSuggestion } from '../../types';
 
-const generateSuggestion = (
-  datasourceSuggestionId: number = 0,
-  state = {},
-  layerId: string = 'first'
-): DatasourceSuggestion => ({
+const generateSuggestion = (state = {}, layerId: string = 'first'): DatasourceSuggestion => ({
   state,
   table: {
-    datasourceSuggestionId,
     columns: [],
     isMultiRow: false,
     layerId,
@@ -58,7 +53,6 @@ describe('suggestion helpers', () => {
           ...mockVisualization,
           getSuggestions: () => [
             {
-              datasourceSuggestionId: 0,
               score: 0.5,
               title: 'Test',
               state: suggestedState,
@@ -88,14 +82,12 @@ describe('suggestion helpers', () => {
           ...mockVisualization1,
           getSuggestions: () => [
             {
-              datasourceSuggestionId: 0,
               score: 0.5,
               title: 'Test',
               state: {},
               previewIcon: 'empty',
             },
             {
-              datasourceSuggestionId: 0,
               score: 0.5,
               title: 'Test2',
               state: {},
@@ -107,7 +99,6 @@ describe('suggestion helpers', () => {
           ...mockVisualization2,
           getSuggestions: () => [
             {
-              datasourceSuggestionId: 0,
               score: 0.5,
               title: 'Test3',
               state: {},
@@ -193,14 +184,12 @@ describe('suggestion helpers', () => {
           ...mockVisualization1,
           getSuggestions: () => [
             {
-              datasourceSuggestionId: 0,
               score: 0.2,
               title: 'Test',
               state: {},
               previewIcon: 'empty',
             },
             {
-              datasourceSuggestionId: 0,
               score: 0.8,
               title: 'Test2',
               state: {},
@@ -212,7 +201,6 @@ describe('suggestion helpers', () => {
           ...mockVisualization2,
           getSuggestions: () => [
             {
-              datasourceSuggestionId: 0,
               score: 0.6,
               title: 'Test3',
               state: {},
@@ -235,14 +223,12 @@ describe('suggestion helpers', () => {
     const mockVisualization1 = createMockVisualization();
     const mockVisualization2 = createMockVisualization();
     const table1: TableSuggestion = {
-      datasourceSuggestionId: 0,
       columns: [],
       isMultiRow: true,
       layerId: 'first',
       changeType: 'unchanged',
     };
     const table2: TableSuggestion = {
-      datasourceSuggestionId: 1,
       columns: [],
       isMultiRow: true,
       layerId: 'first',
@@ -262,10 +248,10 @@ describe('suggestion helpers', () => {
       datasourceMap,
       datasourceStates,
     });
-    expect(mockVisualization1.getSuggestions.mock.calls[0][0].tables[0]).toEqual(table1);
-    expect(mockVisualization1.getSuggestions.mock.calls[0][0].tables[1]).toEqual(table2);
-    expect(mockVisualization2.getSuggestions.mock.calls[0][0].tables[0]).toEqual(table1);
-    expect(mockVisualization2.getSuggestions.mock.calls[0][0].tables[1]).toEqual(table2);
+    expect(mockVisualization1.getSuggestions.mock.calls[0][0].table).toEqual(table1);
+    expect(mockVisualization1.getSuggestions.mock.calls[1][0].table).toEqual(table2);
+    expect(mockVisualization2.getSuggestions.mock.calls[0][0].table).toEqual(table1);
+    expect(mockVisualization2.getSuggestions.mock.calls[1][0].table).toEqual(table2);
   });
 
   it('should map the suggestion ids back to the correct datasource ids and states', () => {
@@ -274,41 +260,45 @@ describe('suggestion helpers', () => {
     const tableState1 = {};
     const tableState2 = {};
     datasourceMap.mock.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
-      generateSuggestion(0, tableState1),
-      generateSuggestion(1, tableState2),
+      generateSuggestion(tableState1),
+      generateSuggestion(tableState2),
+    ]);
+    const vis1Suggestions = jest.fn();
+    vis1Suggestions.mockReturnValueOnce([
+      {
+        score: 0.3,
+        title: 'Test',
+        state: {},
+        previewIcon: 'empty',
+      },
+    ]);
+    vis1Suggestions.mockReturnValueOnce([
+      {
+        score: 0.2,
+        title: 'Test2',
+        state: {},
+        previewIcon: 'empty',
+      },
+    ]);
+    const vis2Suggestions = jest.fn();
+    vis2Suggestions.mockReturnValueOnce([]);
+    vis2Suggestions.mockReturnValueOnce([
+      {
+        score: 0.1,
+        title: 'Test3',
+        state: {},
+        previewIcon: 'empty',
+      },
     ]);
     const suggestions = getSuggestions({
       visualizationMap: {
         vis1: {
           ...mockVisualization1,
-          getSuggestions: () => [
-            {
-              datasourceSuggestionId: 0,
-              score: 0.3,
-              title: 'Test',
-              state: {},
-              previewIcon: 'empty',
-            },
-            {
-              datasourceSuggestionId: 1,
-              score: 0.2,
-              title: 'Test2',
-              state: {},
-              previewIcon: 'empty',
-            },
-          ],
+          getSuggestions: vis1Suggestions,
         },
         vis2: {
           ...mockVisualization2,
-          getSuggestions: () => [
-            {
-              datasourceSuggestionId: 1,
-              score: 0.1,
-              title: 'Test3',
-              state: {},
-              previewIcon: 'empty',
-            },
-          ],
+          getSuggestions: vis2Suggestions,
         },
       },
       activeVisualizationId: 'vis1',
@@ -367,7 +357,6 @@ describe('suggestion helpers', () => {
           ...mockVisualization1,
           getSuggestions: () => [
             {
-              datasourceSuggestionId: 0,
               score: 0.8,
               title: 'Test2',
               state: {},
@@ -379,7 +368,6 @@ describe('suggestion helpers', () => {
           ...mockVisualization2,
           getSuggestions: () => [
             {
-              datasourceSuggestionId: 0,
               score: 0.6,
               title: 'Test3',
               state: {},
