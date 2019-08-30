@@ -82,7 +82,7 @@ export function A11yProvider({ getService }: FtrProviderContext) {
         errorMsgs.push(printResult(chalk.red('VIOLATION'), result));
       }
 
-      if (errorMsgs) {
+      if (errorMsgs.length) {
         throw new Error(`a11y report:\n${errorMsgs.join('\n')}`);
       }
     }
