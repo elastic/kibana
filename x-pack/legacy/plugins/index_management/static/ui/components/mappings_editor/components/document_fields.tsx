@@ -23,7 +23,7 @@ export const DocumentFields = ({ onUpdate }: Props) => {
   const { properties, selectedPath, selectedObjectToAddProperty } = usePropertiesState();
   const dispatch = usePropertiesDispatch();
 
-  const showCreateForm = selectedObjectToAddProperty === '';
+  const isFormVisible = selectedObjectToAddProperty === ''; // an empty string means the root object "properties"
 
   useEffect(() => {
     onUpdate({
@@ -32,7 +32,7 @@ export const DocumentFields = ({ onUpdate }: Props) => {
     });
   }, [properties, selectedPath, selectedObjectToAddProperty]);
 
-  const renderCreateForm = (style = {}) => (
+  const renderForm = (style = {}) => (
     <SavePropertyProvider>
       {saveProperty => (
         <PropertyEditor
@@ -69,8 +69,8 @@ export const DocumentFields = ({ onUpdate }: Props) => {
           ))}
       </Tree>
       <EuiSpacer size="s" />
-      {showCreateForm ? (
-        renderCreateForm()
+      {isFormVisible ? (
+        renderForm()
       ) : (
         <EuiButton
           iconType="plusInCircle"
