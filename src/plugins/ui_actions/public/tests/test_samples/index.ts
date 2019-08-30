@@ -16,11 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { CONTEXT_MENU_TRIGGER } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { setup } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
-import { EditModeAction } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/test_samples/actions/edit_mode_action';
-
-const editModeAction = new EditModeAction();
-setup.registerAction(editModeAction);
-setup.attachAction(CONTEXT_MENU_TRIGGER, editModeAction.id);
+export { createRestrictedAction } from './restricted_action';
+export { createSayHelloAction } from './say_hello_action';
+export { createHelloWorldAction } from './hello_world_action';

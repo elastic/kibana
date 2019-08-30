@@ -17,21 +17,17 @@
  * under the License.
  */
 
-import { SayHelloAction } from '../test_samples/actions/say_hello_action';
-import { HelloWorldAction } from '../test_samples/actions/hello_world_action';
-import { EmptyEmbeddable } from '../test_samples/embeddables/empty_embeddable';
+import { createSayHelloAction } from '../tests/test_samples/say_hello_action';
 
-test('SayHelloAction is not compatible with not matching embeddables', async () => {
-  const sayHelloAction = new SayHelloAction(() => {});
-  const emptyEmbeddable = new EmptyEmbeddable({ id: '234' });
+test('SayHelloAction is not compatible with not matching context', async () => {
+  const sayHelloAction = createSayHelloAction((() => {}) as any);
 
-  const isCompatible = await sayHelloAction.isCompatible({ embeddable: emptyEmbeddable as any });
+  const isCompatible = await sayHelloAction.isCompatible({} as any);
   expect(isCompatible).toBe(false);
 });
 
 test('HelloWorldAction inherits isCompatible from base action', async () => {
-  const helloWorldAction = new HelloWorldAction({} as any);
-  const emptyEmbeddable = new EmptyEmbeddable({ id: '234' });
-  const isCompatible = await helloWorldAction.isCompatible({ embeddable: emptyEmbeddable });
+  const helloWorldAction = createSayHelloAction({} as any);
+  const isCompatible = await helloWorldAction.isCompatible({ name: 'Sue' });
   expect(isCompatible).toBe(true);
 });

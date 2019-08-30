@@ -17,36 +17,25 @@
  * under the License.
  */
 
-import { createApi } from '..';
-import { createDeps } from './helpers';
-import { expectError } from '../../tests/helpers';
+import React from 'react';
+import { EuiFlyout } from '@elastic/eui';
+import { CoreStart } from 'src/core/public';
+import { createAction, IAction } from '../../actions';
 
-test('can get Trigger from registry', () => {
-  const deps = createDeps();
-  const { api } = createApi(deps);
-  api.registerTrigger({
-    actionIds: [],
-    description: 'foo',
-    id: 'bar',
-    title: 'baz',
+export const HELLO_WORLD_ACTION_ID = 'HELLO_WORLD_ACTION_ID';
+
+export function createHelloWorldAction(overlays: CoreStart['overlays']): IAction {
+  return createAction({
+    type: HELLO_WORLD_ACTION_ID,
+    execute: async () => {
+      const flyoutSession = overlays.openFlyout(
+        <EuiFlyout ownFocus onClose={() => flyoutSession && flyoutSession.close()}>
+          Hello World, I am a hello world action!
+        </EuiFlyout>,
+        {
+          'data-test-subj': 'helloWorldAction',
+        }
+      );
+    },
   });
-
-  const trigger = api.getTrigger('bar');
-
-  expect(trigger).toEqual({
-    actionIds: [],
-    description: 'foo',
-    id: 'bar',
-    title: 'baz',
-  });
-});
-
-test('throws if trigger does not exist', () => {
-  const deps = createDeps();
-  const { api } = createApi(deps);
-
-  const error = expectError(() => api.getTrigger('foo'));
-
-  expect(error).toBeInstanceOf(Error);
-  expect(error.message).toMatchInlineSnapshot(`"Trigger [triggerId = foo] does not exist."`);
-});
+}

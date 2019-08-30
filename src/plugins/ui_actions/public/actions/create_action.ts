@@ -17,12 +17,20 @@
  * under the License.
  */
 
-import { EmbeddableApiPure } from './types';
+import { IAction } from './i_action';
 
-export const registerAction: EmbeddableApiPure['registerAction'] = ({ actions }) => action => {
-  if (actions.has(action.id)) {
-    throw new Error(`Action [action.id = ${action.id}] already registered in Embeddables API.`);
-  }
-
-  actions.set(action.id, action);
-};
+export function createAction<ActionContext extends {} = {}>(
+  action: { type: string; execute: IAction<ActionContext>['execute'] } & Partial<
+    IAction<ActionContext>
+  >
+): IAction<ActionContext> {
+  return {
+    getIconType: () => undefined,
+    order: 0,
+    id: action.type,
+    isCompatible: () => Promise.resolve(true),
+    getDisplayName: () => '',
+    getHref: () => undefined,
+    ...action,
+  };
+}
