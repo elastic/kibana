@@ -578,14 +578,6 @@
         ],
       },
       {
-        groupSlug: 'archiver',
-        groupName: 'archiver related packages',
-        packageNames: [
-          'archiver',
-          '@types/archiver',
-        ],
-      },
-      {
         groupSlug: 'base64-js',
         groupName: 'base64-js related packages',
         packageNames: [
@@ -647,6 +639,14 @@
         packageNames: [
           'jsonwebtoken',
           '@types/jsonwebtoken',
+        ],
+      },
+      {
+        groupSlug: 'mapbox-gl',
+        groupName: 'mapbox-gl related packages',
+        packageNames: [
+          'mapbox-gl',
+          '@types/mapbox-gl',
         ],
       },
       {

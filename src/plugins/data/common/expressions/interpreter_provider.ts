@@ -52,6 +52,14 @@ export function interpreterProvider(config: any) {
   async function invokeChain(chainArr: any, context: any): Promise<any> {
     if (!chainArr.length) return Promise.resolve(context);
 
+    // if execution was aborted return error
+    if (handlers.abortSignal && handlers.abortSignal.aborted) {
+      return createError({
+        message: 'The expression was aborted.',
+        name: 'AbortError',
+      });
+    }
+
     const chain = clone(chainArr);
     const link = chain.shift(); // Every thing in the chain will always be a function right?
     const { function: fnName, arguments: fnArgs } = link;
@@ -70,14 +78,6 @@ export function interpreterProvider(config: any) {
 
       // if something failed, just return the failure
       if (getType(newContext) === 'error') return newContext;
-
-      // if execution was aborted return error
-      if (handlers.abortSignal && handlers.abortSignal.aborted) {
-        return createError({
-          message: 'The expression was aborted.',
-          name: 'AbortError',
-        });
-      }
 
       // Continue re-invoking chain until it's empty
       return invokeChain(chain, newContext);
