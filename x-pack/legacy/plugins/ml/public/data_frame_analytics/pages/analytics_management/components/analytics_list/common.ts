@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DataFrameAnalyticsId, DataFrameAnalyticsOutlierConfig } from '../../../../common';
+import { DataFrameAnalyticsId, DataFrameAnalyticsConfig } from '../../../../common';
 
 export enum DATA_FRAME_TASK_STATE {
   ANALYZING = 'analyzing',
@@ -85,7 +85,7 @@ export function getDataFrameAnalyticsProgress(stats: DataFrameAnalyticsStats) {
 export interface DataFrameAnalyticsListRow {
   id: DataFrameAnalyticsId;
   checkpointing: object;
-  config: DataFrameAnalyticsOutlierConfig;
+  config: DataFrameAnalyticsConfig;
   mode: string;
   stats: DataFrameAnalyticsStats;
 }
