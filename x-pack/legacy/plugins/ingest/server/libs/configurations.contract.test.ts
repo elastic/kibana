@@ -136,6 +136,8 @@ describe('Configurations Lib', () => {
 
       const gottenConfigs = await libs.configuration.listVersions(newConfig.shared_id, false);
       expect(gottenConfigs.length).toBe(2);
+      expect(gottenConfigs.filter(c => c.status === 'active').length).toBe(1);
+      expect(gottenConfigs.filter(c => c.status === 'locked').length).toBe(1);
     });
   });
 });
