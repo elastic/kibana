@@ -46,7 +46,7 @@ import { ml } from '../../../../../services/ml_api_service';
 import {
   sortColumns,
   toggleSelectedField,
-  DataFrameAnalyticsOutlierConfig,
+  DataFrameAnalyticsConfig,
   EsFieldName,
   EsDoc,
   MAX_COLUMNS,
@@ -69,7 +69,7 @@ const OUTLIER_SCORE = 'outlier_score';
 
 interface GetDataFrameAnalyticsResponse {
   count: number;
-  data_frame_analytics: DataFrameAnalyticsOutlierConfig[];
+  data_frame_analytics: DataFrameAnalyticsConfig[];
 }
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
@@ -90,9 +90,7 @@ interface Props {
 }
 
 export const Exploration: FC<Props> = React.memo(({ jobId }) => {
-  const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsOutlierConfig | undefined>(
-    undefined
-  );
+  const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(25);
