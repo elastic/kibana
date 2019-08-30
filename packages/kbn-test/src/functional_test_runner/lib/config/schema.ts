@@ -18,7 +18,6 @@
  */
 
 import { dirname, resolve } from 'path';
-import { REPO_ROOT } from '@kbn/dev-utils';
 
 import Joi from 'joi';
 
