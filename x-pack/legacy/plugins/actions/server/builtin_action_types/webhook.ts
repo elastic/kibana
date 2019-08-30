@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
+import { curry } from 'lodash';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
@@ -68,12 +69,15 @@ export function getActionType(configurationUtilities: ActionsConfigurationUtilit
       secrets: SecretsSchema,
       params: ParamsSchema,
     },
-    executor,
+    executor: curry(executor)(configurationUtilities),
   };
 }
 
 // action executor
-async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionTypeExecutorResult> {
+export async function executor(
+  configurationUtilities: ActionsConfigurationUtilities,
+  execOptions: ActionTypeExecutorOptions
+): Promise<ActionTypeExecutorResult> {
   const log = (level: string, msg: string) =>
     execOptions.services.log([level, 'actions', 'webhook'], msg);
 
@@ -81,6 +85,11 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
   const { method, url, headers = {} } = execOptions.config as ActionTypeConfigType;
   const { user: username, password } = execOptions.secrets as ActionTypeSecretsType;
   const { body: data } = execOptions.params as ActionParamsType;
+
+  if (!configurationUtilities.isWhitelistedHostname(url)) {
+    log(`warn`, `error on ${id} webhook event: The target "${url}" ahs not been whitelisted`);
+    return errorRequestInvalid(id);
+  }
 
   const result: Result<AxiosResponse, AxiosError> = await promiseResult(
     axios.request({
@@ -136,6 +145,20 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
 // Action Executor Result w/ internationalisation
 function successResult(data: any): ActionTypeExecutorResult {
   return { status: 'ok', data };
+}
+
+function errorRequestInvalid(id: string): ActionTypeExecutorResult {
+  const errMessage = i18n.translate('xpack.actions.builtin.webhook.invalidRequestErrorMessage', {
+    defaultMessage:
+      'an error occurred in action "{id}" calling a remote webhook: You are not permitted to trigger this webhook',
+    values: {
+      id,
+    },
+  });
+  return {
+    status: 'error',
+    message: errMessage,
+  };
 }
 
 function errorResultInvalid(id: string, message: string): ActionTypeExecutorResult {

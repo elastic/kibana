@@ -4,9 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getActionType } from './webhook';
+import { getActionType, executor } from './webhook';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
 import { ActionsConfigurationUtilities } from '../actions_config';
+import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { Services, ActionTypeExecutorOptions } from '../types';
+
+const NO_OP_FN = () => {};
+const servicesMock: Services = {
+  log: NO_OP_FN,
+  callCluster: async (path: string, opts: any) => {},
+  savedObjectsClient: SavedObjectsClientMock.create(),
+};
 
 const configUtilsMock: ActionsConfigurationUtilities = {
   isWhitelistedHostname() {
@@ -194,5 +203,37 @@ describe('params validation', () => {
     expect(validateParams(actionType, params)).toEqual({
       ...params,
     });
+  });
+});
+
+describe('executor', () => {
+  test('webhook executor should fail if the url is not whitelisted', async () => {
+    const config: Record<string, any> = {
+      url: 'http://mylisteningserver.com:9200/endpoint',
+    };
+    const secrets: Record<string, any> = {
+      user: 'bob',
+      password: 'supersecret',
+    };
+    const params: Record<string, any> = {};
+    const result = await executor(
+      {
+        isWhitelistedHostname: uri => {
+          expect(uri).toEqual(config.url);
+          return false;
+        },
+      },
+      {
+        id: 'webhook',
+        services: servicesMock,
+        config,
+        secrets,
+        params,
+      } as ActionTypeExecutorOptions
+    );
+    expect(result.message).toMatchInlineSnapshot(
+      `"an error occurred in action \\"webhook\\" calling a remote webhook: You are not permitted to trigger this webhook"`
+    );
+    expect(result.status).toEqual('error');
   });
 });

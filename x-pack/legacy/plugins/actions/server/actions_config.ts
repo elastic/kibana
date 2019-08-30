@@ -5,6 +5,7 @@
  */
 
 import { fromNullable } from 'fp-ts/lib/Option';
+import { URL } from 'url';
 
 export interface ActionsKibanaConfig {
   enabled: boolean;
