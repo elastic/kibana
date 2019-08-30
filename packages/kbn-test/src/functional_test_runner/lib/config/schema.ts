@@ -18,6 +18,7 @@
  */
 
 import { dirname, resolve } from 'path';
+import { REPO_ROOT } from '@kbn/dev-utils';
 
 import Joi from 'joi';
 
@@ -187,6 +188,7 @@ export const schema = Joi.object()
         buildArgs: Joi.array(),
         sourceArgs: Joi.array(),
         serverArgs: Joi.array(),
+        installDir: Joi.string(),
       })
       .default(),
 
