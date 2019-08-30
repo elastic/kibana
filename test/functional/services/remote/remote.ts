@@ -73,7 +73,8 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
         mergeMap(logEntry => {
           if (logEntry.message.includes(coveragePrefix)) {
             const id = coverageCounter++;
-            const path = resolve(coverageDir, `${id}.coverage.json`);
+            const timestamp = Date.now();
+            const path = resolve(coverageDir, `${id}.${timestamp}.coverage.json`);
             const [, coverageJsonBase64] = logEntry.message.split(coveragePrefix);
             const coverageJson = Buffer.from(coverageJsonBase64, 'base64').toString('utf8');
 
