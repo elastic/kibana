@@ -151,8 +151,7 @@ export function readFieldCapsResponse(fieldCapsResponse: FieldCapsResponse): Fie
     return field.name.includes('.');
   });
 
-  // Discern which sub fields are multi fields. If the parent field is not an object or nested field
-  // the child must be a multi field.
+  // Determine the type of each sub field.
   subFields.forEach(field => {
     const parentFieldName = field.name
       .split('.')
@@ -160,9 +159,14 @@ export function readFieldCapsResponse(fieldCapsResponse: FieldCapsResponse): Fie
       .join('.');
     const parentFieldCaps = kibanaFormattedCaps.find(caps => caps.name === parentFieldName);
 
-    if (parentFieldCaps && !['object', 'nested'].includes(parentFieldCaps.type)) {
+    if (parentFieldCaps) {
       field.parent = parentFieldName;
-      field.subType = 'multi';
+      // If the parent field is not an object or nested field the child must be a multi field.
+      if (!['object', 'nested'].includes(parentFieldCaps.type)) {
+        field.subType = 'multi';
+      } else if (parentFieldCaps.type === 'nested') {
+        field.subType = 'nested';
+      }
     }
   });
 
