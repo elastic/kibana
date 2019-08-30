@@ -37,6 +37,11 @@ export class WorkspaceCommand {
       const release = await LockFile.lock(lockFile);
 
       try {
+        if (!this.repoConfig.hasOwnProperty('init')) {
+          throw new Error(
+            `RepoConfig's init comes from a prototype, this is unexpected and unsupported`
+          );
+        }
         const process = this.spawnProcess(this.repoConfig.init);
         const logFile = path.join(this.workspaceDir, 'init.log');
         const logFileStream = fs.createWriteStream(logFile, { encoding: 'utf-8', flags: 'a+' });
