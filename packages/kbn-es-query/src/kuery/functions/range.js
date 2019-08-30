@@ -105,3 +105,9 @@ function extractArguments(args) {
     return acc;
   }, {});
 }
+
+export function getTargetFields(node) {
+  const [ fieldNameArg ] = node.arguments;
+  const fieldName = nodeTypes.literal.toElasticsearchQuery(fieldNameArg);
+  return [fieldName];
+}

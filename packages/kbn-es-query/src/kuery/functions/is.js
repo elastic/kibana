@@ -24,6 +24,7 @@ import * as wildcard from '../node_types/wildcard';
 import { getPhraseScript } from '../../filters';
 import { getFields } from './utils/get_fields';
 import { getTimeZoneFromSettings } from '../../utils/get_time_zone_from_settings';
+import { nodeTypes } from '../node_types';
 
 export function buildNodeParams(fieldName, value, isPhrase = false) {
   if (_.isUndefined(fieldName)) {
@@ -147,4 +148,9 @@ export function toElasticsearchQuery(node, indexPattern = null, config = {}) {
   };
 }
 
+export function getTargetFields(node) {
+  const [ fieldNameArg ] = node.arguments;
+  const fieldName = nodeTypes.literal.toElasticsearchQuery(fieldNameArg);
+  return [fieldName];
+}
 

@@ -52,3 +52,9 @@ export function toElasticsearchQuery(node, indexPattern) {
     },
   };
 }
+
+export function getTargetFields(node) {
+  const [ fieldNameArg ] = node.arguments;
+  const fieldName = nodeTypes.literal.toElasticsearchQuery(fieldNameArg);
+  return [fieldName];
+}

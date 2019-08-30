@@ -35,3 +35,8 @@ export function toElasticsearchQuery(node, indexPattern, config) {
   };
 }
 
+export function getTargetFields(node) {
+  const [ argument ] = node.arguments;
+
+  return ast.getTargetFields(argument);
+}

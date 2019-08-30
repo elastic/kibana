@@ -79,3 +79,11 @@ export function doesKueryExpressionHaveLuceneSyntaxError(expression) {
     return (e.message.startsWith('Lucene'));
   }
 }
+
+export function getTargetFields(node) {
+  if (!node || !node.type || !nodeTypes[node.type]) {
+    throw new Error('Unknown node type');
+  }
+
+  return nodeTypes[node.type].getTargetFields(node);
+}

@@ -38,3 +38,9 @@ export function toElasticsearchQuery(node, indexPattern) {
     exists: { field: fieldName }
   };
 }
+
+export function getTargetFields(node) {
+  const { arguments: [ fieldNameArg ] } = node;
+  const fieldName = literal.toElasticsearchQuery(fieldNameArg);
+  return [fieldName];
+}

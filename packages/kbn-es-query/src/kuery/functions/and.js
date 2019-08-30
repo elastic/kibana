@@ -37,3 +37,10 @@ export function toElasticsearchQuery(node, indexPattern, config) {
   };
 }
 
+export function getTargetFields(node) {
+  const children = node.arguments || [];
+
+  children.reduce((acc, child) => {
+    return [...acc, ...ast.getTargetFields(child)];
+  }, []);
+}
