@@ -26,6 +26,6 @@ describe('Bytes', () => {
         .find(PreferenceFormattedBytes)
         .first()
         .text()
-    ).toEqual('1.177MB');
+    ).toEqual('1.2MB');
   });
 });

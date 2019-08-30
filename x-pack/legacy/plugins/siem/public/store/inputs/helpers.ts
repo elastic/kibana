@@ -131,3 +131,35 @@ export const setIsInspected = ({
     },
   };
 };
+
+export const removeGlobalLink = (state: InputsModel): InputsModel => ({
+  ...state,
+  global: {
+    ...state.global,
+    linkTo: [],
+  },
+});
+
+export const addGlobalLink = (linkToId: InputsModelId, state: InputsModel): InputsModel => ({
+  ...state,
+  global: {
+    ...state.global,
+    linkTo: [linkToId],
+  },
+});
+
+export const removeTimelineLink = (state: InputsModel): InputsModel => ({
+  ...state,
+  timeline: {
+    ...state.timeline,
+    linkTo: [],
+  },
+});
+
+export const addTimelineLink = (linkToId: InputsModelId, state: InputsModel): InputsModel => ({
+  ...state,
+  timeline: {
+    ...state.timeline,
+    linkTo: [linkToId],
+  },
+});

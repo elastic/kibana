@@ -97,6 +97,7 @@ class CodeContent extends React.PureComponent<Props, State> {
     if (!props.fileLoading) {
       return { fileLoading: props.fileLoading };
     }
+    return null;
   }
   state = {
     fileLoading: this.props.fileLoading,
