@@ -54,7 +54,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
   } = form;
 
   return (
-    <EuiForm>
+    <EuiForm className="mlDataFrameAnalyticsCreateForm">
       {requestMessages.map((requestMessage, i) => (
         <Fragment key={i}>
           <EuiCallOut
