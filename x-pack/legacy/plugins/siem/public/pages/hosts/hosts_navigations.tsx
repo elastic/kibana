@@ -10,11 +10,10 @@ import React from 'react';
 import * as i18n from './translations';
 
 import { NavTab } from '../../components/navigation/type';
-import { EventsTable, HostsTable, UncommonProcessTable } from '../../components/page/hosts';
+import { HostsTable, UncommonProcessTable } from '../../components/page/hosts';
 
 import { HostsQuery } from '../../containers/hosts';
 import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
-import { EventsQuery } from '../../containers/events';
 import { AnomaliesHostTable } from '../../components/ml/tables/anomalies_host_table';
 import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
 import { InspectQuery, Refetch } from '../../store/inputs/model';
@@ -24,6 +23,7 @@ import { manageQuery } from '../../components/page/manage_query';
 import { AuthenticationsQuery } from '../../containers/authentications';
 import { ESTermQuery } from '../../../common/typed_json';
 import { HostsTableType } from '../../store/hosts/model';
+import { StatefulEventsViewer } from '../../components/events_viewer';
 
 const getTabsOnHostsUrl = (tabName: HostsTableType) => `#/hosts/${tabName}`;
 const getTabsOnHostDetailsUrl = (hostName: string, tabName: HostsTableType) => {
@@ -123,6 +123,7 @@ interface OwnProps {
   startDate: number;
   endDate: number;
   filterQuery?: string | ESTermQuery;
+  kqlQueryExpression: string;
 }
 export type HostsComponentsQueryProps = OwnProps & {
   indexPattern: StaticIndexPattern;
@@ -149,7 +150,6 @@ export type AnomaliesQueryTabBodyProps = OwnProps & {
 
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
 const HostsTableManage = manageQuery(HostsTable);
-const EventsTableManage = manageQuery(EventsTable);
 const UncommonProcessTableManage = manageQuery(UncommonProcessTable);
 
 export const HostsQueryTabBody = ({
@@ -284,36 +284,17 @@ export const AnomaliesTabBody = ({
 
 export const EventsTabBody = ({
   endDate,
-  filterQuery,
-  skip,
-  setQuery,
+  kqlQueryExpression,
   startDate,
-  type,
 }: HostsComponentsQueryProps) => {
+  const HOSTS_PAGE_TIMELINE_ID = 'hosts-page';
+
   return (
-    <EventsQuery
-      endDate={endDate}
-      filterQuery={filterQuery}
-      skip={skip}
-      sourceId="default"
-      startDate={startDate}
-      type={type}
-    >
-      {({ events, loading, id, inspect, refetch, totalCount, pageInfo, loadPage }) => (
-        <EventsTableManage
-          data={events}
-          fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-          id={id}
-          inspect={inspect}
-          loading={loading}
-          loadPage={loadPage}
-          refetch={refetch}
-          setQuery={setQuery}
-          showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
-          totalCount={totalCount}
-          type={hostsModel.HostsType.page}
-        />
-      )}
-    </EventsQuery>
+    <StatefulEventsViewer
+      end={endDate}
+      id={HOSTS_PAGE_TIMELINE_ID}
+      kqlQueryExpression={kqlQueryExpression}
+      start={startDate}
+    />
   );
 };

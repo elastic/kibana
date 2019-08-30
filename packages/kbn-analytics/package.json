@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "Kibana Analytics tool",
   "main": "target/node/index.js",
-  "browser": "target/web/browser.js",
+  "browser": "target/web/index.js",
   "types": "target/types/index.d.ts",
   "author": "Ahmad Bamieh <ahmadbamieh@gmail.com>",
   "license": "Apache-2.0",
@@ -18,8 +18,5 @@
     "@kbn/dev-utils": "1.0.0",
     "@kbn/babel-preset": "1.0.0",
     "typescript": "3.5.1"
-  },
-  "dependencies": {
-    "@kbn/dev-utils": "1.0.0"
   }
 }
