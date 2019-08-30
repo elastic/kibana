@@ -17,24 +17,10 @@
  * under the License.
  */
 
-import { Legacy } from 'kibana';
+import { CONTEXT_MENU_TRIGGER } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { setup } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import { EditModeAction } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/test_samples/actions/edit_mode_action';
 
-// eslint-disable-next-line import/no-default-export
-export default function(kibana: any) {
-  return new kibana.Plugin({
-    require: ['kibana'],
-    uiExports: {
-      app: {
-        title: 'Embeddable Explorer',
-        order: 1,
-        main: 'plugins/kbn_tp_embeddable_explorer/np_ready/public/legacy',
-      },
-      hacks: ['plugins/dashboard_embeddable_container/initialize'],
-    },
-    init(server: Legacy.Server) {
-      server.injectUiAppVars('kbn_tp_embeddable_explorer', async () =>
-        server.getInjectedUiAppVars('kibana')
-      );
-    },
-  });
-}
+const editModeAction = new EditModeAction();
+setup.registerAction(editModeAction);
+setup.attachAction(CONTEXT_MENU_TRIGGER, editModeAction.id);
