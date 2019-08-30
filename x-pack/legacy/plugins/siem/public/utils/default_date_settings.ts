@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome, { Chrome } from 'ui/chrome';
+import chrome from 'ui/chrome';
 import dateMath from '@elastic/datemath';
 import moment from 'moment';
 import { isString, isBoolean, isNumber } from 'lodash/fp';
