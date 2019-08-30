@@ -67,6 +67,11 @@ describe('Job Class', function () {
       const init = () => new Job(mockQueue, index, 'type1', [1, 2, 3]);
       expect(init).to.throwException(/plain.+object/i);
     });
+
+    it(`should throw error if invalid maxAttempts`, function () {
+      const init = () => new Job(mockQueue, index, 'type1', { id: '123' }, { max_attempts: -1 });
+      expect(init).to.throwException(/invalid.+max_attempts/i);
+    });
   });
 
   describe('construction', function () {
@@ -327,14 +332,6 @@ describe('Job Class', function () {
       return job.ready.then(() => {
         const indexArgs = validateDoc(indexSpy);
         expect(indexArgs.body).to.have.property('priority', minPriority);
-      });
-    });
-
-    it(`should throw error if invalid maxAttempts`, function () {
-      const job = new Job(mockQueue, index, type, payload, { max_attempts: -1 });
-      return job.ready.then(() => {
-        const indexArgs = validateDoc(indexSpy);
-        expect(indexArgs.body).to.have.property('priority', defaultPriority);
       });
     });
   });
