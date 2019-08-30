@@ -140,19 +140,38 @@ export async function resolveIndexPatternConflicts(
   overwriteAll
 ) {
   let importCount = 0;
+
   await awaitEachItemInParallel(conflictedIndexPatterns, async ({ obj }) => {
+    // Resolve search index reference:
     let oldIndexId = obj.searchSource.getOwnField('index');
     // Depending on the object, this can either be the raw id or the actual index pattern object
     if (typeof oldIndexId !== 'string') {
       oldIndexId = oldIndexId.id;
     }
-    const resolution = resolutions.find(({ oldId }) => oldId === oldIndexId);
+    let resolution = resolutions.find(({ oldId }) => oldId === oldIndexId);
+    if (resolution) {
+      const newIndexId = resolution.newId;
+      await obj.hydrateIndexPattern(newIndexId);
+    }
+
+    // Resolve filter index reference:
+    const filter = (obj.searchSource.getOwnField('filter') || []).map((filter) => {
+      if (!(filter.meta && filter.meta.index)) {
+        return filter;
+      }
+
+      resolution = resolutions.find(({ oldId }) => oldId === filter.meta.index);
+      return resolution ? ({ ...filter, ...{ meta: { ...filter.meta, index: resolution.newId } } }) : filter;
+    });
+
+    if (filter.length > 0) {
+      obj.searchSource.setField('filter', filter);
+    }
+
     if (!resolution) {
       // The user decided to skip this conflict so do nothing
       return;
     }
-    const newIndexId = resolution.newId;
-    await obj.hydrateIndexPattern(newIndexId);
     if (await saveObject(obj, overwriteAll)) {
       importCount++;
     }
