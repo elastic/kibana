@@ -11,7 +11,11 @@ import { ServiceDetailTabs } from './ServiceDetailTabs';
 import { ServiceIntegrations } from './ServiceIntegrations';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 
-export function ServiceDetails() {
+interface Props {
+  tab: React.ComponentProps<typeof ServiceDetailTabs>['tab'];
+}
+
+export function ServiceDetails({ tab }: Props) {
   const { urlParams } = useUrlParams();
   const { serviceName } = urlParams;
 
@@ -30,7 +34,7 @@ export function ServiceDetails() {
         </EuiFlexGroup>
       </ApmHeader>
 
-      <ServiceDetailTabs urlParams={urlParams} />
+      <ServiceDetailTabs tab={tab} />
     </div>
   );
 }

@@ -16,9 +16,15 @@ interface Props {
       message?: string;
     };
   };
+  actions?: JSX.Element;
 }
 
-export const SectionError: React.FunctionComponent<Props> = ({ title, error, ...rest }) => {
+export const SectionError: React.FunctionComponent<Props> = ({
+  title,
+  error,
+  actions,
+  ...rest
+}) => {
   const {
     error: errorString,
     cause, // wrapEsError() on the server adds a "cause" array
@@ -27,10 +33,10 @@ export const SectionError: React.FunctionComponent<Props> = ({ title, error, ...
 
   return (
     <EuiCallOut title={title} color="danger" iconType="alert" {...rest}>
-      <div>{message || errorString}</div>
+      {cause ? message || errorString : <p>{message || errorString}</p>}
       {cause && (
         <Fragment>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="s" />
           <ul>
             {cause.map((causeMsg, i) => (
               <li key={i}>{causeMsg}</li>
@@ -38,6 +44,7 @@ export const SectionError: React.FunctionComponent<Props> = ({ title, error, ...
           </ul>
         </Fragment>
       )}
+      {actions ? actions : null}
     </EuiCallOut>
   );
 };

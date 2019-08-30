@@ -6,7 +6,7 @@
 
 import { TileLayer } from './tile_layer';
 import _ from 'lodash';
-import { SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
+import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE } from '../../common/constants';
 import { isRetina } from '../meta';
 import { addSpritesheetToMap } from '../connected_components/map/mb/utils';//todo move this implementation
 
@@ -20,7 +20,7 @@ const MB_STYLE_TYPE_TO_OPACITY = {
 
 export class VectorTileLayer extends TileLayer {
 
-  static type = 'VECTOR_TILE';
+  static type = LAYER_TYPE.VECTOR_TILE;
 
   constructor({ layerDescriptor, source, style }) {
     super({ layerDescriptor, source, style });

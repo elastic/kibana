@@ -12,6 +12,9 @@ import {
   SPARSE_DATA_AGGREGATIONS,
 } from '../../../../../../common/constants/aggregation_types';
 import { EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
+import { mlJobService } from '../../../../../services/job_service';
+import { JobCreator } from '../job_creator';
+import { CREATED_BY_LABEL } from './constants';
 
 // populate the detectors with Field and Agg objects loaded from the job capabilities service
 export function getRichDetectors(job: Job, datafeed: Datafeed) {
@@ -120,4 +123,36 @@ export function isSparseDataJob(job: Job, datafeed: Datafeed): boolean {
     }
   }
   return false;
+}
+
+function stashCombinedJob(jobCreator: JobCreator, skipTimeRangeStep: boolean = false) {
+  mlJobService.tempJobCloningObjects.job = {
+    ...jobCreator.jobConfig,
+    datafeed_config: jobCreator.datafeedConfig,
+  };
+
+  if (skipTimeRangeStep === true) {
+    mlJobService.tempJobCloningObjects.skipTimeRangeStep = true;
+  }
+}
+
+export function convertToMultiMetricJob(jobCreator: JobCreator) {
+  jobCreator.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
+  stashCombinedJob(jobCreator, true);
+
+  window.location.href = window.location.href.replace('single_metric', 'multi_metric');
+}
+
+export function convertToAdvancedJob(jobCreator: JobCreator) {
+  jobCreator.createdBy = null;
+  stashCombinedJob(jobCreator);
+
+  window.location.href = window.location.href.replace('multi_metric', 'advanced');
+}
+
+export function resetJob(jobCreator: JobCreator) {
+  jobCreator.jobId = '';
+  stashCombinedJob(jobCreator, true);
+
+  window.location.href = '#/jobs/new_job';
 }

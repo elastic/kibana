@@ -24,6 +24,7 @@ interface FakeRequest {
 }
 
 type ExecuteJobFn = (
+  jobId: string | null,
   job: JobDocPayloadPanelCsv,
   realRequest?: Request
 ) => Promise<JobDocOutputExecuted>;
@@ -37,28 +38,34 @@ function executeJobFactoryFn(server: KbnServer): ExecuteJobFn {
     CSV_FROM_SAVEDOBJECT_JOB_TYPE,
     'execute-job',
   ]);
-  const generateCsv = createGenerateCsv(logger);
 
   return async function executeJob(
+    jobId: string | null,
     job: JobDocPayloadPanelCsv,
     realRequest?: Request
   ): Promise<JobDocOutputExecuted> {
+    // There will not be a jobID for "immediate" generation.
+    // jobID is only for "queued" jobs
+    // Use the jobID as a logging tag or "immediate"
+    const jobLogger = logger.clone([jobId === null ? 'immediate' : jobId]);
+
     const { basePath, jobParams } = job;
     const { isImmediate, panel, visType } = jobParams;
 
-    logger.debug(`Execute job generating [${visType}] csv`);
+    jobLogger.debug(`Execute job generating [${visType}] csv`);
 
     let requestObject: Request | FakeRequest;
     if (isImmediate && realRequest) {
-      logger.info(`Executing job from immediate API`);
+      jobLogger.info(`Executing job from immediate API`);
       requestObject = realRequest;
     } else {
-      logger.info(`Executing job async using encrypted headers`);
+      jobLogger.info(`Executing job async using encrypted headers`);
       let decryptedHeaders;
       const serializedEncryptedHeaders = job.headers;
       try {
         decryptedHeaders = await crypto.decrypt(serializedEncryptedHeaders);
       } catch (err) {
+        jobLogger.error(err);
         throw new Error(
           i18n.translate(
             'xpack.reporting.exportTypes.csv_from_savedobject.executeJob.failedToDecryptReportJobDataErrorMessage',
@@ -82,6 +89,7 @@ function executeJobFactoryFn(server: KbnServer): ExecuteJobFn {
     let maxSizeReached = false;
     let size = 0;
     try {
+      const generateCsv = createGenerateCsv(jobLogger);
       const generateResults: CsvResultFromSearch = await generateCsv(
         requestObject,
         server,
@@ -94,12 +102,12 @@ function executeJobFactoryFn(server: KbnServer): ExecuteJobFn {
         result: { content, maxSizeReached, size },
       } = generateResults);
     } catch (err) {
-      logger.error(`Generate CSV Error! ${err}`);
+      jobLogger.error(`Generate CSV Error! ${err}`);
       throw err;
     }
 
     if (maxSizeReached) {
-      logger.warn(`Max size reached: CSV output truncated to ${size} bytes`);
+      jobLogger.warn(`Max size reached: CSV output truncated to ${size} bytes`);
     }
 
     return {

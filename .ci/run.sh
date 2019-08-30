@@ -11,7 +11,7 @@ source src/dev/ci_setup/setup.sh
 source src/dev/ci_setup/checkout_sibling_es.sh
 
 case "$JOB" in
-kibana-intake)
+intake)
   ./test/scripts/jenkins_unit.sh
   ;;
 kibana-ciGroup*)
@@ -24,11 +24,8 @@ kibana-visualRegression*)
 kibana-accessibility*)
   ./test/scripts/jenkins_accessibility.sh
   ;;
-kibana-firefoxSmoke*)
+firefoxSmoke*)
   ./test/scripts/jenkins_firefox_smoke.sh
-  ;;
-x-pack-intake)
-  ./test/scripts/jenkins_xpack.sh
   ;;
 x-pack-ciGroup*)
   export CI_GROUP="${JOB##x-pack-ciGroup}"
@@ -39,9 +36,6 @@ x-pack-visualRegression*)
   ;;
 x-pack-accessibility*)
   ./test/scripts/jenkins_xpack_accessibility.sh
-  ;;
-x-pack-firefoxSmoke*)
-  ./test/scripts/jenkins_xpack_firefox_smoke.sh
   ;;
 *)
   echo "JOB '$JOB' is not implemented."

@@ -38,9 +38,20 @@ export function SavedQueryManagementComponentProvider({ getService }) {
       if (name) {
         await testSubjects.setValue('saveQueryFormTitle', name);
       }
+
+      // Form input validation only happens onBlur. Clicking the save button should de-focus the
+      // input element and the validation should prevent a save from actually happening if there's
+      // an error.
+      await testSubjects.click('savedQueryFormSaveButton');
+
       const saveQueryFormSaveButtonStatus = await testSubjects.isEnabled('savedQueryFormSaveButton');
-      expect(saveQueryFormSaveButtonStatus).to.not.eql(true);
-      await testSubjects.click('savedQueryFormCancelButton');
+
+      try {
+        expect(saveQueryFormSaveButtonStatus).to.not.eql(true);
+      }
+      finally {
+        await testSubjects.click('savedQueryFormCancelButton');
+      }
     }
 
     async saveCurrentlyLoadedAsNewQuery(name, description, includeFilters, includeTimeFilter) {

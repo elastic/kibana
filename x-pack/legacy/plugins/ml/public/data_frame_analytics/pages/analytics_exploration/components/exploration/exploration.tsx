@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, FunctionComponent, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import moment from 'moment-timezone';
 
 import { i18n } from '@kbn/i18n';
@@ -18,8 +18,6 @@ import {
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiInMemoryTable,
-  EuiInMemoryTableProps,
   EuiPanel,
   EuiPopover,
   EuiPopoverTitle,
@@ -32,12 +30,7 @@ import {
 import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
 import euiThemeDark from '@elastic/eui/dist/eui_theme_dark.json';
 
-// TODO EUI's types for EuiInMemoryTable is missing these props
-interface ExpandableTableProps extends EuiInMemoryTableProps {
-  compressed: boolean;
-}
-
-const ExpandableTable = (EuiInMemoryTable as any) as FunctionComponent<ExpandableTableProps>;
+import { ColumnType, MlInMemoryTable } from '../../../../../../common/types/eui/in_memory_table';
 
 import { useUiChromeContext } from '../../../../../contexts/ui/use_ui_chrome_context';
 
@@ -47,7 +40,7 @@ import { ml } from '../../../../../services/ml_api_service';
 import {
   sortColumns,
   toggleSelectedField,
-  DataFrameAnalyticsOutlierConfig,
+  DataFrameAnalyticsConfig,
   EsFieldName,
   EsDoc,
   MAX_COLUMNS,
@@ -69,7 +62,7 @@ const FEATURE_INFLUENCE = 'feature_influence';
 
 interface GetDataFrameAnalyticsResponse {
   count: number;
-  data_frame_analytics: DataFrameAnalyticsOutlierConfig[];
+  data_frame_analytics: DataFrameAnalyticsConfig[];
 }
 
 // Defining our own ENUM here.
@@ -93,7 +86,7 @@ const ExplorationTitle: React.SFC<{ jobId: string }> = ({ jobId }) => (
   <EuiTitle size="xs">
     <span>
       {i18n.translate('xpack.ml.dataframe.analytics.exploration.jobIdTitle', {
-        defaultMessage: 'Job id {jobId}',
+        defaultMessage: 'Job ID {jobId}',
         values: { jobId },
       })}
     </span>
@@ -105,9 +98,7 @@ interface Props {
 }
 
 export const Exploration: FC<Props> = React.memo(({ jobId }) => {
-  const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsOutlierConfig | undefined>(
-    undefined
-  );
+  const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
 
   useEffect(() => {
     (async function() {
@@ -218,7 +209,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
     docFieldsCount = docFields.length;
   }
 
-  const columns = [];
+  const columns: ColumnType[] = [];
 
   if (selectedFields.length > 0 && tableItems.length > 0) {
     // table cell color coding takes into account:
@@ -241,12 +232,12 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
       ...selectedFields
         .sort(sortColumns(tableItems[0]._source, jobConfig.dest.results_field))
         .map(k => {
-          const column = {
+          const column: ColumnType = {
             field: `_source["${k}"]`,
             name: k,
             sortable: true,
             truncateText: true,
-          } as Record<string, any>;
+          };
 
           const render = (d: any, fullItem: EsDoc) => {
             if (Array.isArray(d) && d.every(item => typeof item === 'string')) {
@@ -367,7 +358,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
   if (columns.length > 0) {
     sorting = {
       sort: {
-        field: columns[0].field,
+        field: `_source["${selectedFields[0]}"]`,
         direction: SORT_DIRECTON.ASC,
       },
     };
@@ -375,12 +366,12 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
 
   return (
     <EuiPanel grow={false}>
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem grow={false}>
           <ExplorationTitle jobId={jobConfig.id} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFlexGroup alignItems="center" gutterSize="xs">
+          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
             <EuiFlexItem style={{ textAlign: 'right' }}>
               {docFieldsCount > MAX_COLUMNS && (
                 <EuiText size="s">
@@ -443,7 +434,8 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
         <EuiProgress size="xs" color="accent" max={1} value={0} />
       )}
       {clearTable === false && columns.length > 0 && (
-        <ExpandableTable
+        <MlInMemoryTable
+          allowNeutralSort={false}
           className="mlDataFrameAnalyticsExploration"
           columns={columns}
           compressed
@@ -454,6 +446,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
             initialPageSize: 25,
             pageSizeOptions: [5, 10, 25, 50],
           }}
+          responsive={false}
           sorting={sorting}
         />
       )}

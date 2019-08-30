@@ -160,6 +160,8 @@ module.exports = {
               {
                 from: ['src/legacy/ui/**/*', 'ui/**/*'],
                 target: [
+                  'test/plugin_functional/plugins/**/public/np_ready/**/*',
+                  'test/plugin_functional/plugins/**/server/np_ready/**/*',
                   'src/legacy/core_plugins/**/public/np_ready/**/*',
                   'src/legacy/core_plugins/**/server/np_ready/**/*',
                   'x-pack/legacy/plugins/**/public/np_ready/**/*',
