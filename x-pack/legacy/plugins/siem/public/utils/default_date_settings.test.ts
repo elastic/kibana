@@ -50,6 +50,7 @@ jest.mock('../../common/constants', () => ({
  * We utilize the internal chrome mocking that is built in to be able to mock different time range
  * scenarios here or the absence of a time range setting.
  * @param timeRange timeRange to use as a mock, including malformed data
+ * @param interval interval to use as a mock, including malformed data
  */
 const mockTimeRange = (
   timeRange: DefaultTimeRangeSetting = { from: DEFAULT_FROM, to: DEFAULT_TO },
@@ -81,7 +82,7 @@ const isMalformedTimeRange = (timeRange: unknown): timeRange is DefaultTimeRange
 /**
  * Return that this unknown is only an object but we recognize in Typescript that we are ok
  * with the object being malformed.
- * @param timeRange Malformed object
+ * @param interval Malformed object
  */
 const isMalformedInterval = (interval: unknown): interval is DefaultIntervalSetting =>
   typeof interval === 'object';
