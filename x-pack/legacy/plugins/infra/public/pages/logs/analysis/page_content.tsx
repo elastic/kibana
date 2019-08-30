@@ -58,6 +58,7 @@ export const AnalysisPageContent = () => {
         isSettingUp={isSettingUpMlModule}
         setupMlModule={setupMlModule}
         isCleaningUpAFailedSetup={isCleaningUp}
+        hasCompletedSetup={hasCompletedSetup}
         indexPattern={source ? source.configuration.logAlias : ''}
       />
     );

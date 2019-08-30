@@ -22,9 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
-
-import { AnalysisSetupTimerangeForm } from './analysis_setup_timerange_form';
-import { CreateMLJobsButton } from './create_ml_jobs_button';
+import { AnalysisSetupSteps } from './setup/steps';
 
 interface AnalysisSetupContentProps {
   setupMlModule: (startTime?: number | undefined, endTime?: number | undefined) => Promise<any>;
@@ -32,6 +30,7 @@ interface AnalysisSetupContentProps {
   didSetupFail: boolean;
   isCleaningUpAFailedSetup: boolean;
   indexPattern: string;
+  hasCompletedSetup: boolean;
 }
 
 const errorTitle = i18n.translate('xpack.infra.analysisSetup.errorTitle', {
@@ -44,11 +43,11 @@ export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentP
   didSetupFail,
   isCleaningUpAFailedSetup,
   indexPattern,
+  hasCompletedSetup,
 }) => {
   useTrackPageview({ app: 'infra_logs', path: 'analysis_setup' });
   useTrackPageview({ app: 'infra_logs', path: 'analysis_setup', delay: 15000 });
 
-  const [showTimeRangeForm, setShowTimeRangeForm] = useState(false);
   return (
     <AnalysisSetupPage>
       <EuiPageBody>
@@ -76,36 +75,14 @@ export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentP
                 defaultMessage="Use Machine Learning to automatically detect anomalous log rate counts."
               />
             </EuiText>
-            {showTimeRangeForm ? (
-              <>
-                <EuiSpacer size="l" />
-                <AnalysisSetupTimerangeForm
-                  isSettingUp={isSettingUp}
-                  setupMlModule={setupMlModule}
-                />
-              </>
-            ) : (
-              <>
-                <EuiSpacer size="m" />
-                <ByDefaultText>
-                  <FormattedMessage
-                    id="xpack.infra.analysisSetup.timeRangeByDefault"
-                    defaultMessage="By default, we'll analyze all past and future log messages in your logs indices."
-                  />{' '}
-                  <EuiButtonEmpty onClick={() => setShowTimeRangeForm(true)}>
-                    <FormattedMessage
-                      id="xpack.infra.analysisSetup.configureTimeRange"
-                      defaultMessage="Configure time range?"
-                    />
-                  </EuiButtonEmpty>
-                </ByDefaultText>
-                <EuiSpacer size="l" />
-                <CreateMLJobsButton
-                  isLoading={isSettingUp || isCleaningUpAFailedSetup}
-                  onClick={() => setupMlModule()}
-                />
-              </>
-            )}
+            <EuiSpacer />
+            <AnalysisSetupSteps
+              setupMlModule={setupMlModule}
+              isSettingUp={isSettingUp}
+              didSetupFail={didSetupFail}
+              isCleaningUpAFailedSetup={isCleaningUpAFailedSetup}
+              hasCompletedSetup={hasCompletedSetup}
+            />
             {didSetupFail && (
               <>
                 <EuiSpacer />
@@ -136,16 +113,4 @@ const AnalysisPageContent = euiStyled(EuiPageContent)`
 
 const AnalysisSetupPage = euiStyled(EuiPage)`
   height: 100%;
-`;
-
-const ByDefaultText = euiStyled(EuiText).attrs({ size: 's' })`
-  & .euiButtonEmpty {
-    font-size: inherit;
-    line-height: inherit;
-    height: initial;
-  }
-
-  & .euiButtonEmpty__content {
-    padding: 0;
-  }
 `;

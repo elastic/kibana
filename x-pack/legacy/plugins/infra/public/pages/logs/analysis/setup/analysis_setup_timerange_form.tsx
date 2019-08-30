@@ -38,25 +38,16 @@ const endTimeDefaultDescription = i18n.translate(
   }
 );
 
-function selectedDateToParam(selectedDate: Moment | null) {
-  if (selectedDate) {
-    return selectedDate.valueOf(); // To ms unix timestamp
-  }
-  return undefined;
-}
-
 export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
-  isSettingUp: boolean;
-  setupMlModule: (startTime: number | undefined, endTime: number | undefined) => Promise<any>;
-}> = ({ isSettingUp, setupMlModule }) => {
-  const [startTime, setStartTime] = useState<Moment | null>(null);
-  const [endTime, setEndTime] = useState<Moment | null>(null);
-
+  setupMlModule: () => Promise<any>;
+  hasAttemptedSetup: boolean;
+  setStartTime: (startTime: Moment | null) => void;
+  setEndTime: (endTime: Moment | null) => void;
+  startTime: Moment | null;
+  endTime: Moment | null;
+}> = ({ setupMlModule, hasAttemptedSetup, setStartTime, setEndTime, startTime, endTime }) => {
   const now = useMemo(() => moment(), []);
   const selectedEndTimeIsToday = !endTime || endTime.isSame(now, 'day');
-
-  const onClickCreateJob = () =>
-    setupMlModule(selectedDateToParam(startTime), selectedDateToParam(endTime));
 
   return (
     <EuiForm>
@@ -126,7 +117,7 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
             </EuiFormControlLayout>
           </EuiFlexGroup>
         </EuiFormRow>
-        <CreateMLJobsButton isLoading={isSettingUp} onClick={onClickCreateJob} />
+        <CreateMLJobsButton isDisabled={hasAttemptedSetup} onClick={setupMlModule} />
       </EuiDescribedFormGroup>
     </EuiForm>
   );
