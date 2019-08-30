@@ -82,5 +82,4 @@ In the log event details, click *Actions* to see the other actions related to th
 Depending on the event and the features you have installed and configured, you may also be able to:
 
 * Select *View status in Uptime* to <<uptime-overview, view related uptime information>> in the *Uptime* app.
-// ++ Is "monitor" the best choice of word here?
 * Select *View in APM* to <<traces, view related APM traces>> in the *APM* app.
