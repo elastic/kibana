@@ -4,7 +4,9 @@
 <titleabbrev>Get object</titleabbrev>
 ++++
 
-Retrieve a single Kibana saved object by ID.
+Retrieve a single {kib} saved object by ID.
+
+experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
 
 [[saved-objects-api-get-request]]
 ==== Request

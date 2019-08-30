@@ -4,7 +4,9 @@
 <titleabbrev>Bulk create objects</titleabbrev>
 ++++
 
-Create multiple Kibana saved objects.
+Create multiple {kib} saved objects.
+
+experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
 
 [[saved-objects-api-bulk-create-request]]
 ==== Request
@@ -41,7 +43,7 @@ Create multiple Kibana saved objects.
 `saved_objects`:: 
   (array) Top-level property the contains objects that represent the response for each of the requested objects. The order of the objects in the response is identical to the order of the objects in the request.
 
-Saved objects that cannot be persisted are replaced with an error object.
+Saved objects that are unable to persist are replaced with an error object.
 
 [[saved-objects-api-bulk-create-codes]]
 ==== Response code

@@ -14,6 +14,8 @@ To resolve errors, you can:
 
 * Change references to different saved objects
 
+experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+
 [[saved-objects-api-resolve-import-errors-request]]
 ==== Request
 

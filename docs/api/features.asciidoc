@@ -2,8 +2,6 @@
 [[features-api]]
 == Features API
 
-experimental[This API is *experimental* and may be changed or removed completely in a future release.]
-
 View information about the available features in {kib}. Features are used by spaces and security to refine and secure access to {kib}.
 
 * <<features-api-get, Get features API>>

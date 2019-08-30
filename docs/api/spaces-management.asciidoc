@@ -1,10 +1,8 @@
 [role="xpack"]
 [[spaces-api]]
-== Kibana Spaces API
+== Kibana Spaces APIs
 
 Manage your {kib} spaces.
-
-experimental["This API is *experimental* and may be changed or removed completely in a future release. The underlying Spaces concepts are stable, but the APIs for managing Spaces are currently experimental."]
 
 * <<spaces-api-post, Create space API>>
 * <<spaces-api-put, Update space API>>

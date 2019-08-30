@@ -6,6 +6,8 @@
 
 Export dashboards and corresponding saved objects.
 
+experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+
 [[dashboard-api-export-request]]
 ==== Request
 

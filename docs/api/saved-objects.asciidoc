@@ -3,8 +3,6 @@
 
 Manage {kib} saved objects, including dashboards, visualizations, index patterns, and more.
 
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
-
 WARNING: Do not write documents directly to the `.kibana` index. When you write directly
 to the `.kibana` index, the data becomes corrupted and permanently breaks future {kib} versions.
 

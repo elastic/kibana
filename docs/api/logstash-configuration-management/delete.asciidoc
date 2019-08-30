@@ -2,6 +2,8 @@
 [[logstash-configuration-management-api-delete]]
 === Delete Pipeline
 
+experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+
 [[logstash-configuration-management-api-delete-request]]
 ==== Request
 

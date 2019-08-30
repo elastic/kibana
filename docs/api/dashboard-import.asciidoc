@@ -4,8 +4,6 @@
 Import and export dashboards with the corresponding saved objects, such as visualizations, saved
 searches, and index patterns.
 
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
-
 WARNING: Do not write documents directly to the `.kibana` index. When you write directly
 to the `.kibana` index, the data becomes corrupted and permanently breaks future {kib} versions.
 
