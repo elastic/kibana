@@ -11,9 +11,9 @@ import { selectToplevelNodes } from '../../state/actions/transient';
 import { matrixToAngle } from '../../lib/aeroelastic/matrix';
 import { arrayToMap, flatten, identity } from '../../lib/aeroelastic/functional';
 import { getLocalTransformMatrix } from '../../lib/aeroelastic/layout_functions';
-import { isGroupId, elementToShape } from './utils';
+import { isGroupId, elementToShape } from './positioning_utils';
 
-export * from './utils';
+export * from './positioning_utils';
 
 const shapeToElement = shape => ({
   left: shape.transformMatrix[12] - shape.a,
