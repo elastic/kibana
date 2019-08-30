@@ -112,7 +112,7 @@ export const ChartSection = injectI18n(
         <EuiTitle size="xs">
           <h3 id={section.id}>{section.label}</h3>
         </EuiTitle>
-        <div style={{ height: 200 }}>
+        <div style={{ height: 250, marginBottom: 16 }}>
           <Chart>
             <Axis
               id={getAxisId('timestamp')}
@@ -137,6 +137,8 @@ export const ChartSection = injectI18n(
               tooltip={tooltipProps}
               onBrushEnd={handleTimeChange}
               theme={getChartTheme()}
+              showLegend={true}
+              legendPosition="right"
             />
           </Chart>
         </div>
