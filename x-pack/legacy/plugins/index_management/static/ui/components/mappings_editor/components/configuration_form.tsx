@@ -22,20 +22,16 @@ import { DYNAMIC_SETTING_OPTIONS } from '../constants';
 
 interface Props {
   setGetDataHandler: (handler: () => Promise<{ isValid: boolean; data: any }>) => void;
-  onFormValidChange: (isValid: boolean) => void;
+  onValidityChange: (isValid: boolean) => void;
   defaultValue?: any;
 }
 
-export const ConfigurationForm = ({
-  setGetDataHandler,
-  defaultValue,
-  onFormValidChange,
-}: Props) => {
+export const ConfigurationForm = ({ setGetDataHandler, defaultValue, onValidityChange }: Props) => {
   const { form } = useForm({ schema, defaultValue });
 
   useEffect(() => {
-    setGetDataHandler(form.onSubmit);
-    onFormValidChange(form.isValid);
+    setGetDataHandler(form.submit);
+    onValidityChange(form.isValid);
   }, [form]);
 
   return (

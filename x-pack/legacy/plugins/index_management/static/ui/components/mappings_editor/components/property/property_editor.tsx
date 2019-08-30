@@ -61,11 +61,13 @@ const updateNameParameterValidations = (
   return [...fieldConfig.validations!, { validator: uniqueNameValidation }];
 };
 
-const fieldConfig = (param: ParameterName): FieldConfig =>
+const getFieldConfig = (param: ParameterName): FieldConfig =>
   parametersDefinition[param].fieldConfig || {};
 
 const defaultValueParam = (param: ParameterName): unknown =>
-  typeof fieldConfig(param).defaultValue !== 'undefined' ? fieldConfig(param).defaultValue : '';
+  typeof getFieldConfig(param).defaultValue !== 'undefined'
+    ? getFieldConfig(param).defaultValue
+    : '';
 
 const sanitizePropParameters = (parameters: Record<string, any>): Record<string, any> =>
   Object.entries(parameters).reduce(
@@ -116,7 +118,7 @@ export const PropertyEditor = ({
   const isEditMode = typeof defaultValue !== 'undefined';
 
   const submitForm = async () => {
-    const { isValid, data: formData } = await form.onSubmit();
+    const { isValid, data: formData } = await form.submit();
     if (isValid) {
       const data =
         defaultValue && defaultValue.properties
@@ -162,9 +164,9 @@ export const PropertyEditor = ({
                     path="name"
                     defaultValue={isEditMode ? undefined : defaultValueParam('name')} // "undefined" means: look into the "defaultValue" object passed to the form
                     config={{
-                      ...fieldConfig('name'),
+                      ...getFieldConfig('name'),
                       validations: updateNameParameterValidations(
-                        fieldConfig('name'),
+                        getFieldConfig('name'),
                         parentObject,
                         form.getFieldDefaultValue('name') as string
                       ),
@@ -178,7 +180,7 @@ export const PropertyEditor = ({
                 <EuiFlexItem grow={false}>
                   <UseField
                     path="type"
-                    config={fieldConfig('type')}
+                    config={getFieldConfig('type')}
                     defaultValue={isEditMode ? undefined : defaultValueParam('type')}
                   >
                     {field => (
@@ -215,7 +217,7 @@ export const PropertyEditor = ({
                           : typeDefinition.subTypes.types[0]
                       }
                       config={{
-                        ...fieldConfig('type'),
+                        ...getFieldConfig('type'),
                         label: typeDefinition.subTypes.label,
                       }}
                       component={Field}

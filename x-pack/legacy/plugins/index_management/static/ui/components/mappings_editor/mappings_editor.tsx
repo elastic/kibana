@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 
 import {
   ConfigurationForm,
@@ -14,74 +14,67 @@ import {
 } from './components';
 
 interface Props {
-  setGetDataHandler: (
-    handler: () => Promise<{ isValid: boolean; data: Record<string, any> }>
-  ) => void;
-  onStateUpdate: (state: State) => void;
+  setGetDataHandler: (handler: GetMappingsDataHandler) => void;
+  onStateUpdate: (state: Partial<State>) => void;
   defaultValue?: Record<string, any>;
 }
+
+type GetMappingsDataHandler = () => Promise<{ isValid: boolean; mappings: Mappings }>;
+type GetConfigFormDataHandler = () => Promise<{ isValid: boolean; data: Record<string, unknown> }>;
 
 export interface State {
   isValid: boolean;
   isEditingProperty: boolean;
-  properties: Record<string, any>;
+  mappings: Mappings;
 }
 
 export type Mappings = Record<string, any>;
 
-type GetFormDataHandler = () => Promise<{ isValid: boolean; data: Record<string, any> }>;
+const DocumentFieldsMemo = React.memo(DocumentFields);
+const ConfigurationFormMemo = React.memo(ConfigurationForm);
 
 export const MappingsEditor = ({ setGetDataHandler, onStateUpdate, defaultValue = {} }: Props) => {
-  const [state, setState] = useState<State>({
-    isValid: true,
-    isEditingProperty: false,
-    properties: {},
-  });
-
-  const getConfigurationFormData = useRef<GetFormDataHandler>(() =>
-    Promise.resolve({
-      isValid: true,
-      data: {},
-    })
+  const properties = useRef<Record<string, unknown>>({});
+  const getConfigurationFormData = useRef<GetConfigFormDataHandler>(() =>
+    Promise.resolve({ isValid: true, data: defaultValue })
   );
 
   useEffect(() => {
     setGetDataHandler(async () => {
-      const { isValid, data } = await getConfigurationFormData.current();
-      return {
-        isValid,
-        data: { ...data, properties: state.properties },
-      };
+      const { isValid, data: configFormData } = await getConfigurationFormData.current();
+      return { isValid, mappings: { ...configFormData, properties: properties.current } };
     });
   }, []);
 
-  useEffect(() => {
-    onStateUpdate(state);
-  }, [state]);
+  const setGetConfigurationFormDataHandler = useCallback((handler: GetConfigFormDataHandler) => {
+    getConfigurationFormData.current = handler;
+  }, []);
 
-  const setGetConfigurationFormDataHandler = (handler: GetFormDataHandler) =>
-    (getConfigurationFormData.current = handler);
+  const onConfigFormValidityChange = useCallback(
+    (isValid: boolean) => onStateUpdate({ isValid }),
+    []
+  );
 
-  const onDocumentFieldsUpdate = (docFieldsState: DocumentFieldsState) => {
-    setState(prev => ({
-      ...prev,
+  const onDocumentFieldsUpdate = useCallback((docFieldsState: DocumentFieldsState) => {
+    properties.current = docFieldsState.properties;
+
+    onStateUpdate({
       isEditingProperty: docFieldsState.isEditing,
-      properties: docFieldsState.properties,
-    }));
-  };
+    });
+  }, []);
 
   return (
     <div className="mappings-editor">
       {/* Global Mappings configuration */}
-      <ConfigurationForm
+      <ConfigurationFormMemo
         setGetDataHandler={setGetConfigurationFormDataHandler}
-        onFormValidChange={(isValid: boolean) => setState(prev => ({ ...prev, isValid }))}
+        onValidityChange={onConfigFormValidityChange}
         defaultValue={defaultValue}
       />
 
       {/* Document fields */}
       <PropertiesProvider defaultProperties={defaultValue.properties}>
-        <DocumentFields onUpdate={onDocumentFieldsUpdate} />
+        <DocumentFieldsMemo onUpdate={onDocumentFieldsUpdate} />
       </PropertiesProvider>
     </div>
   );
