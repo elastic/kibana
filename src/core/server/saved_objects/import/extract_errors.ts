@@ -28,10 +28,22 @@ export async function extractErrors(
 ) {
   const errors: SavedObjectsImportError[] = [];
   const originalSavedObjectsMap = new Map<string, SavedObject>();
+  const savedObjectsTitlesMap = new Map<string, string>();
 
   for (const savedObject of savedObjectsToImport) {
     originalSavedObjectsMap.set(`${savedObject.type}:${savedObject.id}`, savedObject);
   }
+  
+  if (savedObjectsClient) {
+    const bulkGetResult = await savedObjectsClient.bulkGet(savedObjectsToImport, {
+      namespace: sourceSpaceId
+    });
+
+    for (const savedObject of bulkGetResult.saved_objects) {
+      savedObjectsTitlesMap.set(`${savedObject.type}:${savedObject.id}`, `${savedObject.attributes.title}`);
+    }
+  }
+
   for (const savedObject of savedObjectResults) {
     if (savedObject.error) {
       const originalSavedObject = originalSavedObjectsMap.get(
@@ -43,24 +55,12 @@ export async function extractErrors(
         originalSavedObject.attributes.title;
 
       if (savedObject.error.statusCode === 409) {
-        // find the correct title of the saved object that conflicts, in order to use it in the message box
+        // pick the correct title of the saved object that conflicts
         let realTitle = title;
-
         if (savedObjectsClient) {
-          try {
-            if (sourceSpaceId !== undefined) {
-              const resp = await savedObjectsClient.get(savedObject.type, savedObject.id, {
-                namespace: sourceSpaceId,
-              });
-              realTitle = resp.attributes.title;
-            } else {
-              const resp = await savedObjectsClient.get(savedObject.type, savedObject.id);
-              realTitle = resp.attributes.title;
-            }
-          } catch (e) {
-            // this shouldn't go wrong, but we re-throw the exception just in case
-            throw e;
-          }
+          realTitle = savedObjectsTitlesMap.get(
+            `${savedObject.type}:${savedObject.id}`
+          );
         }
         errors.push({
           id: savedObject.id,
