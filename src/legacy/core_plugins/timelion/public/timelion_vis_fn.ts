@@ -20,10 +20,34 @@
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
+import {
+  ExpressionFunction,
+  KibanaContext,
+  Render,
+} from 'src/plugins/data/common/expressions/types';
 import { TimelionRequestHandlerProvider } from './vis/timelion_request_handler';
 
-export const timelionVis = () => ({
-  name: 'timelion_vis',
+const name = 'timelion_vis';
+
+type Context = KibanaContext | null;
+
+interface Arguments {
+  expression: string;
+  interval: any;
+}
+
+export type VisParams = Required<Arguments>;
+
+interface RenderValue {
+  visData: Context;
+  visType: typeof name;
+  visParams: VisParams;
+}
+
+type Return = Promise<Render<RenderValue>>;
+
+export const timelionVis = (): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
+  name,
   type: 'render',
   context: {
     types: ['kibana_context', 'null'],
@@ -36,13 +60,15 @@ export const timelionVis = () => ({
       types: ['string'],
       aliases: ['_'],
       default: '".es(*)"',
+      help: '',
     },
     interval: {
       types: ['string', 'null'],
       default: 'auto',
+      help: '',
     },
   },
-  async fn(context: any, args: any) {
+  async fn(context, args) {
     const $injector = await chrome.dangerouslyGetActiveInjector();
     const Private = $injector.get('Private') as any;
     const timelionRequestHandler = Private(TimelionRequestHandlerProvider).handler;
@@ -64,7 +90,7 @@ export const timelionVis = () => ({
       as: 'visualization',
       value: {
         visParams,
-        visType: 'timelion',
+        visType: name,
         visData: response,
       },
     };
