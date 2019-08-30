@@ -33,7 +33,8 @@ import euiThemeDark from '@elastic/eui/dist/eui_theme_dark.json';
 import {
   ColumnType,
   MlInMemoryTable,
-  SortDirection,
+  OnTableChangeArg,
+  SortingPropType,
   SORT_DIRECTION,
 } from '../../../../../../common/types/eui/in_memory_table';
 
@@ -69,19 +70,6 @@ const OUTLIER_SCORE = 'outlier_score';
 interface GetDataFrameAnalyticsResponse {
   count: number;
   data_frame_analytics: DataFrameAnalyticsOutlierConfig[];
-}
-
-interface Sorting {
-  sort: {
-    field: string;
-    direction: SortDirection;
-  };
-}
-
-type TableSorting = Sorting | boolean;
-
-interface OnTableChangeArg extends Sorting {
-  page: { index: number; size: number };
 }
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
@@ -334,7 +322,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
     }
   }, [jobConfig, columns.length, sortField, sortDirection, tableItems.length]);
 
-  let sorting: TableSorting = false;
+  let sorting: SortingPropType = false;
   let onTableChange;
 
   if (columns.length > 0 && sortField !== '') {

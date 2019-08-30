@@ -154,7 +154,7 @@ export type SortingPropType = boolean | Sorting;
 
 type SelectionType = any;
 
-interface OnTableChangeArg extends Sorting {
+export interface OnTableChangeArg extends Sorting {
   page: { index: number; size: number };
 }
 
