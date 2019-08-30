@@ -34,7 +34,7 @@ export const PopulationDetectorsSummary: FC = () => {
   const [loadingData, setLoadingData] = useState(false);
   const [modelData, setModelData] = useState<Record<number, ModelItem[]>>([]);
   const [anomalyData, setAnomalyData] = useState<Record<number, Anomaly[]>>([]);
-  const [chartSettings] = useChartSettings();
+  const { chartSettings, getChartSettings } = useChartSettings();
   const [fieldValuesPerDetector, setFieldValuesPerDetector] = useState<DetectorFieldValues>({});
 
   function setResultsWrapper(results: Results) {
@@ -71,12 +71,13 @@ export const PopulationDetectorsSummary: FC = () => {
     if (allDataReady()) {
       setLoadingData(true);
       try {
+        const cs = getChartSettings();
         const resp: LineChartData = await chartLoader.loadPopulationCharts(
           jobCreator.start,
           jobCreator.end,
           aggFieldPairList,
           jobCreator.splitField,
-          chartSettings.intervalMs
+          cs.intervalMs
         );
 
         setLineChartsData(resp);

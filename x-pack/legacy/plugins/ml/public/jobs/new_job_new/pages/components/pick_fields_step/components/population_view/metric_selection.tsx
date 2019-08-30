@@ -44,7 +44,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
   const [loadingData, setLoadingData] = useState(false);
   const [start, setStart] = useState(jobCreator.start);
   const [end, setEnd] = useState(jobCreator.end);
-  const [chartSettings] = useChartSettings();
+  const { chartSettings, getChartSettings } = useChartSettings();
   const [splitField, setSplitField] = useState(jobCreator.splitField);
   const [fieldValuesPerDetector, setFieldValuesPerDetector] = useState<DetectorFieldValues>({});
   const [byFieldsUpdated, setByFieldsUpdated] = useReducer<(s: number) => number>(s => s + 1, 0);
@@ -137,12 +137,13 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
     if (allDataReady()) {
       setLoadingData(true);
       try {
+        const cs = getChartSettings();
         const resp: LineChartData = await chartLoader.loadPopulationCharts(
           jobCreator.start,
           jobCreator.end,
           aggFieldPairList,
           jobCreator.splitField,
-          chartSettings.intervalMs
+          cs.intervalMs
         );
 
         setLineChartsData(resp);

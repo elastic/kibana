@@ -30,7 +30,7 @@ export const SingleMetricDetectorsSummary: FC = () => {
   const [loadingData, setLoadingData] = useState(false);
   const [modelData, setModelData] = useState<ModelItem[]>([]);
   const [anomalyData, setAnomalyData] = useState<Anomaly[]>([]);
-  const [chartSettings] = useChartSettings();
+  const { getChartSettings } = useChartSettings();
 
   function setResultsWrapper(results: Results) {
     const model = results.model[DTR_IDX];
@@ -56,13 +56,14 @@ export const SingleMetricDetectorsSummary: FC = () => {
     if (jobCreator.aggFieldPair !== null) {
       setLoadingData(true);
       try {
+        const cs = getChartSettings();
         const resp: LineChartData = await chartLoader.loadLineCharts(
           jobCreator.start,
           jobCreator.end,
           [jobCreator.aggFieldPair],
           null,
           null,
-          chartSettings.intervalMs
+          cs.intervalMs
         );
         if (resp[DTR_IDX] !== undefined) {
           setLineChartData(resp);

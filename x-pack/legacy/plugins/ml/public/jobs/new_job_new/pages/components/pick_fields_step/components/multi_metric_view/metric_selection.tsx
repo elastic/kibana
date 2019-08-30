@@ -40,7 +40,7 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
   const [loadingData, setLoadingData] = useState(false);
   const [start, setStart] = useState(jobCreator.start);
   const [end, setEnd] = useState(jobCreator.end);
-  const [chartSettings] = useChartSettings();
+  const { chartSettings, getChartSettings } = useChartSettings();
   const [splitField, setSplitField] = useState(jobCreator.splitField);
   const [fieldValues, setFieldValues] = useState<string[]>([]);
   const [pageReady, setPageReady] = useState(false);
@@ -120,13 +120,14 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
     if (allDataReady()) {
       setLoadingData(true);
       try {
+        const cs = getChartSettings();
         const resp: LineChartData = await chartLoader.loadLineCharts(
           jobCreator.start,
           jobCreator.end,
           aggFieldPairList,
           jobCreator.splitField,
           fieldValues.length > 0 ? fieldValues[0] : null,
-          chartSettings.intervalMs
+          cs.intervalMs
         );
         setLineChartsData(resp);
       } catch (error) {

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { memoize as memoizeOrig } from 'lodash';
+import memoizeOne from 'memoize-one';
+import { isEqual } from 'lodash';
 import { IndexPattern } from 'ui/index_patterns';
 import { IndexPatternTitle } from '../../../../../common/types/kibana';
 import { Field, SplitField, AggFieldPair } from '../../../../../common/types/fields';
@@ -20,12 +21,12 @@ export interface LineChartPoint {
 type SplitFieldValue = string | null;
 export type LineChartData = Record<DetectorIndex, LineChartPoint[]>;
 
-const memoize = (f: Function) => memoizeOrig(f, (...args: any[]) => JSON.stringify(args));
+const eq = (newArgs: any[], lastArgs: any[]) => isEqual(newArgs, lastArgs);
 
-const newJobLineChart = memoize(ml.jobs.newJobLineChart);
-const newJobPopulationsChart = memoize(ml.jobs.newJobPopulationsChart);
-const getEventRateData = memoize(mlResultsService.getEventRateData);
-const getCategoryFields = memoize(getCategoryFieldsOrig);
+const newJobLineChart = memoizeOne(ml.jobs.newJobLineChart, eq);
+const newJobPopulationsChart = memoizeOne(ml.jobs.newJobPopulationsChart, eq);
+const getEventRateData = memoizeOne(mlResultsService.getEventRateData, eq);
+const getCategoryFields = memoizeOne(getCategoryFieldsOrig, eq);
 
 export class ChartLoader {
   private _indexPatternTitle: IndexPatternTitle = '';

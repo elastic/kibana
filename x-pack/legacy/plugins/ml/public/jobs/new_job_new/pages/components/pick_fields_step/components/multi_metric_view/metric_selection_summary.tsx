@@ -26,7 +26,7 @@ export const MultiMetricDetectorsSummary: FC = () => {
   const [loadingData, setLoadingData] = useState(false);
   const [modelData, setModelData] = useState<Record<number, ModelItem[]>>([]);
   const [anomalyData, setAnomalyData] = useState<Record<number, Anomaly[]>>([]);
-  const [chartSettings] = useChartSettings();
+  const { chartSettings, getChartSettings } = useChartSettings();
   const [fieldValues, setFieldValues] = useState<string[]>([]);
 
   function setResultsWrapper(results: Results) {
@@ -64,13 +64,14 @@ export const MultiMetricDetectorsSummary: FC = () => {
     if (allDataReady()) {
       setLoadingData(true);
       try {
+        const cs = getChartSettings();
         const resp: LineChartData = await chartLoader.loadLineCharts(
           jobCreator.start,
           jobCreator.end,
           jobCreator.aggFieldPairs,
           jobCreator.splitField,
           fieldValues.length > 0 ? fieldValues[0] : null,
-          chartSettings.intervalMs
+          cs.intervalMs
         );
         setLineChartsData(resp);
       } catch (error) {

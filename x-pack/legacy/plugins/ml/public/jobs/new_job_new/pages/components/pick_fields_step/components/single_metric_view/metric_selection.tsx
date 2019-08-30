@@ -43,7 +43,7 @@ export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
   const [loadingData, setLoadingData] = useState(false);
   const [start, setStart] = useState(jobCreator.start);
   const [end, setEnd] = useState(jobCreator.end);
-  const [chartSettings] = useChartSettings();
+  const { getChartSettings } = useChartSettings();
 
   function detectorChangeHandler(selectedOptionsIn: DropDownLabel[]) {
     setSelectedOptions(selectedOptionsIn);
@@ -78,13 +78,14 @@ export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
     if (aggFieldPair !== null) {
       setLoadingData(true);
       try {
+        const cs = getChartSettings();
         const resp: LineChartData = await chartLoader.loadLineCharts(
           jobCreator.start,
           jobCreator.end,
           [aggFieldPair],
           null,
           null,
-          chartSettings.intervalMs
+          cs.intervalMs
         );
         if (resp[DTR_IDX] !== undefined) {
           setLineChartData(resp);
