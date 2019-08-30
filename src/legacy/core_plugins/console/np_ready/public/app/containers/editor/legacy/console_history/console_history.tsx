@@ -115,9 +115,11 @@ export function ConsoleHistory({ close }: Props) {
           role="listbox"
           className="list-group conHistory__reqs"
           tabIndex={0}
-          // aria-activedescendant={`historyReq${selectedIndex}`}
-          // scrollto-activedescendant="true"
-          aria-label="{{:: 'console.historyPage.requestListAriaLabel' | i18n: { defaultMessage: 'History of sent requests' } }}"
+          aria-activedescendant={`historyReq${selectedIndex}`}
+          scrollto-activedescendant="true"
+          aria-label={i18n.translate('console.historyPage.requestListAriaLabel', {
+            defaultMessage: 'History of sent requests',
+          })}
         >
           {reqs.map((req, idx) => {
             const reqDescription = describeReq(req);
