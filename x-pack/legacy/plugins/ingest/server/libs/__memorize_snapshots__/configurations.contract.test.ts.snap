@@ -91,3 +91,32 @@ exports['Configurations Lib create should create a new configuration - get info 
     }
   }
 }
+
+exports['Configurations Lib create should create a new configuration - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1569532145462
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  }
+}
+
+exports['Configurations Lib create should create a new configuration - create - {"name":"test","description":"test description","output":"defaut","monitoring_enabled":true,"version":0,"agent_version":"8.0.0","data_sources":[],"shared_id":"string"} (2)'] = {
+  "results": {
+    "id": "3cc80470-cb34-11e9-8b9f-d9577e842ac3",
+    "shared_id": "d190ec41-773a-4e8a-b6e3-2e26f4a049c2",
+    "version": 0
+  }
+}

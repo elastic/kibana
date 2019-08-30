@@ -3,3 +3,8 @@ exports['Agent Adapter getSetting Work - getSetting'] = {
   "results": "xpack_fleet_default_encryptionKey",
   "thrownError": null
 }
+
+exports['Agent Adapter getSetting Work - getSetting'] = {
+  "results": "xpack_fleet_default_encryptionKey",
+  "thrownError": null
+}

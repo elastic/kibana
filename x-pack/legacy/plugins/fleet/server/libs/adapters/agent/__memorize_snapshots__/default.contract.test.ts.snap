@@ -3955,3 +3955,4990 @@ exports['Agent Adapter findByMetadata should allow to find agents by user provid
 exports['Agent Adapter findByMetadata should allow to find agents by user provided metadata - delete:agents:993a0d30-c061-11e9-97a5-135001c020c0:{} (6)'] = {
   "results": {}
 }
+
+exports['Agent Adapter create should create a new agent - create:agents (1)'] = {
+  "results": {
+    "type": "agents",
+    "id": "b0111170-cb33-11e9-bf13-b3c46881080b",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"localhost\"}",
+      "user_provided_metadata": "{}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:37:26.918Z",
+    "version": "WzE2MywxXQ=="
+  }
+}
+
+exports['Agent Adapter create should create a new agent - find:{"type":"agents","perPage":1000} (2)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "b0111170-cb33-11e9-bf13-b3c46881080b",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id-1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"localhost\"}",
+          "user_provided_metadata": "{}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:37:26.918Z",
+        "version": "WzE2MywxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter create should create a new agent - delete:agents:b0111170-cb33-11e9-bf13-b3c46881080b:{} (3)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter create should create a new agent with the specified id if specified - create:agents (1)'] = {
+  "results": {
+    "type": "agents",
+    "id": "test-agent-id-1",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"localhost\"}",
+      "user_provided_metadata": "{}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:37:28.163Z",
+    "version": "WzE2NSwxXQ=="
+  }
+}
+
+exports['Agent Adapter create should create a new agent with the specified id if specified - find:{"type":"agents","perPage":1000} (2)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "test-agent-id-1",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id-1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"localhost\"}",
+          "user_provided_metadata": "{}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:37:28.163Z",
+        "version": "WzE2NSwxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter create should create a new agent with the specified id if specified - delete:agents:test-agent-id-1:{} (3)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter create should allow to create a new agent with the same id two time if override is true - create:agents (1)'] = {
+  "results": {
+    "type": "agents",
+    "id": "test-agent-id-2",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"localhost\"}",
+      "user_provided_metadata": "{}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:37:30.233Z",
+    "version": "WzE2NywxXQ=="
+  }
+}
+
+exports['Agent Adapter create should allow to create a new agent with the same id two time if override is true - create:agents (2)'] = {
+  "results": {
+    "type": "agents",
+    "id": "test-agent-id-2",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"localhost\"}",
+      "user_provided_metadata": "{}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:37:31.258Z",
+    "version": "WzE2OCwxXQ=="
+  }
+}
+
+exports['Agent Adapter create should allow to create a new agent with the same id two time if override is true - find:{"type":"agents","perPage":1000} (3)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "test-agent-id-2",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id-1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"localhost\"}",
+          "user_provided_metadata": "{}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:37:31.258Z",
+        "version": "WzE2OCwxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter create should allow to create a new agent with the same id two time if override is true - delete:agents:test-agent-id-2:{} (4)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter create should allow to create a new agent with the same id two time if override is true - create:agents (5)'] = {
+  "results": {
+    "type": "agents",
+    "id": "b3dfccb0-cb33-11e9-bf13-b3c46881080b",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"localhost\"}",
+      "user_provided_metadata": "{}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:37:33.307Z",
+    "version": "WzE3MCwxXQ=="
+  }
+}
+
+exports['Agent Adapter update should allow to update an agent - get:agents:b3dfccb0-cb33-11e9-bf13-b3c46881080b:{"active":true}:{} (1)'] = {
+  "results": {
+    "id": "b3dfccb0-cb33-11e9-bf13-b3c46881080b",
+    "type": "agents",
+    "updated_at": "2019-08-30T14:37:34.335Z",
+    "version": "WzE3MSwxXQ==",
+    "references": [],
+    "attributes": {
+      "active": true
+    }
+  }
+}
+
+exports['Agent Adapter update should allow to update an agent - get:agents:b3dfccb0-cb33-11e9-bf13-b3c46881080b:{} (2)'] = {
+  "results": {
+    "id": "b3dfccb0-cb33-11e9-bf13-b3c46881080b",
+    "type": "agents",
+    "updated_at": "2019-08-30T14:37:34.335Z",
+    "version": "WzE3MSwxXQ==",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": true,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"localhost\"}",
+      "user_provided_metadata": "{}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": []
+  }
+}
+
+exports['Agent Adapter update should allow to update an agent - find:{"type":"agents","perPage":1000} (3)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "b3dfccb0-cb33-11e9-bf13-b3c46881080b",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": true,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id-1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"localhost\"}",
+          "user_provided_metadata": "{}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:37:34.335Z",
+        "version": "WzE3MSwxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter update should allow to update an agent - delete:agents:b3dfccb0-cb33-11e9-bf13-b3c46881080b:{} (4)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter update should allow to update an agent - create:agents (5)'] = {
+  "results": {
+    "type": "agents",
+    "id": "b5b799f0-cb33-11e9-bf13-b3c46881080b",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"localhost\"}",
+      "user_provided_metadata": "{}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:37:36.399Z",
+    "version": "WzE3MywxXQ=="
+  }
+}
+
+exports['Agent Adapter delete should delete an agent - delete:agents:b5b799f0-cb33-11e9-bf13-b3c46881080b:{} (1)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter delete should delete an agent - get:agents:b5b799f0-cb33-11e9-bf13-b3c46881080b:{} (2)'] = {
+  "results": null
+}
+
+exports['Agent Adapter delete should delete an agent - find:{"type":"agents","perPage":1000} (3)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['Agent Adapter delete should delete an agent - create:agents (4)'] = {
+  "results": {
+    "type": "agents",
+    "id": "b6f3ea80-cb33-11e9-bf13-b3c46881080b",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:37:38.472Z",
+    "version": "WzE3NSwxXQ=="
+  }
+}
+
+exports['Agent Adapter delete should delete an agent - create:agents (5)'] = {
+  "results": {
+    "type": "agents",
+    "id": "b78fb550-cb33-11e9-bf13-b3c46881080b",
+    "attributes": {
+      "shared_id": "agent2",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"elastic.co\"}",
+      "user_provided_metadata": "{\"color\":\"blue\"}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:37:39.493Z",
+    "version": "WzE3NiwxXQ=="
+  }
+}
+
+exports['Agent Adapter findEphemeralByConfigSharedId should allow to find agent by config shared id - find:{"type":"agents","search":"shared_config_id_1","searchFields":["config_shared_id"]} (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 20,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "b6f3ea80-cb33-11e9-bf13-b3c46881080b",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:37:38.472Z",
+        "version": "WzE3NSwxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter findEphemeralByConfigSharedId should allow to find agent by config shared id - find:{"type":"agents","perPage":1000} (2)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 2,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "b6f3ea80-cb33-11e9-bf13-b3c46881080b",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:37:38.472Z",
+        "version": "WzE3NSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "b78fb550-cb33-11e9-bf13-b3c46881080b",
+        "attributes": {
+          "shared_id": "agent2",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id-1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"elastic.co\"}",
+          "user_provided_metadata": "{\"color\":\"blue\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:37:39.493Z",
+        "version": "WzE3NiwxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter findEphemeralByConfigSharedId should allow to find agent by config shared id - delete:agents:b6f3ea80-cb33-11e9-bf13-b3c46881080b:{} (3)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter findEphemeralByConfigSharedId should allow to find agent by config shared id - delete:agents:b78fb550-cb33-11e9-bf13-b3c46881080b:{} (4)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - create:agents (1)'] = {
+  "results": {
+    "type": "agents",
+    "id": "b962c7a0-cb33-11e9-bf13-b3c46881080b",
+    "attributes": {
+      "shared_id": "agent0",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:37:42.554Z",
+    "version": "WzE3OSwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (2)'] = {
+  "results": {
+    "type": "agents",
+    "id": "b9fda810-cb33-11e9-bf13-b3c46881080b",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-06T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:37:43.569Z",
+    "version": "WzE4MCwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (3)'] = {
+  "results": {
+    "type": "agents",
+    "id": "ba9a5d40-cb33-11e9-bf13-b3c46881080b",
+    "attributes": {
+      "shared_id": "agent2",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-07T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:37:44.596Z",
+    "version": "WzE4MSwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (4)'] = {
+  "results": {
+    "type": "agents",
+    "id": "bb371270-cb33-11e9-bf13-b3c46881080b",
+    "attributes": {
+      "shared_id": "agent3",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-08T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:37:45.623Z",
+    "version": "WzE4MiwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (5)'] = {
+  "results": {
+    "type": "agents",
+    "id": "bbd24100-cb33-11e9-bf13-b3c46881080b",
+    "attributes": {
+      "shared_id": "agent4",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-09T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:37:46.640Z",
+    "version": "WzE4MywxXQ=="
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (6)'] = {
+  "results": {
+    "type": "agents",
+    "id": "bc6f1d40-cb33-11e9-bf13-b3c46881080b",
+    "attributes": {
+      "shared_id": "agent5",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-10T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:37:47.668Z",
+    "version": "WzE4NCwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (7)'] = {
+  "results": {
+    "type": "agents",
+    "id": "bd0c95c0-cb33-11e9-bf13-b3c46881080b",
+    "attributes": {
+      "shared_id": "agent6",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-11T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:37:48.700Z",
+    "version": "WzE4NSwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (8)'] = {
+  "results": {
+    "type": "agents",
+    "id": "bdac5830-cb33-11e9-bf13-b3c46881080b",
+    "attributes": {
+      "shared_id": "agent7",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-12T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:37:49.747Z",
+    "version": "WzE4NiwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (9)'] = {
+  "results": {
+    "type": "agents",
+    "id": "be4a45e0-cb33-11e9-bf13-b3c46881080b",
+    "attributes": {
+      "shared_id": "agent8",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-13T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:37:50.782Z",
+    "version": "WzE4NywxXQ=="
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (10)'] = {
+  "results": {
+    "type": "agents",
+    "id": "bee378a0-cb33-11e9-bf13-b3c46881080b",
+    "attributes": {
+      "shared_id": "agent9",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-14T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:37:51.786Z",
+    "version": "WzE4OCwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (11)'] = {
+  "results": {
+    "type": "agents",
+    "id": "bf7ef550-cb33-11e9-bf13-b3c46881080b",
+    "attributes": {
+      "shared_id": "agent10",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-15T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:37:52.805Z",
+    "version": "WzE4OSwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (12)'] = {
+  "results": {
+    "type": "agents",
+    "id": "c01b5c60-cb33-11e9-bf13-b3c46881080b",
+    "attributes": {
+      "shared_id": "agent11",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-16T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:37:53.829Z",
+    "version": "WzE5MCwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (13)'] = {
+  "results": {
+    "type": "agents",
+    "id": "c0b838a0-cb33-11e9-bf13-b3c46881080b",
+    "attributes": {
+      "shared_id": "agent12",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-17T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:37:54.858Z",
+    "version": "WzE5MSwxXQ=="
+  }
+}
+
+exports['Agent Adapter create should create a new agent - create:agents (1)'] = {
+  "results": {
+    "type": "agents",
+    "id": "d5827ca0-cb33-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"localhost\"}",
+      "user_provided_metadata": "{}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:38:29.738Z",
+    "version": "WzE5MiwxXQ=="
+  }
+}
+
+exports['Agent Adapter create should create a new agent - find:{"type":"agents","perPage":1000} (2)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 14,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "b962c7a0-cb33-11e9-bf13-b3c46881080b",
+        "attributes": {
+          "shared_id": "agent0",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:37:42.554Z",
+        "version": "WzE3OSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "ba9a5d40-cb33-11e9-bf13-b3c46881080b",
+        "attributes": {
+          "shared_id": "agent2",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-07T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:37:44.596Z",
+        "version": "WzE4MSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "bb371270-cb33-11e9-bf13-b3c46881080b",
+        "attributes": {
+          "shared_id": "agent3",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-08T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:37:45.623Z",
+        "version": "WzE4MiwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "bbd24100-cb33-11e9-bf13-b3c46881080b",
+        "attributes": {
+          "shared_id": "agent4",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-09T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:37:46.640Z",
+        "version": "WzE4MywxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "b9fda810-cb33-11e9-bf13-b3c46881080b",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-06T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:37:43.569Z",
+        "version": "WzE4MCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "bc6f1d40-cb33-11e9-bf13-b3c46881080b",
+        "attributes": {
+          "shared_id": "agent5",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-10T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:37:47.668Z",
+        "version": "WzE4NCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "bd0c95c0-cb33-11e9-bf13-b3c46881080b",
+        "attributes": {
+          "shared_id": "agent6",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-11T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:37:48.700Z",
+        "version": "WzE4NSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "bdac5830-cb33-11e9-bf13-b3c46881080b",
+        "attributes": {
+          "shared_id": "agent7",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-12T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:37:49.747Z",
+        "version": "WzE4NiwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "be4a45e0-cb33-11e9-bf13-b3c46881080b",
+        "attributes": {
+          "shared_id": "agent8",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-13T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:37:50.782Z",
+        "version": "WzE4NywxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "bee378a0-cb33-11e9-bf13-b3c46881080b",
+        "attributes": {
+          "shared_id": "agent9",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-14T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:37:51.786Z",
+        "version": "WzE4OCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "bf7ef550-cb33-11e9-bf13-b3c46881080b",
+        "attributes": {
+          "shared_id": "agent10",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-15T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:37:52.805Z",
+        "version": "WzE4OSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "c01b5c60-cb33-11e9-bf13-b3c46881080b",
+        "attributes": {
+          "shared_id": "agent11",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-16T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:37:53.829Z",
+        "version": "WzE5MCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "c0b838a0-cb33-11e9-bf13-b3c46881080b",
+        "attributes": {
+          "shared_id": "agent12",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-17T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:37:54.858Z",
+        "version": "WzE5MSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "d5827ca0-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id-1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"localhost\"}",
+          "user_provided_metadata": "{}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:38:29.738Z",
+        "version": "WzE5MiwxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter create should create a new agent - delete:agents:b962c7a0-cb33-11e9-bf13-b3c46881080b:{} (3)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter create should create a new agent - delete:agents:ba9a5d40-cb33-11e9-bf13-b3c46881080b:{} (4)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter create should create a new agent - delete:agents:bb371270-cb33-11e9-bf13-b3c46881080b:{} (5)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter create should create a new agent - delete:agents:bbd24100-cb33-11e9-bf13-b3c46881080b:{} (6)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter create should create a new agent - delete:agents:b9fda810-cb33-11e9-bf13-b3c46881080b:{} (7)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter create should create a new agent - delete:agents:bc6f1d40-cb33-11e9-bf13-b3c46881080b:{} (8)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter create should create a new agent - delete:agents:bd0c95c0-cb33-11e9-bf13-b3c46881080b:{} (9)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter create should create a new agent - delete:agents:bdac5830-cb33-11e9-bf13-b3c46881080b:{} (10)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter create should create a new agent - delete:agents:be4a45e0-cb33-11e9-bf13-b3c46881080b:{} (11)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter create should create a new agent - delete:agents:bee378a0-cb33-11e9-bf13-b3c46881080b:{} (12)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter create should create a new agent - delete:agents:bf7ef550-cb33-11e9-bf13-b3c46881080b:{} (13)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter create should create a new agent - delete:agents:c01b5c60-cb33-11e9-bf13-b3c46881080b:{} (14)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter create should create a new agent - delete:agents:c0b838a0-cb33-11e9-bf13-b3c46881080b:{} (15)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter create should create a new agent - delete:agents:d5827ca0-cb33-11e9-b9f5-93454d0ee65f:{} (16)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter create should create a new agent with the specified id if specified - create:agents (1)'] = {
+  "results": {
+    "type": "agents",
+    "id": "test-agent-id-1",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"localhost\"}",
+      "user_provided_metadata": "{}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:38:44.465Z",
+    "version": "WzIwNywxXQ=="
+  }
+}
+
+exports['Agent Adapter create should create a new agent with the specified id if specified - find:{"type":"agents","perPage":1000} (2)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "test-agent-id-1",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id-1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"localhost\"}",
+          "user_provided_metadata": "{}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:38:44.465Z",
+        "version": "WzIwNywxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter create should create a new agent with the specified id if specified - delete:agents:test-agent-id-1:{} (3)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter create should allow to create a new agent with the same id two time if override is true - create:agents (1)'] = {
+  "results": {
+    "type": "agents",
+    "id": "test-agent-id-2",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"localhost\"}",
+      "user_provided_metadata": "{}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:38:46.513Z",
+    "version": "WzIwOSwxXQ=="
+  }
+}
+
+exports['Agent Adapter create should allow to create a new agent with the same id two time if override is true - create:agents (2)'] = {
+  "results": {
+    "type": "agents",
+    "id": "test-agent-id-2",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"localhost\"}",
+      "user_provided_metadata": "{}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:38:47.526Z",
+    "version": "WzIxMCwxXQ=="
+  }
+}
+
+exports['Agent Adapter create should allow to create a new agent with the same id two time if override is true - find:{"type":"agents","perPage":1000} (3)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "test-agent-id-2",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id-1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"localhost\"}",
+          "user_provided_metadata": "{}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:38:47.526Z",
+        "version": "WzIxMCwxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter create should allow to create a new agent with the same id two time if override is true - delete:agents:test-agent-id-2:{} (4)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter create should allow to create a new agent with the same id two time if override is true - create:agents (5)'] = {
+  "results": {
+    "type": "agents",
+    "id": "e15b2bd0-cb33-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"localhost\"}",
+      "user_provided_metadata": "{}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:38:49.613Z",
+    "version": "WzIxMiwxXQ=="
+  }
+}
+
+exports['Agent Adapter update should allow to update an agent - get:agents:e15b2bd0-cb33-11e9-b9f5-93454d0ee65f:{"active":true}:{} (1)'] = {
+  "results": {
+    "id": "e15b2bd0-cb33-11e9-b9f5-93454d0ee65f",
+    "type": "agents",
+    "updated_at": "2019-08-30T14:38:50.641Z",
+    "version": "WzIxMywxXQ==",
+    "references": [],
+    "attributes": {
+      "active": true
+    }
+  }
+}
+
+exports['Agent Adapter update should allow to update an agent - get:agents:e15b2bd0-cb33-11e9-b9f5-93454d0ee65f:{} (2)'] = {
+  "results": {
+    "id": "e15b2bd0-cb33-11e9-b9f5-93454d0ee65f",
+    "type": "agents",
+    "updated_at": "2019-08-30T14:38:50.641Z",
+    "version": "WzIxMywxXQ==",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": true,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"localhost\"}",
+      "user_provided_metadata": "{}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": []
+  }
+}
+
+exports['Agent Adapter update should allow to update an agent - find:{"type":"agents","perPage":1000} (3)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "e15b2bd0-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": true,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id-1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"localhost\"}",
+          "user_provided_metadata": "{}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:38:50.641Z",
+        "version": "WzIxMywxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter update should allow to update an agent - delete:agents:e15b2bd0-cb33-11e9-b9f5-93454d0ee65f:{} (4)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter update should allow to update an agent - create:agents (5)'] = {
+  "results": {
+    "type": "agents",
+    "id": "e3319980-cb33-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"localhost\"}",
+      "user_provided_metadata": "{}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:38:52.696Z",
+    "version": "WzIxNSwxXQ=="
+  }
+}
+
+exports['Agent Adapter delete should delete an agent - delete:agents:e3319980-cb33-11e9-b9f5-93454d0ee65f:{} (1)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter delete should delete an agent - get:agents:e3319980-cb33-11e9-b9f5-93454d0ee65f:{} (2)'] = {
+  "results": null
+}
+
+exports['Agent Adapter delete should delete an agent - find:{"type":"agents","perPage":1000} (3)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 0,
+    "saved_objects": []
+  }
+}
+
+exports['Agent Adapter delete should delete an agent - create:agents (4)'] = {
+  "results": {
+    "type": "agents",
+    "id": "e469a450-cb33-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:38:54.741Z",
+    "version": "WzIxNywxXQ=="
+  }
+}
+
+exports['Agent Adapter delete should delete an agent - create:agents (5)'] = {
+  "results": {
+    "type": "agents",
+    "id": "e502fe20-cb33-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent2",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"elastic.co\"}",
+      "user_provided_metadata": "{\"color\":\"blue\"}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:38:55.745Z",
+    "version": "WzIxOCwxXQ=="
+  }
+}
+
+exports['Agent Adapter findEphemeralByConfigSharedId should allow to find agent by config shared id - find:{"type":"agents","search":"shared_config_id_1","searchFields":["config_shared_id"]} (1)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 20,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "e469a450-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:38:54.741Z",
+        "version": "WzIxNywxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter findEphemeralByConfigSharedId should allow to find agent by config shared id - find:{"type":"agents","perPage":1000} (2)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 2,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "e469a450-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:38:54.741Z",
+        "version": "WzIxNywxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "e502fe20-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent2",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id-1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"elastic.co\"}",
+          "user_provided_metadata": "{\"color\":\"blue\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:38:55.745Z",
+        "version": "WzIxOCwxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter findEphemeralByConfigSharedId should allow to find agent by config shared id - delete:agents:e469a450-cb33-11e9-b9f5-93454d0ee65f:{} (3)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter findEphemeralByConfigSharedId should allow to find agent by config shared id - delete:agents:e502fe20-cb33-11e9-b9f5-93454d0ee65f:{} (4)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - create:agents (1)'] = {
+  "results": {
+    "type": "agents",
+    "id": "e6da2f20-cb33-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent0",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:38:58.834Z",
+    "version": "WzIyMSwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (2)'] = {
+  "results": {
+    "type": "agents",
+    "id": "e772c5a0-cb33-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-06T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:38:59.834Z",
+    "version": "WzIyMiwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (3)'] = {
+  "results": {
+    "type": "agents",
+    "id": "e8128810-cb33-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent2",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-07T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:00.881Z",
+    "version": "WzIyMywxXQ=="
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (4)'] = {
+  "results": {
+    "type": "agents",
+    "id": "e8adddb0-cb33-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent3",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-08T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:01.899Z",
+    "version": "WzIyNCwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (5)'] = {
+  "results": {
+    "type": "agents",
+    "id": "e9487000-cb33-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent4",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-09T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:02.912Z",
+    "version": "WzIyNSwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (6)'] = {
+  "results": {
+    "type": "agents",
+    "id": "e9e54c40-cb33-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent5",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-10T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:03.940Z",
+    "version": "WzIyNiwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (7)'] = {
+  "results": {
+    "type": "agents",
+    "id": "ea820170-cb33-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent6",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-11T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:04.967Z",
+    "version": "WzIyNywxXQ=="
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (8)'] = {
+  "results": {
+    "type": "agents",
+    "id": "eb1e1a60-cb33-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent7",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-12T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:05.990Z",
+    "version": "WzIyOCwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (9)'] = {
+  "results": {
+    "type": "agents",
+    "id": "ebb81070-cb33-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent8",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-13T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:06.998Z",
+    "version": "WzIyOSwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (10)'] = {
+  "results": {
+    "type": "agents",
+    "id": "ec57abd0-cb33-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent9",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-14T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:08.045Z",
+    "version": "WzIzMCwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (11)'] = {
+  "results": {
+    "type": "agents",
+    "id": "ecf4af20-cb33-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent10",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-15T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:09.074Z",
+    "version": "WzIzMSwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (12)'] = {
+  "results": {
+    "type": "agents",
+    "id": "ed918b60-cb33-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent11",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-16T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:10.102Z",
+    "version": "WzIzMiwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (13)'] = {
+  "results": {
+    "type": "agents",
+    "id": "ee30ffb0-cb33-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent12",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-17T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:11.147Z",
+    "version": "WzIzMywxXQ=="
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (14)'] = {
+  "results": {
+    "type": "agents",
+    "id": "eecd18a0-cb33-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent13",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-18T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:12.170Z",
+    "version": "WzIzNCwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (15)'] = {
+  "results": {
+    "type": "agents",
+    "id": "ef693190-cb33-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent14",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-19T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:13.193Z",
+    "version": "WzIzNSwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (16)'] = {
+  "results": {
+    "type": "agents",
+    "id": "f003eaf0-cb33-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent15",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-20T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:14.206Z",
+    "version": "WzIzNiwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (17)'] = {
+  "results": {
+    "type": "agents",
+    "id": "f09fdcd0-cb33-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent16",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-21T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:15.229Z",
+    "version": "WzIzNywxXQ=="
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (18)'] = {
+  "results": {
+    "type": "agents",
+    "id": "f13c1cd0-cb33-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent17",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-22T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:16.253Z",
+    "version": "WzIzOCwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (19)'] = {
+  "results": {
+    "type": "agents",
+    "id": "f1daf4e0-cb33-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent18",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-23T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:17.293Z",
+    "version": "WzIzOSwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should list all agents - create:agents (20)'] = {
+  "results": {
+    "type": "agents",
+    "id": "f275fc60-cb33-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent19",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-24T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:18.310Z",
+    "version": "WzI0MCwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should list all agents - find:{"type":"agents","perPage":20} (21)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 20,
+    "total": 20,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "e6da2f20-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent0",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:38:58.834Z",
+        "version": "WzIyMSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "e8128810-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent2",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-07T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:00.881Z",
+        "version": "WzIyMywxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "e8adddb0-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent3",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-08T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:01.899Z",
+        "version": "WzIyNCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "e9487000-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent4",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-09T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:02.912Z",
+        "version": "WzIyNSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "e9e54c40-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent5",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-10T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:03.940Z",
+        "version": "WzIyNiwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "ea820170-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent6",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-11T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:04.967Z",
+        "version": "WzIyNywxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "eb1e1a60-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent7",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-12T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:05.990Z",
+        "version": "WzIyOCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "e772c5a0-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-06T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:38:59.834Z",
+        "version": "WzIyMiwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "ecf4af20-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent10",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-15T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:09.074Z",
+        "version": "WzIzMSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "ee30ffb0-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent12",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-17T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:11.147Z",
+        "version": "WzIzMywxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "eecd18a0-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent13",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-18T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:12.170Z",
+        "version": "WzIzNCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "ef693190-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent14",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-19T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:13.193Z",
+        "version": "WzIzNSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "f09fdcd0-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent16",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-21T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:15.229Z",
+        "version": "WzIzNywxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "ed918b60-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent11",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-16T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:10.102Z",
+        "version": "WzIzMiwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "f003eaf0-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent15",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-20T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:14.206Z",
+        "version": "WzIzNiwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "ebb81070-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent8",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-13T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:06.998Z",
+        "version": "WzIyOSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "ec57abd0-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent9",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-14T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:08.045Z",
+        "version": "WzIzMCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "f13c1cd0-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent17",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-22T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:16.253Z",
+        "version": "WzIzOCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "f1daf4e0-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent18",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-23T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:17.293Z",
+        "version": "WzIzOSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "f275fc60-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent19",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-24T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:18.310Z",
+        "version": "WzI0MCwxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter list should list all agents - find:{"type":"agents","perPage":1000} (22)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 20,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "e6da2f20-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent0",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:38:58.834Z",
+        "version": "WzIyMSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "e8128810-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent2",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-07T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:00.881Z",
+        "version": "WzIyMywxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "e8adddb0-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent3",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-08T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:01.899Z",
+        "version": "WzIyNCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "e9487000-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent4",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-09T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:02.912Z",
+        "version": "WzIyNSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "e9e54c40-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent5",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-10T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:03.940Z",
+        "version": "WzIyNiwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "ea820170-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent6",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-11T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:04.967Z",
+        "version": "WzIyNywxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "eb1e1a60-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent7",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-12T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:05.990Z",
+        "version": "WzIyOCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "e772c5a0-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-06T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:38:59.834Z",
+        "version": "WzIyMiwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "ecf4af20-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent10",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-15T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:09.074Z",
+        "version": "WzIzMSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "ee30ffb0-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent12",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-17T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:11.147Z",
+        "version": "WzIzMywxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "eecd18a0-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent13",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-18T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:12.170Z",
+        "version": "WzIzNCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "ef693190-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent14",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-19T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:13.193Z",
+        "version": "WzIzNSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "f09fdcd0-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent16",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-21T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:15.229Z",
+        "version": "WzIzNywxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "ed918b60-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent11",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-16T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:10.102Z",
+        "version": "WzIzMiwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "f003eaf0-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent15",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-20T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:14.206Z",
+        "version": "WzIzNiwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "ebb81070-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent8",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-13T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:06.998Z",
+        "version": "WzIyOSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "ec57abd0-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent9",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-14T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:08.045Z",
+        "version": "WzIzMCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "f13c1cd0-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent17",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-22T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:16.253Z",
+        "version": "WzIzOCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "f1daf4e0-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent18",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-23T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:17.293Z",
+        "version": "WzIzOSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "f275fc60-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent19",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-24T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:18.310Z",
+        "version": "WzI0MCwxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:e6da2f20-cb33-11e9-b9f5-93454d0ee65f:{} (23)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:e8128810-cb33-11e9-b9f5-93454d0ee65f:{} (24)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:e8adddb0-cb33-11e9-b9f5-93454d0ee65f:{} (25)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:e9487000-cb33-11e9-b9f5-93454d0ee65f:{} (26)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:e9e54c40-cb33-11e9-b9f5-93454d0ee65f:{} (27)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:ea820170-cb33-11e9-b9f5-93454d0ee65f:{} (28)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:eb1e1a60-cb33-11e9-b9f5-93454d0ee65f:{} (29)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:e772c5a0-cb33-11e9-b9f5-93454d0ee65f:{} (30)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:ecf4af20-cb33-11e9-b9f5-93454d0ee65f:{} (31)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:ee30ffb0-cb33-11e9-b9f5-93454d0ee65f:{} (32)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:eecd18a0-cb33-11e9-b9f5-93454d0ee65f:{} (33)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:ef693190-cb33-11e9-b9f5-93454d0ee65f:{} (34)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:f09fdcd0-cb33-11e9-b9f5-93454d0ee65f:{} (35)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:ed918b60-cb33-11e9-b9f5-93454d0ee65f:{} (36)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:f003eaf0-cb33-11e9-b9f5-93454d0ee65f:{} (37)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:ebb81070-cb33-11e9-b9f5-93454d0ee65f:{} (38)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:ec57abd0-cb33-11e9-b9f5-93454d0ee65f:{} (39)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:f13c1cd0-cb33-11e9-b9f5-93454d0ee65f:{} (40)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:f1daf4e0-cb33-11e9-b9f5-93454d0ee65f:{} (41)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should list all agents - delete:agents:f275fc60-cb33-11e9-b9f5-93454d0ee65f:{} (42)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (1)'] = {
+  "results": {
+    "type": "agents",
+    "id": "ff56f3d0-cb33-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent0",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:39.917Z",
+    "version": "WzI2MSwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (2)'] = {
+  "results": {
+    "type": "agents",
+    "id": "ffef1520-cb33-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-06T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:40.914Z",
+    "version": "WzI2MiwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (3)'] = {
+  "results": {
+    "type": "agents",
+    "id": "008bf160-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent2",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-07T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:41.942Z",
+    "version": "WzI2MywxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (4)'] = {
+  "results": {
+    "type": "agents",
+    "id": "015d2410-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent3",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-08T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:43.313Z",
+    "version": "WzI2NCwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (5)'] = {
+  "results": {
+    "type": "agents",
+    "id": "0204d5c0-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent4",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-09T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:44.412Z",
+    "version": "WzI2NSwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (6)'] = {
+  "results": {
+    "type": "agents",
+    "id": "02cb8120-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent5",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-10T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:45.714Z",
+    "version": "WzI2NiwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (7)'] = {
+  "results": {
+    "type": "agents",
+    "id": "039316e0-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent6",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-11T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:47.022Z",
+    "version": "WzI2NywxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (8)'] = {
+  "results": {
+    "type": "agents",
+    "id": "04128010-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent7",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-12T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:47.857Z",
+    "version": "WzI2OCwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (9)'] = {
+  "results": {
+    "type": "agents",
+    "id": "04ad6080-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent8",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-13T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:48.872Z",
+    "version": "WzI2OSwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (10)'] = {
+  "results": {
+    "type": "agents",
+    "id": "05c698b0-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent9",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-14T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:50.715Z",
+    "version": "WzI3MCwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (11)'] = {
+  "results": {
+    "type": "agents",
+    "id": "067f6160-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent10",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-15T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:51.926Z",
+    "version": "WzI3MSwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (12)'] = {
+  "results": {
+    "type": "agents",
+    "id": "071cb2d0-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent11",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-16T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:52.957Z",
+    "version": "WzI3MiwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (13)'] = {
+  "results": {
+    "type": "agents",
+    "id": "07b7ba50-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent12",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-17T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:53.973Z",
+    "version": "WzI3MywxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (14)'] = {
+  "results": {
+    "type": "agents",
+    "id": "08542160-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent13",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-18T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:54.998Z",
+    "version": "WzI3NCwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (15)'] = {
+  "results": {
+    "type": "agents",
+    "id": "08f56a70-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent14",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-19T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:56.054Z",
+    "version": "WzI3NSwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (16)'] = {
+  "results": {
+    "type": "agents",
+    "id": "09944280-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent15",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-20T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:57.096Z",
+    "version": "WzI3NiwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (17)'] = {
+  "results": {
+    "type": "agents",
+    "id": "0a38e6f0-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent16",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-21T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:58.174Z",
+    "version": "WzI3NywxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (18)'] = {
+  "results": {
+    "type": "agents",
+    "id": "0ad6d4a0-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent17",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-22T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:39:59.210Z",
+    "version": "WzI3OCwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (19)'] = {
+  "results": {
+    "type": "agents",
+    "id": "0b77a880-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent18",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-23T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:40:00.264Z",
+    "version": "WzI3OSwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - create:agents (20)'] = {
+  "results": {
+    "type": "agents",
+    "id": "0c140f90-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent19",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-24T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:40:01.289Z",
+    "version": "WzI4MCwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - find:{"type":"agents","page":1,"perPage":3,"sortField":"enrolled_at","sortOrder":"ASC"} (21)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 3,
+    "total": 20,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "ff56f3d0-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent0",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:39.917Z",
+        "version": "WzI2MSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "ffef1520-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-06T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:40.914Z",
+        "version": "WzI2MiwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "008bf160-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent2",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-07T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:41.942Z",
+        "version": "WzI2MywxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - find:{"type":"agents","perPage":1000} (22)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 20,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "ff56f3d0-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent0",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:39.917Z",
+        "version": "WzI2MSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "008bf160-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent2",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-07T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:41.942Z",
+        "version": "WzI2MywxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "015d2410-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent3",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-08T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:43.313Z",
+        "version": "WzI2NCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "ffef1520-cb33-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-06T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:40.914Z",
+        "version": "WzI2MiwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "067f6160-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent10",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-15T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:51.926Z",
+        "version": "WzI3MSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "07b7ba50-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent12",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-17T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:53.973Z",
+        "version": "WzI3MywxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "071cb2d0-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent11",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-16T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:52.957Z",
+        "version": "WzI3MiwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "0204d5c0-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent4",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-09T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:44.412Z",
+        "version": "WzI2NSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "02cb8120-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent5",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-10T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:45.714Z",
+        "version": "WzI2NiwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "039316e0-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent6",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-11T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:47.022Z",
+        "version": "WzI2NywxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "04128010-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent7",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-12T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:47.857Z",
+        "version": "WzI2OCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "04ad6080-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent8",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-13T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:48.872Z",
+        "version": "WzI2OSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "05c698b0-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent9",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-14T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:50.715Z",
+        "version": "WzI3MCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "08542160-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent13",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-18T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:54.998Z",
+        "version": "WzI3NCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "08f56a70-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent14",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-19T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:56.054Z",
+        "version": "WzI3NSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "09944280-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent15",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-20T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:57.096Z",
+        "version": "WzI3NiwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "0a38e6f0-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent16",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-21T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:58.174Z",
+        "version": "WzI3NywxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "0ad6d4a0-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent17",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-22T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:39:59.210Z",
+        "version": "WzI3OCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "0b77a880-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent18",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-23T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:40:00.264Z",
+        "version": "WzI3OSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "0c140f90-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent19",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-24T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:40:01.289Z",
+        "version": "WzI4MCwxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:ff56f3d0-cb33-11e9-b9f5-93454d0ee65f:{} (23)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:008bf160-cb34-11e9-b9f5-93454d0ee65f:{} (24)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:015d2410-cb34-11e9-b9f5-93454d0ee65f:{} (25)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:ffef1520-cb33-11e9-b9f5-93454d0ee65f:{} (26)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:067f6160-cb34-11e9-b9f5-93454d0ee65f:{} (27)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:07b7ba50-cb34-11e9-b9f5-93454d0ee65f:{} (28)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:071cb2d0-cb34-11e9-b9f5-93454d0ee65f:{} (29)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:0204d5c0-cb34-11e9-b9f5-93454d0ee65f:{} (30)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:02cb8120-cb34-11e9-b9f5-93454d0ee65f:{} (31)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:039316e0-cb34-11e9-b9f5-93454d0ee65f:{} (32)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:04128010-cb34-11e9-b9f5-93454d0ee65f:{} (33)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:04ad6080-cb34-11e9-b9f5-93454d0ee65f:{} (34)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:05c698b0-cb34-11e9-b9f5-93454d0ee65f:{} (35)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:08542160-cb34-11e9-b9f5-93454d0ee65f:{} (36)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:08f56a70-cb34-11e9-b9f5-93454d0ee65f:{} (37)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:09944280-cb34-11e9-b9f5-93454d0ee65f:{} (38)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:0a38e6f0-cb34-11e9-b9f5-93454d0ee65f:{} (39)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:0ad6d4a0-cb34-11e9-b9f5-93454d0ee65f:{} (40)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:0b77a880-cb34-11e9-b9f5-93454d0ee65f:{} (41)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date ASC - delete:agents:0c140f90-cb34-11e9-b9f5-93454d0ee65f:{} (42)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (1)'] = {
+  "results": {
+    "type": "agents",
+    "id": "18f5ca50-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent0",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:40:22.901Z",
+    "version": "WzMwMSwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (2)'] = {
+  "results": {
+    "type": "agents",
+    "id": "19951790-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-06T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:40:23.945Z",
+    "version": "WzMwMiwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (3)'] = {
+  "results": {
+    "type": "agents",
+    "id": "1a310970-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent2",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-07T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:40:24.967Z",
+    "version": "WzMwMywxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (4)'] = {
+  "results": {
+    "type": "agents",
+    "id": "1ac7a420-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent3",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-08T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:40:25.954Z",
+    "version": "WzMwNCwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (5)'] = {
+  "results": {
+    "type": "agents",
+    "id": "1b6591d0-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent4",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-09T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:40:26.989Z",
+    "version": "WzMwNSwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (6)'] = {
+  "results": {
+    "type": "agents",
+    "id": "1c05a260-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent5",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-10T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:40:28.038Z",
+    "version": "WzMwNiwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (7)'] = {
+  "results": {
+    "type": "agents",
+    "id": "1c9e8700-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent6",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-11T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:40:29.039Z",
+    "version": "WzMwNywxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (8)'] = {
+  "results": {
+    "type": "agents",
+    "id": "1d37e0d0-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent7",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-12T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:40:30.045Z",
+    "version": "WzMwOCwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (9)'] = {
+  "results": {
+    "type": "agents",
+    "id": "1dd902d0-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent8",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-13T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:40:31.101Z",
+    "version": "WzMwOSwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (10)'] = {
+  "results": {
+    "type": "agents",
+    "id": "1e6eda30-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent9",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-14T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:40:32.083Z",
+    "version": "WzMxMCwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (11)'] = {
+  "results": {
+    "type": "agents",
+    "id": "1f110da0-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent10",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-15T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:40:33.146Z",
+    "version": "WzMxMSwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (12)'] = {
+  "results": {
+    "type": "agents",
+    "id": "1fb16c50-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent11",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-16T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:40:34.197Z",
+    "version": "WzMxMiwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (13)'] = {
+  "results": {
+    "type": "agents",
+    "id": "204a50f0-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent12",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-17T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:40:35.199Z",
+    "version": "WzMxMywxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (14)'] = {
+  "results": {
+    "type": "agents",
+    "id": "20e901f0-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent13",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-18T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:40:36.239Z",
+    "version": "WzMxNCwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (15)'] = {
+  "results": {
+    "type": "agents",
+    "id": "2184a5b0-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent14",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-19T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:40:37.259Z",
+    "version": "WzMxNSwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (16)'] = {
+  "results": {
+    "type": "agents",
+    "id": "22215ae0-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent15",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-20T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:40:38.286Z",
+    "version": "WzMxNiwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (17)'] = {
+  "results": {
+    "type": "agents",
+    "id": "22be1010-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent16",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-21T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:40:39.313Z",
+    "version": "WzMxNywxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (18)'] = {
+  "results": {
+    "type": "agents",
+    "id": "23587b50-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent17",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-22T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:40:40.324Z",
+    "version": "WzMxOCwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (19)'] = {
+  "results": {
+    "type": "agents",
+    "id": "23f2e690-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent18",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-23T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:40:41.337Z",
+    "version": "WzMxOSwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - create:agents (20)'] = {
+  "results": {
+    "type": "agents",
+    "id": "24914970-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent19",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-24T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:40:42.374Z",
+    "version": "WzMyMCwxXQ=="
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - find:{"type":"agents","page":1,"perPage":3,"sortField":"enrolled_at","sortOrder":"DESC"} (21)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 3,
+    "total": 20,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "24914970-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent19",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-24T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:40:42.374Z",
+        "version": "WzMyMCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "23f2e690-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent18",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-23T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:40:41.337Z",
+        "version": "WzMxOSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "23587b50-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent17",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-22T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:40:40.324Z",
+        "version": "WzMxOCwxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - find:{"type":"agents","perPage":1000} (22)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 20,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "18f5ca50-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent0",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:40:22.901Z",
+        "version": "WzMwMSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "1a310970-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent2",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-07T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:40:24.967Z",
+        "version": "WzMwMywxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "1ac7a420-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent3",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-08T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:40:25.954Z",
+        "version": "WzMwNCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "1b6591d0-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent4",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-09T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:40:26.989Z",
+        "version": "WzMwNSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "1c05a260-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent5",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-10T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:40:28.038Z",
+        "version": "WzMwNiwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "1c9e8700-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent6",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-11T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:40:29.039Z",
+        "version": "WzMwNywxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "1d37e0d0-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent7",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-12T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:40:30.045Z",
+        "version": "WzMwOCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "1dd902d0-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent8",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-13T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:40:31.101Z",
+        "version": "WzMwOSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "19951790-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-06T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:40:23.945Z",
+        "version": "WzMwMiwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "1f110da0-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent10",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-15T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:40:33.146Z",
+        "version": "WzMxMSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "204a50f0-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent12",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-17T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:40:35.199Z",
+        "version": "WzMxMywxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "20e901f0-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent13",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-18T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:40:36.239Z",
+        "version": "WzMxNCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "2184a5b0-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent14",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-19T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:40:37.259Z",
+        "version": "WzMxNSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "22215ae0-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent15",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-20T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:40:38.286Z",
+        "version": "WzMxNiwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "22be1010-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent16",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-21T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:40:39.313Z",
+        "version": "WzMxNywxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "23587b50-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent17",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-22T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:40:40.324Z",
+        "version": "WzMxOCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "1fb16c50-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent11",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-16T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:40:34.197Z",
+        "version": "WzMxMiwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "1e6eda30-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent9",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-14T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:40:32.083Z",
+        "version": "WzMxMCwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "23f2e690-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent18",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-23T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:40:41.337Z",
+        "version": "WzMxOSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "24914970-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent19",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-24T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:40:42.374Z",
+        "version": "WzMyMCwxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:18f5ca50-cb34-11e9-b9f5-93454d0ee65f:{} (23)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:1a310970-cb34-11e9-b9f5-93454d0ee65f:{} (24)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:1ac7a420-cb34-11e9-b9f5-93454d0ee65f:{} (25)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:1b6591d0-cb34-11e9-b9f5-93454d0ee65f:{} (26)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:1c05a260-cb34-11e9-b9f5-93454d0ee65f:{} (27)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:1c9e8700-cb34-11e9-b9f5-93454d0ee65f:{} (28)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:1d37e0d0-cb34-11e9-b9f5-93454d0ee65f:{} (29)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:1dd902d0-cb34-11e9-b9f5-93454d0ee65f:{} (30)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:19951790-cb34-11e9-b9f5-93454d0ee65f:{} (31)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:1f110da0-cb34-11e9-b9f5-93454d0ee65f:{} (32)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:204a50f0-cb34-11e9-b9f5-93454d0ee65f:{} (33)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:20e901f0-cb34-11e9-b9f5-93454d0ee65f:{} (34)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:2184a5b0-cb34-11e9-b9f5-93454d0ee65f:{} (35)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:22215ae0-cb34-11e9-b9f5-93454d0ee65f:{} (36)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:22be1010-cb34-11e9-b9f5-93454d0ee65f:{} (37)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:23587b50-cb34-11e9-b9f5-93454d0ee65f:{} (38)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:1fb16c50-cb34-11e9-b9f5-93454d0ee65f:{} (39)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:1e6eda30-cb34-11e9-b9f5-93454d0ee65f:{} (40)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:23f2e690-cb34-11e9-b9f5-93454d0ee65f:{} (41)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter list should support to sort by enrolled_at date DESC - delete:agents:24914970-cb34-11e9-b9f5-93454d0ee65f:{} (42)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter findByMetadata should allow to find agents by local metadata - create:agents (1)'] = {
+  "results": {
+    "type": "agents",
+    "id": "316e2230-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:41:03.955Z",
+    "version": "WzM0MSwxXQ=="
+  }
+}
+
+exports['Agent Adapter findByMetadata should allow to find agents by local metadata - create:agents (2)'] = {
+  "results": {
+    "type": "agents",
+    "id": "3208b480-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent2",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"elastic.co\"}",
+      "user_provided_metadata": "{\"color\":\"blue\"}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:41:04.968Z",
+    "version": "WzM0MiwxXQ=="
+  }
+}
+
+exports['Agent Adapter findByMetadata should allow to find agents by local metadata - find:{"type":"agents","search":"elastic.co"} (3)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 20,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "3208b480-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent2",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id-1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"elastic.co\"}",
+          "user_provided_metadata": "{\"color\":\"blue\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:41:04.968Z",
+        "version": "WzM0MiwxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter findByMetadata should allow to find agents by local metadata - find:{"type":"agents","perPage":1000} (4)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 2,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "316e2230-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:41:03.955Z",
+        "version": "WzM0MSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "3208b480-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent2",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id-1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"elastic.co\"}",
+          "user_provided_metadata": "{\"color\":\"blue\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:41:04.968Z",
+        "version": "WzM0MiwxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter findByMetadata should allow to find agents by local metadata - delete:agents:316e2230-cb34-11e9-b9f5-93454d0ee65f:{} (5)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter findByMetadata should allow to find agents by local metadata - delete:agents:3208b480-cb34-11e9-b9f5-93454d0ee65f:{} (6)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter findByMetadata should allow to find agents by user provided metadata - create:agents (1)'] = {
+  "results": {
+    "type": "agents",
+    "id": "33d9f210-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent1",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id_1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"test.fr\"}",
+      "user_provided_metadata": "{\"color\":\"red\"}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:41:08.017Z",
+    "version": "WzM0NSwxXQ=="
+  }
+}
+
+exports['Agent Adapter findByMetadata should allow to find agents by user provided metadata - create:agents (2)'] = {
+  "results": {
+    "type": "agents",
+    "id": "3478f130-cb34-11e9-b9f5-93454d0ee65f",
+    "attributes": {
+      "shared_id": "agent2",
+      "active": false,
+      "access_token": "TOKEN_1",
+      "config_id": "config_id_1",
+      "config_shared_id": "shared_config_id-1",
+      "type": "EPHEMERAL",
+      "version": "1",
+      "local_metadata": "{\"host\":\"elastic.co\"}",
+      "user_provided_metadata": "{\"color\":\"blue\"}",
+      "enrolled_at": "2019-08-05T19:35:14.861Z"
+    },
+    "references": [],
+    "updated_at": "2019-08-30T14:41:09.059Z",
+    "version": "WzM0NiwxXQ=="
+  }
+}
+
+exports['Agent Adapter findByMetadata should allow to find agents by user provided metadata - find:{"type":"agents","search":"red"} (3)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 20,
+    "total": 1,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "33d9f210-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:41:08.017Z",
+        "version": "WzM0NSwxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter findByMetadata should allow to find agents by user provided metadata - find:{"type":"agents","perPage":1000} (4)'] = {
+  "results": {
+    "page": 1,
+    "per_page": 1000,
+    "total": 2,
+    "saved_objects": [
+      {
+        "type": "agents",
+        "id": "33d9f210-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent1",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id_1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"test.fr\"}",
+          "user_provided_metadata": "{\"color\":\"red\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:41:08.017Z",
+        "version": "WzM0NSwxXQ=="
+      },
+      {
+        "type": "agents",
+        "id": "3478f130-cb34-11e9-b9f5-93454d0ee65f",
+        "attributes": {
+          "shared_id": "agent2",
+          "active": false,
+          "access_token": "TOKEN_1",
+          "config_id": "config_id_1",
+          "config_shared_id": "shared_config_id-1",
+          "type": "EPHEMERAL",
+          "version": "1",
+          "local_metadata": "{\"host\":\"elastic.co\"}",
+          "user_provided_metadata": "{\"color\":\"blue\"}",
+          "enrolled_at": "2019-08-05T19:35:14.861Z"
+        },
+        "references": [],
+        "updated_at": "2019-08-30T14:41:09.059Z",
+        "version": "WzM0NiwxXQ=="
+      }
+    ]
+  }
+}
+
+exports['Agent Adapter findByMetadata should allow to find agents by user provided metadata - delete:agents:33d9f210-cb34-11e9-b9f5-93454d0ee65f:{} (5)'] = {
+  "results": {}
+}
+
+exports['Agent Adapter findByMetadata should allow to find agents by user provided metadata - delete:agents:3478f130-cb34-11e9-b9f5-93454d0ee65f:{} (6)'] = {
+  "results": {}
+}
