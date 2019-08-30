@@ -70,6 +70,7 @@ export const getHostsColumns = (
       }
       return getEmptyTagValue();
     },
+    width: '35%',
   },
   {
     field: 'node.lastSeen',

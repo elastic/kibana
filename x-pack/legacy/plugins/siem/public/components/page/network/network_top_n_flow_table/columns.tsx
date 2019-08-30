@@ -90,7 +90,7 @@ export const getNetworkTopNFlowColumns = (
         return getEmptyTagValue();
       }
     },
-    width: '15%',
+    width: '20%',
   },
   {
     name: i18n.DOMAIN,

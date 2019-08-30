@@ -41,7 +41,7 @@ export const ENTITY = i18n.translate('xpack.siem.ml.table.entityTitle', {
 });
 
 export const DETECTOR = i18n.translate('xpack.siem.ml.table.detectorTitle', {
-  defaultMessage: 'Job name',
+  defaultMessage: 'Job',
 });
 
 export const NETWORK_NAME = i18n.translate('xpack.siem.ml.table.networkNameTitle', {

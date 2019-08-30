@@ -20,20 +20,20 @@ export const UNIT = (totalCount: number) =>
   });
 
 export const HOSTS = i18n.translate('xpack.siem.uncommonProcessTable.hostsTitle', {
-  defaultMessage: 'Hosts',
+  defaultMessage: 'Host names',
 });
 
 export const NUMBER_OF_HOSTS = i18n.translate(
   'xpack.siem.uncommonProcessTable.numberOfHostsTitle',
   {
-    defaultMessage: 'Number of hosts',
+    defaultMessage: 'Hosts',
   }
 );
 
 export const NUMBER_OF_INSTANCES = i18n.translate(
   'xpack.siem.uncommonProcessTable.numberOfInstances',
   {
-    defaultMessage: 'Number of instances',
+    defaultMessage: 'Instances',
   }
 );
 
@@ -46,7 +46,7 @@ export const LAST_USER = i18n.translate('xpack.siem.uncommonProcessTable.lastUse
 });
 
 export const NAME = i18n.translate('xpack.siem.uncommonProcessTable.nameTitle', {
-  defaultMessage: 'Name',
+  defaultMessage: 'Process name',
 });
 
 export const ROWS_5 = i18n.translate('xpack.siem.uncommonProcessTable.rows', {
