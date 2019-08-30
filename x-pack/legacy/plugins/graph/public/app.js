@@ -44,9 +44,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { GraphListing } from './components/graph_listing';
 import { GraphSettings } from './components/graph_settings/graph_settings';
 
-import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs, getHomePath } from './services/url';
-import { save } from  './services/save';
-
 import './angular/angular_venn_simple.js';
 import gws from './angular/graph_client_workspace.js';
 import utils from './utils.js';
@@ -61,12 +58,15 @@ import {
 import {
   getOutlinkEncoders,
 } from './services/outlink_encoders';
+import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs, getHomePath } from './services/url';
+import { save } from  './services/save';
 import {
   asAngularSyncedObservable,
 } from './services/as_observable';
 
 import settingsTemplate from './angular/templates/settings.html';
 
+import './angular/directives/graph_save';
 import './angular/directives/graph_settings';
 
 const app = uiModules.get('app/graph');
@@ -861,7 +861,7 @@ app.controller('graphuiPlugin', function (
         defaultMessage: 'Save',
       }),
       description: i18n.translate('xpack.graph.topNavMenu.saveWorkspace.enabledAriaLabel', {
-        defaultMessage: 'Save Workspace',
+        defaultMessage: 'Save workspace',
       }),
       tooltip: () => {
         if ($scope.allSavingDisabled) {
@@ -1197,10 +1197,8 @@ app.controller('graphuiPlugin', function (
           text,
           'data-test-subj': 'saveGraphSuccess',
         });
-        if ($scope.savedWorkspace.id !== $route.current.params.id) {
-          kbnUrl.change(getEditPath($scope.savedWorkspace));
-        }
-        updateBreadcrumbs();
+        if ($scope.savedWorkspace.id === $route.current.params.id) return;
+        kbnUrl.change(getEditPath($scope.savedWorkspace));
       }
       return { id };
     }, fatalError);

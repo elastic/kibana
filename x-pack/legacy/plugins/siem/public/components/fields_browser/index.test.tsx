@@ -117,4 +117,82 @@ describe('StatefulFieldsBrowser', () => {
       ).toHaveStyleRule('font-weight', 'bold');
     });
   });
+
+  test('it renders the Fields Browser button as a settings gear when the isEventViewer prop is true', () => {
+    const isEventViewer = true;
+
+    const wrapper = mount(
+      <TestProviders>
+        <StatefulFieldsBrowser
+          browserFields={mockBrowserFields}
+          columnHeaders={[]}
+          height={FIELD_BROWSER_HEIGHT}
+          isEventViewer={isEventViewer}
+          onUpdateColumns={jest.fn()}
+          timelineId={timelineId}
+          toggleColumn={jest.fn()}
+          width={FIELD_BROWSER_WIDTH}
+        />
+      </TestProviders>
+    );
+
+    expect(
+      wrapper
+        .find('[data-test-subj="show-field-browser-gear"]')
+        .first()
+        .exists()
+    ).toBe(true);
+  });
+
+  test('it does NOT render the Fields Browser button as a settings gear when the isEventViewer prop is false', () => {
+    const isEventViewer = false;
+
+    const wrapper = mount(
+      <TestProviders>
+        <StatefulFieldsBrowser
+          browserFields={mockBrowserFields}
+          columnHeaders={[]}
+          height={FIELD_BROWSER_HEIGHT}
+          isEventViewer={isEventViewer}
+          onUpdateColumns={jest.fn()}
+          timelineId={timelineId}
+          toggleColumn={jest.fn()}
+          width={FIELD_BROWSER_WIDTH}
+        />
+      </TestProviders>
+    );
+
+    expect(
+      wrapper
+        .find('[data-test-subj="show-field-browser-gear"]')
+        .first()
+        .exists()
+    ).toBe(false);
+  });
+
+  test('it does NOT render the default Fields Browser button when the isEventViewer prop is true', () => {
+    const isEventViewer = true;
+
+    const wrapper = mount(
+      <TestProviders>
+        <StatefulFieldsBrowser
+          browserFields={mockBrowserFields}
+          columnHeaders={[]}
+          height={FIELD_BROWSER_HEIGHT}
+          isEventViewer={isEventViewer}
+          onUpdateColumns={jest.fn()}
+          timelineId={timelineId}
+          toggleColumn={jest.fn()}
+          width={FIELD_BROWSER_WIDTH}
+        />
+      </TestProviders>
+    );
+
+    expect(
+      wrapper
+        .find('[data-test-subj="show-field-browser"]')
+        .first()
+        .exists()
+    ).toBe(false);
+  });
 });
