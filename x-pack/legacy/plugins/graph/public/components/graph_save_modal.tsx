@@ -51,7 +51,7 @@ export function GraphSaveModal({
         <>
           <EuiFormRow
             fullWidth
-            label={i18n.translate('xpack.graph.saveModal.descriptionFormRowLabel', {
+            label={i18n.translate('xpack.graph.topNavMenu.save.descriptionFormRowLabel', {
               defaultMessage: 'Description',
             })}
           >
@@ -74,7 +74,7 @@ export function GraphSaveModal({
               <EuiCallOut
                 color="warning"
                 data-test-subj="graphNoDataSavedMsg"
-                className="gphSaveModal__warning"
+                className="gphSaveModal__callout"
               >
                 <p>
                   {i18n.translate('xpack.graph.topNavMenu.save.saveConfigurationOnlyWarning', {
@@ -97,6 +97,19 @@ export function GraphSaveModal({
                 setDataConsent(e.target.checked);
               }}
             />
+          )}
+          {savePolicy === 'config' && hasData && (
+            <>
+              <EuiCallOut data-test-subj="graphNoDataSavedMsg" className="gphSaveModal__callout">
+                <p>
+                  {i18n.translate('xpack.graph.topNavMenu.save.saveConfigurationOnlyText', {
+                    defaultMessage:
+                      'The data in this workspace will be cleared and only the configuration will be saved.',
+                  })}
+                </p>
+              </EuiCallOut>
+              <EuiSpacer />
+            </>
           )}
         </>
       }
