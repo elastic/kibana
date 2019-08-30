@@ -21,7 +21,7 @@ import React, { useEffect } from 'react';
 
 import { Field as FieldType, FieldConfig } from '../types';
 import { useField } from '../hooks';
-import { useFormState } from '../form_context';
+import { useFormContext } from '../form_context';
 
 interface Props {
   path: string;
@@ -40,7 +40,7 @@ export const UseField = ({
   componentProps = {},
   children,
 }: Props) => {
-  const form = useFormState();
+  const form = useFormContext();
 
   if (typeof defaultValue === 'undefined') {
     defaultValue = form.getFieldDefaultValue(path);

@@ -32,10 +32,10 @@ export const FormProvider = ({ children, form }: Props) => (
   <FormContext.Provider value={form}>{children}</FormContext.Provider>
 );
 
-export const useFormState = function<T = Record<string, unknown>>() {
+export const useFormContext = function<T = Record<string, unknown>>() {
   const context = useContext(FormContext) as Form<T>;
   if (context === undefined) {
-    throw new Error('useFormState must be used within a <FormProvider />');
+    throw new Error('useFormContext must be used within a <FormProvider />');
   }
   return context;
 };

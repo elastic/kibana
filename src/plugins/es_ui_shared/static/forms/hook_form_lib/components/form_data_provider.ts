@@ -21,7 +21,7 @@ import { useState, useEffect, useRef } from 'react';
 
 import { FormData } from '../types';
 import { Subscription } from '../lib';
-import { useFormState } from '../form_context';
+import { useFormContext } from '../form_context';
 
 interface Props {
   children: (formData: FormData) => JSX.Element | null;
@@ -32,7 +32,7 @@ export const FormDataProvider = ({ children, pathsToWatch }: Props) => {
   const [formData, setFormData] = useState<FormData>({});
   const previousState = useRef<FormData>({});
   const subscription = useRef<Subscription | null>(null);
-  const form = useFormState();
+  const form = useFormContext();
 
   useEffect(() => {
     subscription.current = form.__formData$.current.subscribe(data => {
