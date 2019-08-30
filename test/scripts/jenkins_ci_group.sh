@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -ex
 trap 'node "$KIBANA_DIR/src/dev/failed_tests/cli"' EXIT
 
 if [[ "$IS_PIPELINE_JOB" ]] ; then
@@ -19,6 +19,10 @@ else
 
   export KIBANA_INSTALL_DIR="$destDir"
 fi
+
+echo "KIBANA_INSTALL_DIR: $KIBANA_INSTALL_DIR";
+
+env | sort
 
 checks-reporter-with-killswitch "Functional tests / Group ${CI_GROUP}" yarn run grunt "run:functionalTests_ciGroup${CI_GROUP}";
 

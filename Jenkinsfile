@@ -36,6 +36,8 @@ timeout(time: 180, unit: 'MINUTES') {
           getXpackCiGroupWorker(5),
           getXpackCiGroupWorker(6),
         ]),
+        'kibana-xpack-tests-single-2': withWorkers('kibana-xpack-tests', { buildXpack() }, [ getXpackCiGroupWorker(2) ]),
+        'kibana-xpack-tests-single-6': withWorkers('kibana-xpack-tests', { buildXpack() }, [ getXpackCiGroupWorker(6) ]),
         'kibana-xpack-tests-2': withWorkers('kibana-xpack-tests-2', { buildXpack() }, [
           getXpackCiGroupWorker(7),
           getXpackCiGroupWorker(8),

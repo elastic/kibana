@@ -31,6 +31,8 @@ const TEST_TAGS = safeLoad(JOBS_YAML)
   .map(id => id.replace(/^kibana-/, ''));
 
 export function getFunctionalTestGroupRunConfigs({ kibanaInstallDir } = {}) {
+  console.log(`kibanaInstallDir: ${kibanaInstallDir}`);
+
   return {
     // include a run task for each test group
     ...TEST_TAGS.reduce((acc, tag) => ({
