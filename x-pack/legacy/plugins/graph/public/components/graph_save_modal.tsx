@@ -51,7 +51,7 @@ export function GraphSaveModal({
         <>
           <EuiFormRow
             fullWidth
-            label={i18n.translate('xpack.graph.topNavMenu.save.descriptionFormRowLabel', {
+            label={i18n.translate('xpack.graph.topNavMenu.save.descriptionInputLabel', {
               defaultMessage: 'Description',
             })}
           >
