@@ -24,12 +24,15 @@ module.exports = () => {
         require.resolve('@babel/preset-env'),
         {
           useBuiltIns: 'entry',
-          modules: 'cjs',
+          modules: false,
           corejs: 3,
         },
       ],
       require('./common_preset'),
     ],
-    plugins: [require.resolve('@babel/plugin-syntax-dynamic-import')],
+    plugins: [
+      require.resolve('@babel/plugin-transform-modules-commonjs'),
+      require.resolve('@babel/plugin-syntax-dynamic-import'),
+    ]
   };
 };

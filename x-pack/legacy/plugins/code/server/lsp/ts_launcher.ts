@@ -6,7 +6,6 @@
 
 import { spawn } from 'child_process';
 import getPort from 'get-port';
-import { resolve } from 'path';
 import { Logger } from '../log';
 import { ServerOptions } from '../server_options';
 import { LoggerFactory } from '../utils/log_factory';
@@ -61,7 +60,6 @@ export class TypescriptServerLauncher extends AbstractLauncher {
     const p = spawn(process.execPath, [installationPath, '-p', port.toString(), '-c', '1'], {
       detached: false,
       stdio: 'pipe',
-      cwd: resolve(installationPath, '../..'),
     });
     p.stdout.on('data', data => {
       log.stdout(data.toString());
