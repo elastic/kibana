@@ -161,7 +161,7 @@ export const datatableVisualization: Visualization<
 
           return {
             title,
-            // largest possible table will have a score of 0.2, less columns reduce score
+            // largest possible table will have a score of 0.2, fewer columns reduce score
             score: (table.columns.length / maxColumnCount) * 0.2,
             datasourceSuggestionId: table.datasourceSuggestionId,
             state: {
