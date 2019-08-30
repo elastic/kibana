@@ -39,14 +39,21 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
     end: jobCreator.end,
   });
   const [eventRateChartData, setEventRateChartData] = useState<LineChartPoint[]>([]);
+  const [loadingData, setLoadingData] = useState(false);
 
   async function loadChart() {
-    const resp = await chartLoader.loadEventRateChart(
-      jobCreator.start,
-      jobCreator.end,
-      chartInterval.getInterval().asMilliseconds()
-    );
-    setEventRateChartData(resp);
+    setLoadingData(true);
+    try {
+      const resp = await chartLoader.loadEventRateChart(
+        jobCreator.start,
+        jobCreator.end,
+        chartInterval.getInterval().asMilliseconds()
+      );
+      setEventRateChartData(resp);
+    } catch (error) {
+      setEventRateChartData([]);
+    }
+    setLoadingData(false);
   }
 
   useEffect(() => {
@@ -104,6 +111,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
             height="300px"
             width="100%"
             showAxis={true}
+            loading={loadingData}
           />
 
           <WizardNav next={() => setCurrentStep(WIZARD_STEPS.PICK_FIELDS)} nextActive={true} />

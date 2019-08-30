@@ -24,4 +24,5 @@ export const SEARCH_OR_FILTER_CONTAINER =
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
 
 /** Expands or collapses an event in the timeline */
-export const TOGGLE_EXPAND_EVENT = '[data-test-subj="expand-event"]';
+export const TOGGLE_TIMELINE_EXPAND_EVENT =
+  '[data-test-subj="timeline"] [data-test-subj="expand-event"]';

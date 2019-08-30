@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
+
 import { MlCapabilities } from '../types';
 import { getMlCapabilities } from '../api/get_ml_capabilities';
-import { KibanaConfigContext } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { emptyMlCapabilities } from '../empty_ml_capabilities';
 import { errorToToaster } from '../api/error_to_toaster';
 import { useStateToaster } from '../../toasters';
+import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
+import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
 
 import * as i18n from './translations';
 
@@ -20,12 +22,12 @@ MlCapabilitiesContext.displayName = 'MlCapabilitiesContext';
 
 export const MlCapabilitiesProvider = React.memo<{ children: JSX.Element }>(({ children }) => {
   const [capabilities, setCapabilities] = useState(emptyMlCapabilities);
-  const config = useContext(KibanaConfigContext);
   const [, dispatchToaster] = useStateToaster();
+  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
 
   const fetchFunc = async () => {
     try {
-      const mlCapabilities = await getMlCapabilities({ 'kbn-version': config.kbnVersion });
+      const mlCapabilities = await getMlCapabilities({ 'kbn-version': kbnVersion });
       setCapabilities(mlCapabilities);
     } catch (error) {
       errorToToaster({

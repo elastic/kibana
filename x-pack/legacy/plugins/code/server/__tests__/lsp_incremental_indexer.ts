@@ -130,7 +130,7 @@ function setupLsServiceSendRequestSpy(): sinon.SinonSpy {
   );
 }
 
-describe('lsp_incremental_indexer unit tests', () => {
+describe('LSP incremental indexer unit tests', () => {
   // @ts-ignore
   before(async () => {
     return new Promise(resolve => {

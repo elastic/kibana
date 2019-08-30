@@ -9,30 +9,7 @@ import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { JOBS } from './helpers/constants';
 
 jest.mock('ui/new_platform');
-
-jest.mock('ui/index_patterns', () => {
-  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual('../../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
-  return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE };
-});
-
-jest.mock('ui/chrome', () => ({
-  addBasePath: (path) => path ? path : 'api/rollup',
-  breadcrumbs: { set: () => {} },
-  getInjected: (key) => {
-    if (key === 'uiCapabilities') {
-      return {
-        navLinks: {},
-        management: {},
-        catalogue: {}
-      };
-    }
-    throw new Error(`Unexpected call to chrome.getInjected with key ${key}`);
-  },
-  getUiSettingsClient: () => ({}),
-  getSavedObjectsClient: () => ({}),
-}));
-
-jest.mock('ui/timefilter', () => {});
+jest.mock('ui/index_patterns');
 
 jest.mock('../../public/crud_app/services', () => {
   const services = require.requireActual('../../public/crud_app/services');

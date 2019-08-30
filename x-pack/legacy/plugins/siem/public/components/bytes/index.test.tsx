@@ -12,6 +12,8 @@ import { PreferenceFormattedBytes } from '../formatted_bytes';
 
 import { Bytes } from '.';
 
+jest.mock('../../lib/settings/use_kibana_ui_setting');
+
 describe('Bytes', () => {
   test('it renders the expected formatted bytes', () => {
     const wrapper = mount(
@@ -24,6 +26,6 @@ describe('Bytes', () => {
         .find(PreferenceFormattedBytes)
         .first()
         .text()
-    ).toEqual('1.177MB');
+    ).toEqual('1.2MB');
   });
 });

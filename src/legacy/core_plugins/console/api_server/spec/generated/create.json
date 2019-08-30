@@ -23,8 +23,9 @@
       "POST"
     ],
     "patterns": [
-      "{indices}/_create/{id}"
+      "{indices}/_create/{id}",
+      "{indices}/{type}/{id}/_create"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/master/docs-index_.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-index_.html"
   }
 }
