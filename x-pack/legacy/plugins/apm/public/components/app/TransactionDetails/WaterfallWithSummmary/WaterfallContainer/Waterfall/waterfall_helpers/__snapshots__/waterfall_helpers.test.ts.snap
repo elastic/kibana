@@ -3,6 +3,27 @@
 exports[`waterfall_helpers getWaterfall should return full waterfall 1`] = `
 Object {
   "duration": 49660,
+  "entryTransaction": Object {
+    "processor": Object {
+      "event": "transaction",
+    },
+    "service": Object {
+      "name": "opbeans-node",
+    },
+    "timestamp": Object {
+      "us": 1549324795784006,
+    },
+    "trace": Object {
+      "id": "myTraceId",
+    },
+    "transaction": Object {
+      "duration": Object {
+        "us": 49660,
+      },
+      "id": "myTransactionId1",
+      "name": "GET /api",
+    },
+  },
   "errorCountByTransactionId": Object {
     "myTransactionId1": 2,
     "myTransactionId2": 3,
@@ -520,6 +541,30 @@ Object {
 exports[`waterfall_helpers getWaterfall should return partial waterfall 1`] = `
 Object {
   "duration": 8634,
+  "entryTransaction": Object {
+    "parent": Object {
+      "id": "mySpanIdD",
+    },
+    "processor": Object {
+      "event": "transaction",
+    },
+    "service": Object {
+      "name": "opbeans-ruby",
+    },
+    "timestamp": Object {
+      "us": 1549324795823304,
+    },
+    "trace": Object {
+      "id": "myTraceId",
+    },
+    "transaction": Object {
+      "duration": Object {
+        "us": 8634,
+      },
+      "id": "myTransactionId2",
+      "name": "Api::ProductsController#index",
+    },
+  },
   "errorCountByTransactionId": Object {
     "myTransactionId1": 2,
     "myTransactionId2": 3,
