@@ -162,7 +162,12 @@ export function ConsoleEditor({
                   }}
                 />
               </div>
-              <div ref={editorRef} id="ConAppEditor" className="conApp__editorContent" />
+              <div
+                ref={editorRef}
+                id="ConAppEditor"
+                className="conApp__editorContent"
+                data-test-subj="request-editor"
+              />
             </div>
           </div>
         </Panel>

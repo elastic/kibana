@@ -37,7 +37,7 @@ export function TopNavMenu({ items }: Props) {
     <EuiTabs size="s">
       {items.map((item, idx) => {
         return (
-          <EuiTab key={idx} onClick={item.run} title={item.label}>
+          <EuiTab key={idx} onClick={item.run} title={item.label} data-test-subj={item.testId}>
             {item.label}
           </EuiTab>
         );

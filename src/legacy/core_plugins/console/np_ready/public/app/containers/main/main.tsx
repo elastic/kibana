@@ -20,6 +20,11 @@
 import React, { useCallback, useState } from 'react';
 import { debounce } from 'lodash';
 
+// @ts-ignore
+import mappings from '../../../../../public/quarantined/src/mappings';
+
+import { MemoConsoleEditor, ConsoleHistory } from '../editor';
+
 import {
   AutocompleteOptions,
   TopNavMenu,
@@ -28,12 +33,8 @@ import {
   HelpPanel,
 } from '../../components';
 
-import { MemoConsoleEditor, ConsoleHistory } from '../editor';
 import { useAppContext } from '../../context';
 import { StorageKeys, DevToolsSettings } from '../../services';
-
-// @ts-ignore
-import mappings from '../../../../../public/quarantined/src/mappings';
 
 import { getTopNavConfig } from './get_top_nav';
 
@@ -145,7 +146,14 @@ export function Main() {
         initialOutputPanelWidth={secondPanelWidth}
       />
 
-      {showWelcome ? <WelcomePanel onDismiss={() => setShowWelcomePanel(false)} /> : null}
+      {showWelcome ? (
+        <WelcomePanel
+          onDismiss={() => {
+            storage.set('version_welcome_shown', '@@SENSE_REVISION');
+            setShowWelcomePanel(false);
+          }}
+        />
+      ) : null}
 
       {showSettings ? (
         <DevToolsSettingsModal
