@@ -33,34 +33,6 @@ module.exports = async ({ config }) => {
     },
   });
 
-  config.module.rules.push({
-    test: /\.module\.s(a|c)ss$/,
-    loader: [
-      'style-loader',
-      {
-        loader: 'css-loader',
-        options: {
-          modules: true,
-          localIdentName: '[name]__[local]___[hash:base64:5]',
-          camelCase: true,
-          sourceMap: true,
-        },
-      },
-      {
-        loader: 'postcss-loader',
-        options: {
-          path: path.resolve(KIBANA_ROOT, 'src/optimize/postcss.config.js'),
-        },
-      },
-      {
-        loader: 'sass-loader',
-        options: {
-          sourceMap: true,
-        },
-      },
-    ],
-  });
-
   // Handle Typescript files
   config.module.rules.push({
     test: /\.tsx?$/,
