@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { FlexGroupDirection } from '@elastic/eui/src/components/flex/flex_group';
 import { getOr } from 'lodash/fp';
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
@@ -50,30 +50,30 @@ interface NetworkComponentReduxProps {
 }
 
 type NetworkComponentProps = NetworkComponentReduxProps;
-const mediaMatch = window.matchMedia(
-  'screen and (min-width: ' + euiLightVars.euiBreakpoints.xl + ')'
-);
-const getFlexDirectionByMediaMatch = (): 'row' | 'column' => {
-  const { matches } = mediaMatch;
-  return matches ? 'row' : 'column';
-};
-export const getFlexDirection = () => {
-  const [display, setDisplay] = useState(getFlexDirectionByMediaMatch());
-
-  useEffect(() => {
-    const setFromEvent = () => setDisplay(getFlexDirectionByMediaMatch());
-    window.addEventListener('resize', setFromEvent);
-
-    return () => {
-      window.removeEventListener('resize', setFromEvent);
-    };
-  }, []);
-
-  return display;
-};
 
 const NetworkComponent = React.memo<NetworkComponentProps>(
   ({ filterQuery, queryExpression, setAbsoluteRangeDatePicker }) => {
+    const [flexDirection, setFlexDirection] = useState<FlexGroupDirection>('column');
+
+    const wideViewports = window.matchMedia('screen and (min-width: 1441px)');
+
+    const onWidthChange = (mq: MediaQueryList) => {
+      setFlexDirection(mq.matches ? 'row' : 'column');
+    };
+
+    useEffect(() => {
+      wideViewports.addEventListener('change', () => {
+        onWidthChange(wideViewports);
+      });
+      onWidthChange(wideViewports);
+
+      return () => {
+        wideViewports.removeEventListener('change', () => {
+          onWidthChange(wideViewports);
+        });
+      };
+    }, []);
+
     return (
       <WithSource sourceId="default">
         {({ indicesExist, indexPattern }) =>
@@ -130,7 +130,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
 
                     <EuiSpacer />
 
-                    <EuiFlexGroup direction={getFlexDirection()}>
+                    <EuiFlexGroup direction={flexDirection}>
                       <EuiFlexItem>
                         <NetworkTopNFlowQuery
                           endDate={to}
