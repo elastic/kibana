@@ -20,7 +20,7 @@ export function getActionsConfigurationUtilities(
   config: ActionsKibanaConfig
 ): ActionsConfigurationUtilities {
   return {
-    isWhitelistedHostname(uri: string) {
+    isWhitelistedHostname(uri: string): boolean {
       switch (config.whitelistedHosts) {
         case 'none':
           return false;
