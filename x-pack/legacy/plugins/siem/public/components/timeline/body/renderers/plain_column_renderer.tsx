@@ -95,6 +95,7 @@ export const plainColumnRenderer: ColumnRenderer = {
                     fieldName={columnName}
                     fieldType={field.type || ''}
                     value={parseValue(value)}
+                    width={width}
                   />
                 </TruncatableText>
               );
@@ -112,6 +113,7 @@ export const plainColumnRenderer: ColumnRenderer = {
                     fieldName={columnName}
                     fieldType={field.type || ''}
                     value={parseValue(value)}
+                    width={width}
                   />
                 </EuiText>
               );
@@ -136,6 +138,7 @@ export const plainColumnRenderer: ColumnRenderer = {
                     fieldName={columnName}
                     fieldType={field.type || ''}
                     value={parseValue(value)}
+                    width={width}
                   />
                 )
               }

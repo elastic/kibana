@@ -7,7 +7,8 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function codeApp({ loadTestFile }: FtrProviderContext) {
   describe('Code', function codeAppTestSuite() {
-    this.tags('ciGroup2');
+    // Add 'skipCloud' regarding issue: https://github.com/elastic/kibana/issues/39386
+    this.tags(['ciGroup2', 'skipCloud']);
     loadTestFile(require.resolve('./manage_repositories'));
     loadTestFile(require.resolve('./search'));
     loadTestFile(require.resolve('./explore_repository'));
