@@ -66,6 +66,11 @@
   }
 }
 
+.gphListIcon {
+  width: $euiSizeS * 2;
+  margin-right: $euiSizeM;
+}
+
 .gphAddButton {
   background: $euiColorPrimary;
   color: $euiColorEmptyShade;

@@ -13,6 +13,7 @@ export interface LegacyIconProps {
   icon: FontawesomeIcon;
   selected?: boolean;
   onClick?: () => void;
+  asListIcon?: boolean;
 }
 
 export function LegacyIcon(props: LegacyIconProps) {
@@ -24,6 +25,7 @@ export function LegacyIcon(props: LegacyIconProps) {
         'gphNode__text--lowOpacity': !props.onClick,
         gphIconPicker__icon: !!props.onClick,
         gphNoUserSelect: !!props.onClick,
+        gphListIcon: props.asListIcon,
       })}
     >
       {props.icon.code}

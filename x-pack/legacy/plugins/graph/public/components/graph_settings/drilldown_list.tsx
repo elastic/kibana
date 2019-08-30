@@ -54,20 +54,10 @@ export function DrilldownList({
         <EuiListGroup>
           {urlTemplates.map((template, index) => (
             <EuiListGroupItem
-              icon={
-                template.icon ? (
-                  <>
-                    <LegacyIcon icon={template.icon} />
-                    &nbsp;
-                  </>
-                ) : (
-                  undefined
-                )
-              }
+              icon={template.icon ? <LegacyIcon icon={template.icon} asListIcon /> : undefined}
               iconType={template.icon ? undefined : 'empty'}
               onClick={() => {
-                // shallow-clone template to edit
-                setSelectedTemplate({ index, template: { ...template } });
+                setSelectedTemplate({ index, template });
               }}
               key={index}
               label={template.description}

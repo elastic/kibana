@@ -46,12 +46,7 @@ export function BlacklistForm({
       <EuiListGroup>
         {blacklistedNodes.map(node => (
           <EuiListGroupItem
-            icon={
-              <>
-                <LegacyIcon icon={node.icon} />
-                &nbsp;
-              </>
-            }
+            icon={<LegacyIcon icon={node.icon} asListIcon />}
             // TODO this is not enough to be unique
             key={node.label}
             label={node.label}

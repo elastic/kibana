@@ -914,7 +914,7 @@ app.controller('graphuiPlugin', function (
         observable={settingsObservable}
         onLeave={() => { flyoutRef.close(); }}
       />, {
-        size: 's',
+        size: 'm',
         closeButtonAriaLabel: i18n.translate('xpack.graph.settings.closeLabel', { defaultMessage: 'Close' }),
         'data-test-subj': 'graphSettingsFlyout'
       });

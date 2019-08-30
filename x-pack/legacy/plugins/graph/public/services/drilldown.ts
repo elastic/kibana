@@ -5,7 +5,16 @@
  */
 
 export const drillDownRegex = /\{\{gquery\}\}/g;
+const defaultKibanaQuery = ",query:(language:kuery,query:'')";
 
 export function isUrlTemplateValid(url: string) {
   return url.search(drillDownRegex) > -1;
+}
+
+export function isKibanaUrl(url: string) {
+  return url.indexOf(defaultKibanaQuery) > 0;
+}
+
+export function replaceKibanaUrlParam(url: string) {
+  return url.replace(defaultKibanaQuery, ',query:{{gquery}}');
 }
