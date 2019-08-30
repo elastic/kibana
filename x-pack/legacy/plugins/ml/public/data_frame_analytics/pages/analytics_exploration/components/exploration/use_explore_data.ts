@@ -14,7 +14,7 @@ import { getNestedProperty } from '../../../../../util/object_utils';
 import {
   getDefaultSelectableFields,
   getFlattenedFields,
-  DataFrameAnalyticsOutlierConfig,
+  DataFrameAnalyticsConfig,
   EsDoc,
   EsDocSource,
   EsFieldName,
@@ -36,7 +36,7 @@ export interface UseExploreDataReturnType {
 }
 
 export const useExploreData = (
-  jobConfig: DataFrameAnalyticsOutlierConfig | undefined,
+  jobConfig: DataFrameAnalyticsConfig | undefined,
   selectedFields: EsFieldName[],
   setSelectedFields: React.Dispatch<React.SetStateAction<EsFieldName[]>>
 ): UseExploreDataReturnType => {
