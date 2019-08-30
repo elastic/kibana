@@ -6,7 +6,7 @@
 
 import React, { FC } from 'react';
 
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
@@ -27,19 +27,30 @@ export const WizardNav: FC<StepsNavProps> = ({
     <EuiFlexItem />
     {previous && (
       <EuiFlexItem grow={false}>
-        <EuiButton disabled={!previousActive} onClick={previous} iconType="arrowLeft" size="s">
-          {i18n.translate('xpack.ml.newJob.wizard.previousStepButton', {
-            defaultMessage: 'Previous',
-          })}
+        <EuiButton
+          disabled={!previousActive}
+          onClick={previous}
+          iconType="arrowLeft"
+          size="s"
+          data-test-subj="mlJobWizardNavButtonPrevious"
+        >
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.previousStepButton"
+            defaultMessage="Previous"
+          />
         </EuiButton>
       </EuiFlexItem>
     )}
     {next && (
       <EuiFlexItem grow={false}>
-        <EuiButton disabled={!nextActive} onClick={next} iconType="arrowRight" size="s">
-          {i18n.translate('xpack.ml.newJob.wizard.nextStepButton', {
-            defaultMessage: 'Next',
-          })}
+        <EuiButton
+          disabled={!nextActive}
+          onClick={next}
+          iconType="arrowRight"
+          size="s"
+          data-test-subj="mlJobWizardNavButtonNext"
+        >
+          <FormattedMessage id="xpack.ml.newJob.wizard.nextStepButton" defaultMessage="Next" />
         </EuiButton>
       </EuiFlexItem>
     )}

@@ -12,24 +12,19 @@ import moment from 'moment';
 import { WizardNav } from '../wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
-import { KibanaContext, isKibanaContext } from '../../../../../data_frame/common/kibana_context';
+import { useKibanaContext } from '../../../../../contexts/kibana';
 import { FullTimeRangeSelector } from '../../../../../components/full_time_range_selector';
 import { EventRateChart } from '../charts/event_rate_chart';
 import { LineChartPoint } from '../../../common/chart_loader';
 import { TimeRangePicker } from './time_range_picker';
 import { GetTimeFieldRangeResponse } from '../../../../../services/ml_api_service';
-import { mlJobService } from '../../../../../services/job_service';
-import { ml } from '../../../../../services/ml_api_service';
 
 export interface TimeRange {
   start: number;
   end: number;
 }
 export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
-  const kibanaContext = useContext(KibanaContext);
-  if (!isKibanaContext(kibanaContext)) {
-    return null;
-  }
+  const kibanaContext = useKibanaContext();
 
   const {
     jobCreator,
@@ -84,28 +79,6 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
       end: range.end.epoch,
     });
   }
-
-  useEffect(() => {
-    if (mlJobService.currentJob !== undefined) {
-      (async (index: string, timeFieldName: string | undefined, query: object) => {
-        const resp = await ml.getTimeFieldRange({
-          index,
-          timeFieldName,
-          query,
-        });
-        setTimeRange({
-          start: resp.start.epoch,
-          end: resp.end.epoch,
-        });
-        // wipe the cloning job
-        mlJobService.currentJob = undefined;
-      })(
-        kibanaContext.currentIndexPattern.title,
-        kibanaContext.currentIndexPattern.timeFieldName,
-        kibanaContext.combinedQuery
-      );
-    }
-  }, []);
 
   return (
     <Fragment>

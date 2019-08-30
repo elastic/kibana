@@ -78,3 +78,5 @@ export const OpenTimeline = pure<OpenTimelineProps>(
     </EuiPanel>
   )
 );
+
+OpenTimeline.displayName = 'OpenTimeline';

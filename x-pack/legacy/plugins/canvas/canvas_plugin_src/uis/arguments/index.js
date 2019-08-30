@@ -9,6 +9,7 @@ import { datacolumn } from './datacolumn';
 import { filterGroup } from './filter_group';
 import { imageUpload } from './image_upload';
 import { number } from './number';
+import { numberFormat } from './number_format';
 import { palette } from './palette';
 import { percentage } from './percentage';
 import { range } from './range';
@@ -24,6 +25,7 @@ export const args = [
   filterGroup,
   imageUpload,
   number,
+  numberFormat,
   palette,
   percentage,
   range,

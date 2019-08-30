@@ -6,7 +6,6 @@
 
 import { EuiText } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../../containers/source';
@@ -41,7 +40,6 @@ interface Props {
   getNotesByIds: (noteIds: string[]) => Note[];
   height: number;
   id: string;
-  isLoading: boolean;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   onColumnRemoved: OnColumnRemoved;
   onColumnResized: OnColumnResized;
@@ -54,6 +52,7 @@ interface Props {
   range: string;
   rowRenderers: RowRenderer[];
   sort: Sort;
+  toggleColumn: (column: ColumnHeader) => void;
   updateNote: UpdateNote;
   width: number;
 }
@@ -68,6 +67,8 @@ const HorizontalScroll = styled.div<{
   min-height: 0px;
 `;
 
+HorizontalScroll.displayName = 'HorizontalScroll';
+
 const VerticalScrollContainer = styled.div<{
   height: number;
   minWidth: number;
@@ -79,8 +80,10 @@ const VerticalScrollContainer = styled.div<{
   min-width: ${({ minWidth }) => `${minWidth}px`};
 `;
 
+VerticalScrollContainer.displayName = 'VerticalScrollContainer';
+
 /** Renders the timeline body */
-export const Body = pure<Props>(
+export const Body = React.memo<Props>(
   ({
     addNoteToEvent,
     browserFields,
@@ -91,7 +94,6 @@ export const Body = pure<Props>(
     getNotesByIds,
     height,
     id,
-    isLoading,
     onColumnRemoved,
     onColumnResized,
     onColumnSorted,
@@ -102,6 +104,7 @@ export const Body = pure<Props>(
     pinnedEventIds,
     rowRenderers,
     sort,
+    toggleColumn,
     updateNote,
     width,
   }) => {
@@ -117,7 +120,6 @@ export const Body = pure<Props>(
             actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
             browserFields={browserFields}
             columnHeaders={columnHeaders}
-            isLoading={isLoading}
             onColumnRemoved={onColumnRemoved}
             onColumnResized={onColumnResized}
             onColumnSorted={onColumnSorted}
@@ -126,6 +128,7 @@ export const Body = pure<Props>(
             showEventsSelect={false}
             sort={sort}
             timelineId={id}
+            toggleColumn={toggleColumn}
             minWidth={columnWidths}
           />
 
@@ -144,13 +147,13 @@ export const Body = pure<Props>(
               eventIdToNoteIds={eventIdToNoteIds}
               getNotesByIds={getNotesByIds}
               id={id}
-              isLoading={isLoading}
               onColumnResized={onColumnResized}
               onPinEvent={onPinEvent}
               onUpdateColumns={onUpdateColumns}
               onUnPinEvent={onUnPinEvent}
               pinnedEventIds={pinnedEventIds}
               rowRenderers={rowRenderers}
+              toggleColumn={toggleColumn}
               updateNote={updateNote}
               minWidth={columnWidths}
               width={width}
@@ -161,3 +164,5 @@ export const Body = pure<Props>(
     );
   }
 );
+
+Body.displayName = 'Body';

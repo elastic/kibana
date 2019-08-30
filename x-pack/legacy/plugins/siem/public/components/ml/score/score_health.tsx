@@ -19,6 +19,8 @@ export const ScoreHealth = React.memo<Props>(({ score }) => {
   return <EuiHealth color={color}>{scoreCeiling}</EuiHealth>;
 });
 
+ScoreHealth.displayName = 'ScoreHealth';
+
 // ಠ_ಠ A hard-fork of the `ml` ml/common/util/anomaly_utils.js#getSeverityColor ಠ_ಠ
 //
 // Returns a severity label (one of critical, major, minor, warning, low or unknown)

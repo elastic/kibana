@@ -4,6 +4,7 @@
 
 ## SavedObjectAttributes interface
 
+The data for a Saved Object is stored in the `attributes` key as either an object or an array of objects.
 
 <b>Signature:</b>
 

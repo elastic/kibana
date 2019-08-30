@@ -15,3 +15,13 @@ export const TIMELINE_DROPPED_DATA_PROVIDERS = `${TIMELINE_DATA_PROVIDERS} ${DAT
 
 /** The `T I M E L I N E` button that toggles visibility of the Timeline */
 export const TIMELINE_TOGGLE_BUTTON = '[data-test-subj="flyoutOverlay"]';
+
+/** Contains the KQL bar for searching or filtering in the timeline */
+export const SEARCH_OR_FILTER_CONTAINER =
+  '[data-test-subj="timeline-search-or-filter-search-container"]';
+
+/** The total server-side count of the events matching the timeline's search criteria */
+export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
+
+/** Expands or collapses an event in the timeline */
+export const TOGGLE_EXPAND_EVENT = '[data-test-subj="expand-event"]';

@@ -46,7 +46,6 @@
           filters="filters"
           class="kbnDocTable__row"
           on-add-column="onAddColumn"
-          on-change-sort-order="onChangeSortOrder"
           on-remove-column="onRemoveColumn"
         ></tr>
       </tbody>
@@ -98,7 +97,6 @@
         ng-class="{'kbnDocTable__row--highlight': row['$$_isAnchor']}"
         data-test-subj="docTableRow{{ row['$$_isAnchor'] ? ' docTableAnchorRow' : ''}}"
         on-add-column="onAddColumn"
-        on-change-sort-order="onChangeSortOrder"
         on-remove-column="onRemoveColumn"
       ></tr>
     </tbody>

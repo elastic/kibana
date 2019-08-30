@@ -5,9 +5,9 @@
  */
 
 import path from 'path';
-import { SecurityServiceProvider, SpacesServiceProvider } from '../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
-import { FeaturesProvider, UICapabilitiesProvider } from './services';
+import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+
+import { services } from './services';
 
 interface CreateTestConfigOptions {
   license: string;
@@ -18,7 +18,7 @@ interface CreateTestConfigOptions {
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
   const { license = 'trial', disabledPlugins = [] } = options;
 
-  return async ({ readConfigFile }: KibanaFunctionalTestDefaultProviders) => {
+  return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const xPackFunctionalTestsConfig = await readConfigFile(
       require.resolve('../../functional/config.js')
     );
@@ -26,12 +26,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     return {
       testFiles: [require.resolve(`../${name}/tests/`)],
       servers: xPackFunctionalTestsConfig.get('servers'),
-      services: {
-        security: SecurityServiceProvider,
-        spaces: SpacesServiceProvider,
-        uiCapabilities: UICapabilitiesProvider,
-        features: FeaturesProvider,
-      },
+      services,
       junit: {
         reportName: 'X-Pack UI Capabilities Functional Tests',
       },

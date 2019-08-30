@@ -45,7 +45,6 @@ export default function loggingConfiguration(config) {
   else {
     _.defaults(events, {
       log: ['info', 'warning', 'error', 'fatal'],
-      response: config.get('logging.json') ? '*' : '!',
       request: ['info', 'warning', 'error', 'fatal'],
       error: '*'
     });

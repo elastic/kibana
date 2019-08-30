@@ -375,88 +375,6 @@ exports[`render symbol tree correctly 1`] = `
                     </div>
                   </div>
                   <div
-                    className="euiSideNavItem euiSideNavItem--branch"
-                  >
-                    <div
-                      className="code-symbol-container"
-                    >
-                      <div
-                        className="codeSymbol codeSymbol--nested"
-                      >
-                        <a
-                          className="code-symbol-link"
-                          href="/github.com/elastic/kibana/blob/master/packages/elastic-datemath/src/index.d.ts!L21:0?sideTab=structure"
-                          onClick={[Function]}
-                        >
-                          <div
-                            className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
-                          >
-                            <div
-                              className="euiToken euiToken--tokenTint04 euiToken--circle euiToken--small"
-                            >
-                              <svg
-                                className="euiIcon euiIcon--medium euiIcon-isLoading"
-                                focusable="false"
-                                height={16}
-                                style={null}
-                                viewBox="0 0 16 16"
-                                width={16}
-                                xmlns="http://www.w3.org/2000/svg"
-                              />
-                            </div>
-                            <div
-                              className="euiText euiText--small"
-                              data-test-subj="codeStructureTreeNode-Unit"
-                            >
-                              Unit
-                            </div>
-                          </div>
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    className="euiSideNavItem euiSideNavItem--branch"
-                  >
-                    <div
-                      className="code-symbol-container"
-                    >
-                      <div
-                        className="codeSymbol codeSymbol--nested"
-                      >
-                        <a
-                          className="code-symbol-link"
-                          href="/github.com/elastic/kibana/blob/master/packages/elastic-datemath/src/index.d.ts!L23:14?sideTab=structure"
-                          onClick={[Function]}
-                        >
-                          <div
-                            className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
-                          >
-                            <div
-                              className="euiToken euiToken--tokenTint07 euiToken--circle euiToken--small"
-                            >
-                              <svg
-                                className="euiIcon euiIcon--medium euiIcon-isLoading"
-                                focusable="false"
-                                height={16}
-                                style={null}
-                                viewBox="0 0 16 16"
-                                width={16}
-                                xmlns="http://www.w3.org/2000/svg"
-                              />
-                            </div>
-                            <div
-                              className="euiText euiText--small"
-                              data-test-subj="codeStructureTreeNode-datemath"
-                            >
-                              datemath
-                            </div>
-                          </div>
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                  <div
                     className="euiSideNavItem euiSideNavItem--branch euiSideNavItem--hasChildItems"
                   >
                     <div
@@ -477,7 +395,7 @@ exports[`render symbol tree correctly 1`] = `
                         />
                         <a
                           className="code-symbol-link"
-                          href="/github.com/elastic/openjdkMirror/blob/master/jdk/src/share/classes/java/util/HashMap.java!L137:13?sideTab=structure"
+                          href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L137:13?sideTab=structure"
                           onClick={[Function]}
                         >
                           <div
@@ -520,7 +438,7 @@ exports[`render symbol tree correctly 1`] = `
                           >
                             <a
                               className="code-symbol-link"
-                              href="/github.com/elastic/openjdkMirror/blob/master/jdk/src/share/classes/java/util/HashMap.java!L140:30?sideTab=structure"
+                              href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L140:30?sideTab=structure"
                               onClick={[Function]}
                             >
                               <div
@@ -549,6 +467,88 @@ exports[`render symbol tree correctly 1`] = `
                             </a>
                           </div>
                         </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    className="euiSideNavItem euiSideNavItem--branch"
+                  >
+                    <div
+                      className="code-symbol-container"
+                    >
+                      <div
+                        className="codeSymbol codeSymbol--nested"
+                      >
+                        <a
+                          className="code-symbol-link"
+                          href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L21:0?sideTab=structure"
+                          onClick={[Function]}
+                        >
+                          <div
+                            className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
+                          >
+                            <div
+                              className="euiToken euiToken--tokenTint04 euiToken--circle euiToken--small"
+                            >
+                              <svg
+                                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                                focusable="false"
+                                height={16}
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width={16}
+                                xmlns="http://www.w3.org/2000/svg"
+                              />
+                            </div>
+                            <div
+                              className="euiText euiText--small"
+                              data-test-subj="codeStructureTreeNode-Unit"
+                            >
+                              Unit
+                            </div>
+                          </div>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    className="euiSideNavItem euiSideNavItem--branch"
+                  >
+                    <div
+                      className="code-symbol-container"
+                    >
+                      <div
+                        className="codeSymbol codeSymbol--nested"
+                      >
+                        <a
+                          className="code-symbol-link"
+                          href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L23:14?sideTab=structure"
+                          onClick={[Function]}
+                        >
+                          <div
+                            className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
+                          >
+                            <div
+                              className="euiToken euiToken--tokenTint07 euiToken--circle euiToken--small"
+                            >
+                              <svg
+                                className="euiIcon euiIcon--medium euiIcon-isLoading"
+                                focusable="false"
+                                height={16}
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width={16}
+                                xmlns="http://www.w3.org/2000/svg"
+                              />
+                            </div>
+                            <div
+                              className="euiText euiText--small"
+                              data-test-subj="codeStructureTreeNode-datemath"
+                            >
+                              datemath
+                            </div>
+                          </div>
+                        </a>
                       </div>
                     </div>
                   </div>

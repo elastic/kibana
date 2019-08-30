@@ -14,9 +14,8 @@ import {
   AutocompleteSuggestion,
   getAutocompleteProvider
 } from 'ui/autocomplete_providers';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { StaticIndexPattern, getFromSavedObject } from 'ui/index_patterns';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { getFromSavedObject } from 'ui/index_patterns/static_utils';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 import { KibanaLink } from '../Links/KibanaLink';
 // @ts-ignore

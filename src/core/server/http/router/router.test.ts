@@ -18,24 +18,26 @@
  */
 
 import { Router } from './router';
+import { loggingServiceMock } from '../../logging/logging_service.mock';
+const logger = loggingServiceMock.create().get();
 describe('Router', () => {
   describe('Options', () => {
     it('throws if validation for a route is not defined explicitly', () => {
-      const router = new Router('/foo');
+      const router = new Router('', logger);
       expect(
         // we use 'any' because validate is a required field
-        () => router.get({ path: '/' } as any, (req, res) => res.ok({}))
+        () => router.get({ path: '/' } as any, (context, req, res) => res.ok({}))
       ).toThrowErrorMatchingInlineSnapshot(
         `"The [get] at [/] does not have a 'validate' specified. Use 'false' as the value if you want to bypass validation."`
       );
     });
     it('throws if validation for a route is declared wrong', () => {
-      const router = new Router('/foo');
+      const router = new Router('', logger);
       expect(() =>
         router.get(
           // we use 'any' because validate requires @kbn/config-schema usage
           { path: '/', validate: { params: { validate: () => 'error' } } } as any,
-          (req, res) => res.ok({})
+          (context, req, res) => res.ok({})
         )
       ).toThrowErrorMatchingInlineSnapshot(
         `"Expected a valid schema declared with '@kbn/config-schema' package at key: [params]."`

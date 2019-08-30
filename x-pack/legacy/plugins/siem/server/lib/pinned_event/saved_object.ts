@@ -43,6 +43,7 @@ export class PinnedEvent {
 
   public async deleteAllPinnedEventsOnTimeline(request: FrameworkRequest, timelineId: string) {
     const options: SavedObjectsFindOptions = {
+      type: pinnedEventSavedObjectType,
       search: timelineId,
       searchFields: ['timelineId'],
     };
@@ -68,6 +69,7 @@ export class PinnedEvent {
     timelineId: string
   ): Promise<PinnedEventSavedObject[]> {
     const options: SavedObjectsFindOptions = {
+      type: pinnedEventSavedObjectType,
       search: timelineId,
       searchFields: ['timelineId'],
     };
@@ -81,6 +83,7 @@ export class PinnedEvent {
     sort: SortNote | null
   ): Promise<PinnedEventSavedObject[]> {
     const options: SavedObjectsFindOptions = {
+      type: pinnedEventSavedObjectType,
       perPage: pageInfo != null ? pageInfo.pageSize : undefined,
       page: pageInfo != null ? pageInfo.pageIndex : undefined,
       search: search != null ? search : undefined,
@@ -181,10 +184,7 @@ export class PinnedEvent {
       request[internalFrameworkRequest]
     );
 
-    const savedObjects = await savedObjectsClient.find({
-      type: pinnedEventSavedObjectType,
-      ...options,
-    });
+    const savedObjects = await savedObjectsClient.find(options);
 
     return savedObjects.saved_objects.map(savedObject =>
       convertSavedObjectToSavedPinnedEvent(savedObject)

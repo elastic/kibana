@@ -45,3 +45,5 @@ export const NetworkKql = pure<NetworkKqlProps>(({ indexPattern, type }) => (
     )}
   </KueryAutocompletion>
 ));
+
+NetworkKql.displayName = 'NetworkKql';

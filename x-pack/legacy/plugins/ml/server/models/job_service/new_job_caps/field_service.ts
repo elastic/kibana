@@ -79,7 +79,7 @@ class FieldsService {
         }
       });
     }
-    return fields;
+    return fields.sort((a, b) => a.id.localeCompare(b.id));
   }
 
   // public function to load fields from _field_caps and create a list

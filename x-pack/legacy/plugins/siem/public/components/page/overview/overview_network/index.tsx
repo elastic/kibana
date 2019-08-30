@@ -82,3 +82,5 @@ export const OverviewNetwork = pure<OwnProps>(({ endDate, startDate, setQuery })
     </EuiFlexItem>
   );
 });
+
+OverviewNetwork.displayName = 'OverviewNetwork';

@@ -30,7 +30,12 @@ export const FullTimeRangeSelector: FC<Props> = ({ indexPattern, query, disabled
     }
   }
   return (
-    <EuiButton fill isDisabled={disabled} onClick={() => setRange(indexPattern, query)}>
+    <EuiButton
+      fill
+      isDisabled={disabled}
+      onClick={() => setRange(indexPattern, query)}
+      data-test-subj="mlButtonUseFullData"
+    >
       <FormattedMessage
         id="xpack.ml.fullTimeRangeSelector.useFullDataButtonLabel"
         defaultMessage="Use full {indexPatternTitle} data"

@@ -23,3 +23,5 @@ export const PreferenceFormattedBytes = React.memo<{ value: string | number }>((
     </>
   );
 });
+
+PreferenceFormattedBytes.displayName = 'PreferenceFormattedBytes';

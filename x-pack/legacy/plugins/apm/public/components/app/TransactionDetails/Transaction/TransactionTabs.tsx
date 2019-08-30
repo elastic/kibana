@@ -35,13 +35,15 @@ interface Props {
   transaction: Transaction;
   urlParams: IUrlParams;
   waterfall: IWaterfall;
+  exceedsMax: boolean;
 }
 
 export function TransactionTabs({
   location,
   transaction,
   urlParams,
-  waterfall
+  waterfall,
+  exceedsMax
 }: Props) {
   const tabs = [timelineTab, metadataTab];
   const currentTab =
@@ -79,6 +81,7 @@ export function TransactionTabs({
           location={location}
           urlParams={urlParams}
           waterfall={waterfall}
+          exceedsMax={exceedsMax}
         />
       ) : (
         <TransactionMetadata transaction={transaction} />

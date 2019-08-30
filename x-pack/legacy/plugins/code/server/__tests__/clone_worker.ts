@@ -12,13 +12,13 @@ import path from 'path';
 import rimraf from 'rimraf';
 import sinon from 'sinon';
 
-import { Repository } from '../../model';
+import { CloneWorkerResult, Repository } from '../../model';
 import { DiskWatermarkService } from '../disk_watermark';
 import { GitOperations } from '../git_operations';
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
 import { CloneWorker, IndexWorker } from '../queue';
-import { CancellationSerivce } from '../queue/cancellation_service';
+import { CancellationReason, CancellationSerivce } from '../queue/cancellation_service';
 import { RepositoryServiceFactory } from '../repository_service_factory';
 import { createTestServerOption, emptyAsyncFunc } from '../test_utils';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
@@ -372,34 +372,34 @@ describe('clone_worker_tests', () => {
       diskWatermarkService as DiskWatermarkService
     );
 
-    const result1 = await cloneWorker.executeJob({
+    const result1 = (await cloneWorker.executeJob({
       payload: {
         url: 'file:///foo/bar.git',
       },
       options: {},
       timestamp: 0,
-    });
+    })) as CloneWorkerResult;
 
-    assert.ok(result1.repo === null);
+    assert.ok(!result1.repo);
     assert.ok(newInstanceSpy.notCalled);
     assert.ok(cloneSpy.notCalled);
     assert.ok(isLowWatermarkSpy.calledOnce);
 
-    const result2 = await cloneWorker.executeJob({
+    const result2 = (await cloneWorker.executeJob({
       payload: {
         url: '/foo/bar.git',
       },
       options: {},
       timestamp: 0,
-    });
+    })) as CloneWorkerResult;
 
-    assert.ok(result2.repo === null);
+    assert.ok(!result2.repo);
     assert.ok(newInstanceSpy.notCalled);
     assert.ok(cloneSpy.notCalled);
     assert.ok(isLowWatermarkSpy.calledTwice);
   });
 
-  it('Execute clone job failed because of low disk watermark', async () => {
+  it('Execute clone job failed because of low available disk space', async () => {
     // Setup RepositoryService
     const cloneSpy = sinon.spy();
     const repoService = {
@@ -428,28 +428,44 @@ describe('clone_worker_tests', () => {
     const isLowWatermarkSpy = sinon.stub().resolves(true);
     const diskWatermarkService: any = {
       isLowWatermark: isLowWatermarkSpy,
+      diskWatermarkViolationMessage: sinon.stub().returns('No enough disk space'),
     };
+
+    // Setup EsClient
+    const updateSpy = sinon.spy();
+    const esClient = {
+      update: emptyAsyncFunc,
+    };
+    esClient.update = updateSpy;
+
+    // Setup IndexWorker
+    const enqueueJobSpy = sinon.spy();
+    const indexWorker = {
+      enqueueJob: emptyAsyncFunc,
+    };
+    indexWorker.enqueueJob = enqueueJobSpy;
 
     const cloneWorker = new CloneWorker(
       esQueue as Esqueue,
       log,
-      {} as EsClient,
+      esClient as EsClient,
       serverOptions,
       gitOps,
-      {} as IndexWorker,
+      (indexWorker as any) as IndexWorker,
       (repoServiceFactory as any) as RepositoryServiceFactory,
       cancellationService as CancellationSerivce,
       diskWatermarkService as DiskWatermarkService
     );
 
+    let res: CloneWorkerResult = { uri: 'github.com/Microsoft/TypeScript-Node-Starter' };
     try {
-      await cloneWorker.executeJob({
+      res = (await cloneWorker.executeJob({
         payload: {
           url: 'https://github.com/Microsoft/TypeScript-Node-Starter.git',
         },
         options: {},
         timestamp: 0,
-      });
+      })) as CloneWorkerResult;
       // This step should not be touched.
       assert.ok(false);
     } catch (error) {
@@ -457,5 +473,29 @@ describe('clone_worker_tests', () => {
       assert.ok(newInstanceSpy.notCalled);
       assert.ok(cloneSpy.notCalled);
     }
+
+    assert.ok(res.cancelled);
+    assert.ok(res.cancelledReason === CancellationReason.LOW_DISK_SPACE);
+
+    const onJobExecutionErrorSpy = sinon.spy();
+    cloneWorker.onJobExecutionError = onJobExecutionErrorSpy;
+
+    await cloneWorker.onJobCompleted(
+      {
+        payload: {
+          url: 'https://github.com/Microsoft/TypeScript-Node-Starter.git',
+        },
+        options: {},
+        timestamp: 0,
+      },
+      res
+    );
+
+    assert.ok(onJobExecutionErrorSpy.calledOnce);
+    // Non of the follow up steps of a normal complete job should not be called
+    // because the job is going to be forwarded as execution error.
+    assert.ok(updateSpy.notCalled);
+    await delay(1000);
+    assert.ok(enqueueJobSpy.notCalled);
   });
 });

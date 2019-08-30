@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Field } from 'ui/index_patterns/_field';
+import { Field } from 'ui/index_patterns';
 import { RegistryFieldFormatEditorsProvider } from 'ui/registry/field_format_editors';
 import { docTitle } from 'ui/doc_title';
 import { KbnUrlProvider } from 'ui/url';

@@ -23,7 +23,7 @@ import sinon from 'sinon';
 import BluebirdPromise from 'bluebird';
 
 import { SavedObjectProvider } from '../saved_object';
-import { IndexPattern } from '../../index_patterns/_index_pattern';
+import { IndexPattern } from '../../index_patterns';
 import { SavedObjectsClientProvider } from '../saved_objects_client_provider';
 import { InvalidJSONProperty } from '../../errors';
 

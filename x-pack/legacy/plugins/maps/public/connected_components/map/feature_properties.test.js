@@ -33,7 +33,8 @@ const defaultProps = {
   featureId: `feature`,
   layerId: `layer`,
   onCloseTooltip: () => {},
-  showFilterButtons: false
+  showFilterButtons: false,
+  reevaluateTooltipPosition: () => {},
 };
 
 const mockTooltipProperties = [

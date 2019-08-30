@@ -5,10 +5,9 @@
  */
 
 import expect from '@kbn/expect';
-import { TestInvoker } from './lib/types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function searchFunctonalTests({ getService, getPageObjects }: TestInvoker) {
+export default function searchFunctonalTests({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');

@@ -25,7 +25,7 @@ export interface SavedSearch {
   searchSource: SearchSource;
   description?: string;
   columns: string[];
-  sort: string[];
+  sort: string[][];
   destroy: () => void;
 }
 export interface SavedSearchLoader {

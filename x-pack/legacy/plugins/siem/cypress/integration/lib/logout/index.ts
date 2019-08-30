@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LOGOUT_LINK, USER_MENU } from './selectors';
+import { LOGOUT } from '../urls';
 
 export const logout = () => {
-  cy.get(USER_MENU).click();
-
-  cy.get(LOGOUT_LINK).click();
+  cy.visit(`${Cypress.config().baseUrl}${LOGOUT}`);
 };

@@ -23,3 +23,18 @@ export function getPrivileges(): Promise<PrivilegesResponse> {
       });
   });
 }
+
+export function getManageMlPrivileges(): Promise<PrivilegesResponse> {
+  return new Promise((resolve, reject) => {
+    ml.checkManageMLPrivileges()
+      .then((resp: PrivilegesResponse) => {
+        if (resp.upgradeInProgress === true) {
+          setUpgradeInProgress(true);
+        }
+        resolve(resp);
+      })
+      .catch(() => {
+        reject();
+      });
+  });
+}

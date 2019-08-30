@@ -7,16 +7,16 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
+import { KibanaContext } from '../../../../../contexts/kibana';
+import { kibanaContextValueMock } from '../../../../../contexts/kibana/__mocks__/kibana_context_value';
+
 import {
   getPivotQuery,
-  KibanaContext,
   PivotAggsConfig,
   PivotGroupByConfig,
   PIVOT_SUPPORTED_AGGS,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../../../common';
-
-import { IndexPattern } from 'ui/index_patterns';
 
 import { PivotPreview } from './pivot_preview';
 
@@ -28,12 +28,6 @@ jest.mock('react', () => {
 
 describe('Data Frame: <PivotPreview />', () => {
   test('Minimal initialization', () => {
-    const currentIndexPattern = ({
-      id: 'the-index-pattern-id',
-      title: 'the-index-pattern-title',
-      fields: [],
-    } as unknown) as IndexPattern;
-
     const groupBy: PivotGroupByConfig = {
       agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
       field: 'the-group-by-field',
@@ -56,16 +50,7 @@ describe('Data Frame: <PivotPreview />', () => {
     // with the Provider being the outer most component.
     const wrapper = shallow(
       <div>
-        <KibanaContext.Provider
-          value={{
-            combinedQuery: {},
-            currentIndexPattern,
-            currentSavedSearch: {},
-            indexPatterns: {},
-            kbnBaseUrl: 'url',
-            kibanaConfig: {},
-          }}
-        >
+        <KibanaContext.Provider value={kibanaContextValueMock}>
           <PivotPreview {...props} />
         </KibanaContext.Provider>
       </div>

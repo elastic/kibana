@@ -14,6 +14,16 @@ light to dark.
 image::maps/images/sample_data_web_logs.png[]
 
 [float]
+[[maps-read-only-access]]
+NOTE: If you have insufficient privileges to create or save maps, a read-only icon 
+appears in the application header. The buttons to create new maps or edit
+existing maps won't be visible. For more information on granting access to
+Kibana see <<xpack-security-authorization>>.
+
+[role="screenshot"]
+image::maps/images/read-only-badge.png[Example of Maps' read only access indicator in Kibana's header]
+
+[float]
 === Prerequisites
 Before you start this tutorial, <<add-sample-data, add the web logs sample data set>>. Each
 sample data set includes a map to go along with the data. Once you've added the data, open *Maps* and

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC, useContext, useEffect, useRef, useState } from 'react';
+import React, { SFC, useEffect, useRef, useState } from 'react';
 import moment from 'moment-timezone';
 
 import { i18n } from '@kbn/i18n';
@@ -28,11 +28,11 @@ import { Dictionary, dictionaryToArray } from '../../../../../../common/types/co
 import { ES_FIELD_TYPES } from '../../../../../../common/constants/field_types';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
 
+import { useCurrentIndexPattern } from '../../../../../contexts/kibana';
+
 import {
   getFlattenedFields,
-  isKibanaContext,
   PreviewRequestBody,
-  KibanaContext,
   PivotAggsConfigDict,
   PivotGroupByConfig,
   PivotGroupByConfigDict,
@@ -139,13 +139,8 @@ interface PivotPreviewProps {
 export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy, query }) => {
   const [clearTable, setClearTable] = useState(false);
 
-  const kibanaContext = useContext(KibanaContext);
+  const indexPattern = useCurrentIndexPattern();
 
-  if (!isKibanaContext(kibanaContext)) {
-    return null;
-  }
-
-  const indexPattern = kibanaContext.currentIndexPattern;
   const {
     dataFramePreviewData,
     dataFramePreviewMappings,

@@ -12,7 +12,7 @@ import { Aggregation, Field } from '../../../../../common/types/fields';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
 import { mlJobService } from '../../../../services/job_service';
 import { JobRunner, ProgressSubscriber } from '../job_runner';
-import { JOB_TYPE } from './util/constants';
+import { JOB_TYPE, CREATED_BY_LABEL } from './util/constants';
 
 export class JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
@@ -95,9 +95,17 @@ export class JobCreator {
     return agg !== undefined ? agg : null;
   }
 
+  public get aggregations(): Aggregation[] {
+    return this._aggs;
+  }
+
   public getField(index: number): Field | null {
     const field = this._fields[index];
     return field !== undefined ? field : null;
+  }
+
+  public get fields(): Field[] {
+    return this._fields;
   }
 
   public set bucketSpan(bucketSpan: BucketSpan) {
@@ -247,11 +255,12 @@ export class JobCreator {
     return this._subscribers;
   }
 
-  public async createAndStartJob() {
+  public async createAndStartJob(): Promise<JobRunner> {
     try {
       await this.createJob();
       await this.createDatafeed();
-      await this.startDatafeed();
+      const jobRunner = await this.startDatafeed();
+      return jobRunner;
     } catch (error) {
       throw error;
     }
@@ -341,12 +350,12 @@ export class JobCreator {
     return null;
   }
 
-  public set createdBy(createdBy: string | null) {
+  public set createdBy(createdBy: CREATED_BY_LABEL | null) {
     this._setCustomSetting('created_by', createdBy);
   }
 
-  public get createdBy(): string | null {
-    return this._getCustomSetting('created_by') as string | null;
+  public get createdBy(): CREATED_BY_LABEL | null {
+    return this._getCustomSetting('created_by') as CREATED_BY_LABEL | null;
   }
 
   public get formattedJobJson() {

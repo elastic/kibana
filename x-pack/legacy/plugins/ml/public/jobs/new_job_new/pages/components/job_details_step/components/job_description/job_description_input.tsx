@@ -21,9 +21,9 @@ export const JobDescriptionInput: FC = () => {
   return (
     <Description>
       <EuiTextArea
-        placeholder="Job description"
         value={jobDescription}
         onChange={e => setJobDescription(e.target.value)}
+        data-test-subj="mlJobWizardInputJobDescription"
       />
     </Description>
   );

@@ -221,3 +221,5 @@ export const NetworkTopNFlowTable = connect(
 const SelectTypeItem = styled(EuiFlexItem)`
   min-width: 180px;
 `;
+
+SelectTypeItem.displayName = 'SelectTypeItem';

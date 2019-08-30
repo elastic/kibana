@@ -9,7 +9,7 @@ import Boom from 'boom';
 import { RequestFacade, ResponseToolkitFacade } from '../..';
 import { validateGitUrl } from '../../common/git_url_utils';
 import { RepositoryUtils } from '../../common/repository_utils';
-import { RepositoryConfig, RepositoryUri } from '../../model';
+import { RepositoryConfig, RepositoryUri, WorkerReservedProgress } from '../../model';
 import { RepositoryIndexInitializer, RepositoryIndexInitializerFactory } from '../indexer';
 import { Logger } from '../log';
 import { RepositoryConfigController } from '../repository_config_controller';
@@ -108,10 +108,13 @@ export function repositoryRoute(
         // Check if the repository delete status already exists. If so, we should ignore this
         // request.
         try {
-          await repoObjectClient.getRepositoryDeleteStatus(repoUri);
-          const msg = `Repository ${repoUri} is already in delete.`;
-          log.info(msg);
-          return h.response(msg).code(304); // Not Modified
+          const status = await repoObjectClient.getRepositoryDeleteStatus(repoUri);
+          // if the delete status is an ERROR, we can give it another try
+          if (status.progress !== WorkerReservedProgress.ERROR) {
+            const msg = `Repository ${repoUri} is already in delete.`;
+            log.info(msg);
+            return h.response(msg).code(304); // Not Modified
+          }
         } catch (error) {
           // Do nothing here since this error is expected.
           log.info(`Repository ${repoUri} delete status does not exist. Go ahead with delete.`);

@@ -2,7 +2,7 @@
 
 exports[`Host Summary Component rendering it renders the default Host Summary 1`] = `
 <Component>
-  <Memo()
+  <HostOverview
     anomaliesData={
       Object {
         "anomalies": Array [

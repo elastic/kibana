@@ -86,16 +86,14 @@ export const getTransformsFactory = (
               return reducedtableRows;
             }
 
-            config.mode =
-              typeof config.sync !== 'undefined'
-                ? DATA_FRAME_MODE.CONTINUOUS
-                : DATA_FRAME_MODE.BATCH;
-
             // Table with expandable rows requires `id` on the outer most level
             reducedtableRows.push({
-              config,
               id: config.id,
-              checkpointing: stats.checkpointing,
+              config,
+              mode:
+                typeof config.sync !== 'undefined'
+                  ? DATA_FRAME_MODE.CONTINUOUS
+                  : DATA_FRAME_MODE.BATCH,
               stats,
             });
             return reducedtableRows;

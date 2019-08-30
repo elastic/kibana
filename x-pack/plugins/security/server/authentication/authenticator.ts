@@ -66,6 +66,13 @@ export interface ProviderLoginAttempt {
    * Login attempt can have any form and defined by the specific provider.
    */
   value: unknown;
+
+  /**
+   * Indicates whether login attempt should be performed in a "stateless" manner. If `true` provider
+   * performing login will neither be able to retrieve or update existing state if any nor persist
+   * any new state it may produce as a result of the login attempt. It's `false` by default.
+   */
+  stateless?: boolean;
 }
 
 export interface AuthenticatorOptions {
@@ -218,9 +225,9 @@ export class Authenticator {
 
     const sessionStorage = this.options.sessionStorageFactory.asScoped(request);
 
-    // If we detect an existing session that belongs to a different provider than the one request to
-    // perform a login we should clear such session.
-    let existingSession = await this.getSessionValue(sessionStorage);
+    // If we detect an existing session that belongs to a different provider than the one requested
+    // to perform a login we should clear such session.
+    let existingSession = attempt.stateless ? null : await this.getSessionValue(sessionStorage);
     if (existingSession && existingSession.provider !== attempt.provider) {
       this.logger.debug(
         `Clearing existing session of another ("${existingSession.provider}") provider.`
@@ -247,7 +254,7 @@ export class Authenticator {
       (authenticationResult.failed() && getErrorStatusCode(authenticationResult.error) === 401);
     if (existingSession && shouldClearSession) {
       sessionStorage.clear();
-    } else if (authenticationResult.shouldUpdateState()) {
+    } else if (!attempt.stateless && authenticationResult.shouldUpdateState()) {
       sessionStorage.set({
         state: authenticationResult.state,
         provider: attempt.provider,

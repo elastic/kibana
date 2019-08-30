@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SourceConfigurationButton } from './source_configuration_button';
-export { SourceConfigurationFlyout } from './source_configuration_flyout';
+export { SourceConfigurationSettings } from './source_configuration_settings';
 export {
-  SourceConfigurationFlyoutState,
-  useSourceConfigurationFlyoutState,
-} from './source_configuration_flyout_state';
+  ViewSourceConfigurationButton,
+  ViewSourceConfigurationButtonHrefBase,
+} from './view_source_configuration_button';

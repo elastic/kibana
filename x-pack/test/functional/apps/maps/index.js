@@ -19,8 +19,7 @@ export default function ({ loadTestFile, getService }) {
       await kibanaServer.uiSettings.replace({
         'defaultIndex': 'logstash-*'
       });
-      browser.setWindowSize(1600, 1000);
-
+      await browser.setWindowSize(1600, 1000);
     });
 
     after(async () => {

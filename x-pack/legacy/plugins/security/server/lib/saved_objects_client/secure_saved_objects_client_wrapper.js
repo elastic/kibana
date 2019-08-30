@@ -12,7 +12,7 @@ export class SecureSavedObjectsClientWrapper {
       actions,
       auditLogger,
       baseClient,
-      checkPrivilegesDynamicallyWithRequest,
+      checkSavedObjectsPrivilegesWithRequest,
       errors,
       request,
       savedObjectTypes,
@@ -22,8 +22,7 @@ export class SecureSavedObjectsClientWrapper {
     this._actions = actions;
     this._auditLogger = auditLogger;
     this._baseClient = baseClient;
-    this._checkPrivileges = checkPrivilegesDynamicallyWithRequest(request);
-    this._request = request;
+    this._checkSavedObjectsPrivileges = checkSavedObjectsPrivilegesWithRequest(request);
     this._savedObjectTypes = savedObjectTypes;
   }
 
@@ -31,6 +30,7 @@ export class SecureSavedObjectsClientWrapper {
     await this._ensureAuthorized(
       type,
       'create',
+      options.namespace,
       { type, attributes, options },
     );
 
@@ -42,16 +42,18 @@ export class SecureSavedObjectsClientWrapper {
     await this._ensureAuthorized(
       types,
       'bulk_create',
+      options.namespace,
       { objects, options },
     );
 
     return await this._baseClient.bulkCreate(objects, options);
   }
 
-  async delete(type, id, options) {
+  async delete(type, id, options = {}) {
     await this._ensureAuthorized(
       type,
       'delete',
+      options.namespace,
       { type, id, options },
     );
 
@@ -62,6 +64,7 @@ export class SecureSavedObjectsClientWrapper {
     await this._ensureAuthorized(
       options.type,
       'find',
+      options.namespace,
       { options }
     );
 
@@ -73,6 +76,7 @@ export class SecureSavedObjectsClientWrapper {
     await this._ensureAuthorized(
       types,
       'bulk_get',
+      options.namespace,
       { objects, options },
     );
 
@@ -83,6 +87,7 @@ export class SecureSavedObjectsClientWrapper {
     await this._ensureAuthorized(
       type,
       'get',
+      options.namespace,
       { type, id, options },
     );
 
@@ -93,26 +98,27 @@ export class SecureSavedObjectsClientWrapper {
     await this._ensureAuthorized(
       type,
       'update',
+      options.namespace,
       { type, id, attributes, options },
     );
 
     return await this._baseClient.update(type, id, attributes, options);
   }
 
-  async _checkSavedObjectPrivileges(actions) {
+  async _checkPrivileges(actions, namespace) {
     try {
-      return await this._checkPrivileges(actions);
-    } catch(error) {
+      return await this._checkSavedObjectsPrivileges(actions, namespace);
+    } catch (error) {
       const { reason } = get(error, 'body.error', {});
       throw this.errors.decorateGeneralError(error, reason);
     }
   }
 
-  async _ensureAuthorized(typeOrTypes, action, args) {
+  async _ensureAuthorized(typeOrTypes, action, namespace, args) {
     const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
     const actionsToTypesMap = new Map(types.map(type => [this._actions.savedObject.get(type, action), type]));
     const actions = Array.from(actionsToTypesMap.keys());
-    const { hasAllRequested, username, privileges } = await this._checkSavedObjectPrivileges(actions);
+    const { hasAllRequested, username, privileges } = await this._checkPrivileges(actions, namespace);
 
     if (hasAllRequested) {
       this._auditLogger.savedObjectsAuthorizationSuccess(username, action, types, args);

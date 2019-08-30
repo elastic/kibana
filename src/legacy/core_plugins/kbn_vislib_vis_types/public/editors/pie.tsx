@@ -21,15 +21,18 @@ import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { VisOptionsProps, VisOptionsSetValue } from 'ui/vis/editors/default';
+import { VisOptionsProps } from 'ui/vis/editors/default';
 import { BasicOptions } from '../controls/basic_options';
 import { SwitchOption } from '../controls/switch';
 import { TruncateLabelsOption } from '../controls/truncate_labels';
+import { PieVisParams } from '../pie';
 
-function PieOptions(props: VisOptionsProps) {
+function PieOptions(props: VisOptionsProps<PieVisParams>) {
   const { stateParams, setValue } = props;
-  const setLabels: VisOptionsSetValue = (paramName, value) =>
-    setValue('labels', { ...stateParams.labels, [paramName]: value });
+  const setLabels = <T extends keyof PieVisParams['labels']>(
+    paramName: T,
+    value: PieVisParams['labels'][T]
+  ) => setValue('labels', { ...stateParams.labels, [paramName]: value });
 
   return (
     <>

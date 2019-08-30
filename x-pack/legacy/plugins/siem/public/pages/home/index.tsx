@@ -36,6 +36,8 @@ const WrappedByAutoSizer = styled.div`
   height: 100%;
 `;
 
+WrappedByAutoSizer.displayName = 'WrappedByAutoSizer';
+
 const gutterTimeline = '70px'; // Temporary until timeline is moved - MichaelMarcialis
 
 const Page = styled(EuiPage)`
@@ -43,6 +45,8 @@ const Page = styled(EuiPage)`
     padding: 0 ${gutterTimeline} ${theme.eui.euiSizeL} ${theme.eui.euiSizeL};
   `}
 `;
+
+Page.displayName = 'Page';
 
 const NavGlobal = styled.nav`
   ${({ theme }) => `
@@ -52,6 +56,8 @@ const NavGlobal = styled.nav`
     padding: ${theme.eui.euiSize} ${gutterTimeline} ${theme.eui.euiSize} ${theme.eui.euiSizeL};
   `}
 `;
+
+NavGlobal.displayName = 'NavGlobal';
 
 const usersViewing = ['elastic']; // TODO: get the users viewing this timeline from Elasticsearch (persistance)
 
@@ -175,3 +181,5 @@ export const HomePage = pure(() => (
     )}
   </AutoSizer>
 ));
+
+HomePage.displayName = 'HomePage';

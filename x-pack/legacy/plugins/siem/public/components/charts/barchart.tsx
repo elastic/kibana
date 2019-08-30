@@ -18,6 +18,7 @@ import {
   getTheme,
   ChartSeriesConfigs,
   browserTimezone,
+  chartDefaultSettings,
 } from './common';
 import { AutoSizer } from '../auto_sizer';
 
@@ -32,10 +33,13 @@ export const BarChartBaseComponent = React.memo<{
   const yTickFormatter = get('configs.axis.yTickFormatter', chartConfigs);
   const xAxisId = getAxisId(`stat-items-barchart-${data[0].key}-x`);
   const yAxisId = getAxisId(`stat-items-barchart-${data[0].key}-y`);
-
+  const settings = {
+    ...chartDefaultSettings,
+    ...get('configs.settings', chartConfigs),
+  };
   return chartConfigs.width && chartConfigs.height ? (
     <Chart>
-      <Settings rotation={90} theme={getTheme()} />
+      <Settings {...settings} theme={getTheme()} />
       {data.map(series => {
         const barSeriesKey = series.key;
         const barSeriesSpecId = getSpecId(barSeriesKey);
@@ -79,6 +83,8 @@ export const BarChartBaseComponent = React.memo<{
   ) : null;
 });
 
+BarChartBaseComponent.displayName = 'BarChartBaseComponent';
+
 export const BarChartWithCustomPrompt = React.memo<{
   data: ChartConfigsData[] | null | undefined;
   height: number | null | undefined;
@@ -97,6 +103,8 @@ export const BarChartWithCustomPrompt = React.memo<{
   );
 });
 
+BarChartWithCustomPrompt.displayName = 'BarChartWithCustomPrompt';
+
 export const BarChart = React.memo<{
   barChart: ChartConfigsData[] | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
@@ -109,3 +117,5 @@ export const BarChart = React.memo<{
     )}
   </AutoSizer>
 ));
+
+BarChart.displayName = 'BarChart';

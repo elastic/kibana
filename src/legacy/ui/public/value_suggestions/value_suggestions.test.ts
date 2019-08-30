@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { mockFields, mockIndexPattern } from 'ui/index_patterns/fixtures';
+jest.mock('ui/new_platform');
+
+import { mockFields, mockIndexPattern } from 'ui/index_patterns';
 import { getSuggestionsProvider } from './value_suggestions';
 
 describe('getSuggestions', () => {

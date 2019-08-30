@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObject } from '../service';
+import { SavedObject } from '../types';
 import { SavedObjectsImportRetry } from './types';
 
 export function createObjectsFilter(retries: SavedObjectsImportRetry[]) {

@@ -7,7 +7,7 @@ exports[`JobSwitch renders correctly against snapshot 1`] = `
   <EuiFlexItem
     grow={false}
   >
-    <Styled(EuiSwitch)
+    <StaticSwitch
       checked={true}
       data-test-subj="job-switch"
       disabled={false}

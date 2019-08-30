@@ -29,6 +29,8 @@ const DropAndTargetDataProvidersContainer = styled(EuiFlexItem)`
   margin: 0px 8px;
 `;
 
+DropAndTargetDataProvidersContainer.displayName = 'DropAndTargetDataProvidersContainer';
+
 const DropAndTargetDataProviders = styled.div<{ hasAndItem: boolean }>`
   min-width: 230px;
   width: auto;
@@ -49,6 +51,8 @@ const DropAndTargetDataProviders = styled.div<{ hasAndItem: boolean }>`
   cursor: ${({ hasAndItem }) => (!hasAndItem ? `default` : 'inherit')};
 `;
 
+DropAndTargetDataProviders.displayName = 'DropAndTargetDataProviders';
+
 // Ref: https://github.com/elastic/eui/issues/1655
 // const NumberProviderAndBadge = styled(EuiBadge)`
 //   margin: 0px 5px;
@@ -56,6 +60,8 @@ const DropAndTargetDataProviders = styled.div<{ hasAndItem: boolean }>`
 const NumberProviderAndBadge = (props: EuiBadgeProps) => (
   <EuiBadge {...props} style={{ margin: '0px 5px' }} />
 );
+
+NumberProviderAndBadge.displayName = 'NumberProviderAndBadge';
 
 interface ProviderItemDropProps {
   browserFields: BrowserFields;
@@ -124,3 +130,5 @@ export const ProviderItemAndDragDrop = pure<ProviderItemDropProps>(
     );
   }
 );
+
+ProviderItemAndDragDrop.displayName = 'ProviderItemAndDragDrop';

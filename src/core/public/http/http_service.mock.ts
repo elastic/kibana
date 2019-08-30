@@ -46,8 +46,8 @@ const createServiceMock = (): ServiceSetupMockType => ({
   removeAllInterceptors: jest.fn(),
 });
 
-const createSetupContractMock = () => createServiceMock();
-const createStartContractMock = () => createServiceMock();
+const createSetupContractMock = createServiceMock;
+const createStartContractMock = createServiceMock;
 
 const createMock = () => {
   const mocked: jest.Mocked<Required<HttpService>> = {

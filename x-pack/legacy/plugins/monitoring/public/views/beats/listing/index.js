@@ -16,13 +16,14 @@ import { I18nContext } from 'ui/i18n';
 import { Listing } from '../../../components/beats/listing/listing';
 import { SetupModeRenderer } from '../../../components/renderers';
 import { BEATS_SYSTEM_ID } from '../../../../../telemetry/common/constants';
+import { CODE_PATH_BEATS } from '../../../../common/constants';
 
 uiRoutes.when('/beats/beats', {
   template,
   resolve: {
     clusters: function (Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: [CODE_PATH_BEATS] });
     },
     pageData: getPageData,
   },

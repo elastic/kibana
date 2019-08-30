@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObject } from '../service/saved_objects_client';
+import { SavedObject } from '../types';
 import {
   getObjectReferencesToFetch,
   injectNestedDependencies,

@@ -24,7 +24,12 @@ export const ModelPlotSwitch: FC = () => {
 
   return (
     <Description>
-      <EuiSwitch name="switch" checked={modelPlotEnabled} onChange={toggleModelPlot} />
+      <EuiSwitch
+        name="switch"
+        checked={modelPlotEnabled}
+        onChange={toggleModelPlot}
+        data-test-subj="mlJobWizardSwitchModelPlot"
+      />
     </Description>
   );
 };

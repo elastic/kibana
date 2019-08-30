@@ -21,9 +21,13 @@ import { PluginInitializerContext } from 'kibana/public';
 import { npSetup, npStart } from 'ui/new_platform';
 
 import { visualizations } from '../../visualizations/public';
-import { RegionMapPluginSetupDependencies } from './plugin';
+import { RegionMapPluginSetupDependencies, RegionMapsConfig } from './plugin';
 import { LegacyDependenciesPlugin } from './shim';
 import { plugin } from '.';
+
+const regionmapsConfig = npSetup.core.injectedMetadata.getInjectedVar(
+  'regionmap'
+) as RegionMapsConfig;
 
 const plugins: Readonly<RegionMapPluginSetupDependencies> = {
   visualizations,
@@ -31,7 +35,7 @@ const plugins: Readonly<RegionMapPluginSetupDependencies> = {
 
   // Temporary solution
   // It will be removed when all dependent services are migrated to the new platform.
-  __LEGACY: new LegacyDependenciesPlugin(),
+  __LEGACY: new LegacyDependenciesPlugin(regionmapsConfig),
 };
 
 const pluginInstance = plugin({} as PluginInitializerContext);

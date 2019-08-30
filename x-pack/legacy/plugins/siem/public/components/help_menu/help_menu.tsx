@@ -14,6 +14,8 @@ export const Icon = styled(EuiIcon)`
   margin-right: ${theme.euiSizeS};
 `;
 
+Icon.displayName = 'Icon';
+
 export class HelpMenuComponent extends React.PureComponent {
   public render() {
     return (

@@ -2,15 +2,15 @@
 
 exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
 <span>
-  <styled.div>
+  <Row>
     <span>
       some children
     </span>
-    <styled.div
+    <RowRendererContainer
       width={500}
     >
-      <styled.div>
-        <pure(Component)
+      <Details>
+        <Netflow
           contextId="network_flow"
           destinationBytes={
             Array [
@@ -174,8 +174,8 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
             ]
           }
         />
-      </styled.div>
-    </styled.div>
-  </styled.div>
+      </Details>
+    </RowRendererContainer>
+  </Row>
 </span>
 `;

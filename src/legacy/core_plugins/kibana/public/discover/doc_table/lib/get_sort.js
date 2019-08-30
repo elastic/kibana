@@ -19,42 +19,50 @@
 
 import _ from 'lodash';
 
+function isSortable(field, indexPattern) {
+  return (indexPattern.fields.byName[field] && indexPattern.fields.byName[field].sortable);
+}
+
+function createSortObject(sortPair, indexPattern) {
+
+  if (Array.isArray(sortPair) && sortPair.length === 2 && isSortable(sortPair[0], indexPattern)) {
+    const [ field, direction ] = sortPair;
+    return { [field]: direction };
+  }
+  else if (_.isPlainObject(sortPair) && isSortable(Object.keys(sortPair)[0], indexPattern)) {
+    return sortPair;
+  }
+  else {
+    return undefined;
+  }
+}
+
 /**
  * Take a sorting array and make it into an object
- * @param {array} 2 item array [fieldToSort, directionToSort]
+ * @param {array} sort two dimensional array [[fieldToSort, directionToSort]]
+ *  or an array of objects [{fieldToSort: directionToSort}]
  * @param {object} indexPattern used for determining default sort
  * @returns {object} a sort object suitable for returning to elasticsearch
  */
 export function getSort(sort, indexPattern, defaultSortOrder = 'desc') {
-  const sortObj = {};
-  let field;
-  let direction;
 
-  function isSortable(field) {
-    return (indexPattern.fields.byName[field] && indexPattern.fields.byName[field].sortable);
+  let sortObjects;
+  if (Array.isArray(sort)) {
+    sortObjects = _.compact(sort.map((sortPair) => createSortObject(sortPair, indexPattern)));
   }
 
-  if (Array.isArray(sort) && sort.length === 2 && isSortable(sort[0])) {
-    // At some point we need to refactor the sorting logic, this array sucks.
-    field = sort[0];
-    direction = sort[1];
-  } else if (indexPattern.timeFieldName && isSortable(indexPattern.timeFieldName)) {
-    field = indexPattern.timeFieldName;
-    direction = defaultSortOrder;
+  if (!_.isEmpty(sortObjects)) {
+    return sortObjects;
   }
-
-  if (field) {
-    sortObj[field] = direction;
-  } else {
-    sortObj._score = 'desc';
+  else if (indexPattern.timeFieldName && isSortable(indexPattern.timeFieldName, indexPattern)) {
+    return [{ [indexPattern.timeFieldName]: defaultSortOrder }];
   }
-
-
-
-  return sortObj;
+  else {
+    return [{ _score: 'desc' }];
+  }
 }
 
 getSort.array = function (sort, indexPattern, defaultSortOrder) {
-  return _(getSort(sort, indexPattern, defaultSortOrder)).pairs().pop();
+  return getSort(sort, indexPattern, defaultSortOrder).map((sortPair) => _(sortPair).pairs().pop());
 };
 

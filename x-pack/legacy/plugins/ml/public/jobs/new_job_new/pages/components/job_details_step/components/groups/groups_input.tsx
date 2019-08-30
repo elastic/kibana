@@ -68,15 +68,19 @@ export const GroupsInput: FC = () => {
   return (
     <Description validation={validation}>
       <EuiComboBox
-        placeholder={i18n.translate('xpack.ml.newJob.wizard.jobGroupSelectPlaceholder', {
-          defaultMessage: 'Select or create groups',
-        })}
+        placeholder={i18n.translate(
+          'xpack.ml.newJob.wizard.jobDetailsStep.jobGroupSelect.placeholder',
+          {
+            defaultMessage: 'Select or create groups',
+          }
+        )}
         options={options}
         selectedOptions={selectedOptions}
         onChange={onChange}
         onCreateOption={onCreateGroup}
         isClearable={true}
         isInvalid={validation.valid === false}
+        data-test-subj="mlJobWizardComboBoxJobGroups"
       />
     </Description>
   );

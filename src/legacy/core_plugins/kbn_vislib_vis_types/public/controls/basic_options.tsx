@@ -24,7 +24,16 @@ import { VisOptionsProps } from 'ui/vis/editors/default';
 import { SwitchOption } from './switch';
 import { SelectOption } from './select';
 
-function BasicOptions({ stateParams, setValue, vis }: VisOptionsProps) {
+export interface BasicOptionsParams {
+  addTooltip: boolean;
+  legendPosition: string;
+}
+
+function BasicOptions<VisParams extends BasicOptionsParams>({
+  stateParams,
+  setValue,
+  vis,
+}: VisOptionsProps<VisParams>) {
   return (
     <>
       <SelectOption

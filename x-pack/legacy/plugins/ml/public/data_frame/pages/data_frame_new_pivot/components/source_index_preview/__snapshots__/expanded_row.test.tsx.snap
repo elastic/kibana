@@ -3,32 +3,6 @@
 exports[`Data Frame: <ExpandedRow /> Test against strings, objects and arrays. 1`] = `
 <EuiText>
   <span
-    key="arrayObject"
-  >
-    <EuiBadge>
-      arrayObject
-      :
-    </EuiBadge>
-    <small>
-       
-      [{"object1":"the-object-1"},{"object2":"the-objects-2"}]
-        
-    </small>
-  </span>
-  <span
-    key="arrayString"
-  >
-    <EuiBadge>
-      arrayString
-      :
-    </EuiBadge>
-    <small>
-       
-      ["the-array-string-1","the-array-string-2"]
-        
-    </small>
-  </span>
-  <span
     key="name"
   >
     <EuiBadge>
@@ -64,6 +38,32 @@ exports[`Data Frame: <ExpandedRow /> Test against strings, objects and arrays. 1
     <small>
        
       the-inner-2
+        
+    </small>
+  </span>
+  <span
+    key="arrayString"
+  >
+    <EuiBadge>
+      arrayString
+      :
+    </EuiBadge>
+    <small>
+       
+      ["the-array-string-1","the-array-string-2"]
+        
+    </small>
+  </span>
+  <span
+    key="arrayObject"
+  >
+    <EuiBadge>
+      arrayObject
+      :
+    </EuiBadge>
+    <small>
+       
+      [{"object1":"the-object-1"},{"object2":"the-objects-2"}]
         
     </small>
   </span>

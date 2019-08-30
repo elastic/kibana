@@ -18,7 +18,7 @@
  */
 
 import { Readable } from 'stream';
-import { SavedObject } from '../service';
+import { SavedObject } from '../types';
 import { importSavedObjects } from './import_saved_objects';
 
 describe('importSavedObjects()', () => {

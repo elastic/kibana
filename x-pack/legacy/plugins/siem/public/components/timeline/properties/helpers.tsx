@@ -9,6 +9,7 @@ import {
   EuiBadgeProps,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,6 +21,7 @@ import {
 import * as React from 'react';
 import { pure } from 'recompose';
 import uuid from 'uuid';
+import styled from 'styled-components';
 
 import { Note } from '../../../lib/note';
 import { Notes } from '../../notes';
@@ -48,6 +50,8 @@ const NotesCountBadge = (props: EuiBadgeProps) => (
   <EuiBadge {...props} style={{ marginLeft: '5px' }} />
 );
 
+NotesCountBadge.displayName = 'NotesCountBadge';
+
 type CreateTimeline = ({ id, show }: { id: string; show?: boolean }) => void;
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
 type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
@@ -75,6 +79,8 @@ export const StarIcon = pure<{
   </div>
 ));
 
+StarIcon.displayName = 'StarIcon';
+
 export const Description = pure<{
   description: string;
   timelineId: string;
@@ -95,6 +101,8 @@ export const Description = pure<{
   </EuiToolTip>
 ));
 
+Description.displayName = 'Description';
+
 export const Name = pure<{ timelineId: string; title: string; updateTitle: UpdateTitle }>(
   ({ timelineId, title, updateTitle }) => (
     <EuiToolTip data-test-subj="timeline-title-tool-tip" content={i18n.TITLE}>
@@ -109,6 +117,8 @@ export const Name = pure<{ timelineId: string; title: string; updateTitle: Updat
     </EuiToolTip>
   )
 );
+
+Name.displayName = 'Name';
 
 export const NewTimeline = pure<{
   createTimeline: CreateTimeline;
@@ -129,6 +139,8 @@ export const NewTimeline = pure<{
   </EuiButtonEmpty>
 ));
 
+NewTimeline.displayName = 'NewTimeline';
+
 interface NotesButtonProps {
   animate?: boolean;
   associateNote: AssociateNote;
@@ -144,14 +156,24 @@ interface NotesButtonProps {
 
 const getNewNoteId = (): string => uuid.v4();
 
+const NotesButtonIcon = styled(EuiButtonIcon)`
+  svg {
+    height: 24px;
+    width: 24px;
+  }
+`;
+
 const NotesIcon = pure<{ count: number }>(({ count }) => (
-  <EuiIcon
+  <NotesButtonIcon
+    aria-label={i18n.NOTES}
     color={count > 0 ? 'primary' : 'subdued'}
     data-test-subj="timeline-notes-icon"
     size="l"
-    type="editorComment"
+    iconType="editorComment"
   />
 ));
+
+NotesIcon.displayName = 'NotesIcon';
 
 const LargeNotesButton = pure<{ noteIds: string[]; text?: string; toggleShowNotes: () => void }>(
   ({ noteIds, text, toggleShowNotes }) => (
@@ -177,6 +199,8 @@ const LargeNotesButton = pure<{ noteIds: string[]; text?: string; toggleShowNote
   )
 );
 
+LargeNotesButton.displayName = 'LargeNotesButton';
+
 const SmallNotesButton = pure<{ noteIds: string[]; toggleShowNotes: () => void }>(
   ({ noteIds, toggleShowNotes }) => (
     <SmallNotesButtonContainer
@@ -188,6 +212,8 @@ const SmallNotesButton = pure<{ noteIds: string[]; toggleShowNotes: () => void }
     </SmallNotesButtonContainer>
   )
 );
+
+SmallNotesButton.displayName = 'SmallNotesButton';
 
 /**
  * The internal implementation of the `NotesButton`
@@ -228,6 +254,8 @@ const NotesButtonComponent = pure<NotesButtonProps>(
     </ButtonContainer>
   )
 );
+
+NotesButtonComponent.displayName = 'NotesButtonComponent';
 
 export const NotesButton = pure<NotesButtonProps>(
   ({
@@ -270,3 +298,5 @@ export const NotesButton = pure<NotesButtonProps>(
       </EuiToolTip>
     )
 );
+
+NotesButton.displayName = 'NotesButton';

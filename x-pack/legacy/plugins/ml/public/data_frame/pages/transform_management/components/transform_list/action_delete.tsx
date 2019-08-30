@@ -21,14 +21,14 @@ import {
   createPermissionFailureMessage,
 } from '../../../../../privilege/check_privilege';
 
-import { DataFrameTransformListRow, DATA_FRAME_TASK_STATE } from './common';
+import { DataFrameTransformListRow, DATA_FRAME_TRANSFORM_STATE } from './common';
 
 interface DeleteActionProps {
   item: DataFrameTransformListRow;
 }
 
 export const DeleteAction: SFC<DeleteActionProps> = ({ item }) => {
-  const disabled = item.stats.task_state === DATA_FRAME_TASK_STATE.STARTED;
+  const disabled = item.stats.state !== DATA_FRAME_TRANSFORM_STATE.STOPPED;
 
   const canDeleteDataFrame: boolean = checkPermission('canDeleteDataFrame');
 

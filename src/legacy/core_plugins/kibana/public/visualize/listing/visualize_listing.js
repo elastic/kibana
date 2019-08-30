@@ -25,6 +25,7 @@ import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import chrome from 'ui/chrome';
 import { wrapInI18nContext } from 'ui/i18n';
 import { toastNotifications } from 'ui/notify';
+import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 
 import { VisualizeListingTable } from './visualize_listing_table';
 import { NewVisModal } from '../wizard/new_vis_modal';
@@ -111,4 +112,6 @@ export function VisualizeListingController($injector, createNewVis) {
   }]);
 
   this.listingLimit = config.get('savedObjects:listingLimit');
+
+  addHelpMenuToAppChrome(chrome);
 }

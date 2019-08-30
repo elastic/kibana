@@ -16,6 +16,7 @@ import { TestProviders } from '../../../mock/test_providers';
 import { Body } from '.';
 import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
+import { wait } from '../../../lib/helpers';
 
 const testBodyHeight = 700;
 const mockGetNotesByIds = (eventId: string[]) => [];
@@ -38,7 +39,6 @@ describe('Body', () => {
             eventIdToNoteIds={{}}
             height={testBodyHeight}
             id={'timeline-test'}
-            isLoading={false}
             getNotesByIds={mockGetNotesByIds}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
@@ -51,6 +51,7 @@ describe('Body', () => {
             range={'1 Day'}
             rowRenderers={rowRenderers}
             sort={mockSort}
+            toggleColumn={jest.fn()}
             updateNote={jest.fn()}
             width={100}
           />
@@ -77,7 +78,6 @@ describe('Body', () => {
             eventIdToNoteIds={{}}
             height={testBodyHeight}
             id={'timeline-test'}
-            isLoading={false}
             getNotesByIds={mockGetNotesByIds}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
@@ -90,6 +90,7 @@ describe('Body', () => {
             range={'1 Day'}
             rowRenderers={rowRenderers}
             sort={mockSort}
+            toggleColumn={jest.fn()}
             updateNote={jest.fn()}
             width={100}
           />
@@ -116,7 +117,6 @@ describe('Body', () => {
             eventIdToNoteIds={{}}
             height={testBodyHeight}
             id={'timeline-test'}
-            isLoading={false}
             getNotesByIds={mockGetNotesByIds}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
@@ -129,6 +129,7 @@ describe('Body', () => {
             range={'1 Day'}
             rowRenderers={rowRenderers}
             sort={mockSort}
+            toggleColumn={jest.fn()}
             updateNote={jest.fn()}
             width={100}
           />
@@ -143,7 +144,7 @@ describe('Body', () => {
       ).toEqual(true);
     });
 
-    test('it renders a tooltip for timestamp', () => {
+    test('it renders a tooltip for timestamp', async () => {
       const headersJustTimestamp = defaultHeaders.filter(h => h.id === '@timestamp');
 
       const wrapper = mount(
@@ -157,7 +158,6 @@ describe('Body', () => {
             eventIdToNoteIds={{}}
             height={testBodyHeight}
             id={'timeline-test'}
-            isLoading={false}
             getNotesByIds={mockGetNotesByIds}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
@@ -170,12 +170,14 @@ describe('Body', () => {
             range={'1 Day'}
             rowRenderers={rowRenderers}
             sort={mockSort}
+            toggleColumn={jest.fn()}
             updateNote={jest.fn()}
             width={100}
           />
         </TestProviders>
       );
-
+      await wait();
+      wrapper.update();
       headersJustTimestamp.forEach(h => {
         expect(
           wrapper

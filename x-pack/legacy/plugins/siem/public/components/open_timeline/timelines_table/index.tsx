@@ -30,6 +30,8 @@ const BasicTable = styled(EuiBasicTable)`
   }
 `;
 
+BasicTable.displayName = 'BasicTable';
+
 const getExtendedColumnsIfEnabled = (showExtendedColumnsAndActions: boolean) =>
   showExtendedColumnsAndActions ? [...getExtendedColumns()] : [];
 
@@ -158,3 +160,5 @@ export const TimelinesTable = pure<TimelinesTableProps>(
     );
   }
 );
+
+TimelinesTable.displayName = 'TimelinesTable';

@@ -16,13 +16,8 @@ import { checkGetJobsPrivilege, checkPermission } from '../../../privilege/check
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import { getCalendarManagementBreadcrumbs } from '../../breadcrumbs';
 
-import chrome from 'ui/chrome';
 import uiRoutes from 'ui/routes';
-import { timefilter } from 'ui/timefilter';
-import { timeHistory } from 'ui/timefilter/time_history';
 import { I18nContext } from 'ui/i18n';
-
-import { NavigationMenuContext } from '../../../util/context_utils';
 
 const template = `
   <div class="euiSpacer euiSpacer--s" />
@@ -54,9 +49,7 @@ module.directive('mlCalendarsList', function () {
 
       ReactDOM.render(
         <I18nContext>
-          <NavigationMenuContext.Provider value={{ chrome, timefilter, timeHistory }}>
-            <CalendarsList {...props} />
-          </NavigationMenuContext.Provider>
+          <CalendarsList {...props} />
         </I18nContext>,
         element[0]
       );

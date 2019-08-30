@@ -17,6 +17,8 @@
  * under the License.
  */
 
+jest.mock('ui/new_platform');
+
 import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from '../constants';
 
 import {

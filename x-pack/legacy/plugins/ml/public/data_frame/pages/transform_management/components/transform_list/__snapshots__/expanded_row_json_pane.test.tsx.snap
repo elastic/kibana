@@ -2,13 +2,7 @@
 
 exports[`Data Frame: Transform List Expanded Row <ExpandedRowJsonPane /> Minimal initialization 1`] = `
 <EuiFlexGroup>
-  <EuiFlexItem
-    style={
-      Object {
-        "width": "100%",
-      }
-    }
-  >
+  <EuiFlexItem>
     <EuiSpacer
       size="s"
     />
@@ -16,6 +10,11 @@ exports[`Data Frame: Transform List Expanded Row <ExpandedRowJsonPane /> Minimal
       mode="json"
       readOnly={true}
       setOptions={Object {}}
+      style={
+        Object {
+          "width": "100%",
+        }
+      }
       value="{
   \\"id\\": \\"fq_date_histogram_1m_1441\\",
   \\"source\\": {
@@ -47,8 +46,7 @@ exports[`Data Frame: Transform List Expanded Row <ExpandedRowJsonPane /> Minimal
     }
   },
   \\"version\\": \\"8.0.0\\",
-  \\"create_time\\": 1564388146667,
-  \\"mode\\": \\"batch\\"
+  \\"create_time\\": 1564388146667
 }"
     />
   </EuiFlexItem>

@@ -108,11 +108,14 @@ export function asMicros(
   return `${formatted}${withUnit ? microsLabel : ''}`;
 }
 
-type TimeFormatter = (
-  max: number
-) => (value: FormatterValue, options: FormatterOptions) => string;
+export type TimeFormatter = (
+  value: FormatterValue,
+  options?: FormatterOptions
+) => string;
 
-export const getTimeFormatter: TimeFormatter = memoize((max: number) => {
+type TimeFormatterBuilder = (max: number) => TimeFormatter;
+
+export const getTimeFormatter: TimeFormatterBuilder = memoize((max: number) => {
   const unit = timeUnit(max);
   switch (unit) {
     case 'h':

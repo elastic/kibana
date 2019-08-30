@@ -19,5 +19,6 @@ export class MlTimeBuckets {
   getBounds: () => { min: any; max: any };
   getInterval: () => {
     asMilliseconds: () => number;
+    expression: string;
   };
 }

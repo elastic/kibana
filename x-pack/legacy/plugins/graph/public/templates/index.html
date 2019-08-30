@@ -1,9 +1,9 @@
 <div id="graphBasic" ng-controller="graphuiPlugin">
   <!-- Local nav. -->
-  <kbn-top-nav name="workspacesTopNav" config="topNavMenu">
-  </kbn-top-nav>
+  <kbn-top-nav-v2 name="workspacesTopNav" config="topNavMenu">
+  </kbn-top-nav-v2>
 
-  <div class="gphGraph__menus">
+  <div class="gphGraph__menus" ng-show="menus.showLoad || menus.showSave || menus.showSettings">
     <graph-load ng-show="menus.showLoad"></graph-load>
     <graph-save ng-show="menus.showSave"></graph-save>
     <graph-settings ng-show="menus.showSettings"></graph-settings>
@@ -31,7 +31,7 @@
         } }}"
       >
         <svg class="gphNode" width="30" height="30" ng-click="clickVertexFieldIcon(f, $event)" ng-class="{'gphNode-disabled':f.hopSize<=0}">
-          <circle class="gphNode__circle" r="13" cx="15" cy="15" ng-class="{selectedNode:kbnTopNav.currentKey === 'fieldConfig'&&f === selectedFieldConfig}"
+          <circle class="gphNode__circle" r="13" cx="15" cy="15" ng-class="{selectedNode:currentlyDisplayedKey === 'fieldConfig'&&f === selectedFieldConfig}"
             ng-attr-style="fill:{{f.color}}" />
           <text ng-if="f.icon" class="gphNode__text fa" text-anchor="middle" x="15" y="20">
             {{f.icon.code}}
@@ -74,7 +74,7 @@
     </div>
   </div>
 
-  <div class="config" ng-show="kbnTopNav.currentKey === 'fields'" data-test-subj="fieldSelectionList">
+  <div class="config" ng-show="currentlyDisplayedKey === 'fields'" data-test-subj="fieldSelectionList">
     <div class="config">
       <div class="container-fluid">
         <label
@@ -123,7 +123,7 @@
     </div>
   </div>
 
-  <div class="config" ng-show="kbnTopNav.currentKey === 'fieldConfig'">
+  <div class="config" ng-show="currentlyDisplayedKey === 'fieldConfig' && selectedFieldConfig">
     <div class="config">
       <div class="container-fluid">
 

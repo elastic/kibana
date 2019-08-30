@@ -6,7 +6,7 @@
 
 import Joi from 'joi';
 import Hapi from 'hapi';
-import { WithoutQueryAndParams } from '../types';
+import { ActionResult, WithoutQueryAndParams } from '../types';
 
 interface CreateRequest extends WithoutQueryAndParams<Hapi.Request> {
   query: {
@@ -42,13 +42,11 @@ export function createRoute(server: Hapi.Server) {
           .required(),
       },
     },
-    async handler(request: CreateRequest) {
+    async handler(request: CreateRequest): Promise<ActionResult> {
       const actionsClient = request.getActionsClient!();
 
       const action = request.payload;
-      const createdAction = await actionsClient.create({ action });
-
-      return { id: createdAction.id };
+      return await actionsClient.create({ action });
     },
   });
 }

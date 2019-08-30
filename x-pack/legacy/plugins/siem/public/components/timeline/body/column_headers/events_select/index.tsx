@@ -36,11 +36,15 @@ const CheckboxContainer = styled.div`
   position: relative;
 `;
 
+CheckboxContainer.displayName = 'CheckboxContainer';
+
 const PositionedCheckbox = styled.div`
   left: 7px;
   position: absolute;
   top: -28px;
 `;
+
+PositionedCheckbox.displayName = 'PositionedCheckbox';
 
 interface Props {
   checkState: CheckState;
@@ -72,3 +76,5 @@ export const EventsSelect = pure<Props>(({ checkState, timelineId }) => {
     </div>
   );
 });
+
+EventsSelect.displayName = 'EventsSelect';

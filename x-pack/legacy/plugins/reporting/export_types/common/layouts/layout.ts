@@ -5,7 +5,12 @@
  */
 
 import { HeadlessChromiumDriver } from '../../../server/browsers/chromium/driver';
-import { Size, ViewZoomWidthHeight } from '../../../types';
+
+export interface ViewZoomWidthHeight {
+  zoom: number;
+  width: number;
+  height: number;
+}
 
 export interface PageSizeParams {
   pageMarginTop: number;
@@ -50,6 +55,16 @@ export abstract class Layout {
   public abstract getBrowserViewport(): Size;
 
   public abstract getCssOverridesPath(): string;
+}
+
+export interface Size {
+  width: number;
+  height: number;
+}
+
+export interface LayoutParams {
+  id: string;
+  dimensions: Size;
 }
 
 export type LayoutInstance = Layout & {

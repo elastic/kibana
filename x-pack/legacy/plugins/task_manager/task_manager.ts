@@ -68,6 +68,7 @@ export class TaskManager {
       serializer: opts.serializer,
       savedObjectsRepository: opts.savedObjectsRepository,
       callCluster: server.plugins.elasticsearch.getCluster('admin').callWithInternalUser,
+      index: opts.config.get('xpack.task_manager.index'),
       maxAttempts: opts.config.get('xpack.task_manager.max_attempts'),
       definitions: this.definitions,
     });

@@ -65,3 +65,5 @@ export const LastEventTime = pure<LastEventTimeProps>(({ hostName, indexKey, ip 
     </ApolloConsumer>
   );
 });
+
+LastEventTime.displayName = 'LastEventTime';

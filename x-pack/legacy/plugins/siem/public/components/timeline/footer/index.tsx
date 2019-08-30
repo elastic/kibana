@@ -34,18 +34,26 @@ const FixedWidthLastUpdated = styled.div<{ compact: boolean }>`
   text-align: end;
 `;
 
+FixedWidthLastUpdated.displayName = 'FixedWidthLastUpdated';
+
 const FooterContainer = styled(EuiFlexGroup)<{ height: number }>`
   height: ${({ height }) => height}px;
 `;
+
+FooterContainer.displayName = 'FooterContainer';
 
 const FooterFlexGroup = styled(EuiFlexGroup)`
   height: 35px;
   width: 100%;
 `;
 
+FooterFlexGroup.displayName = 'FooterFlexGroup';
+
 const LoadingPanelContainer = styled.div`
   padding-top: 3px;
 `;
+
+LoadingPanelContainer.displayName = 'LoadingPanelContainer';
 
 const PopoverRowItems = styled(EuiPopover)`
   .euiButtonEmpty__content {
@@ -53,14 +61,16 @@ const PopoverRowItems = styled(EuiPopover)`
   }
 `;
 
+PopoverRowItems.displayName = 'PopoverRowItems';
+
 export const ServerSideEventCount = styled.div`
   margin: 0 5px 0 5px;
 `;
 
+ServerSideEventCount.displayName = 'ServerSideEventCount';
+
 /** The height of the footer, exported for use in height calculations */
 export const footerHeight = 40; // px
-
-export const isCompactFooter = (width: number): boolean => width < 600;
 
 interface FooterProps {
   itemsCount: number;
@@ -76,7 +86,7 @@ interface FooterProps {
   serverSideEventCount: number;
   tieBreaker: string;
   getUpdatedAt: () => number;
-  width: number;
+  compact: boolean;
 }
 
 interface FooterState {
@@ -122,11 +132,16 @@ export const EventsCount = pure<{
     </PopoverRowItems>
     <EuiToolTip content={`${serverSideEventCount} ${i18n.TOTAL_COUNT_OF_EVENTS}`}>
       <ServerSideEventCount>
-        <EuiBadge color="hollow">{serverSideEventCount}</EuiBadge> {i18n.EVENTS}
+        <EuiBadge color="hollow" data-test-subj="server-side-event-count">
+          {serverSideEventCount}
+        </EuiBadge>{' '}
+        {i18n.EVENTS}
       </ServerSideEventCount>
     </EuiToolTip>
   </h5>
 ));
+
+EventsCount.displayName = 'EventsCount';
 
 export const PagingControl = pure<{
   hasNextPage: boolean;
@@ -146,6 +161,8 @@ export const PagingControl = pure<{
     )}
   </>
 ));
+
+PagingControl.displayName = 'PagingControl';
 
 /** Renders a loading indicator and paging controls */
 export class Footer extends React.PureComponent<FooterProps, FooterState> {
@@ -186,7 +203,7 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
       serverSideEventCount,
       hasNextPage,
       getUpdatedAt,
-      width,
+      compact,
     } = this.props;
 
     if (isLoading && !this.state.paginationLoading) {
@@ -282,13 +299,10 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
             </EuiFlexItem>
 
             <EuiFlexItem data-test-subj="last-updated-container" grow={false}>
-              <FixedWidthLastUpdated
-                data-test-subj="fixed-width-last-updated"
-                compact={isCompactFooter(width)}
-              >
+              <FixedWidthLastUpdated data-test-subj="fixed-width-last-updated" compact={compact}>
                 <LastUpdatedAt
                   updatedAt={this.state.updatedAt || getUpdatedAt()}
-                  compact={isCompactFooter(width)}
+                  compact={compact}
                 />
               </FixedWidthLastUpdated>
             </EuiFlexItem>

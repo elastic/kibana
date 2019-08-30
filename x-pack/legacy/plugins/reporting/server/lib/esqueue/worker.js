@@ -21,15 +21,41 @@ function formatJobObject(job) {
   };
 }
 
+const MAX_PARTIAL_ERROR_LENGTH = 1000; // 1000 of beginning, 1000 of end
+const ERROR_PARTIAL_SEPARATOR = '...';
+const MAX_ERROR_LENGTH = (MAX_PARTIAL_ERROR_LENGTH * 2) + ERROR_PARTIAL_SEPARATOR.length;
+
 function getLogger(opts, id, logLevel) {
   return (msg, err) => {
+    /*
+     * This does not get the logger instance from queue.registerWorker in the createWorker function.
+     * The logger instance in the Equeue lib comes from createTaggedLogger, so logLevel tags are passed differently
+     */
     const logger = opts.logger || function () {};
-
     const message = `${id} - ${msg}`;
     const tags = ['worker', logLevel];
 
     if (err) {
-      logger(`${message}: ${err.stack  ? err.stack : err }`, tags);
+      // The error message string could be very long if it contains the request
+      // body of a request that was too large for Elasticsearch.
+      // This takes a partial version of the error message without scanning
+      // every character of the string, which would block Node.
+      const errString = `${message}: ${err.stack ? err.stack : err}`;
+      const errLength = errString.length;
+      const subStr = String.prototype.substring.bind(errString);
+      if (errLength > MAX_ERROR_LENGTH) {
+        const partialError =
+          subStr(0, MAX_PARTIAL_ERROR_LENGTH) +
+          ERROR_PARTIAL_SEPARATOR +
+          subStr(errLength - MAX_PARTIAL_ERROR_LENGTH);
+
+        logger(partialError, tags);
+        logger(
+          `A partial version of the entire error message was logged. ` +
+          `The entire error message length is: ${errLength} characters.`,
+          tags
+        );
+      }
       return;
     }
 
@@ -58,6 +84,7 @@ export class Worker extends events.EventEmitter {
 
     this.debug = getLogger(opts, this.id, 'debug');
     this.warn = getLogger(opts, this.id, 'warn');
+    this.info = getLogger(opts, this.id, 'info');
 
     this._running = true;
     this.debug(`Created worker for ${this.jobtype} jobs`);
@@ -196,7 +223,7 @@ export class Worker extends events.EventEmitter {
   }
 
   _performJob(job) {
-    this.debug(`Starting job ${job._id}`);
+    this.info(`Starting job`);
 
     const workerOutput = new Promise((resolve, reject) => {
       // run the worker's workerFn
@@ -206,6 +233,9 @@ export class Worker extends events.EventEmitter {
 
       Promise.resolve(this.workerFn.call(null, job, jobSource.payload, cancellationToken))
         .then(res => {
+          // job execution was successful
+          this.info(`Job execution completed successfully`);
+
           isResolved = true;
           resolve(res);
         })
@@ -231,8 +261,6 @@ export class Worker extends events.EventEmitter {
     });
 
     return workerOutput.then((output) => {
-      // job execution was successful
-      this.debug(`Completed job ${job._id}`);
 
       const completedTime = moment().toISOString();
       const docOutput = this._formatOutput(output);
@@ -250,13 +278,16 @@ export class Worker extends events.EventEmitter {
         if_primary_term: job._primary_term,
         body: { doc }
       })
-        .then(() => {
+        .then((response) => {
           const eventOutput = {
             job: formatJobObject(job),
             output: docOutput,
           };
-
           this.emit(constants.EVENT_WORKER_COMPLETE, eventOutput);
+
+          const formattedDocPath = `/${response._index}/${response._type}/${response._id}`;
+          this.info(`Job data saved successfully: ${formattedDocPath}`);
+          return response;
         })
         .catch((err) => {
           if (err.statusCode === 409) return false;
@@ -342,7 +373,7 @@ export class Worker extends events.EventEmitter {
           this.debug(`Found no claimable jobs out of ${jobs.length} total`);
           return;
         }
-        this.debug(`Claimed job ${claimedJob._id}`);
+        this.info(`Claimed job ${claimedJob._id}`);
         return this._performJob(claimedJob);
       })
       .catch((err) => {

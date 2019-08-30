@@ -105,7 +105,11 @@ export abstract class AbstractIndexer implements Indexer {
           percentage: Math.floor((100 * (successCount + failCount)) / totalCount),
           checkpoint: req,
         };
-        if (moment().diff(prevTimestamp) > this.INDEXER_PROGRESS_UPDATE_INTERVAL_MS) {
+        if (
+          moment().diff(prevTimestamp) > this.INDEXER_PROGRESS_UPDATE_INTERVAL_MS ||
+          // Ensure that the progress reporter always executed at the end of the job.
+          successCount + failCount === totalCount
+        ) {
           progressReporter(progress);
           prevTimestamp = moment();
         }

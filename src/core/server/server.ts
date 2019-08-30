@@ -21,7 +21,7 @@ import { Type } from '@kbn/config-schema';
 
 import { ConfigService, Env, Config, ConfigPath } from './config';
 import { ElasticsearchService } from './elasticsearch';
-import { HttpService, HttpServiceSetup, Router } from './http';
+import { HttpService, HttpServiceSetup } from './http';
 import { LegacyService } from './legacy';
 import { Logger, LoggerFactory } from './logging';
 import { PluginsService, config as pluginsConfig } from './plugins';
@@ -31,9 +31,11 @@ import { config as httpConfig } from './http';
 import { config as loggingConfig } from './logging';
 import { config as devConfig } from './dev';
 import { mapToObject } from '../utils/';
+import { ContextService } from './context';
 
 export class Server {
   public readonly configService: ConfigService;
+  private readonly context: ContextService;
   private readonly elasticsearch: ElasticsearchService;
   private readonly http: HttpService;
   private readonly plugins: PluginsService;
@@ -48,7 +50,8 @@ export class Server {
     this.log = this.logger.get('server');
     this.configService = new ConfigService(config$, env, logger);
 
-    const core = { configService: this.configService, env, logger };
+    const core = { coreId: Symbol('core'), configService: this.configService, env, logger };
+    this.context = new ContextService(core);
     this.http = new HttpService(core);
     this.plugins = new PluginsService(core);
     this.legacy = new LegacyService(core);
@@ -58,19 +61,25 @@ export class Server {
   public async setup() {
     this.log.debug('setting up server');
 
+    // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
+    const pluginDependencies = await this.plugins.discover();
+
     const httpSetup = await this.http.setup();
     this.registerDefaultRoute(httpSetup);
 
+    const contextServiceSetup = this.context.setup({ pluginDependencies });
     const elasticsearchServiceSetup = await this.elasticsearch.setup({
       http: httpSetup,
     });
 
     const pluginsSetup = await this.plugins.setup({
+      context: contextServiceSetup,
       elasticsearch: elasticsearchServiceSetup,
       http: httpSetup,
     });
 
     const coreSetup = {
+      context: contextServiceSetup,
       elasticsearch: elasticsearchServiceSetup,
       http: httpSetup,
       plugins: pluginsSetup,
@@ -110,9 +119,10 @@ export class Server {
   }
 
   private registerDefaultRoute(httpSetup: HttpServiceSetup) {
-    const router = new Router('/core');
-    router.get({ path: '/', validate: false }, async (req, res) => res.ok({ version: '0.0.1' }));
-    httpSetup.registerRouter(router);
+    const router = httpSetup.createRouter('/core');
+    router.get({ path: '/', validate: false }, async (context, req, res) =>
+      res.ok({ version: '0.0.1' })
+    );
   }
 
   public async setupConfigSchemas() {

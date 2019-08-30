@@ -49,7 +49,6 @@ export function getColorRampStops(colorRampName, numberColors = GRADIENT_INTERVA
 
 export const COLOR_GRADIENTS = Object.keys(vislibColorMaps).map(colorRampName => ({
   value: colorRampName,
-  text: colorRampName,
   inputDisplay: <ColorGradient colorRampName={colorRampName}/>
 }));
 

@@ -15,19 +15,27 @@ import { NoteCard } from '../note_card';
 
 const AddNoteContainer = styled.div``;
 
+AddNoteContainer.displayName = 'AddNoteContainer';
+
 const NoteContainer = styled.div`
   margin-top: 5px;
 `;
+
+NoteContainer.displayName = 'NoteContainer';
 
 const NoteCardsContainer = styled(EuiPanel)<{ width?: string }>`
   border: none;
   width: ${({ width = '100%' }) => width};
 `;
 
+NoteCardsContainer.displayName = 'NoteCardsContainer';
+
 const NotesContainer = styled(EuiFlexGroup)`
   padding: 0 5px;
   margin-bottom: 5px;
 `;
+
+NotesContainer.displayName = 'NotesContainer';
 
 interface Props {
   associateNote: AssociateNote;

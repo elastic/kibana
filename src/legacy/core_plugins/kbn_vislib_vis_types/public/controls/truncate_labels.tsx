@@ -20,11 +20,10 @@
 import React, { ChangeEvent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
-import { VisOptionsSetValue } from 'ui/vis/editors/default';
 
 interface TruncateLabelsOptionProps {
   value: number | null;
-  setValue: VisOptionsSetValue;
+  setValue: (paramName: 'truncate', value: null | number) => void;
 }
 
 function TruncateLabelsOption({ value, setValue }: TruncateLabelsOptionProps) {

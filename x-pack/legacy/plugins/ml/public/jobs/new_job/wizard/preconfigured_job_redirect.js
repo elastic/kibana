@@ -23,7 +23,12 @@ export function preConfiguredJobRedirect(AppState, Private, courier) {
     let redirectUrl = getWizardUrlFromAppState(appState);
     if (redirectUrl === null) {
       // no settings in appState
-      const job = mlJobService.currentJob;
+      let job;
+      if(mlJobService.currentJob !== undefined) {
+        job = mlJobService.currentJob;
+      } else if(mlJobService.tempJobCloningObjects.job !== undefined) {
+        job = mlJobService.tempJobCloningObjects.job;
+      }
       if (job) {
         loadIndexPatterns(Private, courier)
           .then(() => {

@@ -8,6 +8,8 @@ import { setupEnvironment, pageHelpers } from './helpers';
 import { first } from 'lodash';
 import { JOBS } from './helpers/constants';
 
+jest.mock('ui/new_platform');
+
 jest.mock('ui/index_patterns', () => {
   const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual('../../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
   return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE };
@@ -17,7 +19,11 @@ jest.mock('ui/chrome', () => ({
   addBasePath: (path) => path,
   breadcrumbs: { set: () => {} },
   getInjected: () => ({}),
+  getUiSettingsClient: () => ({}),
+  getSavedObjectsClient: () => ({}),
 }));
+
+jest.mock('ui/timefilter', () => {});
 
 jest.mock('lodash/function/debounce', () => fn => fn);
 
@@ -93,12 +99,12 @@ describe('Create Rollup Job, step 6: Review', () => {
         .simulate('click');
     };
 
-    it('should have a "Summary" & "JSON" tabs to review the Job', async () => {
+    it('should have a "Summary" & "Request" tabs to review the Job', async () => {
       await goToStep(6);
-      expect(getTabsText()).toEqual(['Summary', 'JSON']);
+      expect(getTabsText()).toEqual(['Summary', 'Request']);
     });
 
-    it('should have a "Summary", "Terms" & "JSON" tab if a term aggregation was added', async () => {
+    it('should have a "Summary", "Terms" & "Request" tab if a term aggregation was added', async () => {
       httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields: ['my-field'] });
       await goToStep(3);
       selectFirstField('Terms');
@@ -107,10 +113,10 @@ describe('Create Rollup Job, step 6: Review', () => {
       actions.clickNextStep(); // go to step 5
       actions.clickNextStep(); // go to review
 
-      expect(getTabsText()).toEqual(['Summary', 'Terms', 'JSON']);
+      expect(getTabsText()).toEqual(['Summary', 'Terms', 'Request']);
     });
 
-    it('should have a "Summary", "Histogram" & "JSON" tab if a histogram field was added', async () => {
+    it('should have a "Summary", "Histogram" & "Request" tab if a histogram field was added', async () => {
       httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields: ['a-field'] });
       await goToStep(4);
       selectFirstField('Histogram');
@@ -119,10 +125,10 @@ describe('Create Rollup Job, step 6: Review', () => {
       actions.clickNextStep(); // go to step 5
       actions.clickNextStep(); // go to review
 
-      expect(getTabsText()).toEqual(['Summary', 'Histogram', 'JSON']);
+      expect(getTabsText()).toEqual(['Summary', 'Histogram', 'Request']);
     });
 
-    it('should have a "Summary", "Metrics" & "JSON" tab if a histogram field was added', async () => {
+    it('should have a "Summary", "Metrics" & "Request" tab if a histogram field was added', async () => {
       httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields: ['a-field'], dateFields: ['b-field'] });
       await goToStep(5);
       selectFirstField('Metrics');
@@ -130,7 +136,7 @@ describe('Create Rollup Job, step 6: Review', () => {
 
       actions.clickNextStep(); // go to review
 
-      expect(getTabsText()).toEqual(['Summary', 'Metrics', 'JSON']);
+      expect(getTabsText()).toEqual(['Summary', 'Metrics', 'Request']);
     });
   });
 

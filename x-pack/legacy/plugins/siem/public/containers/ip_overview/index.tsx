@@ -69,6 +69,8 @@ const IpOverviewComponentQuery = pure<IpOverviewProps & IpOverviewReduxProps>(
   )
 );
 
+IpOverviewComponentQuery.displayName = 'IpOverviewComponentQuery';
+
 const makeMapStateToProps = () => {
   const getQuery = inputsSelectors.globalQueryByIdSelector();
   const mapStateToProps = (state: State, { id = ID }: IpOverviewProps) => {

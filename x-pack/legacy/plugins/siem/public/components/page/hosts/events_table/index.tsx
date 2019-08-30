@@ -122,6 +122,8 @@ const EventsTableComponent = pure<EventsTableProps>(
   )
 );
 
+EventsTableComponent.displayName = 'EventsTableComponent';
+
 const makeMapStateToProps = () => {
   const getEventsSelector = hostsSelectors.eventsSelector();
   const mapStateToProps = (state: State, { type }: OwnProps) => {

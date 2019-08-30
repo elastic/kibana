@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, memo, FC } from 'react';
+import React, { memo, FC } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 
 import { JOB_TYPE } from '../../../../../common/job_creator/util/constants';
@@ -16,16 +18,18 @@ interface Props {
 
 export const Description: FC<Props> = memo(({ children, jobType }) => {
   if (jobType === JOB_TYPE.MULTI_METRIC) {
-    const title = 'Split field';
+    const title = i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.splitField.title', {
+      defaultMessage: 'Split field',
+    });
     return (
       <EuiDescribedFormGroup
         idAria="single-example-aria"
         title={<h3>{title}</h3>}
         description={
-          <Fragment>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.
-          </Fragment>
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.pickFieldsStep.splitField.description"
+            defaultMessage="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam."
+          />
         }
       >
         <EuiFormRow label={title} describedByIds={['single-example-aria']}>
@@ -34,16 +38,18 @@ export const Description: FC<Props> = memo(({ children, jobType }) => {
       </EuiDescribedFormGroup>
     );
   } else if (jobType === JOB_TYPE.POPULATION) {
-    const title = 'Population field';
+    const title = i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.populationField.title', {
+      defaultMessage: 'Population field',
+    });
     return (
       <EuiDescribedFormGroup
         idAria="single-example-aria"
         title={<h3>{title}</h3>}
         description={
-          <Fragment>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.
-          </Fragment>
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.pickFieldsStep.populationField.description"
+            defaultMessage="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam."
+          />
         }
       >
         <EuiFormRow label={title} describedByIds={['single-example-aria']}>

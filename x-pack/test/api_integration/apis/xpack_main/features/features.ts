@@ -7,10 +7,9 @@
 import expect from '@kbn/expect';
 import { SecurityService } from '../../../../common/services';
 import { Feature } from '../../../../../legacy/plugins/xpack_main/types';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   const supertestWithoutAuth = getService('supertestWithoutAuth');

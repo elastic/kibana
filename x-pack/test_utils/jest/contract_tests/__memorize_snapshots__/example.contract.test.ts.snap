@@ -1,0 +1,6 @@
+
+exports['Example contract tests should run online or offline - example_test_snapshot'] = {
+  "results": {
+    "serverExists": true
+  }
+}

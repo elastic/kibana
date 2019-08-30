@@ -31,13 +31,11 @@ import {
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
-import chrome from 'ui/chrome';
+import { UiSettingsClientContract } from 'src/core/public';
 import { IndexPattern } from '../../index_patterns';
 import { FilterEditor } from './filter_editor';
 import { FilterItem } from './filter_item';
 import { FilterOptions } from './filter_options';
-
-const config = chrome.getUiSettingsClient();
 
 interface Props {
   filters: Filter[];
@@ -45,6 +43,7 @@ interface Props {
   className: string;
   indexPatterns: IndexPattern[];
   intl: InjectedIntl;
+  uiSettings: UiSettingsClientContract;
 }
 
 interface State {
@@ -103,13 +102,14 @@ class FilterBarUI extends Component<Props, State> {
           onUpdate={newFilter => this.onUpdate(i, newFilter)}
           onRemove={() => this.onRemove(i)}
           indexPatterns={this.props.indexPatterns}
+          uiSettings={this.props.uiSettings}
         />
       </EuiFlexItem>
     ));
   }
 
   private renderAddFilter() {
-    const isPinned = config.get('filters:pinnedByDefault');
+    const isPinned = this.props.uiSettings.get('filters:pinnedByDefault');
     const [indexPattern] = this.props.indexPatterns;
     const index = indexPattern && indexPattern.id;
     const newFilter = buildEmptyFilter(isPinned, index);
@@ -144,6 +144,7 @@ class FilterBarUI extends Component<Props, State> {
                 onSubmit={this.onAdd}
                 onCancel={this.onCloseAddFilterPopover}
                 key={JSON.stringify(newFilter)}
+                uiSettings={this.props.uiSettings}
               />
             </div>
           </EuiFlexItem>

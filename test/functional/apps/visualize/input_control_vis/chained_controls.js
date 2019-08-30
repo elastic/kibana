@@ -26,7 +26,8 @@ export default function ({ getService, getPageObjects }) {
   const find = getService('find');
   const comboBox = getService('comboBox');
 
-  describe('chained controls', () => {
+  describe('chained controls', function () {
+    this.tags('smoke');
 
     before(async () => {
       await PageObjects.common.navigateToApp('visualize');

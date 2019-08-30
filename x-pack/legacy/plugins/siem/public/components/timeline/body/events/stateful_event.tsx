@@ -4,24 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import * as React from 'react';
 import uuid from 'uuid';
 
 import { BrowserFields } from '../../../../containers/source';
 import { TimelineDetailsComponentQuery } from '../../../../containers/timeline/details';
-import { TimelineItem } from '../../../../graphql/types';
+import { TimelineItem, DetailItem } from '../../../../graphql/types';
 import { Note } from '../../../../lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
-import { NoteCards } from '../../../notes/note_cards';
 import { OnColumnResized, OnPinEvent, OnUnPinEvent, OnUpdateColumns } from '../../events';
 import { ExpandableEvent } from '../../expandable_event';
 import { ColumnHeader } from '../column_headers/column_header';
 
-import { EventColumnView } from './event_column_view';
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { RowRenderer } from '../renderers/row_renderer';
 import { getRowRenderer } from '../renderers/get_row_renderer';
+import { requestIdleCallbackViaScheduler } from '../../../../lib/helpers/scheduler';
+import { StatefulEventChild } from './stateful_event_child';
 
 interface Props {
   actionsColumnWidth: number;
@@ -32,7 +32,6 @@ interface Props {
   event: TimelineItem;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   getNotesByIds: (noteIds: string[]) => Note[];
-  isLoading: boolean;
   onColumnResized: OnColumnResized;
   onPinEvent: OnPinEvent;
   onUpdateColumns: OnUpdateColumns;
@@ -40,24 +39,45 @@ interface Props {
   pinnedEventIds: Readonly<Record<string, boolean>>;
   rowRenderers: RowRenderer[];
   timelineId: string;
+  toggleColumn: (column: ColumnHeader) => void;
   updateNote: UpdateNote;
   width: number;
+  maxDelay?: number;
 }
 
 interface State {
   expanded: { [eventId: string]: boolean };
   showNotes: { [eventId: string]: boolean };
+  initialRender: boolean;
 }
 
 export const getNewNoteId = (): string => uuid.v4();
 
-const emptyNotes: string[] = [];
+const emptyDetails: DetailItem[] = [];
 
-export class StatefulEvent extends React.PureComponent<Props, State> {
+export class StatefulEvent extends React.Component<Props, State> {
   public readonly state: State = {
     expanded: {},
     showNotes: {},
+    initialRender: false,
   };
+
+  /**
+   * Incrementally loads the events when it mounts by trying to
+   * see if it resides within a window frame and if it is it will
+   * indicate to React that it should render its self by setting
+   * its initialRender to true.
+   */
+  public componentDidMount() {
+    requestIdleCallbackViaScheduler(
+      () => {
+        if (!this.state.initialRender) {
+          this.setState({ initialRender: true });
+        }
+      },
+      { timeout: this.props.maxDelay ? this.props.maxDelay : 0 }
+    );
+  }
 
   public render() {
     const {
@@ -69,7 +89,6 @@ export class StatefulEvent extends React.PureComponent<Props, State> {
       event,
       eventIdToNoteIds,
       getNotesByIds,
-      isLoading,
       onColumnResized,
       onPinEvent,
       onUpdateColumns,
@@ -77,10 +96,17 @@ export class StatefulEvent extends React.PureComponent<Props, State> {
       pinnedEventIds,
       rowRenderers,
       timelineId,
+      toggleColumn,
       updateNote,
       width,
     } = this.props;
 
+    // If we are not ready to render yet, just return null
+    // see componentDidMount() for when it schedules the first
+    // time this stateful component should be rendered.
+    if (!this.state.initialRender) {
+      return null;
+    }
     return (
       <TimelineDetailsComponentQuery
         sourceId="default"
@@ -95,57 +121,40 @@ export class StatefulEvent extends React.PureComponent<Props, State> {
               data: event.ecs,
               width,
               children: (
-                <>
-                  <EuiFlexGroup data-test-subj="event-rows" direction="column" gutterSize="none">
-                    <EuiFlexItem data-test-subj="event-column-data" grow={false}>
-                      <EventColumnView
-                        _id={event._id}
-                        actionsColumnWidth={actionsColumnWidth}
-                        associateNote={this.associateNote(event._id, addNoteToEvent, onPinEvent)}
-                        columnHeaders={columnHeaders}
-                        columnRenderers={columnRenderers}
-                        expanded={!!this.state.expanded[event._id]}
-                        data={event.data}
-                        eventIdToNoteIds={eventIdToNoteIds}
-                        getNotesByIds={getNotesByIds}
-                        loading={loading}
-                        onColumnResized={onColumnResized}
-                        onEventToggled={this.onToggleExpanded(event._id)}
-                        onPinEvent={onPinEvent}
-                        onUnPinEvent={onUnPinEvent}
-                        pinnedEventIds={pinnedEventIds}
-                        showNotes={!!this.state.showNotes[event._id]}
-                        toggleShowNotes={this.onToggleShowNotes(event._id)}
-                        updateNote={updateNote}
-                      />
-                    </EuiFlexItem>
-
-                    <EuiFlexItem data-test-subj="event-notes-flex-item" grow={false}>
-                      <NoteCards
-                        associateNote={this.associateNote(event._id, addNoteToEvent, onPinEvent)}
-                        data-test-subj="note-cards"
-                        getNewNoteId={getNewNoteId}
-                        getNotesByIds={getNotesByIds}
-                        noteIds={eventIdToNoteIds[event._id] || emptyNotes}
-                        showAddNote={!!this.state.showNotes[event._id]}
-                        toggleShowAddNote={this.onToggleShowNotes(event._id)}
-                        updateNote={updateNote}
-                        width={`${width - 10}px`}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </>
+                <StatefulEventChild
+                  id={event._id}
+                  actionsColumnWidth={actionsColumnWidth}
+                  associateNote={this.associateNote}
+                  addNoteToEvent={addNoteToEvent}
+                  onPinEvent={onPinEvent}
+                  columnHeaders={columnHeaders}
+                  columnRenderers={columnRenderers}
+                  expanded={!!this.state.expanded[event._id]}
+                  data={event.data}
+                  eventIdToNoteIds={eventIdToNoteIds}
+                  getNotesByIds={getNotesByIds}
+                  loading={loading}
+                  onColumnResized={onColumnResized}
+                  onToggleExpanded={this.onToggleExpanded}
+                  onUnPinEvent={onUnPinEvent}
+                  pinnedEventIds={pinnedEventIds}
+                  showNotes={!!this.state.showNotes[event._id]}
+                  onToggleShowNotes={this.onToggleShowNotes}
+                  updateNote={updateNote}
+                  width={width}
+                />
               ),
             })}
             <EuiFlexItem data-test-subj="event-details" grow={true}>
               <ExpandableEvent
                 browserFields={browserFields}
+                columnHeaders={columnHeaders}
                 id={event._id}
-                isLoading={isLoading}
-                event={detailsData || []}
+                event={detailsData || emptyDetails}
                 forceExpand={!!this.state.expanded[event._id] && !loading}
                 onUpdateColumns={onUpdateColumns}
                 timelineId={timelineId}
+                toggleColumn={toggleColumn}
                 width={width}
               />
             </EuiFlexItem>

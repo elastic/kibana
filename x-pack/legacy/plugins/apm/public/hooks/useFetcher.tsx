@@ -6,7 +6,7 @@
 
 import React, { useContext, useEffect, useState, useMemo } from 'react';
 import { toastNotifications } from 'ui/notify';
-import { idx } from '@kbn/elastic-idx/target';
+import { idx } from '@kbn/elastic-idx';
 import { i18n } from '@kbn/i18n';
 import { LoadingIndicatorContext } from '../context/LoadingIndicatorContext';
 import { useComponentId } from './useComponentId';

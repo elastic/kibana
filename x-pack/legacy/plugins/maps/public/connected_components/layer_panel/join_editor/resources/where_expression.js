@@ -79,6 +79,7 @@ export class WhereExpression extends Component {
             />
           </EuiFormHelpText>
           <QueryBar
+            uiSettings={settings}
             query={whereQuery ? whereQuery : { language: settings.get('search:queryLanguage'), query: '' }}
             onSubmit={this._onQueryChange}
             appName="maps"

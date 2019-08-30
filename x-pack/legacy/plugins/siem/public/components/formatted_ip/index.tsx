@@ -86,6 +86,8 @@ const NonDecoratedIp = pure<{
   />
 ));
 
+NonDecoratedIp.displayName = 'NonDecoratedIp';
+
 const AddressLinks = pure<{
   addresses: string[];
   contextId: string;
@@ -120,6 +122,8 @@ const AddressLinks = pure<{
     ))}
   </>
 ));
+
+AddressLinks.displayName = 'AddressLinks';
 
 export const FormattedIp = pure<{
   contextId: string;
@@ -168,3 +172,5 @@ export const FormattedIp = pure<{
     );
   }
 });
+
+FormattedIp.displayName = 'FormattedIp';

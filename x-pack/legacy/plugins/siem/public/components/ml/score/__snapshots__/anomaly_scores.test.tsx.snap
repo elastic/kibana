@@ -6,7 +6,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
     gutterSize="none"
     responsive={false}
   >
-    <Memo()
+    <AnomalyScore
       endDate={32503680000000}
       index={0}
       interval="day"
@@ -81,7 +81,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
       }
       startDate={0}
     />
-    <Memo()
+    <AnomalyScore
       endDate={32503680000000}
       index={1}
       interval="day"

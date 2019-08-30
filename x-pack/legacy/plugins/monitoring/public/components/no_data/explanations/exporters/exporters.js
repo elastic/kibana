@@ -36,7 +36,7 @@ export function ExplainExporters({ context, property, data }) {
         <p>
           <FormattedMessage
             id="xpack.monitoring.noData.explanations.exporters.problemWithConfigDescription"
-            defaultMessage="Using monitoring exporters ship the monitoring data to a remote
+            defaultMessage="Using monitoring exporters to ship the monitoring data to a remote
             monitoring cluster is highly recommended as it keeps the integrity of
             the monitoring data safe no matter what the state of the production
             cluster. However, as this instance of Kibana could not find any

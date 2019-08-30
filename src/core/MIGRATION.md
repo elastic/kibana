@@ -27,7 +27,7 @@
   * [How do I build my shim for New Platform services?](#how-do-i-build-my-shim-for-new-platform-services)
 * [How to](#how-to)
   * [Configure plugin](#configure-plugin)
-  * [Mock core services in tests](#mock-core-services-in-tests)
+  * [Mock new platform services in tests](#mock-new-platform-services-in-tests)
 
 Make no mistake, it is going to take a lot of work to move certain plugins to the new platform. Our target is to migrate the entire repo over to the new platform throughout 7.x and to remove the legacy plugin system no later than 8.0, and this is only possible if teams start on the effort now.
 
@@ -1046,7 +1046,7 @@ import { npStart: { core } } from 'ui/new_platform';
 _See also: [Public's CoreStart API Docs](/docs/development/core/public/kibana-plugin-public.corestart.md)_
 
 ##### Plugins for shared application services
-In client code, we have a series of plugins which house shared application services that are being built in the shape of the new platform, but still technically reside in the legacy world. If your plugin depends on any of the APIs below, you'll need to add a dependency on the new platform plugin which will house them moving forward.
+In client code, we have a series of plugins which house shared application services that are being built in the shape of the new platform, but for the time being, are only available in legacy. So if your plugin depends on any of the APIs below, you'll need build your plugin as a legacy plugin that shims the new platform. Once these API's have been moved to the new platform you can migrate your plugin and declare a dependency on the plugin that owns the API's you require.
 
 The contracts for these plugins are exposed for you to consume in your own plugin; we have created dedicated exports for the `setup` and `start` contracts in a file called `legacy`. By passing these contracts to your plugin's `setup` and `start` methods, you can mimic the functionality that will eventually be provided in the new platform.
 
@@ -1056,15 +1056,14 @@ import { setup, start } from '../core_plugins/embeddables/public/legacy';
 import { setup, start } from '../core_plugins/visualizations/public/legacy';
 ```
 
-| Legacy Platform                                        | New Platform                               | Notes                                                                                                                              |
-|--------------------------------------------------------|--------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------|
-| `core_plugins/interpreter`                             | `data.expressions`                         | still in progress                                                                                                                  |
-| `import 'ui/apply_filters'`                            | `data.filter.loadLegacyDirectives`         | `loadLegacyDirectives()` should be called explicitly where you previously relied on importing for side effects                     |
-| `import 'ui/filter_bar'`                               | `data.filter.loadLegacyDirectives`         | `loadLegacyDirectives()` should be called explicitly where you previously relied on importing for side effects                     |
-| `import 'ui/query_bar'`                                | `data.query.loadLegacyDirectives`          | `loadLegacyDirectives()` should be called explicitly where you previously relied on importing for side effects                     |
-| `import 'ui/search_bar'`                               | `data.search.loadLegacyDirectives`         | `loadLegacyDirectives()` should be called explicitly where you previously relied on importing for side effects                     |
-| `import { QueryBar } from 'ui/query_bar'`              | `data.query.ui.QueryBar`                   | --                                                                                                                                 |
-| `import { SearchBar } from 'ui/search_bar'`            | `data.search.ui.SearchBar`                 | --                                                                                                                                 |
+| Legacy Platform                                        | New Platform                               | Notes                                                                                                                                  |
+|--------------------------------------------------------|--------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| `import 'ui/apply_filters'`                            | `import { ApplyFiltersPopover } from '../data/public'`         | `import '../data/public/legacy` should be called to load legacy directives                                               |
+| `import 'ui/filter_bar'`                               | `import { FilterBar } from '../data/public'`                   | `import '../data/public/legacy` should be called to load legacy directives                                               |
+| `import 'ui/query_bar'`                                | `import { QueryBar, QueryBarInput } from '../data/public'`     | Directives are deprecated.                                                                                            |
+| `import 'ui/search_bar'`                               | `import { SearchBar } from '../data/public'`           | Directive is deprecated.                                                                                              |
+| `import 'ui/kbn_top_nav'`                              | `import { TopNavMenu } from '../kibana_react/public'`          | Directive is still available in `ui/kbn_top_nav`.                                                                     |              
+| `core_plugins/interpreter`                             | `data.expressions`                                          | still in progress                                                                                                     |
 | `ui/courier`                                           | `data.search`                              | still in progress                                                                                                                  |
 | `ui/embeddable`                                        | `embeddables`                              | still in progress                                                                                                                  |
 | `ui/filter_manager`                                    | `data.filter`                              | --                                                                                                                                 |
@@ -1073,6 +1072,7 @@ import { setup, start } from '../core_plugins/visualizations/public/legacy';
 | `ui/vis`                                               | `visualizations.types`                     | --                                                                                                                                 |
 | `ui/vis/vis_factory`                                   | `visualizations.types`                     | --                                                                                                                                 |
 | `ui/vis/vis_filters`                                   | `visualizations.filters`                   | --                                                                                                                                 |
+| `ui/utils/parse_es_interval`                           | `import { parseEsInterval } from '../data/public'`                  | `parseEsInterval`, `ParsedInterval`, `InvalidEsCalendarIntervalError`, `InvalidEsIntervalFormatError` items were moved to the `Data Plugin` as a static code    |
 
 
 #### Server-side
@@ -1115,20 +1115,37 @@ class MyPlugin {
   }
 ```
 
-### Mock core services in tests
-Core services already provide mocks to simplify testing and make sure plugins always rely on valid public contracts.
+### Mock new platform services in tests
+
+#### Writing mocks for your plugin
+Core services already provide mocks to simplify testing and make sure plugins always rely on valid public contracts:
 ```typescript
 // my_plugin/server/plugin.test.ts
-Import { configServiceMock } from 'src/core/server/mocks.ts'
+import { configServiceMock } from 'src/core/server/mocks';
 
 const configService = configServiceMock.create();
 configService.atPath.mockReturnValue(config$);
 …
-const plugin = new MyPlugin({ configService }, …)
+const plugin = new MyPlugin({ configService }, …);
 ```
-However it's not mandatory, we strongly recommended to export your plugin mocks as well, in order for dependent plugins to use them in tests. Your plugin mocks should be exported from the root level of the plugin. Plugin mocks should consist of mocks for *public API only*: setup/start/stop contracts. Mocks aren't necessary for pure functions as other plugins can call original implementation in tests.
+
+Or if you need to get the whole core `setup` or `start` contracts:
 ```typescript
-// my_plugin/server/mocks.ts
+// my_plugin/public/plugin.test.ts
+import { coreMock } from 'src/core/public/mocks';
+
+const coreSetup = coreMock.createSetup();
+coreSetup.uiSettings.get.mockImplementation((key: string) => {
+  …
+});
+…
+const plugin = new MyPlugin(coreSetup, ...);
+```
+
+
+Although it isn't mandatory, we strongly recommended you export your plugin mocks as well, in order for dependent plugins to use them in tests. Your plugin mocks should be exported from the root `/server` and `/public` directories in your plugin:
+```typescript
+// my_plugin/server/mocks.ts or my_plugin/public/mocks.ts
 const createSetupContractMock = () => {
   const startContract: jest.Mocked<MyPluginStartContract>= {
     isValid: jest.fn();
@@ -1140,6 +1157,31 @@ const createSetupContractMock = () => {
 
 export const myPluginMocks = {
   createSetup: createSetupContractMock,
-  createStart: ...
+  createStart: …
 }
 ```
+Plugin mocks should consist of mocks for *public APIs only*: setup/start/stop contracts. Mocks aren't necessary for pure functions as other plugins can call the original implementation in tests.
+
+#### Using mocks in your tests
+During the migration process, it is likely you are preparing your plugin by shimming in new platform-ready dependencies via the legacy `ui/new_platform` module:
+```typescript
+import { npSetup, npStart } from 'ui/new_platform';
+```
+
+If you are using this approach, the easiest way to mock core and new platform-ready plugins in your legacy tests is to mock the `ui/new_platform` module:
+```typescript
+jest.mock('ui/new_platform');
+```
+
+This will automatically mock the services in `ui/new_platform` thanks to the [helpers that have been added](https://github.com/elastic/kibana/blob/master/src/legacy/ui/public/new_platform/__mocks__/helpers.ts) to that module.
+
+If others are consuming your plugin's new platform contracts via the `ui/new_platform` module, you'll want to update the helpers as well to ensure your contracts are properly mocked.
+
+> Note: The `ui/new_platform` mock is only designed for use by old Jest tests. If you are writing new tests, you should structure your code and tests such that you don't need this mock. Instead, you should import the `core` mock directly and instantiate it.
+
+#### What about karma tests?
+While our plan is to only provide first-class mocks for Jest tests, there are many legacy karma tests that cannot be quickly or easily converted to Jest -- particularly those which are still relying on mocking Angular services via `ngMock`.
+
+For these tests, we are maintaining a separate set of mocks. Files with a `.karma_mock.{js|ts|tsx}` extension will be loaded _globally_ before karma tests are run.
+
+It is important to note that this behavior is different from `jest.mock('ui/new_platform')`, which only mocks tests on an individual basis. If you encounter any failures in karma tests as a result of new platform migration efforts, you may need to add a `.karma_mock.js` file for the affected services, or add to the existing karma mock we are maintaining in `ui/new_platform`.

@@ -17,6 +17,7 @@ import { timefilter } from 'ui/timefilter';
 import { AdvancedIndex } from '../../../../components/elasticsearch/index/advanced';
 import { I18nContext } from 'ui/i18n';
 import { MonitoringViewBaseController } from '../../../base_controller';
+import { CODE_PATH_ELASTICSEARCH } from '../../../../../common/constants';
 
 function getPageData($injector) {
   const globalState = $injector.get('globalState');
@@ -46,7 +47,7 @@ uiRoutes.when('/elasticsearch/indices/:index/advanced', {
   resolve: {
     clusters: function (Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: [CODE_PATH_ELASTICSEARCH] });
     },
     pageData: getPageData
   },

@@ -97,13 +97,15 @@ interface Props {
   urlParams: IUrlParams;
   location: Location;
   waterfall: IWaterfall;
+  exceedsMax: boolean;
 }
 
 export const Transaction: React.SFC<Props> = ({
   transaction,
   urlParams,
   location,
-  waterfall
+  waterfall,
+  exceedsMax
 }) => {
   return (
     <EuiPanel paddingSize="m">
@@ -149,6 +151,7 @@ export const Transaction: React.SFC<Props> = ({
         location={location}
         urlParams={urlParams}
         waterfall={waterfall}
+        exceedsMax={exceedsMax}
       />
     </EuiPanel>
   );

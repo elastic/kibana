@@ -58,3 +58,5 @@ export const TitleRow = pure<Props>(
     </HeaderPanel>
   )
 );
+
+TitleRow.displayName = 'TitleRow';

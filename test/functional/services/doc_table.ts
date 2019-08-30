@@ -34,10 +34,10 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
       return await testSubjects.find('docTable');
     }
 
-    public async getRowsText(): Promise<string[]> {
+    public async getRowsText() {
       const table = await this.getTable();
       const $ = await table.parseDomContent();
-      return $('[data-test-subj~="docTableRow"]')
+      return $.findTestSubjects('docTableRow')
         .toArray()
         .map((row: any) =>
           $(row)
@@ -93,15 +93,11 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
       return await detailsRow.findAllByCssSelector('[data-test-subj~="docTableRowAction"]');
     }
 
-    public async getFields(
-      options: { isAnchorRow: boolean } = { isAnchorRow: false }
-    ): Promise<string[][]> {
+    public async getFields(options: { isAnchorRow: boolean } = { isAnchorRow: false }) {
       const table = await this.getTable();
       const $ = await table.parseDomContent();
-      const rowLocator = options.isAnchorRow
-        ? '[data-test-subj~="docTableAnchorRow"]'
-        : '[data-test-subj~="docTableRow"]';
-      const rows = $(rowLocator).toArray();
+      const rowLocator = options.isAnchorRow ? 'docTableAnchorRow' : 'docTableRow';
+      const rows = $.findTestSubjects(rowLocator).toArray();
       const fields = rows.map((row: any) =>
         $(row)
           .find('[data-test-subj~="docTableField"]')
@@ -114,7 +110,7 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
     public async getHeaderFields(): Promise<string[]> {
       const table = await this.getTable();
       const $ = await table.parseDomContent();
-      return $('[data-test-subj~="docTableHeaderField"]')
+      return $.findTestSubjects('docTableHeaderField')
         .toArray()
         .map((field: any) =>
           $(field)

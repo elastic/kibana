@@ -47,6 +47,7 @@ export class Note {
 
   public async deleteNoteByTimelineId(request: FrameworkRequest, timelineId: string) {
     const options: SavedObjectsFindOptions = {
+      type: noteSavedObjectType,
       search: timelineId,
       searchFields: ['timelineId'],
     };
@@ -69,6 +70,7 @@ export class Note {
     eventId: string
   ): Promise<NoteSavedObject[]> {
     const options: SavedObjectsFindOptions = {
+      type: noteSavedObjectType,
       search: eventId,
       searchFields: ['eventId'],
     };
@@ -81,6 +83,7 @@ export class Note {
     timelineId: string
   ): Promise<NoteSavedObject[]> {
     const options: SavedObjectsFindOptions = {
+      type: noteSavedObjectType,
       search: timelineId,
       searchFields: ['timelineId'],
     };
@@ -95,6 +98,7 @@ export class Note {
     sort: SortNote | null
   ): Promise<ResponseNotes> {
     const options: SavedObjectsFindOptions = {
+      type: noteSavedObjectType,
       perPage: pageInfo != null ? pageInfo.pageSize : undefined,
       page: pageInfo != null ? pageInfo.pageIndex : undefined,
       search: search != null ? search : undefined,
@@ -196,10 +200,7 @@ export class Note {
       request[internalFrameworkRequest]
     );
 
-    const savedObjects = await savedObjectsClient.find({
-      type: noteSavedObjectType,
-      ...options,
-    });
+    const savedObjects = await savedObjectsClient.find(options);
 
     return {
       totalCount: savedObjects.total,

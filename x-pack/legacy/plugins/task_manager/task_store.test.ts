@@ -62,6 +62,7 @@ describe('TaskStore', () => {
         })
       );
       const store = new TaskStore({
+        index: 'tasky',
         serializer,
         callCluster,
         maxAttempts: 2,
@@ -160,6 +161,7 @@ describe('TaskStore', () => {
     async function testFetch(opts?: FetchOpts, hits: any[] = []) {
       const callCluster = sinon.spy(async () => ({ hits: { hits } }));
       const store = new TaskStore({
+        index: 'tasky',
         serializer,
         callCluster,
         maxAttempts: 2,
@@ -181,7 +183,7 @@ describe('TaskStore', () => {
     test('empty call filters by type, sorts by runAt and id', async () => {
       const { args } = await testFetch();
       expect(args).toMatchObject({
-        index: '.kibana_task_manager',
+        index: 'tasky',
         body: {
           sort: [{ 'task.runAt': 'asc' }, { _id: 'desc' }],
           query: { term: { type: 'task' } },
@@ -350,6 +352,7 @@ describe('TaskStore', () => {
     test('it returns normally with no tasks when the index does not exist.', async () => {
       const callCluster = sinon.spy(async () => ({ hits: { hits: [] } }));
       const store = new TaskStore({
+        index: 'tasky',
         serializer,
         callCluster,
         definitions: taskDefinitions,
@@ -580,6 +583,7 @@ describe('TaskStore', () => {
       );
 
       const store = new TaskStore({
+        index: 'tasky',
         serializer,
         callCluster: jest.fn(),
         maxAttempts: 2,
@@ -626,6 +630,7 @@ describe('TaskStore', () => {
       const id = `id-${_.random(1, 20)}`;
       const callCluster = jest.fn();
       const store = new TaskStore({
+        index: 'tasky',
         serializer,
         callCluster,
         maxAttempts: 2,

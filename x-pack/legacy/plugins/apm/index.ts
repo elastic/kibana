@@ -59,7 +59,8 @@ export const apm: LegacyPluginInitializer = kibana => {
         // display menu item
         ui: Joi.object({
           enabled: Joi.boolean().default(true),
-          transactionGroupBucketSize: Joi.number().default(100)
+          transactionGroupBucketSize: Joi.number().default(100),
+          maxTraceItems: Joi.number().default(1000)
         }).default(),
 
         // enable plugin
@@ -67,7 +68,7 @@ export const apm: LegacyPluginInitializer = kibana => {
 
         // buckets
         minimumBucketSize: Joi.number().default(15),
-        bucketTargetCount: Joi.number().default(27)
+        bucketTargetCount: Joi.number().default(15)
       }).default();
     },
 

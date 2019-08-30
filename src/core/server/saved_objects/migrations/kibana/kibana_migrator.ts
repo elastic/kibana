@@ -31,6 +31,7 @@ import { docValidator } from '../../validation';
 import { buildActiveMappings, CallCluster, IndexMigrator, LogFn } from '../core';
 import { DocumentMigrator, VersionedTransformer } from '../core/document_migrator';
 import { createIndexMap } from '../core/build_index_map';
+import { Config } from '../../../config';
 export interface KbnServer {
   server: Server;
   version: string;
@@ -92,13 +93,14 @@ export class KibanaMigrator {
     // Wait until elasticsearch is green...
     await server.plugins.elasticsearch.waitUntilReady();
 
-    const config = server.config();
+    const config = server.config() as Config;
     const kibanaIndexName = config.get('kibana.index');
-    const indexMap = createIndexMap(
+    const indexMap = createIndexMap({
+      config,
       kibanaIndexName,
-      this.kbnServer.uiExports.savedObjectSchemas,
-      this.mappingProperties
-    );
+      indexMap: this.mappingProperties,
+      schema: this.schema,
+    });
 
     const migrators = Object.keys(indexMap).map(index => {
       return new IndexMigrator({
@@ -130,6 +132,7 @@ export class KibanaMigrator {
   private mappingProperties: MappingProperties;
   private log: LogFn;
   private serializer: SavedObjectsSerializer;
+  private readonly schema: SavedObjectsSchema;
 
   /**
    * Creates an instance of KibanaMigrator.
@@ -141,9 +144,8 @@ export class KibanaMigrator {
   constructor({ kbnServer }: { kbnServer: KbnServer }) {
     this.kbnServer = kbnServer;
 
-    this.serializer = new SavedObjectsSerializer(
-      new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas)
-    );
+    this.schema = new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas);
+    this.serializer = new SavedObjectsSerializer(this.schema);
 
     this.mappingProperties = mergeProperties(kbnServer.uiExports.savedObjectMappings || []);
 

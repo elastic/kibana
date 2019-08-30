@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { DiscoveredPlugin, PluginName } from '../../server';
+import { DiscoveredPlugin, PluginName, PluginOpaqueId } from '../../server';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_system';
-import { PluginWrapper, PluginOpaqueId } from './plugin';
+import { PluginWrapper } from './plugin';
 import {
   createPluginInitializerContext,
   createPluginSetupContext,

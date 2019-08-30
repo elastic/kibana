@@ -52,18 +52,18 @@ const DirectoryNodes = (props: DirectoryNodesProps) => {
     </EuiFlexItem>
   ));
   return (
-    <EuiFlexItem className="codeContainer__directoryList">
-      <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexItem>
+    <div className="codeContainer__directoryList">
+      <div>
+        <div>
           <EuiTitle size="s">
             <h3>{props.title}</h3>
           </EuiTitle>
-        </EuiFlexItem>
+        </div>
         <EuiFlexGroup wrap direction="row" gutterSize="none" justifyContent="flexStart">
           {nodes}
         </EuiFlexGroup>
-      </EuiFlexGroup>
-    </EuiFlexItem>
+      </div>
+    </div>
   );
 };
 
@@ -120,9 +120,5 @@ export const Directory = withRouter((props: Props) => {
       {folders.length > 0 && folderList}
     </React.Fragment>
   );
-  return (
-    <EuiFlexGroup direction="column" gutterSize="none">
-      {children}
-    </EuiFlexGroup>
-  );
+  return <div>{children}</div>;
 });

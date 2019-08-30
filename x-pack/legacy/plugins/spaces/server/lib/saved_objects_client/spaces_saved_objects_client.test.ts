@@ -139,7 +139,9 @@ const createSpacesService = async (spaceId: string) => {
           types,
         });
 
-        await expect(client.find({ namespace: 'bar' })).rejects.toThrowErrorMatchingSnapshot();
+        await expect(
+          client.find({ type: 'foo', namespace: 'bar' })
+        ).rejects.toThrowErrorMatchingSnapshot();
       });
 
       test(`passes options.type to baseClient if valid singular type specified`, async () => {

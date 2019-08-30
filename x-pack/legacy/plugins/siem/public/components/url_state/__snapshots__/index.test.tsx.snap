@@ -449,7 +449,7 @@ exports[`UrlStateContainer mounts and renders 1`] = `
                               }
                             }
                           >
-                            <UrlStateContainer
+                            <Component
                               history={
                                 Object {
                                   "action": "POP",
@@ -587,7 +587,7 @@ exports[`UrlStateContainer mounts and renders 1`] = `
                               }
                             >
                               <span />
-                            </UrlStateContainer>
+                            </Component>
                           </Connect(UrlStateContainer)>
                         </Route>
                       </withRouter(Connect(UrlStateContainer))>

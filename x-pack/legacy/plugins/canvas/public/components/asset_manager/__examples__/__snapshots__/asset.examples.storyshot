@@ -75,7 +75,6 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
             onMouseOver={[Function]}
           >
             <button
-              aria-describedby="generated-id"
               aria-label="Create image element"
               className="euiButtonIcon euiButtonIcon--primary"
               onBlur={[Function]}
@@ -173,7 +172,6 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
             onMouseOver={[Function]}
           >
             <button
-              aria-describedby="generated-id"
               aria-label="Delete"
               className="euiButtonIcon euiButtonIcon--danger"
               onBlur={[Function]}
@@ -275,7 +273,6 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
             onMouseOver={[Function]}
           >
             <button
-              aria-describedby="generated-id"
               aria-label="Create image element"
               className="euiButtonIcon euiButtonIcon--primary"
               onBlur={[Function]}
@@ -373,7 +370,6 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
             onMouseOver={[Function]}
           >
             <button
-              aria-describedby="generated-id"
               aria-label="Delete"
               className="euiButtonIcon euiButtonIcon--danger"
               onBlur={[Function]}

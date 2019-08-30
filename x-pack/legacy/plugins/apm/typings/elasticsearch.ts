@@ -25,7 +25,10 @@ declare module 'elasticsearch' {
     | 'min'
     | 'percentiles'
     | 'sum'
-    | 'extended_stats';
+    | 'extended_stats'
+    | 'filter'
+    | 'filters'
+    | 'cardinality';
 
   type AggOptions = AggregationOptionMap & {
     [key: string]: any;
@@ -40,6 +43,10 @@ declare module 'elasticsearch' {
     };
   };
 
+  type SubAggregation<T> = T extends { aggs: any }
+    ? AggregationResultMap<T['aggs']>
+    : {};
+
   // eslint-disable-next-line @typescript-eslint/prefer-interface
   type BucketAggregation<SubAggregationMap, KeyType = string> = {
     buckets: Array<
@@ -47,9 +54,20 @@ declare module 'elasticsearch' {
         key: KeyType;
         key_as_string: string;
         doc_count: number;
-      } & (SubAggregationMap extends { aggs: any }
-        ? AggregationResultMap<SubAggregationMap['aggs']>
-        : {})
+      } & (SubAggregation<SubAggregationMap>)
+    >;
+  };
+
+  type FilterAggregation<SubAggregationMap> = {
+    doc_count: number;
+  } & SubAggregation<SubAggregationMap>;
+
+  // eslint-disable-next-line @typescript-eslint/prefer-interface
+  type FiltersAggregation<SubAggregationMap> = {
+    buckets: Array<
+      {
+        doc_count: number;
+      } & SubAggregation<SubAggregationMap>
     >;
   };
 
@@ -93,17 +111,22 @@ declare module 'elasticsearch' {
         };
         extended_stats: {
           count: number;
-          min: number;
-          max: number;
-          avg: number;
+          min: number | null;
+          max: number | null;
+          avg: number | null;
           sum: number;
-          sum_of_squares: number;
-          variance: number;
-          std_deviation: number;
+          sum_of_squares: number | null;
+          variance: number | null;
+          std_deviation: number | null;
           std_deviation_bounds: {
-            upper: number;
-            lower: number;
+            upper: number | null;
+            lower: number | null;
           };
+        };
+        filter: FilterAggregation<AggregationOption[AggregationName]>;
+        filters: FiltersAggregation<AggregationOption[AggregationName]>;
+        cardinality: {
+          value: number;
         };
       }[AggregationType & keyof AggregationOption[AggregationName]];
     }

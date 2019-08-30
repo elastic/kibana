@@ -51,7 +51,7 @@ class ExitFullScreenButtonUi extends PureComponent<Props> {
     const { intl } = this.props;
 
     return (
-      <div>
+      <div className="hideInPercy">
         <EuiScreenReaderOnly>
           <p aria-live="polite">
             <FormattedMessage

@@ -18,7 +18,7 @@
  */
 
 import Boom from 'boom';
-import { SavedObject } from '../service/saved_objects_client';
+import { SavedObject } from '../types';
 
 export function sortObjects(savedObjects: SavedObject[]): SavedObject[] {
   const path = new Set<SavedObject>();

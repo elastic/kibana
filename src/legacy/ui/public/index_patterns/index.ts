@@ -19,6 +19,7 @@
 
 export { IndexPatternSelect } from './components/index_pattern_select';
 export { Field, FieldType } from './_field';
+export { FieldList } from './_field_list';
 export { IndexPattern, StaticIndexPattern } from './_index_pattern';
 export { IndexPatterns, IndexPatternsProvider } from './index_patterns';
 
@@ -28,3 +29,19 @@ export {
 } from './constants';
 
 export { validateIndexPattern, CONTAINS_SPACES, ILLEGAL_CHARACTERS } from './validate';
+
+export { getRoutes } from './get_routes';
+export { formatHitProvider } from './_format_hit';
+// @ts-ignore
+export { flattenHitWrapper } from './_flatten_hit.js';
+
+export {
+  IndexPatternAlreadyExists,
+  IndexPatternMissingIndices,
+  NoDefinedIndexPatterns,
+  NoDefaultIndexPattern,
+} from './errors';
+
+export { mockFields, mockIndexPattern } from './fixtures';
+
+export { getFromSavedObject, isFilterable } from './static_utils';

@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import { exportDashboards } from '../../../lib/export/export_dashboards';
-import Boom from 'boom';
 import Joi from 'joi';
 import moment from 'moment';
+
+import { exportDashboards } from '../../../lib/export/export_dashboards';
+
 export function exportApi(server) {
   server.route({
     path: '/api/kibana/dashboards/export',
@@ -46,8 +47,7 @@ export function exportApi(server) {
             .header('Content-Disposition', `attachment; filename="${filename}"`)
             .header('Content-Type', 'application/json')
             .header('Content-Length', Buffer.byteLength(json, 'utf8'));
-        })
-        .catch(err => Boom.boomify(err, { statusCode: 400 }));
+        });
     }
   });
 }

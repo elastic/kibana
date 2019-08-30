@@ -29,8 +29,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { InspectorView } from 'ui/inspector';
-
 import {
   DataTableFormat,
 } from './data_table';
@@ -102,54 +100,51 @@ class DataViewComponent extends Component {
 
   renderNoData() {
     return (
-      <InspectorView useFlex={true}>
-        <EuiEmptyPrompt
-          title={
-            <h2>
+      <EuiEmptyPrompt
+        title={
+          <h2>
+            <FormattedMessage
+              id="inspectorViews.data.noDataAvailableTitle"
+              defaultMessage="No data available"
+            />
+          </h2>
+        }
+        body={
+          <React.Fragment>
+            <p>
               <FormattedMessage
-                id="inspectorViews.data.noDataAvailableTitle"
-                defaultMessage="No data available"
+                id="inspectorViews.data.noDataAvailableDescription"
+                defaultMessage="The element did not provide any data."
               />
-            </h2>
-          }
-          body={
-            <React.Fragment>
-              <p>
-                <FormattedMessage
-                  id="inspectorViews.data.noDataAvailableDescription"
-                  defaultMessage="The element did not provide any data."
-                />
-              </p>
-            </React.Fragment>
-          }
-        />
-      </InspectorView>
+            </p>
+          </React.Fragment>
+        }
+      />
     );
   }
 
   renderLoading() {
     return (
-      <InspectorView useFlex={true}>
-        <EuiFlexGroup
-          justifyContent="center"
-          alignItems="center"
-        >
-          <EuiFlexItem grow={false}>
-            <EuiPanel className="eui-textCenter">
-              <EuiLoadingChart size="m" />
-              <EuiSpacer size="s" />
-              <EuiText>
-                <p>
-                  <FormattedMessage
-                    id="inspectorViews.data.gatheringDataLabel"
-                    defaultMessage="Gathering data"
-                  />
-                </p>
-              </EuiText>
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </InspectorView>
+      <EuiFlexGroup
+        justifyContent="center"
+        alignItems="center"
+        style={{ height: '100%' }}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiPanel className="eui-textCenter">
+            <EuiLoadingChart size="m" />
+            <EuiSpacer size="s" />
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="inspectorViews.data.gatheringDataLabel"
+                  defaultMessage="Gathering data"
+                />
+              </p>
+            </EuiText>
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
@@ -161,13 +156,11 @@ class DataViewComponent extends Component {
     }
 
     return (
-      <InspectorView>
-        <DataTableFormat
-          data={this.state.tabularData}
-          isFormatted={this.state.tabularOptions.returnsFormattedValues}
-          exportTitle={this.props.title}
-        />
-      </InspectorView>
+      <DataTableFormat
+        data={this.state.tabularData}
+        isFormatted={this.state.tabularOptions.returnsFormattedValues}
+        exportTitle={this.props.title}
+      />
     );
   }
 }

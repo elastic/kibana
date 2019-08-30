@@ -44,11 +44,11 @@ interface ScrollableLogTextStreamViewProps {
     startKey: TimeKey | null;
     middleKey: TimeKey | null;
     endKey: TimeKey | null;
+    fromScroll: boolean;
   }) => any;
   loadNewerItems: () => void;
   setFlyoutItem: (id: string) => void;
   setFlyoutVisibility: (visible: boolean) => void;
-  showColumnConfiguration: () => void;
   intl: InjectedIntl;
   highlightedItem: string | null;
   currentHighlightKey: UniqueTimeKey | null;
@@ -109,7 +109,6 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
       items,
       lastLoadedTime,
       scale,
-      showColumnConfiguration,
       wrap,
     } = this.props;
     const { targetId } = this.state;
@@ -153,7 +152,6 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
                 <LogColumnHeaders
                   columnConfigurations={columnConfigurations}
                   columnWidths={columnWidths}
-                  showColumnConfiguration={showColumnConfiguration}
                 />
                 <AutoSizer bounds content detectAnyWindowResize="height">
                   {({ measureRef, bounds: { height = 0 }, content: { width = 0 } }) => (
@@ -256,12 +254,14 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
       bottomChild,
       pagesAbove,
       pagesBelow,
+      fromScroll,
     }: {
       topChild: string;
       middleChild: string;
       bottomChild: string;
       pagesAbove: number;
       pagesBelow: number;
+      fromScroll: boolean;
     }) => {
       this.props.reportVisibleInterval({
         endKey: parseStreamItemId(bottomChild),
@@ -269,6 +269,7 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
         pagesAfterEnd: pagesBelow,
         pagesBeforeStart: pagesAbove,
         startKey: parseStreamItemId(topChild),
+        fromScroll,
       });
     }
   );

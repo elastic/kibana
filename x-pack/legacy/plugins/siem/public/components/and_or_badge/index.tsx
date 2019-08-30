@@ -33,6 +33,8 @@ const RoundedBadge = styled(EuiBadge)`
   }
 `;
 
+RoundedBadge.displayName = 'RoundedBadge';
+
 export type AndOr = 'and' | 'or';
 
 /** Displays AND / OR in a round badge */
@@ -45,3 +47,5 @@ export const AndOrBadge = pure<{ type: AndOr }>(({ type }) => {
     </RoundedBadge>
   );
 });
+
+AndOrBadge.displayName = 'AndOrBadge';

@@ -8,6 +8,7 @@ import { GenericParams } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
 import { Legacy } from 'kibana';
 
+import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { InfraMetricModel } from '../metrics/adapter_types';
 import {
   InfraBackendFrameworkAdapter,
@@ -34,6 +35,11 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
 
   constructor(private server: Legacy.Server) {
     this.version = server.config().get('pkg.version');
+  }
+
+  public config(req: InfraFrameworkRequest<Legacy.Request>): KibanaConfig {
+    const internalRequest = req[internalInfraFrameworkRequest];
+    return internalRequest.server.config();
   }
 
   public exposeStaticDir(urlPath: string, dir: string): void {
@@ -112,10 +118,19 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
       }
     }
 
+    const frozenIndicesParams = ['search', 'msearch'].includes(endpoint)
+      ? {
+          ignore_throttled: !includeFrozen,
+        }
+      : {};
+
     const fields = await callWithRequest(
       internalRequest,
       endpoint,
-      { ...params, ignore_throttled: !includeFrozen },
+      {
+        ...params,
+        ...frozenIndicesParams,
+      },
       ...rest
     );
     return fields;
@@ -135,6 +150,10 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
         return fieldCaps;
       },
     });
+  }
+
+  public getSpaceId(request: InfraFrameworkRequest): string {
+    return this.server.plugins.spaces.getSpaceId(request[internalInfraFrameworkRequest]);
   }
 
   public getSavedObjectsService() {

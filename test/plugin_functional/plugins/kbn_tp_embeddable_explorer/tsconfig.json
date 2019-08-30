@@ -2,7 +2,12 @@
   "extends": "../../../tsconfig.json",
   "compilerOptions": {
     "outDir": "./target",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "types": [
+      "node",
+      "jest",
+      "react"
+    ]
   },
   "include": [
     "index.ts",

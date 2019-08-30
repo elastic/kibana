@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default ({ loadTestFile }: KibanaFunctionalTestDefaultProviders) => {
+export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Cross Cluster Replication app', function() {
     this.tags('ciGroup4');
     loadTestFile(require.resolve('./home_page'));

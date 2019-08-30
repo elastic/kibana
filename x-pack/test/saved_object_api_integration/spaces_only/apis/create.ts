@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { SPACES } from '../../common/lib/spaces';
-import { TestInvoker } from '../../common/lib/types';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createTestSuiteFactory } from '../../common/suites/create';
 
 const expectNamespaceSpecifiedBadRequest = (resp: { [key: string]: any }) => {
@@ -21,8 +21,7 @@ const expectNamespaceSpecifiedBadRequest = (resp: { [key: string]: any }) => {
   });
 };
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getService }: TestInvoker) {
+export default function({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const esArchiver = getService('esArchiver');

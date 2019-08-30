@@ -26,6 +26,8 @@ const FingerprintLabel = styled.span`
   margin-right: 5px;
 `;
 
+FingerprintLabel.displayName = 'FingerprintLabel';
+
 /**
  * Represents a field containing a certificate fingerprint (e.g. a sha1), with
  * a link to an external site, which in-turn compares the fingerprint against a
@@ -63,3 +65,5 @@ export const CertificateFingerprint = pure<{
     </DraggableBadge>
   );
 });
+
+CertificateFingerprint.displayName = 'CertificateFingerprint';

@@ -10,6 +10,8 @@ import { EuiTabbedContent } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
+
 import { DataFrameTransformListRow } from './common';
 import { ExpandedRowDetailsPane, SectionConfig } from './expanded_row_details_pane';
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
@@ -24,6 +26,11 @@ function getItemDescription(value: any) {
   return value.toString();
 }
 
+interface Item {
+  title: string;
+  description: any;
+}
+
 interface Props {
   item: DataFrameTransformListRow;
 }
@@ -33,19 +40,92 @@ export const ExpandedRow: SFC<Props> = ({ item }) => {
   delete stateValues.stats;
   delete stateValues.checkpointing;
 
+  const stateItems: Item[] = [];
+  stateItems.push(
+    {
+      title: 'id',
+      description: item.id,
+    },
+    {
+      title: 'state',
+      description: item.stats.state,
+    }
+  );
+  if (item.stats.node !== undefined) {
+    stateItems.push(
+      {
+        title: 'node.id',
+        description: item.stats.node.id,
+      },
+      {
+        title: 'node.name',
+        description: item.stats.node.name,
+      },
+      {
+        title: 'node.ephemeral_id',
+        description: item.stats.node.ephemeral_id,
+      },
+      {
+        title: 'node.transport_address',
+        description: item.stats.node.transport_address,
+      },
+      {
+        title: 'node.attributes',
+        description: getItemDescription(item.stats.node.attributes),
+      }
+    );
+  }
+
   const state: SectionConfig = {
     title: 'State',
-    items: Object.entries(stateValues).map(s => {
-      return { title: s[0].toString(), description: getItemDescription(s[1]) };
-    }),
+    items: stateItems,
     position: 'left',
   };
 
+  const checkpointingItems: Item[] = [];
+  if (item.stats.checkpointing.last !== undefined) {
+    checkpointingItems.push({
+      title: 'last.checkpoint',
+      description: item.stats.checkpointing.last.checkpoint,
+    });
+    if (item.stats.checkpointing.last.timestamp_millis !== undefined) {
+      checkpointingItems.push({
+        title: 'last.timestamp',
+        description: formatHumanReadableDateTimeSeconds(
+          item.stats.checkpointing.last.timestamp_millis
+        ),
+      });
+      checkpointingItems.push({
+        title: 'last.timestamp_millis',
+        description: item.stats.checkpointing.last.timestamp_millis,
+      });
+    }
+  }
+
+  if (item.stats.checkpointing.next !== undefined) {
+    checkpointingItems.push({
+      title: 'next.checkpoint',
+      description: item.stats.checkpointing.next.checkpoint,
+    });
+    if (item.stats.checkpointing.next.checkpoint_progress !== undefined) {
+      checkpointingItems.push({
+        title: 'next.checkpoint_progress.total_docs',
+        description: item.stats.checkpointing.next.checkpoint_progress.total_docs,
+      });
+      checkpointingItems.push({
+        title: 'next.checkpoint_progress.docs_remaining',
+        description: item.stats.checkpointing.next.checkpoint_progress.docs_remaining,
+      });
+      checkpointingItems.push({
+        title: 'next.checkpoint_progress.percent_complete',
+        description: item.stats.checkpointing.next.checkpoint_progress.percent_complete,
+      });
+    }
+  }
+
   const checkpointing: SectionConfig = {
     title: 'Checkpointing',
-    items: Object.entries(item.checkpointing).map(s => {
-      return { title: s[0].toString(), description: getItemDescription(s[1]) };
-    }),
+    items: checkpointingItems,
     position: 'left',
   };
 

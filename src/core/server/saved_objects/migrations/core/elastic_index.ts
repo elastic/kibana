@@ -24,7 +24,7 @@
 
 import _ from 'lodash';
 import { IndexMapping } from '../../mappings';
-import { SavedObjectsMigrationVersion } from '../../';
+import { SavedObjectsMigrationVersion } from '../../types';
 import { AliasAction, CallCluster, NotFound, RawDoc, ShardsInfo } from './call_cluster';
 
 const settings = { number_of_shards: 1, auto_expand_replicas: '0-1' };

@@ -32,7 +32,7 @@ export function ServiceDetailTabs({ urlParams }: Props) {
       defaultMessage: 'Transactions'
     }),
     path: `/services/${serviceName}/transactions`,
-    render: () => <TransactionOverview urlParams={urlParams} />,
+    render: () => <TransactionOverview />,
     name: 'transactions'
   };
 

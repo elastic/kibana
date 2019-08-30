@@ -6,6 +6,7 @@
 
 jest.mock('../layers/vector_layer', () => {});
 jest.mock('../layers/heatmap_layer', () => {});
+jest.mock('../layers/vector_tile_layer', () => {});
 jest.mock('../layers/sources/all_sources', () => {});
 jest.mock('../reducers/non_serializable_instances', () => ({
   getInspectorAdapters: () => {

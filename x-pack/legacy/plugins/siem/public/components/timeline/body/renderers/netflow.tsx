@@ -96,3 +96,5 @@ export const NetflowRenderer = pure<{ data: Ecs }>(({ data }) => (
     userName={undefined}
   />
 ));
+
+NetflowRenderer.displayName = 'NetflowRenderer';

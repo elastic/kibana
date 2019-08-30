@@ -18,17 +18,28 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { npStart } from 'ui/new_platform';
+import { start } from '../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { App } from './app/';
 import { CoreShim, PluginShim } from './shim';
+import { SavedObjectFinder } from '../../../../../src/legacy/ui/public/saved_objects/components/saved_object_finder';
 
 const REACT_ROOT_ID = 'embeddableExplorerRoot';
 
 export class Plugin {
-  public start({ core, plugins }: { core: CoreShim; plugins: PluginShim }): void {
+  public start({ core }: { core: CoreShim; plugins: PluginShim }): void {
     core.onRenderComplete(() => {
       const root = document.getElementById(REACT_ROOT_ID);
       ReactDOM.render(
-        <App embeddableFactories={plugins.embeddableAPI.embeddableFactories} />,
+        <App
+          getActions={start.getTriggerCompatibleActions}
+          getAllEmbeddableFactories={start.getEmbeddableFactories}
+          getEmbeddableFactory={start.getEmbeddableFactory}
+          notifications={npStart.core.notifications}
+          overlays={npStart.core.overlays}
+          inspector={core.inspector}
+          SavedObjectFinder={SavedObjectFinder}
+        />,
         root
       );
     });

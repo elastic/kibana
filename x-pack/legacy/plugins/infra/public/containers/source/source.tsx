@@ -21,6 +21,19 @@ import { updateSourceMutation } from './update_source.gql_query';
 
 type Source = SourceQuery.Query['source'];
 
+const pickIndexPattern = (source: Source | undefined, type: 'logs' | 'metrics' | 'both') => {
+  if (!source) {
+    return 'unknown-index';
+  }
+  if (type === 'logs') {
+    return source.configuration.logAlias;
+  }
+  if (type === 'metrics') {
+    return source.configuration.metricAlias;
+  }
+  return `${source.configuration.logAlias},${source.configuration.metricAlias}`;
+};
+
 export const useSource = ({ sourceId }: { sourceId: string }) => {
   const apolloClient = useApolloClient();
   const [source, setSource] = useState<Source | undefined>(undefined);
@@ -108,13 +121,12 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
     [apolloClient, sourceId]
   );
 
-  const derivedIndexPattern = useMemo(
-    () => ({
+  const createDerivedIndexPattern = (type: 'logs' | 'metrics' | 'both') => {
+    return {
       fields: source ? source.status.indexFields : [],
-      title: source ? `${source.configuration.logAlias}` : 'unknown-index',
-    }),
-    [source]
-  );
+      title: pickIndexPattern(source, type),
+    };
+  };
 
   const isLoading = useMemo(
     () =>
@@ -146,7 +158,7 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
 
   return {
     createSourceConfiguration,
-    derivedIndexPattern,
+    createDerivedIndexPattern,
     logIndicesExist,
     isLoading,
     isLoadingSource: loadSourceRequest.state === 'pending',

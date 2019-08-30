@@ -13,11 +13,18 @@
  * 1. Calculated px values come from the open/closed state of the global nav sidebar
  */
 
+
+ #graphBasic {
+   display: flex;
+   flex-direction: column;
+   flex: 1;
+   overflow: hidden;
+ }
+
 .gphGraph__container {
   background: $euiColorEmptyShade;
-  position: fixed;
-  height: 100%;
-  width: calc(100% - #{$kbnGlobalNavClosedWidth}); /* 1 */
+  position: relative;
+  flex: 1;
 }
 
 .kbnGlobalNav.kbnGlobalNav-isOpen + .app-wrapper .gphGraph__container {
@@ -72,7 +79,7 @@
 }
 
 .gphGraph__menus, .gphGraph__bar {
-  margin: $euiSizeM;
+  margin: $euiSizeM $euiSizeM 0 $euiSizeM;
 }
 
 .gphGraph__flexGroup {

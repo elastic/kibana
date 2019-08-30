@@ -18,7 +18,7 @@
  */
 
 import { EventEmitter } from 'events';
-import { debounce, forEach, get } from 'lodash';
+import { debounce, forEach, get, isEqual } from 'lodash';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
@@ -38,6 +38,7 @@ import { VisFiltersProvider } from '../../vis/vis_filters';
 import { PipelineDataLoader } from './pipeline_data_loader';
 import { visualizationLoader } from './visualization_loader';
 import { VisualizeDataLoader } from './visualize_data_loader';
+import { onlyDisabledFiltersChanged } from '../../../../core_plugins/data/public';
 
 import { DataAdapter, RequestAdapter } from '../../inspector/adapters';
 
@@ -236,15 +237,21 @@ export class EmbeddedVisualizeHandler {
     }
 
     let fetchRequired = false;
-    if (params.hasOwnProperty('timeRange')) {
+    if (
+      params.hasOwnProperty('timeRange') &&
+      !isEqual(this.dataLoaderParams.timeRange, params.timeRange)
+    ) {
       fetchRequired = true;
       this.dataLoaderParams.timeRange = params.timeRange;
     }
-    if (params.hasOwnProperty('filters')) {
+    if (
+      params.hasOwnProperty('filters') &&
+      !onlyDisabledFiltersChanged(this.dataLoaderParams.filters, params.filters)
+    ) {
       fetchRequired = true;
       this.dataLoaderParams.filters = params.filters;
     }
-    if (params.hasOwnProperty('query')) {
+    if (params.hasOwnProperty('query') && !isEqual(this.dataLoaderParams.query, params.query)) {
       fetchRequired = true;
       this.dataLoaderParams.query = params.query;
     }

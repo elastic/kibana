@@ -9,7 +9,7 @@ Create a new handler function pre-wired to context for the plugin.
 <b>Signature:</b>
 
 ```typescript
-createHandler(pluginOpaqueId: PluginOpaqueId, handler: IContextHandler<TContext, THandlerReturn, THandlerParameters>): (...rest: THandlerParameters) => Promisify<THandlerReturn>;
+createHandler(pluginOpaqueId: PluginOpaqueId, handler: IContextHandler<TContext, THandlerReturn, THandlerParameters>): (...rest: THandlerParameters) => THandlerReturn extends Promise<any> ? THandlerReturn : Promise<THandlerReturn>;
 ```
 
 ## Parameters
@@ -21,7 +21,7 @@ createHandler(pluginOpaqueId: PluginOpaqueId, handler: IContextHandler<TContext,
 
 <b>Returns:</b>
 
-`(...rest: THandlerParameters) => Promisify<THandlerReturn>`
+`(...rest: THandlerParameters) => THandlerReturn extends Promise<any> ? THandlerReturn : Promise<THandlerReturn>`
 
 A function that takes `THandlerParameters`<!-- -->, calls `handler` with a new context, and returns a Promise of the `handler` return value.
 

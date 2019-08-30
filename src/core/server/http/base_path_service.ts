@@ -16,24 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Request } from 'hapi';
-import { KibanaRequest, ensureRawRequest } from './router';
+import { ensureRawRequest, KibanaRequest, LegacyRequest } from './router';
 
 import { modifyUrl } from '../../utils';
 
 export class BasePath {
-  private readonly basePathCache = new WeakMap<Request, string>();
+  private readonly basePathCache = new WeakMap<LegacyRequest, string>();
 
   constructor(private readonly serverBasePath?: string) {}
 
-  public get = (request: KibanaRequest | Request) => {
+  public get = (request: KibanaRequest | LegacyRequest) => {
     const requestScopePath = this.basePathCache.get(ensureRawRequest(request)) || '';
     const serverBasePath = this.serverBasePath || '';
     return `${serverBasePath}${requestScopePath}`;
   };
 
   // should work only for KibanaRequest as soon as spaces migrate to NP
-  public set = (request: KibanaRequest | Request, requestSpecificBasePath: string) => {
+  public set = (request: KibanaRequest | LegacyRequest, requestSpecificBasePath: string) => {
     const rawRequest = ensureRawRequest(request);
 
     if (this.basePathCache.has(rawRequest)) {

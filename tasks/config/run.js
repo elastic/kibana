@@ -148,7 +148,7 @@ module.exports = function (grunt) {
       ]
     }),
 
-    // used by the test:mocha task
+    // used by the test:quick task
     //    runs all node.js/server mocha tests
     mocha: scriptWithGithubChecks({
       title: 'Mocha tests',

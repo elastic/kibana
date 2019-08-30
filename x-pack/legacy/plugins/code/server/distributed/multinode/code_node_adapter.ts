@@ -37,6 +37,10 @@ export class CodeNodeAdapter implements ServiceHandlerAdapter {
     async locate(httpRequest: Request, resource: string): Promise<Endpoint> {
       return Promise.resolve(new LocalEndpoint(httpRequest, resource));
     },
+
+    isResourceLocal(resource: string): Promise<boolean> {
+      return Promise.resolve(false);
+    },
   };
 
   getService<def extends ServiceDefinition>(serviceDefinition: def): ServiceMethodMap<def> {

@@ -101,9 +101,11 @@ export async function generateCsvSearch(
     payloadQuery
   );
 
-  const [savedSortField, savedSortOrder] = savedSearchObjectAttr.sort;
-  const sortConfig = [...payloadSort, { [savedSortField]: { order: savedSortOrder } }];
-
+  const savedSortConfigs = savedSearchObjectAttr.sort;
+  const sortConfig = [...payloadSort];
+  savedSortConfigs.forEach(([savedSortField, savedSortOrder]) => {
+    sortConfig.push({ [savedSortField]: { order: savedSortOrder } });
+  });
   const scriptFieldsConfig = indexPatternFields
     .filter((f: IndexPatternField) => f.scripted)
     .reduce((accum: any, curr: IndexPatternField) => {
@@ -137,7 +139,6 @@ export async function generateCsvSearch(
       sort: sortConfig,
     },
   };
-
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   const callCluster = (...params: any[]) => callWithRequest(req, ...params);
   const config = server.config();

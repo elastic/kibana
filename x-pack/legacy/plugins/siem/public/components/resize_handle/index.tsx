@@ -54,6 +54,8 @@ const ResizeHandleContainer = styled.div<{ height?: string }>`
   ${({ height }) => (height != null ? `height: ${height}` : '')}
 `;
 
+ResizeHandleContainer.displayName = 'ResizeHandleContainer';
+
 export const addGlobalResizeCursorStyleToBody = () => {
   document.body.classList.add(globalResizeCursorClassName);
 };

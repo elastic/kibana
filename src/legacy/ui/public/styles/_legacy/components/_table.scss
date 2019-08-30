@@ -33,14 +33,14 @@ table {
     button.fa-sort-down,
     i.fa-sort-asc,
     i.fa-sort-down {
-      color: $euiColorLightShade;
+      color: $euiColorPrimary;
     }
 
     button.fa-sort-desc,
     button.fa-sort-up,
     i.fa-sort-desc,
     i.fa-sort-up {
-      color: $euiColorLightShade;
+      color: $euiColorPrimary;
     }
   }
 }

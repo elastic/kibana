@@ -133,6 +133,7 @@ export class WorkpadHeader extends React.PureComponent {
                     handler={this._keyHandler}
                     targetNodeSelector="body"
                     global
+                    isolate
                   />
                 )}
                 <EuiToolTip position="bottom" content={this._getEditToggleToolTip()}>

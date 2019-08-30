@@ -97,6 +97,7 @@ function generator({ artifactTarball, versionTag, license, usePublicArtifact  })
     org.label-schema.version="${ versionTag }" \\
     org.label-schema.url="https://www.elastic.co/products/kibana" \\
     org.label-schema.vcs-url="https://github.com/elastic/kibana" \\
+    org.label-schema.license="${ license }" \\
     license="${ license }"
 
   ENTRYPOINT ["/usr/local/bin/dumb-init", "--"]

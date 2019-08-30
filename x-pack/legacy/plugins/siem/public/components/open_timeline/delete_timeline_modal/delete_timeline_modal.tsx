@@ -44,3 +44,5 @@ export const DeleteTimelineModal = pure<Props>(({ title, toggleShowModal, onDele
     <div data-test-subj="warning">{i18n.DELETE_WARNING}</div>
   </EuiConfirmModal>
 ));
+
+DeleteTimelineModal.displayName = 'DeleteTimelineModal';

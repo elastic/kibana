@@ -17,8 +17,8 @@
  * under the License.
  */
 
+import { SavedObjectsClientContract } from 'src/core/public';
 import { ChromeBrand } from '../../../../core/public';
-import { SavedObjectsClient } from '../saved_objects';
 import { BadgeApi } from './api/badge';
 import { BreadcrumbsApi } from './api/breadcrumbs';
 import { HelpExtensionApi } from './api/help_extension';
@@ -37,7 +37,7 @@ declare interface Chrome extends ChromeNavLinks {
   getBasePath(): string;
   getXsrfToken(): string;
   getKibanaVersion(): string;
-  getSavedObjectsClient(): SavedObjectsClient;
+  getSavedObjectsClient(): SavedObjectsClientContract;
   getUiSettingsClient(): any;
   setVisible(visible: boolean): any;
   getInjected(key: string, defaultValue?: any): any;

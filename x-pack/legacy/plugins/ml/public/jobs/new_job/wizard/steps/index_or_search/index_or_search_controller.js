@@ -84,3 +84,4 @@ module.controller('MlNewJobStepIndexOrSearch',
       return `${path}?savedSearchId=${encodeURIComponent(savedSearch.id)}`;
     };
   });
+

@@ -16,8 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { SavedObject } from '../service';
+import { SavedObject } from '../types';
 import { SavedObjectsImportError } from './types';
 
 export function extractErrors(

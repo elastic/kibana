@@ -100,6 +100,10 @@ function maybe<V>(type: Type<V>): Type<V | undefined> {
   return new MaybeType(type);
 }
 
+function nullable<V>(type: Type<V>): Type<V | null> {
+  return schema.oneOf([type, schema.literal(null)], { defaultValue: null });
+}
+
 function object<P extends Props>(props: P, options?: ObjectTypeOptions<P>): ObjectType<P> {
   return new ObjectType(props, options);
 }
@@ -191,6 +195,7 @@ export const schema = {
   literal,
   mapOf,
   maybe,
+  nullable,
   never,
   number,
   object,

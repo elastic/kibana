@@ -6,16 +6,33 @@
 
 jest.mock('../../../meta', () => {
   return {
-    getEmsTMSServices: async () => {
-      return [
-        {
-          id: 'road_map',
-          attributionMarkdown: '[foobar](http://foobar.org)  | [foobaz](http://foobaz.org)'
-        }, {
-          id: 'satellite',
-          attributionMarkdown: '[satellite](http://satellite.org)'
+    getEMSClient: () => {
+      class MockTMSService {
+        constructor(config) {
+          this._config = config;
         }
-      ];
+        getMarkdownAttribution() {
+          return this._config.attributionMarkdown;
+        }
+        getId() {
+          return this._config.id;
+        }
+      }
+
+      return {
+        async getTMSServices() {
+          return [
+            new MockTMSService({
+              id: 'road_map',
+              attributionMarkdown: '[foobar](http://foobar.org)  | [foobaz](http://foobaz.org)'
+            }),
+            new MockTMSService({
+              id: 'satellite',
+              attributionMarkdown: '[satellite](http://satellite.org)'
+            })
+          ];
+        }
+      };
     }
   };
 });
