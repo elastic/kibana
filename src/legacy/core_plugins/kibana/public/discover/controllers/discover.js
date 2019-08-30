@@ -761,6 +761,9 @@ function discoverController(
       })
       .then(onResults)
       .catch((error) => {
+        // If the request was aborted then no need to surface this error in the UI
+        if (error instanceof Error && error.name === 'AbortError') return;
+
         const fetchError = getPainlessError(error);
 
         if (fetchError) {
