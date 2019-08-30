@@ -59,6 +59,7 @@ const customColorScaleFactory = (n: number) => (t: number) => {
 };
 
 const FEATURE_INFLUENCE = 'feature_influence';
+const OUTLIER_SCORE = 'outlier_score';
 
 interface GetDataFrameAnalyticsResponse {
   count: number;
@@ -358,10 +359,16 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
   let sorting: TableSorting = false;
 
   if (columns.length > 0) {
+    const outlierScoreFieldName = `${jobConfig.dest.results_field}.${OUTLIER_SCORE}`;
+    const outlierScoreFieldSelected = selectedFields.includes(outlierScoreFieldName);
+
+    const sortField = outlierScoreFieldSelected ? outlierScoreFieldName : selectedFields[0];
+    const sortDirection = outlierScoreFieldSelected ? SORT_DIRECTON.DESC : SORT_DIRECTON.ASC;
+
     sorting = {
       sort: {
-        field: `_source["${selectedFields[0]}"]`,
-        direction: SORT_DIRECTON.ASC,
+        field: `_source["${sortField}"]`,
+        direction: sortDirection,
       },
     };
   }
