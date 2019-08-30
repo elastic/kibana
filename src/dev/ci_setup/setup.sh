@@ -170,6 +170,8 @@ if [[ -z "$ghprbPullId" ]] ; then
   export CHECKS_REPORTER_ACTIVE=false
 fi
 
+export CHECKS_REPORTER_ACTIVE=false # TODO
+
 ###
 ### Implements github-checks-reporter kill switch when scripts are called from the command line
 ### $@ - all arguments
