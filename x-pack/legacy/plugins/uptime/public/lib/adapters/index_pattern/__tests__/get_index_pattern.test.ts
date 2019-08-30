@@ -13,10 +13,31 @@ describe('getIndexPattern', () => {
     axiosSpy = jest.spyOn(axios, 'get');
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('returns expected data', async () => {
-    expect.assertions(1);
+    expect.assertions(3);
     axiosSpy.mockReturnValue(new Promise(r => r({ data: { foo: 'bar' } })));
     expect(await getIndexPattern()).toEqual({ foo: 'bar' });
+    expect(axiosSpy.mock.calls).toHaveLength(1);
+    expect(axiosSpy.mock.calls[0]).toEqual(['/api/uptime/index_pattern']);
+  });
+
+  it('handles the supplied basePath', async () => {
+    expect.assertions(2);
+    await getIndexPattern('foo');
+    expect(axiosSpy.mock.calls).toHaveLength(1);
+    expect(axiosSpy.mock.calls[0]).toEqual(['foo/api/uptime/index_pattern']);
+  });
+
+  it('supplies the returned data to the given setter function', async () => {
+    const mockSetter = jest.fn();
+    axiosSpy.mockReturnValue(new Promise(r => r({ data: { foo: 'bar' } })));
+    await getIndexPattern(undefined, mockSetter);
+    expect(mockSetter).toHaveBeenCalled();
+    expect(mockSetter).toHaveBeenCalledWith({ foo: 'bar' });
   });
 
   it('returns undefined when there is an error fetching', async () => {

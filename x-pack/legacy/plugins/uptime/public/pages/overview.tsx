@@ -66,17 +66,8 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
 
   const [indexPattern, setIndexPattern] = useState<any>(undefined);
 
-  async function fetchIndexPattern() {
-    try {
-      const result = await getIndexPattern(basePath);
-      setIndexPattern(result);
-    } catch {
-      setIndexPattern(undefined);
-    }
-  }
-
   useEffect(() => {
-    fetchIndexPattern();
+    getIndexPattern(basePath, setIndexPattern);
     setBreadcrumbs(getOverviewPageBreadcrumbs());
     logOverviewPageLoad();
     if (setHeadingText) {
@@ -94,7 +85,6 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
 
   const filterQueryString = search || '';
   let error: any;
-  let filters: any | undefined;
   let kueryString: string;
   try {
     const filterMap = new Map<string, string[]>(JSON.parse(urlFilters));
@@ -102,8 +92,9 @@ export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: 
   } catch {
     kueryString = '';
   }
+
+  let filters: any | undefined;
   try {
-    // toESQuery will throw errors
     if (filterQueryString || urlFilters) {
       if (indexPattern) {
         const staticIndexPattern = toStaticIndexPattern(indexPattern);
