@@ -62,7 +62,7 @@ run(
         log.info('Running tests. This does not include Storybook Snapshots...');
       }
     }
-    console.log(path, options);
+
     runXPackScript('jest', [path].concat(options));
   },
   {
