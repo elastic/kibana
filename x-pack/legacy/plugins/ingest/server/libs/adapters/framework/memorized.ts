@@ -58,4 +58,10 @@ export class MemorizedBackendFrameworkAdapter {
       return await this.adapter.getUser(request);
     });
   }
+
+  public async waitForStack() {
+    if (this.adapter) {
+      await this.adapter.waitForStack();
+    }
+  }
 }
