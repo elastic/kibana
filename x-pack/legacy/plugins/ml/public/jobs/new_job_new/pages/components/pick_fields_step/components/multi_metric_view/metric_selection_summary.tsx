@@ -10,14 +10,12 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { MultiMetricJobCreator, isMultiMetricJobCreator } from '../../../../../common/job_creator';
 import { Results, ModelItem, Anomaly } from '../../../../../common/results_loader';
 import { LineChartData } from '../../../../../common/chart_loader';
-import { defaultChartSettings, ChartSettings } from '../../../charts/common/settings';
+import { useChartSettings } from '../../../charts/common/settings';
 import { ChartGrid } from './chart_grid';
 import { mlMessageBarService } from '../../../../../../../components/messagebar/messagebar_service';
 
 export const MultiMetricDetectorsSummary: FC = () => {
-  const { jobCreator: jc, chartLoader, chartInterval, resultsLoader } = useContext(
-    JobCreatorContext
-  );
+  const { jobCreator: jc, chartLoader, resultsLoader } = useContext(JobCreatorContext);
 
   if (isMultiMetricJobCreator(jc) === false) {
     return null;
@@ -28,8 +26,7 @@ export const MultiMetricDetectorsSummary: FC = () => {
   const [loadingData, setLoadingData] = useState(false);
   const [modelData, setModelData] = useState<Record<number, ModelItem[]>>([]);
   const [anomalyData, setAnomalyData] = useState<Record<number, Anomaly[]>>([]);
-
-  const [chartSettings, setChartSettings] = useState(defaultChartSettings);
+  const [chartSettings] = useChartSettings();
   const [fieldValues, setFieldValues] = useState<string[]>([]);
 
   function setResultsWrapper(results: Results) {
@@ -63,27 +60,7 @@ export const MultiMetricDetectorsSummary: FC = () => {
     }
   }, [fieldValues]);
 
-  function getChartSettings(): ChartSettings {
-    const cs = {
-      ...defaultChartSettings,
-      intervalMs: chartInterval.getInterval().asMilliseconds(),
-    };
-    if (jobCreator.aggFieldPairs.length > 2) {
-      cs.cols = 3;
-      cs.height = '150px';
-      cs.intervalMs = cs.intervalMs * 3;
-    } else if (jobCreator.aggFieldPairs.length > 1) {
-      cs.cols = 2;
-      cs.height = '200px';
-      cs.intervalMs = cs.intervalMs * 2;
-    }
-    return cs;
-  }
-
   async function loadCharts() {
-    const cs = getChartSettings();
-    setChartSettings(cs);
-
     if (allDataReady()) {
       setLoadingData(true);
       try {
@@ -93,12 +70,12 @@ export const MultiMetricDetectorsSummary: FC = () => {
           jobCreator.aggFieldPairs,
           jobCreator.splitField,
           fieldValues.length > 0 ? fieldValues[0] : null,
-          cs.intervalMs
+          chartSettings.intervalMs
         );
         setLineChartsData(resp);
       } catch (error) {
         mlMessageBarService.notify.error(error);
-        setLineChartsData([]);
+        setLineChartsData({});
       }
       setLoadingData(false);
     }
@@ -113,18 +90,20 @@ export const MultiMetricDetectorsSummary: FC = () => {
 
   return (
     <Fragment>
-      <ChartGrid
-        aggFieldPairList={jobCreator.aggFieldPairs}
-        chartSettings={chartSettings}
-        splitField={jobCreator.splitField}
-        fieldValues={fieldValues}
-        lineChartsData={lineChartsData}
-        modelData={modelData}
-        anomalyData={anomalyData}
-        deleteDetector={undefined}
-        jobType={jobCreator.type}
-        loading={loadingData}
-      />
+      {Object.keys(lineChartsData).length && (
+        <ChartGrid
+          aggFieldPairList={jobCreator.aggFieldPairs}
+          chartSettings={chartSettings}
+          splitField={jobCreator.splitField}
+          fieldValues={fieldValues}
+          lineChartsData={lineChartsData}
+          modelData={modelData}
+          anomalyData={anomalyData}
+          deleteDetector={undefined}
+          jobType={jobCreator.type}
+          loading={loadingData}
+        />
+      )}
     </Fragment>
   );
 };

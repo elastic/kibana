@@ -63,6 +63,9 @@ export class ChartLoader {
         splitFieldName,
         splitFieldValue
       );
+      if (resp.error !== undefined) {
+        throw resp.error;
+      }
       return resp.results;
     }
     return {};
@@ -88,6 +91,9 @@ export class ChartLoader {
         aggFieldPairs.map(getAggFieldPairNames),
         splitFieldName
       );
+      if (resp.error !== undefined) {
+        throw resp.error;
+      }
       return resp.results;
     }
     return {};
@@ -107,6 +113,10 @@ export class ChartLoader {
         end,
         intervalMs * 3
       );
+      if (resp.error !== undefined) {
+        throw resp.error;
+      }
+
       return Object.entries(resp.results).map(([time, value]) => ({
         time: +time,
         value: value as number,

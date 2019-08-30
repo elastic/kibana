@@ -13,10 +13,9 @@ import { LineChartData } from '../../../../../common/chart_loader';
 import { DropDownLabel, DropDownProps } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
 import { Field, AggFieldPair } from '../../../../../../../../common/types/fields';
-import { defaultChartSettings, ChartSettings } from '../../../charts/common/settings';
+import { useChartSettings } from '../../../charts/common/settings';
 import { MetricSelector } from './metric_selector';
 import { SplitFieldSelector } from '../split_field';
-import { MlTimeBuckets } from '../../../../../../../util/ml_time_buckets';
 import { ChartGrid } from './chart_grid';
 import { mlMessageBarService } from '../../../../../../../components/messagebar/messagebar_service';
 
@@ -27,13 +26,9 @@ interface Props {
 type DetectorFieldValues = Record<number, string[]>;
 
 export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
-  const {
-    jobCreator: jc,
-    jobCreatorUpdate,
-    jobCreatorUpdated,
-    chartLoader,
-    chartInterval,
-  } = useContext(JobCreatorContext);
+  const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated, chartLoader } = useContext(
+    JobCreatorContext
+  );
 
   if (isPopulationJobCreator(jc) === false) {
     return null;
@@ -49,7 +44,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
   const [loadingData, setLoadingData] = useState(false);
   const [start, setStart] = useState(jobCreator.start);
   const [end, setEnd] = useState(jobCreator.end);
-  const [chartSettings, setChartSettings] = useState(defaultChartSettings);
+  const [chartSettings] = useChartSettings();
   const [splitField, setSplitField] = useState(jobCreator.splitField);
   const [fieldValuesPerDetector, setFieldValuesPerDetector] = useState<DetectorFieldValues>({});
   const [byFieldsUpdated, setByFieldsUpdated] = useReducer<(s: number) => number>(s => s + 1, 0);
@@ -138,27 +133,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
     loadFieldExamples();
   }, [splitField, byFieldsUpdated]);
 
-  function getChartSettings(): ChartSettings {
-    const interval = new MlTimeBuckets();
-    interval.setInterval('auto');
-    interval.setBounds(chartInterval.getBounds());
-
-    const cs = {
-      ...defaultChartSettings,
-      intervalMs: interval.getInterval().asMilliseconds(),
-    };
-    if (aggFieldPairList.length > 1) {
-      cs.cols = 2;
-      cs.height = '200px';
-      cs.intervalMs = cs.intervalMs * 2;
-    }
-    return cs;
-  }
-
   async function loadCharts() {
-    const cs = getChartSettings();
-    setChartSettings(cs);
-
     if (allDataReady()) {
       setLoadingData(true);
       try {
@@ -167,7 +142,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
           jobCreator.end,
           aggFieldPairList,
           jobCreator.splitField,
-          cs.intervalMs
+          chartSettings.intervalMs
         );
 
         setLineChartsData(resp);

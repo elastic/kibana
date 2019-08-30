@@ -12,7 +12,7 @@ import { LineChartData } from '../../../../../common/chart_loader';
 import { DropDownLabel, DropDownProps } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
 import { AggFieldPair } from '../../../../../../../../common/types/fields';
-import { defaultChartSettings, ChartSettings } from '../../../charts/common/settings';
+import { useChartSettings } from '../../../charts/common/settings';
 import { MetricSelector } from './metric_selector';
 import { ChartGrid } from './chart_grid';
 import { mlMessageBarService } from '../../../../../../../components/messagebar/messagebar_service';
@@ -22,13 +22,9 @@ interface Props {
 }
 
 export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
-  const {
-    jobCreator: jc,
-    jobCreatorUpdate,
-    jobCreatorUpdated,
-    chartLoader,
-    chartInterval,
-  } = useContext(JobCreatorContext);
+  const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated, chartLoader } = useContext(
+    JobCreatorContext
+  );
 
   if (isMultiMetricJobCreator(jc) === false) {
     return null;
@@ -44,8 +40,7 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
   const [loadingData, setLoadingData] = useState(false);
   const [start, setStart] = useState(jobCreator.start);
   const [end, setEnd] = useState(jobCreator.end);
-
-  const [chartSettings, setChartSettings] = useState(defaultChartSettings);
+  const [chartSettings] = useChartSettings();
   const [splitField, setSplitField] = useState(jobCreator.splitField);
   const [fieldValues, setFieldValues] = useState<string[]>([]);
   const [pageReady, setPageReady] = useState(false);
@@ -121,27 +116,7 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
     loadCharts();
   }, [fieldValues]);
 
-  function getChartSettings(): ChartSettings {
-    const cs = {
-      ...defaultChartSettings,
-      intervalMs: chartInterval.getInterval().asMilliseconds(),
-    };
-    if (aggFieldPairList.length > 2) {
-      cs.cols = 3;
-      cs.height = '150px';
-      cs.intervalMs = cs.intervalMs * 3;
-    } else if (aggFieldPairList.length > 1) {
-      cs.cols = 2;
-      cs.height = '200px';
-      cs.intervalMs = cs.intervalMs * 2;
-    }
-    return cs;
-  }
-
   async function loadCharts() {
-    const cs = getChartSettings();
-    setChartSettings(cs);
-
     if (allDataReady()) {
       setLoadingData(true);
       try {
@@ -151,7 +126,7 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
           aggFieldPairList,
           jobCreator.splitField,
           fieldValues.length > 0 ? fieldValues[0] : null,
-          cs.intervalMs
+          chartSettings.intervalMs
         );
         setLineChartsData(resp);
       } catch (error) {

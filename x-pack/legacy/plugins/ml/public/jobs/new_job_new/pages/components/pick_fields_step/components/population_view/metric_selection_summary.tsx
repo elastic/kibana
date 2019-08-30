@@ -13,16 +13,14 @@ import { PopulationJobCreator, isPopulationJobCreator } from '../../../../../com
 import { Results, ModelItem, Anomaly } from '../../../../../common/results_loader';
 import { LineChartData } from '../../../../../common/chart_loader';
 import { Field, AggFieldPair } from '../../../../../../../../common/types/fields';
-import { defaultChartSettings, ChartSettings } from '../../../charts/common/settings';
-import { MlTimeBuckets } from '../../../../../../../util/ml_time_buckets';
+import { useChartSettings } from '../../../charts/common/settings';
 import { ChartGrid } from './chart_grid';
+import { mlMessageBarService } from '../../../../../../../components/messagebar/messagebar_service';
 
 type DetectorFieldValues = Record<number, string[]>;
 
 export const PopulationDetectorsSummary: FC = () => {
-  const { jobCreator: jc, chartLoader, chartInterval, resultsLoader } = useContext(
-    JobCreatorContext
-  );
+  const { jobCreator: jc, chartLoader, resultsLoader } = useContext(JobCreatorContext);
 
   if (isPopulationJobCreator(jc) === false) {
     return null;
@@ -36,7 +34,7 @@ export const PopulationDetectorsSummary: FC = () => {
   const [loadingData, setLoadingData] = useState(false);
   const [modelData, setModelData] = useState<Record<number, ModelItem[]>>([]);
   const [anomalyData, setAnomalyData] = useState<Record<number, Anomaly[]>>([]);
-  const [chartSettings, setChartSettings] = useState(defaultChartSettings);
+  const [chartSettings] = useChartSettings();
   const [fieldValuesPerDetector, setFieldValuesPerDetector] = useState<DetectorFieldValues>({});
 
   function setResultsWrapper(results: Results) {
@@ -69,38 +67,23 @@ export const PopulationDetectorsSummary: FC = () => {
     loadFieldExamples();
   }, [jobCreator.splitField]);
 
-  function getChartSettings(): ChartSettings {
-    const interval = new MlTimeBuckets();
-    interval.setInterval('auto');
-    interval.setBounds(chartInterval.getBounds());
-
-    const cs = {
-      ...defaultChartSettings,
-      intervalMs: interval.getInterval().asMilliseconds(),
-    };
-    if (aggFieldPairList.length > 1) {
-      cs.cols = 2;
-      cs.height = '200px';
-      cs.intervalMs = cs.intervalMs * 2;
-    }
-    return cs;
-  }
-
   async function loadCharts() {
-    const cs = getChartSettings();
-    setChartSettings(cs);
-
-    if (aggFieldPairList.length > 0) {
+    if (allDataReady()) {
       setLoadingData(true);
-      const resp: LineChartData = await chartLoader.loadPopulationCharts(
-        jobCreator.start,
-        jobCreator.end,
-        aggFieldPairList,
-        jobCreator.splitField,
-        cs.intervalMs
-      );
+      try {
+        const resp: LineChartData = await chartLoader.loadPopulationCharts(
+          jobCreator.start,
+          jobCreator.end,
+          aggFieldPairList,
+          jobCreator.splitField,
+          chartSettings.intervalMs
+        );
 
-      setLineChartsData(resp);
+        setLineChartsData(resp);
+      } catch (error) {
+        mlMessageBarService.notify.error(error);
+        setLineChartsData({});
+      }
       setLoadingData(false);
     }
   }

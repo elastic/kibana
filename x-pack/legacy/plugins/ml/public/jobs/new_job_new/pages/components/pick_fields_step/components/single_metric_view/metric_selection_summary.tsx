@@ -13,23 +13,24 @@ import {
 import { Results, ModelItem, Anomaly } from '../../../../../common/results_loader';
 import { LineChartData } from '../../../../../common/chart_loader';
 import { AnomalyChart, CHART_TYPE } from '../../../charts/anomaly_chart';
+import { useChartSettings } from '../../../charts/common/settings';
+import { mlMessageBarService } from '../../../../../../../components/messagebar/messagebar_service';
 
 const DTR_IDX = 0;
 
 export const SingleMetricDetectorsSummary: FC = () => {
-  const { jobCreator: jc, chartLoader, chartInterval, resultsLoader } = useContext(
-    JobCreatorContext
-  );
+  const { jobCreator: jc, chartLoader, resultsLoader } = useContext(JobCreatorContext);
 
   if (isSingleMetricJobCreator(jc) === false) {
     return null;
   }
   const jobCreator = jc as SingleMetricJobCreator;
 
-  const [lineChartsData, setLineChartData] = useState<LineChartData>([]);
+  const [lineChartsData, setLineChartData] = useState<LineChartData>({});
   const [loadingData, setLoadingData] = useState(false);
   const [modelData, setModelData] = useState<ModelItem[]>([]);
   const [anomalyData, setAnomalyData] = useState<Anomaly[]>([]);
+  const [chartSettings] = useChartSettings();
 
   function setResultsWrapper(results: Results) {
     const model = results.model[DTR_IDX];
@@ -54,16 +55,21 @@ export const SingleMetricDetectorsSummary: FC = () => {
   async function loadChart() {
     if (jobCreator.aggFieldPair !== null) {
       setLoadingData(true);
-      const resp: LineChartData = await chartLoader.loadLineCharts(
-        jobCreator.start,
-        jobCreator.end,
-        [jobCreator.aggFieldPair],
-        null,
-        null,
-        chartInterval.getInterval().asMilliseconds()
-      );
-      if (resp[DTR_IDX] !== undefined) {
-        setLineChartData(resp);
+      try {
+        const resp: LineChartData = await chartLoader.loadLineCharts(
+          jobCreator.start,
+          jobCreator.end,
+          [jobCreator.aggFieldPair],
+          null,
+          null,
+          chartSettings.intervalMs
+        );
+        if (resp[DTR_IDX] !== undefined) {
+          setLineChartData(resp);
+        }
+      } catch (error) {
+        mlMessageBarService.notify.error(error);
+        setLineChartData({});
       }
       setLoadingData(false);
     }
