@@ -14,6 +14,38 @@ export const PAGE_TITLE = i18n.translate('xpack.siem.hosts.pageTitle', {
   defaultMessage: 'Hosts',
 });
 
+export const NAVIGATION_ALL_HOSTS_TITLE = i18n.translate(
+  'xpack.siem.hosts.navigation.allHostsTitle',
+  {
+    defaultMessage: 'All Hosts',
+  }
+);
+
+export const NAVIGATION_AUTHENTICATIONS_TITLE = i18n.translate(
+  'xpack.siem.hosts.navigation.authenticationsTitle',
+  {
+    defaultMessage: 'Authentications',
+  }
+);
+
+export const NAVIGATION_UNCOMMON_PROCESSES_TITLE = i18n.translate(
+  'xpack.siem.hosts.navigation.uncommonProcessesTitle',
+  {
+    defaultMessage: 'Uncommon processes',
+  }
+);
+
+export const NAVIGATION_ANOMALIES_TITLE = i18n.translate(
+  'xpack.siem.hosts.navigation.anomaliesTitle',
+  {
+    defaultMessage: 'Anomalies',
+  }
+);
+
+export const NAVIGATION_EVENTS_TITLE = i18n.translate('xpack.siem.hosts.navigation.eventsTitle', {
+  defaultMessage: 'Events',
+});
+
 export const EMPTY_TITLE = i18n.translate('xpack.siem.hosts.emptyTitle', {
   defaultMessage:
     'It looks like you don’t have any indices relevant to hosts in the SIEM application',

@@ -642,6 +642,14 @@
         ],
       },
       {
+        groupSlug: 'mapbox-gl',
+        groupName: 'mapbox-gl related packages',
+        packageNames: [
+          'mapbox-gl',
+          '@types/mapbox-gl',
+        ],
+      },
+      {
         groupSlug: 'memoize-one',
         groupName: 'memoize-one related packages',
         packageNames: [

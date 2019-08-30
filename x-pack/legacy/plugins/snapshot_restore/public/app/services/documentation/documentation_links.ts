@@ -10,10 +10,16 @@ import { REPOSITORY_DOC_PATHS } from '../../constants';
 class DocumentationLinksService {
   private esDocBasePath: string = '';
   private esPluginDocBasePath: string = '';
+  private esStackOverviewDocBasePath: string = '';
 
-  public init(esDocBasePath: string, esPluginDocBasePath: string): void {
+  public init(
+    esDocBasePath: string,
+    esPluginDocBasePath: string,
+    esStackOverviewDocBasePath: string
+  ): void {
     this.esDocBasePath = esDocBasePath;
     this.esPluginDocBasePath = esPluginDocBasePath;
+    this.esStackOverviewDocBasePath = esStackOverviewDocBasePath;
   }
 
   public getRepositoryPluginDocUrl() {
@@ -42,7 +48,7 @@ class DocumentationLinksService {
   }
 
   public getSnapshotDocUrl() {
-    return `${this.esDocBasePath}/modules-snapshots.html#_snapshot`;
+    return `${this.esDocBasePath}/modules-snapshots.html#snapshots-take-snapshot`;
   }
 
   public getRestoreDocUrl() {
@@ -55,6 +61,18 @@ class DocumentationLinksService {
 
   public getIndexSettingsUrl() {
     return `${this.esDocBasePath}/index-modules.html`;
+  }
+
+  public getDateMathIndexNamesUrl() {
+    return `${this.esDocBasePath}/date-math-index-names.html`;
+  }
+
+  public getSlmUrl() {
+    return `${this.esDocBasePath}/slm-api-put.html`;
+  }
+
+  public getCronUrl() {
+    return `${this.esStackOverviewDocBasePath}/trigger-schedule.html#schedule-cron`;
   }
 }
 

@@ -40,7 +40,7 @@ import { ml } from '../../../../../services/ml_api_service';
 import {
   sortColumns,
   toggleSelectedField,
-  DataFrameAnalyticsOutlierConfig,
+  DataFrameAnalyticsConfig,
   EsFieldName,
   EsDoc,
   MAX_COLUMNS,
@@ -62,7 +62,7 @@ const FEATURE_INFLUENCE = 'feature_influence';
 
 interface GetDataFrameAnalyticsResponse {
   count: number;
-  data_frame_analytics: DataFrameAnalyticsOutlierConfig[];
+  data_frame_analytics: DataFrameAnalyticsConfig[];
 }
 
 // Defining our own ENUM here.
@@ -86,7 +86,7 @@ const ExplorationTitle: React.SFC<{ jobId: string }> = ({ jobId }) => (
   <EuiTitle size="xs">
     <span>
       {i18n.translate('xpack.ml.dataframe.analytics.exploration.jobIdTitle', {
-        defaultMessage: 'Job id {jobId}',
+        defaultMessage: 'Job ID {jobId}',
         values: { jobId },
       })}
     </span>
@@ -98,9 +98,7 @@ interface Props {
 }
 
 export const Exploration: FC<Props> = React.memo(({ jobId }) => {
-  const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsOutlierConfig | undefined>(
-    undefined
-  );
+  const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
 
   useEffect(() => {
     (async function() {
@@ -368,12 +366,12 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
 
   return (
     <EuiPanel grow={false}>
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem grow={false}>
           <ExplorationTitle jobId={jobConfig.id} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFlexGroup alignItems="center" gutterSize="xs">
+          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
             <EuiFlexItem style={{ textAlign: 'right' }}>
               {docFieldsCount > MAX_COLUMNS && (
                 <EuiText size="s">
@@ -448,6 +446,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
             initialPageSize: 25,
             pageSizeOptions: [5, 10, 25, 50],
           }}
+          responsive={false}
           sorting={sorting}
         />
       )}
