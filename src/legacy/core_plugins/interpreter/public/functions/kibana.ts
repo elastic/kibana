@@ -24,10 +24,10 @@ export const kibana = () => ({
   type: 'kibana_context',
   context: {},
   help: i18n.translate('interpreter.functions.kibana.help', {
-    defaultMessage: 'Gets kibana global context'
+    defaultMessage: 'Gets kibana global context',
   }),
   args: {},
-  fn(context, args, handlers) {
+  fn(context: any, args: any, handlers: any) {
     const initialContext = handlers.getInitialContext ? handlers.getInitialContext() : {};
 
     if (context.query) {
@@ -45,7 +45,7 @@ export const kibana = () => ({
       type: 'kibana_context',
       query: initialContext.query,
       filters: initialContext.filters,
-      timeRange: timeRange,
+      timeRange,
     };
   },
 });

@@ -22,9 +22,9 @@ import { kibana } from './kibana';
 
 describe('interpreter/functions#kibana', () => {
   const fn = functionWrapper(kibana);
-  let context;
-  let initialContext;
-  let handlers;
+  let context: any;
+  let initialContext: any;
+  let handlers: any;
 
   beforeEach(() => {
     context = { timeRange: { from: '0', to: '1' } };

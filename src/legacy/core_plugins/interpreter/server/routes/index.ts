@@ -17,13 +17,8 @@
  * under the License.
  */
 
-import { Registry } from '@kbn/interpreter/common';
-import { RenderFunction } from './render_function';
+import { registerServerFunctions } from './server_functions';
 
-class RenderFunctionsRegistry extends Registry {
-  wrapper(obj) {
-    return new RenderFunction(obj);
-  }
+export function routes(server: any) {
+  registerServerFunctions(server);
 }
-
-export { RenderFunctionsRegistry };

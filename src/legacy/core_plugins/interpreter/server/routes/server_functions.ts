@@ -18,16 +18,16 @@
  */
 
 import Boom from 'boom';
+import Joi from 'joi';
 import { serializeProvider, API_ROUTE } from '../../common';
 import { createHandlers } from '../lib/create_handlers';
-import Joi from 'joi';
 
 /**
  * Register the Canvas function endopints.
  *
  * @param {*} server - The Kibana server
  */
-export function registerServerFunctions(server) {
+export function registerServerFunctions(server: any) {
   getServerFunctions(server);
   runServerFunctions(server);
 }
@@ -37,7 +37,7 @@ export function registerServerFunctions(server) {
  *
  * @param {*} server - The Kibana server
  */
-function runServerFunctions(server) {
+function runServerFunctions(server: any) {
   server.route({
     method: 'POST',
     path: `${API_ROUTE}/fns`,
@@ -48,19 +48,20 @@ function runServerFunctions(server) {
       },
       validate: {
         payload: Joi.object({
-          functions: Joi.array().items(
-            Joi.object()
-              .keys({
+          functions: Joi.array()
+            .items(
+              Joi.object().keys({
                 id: Joi.number().required(),
                 functionName: Joi.string().required(),
                 args: Joi.object().default({}),
                 context: Joi.any().default(null),
-              }),
-          ).required(),
+              })
+            )
+            .required(),
         }).required(),
       },
     },
-    async handler(req) {
+    async handler(req: any) {
       const handlers = await createHandlers(req, server);
       const { functions } = req.payload;
 
@@ -73,19 +74,19 @@ function runServerFunctions(server) {
       // Send the initial headers.
       res.writeHead(200, {
         'Content-Type': 'text/plain',
-        'Connection': 'keep-alive',
+        Connection: 'keep-alive',
         'Transfer-Encoding': 'chunked',
         'Cache-Control': 'no-cache',
       });
 
       // Write a length-delimited response
-      const streamResult = (result) => {
+      const streamResult = (result: any) => {
         const payload = JSON.stringify(result) + '\n';
         res.write(`${payload.length}:${payload}`);
       };
 
       // Tries to run an interpreter function, and ensures a consistent error payload on failure.
-      const tryFunction = async (id, fnCall) => {
+      const tryFunction = async (id: any, fnCall: any) => {
         try {
           const result = await runFunction(server, handlers, fnCall);
 
@@ -96,7 +97,7 @@ function runServerFunctions(server) {
           return { id, statusCode: 200, result };
         } catch (err) {
           if (Boom.isBoom(err)) {
-            return batchError(id, err.output.payload, err.statusCode);
+            return batchError(id, err.output.payload, (err as any).statusCode);
           } else if (err instanceof Error) {
             return batchError(id, err.message);
           }
@@ -107,7 +108,9 @@ function runServerFunctions(server) {
       };
 
       // Process each function individually, and stream the responses back to the client
-      await Promise.all(functions.map(({ id, ...fnCall }) => tryFunction(id, fnCall).then(streamResult)));
+      await Promise.all(
+        functions.map(({ id, ...fnCall }: any) => tryFunction(id, fnCall).then(streamResult))
+      );
 
       // All of the responses have been written, so we can close the response.
       res.end();
@@ -118,7 +121,7 @@ function runServerFunctions(server) {
 /**
  * A helper function for bundling up errors.
  */
-function batchError(id, message, statusCode = 500) {
+function batchError(id: any, message: any, statusCode = 500) {
   return {
     id,
     statusCode,
@@ -130,7 +133,7 @@ function batchError(id, message, statusCode = 500) {
  * Register the endpoint that returns the list of server-only functions.
  * @param {*} server - The Kibana server
  */
-function getServerFunctions(server) {
+function getServerFunctions(server: any) {
   server.route({
     method: 'GET',
     path: `${API_ROUTE}/fns`,
@@ -147,7 +150,7 @@ function getServerFunctions(server) {
  * @param {*} handlers - The Canvas handlers
  * @param {*} fnCall - Describes the function being run `{ functionName, args, context }`
  */
-async function runFunction(server, handlers, fnCall) {
+async function runFunction(server: any, handlers: any, fnCall: any) {
   const registries = server.plugins.interpreter.registries();
   const { functionName, args, context } = fnCall;
   const types = registries.types.toJS();

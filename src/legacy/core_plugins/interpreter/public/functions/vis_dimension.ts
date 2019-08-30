@@ -22,48 +22,48 @@ import { i18n } from '@kbn/i18n';
 export const visDimension = () => ({
   name: 'visdimension',
   help: i18n.translate('interpreter.function.visDimension.help', {
-    defaultMessage: 'Generates visConfig dimension object'
+    defaultMessage: 'Generates visConfig dimension object',
   }),
   type: 'vis_dimension',
   context: {
-    types: [
-      'kibana_datatable'
-    ],
+    types: ['kibana_datatable'],
   },
   args: {
     accessor: {
       types: ['string', 'number'],
       aliases: ['_'],
       help: i18n.translate('interpreter.function.visDimension.accessor.help', {
-        defaultMessage: 'Column in your dataset to use (either column index or column name)'
+        defaultMessage: 'Column in your dataset to use (either column index or column name)',
       }),
     },
     format: {
       types: ['string'],
-      default: 'string'
+      default: 'string',
     },
     formatParams: {
       types: ['string'],
       default: '"{}"',
-    }
+    },
   },
-  fn: (context, args) => {
-    const accessor = Number.isInteger(args.accessor) ?
-      args.accessor :
-      context.columns.find(c => c.id === args.accessor);
+  fn: (context: any, args: any) => {
+    const accessor = Number.isInteger(args.accessor)
+      ? args.accessor
+      : context.columns.find((c: any) => c.id === args.accessor);
     if (accessor === undefined) {
-      throw new Error(i18n.translate('interpreter.function.visDimension.error.accessor', {
-        defaultMessage: 'Column name provided is invalid'
-      }));
+      throw new Error(
+        i18n.translate('interpreter.function.visDimension.error.accessor', {
+          defaultMessage: 'Column name provided is invalid',
+        })
+      );
     }
 
     return {
       type: 'vis_dimension',
-      accessor: accessor,
+      accessor,
       format: {
         id: args.format,
         params: JSON.parse(args.formatParams),
-      }
+      },
     };
   },
 });

@@ -18,7 +18,9 @@
  */
 
 import 'uiExports/interpreter';
+// @ts-ignore
 import { register, registryFactory } from '@kbn/interpreter/common';
+// @ts-ignore
 import { npSetup } from 'ui/new_platform';
 import { initializeInterpreter } from './lib/interpreter';
 import { registries } from './registries';
@@ -34,7 +36,10 @@ const KIBANA_BASE_PATH = npSetup.core.injectedMetadata.getBasePath();
 
 // Expose kbnInterpreter.register(specs) and kbnInterpreter.registries() globally so that plugins
 // can register without a transpile step.
-global.kbnInterpreter = Object.assign(global.kbnInterpreter || {}, registryFactory(registries));
+(global as any).kbnInterpreter = Object.assign(
+  (global as any).kbnInterpreter || {},
+  registryFactory(registries)
+);
 
 register(registries, {
   types: typeSpecs,
@@ -58,7 +63,7 @@ const initialize = async () => {
 
 export const getInterpreter = async () => {
   if (!_interpreterPromise) {
-    _interpreterPromise = new Promise(resolve => _resolve = resolve);
+    _interpreterPromise = new Promise(resolve => (_resolve = resolve));
     initialize();
   }
   return await _interpreterPromise;

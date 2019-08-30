@@ -23,18 +23,18 @@ import chrome from 'ui/chrome';
 import { VisRequestHandlersRegistryProvider as RequestHandlersProvider } from 'ui/registry/vis_request_handlers';
 import { VisResponseHandlersRegistryProvider as ResponseHandlerProvider } from 'ui/registry/vis_response_handlers';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import { IndexPatternsProvider } from '../../../data/public';
 import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { PersistedState } from 'ui/persisted_state';
+import { IndexPatternsProvider } from '../../../data/public';
 
-function getHandler(from, type) {
+function getHandler(from: any, type: any) {
   if (typeof type === 'function') {
     return type;
   }
   if (type === 'courier' || type === 'none') {
     return null;
   }
-  const handlerDesc = from.find(handler => handler.name === type);
+  const handlerDesc = from.find((handler: any) => handler.name === type);
   if (!handlerDesc) {
     throw new Error(`Could not find handler "${type}".`);
   }
@@ -45,7 +45,7 @@ export const visualization = () => ({
   name: 'visualization',
   type: 'render',
   help: i18n.translate('interpreter.functions.visualization.help', {
-    defaultMessage: 'A simple visualization'
+    defaultMessage: 'A simple visualization',
   }),
   args: {
     index: {
@@ -75,11 +75,11 @@ export const visualization = () => ({
     uiState: {
       types: ['string'],
       default: '"{}"',
-    }
+    },
   },
-  async fn(context, args, handlers) {
+  async fn(context: any, args: any, handlers: any) {
     const $injector = await chrome.dangerouslyGetActiveInjector();
-    const Private = $injector.get('Private');
+    const Private = $injector.get('Private') as any;
     const requestHandlers = Private(RequestHandlersProvider);
     const responseHandlers = Private(ResponseHandlerProvider);
     const visTypes = Private(VisTypesRegistryProvider);
@@ -105,7 +105,7 @@ export const visualization = () => ({
         timeRange: get(context, 'timeRange', null),
         query: get(context, 'query', null),
         filters: get(context, 'filters', null),
-        uiState: uiState,
+        uiState,
         inspectorAdapters: handlers.inspectorAdapters,
         queryFilter,
         forceFetch: true,
@@ -115,7 +115,7 @@ export const visualization = () => ({
     if (responseHandler) {
       if (context.columns) {
         // assign schemas to aggConfigs
-        context.columns.forEach(column => {
+        context.columns.forEach((column: any) => {
           if (column.aggConfig) {
             column.aggConfig.aggConfigs.schemas = visType.schemas.all;
           }
@@ -139,8 +139,8 @@ export const visualization = () => ({
       value: {
         visData: context,
         visType: args.type,
-        visConfig: visConfigParams
-      }
+        visConfig: visConfigParams,
+      },
     };
-  }
+  },
 });

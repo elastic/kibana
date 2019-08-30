@@ -28,7 +28,7 @@ const mockServer = {
   plugins: {
     elasticsearch: {
       getCluster: () => ({
-        callWithRequest: (...args) => Promise.resolve(args),
+        callWithRequest: (...args: any) => Promise.resolve(args),
       }),
     },
   },

@@ -23,13 +23,13 @@ import { font } from '../font';
 import { functionWrapper } from '../../../test_helpers';
 
 describe('font', () => {
-  const fn = functionWrapper(font);
+  const fn: any = functionWrapper(font);
 
   describe('default output', () => {
     const result = fn(null);
 
     it('returns a style', () => {
-      expect(result)
+      (expect as any)(result)
         .to.have.property('type', 'style')
         .and.to.have.property('spec')
         .and.to.have.property('css');
@@ -40,8 +40,8 @@ describe('font', () => {
     describe('size', () => {
       it('sets font size', () => {
         const result = fn(null, { size: 20 });
-        expect(result.spec).to.have.property('fontSize', '20px');
-        expect(result.css).to.contain('font-size:20px');
+        (expect as any)(result.spec).to.have.property('fontSize', '20px');
+        (expect as any)(result.css).to.contain('font-size:20px');
       });
 
       it('defaults to 14px', () => {
@@ -110,7 +110,7 @@ describe('font', () => {
         expect(result.css).to.contain('font-weight:400');
       });
 
-      it('defaults to \'normal\'', () => {
+      it("defaults to 'normal'", () => {
         const result = fn(null);
         expect(result.spec).to.have.property('fontWeight', 'normal');
         expect(result.css).to.contain('font-weight:normal');

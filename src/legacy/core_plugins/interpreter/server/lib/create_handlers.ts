@@ -17,11 +17,16 @@
  * under the License.
  */
 
-export const clog = () => ({
-  name: 'clog',
-  help: 'Outputs the context to the console',
-  fn: context => {
-    console.log(context); //eslint-disable-line no-console
-    return context;
-  },
-});
+export const createHandlers = (request: any, server: any) => {
+  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+  const config = server.config();
+
+  return {
+    environment: 'server',
+    serverUri:
+      config.has('server.rewriteBasePath') && config.get('server.rewriteBasePath')
+        ? `${server.info.uri}${config.get('server.basePath')}`
+        : server.info.uri,
+    elasticsearchClient: async (...args: any) => callWithRequest(request, ...args),
+  };
+};

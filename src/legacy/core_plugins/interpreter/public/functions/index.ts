@@ -17,16 +17,22 @@
  * under the License.
  */
 
-export const createHandlers = (request, server) => {
-  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-  const config = server.config();
+import { clog } from './clog';
+import { esaggs } from './esaggs';
+import { font } from './font';
+import { kibana } from './kibana';
+import { kibanaContext } from './kibana_context';
+import { range } from './range';
+import { visualization } from './visualization';
+import { visDimension } from './vis_dimension';
 
-  return {
-    environment: 'server',
-    serverUri:
-      config.has('server.rewriteBasePath') && config.get('server.rewriteBasePath')
-        ? `${server.info.uri}${config.get('server.basePath')}`
-        : server.info.uri,
-    elasticsearchClient: async (...args) => callWithRequest(request, ...args),
-  };
-};
+export const functions = [
+  clog,
+  esaggs,
+  font,
+  kibana,
+  kibanaContext,
+  range,
+  visualization,
+  visDimension,
+];

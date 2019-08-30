@@ -19,17 +19,18 @@
 
 import chrome from 'ui/chrome';
 import { visualizationLoader } from 'ui/visualize/loader/visualization_loader';
+// @ts-ignore
 import { VisProvider } from 'ui/visualize/loader/vis';
 
 export const visualization = () => ({
   name: 'visualization',
   displayName: 'visualization',
   reuseDomNode: true,
-  render: async (domNode, config, handlers) => {
+  render: async (domNode: HTMLElement, config: any, handlers: any) => {
     const { visData, visConfig, params } = config;
     const visType = config.visType || visConfig.type;
     const $injector = await chrome.dangerouslyGetActiveInjector();
-    const Private = $injector.get('Private');
+    const Private = $injector.get('Private') as any;
     const Vis = Private(VisProvider);
 
     if (handlers.vis) {
@@ -49,8 +50,10 @@ export const visualization = () => ({
 
     handlers.onDestroy(() => visualizationLoader.destroy());
 
-    await visualizationLoader.render(domNode, handlers.vis, visData, handlers.vis.params, uiState, params).then(() => {
-      if (handlers.done) handlers.done();
-    });
+    await visualizationLoader
+      .render(domNode, handlers.vis, visData, handlers.vis.params, uiState, params)
+      .then(() => {
+        if (handlers.done) handlers.done();
+      });
   },
 });

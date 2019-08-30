@@ -24,9 +24,9 @@ jest.mock('ui/new_platform', () => ({
       injectedMetadata: {
         getKibanaVersion: () => '8.0.0',
         getBasePath: () => '/lol',
-      }
-    }
-  }
+      },
+    },
+  },
 }));
 jest.mock('uiExports/interpreter');
 
@@ -55,9 +55,9 @@ jest.mock('./functions', () => ({ functions: [{}, {}, {}] }));
 jest.mock('./renderers/visualization', () => ({ visualization: {} }));
 
 describe('interpreter/interpreter', () => {
-  let getInterpreter;
-  let interpretAst;
-  let initializeInterpreter;
+  let getInterpreter: any;
+  let interpretAst: any;
+  let initializeInterpreter: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -121,5 +121,4 @@ describe('interpreter/interpreter', () => {
       expect(mockInterpreter.interpretAst).toHaveBeenCalledTimes(2);
     });
   });
-
 });

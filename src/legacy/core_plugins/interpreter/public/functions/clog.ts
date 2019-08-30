@@ -17,15 +17,11 @@
  * under the License.
  */
 
-import { clog } from './clog';
-import { esaggs } from './esaggs';
-import { font } from './font';
-import { kibana } from './kibana';
-import { kibanaContext } from './kibana_context';
-import { range } from './range';
-import { visualization } from './visualization';
-import { visDimension } from './vis_dimension';
-
-export const functions = [
-  clog, esaggs, font, kibana, kibanaContext, range, visualization, visDimension,
-];
+export const clog = () => ({
+  name: 'clog',
+  help: 'Outputs the context to the console',
+  fn: (context: any) => {
+    console.log(context); // eslint-disable-line no-console
+    return context;
+  },
+});
