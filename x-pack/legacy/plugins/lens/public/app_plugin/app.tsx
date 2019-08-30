@@ -48,24 +48,6 @@ function isLocalStateDirty(
   );
 }
 
-// Exported for testing purposes, sets the Kibana breadcrumbs.
-export function setBreadcrumbs(
-  chrome: {
-    addBasePath: (url: string) => string;
-    breadcrumbs: { set: (crumbs: Array<{ text: string; href?: string }>) => void };
-  },
-  persistedDoc?: { title: string }
-) {
-  const rootCrumb = {
-    href: chrome.addBasePath(`/app/kibana#/visualize`),
-    text: i18n.translate('xpack.lens.breadcrumbsTitle', {
-      defaultMessage: 'Visualize',
-    }),
-  };
-
-  chrome.breadcrumbs.set(persistedDoc ? [rootCrumb, { text: persistedDoc.title }] : [rootCrumb]);
-}
-
 export function App({
   editorFrame,
   store,
@@ -105,10 +87,22 @@ export function App({
 
   const lastKnownDocRef = useRef<Document | undefined>(undefined);
 
-  // Sync Kibana breadcrumbs any time we save the document
-  useEffect(() => setBreadcrumbs(chrome, state.persistedDoc), [
-    state.persistedDoc && state.persistedDoc.title,
-  ]);
+  // Sync Kibana breadcrumbs any time the saved document's title changes
+  useEffect(() => {
+    chrome.breadcrumbs.set([
+      {
+        href: chrome.addBasePath(`/app/kibana#/visualize`),
+        text: i18n.translate('xpack.lens.breadcrumbsTitle', {
+          defaultMessage: 'Visualize',
+        }),
+      },
+      {
+        text: state.persistedDoc
+          ? state.persistedDoc.title
+          : i18n.translate('xpack.lens.breadcrumbsCreate', { defaultMessage: 'Create' }),
+      },
+    ]);
+  }, [state.persistedDoc && state.persistedDoc.title]);
 
   useEffect(() => {
     if (docId && (!state.persistedDoc || state.persistedDoc.id !== docId)) {
