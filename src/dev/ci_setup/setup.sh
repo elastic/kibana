@@ -23,7 +23,7 @@ export FORCE_COLOR=1
 ###
 ### Disable git automatic lineend handling
 ###
-git config --global core.autocrlf false;
+git config --global core.autocrlf true;
 
 export KIBANA_DIR="$dir"
 echo " -- KIBANA_DIR='$KIBANA_DIR'"
