@@ -11,6 +11,7 @@ const RuntimeAgentType = t.union([
   t.literal('PERMANENT'),
   t.literal('EPHEMERAL'),
   t.literal('EPHEMERAL_INSTANCE'),
+  t.literal('TEMPORARY'),
 ]);
 
 export type AgentType = t.TypeOf<typeof RuntimeAgentType>;

@@ -49,8 +49,7 @@ export class TokenLib {
 
   public async generateAccessToken(
     agentId: string,
-    config: { id: string; sharedId: string },
-    expire: string = '365d'
+    config: { id: string; sharedId: string }
   ): Promise<string> {
     const encryptionKey = this.frameworkLib.getSetting('encryptionKey');
     const token = signToken(
@@ -59,10 +58,7 @@ export class TokenLib {
         agentId,
         config,
       },
-      encryptionKey,
-      {
-        expiresIn: expire,
-      }
+      encryptionKey
     );
 
     return token;

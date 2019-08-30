@@ -25,7 +25,7 @@ export const createEnrollAgentsRoute = (libs: FleetServerLib) => ({
       }),
       payload: {
         type: Joi.string()
-          .allow('PERMANENT', 'EPHEMERAL_INSTANCE')
+          .allow('PERMANENT', 'EPHEMERAL_INSTANCE', 'TEMPORARY')
           .required(),
         metadata: Joi.object({
           local: Joi.object(),
