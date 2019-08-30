@@ -17,8 +17,10 @@
  * under the License.
  */
 
-export * from './saved_objects';
-export * from './exit_full_screen_button';
-export * from './context';
-export * from './overlays';
-export * from './ui_settings';
+import { CONTEXT_MENU_TRIGGER } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { setup } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import { EditModeAction } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/lib/test_samples/actions/edit_mode_action';
+
+const editModeAction = new EditModeAction();
+setup.registerAction(editModeAction);
+setup.attachAction(CONTEXT_MENU_TRIGGER, editModeAction.id);

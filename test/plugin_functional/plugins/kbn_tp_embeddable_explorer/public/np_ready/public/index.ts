@@ -17,8 +17,14 @@
  * under the License.
  */
 
-export * from './saved_objects';
-export * from './exit_full_screen_button';
-export * from './context';
-export * from './overlays';
-export * from './ui_settings';
+import { PluginInitializer } from 'kibana/public';
+import {
+  EmbeddableExplorerPublicPlugin,
+  EmbeddableExplorerSetup,
+  EmbeddableExplorerStart,
+} from './plugin';
+
+export { EmbeddableExplorerPublicPlugin as Plugin };
+
+export const plugin: PluginInitializer<EmbeddableExplorerSetup, EmbeddableExplorerStart> = () =>
+  new EmbeddableExplorerPublicPlugin();

@@ -1870,7 +1870,11 @@
             "name": "certificate_not_valid_after",
             "description": "The date and time after which the certificate is invalid.",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
             "isDeprecated": false,
             "deprecationReason": null
           },
