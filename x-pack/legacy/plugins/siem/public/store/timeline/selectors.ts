@@ -38,6 +38,8 @@ export const getShowCallOutUnauthorizedMsg = () =>
     showCallOutUnauthorizedMsg => showCallOutUnauthorizedMsg
   );
 
+export const getTimelines = () => timelineByIdSelector;
+
 export const getTimelineByIdSelector = () =>
   createSelector(
     selectTimeline,
