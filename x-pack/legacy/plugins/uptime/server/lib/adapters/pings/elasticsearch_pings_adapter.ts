@@ -14,7 +14,7 @@ import {
   Ping,
   PingResults,
 } from '../../../../common/graphql/types';
-import { formatEsBucketsForHistogram, parseFilterQuery } from '../../helper';
+import { formatEsBucketsForHistogram, parseFilterQuery, getFilterClause } from '../../helper';
 import { DatabaseAdapter, HistogramQueryResult } from '../database';
 import { UMPingsAdapter } from './adapter_types';
 import { getHistogramInterval } from '../../helper/get_histogram_interval';
@@ -201,23 +201,23 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     statusFilter?: string | null
   ): Promise<HistogramDataPoint[]> {
     const boolFilters = parseFilterQuery(filters);
-    const filter: any[] = [{ range: { '@timestamp': { gte: dateRangeStart, lte: dateRangeEnd } } }];
+    const additionaFilters = [];
     if (monitorId) {
-      filter.push({ match: { 'monitor.id': monitorId } });
+      additionaFilters.push({ match: { 'monitor.id': monitorId } });
     }
     if (boolFilters) {
-      filter.push(boolFilters);
+      additionaFilters.push(boolFilters);
     }
-    const query = {
-      bool: {
-        filter,
-      },
-    };
+    const filter = getFilterClause(dateRangeStart, dateRangeEnd, additionaFilters);
 
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
-        query,
+        query: {
+          bool: {
+            filter,
+          },
+        },
         size: 0,
         aggs: {
           timeseries: {

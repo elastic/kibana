@@ -18,7 +18,7 @@ import {
   StatesIndexStatus,
 } from '../../../../common/graphql/types';
 import { INDEX_NAMES, STATES, QUERY } from '../../../../common/constants';
-import { getHistogramInterval, parseFilterQuery } from '../../helper';
+import { getHistogramInterval, parseFilterQuery, getFilterClause } from '../../helper';
 
 type SortChecks = (check: Check) => string[];
 const checksSortBy = (check: Check) => [
@@ -44,15 +44,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     const checkGroupsById = new Map<string, string[]>();
     let afterKey: any = searchAfter;
 
-    const filter: any[] = [
-      {
-        range: {
-          '@timestamp': {
-            gte: dateRangeStart,
-            lte: dateRangeEnd,
-          },
-        },
-      },
+    const additionalFilters = [
       {
         // We check for summary.up to ensure that the check group
         // is complete. Summary fields are only present on
@@ -62,10 +54,10 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
         },
       },
     ];
-
     if (query) {
-      filter.push(query);
+      additionalFilters.push(query);
     }
+    const filter = getFilterClause(dateRangeStart, dateRangeEnd, additionalFilters);
 
     const body = {
       query: {
@@ -180,22 +172,13 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       searchAfter,
       size
     );
-    const filter = [
-      { terms: { 'monitor.check_group': checkGroups } },
-      {
-        range: {
-          '@timestamp': {
-            gte: dateRangeStart,
-            lte: dateRangeEnd,
-          },
-        },
-      },
-    ];
+    const additionalFilters = [{ terms: { 'monitor.check_group': checkGroups } }];
     if (query) {
       // Even though this work is already done when calculating the groups
       // this helps the planner
-      filter.push(query);
+      additionalFilters.push(query);
     }
+    const filter = getFilterClause(dateRangeStart, dateRangeEnd, additionalFilters);
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {

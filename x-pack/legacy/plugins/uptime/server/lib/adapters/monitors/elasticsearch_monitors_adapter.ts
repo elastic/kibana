@@ -13,7 +13,12 @@ import {
   Ping,
   LocationDurationLine,
 } from '../../../../common/graphql/types';
-import { dropLatestBucket, getHistogramInterval, parseFilterQuery } from '../../helper';
+import {
+  dropLatestBucket,
+  getFilterClause,
+  getHistogramInterval,
+  parseFilterQuery,
+} from '../../helper';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorsAdapter } from './adapter_types';
 
@@ -155,14 +160,11 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     statusFilter?: string | null
   ): Promise<any> {
     const query = parseFilterQuery(filters);
-    const filter: any[] = [
-      { range: { '@timestamp': { gte: dateRangeStart, lte: dateRangeEnd } } },
-      { exists: { field: 'summary.up' } },
-    ];
-
+    const additionalFilters = [{ exists: { field: 'summary.up' } }];
     if (query) {
-      filter.push(query);
+      additionalFilters.push(query);
     }
+    const filter = getFilterClause(dateRangeStart, dateRangeEnd, additionalFilters);
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
