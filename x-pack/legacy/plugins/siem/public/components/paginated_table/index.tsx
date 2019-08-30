@@ -237,8 +237,9 @@ export const PaginatedTable = memo<SiemTables>(
         ) : (
           <>
             <BasicTable
-              items={pageOfItems}
               columns={columns}
+              compressed
+              items={pageOfItems}
               onChange={onChange}
               sorting={
                 sorting
@@ -305,6 +306,10 @@ const BasicTable = styled(EuiBasicTable)`
     th,
     td {
       vertical-align: top;
+    }
+
+    .euiTableCellContent {
+      display: block;
     }
   }
 `;

@@ -15,7 +15,7 @@ import {
 
 import { isOutlierAnalysis } from '../../../../common/analytics';
 
-import { getResultsUrl, DataFrameAnalyticsListRow, DATA_FRAME_TASK_STATE } from './common';
+import { getResultsUrl, isDataFrameAnalyticsRunning, DataFrameAnalyticsListRow } from './common';
 import { stopAnalytics } from '../../services/analytics_service';
 
 import { StartAction } from './action_start';
@@ -48,10 +48,7 @@ export const getActions = () => {
     },
     {
       render: (item: DataFrameAnalyticsListRow) => {
-        if (
-          item.stats.state !== DATA_FRAME_TASK_STATE.STARTED &&
-          item.stats.state !== DATA_FRAME_TASK_STATE.REINDEXING
-        ) {
+        if (!isDataFrameAnalyticsRunning(item.stats)) {
           return <StartAction item={item} />;
         }
 

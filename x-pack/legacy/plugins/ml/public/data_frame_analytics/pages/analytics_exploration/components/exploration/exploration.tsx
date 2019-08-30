@@ -366,12 +366,12 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
 
   return (
     <EuiPanel grow={false}>
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem grow={false}>
           <ExplorationTitle jobId={jobConfig.id} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFlexGroup alignItems="center" gutterSize="xs">
+          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
             <EuiFlexItem style={{ textAlign: 'right' }}>
               {docFieldsCount > MAX_COLUMNS && (
                 <EuiText size="s">
@@ -446,6 +446,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId }) => {
             initialPageSize: 25,
             pageSizeOptions: [5, 10, 25, 50],
           }}
+          responsive={false}
           sorting={sorting}
         />
       )}

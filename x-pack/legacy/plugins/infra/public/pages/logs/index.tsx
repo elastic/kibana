@@ -24,7 +24,10 @@ import { StreamPage } from './stream';
 import { SettingsPage } from '../shared/settings';
 import { AppNavigation } from '../../components/navigation/app_navigation';
 import { AnalysisPage } from './analysis';
-import { useLogAnalysisCapabilities } from '../../containers/logs/log_analysis';
+import {
+  useLogAnalysisCapabilities,
+  LogAnalysisCapabilities,
+} from '../../containers/logs/log_analysis';
 import { useSourceId } from '../../containers/source_id';
 
 interface LogsPageProps extends RouteComponentProps {
@@ -36,7 +39,8 @@ export const LogsPage = injectUICapabilities(
   injectI18n(({ match, intl, uiCapabilities }: LogsPageProps) => {
     const [sourceId] = useSourceId();
     const source = useSource({ sourceId });
-    const { hasLogAnalysisCapabilites } = useLogAnalysisCapabilities();
+    const logAnalysisCapabilities = useLogAnalysisCapabilities();
+
     const streamTab = {
       title: intl.formatMessage({
         id: 'xpack.infra.logs.index.streamTabTitle',
@@ -95,62 +99,64 @@ export const LogsPage = injectUICapabilities(
     };
     return (
       <Source.Context.Provider value={source}>
-        <ColumnarPage>
-          <DocumentTitle
-            title={intl.formatMessage({
-              id: 'xpack.infra.logs.index.documentTitle',
-              defaultMessage: 'Logs',
-            })}
-          />
-
-          <HelpCenterContent
-            feedbackLink="https://discuss.elastic.co/c/logs"
-            feedbackLinkText={intl.formatMessage({
-              id: 'xpack.infra.logsPage.logsHelpContent.feedbackLinkText',
-              defaultMessage: 'Provide feedback for Logs',
-            })}
-          />
-
-          <Header
-            breadcrumbs={[
-              {
-                text: i18n.translate('xpack.infra.header.logsTitle', {
-                  defaultMessage: 'Logs',
-                }),
-              },
-            ]}
-            readOnlyBadge={!uiCapabilities.logs.save}
-          />
-          {source.isLoadingSource ||
-          (!source.isLoadingSource &&
-            !source.hasFailedLoadingSource &&
-            source.source === undefined) ? (
-            <SourceLoadingPage />
-          ) : source.hasFailedLoadingSource ? (
-            <SourceErrorPage
-              errorMessage={source.loadSourceFailureMessage || ''}
-              retry={source.loadSource}
+        <LogAnalysisCapabilities.Context.Provider value={logAnalysisCapabilities}>
+          <ColumnarPage>
+            <DocumentTitle
+              title={intl.formatMessage({
+                id: 'xpack.infra.logs.index.documentTitle',
+                defaultMessage: 'Logs',
+              })}
             />
-          ) : (
-            <>
-              <AppNavigation>
-                <RoutedTabs
-                  tabs={
-                    hasLogAnalysisCapabilites
-                      ? [streamTab, analysisTab, settingsTab]
-                      : [streamTab, settingsTab]
-                  }
-                />
-              </AppNavigation>
 
-              <Switch>
-                <Route path={`${match.path}/stream`} component={StreamPage} />
-                <Route path={`${match.path}/analysis`} component={AnalysisPage} />
-                <Route path={`${match.path}/settings`} component={SettingsPage} />
-              </Switch>
-            </>
-          )}
-        </ColumnarPage>
+            <HelpCenterContent
+              feedbackLink="https://discuss.elastic.co/c/logs"
+              feedbackLinkText={intl.formatMessage({
+                id: 'xpack.infra.logsPage.logsHelpContent.feedbackLinkText',
+                defaultMessage: 'Provide feedback for Logs',
+              })}
+            />
+
+            <Header
+              breadcrumbs={[
+                {
+                  text: i18n.translate('xpack.infra.header.logsTitle', {
+                    defaultMessage: 'Logs',
+                  }),
+                },
+              ]}
+              readOnlyBadge={!uiCapabilities.logs.save}
+            />
+            {source.isLoadingSource ||
+            (!source.isLoadingSource &&
+              !source.hasFailedLoadingSource &&
+              source.source === undefined) ? (
+              <SourceLoadingPage />
+            ) : source.hasFailedLoadingSource ? (
+              <SourceErrorPage
+                errorMessage={source.loadSourceFailureMessage || ''}
+                retry={source.loadSource}
+              />
+            ) : (
+              <>
+                <AppNavigation>
+                  <RoutedTabs
+                    tabs={
+                      logAnalysisCapabilities.hasLogAnalysisCapabilites
+                        ? [streamTab, analysisTab, settingsTab]
+                        : [streamTab, settingsTab]
+                    }
+                  />
+                </AppNavigation>
+
+                <Switch>
+                  <Route path={`${match.path}/stream`} component={StreamPage} />
+                  <Route path={`${match.path}/analysis`} component={AnalysisPage} />
+                  <Route path={`${match.path}/settings`} component={SettingsPage} />
+                </Switch>
+              </>
+            )}
+          </ColumnarPage>
+        </LogAnalysisCapabilities.Context.Provider>
       </Source.Context.Provider>
     );
   })
