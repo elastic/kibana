@@ -13,7 +13,9 @@ import { ThemeProvider } from 'styled-components';
 
 import { mockTimelineData, TestProviders } from '../../../../mock';
 import { getEmptyValue } from '../../../empty_value';
+
 import { FormattedFieldValue } from './formatted_field';
+import { HOST_NAME_FIELD_NAME } from './constants';
 
 jest.mock('../../../../lib/settings/use_kibana_ui_setting');
 
@@ -179,5 +181,74 @@ describe('Events', () => {
       />
     );
     expect(wrapper.text()).toEqual('some message');
+  });
+
+  test('it renders truncatable message text when fieldName is message', () => {
+    const wrapper = mount(
+      <FormattedFieldValue
+        eventId={mockTimelineData[0].ecs._id}
+        contextId="test"
+        fieldName="message"
+        fieldType="text"
+        value={'some message'}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="truncatable-message"]').exists()).toEqual(true);
+  });
+
+  test('it does NOT render the truncatable message style when fieldName is NOT message', () => {
+    const wrapper = mount(
+      <FormattedFieldValue
+        eventId={mockTimelineData[0].ecs._id}
+        contextId="test"
+        fieldName="NOT-message"
+        fieldType="text"
+        value={'a NON-message value'}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="truncatable-message"]').exists()).toEqual(false);
+  });
+
+  test('it renders a hyperlink to the hosts details page when fieldName is host.name, and a hostname is provided', () => {
+    const wrapper = mount(
+      <FormattedFieldValue
+        eventId={mockTimelineData[0].ecs._id}
+        contextId="test"
+        fieldName={HOST_NAME_FIELD_NAME}
+        fieldType="text"
+        value={'some-hostname'}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="host-details-link"]').exists()).toEqual(true);
+  });
+
+  test('it does NOT render a hyperlink to the hosts details page when fieldName is host.name, but a hostname is NOT provided', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <FormattedFieldValue
+          eventId={mockTimelineData[0].ecs._id}
+          contextId="test"
+          fieldName={HOST_NAME_FIELD_NAME}
+          fieldType="text"
+          value={undefined}
+        />
+      </TestProviders>
+    );
+    expect(wrapper.find('[data-test-subj="host-details-link"]').exists()).toEqual(false);
+  });
+
+  test('it renders placeholder text when fieldName is host.name, but a hostname is NOT provided', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <FormattedFieldValue
+          eventId={mockTimelineData[0].ecs._id}
+          contextId="test"
+          fieldName={HOST_NAME_FIELD_NAME}
+          fieldType="text"
+          value={undefined}
+        />
+      </TestProviders>
+    );
+    expect(wrapper.text()).toEqual(getEmptyValue());
   });
 });
