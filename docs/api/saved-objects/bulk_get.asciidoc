@@ -4,7 +4,9 @@
 <titleabbrev>Bulk get objects</titleabbrev>
 ++++
 
-Retrieves multiple Kibana saved objects by ID.
+Retrieves multiple {kib} saved objects by ID.
+
+experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
 
 [[saved-objects-api-bulk-get-request]]
 ==== Request
@@ -29,7 +31,7 @@ Retrieves multiple Kibana saved objects by ID.
 `saved_objects`:: 
   (array) Top-level property the contains objects that represent the response for each of the requested objects. The order of the objects in the response is identical to the order of the objects in the request.
 
-Saved objects that cannot be persisted are replaced with an error object.
+Saved objects that are unable to persist are replaced with an error object.
 
 [[saved-objects-api-bulk-get-body-codes]]
 ==== Response code

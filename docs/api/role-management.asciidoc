@@ -1,12 +1,10 @@
 [role="xpack"]
 [[role-management-api]]
-== Kibana role management API
+== Kibana role management APIs
 
 Manage the roles that grant <<kibana-privileges, Kibana privileges>>.
 
 WARNING: Do not use the {ref}/security-api.html#security-role-apis[{es} role management APIs] to manage {kib} roles. 
-
-experimental["This API is *experimental* and may be changed or removed completely in a future release. The underlying mechanism of enforcing role based access control is stable, but the APIs for managing the roles are currently experimental."]
 
 * <<role-management-api-put, Create or update role API>>
 * <<role-management-api-get, Get all {kib} roles API>>

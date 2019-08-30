@@ -1,6 +1,6 @@
 [role="xpack"]
 [[upgrade-assistant-api]]
-== Upgrade assistant API
+== Upgrade assistant APIs
 
 Check the upgrade status of your Elasticsearch cluster and reindex indices that were created in the previous major version. The assistant helps you prepare for the next major version of Elasticsearch.
 

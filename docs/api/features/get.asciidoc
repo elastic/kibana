@@ -5,6 +5,8 @@ experimental[This API is *experimental* and may be changed or removed completely
 
 Retrieves all {kib} features.
 
+experimental[This API is *experimental* and may be changed or removed completely in a future release.]
+
 [[features-api-get-request]]
 ==== Request
 

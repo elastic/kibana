@@ -1,7 +1,7 @@
 [[url-shortening-api]]
 == URL Shortening API
 
-Kibana URLs contain the state of the application, which makes them long and cumbersome.
+{kib} URLs contain the state of the application, which makes them long and cumbersome.
 Internet Explorer has URL length restrictions, and some wiki and markup parsers don't do well with the full-length version of the {kib} URL.
 
 Short URLs are designed to make sharing {kib} URLs easier.

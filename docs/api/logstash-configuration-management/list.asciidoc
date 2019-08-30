@@ -2,6 +2,8 @@
 [[logstash-configuration-management-api-list]]
 === List Pipelines
 
+experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+
 [[logstash-configuration-management-api-list-request]]
 ==== Request
 
