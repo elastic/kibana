@@ -160,15 +160,14 @@ requests. Supported on Elastic Cloud Enterprise.
 `map.includeElasticMapsService:`:: *Default: true*
 Set to false to disable connections to Elastic Maps Service.
 When `includeElasticMapsService` is turned off, only the vector layers configured by `map.regionmap`
-and the tile layer configured by `map.tilemap.url` will be available in the <<maps, Maps application>>,
-<<tilemap, Coordinate map visualizations>>, and <<regionmap, Region map visualizations>>.
+and the tile layer configured by `map.tilemap.url` are available in the <<maps, Maps application>>, Coordinate Map visualization, and Region Map visualization.
 
 `map.proxyElasticMapsServiceInMaps:`:: *Default: false*
 Set to true to proxy all <<maps, Maps application>> Elastic Maps Service requests through the Kibana server.
-This setting does not impact <<tilemap, Coordinate map visualizations>> and <<regionmap, Region map visualizations>>.
+This setting does not impact the Coordinate Map and Region Map visualizations.
 
 [[regionmap-settings]] `map.regionmap:`:: Specifies additional vector layers for
-use in <<regionmap, Region Map>> visualizations. Supported on {ece}. Each layer
+use in Region Map> visualizations. Supported on {ece}. Each layer
 object points to an external vector file that contains a geojson
 FeatureCollection. The file must use the
 https://en.wikipedia.org/wiki/World_Geodetic_System[WGS84 coordinate reference system]

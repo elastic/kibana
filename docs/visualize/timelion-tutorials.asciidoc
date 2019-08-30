@@ -1,16 +1,7 @@
-[[timelion]]
-== Timelion
+[[timelion-tutorials]]
+== Timelion tutorials
 
-Timelion is a time series data visualizer that enables you to combine totally
-independent data sources within a single visualization. It's driven by a simple
-expression language you use to retrieve time series data, perform calculations
-to tease out the answers to complex questions, and visualize the results.
-
-For example, Timelion enables you to easily get the answers to questions like:
-
-* <<time-series-intro, What is the real-time percentage of CPU time spent in user space to the results offset by one hour?>>
-* <<mathematical-functions-intro, What does my inbound and outbound network traffic look like?>>
-* <<timelion-conditional-intro, How much memory is my system actually using?>>
+Short description for Timelion tutorials.
 
 [float]
 [[time-series-before-you-begin]]
