@@ -49,8 +49,6 @@ fi
 echo " -> Running functional and api tests"
 cd "$XPACK_DIR"
 
-env | sort
-
 checks-reporter-with-killswitch "X-Pack Chrome Functional tests / Group ${CI_GROUP}" \
   node scripts/functional_tests \
     --debug --bail \
