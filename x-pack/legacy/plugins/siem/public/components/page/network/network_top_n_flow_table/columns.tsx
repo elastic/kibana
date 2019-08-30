@@ -129,12 +129,17 @@ export const getNetworkTopNFlowColumns = (
                 attrName: `${flowTarget}.as.organization.name`,
                 idPrefix: `${id}-name`,
               })}
-            {as.number &&
-              getRowItemDraggable({
-                rowItem: `${as.number}`,
-                attrName: `${flowTarget}.as.number`,
-                idPrefix: `${id}-number`,
-              })}
+
+            {as.number && (
+              <>
+                {' '}
+                {getRowItemDraggable({
+                  rowItem: `${as.number}`,
+                  attrName: `${flowTarget}.as.number`,
+                  idPrefix: `${id}-number`,
+                })}
+              </>
+            )}
           </>
         );
       } else {
