@@ -139,10 +139,10 @@ export const getTheme = () => {
       barsPadding: 0.5,
     },
   };
-  const isDarkMode = chrome.getUiSettingsClient().get(DEFAULT_DARK_MODE);
+  const isDarkMode: boolean = chrome.getUiSettingsClient().get(DEFAULT_DARK_MODE);
   const defaultTheme = isDarkMode ? DARK_THEME : LIGHT_THEME;
   return mergeWithDefaultTheme(theme, defaultTheme);
 };
 
-const kibanaTimezone = chrome.getUiSettingsClient().get(DEFAULT_DATE_FORMAT_TZ);
+const kibanaTimezone: string = chrome.getUiSettingsClient().get(DEFAULT_DATE_FORMAT_TZ);
 export const browserTimezone = kibanaTimezone === 'Browser' ? moment.tz.guess() : kibanaTimezone;
