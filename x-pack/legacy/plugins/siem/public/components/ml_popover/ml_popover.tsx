@@ -27,7 +27,7 @@ import {
   getJobsToDisplay,
   getJobsToInstall,
 } from './helpers';
-import { configTemplates, siemJobPrefix } from './config_templates';
+import { configTemplates } from './config_templates';
 import { useStateToaster } from '../toasters';
 import { errorToToaster } from '../ml/api/error_to_toaster';
 import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
@@ -176,7 +176,6 @@ export const MlPopover = React.memo(() => {
                 configTemplate: configTemplate.name,
                 indexPatternName: configTemplate.defaultIndexPattern,
                 groups: ['siem'],
-                prefix: siemJobPrefix,
                 headers,
               });
             })

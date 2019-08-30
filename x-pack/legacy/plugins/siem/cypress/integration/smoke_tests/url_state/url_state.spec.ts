@@ -30,7 +30,7 @@ import { HOSTS_PAGE } from '../../lib/urls';
 
 describe('url state', () => {
   afterEach(() => {
-    logout();
+    return logout();
   });
 
   it('sets the global start and end dates from the url', () => {
