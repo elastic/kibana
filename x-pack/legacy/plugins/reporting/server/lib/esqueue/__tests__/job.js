@@ -331,6 +331,11 @@ describe('Job Class', function () {
     });
 
     it(`should throw error if invalid maxAttempts`, function () {
+      const job = new Job(mockQueue, index, type, payload, { max_attempts: -1 });
+      return job.ready.then(() => {
+        const indexArgs = validateDoc(indexSpy);
+        expect(indexArgs.body).to.have.property('priority', defaultPriority);
+      });
     });
   });
 
