@@ -17,9 +17,21 @@
  * under the License.
  */
 
-const { createPreset } = require('./lib/create_preset');
 
-module.exports = createPreset({
-  webpack: true,
-  filterPolyfills: true
+const { createAbsolutePathSerializer, REPO_ROOT } = require('@kbn/dev-utils');
+
+const { createPreset } = require('./create_preset');
+
+const configs = [
+  [{ }],
+  [{ filterPolyfills: true }],
+  [{ webpack: true }],
+];
+
+expect.addSnapshotSerializer(createAbsolutePathSerializer(REPO_ROOT));
+
+describe.each(configs)('%j', (config) => {
+  it('produces correct preset', () => {
+    expect(createPreset(config)()).toMatchSnapshot();
+  });
 });

@@ -19,7 +19,4 @@
 
 const { createPreset } = require('./lib/create_preset');
 
-module.exports = createPreset({
-  webpack: true,
-  filterPolyfills: true
-});
+module.exports = createPreset({});

@@ -1,0 +1,104 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`{"filterPolyfills":true} produces correct preset 1`] = `
+Object {
+  "overrides": Array [
+    Object {
+      "plugins": Array [
+        <absolute path>/node_modules/babel-plugin-typescript-strip-namespaces/index.js,
+      ],
+      "test": Array [
+        /x-pack\\[\\\\/\\\\\\\\\\]legacy\\[\\\\/\\\\\\\\\\]plugins\\[\\\\/\\\\\\\\\\]infra\\[\\\\/\\\\\\\\\\]\\.\\*\\[\\\\/\\\\\\\\\\]graphql/,
+        /x-pack\\[\\\\/\\\\\\\\\\]legacy\\[\\\\/\\\\\\\\\\]plugins\\[\\\\/\\\\\\\\\\]siem\\[\\\\/\\\\\\\\\\]\\.\\*\\[\\\\/\\\\\\\\\\]graphql/,
+      ],
+    },
+  ],
+  "plugins": Array [
+    <absolute path>/packages/kbn-elastic-idx/babel/index.js,
+    <absolute path>/node_modules/babel-plugin-add-module-exports/lib/index.js,
+    <absolute path>/node_modules/@babel/plugin-proposal-class-properties/lib/index.js,
+  ],
+  "presets": Array [
+    Array [
+      <absolute path>/node_modules/@babel/preset-env/lib/index.js,
+      Object {
+        "corejs": 3,
+        "modules": "cjs",
+        "targets": Object {
+          "node": "current",
+        },
+        "useBuiltIns": "entry",
+      },
+    ],
+    <absolute path>/node_modules/@babel/preset-typescript/lib/index.js,
+    <absolute path>/node_modules/@babel/preset-react/lib/index.js,
+  ],
+}
+`;
+
+exports[`{"webpack":true} produces correct preset 1`] = `
+Object {
+  "overrides": Array [
+    Object {
+      "plugins": Array [
+        <absolute path>/node_modules/babel-plugin-typescript-strip-namespaces/index.js,
+      ],
+      "test": Array [
+        /x-pack\\[\\\\/\\\\\\\\\\]legacy\\[\\\\/\\\\\\\\\\]plugins\\[\\\\/\\\\\\\\\\]infra\\[\\\\/\\\\\\\\\\]\\.\\*\\[\\\\/\\\\\\\\\\]graphql/,
+        /x-pack\\[\\\\/\\\\\\\\\\]legacy\\[\\\\/\\\\\\\\\\]plugins\\[\\\\/\\\\\\\\\\]siem\\[\\\\/\\\\\\\\\\]\\.\\*\\[\\\\/\\\\\\\\\\]graphql/,
+      ],
+    },
+  ],
+  "plugins": Array [
+    <absolute path>/packages/kbn-elastic-idx/babel/index.js,
+    <absolute path>/node_modules/babel-plugin-add-module-exports/lib/index.js,
+    <absolute path>/node_modules/@babel/plugin-proposal-class-properties/lib/index.js,
+    <absolute path>/node_modules/@babel/plugin-transform-modules-commonjs/lib/index.js,
+    <absolute path>/node_modules/@babel/plugin-syntax-dynamic-import/lib/index.js,
+  ],
+  "presets": Array [
+    Array [
+      <absolute path>/node_modules/@babel/preset-env/lib/index.js,
+      Object {
+        "modules": false,
+      },
+    ],
+    <absolute path>/node_modules/@babel/preset-typescript/lib/index.js,
+    <absolute path>/node_modules/@babel/preset-react/lib/index.js,
+  ],
+}
+`;
+
+exports[`{} produces correct preset 1`] = `
+Object {
+  "overrides": Array [
+    Object {
+      "plugins": Array [
+        <absolute path>/node_modules/babel-plugin-typescript-strip-namespaces/index.js,
+      ],
+      "test": Array [
+        /x-pack\\[\\\\/\\\\\\\\\\]legacy\\[\\\\/\\\\\\\\\\]plugins\\[\\\\/\\\\\\\\\\]infra\\[\\\\/\\\\\\\\\\]\\.\\*\\[\\\\/\\\\\\\\\\]graphql/,
+        /x-pack\\[\\\\/\\\\\\\\\\]legacy\\[\\\\/\\\\\\\\\\]plugins\\[\\\\/\\\\\\\\\\]siem\\[\\\\/\\\\\\\\\\]\\.\\*\\[\\\\/\\\\\\\\\\]graphql/,
+      ],
+    },
+  ],
+  "plugins": Array [
+    <absolute path>/packages/kbn-elastic-idx/babel/index.js,
+    <absolute path>/node_modules/babel-plugin-add-module-exports/lib/index.js,
+    <absolute path>/node_modules/@babel/plugin-proposal-class-properties/lib/index.js,
+  ],
+  "presets": Array [
+    Array [
+      <absolute path>/node_modules/@babel/preset-env/lib/index.js,
+      Object {
+        "modules": "cjs",
+        "targets": Object {
+          "node": "current",
+        },
+      },
+    ],
+    <absolute path>/node_modules/@babel/preset-typescript/lib/index.js,
+    <absolute path>/node_modules/@babel/preset-react/lib/index.js,
+  ],
+}
+`;

@@ -18,4 +18,6 @@ Finally, add either `@kbn/babel-preset/node_preset` or `@kbn/babel-preset/webpac
 
 `@kbn/babel-preset/webpack_preset` is usually placed directly in your `webpack` configuration.
 
+`@kbn/babel-preset/jest_preset` is usually used by referencing the babel transformer at `src/dev/jest/babel_transform` in your jest config.
+
 ***NOTE:*** If you're transpiling code that will be run in both the browser and node you must transpile your code twice, once for each target. Take a look at the build tasks for `@kbn/i18n` to see how that can look.
