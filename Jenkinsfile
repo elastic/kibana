@@ -32,7 +32,7 @@ timeout(time: 180, unit: 'MINUTES') {
           getXpackCiGroupWorker(3),
           getXpackCiGroupWorker(4),
           getXpackCiGroupWorker(5),
-          // getXpackCiGroupWorker(6),
+          getXpackCiGroupWorker(6),
           getXpackCiGroupWorker(7),
           getXpackCiGroupWorker(8),
           getXpackCiGroupWorker(9),
