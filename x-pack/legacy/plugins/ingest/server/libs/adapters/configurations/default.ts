@@ -4,23 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isRight } from 'fp-ts/lib/Either';
-
+import { PathReporter } from 'io-ts/lib/PathReporter';
 import { SODatabaseAdapter } from '../so_database/default';
-import { RuntimeConfigurationFile, NewConfigurationFile } from './adapter_types';
+import { RuntimePolicyFile, NewPolicyFile } from './adapter_types';
 
-import { ConfigurationFile, DatasourceInput, BackupConfigurationFile } from './adapter_types';
+import { PolicyFile, DatasourceInput, BackupPolicyFile } from './adapter_types';
 
-export class ConfigAdapter {
+export class PolicyAdapter {
   constructor(private readonly so: SODatabaseAdapter) {}
 
   public async create(
-    configuration: NewConfigurationFile
+    policy: NewPolicyFile
   ): Promise<{ id: string; shared_id: string; version: number }> {
-    const newSo = await this.so.create<ConfigurationFile>(
-      'configurations',
-      (configuration as any) as ConfigurationFile
-    );
+    const newSo = await this.so.create<PolicyFile>('policies', (policy as any) as PolicyFile);
 
     return {
       id: newSo.id,
@@ -29,52 +25,69 @@ export class ConfigAdapter {
     };
   }
 
-  public async get(id: string): Promise<ConfigurationFile> {
-    const config = await this.so.get<ConfigurationFile>('configurations', id);
+  public async get(id: string): Promise<PolicyFile> {
+    const policySO = await this.so.get<PolicyFile>('policies', id);
 
-    if (config.error) {
-      throw new Error(config.error.message);
+    if (policySO.error) {
+      throw new Error(policySO.error.message);
     }
 
-    if (!config.attributes) {
-      throw new Error(`No configuration found with ID of ${id}`);
-    }
-    if (isRight(RuntimeConfigurationFile.decode(config.attributes))) {
-      return config.attributes as ConfigurationFile;
+    const policy = {
+      id: policySO.id,
+      ...policySO.attributes,
+    };
+
+    const decoded = RuntimePolicyFile.decode(policy);
+
+    if (decoded.isRight()) {
+      return policy as PolicyFile;
     } else {
-      throw new Error(`Invalid ConfigurationFile data. == ${config.attributes}`);
+      throw new Error(
+        `Invalid PolicyFile data. == ${JSON.stringify(policy)} -- ${PathReporter.report(decoded)}`
+      );
     }
   }
 
-  public async list(page: number = 1, perPage: number = 25): Promise<ConfigurationFile[]> {
-    const configs = await this.so.find<any>({
-      type: 'configurations',
+  public async list(page: number = 1, perPage: number = 25): Promise<PolicyFile[]> {
+    const policys = await this.so.find<any>({
+      type: 'policies',
       search: '*',
       searchFields: ['shared_id'],
       page,
       perPage,
     });
-    const uniqConfigurationFile = configs.saved_objects
-      .map<ConfigurationFile>(config => {
-        if (isRight(RuntimeConfigurationFile.decode(config.attributes))) {
-          return config.attributes;
+
+    const uniqPolicyFile = policys.saved_objects
+      .map<PolicyFile>(policySO => {
+        const policy = {
+          id: policySO.id,
+          ...policySO.attributes,
+        };
+        const decoded = RuntimePolicyFile.decode(policy);
+
+        if (decoded.isRight()) {
+          return policy;
         } else {
-          throw new Error(`Invalid ConfigurationFile data. == ${config.attributes}`);
+          throw new Error(
+            `Invalid PolicyFile data. == ${JSON.stringify(policy)}  -- ${PathReporter.report(
+              decoded
+            )}`
+          );
         }
       })
-      .reduce((acc, config: ConfigurationFile) => {
-        if (!acc.has(config.shared_id)) {
-          acc.set(config.shared_id, config);
+      .reduce((acc, policy: PolicyFile) => {
+        if (!acc.has(policy.shared_id)) {
+          acc.set(policy.shared_id, policy);
         }
-        const prevConfig = acc.get(config.shared_id);
-        if (prevConfig && prevConfig.version < config.version) {
-          acc.set(config.shared_id, config);
+        const prevPolicy = acc.get(policy.shared_id);
+        if (prevPolicy && prevPolicy.version < policy.version) {
+          acc.set(policy.shared_id, policy);
         }
 
         return acc;
-      }, new Map<string, ConfigurationFile>());
+      }, new Map<string, PolicyFile>());
 
-    return [...uniqConfigurationFile.values()];
+    return [...uniqPolicyFile.values()];
   }
 
   public async listVersions(
@@ -82,9 +95,9 @@ export class ConfigAdapter {
     activeOnly = true,
     page: number = 1,
     perPage: number = 25
-  ): Promise<ConfigurationFile[]> {
-    const configs = (await this.so.find<any>({
-      type: 'configurations',
+  ): Promise<PolicyFile[]> {
+    const policys = (await this.so.find<any>({
+      type: 'policies',
       search: sharedID,
       searchFields: ['shared_id'],
       page,
@@ -92,49 +105,47 @@ export class ConfigAdapter {
     })).saved_objects;
 
     if (!activeOnly) {
-      const backupConfigs = await this.so.find<BackupConfigurationFile>({
-        type: 'backup_configurations',
+      const backupPolicies = await this.so.find<BackupPolicyFile>({
+        type: 'backup_policies',
         search: sharedID,
         searchFields: ['shared_id'],
       });
-      configs.concat(backupConfigs.saved_objects);
+      policys.concat(backupPolicies.saved_objects);
     }
 
-    return configs.map<ConfigurationFile>(config => {
-      if (isRight(RuntimeConfigurationFile.decode(config.attributes))) {
-        return config.attributes;
+    return policys.map<PolicyFile>(policySO => {
+      const policy = {
+        id: policySO.id,
+        ...policySO.attributes,
+      };
+      if (RuntimePolicyFile.decode(policy).isRight()) {
+        return policy;
       } else {
-        throw new Error(`Invalid ConfigurationFile data. == ${config.attributes}`);
+        throw new Error(`Invalid PolicyFile data. == ${policy}`);
       }
     });
   }
 
-  public async update(
-    id: string,
-    configuration: ConfigurationFile
-  ): Promise<{ id: string; version: number }> {
-    const config = await this.so.update<ConfigurationFile>('configurations', id, configuration);
+  public async update(id: string, policy: PolicyFile): Promise<{ id: string; version: number }> {
+    const updatedPolicy = await this.so.update<PolicyFile>('policies', id, policy);
 
     return {
-      id: config.id,
-      version: config.attributes.version || 1,
+      id: policy.id,
+      version: updatedPolicy.attributes.version || 1,
     };
   }
 
-  public async delete(id: string): Promise<{ success: boolean }> {
-    await this.so.delete('configurations', id);
+  public async deleteVersion(id: string): Promise<{ success: boolean }> {
+    await this.so.delete('policies', id);
     return {
       success: true,
     };
   }
 
   public async createBackup(
-    configuration: BackupConfigurationFile
+    policy: BackupPolicyFile
   ): Promise<{ success: boolean; id?: string; error?: string }> {
-    const newSo = await this.so.create<ConfigurationFile>(
-      'configurations',
-      (configuration as any) as ConfigurationFile
-    );
+    const newSo = await this.so.create<PolicyFile>('policies', (policy as any) as PolicyFile);
 
     return {
       success: newSo.error ? false : true,
@@ -143,20 +154,20 @@ export class ConfigAdapter {
     };
   }
 
-  public async getBackup(id: string): Promise<BackupConfigurationFile> {
-    const config = await this.so.get<BackupConfigurationFile>('backup_configurations', id);
+  public async getBackup(id: string): Promise<BackupPolicyFile> {
+    const policy = await this.so.get<BackupPolicyFile>('backup_policies', id);
 
-    if (config.error) {
-      throw new Error(config.error.message);
+    if (policy.error) {
+      throw new Error(policy.error.message);
     }
 
-    if (!config.attributes) {
-      throw new Error(`No backup configuration found with ID of ${id}`);
+    if (!policy.attributes) {
+      throw new Error(`No backup policy found with ID of ${id}`);
     }
-    if (isRight(RuntimeConfigurationFile.decode(config.attributes))) {
-      return config.attributes as BackupConfigurationFile;
+    if (RuntimePolicyFile.decode(policy.attributes).isRight()) {
+      return policy.attributes as BackupPolicyFile;
     } else {
-      throw new Error(`Invalid BackupConfigurationFile data. == ${config.attributes}`);
+      throw new Error(`Invalid BackupPolicyFile data. == ${policy.attributes}`);
     }
   }
 
@@ -169,7 +180,7 @@ export class ConfigAdapter {
     perPage: number = 25
   ): Promise<DatasourceInput[]> {
     const inputs = await this.so.find({
-      type: 'configurations',
+      type: 'policies',
       search: ids.reduce((query, id, i) => {
         if (i === ids.length - 1) {
           return `${query} ${id}`;
@@ -184,15 +195,15 @@ export class ConfigAdapter {
     return inputs.saved_objects.map(input => input.attributes);
   }
 
-  public async listInputsforConfiguration(
-    configurationId: string,
+  public async listInputsforPolicy(
+    policyId: string,
     page: number = 1,
     perPage: number = 25
   ): Promise<DatasourceInput[]> {
     const inputs = await this.so.find({
-      type: 'configurations',
-      search: configurationId,
-      searchFields: ['config_id'],
+      type: 'policies',
+      search: policyId,
+      searchFields: ['policy_id'],
       perPage,
       page,
     });
@@ -206,7 +217,7 @@ export class ConfigAdapter {
       newInputs.push(await this.so.create<DatasourceInput>('inputs', input));
     }
 
-    return newInputs.map(input => input.attributes.id);
+    return newInputs.map(input => input.id);
   }
 
   public async deleteInputs(inputIDs: string[]): Promise<{ success: boolean }> {

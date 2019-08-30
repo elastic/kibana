@@ -120,7 +120,7 @@ export interface KibanaUser extends t.TypeOf<typeof RuntimeKibanaUser> {}
 
 export interface FrameworkAuthenticatedUser<AuthDataType = any> {
   kind: 'authenticated';
-  [internalAuthData]: AuthDataType;
+  [internalAuthData]?: AuthDataType;
   username: string;
   roles: string[];
   full_name: string | null;

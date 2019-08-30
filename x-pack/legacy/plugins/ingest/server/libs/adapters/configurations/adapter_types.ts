@@ -6,76 +6,106 @@
 
 import * as t from 'io-ts';
 
-export const RuntimeDatasourceInput = t.interface(
-  {
-    id: t.string,
-    meta: t.union([t.undefined, t.string]),
-    config_id: t.string,
-  },
-  'DatasourceInput'
-);
+export const RuntimeDatasourceInput = t.intersection([
+  t.interface(
+    {
+      data_source_id: t.string,
+    },
+    'DatasourceInput'
+  ),
+  t.partial({
+    meta: t.string,
+  }),
+  t.UnknownRecord,
+]);
 
 const RuntimeDatasource = t.interface(
   {
     uuid: t.string,
     ref_source: t.union([t.undefined, t.string]),
     ref: t.union([t.undefined, t.string]),
-    config: t.union([t.undefined, t.string]),
+    output: t.string,
+    queue: t.union([t.undefined, t.string]),
     inputs: t.array(t.string),
   },
   'Datasource'
 );
 
-export const NewRuntimeConfigurationFile = t.interface(
+const NewRuntimeDatasource = t.interface(
+  {
+    ref_source: t.union([t.undefined, t.string]),
+    ref: t.union([t.undefined, t.string]),
+    output: t.string,
+    queue: t.union([t.undefined, t.object]),
+    inputs: t.array(t.object),
+  },
+  'NewDatasource'
+);
+
+export const NewRuntimePolicyFile = t.interface(
   {
     name: t.string,
     description: t.string,
-    output: t.string,
     monitoring_enabled: t.boolean,
     shared_id: t.string,
     version: t.number,
+    status: t.keyof({
+      active: null,
+      locked: null,
+      inactive: null,
+    }),
     agent_version: t.string,
     data_sources: t.array(RuntimeDatasource),
+    created_on: t.string,
+    created_by: t.union([t.undefined, t.string]),
+    updated_on: t.string,
+    updated_by: t.union([t.undefined, t.string]),
   },
-  'ConfigurationFile'
+  'PolicyFile'
 );
 
-export const NewRuntimeBackupConfigurationFile = t.interface(
+export const NewRuntimeBackupPolicyFile = t.interface(
   {
     name: t.string,
     description: t.string,
-    output: t.string,
     monitoring_enabled: t.boolean,
     agent_version: t.string,
     flat_data_sources: t.string,
   },
-  'BackupConfigurationFile'
+  'BackupPolicyFile'
 );
 
 const ExistingDocument = t.interface({
   id: t.string,
-  shared_id: t.string,
-  version: t.number,
-  status: t.union([t.literal('active'), t.literal('locked'), t.literal('inactive')]),
-  updated_at: t.string,
-  created_by: t.union([t.undefined, t.string]),
   updated_on: t.string,
   updated_by: t.union([t.undefined, t.string]),
 });
 
-export const RuntimeBackupConfigurationFile = t.intersection([
-  NewRuntimeBackupConfigurationFile,
+export const RuntimeBackupPolicyFile = t.intersection([
+  NewRuntimeBackupPolicyFile,
   ExistingDocument,
 ]);
 
-export const RuntimeConfigurationFile = t.intersection([
-  NewRuntimeConfigurationFile,
-  ExistingDocument,
+export const RuntimePolicyFile = t.intersection([NewRuntimePolicyFile, ExistingDocument]);
+export const FullRuntimePolicyFile = t.intersection([
+  RuntimePolicyFile,
+  t.type({
+    data_sources: t.array(
+      t.intersection([
+        RuntimeDatasource,
+        t.type({
+          inputs: t.array(RuntimeDatasourceInput),
+        }),
+      ])
+    ),
+  }),
 ]);
 
-export type NewBackupConfigurationFile = t.TypeOf<typeof NewRuntimeBackupConfigurationFile>;
-export type BackupConfigurationFile = t.TypeOf<typeof RuntimeBackupConfigurationFile>;
-export type ConfigurationFile = t.TypeOf<typeof RuntimeConfigurationFile>;
-export type NewConfigurationFile = t.TypeOf<typeof NewRuntimeConfigurationFile>;
+export type NewBackupPolicyFile = t.TypeOf<typeof NewRuntimeBackupPolicyFile>;
+export type BackupPolicyFile = t.TypeOf<typeof RuntimeBackupPolicyFile>;
+export type PolicyFile = t.TypeOf<typeof RuntimePolicyFile>;
+export type NewPolicyFile = t.TypeOf<typeof NewRuntimePolicyFile>;
+export type NewDatasource = t.TypeOf<typeof NewRuntimeDatasource>;
 export type Datasource = t.TypeOf<typeof RuntimeDatasource>;
 export type DatasourceInput = t.TypeOf<typeof RuntimeDatasourceInput>;
+export type FullPolicyFile = t.TypeOf<typeof FullRuntimePolicyFile>;

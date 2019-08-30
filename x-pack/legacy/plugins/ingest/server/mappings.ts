@@ -50,7 +50,7 @@ export const mappings = {
       status: {
         type: 'keyword',
       },
-      updated_at: {
+      created_on: {
         type: 'keyword',
       },
       created_by: {

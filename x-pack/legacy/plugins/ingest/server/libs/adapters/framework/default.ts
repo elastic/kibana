@@ -8,6 +8,7 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isLeft } from 'fp-ts/lib/Either';
 import { get } from 'lodash';
 import { Request } from 'src/legacy/server/kbn_server';
+import { AuthenticatedUser } from '../../../../../../../plugins/security/common/model';
 import { XPackInfo } from '../../../../../xpack_main/server/lib/xpack_info';
 // @ts-ignore
 import { mirrorPluginStatus } from '../../../../../../server/lib/mirror_plugin_status';
@@ -82,7 +83,7 @@ export class BackendFrameworkAdapter {
   }
 
   public async getUser(request: Request): Promise<KibanaUser | null> {
-    let user;
+    let user: AuthenticatedUser;
     try {
       user = await this.server.plugins.security.getUser(request);
     } catch (e) {
