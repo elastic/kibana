@@ -101,6 +101,8 @@ def getPostBuildWorker(name, closure) {
 
       withEnv([
         "CI_WORKER_NUMBER=${workerNumber}",
+        "TEST_KIBANA_HOST=localhost",
+        "TEST_KIBANA_PORT=${kibanaPort}",
         "TEST_KIBANA_URL=http://elastic:changeme@localhost:${kibanaPort}",
         "TEST_ES_URL=http://elastic:changeme@localhost:${esPort}",
       ]) {
