@@ -23,11 +23,11 @@ import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 // @ts-ignore
-import { initializeInput } from '../../../../../../quarantined/src/input';
+import { initializeInput } from '../../../../../../public/quarantined/src/input';
 // @ts-ignore
-import { initializeOutput } from '../../../../../../quarantined/src/output';
+import { initializeOutput } from '../../../../../../public/quarantined/src/output';
 // @ts-ignore
-import init from '../../../../../../quarantined/src/app';
+import init from '../../../../../../public/quarantined/src/app';
 
 import { ConsoleMenu } from '../../../components';
 

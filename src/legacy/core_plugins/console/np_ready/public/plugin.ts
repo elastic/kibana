@@ -19,15 +19,19 @@
 
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { PluginInitializerContext, Plugin, CoreStart } from '../../../../../../core/public';
+import { PluginInitializerContext, Plugin, CoreStart } from '../../../../../core/public';
 import { boot } from './app';
-import { XCoreSetup } from './legacy';
+import { XCoreSetup, XPluginSet } from './legacy';
 
 export class ConsoleUIPlugin implements Plugin<any, any> {
   // @ts-ignore
   constructor(private readonly ctx: PluginInitializerContext) {}
 
-  async setup({ application, docLinkVersion, I18nContext, ResizeChecker }: XCoreSetup) {
+  async setup({ application }: XCoreSetup, pluginSet: XPluginSet) {
+    const {
+      __LEGACY: { docLinkVersion, I18nContext, ResizeChecker },
+    } = pluginSet;
+
     application.register({
       id: 'console',
       async mount(ctx, targetElement) {

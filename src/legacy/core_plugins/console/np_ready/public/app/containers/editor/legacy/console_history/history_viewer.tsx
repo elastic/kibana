@@ -25,7 +25,7 @@ import { Settings } from '../../../../services';
 import { installEditorsResizeChecker } from '../install_console_resize_checker';
 
 // @ts-ignore
-import SenseEditor from '../../../../../../../quarantined/src/sense_editor/editor';
+import SenseEditor from '../../../../../../../public/quarantined/src/sense_editor/editor';
 
 interface Props {
   settings: Settings;

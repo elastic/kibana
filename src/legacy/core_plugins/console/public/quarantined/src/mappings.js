@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { legacyBackDoorToSettings } from '../../np_ready/public/app';
+import { legacyBackDoorToSettings } from '../../../np_ready/public/app';
 
 const $ = require('jquery');
 const _ = require('lodash');

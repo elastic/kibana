@@ -33,7 +33,7 @@ import { useAppContext } from '../../context';
 import { StorageKeys, DevToolsSettings } from '../../services';
 
 // @ts-ignore
-import mappings from '../../../../../quarantined/src/mappings';
+import mappings from '../../../../../public/quarantined/src/mappings';
 
 import { getTopNavConfig } from './get_top_nav';
 

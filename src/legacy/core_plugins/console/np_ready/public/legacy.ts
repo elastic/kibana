@@ -29,11 +29,8 @@ import 'ui/autoload/styles';
 import 'ui/capabilities/route_setup';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
-// require('./src/directives/sense_history');
-// require('./src/directives/console_menu_directive');
-
-import template from '../../quarantined/index.html';
-import { CoreSetup } from '../../../../../../core/public';
+import template from '../../public/quarantined/index.html';
+import { CoreSetup } from '../../../../../core/public';
 
 interface SetupRegisterAppArgs {
   id: string;
@@ -41,11 +38,16 @@ interface SetupRegisterAppArgs {
 }
 
 export interface XCoreSetup extends CoreSetup {
-  docLinkVersion: string;
-  ResizeChecker: any;
-  I18nContext: any;
   application: {
     register(args: SetupRegisterAppArgs): void;
+  };
+}
+
+export interface XPluginSet {
+  __LEGACY: {
+    I18nContext: any;
+    ResizeChecker: any;
+    docLinkVersion: string;
   };
 }
 
@@ -69,9 +71,6 @@ uiRoutes.when('/dev_tools/console', {
 
       const xNpSetupCore: XCoreSetup = {
         ...npSetup.core,
-        I18nContext,
-        ResizeChecker,
-        docLinkVersion: DOC_LINK_VERSION,
         application: {
           register(args: SetupRegisterAppArgs): void {
             args.mount({}, targetElement).catch(err => {
@@ -81,7 +80,14 @@ uiRoutes.when('/dev_tools/console', {
         },
       };
 
-      pluginInstance.setup(xNpSetupCore);
+      pluginInstance.setup(xNpSetupCore, {
+        ...npSetup.plugins,
+        __LEGACY: {
+          I18nContext,
+          ResizeChecker,
+          docLinkVersion: DOC_LINK_VERSION,
+        },
+      });
       pluginInstance.start(npStart.core);
     };
   },

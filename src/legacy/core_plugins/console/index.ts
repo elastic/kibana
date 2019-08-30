@@ -51,7 +51,7 @@ function filterHeaders(originalHeaders: any, headersToKeep: any) {
 export default function(kibana: any) {
   const modules = resolve(__dirname, 'public/webpackShims/');
   const quarantinedSrc = resolve(__dirname, 'public/quarantined/src/');
-  const src = resolve(__dirname, 'public/np_ready/public');
+  const npSrc = resolve(__dirname, 'np_ready/public');
 
   let defaultVars: any;
   const apps: any[] = [];
@@ -179,7 +179,7 @@ export default function(kibana: any) {
     uiExports: {
       apps,
       hacks: ['plugins/console/quarantined/hacks/register'],
-      devTools: [`${src}/legacy`],
+      devTools: [`${npSrc}/legacy`],
       styleSheetPaths: resolve(__dirname, 'public/quarantined/index.scss'),
 
       injectDefaultVars: () => defaultVars,
