@@ -17,8 +17,5 @@
  * under the License.
  */
 
-export * from './saved_objects';
-export * from './exit_full_screen_button';
-export * from './context';
-export * from './overlays';
-export * from './ui_settings';
+export * from './saved_object_finder';
+export * from './saved_object_save_modal';
