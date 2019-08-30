@@ -78,10 +78,13 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
   };
 
   const onValueChange = () => {
-    if (isPristine) {
-      setPristine(false);
-    }
     setIsChangingValue(true);
+
+    // Update the form data observable
+    form.__updateFormDataAt(path, serializeOutput(value));
+
+    // Validate field(s) and set form.isValid flag
+    form.__validateFields(fieldsToValidateOnChange);
 
     if (debounceTimeout.current) {
       clearTimeout(debounceTimeout.current);
@@ -266,13 +269,12 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
    * @param newValue The new value to assign to the field
    */
   const setValue: Field['setValue'] = newValue => {
-    onValueChange();
+    if (isPristine) {
+      setPristine(false);
+    }
 
     const formattedValue = formatInputValue(newValue);
     setStateValue(formattedValue);
-
-    // Update the form data observable
-    form.__updateFormDataAt(path, serializeOutput(formattedValue));
   };
 
   const _setErrors: Field['setErrors'] = _errors => {
@@ -329,7 +331,7 @@ export const useField = (form: Form, path: string, config: FieldConfig = {}) => 
       // Avoid validate on mount
       return;
     }
-    form.__validateFields(fieldsToValidateOnChange);
+    onValueChange();
   }, [value]);
 
   const field: Field = {
