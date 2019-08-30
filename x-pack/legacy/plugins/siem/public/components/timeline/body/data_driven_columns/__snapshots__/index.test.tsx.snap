@@ -118,6 +118,7 @@ exports[`Columns it renders the expected columns 1`] = `
       ]
     }
     onColumnResized={[MockFunction]}
+    timelineId="test"
   />
 </Component>
 `;
