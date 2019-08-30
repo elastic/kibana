@@ -100,6 +100,7 @@ def getPostBuildWorker(name, closure) {
         "TEST_KIBANA_PORT=${kibanaPort}",
         "TEST_KIBANA_URL=http://elastic:changeme@localhost:${kibanaPort}",
         "TEST_ES_URL=http://elastic:changeme@localhost:${esPort}",
+        "IS_PIPELINE_JOB=1",
       ]) {
         closure()
       }
@@ -160,7 +161,6 @@ def jobRunner(label, closure) {
     "PR_TARGET_BRANCH=${env.ghprbTargetBranch}",
     "PR_AUTHOR=${env.ghprbPullAuthorLogin}",
     "TEST_BROWSER_HEADLESS=1",
-    "IS_PIPELINE_JOB=1",
   ]) {
     withCredentials([ // TODO make these not necessary?
       string(credentialsId: 'vault-addr', variable: 'VAULT_ADDR'),
