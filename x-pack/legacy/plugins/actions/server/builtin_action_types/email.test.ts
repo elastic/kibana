@@ -9,6 +9,7 @@ jest.mock('./lib/send_email', () => ({
 }));
 
 import { ActionType, ActionTypeExecutorOptions } from '../types';
+import { ActionsConfigurationUtilities } from '../actions_config';
 import { ActionTypeRegistry } from '../action_type_registry';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
 import { taskManagerMock } from '../../../task_manager/task_manager.mock';
@@ -22,6 +23,7 @@ const sendEmailMock = sendEmail as jest.Mock;
 
 const ACTION_TYPE_ID = '.email';
 const NO_OP_FN = () => {};
+const MOCK_KIBANA_CONFIG = { isWhitelistedHostname: () => true } as ActionsConfigurationUtilities;
 
 const services = {
   log: NO_OP_FN,
@@ -48,7 +50,7 @@ beforeAll(() => {
     getBasePath: jest.fn().mockReturnValue(undefined),
   });
 
-  registerBuiltInActionTypes(actionTypeRegistry);
+  registerBuiltInActionTypes(actionTypeRegistry, MOCK_KIBANA_CONFIG);
 
   actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
 });

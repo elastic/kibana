@@ -10,6 +10,7 @@ import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_hea
 import { nullableType } from './lib/nullable';
 import { isOk, promiseResult, Result } from './lib/result_type';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
+import { ActionsConfigurationUtilities } from '../actions_config';
 
 // config definition
 enum WebhookMethods {
@@ -17,42 +18,59 @@ enum WebhookMethods {
   PUT = 'put',
 }
 
-export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
-
 const HeadersSchema = schema.recordOf(schema.string(), schema.string());
-
-const ConfigSchema = schema.object({
+const configSchemaProps = {
   url: schema.string(),
   method: schema.oneOf([schema.literal(WebhookMethods.POST), schema.literal(WebhookMethods.PUT)], {
     defaultValue: WebhookMethods.POST,
   }),
   headers: nullableType(HeadersSchema),
-});
+};
+const ConfigSchema = schema.object(configSchemaProps);
+type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 
 // secrets definition
-export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
+type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
 const SecretsSchema = schema.object({
   user: schema.string(),
   password: schema.string(),
 });
 
 // params definition
-export type ActionParamsType = TypeOf<typeof ParamsSchema>;
+type ActionParamsType = TypeOf<typeof ParamsSchema>;
 const ParamsSchema = schema.object({
   body: schema.maybe(schema.string()),
 });
 
 // action type definition
-export const actionType: ActionType = {
-  id: '.webhook',
-  name: 'webhook',
-  validate: {
-    config: ConfigSchema,
-    secrets: SecretsSchema,
-    params: ParamsSchema,
-  },
-  executor,
-};
+export function getActionType(configurationUtilities: ActionsConfigurationUtilities): ActionType {
+  return {
+    id: '.webhook',
+    name: 'webhook',
+    validate: {
+      config: schema.object(configSchemaProps, {
+        validate: configObject => {
+          const { url }: ActionTypeConfigType = configObject;
+          if (!configurationUtilities.isWhitelistedHostname(url)) {
+            return i18n.translate(
+              'xpack.actions.builtin.webhook.unwhitelistedWebhookConfigurationError',
+              {
+                defaultMessage:
+                  'an error occurred configuring webhook with unwhitelisted target url "{url}"',
+                values: {
+                  url,
+                },
+              }
+            );
+          }
+        },
+      }),
+      secrets: SecretsSchema,
+      params: ParamsSchema,
+    },
+    executor,
+  };
+}
 
 // action executor
 async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionTypeExecutorResult> {

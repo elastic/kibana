@@ -27,6 +27,14 @@ export function actions(kibana: any) {
       return Joi.object()
         .keys({
           enabled: Joi.boolean().default(false),
+          whitelistedHosts: Joi.alternatives()
+            .try(
+              Joi.array()
+                .items(Joi.string().hostname())
+                .sparse(false),
+              Joi.string().valid('any', 'none')
+            )
+            .default('none'),
         })
         .default();
     },
