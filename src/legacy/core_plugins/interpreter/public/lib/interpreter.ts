@@ -17,41 +17,19 @@
  * under the License.
  */
 
-import { interpreterProvider, serializeProvider } from '../../common';
+import { npSetup } from 'ui/new_platform';
+import { interpreterProvider } from '../../common';
 import { createHandlers } from './create_handlers';
-import { batchedFetch } from './batched_fetch';
-import { FUNCTIONS_URL } from './consts';
-import { CoreStart } from '../../../../../core/public';
 
-interface Config {
-  http: CoreStart['http'];
-  ajaxStream: any; // TODO: Import this from kibana_utils/ajax_stream
-  typesRegistry: any;
-  functionsRegistry: any;
-}
-
-export async function initializeInterpreter(config: Config) {
-  const { http, ajaxStream, typesRegistry, functionsRegistry } = config;
-  const serverFunctionList = await http.get(FUNCTIONS_URL);
-  const types = typesRegistry.toJS();
-  const { serialize } = serializeProvider(types);
-  const batch = batchedFetch({ ajaxStream, serialize });
-
-  // For every sever-side function, register a client-side
-  // function that matches its definition, but which simply
-  // calls the server-side function endpoint.
-  Object.keys(serverFunctionList).forEach(functionName => {
-    functionsRegistry.register(() => ({
-      ...serverFunctionList[functionName],
-      fn: (context: any, args: any) => batch({ functionName, args, context }),
-    }));
-  });
+export async function initializeInterpreter() {
+  await npSetup.plugins.data.expressions.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
+    .legacyServerSideFnRegistration;
 
   const interpretAst = async (ast: any, context: any, handlers: any) => {
     const interpretFn = await interpreterProvider({
-      types: typesRegistry.toJS(),
+      types: npSetup.plugins.data.expressions.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.types.toJS(),
       handlers: { ...handlers, ...createHandlers() },
-      functions: functionsRegistry.toJS(),
+      functions: npSetup.plugins.data.expressions.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.functions.toJS(),
     });
     return interpretFn(ast, context);
   };

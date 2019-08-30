@@ -28,6 +28,7 @@ export default function InterpreterPlugin(kibana: any) {
     require: ['kibana', 'elasticsearch'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
+      interpreter: ['plugins/interpreter/load_legacy_server_function_wrappers'],
       injectDefaultVars: server => ({
         serverBasePath: server.config().get('server.basePath'),
         interpreterConfig: server.config().get('interpreter'),

@@ -37,6 +37,8 @@ const createSetupContract = (): Setup => {
         types: {
           register: () => {},
         } as any,
+        legacyServerSideFnRegistration: Promise.resolve(),
+        legacyServerSideFnRegistrationResolver: jest.fn(),
       },
     },
   };
