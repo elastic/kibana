@@ -37,15 +37,22 @@ const PageRouterComponent: React.SFC<RouterProps> = ({ history, uiCapabilities }
         {uiCapabilities.infrastructure.show && (
           <Redirect from="/home" exact={true} to="/infrastructure/inventory" />
         )}
+        {uiCapabilities.infrastructure.show && (
+          <Route path="/infrastructure/metrics/:type/:node" component={MetricDetail} />
+        )}
+        {uiCapabilities.infrastructure.show && (
+          <Redirect
+            from="/metrics/:type/:node"
+            exact={true}
+            to="/infrastructure/metrics/:type/:node"
+          />
+        )}
         {uiCapabilities.logs.show && <Redirect from="/logs" exact={true} to="/logs/stream" />}
         {uiCapabilities.logs.show && <Route path="/logs" component={LogsPage} />}
         {uiCapabilities.infrastructure.show && (
           <Route path="/infrastructure" component={InfrastructurePage} />
         )}
         <Route path="/link-to" component={LinkToPage} />
-        {uiCapabilities.infrastructure.show && (
-          <Route path="/metrics/:type/:node" component={MetricDetail} />
-        )}
         <Route component={NotFoundPage} />
       </Switch>
     </Router>
