@@ -15,7 +15,7 @@ import {
   mockScopedClusterClient,
 } from './base.mock';
 
-import { SAMLAuthenticationProvider } from './saml';
+import { SAMLAuthenticationProvider, SAMLLoginStep } from './saml';
 
 describe('SAMLAuthenticationProvider', () => {
   let provider: SAMLAuthenticationProvider;
@@ -49,8 +49,12 @@ describe('SAMLAuthenticationProvider', () => {
 
       const authenticationResult = await provider.login(
         request,
-        { samlResponse: 'saml-response-xml' },
-        { requestId: 'some-request-id', nextURL: '/test-base-path/some-path' }
+        {
+          step: SAMLLoginStep.SAMLResponseReceived,
+          samlResponse: 'saml-response-xml',
+          nextURL: '/test-base-path/some-path',
+        },
+        { requestId: 'some-request-id' }
       );
 
       sinon.assert.calledWithExactly(
@@ -72,8 +76,12 @@ describe('SAMLAuthenticationProvider', () => {
 
       const authenticationResult = await provider.login(
         request,
-        { samlResponse: 'saml-response-xml' },
-        { nextURL: '/test-base-path/some-path' }
+        {
+          step: SAMLLoginStep.SAMLResponseReceived,
+          samlResponse: 'saml-response-xml',
+          nextURL: '/test-base-path/some-path',
+        },
+        {}
       );
 
       sinon.assert.notCalled(mockOptions.client.callAsInternalUser);
@@ -91,7 +99,7 @@ describe('SAMLAuthenticationProvider', () => {
 
       const authenticationResult = await provider.login(
         request,
-        { samlResponse: 'saml-response-xml' },
+        { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
         { requestId: 'some-request-id' }
       );
 
@@ -114,6 +122,7 @@ describe('SAMLAuthenticationProvider', () => {
       });
 
       const authenticationResult = await provider.login(request, {
+        step: SAMLLoginStep.SAMLResponseReceived,
         samlResponse: 'saml-response-xml',
       });
 
@@ -141,8 +150,12 @@ describe('SAMLAuthenticationProvider', () => {
 
       const authenticationResult = await provider.login(
         request,
-        { samlResponse: 'saml-response-xml' },
-        { requestId: 'some-request-id', nextURL: '/test-base-path/some-path' }
+        {
+          step: SAMLLoginStep.SAMLResponseReceived,
+          samlResponse: 'saml-response-xml',
+          nextURL: '/test-base-path/some-path',
+        },
+        { requestId: 'some-request-id' }
       );
 
       sinon.assert.calledWithExactly(
@@ -171,7 +184,7 @@ describe('SAMLAuthenticationProvider', () => {
 
         const authenticationResult = await provider.login(
           request,
-          { samlResponse: 'saml-response-xml' },
+          { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
           { accessToken: 'some-valid-token', refreshToken: 'some-valid-refresh-token' }
         );
 
@@ -212,7 +225,7 @@ describe('SAMLAuthenticationProvider', () => {
 
         const authenticationResult = await provider.login(
           request,
-          { samlResponse: 'saml-response-xml' },
+          { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
           { accessToken: 'existing-valid-token', refreshToken: 'existing-valid-refresh-token' }
         );
 
@@ -247,7 +260,7 @@ describe('SAMLAuthenticationProvider', () => {
 
         const authenticationResult = await provider.login(
           request,
-          { samlResponse: 'saml-response-xml' },
+          { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
           tokenPair
         );
 
@@ -281,7 +294,7 @@ describe('SAMLAuthenticationProvider', () => {
 
         const authenticationResult = await provider.login(
           request,
-          { samlResponse: 'saml-response-xml' },
+          { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
           tokenPair
         );
 
@@ -329,7 +342,7 @@ describe('SAMLAuthenticationProvider', () => {
 
         const authenticationResult = await provider.login(
           request,
-          { samlResponse: 'saml-response-xml' },
+          { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
           tokenPair
         );
 
@@ -377,7 +390,7 @@ describe('SAMLAuthenticationProvider', () => {
 
         const authenticationResult = await provider.login(
           request,
-          { samlResponse: 'saml-response-xml' },
+          { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
           tokenPair
         );
 

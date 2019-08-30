@@ -21,19 +21,28 @@ interface ProviderState extends Partial<TokenPair> {
    * Unique identifier of the SAML request initiated the handshake.
    */
   requestId?: string;
+}
 
+/**
+ * Describes possible SAML Login steps.
+ */
+export enum SAMLLoginStep {
   /**
-   * URL to redirect user to after successful SAML handshake.
+   * The final login step when IdP responds with SAML Response payload.
    */
-  nextURL?: string;
+  SAMLResponseReceived = 'saml-response-received',
+  /**
+   * The login step when we've captured user URL (including URL fragment) and ready to start SAML handshake.
+   */
+  UserURLCaptured = 'user-url-captured',
 }
 
 /**
  * Describes the parameters that are required by the provider to process the initial login request.
  */
-interface ProviderLoginAttempt {
-  samlResponse: string;
-}
+type ProviderLoginAttempt =
+  | { step: SAMLLoginStep.UserURLCaptured; currentURL: string }
+  | { step: SAMLLoginStep.SAMLResponseReceived; samlResponse: string; nextURL?: string };
 
 /**
  * Checks whether request query includes SAML request from IdP.
@@ -73,18 +82,24 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    */
   public async login(
     request: KibanaRequest,
-    { samlResponse }: ProviderLoginAttempt,
+    attempt: ProviderLoginAttempt,
     state?: ProviderState | null
   ) {
     this.logger.debug('Trying to perform a login.');
 
+    if (attempt.step === SAMLLoginStep.UserURLCaptured) {
+      this.logger.debug('Captured user URL.');
+      return this.authenticateViaHandshake(request, attempt.currentURL);
+    }
+
+    const { samlResponse, nextURL } = attempt;
     const authenticationResult = state
       ? await this.authenticateViaState(request, state)
       : AuthenticationResult.notHandled();
 
     // Let's check if user is redirected to Kibana from IdP with valid SAMLResponse.
     if (authenticationResult.notHandled()) {
-      return await this.loginWithSAMLResponse(request, samlResponse, state);
+      return await this.loginWithSAMLResponse(request, { samlResponse, nextURL }, state);
     }
 
     if (authenticationResult.succeeded()) {
@@ -93,7 +108,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       // we'll re-authenticate user and forward to a page with the respective warning.
       return await this.loginWithNewSAMLResponse(
         request,
-        samlResponse,
+        { samlResponse, nextURL },
         (authenticationResult.state || state) as ProviderState,
         authenticationResult.user as AuthenticatedUser
       );
@@ -139,10 +154,10 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       }
     }
 
-    // If we couldn't authenticate by means of all methods above, let's try to
+    // If we couldn't authenticate by means of all methods above, let's try to capture user URL and
     // initiate SAML handshake, otherwise just return authentication result we have.
-    return authenticationResult.notHandled()
-      ? await this.authenticateViaHandshake(request)
+    return authenticationResult.notHandled() && canRedirectRequest(request)
+      ? this.captureCurrentURL(request)
       : authenticationResult;
   }
 
@@ -227,23 +242,21 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * initiated login.
    * @param request Request instance.
    * @param samlResponse SAMLResponse payload string.
+   * @param [nextURL] Optional URL to redirect user to (isn't present for IdP initiated login).
    * @param [state] Optional state object associated with the provider.
    */
   private async loginWithSAMLResponse(
     request: KibanaRequest,
-    samlResponse: string,
+    { samlResponse, nextURL }: { samlResponse: string; nextURL?: string },
     state?: ProviderState | null
   ) {
     this.logger.debug('Trying to log in with SAML response payload.');
 
     // If we have a `SAMLResponse` and state, but state doesn't contain all the necessary information,
     // then something unexpected happened and we should fail.
-    const { requestId: stateRequestId, nextURL: stateRedirectURL } = state || {
-      requestId: '',
-      nextURL: '',
-    };
-    if (state && (!stateRequestId || !stateRedirectURL)) {
-      const message = 'SAML response state does not have corresponding request id or redirect URL.';
+    const { requestId: stateRequestId } = state || { requestId: '' };
+    if (state && !stateRequestId) {
+      const message = 'SAML response state does not have corresponding request id.';
       this.logger.debug(message);
       return AuthenticationResult.failed(Boom.badRequest(message));
     }
@@ -269,10 +282,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       });
 
       this.logger.debug('Login has been performed with SAML response.');
-      return AuthenticationResult.redirectTo(
-        stateRedirectURL || `${this.options.basePath.get(request)}/`,
-        { state: { accessToken, refreshToken } }
-      );
+      return AuthenticationResult.redirectTo(nextURL || `${this.options.basePath.get(request)}/`, {
+        state: { accessToken, refreshToken },
+      });
     } catch (err) {
       this.logger.debug(`Failed to log in with SAML response: ${err.message}`);
       return AuthenticationResult.failed(err);
@@ -289,19 +301,23 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * we'll forward user to a page with the respective warning.
    * @param request Request instance.
    * @param samlResponse SAMLResponse payload string.
+   * @param [nextURL] Optional URL to redirect user to (isn't present for IdP initiated login).
    * @param existingState State existing user session is based on.
    * @param user User returned for the existing session.
    */
   private async loginWithNewSAMLResponse(
     request: KibanaRequest,
-    samlResponse: string,
+    { samlResponse, nextURL }: { samlResponse: string; nextURL?: string },
     existingState: ProviderState,
     user: AuthenticatedUser
   ) {
     this.logger.debug('Trying to log in with SAML response payload and existing valid session.');
 
     // First let's try to authenticate via SAML Response payload.
-    const payloadAuthenticationResult = await this.loginWithSAMLResponse(request, samlResponse);
+    const payloadAuthenticationResult = await this.loginWithSAMLResponse(request, {
+      samlResponse,
+      nextURL,
+    });
     if (payloadAuthenticationResult.failed()) {
       return payloadAuthenticationResult;
     }
@@ -417,9 +433,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     if (refreshedTokenPair === null) {
       if (canRedirectRequest(request)) {
         this.logger.debug(
-          'Both access and refresh tokens are expired. Re-initiating SAML handshake.'
+          'Both access and refresh tokens are expired. Capturing current URL and re-initiating SAML handshake.'
         );
-        return this.authenticateViaHandshake(request);
+        return this.captureCurrentURL(request);
       }
 
       return AuthenticationResult.failed(
@@ -444,8 +460,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   /**
    * Tries to start SAML handshake and eventually receive a token.
    * @param request Request instance.
+   * @param nextURL URL to redirect user to after successful SAML handshake.
    */
-  private async authenticateViaHandshake(request: KibanaRequest) {
+  private async authenticateViaHandshake(request: KibanaRequest, nextURL: string) {
     this.logger.debug('Trying to initiate SAML handshake.');
 
     // If client can't handle redirect response, we shouldn't initiate SAML handshake.
@@ -457,19 +474,22 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     try {
       // This operation should be performed on behalf of the user with a privilege that normal
       // user usually doesn't have `cluster:admin/xpack/security/saml/prepare`.
-      const { id: requestId, redirect } = await this.options.client.callAsInternalUser(
-        'shield.samlPrepare',
-        { body: { realm: this.realm } }
-      );
+      const {
+        id: requestId,
+        redirect: redirectWithoutRelayState,
+      } = await this.options.client.callAsInternalUser('shield.samlPrepare', {
+        body: { realm: this.realm },
+      });
+
+      // HACK: we manually add a `RelayState` query string parameter with URL to redirect user to after
+      // successful SAML handshake since Elasticsearch doesn't support it yet. We may break something
+      // here eventually if we keep this workaround for too long.
+      const redirect = `${redirectWithoutRelayState}&RelayState=${encodeURIComponent(nextURL)}`;
 
       this.logger.debug('Redirecting to Identity Provider with SAML request.');
-      return AuthenticationResult.redirectTo(
-        redirect,
-        // Store request id in the state so that we can reuse it once we receive `SAMLResponse`.
-        {
-          state: { requestId, nextURL: `${this.options.basePath.get(request)}${request.url.path}` },
-        }
-      );
+
+      // Store request id in the state so that we can reuse it once we receive `SAMLResponse`.
+      return AuthenticationResult.redirectTo(redirect, { state: { requestId } });
     } catch (err) {
       this.logger.debug(`Failed to initiate SAML handshake: ${err.message}`);
       return AuthenticationResult.failed(err);
@@ -516,5 +536,20 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     this.logger.debug('User session has been successfully invalidated.');
 
     return redirect;
+  }
+
+  /**
+   * Redirects user to the client-side page that will grab current URL fragment with the current URL
+   * path and redirect user back to Kibana to initiate SAML handshake.
+   * @param request Request instance.
+   */
+  private captureCurrentURL(request: KibanaRequest) {
+    return AuthenticationResult.redirectTo(
+      `${this.options.basePath.get(
+        request
+      )}/security/api/authc/saml/capture-current-url?currentPath=${encodeURIComponent(
+        request.url.path!
+      )}`
+    );
   }
 }
