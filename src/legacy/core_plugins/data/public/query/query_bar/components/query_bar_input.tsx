@@ -472,10 +472,8 @@ export class QueryBarInputUI extends Component<Props, State> {
           )}
           aria-haspopup="true"
           aria-expanded={this.state.isSuggestionsVisible}
-          {...(this.state.isSuggestionsVisible && {
-            'aria-controls': 'kbnTypeahead__items',
-            'aria-owns': 'kbnTypeahead__items',
-          })}
+          aria-controls={this.state.isSuggestionsVisible ? 'kbnTypeahead__items' : undefined}
+          aria-owns={this.state.isSuggestionsVisible ? 'kbnTypeahead__items' : undefined}
         >
           <div role="search">
             <div className="kuiLocalSearchAssistedInput">
