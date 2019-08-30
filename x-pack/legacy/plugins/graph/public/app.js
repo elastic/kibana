@@ -42,9 +42,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { GraphListing } from './components/graph_listing';
 
-import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs, getHomePath } from './services/url';
-import { save } from  './services/save';
-
 import './angular/angular_venn_simple.js';
 import gws from './angular/graph_client_workspace.js';
 import utils from './utils.js';
@@ -59,9 +56,12 @@ import {
 import {
   getOutlinkEncoders,
 } from './angular/services/outlink_encoders';
+import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs, getHomePath } from './services/url';
+import { save } from  './services/save';
 
 import settingsTemplate from './angular/templates/settings.html';
 
+import './angular/directives/graph_save';
 import './angular/directives/graph_settings';
 
 const app = uiModules.get('app/graph');
@@ -1192,10 +1192,8 @@ app.controller('graphuiPlugin', function (
           text,
           'data-test-subj': 'saveGraphSuccess',
         });
-        if ($scope.savedWorkspace.id !== $route.current.params.id) {
-          kbnUrl.change(getEditPath($scope.savedWorkspace));
-        }
-        updateBreadcrumbs();
+        if ($scope.savedWorkspace.id === $route.current.params.id) return;
+        kbnUrl.change(getEditPath($scope.savedWorkspace));
       }
       return { id };
     }, fatalError);
