@@ -1,8 +1,6 @@
 [[setup]]
-= Set Up Kibana
+== Set Up Kibana
 
-[partintro]
---
 This section includes information on how to setup Kibana and get it running,
 including:
 
@@ -14,7 +12,7 @@ including:
 
 [[supported-platforms]]
 [float]
-== Supported platforms
+=== Supported platforms
 
 Packages of Kibana are provided for and tested against Linux, Darwin, and
 Windows. Since Kibana runs on Node.js, we include the necessary Node.js
@@ -23,7 +21,7 @@ version of Node.js is not supported.
 
 [float]
 [[elasticsearch-version]]
-== Elasticsearch version
+=== Elasticsearch version
 
 Kibana should be configured to run against an Elasticsearch node of the same
 version. This is the officially supported configuration.
@@ -44,20 +42,19 @@ Running different patch version releases of Kibana and Elasticsearch (e.g.
 Kibana 5.0.0 and Elasticsearch 5.0.1) is generally supported, though we
 encourage users to run the same versions of Kibana and Elasticsearch down to
 the patch version.
---
 
-include::setup/install.asciidoc[]
+include::setup/install.asciidoc[leveloffset=+1]
 
-include::setup/start-stop.asciidoc[]
+include::setup/start-stop.asciidoc[leveloffset=+1]
 
-include::setup/settings.asciidoc[]
+include::setup/settings.asciidoc[leveloffset=+1]
 
-include::setup/docker.asciidoc[]
+include::setup/docker.asciidoc[leveloffset=+1]
 
-include::setup/access.asciidoc[]
+include::setup/access.asciidoc[leveloffset=+1]
 
-include::setup/connect-to-elasticsearch.asciidoc[]
+include::setup/connect-to-elasticsearch.asciidoc[leveloffset=+1]
 
-include::setup/production.asciidoc[]
+include::setup/production.asciidoc[leveloffset=+1]
 
-include::setup/upgrade.asciidoc[]
+include::setup/upgrade.asciidoc[leveloffset=+1]

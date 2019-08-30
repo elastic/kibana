@@ -1,22 +1,17 @@
 [role="xpack"]
 [[maps]]
-= Maps
-
-[partintro]
---
+== Maps
 
 The **Maps** application enables you to parse through your geographical data at scale, with speed, and in real time. With features like multiple layers and indices in a map, plotting of raw documents, dynamic client-side styling, and global search across multiple layers, you can understand and monitor your data with ease.
 
 [role="screenshot"]
 image::maps/images/sample_data_ecommerce.png[]
 
---
-
-include::maps-getting-started.asciidoc[]
-include::heatmap-layer.asciidoc[]
-include::tile-layer.asciidoc[]
-include::vector-layer.asciidoc[]
-include::maps-aggregations.asciidoc[]
-include::search.asciidoc[]
-include::connect-to-ems.asciidoc[]
-include::trouble-shooting.asciidoc[]
+include::maps-getting-started.asciidoc[leveloffset=+1]
+include::heatmap-layer.asciidoc[leveloffset=+1]
+include::tile-layer.asciidoc[leveloffset=+1]
+include::vector-layer.asciidoc[leveloffset=+1]
+include::maps-aggregations.asciidoc[leveloffset=+1]
+include::search.asciidoc[leveloffset=+1]
+include::connect-to-ems.asciidoc[leveloffset=+1]
+include::trouble-shooting.asciidoc[leveloffset=+1]

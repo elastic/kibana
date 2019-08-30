@@ -20,13 +20,16 @@ include::{asciidoc-dir}/../../shared/versions.asciidoc[]
 
 include::{asciidoc-dir}/../../shared/attributes.asciidoc[]
 
+[[kibana-user-guide]]
+= User guide
+
+[partintro]
+--
+Describe the purpose of this section...
+
+--
+
 include::introduction.asciidoc[]
-
-include::setup.asciidoc[]
-
-include::monitoring/configuring-monitoring.asciidoc[]
-
-include::security/securing-kibana.asciidoc[]
 
 include::getting-started.asciidoc[]
 
@@ -75,6 +78,30 @@ include::reporting/index.asciidoc[]
 include::api.asciidoc[]
 
 include::plugins.asciidoc[]
+
+[[kibana-admin-guide]]
+= Admin guide
+
+[partintro]
+--
+Describe the purpose of this section...
+
+--
+
+include::setup.asciidoc[]
+
+include::monitoring/configuring-monitoring.asciidoc[leveloffset=+1]
+
+include::security/securing-kibana.asciidoc[leveloffset=+1]
+
+[[kibana-dev-guide]]
+= Developer guide
+
+[partintro]
+--
+Describe the purpose of this section...
+
+--
 
 include::development.asciidoc[]
 

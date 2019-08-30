@@ -1,8 +1,6 @@
 [[discover]]
-= Discover
+== Discover
 
-[partintro]
---
 *Discover* enables you to explore your data with {kib}'s data discovery functions. 
 You have access to every document in every index that matches the selected index pattern. 
 You can submit search queries, filter the search results, and view document data.
@@ -12,16 +10,15 @@ documents over time is displayed in a histogram at the top of the page.
 
 [role="screenshot"]
 image::images/Discover-Start.png[Discover]
---
 
-include::discover/set-time-filter.asciidoc[]
+include::discover/set-time-filter.asciidoc[leveloffset=+1]
 
-include::discover/search.asciidoc[]
+include::discover/search.asciidoc[leveloffset=+1]
 
-include::discover/field-filter.asciidoc[]
+include::discover/field-filter.asciidoc[leveloffset=+1]
 
-include::discover/document-data.asciidoc[]
+include::discover/document-data.asciidoc[leveloffset=+1]
 
-include::discover/context.asciidoc[]
+include::discover/context.asciidoc[leveloffset=+1]
 
-include::discover/viewing-field-stats.asciidoc[]
+include::discover/viewing-field-stats.asciidoc[leveloffset=+1]

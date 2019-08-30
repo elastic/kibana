@@ -1,8 +1,6 @@
 [[visualize]]
-= Visualize
+== Visualize
 
-[partintro]
---
 _Visualize_ enables you to create visualizations of the data in your
 Elasticsearch indices. You can then build <<dashboard, dashboards>> that
 display related visualizations.
@@ -14,10 +12,9 @@ you the trends, spikes, and dips you need to know about.
 
 You can create visualizations from a search saved from <<discover, Discover>>
 or start with a new search query.
---
 
 [[createvis]]
-== Creating a Visualization
+=== Creating a Visualization
 
 To create a visualization:
 
@@ -138,36 +135,36 @@ For more information about working with sub aggregations, see
 https://www.elastic.co/blog/kibana-aggregation-execution-order-and-you[Kibana,
 Aggregation Execution Order, and You].
 
-include::visualize/saving.asciidoc[]
+include::visualize/saving.asciidoc[leveloffset=+1]
 
-include::visualize/visualize_rollup_data.asciidoc[]
+include::visualize/visualize_rollup_data.asciidoc[leveloffset=+1]
 
-include::visualize/xychart.asciidoc[]
+include::visualize/xychart.asciidoc[leveloffset=+1]
 
-include::visualize/controls.asciidoc[]
+include::visualize/controls.asciidoc[leveloffset=+1]
 
-include::visualize/datatable.asciidoc[]
+include::visualize/datatable.asciidoc[leveloffset=+1]
 
-include::visualize/markdown.asciidoc[]
+include::visualize/markdown.asciidoc[leveloffset=+1]
 
-include::visualize/metric.asciidoc[]
+include::visualize/metric.asciidoc[leveloffset=+1]
 
-include::visualize/goal.asciidoc[]
+include::visualize/goal.asciidoc[leveloffset=+1]
 
-include::visualize/pie.asciidoc[]
+include::visualize/pie.asciidoc[leveloffset=+1]
 
-include::visualize/tilemap.asciidoc[]
+include::visualize/tilemap.asciidoc[leveloffset=+1]
 
-include::visualize/regionmap.asciidoc[]
+include::visualize/regionmap.asciidoc[leveloffset=+1]
 
-include::visualize/timelion.asciidoc[]
+include::visualize/timelion.asciidoc[leveloffset=+1]
 
-include::visualize/tsvb.asciidoc[]
+include::visualize/tsvb.asciidoc[leveloffset=+1]
 
-include::visualize/tagcloud.asciidoc[]
+include::visualize/tagcloud.asciidoc[leveloffset=+1]
 
-include::visualize/heatmap.asciidoc[]
+include::visualize/heatmap.asciidoc[leveloffset=+1]
 
-include::visualize/vega.asciidoc[]
+include::visualize/vega.asciidoc[leveloffset=+1]
 
-include::visualize/inspector.asciidoc[]
+include::visualize/inspector.asciidoc[leveloffset=+1]

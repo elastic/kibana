@@ -1,9 +1,7 @@
 [role="xpack"]
 [[xpack-logs]]
-= Logs
+== Logs
 
-[partintro]
---
 The Logs app in Kibana enables you to explore logs for common servers, containers, and services.
 
 The Logs app has a compact, console-like display that you can customize.
@@ -20,10 +18,8 @@ In this case, you will only see the logs for the selected component.
 [role="screenshot"]
 image::logs/images/logs-console.png[Log Console in Kibana]
 
---
+include::getting-started.asciidoc[leveloffset=+1]
 
-include::getting-started.asciidoc[]
+include::using.asciidoc[leveloffset=+1]
 
-include::using.asciidoc[]
-
-include::configuring.asciidoc[]
+include::configuring.asciidoc[leveloffset=+1]

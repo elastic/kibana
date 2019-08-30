@@ -1,8 +1,5 @@
 [[code]]
-= Code
-
-[partintro]
---
+== Code
 
 beta[]
 
@@ -14,6 +11,5 @@ Interaction with source code is pervasive and essential for any technology compa
 * Full text search with repo and language filters
 
 <<code-getting-started, Get Started>> with *Code* by importing your first repo.
---
 
-include::code-getting-started.asciidoc[]
+include::code-getting-started.asciidoc[leveloffset=+1]

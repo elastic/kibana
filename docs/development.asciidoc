@@ -1,25 +1,22 @@
 [[development]]
-= Contributing to Kibana
+== Contributing to Kibana
 
-[partintro]
---
 Contributing to Kibana can be daunting at first, but it doesn't have to be. If
 you're planning a pull request to the Kibana repository, you may want to start
 with <<core-development>>.
 
 If you'd prefer to use Kibana's internal plugin API, then check out
 <<plugin-development>>.
---
 
-include::development/core-development.asciidoc[]
+include::development/core-development.asciidoc[leveloffset=+1]
 
-include::development/plugin-development.asciidoc[]
+include::development/plugin-development.asciidoc[leveloffset=+1]
 
-include::development/visualize/development-visualize-index.asciidoc[]
+include::development/visualize/development-visualize-index.asciidoc[leveloffset=+1]
 
-include::development/add-data-guide.asciidoc[]
+include::development/add-data-guide.asciidoc[leveloffset=+1]
 
-include::development/security/index.asciidoc[]
+include::development/security/index.asciidoc[leveloffset=+1]
 
-include::development/pr-review.asciidoc[]
+include::development/pr-review.asciidoc[leveloffset=+1]
 

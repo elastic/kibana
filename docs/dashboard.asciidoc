@@ -1,8 +1,5 @@
 [[dashboard]]
-= Dashboard
-
-[partintro]
---
+== Dashboard
 
 A {kib} _dashboard_ is a collection of visualizations, searches, and 
 maps, typically in real-time. Dashboards provide 
@@ -47,10 +44,8 @@ by entering a search query, changing the time filter, or clicking
 in the visualizations, searches, and maps. If a dashboard element has a stored query, 
 both queries are applied.
 
---
-
 [[dashboard-create-new-dashboard]]
-== Create a dashboard
+=== Create a dashboard
 
 To create a dashboard, you must have data indexed into {es}, an index pattern 
 to retrieve the data from {es}, and 
@@ -78,7 +73,7 @@ image:images/Dashboard_add_visualization.png[Example add visualization to dashbo
 
 [float]
 [[customizing-your-dashboard]]
-=== Arrange dashboard elements
+==== Arrange dashboard elements
 
 In *Edit* mode, you can move, resize, customize, and delete panels to suit your needs. 
 
@@ -97,7 +92,7 @@ dashboard does *not* delete the saved visualization or search.
 
 [float]
 [[sharing-dashboards]]
-=== Share a dashboard
+==== Share a dashboard
 
 [[embedding-dashboards]]
 When you've finished your dashboard, you can share it with your teammates. 
@@ -118,14 +113,14 @@ tools. To create a short URL, you must have write access to {kib}.
 
 [float]
 [[import-dashboards]]
-=== Import and export dashboards
+==== Import and export dashboards
 
 To import and export dashboards, go to *Management > Saved Objects*. For details,
 see <<managing-saved-objects, Managing saved objects>>. 
 
 [float]
 [[viewing-detailed-information]]
-=== Inspect and edit elements
+==== Inspect and edit elements
 
 Many dashboard elements allow you to drill down into the data and requests 
 behind the element. Open the menu in the upper right of the panel and select *Inspect*. 
@@ -138,7 +133,7 @@ To open an element for editing, put the dashboard in *Edit* mode,
 and then select *Edit* from the panel menu. The changes you make appear in
 every dashboard that uses the element. 
 
-include::management/dashboard_only_mode/index.asciidoc[]
+include::management/dashboard_only_mode/index.asciidoc[leveloffset=+1]
 
 
 

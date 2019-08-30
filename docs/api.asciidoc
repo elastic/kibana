@@ -1,8 +1,6 @@
 [[api]]
-= REST API
+== REST API
 
-[partintro]
---
 Some of the features of Kibana are provided via a REST API, which is ideal for
 people that want to create an integration with Kibana or that want to automate
 certain aspects of configuring and deploying Kibana.
@@ -27,7 +25,7 @@ entirely.
 NOTE: You cannot access these APIs via the Console in Kibana.
 
 [float]
-== APIs
+=== APIs
 * <<features-api>>
 * <<spaces-api>>
 * <<role-management-api>>
@@ -36,13 +34,12 @@ NOTE: You cannot access these APIs via the Console in Kibana.
 * <<logstash-configuration-management-api>>
 * <<url-shortening-api>>
 * <<upgrade-assistant-api>>
---
 
-include::api/features.asciidoc[]
-include::api/spaces-management.asciidoc[]
-include::api/role-management.asciidoc[]
-include::api/saved-objects.asciidoc[]
-include::api/dashboard-import.asciidoc[]
-include::api/logstash-configuration-management.asciidoc[]
-include::api/url-shortening.asciidoc[]
-include::api/upgrade-assistant.asciidoc[]
+include::api/features.asciidoc[leveloffset=+1]
+include::api/spaces-management.asciidoc[leveloffset=+1]
+include::api/role-management.asciidoc[leveloffset=+1]
+include::api/saved-objects.asciidoc[leveloffset=+1]
+include::api/dashboard-import.asciidoc[leveloffset=+1]
+include::api/logstash-configuration-management.asciidoc[leveloffset=+1]
+include::api/url-shortening.asciidoc[leveloffset=+1]
+include::api/upgrade-assistant.asciidoc[leveloffset=+1]

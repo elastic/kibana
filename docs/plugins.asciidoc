@@ -1,8 +1,6 @@
 [[kibana-plugins]]
-= Kibana Plugins
+== Kibana Plugins
 
-[partintro]
---
 Add-on functionality for Kibana is implemented with plug-in modules. You use the `bin/kibana-plugin`
 command to manage these modules.
 
@@ -13,10 +11,9 @@ command to manage these modules.
 The Kibana plugin interfaces are in a state of constant development.  We cannot provide backwards compatibility for plugins due to the high rate of change.  Kibana enforces that the installed plugins match the version of Kibana itself.  Plugin developers will have to release a new version of their plugin for each new Kibana release as a result.
 
 ==============================================
---
 
 [[install-plugin]]
-== Installing Plugins
+=== Installing Plugins
 
 Use the following command to install a plugin:
 
@@ -69,7 +66,7 @@ $ http_proxy="http://proxy.local:4242" bin/kibana-plugin install <package name o
 
 
 [[update-remove-plugin]]
-== Updating & Removing Plugins
+=== Updating & Removing Plugins
 
 To update a plugin, remove the current version and reinstall the plugin.
 
@@ -83,7 +80,7 @@ You can also remove a plugin manually by deleting the plugin's subdirectory unde
 NOTE: Removing a plugin will result in an "optimize" run which will delay the next start of Kibana.
 
 [[disable-plugin]]
-== Disabling Plugins
+=== Disabling Plugins
 
 Use the following command to disable a plugin:
 
@@ -97,7 +94,7 @@ NOTE: Disabling or enabling a plugin will result in an "optimize" run which will
 <1> You can find a plugin's plugin ID as the value of the `name` property in the plugin's `package.json` file.
 
 [[configure-plugin-manager]]
-== Configuring the Plugin Manager
+=== Configuring the Plugin Manager
 
 By default, the plugin manager provides you with feedback on the status of the activity you've asked the plugin manager
 to perform. You can control the level of feedback for the `install` and `remove` commands with the `--quiet` and
@@ -132,4 +129,4 @@ you must specify the path to that configuration file each time you use the `bin/
 74:: I/O error
 70:: Other error
 
-include::plugins/known-plugins.asciidoc[]
+include::plugins/known-plugins.asciidoc[leveloffset=+1]

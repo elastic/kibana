@@ -1,9 +1,7 @@
 [role="xpack"]
 [[xpack-infra]]
-= Infrastructure
+== Infrastructure
 
-[partintro]
---
 The Infrastructure app enables you to monitor your infrastructure and identify problems in real time.
 You start with a visual summary of your infrastructure where you can view basic metrics for common servers, containers, and services.
 Then you can drill down to view more detailed metrics or other information for that component.
@@ -26,9 +24,8 @@ To get started, you need to <<xpack-metrics-getting-started, start collecting me
 [role="screenshot"]
 image::infrastructure/images/infra-sysmon.png[Infrastructure Overview in Kibana]
 
---
 
-include::getting-started.asciidoc[]
-include::infra-ui.asciidoc[]
-include::view-metrics.asciidoc[]
-include::metrics-explorer.asciidoc[]
+include::getting-started.asciidoc[leveloffset=+1]
+include::infra-ui.asciidoc[leveloffset=+1]
+include::view-metrics.asciidoc[leveloffset=+1]
+include::metrics-explorer.asciidoc[leveloffset=+1]

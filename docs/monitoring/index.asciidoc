@@ -1,9 +1,6 @@
 [role="xpack"]
 [[xpack-monitoring]]
-= Stack Monitoring
-
-[partintro]
---
+== Stack Monitoring
 
 The {kib} {monitor-features} serve two separate purposes:
 
@@ -23,11 +20,9 @@ license, Top Cluster Alerts are not displayed.
 For more information, see <<configuring-monitoring>> and 
 {stack-ov}/xpack-monitoring.html[Monitoring the {stack}].  
 
---
-
-include::beats-details.asciidoc[]
-include::cluster-alerts.asciidoc[]
-include::elasticsearch-details.asciidoc[]
-include::kibana-details.asciidoc[]
-include::logstash-details.asciidoc[]
-include::monitoring-troubleshooting.asciidoc[]
+include::beats-details.asciidoc[leveloffset=+1]
+include::cluster-alerts.asciidoc[leveloffset=+1]
+include::elasticsearch-details.asciidoc[leveloffset=+1]
+include::kibana-details.asciidoc[leveloffset=+1]
+include::logstash-details.asciidoc[leveloffset=+1]
+include::monitoring-troubleshooting.asciidoc[leveloffset=+1]

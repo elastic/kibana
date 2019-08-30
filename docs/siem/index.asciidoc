@@ -1,9 +1,7 @@
 [role="xpack"]
 [[xpack-siem]]
-= SIEM
+== SIEM
 
-[partintro]
---
 beta[]
 
 The SIEM app in Kibana provides an interactive workspace for security teams to
@@ -17,14 +15,14 @@ image::siem/images/overview-ui.png[SIEM Overview in Kibana]
 
 
 [float]
-== Add data
+=== Add data
 
 Kibana provides step-by-step instructions to help you add data. The
 {siem-guide}[SIEM Guide] is a good source for more
 detailed information and instructions.
 
 [float]
-=== {Beats} 
+==== {Beats} 
 
 https://www.elastic.co/products/beats/auditbeat[{auditbeat}],
 https://www.elastic.co/products/beats/filebeat[{filebeat}],
@@ -37,7 +35,7 @@ The default index patterns for SIEM events are `auditbeat-*`, `winlogbeat-*`,
 *Kibana > Management > Advanced Settings > siem:defaultIndex*.
 
 [float]
-=== Elastic Common Schema (ECS) for normalizing data
+==== Elastic Common Schema (ECS) for normalizing data
 
 The {ecs-ref}[Elastic Common Schema (ECS)] defines a common set of fields to be
 used for storing event data in Elasticsearch. ECS helps users normalize their
@@ -46,8 +44,5 @@ their events.
 
 SIEM can ingest and normalize events from ECS-compatible data sources.
 
---
-
-
-include::siem-ui.asciidoc[]
-include::machine-learning.asciidoc[]
+include::siem-ui.asciidoc[leveloffset=+1]
+include::machine-learning.asciidoc[leveloffset=+1]

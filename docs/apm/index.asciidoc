@@ -1,9 +1,7 @@
 [role="xpack"]
 [[xpack-apm]]
-= APM
+== APM
 
-[partintro]
---
 Elastic Application Performance Monitoring (APM) automatically collects in-depth
 performance metrics and errors from inside your applications.
 
@@ -17,10 +15,9 @@ and quickly locate the performance bottlenecks.
 
 NOTE: For more information about the components of Elastic APM,
 see the {apm-get-started-ref}/overview.html[APM Overview].
---
 
-include::getting-started.asciidoc[]
+include::getting-started.asciidoc[leveloffset=+1]
 
-include::bottlenecks.asciidoc[]
+include::bottlenecks.asciidoc[leveloffset=+1]
 
-include::using-the-apm-ui.asciidoc[]
+include::using-the-apm-ui.asciidoc[leveloffset=+1]

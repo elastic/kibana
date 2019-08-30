@@ -1,8 +1,5 @@
 [[getting-started]]
-= Getting Started
-
-[partintro]
---
+== Getting Started
 
 You’re new to Kibana and want to give it a try. {kib} has sample data sets and 
 tutorials to help you get started.
@@ -46,20 +43,17 @@ a <<connect-to-elasticsearch, connection to Elasticsearch>>.
 If you are running our https://cloud.elastic.co[hosted Elasticsearch Service] 
 on Elastic Cloud, you can access Kibana with a single click.
 
+include::getting-started/add-sample-data.asciidoc[leveloffset=+1]
 
---
+include::getting-started/tutorial-sample-data.asciidoc[leveloffset=+1]
 
-include::getting-started/add-sample-data.asciidoc[]
+include::getting-started/tutorial-full-experience.asciidoc[leveloffset=+1]
 
-include::getting-started/tutorial-sample-data.asciidoc[]
+include::getting-started/tutorial-define-index.asciidoc[leveloffset=+1]
 
-include::getting-started/tutorial-full-experience.asciidoc[]
+include::getting-started/tutorial-discovering.asciidoc[leveloffset=+1]
 
-include::getting-started/tutorial-define-index.asciidoc[]
+include::getting-started/tutorial-visualizing.asciidoc[leveloffset=+1]
 
-include::getting-started/tutorial-discovering.asciidoc[]
-
-include::getting-started/tutorial-visualizing.asciidoc[]
-
-include::getting-started/tutorial-dashboard.asciidoc[]
+include::getting-started/tutorial-dashboard.asciidoc[leveloffset=+1]
 
