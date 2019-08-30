@@ -93,6 +93,7 @@ def getPostBuildWorker(name, closure) {
     stage(name) {
       def kibanaPort = "61${workerNumber}1"
       def esPort = "61${workerNumber}2"
+      def esTransportPort = "61${workerNumber}3"
 
       withEnv([
         "CI_WORKER_NUMBER=${workerNumber}",
@@ -100,6 +101,7 @@ def getPostBuildWorker(name, closure) {
         "TEST_KIBANA_PORT=${kibanaPort}",
         "TEST_KIBANA_URL=http://elastic:changeme@localhost:${kibanaPort}",
         "TEST_ES_URL=http://elastic:changeme@localhost:${esPort}",
+        "TEST_ES_TRANSPORT_PORT=${esTransportPort}",
         "IS_PIPELINE_JOB=1",
       ]) {
         closure()
