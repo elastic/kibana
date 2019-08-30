@@ -18,6 +18,8 @@ With visualizations, you can:
 
 include::visualize/choose-your-visualization.asciidoc[]
 
-include::{kib-repo-dir}/visualize/saving.asciidoc[]
+include::visualize/saving.asciidoc[]
 
-include::{kib-repo-dir}/visualize/visualize_rollup_data.asciidoc[]
+include::visualize/visualize_rollup_data.asciidoc[]
+
+include::visualize/inspector.asciidoc[]
