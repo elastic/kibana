@@ -103,7 +103,7 @@ export function FieldSelect({
             exists: fieldMap[field].exists || false,
             compatible: isCompatibleWithCurrentOperation(field),
           }))
-          .filter(field => (showEmptyFields ? true : field.exists))
+          .filter(field => showEmptyFields || field.exists)
           .sort((a, b) => {
             if (a.compatible && !b.compatible) {
               return -1;

@@ -114,47 +114,36 @@ export function recursiveFlatten(
     string,
     {
       count: number;
-      samples: unknown[];
+      samples: Set<unknown>;
     }
   > = {};
 
-  const expectedKeys: Record<string, boolean> = {};
-  fields.forEach(field => {
-    expectedKeys[field.name] = true;
-  });
+  const expectedKeys = new Set(fields.map(f => f.name));
 
-  // TODO: Alias types
   indexPattern.forEach(field => {
-    if (!expectedKeys[field.name]) {
+    if (!expectedKeys.has(field.name)) {
       return;
     }
 
-    let matches;
-    if (field.parent) {
-      matches = docs.map(doc => {
-        if (!doc) {
-          return;
-        }
-        return get(doc._source, field.parent!);
-      });
-    } else {
-      matches = docs.map(doc => {
-        if (!doc) {
-          return;
-        }
-        return get(doc._source, field.name);
-      });
-    }
+    docs.forEach(doc => {
+      if (!doc) {
+        return;
+      }
 
-    matches.forEach(match => {
+      const match = get(doc._source, field.parent || field.name);
+      if (typeof match === 'undefined') {
+        return;
+      }
+
       const record = overallKeys[field.name];
       if (record) {
         record.count += 1;
-        record.samples.push(match);
-      } else if (match) {
+        record.samples.add(match);
+      } else {
         overallKeys[field.name] = {
           count: 1,
-          samples: [match],
+          // Using a set here makes the most sense and avoids the later uniq computation
+          samples: new Set([match]),
         };
       }
     });
@@ -170,7 +159,7 @@ export function recursiveFlatten(
   Object.entries(overallKeys).forEach(([key, value]) => {
     returnTypes[key] = {
       count: value.count,
-      cardinality: uniq(value.samples).length,
+      cardinality: value.samples.size,
     };
   });
   return returnTypes;

@@ -11,7 +11,7 @@ export function LensPageProvider({ getService }: FtrProviderContext) {
 
   return {
     async openIndexPatternFiltersPopover() {
-      await testSubjects.click('lnsIndexPatternTypeFilterButton');
+      await testSubjects.click('lnsIndexPatternFiltersToggle');
     },
 
     async toggleExistenceFilter() {

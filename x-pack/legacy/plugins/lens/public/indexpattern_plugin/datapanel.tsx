@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mapValues, uniq } from 'lodash';
+import { mapValues, uniq, indexBy } from 'lodash';
 import React, { useState, useEffect, memo, useCallback } from 'react';
 import {
   EuiComboBox,
@@ -15,7 +15,6 @@ import {
   EuiFlexItem,
   EuiTitle,
   EuiButtonEmpty,
-  EuiFilterGroup,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiContextMenuPanelProps,
@@ -171,33 +170,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   onChangeIndexPattern?: (newId: string) => void;
   updateFieldsWithCounts?: (indexPatternId: string, fields: IndexPattern['fields']) => void;
 }) {
-  const [localState, setLocalState] = useState<DataPanelState>({
-    isLoading: false,
-    nameFilter: '',
-    typeFilter: [],
-    isTypeFilterOpen: false,
-  });
-  const [pageSize, setPageSize] = useState(PAGINATION_SIZE);
-  const [scrollContainer, setScrollContainer] = useState<Element | undefined>(undefined);
-  const lazyScroll = () => {
-    if (scrollContainer) {
-      const nearBottom =
-        scrollContainer.scrollTop + scrollContainer.clientHeight >
-        scrollContainer.scrollHeight * 0.9;
-      if (nearBottom) {
-        setPageSize(Math.min(pageSize * 1.5, allFields.length));
-      }
-    }
-  };
-
-  useEffect(() => {
-    if (scrollContainer) {
-      scrollContainer.scrollTop = 0;
-      setPageSize(PAGINATION_SIZE);
-      lazyScroll();
-    }
-  }, [localState.nameFilter, localState.typeFilter, currentIndexPatternId, showEmptyFields]);
-
   if (Object.keys(indexPatterns).length === 0) {
     return (
       <EuiFlexGroup
@@ -227,59 +199,89 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     );
   }
 
-  const allFields = indexPatterns[currentIndexPatternId].fields;
+  const [localState, setLocalState] = useState<DataPanelState>({
+    isLoading: false,
+    nameFilter: '',
+    typeFilter: [],
+    isTypeFilterOpen: false,
+  });
+  const [pageSize, setPageSize] = useState(PAGINATION_SIZE);
+  const [scrollContainer, setScrollContainer] = useState<Element | undefined>(undefined);
+
+  const currentIndexPattern = indexPatterns[currentIndexPatternId];
+  const allFields = currentIndexPattern.fields;
+  const fieldByName = indexBy(allFields, 'name');
+
+  const lazyScroll = () => {
+    if (scrollContainer) {
+      const nearBottom =
+        scrollContainer.scrollTop + scrollContainer.clientHeight >
+        scrollContainer.scrollHeight * 0.9;
+      if (nearBottom) {
+        setPageSize(Math.min(pageSize * 1.5, allFields.length));
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (scrollContainer) {
+      scrollContainer.scrollTop = 0;
+      setPageSize(PAGINATION_SIZE);
+      lazyScroll();
+    }
+  }, [localState.nameFilter, localState.typeFilter, currentIndexPatternId, showEmptyFields]);
 
   const availableFieldTypes = uniq(allFields.map(({ type }) => type)).filter(
     type => type in fieldTypeNames
   );
 
-  const displayedFields = allFields
-    .filter(field => {
-      if (!showEmptyFields) {
-        const indexField =
-          indexPatterns[currentIndexPatternId] &&
-          indexPatterns[currentIndexPatternId].hasExistence &&
-          indexPatterns[currentIndexPatternId].fields.find(f => f.name === field.name);
-        if (localState.typeFilter.length > 0) {
-          return (
-            indexField &&
-            indexField.exists &&
-            localState.typeFilter.includes(field.type as DataType)
-          );
-        }
-        return indexField && indexField.exists;
-      }
+  const displayedFields = allFields.filter(field => {
+    if (!supportedFieldTypes.includes(field.type)) {
+      return false;
+    }
+
+    if (
+      localState.nameFilter.length &&
+      !field.name.toLowerCase().includes(localState.nameFilter.toLowerCase())
+    ) {
+      return false;
+    }
+
+    if (!showEmptyFields) {
+      const indexField =
+        currentIndexPattern && currentIndexPattern.hasExistence && fieldByName[field.name];
       if (localState.typeFilter.length > 0) {
-        return localState.typeFilter.includes(field.type as DataType);
+        return (
+          indexField && indexField.exists && localState.typeFilter.includes(field.type as DataType)
+        );
       }
-      return true;
-    })
-    .filter(
-      (field: IndexPatternField) =>
-        field.name.toLowerCase().includes(localState.nameFilter.toLowerCase()) &&
-        supportedFieldTypes.includes(field.type)
-    );
+      return indexField && indexField.exists;
+    }
+
+    if (localState.typeFilter.length > 0) {
+      return localState.typeFilter.includes(field.type as DataType);
+    }
+
+    return true;
+  });
 
   const paginatedFields = displayedFields.sort(sortFields).slice(0, pageSize);
 
+  // Side effect: Fetch field existence data when the index pattern is switched
   useEffect(() => {
-    if (
-      localState.isLoading ||
-      indexPatterns[currentIndexPatternId].hasExistence ||
-      !updateFieldsWithCounts
-    ) {
+    if (localState.isLoading || currentIndexPattern.hasExistence || !updateFieldsWithCounts) {
       return;
     }
 
     setLocalState(s => ({ ...s, isLoading: true }));
 
     npStart.core.http
-      .post(`/api/lens/index_stats/${indexPatterns[currentIndexPatternId].title}`, {
+      .post(`/api/lens/index_stats/${currentIndexPattern.title}`, {
         body: JSON.stringify({
           earliest: dateRange.fromDate,
           latest: dateRange.toDate,
           size: 500,
-          timeFieldName: indexPatterns[currentIndexPatternId].timeFieldName,
+          timeFieldName: currentIndexPattern.timeFieldName,
           fields: allFields
             .filter(field => field.aggregatable)
             .map(field => ({
@@ -300,7 +302,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
 
         updateFieldsWithCounts(
           currentIndexPatternId,
-          indexPatterns[currentIndexPatternId].fields.map(field => {
+          allFields.map(field => {
             const matching = results[field.name];
             if (!matching) {
               return { ...field, exists: false };
@@ -334,9 +336,9 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 <EuiTitle size="xxs">
                   <h4
                     className="lnsIndexPatternDataPanel__header"
-                    title={indexPatterns[currentIndexPatternId].title}
+                    title={currentIndexPattern.title}
                   >
-                    {indexPatterns[currentIndexPatternId].title}{' '}
+                    {currentIndexPattern.title}{' '}
                   </h4>
                 </EuiTitle>
                 <EuiButtonEmpty
@@ -369,8 +371,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                   currentIndexPatternId
                     ? [
                         {
-                          label: indexPatterns[currentIndexPatternId].title,
-                          value: indexPatterns[currentIndexPatternId].id,
+                          label: currentIndexPattern.title,
+                          value: currentIndexPattern.id,
                         },
                       ]
                     : undefined
@@ -422,7 +424,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                             isTypeFilterOpen: !localState.isTypeFilterOpen,
                           }));
                         }}
-                        data-test-subj="lnsIndexPatternTypeFilterButton"
+                        data-test-subj="lnsIndexPatternFiltersToggle"
                         title={i18n.translate('xpack.lens.indexPatterns.toggleFiltersPopover', {
                           defaultMessage: 'Toggle filters for index pattern',
                         })}
@@ -444,6 +446,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     </EuiPopoverTitle>
                     <FixedEuiContextMenuPanel
                       watchedItemProps={['icon', 'disabled']}
+                      data-test-subj="lnsIndexPatternTypeFilterOptions"
                       items={(availableFieldTypes as DataType[]).map(type => (
                         <EuiContextMenuItem
                           key={type}
@@ -468,8 +471,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                         onChange={() => {
                           onToggleEmptyFields();
                         }}
-                        label={i18n.translate('xpack.lens.datatypes.hiddenFields', {
-                          defaultMessage: 'Only show fields that contain data',
+                        label={i18n.translate('xpack.lens.indexPatterns.toggleEmptyFieldsSwitch', {
+                          defaultMessage: 'Only show fields with data',
                         })}
                         data-test-subj="lnsEmptyFilter"
                       />
@@ -493,7 +496,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 }}
               >
                 <input
-                  className="euiFieldText"
+                  className="euiFieldText euiFieldText--inGroup"
+                  data-test-subj="lnsIndexPatternFieldSearch"
                   placeholder={i18n.translate('xpack.lens.indexPatterns.filterByNameLabel', {
                     defaultMessage: 'Search fields',
                     description:
@@ -508,9 +512,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                   })}
                 />
               </EuiFormControlLayout>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFilterGroup></EuiFilterGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
           <div
@@ -527,12 +528,10 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               {localState.isLoading && <EuiLoadingSpinner />}
 
               {paginatedFields.map(field => {
-                const overallField = indexPatterns[currentIndexPatternId].fields.find(
-                  f => f.name === field.name
-                );
+                const overallField = fieldByName[field.name];
                 return (
                   <FieldItem
-                    indexPattern={indexPatterns[currentIndexPatternId]}
+                    indexPattern={currentIndexPattern}
                     key={field.name}
                     field={field}
                     highlight={localState.nameFilter.toLowerCase()}
@@ -550,7 +549,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                       })
                     : i18n.translate('xpack.lens.indexPatterns.noFieldsLabel', {
                         defaultMessage: 'No fields can be visualized from {title}',
-                        values: { title: indexPatterns[currentIndexPatternId].title },
+                        values: { title: currentIndexPattern.title },
                       })}
                 </EuiText>
               )}

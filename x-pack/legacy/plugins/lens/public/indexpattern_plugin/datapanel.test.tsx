@@ -6,7 +6,7 @@
 
 import { shallow, mount } from 'enzyme';
 import React, { ChangeEvent, ReactElement } from 'react';
-import { EuiComboBox, EuiFieldSearch, EuiContextMenuPanel } from '@elastic/eui';
+import { EuiComboBox, EuiContextMenuPanel } from '@elastic/eui';
 import { IndexPatternPrivateState, IndexPatternColumn } from './indexpattern';
 import { createMockedDragDropContext } from './mocks';
 import { InnerIndexPatternDataPanel, IndexPatternDataPanel, MemoizedDataPanel } from './datapanel';
@@ -432,15 +432,15 @@ describe('IndexPattern Data Panel', () => {
       ]);
     });
 
-    it('should filter down by name', async () => {
+    it('should filter down by name', () => {
       const wrapper = shallow(
         <InnerIndexPatternDataPanel {...defaultProps} showEmptyFields={true} />
       );
 
       act(() => {
-        wrapper.find(EuiFieldSearch).prop('onChange')!({ target: { value: 'mem' } } as ChangeEvent<
-          HTMLInputElement
-        >);
+        wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"]').prop('onChange')!({
+          target: { value: 'mem' },
+        } as ChangeEvent<HTMLInputElement>);
       });
 
       expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
@@ -448,19 +448,20 @@ describe('IndexPattern Data Panel', () => {
       ]);
     });
 
-    it('should filter down by type', async () => {
-      const wrapper = shallow(
+    it('should filter down by type', () => {
+      const wrapper = mount(
         <InnerIndexPatternDataPanel {...defaultProps} showEmptyFields={true} />
       );
 
-      act(() => {
-        (wrapper
-          .find(EuiContextMenuPanel)
-          .prop('items')!
-          .find(
-            item => (item as ReactElement).props['data-test-subj'] === 'typeFilter-number'
-          )! as ReactElement).props.onClick();
-      });
+      wrapper
+        .find('[data-test-subj="lnsIndexPatternFiltersToggle"]')
+        .first()
+        .simulate('click');
+
+      wrapper
+        .find('[data-test-subj="typeFilter-number"]')
+        .first()
+        .simulate('click');
 
       expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
         'bytes',
@@ -468,28 +469,24 @@ describe('IndexPattern Data Panel', () => {
       ]);
     });
 
-    it('should toggle type if clicked again', async () => {
-      const wrapper = shallow(
+    it('should toggle type if clicked again', () => {
+      const wrapper = mount(
         <InnerIndexPatternDataPanel {...defaultProps} showEmptyFields={true} />
       );
 
-      act(() => {
-        (wrapper
-          .find(EuiContextMenuPanel)
-          .prop('items')!
-          .find(
-            item => (item as ReactElement).props['data-test-subj'] === 'typeFilter-number'
-          )! as ReactElement).props.onClick();
-      });
+      wrapper
+        .find('[data-test-subj="lnsIndexPatternFiltersToggle"]')
+        .first()
+        .simulate('click');
 
-      act(() => {
-        (wrapper
-          .find(EuiContextMenuPanel)
-          .prop('items')!
-          .find(
-            item => (item as ReactElement).props['data-test-subj'] === 'typeFilter-number'
-          )! as ReactElement).props.onClick();
-      });
+      wrapper
+        .find('[data-test-subj="typeFilter-number"]')
+        .first()
+        .simulate('click');
+      wrapper
+        .find('[data-test-subj="typeFilter-number"]')
+        .first()
+        .simulate('click');
 
       expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
         'bytes',
@@ -499,25 +496,26 @@ describe('IndexPattern Data Panel', () => {
       ]);
     });
 
-    it('should filter down by type and by name', async () => {
-      const wrapper = shallow(
+    it('should filter down by type and by name', () => {
+      const wrapper = mount(
         <InnerIndexPatternDataPanel {...defaultProps} showEmptyFields={true} />
       );
 
       act(() => {
-        wrapper.find(EuiFieldSearch).prop('onChange')!({ target: { value: 'mem' } } as ChangeEvent<
-          HTMLInputElement
-        >);
+        wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"]').prop('onChange')!({
+          target: { value: 'mem' },
+        } as ChangeEvent<HTMLInputElement>);
       });
 
-      act(() => {
-        (wrapper
-          .find(EuiContextMenuPanel)
-          .prop('items')!
-          .find(
-            item => (item as ReactElement).props['data-test-subj'] === 'typeFilter-number'
-          )! as ReactElement).props.onClick();
-      });
+      wrapper
+        .find('[data-test-subj="lnsIndexPatternFiltersToggle"]')
+        .first()
+        .simulate('click');
+
+      wrapper
+        .find('[data-test-subj="typeFilter-number"]')
+        .first()
+        .simulate('click');
 
       expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
         'memory',
@@ -555,15 +553,15 @@ describe('IndexPattern Data Panel', () => {
       ]);
     });
 
-    it('should filter down by name', async () => {
+    it('should filter down by name', () => {
       const wrapper = shallow(
         <InnerIndexPatternDataPanel {...emptyFieldsTestProps} showEmptyFields={true} />
       );
 
       act(() => {
-        wrapper.find(EuiFieldSearch).prop('onChange')!({ target: { value: 'mem' } } as ChangeEvent<
-          HTMLInputElement
-        >);
+        wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"]').prop('onChange')!({
+          target: { value: 'mem' },
+        } as ChangeEvent<HTMLInputElement>);
       });
 
       expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
@@ -571,17 +569,18 @@ describe('IndexPattern Data Panel', () => {
       ]);
     });
 
-    it('should allow removing the filter for data', async () => {
-      const wrapper = shallow(<InnerIndexPatternDataPanel {...emptyFieldsTestProps} />);
+    it('should allow removing the filter for data', () => {
+      const wrapper = mount(<InnerIndexPatternDataPanel {...emptyFieldsTestProps} />);
 
-      act(() => {
-        (wrapper
-          .find(EuiContextMenuPanel)
-          .prop('items')!
-          .find(
-            item => (item as ReactElement).props['data-test-subj'] === 'emptyFilter'
-          )! as ReactElement).props.onClick();
-      });
+      wrapper
+        .find('[data-test-subj="lnsIndexPatternFiltersToggle"]')
+        .first()
+        .simulate('click');
+
+      wrapper
+        .find('[data-test-subj="lnsEmptyFilter"]')
+        .first()
+        .prop('onChange')!({} as ChangeEvent);
 
       expect(emptyFieldsTestProps.onToggleEmptyFields).toHaveBeenCalled();
     });

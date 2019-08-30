@@ -37,7 +37,6 @@ export interface IndexPattern {
   fields: IndexPatternField[];
   title: string;
   timeFieldName?: string | null;
-  hasExistence?: boolean;
   fieldFormatMap?: Record<
     string,
     {
@@ -45,6 +44,9 @@ export interface IndexPattern {
       params: unknown;
     }
   >;
+
+  // TODO: Load index patterns and existence data in one API call
+  hasExistence?: boolean;
 }
 
 export interface IndexPatternField {
@@ -67,7 +69,7 @@ export interface IndexPatternField {
     >
   >;
 
-  // Loaded separately
+  // TODO: This is loaded separately, but should be combined into one API
   exists?: boolean;
   cardinality?: number;
   count?: number;
@@ -156,6 +158,8 @@ export function getIndexPatternDatasource({
   // Not stateful. State is persisted to the frame
   const indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState> = {
     async initialize(state?: IndexPatternPersistedState) {
+      // TODO: The initial request should only load index pattern names because each saved object is large
+      //       Followup requests should load a single index pattern + existence information
       const indexPatternObjects = await getIndexPatterns(chrome, toastNotifications);
       const indexPatterns: Record<string, IndexPattern> = {};
 

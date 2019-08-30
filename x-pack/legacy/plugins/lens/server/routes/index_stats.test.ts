@@ -11,7 +11,7 @@ import stubbedLogstashFields from '../../../../../../src/fixtures/logstash_field
 import { recursiveFlatten } from './index_stats';
 
 describe('Index Stats route', () => {
-  it('should ignore falsy fields', () => {
+  it('should ignore empty fields, but not falsy ones', () => {
     const results = recursiveFlatten(
       [{ _source: {} }, { _source: { bytes: false } }],
       stubbedLogstashFields(),
@@ -24,10 +24,19 @@ describe('Index Stats route', () => {
           name: 'bytes',
           type: 'number',
         },
+        {
+          name: 'geo.src',
+          type: 'string',
+        },
       ]
     );
 
-    expect(results).toEqual({});
+    expect(results).toEqual({
+      bytes: {
+        cardinality: 1,
+        count: 1,
+      },
+    });
   });
 
   it('should find existing fields based on mapping', () => {
@@ -52,5 +61,45 @@ describe('Index Stats route', () => {
         cardinality: 4,
       },
     });
+  });
+
+  // TODO: Alias information is not persisted in the index pattern, so we don't have access
+  it('fails to map alias fields', () => {
+    const results = recursiveFlatten(realHits, stubbedLogstashFields(), [
+      {
+        name: '@timestamp',
+        type: 'date',
+      },
+    ]);
+
+    expect(results).toEqual({});
+  });
+
+  // TODO: Scripts are not currently run in the _search query
+  it('should fail to map scripted fields', () => {
+    const scriptedField = {
+      name: 'hour_of_day',
+      type: 'number',
+      count: 0,
+      scripted: true,
+      script: "doc['timestamp'].value.hourOfDay",
+      lang: 'painless',
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: false,
+    };
+
+    const results = recursiveFlatten(
+      realHits,
+      [...stubbedLogstashFields(), scriptedField],
+      [
+        {
+          name: 'hour_of_day',
+          type: 'number',
+        },
+      ]
+    );
+
+    expect(results).toEqual({});
   });
 });

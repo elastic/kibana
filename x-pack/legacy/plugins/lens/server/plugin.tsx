@@ -10,7 +10,7 @@ import { setupRoutes } from './routes';
 export class LensServer implements Plugin<{}, {}, {}, {}> {
   constructor() {}
 
-  async setup(core: CoreSetup) {
+  setup(core: CoreSetup) {
     setupRoutes(core);
 
     return {};
@@ -20,5 +20,5 @@ export class LensServer implements Plugin<{}, {}, {}, {}> {
     return {};
   }
 
-  async stop() {}
+  stop() {}
 }
