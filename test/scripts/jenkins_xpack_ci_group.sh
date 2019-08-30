@@ -28,7 +28,7 @@ fi
 cd "$KIBANA_DIR"
 
 if [[ -z "$IS_PIPELINE_JOB" ]] ; then
-  cd echo " -> building and extracting default Kibana distributable for use in functional tests"
+  echo " -> building and extracting default Kibana distributable for use in functional tests"
   node scripts/build --debug --no-oss
 
   linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-*-linux-x86_64.tar.gz')"
