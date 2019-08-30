@@ -17,4 +17,4 @@
  * under the License.
  */
 
-import './size_picker';
+import './size_picker_directive';
