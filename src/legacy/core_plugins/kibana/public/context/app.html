@@ -83,15 +83,10 @@
       </context-loading-button>
       <context-size-picker
         count="contextApp.state.queryParameters.predecessorCount"
-        data-test-subj="predecessorCountPicker"
         is-disabled="contextApp.state.loadingStatus.anchor.status !== contextApp.constants.LOADING_STATUS.LOADED"
         on-change-count="contextApp.actions.fetchGivenPredecessorRows"
-        type="predecessor"
+        type="'predecessor'"
       ></context-size-picker>
-      <span
-        i18n-id="kbn.context.newerDocumentsDescription"
-        i18n-default-message="newer documents"
-      ></span>
       <span
         class="kuiStatusText kuiStatusText--warning"
         ng-if="(contextApp.state.loadingStatus.predecessors.status === contextApp.constants.LOADING_STATUS.LOADED)
@@ -161,15 +156,10 @@
       </context-loading-button>
       <context-size-picker
         count="contextApp.state.queryParameters.successorCount"
-        data-test-subj="successorCountPicker"
         is-disabled="contextApp.state.loadingStatus.anchor.status !== contextApp.constants.LOADING_STATUS.LOADED"
         on-change-count="contextApp.actions.fetchGivenSuccessorRows"
-        type="succesor"
+        type="'successor'"
       ></context-size-picker>
-      <div
-        i18n-id="kbn.context.olderDocumentsDescription"
-        i18n-default-message="older documents"
-      ></div>
       <span
         class="kuiStatusText kuiStatusText--warning"
         ng-if="(contextApp.state.loadingStatus.successors.status === contextApp.constants.LOADING_STATUS.LOADED)

@@ -17,7 +17,10 @@
  * under the License.
  */
 import React from 'react';
-import { EuiFieldText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 
 export function SizePicker({
   count,
@@ -30,15 +33,47 @@ export function SizePicker({
   onChangeCount: (count: number) => void;
   type: string;
 }) {
+  const arialLabel =
+    type === 'successor'
+      ? i18n.translate('kbn.context.olderDocumentsAriaLabel', {
+          defaultMessage: 'Number of older documents',
+        })
+      : i18n.translate('kbn.context.newerDocumentsAriaLabel', {
+          defaultMessage: 'Number of newer documents',
+        });
+
   return (
-    <EuiFieldText
-      aria-label={`Max number of ${type} records to display`}
-      className="cxtSizePicker"
-      data-test-subj={type === 'successor' ? 'successorCountPicker' : 'predecessorCountPicker'}
-      disabled={isDisabled}
-      onChange={ev => onChangeCount(Number(ev.target.value))}
-      type="number"
-      value={count}
-    />
+    <EuiFlexGroup component="span">
+      <EuiFlexItem grow={false}>
+        <EuiFormRow>
+          <EuiFieldNumber
+            aria-label={arialLabel}
+            className="cxtSizePicker"
+            data-test-subj={
+              type === 'successor' ? 'successorCountPicker' : 'predecessorCountPicker'
+            }
+            disabled={isDisabled}
+            onChange={ev => onChangeCount(Number(ev.target.value))}
+            type="number"
+            value={count}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem grow>
+        <EuiFormRow displayOnly>
+          {type === 'successor' ? (
+            <FormattedMessage
+              id="kbn.context.olderDocumentsDescription"
+              defaultMessage="Older documents"
+            />
+          ) : (
+            <FormattedMessage
+              id="kbn.context.newerDocumentsDescription"
+              defaultMessage="Newer documents"
+            />
+          )}
+        </EuiFormRow>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
