@@ -9,7 +9,7 @@ import React, { useContext, useState, useMemo, useCallback } from 'react';
 import { isNumber } from 'lodash';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
-import rt from 'io-ts';
+import * as rt from 'io-ts';
 import { replaceStateKeyInQueryString, UrlStateContainer } from '../../utils/url_state';
 import { InfraTimerangeInput } from '../../graphql/types';
 
