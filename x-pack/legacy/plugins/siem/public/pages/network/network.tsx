@@ -35,6 +35,7 @@ import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from
 import { InputsModelId } from '../../store/inputs/constants';
 import { EmbeddedMap } from '../../components/embeddables/embedded_map';
 import { NetworkFilter } from '../../containers/network';
+import { SpyRoute } from '../../utils/route/spy_routes';
 
 const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
 const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
@@ -73,8 +74,8 @@ export const getFlexDirection = () => {
 };
 
 const NetworkComponent = React.memo<NetworkComponentProps>(
-  ({ filterQuery, queryExpression, setAbsoluteRangeDatePicker }) => {
-    return (
+  ({ filterQuery, queryExpression, setAbsoluteRangeDatePicker }) => (
+    <>
       <WithSource sourceId="default">
         {({ indicesExist, indexPattern }) =>
           indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
@@ -283,8 +284,9 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
           )
         }
       </WithSource>
-    );
-  }
+      <SpyRoute />
+    </>
+  )
 );
 
 NetworkComponent.displayName = 'NetworkComponent';

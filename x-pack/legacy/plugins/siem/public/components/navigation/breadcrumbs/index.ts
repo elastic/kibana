@@ -7,7 +7,7 @@
 import chrome, { Breadcrumb } from 'ui/chrome';
 
 import { APP_NAME } from '../../../../common/constants';
-import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../pages/hosts/host_details';
+import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../pages/hosts/details/utils';
 import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../pages/network/ip_details';
 import { getNetworkUrl, getOverviewUrl, getTimelinesUrl } from '../../link_to';
 import * as i18n from '../translations';

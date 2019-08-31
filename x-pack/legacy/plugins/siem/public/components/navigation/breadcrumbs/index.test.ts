@@ -6,7 +6,7 @@
 import chrome from 'ui/chrome';
 import '../../../mock/match_media';
 import { encodeIpv6 } from '../../../lib/helpers';
-import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../pages/hosts/host_details';
+import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../pages/hosts/details/utils';
 import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../pages/network/ip_details';
 import { TIMELINES_PAGE_NAME } from '../../link_to/redirect_to_timelines';
 

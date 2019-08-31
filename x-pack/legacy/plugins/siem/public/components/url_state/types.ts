@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Location } from 'history';
-import { RouteComponentProps } from 'react-router';
 import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
@@ -16,6 +14,7 @@ import { InputsModelId } from '../../store/inputs/constants';
 
 import { CONSTANTS } from './constants';
 import { DispatchUpdateTimeline } from '../open_timeline/types';
+import { RouteSpyState } from '../../utils/route/spy_routes';
 
 export type UrlStateType = 'host' | 'network' | 'overview' | 'timeline';
 
@@ -53,8 +52,7 @@ export interface UrlState {
 }
 export type KeyUrlState = keyof UrlState;
 
-export interface UrlStateProps<TCache = object> {
-  isInitializing: boolean;
+export interface UrlStateProps {
   indexPattern?: StaticIndexPattern;
   mapToUrlState?: (value: string) => UrlState;
   onChange?: (urlState: UrlState, previousUrlState: UrlState) => void;
@@ -100,12 +98,12 @@ export interface UrlStateDispatchToPropsType {
   }>;
 }
 
-export type UrlStateContainerPropTypes = RouteComponentProps &
+export type UrlStateContainerPropTypes = RouteSpyState &
   UrlStateStateToPropsType &
   UrlStateDispatchToPropsType &
   UrlStateProps;
 
 export interface PreviousLocationUrlState {
-  location: Location;
+  pathName: string | undefined;
   urlState: UrlState;
 }
