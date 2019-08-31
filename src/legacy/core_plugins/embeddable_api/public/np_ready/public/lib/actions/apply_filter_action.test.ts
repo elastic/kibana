@@ -71,7 +71,6 @@ describe('isCompatible()', () => {
   test('when triggerContext or triggerContext filters are not set, returns false', async () => {
     const action = new ApplyFilterAction();
 
-    // @ts-ignore
     const result1 = await action.isCompatible({
       embeddable: {
         getRoot: () => ({
@@ -80,7 +79,7 @@ describe('isCompatible()', () => {
           }),
         }),
       } as any,
-    });
+    } as any);
     expect(result1).toBe(false);
   });
 });

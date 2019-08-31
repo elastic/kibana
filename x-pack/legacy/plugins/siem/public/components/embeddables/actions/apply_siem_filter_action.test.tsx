@@ -87,10 +87,10 @@ describe('ApplySiemFilterAction', () => {
         type: MAP_SAVED_OBJECT_TYPE,
       };
       if (isEmbeddable(embeddable)) {
-        // @ts-ignore
         const result = await action.isCompatible({
           embeddable,
-        });
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any);
         expect(result).toBe(false);
       } else {
         throw new Error('Invalid embeddable in unit test');
@@ -122,10 +122,10 @@ describe('ApplySiemFilterAction', () => {
       };
       if (isEmbeddable(embeddable)) {
         const error = expectError(() =>
-          // @ts-ignore
           action.execute({
             embeddable,
-          })
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          } as any)
         );
         expect(error).toBeInstanceOf(Error);
       } else {
