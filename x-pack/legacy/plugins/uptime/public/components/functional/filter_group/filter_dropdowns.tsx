@@ -8,9 +8,9 @@ import { EuiFilterGroup } from '@elastic/eui';
 import React from 'react';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { FilterBar as FilterBarType } from '../../../common/graphql/types';
-import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
-import { filterBarQuery } from '../../queries';
+import { FilterBar as FilterBarType } from '../../../../common/graphql/types';
+import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../../higher_order';
+import { filterBarQuery } from '../../../queries';
 import { FilterPopoverProps, FilterPopover } from './filter_popout';
 import { FilterStatusButton } from './filter_status_button';
 

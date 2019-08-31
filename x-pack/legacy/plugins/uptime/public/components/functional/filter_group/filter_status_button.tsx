@@ -6,7 +6,7 @@
 
 import { EuiFilterButton } from '@elastic/eui';
 import React from 'react';
-import { useUrlParams } from '../../hooks';
+import { useUrlParams } from '../../../hooks';
 
 export interface FilterStatusButtonProps {
   content: string;
