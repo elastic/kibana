@@ -10,6 +10,8 @@ import { UrlStateContainerPropTypes, LocationTypes, KqlQuery } from './types';
 import { CONSTANTS } from './constants';
 import { InputsModelId } from '../../store/inputs/constants';
 import { DispatchUpdateTimeline } from '../open_timeline/types';
+import { SiemPageName } from '../../pages/home/home_navigations';
+import { HostsTableType } from '../../store/hosts/model';
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
@@ -44,13 +46,11 @@ export const mockHistory = {
 };
 
 export const defaultProps: UrlStateContainerPropTypes = {
-  match: {
-    isExact: true,
-    params: '',
-    path: '',
-    url: '',
-  },
-  isInitializing: true,
+  pageName: SiemPageName.network,
+  detailName: undefined,
+  tabName: HostsTableType.authentications,
+  search: '',
+  pathName: '/network',
   indexPattern: {
     fields: [
       {
@@ -127,7 +127,6 @@ export const defaultProps: UrlStateContainerPropTypes = {
     ...mockHistory,
     location: defaultLocation,
   },
-  location: defaultLocation,
 };
 
 export const getMockProps = (
@@ -144,7 +143,6 @@ export const getMockProps = (
     ...mockHistory,
     location,
   },
-  location,
 });
 
 interface GetMockPropsObj {

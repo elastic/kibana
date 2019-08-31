@@ -35,7 +35,7 @@ export const NetworkContainer = pure<NetworkComponentProps>(({ match }) => (
         )}
       />
       <Route
-        path={`${networkPath}/ip/:ip`}
+        path={`${networkPath}/ip/:detailName`}
         render={props => (
           <PageRoute {...props} component={IPDetails} title={props.match.params.ip} />
         )}

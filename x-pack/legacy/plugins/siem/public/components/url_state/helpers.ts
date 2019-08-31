@@ -9,6 +9,9 @@ import { Location } from 'history';
 import { QueryString } from 'ui/utils/query_string';
 import { CONSTANTS } from './constants';
 import { LocationTypes, UrlStateType } from './types';
+import { SiemPageName } from '../../pages/home/home_navigations';
+
+import * as i18n from './translations';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const decodeRisonUrlState = (value: string | undefined): RisonValue | any | undefined => {
@@ -71,50 +74,60 @@ export const replaceQueryStringInLocation = (location: Location, queryString: st
   }
 };
 
-export const getUrlType = (pathname: string): UrlStateType => {
-  const removeSlash = pathname.replace(/\/$/, '');
-  const trailingPath = removeSlash.match(/([^\/]+$)/);
-  if (trailingPath !== null) {
-    if (trailingPath[0] === 'hosts' || pathname.match(/^\/hosts\/.+$/) != null) {
-      return 'host';
-    } else if (trailingPath[0] === 'network' || pathname.match(/^\/network\/.+$/) != null) {
-      return 'network';
-    } else if (trailingPath[0] === 'overview') {
-      return 'overview';
-    } else if (trailingPath[0] === 'timelines') {
-      return 'timeline';
-    }
+export const getUrlType = (pageName: string): UrlStateType => {
+  if (pageName === SiemPageName.hosts) {
+    return 'host';
+  } else if (pageName === SiemPageName.network) {
+    return 'network';
+  } else if (pageName === SiemPageName.overview) {
+    return 'overview';
+  } else if (pageName === SiemPageName.timelines) {
+    return 'timeline';
   }
   return 'overview';
 };
 
-export const getCurrentLocation = (pathname: string): LocationTypes => {
-  const removeSlash = pathname.replace(/\/$/, '');
-  const trailingPath = removeSlash.match(/([^\/]+$)/);
-  if (trailingPath !== null) {
-    if (trailingPath[0] === 'hosts') {
-      return CONSTANTS.hostsPage;
-    } else if (pathname.match(/^\/hosts\/.+$/) != null) {
+export const getTitle = (pageName: string): string => {
+  if (pageName === SiemPageName.hosts) {
+    return i18n.HOSTS;
+  } else if (pageName === SiemPageName.network) {
+    return i18n.NETWORK;
+  } else if (pageName === SiemPageName.overview) {
+    return i18n.OVERVIEW;
+  } else if (pageName === SiemPageName.timelines) {
+    return i18n.TIMELINES;
+  }
+  return i18n.OVERVIEW;
+};
+
+export const getCurrentLocation = (
+  pageName: string,
+  detailName: string | undefined
+): LocationTypes => {
+  if (pageName === SiemPageName.hosts) {
+    if (detailName != null) {
       return CONSTANTS.hostsDetails;
-    } else if (trailingPath[0] === 'network') {
-      return CONSTANTS.networkPage;
-    } else if (pathname.match(/^\/network\/.+$/) != null) {
-      return CONSTANTS.networkDetails;
-    } else if (trailingPath[0] === 'overview') {
-      return CONSTANTS.overviewPage;
-    } else if (trailingPath[0] === 'timelines') {
-      return CONSTANTS.timelinePage;
     }
+    return CONSTANTS.hostsPage;
+  } else if (pageName === SiemPageName.network) {
+    if (detailName != null) {
+      return CONSTANTS.networkDetails;
+    }
+    return CONSTANTS.networkPage;
+  } else if (pageName === SiemPageName.overview) {
+    return CONSTANTS.overviewPage;
+  } else if (pageName === SiemPageName.timelines) {
+    return CONSTANTS.timelinePage;
   }
   return CONSTANTS.unknown;
-  // throw new Error(`'Unknown pathName in else if statement': ${pathname}`);
 };
 
 export const isKqlForRoute = (
-  pathname: string,
+  pageName: string,
+  detailName: string | undefined,
   queryLocation: LocationTypes | null = null
 ): boolean => {
-  const currentLocation = getCurrentLocation(pathname);
+  const currentLocation = getCurrentLocation(pageName, detailName);
   if (
     (currentLocation === CONSTANTS.hostsPage && queryLocation === CONSTANTS.hostsPage) ||
     (currentLocation === CONSTANTS.networkPage && queryLocation === CONSTANTS.networkPage) ||
