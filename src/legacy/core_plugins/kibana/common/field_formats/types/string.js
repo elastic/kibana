@@ -58,7 +58,7 @@ export function createStringFormat(FieldFormat) {
         case 'title': return this._toTitleCase(val);
         case 'short': return shortenDottedString(val);
         case 'base64': return this._base64Decode(val);
-        case 'urlparam': return decodeURI(val.replace(/\+/g, ' '));
+        case 'urlparam': return decodeURIComponent(val);
         default: return asPrettyString(val);
       }
     }

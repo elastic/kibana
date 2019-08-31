@@ -75,7 +75,6 @@ describe('String Format', function () {
       transform: 'urlparam'
     });
     expect(string.convert('%EC%95%88%EB%85%95%20%ED%82%A4%EB%B0%94%EB%82%98')).to.be('안녕 키바나');
-    expect(string.convert('%EC%95%88%EB%85%95+%ED%82%A4%EB%B0%94%EB%82%98')).to.be('안녕 키바나');
   });
 
 });
