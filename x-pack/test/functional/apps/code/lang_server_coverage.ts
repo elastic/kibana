@@ -82,28 +82,55 @@ export default function langServerCoverageFunctionalTests({
         .head('/.code-reference-github.com-elastic-code-examples_smoke-19c9057c-1')
         .expect(200);
 
-      await esSupertest
-        .get('/.code-symbol-github.com-elastic-code-examples_smoke-19c9057c-1/_count')
-        .expect(200, {
-          count: 7,
-          _shards: {
-            failed: 0,
-            skipped: 0,
-            successful: 1,
-            total: 1,
+      const symbolLangAggs = await esSupertest
+        .post('/.code-symbol-github.com-elastic-code-examples_smoke-19c9057c-1/_search')
+        .send({
+          query: {
+            match_all: {},
           },
-        });
-      await esSupertest
+          aggs: {
+            language: {
+              terms: {
+                script: {
+                  // Aggregate results based on the source file's extension.
+                  source:
+                    "doc['symbolInformation.location.uri'].value.substring(doc['symbolInformation.location.uri'].value.lastIndexOf('.'))",
+                  lang: 'painless',
+                },
+              },
+            },
+          },
+        })
+        .expect(200)
+        .then((res: any) => res.body);
+
+      // Symbol's source file extension aggregations
+      expect(JSON.stringify(symbolLangAggs.aggregations.language.buckets.sort())).to.equal(
+        JSON.stringify(
+          [
+            {
+              key: '.java',
+              doc_count: 3,
+            },
+            {
+              key: '.py',
+              doc_count: 2,
+            },
+            {
+              key: '.ts',
+              doc_count: 2,
+            },
+          ].sort()
+        )
+      );
+      expect(symbolLangAggs.hits.total.value).to.equal(7);
+
+      const referenceCount = await esSupertest
         .get('/.code-reference-github.com-elastic-code-examples_smoke-19c9057c-1/_count')
-        .expect(200, {
-          count: 0,
-          _shards: {
-            failed: 0,
-            skipped: 0,
-            successful: 1,
-            total: 1,
-          },
-        });
+        .expect(200)
+        .then((res: any) => res.body);
+
+      expect(referenceCount.count).to.equal(0);
     });
   });
 }
