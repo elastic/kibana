@@ -60,7 +60,7 @@ export function QueryActionsProvider(Private, Promise) {
   );
 
   const fetchAnchorRow = (state) => () => {
-    const { queryParameters: { indexPatternId, anchorType, anchorId, sort, tieBreakerField } } = state;
+    const { queryParameters: { indexPatternId, anchorId, sort, tieBreakerField } } = state;
 
     if (!tieBreakerField) {
       return Promise.reject(setFailedStatus(state)('anchor', {
@@ -71,7 +71,7 @@ export function QueryActionsProvider(Private, Promise) {
     setLoadingStatus(state)('anchor');
 
     return Promise.try(() => (
-      fetchAnchor(indexPatternId, anchorType, anchorId, [_.zipObject([sort]), { [tieBreakerField]: sort[1] }])
+      fetchAnchor(indexPatternId, anchorId, [_.zipObject([sort]), { [tieBreakerField]: sort[1] }])
     ))
       .then(
         (anchorDocument) => {

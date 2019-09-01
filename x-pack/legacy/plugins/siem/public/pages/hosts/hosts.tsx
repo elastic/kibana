@@ -17,7 +17,6 @@ import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
 import { KpiHostsComponent } from '../../components/page/hosts';
 import { manageQuery } from '../../components/page/manage_query';
-import { UseUrlState } from '../../components/url_state';
 import { GlobalTime } from '../../containers/global_time';
 import { KpiHostsQuery } from '../../containers/kpi_hosts';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
@@ -41,6 +40,7 @@ const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
 
 interface HostsComponentReduxProps {
   filterQuery: string;
+  kqlQueryExpression: string;
   setAbsoluteRangeDatePicker: ActionCreator<{
     id: InputsModelId;
     from: number;
@@ -73,46 +73,42 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, setAbsoluteRang
             />
 
             <GlobalTime>
-              {({ to, from, setQuery }) => (
-                <UseUrlState indexPattern={indexPattern}>
-                  {({ isInitializing }) => (
-                    <>
-                      <KpiHostsQuery
-                        endDate={to}
-                        filterQuery={filterQuery}
-                        skip={isInitializing}
-                        sourceId="default"
-                        startDate={from}
-                      >
-                        {({ kpiHosts, loading, id, inspect, refetch }) => (
-                          <KpiHostsComponentManage
-                            data={kpiHosts}
-                            from={from}
-                            id={id}
-                            inspect={inspect}
-                            loading={loading}
-                            refetch={refetch}
-                            setQuery={setQuery}
-                            to={to}
-                            narrowDateRange={(min: number, max: number) => {
-                              /**
-                               * Using setTimeout here because of this issue:
-                               * https://github.com/elastic/elastic-charts/issues/360
-                               * Need to remove the setTimeout here after this issue is fixed.
-                               * */
-                              setTimeout(() => {
-                                setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
-                              }, 500);
-                            }}
-                          />
-                        )}
-                      </KpiHostsQuery>
-                      <EuiSpacer />
-                      <SiemNavigation navTabs={navTabsHosts} display="default" showBorder={true} />
-                      <EuiSpacer />
-                    </>
-                  )}
-                </UseUrlState>
+              {({ to, from, setQuery, isInitializing }) => (
+                <>
+                  <KpiHostsQuery
+                    endDate={to}
+                    filterQuery={filterQuery}
+                    skip={isInitializing}
+                    sourceId="default"
+                    startDate={from}
+                  >
+                    {({ kpiHosts, loading, id, inspect, refetch }) => (
+                      <KpiHostsComponentManage
+                        data={kpiHosts}
+                        from={from}
+                        id={id}
+                        inspect={inspect}
+                        loading={loading}
+                        refetch={refetch}
+                        setQuery={setQuery}
+                        to={to}
+                        narrowDateRange={(min: number, max: number) => {
+                          /**
+                           * Using setTimeout here because of this issue:
+                           * https://github.com/elastic/elastic-charts/issues/360
+                           * Need to remove the setTimeout here after this issue is fixed.
+                           * */
+                          setTimeout(() => {
+                            setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+                          }, 500);
+                        }}
+                      />
+                    )}
+                  </KpiHostsQuery>
+                  <EuiSpacer />
+                  <SiemNavigation navTabs={navTabsHosts} display="default" showBorder={true} />
+                  <EuiSpacer />
+                </>
               )}
             </GlobalTime>
           </StickyContainer>

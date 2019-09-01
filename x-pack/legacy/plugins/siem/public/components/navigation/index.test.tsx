@@ -6,16 +6,20 @@
 
 import { shallow } from 'enzyme';
 import * as React from 'react';
+import { RouteComponentProps } from 'react-router';
 
+import { CONSTANTS } from '../url_state/constants';
 import { SiemNavigationComponent } from './';
 import { setBreadcrumbs } from './breadcrumbs';
 import { navTabs } from '../../pages/home/home_navigations';
+import { TabNavigationProps } from './type';
 
 jest.mock('./breadcrumbs', () => ({
   setBreadcrumbs: jest.fn(),
 }));
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
+type Props = RouteComponentProps & TabNavigationProps;
 const pop: Action = 'POP';
 describe('SIEM Navigation', () => {
   const location = {
@@ -24,7 +28,8 @@ describe('SIEM Navigation', () => {
     state: '',
     hash: '',
   };
-  const mockProps = {
+
+  const mockProps: Props = {
     location,
     match: {
       isExact: true,
@@ -32,6 +37,7 @@ describe('SIEM Navigation', () => {
       path: '',
       url: '',
     },
+    navTabs,
     history: {
       length: 2,
       location,
@@ -45,6 +51,41 @@ describe('SIEM Navigation', () => {
       createHref: jest.fn(),
       listen: jest.fn(),
     },
+    [CONSTANTS.timerange]: {
+      global: {
+        [CONSTANTS.timerange]: {
+          from: 1558048243696,
+          fromStr: 'now-24h',
+          kind: 'relative',
+          to: 1558134643697,
+          toStr: 'now',
+        },
+        linkTo: ['timeline'],
+      },
+      timeline: {
+        [CONSTANTS.timerange]: {
+          from: 1558048243696,
+          fromStr: 'now-24h',
+          kind: 'relative',
+          to: 1558134643697,
+          toStr: 'now',
+        },
+        linkTo: ['global'],
+      },
+    },
+    hosts: {
+      filterQuery: null,
+      queryLocation: null,
+    },
+    hostDetails: {
+      filterQuery: null,
+      queryLocation: null,
+    },
+    network: {
+      filterQuery: null,
+      queryLocation: null,
+    },
+    [CONSTANTS.timelineId]: '',
   };
   const wrapper = shallow(<SiemNavigationComponent {...mockProps} navTabs={navTabs} />);
   test('it calls setBreadcrumbs with correct path on mount', () => {
