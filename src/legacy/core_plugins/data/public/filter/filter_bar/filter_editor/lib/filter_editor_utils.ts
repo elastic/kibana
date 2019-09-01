@@ -32,7 +32,7 @@ import {
   RangeFilter,
 } from '@kbn/es-query';
 import { omit } from 'lodash';
-import Ipv4Address from '../../../../../../../../plugins/kibana_utils/public';
+import { Ipv4Address } from '../../../../../../../../plugins/kibana_utils/public';
 import { Field, IndexPattern, isFilterable } from '../../../../index_patterns';
 import { FILTER_OPERATORS, Operator } from './filter_operators';
 
