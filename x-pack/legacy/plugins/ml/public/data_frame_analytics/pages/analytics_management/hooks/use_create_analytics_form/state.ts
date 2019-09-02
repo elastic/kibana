@@ -97,6 +97,9 @@ export const getJobConfigFromFormState = (
     dest: {
       index: formState.destinationIndex,
     },
+    analyzed_fields: {
+      excludes: [],
+    },
     analysis: {
       outlier_detection: {},
     },
