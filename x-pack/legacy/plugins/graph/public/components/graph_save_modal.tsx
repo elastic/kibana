@@ -9,7 +9,14 @@ import {
   SavedObjectSaveModal,
   OnSaveProps,
 } from 'ui/saved_objects/components/saved_object_save_modal';
-import { EuiFormRow, EuiTextArea, EuiCallOut, EuiCheckbox, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiTextArea,
+  EuiCallOut,
+  EuiCheckbox,
+  EuiSpacer,
+  EuiSwitch,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { GraphSavePolicy } from '../types/config';
@@ -46,7 +53,10 @@ export function GraphSaveModal({
       onClose={onClose}
       title={title}
       showCopyOnSave={showCopyOnSave}
-      objectType="graph-workspace"
+      objectType={i18n.translate('xpack.graph.topNavMenu.save.objectType', {
+        defaultMessage: 'workspace',
+      })}
+      className="gphSaveModal"
       options={
         <>
           <EuiFormRow
@@ -69,38 +79,30 @@ export function GraphSaveModal({
               rows={5}
             />
           </EuiFormRow>
-          {savePolicy === 'configAndDataWithConsent' && hasData && !dataConsent && (
-            <>
-              <EuiCallOut
-                color="warning"
-                data-test-subj="graphNoDataSavedMsg"
-                className="gphSaveModal__callout"
-              >
-                <p>
-                  {i18n.translate('xpack.graph.topNavMenu.save.saveConfigurationOnlyWarning', {
-                    defaultMessage:
-                      'The data in this workspace will be cleared and only the configuration will be saved.',
-                  })}
-                </p>
-              </EuiCallOut>
-              <EuiSpacer />
-            </>
-          )}
           {savePolicy === 'configAndDataWithConsent' && hasData && (
-            <EuiCheckbox
-              id="graphDataConsent"
-              label={i18n.translate('xpack.graph.topNavMenu.save.saveGraphContentCheckboxLabel', {
-                defaultMessage: 'Save graph content',
+            <EuiFormRow
+              fullWidth
+              label=""
+              helpText={i18n.translate('xpack.graph.topNavMenu.save.saveConfigurationOnlyWarning', {
+                defaultMessage:
+                  'Without this setting, the data in this workspace will be cleared and only the configuration will be saved.',
               })}
-              checked={dataConsent}
-              onChange={e => {
-                setDataConsent(e.target.checked);
-              }}
-            />
+            >
+              <EuiSwitch
+                id="graphDataConsent"
+                label={i18n.translate('xpack.graph.topNavMenu.save.saveGraphContentCheckboxLabel', {
+                  defaultMessage: 'Save graph content',
+                })}
+                checked={dataConsent}
+                onChange={e => {
+                  setDataConsent(e.target.checked);
+                }}
+              />
+            </EuiFormRow>
           )}
           {savePolicy === 'config' && hasData && (
             <>
-              <EuiCallOut data-test-subj="graphNoDataSavedMsg" className="gphSaveModal__callout">
+              <EuiCallOut data-test-subj="graphNoDataSavedMsg">
                 <p>
                   {i18n.translate('xpack.graph.topNavMenu.save.saveConfigurationOnlyText', {
                     defaultMessage:

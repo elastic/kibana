@@ -61,7 +61,6 @@ import { save } from  './services/save';
 
 import settingsTemplate from './angular/templates/settings.html';
 
-import './angular/directives/graph_save';
 import './angular/directives/graph_settings';
 
 const app = uiModules.get('app/graph');
@@ -1174,7 +1173,6 @@ app.controller('graphuiPlugin', function (
     $scope.savedWorkspace.numLinks = links.length;
 
     return $scope.savedWorkspace.save(saveOptions).then(function (id) {
-      $scope.closeMenus();
       if (id) {
         const title = i18n.translate('xpack.graph.saveWorkspace.successNotificationTitle', {
           defaultMessage: 'Saved "{workspaceTitle}"',
@@ -1192,8 +1190,9 @@ app.controller('graphuiPlugin', function (
           text,
           'data-test-subj': 'saveGraphSuccess',
         });
-        if ($scope.savedWorkspace.id === $route.current.params.id) return;
-        kbnUrl.change(getEditPath($scope.savedWorkspace));
+        if ($scope.savedWorkspace.id !== $route.current.params.id) {
+          kbnUrl.change(getEditPath($scope.savedWorkspace));
+        }
       }
       return { id };
     }, fatalError);

@@ -35,6 +35,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import { EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export interface OnSaveProps {
   newTitle: string;
@@ -52,6 +53,7 @@ interface Props {
   confirmButtonLabel?: React.ReactNode;
   options?: React.ReactNode;
   description?: string;
+  className?: string;
 }
 
 interface State {
@@ -79,7 +81,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
         <form onSubmit={this.onFormSubmit}>
           <EuiModal
             data-test-subj="savedObjectSaveModal"
-            className="dshSaveModal"
+            className={this.props.className}
             onClose={this.props.onClose}
           >
             <EuiModalHeader>
@@ -136,22 +138,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
                 />
               </EuiButtonEmpty>
 
-              <EuiButton
-                fill
-                data-test-subj="confirmSaveSavedObjectButton"
-                isLoading={isLoading}
-                isDisabled={title.length === 0}
-                type="submit"
-              >
-                {this.props.confirmButtonLabel ? (
-                  this.props.confirmButtonLabel
-                ) : (
-                  <FormattedMessage
-                    id="common.ui.savedObjects.saveModal.confirmSaveButtonLabel"
-                    defaultMessage="Confirm Save"
-                  />
-                )}
-              </EuiButton>
+              {this.renderConfirmButton()}
             </EuiModalFooter>
           </EuiModal>
         </form>
@@ -204,6 +191,34 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
     this.saveSavedObject();
   };
 
+  private renderConfirmButton = () => {
+    const { isLoading, title, hasTitleDuplicate } = this.state;
+
+    let confirmLabel: string | React.ReactNode = hasTitleDuplicate
+      ? i18n.translate('common.ui.savedObjects.saveModal.confirmSaveButtonLabel', {
+          defaultMessage: 'Confirm save',
+        })
+      : i18n.translate('common.ui.savedObjects.saveModal.saveButtonLabel', {
+          defaultMessage: 'Save',
+        });
+
+    if (this.props.confirmButtonLabel) {
+      confirmLabel = this.props.confirmButtonLabel;
+    }
+
+    return (
+      <EuiButton
+        fill
+        data-test-subj="confirmSaveSavedObjectButton"
+        isLoading={isLoading}
+        isDisabled={title.length === 0}
+        type="submit"
+      >
+        {confirmLabel}
+      </EuiButton>
+    );
+  };
+
   private renderDuplicateTitleCallout = () => {
     if (!this.state.hasTitleDuplicate) {
       return;
@@ -230,10 +245,14 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
                 objectType: this.props.objectType,
                 confirmSaveLabel: (
                   <strong>
-                    <FormattedMessage
-                      id="common.ui.savedObjects.saveModal.duplicateTitleDescription.confirmSaveText"
-                      defaultMessage="Confirm Save"
-                    />
+                    {this.props.confirmButtonLabel
+                      ? this.props.confirmButtonLabel
+                      : i18n.translate(
+                          'common.ui.savedObjects.saveModal.duplicateTitleDescription.confirmSaveText',
+                          {
+                            defaultMessage: 'Confirm save',
+                          }
+                        )}
                   </strong>
                 ),
               }}
