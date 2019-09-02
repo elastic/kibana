@@ -7,8 +7,13 @@
 import _ from 'lodash';
 import React, { useState, useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+<<<<<<< HEAD
 import { EuiIcon, EuiTitle, EuiPanel, EuiIconTip, EuiToolTip, EuiButton } from '@elastic/eui';
 import { toExpression } from '@kbn/interpreter/common';
+=======
+import { EuiIcon, EuiTitle, EuiPanel, EuiIconTip, EuiToolTip } from '@elastic/eui';
+import { toExpression, Ast } from '@kbn/interpreter/common';
+>>>>>>> upstream/feature/lens
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { Action, PreviewState } from './state_management';
@@ -144,16 +149,13 @@ function InnerSuggestionPanel({
     return null;
   }
 
-  const suggestions = (
-    stagedSuggestions ||
-    getSuggestions({
-      datasourceMap,
-      datasourceStates,
-      visualizationMap,
-      activeVisualizationId,
-      visualizationState,
-    })
-  )
+  const suggestions = getSuggestions({
+    datasourceMap,
+    datasourceStates,
+    visualizationMap,
+    activeVisualizationId,
+    visualizationState,
+  })
     .filter(suggestion => !suggestion.hide)
     .slice(0, MAX_SUGGESTIONS_DISPLAYED);
 
@@ -197,17 +199,25 @@ function InnerSuggestionPanel({
             frame
           );
           return (
-            <SuggestionPreview
-              suggestion={suggestion}
-              onSelect={() => {
-                setLastSelectedSuggestion(index);
-                switchToSuggestion(frame, dispatch, suggestion);
-              }}
-              ExpressionRenderer={ExpressionRendererComponent}
-              previewExpression={previewExpression ? toExpression(previewExpression) : undefined}
-              key={`${suggestion.visualizationId}-${suggestion.title}`}
-              selected={index === lastSelectedSuggestion}
-            />
+          <SuggestionPreview
+            suggestion={suggestion}
+            dispatch={dispatch}
+            frame={frame}
+            ExpressionRenderer={ExpressionRendererComponent}
+            previewExpression={
+              suggestion.previewExpression
+                ? preparePreviewExpression(
+                    suggestion.previewExpression,
+                    datasourceMap,
+                    datasourceStates,
+                    frame,
+                    suggestion.datasourceId,
+                    suggestion.datasourceState
+                  )
+                : undefined
+            }
+            key={`${suggestion.visualizationId}-${suggestion.title}`}
+          />
           );
         })}
         {stagedPreview && (
@@ -225,23 +235,24 @@ function InnerSuggestionPanel({
     </div>
   );
 }
+
 function preparePreviewExpression(
-  suggestion: Suggestion,
+  expression: string | Ast,
   datasourceMap: Record<string, Datasource<unknown, unknown>>,
   datasourceStates: Record<string, { isLoading: boolean; state: unknown }>,
-  framePublicAPI: FramePublicAPI
+  framePublicAPI: FramePublicAPI,
+  suggestionDatasourceId?: string,
+  suggestionDatasourceState?: unknown
 ) {
-  if (!suggestion.previewExpression) return null;
-
   const expressionWithDatasource = prependDatasourceExpression(
-    suggestion.previewExpression,
+    expression,
     datasourceMap,
-    suggestion.datasourceId
+    suggestionDatasourceId
       ? {
           ...datasourceStates,
-          [suggestion.datasourceId]: {
+          [suggestionDatasourceId]: {
             isLoading: false,
-            state: suggestion.datasourceState,
+            state: suggestionDatasourceState,
           },
         }
       : datasourceStates
@@ -255,5 +266,7 @@ function preparePreviewExpression(
     },
   };
 
-  return prependKibanaContext(expressionWithDatasource, expressionContext);
+  return expressionWithDatasource
+    ? toExpression(prependKibanaContext(expressionWithDatasource, expressionContext))
+    : undefined;
 }

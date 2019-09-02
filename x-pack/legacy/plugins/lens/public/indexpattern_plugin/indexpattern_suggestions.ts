@@ -22,7 +22,6 @@ function buildSuggestion({
   state,
   updatedLayer,
   layerId,
-  isMultiRow,
   datasourceSuggestionId,
   label,
   changeType,
@@ -31,12 +30,13 @@ function buildSuggestion({
   layerId: string;
   changeType: TableChangeType;
   updatedLayer?: IndexPatternLayer;
-  isMultiRow?: boolean;
   datasourceSuggestionId?: number;
   label?: string;
 }): DatasourceSuggestion<IndexPatternPrivateState> {
   const columnOrder = (updatedLayer || state.layers[layerId]).columnOrder;
   const columnMap = (updatedLayer || state.layers[layerId]).columns;
+
+  const isMultiRow = Object.values(columnMap).some(column => column.isBucketed);
 
   return {
     state: updatedLayer
@@ -54,7 +54,7 @@ function buildSuggestion({
         columnId,
         operation: columnToOperation(columnMap[columnId]),
       })),
-      isMultiRow: typeof isMultiRow === 'undefined' || isMultiRow,
+      isMultiRow,
       datasourceSuggestionId: datasourceSuggestionId || 0,
       layerId,
       changeType,
@@ -331,7 +331,6 @@ export function getDatasourceSuggestionsFromCurrentState(
             buildSuggestion({
               state,
               layerId,
-              isMultiRow: true,
               datasourceSuggestionId: index,
               changeType: 'unchanged',
             })
@@ -347,7 +346,6 @@ export function getDatasourceSuggestionsFromCurrentState(
             buildSuggestion({
               state,
               layerId,
-              isMultiRow: false,
               datasourceSuggestionId: index,
               changeType: 'unchanged',
             })
@@ -383,7 +381,6 @@ function createChangedNestingSuggestion(state: IndexPatternPrivateState, layerId
   return buildSuggestion({
     state,
     layerId,
-    isMultiRow: true,
     updatedLayer,
     label: i18n.translate('xpack.lens.indexpattern.suggestions.nestingChangeLabel', {
       defaultMessage: 'Nest within {operation}',
@@ -404,38 +401,36 @@ function createAlternativeMetricSuggestions(
   const suggestions: Array<DatasourceSuggestion<IndexPatternPrivateState>> = [];
   layer.columnOrder.forEach(columnId => {
     const column = layer.columns[columnId];
-    if (hasField(column)) {
-      const field = indexPattern.fields.find(
-        ({ name }) => hasField(column) && column.sourceField === name
-      )!;
-      const alternativeMetricOperations = getOperationTypesForField(field).filter(
-        operationType => operationType !== column.operationType
-      );
-      if (alternativeMetricOperations.length > 0) {
-        const newId = generateId();
-        const newColumn = buildColumn({
-          op: alternativeMetricOperations[0],
-          columns: layer.columns,
-          indexPattern,
-          layerId,
-          field,
-          suggestedPriority: undefined,
-        });
-        const updatedLayer = buildLayerByColumnOrder(
-          { ...layer, columns: { [newId]: newColumn } },
-          [newId]
-        );
-        suggestions.push(
-          buildSuggestion({
-            state,
-            layerId,
-            isMultiRow: false,
-            updatedLayer,
-            changeType: 'initial',
-          })
-        );
-      }
+    if (!hasField(column)) {
+      return;
     }
+    const field = indexPattern.fields.find(({ name }) => column.sourceField === name)!;
+    const alternativeMetricOperations = getOperationTypesForField(field).filter(
+      operationType => operationType !== column.operationType
+    );
+    if (alternativeMetricOperations.length === 0) {
+      return;
+    }
+    const newId = generateId();
+    const newColumn = buildColumn({
+      op: alternativeMetricOperations[0],
+      columns: layer.columns,
+      indexPattern,
+      layerId,
+      field,
+      suggestedPriority: undefined,
+    });
+    const updatedLayer = buildLayerByColumnOrder({ ...layer, columns: { [newId]: newColumn } }, [
+      newId,
+    ]);
+    suggestions.push(
+      buildSuggestion({
+        state,
+        layerId,
+        updatedLayer,
+        changeType: 'initial',
+      })
+    );
   });
   return suggestions;
 }
@@ -463,7 +458,6 @@ function createSuggestionWithDefaultDateHistogram(
   return buildSuggestion({
     state,
     layerId,
-    isMultiRow: true,
     updatedLayer,
     label: i18n.translate('xpack.lens.indexpattern.suggestions.overTimeLabel', {
       defaultMessage: 'Over time',
@@ -479,7 +473,7 @@ function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layer
 
   return _.flatten(
     availableBucketedColumns.map((_col, index) => {
-      // build suggestions with less buckets
+      // build suggestions with fewer buckets
       const bucketedColumns = availableBucketedColumns.slice(0, index + 1);
       const allMetricsSuggestion = buildLayerByColumnOrder(layer, [
         ...bucketedColumns,
@@ -506,7 +500,6 @@ function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layer
       return buildSuggestion({
         state,
         layerId,
-        isMultiRow: updatedLayer.columnOrder.length > 1,
         updatedLayer,
         changeType:
           layer.columnOrder.length === updatedLayer.columnOrder.length ? 'unchanged' : 'reduced',
