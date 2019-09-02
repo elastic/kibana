@@ -906,30 +906,34 @@ export default function (editor) {
         callback(null, []);
       }
       else {
-        const terms = _.map(context.autoCompleteSet, function (term) {
-          if (typeof term !== 'object') {
-            term = {
-              name: term
+        const terms = _.map(
+          context
+            .autoCompleteSet
+            .filter(term => Boolean(term) && term.name != null),
+          function (term) {
+            if (typeof term !== 'object') {
+              term = {
+                name: term
+              };
+            } else {
+              term = _.clone(term);
+            }
+            const defaults = {
+              value: term.name,
+              meta: 'API',
+              score: 0,
+              context: context,
             };
-          } else {
-            term = _.clone(term);
-          }
-          const defaults = {
-            value: term.name,
-            meta: 'API',
-            score: 0,
-            context: context,
-          };
-          // we only need out custom insertMatch behavior for the body
-          if (context.autoCompleteType === 'body') {
-            defaults.completer = {
-              insertMatch: function () {
-                return applyTerm(term);
-              }
-            };
-          }
-          return _.defaults(term, defaults);
-        });
+            // we only need out custom insertMatch behavior for the body
+            if (context.autoCompleteType === 'body') {
+              defaults.completer = {
+                insertMatch: function () {
+                  return applyTerm(term);
+                }
+              };
+            }
+            return _.defaults(term, defaults);
+          });
 
         terms.sort(function (t1, t2) {
           /* score sorts from high to low */
