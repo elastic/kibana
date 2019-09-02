@@ -207,7 +207,12 @@ function RangesParamEditor({
 
         <EuiSpacer size="s" />
         <EuiFlexItem>
-          <EuiButtonEmpty iconType="plusInCircleFilled" onClick={onAddRange} size="xs">
+          <EuiButtonEmpty
+            data-test-subj={`${dataTestSubj}__addRangeButton`}
+            iconType="plusInCircleFilled"
+            onClick={onAddRange}
+            size="xs"
+          >
             <FormattedMessage
               id="common.ui.aggTypes.ranges.addRangeButtonLabel"
               defaultMessage="Add range"

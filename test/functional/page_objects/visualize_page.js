@@ -649,7 +649,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async changeHeatmapColorNumbers(value = 6) {
-      const input = await testSubjects.find(`heatmapOptionsColorsNumberInput`);
+      const input = await testSubjects.find(`heatmapColorsNumber`);
       await input.clearValue();
       await input.type(`${value}`);
     }
@@ -663,19 +663,19 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async clickEnableCustomRanges() {
-      await testSubjects.click('heatmapEnableCustomRanges');
+      await testSubjects.click('heatmapUseCustomRanges');
     }
 
     async clickAddRange() {
-      await testSubjects.click(`heatmapAddRangeButton`);
+      await testSubjects.click(`heatmapColorRange__addRangeButton`);
     }
 
     async isCustomRangeTableShown() {
-      await testSubjects.exists('heatmapCustomRangesTable');
+      await testSubjects.exists('heatmapColorRange');
     }
 
     async addCustomRange(from, to) {
-      const table = await testSubjects.find('heatmapCustomRangesTable');
+      const table = await testSubjects.find('heatmapColorRange');
       const lastRow = await table.findByCssSelector('tr:last-child');
       const fromCell = await lastRow.findByCssSelector('td:first-child input');
       await fromCell.clearValue();

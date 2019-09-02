@@ -25,7 +25,9 @@ export interface CommonVislibParams {
 }
 
 interface Labels {
+  color: string;
   filter: boolean;
+  overwriteColor?: boolean;
   rotate?: number;
   show: boolean;
   truncate: number;
@@ -42,7 +44,10 @@ export interface ValueAxis {
   labels: Labels;
   name: string;
   position: LegendPositions;
-  scale: { type: string };
+  scale: {
+    type: string;
+    defaultYExtents: boolean;
+  };
   show: boolean;
   style: object;
   title: { text: string };
