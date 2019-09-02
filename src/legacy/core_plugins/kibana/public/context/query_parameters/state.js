@@ -19,7 +19,6 @@
 
 export function createInitialQueryParametersState(defaultStepSize, tieBreakerField) {
   return {
-    anchorType: null,
     anchorId: null,
     columns: [],
     defaultStepSize,

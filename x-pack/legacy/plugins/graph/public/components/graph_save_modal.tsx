@@ -5,19 +5,12 @@
  */
 
 import React, { useState } from 'react';
+import { EuiFormRow, EuiTextArea, EuiCallOut, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import {
   SavedObjectSaveModal,
   OnSaveProps,
-} from 'ui/saved_objects/components/saved_object_save_modal';
-import {
-  EuiFormRow,
-  EuiTextArea,
-  EuiCallOut,
-  EuiCheckbox,
-  EuiSpacer,
-  EuiSwitch,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+} from '../../../../../../src/plugins/kibana_react/public';
 
 import { GraphSavePolicy } from '../types/config';
 
