@@ -33,7 +33,7 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Fragment } from 'react';
+import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -225,7 +225,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
     }
 
     return (
-      <Fragment>
+      <>
         <EuiCallOut
           title={
             <FormattedMessage
@@ -260,7 +260,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
           </p>
         </EuiCallOut>
         <EuiSpacer />
-      </Fragment>
+      </>
     );
   };
 
@@ -270,7 +270,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
     }
 
     return (
-      <Fragment>
+      <>
         <EuiSwitch
           data-test-subj="saveAsNewCheckbox"
           checked={this.state.copyOnSave}
@@ -284,7 +284,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
           }
         />
         <EuiSpacer />
-      </Fragment>
+      </>
     );
   };
 }
