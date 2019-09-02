@@ -22,7 +22,7 @@ import IntlMessageFormat from 'intl-messageformat';
 import IntlRelativeFormat from 'intl-relativeformat';
 
 import { Translation } from '../translation';
-import { headerDetector } from './detectors';
+import { headerDetector, cookieDetector } from './detectors';
 // import { getUserLanguage } from './language_detector';
 import { Formats, formats as EN_FORMATS } from './formats';
 import { hasValues, isObject, isString, mergeAll,  } from './helper';
@@ -153,7 +153,7 @@ export function getLocaleFromRequest(h: any) {
   console.log('get locale from request!')
   const detectors = [
     // 1. Check cookies
-    () => h.request.server.states.cookies[LOCALE_COOKIE],
+    () => cookieDetector(h.request),
     // 2. Check header
     () => headerDetector(h.request),
     // 3. Default server locale
