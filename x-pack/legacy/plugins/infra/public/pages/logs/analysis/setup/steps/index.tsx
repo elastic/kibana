@@ -8,15 +8,17 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSteps, EuiStepStatus } from '@elastic/eui';
 import { InitialConfiguration } from './initial_configuration';
-import { SuccessOrFailure } from './success_or_failure';
+import { SetupProcess } from './setup_process';
 import { useAnalysisSetupState } from '../../../../../containers/logs/log_analysis/log_analysis_setup_state';
 
 interface AnalysisSetupStepsProps {
   setupMlModule: (startTime?: number | undefined, endTime?: number | undefined) => Promise<any>;
   isSettingUp: boolean;
   didSetupFail: boolean;
+  cleanupFailure: () => void;
   isCleaningUpAFailedSetup: boolean;
   hasCompletedSetup: boolean;
+  viewResults: () => void;
 }
 
 export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps> = ({
@@ -25,6 +27,8 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
   didSetupFail,
   isCleaningUpAFailedSetup,
   hasCompletedSetup,
+  viewResults,
+  cleanupFailure,
 }: AnalysisSetupStepsProps) => {
   const {
     hasAttemptedSetup,
@@ -38,7 +42,7 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
   const steps = [
     {
       title: i18n.translate('xpack.infra.analysisSetup.stepOneTitle', {
-        defaultMessage: 'Configuration',
+        defaultMessage: 'Configuration (optional)',
       }),
       children: (
         <InitialConfiguration
@@ -50,22 +54,23 @@ export const AnalysisSetupSteps: React.FunctionComponent<AnalysisSetupStepsProps
           endTime={endTime}
         />
       ),
-      status: hasAttemptedSetup ? ('complete' as EuiStepStatus) : undefined,
     },
     {
       title: i18n.translate('xpack.infra.analysisSetup.stepTwoTitle', {
-        defaultMessage: 'Setup status',
+        defaultMessage: 'Setup resources',
       }),
       children: (
-        <SuccessOrFailure
+        <SetupProcess
           isSettingUp={isSettingUp}
           didSetupFail={didSetupFail}
+          isCleaningUp={isCleaningUpAFailedSetup}
           hasCompletedSetup={hasCompletedSetup}
+          viewResults={viewResults}
+          setup={setup}
+          cleanup={cleanupFailure}
         />
       ),
-      status: !hasAttemptedSetup
-        ? ('disabled' as EuiStepStatus)
-        : isSettingUp
+      status: isSettingUp
         ? ('incomplete' as EuiStepStatus)
         : didSetupFail
         ? ('danger' as EuiStepStatus)

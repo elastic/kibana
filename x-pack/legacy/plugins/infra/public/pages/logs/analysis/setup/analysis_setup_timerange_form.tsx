@@ -117,7 +117,6 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
             </EuiFormControlLayout>
           </EuiFlexGroup>
         </EuiFormRow>
-        <CreateMLJobsButton isDisabled={hasAttemptedSetup} onClick={setupMlModule} />
       </EuiDescribedFormGroup>
     </EuiForm>
   );

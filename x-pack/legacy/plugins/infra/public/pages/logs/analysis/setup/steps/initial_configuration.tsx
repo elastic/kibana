@@ -59,8 +59,6 @@ export const InitialConfiguration: React.FunctionComponent<InitialConfigurationP
               />
             </EuiButtonEmpty>
           </ByDefaultText>
-          <EuiSpacer size="l" />
-          <CreateMLJobsButton isDisabled={hasAttemptedSetup} onClick={() => setupMlModule()} />
         </>
       )}
     </>

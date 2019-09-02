@@ -44,13 +44,14 @@ export const useLogAnalysisJobs = ({
   timeField: string;
 }) => {
   const [jobStatus, setJobStatus] = useState<AllJobStatuses>(getInitialJobStatuses());
-  const [hasCompletedSetup, setHasCompletedSetup] = useState<boolean>(false);
+  const [hasAttemptedSetup, setHasAttemptedSetup] = useState<boolean>(false);
 
   const [setupMlModuleRequest, setupMlModule] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
       createPromise: async (start, end) => {
         setJobStatus(getInitialJobStatuses());
+        setHasAttemptedSetup(true);
         return await callSetupMlModuleAPI(
           start,
           end,
@@ -76,11 +77,9 @@ export const useLogAnalysisJobs = ({
             : hasSuccessfullyCreatedJobs
             ? hasSuccessfullyStartedDatafeeds
               ? 'started'
-              : 'failed'
-            : 'failed',
+              : 'created'
+            : 'created',
         }));
-
-        setHasCompletedSetup(true);
       },
     },
     [indexPattern, spaceId, sourceId]
@@ -133,6 +132,10 @@ export const useLogAnalysisJobs = ({
     const jobStates = Object.values(jobStatus);
     return jobStates.filter(state => state === 'failed').length > 0;
   }, [jobStatus]);
+
+  const hasCompletedSetup = useMemo(() => {
+    return hasAttemptedSetup && !isSetupRequired;
+  }, [isSetupRequired, hasAttemptedSetup]);
 
   return {
     jobStatus,

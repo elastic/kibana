@@ -28,9 +28,11 @@ interface AnalysisSetupContentProps {
   setupMlModule: (startTime?: number | undefined, endTime?: number | undefined) => Promise<any>;
   isSettingUp: boolean;
   didSetupFail: boolean;
+  cleanupFailure: () => Promise<any>;
   isCleaningUpAFailedSetup: boolean;
   indexPattern: string;
   hasCompletedSetup: boolean;
+  viewResults: () => void;
 }
 
 const errorTitle = i18n.translate('xpack.infra.analysisSetup.errorTitle', {
@@ -44,6 +46,8 @@ export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentP
   isCleaningUpAFailedSetup,
   indexPattern,
   hasCompletedSetup,
+  viewResults,
+  cleanupFailure,
 }) => {
   useTrackPageview({ app: 'infra_logs', path: 'analysis_setup' });
   useTrackPageview({ app: 'infra_logs', path: 'analysis_setup', delay: 15000 });
@@ -80,8 +84,10 @@ export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentP
               setupMlModule={setupMlModule}
               isSettingUp={isSettingUp}
               didSetupFail={didSetupFail}
+              cleanupFailure={cleanupFailure}
               isCleaningUpAFailedSetup={isCleaningUpAFailedSetup}
               hasCompletedSetup={hasCompletedSetup}
+              viewResults={viewResults}
             />
             {didSetupFail && (
               <>

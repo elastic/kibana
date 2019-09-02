@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useState, useCallback } from 'react';
 import chrome from 'ui/chrome';
 
 import { LoadingPage } from '../../../components/loading_page';
@@ -35,11 +35,8 @@ export const AnalysisPageContent = () => {
   } = useContext(LogAnalysisJobs.Context);
 
   const { cleanupMLResources, isCleaningUp } = useLogAnalysisCleanup({ sourceId, spaceId });
-  useEffect(() => {
-    if (didSetupFail) {
-      cleanupMLResources();
-    }
-  }, [didSetupFail, cleanupMLResources]);
+  const [isViewingResults, setIsViewingResults] = useState<boolean>(false);
+  const viewResults = useCallback(() => setIsViewingResults(true), [setIsViewingResults]);
 
   if (!hasLogAnalysisCapabilites) {
     return <AnalysisUnavailableContent />;
@@ -51,18 +48,20 @@ export const AnalysisPageContent = () => {
         })}
       />
     );
-  } else if (isSetupRequired) {
+  } else if (isSetupRequired || (hasCompletedSetup && !isViewingResults)) {
     return (
       <AnalysisSetupContent
         didSetupFail={didSetupFail}
         isSettingUp={isSettingUpMlModule}
         setupMlModule={setupMlModule}
+        cleanupFailure={cleanupMLResources}
         isCleaningUpAFailedSetup={isCleaningUp}
         hasCompletedSetup={hasCompletedSetup}
         indexPattern={source ? source.configuration.logAlias : ''}
+        viewResults={viewResults}
       />
     );
   } else {
-    return <AnalysisResultsContent sourceId={sourceId} isFirstUse={hasCompletedSetup} />;
+    return <AnalysisResultsContent sourceId={sourceId} isFirstUse={isViewingResults} />;
   }
 };
