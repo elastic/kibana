@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiForm, EuiFormRow, EuiFieldNumber, EuiCheckbox, EuiComboBox } from '@elastic/eui';
+import { EuiForm, EuiFormRow, EuiFieldNumber, EuiComboBox, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { GraphSettingsProps } from './graph_settings';
 import { AdvancedSettings } from '../../types';
@@ -68,7 +68,7 @@ export function AdvancedSettingsForm({
         )}
         label=""
       >
-        <EuiCheckbox
+        <EuiSwitch
           label={i18n.translate(
             'xpack.graph.settings.advancedSettings.significantLinksCheckboxLabel',
             { defaultMessage: 'Significant links' }
