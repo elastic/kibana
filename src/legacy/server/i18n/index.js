@@ -37,19 +37,28 @@ export function getLocalesToRegister(config) {
 
   const configDefaultLocale = config.get('i18n.defaultLocale');
 
-  return [configDefaultLocale];
+  if (configDefaultLocale) {
+    return [configDefaultLocale];
+  }
+  return ["en"];
 }
 
 function getDefaultLocale(config) {
-  const configLocales = config.get('i18n.locales');
+  const locales = config.get('i18n.locales');
   const defaultLocale = config.get('i18n.defaultLocale') || config.get('i18n.locale');
-  if (defaultLocale) {
-    if (!configLocales.includes(defaultLocale)) {
+
+  if (defaultLocale || deprecatedLocale) {
+    if (locales.length && !locales.includes(defaultLocale)) {
       throw Error(`Default Locale "${defaultLocale}" must be included in the i18n.locales config.`)
     }
-    return defaultLocale;
+    return defaultLocale || deprecatedLocale;
   }
-  return configLocales[0];
+
+  if (locales.length) {
+    return locales[0];
+  }
+
+  return "en"
 }
 
 export async function i18nMixin(kbnServer, server, config) {
