@@ -46,7 +46,6 @@ import { GraphSettings } from './components/graph_settings/graph_settings';
 
 import './angular/angular_venn_simple.js';
 import gws from './angular/graph_client_workspace.js';
-import utils from './utils.js';
 import { SavedWorkspacesProvider } from './angular/services/saved_workspaces';
 import {
   iconChoices,
@@ -54,7 +53,7 @@ import {
   iconChoicesByClass,
   drillDownIconChoices,
   drillDownIconChoicesByClass
-} from './style_choices';
+} from './services/style_choices';
 import {
   getOutlinkEncoders,
 } from './services/outlink_encoders';
@@ -710,9 +709,22 @@ app.controller('graphuiPlugin', function (
 
 
   $scope.handleMergeCandidatesCallback = function (termIntersects) {
-    $scope.detail = {
-      'mergeCandidates': utils.getMergeSuggestionObjects(termIntersects)
-    };
+    const mergeCandidates = [];
+    for (const i in termIntersects) {
+      const ti = termIntersects[i];
+      mergeCandidates.push({
+        'id1': ti.id1,
+        'id2': ti.id2,
+        'term1': ti.term1,
+        'term2': ti.term2,
+        'v1': ti.v1,
+        'v2': ti.v2,
+        'overlap': ti.overlap,
+        width: 100,
+        height: 60 });
+
+    }
+    $scope.detail = { mergeCandidates };
   };
 
   // Zoom functions for the SVG-based graph
