@@ -9,6 +9,7 @@ import { validateConfig, validateSecrets, validateParams } from '../lib';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { Services, ActionTypeExecutorOptions } from '../types';
+import { asOk, asErr } from './lib/result_type';
 
 const NO_OP_FN = () => {};
 const servicesMock: Services = {
@@ -18,8 +19,8 @@ const servicesMock: Services = {
 };
 
 const configUtilsMock: ActionsConfigurationUtilities = {
-  isWhitelistedHostname() {
-    return true;
+  isWhitelistedHostname(uri) {
+    return asOk(uri);
   },
 };
 
@@ -148,8 +149,8 @@ describe('config validation', () => {
 
   test('config validation passes when kibana config whitelists the url', () => {
     const actionType = getActionType({
-      isWhitelistedHostname() {
-        return true;
+      isWhitelistedHostname(uri) {
+        return asOk(uri);
       },
     });
 
@@ -168,8 +169,8 @@ describe('config validation', () => {
 
   test('config validation returns an error if the specified URL isnt whitelisted', () => {
     const actionType = getActionType({
-      isWhitelistedHostname() {
-        return false;
+      isWhitelistedHostname(uri) {
+        return asErr(`target url is not whitelisted`);
       },
     });
 
@@ -183,7 +184,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(actionType, config);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: an error occurred configuring webhook with unwhitelisted target url \\"http://mylisteningserver.com:9200/endpoint\\""`
+      `"error validating action type config: error configuring webhook: target url is not whitelisted"`
     );
   });
 });
@@ -218,9 +219,9 @@ describe('executor', () => {
     const params: Record<string, any> = {};
     const result = await executor(
       {
-        isWhitelistedHostname: uri => {
+        isWhitelistedHostname(uri) {
           expect(uri).toEqual(config.url);
-          return false;
+          return asErr(`${uri}`);
         },
       },
       {
@@ -232,7 +233,7 @@ describe('executor', () => {
       } as ActionTypeExecutorOptions
     );
     expect(result.message).toMatchInlineSnapshot(
-      `"an error occurred in action \\"webhook\\" calling a remote webhook: You are not permitted to trigger this webhook"`
+      `"an error occurred in action \\"webhook\\" calling a remote webhook: http://mylisteningserver.com:9200/endpoint"`
     );
     expect(result.status).toEqual('error');
   });

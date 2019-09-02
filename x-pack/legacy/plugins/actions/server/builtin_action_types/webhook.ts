@@ -9,7 +9,7 @@ import axios, { AxiosError, AxiosResponse } from 'axios';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
 import { nullableType } from './lib/nullable';
-import { isOk, promiseResult, Result } from './lib/result_type';
+import { isOk, isErr, promiseResult, Result } from './lib/result_type';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 
@@ -52,17 +52,14 @@ export function getActionType(configurationUtilities: ActionsConfigurationUtilit
       config: schema.object(configSchemaProps, {
         validate: configObject => {
           const { url }: ActionTypeConfigType = configObject;
-          if (!configurationUtilities.isWhitelistedHostname(url)) {
-            return i18n.translate(
-              'xpack.actions.builtin.webhook.unwhitelistedWebhookConfigurationError',
-              {
-                defaultMessage:
-                  'an error occurred configuring webhook with unwhitelisted target url "{url}"',
-                values: {
-                  url,
-                },
-              }
-            );
+          const whitelistValidation = configurationUtilities.isWhitelistedHostname(url);
+          if (isErr(whitelistValidation)) {
+            return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationError', {
+              defaultMessage: 'error configuring webhook: {message}',
+              values: {
+                message: whitelistValidation.error,
+              },
+            });
           }
         },
       }),
@@ -85,10 +82,10 @@ export async function executor(
   const { method, url, headers = {} } = execOptions.config as ActionTypeConfigType;
   const { user: username, password } = execOptions.secrets as ActionTypeSecretsType;
   const { body: data } = execOptions.params as ActionParamsType;
-
-  if (!configurationUtilities.isWhitelistedHostname(url)) {
-    log(`warn`, `error on ${id} webhook event: The target "${url}" ahs not been whitelisted`);
-    return errorRequestInvalid(id);
+  const whitelistValidation = configurationUtilities.isWhitelistedHostname(url);
+  if (isErr(whitelistValidation)) {
+    log(`warn`, `error on ${id} webhook event: The target "${url}" has not been whitelisted`);
+    return errorRequestInvalid(id, whitelistValidation.error);
   }
 
   const result: Result<AxiosResponse, AxiosError> = await promiseResult(
@@ -147,11 +144,11 @@ function successResult(data: any): ActionTypeExecutorResult {
   return { status: 'ok', data };
 }
 
-function errorRequestInvalid(id: string): ActionTypeExecutorResult {
+function errorRequestInvalid(id: string, message: string): ActionTypeExecutorResult {
   const errMessage = i18n.translate('xpack.actions.builtin.webhook.invalidRequestErrorMessage', {
-    defaultMessage:
-      'an error occurred in action "{id}" calling a remote webhook: You are not permitted to trigger this webhook',
+    defaultMessage: 'an error occurred in action "{id}" calling a remote webhook: {message}',
     values: {
+      message,
       id,
     },
   });

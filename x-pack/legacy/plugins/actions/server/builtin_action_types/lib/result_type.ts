@@ -42,6 +42,13 @@ export function isErr<T, E>(result: Result<T, E>): result is Err<E> {
   return !isOk(result);
 }
 
+export function unsafeGet<T, E>(result: Result<T, E>): T {
+  if (isErr(result)) {
+    throw new Error(`${result.error}`);
+  }
+  return result.value;
+}
+
 export async function promiseResult<T, E>(future: Promise<T>): Promise<Result<T, E>> {
   try {
     return asOk(await future);

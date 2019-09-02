@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isOk, unsafeGet } from './builtin_action_types/lib/result_type';
 import {
   ActionsKibanaConfig,
   getActionsConfigurationUtilities,
@@ -14,27 +15,33 @@ describe('isWhitelistedHostname', () => {
   test('returns true when "any" hostnames are allowed', () => {
     const config: ActionsKibanaConfig = { enabled: false, whitelistedHosts: WhitelistedHosts.Any };
     expect(
-      getActionsConfigurationUtilities(config).isWhitelistedHostname(
-        'https://github.com/elastic/kibana'
+      unsafeGet(
+        getActionsConfigurationUtilities(config).isWhitelistedHostname(
+          'https://github.com/elastic/kibana'
+        )
       )
-    ).toEqual(true);
+    ).toEqual('https://github.com/elastic/kibana');
   });
 
   test('returns false when the hostname in the requested uri is not in the whitelist', () => {
     const config: ActionsKibanaConfig = { enabled: false, whitelistedHosts: [] };
-    expect(
-      getActionsConfigurationUtilities(config).isWhitelistedHostname(
-        'https://github.com/elastic/kibana'
+    expect(() =>
+      unsafeGet(
+        getActionsConfigurationUtilities(config).isWhitelistedHostname(
+          'https://github.com/elastic/kibana'
+        )
       )
-    ).toEqual(false);
+    ).toThrowErrorMatchingInlineSnapshot(`"target url not in whitelist"`);
   });
 
   test('returns true when the hostname in the requested uri is in the whitelist', () => {
     const config: ActionsKibanaConfig = { enabled: false, whitelistedHosts: ['github.com'] };
     expect(
-      getActionsConfigurationUtilities(config).isWhitelistedHostname(
-        'https://github.com/elastic/kibana'
+      unsafeGet(
+        getActionsConfigurationUtilities(config).isWhitelistedHostname(
+          'https://github.com/elastic/kibana'
+        )
       )
-    ).toEqual(true);
+    ).toEqual('https://github.com/elastic/kibana');
   });
 });
