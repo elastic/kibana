@@ -67,7 +67,7 @@ function valdiateActionTypeConfig(
   const whitelistValidation = configurationUtilities.isWhitelistedHostname(url);
   if (isErr(whitelistValidation)) {
     return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationError', {
-      defaultMessage: 'error configuring webhook: {message}',
+      defaultMessage: 'error configuring webhook action: {message}',
       values: {
         message: whitelistValidation.error,
       },
@@ -89,7 +89,7 @@ export async function executor(
   const { body: data } = execOptions.params as ActionParamsType;
   const whitelistValidation = configurationUtilities.isWhitelistedHostname(url);
   if (isErr(whitelistValidation)) {
-    log(`warn`, `error on ${id} webhook event: The target "${url}" has not been whitelisted`);
+    log(`warn`, `error on webhook action "${id}": The target "${url}" has not been whitelisted`);
     return errorRequestInvalid(id, whitelistValidation.error);
   }
 
@@ -110,7 +110,7 @@ export async function executor(
     const {
       value: { status, statusText },
     } = result;
-    log('debug', `response from ${id} webhook event: [HTTP ${status}] ${statusText}`);
+    log('debug', `response from webhook action "${id}": [HTTP ${status}] ${statusText}`);
 
     return successResult(data);
   } else {
@@ -139,7 +139,7 @@ export async function executor(
     const message = i18n.translate('xpack.actions.builtin.webhook.unreachableRemoteWebhook', {
       defaultMessage: 'Unreachable Remote Webhook, are you sure the address is correct?',
     });
-    log(`warn`, `error on ${id} webhook event: ${message}`);
+    log(`warn`, `error on ${id} webhook action: ${message}`);
     return errorResultUnreachable(id, message);
   }
 }
@@ -151,7 +151,8 @@ function successResult(data: any): ActionTypeExecutorResult {
 
 function errorRequestInvalid(id: string, message: string): ActionTypeExecutorResult {
   const errMessage = i18n.translate('xpack.actions.builtin.webhook.invalidRequestErrorMessage', {
-    defaultMessage: 'an error occurred in action "{id}" calling a remote webhook: {message}',
+    defaultMessage:
+      'an error occurred in webhook action "{id}" calling a remote webhook: {message}',
     values: {
       message,
       id,
@@ -165,7 +166,8 @@ function errorRequestInvalid(id: string, message: string): ActionTypeExecutorRes
 
 function errorResultInvalid(id: string, message: string): ActionTypeExecutorResult {
   const errMessage = i18n.translate('xpack.actions.builtin.webhook.invalidResponseErrorMessage', {
-    defaultMessage: 'an error occurred in action "{id}" calling a remote webhook: {message}',
+    defaultMessage:
+      'an error occurred in webhook action "{id}" calling a remote webhook: {message}',
     values: {
       id,
       message,
@@ -179,7 +181,8 @@ function errorResultInvalid(id: string, message: string): ActionTypeExecutorResu
 
 function errorResultUnreachable(id: string, message: string): ActionTypeExecutorResult {
   const errMessage = i18n.translate('xpack.actions.builtin.webhook.unreachableErrorMessage', {
-    defaultMessage: 'an error occurred in action "{id}" calling a remote webhook: {message}',
+    defaultMessage:
+      'an error occurred in webhook action "{id}" calling a remote webhook: {message}',
     values: {
       id,
       message,
@@ -195,7 +198,8 @@ function retryResult(id: string, message: string): ActionTypeExecutorResult {
   const errMessage = i18n.translate(
     'xpack.actions.builtin.webhook.invalidResponseRetryLaterErrorMessage',
     {
-      defaultMessage: 'an error occurred in action "{id}" calling a remote webhook, retry later',
+      defaultMessage:
+        'an error occurred in webhook action "{id}" calling a remote webhook, retry later',
       values: {
         id,
       },
@@ -221,7 +225,7 @@ function retryResultSeconds(
     'xpack.actions.builtin.webhook.invalidResponseRetryDateErrorMessage',
     {
       defaultMessage:
-        'an error occurred in action "{id}" calling a remote webhook, retry at {retryString}: {message}',
+        'an error occurred in webhook action "{id}" calling a remote webhook, retry at {retryString}: {message}',
       values: {
         id,
         retryString,

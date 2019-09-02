@@ -184,7 +184,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(actionType, config);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: error configuring webhook: target url is not whitelisted"`
+      `"error validating action type config: error configuring webhook action: target url is not whitelisted"`
     );
   });
 });
@@ -233,7 +233,7 @@ describe('executor', () => {
       } as ActionTypeExecutorOptions
     );
     expect(result.message).toMatchInlineSnapshot(
-      `"an error occurred in action \\"webhook\\" calling a remote webhook: http://mylisteningserver.com:9200/endpoint"`
+      `"an error occurred in webhook action \\"webhook\\" calling a remote webhook: http://mylisteningserver.com:9200/endpoint"`
     );
     expect(result.status).toEqual('error');
   });
