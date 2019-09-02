@@ -6,6 +6,7 @@
 
 import { handleActions } from 'redux-actions';
 import { recentlyAccessed } from 'ui/persisted_log';
+import { getDefaultWorkpad } from '../defaults';
 import {
   setWorkpad,
   sizeWorkpad,
@@ -13,6 +14,7 @@ import {
   setName,
   setWriteable,
   setWorkpadCSS,
+  resetWorkpad,
 } from '../actions/workpad';
 
 import { APP_ROUTE_WORKPAD } from '../../../common/lib/constants';
@@ -44,6 +46,8 @@ export const workpadReducer = handleActions(
     [setWorkpadCSS]: (workpadState, { payload }) => {
       return { ...workpadState, css: payload };
     },
+
+    [resetWorkpad]: () => ({ ...getDefaultWorkpad() }),
   },
   {}
 );
