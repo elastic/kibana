@@ -11,7 +11,7 @@ import { getApiPath } from '../../helper';
  * Fetches and returns the uptime index pattern, optionally provides it to
  * a given setter function.
  * @param basePath - the base path, if any
- * @param setter - a setter callback for use with non-async functions like `useEffect`
+ * @param setter - a callback for use with non-async functions like `useEffect`
  */
 export const getIndexPattern = async (basePath?: string, setter?: (data: unknown) => void) => {
   try {
